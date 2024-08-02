@@ -60,16 +60,18 @@ def evaluate_parser_input_arguments(args):
         Path to configuration file.
     experiment_path : str
         Path to experiment file
-    waveform_constants_path,
+    waveform_constants_path : str
         Path to remote focusing and galvo waveform constants file
-    rest_api_path
+    rest_api_path : str
         Path to REST API file
-    waveform_templates_path
+    waveform_templates_path : str
         Path to waveform templates file
-    logging_path
+    logging_path : str
         Path to non-default logging location
-    configurator
-        Boolean, True if configurator is enabled
+    configurator : bool
+        True if configurator is enabled
+    gui_configuration_path
+        Path to gui_configuration file
     """
     # Retrieve the Default Configuration paths
     (
@@ -78,6 +80,7 @@ def evaluate_parser_input_arguments(args):
         waveform_constants_path,
         rest_api_path,
         waveform_templates_path,
+        gui_configuration_path,
     ) = get_configuration_paths()
 
     # Evaluate Input Arguments
@@ -98,7 +101,7 @@ def evaluate_parser_input_arguments(args):
         ), "experiment_file file Path {} not valid".format(args.experiment_file)
         experiment_path = args.experiment_file
 
-    if args.waveform_constants_path:
+    if args.waveform_constants_file:
         assert (
             args.waveform_constants_path.exists()
         ), "waveform_constants_path Path {} not valid".format(
@@ -118,6 +121,12 @@ def evaluate_parser_input_arguments(args):
         ), "waveform_templates Path {} not valid".format(args.waveform_templates_file)
         waveform_templates_path = args.waveform_templates_file
 
+    if args.gui_config_file:
+        assert (
+            args.gui_config_file.exists()
+        ), "gui_configuration Path {} not valid".format(args.gui_config_file)
+        gui_configuration_path = args.gui_config
+
     # Creating Loggers etc., they exist globally so no need to pass
     if args.logging_config:
         assert args.logging_config.exists(), "Logging Config Path {} not valid".format(
@@ -135,15 +144,12 @@ def evaluate_parser_input_arguments(args):
         waveform_templates_path,
         logging_path,
         configurator,
+        gui_configuration_path,
     )
 
 
 def create_parser():
     """Add Parser Input Arguments to ArgumentParser Object.
-
-    Parameters
-    ----------
-    None
 
     Returns
     -------
@@ -194,6 +200,16 @@ def create_parser():
     )
 
     input_args.add_argument(
+        "--gui-config-file",
+        type=Path,
+        required=False,
+        default=None,
+        help="Non-default path to the gui_config.yml file.  \n"
+        "This file sets the default graphical user interface parameters, such as the "
+        "default number of channels, spinbox values, etc.",
+    )
+
+    input_args.add_argument(
         "--experiment-file",
         type=Path,
         required=False,
@@ -205,7 +221,7 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--waveform-constants-path",
+        "--waveform-constants-file",
         type=Path,
         required=False,
         default=None,

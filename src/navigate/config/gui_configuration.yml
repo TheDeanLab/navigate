@@ -1,0 +1,48 @@
+channel_settings:
+  count: 5
+  laser_power:
+    step: 1
+    min: 0
+    max: 100
+  exposure_time:
+    step: 1
+    min: 1
+    max: 1000
+  interval:
+    step: 1
+    min: 1
+    max: 10
+  defocus:
+    step: 1
+    min: 0
+    max: 100
+stack_acquisition:
+  step_size:
+    step: 0.01
+    min: 0.01
+    max: 1000
+  z_start_pos:
+    step: 1.0
+    min: -10000
+    max: 10000
+  z_end_pos:
+    step: 1.0
+    min: -10000
+    max: 10000
+  f_start_pos:
+    step: 0.01
+    min: -200
+    max: 2000
+  f_end_pos:
+    step: 0.01
+    min: -200
+    max: 200
+time:
+  stack_pause:
+    step: 0.1
+    min: 0
+    max: 1000
+  timepoints:
+    step: 1
+    min: 1
+    max: 5000

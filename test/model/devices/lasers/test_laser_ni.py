@@ -2,10 +2,10 @@ from multiprocessing import Manager
 
 import random
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from navigate.config import load_configs, get_configuration_paths
-from navigate.model.devices.lasers.laser_ni import LaserNI
+from navigate.model.devices.lasers.ni import LaserNI
 
 
 class TestLaserNI(unittest.TestCase):
@@ -23,6 +23,7 @@ class TestLaserNI(unittest.TestCase):
             waveform_constants_path,
             rest_api_path,
             waveform_templates_path,
+            gui_configuration_path,
         ) = get_configuration_paths()
 
         self.configuration = load_configs(
@@ -32,9 +33,12 @@ class TestLaserNI(unittest.TestCase):
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
+            gui_configuration=gui_configuration_path,
         )
 
-        self.microscope_name = self.configuration["configuration"]["microscopes"].keys()[0]
+        self.microscope_name = self.configuration["configuration"][
+            "microscopes"
+        ].keys()[0]
         self.device_connection = None
         laser_id = 0
 
@@ -90,4 +94,3 @@ class TestLaserNI(unittest.TestCase):
         )
 
         assert self.laser._current_intensity == self.current_intensity
-        

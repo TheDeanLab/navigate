@@ -46,7 +46,7 @@ from navigate.config.config import (
     verify_waveform_constants,
     verify_configuration,
 )
-from navigate.model.devices.camera.camera_synthetic import (
+from navigate.model.devices.camera.synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
 )
@@ -72,31 +72,44 @@ class DummyController:
         """
         from navigate.controller.configuration_controller import ConfigurationController
         from navigate.controller.sub_controllers import MenuController
-        from navigate.controller.sub_controllers.multi_position_controller import (
+        from navigate.controller.sub_controllers.multiposition import (
             MultiPositionController,
         )
-        from navigate.controller.sub_controllers.channels_tab_controller import (
+        from navigate.controller.sub_controllers.channels_tab import (
             ChannelsTabController,
         )
 
         #: dict: The configuration dictionary.
         self.configuration = DummyModel().configuration
+
         #: list: The list of commands.
         self.commands = []
+    
+        #: dict: The custom events
+        self.event_listeners = {}
+
         #: DummyView: The view to be controlled by this controller.
         self.view = view
+
         #: ConfigurationController: The configuration controller.
         self.configuration_controller = ConfigurationController(self.configuration)
+
         #: MenuController: The menu controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
+
+        #: ChannelsTabController: The channels tab controller.
         self.channels_tab_controller = ChannelsTabController(
             self.view.settings.channels_tab, self
         )
+
+        #: MultiPositionController: The multiposition tab controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
         )
+
         #: dict: The stage positions.
         self.stage_pos = {}
+
         #: dict: The stage offset positions.
         self.off_stage_pos = {}
         base_directory = Path.joinpath(Path(__file__).resolve().parent.parent)
@@ -164,15 +177,17 @@ class DummyModel:
         """Initialize the Dummy model."""
         # Set up the model, experiment, waveform dictionaries
         base_directory = Path(__file__).resolve().parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory,
-                                                "src",
-                                                "navigate",
-                                                "config")
+        configuration_directory = Path.joinpath(
+            base_directory, "src", "navigate", "config"
+        )
 
         config = Path.joinpath(configuration_directory, "configuration.yaml")
         experiment = Path.joinpath(configuration_directory, "experiment.yml")
         waveform_constants = Path.joinpath(
             configuration_directory, "waveform_constants.yml"
+        )
+        gui_configuration_path = Path.joinpath(
+            configuration_directory, "gui_configuration.yml"
         )
 
         #: Manager: The manager.
@@ -183,6 +198,7 @@ class DummyModel:
             configuration=config,
             experiment=experiment,
             waveform_constants=waveform_constants,
+            gui=gui_configuration_path,
         )
 
         verify_configuration(self.manager, self.configuration)
@@ -520,64 +536,91 @@ class DummyMicroscope:
         exposure_times = {}
         sweep_times = {}
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        zoom = microscope_state["zoom"]
         waveform_constants = self.configuration["waveform_constants"]
-        camera_delay = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["camera"]["delay"] / 1000
-        camera_settle_duration = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["camera"].get("settle_duration", 0) / 1000
-        remote_focus_ramp_falling = float(
-                waveform_constants["other_constants"]["remote_focus_ramp_falling"]
-            ) / 1000
+        camera_delay = (
+            self.configuration["configuration"]["microscopes"][self.microscope_name][
+                "camera"
+            ]["delay"]
+            / 1000
+        )
+        camera_settle_duration = (
+            self.configuration["configuration"]["microscopes"][self.microscope_name][
+                "camera"
+            ].get("settle_duration", 0)
+            / 1000
+        )
+        remote_focus_ramp_falling = (
+            float(waveform_constants["other_constants"]["remote_focus_ramp_falling"])
+            / 1000
+        )
 
         duty_cycle_wait_duration = (
-            float(
-                waveform_constants["other_constants"]["remote_focus_settle_duration"]
-            ) / 1000
+            float(waveform_constants["other_constants"]["remote_focus_settle_duration"])
+            / 1000
         )
-        ps = float(
-            waveform_constants["other_constants"].get("percent_smoothing", 0.0)
-        )
+        ps = float(waveform_constants["other_constants"].get("percent_smoothing", 0.0))
 
         readout_time = 0
-        readout_mode = self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
+        readout_mode = self.configuration["experiment"]["CameraParameters"][
+            "sensor_mode"
+        ]
         if readout_mode == "Normal":
             readout_time = self.camera.calculate_readout_time()
-        elif (
-            self.configuration["experiment"]["CameraParameters"]["readout_direction"] in ["Bidirectional", "Rev. Bidirectional"]
-        ):
+        elif self.configuration["experiment"]["CameraParameters"][
+            "readout_direction"
+        ] in ["Bidirectional", "Rev. Bidirectional"]:
             remote_focus_ramp_falling = 0
         # set readout out time
-        self.configuration["experiment"]["CameraParameters"]["readout_time"] = readout_time * 1000
+        self.configuration["experiment"]["CameraParameters"]["readout_time"] = (
+            readout_time * 1000
+        )
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
             if channel["is_selected"] is True:
                 exposure_time = channel["camera_exposure_time"] / 1000
 
                 if readout_mode == "Light-Sheet":
-                    _, _, updated_exposure_time = self.camera.calculate_light_sheet_exposure_time(
+                    (
+                        _,
+                        _,
+                        updated_exposure_time,
+                    ) = self.camera.calculate_light_sheet_exposure_time(
                         exposure_time,
                         int(
                             self.configuration["experiment"]["CameraParameters"][
                                 "number_of_pixels"
                             ]
-                        )
+                        ),
                     )
                     if updated_exposure_time != exposure_time:
-                        print(f"*** Notice: The actual exposure time of the camera for {channel_key} is {round(updated_exposure_time*1000, 1)}ms, not {exposure_time*1000}ms!")
+                        print(
+                            f"*** Notice: The actual exposure time of the camera for "
+                            f"{channel_key} is {round(updated_exposure_time*1000, 1)}"
+                            f"ms, not {exposure_time*1000}ms!"
+                        )
                         exposure_time = round(updated_exposure_time, 4)
                         # update the experiment file
-                        channel["camera_exposure_time"] = round(updated_exposure_time * 1000, 1)
-                        self.output_event_queue.put(("exposure_time", (channel_key, channel["camera_exposure_time"])))
+                        channel["camera_exposure_time"] = round(
+                            updated_exposure_time * 1000, 1
+                        )
+                        self.output_event_queue.put(
+                            (
+                                "exposure_time",
+                                (channel_key, channel["camera_exposure_time"]),
+                            )
+                        )
 
                 sweep_time = (
                     exposure_time
                     + readout_time
                     + camera_delay
-                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration, camera_delay) - camera_delay
-                )        
+                    + max(
+                        remote_focus_ramp_falling + duty_cycle_wait_duration,
+                        camera_settle_duration,
+                        camera_delay,
+                    )
+                    - camera_delay
+                )
                 # TODO: should we keep the percent_smoothing?
                 if ps > 0:
                     sweep_time = (1 + ps / 100) * sweep_time

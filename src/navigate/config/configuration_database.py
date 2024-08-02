@@ -30,8 +30,20 @@ camera_hardware_widgets = {
         {"On": 2.0, "Off": 1.0},
         None,
     ],
-    "delay": ["Delay (ms)", "Spinbox", "float", {"from": 0, "to": 100, "step": 0.1}, None],
-    "settle_down": ["Settle Down (ms)", "Spinbox", "float", {"from": 0, "to": 100, "step": 0.1}, None],
+    "delay": [
+        "Delay (ms)",
+        "Spinbox",
+        "float",
+        {"from": 0, "to": 100, "step": 0.1},
+        None,
+    ],
+    "settle_down": [
+        "Settle Down (ms)",
+        "Spinbox",
+        "float",
+        {"from": 0, "to": 100, "step": 0.1},
+        None,
+    ],
     "flip_x": ["Flip X", "Checkbutton", "bool", None, None],
     "flip_y": ["Flip Y", "Checkbutton", "bool", None, None],
     "supported_channel_count": [
@@ -45,7 +57,10 @@ camera_hardware_widgets = {
 
 filter_wheel_device_types = {
     "Sutter Instruments": "SutterFilterWheel",
-    "Applied Scientific Instrumentation": "ASI",
+    "ASI Filter Wheel": "ASI",
+    "ASI Dichroic Slider": "ASICubeSlider",
+    "Ludl Electronic Products": "LUDLFilterWheel",
+    "Analog/Digital Device": "NI",
     "Virtual Device": "synthetic",
 }
 
@@ -71,6 +86,7 @@ filter_wheel_hardware_widgets = {
     "hardware/wheel_number": ["Number of Wheels", "Spinbox", "int", None, "Example: 1"],
     "hardware/port": ["Serial Port", "Input", "string", None, "Example: COM1"],
     "hardware/baudrate": ["Baudrate", "Input", "int", None, "Example: 9600"],
+    "hardware/name": ["GUI Label", "Input", "string", None, "Example: Filter Wheel 1"],
     "filter_wheel_delay": [
         "Filter Wheel Delay (s)",
         "Input",
@@ -164,17 +180,45 @@ stage_device_types = {
 stage_hardware_widgets = {
     "type": ["Device Type", "Combobox", "string", stage_device_types, None],
     "serial_number": ["Serial Number", "Input", "string", None, None],
-    "axes": ["Axes", "Input", "string", None,"Example: [x, y, z, theta, f]", "[x, y, z]"],
-    "axes_mapping": ["Axes Mapping", "Input", "string", None, "Example: [X, M, Y, D, E]", "[X, M, Y]"],
-    "feedback_alignment": ["Feedback Alighment", "Input", "string", None, "*ASI stage only. Example: [90, 90, 90, 0, 90]", "[90, 90, 90]"],
-    "device_units_per_mm": ["Device Units Per Micron", "Input", "float", None, "*KST101 only. Example: 2000.0", 1000.25],
+    "axes": [
+        "Axes",
+        "Input",
+        "string",
+        None,
+        "Example: [x, y, z, theta, f]",
+        "[x, y, z]",
+    ],
+    "axes_mapping": [
+        "Axes Mapping",
+        "Input",
+        "string",
+        None,
+        "Example: [X, M, Y, D, E]",
+        "[X, M, Y]",
+    ],
+    "feedback_alignment": [
+        "Feedback Alighment",
+        "Input",
+        "string",
+        None,
+        "*ASI stage only. Example: [90, 90, 90, 0, 90]",
+        "[90, 90, 90]",
+    ],
+    "device_units_per_mm": [
+        "Device Units Per Micron",
+        "Input",
+        "float",
+        None,
+        "*KST101 only. Example: 2000.0",
+        1000.25,
+    ],
     "volts_per_micron": [
         "Volts Per Micron",
         "Input",
         "string",
         None,
         "*Analog/Digital Device only. Example: '0.1*x+0.05'",
-        "0.1*x+0.05"
+        "0.1*x+0.05",
     ],
     "min": [
         "Minimum Volts",
@@ -193,12 +237,12 @@ stage_hardware_widgets = {
         5,
     ],
     "distance_threshold": [
-        "Distance Threshold", 
+        "Distance Threshold",
         "Spinbox",
         "float",
         {"from": 0, "to": 100, "step": 1},
         "*Analog-Controlled Galvo/Peizo only",
-        5
+        5,
     ],
     "settle_duration_ms": [
         "Settle Duration (ms)",
@@ -206,7 +250,7 @@ stage_hardware_widgets = {
         "float",
         {"from": 0, "to": 100, "step": 1},
         "*Analog-Controlled Galvo/Peizo only",
-        20
+        20,
     ],
     "controllername": [
         "Controller Name",
@@ -250,14 +294,21 @@ stage_top_widgets = {
 }
 
 stage_constants_widgets = {
-    "joystick_axes": ["Joystick Axes", "Input", "string", None, "Example: [x, y, z]", "[x, y, z]"],
+    "joystick_axes": [
+        "Joystick Axes",
+        "Input",
+        "string",
+        None,
+        "Example: [x, y, z]",
+        "[x, y, z]",
+    ],
     "x_min": [
         "Min X",
         "Spinbox",
         "float",
         {"from": -100000, "to": 100000, "step": 1000},
         None,
-        -10000
+        -10000,
     ],
     "x_max": [
         "Max X",
@@ -265,7 +316,7 @@ stage_constants_widgets = {
         "float",
         {"from": 0, "to": 100000, "step": 1000},
         None,
-        10000
+        10000,
     ],
     "y_min": [
         "Min Y",
@@ -273,7 +324,7 @@ stage_constants_widgets = {
         "float",
         {"from": -100000, "to": 100000, "step": 1000},
         None,
-        -10000
+        -10000,
     ],
     "y_max": [
         "Max Y",
@@ -281,7 +332,7 @@ stage_constants_widgets = {
         "float",
         {"from": 0, "to": 100000, "step": 1000},
         None,
-        10000
+        10000,
     ],
     "z_min": [
         "Min Z",
@@ -289,7 +340,7 @@ stage_constants_widgets = {
         "float",
         {"from": -100000, "to": 10000, "step": 1000},
         None,
-        -10000
+        -10000,
     ],
     "z_max": [
         "Max Z",
@@ -297,7 +348,7 @@ stage_constants_widgets = {
         "float",
         {"from": 0, "to": 100000, "step": 1000},
         None,
-        10000
+        10000,
     ],
     "theta_min": [
         "Min Theta",
@@ -305,7 +356,7 @@ stage_constants_widgets = {
         "float",
         {"from": 0, "to": 360, "step": 1},
         None,
-        0
+        0,
     ],
     "theta_max": [
         "Max Theta",
@@ -450,7 +501,7 @@ galvo_hardware_widgets = {
         "float",
         {"from": 0, "to": 10, "step": 0.1},
         "Example: 1.57",
-        0
+        0,
     ],
     "button_1": ["Delete", "Button", {"delete": True}],
     "frame_config": {

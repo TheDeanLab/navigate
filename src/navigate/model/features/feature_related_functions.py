@@ -40,16 +40,19 @@ import importlib
 # Local application imports
 from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from navigate.model.features.autofocus import Autofocus  # noqa
+from navigate.model.features.adaptive_optics import TonyWilson  # noqa
 from navigate.model.features.common_features import (
     ChangeResolution,  # noqa
     Snap,  # noqa
     WaitToContinue,  # noqa
+    WaitForExternalTrigger,  # noqa
     LoopByCount,  # noqa
     PrepareNextChannel,  # noqa
     MoveToNextPositionInMultiPositionTable,  # noqa
     StackPause,  # noqa
     ZStackAcquisition,  # noqa
     FindTissueSimple2D,  # noqa
+    SetCameraParameters, # noqa
 )
 from navigate.model.features.image_writer import ImageWriter  # noqa
 from navigate.model.features.restful_features import IlastikSegmentation  # noqa

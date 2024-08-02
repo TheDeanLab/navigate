@@ -105,6 +105,7 @@ class Controller:
         waveform_constants_path,
         rest_api_path,
         waveform_templates_path,
+        gui_configuration_path,
         args,
     ):
         """Initialize the Navigate Controller.
@@ -130,6 +131,9 @@ class Controller:
         waveform_templates_path : string
             Path to the waveform templates yaml file.
             Provides waveform templates for each channel.
+        gui_configuration_path : string
+            Path to the GUI configuration yaml file.
+            Provides GUI configuration parameters.
         *args :
             Command line input arguments for non-default
             file paths or using synthetic hardware modes.
@@ -152,6 +156,7 @@ class Controller:
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
+            gui=gui_configuration_path,
         )
 
         verify_configuration(self.manager, self.configuration)
@@ -169,45 +174,47 @@ class Controller:
         logger.info(f"Spec - Waveform Constants Path: {waveform_constants_path}")
         logger.info(f"Spec - Rest API Path: {rest_api_path}")
 
-        # Wire up pipes
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
 
-        # save default experiment file
         #: string: Path to the default experiment yaml file.
         self.default_experiment_file = experiment_path
 
-        # waveform setting file
         #: string: Path to the waveform constants yaml file.
         self.waveform_constants_path = waveform_constants_path
 
-        # Configuration Reader
         #: ConfigurationController: Configuration Controller object.
         self.configuration_controller = ConfigurationController(self.configuration)
 
-        # Initialize the View
         #: View: View object in MVC architecture.
         self.view = view(root)
 
-        # Sub Gui Controllers
+        #: dict: Event listeners for the controller.
+        self.event_listeners = {}
+
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acqbar, self)
+
         #: ChannelsTabController: Channels Tab Sub-Controller.
         self.channels_tab_controller = ChannelsTabController(
             self.view.settings.channels_tab, self
         )
+
         #: MultiPositionController: Multi-Position Tab Sub-Controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
         )
+
         #: CameraViewController: Camera View Tab Sub-Controller.
         self.camera_view_controller = CameraViewController(
             self.view.camera_waveform.camera_tab, self
         )
+
         #: CameraSettingController: Camera Settings Tab Sub-Controller.
         self.camera_setting_controller = CameraSettingController(
             self.view.settings.camera_settings_tab, self
         )
+
         #: StageController: Stage Sub-Controller.
         self.stage_controller = StageController(
             self.view.settings.stage_control_tab,
@@ -215,14 +222,16 @@ class Controller:
             self.camera_view_controller.canvas,
             self,
         )
+
         #: WaveformTabController: Waveform Display Sub-Controller.
         self.waveform_tab_controller = WaveformTabController(
             self.view.camera_waveform.waveform_tab, self
         )
+
         #: KeystrokeController: Keystroke Sub-Controller.
         self.keystroke_controller = KeystrokeController(self.view, self)
 
-        # Exit
+        # Exit the program when the window is closed
         self.view.root.protocol(
             "WM_DELETE_WINDOW", self.acquire_bar_controller.exit_program
         )
@@ -236,7 +245,6 @@ class Controller:
         # self.microscope = self.configuration['configuration']
         # ['microscopes'].keys()[0]  # Default to the first microscope
 
-        # Initialize the menus
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
@@ -244,14 +252,12 @@ class Controller:
         #: dict: acquisition modes from plugins
         self.plugin_acquisition_modes = {}
 
-        # add plugin menus
         #: PluginsController: Plugin Sub-Controller
         self.plugin_controller = PluginsController(
             view=self.view, parent_controller=self
         )
         self.plugin_controller.load_plugins()
 
-        # Create default data buffer
         #: int: Number of x_pixels from microscope configuration file.
         self.img_width = 0
 
@@ -460,6 +466,16 @@ class Controller:
         self.configuration["experiment"]["MicroscopeState"][
             "multiposition_count"
         ] = len(positions)
+
+        if (
+            self.configuration["experiment"]["MicroscopeState"]["is_multiposition"]
+            and len(positions) == 0
+        ):
+            # Update the view and override the settings.
+            self.configuration["experiment"]["MicroscopeState"][
+                "is_multiposition"
+            ] = False
+            self.channels_tab_controller.is_multiposition_val.set(False)
 
         # TODO: validate experiment dict
 
@@ -814,8 +830,10 @@ class Controller:
                         feature_list_popup, self
                     )
                     self.features_popup_controller.populate_feature_list(feature_id)
+
                     # wait until close the popup windows
                     self.view.wait_window(feature_list_popup.popup)
+
                     # do not run acquisition if "cancel" is selected
                     temp = self.features_popup_controller.start_acquisiton_flag
                     delattr(self, "features_popup_controller")
@@ -852,16 +870,14 @@ class Controller:
 
             # clear show_img_pipe
             while self.show_img_pipe.poll():
-                # TODO: image_id never called.
                 self.show_img_pipe.recv()
-                # image_id = self.show_img_pipe.recv()
 
         elif command == "exit":
-            """Exit the program."""
-            # Save current GUI settings to .navigate/config/experiment.yml file.
-            self.sloppy_stop()
-            # self.menu_controller.feature_id_val.set(0)
+            """Exit the program.
 
+            Saves the current GUI settings to .navigate/config/experiment.yml file.
+            """
+            self.sloppy_stop()
             self.update_experiment_setting()
             file_directory = os.path.join(get_navigate_path(), "config")
             save_yaml_file(
@@ -918,7 +934,7 @@ class Controller:
         self.threads_pool.createThread('model', target)
         commands and the need to stop as abruptly as
         possible when the user hits stop. Here we leverage
-        ObjectInSubprocess's refusal to let us access
+        ObjectInSubprocess' refusal to let us access
         the model from two threads to our advantage, and just
         try repeatedly until we get a command in front
         of the next command in the model threads_pool resource.
@@ -940,9 +956,9 @@ class Controller:
         Parameters
         ----------
         command : string
-            string = 'acquire' or 'autofocus'
+            'acquire' or 'autofocus'
         mode : string
-            string = 'continuous', 'z-stack', 'single', or 'projection'
+            'continuous', 'z-stack', 'single', or 'projection'
         args : function-specific passes.
         """
         self.camera_view_controller.image_count = 0
@@ -1009,7 +1025,16 @@ class Controller:
             )
             # update framerate
             stop_time = time.time()
-            frames_per_second = images_received / (stop_time - start_time)
+            try:
+                frames_per_second = images_received / (stop_time - start_time)
+            except ZeroDivisionError:
+                frames_per_second = 1 / (
+                    self.configuration["experiment"]["MicroscopeState"]["channels"][
+                        "channel_1"
+                    ].get("camera_exposure_time", 200)
+                    / 1000
+                )
+
             # Update the Framerate in the Camera Settings Tab
             self.camera_setting_controller.framerate_widgets["max_framerate"].set(
                 frames_per_second
@@ -1204,58 +1229,19 @@ class Controller:
                 # Display a warning that arises from the model as a top-level GUI popup
                 messagebox.showwarning(title="Navigate", message=value)
 
-            elif event == "waveform":
-                # Update the waveform plot.
-                self.waveform_tab_controller.update_waveforms(
-                    waveform_dict=value,
-                    sample_rate=self.configuration_controller.daq_sample_rate,
-                )
             elif event == "multiposition":
                 # Update the multi-position tab without appending to the list
                 update_table(
-                    table=self.view.settings.multiposition_tab.multipoint_list.get_table(),
+                    table=self.multiposition_tab_controller.table,
                     pos=value,
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)
-                self.channels_tab_controller.toggle_multiposition()
-
-            elif event == "disable_multiposition":
-                self.channels_tab_controller.is_multiposition_val.set(False)
-                self.channels_tab_controller.toggle_multiposition()
-
-            elif event == "ilastik_mask":
-                # Display the ilastik mask
-                self.camera_view_controller.display_mask(mask=value)
-
-            elif event == "autofocus":
-                # Display the autofocus plot
-                if hasattr(self, "af_popup_controller"):
-                    self.af_popup_controller.display_plot(
-                        data=value[0], line_plot=value[1], clear_data=value[2]
-                    )
-
-            elif event == "tonywilson":
-                if hasattr(self, "ao_popup_controller"):
-                    # self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
-                    self.ao_popup_controller.plot_tonywilson(value)
-                    # self.ao_popup_controller.plot_mirror(value)
-                    if value["done"]:
-                        print("Tony Wilson done! Updating expt...")
-                        self.ao_popup_controller.update_experiment_values()
-            elif event == "mirror_update":
-                if hasattr(self, "ao_popup_controller"):
-                    self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
-                    self.ao_popup_controller.plot_mirror(value)
-            elif event == "ao_save_report":
-                if hasattr(self, "ao_popup_controller"):
-                    self.ao_popup_controller.save_report_to_file(value)
 
             elif event == "stop":
                 # Stop the software
                 break
 
             elif event == "update_stage":
-                # ZM: I am so sorry for this.
                 for _ in range(10):
                     try:
                         self.update_stage_controller_silent(value)
@@ -1263,24 +1249,48 @@ class Controller:
                     except RuntimeError:
                         time.sleep(0.001)
                         pass
-            elif event == "remove_positions":
-                self.multiposition_tab_controller.remove_positions(value)
-            elif event == "exposure_time":
-                self.channels_tab_controller.set_exposure_time(value[0], value[1])
 
-    # def exit_program(self):
-    #     """Exit the program.
-
-    #     This function is called when the user clicks the exit button in the GUI.
-    #     """
-    #     if messagebox.askyesno("Exit", "Are you sure?"):
-    #         logger.info("Exiting Program")
-    #         self.execute("exit")
-    #         sys.exit()
+            elif event in self.event_listeners.keys():
+                try:
+                    self.event_listeners[event](value)
+                except Exception:
+                    print(f"*** unhandled event: {event}, {value}")
 
     def add_acquisition_mode(self, name, acquisition_obj):
+        """Add and Acquisition Mode.
+
+        Parameters
+        ----------
+        name : string
+            Name of the acquisition mode.
+        acquisition_obj : object
+            Object of the acquisition mode.
+        """
         if name in self.plugin_acquisition_modes:
             print(f"*** plugin acquisition mode {name} exists, can't add another one!")
             return
         self.plugin_acquisition_modes[name] = acquisition_obj(name)
         self.acquire_bar_controller.add_mode(name)
+
+    def register_event_listener(self, event_name, event_handler):
+        """Register an event listener.
+
+        Parameters
+        ----------
+        event_name : string
+            Name of the event.
+        event_handler : function
+            Function to handle the event.
+        """
+        self.event_listeners[event_name] = event_handler
+
+    def register_event_listeners(self, events):
+        """Register multiple event listeners.
+
+        Parameters
+        ----------
+        events : dict
+            Dictionary of event names and handlers.
+        """
+        for event_name, event_handler in events.items():
+            self.register_event_listener(event_name, event_handler)

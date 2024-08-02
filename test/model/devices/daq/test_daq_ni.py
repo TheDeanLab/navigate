@@ -39,7 +39,7 @@ import pytest
 
 @pytest.mark.hardware
 def test_initialize_daq_ni():
-    from navigate.model.devices.daq.daq_ni import NIDAQ
+    from navigate.model.devices.daq.ni import NIDAQ
     from test.model.dummy import DummyModel
 
     model = DummyModel()
@@ -49,7 +49,7 @@ def test_initialize_daq_ni():
 
 @pytest.mark.hardware
 def test_daq_ni_functions():
-    from navigate.model.devices.daq.daq_ni import NIDAQ
+    from navigate.model.devices.daq.ni import NIDAQ
     from test.model.dummy import DummyModel
 
     model = DummyModel()

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ from tkinter.scrolledtext import ScrolledText
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from navigate.view.custom_widgets.validation import ValidatedCombobox, ValidatedEntry
+from navigate.view.custom_widgets.validation import ValidatedCombobox
 from navigate.model.data_sources import FILE_TYPES
 
 # Logger Setup
@@ -69,7 +69,7 @@ class AcquirePopUp:
         # window
         #: PopUp: The popup window
         self.popup = PopUp(
-            root, "File Saving Dialog", "430x530+320+180", transient=True
+            root, "File Saving Dialog", "430x370+320+180", transient=True
         )
 
         # Storing the content frame of the popup, this will be the parent of the widgets
@@ -82,6 +82,7 @@ class AcquirePopUp:
         # Dictionary for all the variables
         #: dict: Dictionary of all the variables
         self.inputs = {}
+
         #: dict: Dictionary of all the buttons
         self.buttons = {}
 
@@ -165,7 +166,7 @@ class AcquirePopUp:
         self.inputs["user"].widget.grid(padx=(53, 0))
         self.inputs["tissue"].widget.grid(padx=(16, 0))
         self.inputs["celltype"].widget.grid(padx=(28, 0))
-        self.inputs["prefix"].widget.grid(padx=(46,0))
+        self.inputs["prefix"].widget.grid(padx=(46, 0))
         self.inputs["label"].widget.grid(padx=(48, 0))
         self.inputs["misc"].widget.grid(padx=(40, 0))
 

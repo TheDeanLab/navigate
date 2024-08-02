@@ -130,10 +130,11 @@ class ConfigurationController:
 
         setting = {
             "laser": self.lasers_info,
-            "filter": list(
-                self.microscope_config["filter_wheel"]["available_filters"].keys()
-            ),
         }
+        for i, filter_wheel_config in enumerate(self.microscope_config["filter_wheel"]):
+            setting[f"filter_wheel_{i}"] = list(
+                filter_wheel_config["available_filters"].keys()
+            )
         return setting
 
     @property
@@ -250,9 +251,9 @@ class ConfigurationController:
 
         """
         axis = ["x", "y", "z", "theta", "f"]
+        position_limits = {}
         if self.microscope_config is not None:
             stage_dict = self.microscope_config["stage"]
-            position_limits = {}
             for a in axis:
                 position_limits[a] = stage_dict[a + suffix]
         else:
@@ -378,9 +379,40 @@ class ConfigurationController:
             Number of channels.
         """
         if self.microscope_config is not None:
-            return self.configuration[
-                "configuration"]["gui"]["channels"].get("count", 5)
+            return self.configuration["gui"]["channel_settings"].get("count", 5)
         return 5
+
+    @property
+    def number_of_filter_wheels(self):
+        """Return number of filter wheels
+
+        Returns
+        -------
+        number_of_filter_wheels : int
+            Number of filter wheels
+        """
+
+        if self.microscope_config is not None:
+            return len(self.microscope_config["filter_wheel"])
+        return 1
+
+    @property
+    def filter_wheel_names(self):
+        """Return a list of filter wheel names
+
+        Returns
+        -------
+        filter_wheel_names : list
+            List of filter wheel names.
+        """
+        filter_wheel_names = []
+        if self.microscope_config is not None:
+            for i in range(self.number_of_filter_wheels):
+                name = self.microscope_config["filter_wheel"][i]["hardware"].get(
+                    "name", f"Filter Wheel {i}"
+                )
+                filter_wheel_names.append(name)
+        return filter_wheel_names
 
     @property
     def microscope_list(self):
@@ -404,7 +436,7 @@ class ConfigurationController:
         return self.configuration["waveform_constants"]["remote_focus_constants"][
             microscope_name
         ].keys()
-    
+
     @property
     def gui_setting(self):
         return self.configuration["configuration"]["gui"]

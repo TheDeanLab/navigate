@@ -42,7 +42,6 @@ import os
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.model.features.autofocus import Autofocus
-from navigate.model.features.cva_conpro import ConstantVelocityAcquisition
 from navigate.model.features.adaptive_optics import TonyWilson
 from navigate.model.features.image_writer import ImageWriter
 from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
@@ -357,7 +356,6 @@ class Model:
                     },
                 )
             ],
-            "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
         # append plugin acquisition mode
@@ -511,15 +509,6 @@ class Model:
             self.is_save = self.configuration["experiment"]["MicroscopeState"][
                 "is_save"
             ]
-
-            # If multiposition is selected, verify that it is not empty.
-            if self.configuration["experiment"]["MicroscopeState"]["is_multiposition"]:
-                if len(self.configuration["experiment"]["MultiPositions"]) == 0:
-                    # Update the view and override the settings.
-                    self.event_queue.put(("disable_multiposition", None))
-                    self.configuration["experiment"]["MicroscopeState"][
-                        "is_multiposition"
-                    ] = False
 
             # Calculate waveforms, turn on lasers, etc.
             self.prepare_acquisition()
@@ -736,8 +725,6 @@ class Model:
 
             if hasattr(self, "signal_container"):
                 self.signal_container.end_flag = True
-            if self.imaging_mode == "ConstantVelocityAcquisition":
-                self.active_microscope.stages["z"].stop()
             if self.signal_thread:
                 self.signal_thread.join()
             if self.data_thread:
@@ -1321,7 +1308,6 @@ class Model:
         # TODO: lasers
         temp = {
             "zoom": "SyntheticZoom",
-            "filter_wheel": "SyntheticFilterWheel",
             "shutter": "SyntheticShutter",
             "remote_focus_device": "SyntheticRemoteFocus",
             "mirror": "SyntheticMirror",
@@ -1345,6 +1331,15 @@ class Model:
                     )
                 else:
                     microscope.galvo[k] = self.microscopes[microscope_name].galvo[k]
+            elif k.startswith("filter"):
+                if microscope_config[k] == "":
+                    idx = int(k[k.rfind("_") + 1 :])
+                    microscope.filter_wheel[k] = SyntheticFilterWheel(
+                        type("DummyConnection", (object,), {}),
+                        self.configuration["configuration"]["microscopes"][
+                            microscope_name
+                        ]["filter_wheel"][idx],
+                    )
             else:
                 if microscope_config[k] == "":
                     exec(

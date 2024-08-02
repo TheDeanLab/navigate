@@ -29,10 +29,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
+from math import ceil
 
+# Third party imports
 import numpy as np
 import pandas as pd
-from math import ceil
+
+# Local application imports
+
 
 
 def sign(x):
@@ -143,25 +148,33 @@ def compute_tiles_from_bounding_box(
     theta_step = theta_length * (1 - theta_overlap)
     f_step = f_length * (1 - f_overlap)
 
-    # grid out each dimension starting from (x_start, y_start, z_start) in steps
+    # grid out each dimension from (x_start, y_start, z_start) in steps
     def dim_vector(start, n_tiles, step):
         return start + np.arange(0, n_tiles, 1) * step
 
-    xs = dim_vector(x_start, x_tiles, x_step)  # x-coordinate is centered on FOV
-    ys = dim_vector(y_start, y_tiles, y_step)  # y-coordinate is centered on FOV
+    # x-coordinate is centered on FOV
+    xs = dim_vector(x_start, x_tiles, x_step)
+
+    # y-coordinate is centered on FOV
+    ys = dim_vector(y_start, y_tiles, y_step)
+
+    # z-coordinate is centered on local z-stack origin
     zs = dim_vector(
         z_start, z_tiles, z_step
-    )  # z-coordinate is centered on local z-stack origin
+    )
+
     thetas = dim_vector(
         theta_start, theta_tiles, theta_step
-    )  # we assume theta FOVs have no thickness
+    )
+
+    # we assume theta FOVs have no thickness
     fs = dim_vector(f_start, f_tiles, f_step)
 
     if f_track_with_z:
         # grid out the 4D space...
         x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
 
-        # we need to make f vary the same as z, for now, since focus changes with z
+        # we need to make f vary the same as z since focus changes with z
         lz = len(z.ravel())
         f = np.repeat(fs, np.ceil(lz / len(fs)))[
             :lz
@@ -234,6 +247,6 @@ def update_table(table, pos, append=False):
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1
-    table.update_rowcolors()
+    table.resetColors()
     table.redraw()
     table.tableChanged()

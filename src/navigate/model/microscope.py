@@ -90,11 +90,12 @@ class Microscope:
         #: dict: Dictionary of galvanometers.
         self.galvo = {}
 
+        #: dict: Dictionary of filter_wheels
+        self.filter_wheel = {}
+
         #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict.get("daq", None)
 
-        #: object; Tiger Controller object.
-        self.tiger_controller = None
 
         #: dict: Dictionary of microscope info.
         self.info = {}
@@ -137,7 +138,7 @@ class Microscope:
 
         device_ref_dict = {
             "camera": ["serial_number"],
-            "filter_wheel": ["type"],
+            "filter_wheel": ["type", "wheel_number"],
             "zoom": ["type", "servo_id"],
             "shutter": ["type", "channel"],
             "remote_focus_device": ["type", "channel"],
@@ -251,18 +252,6 @@ class Microscope:
                 if device_ref_name.startswith("EquipmentSolutions"):
                     device_connection = self.daq
 
-                if device_ref_name.startswith("ASI") and self.tiger_controller is None:
-                    # The first ASI instance of a device connection will be passed to
-                    # all other ASI devices as self.tiger_controller
-                    device_connection = devices_dict[device_name][device_ref_name]
-                    self.tiger_controller = device_connection
-                elif (
-                    device_ref_name.startswith("ASI")
-                    and self.tiger_controller is not None
-                ):
-                    # If subsequent ASI-based tiger controller devices are included.
-                    device_connection = self.tiger_controller
-
                 # LOAD AND START DEVICES
                 self.load_and_start_devices(
                     device_name=device_name,
@@ -333,11 +322,6 @@ class Microscope:
                     self.microscope_name
                 ]["stage"]["has_ni_galvo_stage"] = True
 
-            if device_ref_name.startswith("ASI") and self.tiger_controller is not None:
-                # If the self.tiger_controller is already set, then we can pass it to
-                # other devices that are connected to the same controller.
-                devices_dict["stages"][device_ref_name] = self.tiger_controller
-
             stage = start_stage(
                 microscope_name=self.microscope_name,
                 device_connection=devices_dict["stages"][device_ref_name],
@@ -399,6 +383,8 @@ class Microscope:
         # print(self.stages)
         pos_dict = self.get_stage_position()
         for stage, axes in self.stages_list:
+
+            # x_abs: current x_pos + current_x_offset - former_x_offset
             pos = {
                 axis
                 + "_abs": (
@@ -683,7 +669,8 @@ class Microscope:
             channel_key
         ]
         # Filter Wheel Settings.
-        self.filter_wheel.set_filter(channel["filter"])
+        for k in self.filter_wheel:
+            self.filter_wheel[k].set_filter(channel[k])
 
         # Camera Settings
         self.current_exposure_time = float(channel["camera_exposure_time"]) / 1000

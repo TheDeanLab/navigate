@@ -1151,7 +1151,8 @@ class CameraViewController(BaseViewController):
         # else:
         self.process_image()
         self.update_max_counts()
-        self.image_metrics["Channel"].set(self.channel_index)
+        channel_idx, _ = self.identify_channel_index_and_slice()
+        self.image_metrics["Channel"].set(channel_idx + 1)
         self.image_count = self.image_count + 1
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False

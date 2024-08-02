@@ -38,7 +38,12 @@ import json
 # Third party imports
 
 # Local application imports
-from navigate.tools.file_functions import create_save_path, save_yaml_file, delete_folder, load_yaml_file
+from navigate.tools.file_functions import (
+    create_save_path,
+    save_yaml_file,
+    delete_folder,
+    load_yaml_file,
+)
 
 
 class CreateSavePathTestCase(unittest.TestCase):
@@ -59,6 +64,7 @@ class CreateSavePathTestCase(unittest.TestCase):
             "tissue": "Liver",
             "celltype": "Hepatocyte",
             "label": "Sample1",
+            "prefix": "Cell_",
         }
         expected_save_directory = os.path.join(
             self.save_root,
@@ -102,6 +108,7 @@ class CreateSavePathTestCase(unittest.TestCase):
             "tissue": "Liver",
             "celltype": "Hepatocyte",
             "label": "Sample1",
+            "prefix": "Cell_",
         }
 
         save_directory = create_save_path(saving_settings)
@@ -133,6 +140,7 @@ class CreateSavePathTestCase(unittest.TestCase):
             "tissue": "Liver Tissue",
             "celltype": "Hepatocyte Cell Type",
             "label": "Sample 1",
+            "prefix": "Cell_",
         }
 
         save_directory = create_save_path(saving_settings)
@@ -212,7 +220,6 @@ class TestDeleteFolder(unittest.TestCase):
 
 
 class TestLoadYamlFile(unittest.TestCase):
-
     def setUp(self) -> None:
         os.mkdir("test_dir")
         self.save_root = "test_dir"
@@ -238,9 +245,11 @@ class TestLoadYamlFile(unittest.TestCase):
     def test_load_invalid_yaml_file(self):
         file_path = os.path.join(self.save_root, "test.yml")
         with open(file_path, "w") as f:
-            f.write("""
-{"name": "John Doe", "age": 30, "locati            
-            """)
+            f.write(
+                """
+{"name": "John Doe", "age": 30, "locati
+            """
+            )
         result = load_yaml_file(file_path)
         self.assertIsNone(result)
 

@@ -341,6 +341,7 @@ def verify_experiment_config(manager, configuration):
         "celltype": "MV3",
         "label": "GFP",
         "file_type": "TIFF",
+        "prefix": "Cell_",
         "date": time.strftime("%Y-%m-%d"),
         "solvent": "BABB",
     }

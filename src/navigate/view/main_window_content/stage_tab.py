@@ -525,7 +525,7 @@ class PositionFrame(ttk.Labelframe):
                 input_args={
                     "required": True,
                     "precision": 0.1,
-                    "width": 6,
+                    "width": 10,
                     "takefocus": False,
                 },
             )

@@ -95,40 +95,41 @@ class BaseViewController(GUIController, ABaseViewController):
             The parent controller of the camera view controller.
         """
         super().__init__(view, parent_controller)
-        self.width = None
-        self.height = None
-        self.tk_image2 = None
-        self.tk_image = None
-        self.min_counts = None
-        self.max_counts = None
-        self.saturated_pixels = None
-        self.selected_channels = None
-        self.autoscale = False
         self._snr_selected = False
         self.apply_cross_hair = True
+        self.autoscale = True
         self.bit_depth = 8
         self.canvas = self.view.canvas
         self.canvas_height = 512
-        self.canvas_height_scale = 1
+        self.canvas_height_scale = 4
         self.canvas_width = 512
-        self.canvas_width_scale = 1
+        self.canvas_width_scale = 4
         self.colormap = plt.get_cmap("gist_gray")
         self.data_buffer = None
         self.display_mask_flag = False
         self.flip_flags = None
+        self.height = None
+        self.image = None
         self.image_cache_flag = True
         self.image_count = 0
         self.is_displaying_image = VariableWithLock(bool)
         self.logger = logging.getLogger(p)
+        self.max_counts = None
+        self.min_counts = None
         self.number_of_channels = 0
         self.number_of_slices = 0
         self.original_image_height = 2048
         self.original_image_width = 2048
         self.resize_event_id = None
+        self.saturated_pixels = None
+        self.selected_channels = None
         self.slice_index = 0
         self.stack_cycling_mode = "per_stack"
+        self.tk_image = None
+        self.tk_image2 = None
         self.total_images_per_volume = 0
         self.transpose = False
+        self.width = None
         self.zoom_height = self.canvas_height
         self.zoom_offset = np.array([[0], [0]])
         self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
@@ -562,23 +563,15 @@ class CameraViewController(BaseViewController):
 
         # Transpose and live bindings
         self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
-
-        #: bool: The signal-to-noise ratio flag.
-        self._snr_selected = False
-
         self.update_snr()
 
         self.view.live_frame.live.bind(
             "<<ComboboxSelected>>", self.update_display_state
         )
 
-        #: event: The resize event id.
-        self.resize_event_id = None
         if platform.system() == "Windows":
             self.resize_event_id = self.view.bind("<Configure>", self.resize)
 
-        #: int: The width of the canvas.
-        #: int: The height of the canvas.
         self.width, self.height = 663, 597
         self.canvas_width, self.canvas_height = (
             self.view.canvas_width,
@@ -599,50 +592,11 @@ class CameraViewController(BaseViewController):
         #: int: The y position of the mouse.
         self.move_to_y = None
 
-        #: numpy.ndarray: The image data.
-        self.tk_image = None
-
-        #: numpy.ndarray: The image data.
-        self.image = None
-
-        #: numpy.ndarray: The image data.
-        self.cross_hair_image = None
-
-        #: numpy.ndarray: The image data.
-        self.saturated_pixels = None
-
-        #: numpy.ndarray: The image data.
-        self.down_sampled_image = None
-
-        #: numpy.ndarray: The image data.
-        self.zoom_image = None
-
-        #: bool: The autoscale flag.
-        self.autoscale = True
-
-        #: int: The maximum image counts.
-        self.max_counts = None
-
-        #: int: The minimum image counts.
-        self.min_counts = None
-
-        #: bool: The crosshair flag.
-        self.apply_cross_hair = True
-
         #: str: The mode of the camera view controller.
         self.mode = "stop"
 
-        #: bool: The transpose flag.
-        self.transpose = False
-
         #: str: The display state.
         self.display_state = "Live"
-
-        #: int: The number of images displayed.
-        self.image_count = 0
-
-        #: ndarray: A temporary array for image processing.
-        self.temp_array = None
 
         #: int: The number of frames to average.
         self.rolling_frames = 1
@@ -650,38 +604,8 @@ class CameraViewController(BaseViewController):
         #: list: The list of maximum intensity values.
         self.max_intensity_history = []
 
-        #: int: The canvas width scaling factor.
-        self.canvas_width_scale = 4
-
-        #: int: The canvas height scaling factor.
-        self.canvas_height_scale = 4
-
-        #: int: The number of slices.
-        self.number_of_slices = 0
-
-        #: numpy.ndarray: The image volume.
-        self.image_volume = None
-
-        #: int: The total number of images per volume.
-        self.total_images_per_volume = 0
-
-        #: int: The number of channels.
-        self.number_of_channels = 0
-
-        #: int: The image counter.
-        self.image_counter = 0
-
-        #: int: The slice index.
-        self.slice_index = 0
-
-        #: int: The channel index.
-        self.channel_index = 0
-
         #: bool: The display mask flag.
         self.mask_color_table = None
-
-        #: bool: Whether or not to flip the image.
-        self.flip_flags = None
 
         #: threading.Lock: The lock for the ilastik mask.
         self.ilastik_mask_ready_lock = threading.Lock()
@@ -691,7 +615,6 @@ class CameraViewController(BaseViewController):
 
     def update_snr(self):
         """Updates the signal-to-noise ratio."""
-        #: bool: The signal-to-noise ratio flag.
         self._snr_selected = False
 
         #: numpy.ndarray: The offset of the image.
@@ -735,36 +658,13 @@ class CameraViewController(BaseViewController):
         self.display_state = self.view.live_frame.live.get()
         # Slice in the XY Dimension.
         if self.display_state == "XY Slice":
-            print("XY Slice")
-            try:
-                slider_length = np.shape(self.image_volume)[2] - 1
-            except IndexError:
-                slider_length = (
-                    self.parent_controller.configuration["experiment"][
-                        "MicroscopeState"
-                    ]["number_z_steps"]
-                    - 1
-                )
-        if self.display_state == "YZ Slice":
-            try:
-                slider_length = np.shape(self.image_volume)[0] - 1
-            except IndexError:
-                slider_length = (
-                    self.parent_controller.configuration["experiment"][
-                        "CameraParameters"
-                    ]["y_pixels"]
-                    - 1
-                )
-        if self.display_state == "YZ Slice":
-            try:
-                slider_length = np.shape(self.image_volume)[1] - 1
-            except IndexError:
-                slider_length = (
-                    self.parent_controller.configuration["experiment"][
-                        "CameraParameters"
-                    ]["x_pixels"]
-                    - 1
-                )
+            # NOTE: Can only display previously acquired full stack.
+            slider_length = (
+                self.parent_controller.configuration["experiment"]["MicroscopeState"][
+                    "number_z_steps"
+                ]
+                - 1
+            )
 
         if self.display_state.find("Slice") != -1:
             self.view.slider.slider_widget.configure(
@@ -1021,24 +921,9 @@ class CameraViewController(BaseViewController):
         channel_display_index : int
             Index of the channel to display.
         """
-        if self.display_state == "XY MIP":
-            self.image = np.max(
-                self.image_volume[:, :, :, channel_display_index], axis=2
-            )
-        if self.display_state == "YZ MIP":
-            self.image = np.max(
-                self.image_volume[:, :, :, channel_display_index], axis=0
-            )
-        if self.display_state == "ZY MIP":
-            self.image = np.max(
-                self.image_volume[:, :, :, channel_display_index], axis=1
-            )
+        # TODO: Implement lazy loader for XY slice.
         if self.display_state == "XY Slice":
-            self.image = self.image_volume[:, :, slider_index, channel_display_index]
-        if self.display_state == "YZ Slice":
-            self.image = self.image_volume[slider_index, :, :, channel_display_index]
-        if self.display_state == "ZY Slice":
-            self.image = self.image_volume[:, slider_index, :, channel_display_index]
+            pass
 
     def display_image(self, image_id):
         """Display an image using the LUT specified in the View.

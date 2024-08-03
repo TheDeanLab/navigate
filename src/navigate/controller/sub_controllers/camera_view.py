@@ -96,6 +96,8 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         super().__init__(view, parent_controller)
         self._snr_selected = False
+        self._offset = None
+        self._variance = None
         self.apply_cross_hair = True
         self.autoscale = True
         self.bit_depth = 8
@@ -147,11 +149,10 @@ class BaseViewController(GUIController, ABaseViewController):
             pass
         else:
             cmap_name = self.view.scale_palette.color.get()
-            # TODO: Don't use a proxy for SNR
             self._snr_selected = True if cmap_name == "RdBu_r" else False
             self.colormap = plt.get_cmap(cmap_name)
             image = self.add_crosshair(image=self.image)
-            image = self.apply_LUT(image=image)
+            image = self.apply_lut(image=image)
             self.populate_image(image=image)
             logger.debug(f"Updating the LUT, {cmap_name}")
 
@@ -198,7 +199,7 @@ class BaseViewController(GUIController, ABaseViewController):
         display_thread = threading.Thread(target=self.display_image, args=(image_id,))
         display_thread.start()
 
-    def apply_LUT(self, image):
+    def apply_lut(self, image):
         """Applies a LUT to an image.
 
         Red is reserved for saturated pixels.
@@ -360,7 +361,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
-
         zoom_image = self.image[
             int(y_start_index * self.canvas_height_scale) : int(
                 y_end_index * self.canvas_height_scale
@@ -458,7 +458,7 @@ class BaseViewController(GUIController, ABaseViewController):
         image = self.down_sample_image(image)
         image = self.scale_image_intensity(image)
         image = self.add_crosshair(image)
-        image = self.apply_LUT(image)
+        image = self.apply_lut(image)
         self.populate_image(image)
 
     def left_click(self, *args):
@@ -466,7 +466,7 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.image is not None:
             self.apply_cross_hair = not self.apply_cross_hair
             image = self.add_crosshair(image=self.image)
-            image = self.apply_LUT(image=image)
+            image = self.apply_lut(image=image)
             self.populate_image(image=image)
 
     def resize(self, event):
@@ -615,11 +615,6 @@ class CameraViewController(BaseViewController):
 
     def update_snr(self):
         """Updates the signal-to-noise ratio."""
-        self._snr_selected = False
-
-        #: numpy.ndarray: The offset of the image.
-        #: numpy.ndarray: The variance of the image.
-        self._offset, self._variance = None, None
         off, var = self.parent_controller.model.get_offset_variance_maps()
         if off is None:
             self.image_palette["SNR"].grid_remove()
@@ -627,17 +622,13 @@ class CameraViewController(BaseViewController):
             self._offset, self._variance = copy.deepcopy(off), copy.deepcopy(var)
             self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.NSEW, pady=3)
 
-    def slider_update(self, event):
-        """Updates the image when the slider is moved.
-
-        Parameters
-        ----------
-        event : tkinter event
-            The tkinter event that triggered the function.
-        """
+    def slider_update(self, *args):
+        """Updates the image when the slider is moved."""
 
         slider_index = self.view.slider.get()
         channel_display_index = 0
+        if self.image is None:
+            return
         self.retrieve_image_slice_from_volume(
             slider_index=slider_index, channel_display_index=channel_display_index
         )
@@ -655,23 +646,23 @@ class CameraViewController(BaseViewController):
         event : tkinter event
             The tkinter event that triggered the function.
         """
-        self.display_state = self.view.live_frame.live.get()
-        # Slice in the XY Dimension.
-        if self.display_state == "XY Slice":
-            # NOTE: Can only display previously acquired full stack.
-            slider_length = (
-                self.parent_controller.configuration["experiment"]["MicroscopeState"][
-                    "number_z_steps"
-                ]
-                - 1
-            )
-
-        if self.display_state.find("Slice") != -1:
-            self.view.slider.slider_widget.configure(
-                to=slider_length, tickinterval=(slider_length / 5), state="normal"
-            )
-        else:
-            self.view.slider.slider_widget.configure(state="disabled")
+        # self.display_state = self.view.live_frame.live.get()
+        # # Slice in the XY Dimension.
+        # if self.display_state == "XY Slice":
+        #     # NOTE: Can only display previously acquired full stack.
+        #     slider_length = (
+        #         self.parent_controller.configuration["experiment"]["MicroscopeState"][
+        #             "number_z_steps"
+        #         ]
+        #         - 1
+        #     )
+        #
+        # if self.display_state.find("Slice") != -1:
+        #     self.view.slider.slider_widget.configure(
+        #         to=slider_length, tickinterval=(slider_length / 5), state="normal"
+        #     )
+        # else:
+        self.view.slider.configure(state="disabled")
 
     def get_absolute_position(self):
         """Gets the absolute position of the computer mouse.
@@ -716,19 +707,19 @@ class CameraViewController(BaseViewController):
         data : list
             Min and max intensity values.
         """
-        # Pallete section (colors, autoscale, min/max counts)
+        # Pallet section (colors, autoscale, min/max counts)
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
         if name == "minmax":
-            min = data[0]
-            max = data[1]
+            min_value = data[0]
+            max_value = data[1]
 
             # Invoking defaults
             self.image_palette["Gray"].widget.invoke()
             self.image_palette["Autoscale"].widget.invoke()
 
             # Populating defaults
-            self.image_palette["Min"].set(min)
-            self.image_palette["Max"].set(max)
+            self.image_palette["Min"].set(min_value)
+            self.image_palette["Max"].set(max_value)
             self.image_palette["Min"].widget["state"] = "disabled"
             self.image_palette["Max"].widget["state"] = "disabled"
 
@@ -739,8 +730,6 @@ class CameraViewController(BaseViewController):
             frames = data[0]
             # Populating defaults
             self.image_metrics["Frames"].set(frames)
-
-    #  Set mode for the execute statement in main controller
 
     def set_mode(self, mode=""):
         """Sets mode of camera_view_controller.
@@ -963,7 +952,7 @@ class CameraViewController(BaseViewController):
                 self.image, self._offset, self._variance
             )
 
-        # MIP and Slice Mode TODO: Consider channels
+        # Slice Mode TODO: Consider channels
         # if self.display_state != 'Live':
         #     slider_index = self.view.slider.slider_widget.get()
         #     channel_display_index = 0
@@ -1041,9 +1030,18 @@ class MIPViewController(BaseViewController):
         self.zy_mip = None
         self.xy_mip = None
         self.autoscale = True
-        self.lut_widgets = self.view.lut.get_widgets()
-        self.lut_widgets["Gray"].widget.invoke()
-        self.lut_widgets["Autoscale"].widget.invoke()
+
+        self.image_palette = self.view.lut.get_widgets()
+        self.image_palette["Gray"].widget.invoke()
+        self.image_palette["Autoscale"].widget.invoke()
+        self.image_palette["SNR"].grid_remove()
+        self.image_palette["Min"].set(100)
+        self.image_palette["Max"].set(2**16 - 1)
+        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
+        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
+        self.image_palette["Autoscale"].widget.config(
+            command=self.toggle_min_max_buttons
+        )
 
         self.render_widgets = self.view.render.get_widgets()
         self.render_widgets["perspective"].widget["values"] = ("XY", "ZY", "ZX")

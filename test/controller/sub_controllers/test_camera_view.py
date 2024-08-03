@@ -268,7 +268,7 @@ class TestCameraViewController:
         self.camera_view.down_sample_image = MagicMock()
         self.camera_view.scale_image_intensity = MagicMock()
         self.camera_view.add_crosshair = MagicMock()
-        self.camera_view.apply_LUT = MagicMock()
+        self.camera_view.apply_lut = MagicMock()
         self.camera_view.populate_image = MagicMock()
 
         self.camera_view.process_image()
@@ -278,7 +278,7 @@ class TestCameraViewController:
         self.camera_view.down_sample_image.assert_called()
         self.camera_view.scale_image_intensity.assert_called()
         self.camera_view.add_crosshair.assert_called()
-        self.camera_view.apply_LUT.assert_called()
+        self.camera_view.apply_lut.assert_called()
         self.camera_view.populate_image.assert_called()
 
     @pytest.mark.parametrize("num,value", [(4, 0.95), (5, 1.05)])
@@ -383,7 +383,7 @@ class TestCameraViewController:
     def test_left_click(self, onoff):
 
         self.camera_view.add_crosshair = MagicMock()
-        self.camera_view.apply_LUT = MagicMock()
+        self.camera_view.apply_lut = MagicMock()
         self.camera_view.populate_image = MagicMock()
         event = MagicMock()
 
@@ -393,7 +393,7 @@ class TestCameraViewController:
         self.camera_view.left_click(event)
 
         self.camera_view.add_crosshair.assert_called()
-        self.camera_view.apply_LUT.assert_called()
+        self.camera_view.apply_lut.assert_called()
         self.camera_view.populate_image.assert_called()
         assert self.camera_view.apply_cross_hair == (not onoff)
 

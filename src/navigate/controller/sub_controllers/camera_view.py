@@ -95,117 +95,59 @@ class BaseViewController(GUIController, ABaseViewController):
             The parent controller of the camera view controller.
         """
         super().__init__(view, parent_controller)
-
-        #: SharedNDArray: The shared array that contains the image data.
-        self.data_buffer = None
-
-        #: VariableWithLock: The variable that indicates if the image is being
-        # displayed.
-        self.is_displaying_image = VariableWithLock(bool)
-
-        #: logging.Logger: The logger for the camera view controller.
-        self.logger = logging.getLogger(p)
-
-        #: int: Number of images received.
-        self.image_count = 0
-
-        #: int: Index of the slice.
-        self.slice_index = 0
-
-        #: str: The stack cycling mode.
-        self.stack_cycling_mode = "per_stack"
-
-        #: int: Number of channels.
-        self.number_of_channels = 0
-
-        #: int: Number of slices.
-        self.number_of_slices = 0
-
-        #: int: Total number of images per volume.
-        self.total_images_per_volume = 0
-
-        #: int: The original image height.
-        self.original_image_height = 2048
-
-        #: int: The original image width.
-        self.original_image_width = 2048
-
-        #: bool: Flat to flip the camera
-        self.flip_flags = None
-
-        #: int: The canvas width.
-        self.canvas_width = 512
-
-        #: int: The canvas height.
+        self.width = None
+        self.height = None
+        self.tk_image2 = None
+        self.tk_image = None
+        self.min_counts = None
+        self.max_counts = None
+        self.saturated_pixels = None
+        self.selected_channels = None
+        self.autoscale = False
+        self._snr_selected = False
+        self.apply_cross_hair = True
+        self.bit_depth = 8
+        self.canvas = self.view.canvas
         self.canvas_height = 512
-
-        #: int: The zoom width.
+        self.canvas_height_scale = 1
+        self.canvas_width = 512
+        self.canvas_width_scale = 1
+        self.colormap = plt.get_cmap("gist_gray")
+        self.data_buffer = None
+        self.display_mask_flag = False
+        self.flip_flags = None
+        self.image_cache_flag = True
+        self.image_count = 0
+        self.is_displaying_image = VariableWithLock(bool)
+        self.logger = logging.getLogger(p)
+        self.number_of_channels = 0
+        self.number_of_slices = 0
+        self.original_image_height = 2048
+        self.original_image_width = 2048
+        self.resize_event_id = None
+        self.slice_index = 0
+        self.stack_cycling_mode = "per_stack"
+        self.total_images_per_volume = 0
+        self.transpose = False
+        self.zoom_height = self.canvas_height
+        self.zoom_offset = np.array([[0], [0]])
+        self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
+        self.zoom_scale = 1
+        self.zoom_value = 1
         self.zoom_width = self.canvas_width
 
-        #: int: The zoom height.
-        self.zoom_height = self.canvas_height
-
-        #: numpy.ndarray: The zoom rectangle.
-        self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
-
-        #: numpy.ndarray: The zoom offset.
-        self.zoom_offset = np.array([[0], [0]])
-
-        #: float: The zoom value.
-        self.zoom_value = 1
-
-        #: float: The zoom scale.
-        self.zoom_scale = 1
-
-        #: float: The canvas width scale.
-        self.canvas_width_scale = 1
-
-        #: float: The canvas height scale.
-        self.canvas_height_scale = 1
-
-        #: bool: The crosshair flag.
-        self.apply_cross_hair = True
-
-        #: event: The resize event id.
-        self.resize_event_id = None
-
-        #: tkinter.Canvas: The tkinter canvas that displays the image.
-        self.canvas = self.view.canvas
-
-        #: matplotlib.colors.LinearSegmentedColormap: The colormap.
-        self.colormap = plt.get_cmap("gist_gray")
-
-        #: int: The bit-depth for PIL presentation.
-        self.bit_depth = 8
-
-        #: bool: The display mask flag for ilastik.
-        self.display_mask_flag = False
-
-        #: bool: Image cache flag
-        self.image_cache_flag = True
-
-    def update_LUT(self):
+    def update_lut(self):
         """Update the LUT in the Camera View.
 
         When the LUT is changed in the GUI, this function is called.
         Updates the LUT.
-
-        Parameters
-        ----------
-        self.image : np.array
-            Must be a 2D image.
-
-        Returns
-        -------
-        self.apply_LUT_image : np.arrays
         """
         if self.image is None:
             pass
         else:
             cmap_name = self.view.scale_palette.color.get()
-            self._snr_selected = (
-                True if cmap_name == "RdBu_r" else False
-            )  # TODO: Don't use a proxy for SNR
+            # TODO: Don't use a proxy for SNR
+            self._snr_selected = True if cmap_name == "RdBu_r" else False
             self.colormap = plt.get_cmap(cmap_name)
             image = self.add_crosshair(image=self.image)
             image = self.apply_LUT(image=image)
@@ -216,11 +158,6 @@ class BaseViewController(GUIController, ABaseViewController):
         """Get Flip XY widget value from the View.
 
         If True, transpose the image.
-
-        Returns
-        -------
-        self.image : np.array
-            Transposed image.
         """
         self.transpose = self.image_palette["Flip XY"].get()
 
@@ -233,12 +170,12 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         self.autoscale = self.image_palette["Autoscale"].get()
 
-        if self.autoscale is True:  # Autoscale Enabled
+        if self.autoscale is True:
             self.image_palette["Min"].widget["state"] = "disabled"
             self.image_palette["Max"].widget["state"] = "disabled"
             logger.info("Autoscale Enabled")
 
-        elif self.autoscale is False:  # Autoscale Disabled
+        elif self.autoscale is False:
             self.image_palette["Min"].widget["state"] = "normal"
             self.image_palette["Max"].widget["state"] = "normal"
             logger.info("Autoscale Disabled")
@@ -268,6 +205,8 @@ class BaseViewController(GUIController, ABaseViewController):
 
         Parameters
         ----------
+        image : numpy.ndarray
+            Image data.
         """
         image = self.colormap(image)
 
@@ -457,7 +396,18 @@ class BaseViewController(GUIController, ABaseViewController):
         return image
 
     def add_crosshair(self, image):
-        """Adds a cross-hair to the image."""
+        """Adds a cross-hair to the image.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+
+        Returns
+        -------
+        image : numpy.ndarray
+            Image data with cross-hair.
+        """
         if self.apply_cross_hair:
             crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
             crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
@@ -485,7 +435,7 @@ class BaseViewController(GUIController, ABaseViewController):
             temp_img = Image.fromarray(image.astype(np.uint8))
 
         # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
-        # what the canvas is showing and cause a blink.
+        # what the canvas is showing, causing it to blink.
         if self.image_cache_flag:
             self.tk_image = ImageTk.PhotoImage(temp_img)
             self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
@@ -510,14 +460,8 @@ class BaseViewController(GUIController, ABaseViewController):
         image = self.apply_LUT(image)
         self.populate_image(image)
 
-    def left_click(self, event):
-        """Toggles cross-hair on image upon left click event.
-
-        Parameters
-        ----------
-        event : tkinter.Event
-            Tkinter event.
-        """
+    def left_click(self, *args):
+        """Toggles cross-hair on image upon left click event."""
         if self.image is not None:
             self.apply_cross_hair = not self.apply_cross_hair
             image = self.add_crosshair(image=self.image)
@@ -573,13 +517,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         When the min and max counts are toggled in the GUI, this function is called.
         Updates the min and max values.
-
-        Returns
-        -------
-        self.min_counts : int
-            Minimum counts for the image.
-        self.max_counts : int
-            Maximum counts for the image.
         """
         if self.image_palette["Min"].get() != "":
             self.min_counts = float(self.image_palette["Min"].get())
@@ -621,7 +558,7 @@ class CameraViewController(BaseViewController):
 
         # Bindings for changes to the LUT
         for color in self.image_palette.values():
-            color.widget.config(command=self.update_LUT)
+            color.widget.config(command=self.update_lut)
 
         # Transpose and live bindings
         self.image_palette["Flip XY"].widget.config(command=self.transpose_image)

@@ -320,10 +320,9 @@ class Controller:
         self.img_height = img_height
 
         # virtual microscopes
-        for microscope_name in self.additional_microscopes:
-            self.model.destroy_virtual_microscope(microscope_name)
-            # TODO: destroy the popup window
-            self.additional_microscopes.pop(microscope_name)
+        for microscope_name in list(self.additional_microscopes.keys()):
+            self.destroy_virtual_microscope(microscope_name)
+        self.additional_microscopes = {}
 
     def update_acquire_control(self):
         """Update the acquire control based on the current experiment parameters."""
@@ -1115,8 +1114,7 @@ class Controller:
             if microscope_name not in self.additional_microscopes_configs:
                 temp.append(microscope_name)
         for microscope_name in temp:
-            del self.additional_microscopes[microscope_name]
-            self.model.destroy_virtual_microscope(microscope_name)
+            self.destroy_virtual_microscope(microscope_name)
 
         # show additional camera view popup
         for microscope_name in self.additional_microscopes_configs:
@@ -1147,6 +1145,9 @@ class Controller:
                     microscope_name
                 ]["data_buffer"]
                 popup_window.popup.bind("<Configure>", camera_view_controller.resize)
+                self.additional_microscopes[microscope_name][
+                    "popup_window"
+                ] = popup_window
                 self.additional_microscopes[microscope_name][
                     "camera_view_controller"
                 ] = camera_view_controller
@@ -1181,6 +1182,26 @@ class Controller:
                 ),
             )
             capture_img_thread.start()
+
+    def destroy_virtual_microscope(self, microscope_name):
+        """Destroy virtual microscopes.
+
+        Parameters
+        ----------
+        microscope_name : str
+            The microscope name
+        """
+        if microscope_name not in self.additional_microscopes:
+            return
+        del self.additional_microscopes[microscope_name]["data_buffer"]
+        self.model.destroy_virtual_microscope(microscope_name)
+        # release pipe
+        self.model.release_pipe(f"{microscope_name}_show_img_pipe")
+        del self.additional_microscopes[microscope_name]["show_img_pipe"]
+        # destroy the popup window
+        self.additional_microscopes[microscope_name]["popup_window"].popup.dismiss()
+        self.additional_microscopes[microscope_name]["camera_view_controller"] = None
+        del self.additional_microscopes[microscope_name]
 
     def move_stage(self, pos_dict):
         """Trigger the model to move the stage.

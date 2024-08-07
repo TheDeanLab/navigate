@@ -171,8 +171,8 @@ class KeystrokeController(GUIController):
         if platform.system() != "Linux":
             self.mip_view.canvas.bind("<MouseWheel>", self.mip_controller.mouse_wheel)
         else:
-            self.camera_view.canvas.bind("<Button-4>", self.mip_controller.mouse_wheel)
-            self.camera_view.canvas.bind("<Button-5>", self.mip_controller.mouse_wheel)
+            self.mip_view.canvas.bind("<Button-4>", self.mip_controller.mouse_wheel)
+            self.mip_view.canvas.bind("<Button-5>", self.mip_controller.mouse_wheel)
 
     def camera_controller_mouse_wheel_leave(self, event):
         """Mouse wheel binding for camera view

@@ -1353,7 +1353,10 @@ class Model:
 
         # connect virtual microscope with data_buffer
         microscope.update_data_buffer(
-            self.img_width, self.img_height, data_buffer, self.number_of_frames
+            self.configuration["experiment"]["CameraParameters"]["x_pixels"],
+            self.configuration["experiment"]["CameraParameters"]["y_pixels"],
+            data_buffer,
+            self.number_of_frames
         )
 
         # add microscope to self.virtual_microscopes

@@ -64,10 +64,15 @@ def test_config_methods():
         "__package__",
         "__spec__",
         "build_nested_dict",
-        "get_navigate_path",
+        "build_ref_name",
+        "feature_related_functions",
         "get_configuration_paths",
+        "get_navigate_path",
+        "inspect",
         "isfile",
         "load_configs",
+        "load_module_from_file",
+        "set_feature_attributes",
         "os",
         "platform",
         "shutil",
@@ -78,7 +83,6 @@ def test_config_methods():
         "verify_waveform_constants",
         "verify_configuration",
         "yaml",
-        "build_ref_name",
     ]
     for method in methods:
         assert method in desired_methods

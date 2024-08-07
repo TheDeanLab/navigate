@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
@@ -39,12 +38,14 @@ import platform
 from pathlib import Path
 from os.path import isfile
 from multiprocessing.managers import ListProxy, DictProxy
+import inspect
 
 # Third Party Imports
 import yaml
 
 # Local Imports
-from navigate.tools.common_functions import build_ref_name
+from navigate.tools.common_functions import build_ref_name, load_module_from_file
+from navigate.model.features import feature_related_functions
 
 
 def get_navigate_path():
@@ -1097,3 +1098,23 @@ def verify_configuration(manager, configuration):
         "gui",
         {"channels": {"count": channel_count}},
     )
+
+
+def set_feature_attributes(plugin_path):
+    """Load feature module and set function attributes.
+
+    Parameters
+    ----------
+    plugin_path : str
+        The path to the plugins folder.
+    """
+    features_dir = os.path.join(plugin_path, "model", "features")
+    if os.path.exists(features_dir):
+        features = os.listdir(features_dir)
+        for feature in features:
+            feature_file = os.path.join(features_dir, feature)
+            if os.path.isfile(feature_file):
+                temp = load_module_from_file(feature, feature_file)
+                for c in dir(temp):
+                    if inspect.isclass(getattr(temp, c)):
+                        setattr(feature_related_functions, c, getattr(temp, c))

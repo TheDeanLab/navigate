@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
 # Standard library imports
 from pathlib import Path
 import os
-import inspect
 import tkinter as tk
 from tkinter import messagebox
 
@@ -48,6 +47,7 @@ from navigate.tools.decorators import AcquisitionMode
 from navigate.model.features import feature_related_functions
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.plugins_popup import PluginsPopup
+from navigate.config import set_feature_attributes
 
 
 class PluginsController:
@@ -174,18 +174,7 @@ class PluginsController:
                             plugin_name, plugin_frame, plugin_controller
                         )
             # feature
-            features_dir = os.path.join(plugin_path, "model", "features")
-            if os.path.exists(features_dir):
-                features = os.listdir(features_dir)
-                for feature in features:
-                    feature_file = os.path.join(features_dir, feature)
-                    if os.path.isfile(feature_file):
-                        module = load_module_from_file(feature, feature_file)
-                        for c in dir(module):
-                            if inspect.isclass(getattr(module, c)):
-                                setattr(
-                                    feature_related_functions, c, getattr(module, c)
-                                )
+            set_feature_attributes(plugin_path)
 
             # acquisition mode
             acquisition_modes = plugin_config.get("acquisition_modes", [])

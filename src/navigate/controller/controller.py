@@ -367,18 +367,15 @@ class Controller:
             self.waveform_popup_controller.populate_experiment_values()
 
     def initialize_cam_view(self):
-        """Populate view tab.
+        """Populate view and maximum intensity projection tabs.
 
-        Populate widgets with necessary data from
-        config file via config controller. For the entire view tab.
-        Sets the minimum and maximum counts
-        for when the data is not being autoscaled.
+        Communicates with the camera view controller and mip setting controller to
+        set the minimum and maximum counts, as well as the default channel settings.
         """
         # Populating Min and Max Counts
-        minmax_values = [0, 2**16 - 1]
-        self.camera_view_controller.initialize("minmax", minmax_values)
-        image_metrics = [1, 0, 0]
-        self.camera_view_controller.initialize("image", image_metrics)
+        self.camera_view_controller.initialize("minmax", [0, 2**16 - 1])
+        self.mip_setting_controller.initialize("minmax", [0, 2**16 - 1])
+        self.camera_view_controller.initialize("image", [1, 0, 0])
 
     def populate_experiment_setting(self, file_name=None, in_initialize=False):
         """Load experiment file and populate model.experiment and configure view.

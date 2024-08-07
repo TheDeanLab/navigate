@@ -139,7 +139,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_value = 1
         self.zoom_width = self.canvas_width
 
-    def update_lut(self):
+    def update_lut(self, target):
         """Update the LUT in the Camera View.
 
         When the LUT is changed in the GUI, this function is called.
@@ -148,7 +148,7 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.image is None:
             pass
         else:
-            cmap_name = self.view.scale_palette.color.get()
+            cmap_name = target.color.get()
             self._snr_selected = True if cmap_name == "RdBu_r" else False
             self.colormap = plt.get_cmap(cmap_name)
             image = self.add_crosshair(image=self.image)
@@ -527,6 +527,41 @@ class BaseViewController(GUIController, ABaseViewController):
             f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}"
         )
 
+    def mouse_wheel(self, event):
+        """Digitally zooms in or out on the image upon scroll wheel event.
+
+        Sets the self.zoom_value between 0.05 and 1 in .05 unit steps.
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            num = 4 is zoom out.
+            num = 5 is zoom in.
+            x, y location.  0,0 is top left corner.
+        """
+        if event.x >= self.canvas_width or event.y >= self.canvas_height:
+            return
+        self.zoom_offset = np.array([[int(event.x)], [int(event.y)]])
+        delta = 120 if platform.system() != "Darwin" else 1
+        threshold = event.delta / delta
+        if (event.num == 4) or (threshold > 0):
+            # Zoom out event.
+            self.zoom_value = 0.95
+        if (event.num == 5) or (threshold < 0):
+            # Zoom in event.
+            self.zoom_value = 1.05
+
+        self.zoom_scale *= self.zoom_value
+        self.zoom_width /= self.zoom_value
+        self.zoom_height /= self.zoom_value
+
+        if self.zoom_width > self.canvas_width or self.zoom_height > self.canvas_height:
+            self.reset_display(False)
+        elif self.zoom_width < 5 or self.zoom_height < 5:
+            return
+
+        self.process_image()
+
 
 class CameraViewController(BaseViewController):
     """Camera View Controller Class."""
@@ -559,7 +594,9 @@ class CameraViewController(BaseViewController):
 
         # Bindings for changes to the LUT
         for color in self.image_palette.values():
-            color.widget.config(command=self.update_lut)
+            color.widget.config(
+                command=lambda: self.update_lut(self.view.scale_palette)
+            )
 
         # Transpose and live bindings
         self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
@@ -831,41 +868,6 @@ class CameraViewController(BaseViewController):
                 title="Warning", message="Can't move to there! Invalid stage position!"
             )
 
-    def mouse_wheel(self, event):
-        """Digitally zooms in or out on the image upon scroll wheel event.
-
-        Sets the self.zoom_value between 0.05 and 1 in .05 unit steps.
-
-        Parameters
-        ----------
-        event : tkinter.Event
-            num = 4 is zoom out.
-            num = 5 is zoom in.
-            x, y location.  0,0 is top left corner.
-        """
-        if event.x >= self.canvas_width or event.y >= self.canvas_height:
-            return
-        self.zoom_offset = np.array([[int(event.x)], [int(event.y)]])
-        delta = 120 if platform.system() != "Darwin" else 1
-        threshold = event.delta / delta
-        if (event.num == 4) or (threshold > 0):
-            # Zoom out event.
-            self.zoom_value = 0.95
-        if (event.num == 5) or (threshold < 0):
-            # Zoom in event.
-            self.zoom_value = 1.05
-
-        self.zoom_scale *= self.zoom_value
-        self.zoom_width /= self.zoom_value
-        self.zoom_height /= self.zoom_value
-
-        if self.zoom_width > self.canvas_width or self.zoom_height > self.canvas_height:
-            self.reset_display(False)
-        elif self.zoom_width < 5 or self.zoom_height < 5:
-            return
-
-        self.process_image()
-
     def update_max_counts(self):
         """Update the max counts in the camera view.
 
@@ -1032,30 +1034,67 @@ class MIPViewController(BaseViewController):
         self.autoscale = True
 
         self.image_palette = self.view.lut.get_widgets()
-        self.image_palette["Gray"].widget.invoke()
-        self.image_palette["Autoscale"].widget.invoke()
-        self.image_palette["SNR"].grid_remove()
-        self.image_palette["Min"].set(100)
-        self.image_palette["Max"].set(2**16 - 1)
         self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
         self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
         self.image_palette["Autoscale"].widget.config(
             command=self.toggle_min_max_buttons
         )
+        for color in ["Gray", "Gradient", "Rainbow"]:
+            self.image_palette[color].widget.config(
+                command=lambda: self.update_lut(self.view.lut)
+            )
+        self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
 
         self.render_widgets = self.view.render.get_widgets()
+
+    def initialize(self, name, data):
+        """Initialize the MIP view.
+
+        Sets the min and max intensity values for the image.
+        Disables the min and max widgets.
+        Invokes the gray and autoscale widgets.
+        Hides the SNR widget.
+        Sets the perspective widget values.
+        Sets the perspective widget to XY.
+        Sets the channel widget to CH0.
+
+        Parameters
+        ----------
+        name : str
+            'minmax', 'image'.
+        data : list
+            Min and max intensity values.
+        """
+
+        min_value = data[0]
+        max_value = data[1]
+        self.image_palette["Min"].set(min_value)
+        self.image_palette["Max"].set(max_value)
+        self.image_palette["Min"].widget["state"] = "disabled"
+        self.image_palette["Max"].widget["state"] = "disabled"
+        self.image_palette["Gray"].widget.invoke()
+        self.image_palette["Autoscale"].widget.invoke()
+        self.image_palette["SNR"].grid_remove()
         self.render_widgets["perspective"].widget["values"] = ("XY", "ZY", "ZX")
         self.render_widgets["perspective"].set("XY")
         self.render_widgets["channel"].set("CH0")
 
     def prepare_mip_view(self):
+        """Prepare the MIP view.
+
+        Set the number of channels, number of slices, and the selected channels.
+        Pre-allocate the matrices for the MIP.
+        """
         self.render_widgets["channel"].widget["values"] = self.selected_channels
         self.preallocate_matrices()
 
     def preallocate_matrices(self):
-        """Preallocate the matrices for the MIP."""
+        """Preallocate the matrices for the MIP.
 
-        self.xy_mip = np.zeros(
+        Pre-allocated matrix is shape (number_of_channels, number_of_slices, width)
+        """
+
+        self.xy_mip = 100 * np.ones(
             (
                 self.number_of_channels,
                 self.original_image_height,
@@ -1064,7 +1103,7 @@ class MIPViewController(BaseViewController):
             dtype=np.uint16,
         )
 
-        self.zy_mip = np.zeros(
+        self.zy_mip = 100 * np.ones(
             (
                 self.number_of_channels,
                 self.number_of_slices,
@@ -1073,7 +1112,7 @@ class MIPViewController(BaseViewController):
             dtype=np.uint16,
         )
 
-        self.zx_mip = np.zeros(
+        self.zx_mip = 100 * np.ones(
             (
                 self.number_of_channels,
                 self.number_of_slices,
@@ -1107,7 +1146,7 @@ class MIPViewController(BaseViewController):
         if display_mode == "XY":
             self.image = self.xy_mip[channel_idx]
         elif display_mode == "ZY":
-            self.image = self.zy_mip[channel_idx]
+            self.image = self.zy_mip[channel_idx].T
         elif display_mode == "ZX":
             self.image = self.zx_mip[channel_idx]
 

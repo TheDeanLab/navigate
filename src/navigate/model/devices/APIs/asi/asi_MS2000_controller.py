@@ -94,6 +94,7 @@ class MS2000Controller:
         #: float: Last time a command was sent to the MS2000 Controller
         self._last_cmd_send_time = time.perf_counter()
 
+
     @staticmethod
     def scan_ports() -> list[str]:
         """Scans for available COM ports
@@ -108,6 +109,7 @@ class MS2000Controller:
         com_ports = [port.device for port in list_ports.comports()]
         com_ports.sort(key=lambda value: int(value[3:]))
         return com_ports
+
 
     def connect_to_serial(
         self,
@@ -143,8 +145,6 @@ class MS2000Controller:
 
         # set the size of the rx and tx buffers before calling open
         self.serial_port.set_buffer_size(rx_size, tx_size)
-
-        # try to open the serial port
         try:
             self.serial_port.open()
         except SerialException:
@@ -164,7 +164,8 @@ class MS2000Controller:
             )
 
             #: list[str]: Default axes sequence of the MS2000 Controller
-            self.default_axes_sequence = self.get_default_motor_axis_sequence()
+            self.default_axes_sequence = ["X", "Y", "Z"] # self.get_default_motor_axis_sequence()
+
 
     def get_default_motor_axis_sequence(self) -> None:
         """Get the default motor axis sequence from the ASI device
@@ -187,6 +188,7 @@ class MS2000Controller:
 
         return default_axes_sequence
 
+
     def set_feedback_alignment(self, axis, aa):
         """Set the stage feedback alignment.
 
@@ -200,6 +202,7 @@ class MS2000Controller:
         self.send_command(f"AZ {axis}\r")
         self.read_response()
 
+
     def set_backlash(self, axis, val):
         """Enable/disable stage backlash correction.
 
@@ -210,9 +213,9 @@ class MS2000Controller:
         val : float
             Distance of anti-backlash motion [mm]
         """
-        cmd_str = f"B {axis}={val:.7f}\r"
         self.send_command(f"B {axis}={val:.7f}\r")
         self.read_response()
+
 
     def set_finishing_accuracy(self, axis, ac):
         """Set the stage finishing accuracy.
@@ -227,6 +230,7 @@ class MS2000Controller:
         self.send_command(f"PC {axis}={ac:.7f}\r")
         self.read_response()
 
+
     def set_error(self, axis, ac):
         """
         Set the stage drift error
@@ -240,13 +244,14 @@ class MS2000Controller:
         """
         self.send_command(f"E {axis}={ac:.7f}\r")
         self.read_response()
-        
+       
         
     def disconnect_from_serial(self) -> None:
         """Disconnect from the serial port if it's open."""
         if self.is_open():
             self.serial_port.close()
             self.report_to_console("Disconnected from the serial port.")
+
 
     def is_open(self) -> bool:
         """Returns True if the serial port exists and is open.
@@ -259,6 +264,7 @@ class MS2000Controller:
         # short circuits if serial port is None
         return self.serial_port and self.serial_port.is_open
 
+
     def report_to_console(self, message: str) -> None:
         """Print message to the output device, usually the console.
 
@@ -268,9 +274,9 @@ class MS2000Controller:
             Message to print to the output device
         """
         # useful if we want to output data to something other than the console
-        # (ui element etc)
         if self.verbose:
             print(message)
+            
             
     def wait_for_device(self, report: bool = False) :
         """Waits for the all motors to stop moving."""
@@ -282,6 +288,7 @@ class MS2000Controller:
         while busy:
             busy = self.is_device_busy()
         self.report = temp
+        
         
     def send_command(self, cmd: bytes) -> None:
         """Send a serial command to the device.
@@ -309,6 +316,7 @@ class MS2000Controller:
         
         # sleep to avoid error, emperically found this made it work
         time.sleep(0.1)
+       
         
     def read_response(self) -> str:
         """Read a line from the serial response.
@@ -320,15 +328,14 @@ class MS2000Controller:
         """
         response = self.serial_port.readline()
         self.safe_to_write.set()
-
         response = response.decode(encoding="ascii")
         # Remove leading and trailing empty spaces
         self.report_to_console(f"Received Response: {response.strip()}")
-        
         if response.startswith(":N"):
             raise MS2000Exception(response)
 
         return response  # in case we want to read the response
+
 
     def moverel(self, x: int = 0, y: int = 0, z: int = 0) -> None:
         """Move the stage with a relative move on multiple axes.
@@ -345,6 +352,7 @@ class MS2000Controller:
         self.send_command(f"MOVREL X={x} Y={y} Z={z}\r")
         self.read_response()
 
+
     def moverel_axis(self, axis: str, distance: float) -> None:
         """Move the stage with a relative move on one axis
 
@@ -357,6 +365,7 @@ class MS2000Controller:
         """
         self.send_command(f"MOVREL {axis}={round(distance, 6)}\r")
         self.read_response()
+
 
     def move(self, pos_dict) -> None:
         """Move the stage with an absolute move on multiple axes
@@ -372,6 +381,7 @@ class MS2000Controller:
         self.send_command(f"MOVE {pos_str}\r")
         self.read_response()
         
+        
     def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis
 
@@ -384,6 +394,7 @@ class MS2000Controller:
         """
         self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
         self.read_response()
+
 
     def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s.
@@ -401,6 +412,7 @@ class MS2000Controller:
         self.send_command(f"SPEED {axis}={speed}\r")
         self.read_response()
 
+
     def get_axis_position(self, axis: str) -> int:
         """Return the position of the stage in ASI units (tenths of microns).
 
@@ -415,11 +427,9 @@ class MS2000Controller:
         """
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
-        # try:
         pos = float(response.split(" ")[1])
-        # except:
-        #     pos = float('Inf')
         return pos
+
 
     def get_axis_position_um(self, axis: str) -> float:
         """Return the position of the stage in microns.
@@ -436,6 +446,7 @@ class MS2000Controller:
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
         return float(response.split(" ")[1]) / 10.0
+
 
     def get_position(self, axes) -> dict:
         """Return current stage position in ASI units.
@@ -465,8 +476,7 @@ class MS2000Controller:
             cmd = f"WHERE {' '.join(axes)}\r"
             self.send_command(cmd)
             response = self.read_response()
-
-            # return response.split(" ")[1:-1]
+            
             pos = response.split(" ")
             axes_seq = list(
                 filter(
@@ -483,13 +493,16 @@ class MS2000Controller:
                     # Report position failed. Don't crash, we can try again.
                     pass
             return axis_dict
+        
         else:
             result = {}
             for axis in axes:
                 result[axis] = self.get_axis_position(axis)
             return result
 
+
     # Utility Functions
+
 
     def is_axis_busy(self, axis: str) -> bool:
         """Returns True if the axis is busy.
@@ -507,6 +520,7 @@ class MS2000Controller:
         res = self.read_response()
         return "B" in res
 
+
     def is_device_busy(self) -> bool:
         """Returns True if any axis is busy.
 
@@ -519,17 +533,20 @@ class MS2000Controller:
         res = self.read_response()
         return "B" in res
 
+
     def wait_for_device(self, timeout: float = 1.75) -> None:
         """Waits for the all motors to stop moving.
 
         timeout : float
             Timeout in seconds. Default is 1.75 seconds.
         """
+        
         if self.verbose:
             print("Waiting for device...")
         busy = self.is_device_busy()
         waiting_time = 0.0
-
+        
+        # t_start = time.time()      
         while busy:
             waiting_time += 0.001
             if waiting_time >= timeout:
@@ -540,6 +557,7 @@ class MS2000Controller:
         if self.verbose:
             print(f"Waited {waiting_time:.2f} s")
 
+
     def stop(self):
         """Stop all stage movement immediately"""
 
@@ -547,6 +565,7 @@ class MS2000Controller:
         self.read_response()
         if self.verbose:
             print("ASI Stages stopped successfully")
+
 
     def set_speed(self, speed_dict):
         """Set speed
@@ -559,6 +578,7 @@ class MS2000Controller:
         axes = " ".join([f"{x}={round(v, 6)}" for x, v in speed_dict.items()])
         self.send_command(f"S {axes}")
         self.read_response()
+
 
     def set_speed_as_percent_max(self, pct):
         """Set speed as a percentage of the maximum speed
@@ -601,6 +621,7 @@ class MS2000Controller:
         response = self.read_response()
         return float(response.split("=")[1])
 
+
     def get_encoder_counts_per_mm(self, axis: str):
         """Get encoder counts pre mm of axis
 
@@ -618,6 +639,7 @@ class MS2000Controller:
         self.send_command(f"CNTS {axis}?")
         response = self.read_response()
         return float(response.split("=")[1].split()[0])
+
 
     def scanr(
         self,
@@ -655,6 +677,7 @@ class MS2000Controller:
         self.send_command(command)
         self.read_response()
 
+
     def scanv(
         self,
         start_position_mm: float,
@@ -689,6 +712,7 @@ class MS2000Controller:
         self.send_command(command)
         self.read_response()
 
+
     def start_scan(self, axis: str, is_single_axis_scan: bool = True):
         """
         Start scan
@@ -703,10 +727,12 @@ class MS2000Controller:
         self.send_command("SCAN")
         self.read_response()
 
+
     def stop_scan(self):
         """Stop scan."""
         self.send_command("SCAN P")
         self.read_response()
+
 
     def is_moving(self):
         """Check to see if the stage is moving.
@@ -743,6 +769,7 @@ class MS2000Controller:
         else:
             print("WARNING: WAIT UNTIL DONE RECEIVED NO RESPONSE")
             return False
+
 
     def set_triggered_move(self, axis):
         '''

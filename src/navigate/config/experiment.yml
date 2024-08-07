@@ -63,11 +63,6 @@ MicroscopeState:
   end_focus: 0.0
   abs_z_start: 0.0
   abs_z_end: 200.0
-  scanrange: 500.0
-  n_plane: 1
-  offset_start: 0.0
-  offset_end: 10.0
-  conpro_cycling_mode: Per Stack
   waveform_template: Default
 MultiPositions:
   [[15000.0,12000.0,15500.0,0.0,70000.0], [35000.0,42000.0,15500.0,0.0,70000.0]]

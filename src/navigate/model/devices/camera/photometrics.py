@@ -214,9 +214,6 @@ class PhotometricsBase(CameraBase):
             Scan direction options: {'Down': 0, 'Up': 1, 'Down/Up Alternate': 2}
 
         """
-        # print("available scan directions on camera are:")
-        # print(str(self.camera_controller.prog_scan_dirs))
-
         if mode == "Top-to-Bottom":
             #  'Down' readout direction
             self.camera_controller.prog_scan_dir = 0
@@ -359,7 +356,6 @@ class PhotometricsBase(CameraBase):
         }
         if binning_string not in binning_dict.keys():
             logger.debug(f"can't set binning to {binning_string}")
-            print(f"Can't set binning to {binning_string}")
             return False
         self.camera_controller.binning = binning_dict[binning_string]
         idx = binning_string.index("x")
@@ -442,15 +438,11 @@ class PhotometricsBase(CameraBase):
             self.camera_controller.exp_mode = "Edge Trigger"
             self.camera_controller.prog_scan_line_delay = self._scandelay
             self.camera_controller.exp_out_mode = 4
-            print(
-                "camera ready to acquire programmable scan mode "
-                "with scandelay {}".format(self._scandelay)
-            )
+
         else:
             # Normal mode
             self.camera_controller.exp_out_mode = "Any Row"
             self.camera_controller.exp_mode = "Edge Trigger"
-            print("camera ready to acquire static light sheet mode")
 
         # Prepare for buffered acquisition
         #: int: Number of frames
@@ -496,10 +488,14 @@ class PhotometricsBase(CameraBase):
             # Delete copied frame for memory management
             frame = None
             del frame
+
+            frame_to_return = [self._frames_received]
             self._frames_received += 1
+            # check to make sure the next frame exist in buffer
             if self._frames_received >= self._numberofframes:
                 self._frames_received = 0
-            return [self._frames_received - 1]
+            return frame_to_return
+
         except Exception as e:
             print(str(e))
 

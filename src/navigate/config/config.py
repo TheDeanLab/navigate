@@ -341,6 +341,7 @@ def verify_experiment_config(manager, configuration):
         "celltype": "MV3",
         "label": "GFP",
         "file_type": "TIFF",
+        "prefix": "Cell_",
         "date": time.strftime("%Y-%m-%d"),
         "solvent": "BABB",
     }
@@ -518,11 +519,6 @@ def verify_experiment_config(manager, configuration):
         "end_focus": 0.0,
         "abs_z_start": 0.0,
         "abs_z_end": 100.0,
-        "scanrange": 500.0,
-        "n_plane": 1.0,
-        "offset_start": 0.0,
-        "offset_end": 9.8,
-        "conpro_cycling_mode": "per_stack",
         "waveform_template": "Default",
     }
     if (

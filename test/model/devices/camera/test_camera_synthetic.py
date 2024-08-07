@@ -34,7 +34,7 @@
 import pytest
 import numpy as np
 
-from navigate.model.devices.camera.camera_synthetic import (
+from navigate.model.devices.camera.synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
 )

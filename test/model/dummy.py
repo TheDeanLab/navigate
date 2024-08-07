@@ -46,7 +46,7 @@ from navigate.config.config import (
     verify_waveform_constants,
     verify_configuration,
 )
-from navigate.model.devices.camera.camera_synthetic import (
+from navigate.model.devices.camera.synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
 )
@@ -65,13 +65,17 @@ class DummyController:
         ----------
         view : DummyView
             The view to be controlled by this controller.
+
+        Example
+        -------
+        >>> controller = DummyController(view)
         """
         from navigate.controller.configuration_controller import ConfigurationController
         from navigate.controller.sub_controllers import MenuController
-        from navigate.controller.sub_controllers.multi_position_controller import (
+        from navigate.controller.sub_controllers.multiposition import (
             MultiPositionController,
         )
-        from navigate.controller.sub_controllers.channels_tab_controller import (
+        from navigate.controller.sub_controllers.channels_tab import (
             ChannelsTabController,
         )
 
@@ -80,6 +84,9 @@ class DummyController:
 
         #: list: The list of commands.
         self.commands = []
+    
+        #: dict: The custom events
+        self.event_listeners = {}
 
         #: DummyView: The view to be controlled by this controller.
         self.view = view
@@ -105,7 +112,6 @@ class DummyController:
 
         #: dict: The stage offset positions.
         self.off_stage_pos = {}
-
         base_directory = Path.joinpath(Path(__file__).resolve().parent.parent)
         configuration_directory = Path.joinpath(base_directory, "config")
         self.waveform_constants_path = Path.joinpath(
@@ -124,6 +130,10 @@ class DummyController:
             The command to be executed.
         sec : float
             The time to wait before executing the command.
+
+        Example
+        -------
+        >>> controller.execute('move_stage', 1)
         """
 
         self.commands.append(str)
@@ -176,20 +186,19 @@ class DummyModel:
         waveform_constants = Path.joinpath(
             configuration_directory, "waveform_constants.yml"
         )
-        gui_configuration = Path.joinpath(
+        gui_configuration_path = Path.joinpath(
             configuration_directory, "gui_configuration.yml"
         )
 
         #: Manager: The manager.
         self.manager = Manager()
-
         #: dict: The configuration dictionary.
         self.configuration = load_configs(
             self.manager,
             configuration=config,
             experiment=experiment,
             waveform_constants=waveform_constants,
-            gui=gui_configuration,
+            gui=gui_configuration_path,
         )
 
         verify_configuration(self.manager, self.configuration)
@@ -198,68 +207,51 @@ class DummyModel:
 
         #: DummyDevice: The device.
         self.device = DummyDevice()
-
         #: Pipe: The pipe for sending signals.
         self.signal_pipe, self.data_pipe = None, None
-
         #: DummyMicroscope: The microscope.
         self.active_microscope = DummyMicroscope(
             "Mesoscale", self.configuration, devices_dict={}, is_synthetic=True
         )
-
         #: Object: The signal container.
         self.signal_container = None
-
         #: Object: The data container.
         self.data_container = None
-
         #: Thread: The signal thread.
         self.signal_thread = None
-
         #: Thread: The data thread.
         self.data_thread = None
 
         #: bool: The flag for stopping the model.
         self.stop_flag = False
-
         #: int: The frame id.
         self.frame_id = 0  # signal_num
-
         #: list: The list of data.
         self.data = []
-
         #: list: The list of signal records.
         self.signal_records = []
-
         #: list: The list of data records.
         self.data_records = []
-
         #: int: The image width.
         self.img_width = int(
             self.configuration["experiment"]["CameraParameters"]["x_pixels"]
         )
-
         #: int: The image height.
         self.img_height = int(
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
-
         #: int: The number of frames in the data buffer.
         self.number_of_frames = 10
-
         #: ndarray: The data buffer.
         self.data_buffer = np.zeros(
             (self.number_of_frames, self.img_width, self.img_height)
         )
-
         #: ndarray: The data buffer positions.
         self.data_buffer_positions = np.zeros(
             shape=(self.number_of_frames, 5), dtype=float
         )  # z-index, x, y, z, theta, f
-
         #: dict: The camera dictionary.
         self.camera = {}
-
         #: str: The active microscope name.
         self.active_microscope_name = self.configuration["experiment"][
             "MicroscopeState"
@@ -603,8 +595,8 @@ class DummyMicroscope:
                     if updated_exposure_time != exposure_time:
                         print(
                             f"*** Notice: The actual exposure time of the camera for "
-                            f"{channel_key} is {round(updated_exposure_time*1000, 1)}ms"
-                            f", not {exposure_time*1000}ms!"
+                            f"{channel_key} is {round(updated_exposure_time*1000, 1)}"
+                            f"ms, not {exposure_time*1000}ms!"
                         )
                         exposure_time = round(updated_exposure_time, 4)
                         # update the experiment file

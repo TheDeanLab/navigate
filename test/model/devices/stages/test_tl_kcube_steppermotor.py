@@ -6,8 +6,8 @@ import unittest
 import pytest
 
 # Local Imports
-from navigate.model.devices.stages.stage_tl_kcube_steppermotor import TLKSTStage
-from navigate.model.devices.stages.stage_tl_kcube_steppermotor import (
+from navigate.model.devices.stages.tl_kcube_steppermotor import TLKSTStage
+from navigate.model.devices.stages.tl_kcube_steppermotor import (
     build_TLKSTStage_connection,
 )
 

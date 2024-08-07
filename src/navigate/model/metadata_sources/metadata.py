@@ -131,7 +131,7 @@ class Metadata:
 
     def set_from_dict(self, metadata_config: dict) -> None:
         """Set from a dictionary
-        
+
         Parameters
         ----------
         metadata_config : dict
@@ -144,7 +144,7 @@ class Metadata:
         if metadata_config.get("is_dynamic", False):
             self._multiposition = True
         self._per_stack = metadata_config.get("per_stack", self._per_stack)
-    
+
     def set_from_configuration_experiment(self) -> None:
         """Set from configuration experiment"""
         if (
@@ -176,11 +176,7 @@ class Metadata:
         self.shape_y = int(
             self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
         )
-        if (
-            (state["image_mode"] == "z-stack")
-            or (state["image_mode"] == "customized")
-            or (state["image_mode"] == "ConstantVelocityAcquisition")
-        ):
+        if (state["image_mode"] == "z-stack") or (state["image_mode"] == "customized"):
             self.shape_z = int(state["number_z_steps"])
         else:
             self.shape_z = 1
@@ -232,18 +228,8 @@ class Metadata:
         """Set stack order from configuration experiment"""
         state = self.configuration["experiment"]["MicroscopeState"]
         self._per_stack = (
-            (
-                state["stack_cycling_mode"] == "per_stack"
-                and state["image_mode"] == "z-stack"
-            )
-            or (
-                state["conpro_cycling_mode"] == "per_stack"
-                and state["image_mode"] == "confocal-projection"
-            )
-            or (
-                state["stack_cycling_mode"] == "per_stack"
-                and state["image_mode"] == "ConstantVelocityAcquisition"
-            )
+            state["stack_cycling_mode"] == "per_stack"
+            and state["image_mode"] != "single"
         )
 
     @property

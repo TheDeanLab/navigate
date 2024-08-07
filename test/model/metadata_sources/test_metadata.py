@@ -63,9 +63,8 @@ def test_metadata_shape(dummy_model):
     "image_mode",
     [
         "single",
-        "live",
+        "Confocal Projection",
         "z-stack",
-        "ConstantVelocityAcquisition",
     ],
 )
 @pytest.mark.parametrize("stack_cycling_mode", ["per_stack", "per_z"])
@@ -91,10 +90,7 @@ def test_metadata_set_stack_order_from_configuration_experiment(
 
     if image_mode == "z-stack" and stack_cycling_mode == "per_stack":
         assert md._per_stack is True
-    elif (
-        image_mode == "ConstantVelocityAcquisition"
-        and stack_cycling_mode == "per_stack"
-    ):
+    elif image_mode == "Confocal Projection" and stack_cycling_mode == "per_stack":
         assert md._per_stack is True
     else:
         assert md._per_stack is False

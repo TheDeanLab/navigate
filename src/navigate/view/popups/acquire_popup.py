@@ -100,6 +100,7 @@ class AcquirePopUp:
             "tissue",
             "celltype",
             "label",
+            "prefix",
             "solvent",
             "file_type",
             "misc",
@@ -111,6 +112,7 @@ class AcquirePopUp:
             "Tissue Type",
             "Cell Type",
             "Label",
+            "Prefix",
             "Solvent",
             "File Type",
             "Notes",
@@ -164,15 +166,16 @@ class AcquirePopUp:
         self.inputs["user"].widget.grid(padx=(53, 0))
         self.inputs["tissue"].widget.grid(padx=(16, 0))
         self.inputs["celltype"].widget.grid(padx=(28, 0))
+        self.inputs["prefix"].widget.grid(padx=(46, 0))
         self.inputs["label"].widget.grid(padx=(48, 0))
-        self.inputs["misc"].widget.grid(padx=(24, 0))
+        self.inputs["misc"].widget.grid(padx=(40, 0))
 
         # Done and Cancel Buttons
         self.buttons["Cancel"] = ttk.Button(content_frame, text="Cancel Acquisition")
-        self.buttons["Cancel"].grid(row=9, column=0, padx=5, sticky=tk.NSEW)
+        self.buttons["Cancel"].grid(row=10, column=0, padx=5, sticky=tk.NSEW)
 
         self.buttons["Done"] = ttk.Button(content_frame, text="Acquire Data")
-        self.buttons["Done"].grid(row=9, column=1, padx=5, sticky=tk.NSEW)
+        self.buttons["Done"].grid(row=10, column=1, padx=5, sticky=tk.NSEW)
 
     def get_variables(self):
         """Get the variables of the popup

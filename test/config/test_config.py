@@ -357,11 +357,6 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "end_focus": 0.0,
             "abs_z_start": 0.0,
             "abs_z_end": 100.0,
-            "scanrange": 500.0,
-            "n_plane": 1.0,
-            "offset_start": 0.0,
-            "offset_end": 9.8,
-            "conpro_cycling_mode": "per_stack",
             "waveform_template": "Default",
         }
 
@@ -645,10 +640,6 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "end_focus",
             "abs_z_start",
             "abs_z_end",
-            "scanrange",
-            "n_plane",
-            "offset_start",
-            "offset_end",
         ]:
             experiment["MicroscopeState"][k] = "nonsense_value"
             config.verify_experiment_config(self.manager, configuration)

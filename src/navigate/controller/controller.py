@@ -174,27 +174,24 @@ class Controller:
         logger.info(f"Spec - Waveform Constants Path: {waveform_constants_path}")
         logger.info(f"Spec - Rest API Path: {rest_api_path}")
 
-        # Wire up pipes
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
 
-        # save default experiment file
         #: string: Path to the default experiment yaml file.
         self.default_experiment_file = experiment_path
 
-        # waveform setting file
         #: string: Path to the waveform constants yaml file.
         self.waveform_constants_path = waveform_constants_path
 
-        # Configuration Reader
         #: ConfigurationController: Configuration Controller object.
         self.configuration_controller = ConfigurationController(self.configuration)
 
-        # Initialize the View
         #: View: View object in MVC architecture.
         self.view = view(root)
 
-        # Sub Gui Controllers
+        #: dict: Event listeners for the controller.
+        self.event_listeners = {}
+
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acqbar, self)
 
@@ -234,7 +231,7 @@ class Controller:
         #: KeystrokeController: Keystroke Sub-Controller.
         self.keystroke_controller = KeystrokeController(self.view, self)
 
-        # Exit
+        # Exit the program when the window is closed
         self.view.root.protocol(
             "WM_DELETE_WINDOW", self.acquire_bar_controller.exit_program
         )
@@ -248,7 +245,6 @@ class Controller:
         # self.microscope = self.configuration['configuration']
         # ['microscopes'].keys()[0]  # Default to the first microscope
 
-        # Initialize the menus
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
@@ -256,14 +252,12 @@ class Controller:
         #: dict: acquisition modes from plugins
         self.plugin_acquisition_modes = {}
 
-        # add plugin menus
         #: PluginsController: Plugin Sub-Controller
         self.plugin_controller = PluginsController(
             view=self.view, parent_controller=self
         )
         self.plugin_controller.load_plugins()
 
-        # Create default data buffer
         #: int: Number of x_pixels from microscope configuration file.
         self.img_width = 0
 
@@ -473,13 +467,21 @@ class Controller:
             "multiposition_count"
         ] = len(positions)
 
+        if (
+            self.configuration["experiment"]["MicroscopeState"]["is_multiposition"]
+            and len(positions) == 0
+        ):
+            # Update the view and override the settings.
+            self.configuration["experiment"]["MicroscopeState"][
+                "is_multiposition"
+            ] = False
+            self.channels_tab_controller.is_multiposition_val.set(False)
+
         # TODO: validate experiment dict
 
         channel_warning = self.channels_tab_controller.verify_experiment_values()
         if channel_warning:
             return channel_warning
-        if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
-            return "Scan range shouldn't be 0!"
         return ""
 
     def resize(self, event):
@@ -1225,13 +1227,6 @@ class Controller:
                 # Display a warning that arises from the model as a top-level GUI popup
                 messagebox.showwarning(title="Navigate", message=value)
 
-            elif event == "waveform":
-                # Update the waveform plot.
-                self.waveform_tab_controller.update_waveforms(
-                    waveform_dict=value,
-                    sample_rate=self.configuration_controller.daq_sample_rate,
-                )
-
             elif event == "multiposition":
                 # Update the multi-position tab without appending to the list
                 update_table(
@@ -1239,40 +1234,6 @@ class Controller:
                     pos=value,
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)
-                self.channels_tab_controller.toggle_multiposition()
-
-            elif event == "disable_multiposition":
-                self.channels_tab_controller.is_multiposition_val.set(False)
-                self.channels_tab_controller.toggle_multiposition()
-
-            elif event == "ilastik_mask":
-                # Display the ilastik mask
-                self.camera_view_controller.display_mask(mask=value)
-
-            elif event == "autofocus":
-                # Display the autofocus plot
-                if hasattr(self, "af_popup_controller"):
-                    self.af_popup_controller.display_plot(
-                        data=value[0], line_plot=value[1], clear_data=value[2]
-                    )
-
-            elif event == "tonywilson":
-                if hasattr(self, "ao_popup_controller"):
-                    # self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
-                    self.ao_popup_controller.plot_tonywilson(value)
-                    # self.ao_popup_controller.plot_mirror(value)
-                    if value["done"]:
-                        print("Tony Wilson done! Updating expt...")
-                        self.ao_popup_controller.update_experiment_values()
-
-            elif event == "mirror_update":
-                if hasattr(self, "ao_popup_controller"):
-                    self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
-                    self.ao_popup_controller.plot_mirror(value)
-
-            elif event == "ao_save_report":
-                if hasattr(self, "ao_popup_controller"):
-                    self.ao_popup_controller.save_report_to_file(value)
 
             elif event == "stop":
                 # Stop the software
@@ -1287,15 +1248,47 @@ class Controller:
                         time.sleep(0.001)
                         pass
 
-            elif event == "remove_positions":
-                self.multiposition_tab_controller.remove_positions(value)
-
-            elif event == "exposure_time":
-                self.channels_tab_controller.set_exposure_time(value[0], value[1])
+            elif event in self.event_listeners.keys():
+                try:
+                    self.event_listeners[event](value)
+                except Exception:
+                    print(f"*** unhandled event: {event}, {value}")
 
     def add_acquisition_mode(self, name, acquisition_obj):
+        """Add and Acquisition Mode.
+
+        Parameters
+        ----------
+        name : string
+            Name of the acquisition mode.
+        acquisition_obj : object
+            Object of the acquisition mode.
+        """
         if name in self.plugin_acquisition_modes:
             print(f"*** plugin acquisition mode {name} exists, can't add another one!")
             return
         self.plugin_acquisition_modes[name] = acquisition_obj(name)
         self.acquire_bar_controller.add_mode(name)
+
+    def register_event_listener(self, event_name, event_handler):
+        """Register an event listener.
+
+        Parameters
+        ----------
+        event_name : string
+            Name of the event.
+        event_handler : function
+            Function to handle the event.
+        """
+        self.event_listeners[event_name] = event_handler
+
+    def register_event_listeners(self, events):
+        """Register multiple event listeners.
+
+        Parameters
+        ----------
+        events : dict
+            Dictionary of event names and handlers.
+        """
+        for event_name, event_handler in events.items():
+            self.register_event_listener(event_name, event_handler)

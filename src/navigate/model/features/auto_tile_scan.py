@@ -114,6 +114,8 @@ class CalculateFocusRange:
         stage_pos = self.model.get_stage_position()
         #: float: The current z position of the stage.
         self.current_z_pos = stage_pos["z_pos"]
+        #: float: The current f position of the stage.
+        self.current_f_pos = stage_pos["f_pos"]
         #: float: The last z position of the stage in a stack.
         self.last_z_pos = self.current_z_pos + float(
             self.model.configuration["experiment"]["MicroscopeState"]["end_position"]
@@ -132,10 +134,11 @@ class CalculateFocusRange:
             self.focus_end_pos = self.autofocus.in_func_signal()
 
             # calculate the slope and save it
-            if self.focus_end_pos:
+            if self.focus_end_pos is not None:
                 microscope_state = self.model.configuration["experiment"][
                     "MicroscopeState"
                 ]
+                microscope_state["start_focus"] = self.focus_start_pos - self.current_f_pos
                 microscope_state["end_focus"] = (
                     float(microscope_state["start_focus"])
                     + self.focus_end_pos
@@ -161,7 +164,11 @@ class CalculateFocusRange:
                 # TODO: should the focus move at the same time?
                 self.model.move_stage({"z_abs": self.last_z_pos}, wait_until_done=True)
                 self.autofocus.pre_func_signal()
-        return self.autofocus_count >= 2
+        if self.autofocus_count >= 2:
+            # move stage back
+            self.model.move_stage({"z_abs": self.current_z_pos, "f_abs": self.current_f_pos})
+            return True
+        return False
 
     def pre_func_data(self):
         """Prepare for the data acquisition stage, if applicable.

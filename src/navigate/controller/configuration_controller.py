@@ -397,6 +397,24 @@ class ConfigurationController:
         return 1
 
     @property
+    def filter_wheel_names(self):
+        """Return a list of filter wheel names
+
+        Returns
+        -------
+        filter_wheel_names : list
+            List of filter wheel names.
+        """
+        filter_wheel_names = []
+        if self.microscope_config is not None:
+            for i in range(self.number_of_filter_wheels):
+                name = self.microscope_config["filter_wheel"][i]["hardware"].get(
+                    "name", f"Filter Wheel {i}"
+                )
+                filter_wheel_names.append(name)
+        return filter_wheel_names
+
+    @property
     def microscope_list(self):
         """Return a list of microscope names
 

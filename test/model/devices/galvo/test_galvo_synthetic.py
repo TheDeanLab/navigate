@@ -31,7 +31,7 @@
 
 import unittest
 from unittest.mock import MagicMock
-from navigate.model.devices.galvo.galvo_synthetic import SyntheticGalvo
+from navigate.model.devices.galvo.synthetic import SyntheticGalvo
 from navigate.config import (
     load_configs,
     get_configuration_paths,

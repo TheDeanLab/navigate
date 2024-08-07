@@ -21,6 +21,7 @@ Additional devices are available by installing the
    remote_focus.rst
    stage.rst
    filter_wheel.rst
+   dichroic.rst
    galvo.rst
    laser.rst
    shutter.rst

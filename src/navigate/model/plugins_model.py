@@ -185,7 +185,7 @@ class PluginsModel:
         return plugin_acquisition_modes
 
     @staticmethod
-    def load_plugin_features(self, feature_lists_path, plugin_path):
+    def load_plugin_features(feature_lists_path, plugin_path):
         plugin_feature_list = os.path.join(plugin_path, "feature_list.py")
         if os.path.exists(plugin_feature_list):
             module = load_module_from_file("feature_list_temp", plugin_feature_list)

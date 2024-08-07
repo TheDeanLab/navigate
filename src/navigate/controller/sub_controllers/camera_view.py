@@ -453,7 +453,6 @@ class BaseViewController(GUIController, ABaseViewController):
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
-        self.transpose_image()
         image = self.digital_zoom()
         self.detect_saturation(image)
         image = self.down_sample_image(image)
@@ -1150,5 +1149,15 @@ class MIPViewController(BaseViewController):
             self.image = self.zy_mip[channel_idx].T
         elif display_mode == "ZX":
             self.image = self.zx_mip[channel_idx]
+
+        if self.flip_flags["x"] and self.flip_flags["y"]:
+            self.image = self.image[::-1, ::-1]
+        elif self.flip_flags["x"]:
+            self.image = self.image[:, ::-1]
+        elif self.flip_flags["y"]:
+            self.image = self.image[::-1, :]
+
+        if self.transpose:
+            self.image = self.image.T
 
         self.process_image()

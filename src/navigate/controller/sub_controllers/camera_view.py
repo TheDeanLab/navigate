@@ -453,6 +453,7 @@ class BaseViewController(GUIController, ABaseViewController):
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
+        self.transpose_image()
         image = self.digital_zoom()
         self.detect_saturation(image)
         image = self.down_sample_image(image)
@@ -1075,7 +1076,6 @@ class MIPViewController(BaseViewController):
         self.image_palette["Gray"].widget.invoke()
         self.image_palette["Autoscale"].widget.invoke()
         self.image_palette["SNR"].grid_remove()
-        self.image_palette["Flip XY"].widget.config(self.transpose_image)
         self.render_widgets["perspective"].widget["values"] = ("XY", "ZY", "ZX")
         self.render_widgets["perspective"].set("XY")
         self.render_widgets["channel"].set("CH1")

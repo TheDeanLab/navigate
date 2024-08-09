@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -58,9 +58,7 @@ class PluginsModel:
         if not os.path.exists(self.feature_lists_path):
             os.makedirs(self.feature_lists_path)
 
-        plugins_path = os.path.join(
-            Path(__file__).resolve().parent.parent, "plugins"
-        )
+        plugins_path = os.path.join(Path(__file__).resolve().parent.parent, "plugins")
         plugins_config_path = os.path.join(
             get_navigate_path(), "config", "plugins_config.yml"
         )
@@ -69,10 +67,10 @@ class PluginsModel:
         self.load_plugins_through_manager(PluginPackageManager)
 
         return self.devices_dict, self.plugin_acquisition_modes
-    
+
     def load_plugins_through_manager(self, plugin_manager):
         """Load plugins through plugin manager
-        
+
         Parameters
         ----------
         plugin_manager : object
@@ -92,19 +90,25 @@ class PluginsModel:
             plugin_manager.load_features(plugin_name, plugin_path)
 
             # feature lists
-            plugin_manager.load_feature_lists(plugin_name, plugin_path, self.register_feature_list)
+            plugin_manager.load_feature_lists(
+                plugin_name, plugin_path, self.register_feature_list
+            )
 
             # acquisition mode
             acquisition_modes = plugin_config.get("acquisition_modes", [])
-            plugin_manager.load_acquisition_modes(plugin_name, plugin_path, acquisition_modes, self.register_acquisition_mode)
+            plugin_manager.load_acquisition_modes(
+                plugin_name,
+                plugin_path,
+                acquisition_modes,
+                self.register_acquisition_mode,
+            )
 
             # load devices
             plugin_manager.load_devices(plugin_name, plugin_path, self.register_device)
 
-
     def register_device(self, device, module):
         """Regiseter device
-        
+
         Parameters
         ----------
         device : str
@@ -157,19 +161,15 @@ class PluginsModel:
                     )
             else:
                 self.devices_dict[device_type_name] = {}
-                self.devices_dict[device_type_name][
-                    "ref_list"
-                ] = module.DEVICE_REF_LIST
-                self.devices_dict[device_type_name][
-                    "load_device"
-                ] = module.load_device
+                self.devices_dict[device_type_name]["ref_list"] = module.DEVICE_REF_LIST
+                self.devices_dict[device_type_name]["load_device"] = module.load_device
                 self.devices_dict[device_type_name][
                     "start_device"
                 ] = module.start_device
-    
+
     def register_acquisition_mode(self, acquisition_mode_name, module):
         """Register acquisition mode
-        
+
         Parameters
         ----------
         acquisition_mode_name : str
@@ -180,9 +180,7 @@ class PluginsModel:
         if not module:
             return
         acquisition_mode = [
-            m
-            for m in dir(module)
-            if isinstance(getattr(module, m), AcquisitionMode)
+            m for m in dir(module) if isinstance(getattr(module, m), AcquisitionMode)
         ]
         if acquisition_mode:
             self.plugin_acquisition_modes[acquisition_mode_name] = getattr(
@@ -191,7 +189,7 @@ class PluginsModel:
 
     def register_feature_list(self, plugin_feature_list, module):
         """Register feature list
-        
+
         Parameters
         ----------
         plugin_feature_list : str

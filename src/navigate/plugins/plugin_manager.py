@@ -1,3 +1,36 @@
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
+
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
+
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+# Standard library imports
 import importlib
 from importlib.metadata import entry_points
 import importlib.resources
@@ -5,13 +38,15 @@ import pkgutil
 import os
 import inspect
 
+# Local application imports
 from navigate.tools.file_functions import load_yaml_file
 from navigate.tools.common_functions import load_module_from_file
 from navigate.model.features import feature_related_functions
 
+
 def register_features(module):
     """Register features
-    
+
     Parameters
     ----------
     module : module
@@ -21,12 +56,12 @@ def register_features(module):
         if inspect.isclass(getattr(module, c)):
             setattr(feature_related_functions, c, getattr(module, c))
 
-class PluginPackageManager:
 
+class PluginPackageManager:
     @staticmethod
     def get_plugins():
         """Get plugins
-        
+
         Returns
         -------
         plugins : dict
@@ -42,13 +77,15 @@ class PluginPackageManager:
                     "Please double-check the installed plugins!"
                 )
                 continue
-            plugins[plugin_package_name] = importlib.resources.files(plugin_package_name)
+            plugins[plugin_package_name] = importlib.resources.files(
+                plugin_package_name
+            )
         return plugins
-    
+
     @staticmethod
     def load_controller(package_name, package_path, controller_name):
         """Load controller
-        
+
         Parameters
         ----------
         package_name : str
@@ -57,7 +94,7 @@ class PluginPackageManager:
             package path
         controller_name : str
             controller name
-        
+
         Returns
         -------
         controller_class : class
@@ -66,15 +103,17 @@ class PluginPackageManager:
         controller_file_name = "_".join(controller_name.lower().split()) + "_controller"
         controller_class_name = "".join(controller_name.title().split()) + "Controller"
         try:
-            controller_module = importlib.import_module(f"{package_name}.controller.{controller_file_name}")
+            controller_module = importlib.import_module(
+                f"{package_name}.controller.{controller_file_name}"
+            )
             return getattr(controller_module, controller_class_name)
         except (ImportError, AttributeError):
             return None
-        
+
     @staticmethod
     def load_view(package_name, package_path, frame_name):
         """Load view
-        
+
         Parameters
         ----------
         package_name : str
@@ -83,7 +122,7 @@ class PluginPackageManager:
             package path
         frame_name : str
             frame name
-        
+
         Returns
         -------
         frame_class : class
@@ -92,15 +131,17 @@ class PluginPackageManager:
         frame_file_name = "_".join(frame_name.lower().split()) + "_frame"
         frame_class_name = "".join(frame_name.title().split()) + "Frame"
         try:
-            view_module = importlib.import_module(f"{package_name}.view.{frame_file_name}")
+            view_module = importlib.import_module(
+                f"{package_name}.view.{frame_file_name}"
+            )
             return getattr(view_module, frame_class_name)
         except (ImportError, AttributeError):
             return None
-        
+
     @staticmethod
     def load_feature_lists(package_name, package_path, register_func):
         """Load feature lists
-        
+
         Parameters
         ----------
         package_name : str
@@ -112,14 +153,17 @@ class PluginPackageManager:
         """
         try:
             module = importlib.import_module(f"{package_name}.feature_list")
-            register_func(importlib.resources.files(package_name).joinpath("feature_list.py"), module)
+            register_func(
+                importlib.resources.files(package_name).joinpath("feature_list.py"),
+                module,
+            )
         except (ImportError, AttributeError):
             pass
 
     @staticmethod
     def load_features(package_name, package_path):
         """Load features
-        
+
         Parameters
         ----------
         package_name : str
@@ -127,7 +171,9 @@ class PluginPackageManager:
         package_path : str
             package path
         """
-        for _, module_name, is_pkg in pkgutil.iter_modules([importlib.resources.files(package_name).joinpath("model/features")]):
+        for _, module_name, is_pkg in pkgutil.iter_modules(
+            [importlib.resources.files(package_name).joinpath("model/features")]
+        ):
             if not is_pkg:
                 full_module_name = f"{package_name}.model.features.{module_name}"
                 try:
@@ -135,11 +181,13 @@ class PluginPackageManager:
                 except (ImportError, AttributeError):
                     continue
                 register_features(module)
-    
+
     @staticmethod
-    def load_acquisition_modes(package_name, package_path, acquisition_modes, register_func):
+    def load_acquisition_modes(
+        package_name, package_path, acquisition_modes, register_func
+    ):
         """Load acquisition modes
-        
+
         Parameters
         ----------
         package_name : str
@@ -159,11 +207,11 @@ class PluginPackageManager:
                 continue
             if module:
                 register_func(acquisition_mode_config["name"], module)
-        
+
     @staticmethod
     def load_devices(package_name, package_path, register_func):
         """Load devices
-        
+
         Parameters
         ----------
         package_name : str
@@ -173,7 +221,9 @@ class PluginPackageManager:
         register_func : func
             the function to register devices
         """
-        for _, module_name, is_pkg in pkgutil.iter_modules([importlib.resources.files(package_name).joinpath("model/devices")]):
+        for _, module_name, is_pkg in pkgutil.iter_modules(
+            [importlib.resources.files(package_name).joinpath("model/devices")]
+        ):
             if is_pkg:
                 full_module_name = f"{package_name}.model.devices.{module_name}.device_startup_functions"
                 try:
@@ -184,21 +234,20 @@ class PluginPackageManager:
 
 
 class PluginFileManager:
-    
     def __init__(self, plugins_path, plugins_config_path):
         self.plugins_path = plugins_path
         self.plugins_config_path = plugins_config_path
 
     def get_plugins(self):
         """Get plugins
-        
+
         Returns
         -------
         plugins : dict
             plugins dict
         """
         plugins = {}
-        
+
         folder_names = os.listdir(self.plugins_path)
         full_path_names = dict(
             [(f, os.path.join(self.plugins_path, f)) for f in folder_names]
@@ -209,15 +258,19 @@ class PluginFileManager:
             full_path_names.update(plugins_config)
 
         for plugin_name, plugin_path in full_path_names.items():
-            if plugin_path and os.path.exists(plugin_path) and os.path.isdir(plugin_path):
+            if (
+                plugin_path
+                and os.path.exists(plugin_path)
+                and os.path.isdir(plugin_path)
+            ):
                 plugins[plugin_name] = plugin_path
 
         return plugins
-    
+
     @staticmethod
     def load_controller(plugin_name, plugin_path, controller_name):
         """Load controller
-        
+
         Parameters
         ----------
         plugin_name : str
@@ -226,30 +279,30 @@ class PluginFileManager:
             plugin path
         controller_name : str
             controller name
-        
+
         Returns
         -------
         controller_class : class
             controller class
         """
-        controller_file_name = "_".join(controller_name.lower().split()) + "_controller.py"
+        controller_file_name = (
+            "_".join(controller_name.lower().split()) + "_controller.py"
+        )
         controller_class_name = "".join(controller_name.title().split()) + "Controller"
         controller_file_path = os.path.join(
-            plugin_path,
-            "controller",
-            controller_file_name
+            plugin_path, "controller", controller_file_name
         )
-        if os.path.exists(controller_file_path) and os.path.isfile(controller_file_path):
-            module = load_module_from_file(
-                controller_class_name, controller_file_path
-            )
+        if os.path.exists(controller_file_path) and os.path.isfile(
+            controller_file_path
+        ):
+            module = load_module_from_file(controller_class_name, controller_file_path)
             return getattr(module, controller_class_name)
         return None
-    
+
     @staticmethod
     def load_view(plugin_name, plugin_path, frame_name):
         """Load view
-        
+
         Parameters
         ----------
         plugin_name : str
@@ -258,7 +311,7 @@ class PluginFileManager:
             plugin path
         frame_name : str
             frame name
-        
+
         Returns
         -------
         frame_class : class
@@ -266,22 +319,16 @@ class PluginFileManager:
         """
         frame_file_name = "_".join(frame_name.lower().split()) + "_frame.py"
         frame_class_name = "".join(frame_name.title().split()) + "Frame"
-        frame_file_path = os.path.join(
-            plugin_path,
-            "view",
-            frame_file_name
-        )
+        frame_file_path = os.path.join(plugin_path, "view", frame_file_name)
         if os.path.exists(frame_file_path) and os.path.isfile(frame_file_path):
-            module = load_module_from_file(
-                frame_class_name, frame_file_path
-            )
+            module = load_module_from_file(frame_class_name, frame_file_path)
             return getattr(module, frame_class_name)
         return None
-    
+
     @staticmethod
     def load_feature_lists(plugin_name, plugin_path, register_func):
         """Load feature lists
-        
+
         Parameters
         ----------
         plugin_name : str
@@ -299,7 +346,7 @@ class PluginFileManager:
     @staticmethod
     def load_features(plugin_name, plugin_path):
         """Load features
-        
+
         Parameters
         ----------
         plugin_name : str
@@ -316,11 +363,13 @@ class PluginFileManager:
             if os.path.isfile(feature_file):
                 module = load_module_from_file(feature, feature_file)
                 register_features(module)
-    
+
     @staticmethod
-    def load_acquisition_modes(plugin_name, plugin_path, acquisition_modes, register_func):
+    def load_acquisition_modes(
+        plugin_name, plugin_path, acquisition_modes, register_func
+    ):
         """Load acquisition modes
-        
+
         Parameters
         ----------
         plugin_name : str
@@ -339,11 +388,11 @@ class PluginFileManager:
                 module = load_module_from_file(acquisition_file[:-3], full_path_name)
                 if module:
                     register_func(acquisition_mode_config["name"], module)
-        
+
     @staticmethod
     def load_devices(plugin_name, plugin_path, register_func):
         """Load devices
-        
+
         Parameters
         ----------
         plugin_name : str
@@ -363,7 +412,7 @@ class PluginFileManager:
                 try:
                     module = load_module_from_file(
                         "device_module",
-                        os.path.join(device_path, "device_startup_functions.py")
+                        os.path.join(device_path, "device_startup_functions.py"),
                     )
                 except FileNotFoundError:
                     continue

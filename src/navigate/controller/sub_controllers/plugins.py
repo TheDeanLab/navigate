@@ -112,9 +112,13 @@ class PluginsController:
             if plugin_config is None:
                 continue
             plugin_display_name = plugin_config.get("name", plugin_name)
-            
-            plugin_frame = plugin_manager.load_view(plugin_name, plugin_path, plugin_display_name)
-            plugin_controller = plugin_manager.load_controller(plugin_name, plugin_path, plugin_display_name)
+
+            plugin_frame = plugin_manager.load_view(
+                plugin_name, plugin_path, plugin_display_name
+            )
+            plugin_controller = plugin_manager.load_controller(
+                plugin_name, plugin_path, plugin_display_name
+            )
 
             if plugin_frame and plugin_controller:
                 if plugin_config["view"] == "Popup":
@@ -126,15 +130,18 @@ class PluginsController:
                         ),
                     )
                 else:
-                    self.build_tab_window(
-                        plugin_name, plugin_frame, plugin_controller
-                    )
+                    self.build_tab_window(plugin_name, plugin_frame, plugin_controller)
             # feature
             plugin_manager.load_features(plugin_name, plugin_path)
 
             # acquisition mode
             acquisition_modes = plugin_config.get("acquisition_modes", [])
-            plugin_manager.load_acquisition_modes(plugin_name, plugin_path, acquisition_modes, self.register_acquisition_mode)
+            plugin_manager.load_acquisition_modes(
+                plugin_name,
+                plugin_path,
+                acquisition_modes,
+                self.register_acquisition_mode,
+            )
 
     def build_tab_window(self, plugin_name, frame, controller):
         """Build tab for a plugin
@@ -234,10 +241,10 @@ class PluginsController:
                 )
 
         return func_with_wrapper
-    
+
     def register_acquisition_mode(self, acquisition_mode_name, module):
         """Register acquisition mode
-        
+
         Parameters
         ----------
         acquisition_mode_name : str
@@ -248,16 +255,13 @@ class PluginsController:
         if not module:
             return
         acquisition_mode = [
-            m
-            for m in dir(module)
-            if isinstance(getattr(module, m), AcquisitionMode)
+            m for m in dir(module) if isinstance(getattr(module, m), AcquisitionMode)
         ]
         if acquisition_mode:
             self.parent_controller.add_acquisition_mode(
                 acquisition_mode_name,
                 getattr(module, acquisition_mode[0]),
             )
-    
 
 
 class UninstallPluginController(GUIController):

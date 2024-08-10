@@ -292,8 +292,6 @@ class PluginFileManager:
 
         Parameters
         ----------
-        plugin_name : str
-            plugin name
         plugin_path : str
             plugin path
         controller_name : str
@@ -324,8 +322,6 @@ class PluginFileManager:
 
         Parameters
         ----------
-        plugin_name : str
-            plugin name
         plugin_path : str
             plugin path
         frame_name : str
@@ -350,8 +346,6 @@ class PluginFileManager:
 
         Parameters
         ----------
-        plugin_name : str
-            plugin name
         plugin_path : str
             plugin path
         register_func : func
@@ -368,8 +362,6 @@ class PluginFileManager:
 
         Parameters
         ----------
-        plugin_name : str
-            plugin name
         plugin_path : str
             plugin path
         """
@@ -389,8 +381,6 @@ class PluginFileManager:
 
         Parameters
         ----------
-        plugin_name : str
-            plugin name
         plugin_path : str
             plugin path
         acquisition_modes : []
@@ -412,8 +402,6 @@ class PluginFileManager:
 
         Parameters
         ----------
-        plugin_name : str
-            plugin name
         plugin_path : str
             plugin path
         register_func : func

@@ -78,33 +78,28 @@ class PluginsModel:
         """
         plugins = plugin_manager.get_plugins()
 
-        for plugin_name, plugin_path in plugins.items():
+        for _, plugin_ref in plugins.items():
             # read "plugin_config.yml"
-            plugin_config = load_yaml_file(
-                os.path.join(plugin_path, "plugin_config.yml")
-            )
+            plugin_config = plugin_manager.load_config(plugin_ref)
             if plugin_config is None:
                 continue
 
             # feature
-            plugin_manager.load_features(plugin_name, plugin_path)
+            plugin_manager.load_features(plugin_ref)
 
             # feature lists
-            plugin_manager.load_feature_lists(
-                plugin_name, plugin_path, self.register_feature_list
-            )
+            plugin_manager.load_feature_lists(plugin_ref, self.register_feature_list)
 
             # acquisition mode
             acquisition_modes = plugin_config.get("acquisition_modes", [])
             plugin_manager.load_acquisition_modes(
-                plugin_name,
-                plugin_path,
+                plugin_ref,
                 acquisition_modes,
                 self.register_acquisition_mode,
             )
 
             # load devices
-            plugin_manager.load_devices(plugin_name, plugin_path, self.register_device)
+            plugin_manager.load_devices(plugin_ref, self.register_device)
 
     def register_device(self, device, module):
         """Regiseter device

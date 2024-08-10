@@ -103,21 +103,17 @@ class PluginsController:
         """
         plugins = plugin_manager.get_plugins()
 
-        for plugin_name, plugin_path in plugins.items():
+        for plugin_name, plugin_ref in plugins.items():
 
             # read "plugin_config.yml"
-            plugin_config = load_yaml_file(
-                os.path.join(plugin_path, "plugin_config.yml")
-            )
+            plugin_config = plugin_manager.load_config(plugin_ref)
             if plugin_config is None:
                 continue
             plugin_display_name = plugin_config.get("name", plugin_name)
 
-            plugin_frame = plugin_manager.load_view(
-                plugin_name, plugin_path, plugin_display_name
-            )
+            plugin_frame = plugin_manager.load_view(plugin_ref, plugin_display_name)
             plugin_controller = plugin_manager.load_controller(
-                plugin_name, plugin_path, plugin_display_name
+                plugin_ref, plugin_display_name
             )
 
             if plugin_frame and plugin_controller:
@@ -132,13 +128,12 @@ class PluginsController:
                 else:
                     self.build_tab_window(plugin_name, plugin_frame, plugin_controller)
             # feature
-            plugin_manager.load_features(plugin_name, plugin_path)
+            plugin_manager.load_features(plugin_ref)
 
             # acquisition mode
             acquisition_modes = plugin_config.get("acquisition_modes", [])
             plugin_manager.load_acquisition_modes(
-                plugin_name,
-                plugin_path,
+                plugin_ref,
                 acquisition_modes,
                 self.register_acquisition_mode,
             )

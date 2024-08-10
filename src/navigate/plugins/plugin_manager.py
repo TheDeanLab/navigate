@@ -77,21 +77,35 @@ class PluginPackageManager:
                     "Please double-check the installed plugins!"
                 )
                 continue
-            plugins[plugin_package_name] = importlib.resources.files(
-                plugin_package_name
-            )
+            plugins[plugin_package_name] = plugin_package_name
         return plugins
 
     @staticmethod
-    def load_controller(package_name, package_path, controller_name):
+    def load_config(package_name):
+        """Load plugin_config.yml
+
+        Parameters
+        ----------
+        package_name : str
+            package name
+
+        Returns
+        -------
+        plugin_config : dict
+            plugin configuration
+        """
+        package_path = importlib.resources.files(package_name)
+        plugin_config = load_yaml_file(os.path.join(package_path, "plugin_config.yml"))
+        return plugin_config
+
+    @staticmethod
+    def load_controller(package_name, controller_name):
         """Load controller
 
         Parameters
         ----------
         package_name : str
             package name
-        package_path : str
-            package path
         controller_name : str
             controller name
 
@@ -111,15 +125,13 @@ class PluginPackageManager:
             return None
 
     @staticmethod
-    def load_view(package_name, package_path, frame_name):
+    def load_view(package_name, frame_name):
         """Load view
 
         Parameters
         ----------
         package_name : str
             package name
-        package_path : str
-            package path
         frame_name : str
             frame name
 
@@ -139,15 +151,13 @@ class PluginPackageManager:
             return None
 
     @staticmethod
-    def load_feature_lists(package_name, package_path, register_func):
+    def load_feature_lists(package_name, register_func):
         """Load feature lists
 
         Parameters
         ----------
         package_name : str
             package name
-        package_path : str
-            package path
         register_func : func
             the function to handle feature lists
         """
@@ -161,15 +171,13 @@ class PluginPackageManager:
             pass
 
     @staticmethod
-    def load_features(package_name, package_path):
+    def load_features(package_name):
         """Load features
 
         Parameters
         ----------
         package_name : str
             package name
-        package_path : str
-            package path
         """
         for _, module_name, is_pkg in pkgutil.iter_modules(
             [importlib.resources.files(package_name).joinpath("model/features")]
@@ -183,17 +191,13 @@ class PluginPackageManager:
                 register_features(module)
 
     @staticmethod
-    def load_acquisition_modes(
-        package_name, package_path, acquisition_modes, register_func
-    ):
+    def load_acquisition_modes(package_name, acquisition_modes, register_func):
         """Load acquisition modes
 
         Parameters
         ----------
         package_name : str
             package name
-        package_path : str
-            package path
         acquisition_modes : []
             list of acquisition mode configurations
         register_func : func
@@ -209,15 +213,13 @@ class PluginPackageManager:
                 register_func(acquisition_mode_config["name"], module)
 
     @staticmethod
-    def load_devices(package_name, package_path, register_func):
+    def load_devices(package_name, register_func):
         """Load devices
 
         Parameters
         ----------
         package_name : str
             package name
-        package_path : str
-            package path
         register_func : func
             the function to register devices
         """
@@ -268,7 +270,24 @@ class PluginFileManager:
         return plugins
 
     @staticmethod
-    def load_controller(plugin_name, plugin_path, controller_name):
+    def load_config(plugin_path):
+        """Load plugin_config.yml
+
+        Parameters
+        ----------
+        plugin_path : str
+            plugin path
+
+        Returns
+        -------
+        plugin_config : dict
+            plugin configuration
+        """
+        plugin_config = load_yaml_file(os.path.join(plugin_path, "plugin_config.yml"))
+        return plugin_config
+
+    @staticmethod
+    def load_controller(plugin_path, controller_name):
         """Load controller
 
         Parameters
@@ -300,7 +319,7 @@ class PluginFileManager:
         return None
 
     @staticmethod
-    def load_view(plugin_name, plugin_path, frame_name):
+    def load_view(plugin_path, frame_name):
         """Load view
 
         Parameters
@@ -326,7 +345,7 @@ class PluginFileManager:
         return None
 
     @staticmethod
-    def load_feature_lists(plugin_name, plugin_path, register_func):
+    def load_feature_lists(plugin_path, register_func):
         """Load feature lists
 
         Parameters
@@ -344,7 +363,7 @@ class PluginFileManager:
             register_func(plugin_feature_list, module)
 
     @staticmethod
-    def load_features(plugin_name, plugin_path):
+    def load_features(plugin_path):
         """Load features
 
         Parameters
@@ -365,9 +384,7 @@ class PluginFileManager:
                 register_features(module)
 
     @staticmethod
-    def load_acquisition_modes(
-        plugin_name, plugin_path, acquisition_modes, register_func
-    ):
+    def load_acquisition_modes(plugin_path, acquisition_modes, register_func):
         """Load acquisition modes
 
         Parameters
@@ -390,7 +407,7 @@ class PluginFileManager:
                     register_func(acquisition_mode_config["name"], module)
 
     @staticmethod
-    def load_devices(plugin_name, plugin_path, register_func):
+    def load_devices(plugin_path, register_func):
         """Load devices
 
         Parameters

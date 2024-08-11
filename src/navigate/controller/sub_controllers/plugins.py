@@ -42,12 +42,12 @@ from tkinter import messagebox
 from navigate.config.config import get_navigate_path
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
-from navigate.tools.common_functions import combine_funcs, load_module_from_file
+from navigate.tools.common_functions import combine_funcs
 from navigate.tools.decorators import AcquisitionMode
-from navigate.model.features import feature_related_functions
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.plugins_popup import PluginsPopup
-from navigate.config import set_feature_attributes
+
+from navigate.plugins.plugin_manager import PluginFileManager, PluginPackageManager
 
 
 class PluginsController:
@@ -69,11 +69,6 @@ class PluginsController:
         #: object: navigate controller.
         self.parent_controller = parent_controller
 
-        #: str: plugins default path.
-        self.plugins_path = os.path.join(
-            Path(__file__).resolve().parent.parent.parent, "plugins"
-        )
-
         #: dict: installed plugins with GUI
         self.plugins_dict = {}
 
@@ -87,115 +82,61 @@ class PluginsController:
 
     def load_plugins(self):
         """Load plugins"""
-        plugins = os.listdir(self.plugins_path)
-        installed_plugins = dict(
-            [(f, os.path.join(self.plugins_path, f)) for f in plugins]
+        # load through files
+        plugins_path = os.path.join(
+            Path(__file__).resolve().parent.parent.parent, "plugins"
         )
-        # load plugins from plugins_config
         plugins_config_path = os.path.join(
             get_navigate_path(), "config", "plugins_config.yml"
         )
-        plugins_config = load_yaml_file(plugins_config_path)
-        if plugins_config is None:
-            plugins_config = {}
-            save_yaml_file(get_navigate_path(), {}, "plugins_config.yml")
-        else:
-            for plugin_name, plugin_path in plugins_config.items():
-                if plugin_path and os.path.exists(plugin_path):
-                    installed_plugins[plugin_name] = plugin_path
-        for _, plugin_path in installed_plugins.items():
-            if not os.path.isdir(plugin_path):
-                continue
+        plugin_file_manager = PluginFileManager(plugins_path, plugins_config_path)
+        self.load_plugins_through_manager(plugin_file_manager)
+        self.load_plugins_through_manager(PluginPackageManager)
+
+    def load_plugins_through_manager(self, plugin_manager):
+        """Load plugins through plugin manager
+
+        Parameters
+        ----------
+        plugin_manager : object
+            PluginManager object
+        """
+        plugins = plugin_manager.get_plugins()
+
+        for plugin_name, plugin_ref in plugins.items():
 
             # read "plugin_config.yml"
-            plugin_config = load_yaml_file(
-                os.path.join(plugin_path, "plugin_config.yml")
-            )
+            plugin_config = plugin_manager.load_config(plugin_ref)
             if plugin_config is None:
                 continue
-            plugin_name = plugin_config.get("name", _)
-            plugin_file_name = "_".join(plugin_name.lower().split())
-            plugin_class_name = "".join(plugin_name.title().split())
-            if "view" in plugin_config:
-                # verify if "frame_name" and "file_name" are given and correct
-                view_file = os.path.join(
-                    plugin_path, "view", f"{plugin_file_name}_frame.py"
-                )
-                controller_file = os.path.join(
-                    plugin_path,
-                    "controller",
-                    f"{plugin_file_name}_controller.py",
-                )
-                if (
-                    os.path.exists(view_file)
-                    and os.path.isfile(view_file)
-                    and os.path.exists(controller_file)
-                    and os.path.isfile(controller_file)
-                ):
-                    plugin_frame_module = load_module_from_file(
-                        f"{plugin_class_name}Frame", view_file
-                    )
-                    if plugin_frame_module is None:
-                        print(
-                            f"Make sure that the plugin frame name "
-                            f"{plugin_class_name} is correct! "
-                            f"Plugin {plugin_name} needs to be uninstalled from "
-                            f"navigate or reinstalled!"
-                        )
-                        continue
-                    plugin_frame = getattr(
-                        plugin_frame_module, f"{plugin_class_name}Frame"
-                    )
-                    plugin_controller_module = load_module_from_file(
-                        f"{plugin_class_name}Controller", controller_file
-                    )
-                    if plugin_controller_module is None:
-                        print(
-                            f"Make sure that the plugin controller "
-                            f"{plugin_class_name} is correct! "
-                            f"Plugin {plugin_name} needs to be uninstalled from "
-                            f"navigate or reinstalled!"
-                        )
-                        continue
-                    plugin_controller = getattr(
-                        plugin_controller_module, f"{plugin_class_name}Controller"
-                    )
+            plugin_display_name = plugin_config.get("name", plugin_name)
 
-                    if plugin_config["view"] == "Popup":
-                        # menu
-                        self.parent_controller.view.menubar.menu_plugins.add_command(
-                            label=plugin_name,
-                            command=self.build_popup_window(
-                                plugin_name, plugin_frame, plugin_controller
-                            ),
-                        )
-                    else:
-                        self.build_tab_window(
+            plugin_frame = plugin_manager.load_view(plugin_ref, plugin_display_name)
+            plugin_controller = plugin_manager.load_controller(
+                plugin_ref, plugin_display_name
+            )
+
+            if plugin_frame and plugin_controller:
+                if plugin_config["view"] == "Popup":
+                    # menu
+                    self.parent_controller.view.menubar.menu_plugins.add_command(
+                        label=plugin_name,
+                        command=self.build_popup_window(
                             plugin_name, plugin_frame, plugin_controller
-                        )
+                        ),
+                    )
+                else:
+                    self.build_tab_window(plugin_name, plugin_frame, plugin_controller)
             # feature
-            set_feature_attributes(plugin_path)
+            plugin_manager.load_features(plugin_ref)
 
             # acquisition mode
             acquisition_modes = plugin_config.get("acquisition_modes", [])
-            for acquisition_mode_config in acquisition_modes:
-                acquisition_file = os.path.join(
-                    plugin_path, acquisition_mode_config["file_name"]
-                )
-                if os.path.exists(acquisition_file):
-                    module = load_module_from_file(
-                        acquisition_mode_config["file_name"][:-3], acquisition_file
-                    )
-                    acquisition_mode = [
-                        m
-                        for m in dir(module)
-                        if isinstance(getattr(module, m), AcquisitionMode)
-                    ]
-                    if acquisition_mode:
-                        self.parent_controller.add_acquisition_mode(
-                            acquisition_mode_config["name"],
-                            getattr(module, acquisition_mode[0]),
-                        )
+            plugin_manager.load_acquisition_modes(
+                plugin_ref,
+                acquisition_modes,
+                self.register_acquisition_mode,
+            )
 
     def build_tab_window(self, plugin_name, frame, controller):
         """Build tab for a plugin
@@ -220,11 +161,12 @@ class PluginsController:
                 "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
             )
             self.plugins_dict[controller_name] = plugin_controller
-        except Exception:
+        except Exception as e:
             messagebox.showwarning(
                 title="Warning",
                 message=(
                     f"Plugin {plugin_name} has something went wrong."
+                    f"Error: {e}"
                     f"Please make sure the plugin works correctly or uninstall it!"
                 ),
             )
@@ -294,6 +236,27 @@ class PluginsController:
                 )
 
         return func_with_wrapper
+
+    def register_acquisition_mode(self, acquisition_mode_name, module):
+        """Register acquisition mode
+
+        Parameters
+        ----------
+        acquisition_mode_name : str
+            The name of an acquisition mode
+        module : module
+            acquisition mode module
+        """
+        if not module:
+            return
+        acquisition_mode = [
+            m for m in dir(module) if isinstance(getattr(module, m), AcquisitionMode)
+        ]
+        if acquisition_mode:
+            self.parent_controller.add_acquisition_mode(
+                acquisition_mode_name,
+                getattr(module, acquisition_mode[0]),
+            )
 
 
 class UninstallPluginController(GUIController):

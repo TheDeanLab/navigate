@@ -38,14 +38,12 @@ import platform
 from pathlib import Path
 from os.path import isfile
 from multiprocessing.managers import ListProxy, DictProxy
-import inspect
 
 # Third Party Imports
 import yaml
 
 # Local Imports
-from navigate.tools.common_functions import build_ref_name, load_module_from_file
-from navigate.model.features import feature_related_functions
+from navigate.tools.common_functions import build_ref_name
 
 
 def get_navigate_path():
@@ -56,11 +54,6 @@ def get_navigate_path():
     -------
     str
         Path to Navigate home directory.
-
-    Examples
-    --------
-    >>> get_navigate_path()
-    'C:\\Users\\username\\AppData\\Local\\.navigate'
     """
     if platform.system() == "Windows":
         base_directory = os.getenv("LOCALAPPDATA")
@@ -172,14 +165,6 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
         Name of dictionary to insert
     dict_data : dict
         Dictionary to insert
-
-    Returns
-    -------
-    None
-
-    Examples
-    --------
-    >>> build_nested_dict(manager, parent_dict, key_name, dict_data)
     """
     if type(dict_data) != dict and type(dict_data) != list:
         parent_dict[key_name] = dict_data
@@ -215,10 +200,6 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
     -------
     bool
         True or False
-
-    Examples
-    --------
-    >>> update_config_dict(manager, parent_dict, config_name, new_config)
     """
     if type(new_config) != dict and type(new_config) != list:
         file_path = str(new_config)
@@ -1098,23 +1079,3 @@ def verify_configuration(manager, configuration):
         "gui",
         {"channels": {"count": channel_count}},
     )
-
-
-def set_feature_attributes(plugin_path):
-    """Load feature module and set function attributes.
-
-    Parameters
-    ----------
-    plugin_path : str
-        The path to the plugins folder.
-    """
-    features_dir = os.path.join(plugin_path, "model", "features")
-    if os.path.exists(features_dir):
-        features = os.listdir(features_dir)
-        for feature in features:
-            feature_file = os.path.join(features_dir, feature)
-            if os.path.isfile(feature_file):
-                temp = load_module_from_file(feature, feature_file)
-                for c in dir(temp):
-                    if inspect.isclass(getattr(temp, c)):
-                        setattr(feature_related_functions, c, getattr(temp, c))

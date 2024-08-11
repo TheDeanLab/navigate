@@ -35,13 +35,15 @@ from navigate.model.plugins_model import PluginsModel
 
 
 class TestPluginsModel(unittest.TestCase):
-    @patch("os.path.join")
-    @patch("pathlib.Path.resolve")
-    def test_initialization(self, mock_resolve, mock_join):
-        mock_resolve.return_value.parent.parent = "mocked_path"
-        mock_join.return_value = "mocked_path/plugins"
-        model = PluginsModel()
-        self.assertEqual(model.plugins_path, "mocked_path/plugins")
+    
+    # comment this testcase since plugin_model doesn't have plugins_path now
+    # @patch("os.path.join")
+    # @patch("pathlib.Path.resolve")
+    # def test_initialization(self, mock_resolve, mock_join):
+    #     mock_resolve.return_value.parent.parent = "mocked_path"
+    #     mock_join.return_value = "mocked_path/plugins"
+    #     model = PluginsModel()
+    #     self.assertEqual(model.plugins_path, "mocked_path/plugins")
 
     @patch("navigate.config.config.get_navigate_path")
     @patch("os.makedirs")

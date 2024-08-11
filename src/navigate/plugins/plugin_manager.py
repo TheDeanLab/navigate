@@ -58,6 +58,8 @@ def register_features(module):
 
 
 class PluginPackageManager:
+    """Plugin package manager"""
+
     @staticmethod
     def get_plugins():
         """Get plugins
@@ -227,7 +229,10 @@ class PluginPackageManager:
             [importlib.resources.files(package_name).joinpath("model/devices")]
         ):
             if is_pkg:
-                full_module_name = f"{package_name}.model.devices.{module_name}.device_startup_functions"
+                full_module_name = (
+                    f"{package_name}.model."
+                    f"devices.{module_name}.device_startup_functions"
+                )
                 try:
                     module = importlib.import_module(full_module_name)
                 except (ImportError, AttributeError):
@@ -236,8 +241,23 @@ class PluginPackageManager:
 
 
 class PluginFileManager:
+    """Plugin file manager"""
+
     def __init__(self, plugins_path, plugins_config_path):
+        """Initialize PluginFileManager
+
+        Parameters
+        ----------
+        plugins_path : str
+            plugins path
+        plugins_config_path : str
+            plugins config path
+        """
+
+        #: str: plugins path
         self.plugins_path = plugins_path
+
+        #: str: plugins config path
         self.plugins_config_path = plugins_config_path
 
     def get_plugins(self):

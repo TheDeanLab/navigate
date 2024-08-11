@@ -54,11 +54,6 @@ def get_navigate_path():
     -------
     str
         Path to Navigate home directory.
-
-    Examples
-    --------
-    >>> get_navigate_path()
-    'C:\\Users\\username\\AppData\\Local\\.navigate'
     """
     if platform.system() == "Windows":
         base_directory = os.getenv("LOCALAPPDATA")
@@ -170,14 +165,6 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
         Name of dictionary to insert
     dict_data : dict
         Dictionary to insert
-
-    Returns
-    -------
-    None
-
-    Examples
-    --------
-    >>> build_nested_dict(manager, parent_dict, key_name, dict_data)
     """
     if type(dict_data) != dict and type(dict_data) != list:
         parent_dict[key_name] = dict_data
@@ -213,10 +200,6 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
     -------
     bool
         True or False
-
-    Examples
-    --------
-    >>> update_config_dict(manager, parent_dict, config_name, new_config)
     """
     if type(new_config) != dict and type(new_config) != list:
         file_path = str(new_config)
@@ -1096,4 +1079,3 @@ def verify_configuration(manager, configuration):
         "gui",
         {"channels": {"count": channel_count}},
     )
-

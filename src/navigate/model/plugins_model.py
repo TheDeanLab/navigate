@@ -37,7 +37,7 @@ from pathlib import Path
 # Third-party imports
 
 # Local application imports
-from navigate.tools.file_functions import load_yaml_file, save_yaml_file
+from navigate.tools.file_functions import save_yaml_file
 from navigate.tools.decorators import FeatureList, AcquisitionMode
 from navigate.config.config import get_navigate_path
 from navigate.plugins.plugin_manager import PluginFileManager, PluginPackageManager
@@ -102,7 +102,7 @@ class PluginsModel:
             plugin_manager.load_devices(plugin_ref, self.register_device)
 
     def register_device(self, device, module):
-        """Regiseter device
+        """Register device
 
         Parameters
         ----------

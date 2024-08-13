@@ -69,7 +69,7 @@ class AcquirePopUp:
         # window
         #: PopUp: The popup window
         self.popup = PopUp(
-            root, "File Saving Dialog", "430x370+320+180", transient=True
+            root, "File Saving Dialog", "450x390+320+180", transient=True
         )
 
         # Storing the content frame of the popup, this will be the parent of the widgets
@@ -133,6 +133,7 @@ class AcquirePopUp:
                     label=entry_labels[i],
                     input_class=ValidatedCombobox,
                     input_var=tk.StringVar(),
+                    label_args={"padding": [0, 0, 30, 0]}
                 )
                 self.inputs[entry_names[i]].set_values(tuple(FILE_TYPES))
                 self.inputs[entry_names[i]].set("TIFF")
@@ -143,6 +144,7 @@ class AcquirePopUp:
                     label=entry_labels[i],
                     input_class=ValidatedCombobox,
                     input_var=tk.StringVar(),
+                    label_args={"padding": [0, 0, 36, 0]}
                 )
                 self.inputs[entry_names[i]].set_values(
                     ("BABB", "Water", "CUBIC", "CLARITY", "uDISCO", "eFLASH")
@@ -175,7 +177,7 @@ class AcquirePopUp:
         self.buttons["Cancel"].grid(row=10, column=0, padx=5, sticky=tk.NSEW)
 
         self.buttons["Done"] = ttk.Button(content_frame, text="Acquire Data")
-        self.buttons["Done"].grid(row=10, column=1, padx=5, sticky=tk.NSEW)
+        self.buttons["Done"].grid(row=10, column=1, padx=(0, 5), sticky=tk.NSEW)
 
     def get_variables(self):
         """Get the variables of the popup

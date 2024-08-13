@@ -35,6 +35,9 @@ import platform
 import tkinter as tk
 import logging
 import threading
+from typing import Dict
+import tempfile
+import os
 
 # Third Party Imports
 import cv2
@@ -48,6 +51,8 @@ from abc import ABCMeta
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.analysis.camera import compute_signal_to_noise
 from navigate.tools.common_functions import VariableWithLock
+from navigate.tools.file_functions import get_ram_info
+from navigate.config import get_navigate_path
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -266,9 +271,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
     def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
         """Initialize the non-live display.
-
-        Starts image and slice counter, number of channels, number of slices,
-        images per volume, and image volume.
 
         Parameters
         ----------
@@ -578,6 +580,9 @@ class CameraViewController(BaseViewController):
         """
         super().__init__(view, parent_controller)
 
+        # SpooledImageLoader: The spooled image loader.
+        self.spooled_images = None
+
         #: dict: The dictionary of image metrics widgets.
         self.image_metrics = view.image_metrics.get_widgets()
 
@@ -605,6 +610,10 @@ class CameraViewController(BaseViewController):
         self.view.live_frame.live.bind(
             "<<ComboboxSelected>>", self.update_display_state
         )
+        self.view.live_frame.channel.bind(
+            "<<ComboboxSelected>>", self.update_display_state
+        )
+        self.view.live_frame.channel.configure(state="disabled")
 
         if platform.system() == "Windows":
             self.resize_event_id = self.view.bind("<Configure>", self.resize)
@@ -650,6 +659,28 @@ class CameraViewController(BaseViewController):
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
+    def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
+        """Initialize the non-live display.
+
+        Parameters
+        ----------
+        buffer : numpy.ndarray
+            Image data.
+        microscope_state : dict
+            Microscope state.
+        camera_parameters : dict
+            Camera parameters.
+        """
+        super().initialize_non_live_display(buffer, microscope_state, camera_parameters)
+
+        self.view.live_frame.channel["values"] = self.selected_channels
+
+        self.spooled_images = SpooledImageLoader(
+            channels=self.number_of_channels,
+            size_y=self.original_image_height,
+            size_x=self.original_image_width,
+        )
+
     def update_snr(self):
         """Updates the signal-to-noise ratio."""
         off, var = self.parent_controller.model.get_offset_variance_maps()
@@ -663,13 +694,39 @@ class CameraViewController(BaseViewController):
         """Updates the image when the slider is moved."""
 
         slider_index = self.view.slider.get()
-        channel_display_index = 0
+        channel_index = self.view.live_frame.channel.get()
+        channel_index = channel_index[-1]
+        channel_index = int(channel_index) - 1
+
+        print("Updating slider to index: ", slider_index)
+        image = self.spooled_images.load_image(
+            channel=channel_index, slice_index=slider_index
+        )
+
         if self.image is None:
             return
-        self.retrieve_image_slice_from_volume(
-            slider_index=slider_index, channel_display_index=channel_display_index
-        )
-        self.reset_display()
+
+        # flip back image
+        if self.flip_flags["x"] and self.flip_flags["y"]:
+            image = image[::-1, ::-1]
+        elif self.flip_flags["x"]:
+            image = image[:, ::-1]
+        elif self.flip_flags["y"]:
+            image = image[::-1, :]
+
+        # If the user has toggled the transpose button, transpose the image.
+        if self.transpose:
+            self.image = image.T
+        else:
+            self.image = image
+
+        self.process_image()
+        self.update_max_counts()
+
+        with self.is_displaying_image as is_displaying_image:
+            is_displaying_image.value = False
+
+        # self.reset_display()
 
     def update_display_state(self, event):
         """Image Display Combobox Called.
@@ -683,23 +740,24 @@ class CameraViewController(BaseViewController):
         event : tkinter event
             The tkinter event that triggered the function.
         """
-        # self.display_state = self.view.live_frame.live.get()
-        # # Slice in the XY Dimension.
-        # if self.display_state == "XY Slice":
-        #     # NOTE: Can only display previously acquired full stack.
-        #     slider_length = (
-        #         self.parent_controller.configuration["experiment"]["MicroscopeState"][
-        #             "number_z_steps"
-        #         ]
-        #         - 1
-        #     )
-        #
-        # if self.display_state.find("Slice") != -1:
-        #     self.view.slider.slider_widget.configure(
-        #         to=slider_length, tickinterval=(slider_length / 5), state="normal"
-        #     )
-        # else:
-        self.view.slider.configure(state="disabled")
+        if self.number_of_slices == 0:
+            return
+
+        self.display_state = self.view.live_frame.live.get()
+
+        if self.display_state == "Live":
+            self.view.slider.configure(state="disabled")
+            self.view.live_frame.channel.configure(state="disabled")
+
+        else:
+            self.view.slider.configure(state="normal")
+            self.view.slider.configure(
+                from_=1,
+                to=self.number_of_slices,
+                tickinterval=self.number_of_slices // 11,
+            )
+
+            self.view.live_frame.channel.configure(state="normal")
 
     def get_absolute_position(self):
         """Gets the absolute position of the computer mouse.
@@ -902,20 +960,6 @@ class CameraViewController(BaseViewController):
             )
             self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
-    def retrieve_image_slice_from_volume(self, slider_index, channel_display_index):
-        """Retrieve image slice from volume.
-
-        Parameters
-        ----------
-        slider_index : int
-            Index of the slider.
-        channel_display_index : int
-            Index of the channel to display.
-        """
-        # TODO: Implement lazy loader for XY slice.
-        if self.display_state == "XY Slice":
-            pass
-
     def display_image(self, image_id):
         """Display an image using the LUT specified in the View.
 
@@ -933,6 +977,18 @@ class CameraViewController(BaseViewController):
 
         # Store the maximum intensity value for the image.
         image = self.data_buffer[image_id]
+
+        # Identify the channel index and slice index.
+        channel_idx, slice_idx = self.identify_channel_index_and_slice()
+        self.image_metrics["Channel"].set(channel_idx + 1)
+
+        # Spool the image for later visualization.
+        self.spooled_images.save_image(image, channel_idx, slice_idx)
+
+        # Slice Mode
+        if self.display_state != "Live":
+            return
+
         # flip back image
         if self.flip_flags["x"] and self.flip_flags["y"]:
             image = image[::-1, ::-1]
@@ -954,21 +1010,11 @@ class CameraViewController(BaseViewController):
                 self.image, self._offset, self._variance
             )
 
-        # Slice Mode TODO: Consider channels
-        # if self.display_state != 'Live':
-        #     slider_index = self.view.slider.slider_widget.get()
-        #     channel_display_index = 0
-        #     self.retrieve_image_slice_from_volume(slider_index=slider_index,
-        #                                           channel_display_index=channel_display_index)
-        #
-        # else:
         self.process_image()
         self.update_max_counts()
-        channel_idx, _ = self.identify_channel_index_and_slice()
-        self.image_metrics["Channel"].set(channel_idx + 1)
-        self.image_count = self.image_count + 1
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
+        self.image_count = self.image_count + 1
 
     def set_mask_color_table(self, colors):
         """Set up segmentation mask color table
@@ -1161,3 +1207,150 @@ class MIPViewController(BaseViewController):
             self.image = self.image.T
 
         self.process_image()
+
+
+class SpooledImageLoader:
+    """A class to lazily load images from disk using a spooled temporary file."""
+
+    def __init__(self, channels: int, size_y: int, size_x: int):
+        """Initialize the SpooledImageLoader.
+
+        Parameters
+        ----------
+        channels : int
+            The number of channels.
+        """
+        #: int: The number of channels.
+        self.channels = channels
+
+        #: int: The number of bytes in the image.
+        self.n_bytes = None
+
+        #: int: The height of the image.
+        self.size_y = size_y
+
+        #: int: The width of the image.
+        self.size_x = size_x
+
+        max_size_per_channel = self.get_default_max_size() // self.channels
+        default_directory = self.get_default_directory()
+
+        #: Dict[int, tempfile.SpooledTemporaryFile]: The temporary files.
+        self.temp_files: Dict[int, tempfile.SpooledTemporaryFile] = {}
+        for channel in range(self.channels):
+            self.temp_files[channel] = tempfile.SpooledTemporaryFile(
+                max_size=max_size_per_channel,
+                mode="w+b",
+                dir=default_directory,
+            )
+
+        logger.info(self.__repr__())
+
+    def __del__(self):
+        """Delete the temporary files."""
+        if self.temp_files is not None:
+            for temp_file in self.temp_files.values():
+                temp_file.close()
+
+    def __repr__(self):
+        """Return the string representation of the SpooledImageLoader."""
+        return (
+            f"SpooledImageLoader(channels={len(self.temp_files)}, "
+            f"size_y={self.size_y}, "
+            f"size_x={self.size_x})"
+        )
+
+    @staticmethod
+    def get_default_max_size() -> int:
+        """Get the default max_size based on the total RAM.
+
+        Returns
+        -------
+        int
+            The default max_size in bytes. By default, half the available RAM.
+        """
+        total_ram, _ = get_ram_info()
+        return total_ram // 2
+
+    @staticmethod
+    def get_default_directory() -> str:
+        """Get the default directory for storing temporary files.
+
+        Default directory is within the .navigate directory.
+
+        Returns
+        -------
+        str
+            The default directory for storing temporary files.
+        """
+        base_path = get_navigate_path()
+        temp_path = os.path.join(base_path, "temp")
+        os.makedirs(temp_path, exist_ok=True)
+        return temp_path
+
+    def save_image(self, image: np.ndarray, channel: int, slice_index: int):
+        """Save an image to a temporary file.
+
+        Parameters
+        ----------
+        image : np.ndarray
+            The image to save.
+        channel : int
+            The channel of the image.
+        slice_index : int
+            The slice index of the image.
+        """
+
+        image = image.flatten()
+
+        if self.temp_files[channel].tell() == 0:
+            self.n_bytes = image.nbytes
+
+        start_idx, end_idx = self.get_indices(slice_index)
+        self.temp_files[channel].seek(start_idx)
+        self.temp_files[channel].write(image)
+
+    def load_image(self, channel: int, slice_index: int):
+        """Load an image from a temporary file.
+
+        Parameters
+        ----------
+        channel : int
+            The channel of the image.
+        slice_index : int
+            The slice index of the image.
+
+        Returns
+        -------
+        np.ndarray or None
+            The image data or None if the image could not be loaded.
+        """
+        start_idx, _ = self.get_indices(slice_index)
+        self.temp_files[channel].seek(start_idx)
+
+        try:
+            image = np.frombuffer(
+                self.temp_files[channel].read(self.n_bytes), dtype=np.uint16
+            )
+            image = image.reshape((self.size_y, self.size_x))
+        except (ValueError, TypeError, AttributeError):
+            return None
+        return image
+
+    def get_indices(self, slice_index: int):
+        """Get the indices of the images stored in the spooled files.
+
+        Parameters
+        ----------
+        slice_index : int
+            The slice index.
+
+        Returns
+        -------
+        Tuple[int, int]
+            The start and end indices of the images.
+        """
+
+        start_idx = slice_index * self.n_bytes
+        end_idx = start_idx + self.n_bytes
+        return start_idx, end_idx

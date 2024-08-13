@@ -262,6 +262,15 @@ class RenderFrame(ttk.Labelframe):
         self.live.grid(row=0, column=0)
         self.live.state = "readonly"
 
+        self.channel_var = tk.StringVar()
+        self.channel = ttk.Combobox(
+            self, textvariable=self.channel_var, state="readonly", width=6
+        )
+        self.channel["values"] = "CH1"
+        self.channel.set("CH1")
+        self.channel.grid(row=1, column=0)
+        self.channel.state = "readonly"
+
     def get_variables(self):
         """Function to get the variables.
 

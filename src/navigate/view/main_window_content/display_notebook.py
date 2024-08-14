@@ -215,8 +215,9 @@ class CameraTab(tk.Frame):
             showvalue=0,
             label="Slice",
         )
-        self.slider.configure(state="disabled")  # 'normal'
+        self.slider.configure(state="disabled")
         self.slider.grid(row=3, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.slider.grid_remove()
 
         #: MetricsFrame: The frame that will hold the camera selection and counts.
         self.image_metrics = MetricsFrame(self)
@@ -310,7 +311,7 @@ class MipRenderFrame(ttk.Labelframe):
             Arbitrary keyword arguments.
         """
         # Init Frame
-        text_label = "Display"
+        text_label = "Image Display"
         ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
 
         # Formatting

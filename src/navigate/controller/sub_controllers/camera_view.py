@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ class ABaseViewController(metaclass=ABCMeta):
         """Sets mode of camera_view_controller."""
         pass
 
-    def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
+    def initialize_non_live_display(self, microscope_state, camera_parameters):
         """Initialize the non-live display."""
         pass
 
@@ -100,52 +100,135 @@ class BaseViewController(GUIController, ABaseViewController):
             The parent controller of the camera view controller.
         """
         super().__init__(view, parent_controller)
+
+        #: bool: The flag for the selected signal-to-noise ratio.
         self._snr_selected = False
+
+        #: numpy.ndarray: The offset map.
         self._offset = None
+
+        #: numpy.ndarray: The variance map.
         self._variance = None
+
+        #: bool: The flag for the display of the cross-hair.
         self.apply_cross_hair = True
+
+        #: bool: The flag for autoscaling the image intensity.
         self.autoscale = True
+
+        #: int: The bit depth of the image.
         self.bit_depth = 8
+
+        #: tkinter.Canvas: The tkinter canvas that displays the image.
         self.canvas = self.view.canvas
+
+        #: int: The height of the canvas.
         self.canvas_height = 512
+
+        #: int: The scaling factor for the height of the canvas.
         self.canvas_height_scale = 4
+
+        #: int: The width of the canvas.
         self.canvas_width = 512
+
+        #: int: The scaling factor for the width of the canvas.
         self.canvas_width_scale = 4
+
+        #: str: The colormap for the image.
         self.colormap = plt.get_cmap("gist_gray")
-        self.data_buffer = None
+
+        #: bool: The flag for displaying the mask.
         self.display_mask_flag = False
+
+        #: dict: The flip flags for the camera.
         self.flip_flags = None
+
+        #: int: The height of the image.
         self.height = None
+
+        #: numpy.ndarray: The image data.
         self.image = None
+
+        #: bool: The flag for the image cache.
         self.image_cache_flag = True
+
+        #: int: The count of images.
         self.image_count = 0
+
+        #: VariableWithLock: The lock for displaying the image.
         self.is_displaying_image = VariableWithLock(bool)
+
+        #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
+
+        #: int: The maximum counts of the image.
         self.max_counts = None
+
+        #: int: The minimum counts of the image.
         self.min_counts = None
+
+        #: int: The number of channels in the image.
         self.number_of_channels = 0
+
+        #: int: The number of slices in the image volume.
         self.number_of_slices = 0
+
+        #: int: The original height of the image.
         self.original_image_height = 2048
+
+        #: int: The original width of the image.
         self.original_image_width = 2048
+
+        #: event: The resize event ID.
         self.resize_event_id = None
+
+        #: np.ndarray: The saturated pixels in the image.
         self.saturated_pixels = None
+
+        #: list: The selected channels being acquired.
         self.selected_channels = None
+
+        #: int: The index of the slice in the image volume.
         self.slice_index = 0
+
+        #: str: The stack cycling mode.
         self.stack_cycling_mode = "per_stack"
+
+        #: ImageTk.PhotoImage: The tkinter image.
         self.tk_image = None
+
+        #: ImageTk.PhotoImage: The tkinter image 2.
         self.tk_image2 = None
+
+        #: int: The total number of images per volume.
         self.total_images_per_volume = 0
+
+        #: bool: The flag for transposing the image.
         self.transpose = False
+
+        #: int: The width of the canvas.
         self.width = None
+
+        #: float: The zoom scale of the image.
         self.zoom_height = self.canvas_height
+
+        #: numpy.ndarray: The zoom offset of the image.
         self.zoom_offset = np.array([[0], [0]])
+
+        #: numpy.ndarray: The zoom rectangle of the image.
         self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
+
+        #: float: The zoom scale of the image.
         self.zoom_scale = 1
+
+        #: float: The zoom value of the image.
         self.zoom_value = 1
+
+        #: int: The zoom width of the image.
         self.zoom_width = self.canvas_width
 
     def flip_image(self, image):
-        """Flip the image according to the flip flags.
+        """Flip and transpose the image according to the flip flags.
 
         Parameters
         ----------
@@ -155,7 +238,7 @@ class BaseViewController(GUIController, ABaseViewController):
         Returns
         -------
         image : numpy.ndarray
-            Flipped image data.
+            Flipped and/or transposed image data.
         """
         if self.flip_flags["x"] and self.flip_flags["y"]:
             image = image[::-1, ::-1]
@@ -163,6 +246,10 @@ class BaseViewController(GUIController, ABaseViewController):
             image = image[:, ::-1]
         elif self.flip_flags["y"]:
             image = image[::-1, :]
+
+        if self.transpose:
+            image = image.T
+
         return image
 
     def update_lut(self, target):
@@ -182,7 +269,7 @@ class BaseViewController(GUIController, ABaseViewController):
             self.populate_image(image=image)
             logger.debug(f"Updating the LUT, {cmap_name}")
 
-    def transpose_image(self):
+    def update_transpose_state(self):
         """Get Flip XY widget value from the View.
 
         If True, transpose the image.
@@ -217,9 +304,7 @@ class BaseViewController(GUIController, ABaseViewController):
         image : numpy.ndarray
             Image data.
         """
-        print("try to display image")
         with self.is_displaying_image as is_displaying_image:
-            print("is displaying image", is_displaying_image.value)
             if is_displaying_image.value:
                 return
             is_displaying_image.value = True
@@ -245,6 +330,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         # Specify the saturated values in the red channel
         if np.any(self.saturated_pixels):
+            # TODO: Evaluate if this is functional.
             # Saturated pixels is an array of True or
             # False statements same size as the image.
 
@@ -292,19 +378,16 @@ class BaseViewController(GUIController, ABaseViewController):
         self.image_count += 1
         return channel_idx, slice_idx
 
-    def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
+    def initialize_non_live_display(self, microscope_state, camera_parameters):
         """Initialize the non-live display.
 
         Parameters
         ----------
-        buffer : numpy.ndarray
-            Image data.
         microscope_state : dict
             Microscope state.
         camera_parameters : dict
             Camera parameters.
         """
-        self.data_buffer = buffer
         self.is_displaying_image.value = False
         self.image_count = 0  # was image_counter
         self.slice_index = 0
@@ -443,9 +526,7 @@ class BaseViewController(GUIController, ABaseViewController):
                 crosshair_y = -1
             image[:, int(crosshair_x)] = 1
             image[int(crosshair_y), :] = 1
-            return image
-        else:
-            return image
+        return image
 
     def populate_image(self, image):
         """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
@@ -613,7 +694,6 @@ class CameraViewController(BaseViewController):
         self.image_palette = view.scale_palette.get_widgets()
 
         # Binding for adjusting the lookup table min and max counts.
-        # keys = ['Autoscale', 'Min','Max']
         self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
         self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
         self.image_palette["Autoscale"].widget.config(
@@ -621,13 +701,13 @@ class CameraViewController(BaseViewController):
         )
 
         # Bindings for changes to the LUT
-        for color in self.image_palette.values():
-            color.widget.config(
+        for color in self.view.scale_palette.color_labels:
+            self.image_palette[color].widget.config(
                 command=lambda: self.update_lut(self.view.scale_palette)
             )
 
         # Transpose and live bindings
-        self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
+        self.image_palette["Flip XY"].widget.config(command=self.update_transpose_state)
         self.update_snr()
 
         self.view.live_frame.live.bind(
@@ -638,14 +718,13 @@ class CameraViewController(BaseViewController):
         )
         self.view.live_frame.channel.configure(state="disabled")
 
+        # Slider Binding
+        self.view.slider.bind("<Motion>", self.slider_update)
+
         if platform.system() == "Windows":
             self.resize_event_id = self.view.bind("<Configure>", self.resize)
 
         self.width, self.height = 663, 597
-        self.canvas_width, self.canvas_height = (
-            self.view.canvas_width,
-            self.view.canvas_height,
-        )
         self.canvas_width, self.canvas_height = 512, 512
 
         # Right-Click Binding
@@ -682,33 +761,76 @@ class CameraViewController(BaseViewController):
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
+    def update_min_max_counts(self):
+        """Get min and max count values from the View.
+
+        When the min and max counts are toggled in the GUI, this function is called.
+        Updates the min and max values.
+        """
+        # TODO: Find a way to update the min and max counts in the non-live view.
+        super().update_min_max_counts()
+
+    def toggle_min_max_buttons(self):
+        """Checks the value of the autoscale widget.
+
+        If enabled, the min and max widgets are disabled and the image intensity is
+        autoscaled. If disabled, miu and max widgets are enabled, and image intensity
+        scaled.
+        """
+        super().toggle_min_max_buttons()
+
+        # Refresh the display with updated values.
+        if self.display_state != "Live":
+            self.process_image()
+
     def try_to_display_image(self, image):
         """Try to display an image.
+
+        In the live mode, images are automatically passed to the display function.
+
+        In the slice mode, images are passed to a spooled temporary file. However,
+        when the same slice and channel index is acquired again, the image is
+        updated. In all other cases, the image is only displayed upon slider events.
 
         Parameters
         ----------
         image : numpy.ndarray
             Image data.
         """
+        # Identify the channel index and slice index, update GUI.
+        channel_idx, slice_idx = self.identify_channel_index_and_slice()
+        self.image_metrics["Channel"].set(channel_idx + 1)
 
-        super().try_to_display_image(image)
+        # Save the image to the spooled image loader.
+        self.spooled_images.save_image(
+            image=image, channel=channel_idx, slice_index=slice_idx
+        )
 
-    def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
+        # Update image according to the display state.
+        self.display_state = self.view.live_frame.live.get()
+        if self.display_state == "Live":
+            super().try_to_display_image(image)
+
+        elif self.display_state == "Slice":
+            requested_slice = self.view.slider.get()
+            requested_channel = self.view.live_frame.channel.get()
+            requested_channel = int(requested_channel[-1]) - 1
+            if slice_idx == requested_slice and channel_idx == requested_channel:
+                super().try_to_display_image(image)
+
+    def initialize_non_live_display(self, microscope_state, camera_parameters):
         """Initialize the non-live display.
 
         Parameters
         ----------
-        buffer : numpy.ndarray
-            Image data.
         microscope_state : dict
             Microscope state.
         camera_parameters : dict
             Camera parameters.
         """
-        super().initialize_non_live_display(buffer, microscope_state, camera_parameters)
-
+        super().initialize_non_live_display(microscope_state, camera_parameters)
+        self.update_display_state()
         self.view.live_frame.channel["values"] = self.selected_channels
-
         self.spooled_images = SpooledImageLoader(
             channels=self.number_of_channels,
             size_y=self.original_image_height,
@@ -738,31 +860,19 @@ class CameraViewController(BaseViewController):
         if image is None:
             return
 
-        image = self.flip_image(image)
-        if self.transpose:
-            self.image = image.T
-        else:
-            self.image = image
-
+        self.image = self.flip_image(image)
         self.process_image()
         self.update_max_counts()
 
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
 
-        # self.reset_display()
-
-    def update_display_state(self, event):
+    def update_display_state(self, *args):
         """Image Display Combobox Called.
 
         Sets self.display_state to desired display format.
         Toggles state of slider widget.
         Sets number of positions.
-
-        Parameters
-        ----------
-        event : tkinter event
-            The tkinter event that triggered the function.
         """
         if self.number_of_slices == 0:
             return
@@ -770,18 +880,18 @@ class CameraViewController(BaseViewController):
         self.display_state = self.view.live_frame.live.get()
         if self.display_state == "Live":
             self.view.slider.configure(state="disabled")
+            self.view.slider.grid_remove()
             self.view.live_frame.channel.configure(state="disabled")
-
         else:
-            self.view.slider.configure(state="normal")
+            self.view.slider.set(1)
             self.view.slider.configure(
                 from_=1,
                 to=self.number_of_slices,
                 tickinterval=self.number_of_slices // 11,
             )
-
+            self.view.slider.configure(state="normal")
+            self.view.slider.grid()
             self.view.live_frame.channel.configure(state="normal")
-        print("display state", self.display_state)
 
     def get_absolute_position(self):
         """Gets the absolute position of the computer mouse.
@@ -998,43 +1108,12 @@ class CameraViewController(BaseViewController):
         image : numpy.ndarray
             Image data.
         """
-
-        # Identify the channel index and slice index, spool image.
-        channel_idx, slice_idx = self.identify_channel_index_and_slice()
-        self.image_metrics["Channel"].set(channel_idx + 1)
-        self.spooled_images.save_image(
-            image=image, channel=channel_idx, slice_index=slice_idx
-        )
-
-        self.display_state = self.view.live_frame.live.get()
-        print(self.display_state)
-        # Slice Mode
-        if self.display_state != "Live":
-            return
-
-        if self.display_state == "Slice":
-            slider_position = self.view.slider.get()
-            channel_position = self.view.live_frame.channel.get()
-            channel_position = int(channel_position[-1]) - 1
-
-            if slice_idx == slider_position and channel_idx != channel_position:
-                return
-                # self.slider_update()
-
-        image = self.flip_image(image)
+        self.image = self.flip_image(image)
         self.max_intensity_history.append(np.max(image))
-
-        # If the user has toggled the transpose button, transpose the image.
-        if self.transpose:
-            self.image = image.T
-        else:
-            self.image = image
-
         if self._snr_selected:
             self.image = compute_signal_to_noise(
                 self.image, self._offset, self._variance
             )
-
         self.process_image()
         self.update_max_counts()
         with self.is_displaying_image as is_displaying_image:
@@ -1113,7 +1192,7 @@ class MIPViewController(BaseViewController):
             self.image_palette[color].widget.config(
                 command=lambda: self.update_lut(self.view.lut)
             )
-        self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
+        self.image_palette["Flip XY"].widget.config(command=self.update_transpose_state)
 
         self.render_widgets = self.view.render.get_widgets()
 
@@ -1219,10 +1298,6 @@ class MIPViewController(BaseViewController):
             self.image = self.zx_mip[channel_idx]
 
         self.image = self.flip_image(self.image)
-
-        if self.transpose:
-            self.image = self.image.T
-
         self.process_image()
 
 
@@ -1349,7 +1424,7 @@ class SpooledImageLoader:
             image = np.frombuffer(
                 self.temp_files[channel].read(self.n_bytes), dtype=np.uint16
             )
-            image = image.reshape((self.size_y, self.size_x))
+            image = np.copy(image.reshape((self.size_y, self.size_x)))
         except (ValueError, TypeError, AttributeError):
             return None
         return image

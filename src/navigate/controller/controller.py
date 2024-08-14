@@ -988,13 +988,11 @@ class Controller:
         self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         self.camera_view_controller.initialize_non_live_display(
-            self.data_buffer,
             self.configuration["experiment"]["MicroscopeState"],
             self.configuration["experiment"]["CameraParameters"],
         )
 
         self.mip_setting_controller.initialize_non_live_display(
-            self.data_buffer,
             self.configuration["experiment"]["MicroscopeState"],
             self.configuration["experiment"]["CameraParameters"],
         )

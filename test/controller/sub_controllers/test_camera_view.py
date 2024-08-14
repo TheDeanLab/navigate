@@ -729,7 +729,7 @@ class TestCameraViewController:
         self.camera_view.transpose = None
 
         # Call the function
-        self.camera_view.transpose_image()
+        self.camera_view.update_transpose_state()
 
         # Assert the output
         assert self.camera_view.transpose is True
@@ -739,7 +739,7 @@ class TestCameraViewController:
         self.camera_view.transpose = None
 
         # Call the function
-        self.camera_view.transpose_image()
+        self.camera_view.update_transpose_state()
 
         # Assert the output
         assert self.camera_view.transpose is False

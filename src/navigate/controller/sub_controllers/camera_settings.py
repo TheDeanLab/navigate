@@ -126,6 +126,13 @@ class CameraSettingController(GUIController):
         )
         self.roi_widgets["Width"].get_variable().trace_add("write", self.update_fov)
         self.roi_widgets["Height"].get_variable().trace_add("write", self.update_fov)
+        self.roi_widgets["is_centered"].get_variable().trace_add(
+            "write", self.update_fov
+        )
+        self.roi_widgets["Top_X"].get_variable().trace_add("write", self.update_fov)
+        self.roi_widgets["Top_Y"].get_variable().trace_add("write", self.update_fov)
+        self.roi_widgets["Bottom_X"].get_variable().trace_add("write", self.update_fov)
+        self.roi_widgets["Bottom_Y"].get_variable().trace_add("write", self.update_fov)
 
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name].config(command=self.update_roi(btn_name))
@@ -181,11 +188,6 @@ class CameraSettingController(GUIController):
         ]
         self.roi_widgets["Binning"].widget["state"] = "readonly"
 
-        # This should not be edited for now
-        # Center position
-        self.roi_widgets["Center_X"].widget["state"] = "disabled"
-        self.roi_widgets["Center_Y"].widget["state"] = "disabled"
-
         # FOV
         self.roi_widgets["FOV_X"].widget["state"] = "disabled"
         self.roi_widgets["FOV_Y"].widget["state"] = "disabled"
@@ -229,6 +231,19 @@ class CameraSettingController(GUIController):
             )
 
         # ROI Settings
+        if self.camera_setting_dict.get("is_centered", True):
+            self.camera_setting_dict["is_centered"] = True
+            self.roi_widgets["is_centered"].set(True)
+        else:
+            self.roi_widgets["is_centered"].set(False)
+        self.roi_widgets["Top_X"].set(self.camera_setting_dict.get("top_x", 0))
+        self.roi_widgets["Top_Y"].set(self.camera_setting_dict.get("top_y", 0))
+        self.roi_widgets["Bottom_X"].set(
+            self.camera_setting_dict.get("bottom_x", self.default_width)
+        )
+        self.roi_widgets["Bottom_Y"].set(
+            self.camera_setting_dict.get("bottom_y", self.default_height)
+        )
         if self.camera_setting_dict["x_pixels"] > self.default_width:
             self.camera_setting_dict["x_pixels"] = self.default_width
         if self.camera_setting_dict["y_pixels"] > self.default_height:
@@ -249,13 +264,13 @@ class CameraSettingController(GUIController):
             self.camera_setting_dict["frames_to_average"]
         )
 
-        # Physical Dimensions
-        self.calculate_physical_dimensions()
         # readout time
         self.update_readout_time()
 
         # after initialization
         self.in_initialization = False
+
+        self.update_fov()
 
     def update_experiment_values(self, *args):
         """Updates experiment yaml file according to the values in View.
@@ -282,6 +297,34 @@ class CameraSettingController(GUIController):
         self.camera_setting_dict["binning"] = self.roi_widgets["Binning"].get()
 
         # Camera FOV Size.
+        if not self.roi_widgets["is_centered"].get():
+            top_x = self.roi_widgets["Top_X"].get()
+            top_y = self.roi_widgets["Top_Y"].get()
+            bottom_x = self.roi_widgets["Bottom_X"].get()
+            bottom_y = self.roi_widgets["Bottom_Y"].get()
+            if (
+                top_x % self.step_width
+                or top_y % self.step_height
+                or bottom_x % self.step_width
+                or bottom_y % self.step_height
+                or top_x >= bottom_x
+                or top_y >= bottom_y
+                or bottom_x > self.default_width
+                or bottom_y > self.default_height
+            ):
+                warning_message = (
+                    "The camera ROI Boundary isn't correct, please set a valid value!"
+                    + f"The values of X must be divisible by {self.step_width}!"
+                    + f"The values of Y must be divisible by {self.step_height}!"
+                )
+                return warning_message
+
+            center_x = (bottom_x - top_x) // 2
+            center_y = (bottom_y - top_y) // 2
+        else:
+            center_x = self.default_width // 2
+            center_y = self.default_height // 2
+
         x_pixel = self.roi_widgets["Width"].get()
         y_pixel = self.roi_widgets["Height"].get()
 
@@ -310,11 +353,13 @@ class CameraSettingController(GUIController):
         self.camera_setting_dict["y_pixels"] = y_pixels
         self.camera_setting_dict["img_x_pixels"] = img_width
         self.camera_setting_dict["img_y_pixels"] = img_height
+        self.camera_setting_dict["center_x"] = center_x
+        self.camera_setting_dict["center_y"] = center_y
 
         self.roi_widgets["Width"].set(x_pixels)
         self.roi_widgets["Height"].set(y_pixels)
 
-        return True
+        return ""
 
     def update_sensor_mode(self, *args):
         """Updates the camera sensor mode.
@@ -404,6 +449,7 @@ class CameraSettingController(GUIController):
                     height = self.default_height
             self.roi_widgets["Width"].set(width)
             self.roi_widgets["Height"].set(height)
+            self.roi_widgets["is_centered"].set(True)
             self.show_verbose_info("ROI width and height are changed to", width, height)
 
         return handler
@@ -417,6 +463,48 @@ class CameraSettingController(GUIController):
         """
         if self.in_initialization:
             return
+
+        self.set_roi_widgets_state()
+        self.camera_setting_dict["is_centered"] = self.roi_widgets["is_centered"].get()
+        if not self.roi_widgets["is_centered"].get():
+            error_flag = False
+            for widget_name in ["Top_X", "Top_Y", "Bottom_X", "Bottom_Y"]:
+                step_value = (
+                    self.step_width if widget_name.endswith("X") else self.step_height
+                )
+                max_value = (
+                    self.default_width
+                    if widget_name.endswith("X")
+                    else self.default_height
+                )
+                value = self.roi_widgets[widget_name].get()
+                if value < 0 or value > max_value or value % step_value:
+                    self.roi_widgets[widget_name].widget._focusout_invalid()
+                    error_flag = True
+            if error_flag:
+                return
+            width = self.roi_widgets["Bottom_X"].get() - self.roi_widgets["Top_X"].get()
+            height = (
+                self.roi_widgets["Bottom_Y"].get() - self.roi_widgets["Top_Y"].get()
+            )
+            if width <= 0:
+                self.roi_widgets["Top_X"].widget._focusout_invalid()
+                self.roi_widgets["Bottom_X"].widget._focusout_invalid()
+                error_flag = True
+            if height <= 0:
+                self.roi_widgets["Top_Y"].widget._focusout_invalid()
+                self.roi_widgets["Bottom_Y"].widget._focusout_invalid()
+                error_flag = True
+            if error_flag:
+                return
+            self.camera_setting_dict["top_x"] = self.roi_widgets["Top_X"].get()
+            self.camera_setting_dict["bottom_x"] = self.roi_widgets["Bottom_X"].get()
+            self.camera_setting_dict["top_y"] = self.roi_widgets["Top_Y"].get()
+            self.camera_setting_dict["bottom_y"] = self.roi_widgets["Bottom_Y"].get()
+            self.camera_setting_dict["x_pixels"] = width
+            self.camera_setting_dict["y_pixels"] = height
+            self.roi_widgets["Width"].widget.set(width)
+            self.roi_widgets["Height"].widget.set(height)
         self.calculate_physical_dimensions()
 
     def set_mode(self, mode):
@@ -444,11 +532,28 @@ class CameraSettingController(GUIController):
             self.mode_widgets["Readout"].widget["state"] = "disabled"
             self.mode_widgets["Pixels"].widget["state"] = "disabled"
         self.framerate_widgets["frames_to_average"].widget["state"] = state
-        self.roi_widgets["Width"].widget["state"] = state
-        self.roi_widgets["Height"].widget["state"] = state
+        if mode != "stop":
+            self.roi_widgets["Width"].widget["state"] = "disabled"
+            self.roi_widgets["Height"].widget["state"] = "disabled"
+            for widget_name in ["Top_X", "Top_Y", "Bottom_X", "Bottom_Y"]:
+                self.roi_widgets[widget_name].widget["state"] = "disabled"
+        else:
+            self.set_roi_widgets_state()
         self.roi_widgets["Binning"].widget["state"] = state_readonly
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]["state"] = state
+
+    def set_roi_widgets_state(self):
+        """Set the status of ROI widgets"""
+
+        roi_boundary_state = (
+            "disabled" if self.roi_widgets["is_centered"].get() else "normal"
+        )
+        size_state = "normal" if roi_boundary_state == "disabled" else "disabled"
+        for widget_name in ["Top_X", "Top_Y", "Bottom_X", "Bottom_Y"]:
+            self.roi_widgets[widget_name].widget["state"] = roi_boundary_state
+        self.roi_widgets["Width"].widget["state"] = size_state
+        self.roi_widgets["Height"].widget["state"] = size_state
 
     def calculate_physical_dimensions(self):
         """Calculate size of the FOV in microns.
@@ -576,9 +681,8 @@ class CameraSettingController(GUIController):
         if self.roi_widgets["Height"].get() > self.default_height:
             self.roi_widgets["Height"].set(self.default_height)
 
-        # Center position
-        self.roi_widgets["Center_X"].set(self.default_width / 2)
-        self.roi_widgets["Center_Y"].set(self.default_height / 2)
+        self.roi_widgets["Bottom_X"].widget.config(to=self.default_width)
+        self.roi_widgets["Bottom_Y"].widget.config(to=self.default_height)
 
     def update_camera_parameters_silent(self, value):
         """Update GUI camera parameters

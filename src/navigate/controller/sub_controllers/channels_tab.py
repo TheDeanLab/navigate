@@ -824,7 +824,7 @@ class ChannelsTabController(GUIController):
                 return "Stack pause should be a valid number!"
             if self.microscope_state_dict["timepoints"] < 1:
                 return "Timepoints should be at least 1!"
-        return None
+        return ""
 
     def set_exposure_time(self, channel_exposure_time):
         """Set exposure time for a specified channel

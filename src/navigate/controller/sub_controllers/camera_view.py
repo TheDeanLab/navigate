@@ -81,7 +81,7 @@ class ABaseViewController(metaclass=ABCMeta):
         """Initialize the non-live display."""
         pass
 
-    def try_to_display_image(self, image_id):
+    def try_to_display_image(self, image):
         """Try to display an image."""
         pass
 
@@ -209,13 +209,13 @@ class BaseViewController(GUIController, ABaseViewController):
             logger.info("Autoscale Disabled")
             self.update_min_max_counts()
 
-    def try_to_display_image(self, image_id):
+    def try_to_display_image(self, image):
         """Try to display an image.
 
         Parameters
         ----------
-        image_id : int
-            Frame index in the data_buffer.
+        image : numpy.ndarray
+            Image data.
         """
         print("try to display image")
         with self.is_displaying_image as is_displaying_image:
@@ -224,7 +224,7 @@ class BaseViewController(GUIController, ABaseViewController):
                 return
             is_displaying_image.value = True
 
-        display_thread = threading.Thread(target=self.display_image, args=(image_id,))
+        display_thread = threading.Thread(target=self.display_image, args=(image,))
         display_thread.start()
 
     def apply_lut(self, image):
@@ -682,6 +682,17 @@ class CameraViewController(BaseViewController):
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
+    def try_to_display_image(self, image):
+        """Try to display an image.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+        """
+
+        super().try_to_display_image(image)
+
     def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
         """Initialize the non-live display.
 
@@ -973,7 +984,7 @@ class CameraViewController(BaseViewController):
             )
             self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
-    def display_image(self, image_id):
+    def display_image(self, image):
         """Display an image using the LUT specified in the View.
 
         If Autoscale is selected, automatically calculates
@@ -984,12 +995,9 @@ class CameraViewController(BaseViewController):
 
         Parameters
         ----------
-        image_id: int
-            frame index in the data_buffer.
+        image : numpy.ndarray
+            Image data.
         """
-
-        # Store the maximum intensity value for the image.
-        image = self.data_buffer[image_id]
 
         # Identify the channel index and slice index, spool image.
         channel_idx, slice_idx = self.identify_channel_index_and_slice()
@@ -1183,19 +1191,17 @@ class MIPViewController(BaseViewController):
             dtype=np.uint16,
         )
 
-    def try_to_display_image(self, image_id):
+    def try_to_display_image(self, image):
         """Display the image.
 
         Parameters
         ----------
-        image_id : int
-            The image id.
+        image : numpy.ndarray
+            Image data.
         """
         channel_idx, slice_idx = self.identify_channel_index_and_slice()
 
-        image = self.data_buffer[image_id]
-
-        # Take maximum of the current image and the MIP image.
+        # Orthogonal maximum intensity projections.
         self.xy_mip[channel_idx] = np.maximum(self.xy_mip[channel_idx], image)
         self.zy_mip[channel_idx, slice_idx] = np.maximum(
             self.zy_mip[channel_idx, slice_idx], np.max(image, axis=0)
@@ -1212,7 +1218,7 @@ class MIPViewController(BaseViewController):
         elif display_mode == "ZX":
             self.image = self.zx_mip[channel_idx]
 
-        image = self.flip_image(image)
+        self.image = self.flip_image(self.image)
 
         if self.transpose:
             self.image = self.image.T

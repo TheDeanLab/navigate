@@ -1022,8 +1022,12 @@ class Controller:
                 self.execute("stop_acquire")
 
             # Display the Image in the View
-            self.camera_view_controller.try_to_display_image(image_id=image_id)
-            self.mip_setting_controller.try_to_display_image(image_id=image_id)
+            self.camera_view_controller.try_to_display_image(
+                image=self.data_buffer[image_id]
+            )
+            self.mip_setting_controller.try_to_display_image(
+                image=self.data_buffer[image_id]
+            )
             images_received += 1
 
             # Update progress bar.
@@ -1114,7 +1118,7 @@ class Controller:
                 # Display the Image in the View
                 try:
                     camera_view_controller.try_to_display_image(
-                        image_id=image_id,
+                        image=self.data_buffer[image_id],
                     )
                 except tkinter._tkinter.TclError:
                     print("Can't show images for the additional microscope!")

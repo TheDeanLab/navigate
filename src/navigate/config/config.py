@@ -357,6 +357,9 @@ def verify_experiment_config(manager, configuration):
         "binning": "1x1",
         "frames_to_average": 1,
         "databuffer_size": 100,
+        "is_centered": True,
+        "center_x": 1024,
+        "center_y": 1024,
     }
     if (
         "CameraParameters" not in configuration["experiment"]
@@ -397,6 +400,9 @@ def verify_experiment_config(manager, configuration):
     img_y_pixels = camera_setting_dict["y_pixels"] // y_binning
     camera_setting_dict["img_x_pixels"] = img_x_pixels
     camera_setting_dict["img_y_pixels"] = img_y_pixels
+    if camera_setting_dict["is_centered"]:
+        camera_setting_dict["center_x"] = camera_setting_dict["x_pixels"] // 2
+        camera_setting_dict["center_y"] = camera_setting_dict["y_pixels"] // 2
 
     # sensor mode
     if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:

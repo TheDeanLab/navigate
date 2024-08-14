@@ -477,7 +477,10 @@ class CameraSettingController(GUIController):
                     if widget_name.endswith("X")
                     else self.default_height
                 )
-                value = self.roi_widgets[widget_name].get()
+                try:
+                    value = int(self.roi_widgets[widget_name].get())
+                except (TypeError, ValueError):
+                    return
                 if value < 0 or value > max_value or value % step_value:
                     self.roi_widgets[widget_name].widget._focusout_invalid()
                     error_flag = True
@@ -497,6 +500,10 @@ class CameraSettingController(GUIController):
                 error_flag = True
             if error_flag:
                 return
+            # reset widgets
+            for widget_name in ["Top_X", "Top_Y", "Bottom_X", "Bottom_Y"]:
+                self.roi_widgets[widget_name].widget._toggle_error(False)
+                
             self.camera_setting_dict["top_x"] = self.roi_widgets["Top_X"].get()
             self.camera_setting_dict["bottom_x"] = self.roi_widgets["Bottom_X"].get()
             self.camera_setting_dict["top_y"] = self.roi_widgets["Top_Y"].get()

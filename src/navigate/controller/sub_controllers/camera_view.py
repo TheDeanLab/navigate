@@ -144,6 +144,27 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_value = 1
         self.zoom_width = self.canvas_width
 
+    def flip_image(self, image):
+        """Flip the image according to the flip flags.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+
+        Returns
+        -------
+        image : numpy.ndarray
+            Flipped image data.
+        """
+        if self.flip_flags["x"] and self.flip_flags["y"]:
+            image = image[::-1, ::-1]
+        elif self.flip_flags["x"]:
+            image = image[:, ::-1]
+        elif self.flip_flags["y"]:
+            image = image[::-1, :]
+        return image
+
     def update_lut(self, target):
         """Update the LUT in the Camera View.
 
@@ -196,7 +217,9 @@ class BaseViewController(GUIController, ABaseViewController):
         image_id : int
             Frame index in the data_buffer.
         """
+        print("try to display image")
         with self.is_displaying_image as is_displaying_image:
+            print("is displaying image", is_displaying_image.value)
             if is_displaying_image.value:
                 return
             is_displaying_image.value = True
@@ -697,24 +720,14 @@ class CameraViewController(BaseViewController):
         channel_index = self.view.live_frame.channel.get()
         channel_index = channel_index[-1]
         channel_index = int(channel_index) - 1
-
-        print("Updating slider to index: ", slider_index)
         image = self.spooled_images.load_image(
             channel=channel_index, slice_index=slider_index
         )
 
-        if self.image is None:
+        if image is None:
             return
 
-        # flip back image
-        if self.flip_flags["x"] and self.flip_flags["y"]:
-            image = image[::-1, ::-1]
-        elif self.flip_flags["x"]:
-            image = image[:, ::-1]
-        elif self.flip_flags["y"]:
-            image = image[::-1, :]
-
-        # If the user has toggled the transpose button, transpose the image.
+        image = self.flip_image(image)
         if self.transpose:
             self.image = image.T
         else:
@@ -744,7 +757,6 @@ class CameraViewController(BaseViewController):
             return
 
         self.display_state = self.view.live_frame.live.get()
-
         if self.display_state == "Live":
             self.view.slider.configure(state="disabled")
             self.view.live_frame.channel.configure(state="disabled")
@@ -758,6 +770,7 @@ class CameraViewController(BaseViewController):
             )
 
             self.view.live_frame.channel.configure(state="normal")
+        print("display state", self.display_state)
 
     def get_absolute_position(self):
         """Gets the absolute position of the computer mouse.
@@ -978,25 +991,29 @@ class CameraViewController(BaseViewController):
         # Store the maximum intensity value for the image.
         image = self.data_buffer[image_id]
 
-        # Identify the channel index and slice index.
+        # Identify the channel index and slice index, spool image.
         channel_idx, slice_idx = self.identify_channel_index_and_slice()
         self.image_metrics["Channel"].set(channel_idx + 1)
+        self.spooled_images.save_image(
+            image=image, channel=channel_idx, slice_index=slice_idx
+        )
 
-        # Spool the image for later visualization.
-        self.spooled_images.save_image(image, channel_idx, slice_idx)
-
+        self.display_state = self.view.live_frame.live.get()
+        print(self.display_state)
         # Slice Mode
         if self.display_state != "Live":
             return
 
-        # flip back image
-        if self.flip_flags["x"] and self.flip_flags["y"]:
-            image = image[::-1, ::-1]
-        elif self.flip_flags["x"]:
-            image = image[:, ::-1]
-        elif self.flip_flags["y"]:
-            image = image[::-1, :]
+        if self.display_state == "Slice":
+            slider_position = self.view.slider.get()
+            channel_position = self.view.live_frame.channel.get()
+            channel_position = int(channel_position[-1]) - 1
 
+            if slice_idx == slider_position and channel_idx != channel_position:
+                return
+                # self.slider_update()
+
+        image = self.flip_image(image)
         self.max_intensity_history.append(np.max(image))
 
         # If the user has toggled the transpose button, transpose the image.
@@ -1014,7 +1031,6 @@ class CameraViewController(BaseViewController):
         self.update_max_counts()
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
-        self.image_count = self.image_count + 1
 
     def set_mask_color_table(self, colors):
         """Set up segmentation mask color table
@@ -1196,12 +1212,7 @@ class MIPViewController(BaseViewController):
         elif display_mode == "ZX":
             self.image = self.zx_mip[channel_idx]
 
-        if self.flip_flags["x"] and self.flip_flags["y"]:
-            self.image = self.image[::-1, ::-1]
-        elif self.flip_flags["x"]:
-            self.image = self.image[:, ::-1]
-        elif self.flip_flags["y"]:
-            self.image = self.image[::-1, :]
+        image = self.flip_image(image)
 
         if self.transpose:
             self.image = self.image.T

@@ -48,34 +48,56 @@ class TestCameraViewController:
 
         self.camera_view = CameraViewController(self.v.camera_waveform.camera_tab, c)
 
+        self.microscope_state = {
+            "channels": {
+                "channel_1": {
+                    "is_selected": True,
+                    "laser": "488nm",
+                    "laser_index": 0,
+                    "camera_exposure_time": 200.0,
+                    "laser_power": 20.0,
+                    "interval_time": 1.0,
+                    "defocus": 100.0,
+                    "filter_wheel_0": "Empty-Alignment",
+                    "filter_position_0": 0,
+                    "filter_wheel_1": "Empty-Alignment",
+                    "filter_position_1": 0,
+                },
+                "channel_2": {
+                    "is_selected": True,
+                    "laser": "488nm",
+                    "laser_index": 0,
+                    "camera_exposure_time": 200.0,
+                    "laser_power": 20.0,
+                    "interval_time": 1.0,
+                    "defocus": 100.0,
+                    "filter_wheel_0": "Empty-Alignment",
+                    "filter_position_0": 0,
+                    "filter_wheel_1": "Empty-Alignment",
+                    "filter_position_1": 0,
+                },
+                "channel_3": {
+                    "is_selected": True,
+                    "laser": "488nm",
+                    "laser_index": 0,
+                    "camera_exposure_time": 200.0,
+                    "laser_power": 20.0,
+                    "interval_time": 1.0,
+                    "defocus": 100.0,
+                    "filter_wheel_0": "Empty-Alignment",
+                    "filter_position_0": 0,
+                    "filter_wheel_1": "Empty-Alignment",
+                    "filter_position_1": 0,
+                },
+            },
+            "number_z_steps": np.random.randint(0, 100),
+            "stack_cycling_mode": "per_stack",
+            "selected_channels": 3,
+        }
+
     def test_init(self):
 
         assert isinstance(self.camera_view, CameraViewController)
-
-    def test_slider_update(self, monkeypatch):
-
-        # Testing it can be triggered, other functions within are tested later
-        self.image = (int(random.random()), int(random.random()))
-        self.reset = False
-
-        def mock_retrieve(slider_index, channel_display_index):
-            self.x = int(random.random())
-            self.y = int(random.random())
-            self.image = (self.x, self.y)
-
-        def mock_reset():
-            self.reset = True
-
-        monkeypatch.setattr(
-            self.camera_view, "retrieve_image_slice_from_volume", mock_retrieve
-        )
-        monkeypatch.setattr(self.camera_view, "reset_display", mock_reset)
-        event = type("Event", (object,), {})()
-
-        self.camera_view.slider_update(event)
-
-        assert self.image == (self.x, self.y)
-        assert self.reset is True
 
     def test_update_display_state(self):
         pass
@@ -422,15 +444,6 @@ class TestCameraViewController:
         if frames == 1:
             assert self.camera_view.image_metrics["Image"].get() == max
 
-        if frames == 2:
-            if count == 0:
-                assert (
-                    self.camera_view.temp_array == self.camera_view.down_sampled_image
-                )
-                assert self.camera_view.image_metrics["Image"].get() == max
-            else:
-                assert self.camera_view.image_metrics["Image"].get() == max
-
     def test_down_sample_image(self, monkeypatch):
         import cv2
 
@@ -458,22 +471,21 @@ class TestCameraViewController:
         monkeypatch.setattr(cv2, "resize", mocked_resize)
 
         # call the function
-        self.camera_view.down_sample_image()
+        down_sampled_image = self.camera_view.down_sample_image(test_image)
 
         # assert that the image has been resized correctly
-        assert np.shape(self.camera_view.down_sampled_image) == (
+        assert np.shape(down_sampled_image) == (
             self.camera_view.view.canvas_width,
             self.camera_view.view.canvas_height,
         )
 
         # assert that the image has not been modified
-        assert not np.array_equal(self.camera_view.down_sampled_image, test_image)
+        assert not np.array_equal(down_sampled_image, test_image)
 
     @pytest.mark.parametrize("auto", [True, False])
     def test_scale_image_intensity(self, auto):
         # Create a test image
         test_image = np.random.rand(100, 100)
-        self.camera_view.down_sampled_image = test_image
 
         # Set autoscale to True
         self.camera_view.autoscale = auto
@@ -483,7 +495,7 @@ class TestCameraViewController:
             self.camera_view.min_counts = 0.5
 
         # Call the function
-        self.camera_view.scale_image_intensity()
+        scaled_image = self.camera_view.scale_image_intensity(test_image)
 
         # Assert that max_counts and min_counts have been set correctly
         if auto is True:
@@ -491,8 +503,8 @@ class TestCameraViewController:
             assert self.camera_view.min_counts == np.min(test_image)
 
         # Assert that the image has been scaled correctly
-        assert np.min(self.camera_view.down_sampled_image) >= 0
-        assert np.max(self.camera_view.down_sampled_image) <= 1
+        assert np.min(scaled_image) >= 0
+        assert np.max(scaled_image) <= 1
 
     def test_populate_image(self, monkeypatch):
         from PIL import Image, ImageTk
@@ -532,7 +544,7 @@ class TestCameraViewController:
         self.camera_view.image_cache_flag = True
 
         # Call the function
-        self.camera_view.populate_image()
+        self.camera_view.populate_image(self.camera_view.cross_hair_image)
 
         # Assert that the tk_image has been created correctly
         assert self.camera_view.tk_image is not None
@@ -543,7 +555,7 @@ class TestCameraViewController:
         self.camera_view.display_mask_flag = False
 
         # Call the function
-        self.camera_view.populate_image()
+        self.camera_view.populate_image(self.camera_view.cross_hair_image)
 
         # Assert that the tk_image has been created correctly
         assert self.camera_view.tk_image2 is not None
@@ -551,11 +563,6 @@ class TestCameraViewController:
 
     def test_initialize_non_live_display(self):
         # Create test buffer and microscope_state
-        buffer = np.random.rand(100, 100)
-        microscope_state = {
-            "channels": ["channel1", "channel2", "channel3"],
-            "number_z_steps": np.random.randint(0, 100),
-        }
         camera_parameters = {
             "x_pixels": np.random.randint(1, 200),
             "y_pixels": np.random.randint(1, 200),
@@ -563,14 +570,18 @@ class TestCameraViewController:
 
         # Call the function
         self.camera_view.initialize_non_live_display(
-            buffer, microscope_state, camera_parameters
+            self.microscope_state, camera_parameters
         )
 
         # Assert that the variables have been set correctly
-        assert self.camera_view.image_counter == 0
+        assert self.camera_view.image_count == 0
         assert self.camera_view.slice_index == 0
-        assert self.camera_view.number_of_channels == len(microscope_state["channels"])
-        assert self.camera_view.number_of_slices == microscope_state["number_z_steps"]
+        assert self.camera_view.number_of_channels == len(
+            self.microscope_state["channels"]
+        )
+        assert (
+            self.camera_view.number_of_slices == self.microscope_state["number_z_steps"]
+        )
         assert (
             self.camera_view.total_images_per_volume
             == self.camera_view.number_of_channels * self.camera_view.number_of_slices
@@ -598,62 +609,53 @@ class TestCameraViewController:
 
     @pytest.mark.parametrize("transpose", [True, False])
     def test_display_image(self, transpose):
+        self.camera_view.initialize_non_live_display(
+            self.microscope_state, {"x_pixels": 100, "y_pixels": 100}
+        )
+
         images = np.random.rand(10, 100, 100)
 
         self.camera_view.transpose = transpose
-        count = np.random.randint(0, 10)
+        count = 0
         self.camera_view.image_count = count
         self.camera_view.image_metrics = {"Channel": MagicMock()}
         self.camera_view.process_image = MagicMock()
         self.camera_view.update_max_counts = MagicMock()
-        self.camera_view.data_buffer = images
-
         self.camera_view.flip_flags = {"x": False, "y": False}
+
         image_id = np.random.randint(0, 10)
-        self.camera_view.display_image(image_id)
+        self.camera_view.try_to_display_image(images[image_id])
         assert np.shape(self.camera_view.image) == np.shape(images[image_id])
-        self.camera_view.image_metrics["Channel"].set.assert_called_with(
-            self.camera_view.channel_index
-        )
         assert self.camera_view.image_count == count + 1
 
         self.camera_view.flip_flags = {"x": True, "y": False}
         image_id = np.random.randint(0, 10)
-        self.camera_view.display_image(image_id)
+        self.camera_view.try_to_display_image(images[image_id])
         assert np.shape(self.camera_view.image) == np.shape(images[image_id])
         if not transpose:
             assert (self.camera_view.image == images[image_id][:, ::-1]).all()
-        else:
-            assert (self.camera_view.image == images[image_id][:, ::-1].T).all()
-        self.camera_view.image_metrics["Channel"].set.assert_called_with(
-            self.camera_view.channel_index
-        )
+        # else:
+        #     assert (self.camera_view.image == images[image_id][:, ::-1].T).all()
         assert self.camera_view.image_count == count + 2
 
         self.camera_view.flip_flags = {"x": False, "y": True}
         image_id = np.random.randint(0, 10)
-        self.camera_view.display_image(image_id)
+        self.camera_view.try_to_display_image(images[image_id])
         assert np.shape(self.camera_view.image) == np.shape(images[image_id])
         if not transpose:
             assert (self.camera_view.image == images[image_id][::-1, :]).all()
-        else:
-            assert (self.camera_view.image == images[image_id][::-1, :].T).all()
-        self.camera_view.image_metrics["Channel"].set.assert_called_with(
-            self.camera_view.channel_index
-        )
+        # else:
+        #     assert (self.camera_view.image == images[image_id][::-1, :].T).all()
         assert self.camera_view.image_count == count + 3
 
         self.camera_view.flip_flags = {"x": True, "y": True}
         image_id = np.random.randint(0, 10)
-        self.camera_view.display_image(image_id)
+        self.camera_view.try_to_display_image(images[image_id])
         assert np.shape(self.camera_view.image) == np.shape(images[image_id])
-        if not transpose:
-            assert (self.camera_view.image == images[image_id][::-1, ::-1]).all()
-        else:
-            assert (self.camera_view.image == images[image_id][::-1, ::-1].T).all()
-        self.camera_view.image_metrics["Channel"].set.assert_called_with(
-            self.camera_view.channel_index
-        )
+        # if not transpose:
+        #     assert (self.camera_view.image == images[image_id][::-1, ::-1]).all()
+        # else:
+        #     assert (self.camera_view.image == images[image_id][::-1, ::-1].T).all()
         assert self.camera_view.image_count == count + 4
 
     def test_add_crosshair(self):

@@ -151,24 +151,6 @@ class TestCameraSettingController:
             == "readonly"
         )
 
-        # Center position
-        assert (
-            self.camera_settings.roi_widgets["Center_X"].get()
-            == self.camera_settings.default_width / 2
-        )
-        assert (
-            self.camera_settings.roi_widgets["Center_Y"].get()
-            == self.camera_settings.default_height / 2
-        )
-        assert (
-            str(self.camera_settings.roi_widgets["Center_X"].widget["state"])
-            == "disabled"
-        )
-        assert (
-            str(self.camera_settings.roi_widgets["Center_Y"].widget["state"])
-            == "disabled"
-        )
-
         # FOV
         assert (
             str(self.camera_settings.roi_widgets["FOV_X"].widget["state"]) == "disabled"
@@ -245,6 +227,24 @@ class TestCameraSettingController:
             self.camera_settings.roi_widgets["Height"].get()
             == camera_setting_dict["y_pixels"]
         )
+
+        assert (
+            self.camera_settings.roi_widgets["Top_X"].get()
+            == camera_setting_dict.get("top_x", 0)
+        )
+        assert (
+            self.camera_settings.roi_widgets["Top_Y"].get()
+            == camera_setting_dict.get("top_y", 0)
+        )
+        if camera_setting_dict.get("is_centered", True):
+            assert (
+                str(self.camera_settings.roi_widgets["Top_X"].widget["state"])
+                == "disabled"
+            )
+            assert (
+                str(self.camera_settings.roi_widgets["Top_Y"].widget["state"])
+                == "disabled"
+            )
 
         # Binning
         assert (

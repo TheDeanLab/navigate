@@ -96,7 +96,6 @@ class Microscope:
         #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict.get("daq", None)
 
-
         #: dict: Dictionary of microscope info.
         self.info = {}
 
@@ -340,15 +339,11 @@ class Microscope:
         if is_synthetic:
             self.daq.add_camera(self.microscope_name, self.camera)
 
-    def update_data_buffer(self, img_width, img_height, data_buffer, number_of_frames):
+    def update_data_buffer(self, data_buffer, number_of_frames):
         """Update the data buffer for the camera.
 
         Parameters
         ----------
-        img_width : int
-            Width of the image.
-        img_height : int
-            Height of the image.
         data_buffer : numpy.ndarray
             Data buffer for the camera.
         number_of_frames : int
@@ -357,7 +352,6 @@ class Microscope:
 
         if self.camera.is_acquiring:
             self.camera.close_image_series()
-        self.camera.set_ROI(img_height, img_width)
         self.data_buffer = data_buffer
         self.number_of_frames = number_of_frames
 
@@ -416,6 +410,13 @@ class Microscope:
         )
         if self.camera.is_acquiring:
             self.camera.close_image_series()
+
+        # set ROI
+        img_width = self.configuration["experiment"]["CameraParameters"]["x_pixels"]
+        img_height = self.configuration["experiment"]["CameraParameters"]["y_pixels"]
+        center_x = self.configuration["experiment"]["CameraParameters"]["center_x"]
+        center_y = self.configuration["experiment"]["CameraParameters"]["center_y"]
+        self.camera.set_ROI(img_width, img_height, center_x, center_y)
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
         sensor_mode = self.configuration["experiment"]["CameraParameters"][

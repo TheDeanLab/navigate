@@ -387,8 +387,6 @@ class Model:
         )  # z-index, x, y, z, theta, f
         for microscope_name in self.microscopes:
             self.microscopes[microscope_name].update_data_buffer(
-                self.configuration["experiment"]["CameraParameters"]["x_pixels"],
-                self.configuration["experiment"]["CameraParameters"]["y_pixels"],
                 self.data_buffer,
                 self.number_of_frames,
             )
@@ -1353,8 +1351,6 @@ class Model:
 
         # connect virtual microscope with data_buffer
         microscope.update_data_buffer(
-            self.configuration["experiment"]["CameraParameters"]["x_pixels"],
-            self.configuration["experiment"]["CameraParameters"]["y_pixels"],
             data_buffer,
             self.number_of_frames
         )

@@ -447,7 +447,7 @@ class Controller:
             Warning info if any
 
         """
-        self.camera_setting_controller.update_experiment_values()
+        warning_message = self.camera_setting_controller.update_experiment_values()
 
         # set waveform template
         if self.acquire_bar_controller.mode in ["live", "single", "z-stack"]:
@@ -478,9 +478,9 @@ class Controller:
 
         # TODO: validate experiment dict
 
-        channel_warning = self.channels_tab_controller.verify_experiment_values()
-        if channel_warning:
-            return channel_warning
+        warning_message += self.channels_tab_controller.verify_experiment_values()
+        if warning_message:
+            return warning_message
         return ""
 
     def resize(self, event):

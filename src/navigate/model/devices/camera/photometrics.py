@@ -373,15 +373,19 @@ class PhotometricsBase(CameraBase):
         self.y_pixels = int(self.y_pixels / self.y_binning)
         return True
 
-    def set_ROI(self, roi_height=3200, roi_width=3200):
+    def set_ROI(self, roi_height=3200, roi_width=3200, center_x=1600, center_y=1600):
         """Change the size of the active region on the camera.
 
         Parameters
         ----------
-        roi_height : int
-            Height of active camera region. Default is 3200.
         roi_width : int
-            Width of active camera region. Default is 3200.
+            Width of active camera region.
+        roi_height : int
+            Height of active camera region.
+        center_x : int
+            X position of the center of view
+        center_y : int
+            Y position of the center of view
 
         Returns
         -------
@@ -405,9 +409,9 @@ class PhotometricsBase(CameraBase):
             return False
 
         # Calculate Location of Image Edges
-        roi_top = (camera_height - roi_height) / 2
+        roi_top = center_y - roi_height//2
         roi_bottom = roi_top + roi_height - 1
-        roi_left = (camera_width - roi_width) / 2
+        roi_left = center_x - roi_width//2
 
         if roi_top % 2 != 0 or roi_bottom % 2 == 0:
             logger.debug(f"can't set ROI to {roi_width} and {roi_height}")

@@ -319,8 +319,8 @@ class CameraSettingController(GUIController):
                 )
                 return warning_message
 
-            center_x = (bottom_x - top_x) // 2
-            center_y = (bottom_y - top_y) // 2
+            center_x = (bottom_x + top_x) // 2
+            center_y = (bottom_y + top_y) // 2
         else:
             center_x = self.default_width // 2
             center_y = self.default_height // 2

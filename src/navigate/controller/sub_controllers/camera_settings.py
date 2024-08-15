@@ -447,9 +447,9 @@ class CameraSettingController(GUIController):
                     width = self.default_width
                 if height > self.default_height:
                     height = self.default_height
+            self.roi_widgets["is_centered"].set(True)
             self.roi_widgets["Width"].set(width)
             self.roi_widgets["Height"].set(height)
-            self.roi_widgets["is_centered"].set(True)
             self.show_verbose_info("ROI width and height are changed to", width, height)
 
         return handler

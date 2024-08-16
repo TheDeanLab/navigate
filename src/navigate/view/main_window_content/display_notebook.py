@@ -202,8 +202,8 @@ class CameraTab(tk.Frame):
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
-        self.scale_palette = IntensityFrame(self)
-        self.scale_palette.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.lut = IntensityFrame(self)
+        self.lut.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
         #: tk.Scale: The slider that will hold the slice index.
         self.slider = tk.Scale(

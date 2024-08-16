@@ -224,8 +224,33 @@ class BaseViewController(GUIController, ABaseViewController):
         #: int: The zoom width of the image.
         self.zoom_width = self.canvas_width
 
+        #: dict: The dictionary of image palette widgets.
+        self.image_palette = view.lut.get_widgets()
+
+        # Binding for adjusting the lookup table min and max counts.
+        self.image_palette["Min"].get_variable().trace_add(
+            "write", lambda *args: self.update_min_max_counts(display=True)
+        )
+        self.image_palette["Max"].get_variable().trace_add(
+            "write", lambda *args: self.update_min_max_counts(display=True)
+        )
+        self.image_palette["Autoscale"].widget.config(
+            command=lambda: self.toggle_min_max_buttons(display=True)
+        )
+
+        # Bindings for changes to the LUT
+        for color in self.view.lut.color_labels:
+            self.image_palette[color].widget.config(
+                command=lambda: self.update_lut(self.view.lut)
+            )
+
+        # Transpose and live bindings
+        self.image_palette["Flip XY"].widget.config(
+            command=lambda: self.update_transpose_state(display=True)
+        )
+
     def flip_image(self, image):
-        """Flip and transpose the image according to the flip flags.
+        """Flip the image according to the flip flags.
 
         Parameters
         ----------
@@ -244,9 +269,23 @@ class BaseViewController(GUIController, ABaseViewController):
         elif self.flip_flags["y"]:
             image = image[::-1, :]
 
+        return image
+    
+    def transpose_image(self, image):
+        """Transpose the image according to the flip flags.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+
+        Returns
+        -------
+        image : numpy.ndarray
+            Flipped and/or transposed image data.
+        """
         if self.transpose:
             image = image.T
-
         return image
 
     def update_lut(self, target):
@@ -261,19 +300,20 @@ class BaseViewController(GUIController, ABaseViewController):
             cmap_name = target.color.get()
             self._snr_selected = True if cmap_name == "RdBu_r" else False
             self.colormap = plt.get_cmap(cmap_name)
-            image = self.add_crosshair(image=self.image)
-            image = self.apply_lut(image=image)
-            self.populate_image(image=image)
+            self.process_image()
             logger.debug(f"Updating the LUT, {cmap_name}")
 
-    def update_transpose_state(self):
+    def update_transpose_state(self, display=False):
         """Get Flip XY widget value from the View.
 
         If True, transpose the image.
         """
         self.transpose = self.image_palette["Flip XY"].get()
+        if display and self.image is not None:
+            self.image = self.flip_image(self.image)
+            self.process_image()
 
-    def toggle_min_max_buttons(self):
+    def toggle_min_max_buttons(self, display=False):
         """Checks the value of the autoscale widget.
 
         If enabled, the min and max widgets are disabled and the image intensity is
@@ -286,12 +326,14 @@ class BaseViewController(GUIController, ABaseViewController):
             self.image_palette["Min"].widget["state"] = "disabled"
             self.image_palette["Max"].widget["state"] = "disabled"
             logger.info("Autoscale Enabled")
+            if display and self.image is not None:
+                self.process_image()
 
         elif self.autoscale is False:
             self.image_palette["Min"].widget["state"] = "normal"
             self.image_palette["Max"].widget["state"] = "normal"
             logger.info("Autoscale Disabled")
-            self.update_min_max_counts()
+            self.update_min_max_counts(display=display)
 
     def try_to_display_image(self, image):
         """Try to display an image.
@@ -561,6 +603,7 @@ class BaseViewController(GUIController, ABaseViewController):
         image = self.digital_zoom()
         self.detect_saturation(image)
         image = self.down_sample_image(image)
+        image = self.transpose_image(image)
         image = self.scale_image_intensity(image)
         image = self.add_crosshair(image)
         image = self.apply_lut(image)
@@ -616,7 +659,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.update_canvas_size()
         self.reset_display(False)
 
-    def update_min_max_counts(self):
+    def update_min_max_counts(self, display=False):
         """Get min and max count values from the View.
 
         When the min and max counts are toggled in the GUI, this function is called.
@@ -626,6 +669,8 @@ class BaseViewController(GUIController, ABaseViewController):
             self.min_counts = float(self.image_palette["Min"].get())
         if self.image_palette["Max"].get() != "":
             self.max_counts = float(self.image_palette["Max"].get())
+        if display and self.image is not None:
+            self.process_image()
         logger.debug(
             f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}"
         )
@@ -687,24 +732,6 @@ class CameraViewController(BaseViewController):
         #: dict: The dictionary of image metrics widgets.
         self.image_metrics = view.image_metrics.get_widgets()
 
-        #: dict: The dictionary of image palette widgets.
-        self.image_palette = view.scale_palette.get_widgets()
-
-        # Binding for adjusting the lookup table min and max counts.
-        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Autoscale"].widget.config(
-            command=self.toggle_min_max_buttons
-        )
-
-        # Bindings for changes to the LUT
-        for color in self.view.scale_palette.color_labels:
-            self.image_palette[color].widget.config(
-                command=lambda: self.update_lut(self.view.scale_palette)
-            )
-
-        # Transpose and live bindings
-        self.image_palette["Flip XY"].widget.config(command=self.update_transpose_state)
         self.update_snr()
 
         self.view.live_frame.live.bind(
@@ -760,28 +787,6 @@ class CameraViewController(BaseViewController):
 
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
-
-    def update_min_max_counts(self):
-        """Get min and max count values from the View.
-
-        When the min and max counts are toggled in the GUI, this function is called.
-        Updates the min and max values.
-        """
-        # TODO: Find a way to update the min and max counts in the non-live view.
-        super().update_min_max_counts()
-
-    def toggle_min_max_buttons(self):
-        """Checks the value of the autoscale widget.
-
-        If enabled, the min and max widgets are disabled and the image intensity is
-        autoscaled. If disabled, miu and max widgets are enabled, and image intensity
-        scaled.
-        """
-        super().toggle_min_max_buttons()
-
-        # Refresh the display with updated values.
-        if self.display_state != "Live":
-            self.process_image()
 
     def try_to_display_image(self, image):
         """Try to display an image.
@@ -1206,17 +1211,6 @@ class MIPViewController(BaseViewController):
         self.xy_mip = None
         self.autoscale = True
 
-        self.image_palette = self.view.lut.get_widgets()
-        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Autoscale"].widget.config(
-            command=self.toggle_min_max_buttons
-        )
-        for color in ["Gray", "Gradient", "Rainbow"]:
-            self.image_palette[color].widget.config(
-                command=lambda: self.update_lut(self.view.lut)
-            )
-        self.image_palette["Flip XY"].widget.config(command=self.update_transpose_state)
 
         self.render_widgets = self.view.render.get_widgets()
 

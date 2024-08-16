@@ -62,3 +62,6 @@ class SyntheticGalvo(GalvoBase):
         """
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
         pass
+
+    def __del__(self):
+        pass

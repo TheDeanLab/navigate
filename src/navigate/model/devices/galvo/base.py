@@ -106,7 +106,7 @@ class GalvoBase:
 
     def __del__(self):
         """Destructor"""
-        pass
+        raise NotImplementedError
 
     def adjust(self, exposure_times, sweep_times):
         """Adjust the galvo waveform to account for the camera readout time.

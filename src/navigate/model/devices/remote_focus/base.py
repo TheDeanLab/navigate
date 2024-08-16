@@ -102,7 +102,7 @@ class RemoteFocusBase:
 
     def __del__(self):
         """Destructor"""
-        pass
+        raise NotImplementedError
 
     def adjust(self, exposure_times, sweep_times, offset=None):
         """Adjusts the remote focus waveform based on the readout time.

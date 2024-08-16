@@ -922,7 +922,7 @@ class Microscope:
         self.camera.close_camera()
 
         for k in self.galvo:
-            self.galvo[k].turn_off()
+            self.galvo[k].__del__()
 
         try:
             # Currently only for RemoteFocusEquipmentSolutions

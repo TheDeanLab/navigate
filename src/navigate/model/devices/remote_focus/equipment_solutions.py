@@ -77,26 +77,11 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
             "remote_focus_device"
         ]["hardware"].get("port", "COM1")
 
-        #: int: Baud rate of the RS232 communication port.
-        self.baud_rate = 115200
-
-        #: int: Number of data bits.
-        self.byte_size = serial.EIGHTBITS
-
-        #: int: Parity bit.
-        self.parity = serial.PARITY_NONE
-
-        #: int: Number of stop bits.
-        self.stop_bits = serial.STOPBITS_ONE
-
         #: float: Timeout for the serial port.
         self.timeout = 1.25
 
         #: bool: Read on initialization.
         self.read_on_init = True
-
-        #: bool: Debug mode.
-        self.debug = False
 
         # Open Serial Port
         try:
@@ -106,10 +91,10 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
             )
             self.serial = serial.Serial(
                 port=self.comport,
-                baudrate=self.baud_rate,
-                bytesize=self.byte_size,
-                parity=self.parity,
-                stopbits=self.stop_bits,
+                baudrate=115200,
+                bytesize=serial.EIGHTBITS,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
                 timeout=self.timeout,
                 dsrdtr=False,
                 rtscts=False,
@@ -124,22 +109,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
 
         # Send command d0 and read returned information
         if self.read_on_init:
-            string = b"d0\r"  # Can also use str.encode()
-            if self.debug:
-                print("RemoteFocusEquipmentSolutions - Before Write")
-                print(
-                    "RemoteFocusEquipmentSolutions - Bytes in Input Buffer: ",
-                    self.serial.in_waiting,
-                )
-                print(
-                    "RemoteFocusEquipmentSolutions - Bytes in Output Buffer: ",
-                    self.serial.out_waiting,
-                )
-                print(
-                    "RemoteFocusEquipmentSolutions - "
-                    "Sending Command to the voice coil:",
-                    string,
-                )
+            string = b"d0\r"
             logger.debug(f"RemoteFocusEquipmentSolutions - Sending command: {string}")
             try:
                 self.serial.write(string)
@@ -147,40 +117,9 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
                 logger.debug(f"RemoteFocusEquipmentSolutions - Error: {e}")
                 raise UserWarning("RemoteFocusEquipmentSolutions Timeout Exception")
 
-            # After write , Before read
-            if self.debug:
-                print(
-                    "RemoteFocusEquipmentSolutions - Bytes in Input Buffer: ",
-                    self.serial.in_waiting,
-                )
-                print(
-                    "RemoteFocusEquipmentSolutions - Bytes in Output Buffer: ",
-                    self.serial.out_waiting,
-                )
-
             time.sleep(self.timeout)
             data = self.serial.readline()
             logger.debug(f"RemoteFocusEquipmentSolutions - Received command: {data}")
-            if self.debug:
-                print("RemoteFocusEquipmentSolutions - After Read")
-                print("RemoteFocusEquipmentSolutions - Raw Data Received:", data)
-                print(
-                    "RemoteFocusEquipmentSolutions - Bytes in Input Buffer: ",
-                    self.serial.in_waiting,
-                )
-                print(
-                    "RemoteFocusEquipmentSolutions - Bytes in Output Buffer: ",
-                    self.serial.out_waiting,
-                )
-                if len(data) > 0:
-                    print(
-                        "RemoteFocusEquipmentSolutions - Encoded Data received: "
-                        + data.decode()
-                    )
-                else:
-                    print(
-                        "RemoteFocusEquipmentSolutions - Nothing received from", string
-                    )
 
             # Initialize Servo
             self.send_command("k0\r")  # Turn off servo
@@ -248,15 +187,10 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
             if message == "close":
                 self.close_connection()
             else:
-                # Send command to device
                 self.serial.write(message.encode("utf-8"))
-            # Read data sent from device
             data = self.serial.read(9999)
             if len(data) > 0:
-                if self.debug:
-                    print("Data received: " + data.decode())
-                else:
-                    pass
+                pass
             time.sleep(self.timeout)
 
         except serial.SerialException:
@@ -272,8 +206,3 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
         except Exception:
             pass
 
-
-if __name__ == "__main__":
-    vc = RemoteFocusEquipmentSolutions()
-    vc.send_command("k0\r")  # Turn off servo
-    vc.send_command("k1\r")  # Engage servo

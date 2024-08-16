@@ -74,3 +74,7 @@ class SyntheticRemoteFocus(RemoteFocusBase):
             The offset of the signal in volts.
         """
         logger.debug(f"move remote focus offset: {offset}")
+
+    def __del__(self):
+        """Destructor"""
+        pass

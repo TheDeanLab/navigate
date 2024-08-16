@@ -116,3 +116,11 @@ class RemoteFocusNI(RemoteFocusBase):
         """
         self.adjust(exposure_times, sweep_times, offset)
         self.daq.update_analog_task(self.board_name)
+
+    def __del__(self):
+        """Destructor"""
+        if self.self.daq.analog_outputs is not None:
+            for task in self.daq.analog_outputs:
+                task.stop()
+                task.close()
+                

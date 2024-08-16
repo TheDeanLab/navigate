@@ -137,6 +137,9 @@ class BaseViewController(GUIController, ABaseViewController):
         #: str: The colormap for the image.
         self.colormap = plt.get_cmap("gist_gray")
 
+        #: str: The mode of the camera view controller.
+        self.mode = "stop"
+
         #: dict: The flip flags for the camera.
         self.flip_flags = None
 
@@ -248,6 +251,16 @@ class BaseViewController(GUIController, ABaseViewController):
         self.image_palette["Flip XY"].widget.config(
             command=lambda: self.update_transpose_state(display=True)
         )
+
+    def set_mode(self, mode=""):
+        """Sets mode of camera_view_controller.
+
+        Parameters
+        ----------
+        mode : str
+            camera_view_controller mode.
+        """
+        self.mode = mode
 
     def flip_image(self, image):
         """Flip the image according to the flip flags.
@@ -540,9 +553,10 @@ class BaseViewController(GUIController, ABaseViewController):
         else:
             self.update_min_max_counts()
 
-        image = (image - self.min_counts) / (self.max_counts - self.min_counts)
-        image[image < 0] = 0
-        image[image > 1] = 1
+        if self.max_counts != self.min_counts:
+            image = (image - self.min_counts) / (self.max_counts - self.min_counts)
+            image[image < 0] = 0
+            image[image > 1] = 1
         return image
 
     def add_crosshair(self, image):
@@ -763,9 +777,6 @@ class CameraViewController(BaseViewController):
 
         #: int: The y position of the mouse.
         self.move_to_y = None
-
-        #: str: The mode of the camera view controller.
-        self.mode = "stop"
 
         #: str: The display state.
         self.display_state = "Live"
@@ -1210,7 +1221,7 @@ class MIPViewController(BaseViewController):
         self.zy_mip = None
         self.xy_mip = None
         self.autoscale = True
-
+        self.perspective = "XY"
 
         self.render_widgets = self.view.render.get_widgets()
 
@@ -1245,6 +1256,14 @@ class MIPViewController(BaseViewController):
         self.render_widgets["perspective"].widget["values"] = ("XY", "ZY", "ZX")
         self.render_widgets["perspective"].set("XY")
         self.render_widgets["channel"].set("CH1")
+
+        # event binding
+        self.render_widgets["perspective"].get_variable().trace_add(
+            "write", self.display_mip_image
+        )
+        self.render_widgets["channel"].get_variable().trace_add(
+            "write", self.display_mip_image
+        )
 
     def prepare_mip_view(self):
         """Prepare the MIP view.
@@ -1288,6 +1307,54 @@ class MIPViewController(BaseViewController):
             dtype=np.uint16,
         )
 
+    def get_mip_image(self, channel_idx):
+        """Get MIP image according to perspective and channel id
+        
+        Parameters
+        ----------
+        channel_idx : int
+            channel id
+        
+        Returns
+        -------
+        image : numpy.ndarray
+            Image data
+        """
+        if self.xy_mip is None:
+            return None
+        
+        display_mode = self.render_widgets["perspective"].get()
+        if display_mode == "XY":
+            image = self.xy_mip[channel_idx]
+        elif display_mode == "ZY":
+            image = self.zy_mip[channel_idx].T
+        elif display_mode == "ZX":
+            image = self.zx_mip[channel_idx]
+
+        image = self.flip_image(image)
+        return image
+    
+    def initialize_non_live_display(self, microscope_state, camera_parameters):
+        """Initialize the non-live display.
+
+        Parameters
+        ----------
+        microscope_state : dict
+            Microscope state.
+        camera_parameters : dict
+            Camera parameters.
+        """
+        super().initialize_non_live_display(microscope_state, camera_parameters)
+        self.perspective = self.render_widgets["perspective"].get()
+        self.XY_image_width = self.original_image_width
+        self.XY_image_height = self.original_image_height
+        # in microns
+        z_range = microscope_state["abs_z_end"] - microscope_state["abs_z_start"]
+        # TODO: may stretch by the value of binning.
+        self.Z_image_value = self.XY_image_width * camera_parameters["fov_x"] / z_range
+        self.prepare_mip_view()
+        self.update_perspective()
+
     def try_to_display_image(self, image):
         """Display the image.
 
@@ -1307,16 +1374,35 @@ class MIPViewController(BaseViewController):
             self.zx_mip[channel_idx, slice_idx], np.max(image, axis=1)
         )
 
-        display_mode = self.render_widgets["perspective"].get()
-        if display_mode == "XY":
-            self.image = self.xy_mip[channel_idx]
-        elif display_mode == "ZY":
-            self.image = self.zy_mip[channel_idx].T
-        elif display_mode == "ZX":
-            self.image = self.zx_mip[channel_idx]
-
-        self.image = self.flip_image(self.image)
+        self.image = self.get_mip_image(channel_idx)
         self.process_image()
+
+    def display_mip_image(self, *args):
+        """Display MIP image in non-live view"""
+        if self.perspective != self.render_widgets["perspective"].get():
+            self.update_perspective()
+        if self.mode != "stop":
+            return
+        channel_idx = int(self.render_widgets["channel"].get()[2:]) - 1
+        self.image = self.get_mip_image(channel_idx)
+        if self.image is not None:
+            self.process_image()
+
+    def update_perspective(self, *args, display=False):
+        display_mode = self.render_widgets["perspective"].get()
+        self.perspective = display_mode
+        if display_mode == "XY":
+            self.original_image_width = self.XY_image_width
+            self.original_image_height = self.XY_image_height
+        elif display_mode == "ZY":
+            self.original_image_width = self.Z_image_value
+            self.original_image_height = self.XY_image_height
+        elif display_mode == "ZX":
+            self.original_image_width = self.Z_image_value
+            self.original_image_height = self.XY_image_width
+
+        self.update_canvas_size()
+        self.reset_display(False)
 
 
 class SpooledImageLoader:

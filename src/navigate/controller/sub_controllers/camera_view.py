@@ -1333,13 +1333,8 @@ class MIPViewController(BaseViewController):
             dtype=np.uint16,
         )
 
-    def get_mip_image(self, channel_idx):
+    def get_mip_image(self):
         """Get MIP image according to perspective and channel id
-
-        Parameters
-        ----------
-        channel_idx : int
-            channel id
 
         Returns
         -------
@@ -1350,6 +1345,7 @@ class MIPViewController(BaseViewController):
             return None
 
         display_mode = self.render_widgets["perspective"].get()
+        channel_idx = int(self.render_widgets["channel"].get()[2:]) - 1
         if display_mode == "XY":
             image = self.xy_mip[channel_idx]
         elif display_mode == "ZY":
@@ -1358,6 +1354,8 @@ class MIPViewController(BaseViewController):
             image = self.zx_mip[channel_idx]
 
         image = self.flip_image(image)
+        # map the image to canvas size()
+        image = self.down_sample_image(image, True)
         return image
 
     def initialize_non_live_display(self, microscope_state, camera_parameters):
@@ -1402,8 +1400,26 @@ class MIPViewController(BaseViewController):
             self.zx_mip[channel_idx, slice_idx], np.max(image, axis=1)
         )
 
-        self.image = self.get_mip_image(channel_idx)
+        super().try_to_display_image(image)
+
+    def display_image(self, image):
+        """Display an image using the LUT specified in the View.
+
+        If Autoscale is selected, automatically calculates
+        the min and max values for the data.
+
+        If Autoscale is not selected, takes the user values
+        as specified in the min and max counts.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+        """
+        self.image = self.get_mip_image()
         self.process_image()
+        with self.is_displaying_image as is_displaying_image:
+            is_displaying_image.value = False
 
     def display_mip_image(self, *args):
         """Display MIP image in non-live view"""
@@ -1411,8 +1427,7 @@ class MIPViewController(BaseViewController):
             self.update_perspective()
         if self.mode != "stop":
             return
-        channel_idx = int(self.render_widgets["channel"].get()[2:]) - 1
-        self.image = self.get_mip_image(channel_idx)
+        self.image = self.get_mip_image()
         if self.image is not None:
             self.process_image()
 
@@ -1432,6 +1447,16 @@ class MIPViewController(BaseViewController):
         self.update_canvas_size()
         self.reset_display(False)
 
+    def down_sample_image(self, image, reset_original=False):
+        """Down-sample the data for image display according to widget size."""
+        sx, sy = self.canvas_width, self.canvas_height
+        down_sampled_image = cv2.resize(image, (sx, sy))
+        if reset_original:
+            self.original_image_width = self.canvas_width
+            self.original_image_height = self.canvas_height
+            self.canvas_width_scale = 1
+            self.canvas_height_scale = 1
+        return down_sampled_image
 
 class SpooledImageLoader:
     """A class to lazily load images from disk using a spooled temporary file."""

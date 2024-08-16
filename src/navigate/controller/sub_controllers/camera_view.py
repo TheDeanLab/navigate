@@ -1354,7 +1354,7 @@ class MIPViewController(BaseViewController):
         # in microns
         z_range = microscope_state["abs_z_end"] - microscope_state["abs_z_start"]
         # TODO: may stretch by the value of binning.
-        self.Z_image_value = self.XY_image_width * camera_parameters["fov_x"] / z_range
+        self.Z_image_value = int(self.XY_image_width * camera_parameters["fov_x"] / z_range)
         self.prepare_mip_view()
         self.update_perspective()
 

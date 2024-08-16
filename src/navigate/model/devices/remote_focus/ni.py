@@ -119,8 +119,10 @@ class RemoteFocusNI(RemoteFocusBase):
 
     def __del__(self):
         """Destructor"""
-        if self.self.daq.analog_outputs is not None:
-            for task in self.daq.analog_outputs:
-                task.stop()
-                task.close()
+        try:
+            # TODO: Figure out how to kill the analog output task...
+            pass
+        except Exception:
+            pass
+
                 

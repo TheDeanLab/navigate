@@ -117,7 +117,6 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
                 logger.debug(f"RemoteFocusEquipmentSolutions - Error: {e}")
                 raise UserWarning("RemoteFocusEquipmentSolutions Timeout Exception")
 
-            time.sleep(self.timeout)
             data = self.serial.readline()
             logger.debug(f"RemoteFocusEquipmentSolutions - Received command: {data}")
 
@@ -128,8 +127,8 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
 
     def __del__(self):
         """Close the RemoteFocusEquipmentSolutions Class"""
-        logger.debug("Closing RemoteFocusEquipmentSolutions Serial Port")
-        self.close_connection()
+        self.serial.close()
+        super().__del__()
 
     def read_bytes(self, num_bytes):
         """Read the specified number of bytes from RemoteFocusEquipmentSolutions.
@@ -184,25 +183,13 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
             device.
         """
         try:
-            if message == "close":
-                self.close_connection()
-            else:
-                self.serial.write(message.encode("utf-8"))
+            self.serial.write(message.encode("utf-8"))
             data = self.serial.read(9999)
             if len(data) > 0:
                 pass
-            time.sleep(self.timeout)
+            time.sleep(0.02)
 
         except serial.SerialException:
             raise UserWarning(
                 "Error in communicating with Voice Coil via COMPORT", self.comport
             )
-
-    def close_connection(self):
-        """Close RemoteFocusEquipmentSolutions class"""
-        try:
-            self.send_command("k0\r")
-            self.serial.close()
-        except Exception:
-            pass
-

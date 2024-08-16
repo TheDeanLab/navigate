@@ -153,6 +153,14 @@ class GalvoNIStage(StageBase):
 
         self.switch_mode("normal")
 
+    def __del__(self):
+        """Destructor"""
+        try:
+            self.ao_task.stop()
+            self.ao_task.close()
+        except Exception:
+            pass
+
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
         """Reports the position for all axes, and create position dictionary.

@@ -925,16 +925,15 @@ class Microscope:
             self.galvo[k].__del__()
 
         try:
-            # Currently only for RemoteFocusEquipmentSolutions
-            self.remote_focus_device.close_connection()
-        except AttributeError:
+            self.remote_focus_device.__del__()
+        except AttributeError as e:
             pass
 
-        try:
-            for stage, _ in self.stages_list:
+        for stage, _ in self.stages_list:
+            try:
                 stage.close()
-        except Exception as e:
-            logger.debug(f"Stage delete failure: {e}")
+            except Exception as e:
+                logger.debug(f"Stage delete failure: {e}")
 
         try:
             self.daq.__del__()

@@ -81,7 +81,7 @@ class CameraNotebook(DockableNotebook):
         self.waveform_tab = WaveformTab(self)
 
         # Tab list
-        tab_list = [self.camera_tab, self.waveform_tab]
+        tab_list = [self.camera_tab, self.mip_tab, self.waveform_tab]
         self.set_tablist(tab_list)
 
         # Adding tabs to self notebook
@@ -110,6 +110,12 @@ class MIPTab(tk.Frame):
 
         #: int: The index of the tab.
         self.index = 1
+
+        #: Bool: The popup flag.
+        self.is_popup = False
+
+        #: Bool: The docked flag.
+        self.is_docked = True
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)

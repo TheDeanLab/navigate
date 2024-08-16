@@ -93,6 +93,7 @@ class TestCameraViewController:
             "number_z_steps": np.random.randint(0, 100),
             "stack_cycling_mode": "per_stack",
             "selected_channels": 3,
+            "image_mode": "z-stack"
         }
 
     def test_init(self):
@@ -403,8 +404,12 @@ class TestCameraViewController:
 
     @pytest.mark.parametrize("onoff", [True, False])
     def test_left_click(self, onoff):
-
         self.camera_view.add_crosshair = MagicMock()
+        self.camera_view.digital_zoom = MagicMock()
+        self.camera_view.detect_saturation = MagicMock()
+        self.camera_view.down_sample_image = MagicMock()
+        self.camera_view.transpose_image = MagicMock()
+        self.camera_view.scale_image_intensity = MagicMock()
         self.camera_view.apply_lut = MagicMock()
         self.camera_view.populate_image = MagicMock()
         event = MagicMock()
@@ -415,7 +420,6 @@ class TestCameraViewController:
         self.camera_view.left_click(event)
 
         self.camera_view.add_crosshair.assert_called()
-        self.camera_view.apply_lut.assert_called()
         self.camera_view.populate_image.assert_called()
         assert self.camera_view.apply_cross_hair == (not onoff)
 
@@ -564,8 +568,8 @@ class TestCameraViewController:
     def test_initialize_non_live_display(self):
         # Create test buffer and microscope_state
         camera_parameters = {
-            "x_pixels": np.random.randint(1, 200),
-            "y_pixels": np.random.randint(1, 200),
+            "img_x_pixels": np.random.randint(1, 200),
+            "img_y_pixels": np.random.randint(1, 200),
         }
 
         # Call the function
@@ -587,10 +591,10 @@ class TestCameraViewController:
             == self.camera_view.number_of_channels * self.camera_view.number_of_slices
         )
         assert self.camera_view.original_image_width == int(
-            camera_parameters["x_pixels"]
+            camera_parameters["img_x_pixels"]
         )
         assert self.camera_view.original_image_height == int(
-            camera_parameters["y_pixels"]
+            camera_parameters["img_y_pixels"]
         )
         assert self.camera_view.canvas_width_scale == float(
             self.camera_view.original_image_width / self.camera_view.canvas_width
@@ -610,16 +614,20 @@ class TestCameraViewController:
     @pytest.mark.parametrize("transpose", [True, False])
     def test_display_image(self, transpose):
         self.camera_view.initialize_non_live_display(
-            self.microscope_state, {"x_pixels": 100, "y_pixels": 100}
+            self.microscope_state, {"img_x_pixels": 100, "img_y_pixels": 100}
         )
-
+        self.camera_view.digital_zoom = MagicMock()
+        self.camera_view.detect_saturation = MagicMock()
+        self.camera_view.down_sample_image = MagicMock()
+        self.camera_view.scale_image_intensity = MagicMock()
+        self.camera_view.apply_lut = MagicMock()
+        self.camera_view.populate_image = MagicMock()
         images = np.random.rand(10, 100, 100)
 
         self.camera_view.transpose = transpose
         count = 0
         self.camera_view.image_count = count
         self.camera_view.image_metrics = {"Channel": MagicMock()}
-        self.camera_view.process_image = MagicMock()
         self.camera_view.update_max_counts = MagicMock()
         self.camera_view.flip_flags = {"x": False, "y": False}
 
@@ -661,22 +669,20 @@ class TestCameraViewController:
     def test_add_crosshair(self):
 
         # Arrange
-        image = np.random.rand(500, 500)
-        self.camera_view.down_sampled_image = image
+        x = self.camera_view.canvas_width
+        y = self.camera_view.canvas_height
+        image = np.random.rand(x, y)
         self.camera_view.apply_cross_hair = True
-        num = np.random.randint(1, 50)
-        self.camera_view.crosshair_x = num
-        self.camera_view.crosshair_y = num
 
         # Act
-        self.camera_view.add_crosshair()
+        image2 = self.camera_view.add_crosshair(image)
 
         # Assert
         assert np.all(
-            self.camera_view.cross_hair_image[:, self.camera_view.crosshair_x] == 1
+            image2[:, self.camera_view.zoom_rect[0][1]//2] == 1
         )
         assert np.all(
-            self.camera_view.cross_hair_image[self.camera_view.crosshair_y, :] == 1
+            image2[self.camera_view.zoom_rect[1][1]//2, :] == 1
         )
 
     def test_apply_LUT(self):
@@ -691,10 +697,9 @@ class TestCameraViewController:
     def test_detect_saturation(self):
         test_image = np.random.randint(0, 2**16, size=(100, 100))
         test_image[:50, :50] = 2**16 - 1  # set top left corner to saturation value
-        self.camera_view.zoom_image = test_image
 
         # Call the function to detect saturation
-        self.camera_view.detect_saturation()
+        self.camera_view.detect_saturation(test_image)
 
         # Assert that the saturated pixels were correctly detected
         assert np.all(self.camera_view.saturated_pixels == 2**16 - 1)

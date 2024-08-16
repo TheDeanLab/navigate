@@ -555,6 +555,7 @@ class Controller:
         self.channels_tab_controller.set_mode(mode)
         self.camera_view_controller.set_mode(mode)
         self.camera_setting_controller.set_mode(mode)
+        self.mip_setting_controller.set_mode(mode)
         self.waveform_tab_controller.set_mode(mode)
         if mode == "stop":
             # GUI Failsafe
@@ -997,8 +998,6 @@ class Controller:
             self.configuration["experiment"]["CameraParameters"],
         )
 
-        self.mip_setting_controller.prepare_mip_view()
-
         self.stop_acquisition_flag = False
         start_time = time.time()
         self.camera_setting_controller.update_readout_time()
@@ -1116,7 +1115,7 @@ class Controller:
                 # Display the Image in the View
                 try:
                     camera_view_controller.try_to_display_image(
-                        image=self.data_buffer[image_id],
+                        image=data_buffer[image_id],
                     )
                 except tkinter._tkinter.TclError:
                     print("Can't show images for the additional microscope!")

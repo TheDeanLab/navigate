@@ -178,7 +178,10 @@ class LaserNI(LaserBase):
         """Close the NI Task before exit."""
         try:
             self.laser_ao_task.close()
-            if self.laser_do_task is not None:
-                self.laser_do_task.close()
-        except DaqError as e:
+        except Exception as e:
+            logger.exception(e)
+
+        try:
+            self.laser_do_task.close()
+        except Exception as e:
             logger.exception(e)

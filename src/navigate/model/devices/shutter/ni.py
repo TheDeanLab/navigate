@@ -125,3 +125,11 @@ class ShutterTTL(ShutterBase):
             State of the shutter.
         """
         return self.shutter_state
+
+    def close(self):
+        """Stop and close the NI Task"""
+        try:
+            self.shutter_task.stop()
+            self.shutter_task.close()
+        except Exception as e:
+            logger.debug(f"ShutterTTL close error: {e}")

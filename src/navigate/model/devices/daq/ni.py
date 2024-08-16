@@ -102,6 +102,8 @@ class NIDAQ(DAQBase):
         """Destructor."""
         if self.camera_trigger_task is not None:
             self.stop_acquisition()
+        else:
+            pass
 
     def set_external_trigger(self, external_trigger=None):
         """Set trigger mode.
@@ -449,25 +451,24 @@ class NIDAQ(DAQBase):
 
         Stop all tasks and close them.
         """
-        try:
-            self.camera_trigger_task.stop()
-            self.camera_trigger_task.close()
 
-            if self.trigger_mode == "self-trigger":
-                self.master_trigger_task.stop()
-                self.master_trigger_task.close()
+        for task in [self.camera_trigger_task, self.master_trigger_task]:
+            if task is not None:
+                try:
+                    task.stop()
+                    task.close()
+                except (AttributeError, nidaqmx.errors.DaqError):
+                    pass
 
+        if self.analog_output_tasks is not None:
             for k, task in self.analog_output_tasks.items():
                 task.stop()
                 task.close()
 
-        except (AttributeError, nidaqmx.errors.DaqError):
-            pass
+        self.analog_output_tasks = {}
 
         if self.wait_to_run_lock.locked():
             self.wait_to_run_lock.release()
-
-        self.analog_output_tasks = {}
 
     def enable_microscope(self, microscope_name):
         """Enable microscope.

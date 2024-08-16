@@ -109,3 +109,12 @@ class GalvoNI(GalvoBase):
             task.close()
         except Exception as e:
             print(f"Galvo turn_off error: {e}")
+
+    def close(self):
+        """Close the NI DAQ connection."""
+        for task, _ in self.daq.analog_outputs.values():
+            try:
+                task.stop()
+                task.close()
+            except Exception as e:
+                print(f"Galvo close error: {e}")

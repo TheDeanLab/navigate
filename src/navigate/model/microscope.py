@@ -914,7 +914,11 @@ class Microscope:
             self.info[device_name] = device_ref_name
 
     def terminate(self):
-        """Close hardware explicitly."""
+        """Close hardware explicitly.
+
+        Should close camera, filter_wheel, zoom, shutter,
+        remote_focus_device, galvo, lasers, and mirrors.
+        """
         self.camera.close_camera()
 
         for k in self.galvo:
@@ -930,8 +934,18 @@ class Microscope:
             for stage, _ in self.stages_list:
                 stage.close()
         except Exception as e:
-            print(f"Stage delete failure: {e}")
-        pass
+            logger.debug(f"Stage delete failure: {e}")
+
+        try:
+            self.daq.__del__()
+        except Exception as e:
+            logger.debug(f"DAQ delete failure: {e}")
+            pass
+
+        for k in self.lasers:
+            self.lasers[k].close()
+
+        self.shutter
 
     def run_command(self, command, *args):
         if command in self.commands:

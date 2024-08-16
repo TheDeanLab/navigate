@@ -137,9 +137,6 @@ class BaseViewController(GUIController, ABaseViewController):
         #: str: The colormap for the image.
         self.colormap = plt.get_cmap("gist_gray")
 
-        #: bool: The flag for displaying the mask.
-        self.display_mask_flag = False
-
         #: dict: The flip flags for the camera.
         self.flip_flags = None
 
@@ -359,21 +356,22 @@ class BaseViewController(GUIController, ABaseViewController):
             self.image_count = 0
 
         # Store each image to the pre-allocated memory.
-        if self.stack_cycling_mode == "per_stack":
-            for i in range(self.number_of_channels):
-                if (
-                    i * self.number_of_slices
-                    <= self.image_count
-                    < (i + 1) * self.number_of_slices
-                ):
-                    channel_idx = i
-                    slice_idx = self.image_count - i * self.number_of_slices
-                    break
-
-        elif self.stack_cycling_mode == "per_z":
+        if (
+            self.image_mode in ["live", "single"]
+            or self.image_mode != "customized"
+            and self.stack_cycling_mode == "per_z"
+        ):
             # Every image that comes in will be the next channel.
             channel_idx = self.image_count % self.number_of_channels
             slice_idx = self.image_count // self.number_of_channels
+
+        elif self.image_mode != "customized" and self.stack_cycling_mode == "per_stack":
+            channel_idx = self.image_count // self.number_of_slices
+            slice_idx = self.image_count - channel_idx * self.number_of_slices
+
+        else:
+            channel_idx = 0
+            slice_idx = self.image_count
 
         self.image_count += 1
         return channel_idx, slice_idx
@@ -392,6 +390,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.image_count = 0  # was image_counter
         self.slice_index = 0
 
+        self.image_mode = microscope_state["image_mode"]
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
         self.number_of_channels = int(microscope_state["selected_channels"])
 
@@ -403,8 +402,8 @@ class BaseViewController(GUIController, ABaseViewController):
 
         self.number_of_slices = int(microscope_state["number_z_steps"])
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
-        self.original_image_width = int(camera_parameters["x_pixels"])
-        self.original_image_height = int(camera_parameters["y_pixels"])
+        self.original_image_width = int(camera_parameters["img_x_pixels"])
+        self.original_image_height = int(camera_parameters["img_y_pixels"])
 
         self.flip_flags = (
             self.parent_controller.configuration_controller.camera_flip_flags
@@ -528,19 +527,19 @@ class BaseViewController(GUIController, ABaseViewController):
             image[int(crosshair_y), :] = 1
         return image
 
+    def array_to_image(self, image):
+        """Convert a numpy array to a PIL Image
+
+        Returns
+        -------
+        image : Image
+            A PIL Image
+        """
+        return Image.fromarray(image.astype(np.uint8))
+
     def populate_image(self, image):
         """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
-        if self.display_mask_flag:
-            self.ilastik_mask_ready_lock.acquire()
-            temp_img1 = image.astype(np.uint8)
-            img1 = Image.fromarray(temp_img1)
-
-            temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
-            img2 = Image.fromarray(temp_img2)
-            temp_img = Image.blend(img1, img2, 0.2)
-        else:
-            temp_img = Image.fromarray(image.astype(np.uint8))
-
+        temp_img = self.array_to_image(image)
         # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
         # what the canvas is showing, causing it to blink.
         if self.image_cache_flag:
@@ -571,9 +570,7 @@ class BaseViewController(GUIController, ABaseViewController):
         """Toggles cross-hair on image upon left click event."""
         if self.image is not None:
             self.apply_cross_hair = not self.apply_cross_hair
-            image = self.add_crosshair(image=self.image)
-            image = self.apply_lut(image=image)
-            self.populate_image(image=image)
+            self.process_image()
 
     def resize(self, event):
         """Resize the window.
@@ -752,6 +749,9 @@ class CameraViewController(BaseViewController):
         #: list: The list of maximum intensity values.
         self.max_intensity_history = []
 
+        #: bool: The flag for displaying the mask.
+        self.display_mask_flag = False
+
         #: bool: The display mask flag.
         self.mask_color_table = None
 
@@ -799,7 +799,7 @@ class CameraViewController(BaseViewController):
         """
         # Identify the channel index and slice index, update GUI.
         channel_idx, slice_idx = self.identify_channel_index_and_slice()
-        self.image_metrics["Channel"].set(channel_idx + 1)
+        self.image_metrics["Channel"].set(int(self.selected_channels[channel_idx][2:]))
 
         # Save the image to the spooled image loader.
         self.spooled_images.save_image(
@@ -892,6 +892,8 @@ class CameraViewController(BaseViewController):
             self.view.slider.configure(state="normal")
             self.view.slider.grid()
             self.view.live_frame.channel.configure(state="normal")
+            if self.view.live_frame.channel.get() not in self.selected_channels:
+                self.view.live_frame.channel.set(self.selected_channels[0])
 
     def get_absolute_position(self):
         """Gets the absolute position of the computer mouse.
@@ -1093,6 +1095,28 @@ class CameraViewController(BaseViewController):
                 / self.rolling_frames
             )
             self.image_metrics["Image"].set(f"{rolling_average:.0f}")
+
+    def array_to_image(self, image):
+        """Convert a numpy array to a PIL Image.
+
+        If a color mask is present, it will apply the mask to the image.
+
+        Returns
+        -------
+        image : Image
+            A PIL Image
+        """
+        if self.display_mask_flag and self.display_state == "Live":
+            self.ilastik_mask_ready_lock.acquire()
+            temp_img1 = image.astype(np.uint8)
+            img1 = Image.fromarray(temp_img1)
+
+            temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
+            img2 = Image.fromarray(temp_img2)
+            temp_img = Image.blend(img1, img2, 0.2)
+        else:
+            temp_img = Image.fromarray(image.astype(np.uint8))
+        return temp_img
 
     def display_image(self, image):
         """Display an image using the LUT specified in the View.

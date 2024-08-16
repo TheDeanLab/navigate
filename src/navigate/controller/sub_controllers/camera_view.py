@@ -45,7 +45,7 @@ from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
-from abc import ABCMeta
+import abc
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
@@ -59,28 +59,34 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ABaseViewController(metaclass=ABCMeta):
+class ABaseViewController(metaclass=abc.ABCMeta):
     """Abstract Base View Controller Class."""
 
+    @abc.abstractmethod
     def __init__(self):
         pass
 
+    @abc.abstractmethod
     def update_snr(self):
         """Updates the signal-to-noise ratio."""
         pass
 
+    @abc.abstractmethod
     def initialize(self):
         """Initializes the camera view controller."""
         pass
 
+    @abc.abstractmethod
     def set_mode(self, mode=""):
         """Sets mode of camera_view_controller."""
         pass
 
+    @abc.abstractmethod
     def initialize_non_live_display(self, microscope_state, camera_parameters):
         """Initialize the non-live display."""
         pass
 
+    @abc.abstractmethod
     def try_to_display_image(self, image):
         """Try to display an image."""
         pass
@@ -252,6 +258,23 @@ class BaseViewController(GUIController, ABaseViewController):
             command=lambda: self.update_transpose_state(display=True)
         )
 
+    def initialize(self, name, data):
+        """Sets widgets based on data given from main controller/config.
+
+        Parameters
+        ----------
+        name : str
+            'minmax', 'image'.
+        data : list
+            Min and max intensity values.
+        """
+
+        pass
+
+    def update_snr(self):
+        """Updates the signal-to-noise ratio."""
+        pass
+
     def set_mode(self, mode=""):
         """Sets mode of camera_view_controller.
 
@@ -283,7 +306,7 @@ class BaseViewController(GUIController, ABaseViewController):
             image = image[::-1, :]
 
         return image
-    
+
     def transpose_image(self, image):
         """Transpose the image according to the flip flags.
 
@@ -1312,12 +1335,12 @@ class MIPViewController(BaseViewController):
 
     def get_mip_image(self, channel_idx):
         """Get MIP image according to perspective and channel id
-        
+
         Parameters
         ----------
         channel_idx : int
             channel id
-        
+
         Returns
         -------
         image : numpy.ndarray
@@ -1325,7 +1348,7 @@ class MIPViewController(BaseViewController):
         """
         if self.xy_mip is None:
             return None
-        
+
         display_mode = self.render_widgets["perspective"].get()
         if display_mode == "XY":
             image = self.xy_mip[channel_idx]
@@ -1336,7 +1359,7 @@ class MIPViewController(BaseViewController):
 
         image = self.flip_image(image)
         return image
-    
+
     def initialize_non_live_display(self, microscope_state, camera_parameters):
         """Initialize the non-live display.
 
@@ -1354,7 +1377,9 @@ class MIPViewController(BaseViewController):
         # in microns
         z_range = microscope_state["abs_z_end"] - microscope_state["abs_z_start"]
         # TODO: may stretch by the value of binning.
-        self.Z_image_value = int(self.XY_image_width * camera_parameters["fov_x"] / z_range)
+        self.Z_image_value = int(
+            self.XY_image_width * camera_parameters["fov_x"] / z_range
+        )
         self.prepare_mip_view()
         self.update_perspective()
 

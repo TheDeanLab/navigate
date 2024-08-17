@@ -358,6 +358,8 @@ class CameraSettingController(GUIController):
 
         self.roi_widgets["Width"].set(x_pixels)
         self.roi_widgets["Height"].set(y_pixels)
+        self.camera_setting_dict["fov_x"] = self.roi_widgets["FOV_X"].get()
+        self.camera_setting_dict["fov_y"] = self.roi_widgets["FOV_Y"].get()
 
         return ""
 

@@ -5,7 +5,7 @@ Sub-controllers for navigate.
 from .stages import StageController  # noqa
 from .acquire_bar import AcquireBarController  # noqa
 from .channels_tab import ChannelsTabController  # noqa
-from .camera_view import CameraViewController  # noqa
+from .camera_view import CameraViewController, MIPViewController  # noqa
 from .camera_settings import CameraSettingController  # noqa
 from .waveform_tab import WaveformTabController  # noqa
 from .waveform_popup import WaveformPopupController  # noqa

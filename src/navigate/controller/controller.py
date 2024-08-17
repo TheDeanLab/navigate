@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -56,6 +56,7 @@ from navigate.controller.sub_controllers import (
     StageController,
     CameraSettingController,
     CameraViewController,
+    MIPViewController,
     MultiPositionController,
     ChannelsTabController,
     AcquireBarController,
@@ -210,6 +211,11 @@ class Controller:
             self.view.camera_waveform.camera_tab, self
         )
 
+        #: MIPSettingController: MIP Settings Tab Sub-Controller.
+        self.mip_setting_controller = MIPViewController(
+            self.view.camera_waveform.mip_tab, self
+        )
+
         #: CameraSettingController: Camera Settings Tab Sub-Controller.
         self.camera_setting_controller = CameraSettingController(
             self.view.settings.camera_settings_tab, self
@@ -360,18 +366,15 @@ class Controller:
             self.waveform_popup_controller.populate_experiment_values()
 
     def initialize_cam_view(self):
-        """Populate view tab.
+        """Populate view and maximum intensity projection tabs.
 
-        Populate widgets with necessary data from
-        config file via config controller. For the entire view tab.
-        Sets the minimum and maximum counts
-        for when the data is not being autoscaled.
+        Communicates with the camera view controller and mip setting controller to
+        set the minimum and maximum counts, as well as the default channel settings.
         """
         # Populating Min and Max Counts
-        minmax_values = [0, 2**16 - 1]
-        self.camera_view_controller.initialize("minmax", minmax_values)
-        image_metrics = [1, 0, 0]
-        self.camera_view_controller.initialize("image", image_metrics)
+        self.camera_view_controller.initialize("minmax", [0, 2**16 - 1])
+        self.mip_setting_controller.initialize("minmax", [0, 2**16 - 1])
+        self.camera_view_controller.initialize("image", [1, 0, 0])
 
     def populate_experiment_setting(self, file_name=None, in_initialize=False):
         """Load experiment file and populate model.experiment and configure view.
@@ -552,6 +555,7 @@ class Controller:
         self.channels_tab_controller.set_mode(mode)
         self.camera_view_controller.set_mode(mode)
         self.camera_setting_controller.set_mode(mode)
+        self.mip_setting_controller.set_mode(mode)
         self.waveform_tab_controller.set_mode(mode)
         if mode == "stop":
             # GUI Failsafe
@@ -959,6 +963,7 @@ class Controller:
         args : function-specific passes.
         """
         self.camera_view_controller.image_count = 0
+        self.mip_setting_controller.image_count = 0
 
         # Start up Progress Bars
         images_received = 0
@@ -984,7 +989,11 @@ class Controller:
         self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         self.camera_view_controller.initialize_non_live_display(
-            self.data_buffer,
+            self.configuration["experiment"]["MicroscopeState"],
+            self.configuration["experiment"]["CameraParameters"],
+        )
+
+        self.mip_setting_controller.initialize_non_live_display(
             self.configuration["experiment"]["MicroscopeState"],
             self.configuration["experiment"]["CameraParameters"],
         )
@@ -1010,7 +1019,12 @@ class Controller:
                 self.execute("stop_acquire")
 
             # Display the Image in the View
-            self.camera_view_controller.try_to_display_image(image_id=image_id)
+            self.camera_view_controller.try_to_display_image(
+                image=self.data_buffer[image_id]
+            )
+            self.mip_setting_controller.try_to_display_image(
+                image=self.data_buffer[image_id]
+            )
             images_received += 1
 
             # Update progress bar.
@@ -1101,7 +1115,7 @@ class Controller:
                 # Display the Image in the View
                 try:
                     camera_view_controller.try_to_display_image(
-                        image_id=image_id,
+                        image=data_buffer[image_id],
                     )
                 except tkinter._tkinter.TclError:
                     print("Can't show images for the additional microscope!")

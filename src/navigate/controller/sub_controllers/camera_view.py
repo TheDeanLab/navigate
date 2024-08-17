@@ -273,6 +273,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
     def update_snr(self):
         """Updates the signal-to-noise ratio."""
+
         pass
 
     def set_mode(self, mode=""):
@@ -373,6 +374,13 @@ class BaseViewController(GUIController, ABaseViewController):
 
     def try_to_display_image(self, image):
         """Try to display an image.
+
+        Note
+        ----
+        This function is called when an image is acquired. The image is passed to the
+        display function. If the display function is already displaying an image, the
+        function will return. Thus, if imaging is faster than the display, the display
+        will skip frames.
 
         Parameters
         ----------
@@ -558,18 +566,59 @@ class BaseViewController(GUIController, ABaseViewController):
         return zoom_image
 
     def detect_saturation(self, image):
-        """Look for any pixels at the maximum intensity allowable for the camera."""
+        """Look for any pixels at the maximum intensity allowable for the camera.
+
+        Note
+        ----
+        The camera is set to 16-bit depth, so the maximum intensity is 2^16 - 1. If
+        another camera is used, this function should be updated to reflect the maximum
+        intensity value.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+
+        Returns
+        -------
+        saturated_pixels : numpy.ndarray
+            Saturated pixels in the image.
+        """
         saturation_value = 2**16 - 1
         self.saturated_pixels = image[image > saturation_value]
 
     def down_sample_image(self, image):
-        """Down-sample the data for image display according to widget size."""
+        """Down-sample the data for image display according to widget size.
+
+        Interpolation type is cv2.INTER_LINEAR by default.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+
+        Returns
+        -------
+        down_sampled_image : numpy.ndarray
+            Down-sampled image data.
+        """
         sx, sy = self.canvas_width, self.canvas_height
         down_sampled_image = cv2.resize(image, (sx, sy))
         return down_sampled_image
 
     def scale_image_intensity(self, image):
-        """Scale the data to the min/max counts, and adjust bit-depth."""
+        """Scale the data to the min/max counts, and adjust bit-depth.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+
+        Returns
+        -------
+        image : numpy.ndarray
+            Scaled image data.
+        """
         if self.autoscale is True:
             self.max_counts = np.max(image)
             self.min_counts = np.min(image)
@@ -609,6 +658,11 @@ class BaseViewController(GUIController, ABaseViewController):
     def array_to_image(self, image):
         """Convert a numpy array to a PIL Image
 
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+
         Returns
         -------
         image : Image
@@ -617,17 +671,26 @@ class BaseViewController(GUIController, ABaseViewController):
         return Image.fromarray(image.astype(np.uint8))
 
     def populate_image(self, image):
-        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
+        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas
+
+        Note
+        ----
+        When calling ImageTk.PhotoImage() to generate a new image, it will destroy
+        what the canvas is showing, causing it to blink. This problem is solved by
+        creating two images and alternating between them.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+        """
         temp_img = self.array_to_image(image)
-        # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
-        # what the canvas is showing, causing it to blink.
         if self.image_cache_flag:
             self.tk_image = ImageTk.PhotoImage(temp_img)
             self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
         else:
             self.tk_image2 = ImageTk.PhotoImage(temp_img)
             self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
-
         self.image_cache_flag = not self.image_cache_flag
 
     def process_image(self):
@@ -647,7 +710,13 @@ class BaseViewController(GUIController, ABaseViewController):
         self.populate_image(image)
 
     def left_click(self, *args):
-        """Toggles cross-hair on image upon left click event."""
+        """Toggles cross-hair on image upon left click event.
+
+        Parameters
+        ----------
+        args : tuple
+            Arguments.
+        """
         if self.image is not None:
             self.apply_cross_hair = not self.apply_cross_hair
             self.process_image()
@@ -701,6 +770,11 @@ class BaseViewController(GUIController, ABaseViewController):
 
         When the min and max counts are toggled in the GUI, this function is called.
         Updates the min and max values.
+
+        Parameters
+        ----------
+        display : bool
+            Flag to display the image.
         """
         if self.image_palette["Min"].get() != "":
             self.min_counts = float(self.image_palette["Min"].get())
@@ -886,7 +960,13 @@ class CameraViewController(BaseViewController):
             self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.NSEW, pady=3)
 
     def slider_update(self, *args):
-        """Updates the image when the slider is moved."""
+        """Updates the image when the slider is moved.
+
+        Parameters
+        ----------
+        args : tuple
+            Arguments.
+        """
 
         slider_index = self.view.slider.get()
         channel_index = self.view.live_frame.channel.get()
@@ -909,9 +989,13 @@ class CameraViewController(BaseViewController):
     def update_display_state(self, *args):
         """Image Display Combobox Called.
 
-        Sets self.display_state to desired display format.
-        Toggles state of slider widget.
-        Sets number of positions.
+        Sets self.display_state to desired display format. Toggles state of slider
+        widget. Sets number of positions.
+
+        Parameters
+        ----------
+        args : tuple
+            Arguments.
         """
         if self.number_of_slices == 0:
             return
@@ -1140,6 +1224,11 @@ class CameraViewController(BaseViewController):
 
         If a color mask is present, it will apply the mask to the image.
 
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+
         Returns
         -------
         image : Image
@@ -1189,11 +1278,6 @@ class CameraViewController(BaseViewController):
         ----------
         colors : list
             List of colors to use for the segmentation mask
-
-        Returns
-        -------
-        self.mask_color_table : np.array
-            Array of colors to use for the segmentation mask
         """
         self.mask_color_table = np.zeros((256, 1, 3), dtype=np.uint8)
         self.mask_color_table[0] = [0, 0, 0]
@@ -1238,14 +1322,29 @@ class MIPViewController(BaseViewController):
             The parent controller of the camera view controller.
         """
         super().__init__(view, parent_controller)
+
+        #: tkinter.Canvas: The tkinter canvas that displays the image.
         self.view = view
+
+        #: np.ndarray: The image data.
         self.image = None
+
+        #: np.ndarray: The maximum intensity projection in the ZY plane.
         self.zx_mip = None
+
+        #: np.ndarray: The maximum intensity projection in the ZY plane.
         self.zy_mip = None
+
+        #: np.ndarray: The maximum intensity projection in the XY plane.
         self.xy_mip = None
+
+        #: bool: The autoscale flag.
         self.autoscale = True
+
+        #: str: The perspective of the image.
         self.perspective = "XY"
 
+        #: dict: The render widgets.
         self.render_widgets = self.view.render.get_widgets()
 
         if platform.system() == "Windows":
@@ -1254,13 +1353,10 @@ class MIPViewController(BaseViewController):
     def initialize(self, name, data):
         """Initialize the MIP view.
 
-        Sets the min and max intensity values for the image.
-        Disables the min and max widgets.
-        Invokes the gray and autoscale widgets.
-        Hides the SNR widget.
-        Sets the perspective widget values.
-        Sets the perspective widget to XY.
-        Sets the channel widget to CH0.
+        Sets the min and max intensity values for the image.Disables the min and max
+        widgets. Invokes the gray and autoscale widgets.Hides the SNR widget.
+        Sets the perspective widget values. Sets the perspective widget to XY. Sets
+        the channel widget to CH0.
 
         Parameters
         ----------
@@ -1422,7 +1518,13 @@ class MIPViewController(BaseViewController):
             is_displaying_image.value = False
 
     def display_mip_image(self, *args):
-        """Display MIP image in non-live view"""
+        """Display MIP image in non-live view.
+
+        Parameters
+        ----------
+        args : tuple
+            Arguments.
+        """
         if self.perspective != self.render_widgets["perspective"].get():
             self.update_perspective()
         if self.mode != "stop":
@@ -1432,6 +1534,15 @@ class MIPViewController(BaseViewController):
             self.process_image()
 
     def update_perspective(self, *args, display=False):
+        """Update the perspective of the image.
+
+        Parameters
+        ----------
+        args : tuple
+            Arguments.
+        display : bool
+            Flag to display the image.
+        """
         display_mode = self.render_widgets["perspective"].get()
         self.perspective = display_mode
         if display_mode == "XY":
@@ -1448,7 +1559,15 @@ class MIPViewController(BaseViewController):
         self.reset_display(False)
 
     def down_sample_image(self, image, reset_original=False):
-        """Down-sample the data for image display according to widget size."""
+        """Down-sample the data for image display according to widget size.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+        reset_original : bool
+            Flag to reset the original image size.
+        """
         sx, sy = self.canvas_width, self.canvas_height
         down_sampled_image = cv2.resize(image, (sx, sy))
         if reset_original:
@@ -1457,6 +1576,7 @@ class MIPViewController(BaseViewController):
             self.canvas_width_scale = 1
             self.canvas_height_scale = 1
         return down_sampled_image
+
 
 class SpooledImageLoader:
     """A class to lazily load images from disk using a spooled temporary file."""

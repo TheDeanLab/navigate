@@ -136,10 +136,6 @@ class SyntheticCamera(CameraBase):
         """Print Camera Settings."""
         pass
 
-    def close_camera(self):
-        """Close SyntheticCamera Camera"""
-        pass
-
     def set_sensor_mode(self, mode):
         """Set SyntheticCamera sensor mode.
 

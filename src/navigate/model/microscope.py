@@ -917,17 +917,27 @@ class Microscope:
         """Close hardware explicitly.
 
         Should close camera, filter_wheel, zoom, shutter,
-        remote_focus_device, galvo, lasers, and mirrors.
-        """
-        self.camera.close_camera()
+        remote_focus_device, galvo, lasers, stages, daq.
 
-        for k in self.galvo:
-            self.galvo[k].__del__()
+        TODO: Zoom and Mirror devices are not called.
+        """
+        self.camera.__del__()
+
+        for k in self.filter_wheel:
+            self.filter_wheel[k].close()
+
+        self.shutter.__del__()
 
         try:
             self.remote_focus_device.__del__()
         except AttributeError as e:
             pass
+
+        for k in self.galvo:
+            self.galvo[k].__del__()
+
+        for k in self.lasers:
+            self.lasers[k].close()
 
         for stage, _ in self.stages_list:
             try:
@@ -935,16 +945,7 @@ class Microscope:
             except Exception as e:
                 logger.debug(f"Stage delete failure: {e}")
 
-        try:
-            self.daq.__del__()
-        except Exception as e:
-            logger.debug(f"DAQ delete failure: {e}")
-            pass
-
-        for k in self.lasers:
-            self.lasers[k].close()
-
-        self.shutter
+        self.daq.__del__()
 
     def run_command(self, command, *args):
         if command in self.commands:

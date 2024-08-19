@@ -219,7 +219,7 @@ class CameraBase:
         exposure_time = camera_line_interval * shutter_width
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
-    def close_camera(self):
+    def __del__(self):
         """Close camera."""
         pass
 

@@ -74,3 +74,7 @@ class MirrorBase:
 
         #: bool: Is the mirror synthetic?
         self.is_synthetic = False
+
+    def __del__(self):
+        """ Close the deformable mirror. """
+        pass

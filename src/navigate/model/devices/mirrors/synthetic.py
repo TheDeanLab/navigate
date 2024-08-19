@@ -63,6 +63,10 @@ class SyntheticMirror(MirrorBase):
         #: bool: Is this a synthetic mirror?
         self.is_synthetic = True
 
+    def __del__(self):
+        """ Close the Synthetic Deformable Mirror """
+        pass
+
     def flat(self):
         """Flat the mirror."""
         pass

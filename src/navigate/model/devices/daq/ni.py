@@ -99,11 +99,21 @@ class NIDAQ(DAQBase):
         self.wait_to_run_lock = Lock()
 
     def __del__(self):
-        """Destructor."""
-        if self.camera_trigger_task is not None:
-            self.stop_acquisition()
-        else:
-            pass
+        """Destructor. """
+        if self.laser_switching_task is not None:
+            try:
+                self.laser_switching_task.stop()
+                self.laser_switching_task.close()
+            except Exception:
+                pass
+
+        if self.analog_output_tasks is not None:
+            for k, task in self.analog_output_tasks.items():
+                try:
+                    task.close()
+                except Exception:
+                    pass
+
 
     def set_external_trigger(self, external_trigger=None):
         """Set trigger mode.
@@ -267,7 +277,7 @@ class NIDAQ(DAQBase):
         channel_key : str
             Channel key for current channel.
         """
-        self.camera_trigger_task = nidaqmx.Task()
+        self.camera_trigger_task = nidaqmx.Task(new_task_name="Camera Trigger")
         camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["camera_trigger_out_line"]
@@ -292,7 +302,7 @@ class NIDAQ(DAQBase):
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""
-        self.master_trigger_task = nidaqmx.Task()
+        self.master_trigger_task = nidaqmx.Task(new_task_name="Master Trigger")
         master_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["master_trigger_out_line"]
@@ -326,7 +336,7 @@ class NIDAQ(DAQBase):
                     [x for x in self.analog_outputs.keys() if x.split("/")[0] == board]
                 )
             )
-            self.analog_output_tasks[board] = nidaqmx.Task()
+            self.analog_output_tasks[board] = nidaqmx.Task(new_task_name="Analog Outputs")
             self.analog_output_tasks[board].ao_channels.add_ao_voltage_chan(channel)
 
             # apply templates to analog tasks
@@ -503,7 +513,7 @@ class NIDAQ(DAQBase):
 
             if self.laser_switching_task:
                 self.laser_switching_task.close()
-            self.laser_switching_task = nidaqmx.Task()
+            self.laser_switching_task = nidaqmx.Task(new_task_name="Laser Switching")
             self.laser_switching_task.do_channels.add_do_chan(
                 switching_port,
                 line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,

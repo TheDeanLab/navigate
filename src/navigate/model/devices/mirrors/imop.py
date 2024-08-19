@@ -71,6 +71,10 @@ class ImagineOpticsMirror(MirrorBase):
         # flatten the mirror
         self.flat()
 
+    def __del__(self):
+        """Close the deformable mirror. """
+        pass
+
     def flat(self):
         """Move the mirror to the flat position."""
         self.mirror_controller.flat()

@@ -182,10 +182,6 @@ class PhotometricsBase(CameraBase):
         print("image_height and width" + str(self.x_pixels) + ", " + str(self.y_pixels))
         print("exposure_time" + str(self._exposuretime))
 
-    def close_camera(self):
-        """Close Photometrics Camera"""
-        self.camera_controller.close()
-
     def set_sensor_mode(self, mode):
         """Set Photometrics sensor mode
 

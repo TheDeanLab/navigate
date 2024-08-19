@@ -118,6 +118,7 @@ class HamamatsuBase(CameraBase):
 
     def __del__(self):
         """Delete HamamatsuOrca class."""
+        self.camera_controller.dev_close()
         logger.info("HamamatsuOrca Shutdown")
 
     @property
@@ -162,11 +163,6 @@ class HamamatsuBase(CameraBase):
             "*** exposure time range:",
             self.camera_controller.get_property_range("exposure_time"),
         )
-
-    def close_camera(self):
-        """Close HamamatsuOrca Camera"""
-        self.camera_controller.dev_close()
-
     def set_sensor_mode(self, mode):
         """Set HamamatsuOrca sensor mode.
 

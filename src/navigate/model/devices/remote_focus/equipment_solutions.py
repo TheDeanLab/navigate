@@ -127,6 +127,10 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
 
     def __del__(self):
         """Close the RemoteFocusEquipmentSolutions Class"""
+        try:
+            self.send_command("k0\r")  # Turn off servo
+        except Exception:
+            pass
         self.serial.close()
         super().__del__()
 

@@ -55,8 +55,9 @@ class SyntheticCameraController:
         """Initialize SyntheticCameraController class."""
         pass
 
-    def get_property_value(self, name):
-        """Provides the idprop value after looking it up in the property_dict
+    @staticmethod
+    def get_property_value(name):
+        """Provides the property value after looking it up in the property_dict
 
         Parameters
         ----------
@@ -68,9 +69,11 @@ class SyntheticCameraController:
         property_value : int
             Currently hard-coded to -1.
         """
+        logger.debug(f"get camera property {name}: -1")
         return -1
 
-    def set_property_value(self, name, value):
+    @staticmethod
+    def set_property_value(name, value):
         """Set the value of a camera property.
 
         Parameters
@@ -100,36 +103,78 @@ class SyntheticCamera(CameraBase):
         """
         super().__init__(microscope_name, device_connection, configuration)
 
+        #: list: list of tif images
+        self.tif_images = []
+
+        #: int: x binning
+        self.x_binning = 1
+
+        #: int: y binning
+        self.y_binning = 1
+
         #: bool: Whether the camera is currently acquiring
         self.is_acquiring = False
+
         #: int: mean background count for synthetic image
         self._mean_background_count = 100
+
         #: float: noise sigma for synthetic image
         self._noise_sigma = camera.compute_noise_sigma()
+
         #: int: current image id
         self.current_frame_idx = None
+
         #: object: data buffer
         self.data_buffer = None
+
         #: int: number of frames
         self.num_of_frame = None
+
         #: int: previous image id
         self.pre_frame_idx = None
+
         #: bool: whether to use random image
         self.random_image = True
+
         #: int: serial number
         self.serial_number = "synthetic"
+
         #: float: exposure time
         self.camera_exposure_time = 0.2
+
+        #: int: current image id
+        self.img_id = 0
+
+        #: int: current tif id
+        self.current_tif_id = 0
+
         #: int: width
         self.x_pixels = self.camera_parameters["x_pixels"]
+
         #: int: height
         self.y_pixels = self.camera_parameters["y_pixels"]
+
+        #: int: center x
+        self.center_x = self.x_pixels // 2
+
+        #: int: center y
+        self.center_y = self.y_pixels // 2
 
         logger.info("SyntheticCamera Class Initialized")
 
     def __del__(self):
         """Delete SyntheticCamera class."""
         logger.info("SyntheticCamera Shutdown")
+        pass
+
+    def set_readout_direction(self, mode):
+        """Set readout direction.
+
+        Parameters
+        ----------
+        mode : str
+            Readout direction of the camera.
+        """
         pass
 
     def report_settings(self):
@@ -155,7 +200,6 @@ class SyntheticCamera(CameraBase):
         ----------
         exposure_time : float
             Exposure time in seconds.
-
         """
         self.camera_exposure_time = exposure_time
 
@@ -177,9 +221,7 @@ class SyntheticCamera(CameraBase):
         binning_string : str
             Desired binning properties (e.g., '2x2', '4x4', '8x8'
         """
-        #: int: x binning
         self.x_binning = int(binning_string[0])
-        #: int: y binning
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
@@ -213,11 +255,9 @@ class SyntheticCamera(CameraBase):
         """Pre-populate the buffer with images. Can either come from TIFF files or
         Numpy stacks."""
         self.random_image = False
-        #: int: current image id
         self.img_id = 0
-        #: int: current tif id
         self.current_tif_id = 0
-        #: list: list of tif images
+
         self.tif_images = []
         idx = 0
         if filenames is not None:
@@ -309,7 +349,8 @@ class SyntheticCamera(CameraBase):
         self.center_x = center_x
         self.center_y = center_y
 
-    def calculate_readout_time(self):
+    @staticmethod
+    def calculate_readout_time():
         """Calculate duration of time needed to readout an image. Calculates the readout
         time and maximum frame rate according to the camera configuration settings.
 
@@ -317,7 +358,6 @@ class SyntheticCamera(CameraBase):
         -------
         readout_time : float
             Duration of time needed to readout an image.
-
         """
         readout_time = 0.01  # 10 milliseconds.
         return readout_time

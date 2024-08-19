@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 import os
+import abc
 
 # Third Party Imports
 import tifffile
@@ -45,7 +46,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class CameraBase:
+class CameraBase(metaclass=abc.ABCMeta):
     """CameraBase - Parent camera class."""
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -57,7 +58,7 @@ class CameraBase:
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
 
         Raises
@@ -82,19 +83,24 @@ class CameraBase:
         #: bool: Whether the camera is currently acquiring
         self.is_acquiring = False
 
-        # Initialize Pixel Information
         #: int: Minimum image width
         self.min_image_width = 4
+
         #: int: Minimum image height
         self.min_image_height = 4
+
         #: int: Minimum step size for image width.
         self.step_image_width = 4
+
         #: int: Minimum step size for image height.
         self.step_image_height = 4
+
         #: int: Number of pixels in the x direction
         self.x_pixels = 2048
+
         #: int: Number of pixels in the y direction
         self.y_pixels = 2048
+
         #: float: minimum exposure time
         self.minimum_exposure_time = 0.001
         self.camera_parameters["x_pixels"] = 2048
@@ -116,7 +122,6 @@ class CameraBase:
             "Rev. Bidirectional",
         ]
 
-        # Initialize offset and variance maps, if present
         #: np.ndarray: Offset map
         #: np.ndarray: Variance map
         self._offset, self._variance = None, None
@@ -177,15 +182,16 @@ class CameraBase:
             self.get_offset_variance_maps()
         return self._variance
 
+    @abc.abstractmethod
     def set_readout_direction(self, mode):
-        """Set HamamatsuOrca readout direction.
+        """Set readout direction.
 
         Parameters
         ----------
         mode : str
-            'Top-to-Bottom', 'Bottom-to-Top', 'bytrigger', or 'diverge'.
+            Readout direction of the camera.
         """
-        logger.debug(f"set camera readout direction to: {mode}")
+        pass
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
@@ -219,9 +225,10 @@ class CameraBase:
         exposure_time = camera_line_interval * shutter_width
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
+    @abc.abstractmethod
     def __del__(self):
         """Close camera."""
-        pass
+        raise NotImplementedError
 
     def get_line_interval(self):
         """Return stored camera line interval.

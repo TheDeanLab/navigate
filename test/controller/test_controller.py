@@ -2,6 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, ANY
 import pytest
+import numpy
 
 
 class DummySplashScreen:
@@ -500,11 +501,24 @@ def test_execute_random(controller):
 
 
 def test_capture_image(controller):
+
+    count = 0
+    def get_image_id():
+        nonlocal count
+        count += 1
+        if count >= 10:
+            return "stop"
+        return numpy.random.randint(0, 10)
+    
+    width = controller.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
+    height = controller.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
+    images = numpy.random.rand(10, width, height)
+    controller.data_buffer = images
     work_thread = MagicMock()
     work_thread.join = MagicMock()
     controller.threads_pool.createThread = MagicMock()
     controller.threads_pool.createThread.return_value = work_thread
-    controller.show_img_pipe.recv = MagicMock()
+    controller.show_img_pipe.recv = get_image_id
     controller.show_img_pipe.poll = MagicMock()
     controller.show_img_pipe.poll.return_value = False
 

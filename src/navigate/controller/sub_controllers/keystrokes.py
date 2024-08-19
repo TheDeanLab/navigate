@@ -64,6 +64,9 @@ class KeystrokeController(GUIController):
         #: tk.Frame: Camera View
         self.camera_view = main_view.camera_waveform.camera_tab  # Camera View
 
+        #: tk.Frame: MIP View
+        self.mip_view = main_view.camera_waveform.mip_tab  # MIP View
+
         # Multiposition Table
         #: MultipositionTable: Multiposition Table
         self.multi_table = main_view.settings.multiposition_tab.multipoint_list
@@ -79,18 +82,19 @@ class KeystrokeController(GUIController):
         #: CameraViewController: Camera View Controller
         self.camera_controller = parent_controller.camera_view_controller
 
+        #: MIPSettingController: MIP Setting Controller
+        self.mip_controller = parent_controller.mip_setting_controller
+
         #: MultipositionTableController: Multiposition Table Controller
         self.multi_controller = parent_controller.multiposition_tab_controller
 
         #: StageController: Stage Controller
         self.stage_controller = parent_controller.stage_controller
 
-        """Keystrokes for Camera View"""
+        """Keystrokes for Camera & MIP View"""
         # Left Click binding
         self.camera_view.canvas.bind("<Button-1>", self.camera_controller.left_click)
-
-        # Slider Binding
-        self.camera_view.slider.bind("<Button-1>", self.camera_controller.slider_update)
+        self.mip_view.canvas.bind("<Button-1>", self.mip_controller.left_click)
 
         # MouseWheel Binding
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
@@ -100,6 +104,8 @@ class KeystrokeController(GUIController):
         self.camera_view.canvas.bind(
             "<Leave>", self.camera_controller_mouse_wheel_leave
         )
+        self.mip_view.canvas.bind("<Enter>", self.mip_controller_mouse_wheel_enter)
+        self.mip_view.canvas.bind("<Leave>", self.mip_controller_mouse_wheel_leave)
 
         # Right Click Binding
         if platform.system() == "Darwin":
@@ -150,6 +156,21 @@ class KeystrokeController(GUIController):
                 "<Button-5>", self.camera_controller.mouse_wheel
             )
 
+    def mip_controller_mouse_wheel_enter(self, event):
+        """Mouse wheel binding for MIP view
+
+        Parameters
+        ----------
+        event : tkinter event
+            Mouse wheel event
+        """
+        self.view.root.unbind("<MouseWheel>")
+        if platform.system() != "Linux":
+            self.mip_view.canvas.bind("<MouseWheel>", self.mip_controller.mouse_wheel)
+        else:
+            self.mip_view.canvas.bind("<Button-4>", self.mip_controller.mouse_wheel)
+            self.mip_view.canvas.bind("<Button-5>", self.mip_controller.mouse_wheel)
+
     def camera_controller_mouse_wheel_leave(self, event):
         """Mouse wheel binding for camera view
 
@@ -167,6 +188,22 @@ class KeystrokeController(GUIController):
         self.view.root.bind(
             "<MouseWheel>", self.view.scroll_frame.mouse_wheel
         )  # reinstate scrollbar mousewheel
+
+    def mip_controller_mouse_wheel_leave(self, event):
+        """Mouse wheel binding for MIP view
+
+        Parameters
+        ----------
+        event : tkinter event
+            Mouse wheel event
+        """
+
+        if platform.system() != "Linux":
+            self.mip_view.canvas.unbind("<MouseWheel>")
+        else:
+            self.mip_view.canvas.unbind("<Button-4>")
+            self.mip_view.canvas.unbind("<Button-5>")
+        self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
 
     def switch_tab(self, event):
         """Switches between tabs

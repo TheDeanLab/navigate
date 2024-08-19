@@ -290,18 +290,24 @@ class SyntheticCamera(CameraBase):
         logger.debug(f"Get a new frame from camera, {frames}")
         return frames
 
-    def set_ROI(self, roi_height=2048, roi_width=2048):
+    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024):
         """Change the size of the active region on the camera.
 
         Parameters
         ----------
-        roi_height : int
-            Height of active camera region.
         roi_width : int
             Width of active camera region.
+        roi_height : int
+            Height of active camera region.
+        center_x : int
+            X position of the center of view
+        center_y : int
+            Y position of the center of view
         """
         self.x_pixels = roi_width
         self.y_pixels = roi_height
+        self.center_x = center_x
+        self.center_y = center_y
 
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image. Calculates the readout

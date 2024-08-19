@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -36,11 +36,35 @@ import os
 import json
 import yaml
 from pathlib import Path
+import psutil
 
 # Third party imports
 
 # Local application imports
 from navigate.tools.common_functions import copy_proxy_object
+
+
+def get_ram_info():
+    """Get computer RAM information.
+
+    This function retrieves the total and available RAM on the computer.
+
+    Note
+    ----
+    This function uses the psutil library to retrieve the RAM information.
+    The returned value is in bytes. To convert to GB, divide by 1024^3.
+
+    Returns
+    -------
+    total_ram : int
+        Total RAM on the computer.
+    available_ram : int
+        Available RAM on the computer.
+    """
+    virtual_memory = psutil.virtual_memory()
+    total_ram = virtual_memory.total
+    available_ram = virtual_memory.available
+    return total_ram, available_ram
 
 
 def create_save_path(saving_settings):

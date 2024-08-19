@@ -317,15 +317,19 @@ class HamamatsuBase(CameraBase):
         )
         return True
 
-    def set_ROI(self, roi_height=2048, roi_width=2048):
+    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024):
         """Change the size of the active region on the camera.
 
         Parameters
         ----------
-        roi_height : int
-            Height of active camera region.
         roi_width : int
             Width of active camera region.
+        roi_height : int
+            Height of active camera region.
+        center_x : int
+            X position of the center of view
+        center_y : int
+            Y position of the center of view
 
         Returns
         -------
@@ -336,20 +340,26 @@ class HamamatsuBase(CameraBase):
         camera_height = self.camera_parameters["y_pixels"]
         camera_width = self.camera_parameters["x_pixels"]
 
+        roi_top = center_y - roi_height // 2
+        roi_bottom = center_y + roi_height // 2
+        roi_left = center_x - roi_width // 2
+        roi_right = center_x + roi_width // 2
+
+        step_image_height = self.camera_controller.step_image_height
+        step_image_width = self.camera_controller.step_image_width
+
         if (
-            roi_height > camera_height
-            or roi_width > camera_width
-            or roi_height < 1
-            or roi_width < 1
+            roi_top < 0
+            or roi_bottom > camera_height
+            or roi_left < 0
+            or roi_right > camera_width
+            or roi_top % step_image_height != 0
+            or roi_bottom % step_image_height != 0
+            or roi_left % step_image_width != 0
+            or roi_right % step_image_width != 0
         ):
             logger.debug(f"can't set roi to {roi_width} and {roi_height}")
             return False
-
-        # Calculate Location of Image Edges
-        roi_top = (camera_height - roi_height) / 2
-        roi_bottom = roi_top + roi_height
-        roi_left = (camera_width - roi_width) / 2
-        roi_right = roi_left + roi_width
 
         # Set ROI
         self.x_pixels, self.y_pixels = self.camera_controller.set_ROI(

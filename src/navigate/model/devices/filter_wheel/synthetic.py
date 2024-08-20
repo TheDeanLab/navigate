@@ -43,28 +43,23 @@ logger = logging.getLogger(p)
 
 
 class SyntheticFilterWheel(FilterWheelBase):
-    """SyntheticFilterWheel Class
-
-    Attributes
-    ----------
-    comport : str
-        Comport for communicating with the filter wheel, e.g., COM1.
-    baudrate : int
-        Baud rate for communicating with the filter wheel, e.g., 9600.
-    filter_dictionary : dict
-        Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
-    number_of_filter_wheels : int
-        Number of installed filter wheels.
-    wheel_position : int
-        Default filter wheel position
-    wait_until_done_delay = float
-        Duration of time to wait for a filter wheel change.
-    wait_until_done = bool
-        Flag for enabling the wait period for a filter wheel change.
-    """
+    """SyntheticFilterWheel Class"""
 
     def __init__(self, device_connection, device_config):
+        """Initialize the SyntheticFilterWheel class.
+
+        Parameters
+        ----------
+        device_connection : dict
+            Dictionary of device connections.
+        device_config : dict
+            Dictionary of device configuration parameters.
+        """
         super().__init__(device_connection, device_config)
+
+    def __del__(self):
+        """Close the SyntheticFilterWheel."""
+        pass
 
     def filter_change_delay(self, filter_name):
         """Calculate duration of time necessary to change filter wheel positions
@@ -86,22 +81,5 @@ class SyntheticFilterWheel(FilterWheelBase):
             Name of filter to move to.
         wait_until_done : bool
             Waits duration of time necessary for filter wheel to change positions.
-        """
-        pass
-
-    def read(self, num_bytes):
-        """Reads the specified number of bytes from the serial port.
-
-        Parameters
-        ----------
-        num_bytes : int
-            Number of bytes to read from the serial port.
-        """
-        pass
-
-    def close(self):
-        """Close the SyntheticFilterWheel.
-
-        Sets the filter wheel to the Empty-Alignment position and then closes the port.
         """
         pass

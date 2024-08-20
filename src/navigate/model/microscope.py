@@ -925,14 +925,14 @@ class Microscope:
         self.camera.__del__()
 
         for k in self.filter_wheel:
-            self.filter_wheel[k].close()
+            self.filter_wheel[k].__del__()
 
         self.shutter.__del__()
 
         try:
             self.remote_focus_device.__del__()
-        except AttributeError as e:
-            pass
+        except Exception as e:
+            logger.debug(f"Remote focus delete failure: {e}")
 
         for k in self.galvo:
             self.galvo[k].__del__()

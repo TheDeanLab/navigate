@@ -86,7 +86,6 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
 
 
 class LUDLFilterWheel(FilterWheelBase):
-
     """LUDLFilterWheel - Class for controlling LUDL Electronic Products Filter Wheels
 
     Testing using MAC6000 controller over RS-232. USB or Ethernet not tested.
@@ -121,6 +120,15 @@ class LUDLFilterWheel(FilterWheelBase):
         #: float: Delay for filter wheel to change positions.
         self.wait_until_done_delay = device_config["filter_wheel_delay"]
 
+    def __del__(self):
+        """Close the LUDLFilterWheel serial port.
+
+        Sets the filter wheel to the Empty-Alignment position and then closes the port.
+        """
+        logger.debug("LUDLFilterWheel - Closing the Filter Wheel Serial Port")
+        self.set_filter(list(self.filter_dictionary.keys())[0])
+        self.serial.close()
+
     def set_filter(self, filter_name, wait_until_done=True):
         """Set the filter wheel to a specific filter position.
 
@@ -145,12 +153,3 @@ class LUDLFilterWheel(FilterWheelBase):
 
             if wait_until_done:
                 time.sleep(self.wait_until_done_delay)
-
-    def close(self):
-        """Close the LUDLFilterWheel serial port.
-
-        Sets the filter wheel to the Empty-Alignment position and then closes the port.
-        """
-        logger.debug("LUDLFilterWheel - Closing the Filter Wheel Serial Port")
-        self.set_filter(list(self.filter_dictionary.keys())[0])
-        self.serial.close()

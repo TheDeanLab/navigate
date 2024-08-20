@@ -32,6 +32,8 @@
 
 #  Standard Library Imports
 import logging
+import abc
+import warnings
 
 # Third Party Imports
 
@@ -42,7 +44,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class FilterWheelBase:
+class FilterWheelBase(metaclass=abc.ABCMeta):
     """FilterWheelBase - Parent class for controlling filter wheels."""
 
     def __init__(self, device_connection, device_config):
@@ -65,6 +67,11 @@ class FilterWheelBase:
         #: int: index of filter wheel
         self.filter_wheel_number = device_config["hardware"]["wheel_number"]
 
+    @abc.abstractmethod
+    def __del__(self):
+        """Close the FilterWheel."""
+        raise NotImplementedError
+
     def check_if_filter_in_filter_dictionary(self, filter_name):
         """Checks if the filter designation (string) given exists in the
         filter dictionary
@@ -78,17 +85,25 @@ class FilterWheelBase:
         -------
         filter_exists : bool
             Flag if filter exists in the filter dictionary.
-
-        Raises
-        ------
-        ValueError
-            If filter name is not in the filter dictionary.
-
         """
+        filter_exists = False
         if filter_name in self.filter_dictionary:
             filter_exists = True
         else:
-            filter_exists = False
             logger.debug("Filter Name not in the Filter Dictionary")
-            raise ValueError("Filter Name not in the Filter Dictionary.")
+            warnings.warn("Filter Name not in the Filter Dictionary")
         return filter_exists
+
+    @abc.abstractmethod
+    def set_filter(self, filter_name, wait_until_done=True):
+        """Change the filter wheel to the filter designated by the filter
+        position argument.
+
+        Parameters
+        ----------
+        filter_name : str
+            Name of filter to move to.
+        wait_until_done : bool
+            Waits duration of time necessary for filter wheel to change positions.
+        """
+        raise NotImplementedError

@@ -35,7 +35,6 @@ import logging
 import time
 
 # Third Party Imports
-import numpy as np
 import serial
 
 # Local Imports
@@ -111,35 +110,19 @@ class SutterFilterWheel(FilterWheelBase):
         #: bool: Read on initialization.
         self.read_on_init = True
 
+        #: bool: Software initialization complete flag.
+        self.init_finished = False
+
         #: int: Filter wheel speed.
         self.speed = 2
 
-        # Delay in s for the wait until done function
-        #: np.matrix: Delay matrix for filter wheel.
-        self.delay_matrix = np.matrix(
-            [
-                [0, 0.031, 0.051, 0.074, 0.095, 0.115],
-                [0, 0.040, 0.065, 0.095, 0.120, 0.148],
-                [0, 0.044, 0.075, 0.105, 0.136, 0.168],
-                [0, 0.050, 0.088, 0.127, 0.165, 0.205],
-                [0, 0.060, 0.108, 0.156, 0.205, 0.250],
-                [0, 0.068, 0.123, 0.178, 0.235, 0.290],
-                [0, 0.124, 0.235, 0.350, 0.460, 0.580],
-                [0, 0.230, 0.440, 0.650, 0.860, 1.100],
-            ]
-        )
-
         logger.debug("SutterFilterWheel - Placing device In Online Mode")
-
         self.serial.write(bytes.fromhex("ee"))
 
         if self.read_on_init:
             self.read(2)  # class 'bytes'
-            #: bool: Software initialization complete flag.
             self.init_finished = True
             logger.debug("SutterFilterWheel - Initialized.")
-        else:
-            self.init_finished = False
 
         # Set filter to the 0th position by default upon initialization.
         self.set_filter(list(self.filter_dictionary.keys())[0])
@@ -154,6 +137,15 @@ class SutterFilterWheel(FilterWheelBase):
         """Exit the SutterFilterWheel context manager."""
         logger.debug("SutterFilterWheel - Closing Device.")
         self.close()
+
+    def __del__(self):
+        """Close the SutterFilterWheel serial port.
+
+        Sets the filter wheel to the Empty-Alignment position and then closes the port.
+        """
+        logger.debug("SutterFilterWheel - Closing the Filter Wheel Serial Port")
+        self.set_filter(list(self.filter_dictionary.keys())[0])
+        self.serial.close()
 
     def filter_change_delay(self, filter_name):
         """Calculate duration of time necessary to change filter wheel positions.
@@ -175,22 +167,11 @@ class SutterFilterWheel(FilterWheelBase):
         Warn
         ----
             Delay matrix should be model specific.
-
-        Returns
-        -------
-        Index Error
-            If the filter wheel position is out of range.
         """
-        # Find the old and new positions, the distance between them, and the
-        # delay necessary.
         old_position = self.wheel_position
         self.wheel_position = self.filter_dictionary[filter_name]
         delta_position = int(abs(old_position - self.wheel_position))
-        try:
-            self.wait_until_done_delay = self.delay_matrix[delta_position, self.speed]
-        except IndexError:
-            # Murdered by the hard coded delay matrix - Guess a value
-            self.wait_until_done_delay = 0.01
+        self.wait_until_done_delay = 0.025 * delta_position
 
     def set_filter(self, filter_name, wait_until_done=True):
         """Change the filter wheel to the filter designated by the filter
@@ -213,23 +194,11 @@ class SutterFilterWheel(FilterWheelBase):
             assert self.wheel_position in range(10)
             assert self.speed in range(8)
 
-            # If previously we did not confirm that the initialization was complete,
-            # check now.
             if not self.init_finished:
                 self.read(2)
                 self.init_finished = True
                 logger.debug("SutterFilterWheel - Initialized.")
 
-            """send the binary sequence via serial to move to the desired
-            filter wheel position
-            When number_of_filter_wheels = 1, wheel A changes.
-            When number_of_filter_wheels = 2, wheel B changes.
-            Filter Wheel Command Byte Encoding = wheel + (self.speed*16) +
-            position = command byte
-            """
-            logger.debug(
-                f"SutterFilterWheel - Moving to Position {self.filter_wheel_number-1}"
-            )
             output_command = (
                 (self.filter_wheel_number - 1) * 128
                 + self.wheel_position
@@ -237,13 +206,12 @@ class SutterFilterWheel(FilterWheelBase):
             )
             output_command = output_command.to_bytes(1, "little")
             self.serial.write(output_command)
-            # read echoing back
             self.read(1)
 
             #  Wheel Position Change Delay
             if wait_until_done:
                 time.sleep(self.wait_until_done_delay)
-                # read 0D back. 
+                # read 0D back.
                 self.read(1)
 
     def read(self, num_bytes):
@@ -281,12 +249,3 @@ class SutterFilterWheel(FilterWheelBase):
                 "responding as expected."
             )
         return self.serial.read(num_bytes)
-
-    def close(self):
-        """Close the SutterFilterWheel serial port.
-
-        Sets the filter wheel to the Empty-Alignment position and then closes the port.
-        """
-        logger.debug("SutterFilterWheel - Closing the Filter Wheel Serial Port")
-        self.set_filter(list(self.filter_dictionary.keys())[0])
-        self.serial.close()

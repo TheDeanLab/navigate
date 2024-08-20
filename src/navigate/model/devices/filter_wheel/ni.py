@@ -96,6 +96,10 @@ class DAQFilterWheel(FilterWheelBase):
             except Exception:
                 pass
 
+    def __del__(self):
+        """Close the DAQ Filter Wheel."""
+        self.__exit__()
+
     def set_filter(self, filter_name, wait_until_done=True):
         """Change the filter wheel to the filter designated by the filter
         position argument. Requires a digital port on the DAQ.
@@ -131,10 +135,3 @@ class DAQFilterWheel(FilterWheelBase):
                 self.filter_wheel_task.close()
             except DaqError as e:
                 logger.debug(e)
-
-    def close(self):
-        """Close the DAQ Filter Wheel
-
-        Sets the filter wheel to the home position and then closes the port.
-        """
-        pass

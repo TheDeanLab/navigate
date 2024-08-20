@@ -34,7 +34,6 @@
 import logging
 
 # Third Party Imports
-import nidaqmx
 
 # Local Imports
 from navigate.model.devices.galvo.base import GalvoBase
@@ -71,6 +70,15 @@ class GalvoNI(GalvoBase):
         #: obj: NI DAQ device connection.
         self.daq = device_connection
 
+    def __del__(self):
+        """Close the NI DAQ connection."""
+        for task, _ in self.daq.analog_outputs.values():
+            try:
+                task.stop()
+                task.close()
+            except Exception:
+                pass
+
     def adjust(self, exposure_times, sweep_times):
         """Adjust the galvo to the readout time
 
@@ -93,28 +101,3 @@ class GalvoNI(GalvoBase):
             "waveform": waveform_dict,
         }
         return waveform_dict
-
-    def turn_off(self):
-        """Turn off the galvo.
-        Turns off the galvo. NOTE: This will only work if there isn't another task
-        bound to this channel. This should only be called in microscope.terminate().
-        """
-        try:
-            task = nidaqmx.Task()
-            task.ao_channels.add_ao_voltage_chan(
-                self.device_config["hardware"]["channel"]
-            )
-            task.write([0], auto_start=True)
-            task.stop()
-            task.close()
-        except Exception as e:
-            print(f"Galvo turn_off error: {e}")
-
-    def __del__(self):
-        """Close the NI DAQ connection."""
-        for task, _ in self.daq.analog_outputs.values():
-            try:
-                task.stop()
-                task.close()
-            except Exception as e:
-                pass

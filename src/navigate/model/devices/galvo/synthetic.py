@@ -65,3 +65,22 @@ class SyntheticGalvo(GalvoBase):
 
     def __del__(self):
         pass
+
+    def adjust(self, exposure_times, sweep_times):
+        """Adjust the galvo waveform to account for the camera readout time.
+
+        Parameters
+        ----------
+        exposure_times : dict
+            Dictionary of camera exposure time in seconds on a per-channel basis.
+            e.g., exposure_times = {"channel_1": 0.1, "channel_2": 0.2}
+        sweep_times : dict
+            Dictionary of acquisition sweep time in seconds on a per-channel basis.
+            e.g., sweep_times = {"channel_1": 0.1, "channel_2": 0.2}
+
+        Returns
+        -------
+        waveform_dict : dict
+            Dictionary that includes the galvo waveforms on a per-channel basis.
+        """
+        return super().adjust(exposure_times, sweep_times)

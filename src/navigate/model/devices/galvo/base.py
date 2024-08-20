@@ -32,6 +32,7 @@
 
 #  Standard Library Imports
 import logging
+import abc
 
 # Third Party Imports
 
@@ -43,7 +44,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class GalvoBase:
+class GalvoBase(metaclass=abc.ABCMeta):
     """GalvoBase Class - Parent class for galvanometers."""
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
@@ -104,10 +105,12 @@ class GalvoBase:
         #: dict: Dictionary of galvo waveforms.
         self.waveform_dict = {}
 
+    @abc.abstractmethod
     def __del__(self):
         """Destructor"""
         raise NotImplementedError
 
+    @abc.abstractmethod
     def adjust(self, exposure_times, sweep_times):
         """Adjust the galvo waveform to account for the camera readout time.
 
@@ -207,7 +210,3 @@ class GalvoBase:
                 ] = self.galvo_min_voltage
 
         return self.waveform_dict
-
-    def turn_off(self):
-        """Turn off the galvo."""
-        pass

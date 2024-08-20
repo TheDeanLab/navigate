@@ -73,6 +73,31 @@ class SyntheticDAQ(DAQBase):
         #: str: Trigger mode. Self-trigger or external-trigger.
         self.trigger_mode = "self-trigger"
 
+    def __del__(self):
+        """Destructor for SyntheticDAQ."""
+        pass
+
+    def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
+        """Pre-calculates all waveforms necessary for the acquisition and organizes in
+        a dictionary format.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the active microscope
+        exposure_times : dict
+            Dictionary of exposure times for each selected channel
+        sweep_times : dict
+            Dictionary of sweep times for each selected channel
+
+        Returns
+        -------
+        self.waveform_dict : dict
+            Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for
+            display purposes.
+        """
+        super().calculate_all_waveforms(microscope_name, exposure_times, sweep_times)
+
     def create_camera_task(self):
         """Set up the camera trigger task."""
         pass
@@ -179,3 +204,25 @@ class SyntheticDAQ(DAQBase):
         self.trigger_mode = (
             "self-trigger" if external_trigger is None else "external-trigger"
         )
+
+    def wait_for_external_trigger(
+        self, trigger_channel, wait_internal=0.001, timeout=-1
+    ):
+        """Wait for a digital external trigger.
+
+        Parameters
+        ----------
+        trigger_channel : str
+            The name of the DAQ PFI digital input.
+        wait_internal : float
+            The internal waiting time to check the trigger
+        timeout : float
+            Continue on anyway if timeout is reached. timeout < 0 will
+            run forever.
+
+        Returns
+        -------
+            result : bool
+                True for the trigger, False for no trigger.
+        """
+        return False

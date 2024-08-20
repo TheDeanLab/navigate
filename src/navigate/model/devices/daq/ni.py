@@ -99,7 +99,7 @@ class NIDAQ(DAQBase):
         self.wait_to_run_lock = Lock()
 
     def __del__(self):
-        """Destructor. """
+        """Destructor."""
         if self.laser_switching_task is not None:
             try:
                 self.laser_switching_task.stop()
@@ -113,7 +113,6 @@ class NIDAQ(DAQBase):
                     task.close()
                 except Exception:
                     pass
-
 
     def set_external_trigger(self, external_trigger=None):
         """Set trigger mode.
@@ -336,7 +335,9 @@ class NIDAQ(DAQBase):
                     [x for x in self.analog_outputs.keys() if x.split("/")[0] == board]
                 )
             )
-            self.analog_output_tasks[board] = nidaqmx.Task(new_task_name="Analog Outputs")
+            self.analog_output_tasks[board] = nidaqmx.Task(
+                new_task_name="Analog Outputs"
+            )
             self.analog_output_tasks[board].ao_channels.add_ao_voltage_chan(channel)
 
             # apply templates to analog tasks

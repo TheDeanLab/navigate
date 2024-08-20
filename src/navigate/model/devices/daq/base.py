@@ -32,6 +32,7 @@
 
 # Standard Imports
 import logging
+import abc
 
 # Third Party Imports
 
@@ -43,7 +44,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class DAQBase:
+class DAQBase(metaclass=abc.ABCMeta):
     """DAQBase - Parent class for Data Acquisition (DAQ) classes."""
 
     def __init__(self, configuration):
@@ -99,6 +100,12 @@ class DAQBase:
         #: int: Number of times to expand the waveform
         self.waveform_expand_num = 1
 
+    @abc.abstractmethod
+    def __del__(self):
+        """Destructor for DAQBase."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in
         a dictionary format.
@@ -165,3 +172,75 @@ class DAQBase:
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]
+
+    @abc.abstractmethod
+    def prepare_acquisition(self, channel_key):
+        """Prepare the acquisition.
+
+        Creates and configures the DAQ tasks.
+        Writes the waveforms to each task.
+
+        Parameters
+        ----------
+        channel_key : str
+            Channel key for current channel.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def run_acquisition(self):
+        """Run DAQ Acquisition.
+
+        Run the tasks for triggering, analog and counter outputs.
+        The master trigger initiates all other tasks via a shared trigger
+        For this to work, all analog output and counter tasks have to be started so that
+        they are waiting for the trigger signal.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def stop_acquisition(self):
+        """Stop Acquisition.
+
+        Stop all tasks and close them.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def update_analog_task(self, board_name):
+        """Update analog task.
+
+        Parameters
+        ----------
+        board_name : str
+            Name of board to update.
+
+        Returns
+        -------
+        bool
+            True if task is updated, False otherwise.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def wait_for_external_trigger(
+        self, trigger_channel, wait_internal=0.001, timeout=-1
+    ):
+        """Wait for a digital external trigger.
+
+        Parameters
+        ----------
+        trigger_channel : str
+            The name of the DAQ PFI digital input.
+        wait_internal : float
+            The internal waiting time to check the trigger
+        timeout : float
+            Continue on anyway if timeout is reached. timeout < 0 will
+            run forever.
+
+        Returns
+        -------
+            result : bool
+                True for the trigger, False for no trigger.
+        """
+        raise NotImplementedError

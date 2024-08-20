@@ -167,6 +167,39 @@ class SyntheticCamera(CameraBase):
         logger.info("SyntheticCamera Shutdown")
         pass
 
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time, shutter_width
+    ):
+        """Calculate the exposure time for light sheet imaging.
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Exposure time for full chip.
+        shutter_width : float
+            Shutter width.
+
+        Returns
+        -------
+        exposure_time : float
+            Exposure time for light sheet imaging.
+        """
+        return super().calculate_light_sheet_exposure_time(
+            full_chip_exposure_time, shutter_width
+        )
+
+    def get_offset_variance_maps(self):
+        """Get offset and variance maps from file.
+
+        Returns
+        -------
+        offset : np.ndarray
+            Offset map.
+        variance : np.ndarray
+            Variance map.
+        """
+        return super().get_offset_variance_maps()
+
     def set_readout_direction(self, mode):
         """Set readout direction.
 

@@ -127,6 +127,12 @@ class CameraBase(metaclass=abc.ABCMeta):
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
+    @abc.abstractmethod
+    def __del__(self):
+        """Close camera."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_offset_variance_maps(self):
         """Get offset and variance maps from file.
 
@@ -136,11 +142,6 @@ class CameraBase(metaclass=abc.ABCMeta):
             Offset map.
         variance : np.ndarray
             Variance map.
-
-        Raises
-        ------
-        FileNotFoundError
-            If offset or variance map is not found.
         """
         serial_number = self.camera_parameters["hardware"]["serial_number"]
         try:
@@ -184,7 +185,7 @@ class CameraBase(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def set_readout_direction(self, mode):
-        """Set readout direction.
+        """Set camera readout direction.
 
         Parameters
         ----------
@@ -193,6 +194,7 @@ class CameraBase(metaclass=abc.ABCMeta):
         """
         pass
 
+    @abc.abstractmethod
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
@@ -226,16 +228,112 @@ class CameraBase(metaclass=abc.ABCMeta):
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
     @abc.abstractmethod
-    def __del__(self):
-        """Close camera."""
+    def set_sensor_mode(self, mode):
+        """Set sensor mode.
+
+        Parameters
+        ----------
+        mode : str
+            Sensor mode.
+        """
         raise NotImplementedError
 
-    def get_line_interval(self):
-        """Return stored camera line interval.
+    @abc.abstractmethod
+    def calculate_readout_time(self):
+        """Calculate readout time for the camera.
 
         Returns
         -------
-        line_interval : float
-            line interval duration (s).
+        readout_time : float
+            Readout time in seconds.
         """
-        return self.camera_parameters.get("line_interval", None)
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_exposure_time(self, exposure_time):
+        """Set exposure time.
+
+        Parameters
+        ----------
+        exposure_time : float
+            Exposure time in seconds.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_line_interval(self, line_interval_time):
+        """Set line interval.
+
+        Parameters
+        ----------
+        line_interval_time : float
+            Line interval in seconds.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_binning(self, binning_string):
+        """Set binning.
+
+        Parameters
+        ----------
+        binning_string : str
+            Desired binning properties (e.g., 1x1).
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024):
+        """Change the size of the active region on the camera.
+
+        Parameters
+        ----------
+        roi_width : int
+            Width of active camera region.
+        roi_height : int
+            Height of active camera region.
+        center_x : int
+            X position of the center of view
+        center_y : int
+            Y position of the center of view
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+        """Initialize image series.
+
+        Parameters
+        ----------
+        data_buffer :
+            List of SharedNDArrays of shape=(self.img_height,
+            self.img_width) and dtype="uint16"
+            Default is None.
+        number_of_frames : int
+            Number of frames.  Default is 100.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def close_image_series(self):
+        """Close image series.
+
+        Stops the acquisition and sets is_acquiring flag to False.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_new_frame(self):
+        """Get frame from camera.
+
+        Returns
+        -------
+        frame : numpy.ndarray
+            Frame ids from HamamatsuOrca camera.
+        """
+        raise NotImplementedError

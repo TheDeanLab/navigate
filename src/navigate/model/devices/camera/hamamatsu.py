@@ -163,6 +163,7 @@ class HamamatsuBase(CameraBase):
             "*** exposure time range:",
             self.camera_controller.get_property_range("exposure_time"),
         )
+
     def set_sensor_mode(self, mode):
         """Set HamamatsuOrca sensor mode.
 
@@ -271,18 +272,6 @@ class HamamatsuBase(CameraBase):
         """
         return self.camera_controller.set_property_value(
             "internal_line_interval", line_interval_time
-        )
-
-    def get_line_interval(self):
-        """Get HamamatsuOrca line interval.
-
-        Returns
-        -------
-        line_interval_time : float
-            Line interval duration.
-        """
-        self.line_interval = self.camera_controller.get_property_value(
-            "internal_line_interval"
         )
 
     def set_binning(self, binning_string):

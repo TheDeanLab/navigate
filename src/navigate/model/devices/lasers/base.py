@@ -30,17 +30,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Laser Base Class
-"""
+# Standard Library Imports
 import logging
+import abc
+
+# Third Party Imports
+
+# Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class LaserBase:
+class LaserBase(metaclass=abc.ABCMeta):
     """Laser Base Class"""
 
     def __init__(self, microscope_name, device_connection, configuration, laser_id):
@@ -69,6 +72,12 @@ class LaserBase:
             microscope_name
         ]["lasers"][laser_id]
 
+    @abc.abstractmethod
+    def __del__(self):
+        """Close the laser before exit."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def set_power(self, laser_intensity):
         """Set laser power
 
@@ -77,22 +86,14 @@ class LaserBase:
         laser_intensity : int
             Laser intensity
         """
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def turn_on(self):
         """Turn on the laser"""
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def turn_off(self):
         """Turn off the laser"""
-        pass
-
-    def close(self):
-        """
-        Close the laser before exit.
-        """
-        pass
-
-    def initialize_laser(self):
-        """Initialize lasers."""
-        pass
+        raise NotImplementedError

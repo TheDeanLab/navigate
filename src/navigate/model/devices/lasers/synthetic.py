@@ -59,12 +59,24 @@ class SyntheticLaser(LaserBase):
         """
         super().__init__(microscope_name, device_connection, configuration, laser_id)
 
-    def close(self):
-        """Close the port before exit."""
+    def __del__(self):
+        """Destructor"""
         pass
 
-    def initialize_laser(self):
+    def set_power(self, laser_intensity):
+        """Set laser power
+
+        Parameters
+        ----------
+        laser_intensity : int
+            Laser intensity
         """
-        Initialize lasers.
-        """
+        pass
+
+    def turn_on(self):
+        """Turn on the laser"""
+        pass
+
+    def turn_off(self):
+        """Turn off the laser"""
         pass

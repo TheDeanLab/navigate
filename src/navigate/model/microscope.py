@@ -938,7 +938,7 @@ class Microscope:
             self.galvo[k].__del__()
 
         for k in self.lasers:
-            self.lasers[k].close()
+            self.lasers[k].__del__()
 
         for stage, _ in self.stages_list:
             try:

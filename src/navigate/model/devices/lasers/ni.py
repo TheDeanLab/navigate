@@ -133,6 +133,18 @@ class LaserNI(LaserBase):
             print(e.error_code)
             print(e.error_type)
 
+    def __del__(self):
+        """Close NI Task before exit."""
+        try:
+            self.laser_ao_task.close()
+        except Exception as e:
+            logger.exception(e)
+
+        try:
+            self.laser_do_task.close()
+        except Exception as e:
+            logger.exception(e)
+
     def set_power(self, laser_intensity):
         """Sets the laser power.
 
@@ -172,16 +184,4 @@ class LaserNI(LaserBase):
                 elif self.on_off_type == "analog":
                     self.laser_do_task.write(self.laser_min_do, auto_start=True)
         except DaqError as e:
-            logger.exception(e)
-
-    def close(self):
-        """Close the NI Task before exit."""
-        try:
-            self.laser_ao_task.close()
-        except Exception as e:
-            logger.exception(e)
-
-        try:
-            self.laser_do_task.close()
-        except Exception as e:
             logger.exception(e)

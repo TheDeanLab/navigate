@@ -72,7 +72,7 @@ class ImagineOpticsMirror(MirrorBase):
         self.flat()
 
     def __del__(self):
-        """Close the deformable mirror. """
+        """Close the deformable mirror."""
         pass
 
     def flat(self):
@@ -108,8 +108,8 @@ class ImagineOpticsMirror(MirrorBase):
 
         Returns
         -------
-        list
-            List of modal coefficients.
+        coefficients : list
+            Modal coefficients.
         """
         return self.mirror_controller.get_modal_coefs()
 
@@ -125,7 +125,7 @@ class ImagineOpticsMirror(MirrorBase):
 
         Returns
         -------
-        list
+        coefficients : list
             List of coefficients.
         """
         if path:

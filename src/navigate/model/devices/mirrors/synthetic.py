@@ -64,9 +64,62 @@ class SyntheticMirror(MirrorBase):
         self.is_synthetic = True
 
     def __del__(self):
-        """ Close the Synthetic Deformable Mirror """
+        """Close the Synthetic Deformable Mirror"""
         pass
 
     def flat(self):
         """Flat the mirror."""
+        pass
+
+    def zero_flatness(self):
+        """Zero the mirror flatness."""
+        pass
+
+    def display_modes(self, coefs):
+        """Display the mirror modes.
+
+        Parameters
+        ----------
+        coefs : list
+            List of coefficients to display the mirror modes.
+        """
+        pass
+
+    def get_modal_coefs(self):
+        """Get the modal coefficients.
+
+        Returns
+        -------
+        coefficients : list
+            Modal coefficients.
+        """
+        pass
+
+    def set_from_wcs_file(self, path=None, name=None):
+        """Set the mirror from a WCS file.
+
+        Parameters
+        ----------
+        path : str, optional
+            Path to the WCS file, by default None
+        name : str, optional
+            Name of the WCS file, by default None
+
+        Returns
+        -------
+        coefficients : list
+            List of coefficients.
+        """
+        pass
+
+    def save_wcs_file(self, path=None, name=None):
+        """Save the WCS file.
+
+        Parameters
+        ----------
+        path : str, optional
+            Path to save the WCS file, by default None
+        name : str, optional
+            Name of the WCS file, by default None
+        """
         pass

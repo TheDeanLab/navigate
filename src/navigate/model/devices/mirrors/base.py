@@ -33,6 +33,7 @@
 
 # Standard Library Imports
 import logging
+import abc
 
 # Third Party Imports
 
@@ -43,7 +44,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class MirrorBase:
+class MirrorBase(metaclass=abc.ABCMeta):
     """MirrorBase Parent camera class."""
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -55,7 +56,7 @@ class MirrorBase:
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
         """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
@@ -75,6 +76,70 @@ class MirrorBase:
         #: bool: Is the mirror synthetic?
         self.is_synthetic = False
 
+    @abc.abstractmethod
     def __del__(self):
-        """ Close the deformable mirror. """
-        pass
+        """Close the deformable mirror."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def flat(self):
+        """Move the mirror to the flat position."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def zero_flatness(self):
+        """Zero the mirror flatness."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def display_modes(self, coefs):
+        """Display the mirror modes.
+
+        Parameters
+        ----------
+        coefs : list
+            List of coefficients to display the mirror modes.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_modal_coefs(self):
+        """Get the modal coefficients.
+
+        Returns
+        -------
+        coefficients : list
+            Modal coefficients.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_from_wcs_file(self, path=None, name=None):
+        """Set the mirror from a WCS file.
+
+        Parameters
+        ----------
+        path : str, optional
+            Path to the WCS file, by default None
+        name : str, optional
+            Name of the WCS file, by default None
+
+        Returns
+        -------
+        coefficients : list
+            List of coefficients.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def save_wcs_file(self, path=None, name=None):
+        """Save the WCS file.
+
+        Parameters
+        ----------
+        path : str, optional
+            Path to save the WCS file, by default None
+        name : str, optional
+            Name of the WCS file, by default None
+        """
+        raise NotImplementedError

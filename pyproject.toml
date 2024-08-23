@@ -39,7 +39,8 @@ dependencies = [
     'fsspec==2022.8.2; sys_platform != "darwin"',
     'fsspec==2022.5.0; sys_platform == "darwin"',
     'h5py==3.7.0',
-    'requests==2.28.1'
+    'requests==2.28.1',
+    'psutil'
     ]
 
 [project.scripts]

@@ -308,7 +308,7 @@ class PhotometricsBase(CameraBase):
         full_chip_exposure_time = full_chip_exposure_time * 1000
 
         # equations to calculate ASLM parameters
-        linedelay = self.camera_parameters["unitforlinedelay"] / 1000
+        linedelay = self.camera_parameters.get("unitforlinedelay", 1) / 1000
         ASLM_lineExposure = int(
             np.ceil(full_chip_exposure_time / (1 + (1 + nbrows) / shutter_width))
         )
@@ -373,7 +373,7 @@ class PhotometricsBase(CameraBase):
         self.y_pixels = int(self.y_pixels / self.y_binning)
         return True
 
-    def set_ROI(self, roi_height=3200, roi_width=3200, center_x=1600, center_y=1600):
+    def set_ROI(self, roi_width=3200, roi_height=3200, center_x=1600, center_y=1600):
         """Change the size of the active region on the camera.
 
         Parameters
@@ -419,6 +419,7 @@ class PhotometricsBase(CameraBase):
 
         # Set ROI
         self.camera_controller.set_roi(roi_left, roi_top, roi_width, roi_height)
+        self.x_pixels, self.y_pixels = self.camera_controller.shape()
         logger.info(f"Photometrics ROI shape, {self.camera_controller.shape()}")
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 

@@ -231,10 +231,23 @@ class MicroscopePopupController(GUIController):
                 self.parent_controller.view.menubar.menu_resolution.entryconfig(
                     microscope_name, state="normal"
                 )
+                # disable camera setting menu item
+                self.parent_controller.view.menubar.menu_resolution.entryconfig(
+                    f"{microscope_name} Camera Setting", state="disabled"
+                )
+                controller_name = f"{microscope_name.lower()}_camera_setting_controller"
+                if hasattr(self.parent_controller, controller_name):
+                    camera_setting_controller = getattr(self.parent_controller, controller_name)
+                    camera_setting_controller.popup.popup.dismiss()
+                    delattr(self.parent_controller, controller_name)
             else:
                 # disable
                 self.parent_controller.view.menubar.menu_resolution.entryconfig(
                     microscope_name, state="disabled"
+                )
+                # enable camera setting menu item
+                self.parent_controller.view.menubar.menu_resolution.entryconfig(
+                    f"{microscope_name} Camera Setting", state="normal"
                 )
 
         self.exit_func()

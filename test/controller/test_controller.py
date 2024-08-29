@@ -70,8 +70,9 @@ def test_update_buffer(controller):
     assert controller.model.get_data_buffer.called is False
 
     # Change the buffer size
-    controller.configuration["experiment"]["CameraParameters"]["img_x_pixels"] = 100
-    controller.configuration["experiment"]["CameraParameters"]["img_y_pixels"] = 100
+    microscope_name = controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+    controller.configuration["experiment"]["CameraParameters"][microscope_name]["img_x_pixels"] = 100
+    controller.configuration["experiment"]["CameraParameters"][microscope_name]["img_y_pixels"] = 100
     controller.update_buffer()
 
     # Make sure that the get_data_buffer method is called.
@@ -510,8 +511,9 @@ def test_capture_image(controller):
             return "stop"
         return numpy.random.randint(0, 10)
     
-    width = controller.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
-    height = controller.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
+    microscope_name = controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+    width = controller.configuration["experiment"]["CameraParameters"][microscope_name]["img_x_pixels"]
+    height = controller.configuration["experiment"]["CameraParameters"][microscope_name]["img_y_pixels"]
     images = numpy.random.rand(10, width, height)
     controller.data_buffer = images
     work_thread = MagicMock()
@@ -612,7 +614,8 @@ def test_waveform_template(
     controller.configuration["experiment"]["MicroscopeState"][
         "image_mode"
     ] = acquisition_mode
-    controller.configuration["experiment"]["CameraParameters"]["number_of_pixels"] = 10
+    microscope_name = controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+    controller.configuration["experiment"]["CameraParameters"][microscope_name]["number_of_pixels"] = 10
     controller.populate_experiment_setting(in_initialize=True)
 
     controller.camera_setting_controller.mode_widgets["Readout"].set(readout_direction)

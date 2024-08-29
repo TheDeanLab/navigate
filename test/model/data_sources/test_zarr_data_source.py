@@ -8,7 +8,7 @@ try:
     from pydantic_ome_ngff.v04.multiscale import Group
 
     pydantic = True
-except ImportError:
+except (ImportError, TypeError):
     pydantic = False
 
 from navigate.tools.file_functions import delete_folder

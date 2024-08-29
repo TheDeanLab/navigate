@@ -198,7 +198,12 @@ class TestVolumeSearch:
         from navigate.tools.sdf import volume_from_sdf, box
 
         M = int(self.config["number_z_steps"])
-        self.model.configuration["experiment"]["CameraParameters"]["x_pixels"] = self.N
+        microscope_name = self.model.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        self.model.configuration["experiment"]["CameraParameters"][microscope_name][
+            "x_pixels"
+        ] = self.N
         self.lxy = (
             np.random.randint(int(0.1 * self.N), int(0.4 * self.N))
             * self.curr_pixel_size

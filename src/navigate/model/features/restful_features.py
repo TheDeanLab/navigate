@@ -199,7 +199,9 @@ class IlastikSegmentation:
         self.pieces_num = int(curr_pixel_size / pixel_size)
         self.pieces_size = ceil(
             float(
-                self.model.configuration["experiment"]["CameraParameters"]["x_pixels"]
+                self.model.configuration["experiment"]["CameraParameters"][
+                    self.model.active_microscope_name
+                ]["x_pixels"]
             )
             / self.pieces_num
         )
@@ -209,13 +211,17 @@ class IlastikSegmentation:
         # calculate corner (x,y)
         curr_fov_x = (
             float(
-                self.model.configuration["experiment"]["CameraParameters"]["x_pixels"]
+                self.model.configuration["experiment"]["CameraParameters"][
+                    self.model.active_microscope_name
+                ]["x_pixels"]
             )
             * curr_pixel_size
         )
         curr_fov_y = (
             float(
-                self.model.configuration["experiment"]["CameraParameters"]["y_pixels"]
+                self.model.configuration["experiment"]["CameraParameters"][
+                    self.model.active_microscope_name
+                ]["y_pixels"]
             )
             * curr_pixel_size
         )

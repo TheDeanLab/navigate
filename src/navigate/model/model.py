@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -102,15 +102,16 @@ class Model:
         """
 
         log_setup("model_logging.yml")
+
         #: object: Logger object.
         self.logger = logging.getLogger(p)
 
-        # Loads the YAML file for all of the microscope parameters
+        # Loads the YAML file for all the microscope parameters
         #: dict: Configuration dictionary.
         self.configuration = configuration
 
-        plugins = PluginsModel()
         # load plugin feature and devices
+        plugins = PluginsModel()
         plugin_devices, plugin_acquisition_modes = plugins.load_plugins()
         devices_dict = load_devices(
             configuration, args.synthetic_hardware, plugin_devices
@@ -122,6 +123,7 @@ class Model:
 
         #: dict: Dictionary of virtual microscopes.
         self.virtual_microscopes = {}
+
         #: dict: Dictionary of physical microscopes.
         self.microscopes = {}
         for microscope_name in configuration["configuration"]["microscopes"].keys():
@@ -133,6 +135,7 @@ class Model:
 
         #: str: Name of the active microscope.
         self.active_microscope = None
+
         #: str: Name of the active microscope.
         self.active_microscope_name = None
         self.get_active_microscope()
@@ -140,24 +143,34 @@ class Model:
         # Acquisition Housekeeping
         #: str: Imaging mode.
         self.imaging_mode = None
+
         #: int: Number of images acquired.
         self.image_count = 0
+
         #: int: Number of acquisitions.
         self.acquisition_count = 0
+
         #: int: Total number of acquisitions.
         self.total_acquisition_count = None
+
         #: int: Total number of images.
         self.total_image_count = None
+
         #: float: Current exposure time in milliseconds
         self.current_exposure_time = 0  # milliseconds
+
         #: float: Pre-exposure time in milliseconds
         self.pre_exposure_time = 0  # milliseconds
+
         #: int: Number of timeouts before aborting acquisition.
         self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
+
         #: float: Time before acquisition.
         self.start_time = None
+
         #: object: Data buffer.
         self.data_buffer = None
+
         #: int: Number of active pixels in the x-dimension.
         self.img_width = int(
             self.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
@@ -166,26 +179,33 @@ class Model:
         self.img_height = int(
             self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
         )
+
         #: str: Binning mode.
         self.binning = "1x1"
+
         #: array: stage positions.
         self.data_buffer_positions = None
+
         #: array: saving flags for a frame
         self.data_buffer_saving_flags = None
+
         #: bool: Is the model acquiring?
         self.is_acquiring = False
 
         # Autofocusing
         #: float: Current focus position.
         self.f_position = None
+
         #: float: Autofocus maximum entropy.
         self.max_entropy = None
+
         #: float: Autofocus maximum entropy position.
         self.focus_pos = None
 
         # Threads
         #: threading.Thread: Signal thread.
         self.signal_thread = None
+
         #: threading.Thread: Data thread.
         self.data_thread = None
 
@@ -208,18 +228,25 @@ class Model:
         # flags
         #: bool: Inject a feature list?
         self.injected_flag = VariableWithLock(bool)  # autofocus
+
         #: bool: Is the model live?
         self.is_live = False  # need to clear up data buffer after acquisition
+
         #: bool: Is the model saving the data?
         self.is_save = False  # save data
+
         #: bool: Stop signal and data threads?
         self.stop_acquisition = False  # stop signal and data threads
+
         #: bool: Stop signal thread?
         self.stop_send_signal = False  # stop signal thread
+
         #: event: Pause data event.
         self.pause_data_event = threading.Event()
+
         #: threading.Lock: Pause data ready lock.
         self.pause_data_ready_lock = threading.Lock()
+
         #: bool: Ask to pause data thread?
         self.ask_to_pause_data_thread = False
 
@@ -237,8 +264,10 @@ class Model:
         # feature list
         #: list: add on feature in customized mode
         self.addon_feature = None
+
         #: list: List of features.
         self.feature_list = []
+
         # automatically switch resolution
         self.feature_list.append(
             [
@@ -248,10 +277,13 @@ class Model:
         )
         # z stack acquisition
         self.feature_list.append([{"name": ZStackAcquisition}])
+
         # threshold and tile
         self.feature_list.append([{"name": FindTissueSimple2D}])
+
         # Ilastik segmentation
         self.feature_list.append([{"name": IlastikSegmentation}])
+
         # volume search
         self.feature_list.append(
             [
@@ -261,6 +293,7 @@ class Model:
                 }
             ]
         )
+
         self.feature_list.append(
             [
                 (
@@ -1350,10 +1383,7 @@ class Model:
                     )
 
         # connect virtual microscope with data_buffer
-        microscope.update_data_buffer(
-            data_buffer,
-            self.number_of_frames
-        )
+        microscope.update_data_buffer(data_buffer, self.number_of_frames)
 
         # add microscope to self.virtual_microscopes
         self.virtual_microscopes[microscope_name] = microscope

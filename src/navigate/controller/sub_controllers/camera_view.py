@@ -1141,6 +1141,7 @@ class CameraViewController(BaseViewController):
             "microscopes"
         ][microscope_name]["zoom"]["pixel_size"][zoom_value]
 
+        # self.move_to_x is the absolute position on the screen.
         offset_x = int(
             (self.move_to_x - current_center_x)
             / self.zoom_scale

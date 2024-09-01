@@ -646,7 +646,6 @@ class Microscope:
             whether to override waveforms in the DAQ (create new tasks)
         """
         curr_channel = self.current_channel
-        prefix = "channel_"
         if self.current_channel == 0:
             self.current_channel = self.available_channels[0]
         else:
@@ -657,7 +656,7 @@ class Microscope:
         if curr_channel == self.current_channel:
             return
 
-        channel_key = prefix + str(self.current_channel)
+        channel_key = "channel_" + str(self.current_channel)
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
             channel_key
         ]

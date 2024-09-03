@@ -34,12 +34,15 @@
 import time
 import serial
 import threading
+import logging
 
 # Third-party imports
 import numpy as np
 
 # Local application imports
 
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 class MP285:
     """Sutter MP285 3D Stage API
@@ -110,9 +113,11 @@ class MP285:
         except serial.SerialException as e:
             print("MP285 serial connection failed!")
             raise e
+        logger.debug("Connection established.")
 
     def disconnect_from_serial(self):
         self.serial.close()
+        logger.debug("Connection closed.")
 
     def flush_buffers(self):
         """Flush Serial I/O Buffers."""
@@ -122,6 +127,7 @@ class MP285:
         self.serial.reset_input_buffer()
         self.serial.reset_output_buffer()
         self.safe_to_write.set()
+        logger.debug("Serial I/O buffers flushed.")
 
     @staticmethod
     def convert_microsteps_to_microns(microsteps):
@@ -180,6 +186,7 @@ class MP285:
         # self.flush_buffers()
         command = bytes.fromhex("63") + bytes.fromhex("0d")
         self.safe_write(command)
+        logger.debug(f"safe_write({command})")
         # position_information = self.serial.read_until(
         #     expected=bytes.fromhex("0d"), size=100
         # )
@@ -192,8 +199,10 @@ class MP285:
             else:
                 position_information += curr_read
             if len(position_information) == 13:
+                logger.debug(f"position_information = {position_information}")
                 break
         if len(position_information) != 13:
+            logger.debug(f"position_information = {position_information}")
             raise UserWarning(
                 f"Encountered response {position_information}. "
                 "You need to power cycle the stage."
@@ -261,6 +270,7 @@ class MP285:
         )
         # self.flush_buffers()
         self.safe_write(move_cmd)
+        logger.debug(f"save_write({move_cmd})")
         # print(f"move command: {move_cmd} wait_until_done {self.wait_until_done}")
 
         for _ in range(self.n_waits):
@@ -270,6 +280,7 @@ class MP285:
             if response == b"":
                 time.sleep(self.wait_time)
             elif response == bytes.fromhex("0d"):
+                logger.debug(f"read({response})")
                 self.safe_to_write.set()
                 return True
             else:
@@ -376,6 +387,7 @@ class MP285:
             True if move was successful, False if not.
         """
         # print("calling interrupt_move")
+        logger.debug("interrupt_move() called")
 
         # Send Command
         self.safe_to_write.set()
@@ -390,11 +402,14 @@ class MP285:
             if response == b"":
                 time.sleep(self.wait_time)
             elif response == bytes.fromhex("0d"):
+                logger.debug(f"read({response})")
                 self.safe_to_write.set()
                 return True
             elif response == bytes.fromhex("3d"):
+                logger.debug(f"read({response})")
                 for _ in range(self.n_waits):
                     response2 = self.serial.read(1)
+                    logger.debug(f"response2 = {response2}")
                     if response2 == b"":
                         time.sleep(self.wait_time)
                     elif response2 == bytes.fromhex("0d"):

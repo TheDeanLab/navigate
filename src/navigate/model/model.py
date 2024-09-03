@@ -718,7 +718,7 @@ class Model:
             """
             Called when user halts the acquisition
             """
-            self.logger.info("Navigate Model - Stopping with stop command.")
+            logging.info("Navigate Model - Stopping with stop command.")
             self.stop_acquisition = True
 
             if hasattr(self, "signal_container"):
@@ -807,7 +807,7 @@ class Model:
 
     def stop_stage(self):
         """Stop the stages."""
-        self.active_microscope.stop_stage()
+        # self.active_microscope.stop_stage()
         ret_pos_dict = self.get_stage_position()
         update_stage_dict(self, ret_pos_dict)
         self.event_queue.put(("update_stage", ret_pos_dict))

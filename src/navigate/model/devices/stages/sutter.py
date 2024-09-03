@@ -152,8 +152,6 @@ class SutterStage(StageBase):
     def __del__(self):
         """Delete SutterStage Serial Port.
 
-
-
         Raises
         ------
         UserWarning

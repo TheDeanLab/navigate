@@ -763,8 +763,8 @@ class Microscope:
 
         self.ask_stage_for_position = True
 
-        for stage, axes in self.stages_list:
-            stage.stop()
+        # for stage, axes in self.stages_list:
+        #     stage.stop()
 
         self.central_focus = self.get_stage_position().get("f_pos", self.central_focus)
 

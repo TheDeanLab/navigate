@@ -1175,6 +1175,7 @@ class Controller:
             camera_view_controller.data_buffer = self.additional_microscopes[
                 microscope_name
             ]["data_buffer"]
+            camera_view_controller.microscope_name = microscope_name
             popup_window.popup.bind("<Configure>", camera_view_controller.resize)
             self.additional_microscopes[microscope_name]["popup_window"] = popup_window
             self.additional_microscopes[microscope_name][

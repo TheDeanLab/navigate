@@ -666,10 +666,12 @@ class CameraSettingController(GUIController):
         self.min_height = camera_config_dict.get("y_pixels_min", 4)
 
         self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
-        (
-            self.default_width,
-            self.default_height,
-        ) = self.parent_controller.configuration_controller.camera_pixels
+        self.default_height = camera_config_dict["y_pixels"]
+        self.default_width = camera_config_dict["x_pixels"]
+        # (
+        #     self.default_width,
+        #     self.default_height,
+        # ) = self.parent_controller.configuration_controller.camera_pixels
         self.trigger_source = camera_config_dict["trigger_source"]
         self.trigger_active = camera_config_dict["trigger_active"]
         self.readout_speed = camera_config_dict["readout_speed"]

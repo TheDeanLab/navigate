@@ -146,6 +146,9 @@ class BaseViewController(GUIController, ABaseViewController):
         #: str: The mode of the camera view controller.
         self.mode = "stop"
 
+        #: str: The microscope name
+        self.microscope_name = None
+
         #: dict: The flip flags for the camera.
         self.flip_flags = None
 
@@ -491,9 +494,18 @@ class BaseViewController(GUIController, ABaseViewController):
         self.original_image_width = int(camera_parameters["img_x_pixels"])
         self.original_image_height = int(camera_parameters["img_y_pixels"])
 
-        self.flip_flags = (
-            self.parent_controller.configuration_controller.camera_flip_flags
-        )
+        if self.microscope_name is None:
+            self.flip_flags = (
+                self.parent_controller.configuration_controller.camera_flip_flags
+            )
+        else:
+            camera_config = self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][self.microscope_name]["camera"]
+            self.flip_flags = {
+                "x": camera_config.get("flip_x", False),
+                "y": camera_config.get("flip_y", False)
+            }
 
         self.update_canvas_size()
         self.reset_display(False)
@@ -915,9 +927,9 @@ class CameraViewController(BaseViewController):
         self.image_metrics["Channel"].set(int(self.selected_channels[channel_idx][2:]))
 
         # Save the image to the spooled image loader.
-        self.spooled_images.save_image(
-            image=image, channel=channel_idx, slice_index=slice_idx
-        )
+        # self.spooled_images.save_image(
+        #     image=image, channel=channel_idx, slice_index=slice_idx
+        # )
 
         # Update image according to the display state.
         self.display_state = self.view.live_frame.live.get()

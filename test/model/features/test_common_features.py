@@ -40,6 +40,7 @@ class TestZStack:
     @pytest.fixture(autouse=True)
     def _prepare_test(self, dummy_model_to_test_features):
         self.model = dummy_model_to_test_features
+        self.model.virtual_microscopes = {}
         self.config = self.model.configuration["experiment"]["MicroscopeState"]
         self.record_num = 0
         self.feature_list = [[{"name": ZStackAcquisition}]]

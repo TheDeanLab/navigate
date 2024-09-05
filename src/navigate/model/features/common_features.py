@@ -1062,9 +1062,10 @@ class ZStackAcquisition:
         # restore f_pos, positions
         self.model.active_microscope.central_focus = None
         self.model.active_microscope.current_channel = 0
+        for microscope_name in self.model.virtual_microscopes:
+            self.model.virtual_microscopes[microscope_name].current_channel = 0
         # prepare next channel
         self.prepare_next_channel.signal_func()
-        # self.model.active_microscope.prepare_next_channel()
 
         self.model.logger.debug(
             f"*** ZStack pre_signal_func: {self.positions}, {self.start_focus}, "
@@ -1281,7 +1282,6 @@ class ZStackAcquisition:
         ) % self.channels
         # not update DAQ tasks if there is a NI Galvo stage
         self.prepare_next_channel.signal_func()
-        self.model.active_microscope.prepare_next_channel()
         if self.defocus is not None:
             self.current_focus_position += self.defocus[self.current_channel_in_list]
 

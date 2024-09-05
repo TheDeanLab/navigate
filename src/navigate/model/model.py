@@ -1291,7 +1291,6 @@ class Model:
             microscope_name
         ]["img_x_pixels"]
 
-        print("*** microscope:", microscope_name, " data buffer size:", img_height, img_width)
 
         # create databuffer
         data_buffer = [

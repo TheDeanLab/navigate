@@ -927,9 +927,9 @@ class CameraViewController(BaseViewController):
         self.image_metrics["Channel"].set(int(self.selected_channels[channel_idx][2:]))
 
         # Save the image to the spooled image loader.
-        # self.spooled_images.save_image(
-        #     image=image, channel=channel_idx, slice_index=slice_idx
-        # )
+        self.spooled_images.save_image(
+            image=image, channel=channel_idx, slice_index=slice_idx
+        )
 
         # Update image according to the display state.
         self.display_state = self.view.live_frame.live.get()

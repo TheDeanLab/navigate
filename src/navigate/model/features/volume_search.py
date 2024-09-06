@@ -302,8 +302,8 @@ class VolumeSearch:
 
         # consider the image as a square
         img_width = self.model.configuration["experiment"]["CameraParameters"][
-            "x_pixels"
-        ]
+            microscope_name
+        ]["x_pixels"]
 
         # The target image size in pixels
         self.mag_ratio = int(curr_pixel_size / target_pixel_size)

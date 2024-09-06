@@ -50,11 +50,13 @@ from navigate.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
 from navigate.view.popups.feature_list_popup import FeatureListPopup
+from navigate.view.popups.camera_setting_popup import CameraSettingPopup
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.controller.sub_controllers import (
     AutofocusPopupController,
     IlastikPopupController,
     CameraMapSettingPopupController,
+    CameraSettingController,
     WaveformPopupController,
     MicroscopePopupController,
     FeaturePopupController,
@@ -64,7 +66,7 @@ from navigate.controller.sub_controllers import (
 )
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.tools.decorators import FeatureList
-from navigate.tools.common_functions import load_module_from_file
+from navigate.tools.common_functions import load_module_from_file, combine_funcs
 
 
 # Misc. Local Imports
@@ -467,6 +469,20 @@ class MenuController(GUIController):
                 ],
             }
         }
+        # camera setting menus
+        for microscope_name in self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ].keys():
+            configuration_dict[self.view.menubar.menu_resolution][
+                f"{microscope_name} Camera Setting"
+            ] = [
+                "standard",
+                self.popup_camera_setting(microscope_name),
+                None,
+                None,
+                None,
+                "disabled",
+            ]
         self.populate_menu(configuration_dict)
 
         # plugins
@@ -687,6 +703,12 @@ class MenuController(GUIController):
                                 menu.bind_all(
                                     menu_items[label][3], menu_items[label][1]
                                 )
+                    # set menu state
+                    if len(menu_items[label]) > 5 and menu_items[label][5] in [
+                        "disabled",
+                        "normal",
+                    ]:
+                        menu.entryconfig(label, state=menu_items[label][5])
 
     def new_experiment(self, *args):
         """Create a new experiment file."""
@@ -1090,3 +1112,39 @@ class MenuController(GUIController):
             self.uninstall_plugin_controller.showup()
             return
         self.uninstall_plugin_controller = UninstallPluginController(self.view, self)
+
+    def popup_camera_setting(self, microscope_name):
+        def func(*args):
+            controller_name = f"{microscope_name.lower()}_camera_setting_controller"
+            if hasattr(self.parent_controller, controller_name):
+                camera_setting_controller = getattr(
+                    self.parent_controller, controller_name
+                )
+                camera_setting_controller.popup.popup.deiconify()
+                camera_setting_controller.popup.popup.attributes("-topmost", 1)
+            else:
+                popup = CameraSettingPopup(self.view, microscope_name)
+                camera_setting_controller = CameraSettingController(
+                    popup.camera_setting,
+                    self.parent_controller,
+                    microscope_name=microscope_name,
+                )
+                camera_setting_controller.populate_experiment_values()
+                camera_setting_controller.popup = popup
+                setattr(
+                    self.parent_controller, controller_name, camera_setting_controller
+                )
+                popup.popup.protocol(
+                    "WM_DELETE_WINDOW",
+                    combine_funcs(
+                        popup.popup.dismiss,
+                        camera_setting_controller.update_experiment_values(),
+                        lambda: delattr(self.parent_controller, controller_name),
+                    ),
+                )
+            if self.parent_controller.acquire_bar_controller.is_acquiring:
+                camera_setting_controller.set_mode(
+                    self.parent_controller.acquire_bar_controller.mode
+                )
+
+        return func

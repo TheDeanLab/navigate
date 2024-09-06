@@ -149,7 +149,7 @@ class PyramidalDataSource(DataSource):
         ).sum()
 
     def set_metadata_from_configuration_experiment(
-        self, configuration: DictProxy
+        self, configuration: DictProxy, microscope_name: str=None
     ) -> None:
         """Sets the metadata from according to the microscope configuration.
 
@@ -157,11 +157,13 @@ class PyramidalDataSource(DataSource):
         ----------
         configuration : DictProxy
             The configuration experiment.
+        microscope_name : str
+            The microscope name
         """
         self._subdivisions = None
         self._shapes = None
 
-        return super().set_metadata_from_configuration_experiment(configuration)
+        return super().set_metadata_from_configuration_experiment(configuration, microscope_name)
 
     def __getitem__(self, keys):
         """Magic method to get slice requests passed by, e.g., ds[:,2:3,...].

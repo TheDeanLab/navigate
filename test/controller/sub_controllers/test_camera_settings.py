@@ -183,20 +183,23 @@ class TestCameraSettingController:
             assert hasattr(self.camera_settings, attr)
 
     def test_populate_experiment_values(self):
+        microscope_name = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["microscope_name"]
         self.camera_settings.parent_controller.configuration["experiment"][
             "CameraParameters"
-        ]["readout_time"] = 0.1
+        ][microscope_name]["readout_time"] = 0.1
         # Populate widgets with values from experiment file and check
         self.camera_settings.populate_experiment_values()
         camera_setting_dict = self.camera_settings.parent_controller.configuration[
             "experiment"
-        ]["CameraParameters"]
+        ]["CameraParameters"][microscope_name]
 
         # Checking values altered are correct
         assert dict(self.camera_settings.camera_setting_dict) == dict(
             self.camera_settings.parent_controller.configuration["experiment"][
                 "CameraParameters"
-            ]
+            ][microscope_name]
         )
         assert (
             str(self.camera_settings.mode_widgets["Sensor"].get())
@@ -228,14 +231,12 @@ class TestCameraSettingController:
             == camera_setting_dict["y_pixels"]
         )
 
-        assert (
-            self.camera_settings.roi_widgets["Top_X"].get()
-            == camera_setting_dict.get("top_x", 0)
-        )
-        assert (
-            self.camera_settings.roi_widgets["Top_Y"].get()
-            == camera_setting_dict.get("top_y", 0)
-        )
+        assert self.camera_settings.roi_widgets[
+            "Top_X"
+        ].get() == camera_setting_dict.get("top_x", 0)
+        assert self.camera_settings.roi_widgets[
+            "Top_Y"
+        ].get() == camera_setting_dict.get("top_y", 0)
         if camera_setting_dict.get("is_centered", True):
             assert (
                 str(self.camera_settings.roi_widgets["Top_X"].widget["state"])
@@ -253,7 +254,9 @@ class TestCameraSettingController:
         )
 
         # Exposure Time
-        channels = self.camera_settings.microscope_state_dict["channels"]
+        channels = self.camera_settings.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["channels"]
         exposure_time = channels[list(channels.keys())[0]]["camera_exposure_time"]
         assert (
             self.camera_settings.framerate_widgets["exposure_time"].get()
@@ -268,11 +271,14 @@ class TestCameraSettingController:
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
     def test_update_experiment_values(self, mode):
 
+        microscope_name = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["microscope_name"]
         # Setup basic default experiment
         self.camera_settings.camera_setting_dict = (
             self.camera_settings.parent_controller.configuration["experiment"][
                 "CameraParameters"
-            ]
+            ][microscope_name]
         )
 
         # Setting up new values in widgets
@@ -329,9 +335,12 @@ class TestCameraSettingController:
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
     def test_update_sensor_mode(self, mode):
         self.camera_settings.populate_experiment_values()
+        microscope_name = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["microscope_name"]
         camera_setting_dict = self.camera_settings.parent_controller.configuration[
             "experiment"
-        ]["CameraParameters"]
+        ]["CameraParameters"][microscope_name]
 
         # Set mode
         self.camera_settings.mode_widgets["Sensor"].widget.set(mode)

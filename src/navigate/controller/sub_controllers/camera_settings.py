@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 class CameraSettingController(GUIController):
     """Controller for the camera settings."""
 
-    def __init__(self, view, parent_controller=None):
+    def __init__(self, view, parent_controller=None, microscope_name=None):
         """Initialize the camera setting controller.
 
         Parameters
@@ -57,6 +57,9 @@ class CameraSettingController(GUIController):
             The parent controller.
         """
         super().__init__(view, parent_controller)
+
+        #: str: Camera name
+        self.microscope_name = microscope_name
 
         #: bool: True if in initialization
         self.in_initialization = True
@@ -200,35 +203,24 @@ class CameraSettingController(GUIController):
         self.in_initialization = True
 
         # Retrieve settings.
+
+        # Microscope state dictionary
+        microscope_state_dict = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]
+        microscope_name = (
+            self.microscope_name
+            if self.microscope_name
+            else microscope_state_dict["microscope_name"]
+        )
         #: dict: Camera setting dictionary
         self.camera_setting_dict = self.parent_controller.configuration["experiment"][
             "CameraParameters"
-        ]
-
-        #: dict: Microscope state dictionary
-        self.microscope_state_dict = self.parent_controller.configuration["experiment"][
-            "MicroscopeState"
-        ]
+        ][microscope_name]
 
         # Readout Settings
         self.mode_widgets["Sensor"].set(self.camera_setting_dict["sensor_mode"])
-        if self.camera_setting_dict["sensor_mode"] == "Normal":
-            self.mode_widgets["Readout"].set("")
-            self.mode_widgets["Pixels"].set("")
-        else:
-            if (
-                self.camera_setting_dict["readout_direction"]
-                not in self.camera_readout_directions
-            ):
-                self.camera_setting_dict[
-                    "readout_direction"
-                ] = self.camera_readout_directions[0]
-            self.mode_widgets["Readout"].set(
-                self.camera_setting_dict["readout_direction"]
-            )
-            self.mode_widgets["Pixels"].set(
-                self.camera_setting_dict["number_of_pixels"]
-            )
+        self.update_sensor_mode()
 
         # ROI Settings
         if self.camera_setting_dict.get("is_centered", True):
@@ -257,15 +249,13 @@ class CameraSettingController(GUIController):
         # Camera Framerate Info - 'exposure_time', 'readout_time',
         # 'framerate', 'frames_to_average'
         # Exposure time is currently for just the first active channel
-        channels = self.microscope_state_dict["channels"]
+        channels = microscope_state_dict["channels"]
         exposure_time = channels[list(channels.keys())[0]]["camera_exposure_time"]
         self.framerate_widgets["exposure_time"].set(exposure_time)
         self.framerate_widgets["frames_to_average"].set(
             self.camera_setting_dict["frames_to_average"]
         )
 
-        # readout time
-        self.update_readout_time()
 
         # after initialization
         self.in_initialization = False
@@ -370,7 +360,7 @@ class CameraSettingController(GUIController):
         If we are in the Light Sheet mode, then we want the camera
         self.model['CameraParameters']['sensor_mode']) == 12
 
-        If we are in the normal mode, then we want the camera
+        If we are in thef normal mode, then we want the camera
         self.model['CameraParameters']['sensor_mode']) == 1
 
         Should initialize from the configuration file to the default version
@@ -505,7 +495,7 @@ class CameraSettingController(GUIController):
             # reset widgets
             for widget_name in ["Top_X", "Top_Y", "Bottom_X", "Bottom_Y"]:
                 self.roi_widgets[widget_name].widget._toggle_error(False)
-                
+
             self.camera_setting_dict["top_x"] = self.roi_widgets["Top_X"].get()
             self.camera_setting_dict["bottom_x"] = self.roi_widgets["Bottom_X"].get()
             self.camera_setting_dict["top_y"] = self.roi_widgets["Top_Y"].get()
@@ -587,6 +577,9 @@ class CameraSettingController(GUIController):
             "MicroscopeState"
         ]
         zoom = microscope_state_dict["zoom"]
+        # TODO: calculate fov_x and fov_y for additional microscopes
+        if self.microscope_name:
+            return
         microscope_name = microscope_state_dict["microscope_name"]
         pixel_size = self.parent_controller.configuration["configuration"][
             "microscopes"
@@ -655,9 +648,15 @@ class CameraSettingController(GUIController):
         This function will update default width and height according to microscope name.
 
         """
-        camera_config_dict = (
-            self.parent_controller.configuration_controller.camera_config_dict
-        )
+        if self.microscope_name is None:
+            camera_config_dict = (
+                self.parent_controller.configuration_controller.camera_config_dict
+            )
+        else:
+            camera_config_dict = self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][self.microscope_name]["camera"]
+
         if camera_config_dict is None:
             return
 
@@ -667,10 +666,12 @@ class CameraSettingController(GUIController):
         self.min_height = camera_config_dict.get("y_pixels_min", 4)
 
         self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
-        (
-            self.default_width,
-            self.default_height,
-        ) = self.parent_controller.configuration_controller.camera_pixels
+        self.default_height = camera_config_dict["y_pixels"]
+        self.default_width = camera_config_dict["x_pixels"]
+        # (
+        #     self.default_width,
+        #     self.default_height,
+        # ) = self.parent_controller.configuration_controller.camera_pixels
         self.trigger_source = camera_config_dict["trigger_source"]
         self.trigger_active = camera_config_dict["trigger_active"]
         self.readout_speed = camera_config_dict["readout_speed"]
@@ -692,6 +693,19 @@ class CameraSettingController(GUIController):
 
         self.roi_widgets["Bottom_X"].widget.config(to=self.default_width)
         self.roi_widgets["Bottom_Y"].widget.config(to=self.default_height)
+
+        # update camera setting_dict
+        microscope_state_dict = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]
+        microscope_name = (
+            self.microscope_name
+            if self.microscope_name
+            else microscope_state_dict["microscope_name"]
+        )
+        self.camera_setting_dict = self.parent_controller.configuration["experiment"][
+            "CameraParameters"
+        ][microscope_name]
 
     def update_camera_parameters_silent(self, value):
         """Update GUI camera parameters

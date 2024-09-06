@@ -412,7 +412,9 @@ class Model:
         if (
             img_width != self.img_width
             or img_height != self.img_height
-            or self.configuration["experiment"]["CameraParameters"]["binning"]
+            or self.configuration["experiment"]["CameraParameters"][
+                self.active_microscope_name
+            ]["binning"]
             != self.binning
         ):
             self.update_data_buffer(img_width, img_height)
@@ -556,21 +558,25 @@ class Model:
             for m in self.virtual_microscopes:
                 image_writer = (
                     ImageWriter(
-                        self,
-                        self.virtual_microscopes[m].data_buffer,
-                        m,
+                        model=self,
+                        data_buffer=self.virtual_microscopes[m].data_buffer,
+                        microscope_name=m,
+                        sub_dir=m,
                         saving_flags=self.data_buffer_saving_flags,
                         saving_config=saving_config,
-                    ).save_image
+                    )
                     if self.is_save
                     else None
                 )
+                if image_writer:
+                    self.virtual_microscopes[m].image_writer = image_writer
+
                 threading.Thread(
                     target=self.simplified_data_process,
                     args=(
                         self.virtual_microscopes[m],
                         getattr(self, f"{m}_show_img_pipe"),
-                        image_writer,
+                        image_writer.save_image if image_writer else None,
                     ),
                 ).start()
 
@@ -822,6 +828,8 @@ class Model:
         self.active_microscope.end_acquisition()
         for microscope_name in self.virtual_microscopes:
             self.virtual_microscopes[microscope_name].end_acquisition()
+            if hasattr(self.virtual_microscopes[microscope_name], "image_writer"):
+                self.virtual_microscopes[microscope_name].image_writer.close()
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
         if plugin_obj and hasattr(plugin_obj, "end_acquisition_model"):
@@ -835,6 +843,7 @@ class Model:
             delattr(self, "data_container")
         if self.image_writer is not None:
             self.image_writer.close()
+
         #: obj: Add on feature.
         self.addon_feature = None
 
@@ -1275,10 +1284,17 @@ class Model:
         data_buffer : list
             List of data buffer.
         """
+        img_height = self.configuration["experiment"]["CameraParameters"][
+            microscope_name
+        ]["img_y_pixels"]
+        img_width = self.configuration["experiment"]["CameraParameters"][
+            microscope_name
+        ]["img_x_pixels"]
+
 
         # create databuffer
         data_buffer = [
-            SharedNDArray(shape=(self.img_height, self.img_width), dtype="uint16")
+            SharedNDArray(shape=(img_height, img_width), dtype="uint16")
             for i in range(self.number_of_frames)
         ]
 
@@ -1350,10 +1366,7 @@ class Model:
                     )
 
         # connect virtual microscope with data_buffer
-        microscope.update_data_buffer(
-            data_buffer,
-            self.number_of_frames
-        )
+        microscope.update_data_buffer(data_buffer, self.number_of_frames)
 
         # add microscope to self.virtual_microscopes
         self.virtual_microscopes[microscope_name] = microscope

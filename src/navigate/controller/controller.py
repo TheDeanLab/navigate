@@ -312,11 +312,18 @@ class Controller:
             Size dictated by x_pixels, y_pixels, an number_of_frames in
             configuration file.
         """
+        microscope_name = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
         img_width = int(
-            self.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
+            self.configuration["experiment"]["CameraParameters"][microscope_name][
+                "img_x_pixels"
+            ]
         )
         img_height = int(
-            self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
+            self.configuration["experiment"]["CameraParameters"][microscope_name][
+                "img_y_pixels"
+            ]
         )
         if img_width == self.img_width and img_height == self.img_height:
             return
@@ -324,11 +331,6 @@ class Controller:
         self.data_buffer = self.model.get_data_buffer(img_width, img_height)
         self.img_width = img_width
         self.img_height = img_height
-
-        # virtual microscopes
-        for microscope_name in list(self.additional_microscopes.keys()):
-            self.destroy_virtual_microscope(microscope_name)
-        self.additional_microscopes = {}
 
     def update_acquire_control(self):
         """Update the acquire control based on the current experiment parameters."""
@@ -356,6 +358,7 @@ class Controller:
             self.stage_controller.initialize()
             self.channels_tab_controller.initialize()
             self.camera_setting_controller.update_camera_device_related_setting()
+            self.camera_setting_controller.populate_experiment_values()
             self.camera_setting_controller.calculate_physical_dimensions()
             self.camera_view_controller.update_snr()
 
@@ -451,10 +454,15 @@ class Controller:
 
         """
         warning_message = self.camera_setting_controller.update_experiment_values()
+        microscope_name = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
 
         # set waveform template
         if self.acquire_bar_controller.mode in ["live", "single", "z-stack"]:
-            camera_setting = self.configuration["experiment"]["CameraParameters"]
+            camera_setting = self.configuration["experiment"]["CameraParameters"][
+                microscope_name
+            ]
             if camera_setting["sensor_mode"] == "Light-Sheet" and camera_setting[
                 "readout_direction"
             ] in ["Bidirectional", "Rev. Bidirectional"]:
@@ -482,6 +490,13 @@ class Controller:
         # TODO: validate experiment dict
 
         warning_message += self.channels_tab_controller.verify_experiment_values()
+
+        # additional microscopes
+        for microscope_name in self.additional_microscopes_configs:
+            if hasattr(self, f"{microscope_name.lower()}_camera_setting_controller"):
+                getattr(
+                    self, f"{microscope_name.lower()}_camera_setting_controller"
+                ).update_experiment_values()
         if warning_message:
             return warning_message
         return ""
@@ -557,6 +572,14 @@ class Controller:
         self.camera_setting_controller.set_mode(mode)
         self.mip_setting_controller.set_mode(mode)
         self.waveform_tab_controller.set_mode(mode)
+
+        # additional microscopes
+        for microscope_name in self.additional_microscopes_configs:
+            if hasattr(self, f"{microscope_name.lower()}_camera_setting_controller"):
+                getattr(
+                    self, f"{microscope_name.lower()}_camera_setting_controller"
+                ).set_mode(mode)
+
         if mode == "stop":
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()
@@ -987,15 +1010,18 @@ class Controller:
             return
         self.acquire_bar_controller.view.acquire_btn.configure(text="Stop")
         self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
+        microscope_name = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
 
         self.camera_view_controller.initialize_non_live_display(
             self.configuration["experiment"]["MicroscopeState"],
-            self.configuration["experiment"]["CameraParameters"],
+            self.configuration["experiment"]["CameraParameters"][microscope_name],
         )
 
         self.mip_setting_controller.initialize_non_live_display(
             self.configuration["experiment"]["MicroscopeState"],
-            self.configuration["experiment"]["CameraParameters"],
+            self.configuration["experiment"]["CameraParameters"][microscope_name],
         )
 
         self.stop_acquisition_flag = False
@@ -1076,11 +1102,15 @@ class Controller:
     def launch_additional_microscopes(self):
         """Launch additional microscopes."""
 
-        def display_images(camera_view_controller, show_img_pipe, data_buffer):
+        def display_images(
+            microscope_name, camera_view_controller, show_img_pipe, data_buffer
+        ):
             """Display images from additional microscopes.
 
             Parameters
             ----------
+            microscope_name : str
+                Microscope name
             camera_view_controller : CameraViewController
                 Camera View Controller object.
             show_img_pipe : multiprocessing.Pipe
@@ -1091,9 +1121,8 @@ class Controller:
                 configuration file.
             """
             camera_view_controller.initialize_non_live_display(
-                data_buffer,
                 self.configuration["experiment"]["MicroscopeState"],
-                self.configuration["experiment"]["CameraParameters"],
+                self.configuration["experiment"]["CameraParameters"][microscope_name],
             )
             images_received = 0
             while True:
@@ -1122,72 +1151,51 @@ class Controller:
                     break
                 images_received += 1
 
-        # destroy unnecessary additional microscopes
-        temp = []
-        for microscope_name in self.additional_microscopes:
-            if microscope_name not in self.additional_microscopes_configs:
-                temp.append(microscope_name)
-        for microscope_name in temp:
+        # destroy all additional microscopes
+        for microscope_name in list(self.additional_microscopes.keys()):
             self.destroy_virtual_microscope(microscope_name)
+        self.additional_microscopes = {}
 
         # show additional camera view popup
         for microscope_name in self.additional_microscopes_configs:
-            if microscope_name not in self.additional_microscopes:
-                show_img_pipe = self.model.create_pipe(
-                    f"{microscope_name}_show_img_pipe"
-                )
-                data_buffer = self.model.launch_virtual_microscope(
-                    microscope_name,
-                    self.additional_microscopes_configs[microscope_name],
-                )
+            show_img_pipe = self.model.create_pipe(f"{microscope_name}_show_img_pipe")
+            data_buffer = self.model.launch_virtual_microscope(
+                microscope_name,
+                self.additional_microscopes_configs[microscope_name],
+            )
 
-                self.additional_microscopes[microscope_name] = {
-                    "show_img_pipe": show_img_pipe,
-                    "data_buffer": data_buffer,
-                }
-            if (
-                self.additional_microscopes[microscope_name].get(
-                    "camera_view_controller", None
-                )
-                is None
-            ):
-                popup_window = CameraViewPopupWindow(self.view, microscope_name)
-                camera_view_controller = CameraViewController(
-                    popup_window.camera_view, self
-                )
-                camera_view_controller.data_buffer = self.additional_microscopes[
-                    microscope_name
-                ]["data_buffer"]
-                popup_window.popup.bind("<Configure>", camera_view_controller.resize)
-                self.additional_microscopes[microscope_name][
-                    "popup_window"
-                ] = popup_window
-                self.additional_microscopes[microscope_name][
-                    "camera_view_controller"
-                ] = camera_view_controller
-                popup_window.popup.protocol(
-                    "WM_DELETE_WINDOW",
-                    combine_funcs(
-                        popup_window.popup.dismiss,
-                        lambda: self.additional_microscopes[microscope_name].pop(
-                            "camera_view_controller"
-                        ),
+            self.additional_microscopes[microscope_name] = {
+                "show_img_pipe": show_img_pipe,
+                "data_buffer": data_buffer,
+            }
+            popup_window = CameraViewPopupWindow(self.view, microscope_name)
+            camera_view_controller = CameraViewController(
+                popup_window.camera_view, self
+            )
+            camera_view_controller.data_buffer = self.additional_microscopes[
+                microscope_name
+            ]["data_buffer"]
+            camera_view_controller.microscope_name = microscope_name
+            popup_window.popup.bind("<Configure>", camera_view_controller.resize)
+            self.additional_microscopes[microscope_name]["popup_window"] = popup_window
+            self.additional_microscopes[microscope_name][
+                "camera_view_controller"
+            ] = camera_view_controller
+            popup_window.popup.protocol(
+                "WM_DELETE_WINDOW",
+                combine_funcs(
+                    popup_window.popup.dismiss,
+                    lambda: self.additional_microscopes[microscope_name].pop(
+                        "camera_view_controller"
                     ),
-                )
-
-            # clear show_img_pipe
-            show_img_pipe = self.additional_microscopes[microscope_name][
-                "show_img_pipe"
-            ]
-            while show_img_pipe.poll():
-                image_id = show_img_pipe.recv()
-                if image_id == "stop":
-                    break
+                ),
+            )
 
             # start thread
             capture_img_thread = threading.Thread(
                 target=display_images,
                 args=(
+                    microscope_name,
                     self.additional_microscopes[microscope_name][
                         "camera_view_controller"
                     ],

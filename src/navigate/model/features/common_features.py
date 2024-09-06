@@ -752,7 +752,8 @@ class MoveToNextPositionInMultiPositionTable:
                 zip(
                     ["x", "y", "z", "theta", "f"],
                     [
-                        self.multiposition_table[self.current_idx - 1][i] + self.offset[i]
+                        self.multiposition_table[self.current_idx - 1][i]
+                        + self.offset[i]
                         for i in range(5)
                     ],
                 )
@@ -972,6 +973,8 @@ class ZStackAcquisition:
         self.image_writer = None
         if saving_flag:
             self.image_writer = ImageWriter(model, sub_dir=saving_dir)
+        
+        self.prepare_next_channel = PrepareNextChannel(model)
 
         #: dict: A dictionary defining the configuration for the z-stack acquisition
         self.config_table = {
@@ -1059,7 +1062,10 @@ class ZStackAcquisition:
         # restore f_pos, positions
         self.model.active_microscope.central_focus = None
         self.model.active_microscope.current_channel = 0
-        self.model.active_microscope.prepare_next_channel()
+        for microscope_name in self.model.virtual_microscopes:
+            self.model.virtual_microscopes[microscope_name].current_channel = 0
+        # prepare next channel
+        self.prepare_next_channel.signal_func()
 
         self.model.logger.debug(
             f"*** ZStack pre_signal_func: {self.positions}, {self.start_focus}, "
@@ -1275,7 +1281,7 @@ class ZStackAcquisition:
             self.current_channel_in_list + 1
         ) % self.channels
         # not update DAQ tasks if there is a NI Galvo stage
-        self.model.active_microscope.prepare_next_channel()
+        self.prepare_next_channel.signal_func()
         if self.defocus is not None:
             self.current_focus_position += self.defocus[self.current_channel_in_list]
 
@@ -1456,16 +1462,16 @@ class FindTissueSimple2D:
             curr_fov_x = (
                 float(
                     self.model.configuration["experiment"]["CameraParameters"][
-                        "x_pixels"
-                    ]
+                        microscope_name
+                    ]["x_pixels"]
                 )
                 * curr_pixel_size
             )
             curr_fov_y = (
                 float(
                     self.model.configuration["experiment"]["CameraParameters"][
-                        "y_pixels"
-                    ]
+                        microscope_name
+                    ]["y_pixels"]
                 )
                 * curr_pixel_size
             )
@@ -1520,16 +1526,16 @@ class FindTissueSimple2D:
             fov_x = (
                 float(
                     self.model.configuration["experiment"]["CameraParameters"][
-                        "x_pixels"
-                    ]
+                        microscope_name
+                    ]["x_pixels"]
                 )
                 * pixel_size
             )
             fov_y = (
                 float(
                     self.model.configuration["experiment"]["CameraParameters"][
-                        "y_pixels"
-                    ]
+                        microscope_name
+                    ]["y_pixels"]
                 )
                 * pixel_size
             )
@@ -1578,6 +1584,7 @@ class SetCameraParameters:
     def __init__(
         self,
         model,
+        microscope_name=None,
         sensor_mode="Normal",
         readout_direction=None,
         rolling_shutter_width=None,
@@ -1605,6 +1612,8 @@ class SetCameraParameters:
             "signal": {"main": self.signal_func, "cleanup": self.cleanup},
             "node": {"device_related": True},
         }
+        #: str: Microscope name
+        self.microscope_name = microscope_name
 
         #: str: The desired sensor mode to set for the camera.
         self.sensor_mode = sensor_mode
@@ -1631,11 +1640,19 @@ class SetCameraParameters:
         bool
             A boolean value indicating the success of the resolution change process.
         """
+        if (
+            self.microscope_name is None
+            or self.microscope_name
+            not in self.model.configuration["configuration"]["microscopes"].keys()
+        ):
+            self.microscope_name = self.model.active_microscope_name
         update_flag = False
         update_sensor_mode = False
-        camera_parameters = self.model.configuration["experiment"]["CameraParameters"]
+        camera_parameters = self.model.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ]
         camera_config = self.model.configuration["configuration"]["microscopes"][
-            self.model.active_microscope_name
+            self.microscope_name
         ]["camera"]
         updated_value = [None] * 3
         if (

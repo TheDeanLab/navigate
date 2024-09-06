@@ -151,9 +151,8 @@ class Metadata:
             self.configuration.get("experiment") is not None
             and self.configuration.get("configuration") is not None
         ):
-            self.active_microscope = self.configuration["experiment"][
-                "MicroscopeState"
-            ]["microscope_name"]
+            if self.active_microscope is None:
+                self.active_microscope = self.configuration["experiment"]["MicroscopeState"]["microscope_name"]
             self.set_shape_from_configuration_experiment()
             self.set_stack_order_from_configuration_experiment()
 
@@ -164,17 +163,21 @@ class Metadata:
             self.active_microscope
         ]
         zoom = state["zoom"]
-        pixel_size = float(scope["zoom"]["pixel_size"][zoom])
+        pixel_size = float(scope["zoom"]["pixel_size"].get(zoom, 1))
         self.dx, self.dy = pixel_size, pixel_size
         self.dz = float(abs(state["step_size"]))
         self.dt = float(state["timepoint_interval"])
 
         # TODO: do we need to update the XML meta data accordingly?
         self.shape_x = int(
-            self.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
+            self.configuration["experiment"]["CameraParameters"][
+                self.active_microscope
+            ]["img_x_pixels"]
         )
         self.shape_y = int(
-            self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
+            self.configuration["experiment"]["CameraParameters"][
+                self.active_microscope
+            ]["img_y_pixels"]
         )
         if (state["image_mode"] == "z-stack") or (state["image_mode"] == "customized"):
             self.shape_z = int(state["number_z_steps"])

@@ -205,7 +205,7 @@ class DataSource:
         pass
 
     def set_metadata_from_configuration_experiment(
-        self, configuration: DictProxy
+        self, configuration: DictProxy, microscope_name: str = None
     ) -> None:
         """Sets the metadata from according to the microscope configuration.
 
@@ -213,8 +213,10 @@ class DataSource:
         ----------
         configuration : DictProxy
             Configuration experiment.
+        microscope_name : str
+            The microscope name
         """
-
+        self.metadata.active_microscope = microscope_name
         self.metadata.configuration = configuration
         self.get_shape_from_metadata()
 

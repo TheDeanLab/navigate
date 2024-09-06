@@ -412,28 +412,38 @@ class Microscope:
             self.camera.close_image_series()
 
         # set ROI
-        img_width = self.configuration["experiment"]["CameraParameters"]["x_pixels"]
-        img_height = self.configuration["experiment"]["CameraParameters"]["y_pixels"]
-        center_x = self.configuration["experiment"]["CameraParameters"]["center_x"]
-        center_y = self.configuration["experiment"]["CameraParameters"]["center_y"]
+        img_width = self.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ]["x_pixels"]
+        img_height = self.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ]["y_pixels"]
+        center_x = self.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ]["center_x"]
+        center_y = self.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ]["center_y"]
         self.camera.set_ROI(img_width, img_height, center_x, center_y)
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
         sensor_mode = self.configuration["experiment"]["CameraParameters"][
-            "sensor_mode"
-        ]
+            self.microscope_name
+        ]["sensor_mode"]
 
         self.camera.set_sensor_mode(sensor_mode)
         if sensor_mode == "Light-Sheet":
             self.camera.set_readout_direction(
                 self.configuration["experiment"]["CameraParameters"][
-                    "readout_direction"
-                ]
+                    self.microscope_name
+                ]["readout_direction"]
             )
 
         # set binning
         self.camera.set_binning(
-            self.configuration["experiment"]["CameraParameters"]["binning"]
+            self.configuration["experiment"]["CameraParameters"][self.microscope_name][
+                "binning"
+            ]
         )
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
@@ -544,18 +554,18 @@ class Microscope:
 
         readout_time = 0
         readout_mode = self.configuration["experiment"]["CameraParameters"][
-            "sensor_mode"
-        ]
+            self.microscope_name
+        ]["sensor_mode"]
         if readout_mode == "Normal":
             readout_time = self.camera.calculate_readout_time()
-        elif self.configuration["experiment"]["CameraParameters"][
+        elif self.configuration["experiment"]["CameraParameters"][self.microscope_name][
             "readout_direction"
         ] in ["Bidirectional", "Rev. Bidirectional"]:
             remote_focus_ramp_falling = 0
         # set readout out time
-        self.configuration["experiment"]["CameraParameters"]["readout_time"] = (
-            readout_time * 1000
-        )
+        self.configuration["experiment"]["CameraParameters"][self.microscope_name][
+            "readout_time"
+        ] = (readout_time * 1000)
 
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
@@ -571,8 +581,8 @@ class Microscope:
                         exposure_time,
                         int(
                             self.configuration["experiment"]["CameraParameters"][
-                                "number_of_pixels"
-                            ]
+                                self.microscope_name
+                            ]["number_of_pixels"]
                         ),
                     )
                     if updated_exposure_time != exposure_time:
@@ -668,7 +678,9 @@ class Microscope:
         # Camera Settings
         self.current_exposure_time = float(channel["camera_exposure_time"]) / 1000
         if (
-            self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
+            self.configuration["experiment"]["CameraParameters"][self.microscope_name][
+                "sensor_mode"
+            ]
             == "Light-Sheet"
         ):
             (
@@ -679,8 +691,8 @@ class Microscope:
                 self.current_exposure_time,
                 int(
                     self.configuration["experiment"]["CameraParameters"][
-                        "number_of_pixels"
-                    ]
+                        self.microscope_name
+                    ]["number_of_pixels"]
                 ),
             )
             self.camera.set_line_interval(camera_line_interval)

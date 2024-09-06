@@ -360,6 +360,7 @@ def verify_experiment_config(manager, configuration):
         "is_centered": True,
         "center_x": 1024,
         "center_y": 1024,
+        "readout_time": 0,
     }
     if (
         "CameraParameters" not in configuration["experiment"]
@@ -371,58 +372,73 @@ def verify_experiment_config(manager, configuration):
             "CameraParameters",
             camera_parameters_dict_sample,
         )
-    camera_setting_dict = configuration["experiment"]["CameraParameters"]
-    for k in camera_parameters_dict_sample:
-        if k not in camera_setting_dict.keys():
-            camera_setting_dict[k] = camera_parameters_dict_sample[k]
-    # binning
-    if camera_setting_dict["binning"] not in ["1x1", "2x2", "4x4"]:
-        camera_setting_dict["binning"] = "1x1"
-    # x_pixels and y_pixels
-    try:
-        camera_setting_dict["x_pixels"] = int(camera_setting_dict["x_pixels"])
-    except ValueError:
-        camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
+    microscope_names = [""] + list(configuration["configuration"]["microscopes"].keys())
+    for microscope_name in microscope_names:
+        camera_setting_dict = configuration["experiment"]["CameraParameters"]
+        if microscope_name:
+            if (
+                microscope_name not in camera_setting_dict
+                or type(camera_setting_dict[microscope_name]) is not DictProxy
+            ):
+                update_config_dict(
+                    manager,
+                    camera_setting_dict,
+                    microscope_name,
+                    camera_parameters_dict_sample,
+                )
+            camera_setting_dict = camera_setting_dict[microscope_name]
 
-    try:
-        camera_setting_dict["y_pixels"] = int(camera_setting_dict["y_pixels"])
-    except ValueError:
-        camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
-
-    # image width and height
-    if camera_setting_dict["x_pixels"] <= 0:
-        camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
-    if camera_setting_dict["y_pixels"] <= 0:
-        camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
-    x_binning = int(camera_setting_dict["binning"][0])
-    y_binning = int(camera_setting_dict["binning"][2])
-    img_x_pixels = camera_setting_dict["x_pixels"] // x_binning
-    img_y_pixels = camera_setting_dict["y_pixels"] // y_binning
-    camera_setting_dict["img_x_pixels"] = img_x_pixels
-    camera_setting_dict["img_y_pixels"] = img_y_pixels
-    if camera_setting_dict["is_centered"]:
-        camera_setting_dict["center_x"] = camera_setting_dict["x_pixels"] // 2
-        camera_setting_dict["center_y"] = camera_setting_dict["y_pixels"] // 2
-
-    # sensor mode
-    if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:
-        camera_setting_dict["sensor_mode"] = "Normal"
-    if camera_setting_dict["readout_direction"] not in [
-        "Top-to-Bottom",
-        "Bottom-to-Top",
-        "Bidirectional",
-        "Rev. Bidirectional",
-    ]:
-        camera_setting_dict["readout_direction"] = "Top-to-Bottom"
-
-    # databuffer_size, number_of_pixels
-    for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:
+        for k in camera_parameters_dict_sample:
+            if k not in camera_setting_dict.keys():
+                camera_setting_dict[k] = camera_parameters_dict_sample[k]
+        # binning
+        if camera_setting_dict["binning"] not in ["1x1", "2x2", "4x4"]:
+            camera_setting_dict["binning"] = "1x1"
+        # x_pixels and y_pixels
         try:
-            camera_setting_dict[k] = int(camera_setting_dict[k])
+            camera_setting_dict["x_pixels"] = int(camera_setting_dict["x_pixels"])
         except ValueError:
-            camera_setting_dict[k] = camera_parameters_dict_sample[k]
-        if camera_setting_dict[k] < 1:
-            camera_setting_dict[k] = camera_parameters_dict_sample[k]
+            camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
+
+        try:
+            camera_setting_dict["y_pixels"] = int(camera_setting_dict["y_pixels"])
+        except ValueError:
+            camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
+
+        # image width and height
+        if camera_setting_dict["x_pixels"] <= 0:
+            camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
+        if camera_setting_dict["y_pixels"] <= 0:
+            camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
+        x_binning = int(camera_setting_dict["binning"][0])
+        y_binning = int(camera_setting_dict["binning"][2])
+        img_x_pixels = camera_setting_dict["x_pixels"] // x_binning
+        img_y_pixels = camera_setting_dict["y_pixels"] // y_binning
+        camera_setting_dict["img_x_pixels"] = img_x_pixels
+        camera_setting_dict["img_y_pixels"] = img_y_pixels
+        if camera_setting_dict["is_centered"]:
+            camera_setting_dict["center_x"] = camera_setting_dict["x_pixels"] // 2
+            camera_setting_dict["center_y"] = camera_setting_dict["y_pixels"] // 2
+
+        # sensor mode
+        if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:
+            camera_setting_dict["sensor_mode"] = "Normal"
+        if camera_setting_dict["readout_direction"] not in [
+            "Top-to-Bottom",
+            "Bottom-to-Top",
+            "Bidirectional",
+            "Rev. Bidirectional",
+        ]:
+            camera_setting_dict["readout_direction"] = "Top-to-Bottom"
+
+        # databuffer_size, number_of_pixels
+        for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:
+            try:
+                camera_setting_dict[k] = int(camera_setting_dict[k])
+            except ValueError:
+                camera_setting_dict[k] = camera_parameters_dict_sample[k]
+            if camera_setting_dict[k] < 1:
+                camera_setting_dict[k] = camera_parameters_dict_sample[k]
 
     # stage parameters
     stage_dict_sample = {}

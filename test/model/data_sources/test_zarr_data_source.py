@@ -8,7 +8,7 @@ try:
     from pydantic_ome_ngff.v04.multiscale import Group
 
     pydantic = True
-except ImportError:
+except (ImportError, TypeError):
     pydantic = False
 
 from navigate.tools.file_functions import delete_folder
@@ -29,8 +29,9 @@ def zarr_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
     timepoints = np.random.randint(1, 3)
 
     x_size, y_size = size
-    model.configuration["experiment"]["CameraParameters"]["x_pixels"] = x_size
-    model.configuration["experiment"]["CameraParameters"]["y_pixels"] = y_size
+    microscope_name = model.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+    model.configuration["experiment"]["CameraParameters"][microscope_name]["x_pixels"] = x_size
+    model.configuration["experiment"]["CameraParameters"][microscope_name]["y_pixels"] = y_size
     model.img_width = x_size
     model.img_height = y_size
 

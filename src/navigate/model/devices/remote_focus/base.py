@@ -121,11 +121,11 @@ class RemoteFocusBase:
         """
         # to determine if the waveform has to be triangular
         sensor_mode = self.configuration["experiment"]["CameraParameters"][
-            "sensor_mode"
-        ]
+            self.microscope_name
+        ]["sensor_mode"]
         readout_direction = self.configuration["experiment"]["CameraParameters"][
-            "readout_direction"
-        ]
+            self.microscope_name
+        ]["readout_direction"]
 
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]

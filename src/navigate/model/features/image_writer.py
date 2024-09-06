@@ -54,6 +54,7 @@ class ImageWriter:
     def __init__(
         self,
         model,
+        microscope_name=None,
         data_buffer=None,
         sub_dir="",
         image_name=None,
@@ -75,6 +76,7 @@ class ImageWriter:
         image_name : str
             Name of the image to be saved. If None, a name will be generated
         """
+        self.microscope_name = microscope_name
         #: navigate.model.model.Model: Navigate Model class for controlling
         # hardware/acquisition.
         self.model = model
@@ -174,7 +176,7 @@ class ImageWriter:
 
         # Pass experiment and configuration to metadata
         self.data_source.set_metadata_from_configuration_experiment(
-            self.model.configuration
+            self.model.configuration, microscope_name
         )
 
         self.data_source.set_metadata(saving_config)

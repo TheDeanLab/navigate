@@ -100,7 +100,9 @@ class TestIlastikSegmentation(unittest.TestCase):
             "rest_api_config": {"Ilastik": {"url": "http://example.com/ilastik"}},
             "experiment": {
                 "MicroscopeState": {"microscope_name": "Nanoscale", "zoom": "1.0"},
-                "CameraParameters": {"x_pixels": "2048", "y_pixels": "2048"},
+                "CameraParameters": {
+                    "Nanoscale": {"x_pixels": "2048", "y_pixels": "2048"},
+                },
                 "StageParameters": {
                     "x": "100",
                     "y": "100",
@@ -125,6 +127,7 @@ class TestIlastikSegmentation(unittest.TestCase):
         self.mock_model.display_ilastik_segmentation = True
         self.mock_model.mark_ilastik_position = False
         self.mock_model.event_queue = MagicMock()
+        self.mock_model.active_microscope_name = "Nanoscale"
 
         self.ilastik_segmentation = IlastikSegmentation(self.mock_model)
 

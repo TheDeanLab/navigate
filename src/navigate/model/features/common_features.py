@@ -162,7 +162,7 @@ class Snap:
     data capture process, specifically the main data capture function.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, saving_flag=False):
         """Initialize the Snap class.
 
         Parameters:
@@ -172,6 +172,9 @@ class Snap:
         """
         #: MicroscopeModel: The microscope model associated with the data capture.
         self.model = model
+
+        #: bool: Saving each frames
+        self.saving_flag = saving_flag
 
         #: dict: A dictionary defining the configuration for the data capture process.
         self.config_table = {"data": {"main": self.data_func}}
@@ -192,6 +195,8 @@ class Snap:
         bool
             A boolean value indicating the success of the data capture process.
         """
+        if self.saving_flag:
+            self.model.mark_saving_flags(frame_ids)
         self.model.logger.info(
             f"the camera is:{self.model.active_microscope_name}, {frame_ids}"
         )

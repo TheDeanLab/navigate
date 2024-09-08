@@ -14,8 +14,8 @@ Once a feature is executed, any features dependent on this feature's execution
 will execute (for example, move the stage, then snap a picture). Following
 this, the next set of features in sequence will be executed.
 
-Examples of some existing features include ``navigate.model.features.common_features.ZStackAcquisition``, 
-which acquires a z-stack, and ``navigate.model.features.autofocus.Autofocus``, 
+Examples of some existing features include ``navigate.model.features.common_features.ZStackAcquisition``,
+which acquires a z-stack, and ``navigate.model.features.autofocus.Autofocus``,
 which finds the ideal plane of focus of a sample using a discrete cosine transform.
 
 -----------------
@@ -30,7 +30,6 @@ Currently Implemented Features
    ../_autosummary/navigate.model.features.auto_tile_scan
    ../_autosummary/navigate.model.features.autofocus
    ../_autosummary/navigate.model.features.common_features
-   ../_autosummary/navigate.model.features.cva_conpro
    ../_autosummary/navigate.model.features.image_writer
    ../_autosummary/navigate.model.features.remove_empty_tiles
    ../_autosummary/navigate.model.features.restful_features

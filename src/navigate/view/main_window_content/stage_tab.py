@@ -264,8 +264,6 @@ class StageControlTab(tk.Frame):
 
         joystick_axes : ListProxy
             A ListProxy containing the axes controlled by the joystick, if any
-
-
         """
         self.xy_frame.toggle_button_states(joystick_is_on, joystick_axes)
         self.z_frame.toggle_button_states(joystick_is_on, joystick_axes)
@@ -544,6 +542,7 @@ class PositionFrame(ttk.Labelframe):
         dict
             A dictionary of the label input widgets for the position entries
         """
+
         return self.inputs
 
     def get_variables(self):
@@ -554,6 +553,7 @@ class PositionFrame(ttk.Labelframe):
         dict
             A dictionary of the variables for the position entries
         """
+
         variables = {}
         for name in self.inputs:
             variables[name] = self.inputs[name].get_variable()
@@ -570,6 +570,7 @@ class PositionFrame(ttk.Labelframe):
         joystick_axes : ListProxy
             A ListProxy containing the axes controlled by the joystick, if any
         """
+
         frame_back_counter = 0
         if joystick_is_on:
             entry_state = "disabled"

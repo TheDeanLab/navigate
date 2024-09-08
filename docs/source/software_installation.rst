@@ -12,10 +12,9 @@ Operating System Compatibility
 
 .. important::
    **navigate** is developed for use on Windows-based systems. This is due to the
-   compatibility of :ref:`device drivers <firmware_overview>` for various microscope
-   hardware components, such as
-   cameras, stages, and data acquisition cards, which are predominantly designed for the
-   Windows environment.
+   compatibility of device drivers for various microscope hardware components, such
+   as cameras, stages, and data acquisition cards, which are predominantly designed
+   for the Windows environment.
 
    While it is possible to launch the software on a Mac using synthetic hardware mode,
    users should be aware of known issues with the Tkinter interface. These issues
@@ -108,7 +107,7 @@ Quick install
 
 **Setup your Python Environment**
 
-Head over to the `miniconda website <https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links>`_
+Head over to the `miniconda website <https://docs.conda.io/en/latest/miniconda.html>`_
 and install the appropriate version based on your operating system.
 
 .. tip::

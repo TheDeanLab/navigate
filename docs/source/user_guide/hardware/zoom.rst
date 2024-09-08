@@ -1,3 +1,4 @@
+.. _mechanical_zoom:
 ===============
 Mechanical Zoom
 ===============

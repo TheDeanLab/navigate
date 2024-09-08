@@ -98,10 +98,6 @@ def compute_flatfield_map(
 def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=0.0, Nr=1.4, M=1.0):
     """Compute the noise model for an sCMOS camera.
 
-    Using https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/
-    99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf
-    the sCMOS mean noise sigma is given by
-
     Parameters
     ----------
     Fn : float

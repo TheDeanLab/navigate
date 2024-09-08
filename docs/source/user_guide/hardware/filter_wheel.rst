@@ -128,7 +128,7 @@ for the stage. A single communication instance is used for both the stage and fi
 --------------
 
 LUDL Electronic Products
-------------------
+------------------------
 
 MAC6000
 ~~~~~~~
@@ -164,7 +164,7 @@ MAC6000
 -------------
 
 Analog/Digital Devices
-------------------
+----------------------
 
 Some manufacturers provide filter wheels that are controlled by analog or digital signals.
 Here, each digital signal corresponds to a filter position. The user must specify the

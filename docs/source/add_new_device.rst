@@ -126,7 +126,7 @@ Startup and Configuration
 --------------
 
 Integration with Microscope Object Configurations
-------------------------------------------------
+-------------------------------------------------
 
 -   Each microscope configuration in **navigate** that uses the new device should
     receive a reference to the established communication object.

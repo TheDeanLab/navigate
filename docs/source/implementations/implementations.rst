@@ -1,3 +1,5 @@
+.. _implemented_microscopes:
+
 ===========================================
 Implemented Microscopes
 ===========================================
@@ -58,10 +60,10 @@ The University of Texas Southwestern Medical Center, Dallas, TX
 **Relevant Publications**:
 
 * `Deconvolution-free subcellular imaging with axially swept light sheet microscopy
-  <https://www.cell.com/biophysj/pdf/S0006-3495(15)00498-1.pdf>`_
+  <https://pubmed.ncbi.nlm.nih.gov/26083920/>`_
 * `Diagonally scanned light-sheet microscopy for fast volumetric imaging of adherent cells
-  <https://www.cell.com/biophysj/pdf/S0006-3495(16)00139-9.pdf>`_
-* `u-track3D: Measuring, navigating, and validating dense particle trajectories in three dimensions <https://www.cell.com/cell-reports-methods/pdf/S2667-2375(23)00326-0.pdf>`_
+  <https://pubmed.ncbi.nlm.nih.gov/27028654/>`_
+* `u-track3D: Measuring, navigating, and validating dense particle trajectories in three dimensions <https://pubmed.ncbi.nlm.nih.gov/38042149/>`_
 * `Robust and automated detection of subcellular morphological motifs in 3D microscopy images <https://www.nature.com/articles/s41592-019-0539-z>`_
 
 .. collapse:: Technical Information
@@ -142,7 +144,7 @@ The University of Texas Southwestern Medical Center, Dallas, TX
 **Relevant Publications**:
 
 * `Increasing the field-of-view in oblique plane microscopy via optical tiling
-  <https://opg.optica.org/abstract.cfm?uri=boe-13-11-5616>`_
+  <https://pubmed.ncbi.nlm.nih.gov/36733723/>`_
 * `A versatile oblique plane microscope for large-scale and high-resolution imaging of subcellular dynamics
   <https://elifesciences.org/articles/57681>`_
 
@@ -215,8 +217,8 @@ The University of Texas Southwestern Medical Center, Dallas, TX
 
 **Relevant Publications**:
 
-* `Adaptive optics in an oblique plane microscope <https://www.biorxiv.org/content/10.1101/2024.03.21.586191v1>`_
-* `Increasing the field-of-view in oblique plane microscopy via optical tiling <https://opg.optica.org/abstract.cfm?uri=boe-13-11-5616>`_
+* `Adaptive optics in an oblique plane microscope <https://pubmed.ncbi.nlm.nih.gov/38562744/>`_
+* `Increasing the field-of-view in oblique plane microscopy via optical tiling <https://pubmed.ncbi.nlm.nih.gov/36733723/>`_
 * `A versatile oblique plane microscope for large-scale and high-resolution imaging of subcellular dynamics <https://elifesciences.org/articles/57681>`_
 
 .. collapse:: Technical Information
@@ -428,7 +430,7 @@ The University of Texas Southwestern Medical Center, Dallas, TX
 
 **Relevant Publications**:
 
-* `Mechanically sheared Axially Swept Light-Sheet Microscopy <https://www.biorxiv.org/content/10.1101/2024.04.10.588892>`_
+* `Mechanically sheared Axially Swept Light-Sheet Microscopy <https://pubmed.ncbi.nlm.nih.gov/38645073/>`_
 * `The mesoSPIM initiative: open-source light-sheet microscopes for imaging cleared tissue <https://www.nature.com/articles/s41592-019-0554-0>`_.
 * `Isotropic imaging across spatial scales with axially swept light-sheet microscopy <https://www.nature.com/articles/s41596-022-00706-6>`_
 * `Light-sheet microscopy of cleared tissues with isotropic, subcellular resolution <https://www.nature.com/articles/s41592-019-0615-4>`_.
@@ -591,8 +593,8 @@ The University of Texas Southwestern Medical Center, Dallas, TX
 
 **Relevant Publications**:
 
-* `Effective elimination of laser interference fringing in fluorescence microscopy by Spinning azimuthal incidence angle <https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/10.1002/jemt.20334>`_.
-* `Spinning-spot shadowless TIRF microscopy <https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0136055>`_
+* `Effective elimination of laser interference fringing in fluorescence microscopy by Spinning azimuthal incidence angle <https://pubmed.ncbi.nlm.nih.gov/16770769/>`_.
+* `Spinning-spot shadowless TIRF microscopy <https://pubmed.ncbi.nlm.nih.gov/26308212/>`_
 
 .. collapse:: Technical Information
 
@@ -824,7 +826,7 @@ Arizona State University, Tempe, AZ
 **Relevant Publications**:
 
 * `Increasing the field-of-view in oblique plane microscopy via optical tiling
-  <https://opg.optica.org/abstract.cfm?uri=boe-13-11-5616>`_
+  <https://pubmed.ncbi.nlm.nih.gov/36733723/>`_
 * `A versatile oblique plane microscope for large-scale and high-resolution imaging of subcellular dynamics
   <https://elifesciences.org/articles/57681>`_
 

@@ -22,7 +22,7 @@ unnecessarily results in greater data overhead owing to empty space introduced i
 To avoid this, we also provide a guide on how to perform two axis stage
 scanning which removes the need for computational shearing.
 More information about this microscope and this method, which we refer to as mechanical shearing, can be found
-`here <https://www.biorxiv.org/content/10.1101/2024.04.10.588892v1>`_.
+`here <https://pubmed.ncbi.nlm.nih.gov/38645073/>`_.
 
 .. Constant Velocity Acquisition:
 

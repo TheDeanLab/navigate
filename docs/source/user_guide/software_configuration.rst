@@ -8,6 +8,7 @@ This section outlines the ``configuration.yaml``, ``experiment.yml``,
 
 -----------------
 
+.. _configuration_file:
 Initial Configuration
 =====================
 In order for the **navigate** software to function, you will need to configure the
@@ -94,10 +95,11 @@ along in this file when reading the next sections.
 
 See the :ref:`Setting up an Axially Swept Light-Sheet Microscope <setup_aslm>` case
 study for a general walkthrough of how to build your own configuration file and see
-:doc:`Implementations <hardware/implementations>` for examples of configuration files.
+:doc:`Implementations <implemented_microscopes>` for examples of configuration files.
 
 -----------------
 
+.. _multiple_microscopes:
 Microscope Configurations
 -------------------------
 
@@ -163,7 +165,7 @@ Each microscope is expected to have a ``daq``, ``camera``, ``remote_focus_device
 can be specified as synthetic.
 
 Most of the information to set up these devices can be found in the
-:doc:`Supported Hardware <hardware/supported_hardware>` section of the documentation.
+:doc:`Supported Hardware <hardware_overview>` section of the documentation.
 Additional explanations of a few specific sections of the microscope configuration are
 below. Notably, the ``zoom`` section of the ``configuration.yaml`` specifies effective
 pixel size.
@@ -280,7 +282,7 @@ and vice versa, you would then have to import the stages as following:
 -----------------
 
 Joystick Axes Definition
-^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are using a joystick, it is possible to disable GUI control of the stage axes
 that the joystick can interact with. The axes that the joystick can interact with
@@ -376,6 +378,8 @@ For example,
 
 -----------------
 
+.. _experiment_file:
+
 Experiment File
 ===============
 
@@ -412,4 +416,4 @@ The REST API configuration file specifies where the REST API should look to get
 and post data. This is only needed if you are using a plugin that requires the
 REST API, such as our communication with `ilastik <https://www.ilastik.org>`_. More
 information on how to setup the REST API for communication with ilastik can be found
-:doc:`here <REST-apis/ilastik_segmentation>`.
+:doc:`here <case_studies/ilastik_segmentation>`.

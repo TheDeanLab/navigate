@@ -22,7 +22,7 @@ ASI
 C60-CUBE-SLDR
 ~~~~~~~~~~~~~
 
-The `C60-CUBE-SLDR <https://www.asiimaging.com/illumination-control/c60-cube-sldr/>`_
+The `C60-CUBE-SLDR <https://www.asiimaging.com/products/modular-infinity-microscope-mim/modular-infinity-microscope-mim/cubes/>`_
 is a motorized dichroic slider that can be controlled by the ASI Tiger Controller.
 The example below shows the configuration file with one dichroic turret, and one
 filter wheel. The same communication instance is used for both the stage and filter

@@ -79,10 +79,12 @@ technology developers.
    :maxdepth: 1
 
    navigate Plugin Template <https://github.com/TheDeanLab/navigate-plugin-template>
-   navigate Confocal Projection Plugin <https://github.com/TheDeanLab/navigate-confocal-projection>
+   navigate Confocal Projection <https://github.com/TheDeanLab/navigate-confocal-projection>
    navigate at Scale <https://github.com/TheDeanLab/navigate-at-scale>
-   navigate MMCore Plugin <https://github.com/TheDeanLab/navigate-mmcore-plugin>
+   navigate Constant Velocity Acquisition <https://github.com/TheDeanLab/navigate-constant-velocity-acquisition>
+   navigate MMCore <https://github.com/TheDeanLab/navigate-mmcore-plugin>
    navigate ilastik Server <https://github.com/TheDeanLab/navigate-ilastik-server>
+   navigate Photoactivation <https://github.com/TheDeanLab/navigate-photoactivation>
 
 .. toctree::
    :caption: Reference
@@ -96,7 +98,7 @@ technology developers.
 ============
 **navigate** includes key contributions from numerous individuals, both past and
 present, in `The Dean Lab <https://www.dean-lab.org>`_. Please see the accompanying manuscript
-for a full list of contributors. :ref:`Outside contributors <contributing/contributing_guidelines>` are welcome.
+for a full list of contributors. :ref:`Outside contributors  <contributing_guidelines>` are welcome.
 
 **Funding**
 ============

@@ -1,8 +1,9 @@
-.. _hardware_overview:
-
 ====================
 Supported Hardware
 ====================
+
+.. _hardware_overview:
+
 
 **navigate** provides access to a growing list of hardware devices. Information on
 how to configure each of these devices, including supported firmware, is provided

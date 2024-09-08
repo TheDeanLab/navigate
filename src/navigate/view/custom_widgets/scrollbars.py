@@ -41,11 +41,7 @@ import platform
 
 
 class ScrolledFrame(ttk.Frame):
-    """A scrollable frame implemented in tkinter.
-
-    Based upon: https://web.archive.org/web/20170514022131id_/http://tkinter.unpythonic
-    .net/wiki/VerticalScrolledFrame
-    """
+    """A scrollable frame implemented in tkinter."""
 
     def __init__(self, parent, *args, **kw):
         """Initialize the ScrolledFrame.

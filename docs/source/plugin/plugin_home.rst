@@ -99,14 +99,14 @@ Plugin Structure:
         │   └── features/
         │           ├── plugin_feature.py
         │           ├── ...
-        │               
+        │
         ├── view/
         |   ├── plugin_name_frame.py
         |   ├── ...
         │
         ├── feature_list.py
         ├── plugin_acquisition_mode.py
-        └── plugin_config.yml 
+        └── plugin_config.yml
 
 
 .. note::
@@ -127,7 +127,7 @@ is:
 
     name: Plugin Name
     view: Popup # or Tab
-    acquisition_modes: 
+    acquisition_modes:
       - name: Plugin Acquisition
         file_name: plugin_acquisition_mode.py
 
@@ -137,8 +137,8 @@ Plugin GUI Elements
 --------------------
 
 **navigate** supports plugins with their own GUIs. A custom plugin GUI can be integrated as a tab or a popup.
-Users should specify a view option in ``plugin_config.yml``. If it is a popup, users can find the plugin under 
-the :guilabel:`Plugins` menu in the **navigate** window. If it is a tab, it will appear next to the 
+Users should specify a view option in ``plugin_config.yml``. If it is a popup, users can find the plugin under
+the :guilabel:`Plugins` menu in the **navigate** window. If it is a tab, it will appear next to the
 :ref:`Settings Notebooks <user_guide/gui_walkthrough:settings notebooks>`.
 
 
@@ -155,7 +155,7 @@ should be named: ``my_plugin_frame.py`` and ``my_plugin_controller.py``.
 Plugin Devices
 ------------------
 
-The **navigate** plugin architecture allows you to integrate new hardware device. There can be more than one 
+The **navigate** plugin architecture allows you to integrate new hardware device. There can be more than one
 device inside a plugin. If they are different kinds of device, please put them into different folders. For each
 kind of device, there should be a ``device_startup_functions.py`` telling **navigate** how to start the device
 and indicating the reference name of the device to be used in ``configuration.yaml``.
@@ -186,8 +186,8 @@ A function to start the device should be given,
         return device_object
 
 
-The template for ``device_startup_functions.py`` can be found in the `plugin template <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/src/plugins-template/model/devices/plugin_device/device_startup_functions.py>`_.
-
+The template for ``device_startup_functions.py`` can be found in the
+`plugin template <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins_template/model/devices/plugin_device/device_startup_functions.py>`_.
 -------------------------------------
 
 Plugin Features
@@ -195,7 +195,7 @@ Plugin Features
 **navigate** allows users to add new features. New feature objects and feature lists can each be a plugin or components
 of a plugin. Features and feature lists are automatically loaded into **navigate**.
 
-Please visit `here <https://thedeanlab.github.io/**navigate**/feature_container/feature_container_home.html>`_ for details about how to build a new feature object and feature list.
+Please visit `here <https://thedeanlab.github.io/navigate/contributing/feature_container.html>`_ for details about how to build a new feature object and feature list.
 
 -------------------------------------
 
@@ -204,7 +204,7 @@ Custom Acquisition Modes
 Navigate offers seamless support for custom acquisition modes, and registering a new mode is straightforward.
 
 1. Download the template for `plugin_acquisition_mode.py
-<https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins-template/plugin_acquisition_mode.py>`_
+<https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins_template/plugin_acquisition_mode.py>`_
 
 2. Update the ``feature_list``.
 
@@ -214,7 +214,7 @@ Navigate offers seamless support for custom acquisition modes, and registering a
     class PluginAcquisitionMode:
         def __init__(self, name):
             self.acquisition_mode = name
-            
+
             self.feature_list = [
                 # update here
             ]
@@ -230,7 +230,7 @@ Users should tell **navigate** what to do before and after acquisition using the
 
     def end_acquisition_controller(self, controller):
         # update here
-    
+
     def prepare_acquisition_model(self, model):
         # update here
 
@@ -241,11 +241,12 @@ Users should tell **navigate** what to do before and after acquisition using the
 
 .. code-block:: none
 
-    acquisition_modes: 
+    acquisition_modes:
         - name: Custom Acquisition
             file_name: plugin_acquisition_mode.py
 
 
 -----------
 
-For more plugin examples, please visit `navigate <https://github.com/TheDeanLab/navigate/tree/develop/src/navigate/plugins>`_ and `Navigate Plugins <https://github.com/TheDeanLab/navigate-plugins>`_.
+For more plugin examples, please visit the plugins in the table of contents menu on
+the left.

@@ -57,7 +57,7 @@ Data Acquisition Card
 #. We will now begin sequentially adding non-synthetic devices to the configuration
    file. The first device to add is the NI data acquisition card. Of course, the data
    acquisition card's drivers must be `installed <https://www.ni
-   .com/en/support/downloads/drivers/download.ni-daq-mx.html#494676>`_ and functioning.
+   .com/en/support/downloads/drivers/download.ni-daq-mx.html>`_ and functioning.
    To confirm that it is functioning, it is best to use the `NI MAX` software and
    evaluate the card's functionality with an oscilloscope.
 

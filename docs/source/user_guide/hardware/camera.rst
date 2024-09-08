@@ -86,8 +86,7 @@ ORCA-Lightning
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -   :ref:`Install Directions <dcam>`.
--   `ORCA-Lightning Manual <https://www.hamamatsu
-    .com/us/en/product/cameras/cmos-cameras/C14120-20P.html>`_.
+-   `ORCA-Lightning Manual <https://camera.hamamatsu.com/content/dam/hamamatsu-photonics/sites/static/sys/en/manual/C14120-20P_IM_En.pdf>`_.
 
 
 .. collapse:: Configuration File
@@ -182,7 +181,7 @@ Iris 15
 
 ------------------
 
-
+.. _synthetic_camera:
 Synthetic Camera
 ----------------
 

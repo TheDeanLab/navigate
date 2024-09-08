@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mechanical Zoom &mdash; navigate 0.0.6 documentation</title>
+  <title>Mechanical Zoom &mdash; navigate 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
 
@@ -92,10 +92,12 @@
 <p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
@@ -129,7 +131,7 @@
            <div itemprop="articleBody">
              
   <section id="mechanical-zoom">
-<h1>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Permalink to this heading"></a></h1>
+<span id="id1"></span><h1>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Permalink to this heading"></a></h1>
 <p>Zoom devices control the magnification of the microscope. If such control is not
 needed, the software expects a <a class="reference internal" href="#synthetic-zoom"><span class="std std-ref">Synthetic Zoom</span></a> to provide
 the fixed magnification and the effective pixel size of the microscope.</p>
@@ -178,7 +180,7 @@ the system at each zoom.</p>
 </section>
 </section>
 <section id="synthetic-zoom">
-<span id="id1"></span><h2>Synthetic Zoom<a class="headerlink" href="#synthetic-zoom" title="Permalink to this heading"></a></h2>
+<span id="id2"></span><h2>Synthetic Zoom<a class="headerlink" href="#synthetic-zoom" title="Permalink to this heading"></a></h2>
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>

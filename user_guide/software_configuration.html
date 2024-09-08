@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration Overview &mdash; navigate 0.0.6 documentation</title>
+  <title>Configuration Overview &mdash; navigate 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -90,10 +90,12 @@
 <p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
@@ -133,7 +135,7 @@
 <code class="docutils literal notranslate"><span class="pre">waveform_constants.yml</span></code> files.</p>
 <hr class="docutils" />
 <section id="initial-configuration">
-<h2>Initial Configuration<a class="headerlink" href="#initial-configuration" title="Permalink to this heading"></a></h2>
+<span id="configuration-file"></span><h2>Initial Configuration<a class="headerlink" href="#initial-configuration" title="Permalink to this heading"></a></h2>
 <p>In order for the <strong>navigate</strong> software to function, you will need to configure the
 specifications of the various hardware that you will be using in the
 <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file.</p>
@@ -208,10 +210,10 @@ along in this file when reading the next sections.</p>
 <p>See the <a class="reference internal" href="case_studies/setup_voodoo.html#setup-aslm"><span class="std std-ref">Setting up an Axially Swept Light-Sheet Microscope</span></a> case
 study for a general walkthrough of how to build your own configuration file and see
 <span class="xref std std-doc">Implementations</span> for examples of configuration files.</p>
-</section>
 <hr class="docutils" />
+</section>
 <section id="microscope-configurations">
-<h3>Microscope Configurations<a class="headerlink" href="#microscope-configurations" title="Permalink to this heading"></a></h3>
+<span id="multiple-microscopes"></span><h3>Microscope Configurations<a class="headerlink" href="#microscope-configurations" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file contains the microscope configurations
 that you will be using with the software. Each microscope is represented as a YAML
 dictionary.</p>
@@ -446,12 +448,12 @@ For example,</p>
 <span class="w">    </span><span class="nt">N/A</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.168</span>
 </pre></div>
 </div>
-</section>
-</section>
-</section>
 <hr class="docutils" />
+</section>
+</section>
+</section>
 <section id="experiment-file">
-<h2>Experiment File<a class="headerlink" href="#experiment-file" title="Permalink to this heading"></a></h2>
+<span id="id1"></span><h2>Experiment File<a class="headerlink" href="#experiment-file" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">experiment.yml</span></code> file stores information about the current state of the program.
 This includes laser and camera parameters, saving options, z-stack settings and much
 more. This file does not need to be edited by the user. The program will update it
@@ -479,7 +481,7 @@ a new waveform behavior to the application.</p>
 and post data. This is only needed if you are using a plugin that requires the
 REST API, such as our communication with <a class="reference external" href="https://www.ilastik.org">ilastik</a>. More
 information on how to setup the REST API for communication with ilastik can be found
-<span class="xref std std-doc">here</span>.</p>
+<a class="reference internal" href="case_studies/ilastik_segmentation.html"><span class="doc">here</span></a>.</p>
 </section>
 </section>
 

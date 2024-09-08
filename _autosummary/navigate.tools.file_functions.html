@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>navigate.tools.file_functions &mdash; navigate 0.0.6 documentation</title>
+  <title>navigate.tools.file_functions &mdash; navigate 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -72,10 +72,12 @@
 <p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -92,6 +94,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.tools.file_functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="navigate.tools.file_functions.create_save_path.html">navigate.tools.file_functions.create_save_path</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.tools.file_functions.delete_folder.html">navigate.tools.file_functions.delete_folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.file_functions.get_ram_info.html">navigate.tools.file_functions.get_ram_info</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.tools.file_functions.load_yaml_file.html">navigate.tools.file_functions.load_yaml_file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.tools.file_functions.save_yaml_file.html">navigate.tools.file_functions.save_yaml_file</a></li>
 </ul>
@@ -148,10 +151,13 @@
 <tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.file_functions.delete_folder.html#navigate.tools.file_functions.delete_folder" title="navigate.tools.file_functions.delete_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_folder</span></code></a>(top)</p></td>
 <td><p>Delete folder and all sub-folders.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.file_functions.load_yaml_file.html#navigate.tools.file_functions.load_yaml_file" title="navigate.tools.file_functions.load_yaml_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_yaml_file</span></code></a>(file_path)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.file_functions.get_ram_info.html#navigate.tools.file_functions.get_ram_info" title="navigate.tools.file_functions.get_ram_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ram_info</span></code></a>()</p></td>
+<td><p>Get computer RAM information.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.file_functions.load_yaml_file.html#navigate.tools.file_functions.load_yaml_file" title="navigate.tools.file_functions.load_yaml_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_yaml_file</span></code></a>(file_path)</p></td>
 <td><p>Load YAML file from Disk</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.file_functions.save_yaml_file.html#navigate.tools.file_functions.save_yaml_file" title="navigate.tools.file_functions.save_yaml_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_yaml_file</span></code></a>(file_directory, content_dict)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.file_functions.save_yaml_file.html#navigate.tools.file_functions.save_yaml_file" title="navigate.tools.file_functions.save_yaml_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_yaml_file</span></code></a>(file_directory, content_dict)</p></td>
 <td><p>Same YAML file to Disk</p></td>
 </tr>
 </tbody>

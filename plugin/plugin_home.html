@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plugin Architecture &mdash; navigate 0.0.6 documentation</title>
+  <title>Plugin Architecture &mdash; navigate 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -86,10 +86,12 @@
 <p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
@@ -257,20 +259,21 @@ and indicating the reference name of the device to be used in <code class="docut
     <span class="k">return</span> <span class="n">device_object</span>
 </pre></div>
 </div>
-<p>The template for <code class="docutils literal notranslate"><span class="pre">device_startup_functions.py</span></code> can be found in the <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/src/plugins-template/model/devices/plugin_device/device_startup_functions.py">plugin template</a>.</p>
+<p>The template for <code class="docutils literal notranslate"><span class="pre">device_startup_functions.py</span></code> can be found in the
+<a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins_template/model/devices/plugin_device/device_startup_functions.py">plugin template</a>.
+————————————-</p>
 </section>
-<hr class="docutils" />
 <section id="plugin-features">
 <h3>Plugin Features<a class="headerlink" href="#plugin-features" title="Permalink to this heading"></a></h3>
 <p><strong>navigate</strong> allows users to add new features. New feature objects and feature lists can each be a plugin or components
 of a plugin. Features and feature lists are automatically loaded into <strong>navigate</strong>.</p>
-<p>Please visit <a class="reference external" href="https://thedeanlab.github.io/**navigate**/feature_container/feature_container_home.html">here</a> for details about how to build a new feature object and feature list.</p>
+<p>Please visit <a class="reference external" href="https://thedeanlab.github.io/navigate/contributing/feature_container.html">here</a> for details about how to build a new feature object and feature list.</p>
 </section>
 <hr class="docutils" />
 <section id="custom-acquisition-modes">
 <h3>Custom Acquisition Modes<a class="headerlink" href="#custom-acquisition-modes" title="Permalink to this heading"></a></h3>
 <p>Navigate offers seamless support for custom acquisition modes, and registering a new mode is straightforward.</p>
-<p>1. Download the template for <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins-template/plugin_acquisition_mode.py">plugin_acquisition_mode.py</a></p>
+<p>1. Download the template for <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins_template/plugin_acquisition_mode.py">plugin_acquisition_mode.py</a></p>
 <ol class="arabic simple" start="2">
 <li><p>Update the <code class="docutils literal notranslate"><span class="pre">feature_list</span></code>.</p></li>
 </ol>
@@ -310,7 +313,8 @@ of a plugin. Features and feature lists are automatically loaded into <strong>na
 </pre></div>
 </div>
 <hr class="docutils" />
-<p>For more plugin examples, please visit <a class="reference external" href="https://github.com/TheDeanLab/navigate/tree/develop/src/navigate/plugins">navigate</a> and <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugins">Navigate Plugins</a>.</p>
+<p>For more plugin examples, please visit the plugins in the table of contents menu on
+the left.</p>
 </section>
 </section>
 </section>

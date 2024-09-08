@@ -2,7 +2,7 @@
 Imaging on a mesoSPIM BT
 ========================
 
-This is a case study in using the software to image with a `mesoSPIM BT microscope <https://www.biorxiv.org/content/10.1101/2023.06.16.545256v1>`_.
+This is a case study in using the software to image with a `mesoSPIM BT microscope <https://pubmed.ncbi.nlm.nih.gov/38538644/>`_.
 
 -----------------
 
@@ -19,7 +19,7 @@ the beam path.
    option.
 
    .. image:: images/meso_beam_1.png
-   
+
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear. Make sure the
    :guilabel:`Mode` matches "mesoSPIM BT" and the :guilabel:`Magnification` matches the
@@ -36,8 +36,8 @@ the beam path.
 
 #. :guilabel:`Galvo 0` digitally sweeps the beam across the field of view in the ``X`` direction. To align the
    axially-swept light sheet parameters, set the :guilabel:`Galvo 0`
-   :guilabel:`Amplitude` to ``0.0``. 
-   
+   :guilabel:`Amplitude` to ``0.0``.
+
    .. image:: images/meso_beam_2.png
 
 #. The empty filter makes us susceptible to seeing particles scattering light in the
@@ -64,8 +64,8 @@ the beam path.
 #. Go to :guilabel:`Camera Settings` and ensure that :guilabel:`Light-Sheet` is selected under
    :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude`
    until the beam becomes a straight line across the screen. If the beam does not
-   become straighter, try changing the camera's 
-   :ref:`Readout Direction <user_guide/gui_walkthrough:camera modes>`. 
+   become straighter, try changing the camera's
+   :ref:`Readout Direction <user_guide/gui_walkthrough:camera modes>`.
 
 
    .. image:: images/meso_beam_7.png
@@ -79,7 +79,7 @@ the beam path.
    .. image:: images/meso_beam_9.png
 
 #. Once the beam is straight, slowly change the wavelength's :guilabel:`Offset` until
-   the beam has an even thickness across the field of view. This will also make the 
+   the beam has an even thickness across the field of view. This will also make the
    beam a bit thinner.
 
    .. image:: images/meso_beam_10.png

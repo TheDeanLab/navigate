@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; navigate 0.0.6 documentation</title>
+  <title>Index &mdash; navigate 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
@@ -69,10 +69,12 @@
 <p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
@@ -1956,6 +1958,8 @@
 </li>
       <li><a href="_autosummary/navigate.model.devices.camera.synthetic.SyntheticCameraController.html#navigate.model.devices.camera.synthetic.SyntheticCameraController.get_property_value">get_property_value() (navigate.model.devices.camera.synthetic.SyntheticCameraController method)</a>
 </li>
+      <li><a href="_autosummary/navigate.tools.file_functions.get_ram_info.html#navigate.tools.file_functions.get_ram_info">get_ram_info() (in module navigate.tools.file_functions)</a>
+</li>
       <li><a href="_autosummary/navigate.model.features.feature_container.get_registered_funcs.html#navigate.model.features.feature_container.get_registered_funcs">get_registered_funcs() (in module navigate.model.features.feature_container)</a>
 </li>
       <li><a href="_autosummary/navigate.model.concurrency.concurrency_tools.CustodyThread.html#navigate.model.concurrency.concurrency_tools.CustodyThread.get_result">get_result() (navigate.model.concurrency.concurrency_tools.CustodyThread method)</a>
@@ -2378,13 +2382,15 @@
         <li><a href="_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.load_images">(navigate.model.model.Model method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/navigate.model.device_startup_functions.load_mirror.html#navigate.model.device_startup_functions.load_mirror">load_mirror() (in module navigate.model.device_startup_functions)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/navigate.tools.common_functions.load_module_from_file.html#navigate.tools.common_functions.load_module_from_file">load_module_from_file() (in module navigate.tools.common_functions)</a>
 </li>
       <li><a href="_autosummary/navigate.model.plugins_model.PluginsModel.html#navigate.model.plugins_model.PluginsModel.load_plugins">load_plugins() (navigate.model.plugins_model.PluginsModel method)</a>
+</li>
+      <li><a href="_autosummary/navigate.model.plugins_model.PluginsModel.html#navigate.model.plugins_model.PluginsModel.load_plugins_through_manager">load_plugins_through_manager() (navigate.model.plugins_model.PluginsModel method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.stages.synthetic.SyntheticStage.html#navigate.model.devices.stages.synthetic.SyntheticStage.load_sample">load_sample() (navigate.model.devices.stages.synthetic.SyntheticStage method)</a>
 </li>
@@ -2494,6 +2500,8 @@
         <li><a href="_autosummary/navigate.model.devices.remote_focus.ni.RemoteFocusNI.html#navigate.model.devices.remote_focus.ni.RemoteFocusNI.microscope_name">(navigate.model.devices.remote_focus.ni.RemoteFocusNI attribute)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.remote_focus.synthetic.SyntheticRemoteFocus.html#navigate.model.devices.remote_focus.synthetic.SyntheticRemoteFocus.microscope_name">(navigate.model.devices.remote_focus.synthetic.SyntheticRemoteFocus attribute)</a>
+</li>
+        <li><a href="_autosummary/navigate.model.features.common_features.SetCameraParameters.html#navigate.model.features.common_features.SetCameraParameters.microscope_name">(navigate.model.features.common_features.SetCameraParameters attribute)</a>
 </li>
         <li><a href="_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.microscope_name">(navigate.model.microscope.Microscope attribute)</a>
 </li>
@@ -4142,8 +4150,6 @@
 </li>
       <li><a href="_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.plugin_devices">plugin_devices (navigate.model.microscope.Microscope attribute)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.plugins_model.PluginsModel.html#navigate.model.plugins_model.PluginsModel.plugins_path">plugins_path (navigate.model.plugins_model.PluginsModel attribute)</a>
-</li>
       <li><a href="_autosummary/navigate.model.plugins_model.PluginsModel.html#navigate.model.plugins_model.PluginsModel">PluginsModel (class in navigate.model.plugins_model)</a>
 </li>
       <li><a href="_autosummary/navigate.model.concurrency.concurrency_tools.PoliteThread.html#navigate.model.concurrency.concurrency_tools.PoliteThread">PoliteThread (in module navigate.model.concurrency.concurrency_tools)</a>
@@ -4329,6 +4335,12 @@
       <li><a href="_autosummary/navigate.model.concurrency.concurrency_tools.SharedNDArray.html#navigate.model.concurrency.concurrency_tools.SharedNDArray.real">real (navigate.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.APIs.sutter.MP285.MP285.html#navigate.model.devices.APIs.sutter.MP285.MP285.refresh_display">refresh_display() (navigate.model.devices.APIs.sutter.MP285.MP285 method)</a>
+</li>
+      <li><a href="_autosummary/navigate.model.plugins_model.PluginsModel.html#navigate.model.plugins_model.PluginsModel.register_acquisition_mode">register_acquisition_mode() (navigate.model.plugins_model.PluginsModel method)</a>
+</li>
+      <li><a href="_autosummary/navigate.model.plugins_model.PluginsModel.html#navigate.model.plugins_model.PluginsModel.register_device">register_device() (navigate.model.plugins_model.PluginsModel method)</a>
+</li>
+      <li><a href="_autosummary/navigate.model.plugins_model.PluginsModel.html#navigate.model.plugins_model.PluginsModel.register_feature_list">register_feature_list() (navigate.model.plugins_model.PluginsModel method)</a>
 </li>
       <li><a href="_autosummary/navigate.controller.thread_pool.SynchronizedThreadPool.html#navigate.controller.thread_pool.SynchronizedThreadPool.registerResource">registerResource() (navigate.controller.thread_pool.SynchronizedThreadPool method)</a>
 </li>
@@ -4565,6 +4577,8 @@
       <li><a href="_autosummary/navigate.model.devices.mirrors.imop.ImagineOpticsMirror.html#navigate.model.devices.mirrors.imop.ImagineOpticsMirror.save_wcs_file">save_wcs_file() (navigate.model.devices.mirrors.imop.ImagineOpticsMirror method)</a>
 </li>
       <li><a href="_autosummary/navigate.tools.file_functions.save_yaml_file.html#navigate.tools.file_functions.save_yaml_file">save_yaml_file() (in module navigate.tools.file_functions)</a>
+</li>
+      <li><a href="_autosummary/navigate.model.features.common_features.Snap.html#navigate.model.features.common_features.Snap.saving_flag">saving_flag (navigate.model.features.common_features.Snap attribute)</a>
 </li>
       <li><a href="_autosummary/navigate.model.features.image_writer.ImageWriter.html#navigate.model.features.image_writer.ImageWriter.saving_flags">saving_flags (navigate.model.features.image_writer.ImageWriter attribute)</a>
 </li>

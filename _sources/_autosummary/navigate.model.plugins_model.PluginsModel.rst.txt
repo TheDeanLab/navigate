@@ -18,15 +18,13 @@ navigate.model.plugins\_model.PluginsModel
    
       ~PluginsModel.__init__
       ~PluginsModel.load_plugins
+      ~PluginsModel.load_plugins_through_manager
+      ~PluginsModel.register_acquisition_mode
+      ~PluginsModel.register_device
+      ~PluginsModel.register_feature_list
    
    
 
    
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~PluginsModel.plugins_path
    
    

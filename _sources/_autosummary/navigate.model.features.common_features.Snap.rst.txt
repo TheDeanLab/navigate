@@ -28,6 +28,7 @@ navigate.model.features.common\_features.Snap
    .. autosummary::
    
       ~Snap.model
+      ~Snap.saving_flag
       ~Snap.config_table
    
    

@@ -158,8 +158,8 @@ hardware.
 **navigate** establishes communication with each device independently, and passes the
 instance of that device to class that controls it (e.g., in this case, the
 `CustomDevice` class). This allows **navigate** to be initialized with multiple
-microscope :ref:`configurations <user_guide/software_configuration:configuration file>`,
-some of which may share devices.
+microscope :ref:`configurations <multiple_microscopes>`, some of which may share devices.
+
 
 .. code-block:: python
 
@@ -470,7 +470,7 @@ Install the plugin using one of two methods:
     * Install a plugin by putting the whole plugin folder directly into
       ``navigate/plugins/``. In this example, put ``custom_device`` folder
       and all its contents into ``navigate/plugins``.
-    * Alernatively, install this plugin through the menu
+    * Alternatively, install this plugin through the menu
       :menuselection:`Plugins --> Install Plugin` by selecting the plugin folder.
 
 The plugin is ready to use. For this plugin, you can now specify a CustomDevice in the

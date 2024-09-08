@@ -22,7 +22,7 @@ as there are a sufficient number of analog and digital ports, and the sampling r
 is high enough per port.
 
 Prior to installing the card within
-the computer, first install the `NI-DAQmx drivers <https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560>`_.
+the computer, first install the `NI-DAQmx drivers <https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html>`_.
 Once installed, connect the PCIe or PXIe-based device to the computer. A functioning
 system should be recognized by the operating system, and visible in the Windows Device
 Manager as a **NI Data Acquisition Device**.

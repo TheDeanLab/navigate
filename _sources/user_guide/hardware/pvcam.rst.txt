@@ -9,7 +9,7 @@ Photometrics Drivers
   likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
 * Should a "Base Device" still show up as unknown in the Windows Device Manager, you
-  may need to install the `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits>`_
+  may need to install the `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-retimers/software-dev-kits>`_
 * Upon successful installation, one should be able to acquire images with the
   manufacturer-provided PVCamTest software.
 

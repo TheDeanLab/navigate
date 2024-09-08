@@ -30,6 +30,7 @@ navigate.model.features.common\_features.SetCameraParameters
    
       ~SetCameraParameters.model
       ~SetCameraParameters.config_table
+      ~SetCameraParameters.microscope_name
       ~SetCameraParameters.sensor_mode
       ~SetCameraParameters.readout_direction
    

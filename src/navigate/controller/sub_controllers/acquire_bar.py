@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,7 @@ class AcquireBarController(GUIController):
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
         self.view.pull_down.current(0)
+        self.view.pull_down.state(["!disabled", "readonly"])
 
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
@@ -248,16 +249,27 @@ class AcquireBarController(GUIController):
         return self.mode
 
     def add_mode(self, mode):
+        """Add a new mode to the mode dictionary.
+
+        Parameters
+        ----------
+        mode : str
+            Mode to add to the dictionary.
+        """
         if mode not in self.mode_dict:
             self.mode_dict[mode] = mode
             self.view.pull_down["values"] = list(self.mode_dict.keys())
 
     def stop_acquire(self):
-        """Stop the acquisition."""
+        """Stop the acquisition.
+
+        Stop the progress bar, set the acquire button back to "Acquire", place pull
+        down menu in non-disabled format.
+        """
         self.stop_progress_bar()
         self.view.acquire_btn.configure(text="Acquire")
         self.view.acquire_btn.configure(state="normal")
-        self.view.pull_down.configure(state="normal")
+        self.view.pull_down.state(["!disabled", "readonly"])
         self.is_acquiring = False
 
     def set_save_option(self, is_save):
@@ -267,10 +279,6 @@ class AcquireBarController(GUIController):
         ----------
         is_save : bool
             True if we will save the data.  False if we will not.
-
-        Examples
-        --------
-        >>> set_save_option(True)
         """
         self.is_save = is_save
         self.parent_controller.configuration["experiment"]["MicroscopeState"][
@@ -282,14 +290,9 @@ class AcquireBarController(GUIController):
         """Launch the Save Dialog Popup Window
 
         The popup window should only be launched if the microscope is set to save the
-        data, with the exception of the continuous acquisition mode.
-        The popup window provides the user with the opportunity to fill in fields that
-        describe the experiment and also dictate the save path of the data in a
-        standardized format.
-
-        Examples
-        --------
-        >>> launch_popup_window()
+        data, except the continuous acquisition mode. The popup window provides the
+        user with the opportunity to fill in fields that describe the experiment and
+        also dictate the save path of the data in a standardized format.
         """
         if self.is_acquiring and self.view.acquire_btn["text"] == "Acquire":
             return
@@ -303,9 +306,7 @@ class AcquireBarController(GUIController):
         elif self.is_save and self.mode != "live":
             #: object: Instance of the popup save dialog.
             self.acquire_pop = AcquirePopUp(self.view)
-            buttons = (
-                self.acquire_pop.get_buttons()
-            )  # This holds all the buttons in the popup
+            buttons = self.acquire_pop.get_buttons()
             widgets = self.acquire_pop.get_widgets()
 
             # Configure the button callbacks on the popup window
@@ -326,22 +327,20 @@ class AcquireBarController(GUIController):
         else:
             self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
-            self.view.pull_down.configure(state="disabled")
+            # self.view.pull_down.configure(state="disabled")
+            self.view.pull_down.state(["disabled", "readonly"])
+
             self.parent_controller.execute("acquire")
 
     def update_microscope_mode(self, *args):
         """Gets the state of the pull-down menu and tells the central controller
-            Will additionally call functions to disable and enable widgets based on mode
+
+        Will additionally call functions to disable and enable widgets based on mode
 
         Parameters
-
         ----------
         args : str
             Imaging Mode.
-
-        Examples
-        --------
-        >>> update_microscope_mode('live')
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
@@ -359,10 +358,6 @@ class AcquireBarController(GUIController):
         ----------
         file_type : str
             File type.
-
-        Examples
-        --------
-        >>> update_file_type('tiff')
         """
         self.saving_settings["file_type"] = file_type.get()
 
@@ -379,10 +374,6 @@ class AcquireBarController(GUIController):
         ----------
         popup_window : object
             Instance of the popup save dialog.
-
-        Examples
-        --------
-        >>> launch_acquisition(popup_window)
         """
         # update saving settings according to user's input
         self.update_experiment_values(popup_window)
@@ -404,26 +395,14 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("acquire_and_save")
 
     def exit_program(self):
-        """Exit Button
-
-        Quit the software.
-
-        Examples
-        --------
-        >>> exit_program()
-        """
+        """Exit Button to close the program."""
         if messagebox.askyesno("Exit", "Are you sure?"):
             self.show_verbose_info("Exiting Program")
             # call the central controller to stop all the threads
             self.parent_controller.execute("exit")
 
     def populate_experiment_values(self):
-        """Populate the experiment values from the config file.
-
-        Examples
-        --------
-        >>> populate_experiment_values()
-        """
+        """Populate the experiment values from the config file."""
         #: dict: Saving settings.
         self.saving_settings = self.parent_controller.configuration["experiment"][
             "Saving"
@@ -446,10 +425,6 @@ class AcquireBarController(GUIController):
         ----------
         popup_window : object
             Instance of the popup save dialog.
-
-        Examples
-        --------
-        >>> update_experiment_values(popup_window)
         """
         popup_vals = popup_window.get_variables()
         for name in popup_vals:

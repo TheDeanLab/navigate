@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Reconfigurable Acquisitions Using Features" href="features.html" />
+    <link rel="next" title="Reconfigurable Acquisitions Using Features" href="features/features.html" />
     <link rel="prev" title="Acquiring Data" href="acquiring_home.html" /> 
 </head>
 
@@ -70,7 +70,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#analysis-pipeline">Analysis Pipeline</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="features.html">Reconfigurable Acquisitions Using Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features/features.html">Reconfigurable Acquisitions Using Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features/example_feature_lists.html">Example Feature Lists</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a></li>
@@ -137,7 +138,7 @@ and Z-Stack, which can be saved to TIFF, OME-TIFF, HDF5, N5, and OME-Zarr data f
 Saving is toggled under the GUI’s <a class="reference internal" href="gui_walkthrough.html#timepoint-settings"><span class="std std-ref">timepoint settings</span></a>.</p>
 <p>These modes (and other custom modes) can be selected in the program’s
 <a class="reference internal" href="gui_walkthrough.html#acquisition-bar"><span class="std std-ref">acquisition bar</span></a> dropdown list.</p>
-<p>Each acquisition mode is implemented as a <a class="reference internal" href="features.html"><span class="doc">feature list</span></a> and can be used
+<p>Each acquisition mode is implemented as a <span class="xref std std-doc">feature list</span> and can be used
 in sequence with other features that can, for example,
 <a class="reference internal" href="../intermediate.html"><span class="doc">make smart decisions</span></a>.</p>
 <hr class="docutils" />
@@ -147,8 +148,8 @@ in sequence with other features that can, for example,
 this mode, only to preview what is in focus. This mode is helpful for alignment,
 parameter tuning, and scrolling around the sample with the stage.</p>
 <p>It is implemented as
-a <a class="reference internal" href="features.html"><span class="doc">feature list</span></a>, shown in its
-<a class="reference internal" href="features.html#text-representation-of-feature-lists"><span class="std std-ref">textual form</span></a> below.</p>
+a <span class="xref std std-doc">feature list</span>, shown in its
+<span class="xref std std-ref">textual form</span> below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
   <span class="p">(</span>
     <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">},</span>
@@ -209,7 +210,7 @@ or “Per Z”, and then will loop over positions.</p>
 <h3>Customized<a class="headerlink" href="#customized" title="Permalink to this heading"></a></h3>
 <p>The customized acquisition mode can be used to run any feature list of the user’s choosing.
 Data acquisition with <strong>navigate</strong> is almost infinitely reconfigurable with the either the
-<a class="reference internal" href="features.html"><span class="doc">feature container</span></a>, if a desired acquisition can be
+<span class="xref std std-doc">feature container</span>, if a desired acquisition can be
 performed using a reconfiguration of existing features and saving formats, or the
 <a class="reference internal" href="../plugin/plugin_home.html"><span class="doc">plugin architecture</span></a>, if new features or saving formats are
 required. We strongly recommend the reader check through the
@@ -237,7 +238,7 @@ part, why saving to an SSD (as opposed to HDD) is critical.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="acquiring_home.html" class="btn btn-neutral float-left" title="Acquiring Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="features.html" class="btn btn-neutral float-right" title="Reconfigurable Acquisitions Using Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="features/features.html" class="btn btn-neutral float-right" title="Reconfigurable Acquisitions Using Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

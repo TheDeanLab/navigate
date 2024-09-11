@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example Feature Lists &mdash; navigate 0.0.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Case Studies" href="../case_studies/case_studies_home.html" />
+    <link rel="prev" title="Reconfigurable Acquisitions Using Features" href="features.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            navigate
+              <img src="../../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../acquiring_home.html">Acquiring Data</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../acquiring_guide.html">Acquiring Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html">Reconfigurable Acquisitions Using Features</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example Feature Lists</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#multi-position-imaging-with-automated-autofocus">Multi-Position Imaging with Automated Autofocus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time-lapse-imaging-with-automated-autofocus">Time-Lapse Imaging with Automated Autofocus</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../acquiring_home.html">Acquiring Data</a></li>
+      <li class="breadcrumb-item active">Example Feature Lists</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/features/example_feature_lists.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="example-feature-lists">
+<h1>Example Feature Lists<a class="headerlink" href="#example-feature-lists" title="Permalink to this heading"></a></h1>
+<p>Fairly complex imaging sequences can be created by chaining together multiple
+features. Here are a few examples of feature lists that can be used to create custom
+acquisition protocols.</p>
+<section id="multi-position-imaging-with-automated-autofocus">
+<h2>Multi-Position Imaging with Automated Autofocus<a class="headerlink" href="#multi-position-imaging-with-automated-autofocus" title="Permalink to this heading"></a></h2>
+<p>Large volumes are often acquired in a tiling format, where the sample is imaged at
+multiple positions. In some cases, if the sample is not perfectly transparent, the focus
+may need to be adjusted at each position. This can be done automatically using the
+autofocus feature.
+#. You can load customized functions in the software by selecting the menu</p>
+<p>Here, we begin by moving to the first position of the multi-position table, then move to
+the first z-position, measure the autofocus, set the F_Start position, move to the last
+z-position, measure the autofocus, set the F_End position, and image the full z-stack
+prior to moving to the next position in the multi-position table.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">,},</span>
+    <span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">MoveToNextPositionInMultiPositionTable</span><span class="p">,</span><span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,),},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">CalculateFocusRange</span><span class="p">,},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">ZStackAcquisition</span><span class="p">,</span><span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;z-stack&quot;</span><span class="p">,),},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">WaitToContinue</span><span class="p">,},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span><span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;experiment.MicroscopeState.multiposition_count&quot;</span><span class="p">,),},</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="time-lapse-imaging-with-automated-autofocus">
+<h2>Time-Lapse Imaging with Automated Autofocus<a class="headerlink" href="#time-lapse-imaging-with-automated-autofocus" title="Permalink to this heading"></a></h2>
+<p>Time-lapse imaging is a common technique used to monitor changes in samples over time
+. If you do not have a hardware solution for maintaining the focus of the specimen, a
+common technique for maintaining the focus of a microscope is to intermittently measure
+the focus using the image as a metric.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">,</span> <span class="p">},</span>
+        <span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">Snap</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,),},</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,),},</span>
+        <span class="p">),</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,),},),</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">,</span> <span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">WaitToContinue</span><span class="p">,</span> <span class="p">},</span>
+        <span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">Autofocus</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;stage&quot;</span><span class="p">,</span><span class="s2">&quot;z&quot;</span><span class="p">,),},</span>
+            <span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">Snap</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,),},</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,),},</span>
+            <span class="p">),</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">StackPause</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;experiment.MicroscopeState.timepoints&quot;</span><span class="p">,),},</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,),},</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="features.html" class="btn btn-neutral float-left" title="Reconfigurable Acquisitions Using Features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../case_studies/case_studies_home.html" class="btn btn-neutral float-right" title="Case Studies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

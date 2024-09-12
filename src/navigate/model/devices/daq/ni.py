@@ -147,8 +147,13 @@ class NIDAQ(DAQBase):
                 self.analog_output_tasks[
                     board_name
                 ].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
-                self.analog_output_tasks[board_name].register_done_event(None)
-
+                try:
+                    self.analog_output_tasks[board_name].register_done_event(None)
+                except Exception:
+                    logger.debug(
+                        f"DAQ NI - Error Registering Done Event: "
+                        f"{traceback.format_exc()}"
+                    )
         else:
             # close master trigger task
             if self.master_trigger_task:

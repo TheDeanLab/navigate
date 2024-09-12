@@ -286,6 +286,7 @@ class TestCameraViewController:
         assert process_image_called is True
 
     def test_process_image(self):
+        self.camera_view.image = np.random.randint(0, 256, (600, 800))
         self.camera_view.digital_zoom = MagicMock()
         self.camera_view.detect_saturation = MagicMock()
         self.camera_view.down_sample_image = MagicMock()

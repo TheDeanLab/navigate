@@ -84,7 +84,6 @@ class AcquireBar(ttk.Frame):
         self.options = tk.StringVar()
         #: ttk.Combobox: Pull down menu to select acquisition type
         self.pull_down = ttk.Combobox(self, textvariable=self.options)
-        self.pull_down.state(["readonly"])
 
         #  Progress Bar: Current Acquisitions and Overall
         #: ttk.Frame: Frame to hold the progress bars
@@ -104,9 +103,9 @@ class AcquireBar(ttk.Frame):
         )
 
         #: tk.Label: Label to display the current acquisition progress
-        self.total_acquisition_label = tk.Label(self, text=f"{0:02}"
-                                                           f":{0:02}"
-                                                           f":{0:02}")
+        self.total_acquisition_label = tk.Label(
+            self, text=f"{0:02}" f":{0:02}" f":{0:02}"
+        )
 
         self.CurAcq.grid(row=0, column=0)
         self.OvrAcq.grid(row=1, column=0)

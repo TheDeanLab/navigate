@@ -35,6 +35,7 @@ from tkinter import messagebox
 import inspect
 import json
 import os
+import platform
 
 # Third party imports
 from PIL import Image, ImageTk
@@ -335,8 +336,13 @@ class FeatureListGraphController:
 
             btn.grid(row=0, column=i * 2, sticky="", pady=(30, 0))
             btn["width"] = 20
-            # right click
-            btn.bind("<Button-3>", self.show_menu(i, flag))
+
+            # Right-Click Bindings
+            if platform.system() == "Darwin":
+                btn.bind("<ButtonPress-2>", self.show_menu(i, flag))
+            else:
+                btn.bind("<Button-3>", self.show_menu(i, flag))
+
             if i == 0:
                 self.feature_list_view.update()
                 feature_icon_width = btn.winfo_width()
@@ -355,7 +361,6 @@ class FeatureListGraphController:
         # draw loop arrows
         image_width = feature_icon_width * (l + 1) + al_width * l
         image_height = self.calculate_arrow_image_height()
-        arrow_height = 50
         stack = []
         arrow_image = None
         space = 30
@@ -418,6 +423,7 @@ class FeatureListGraphController:
                 end_pos = c * (feature_icon_width + al_width) + feature_icon_width // 2
         if arrow_image:
             image_gif = arrow_image.convert("P", palette=Image.ADAPTIVE)
+
             #: ImageTk.PhotoImage: The image of the feature list graph.
             self.image = ImageTk.PhotoImage(image_gif)
             al = tk.Label(self.feature_list_view, image=self.image)
@@ -433,7 +439,7 @@ class FeatureListGraphController:
 
         Returns
         -------
-        func
+        func : function
             The function to show the feature configuration popup
         """
         feature = self.features[idx]
@@ -534,11 +540,6 @@ class FeatureListGraphController:
             ----------
             popup : navigate.view.popups.feature_list_popup.FeatureConfigPopup
                 The feature configuration popup
-
-            Returns
-            -------
-            func
-                The function to update the feature parameters
             """
             widgets = popup.get_widgets()
             feature_name = popup.feature_name_widget.get()
@@ -581,10 +582,12 @@ class FeatureListGraphController:
         ----------
         idx : int
             The index of the feature
+        flag : bool, optional
+            Whether the feature is a decision node, by default True
 
         Returns
         -------
-        func
+        func : function
             The function to show the popup menu
         """
 
@@ -688,11 +691,6 @@ class FeatureListGraphController:
             ----------
             idx : int
                 The index of the feature
-
-            Returns
-            -------
-            func
-                The function to insert the feature after the current feature
             """
             self.features.insert(
                 idx,
@@ -715,14 +713,9 @@ class FeatureListGraphController:
     def calculate_arrow_image_height(self):
         """Calculate the height of the arrow image
 
-        Parameters
-        ----------
-        feature_structure : list
-            The feature structure
-
         Returns
         -------
-        int
+        image_height : int
             The height of the arrow image
         """
         image_height = 0
@@ -740,7 +733,7 @@ class FeatureListGraphController:
 
         Returns
         -------
-        str
+        content : str
             The feature list text
         """
         content = "["

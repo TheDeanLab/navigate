@@ -128,6 +128,12 @@ class BaseViewController(GUIController, ABaseViewController):
         #: tkinter.Canvas: The tkinter canvas that displays the image.
         self.canvas = self.view.canvas
 
+        #: int: The width of the window
+        self.width = 663
+
+        #: int: The height of the window
+        self.height = 597
+
         #: int: The height of the canvas.
         self.canvas_height = 512
 
@@ -260,6 +266,25 @@ class BaseViewController(GUIController, ABaseViewController):
         self.image_palette["Flip XY"].widget.config(
             command=lambda: self.update_transpose_state(display=True)
         )
+
+        #: int: The x position of the mouse.
+        self.move_to_x = None
+
+        #: int: The y position of the mouse.
+        self.move_to_y = None
+
+        #: int: Location of crosshair in x
+        self.crosshair_x = None
+
+        #: int: Location of crosshair in y
+        self.crosshair_y = None
+
+        #: bool: Flag to move the crosshair to non-default position.
+        self.offset_crosshair = False
+
+        self.menu = tk.Menu(self.canvas, tearoff=0)
+        self.menu.add_command(label="Reset Display", command=self.reset_display)
+        self.menu.add_command(label="Move Crosshair", command=self.move_crosshair)
 
     def initialize(self, name, data):
         """Sets widgets based on data given from main controller/config.
@@ -504,19 +529,24 @@ class BaseViewController(GUIController, ABaseViewController):
             ][self.microscope_name]["camera"]
             self.flip_flags = {
                 "x": camera_config.get("flip_x", False),
-                "y": camera_config.get("flip_y", False)
+                "y": camera_config.get("flip_y", False),
             }
 
         self.update_canvas_size()
         self.reset_display(False)
 
-    def reset_display(self, display_flag=True):
+    def reset_display(self, display_flag=True, reset_crosshair=True):
         """Set the display back to the original digital zoom.
 
         Parameters
         ----------
         display_flag : bool
+            Flag for refreshing the image display. Default True.
+        reset_crosshair : bool
+            Flag for resetting the crosshair. Default True.
         """
+        if reset_crosshair:
+            self.offset_crosshair = False
         self.zoom_width = self.canvas_width
         self.zoom_height = self.canvas_height
         self.zoom_rect = np.array([[0, self.zoom_width], [0, self.zoom_height]])
@@ -525,6 +555,12 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_scale = 1
         if display_flag:
             self.process_image()
+
+    def move_crosshair(self):
+        """Move the crosshair to a non-default position."""
+        self.offset_crosshair = True
+        self.crosshair_x, self.crosshair_y = self.move_to_x, self.move_to_y
+        self.process_image()
 
     def update_canvas_size(self):
         """Update the canvas size."""
@@ -545,12 +581,21 @@ class BaseViewController(GUIController, ABaseViewController):
             self.original_image_height / self.canvas_height
         )
 
-    def digital_zoom(self):
+    def digital_zoom(self, image):
         """Apply digital zoom.
 
-        The x and y positions are between 0
-        and the canvas width and height respectively.
+        The x and y positions are between 0 and the canvas width and height
+        respectively.
 
+        Parameters
+        ----------
+        image : np.array
+            Image to be displayed
+
+        Returns
+        -------
+        image : np.array
+            Image after digital zoom applied
         """
         self.zoom_rect = self.zoom_rect - self.zoom_offset
         self.zoom_rect = self.zoom_rect * self.zoom_value
@@ -566,7 +611,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
-        zoom_image = self.image[
+        zoom_image = image[
             int(y_start_index * self.canvas_height_scale) : int(
                 y_end_index * self.canvas_height_scale
             ),
@@ -659,13 +704,36 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.apply_cross_hair:
             crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
             crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
+
+            if self.offset_crosshair:
+                if self.zoom_rect[0][0] < self.crosshair_x < self.zoom_rect[0][1]:
+                    crosshair_x = self.crosshair_x + self.zoom_rect[0][0]
+
+                if self.zoom_rect[1][0] < self.crosshair_y < self.zoom_rect[1][1]:
+                    crosshair_y = self.crosshair_y + self.zoom_rect[1][0]
+
             if crosshair_x < 0 or crosshair_x >= self.canvas_width:
                 crosshair_x = -1
             if crosshair_y < 0 or crosshair_y >= self.canvas_height:
                 crosshair_y = -1
             image[:, int(crosshair_x)] = 1
             image[int(crosshair_y), :] = 1
+
         return image
+
+    def get_absolute_position(self):
+        """Gets the absolute position of the computer mouse.
+
+        Returns
+        -------
+        x : int
+            The x position of the mouse.
+        y : int
+            The y position of the mouse.
+        """
+        x = self.parent_controller.view.winfo_pointerx()
+        y = self.parent_controller.view.winfo_pointery()
+        return x, y
 
     def array_to_image(self, image):
         """Convert a numpy array to a PIL Image
@@ -712,7 +780,11 @@ class BaseViewController(GUIController, ABaseViewController):
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
-        image = self.digital_zoom()
+        if self.image is None:
+            return
+        else:
+            image = self.image
+        image = self.digital_zoom(image)
         self.detect_saturation(image)
         image = self.down_sample_image(image)
         image = self.transpose_image(image)
@@ -827,7 +899,8 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_height /= self.zoom_value
 
         if self.zoom_width > self.canvas_width or self.zoom_height > self.canvas_height:
-            self.reset_display(False)
+            reset_crosshair = not self.offset_crosshair
+            self.reset_display(display_flag=False, reset_crosshair=reset_crosshair)
         elif self.zoom_width < 5 or self.zoom_height < 5:
             return
 
@@ -871,21 +944,9 @@ class CameraViewController(BaseViewController):
         if platform.system() == "Windows":
             self.resize_event_id = self.view.bind("<Configure>", self.resize)
 
-        self.width, self.height = 663, 597
-        self.canvas_width, self.canvas_height = 512, 512
-
-        # Right-Click Binding
-        #: tkinter.Menu: The tkinter menu that pops up on right click.
-        self.menu = tk.Menu(self.canvas, tearoff=0)
+        # Right-Click Popup Menu
         self.menu.add_command(label="Move Here", command=self.move_stage)
-        self.menu.add_command(label="Reset Display", command=self.reset_display)
         self.menu.add_command(label="Mark Position", command=self.mark_position)
-
-        #: int: The x position of the mouse.
-        self.move_to_x = None
-
-        #: int: The y position of the mouse.
-        self.move_to_y = None
 
         #: str: The display state.
         self.display_state = "Live"
@@ -1029,20 +1090,6 @@ class CameraViewController(BaseViewController):
             self.view.live_frame.channel.configure(state="normal")
             if self.view.live_frame.channel.get() not in self.selected_channels:
                 self.view.live_frame.channel.set(self.selected_channels[0])
-
-    def get_absolute_position(self):
-        """Gets the absolute position of the computer mouse.
-
-        Returns
-        -------
-        x : int
-            The x position of the mouse.
-        y : int
-            The y position of the mouse.
-        """
-        x = self.parent_controller.view.winfo_pointerx()
-        y = self.parent_controller.view.winfo_pointery()
-        return x, y
 
     def popup_menu(self, event):
         """Right-Click Popup Menu

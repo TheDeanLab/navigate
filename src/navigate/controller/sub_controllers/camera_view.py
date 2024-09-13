@@ -772,6 +772,8 @@ class BaseViewController(GUIController, ABaseViewController):
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
+        if self.image is None:
+            return
         image = self.digital_zoom()
         self.detect_saturation(image)
         image = self.down_sample_image(image)

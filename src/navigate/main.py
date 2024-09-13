@@ -69,14 +69,7 @@ def main():
         --rest-api-file
         --waveform-templates-file
         --logging-confi
-
-    Returns
-    -------
-    None
-
-    Examples
-    --------
-    >>> python main.py --synthetic-hardware
+        --configurator
     """
     if platform.system() != "Windows":
         print(

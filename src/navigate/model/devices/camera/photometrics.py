@@ -98,7 +98,7 @@ class PhotometricsBase(CameraBase):
                 Name of microscope in configuration
         device_connection : object
                 Hardware device to connect to. will be saved in camera_controller
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
                 Global configuration of the microscope
         -------
 
@@ -109,6 +109,15 @@ class PhotometricsBase(CameraBase):
             "Top-to-Bottom",
             "Bottom-to-Top",
         ]
+
+        #: str: Name of the microscope
+        self.microscope_name = microscope_name
+
+        #: obj: Camera Controller
+        self.device_connection = device_connection
+
+        #: dict: Configuration of the microscope
+        self.configuration = configuration
 
         #: int: Exposure Time in milliseconds
         self._exposuretime = 20
@@ -148,13 +157,20 @@ class PhotometricsBase(CameraBase):
         ]
         self.camera_controller.gain = self.camera_parameters["gain"]
 
-        logger.info("Photometrics Initialized")
+        logger.info(self.__repr__())
+
+    def __repr__(self):
+        return (
+            f"PhotometricsBase("
+            f"{self.microscope_name}, "
+            f"{self.device_connection}, "
+            f"{self.configuration})"
+        )
 
     def __del__(self):
         """Delete PhotometricsBase object."""
         if hasattr(self, "camera_controller"):
             self.camera_controller.close()
-        logger.info("PhotometricsBase Shutdown")
 
     @property
     def serial_number(self):
@@ -202,7 +218,7 @@ class PhotometricsBase(CameraBase):
             self._scanmode = modes_dict[mode]
         else:
             print("Camera mode not supported" + str(modes_dict[mode]))
-            logger.info("Camera mode not supported" + str(modes_dict[mode]))
+            logger.debug("Camera mode not supported" + str(modes_dict[mode]))
 
     def set_readout_direction(self, mode):
         """Set Photometrics readout direction.
@@ -223,7 +239,7 @@ class PhotometricsBase(CameraBase):
         elif mode == "Alternate":
             self.camera_controller.prog_scan_dir = 2
         else:
-            logger.info("Camera readout direction not supported")
+            logger.debug("Camera readout direction not supported")
 
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image.
@@ -409,9 +425,9 @@ class PhotometricsBase(CameraBase):
             return False
 
         # Calculate Location of Image Edges
-        roi_top = center_y - roi_height//2
+        roi_top = center_y - roi_height // 2
         roi_bottom = roi_top + roi_height - 1
-        roi_left = center_x - roi_width//2
+        roi_left = center_x - roi_width // 2
 
         if roi_top % 2 != 0 or roi_bottom % 2 == 0:
             logger.debug(f"can't set ROI to {roi_width} and {roi_height}")
@@ -420,7 +436,6 @@ class PhotometricsBase(CameraBase):
         # Set ROI
         self.camera_controller.set_roi(roi_left, roi_top, roi_width, roi_height)
         self.x_pixels, self.y_pixels = self.camera_controller.shape()
-        logger.info(f"Photometrics ROI shape, {self.camera_controller.shape()}")
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):

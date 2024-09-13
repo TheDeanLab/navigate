@@ -100,32 +100,60 @@ class SyntheticCamera(CameraBase):
         """
         super().__init__(microscope_name, device_connection, configuration)
 
+        #: str: Name of the microscope
+        self.microscope_name = microscope_name
+
+        #: object: Device connection
+        self.device_connection = device_connection
+
+        #: dict: Configuration settings
+        self.configuration = configuration
+
         #: bool: Whether the camera is currently acquiring
         self.is_acquiring = False
+
         #: int: mean background count for synthetic image
         self._mean_background_count = 100
+
         #: float: noise sigma for synthetic image
         self._noise_sigma = camera.compute_noise_sigma()
+
         #: int: current image id
         self.current_frame_idx = None
+
         #: object: data buffer
         self.data_buffer = None
+
         #: int: number of frames
         self.num_of_frame = None
+
         #: int: previous image id
         self.pre_frame_idx = None
+
         #: bool: whether to use random image
         self.random_image = True
+
         #: int: serial number
         self.serial_number = "synthetic"
+
         #: float: exposure time
         self.camera_exposure_time = 0.2
+
         #: int: width
         self.x_pixels = self.camera_parameters["x_pixels"]
+
         #: int: height
         self.y_pixels = self.camera_parameters["y_pixels"]
 
-        logger.info("SyntheticCamera Class Initialized")
+        logger.info(self.__repr__())
+
+    def __repr__(self):
+        return (
+            f"SyntheticCamera("
+            f"{self.microscope_name}, "
+            f"{self.device_connection}, "
+            f"{self.configuration})"
+        )
 
     def __del__(self):
         """Delete SyntheticCamera class."""

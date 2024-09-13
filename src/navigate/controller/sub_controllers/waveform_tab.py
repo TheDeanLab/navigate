@@ -166,7 +166,7 @@ class WaveformTabController(GUIController):
 
         if (
             self.view.is_docked
-            and parent_notebook.tab(current_tab, "text") != "Waveform Settings"
+            and parent_notebook.tab(current_tab, "text") != "Waveforms"
         ):
             return
         self.view.plot_etl.clear()

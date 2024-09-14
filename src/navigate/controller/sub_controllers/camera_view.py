@@ -128,6 +128,12 @@ class BaseViewController(GUIController, ABaseViewController):
         #: tkinter.Canvas: The tkinter canvas that displays the image.
         self.canvas = self.view.canvas
 
+        #: int: The width of the window
+        self.width = 663
+
+        #: int: The height of the window
+        self.height = 597
+
         #: int: The height of the canvas.
         self.canvas_height = 512
 
@@ -260,6 +266,31 @@ class BaseViewController(GUIController, ABaseViewController):
         self.image_palette["Flip XY"].widget.config(
             command=lambda: self.update_transpose_state(display=True)
         )
+
+        #: int: The x position of the mouse.
+        self.move_to_x = None
+
+        #: int: The y position of the mouse.
+        self.move_to_y = None
+
+        #: float: Percentage of crosshair in x
+        self.crosshair_x = 0.5
+
+        #: float: Percentage of crosshair in y
+        self.crosshair_y = 0.5
+
+        #: bool: the flag for offsetting the crosshair
+        self.offset_crosshair = False
+
+        # Right-Click Popup Menu
+        self.menu = tk.Menu(self.canvas, tearoff=0)
+        self.menu.add_command(label="Reset Display", command=self.reset_display)
+        self.menu.add_separator()
+        self.menu.add_command(label="Toggle Crosshair", command=self.left_click)
+        self.menu.add_command(label="Move Crosshair", command=self.move_crosshair)
+        self.menu.add_separator()
+        self.menu.add_command(label="Move Here", command=self.move_stage)
+        self.menu.add_command(label="Mark Position", command=self.mark_position)
 
     def initialize(self, name, data):
         """Sets widgets based on data given from main controller/config.
@@ -504,19 +535,26 @@ class BaseViewController(GUIController, ABaseViewController):
             ][self.microscope_name]["camera"]
             self.flip_flags = {
                 "x": camera_config.get("flip_x", False),
-                "y": camera_config.get("flip_y", False)
+                "y": camera_config.get("flip_y", False),
             }
 
         self.update_canvas_size()
-        self.reset_display(False)
+        self.reset_display(False, False)
 
-    def reset_display(self, display_flag=True):
+    def reset_display(self, display_flag=True, reset_crosshair=True):
         """Set the display back to the original digital zoom.
 
         Parameters
         ----------
         display_flag : bool
+            Flag for refreshing the image display. Default True.
+        reset_crosshair : bool
+            Flag for resetting the crosshair. Default True.
         """
+        if reset_crosshair:
+            self.offset_crosshair = False
+            self.crosshair_x = 0.5
+            self.crosshair_y = 0.5
         self.zoom_width = self.canvas_width
         self.zoom_height = self.canvas_height
         self.zoom_rect = np.array([[0, self.zoom_width], [0, self.zoom_height]])
@@ -525,6 +563,120 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_scale = 1
         if display_flag:
             self.process_image()
+
+    def move_crosshair(self):
+        """Move the crosshair to a non-default position."""
+        self.offset_crosshair = True
+        width = (self.zoom_rect[0][1] - self.zoom_rect[0][0]) / self.zoom_scale
+        height = (self.zoom_rect[1][1] - self.zoom_rect[1][0]) / self.zoom_scale
+        self.crosshair_x = self.move_to_x / width
+        self.crosshair_y = self.move_to_y / height
+        self.process_image()
+
+    def mark_position(self):
+        """Marks the current position of the microscope in
+        the multi-position acquisition table."""
+        offset_x, offset_y = self.calculate_offset()
+        stage_position = self.parent_controller.execute("get_stage_position")
+        if stage_position is not None:
+            stage_flip_flags = (
+                self.parent_controller.configuration_controller.stage_flip_flags
+            )
+            stage_position["x"] = float(stage_position["x"]) + offset_x * (
+                -1 if stage_flip_flags["x"] else 1
+            )
+            stage_position["y"] = float(stage_position["y"]) - offset_y * (
+                -1 if stage_flip_flags["y"] else 1
+            )
+
+            # Place the stage position in the multi-position table.
+            self.parent_controller.execute("mark_position", stage_position)
+
+    def popup_menu(self, event):
+        """Right-Click Popup Menu
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            x, y location.  0,0 is top left corner.
+        """
+        try:
+            # only popup the menu when click on image
+            if event.x >= self.canvas_width or event.y >= self.canvas_height:
+                return
+            self.move_to_x = event.x
+            self.move_to_y = event.y
+            x, y = self.get_absolute_position()
+            self.menu.tk_popup(x, y)
+        finally:
+            self.menu.grab_release()
+
+    def calculate_offset(self):
+        """Calculates the offset of the image.
+
+        Returns
+        -------
+        offset_x : int
+            The offset of the image in x.
+        offset_y : int
+            The offset of the image in y.
+        """
+        current_center_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
+        current_center_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
+
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        zoom_value = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["zoom"]
+        pixel_size = self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ][microscope_name]["zoom"]["pixel_size"][zoom_value]
+
+        offset_x = int(
+            (self.move_to_x - current_center_x)
+            / self.zoom_scale
+            * self.canvas_width_scale
+            * pixel_size
+        )
+        offset_y = int(
+            (self.move_to_y - current_center_y)
+            / self.zoom_scale
+            * self.canvas_height_scale
+            * pixel_size
+        )
+
+        return offset_x, offset_y
+
+    def move_stage(self):
+        """Move the stage according to the position the user clicked."""
+        offset_x, offset_y = self.calculate_offset()
+
+        self.show_verbose_info(
+            f"Try moving stage by {offset_x} in x and {offset_y} in y"
+        )
+
+        stage_position = self.parent_controller.execute("get_stage_position")
+
+        if stage_position is not None:
+            # TODO: if show image as what the camera gets(flipped one), the stage
+            # moving direction should be decided by stage_flip_flags
+            # and camera_flip_flags
+            stage_flip_flags = (
+                self.parent_controller.configuration_controller.stage_flip_flags
+            )
+            stage_position["x"] += offset_x * (-1 if stage_flip_flags["x"] else 1)
+            stage_position["y"] -= offset_y * (-1 if stage_flip_flags["y"] else 1)
+            if self.mode == "stop":
+                command = "move_stage_and_acquire_image"
+            else:
+                command = "move_stage_and_update_info"
+            self.parent_controller.execute(command, stage_position)
+        else:
+            tk.messagebox.showerror(
+                title="Warning", message="Can't move to there! Invalid stage position!"
+            )
 
     def update_canvas_size(self):
         """Update the canvas size."""
@@ -548,9 +700,13 @@ class BaseViewController(GUIController, ABaseViewController):
     def digital_zoom(self):
         """Apply digital zoom.
 
-        The x and y positions are between 0
-        and the canvas width and height respectively.
+        The x and y positions are between 0 and the canvas width and height
+        respectively.
 
+        Returns
+        -------
+        image : np.array
+            Image after digital zoom applied
         """
         self.zoom_rect = self.zoom_rect - self.zoom_offset
         self.zoom_rect = self.zoom_rect * self.zoom_value
@@ -559,7 +715,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_value = 1
 
         if self.zoom_rect[0][0] > 0 or self.zoom_rect[1][0] > 0:
-            self.reset_display(False)
+            self.reset_display(False, False)
 
         x_start_index = int(-self.zoom_rect[0][0] / self.zoom_scale)
         x_end_index = int(x_start_index + self.zoom_width)
@@ -657,15 +813,41 @@ class BaseViewController(GUIController, ABaseViewController):
             Image data with cross-hair.
         """
         if self.apply_cross_hair:
-            crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
-            crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
+            if self.offset_crosshair:
+                width = (self.zoom_rect[0][1] - self.zoom_rect[0][0]) / self.zoom_scale
+                height = (self.zoom_rect[1][1] - self.zoom_rect[1][0]) / self.zoom_scale
+                crosshair_x = self.crosshair_x * width
+                crosshair_y = self.crosshair_y * height
+            else:
+                crosshair_x = (
+                    self.zoom_rect[0][1] - self.zoom_rect[0][0]
+                ) * self.crosshair_x + self.zoom_rect[0][0]
+                crosshair_y = (
+                    self.zoom_rect[1][1] - self.zoom_rect[1][0]
+                ) * self.crosshair_y + self.zoom_rect[1][0]
+
             if crosshair_x < 0 or crosshair_x >= self.canvas_width:
                 crosshair_x = -1
             if crosshair_y < 0 or crosshair_y >= self.canvas_height:
                 crosshair_y = -1
             image[:, int(crosshair_x)] = 1
             image[int(crosshair_y), :] = 1
+
         return image
+
+    def get_absolute_position(self):
+        """Gets the absolute position of the computer mouse.
+
+        Returns
+        -------
+        x : int
+            The x position of the mouse.
+        y : int
+            The y position of the mouse.
+        """
+        x = self.parent_controller.view.winfo_pointerx()
+        y = self.parent_controller.view.winfo_pointery()
+        return x, y
 
     def array_to_image(self, image):
         """Convert a numpy array to a PIL Image
@@ -712,6 +894,8 @@ class BaseViewController(GUIController, ABaseViewController):
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
+        if self.image is None:
+            return
         image = self.digital_zoom()
         self.detect_saturation(image)
         image = self.down_sample_image(image)
@@ -827,7 +1011,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_height /= self.zoom_value
 
         if self.zoom_width > self.canvas_width or self.zoom_height > self.canvas_height:
-            self.reset_display(False)
+            self.reset_display(display_flag=False, reset_crosshair=False)
         elif self.zoom_width < 5 or self.zoom_height < 5:
             return
 
@@ -870,22 +1054,6 @@ class CameraViewController(BaseViewController):
 
         if platform.system() == "Windows":
             self.resize_event_id = self.view.bind("<Configure>", self.resize)
-
-        self.width, self.height = 663, 597
-        self.canvas_width, self.canvas_height = 512, 512
-
-        # Right-Click Binding
-        #: tkinter.Menu: The tkinter menu that pops up on right click.
-        self.menu = tk.Menu(self.canvas, tearoff=0)
-        self.menu.add_command(label="Move Here", command=self.move_stage)
-        self.menu.add_command(label="Reset Display", command=self.reset_display)
-        self.menu.add_command(label="Mark Position", command=self.mark_position)
-
-        #: int: The x position of the mouse.
-        self.move_to_x = None
-
-        #: int: The y position of the mouse.
-        self.move_to_y = None
 
         #: str: The display state.
         self.display_state = "Live"
@@ -1030,39 +1198,6 @@ class CameraViewController(BaseViewController):
             if self.view.live_frame.channel.get() not in self.selected_channels:
                 self.view.live_frame.channel.set(self.selected_channels[0])
 
-    def get_absolute_position(self):
-        """Gets the absolute position of the computer mouse.
-
-        Returns
-        -------
-        x : int
-            The x position of the mouse.
-        y : int
-            The y position of the mouse.
-        """
-        x = self.parent_controller.view.winfo_pointerx()
-        y = self.parent_controller.view.winfo_pointery()
-        return x, y
-
-    def popup_menu(self, event):
-        """Right-Click Popup Menu
-
-        Parameters
-        ----------
-        event : tkinter.Event
-            x, y location.  0,0 is top left corner.
-        """
-        try:
-            # only popup the menu when click on image
-            if event.x >= self.canvas_width or event.y >= self.canvas_height:
-                return
-            self.move_to_x = event.x
-            self.move_to_y = event.y
-            x, y = self.get_absolute_position()
-            self.menu.tk_popup(x, y)
-        finally:
-            self.menu.grab_release()
-
     def initialize(self, name, data):
         """Sets widgets based on data given from main controller/config.
 
@@ -1110,92 +1245,6 @@ class CameraViewController(BaseViewController):
             self.menu.entryconfig("Move Here", state="normal")
         else:
             self.menu.entryconfig("Move Here", state="disabled")
-
-    def mark_position(self):
-        """Marks the current position of the microscope in
-        the multi-position acquisition table."""
-        offset_x, offset_y = self.calculate_offset()
-        stage_position = self.parent_controller.execute("get_stage_position")
-        if stage_position is not None:
-            stage_flip_flags = (
-                self.parent_controller.configuration_controller.stage_flip_flags
-            )
-            stage_position["x"] = float(stage_position["x"]) + offset_x * (
-                -1 if stage_flip_flags["x"] else 1
-            )
-            stage_position["y"] = float(stage_position["y"]) - offset_y * (
-                -1 if stage_flip_flags["y"] else 1
-            )
-
-            # Place the stage position in the multi-position table.
-            self.parent_controller.execute("mark_position", stage_position)
-
-    def calculate_offset(self):
-        """Calculates the offset of the image.
-
-        Returns
-        -------
-        offset_x : int
-            The offset of the image in x.
-        offset_y : int
-            The offset of the image in y.
-        """
-        current_center_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
-        current_center_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
-
-        microscope_name = self.parent_controller.configuration["experiment"][
-            "MicroscopeState"
-        ]["microscope_name"]
-        zoom_value = self.parent_controller.configuration["experiment"][
-            "MicroscopeState"
-        ]["zoom"]
-        pixel_size = self.parent_controller.configuration["configuration"][
-            "microscopes"
-        ][microscope_name]["zoom"]["pixel_size"][zoom_value]
-
-        offset_x = int(
-            (self.move_to_x - current_center_x)
-            / self.zoom_scale
-            * self.canvas_width_scale
-            * pixel_size
-        )
-        offset_y = int(
-            (self.move_to_y - current_center_y)
-            / self.zoom_scale
-            * self.canvas_height_scale
-            * pixel_size
-        )
-
-        return offset_x, offset_y
-
-    def move_stage(self):
-        """Move the stage according to the position the user clicked."""
-        offset_x, offset_y = self.calculate_offset()
-
-        self.show_verbose_info(
-            f"Try moving stage by {offset_x} in x and {offset_y} in y"
-        )
-
-        stage_position = self.parent_controller.execute("get_stage_position")
-
-        if stage_position is not None:
-            # TODO: if show image as what the camera gets(flipped one), the stage
-            # moving direction should be decided by stage_flip_flags
-            # and camera_flip_flags
-            stage_flip_flags = (
-                self.parent_controller.configuration_controller.stage_flip_flags
-            )
-            stage_position["x"] += offset_x * (-1 if stage_flip_flags["x"] else 1)
-            stage_position["y"] -= offset_y * (-1 if stage_flip_flags["y"] else 1)
-            if self.mode == "stop":
-                command = "move_stage_and_acquire_image"
-            else:
-                command = "move_stage_and_update_info"
-            self.parent_controller.execute(command, stage_position)
-        else:
-            tk.messagebox.showerror(
-                title="Warning", message="Can't move to there! Invalid stage position!"
-            )
 
     def update_max_counts(self):
         """Update the max counts in the camera view.
@@ -1361,6 +1410,9 @@ class MIPViewController(BaseViewController):
 
         if platform.system() == "Windows":
             self.resize_event_id = self.view.bind("<Configure>", self.resize)
+
+        self.menu.entryconfig("Move Here", state="disabled")
+        self.menu.entryconfig("Mark Position", state="disabled")
 
     def initialize(self, name, data):
         """Initialize the MIP view.

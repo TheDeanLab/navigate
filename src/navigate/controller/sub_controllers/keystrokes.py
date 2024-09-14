@@ -112,10 +112,12 @@ class KeystrokeController(GUIController):
             self.camera_view.canvas.bind(
                 "<Button-2>", self.camera_controller.popup_menu
             )
+            self.mip_view.canvas.bind("<Button-2>", self.mip_controller.popup_menu)
         else:
             self.camera_view.canvas.bind(
                 "<Button-3>", self.camera_controller.popup_menu
             )
+            self.mip_view.canvas.bind("<Button-3>", self.mip_controller.popup_menu)
 
         """Keystrokes for MultiTable"""
         #: MultiPositionTable: Multiposition Table

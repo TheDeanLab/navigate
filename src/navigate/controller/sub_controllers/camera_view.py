@@ -279,6 +279,9 @@ class BaseViewController(GUIController, ABaseViewController):
         #: float: Percentage of crosshair in y
         self.crosshair_y = 0.5
 
+        #: bool: the flag for offsetting the crosshair
+        self.offset_crosshair = False
+
         # Right-Click Popup Menu
         self.menu = tk.Menu(self.canvas, tearoff=0)
         self.menu.add_command(label="Reset Display", command=self.reset_display)
@@ -536,7 +539,7 @@ class BaseViewController(GUIController, ABaseViewController):
             }
 
         self.update_canvas_size()
-        self.reset_display(False)
+        self.reset_display(False, False)
 
     def reset_display(self, display_flag=True, reset_crosshair=True):
         """Set the display back to the original digital zoom.
@@ -549,6 +552,7 @@ class BaseViewController(GUIController, ABaseViewController):
             Flag for resetting the crosshair. Default True.
         """
         if reset_crosshair:
+            self.offset_crosshair = False
             self.crosshair_x = 0.5
             self.crosshair_y = 0.5
         self.zoom_width = self.canvas_width
@@ -562,6 +566,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
     def move_crosshair(self):
         """Move the crosshair to a non-default position."""
+        self.offset_crosshair = True
         width = (self.zoom_rect[0][1] - self.zoom_rect[0][0]) / self.zoom_scale
         height = (self.zoom_rect[1][1] - self.zoom_rect[1][0]) / self.zoom_scale
         self.crosshair_x = self.move_to_x / width
@@ -808,12 +813,18 @@ class BaseViewController(GUIController, ABaseViewController):
             Image data with cross-hair.
         """
         if self.apply_cross_hair:
-            crosshair_x = (
-                self.zoom_rect[0][1] - self.zoom_rect[0][0]
-            ) * self.crosshair_x + self.zoom_rect[0][0]
-            crosshair_y = (
-                self.zoom_rect[1][1] - self.zoom_rect[1][0]
-            ) * self.crosshair_y + self.zoom_rect[1][0]
+            if self.offset_crosshair:
+                width = (self.zoom_rect[0][1] - self.zoom_rect[0][0]) / self.zoom_scale
+                height = (self.zoom_rect[1][1] - self.zoom_rect[1][0]) / self.zoom_scale
+                crosshair_x = self.crosshair_x * width
+                crosshair_y = self.crosshair_y * height
+            else:
+                crosshair_x = (
+                    self.zoom_rect[0][1] - self.zoom_rect[0][0]
+                ) * self.crosshair_x + self.zoom_rect[0][0]
+                crosshair_y = (
+                    self.zoom_rect[1][1] - self.zoom_rect[1][0]
+                ) * self.crosshair_y + self.zoom_rect[1][0]
 
             if crosshair_x < 0 or crosshair_x >= self.canvas_width:
                 crosshair_x = -1
@@ -1000,7 +1011,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_height /= self.zoom_value
 
         if self.zoom_width > self.canvas_width or self.zoom_height > self.canvas_height:
-            self.reset_display(False, False)
+            self.reset_display(display_flag=False, reset_crosshair=False)
         elif self.zoom_width < 5 or self.zoom_height < 5:
             return
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acquiring Data &mdash; navigate 0.0.8 documentation</title>
+  <title>Known Issues &mdash; navigate 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Acquiring Data" href="acquiring_guide.html" />
-    <link rel="prev" title="Multiple Cameras" href="multiple_cameras.html" /> 
+    <link rel="next" title="Case Studies" href="case_studies/case_studies_home.html" />
+    <link rel="prev" title="Example Feature Lists" href="features/example_feature_lists.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,11 +58,14 @@
 <li class="toctree-l1"><a class="reference internal" href="file_formats.html">Supported File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Acquiring Data</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="acquiring_home.html">Acquiring Data</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="acquiring_guide.html">Acquiring Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="features/features.html">Reconfigurable Acquisitions Using Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="features/example_feature_lists.html">Example Feature Lists</a></li>
-<li class="toctree-l2"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Known Issues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#slow-channel-switching">Slow Channel Switching</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a></li>
@@ -105,9 +108,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Acquiring Data</li>
+          <li class="breadcrumb-item"><a href="acquiring_home.html">Acquiring Data</a></li>
+      <li class="breadcrumb-item active">Known Issues</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/user_guide/acquiring_home.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/user_guide/known_issues.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -115,43 +119,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="acquiring-data">
-<h1>Acquiring Data<a class="headerlink" href="#acquiring-data" title="Permalink to this heading"></a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="acquiring_guide.html">Acquiring Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="acquiring_guide.html#standard-acquisition-modes">Standard Acquisition Modes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="acquiring_guide.html#analysis-pipeline">Analysis Pipeline</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="features/features.html">Reconfigurable Acquisitions Using Features</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="features/features.html#what-are-features">What are features?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/features.html#customizing-feature-functionality-in-the-gui">Customizing Feature Functionality in the GUI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/features.html#creating-a-custom-feature-list-in-the-gui">Creating a Custom Feature List in the GUI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/features.html#editing-feature-lists-on-the-fly">Editing Feature Lists on the Fly</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/features.html#deleting-feature-lists">Deleting Feature Lists</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/features.html#text-representation-of-feature-lists">Text Representation of Feature Lists</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="features/example_feature_lists.html">Example Feature Lists</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="features/example_feature_lists.html#multi-position-imaging-with-automated-autofocus">Multi-Position Imaging with Automated Autofocus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/example_feature_lists.html#time-lapse-imaging-with-automated-autofocus">Time-Lapse Imaging with Automated Autofocus</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="known_issues.html#slow-channel-switching">Slow Channel Switching</a></li>
-</ul>
-</li>
-</ul>
-</div>
+  <section id="known-issues">
+<h1>Known Issues<a class="headerlink" href="#known-issues" title="Permalink to this heading"></a></h1>
+<p>This page lists known issues with the <strong>navigate</strong> software that currently do not have
+an obvious solution. Please report any other issues you encounter on GitHub.</p>
+<section id="slow-channel-switching">
+<h2>Slow Channel Switching<a class="headerlink" href="#slow-channel-switching" title="Permalink to this heading"></a></h2>
+<p>When we operate multiple channels, there is a clear time delay between channels.
+This is most obvious when operating in the continuous mode, or when you are acquiring
+a Z-stack in the Per Z Laser Cycling mode.</p>
+<p>This delay is associated with the time it takes to load the waveforms onto the DAQ
+card. One possible solution is to write the waveforms to different channels on the
+DAQ, but this would require that the analog/digital signals be combined physically.
+For example, if CH00 was delivered on AO0, and CH01 was delivered on AO1, but both
+were communicating with a single laser, then the signals could be combined and
+delivered to the laser. However, a more obvious solution would be to reduce the time
+necessary to load the waveforms onto the DAQ card. One immediate way to do this is by
+reducing the DAQ sampling rate, but this would reduce the resolution of the waveforms
+. More sophisticated DAQ systems, including an FPGA, could also be used to eliminate
+this delay.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="multiple_cameras.html" class="btn btn-neutral float-left" title="Multiple Cameras" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="acquiring_guide.html" class="btn btn-neutral float-right" title="Acquiring Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="features/example_feature_lists.html" class="btn btn-neutral float-left" title="Example Feature Lists" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="case_studies/case_studies_home.html" class="btn btn-neutral float-right" title="Case Studies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

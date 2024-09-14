@@ -44,6 +44,8 @@ navigate.model.devices.camera.hamamatsu.HamamatsuBase
       ~HamamatsuBase.offset
       ~HamamatsuBase.serial_number
       ~HamamatsuBase.variance
+      ~HamamatsuBase.microscope_name
+      ~HamamatsuBase.device_connection
       ~HamamatsuBase.configuration
       ~HamamatsuBase.camera_controller
       ~HamamatsuBase.camera_parameters

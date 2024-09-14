@@ -8,3 +8,4 @@ Acquiring Data
    acquiring_guide
    features/features
    features/example_feature_lists
+   known_issues

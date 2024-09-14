@@ -44,6 +44,8 @@ navigate.model.devices.camera.hamamatsu.HamamatsuOrcaLightning
       ~HamamatsuOrcaLightning.offset
       ~HamamatsuOrcaLightning.serial_number
       ~HamamatsuOrcaLightning.variance
+      ~HamamatsuOrcaLightning.microscope_name
+      ~HamamatsuOrcaLightning.device_connection
       ~HamamatsuOrcaLightning.configuration
       ~HamamatsuOrcaLightning.camera_controller
       ~HamamatsuOrcaLightning.camera_parameters

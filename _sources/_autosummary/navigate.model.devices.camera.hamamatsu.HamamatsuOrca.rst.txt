@@ -44,6 +44,8 @@ navigate.model.devices.camera.hamamatsu.HamamatsuOrca
       ~HamamatsuOrca.offset
       ~HamamatsuOrca.serial_number
       ~HamamatsuOrca.variance
+      ~HamamatsuOrca.microscope_name
+      ~HamamatsuOrca.device_connection
       ~HamamatsuOrca.configuration
       ~HamamatsuOrca.camera_controller
       ~HamamatsuOrca.camera_parameters

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>navigate.model.devices.camera.synthetic.SyntheticCamera &mdash; navigate 0.0.7 documentation</title>
+  <title>navigate.model.devices.camera.synthetic.SyntheticCamera &mdash; navigate 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -239,34 +239,43 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.variance" title="navigate.model.devices.camera.synthetic.SyntheticCamera.variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variance</span></code></a></p></td>
 <td><p>Return variance map.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.is_acquiring" title="navigate.model.devices.camera.synthetic.SyntheticCamera.is_acquiring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_acquiring</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.microscope_name" title="navigate.model.devices.camera.synthetic.SyntheticCamera.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>Name of the microscope</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.device_connection" title="navigate.model.devices.camera.synthetic.SyntheticCamera.device_connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device_connection</span></code></a></p></td>
+<td><p>Device connection</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.configuration" title="navigate.model.devices.camera.synthetic.SyntheticCamera.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Configuration settings</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.is_acquiring" title="navigate.model.devices.camera.synthetic.SyntheticCamera.is_acquiring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_acquiring</span></code></a></p></td>
 <td><p>Whether the camera is currently acquiring</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.current_frame_idx" title="navigate.model.devices.camera.synthetic.SyntheticCamera.current_frame_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_frame_idx</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.current_frame_idx" title="navigate.model.devices.camera.synthetic.SyntheticCamera.current_frame_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_frame_idx</span></code></a></p></td>
 <td><p>current image id</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.data_buffer" title="navigate.model.devices.camera.synthetic.SyntheticCamera.data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_buffer</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.data_buffer" title="navigate.model.devices.camera.synthetic.SyntheticCamera.data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_buffer</span></code></a></p></td>
 <td><p>data buffer</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.num_of_frame" title="navigate.model.devices.camera.synthetic.SyntheticCamera.num_of_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_of_frame</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.num_of_frame" title="navigate.model.devices.camera.synthetic.SyntheticCamera.num_of_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_of_frame</span></code></a></p></td>
 <td><p>number of frames</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.pre_frame_idx" title="navigate.model.devices.camera.synthetic.SyntheticCamera.pre_frame_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_frame_idx</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.pre_frame_idx" title="navigate.model.devices.camera.synthetic.SyntheticCamera.pre_frame_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_frame_idx</span></code></a></p></td>
 <td><p>previous image id</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.random_image" title="navigate.model.devices.camera.synthetic.SyntheticCamera.random_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_image</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.random_image" title="navigate.model.devices.camera.synthetic.SyntheticCamera.random_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_image</span></code></a></p></td>
 <td><p>whether to use random image</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.serial_number" title="navigate.model.devices.camera.synthetic.SyntheticCamera.serial_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_number</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.serial_number" title="navigate.model.devices.camera.synthetic.SyntheticCamera.serial_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_number</span></code></a></p></td>
 <td><p>serial number</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.camera_exposure_time" title="navigate.model.devices.camera.synthetic.SyntheticCamera.camera_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_exposure_time</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.camera_exposure_time" title="navigate.model.devices.camera.synthetic.SyntheticCamera.camera_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_exposure_time</span></code></a></p></td>
 <td><p>exposure time</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.x_pixels" title="navigate.model.devices.camera.synthetic.SyntheticCamera.x_pixels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_pixels</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.x_pixels" title="navigate.model.devices.camera.synthetic.SyntheticCamera.x_pixels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_pixels</span></code></a></p></td>
 <td><p>width</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.y_pixels" title="navigate.model.devices.camera.synthetic.SyntheticCamera.y_pixels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_pixels</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.y_pixels" title="navigate.model.devices.camera.synthetic.SyntheticCamera.y_pixels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_pixels</span></code></a></p></td>
 <td><p>height</p></td>
 </tr>
 </tbody>
@@ -501,7 +510,7 @@ Numpy stacks.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.synthetic.SyntheticCamera.configuration">
 <span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.configuration" title="Permalink to this definition"></a></dt>
-<dd><p>Global configuration of the microscope</p>
+<dd><p>Configuration settings</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
@@ -532,12 +541,34 @@ Numpy stacks.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.camera.synthetic.SyntheticCamera.device_connection">
+<span class="sig-name descname"><span class="pre">device_connection</span></span><a class="headerlink" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.device_connection" title="Permalink to this definition"></a></dt>
+<dd><p>Device connection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.synthetic.SyntheticCamera.is_acquiring">
 <span class="sig-name descname"><span class="pre">is_acquiring</span></span><a class="headerlink" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.is_acquiring" title="Permalink to this definition"></a></dt>
 <dd><p>Whether the camera is currently acquiring</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.camera.synthetic.SyntheticCamera.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#navigate.model.devices.camera.synthetic.SyntheticCamera.microscope_name" title="Permalink to this definition"></a></dt>
+<dd><p>Name of the microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>

@@ -44,6 +44,8 @@ navigate.model.devices.camera.hamamatsu.HamamatsuOrcaFire
       ~HamamatsuOrcaFire.offset
       ~HamamatsuOrcaFire.serial_number
       ~HamamatsuOrcaFire.variance
+      ~HamamatsuOrcaFire.microscope_name
+      ~HamamatsuOrcaFire.device_connection
       ~HamamatsuOrcaFire.configuration
       ~HamamatsuOrcaFire.camera_controller
       ~HamamatsuOrcaFire.camera_parameters

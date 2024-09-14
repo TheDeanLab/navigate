@@ -45,6 +45,9 @@ navigate.model.devices.camera.synthetic.SyntheticCamera
    
       ~SyntheticCamera.offset
       ~SyntheticCamera.variance
+      ~SyntheticCamera.microscope_name
+      ~SyntheticCamera.device_connection
+      ~SyntheticCamera.configuration
       ~SyntheticCamera.is_acquiring
       ~SyntheticCamera.current_frame_idx
       ~SyntheticCamera.data_buffer
@@ -55,7 +58,6 @@ navigate.model.devices.camera.synthetic.SyntheticCamera
       ~SyntheticCamera.camera_exposure_time
       ~SyntheticCamera.x_pixels
       ~SyntheticCamera.y_pixels
-      ~SyntheticCamera.configuration
       ~SyntheticCamera.camera_controller
       ~SyntheticCamera.camera_parameters
       ~SyntheticCamera.min_image_width

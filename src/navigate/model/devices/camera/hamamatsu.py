@@ -64,6 +64,15 @@ class HamamatsuBase(CameraBase):
         """
         super().__init__(microscope_name, device_connection, configuration)
 
+        #: str: Name of the microscope
+        self.microscope_name = microscope_name
+
+        #: object: Device connection
+        self.device_connection = device_connection
+
+        #: dict: Configuration settings
+        self.configuration = configuration
+
         #: dict: Camera parameters
         self.camera_parameters["x_pixels"] = self.camera_controller.max_image_width
         self.camera_parameters["y_pixels"] = self.camera_controller.max_image_height
@@ -114,11 +123,9 @@ class HamamatsuBase(CameraBase):
             "trigger_source", self.camera_parameters["trigger_source"]
         )
 
-        logger.info("HamamatsuOrca Initialized")
-
     def __del__(self):
         """Delete HamamatsuOrca class."""
-        logger.info("HamamatsuOrca Shutdown")
+        pass
 
     @property
     def serial_number(self):
@@ -205,7 +212,7 @@ class HamamatsuBase(CameraBase):
             ] = self.camera_controller.step_image_height
         else:
             print("Camera mode not supported")
-            logger.info("Camera mode not supported")
+            logger.debug("Camera mode not supported")
 
     def set_readout_direction(self, mode):
         """Set HamamatsuOrca readout direction.
@@ -230,7 +237,7 @@ class HamamatsuBase(CameraBase):
             )
         else:
             print("Camera readout direction not supported")
-            logger.info("Camera readout direction not supported")
+            logger.debug("Camera readout direction not supported")
 
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image.
@@ -444,7 +451,15 @@ class HamamatsuOrcaLightning(HamamatsuBase):
 
         # self.minimum_exposure_time = 6.304 * 10 ** -6
 
-        logger.info("HamamatsuOrcaLightning Initialized")
+        logger.info(self.__repr__())
+
+    def __repr__(self):
+        return (
+            f"HamamatsuOrcaLightning("
+            f"{self.microscope_name}, "
+            f"{self.device_connection}, "
+            f"{self.configuration})"
+        )
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
@@ -515,7 +530,15 @@ class HamamatsuOrcaFire(HamamatsuBase):
             "image_height"
         )
 
-        logger.info("HamamatsuOrcaFire Initialized")
+        logger.info(self.__repr__())
+
+    def __repr__(self):
+        return (
+            f"HamamatsuOrcaFire("
+            f"{self.microscope_name}, "
+            f"{self.device_connection}, "
+            f"{self.configuration})"
+        )
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
@@ -582,7 +605,15 @@ class HamamatsuOrca(HamamatsuBase):
 
         # self.minimum_exposure_time = 9.74436 * 10 ** -6
 
-        logger.info("HamamatsuOrca Initialized")
+        logger.info(self.__repr__())
+
+    def __repr__(self):
+        return (
+            f"HamamatsuOrca("
+            f"{self.microscope_name}, "
+            f"{self.device_connection}, "
+            f"{self.configuration})"
+        )
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
@@ -646,7 +677,15 @@ class HamamatsuOrcaFusion(HamamatsuBase):
             "Bottom-to-Top",
         ]
 
-        logger.info("HamamatsuOrcaFusion Initialized")
+        logger.info(self.__repr__())
+
+    def __repr__(self):
+        return (
+            f"HamamatsuOrcaFusion("
+            f"{self.microscope_name}, "
+            f"{self.device_connection}, "
+            f"{self.configuration})"
+        )
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width

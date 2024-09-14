@@ -140,6 +140,33 @@ class Controller:
             file paths or using synthetic hardware modes.
         """
 
+        #: Tk top-level widget: Tk.tk GUI instance.
+        self.root = root
+
+        #: Tk top-level widget: Tk.tk GUI instance.
+        self.splash_screen = splash_screen
+
+        #: string: Path to the configuration yaml file.
+        self.configuration_path = configuration_path
+
+        #: string: Path to the experiment yaml file.
+        self.experiment_path = experiment_path
+
+        #: string: Path to the waveform constants yaml file.
+        self.waveform_constants_path = waveform_constants_path
+
+        #: string: Path to the REST API yaml file.
+        self.rest_api_path = rest_api_path
+
+        #: string: Path to the waveform templates yaml file.
+        self.waveform_templates_path = waveform_templates_path
+
+        #: string: Path to the GUI configuration yaml file.
+        self.gui_configuration_path = gui_configuration_path
+
+        #: iterable: Non-default command line input arguments for
+        self.args = args
+
         #: Object: Thread pool for the controller.
         self.threads_pool = SynchronizedThreadPool()
 
@@ -152,34 +179,28 @@ class Controller:
         #: dict: Configuration dictionary
         self.configuration = load_configs(
             self.manager,
-            configuration=configuration_path,
-            experiment=experiment_path,
-            waveform_constants=waveform_constants_path,
-            rest_api_config=rest_api_path,
-            waveform_templates=waveform_templates_path,
-            gui=gui_configuration_path,
+            configuration=self.configuration_path,
+            experiment=self.experiment_path,
+            waveform_constants=self.waveform_constants_path,
+            rest_api_config=self.rest_api_path,
+            waveform_templates=self.waveform_templates_path,
+            gui=self.gui_configuration_path,
         )
 
         verify_configuration(self.manager, self.configuration)
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
 
-        # Initialize the Model
         #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
             Model, args, self.configuration, event_queue=self.event_queue
         )
 
-        logger.info(f"Spec - Configuration Path: {configuration_path}")
-        logger.info(f"Spec - Experiment Path: {experiment_path}")
-        logger.info(f"Spec - Waveform Constants Path: {waveform_constants_path}")
-        logger.info(f"Spec - Rest API Path: {rest_api_path}")
-
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
 
         #: string: Path to the default experiment yaml file.
-        self.default_experiment_file = experiment_path
+        self.default_experiment_file = self.experiment_path
 
         #: string: Path to the waveform constants yaml file.
         self.waveform_constants_path = waveform_constants_path
@@ -188,7 +209,7 @@ class Controller:
         self.configuration_controller = ConfigurationController(self.configuration)
 
         #: View: View object in MVC architecture.
-        self.view = view(root)
+        self.view = view(self.root)
 
         #: dict: Event listeners for the controller.
         self.event_listeners = {}
@@ -289,13 +310,24 @@ class Controller:
         self.initialize_cam_view()
 
         # destroy splash screen and show main screen
-        splash_screen.destroy()
-        root.deiconify()
+        self.splash_screen.destroy()
+        self.root.deiconify()
 
         #: int: ID for the resize event.Only works on Windows OS.
         self.resize_event_id = None
         if platform.system() == "Windows":
             self.view.root.bind("<Configure>", self.resize)
+
+        logger.info(self.__repr__())
+
+    def __repr__(self):
+        return (
+            f'Controller("{self.root}", "{self.splash_screen}", '
+            f'"{self.configuration_path}", "{self.experiment_path}", '
+            f'"{self.waveform_constants_path}", "{self.rest_api_path}", '
+            f'"{self.waveform_templates_path}", "{self.gui_configuration_path}", '
+            f'"{self.args}")'
+        )
 
     def update_buffer(self):
         """Update the buffer size according to the camera

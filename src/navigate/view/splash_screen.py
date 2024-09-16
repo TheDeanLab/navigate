@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,10 +32,8 @@
 
 # Standard Library Imports
 import tkinter as tk
-from pathlib import Path
 
 # Third Party Imports
-from PIL import Image, ImageTk
 
 # Local Imports
 
@@ -87,4 +85,3 @@ class SplashScreen(tk.Toplevel):
         self.geometry("%dx%d+%d+%d" % (w, h, x, y))
         self.resizable(0, 0)
         self.update()
-

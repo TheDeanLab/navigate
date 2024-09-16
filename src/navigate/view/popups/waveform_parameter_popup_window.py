@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -229,8 +229,13 @@ class WaveformParameterPopupWindow:
             prev = prev + 2
 
         # High/Low Resolution
-        hi_lo_labels = ["Delay (ms)", "Fly Back Time (ms)", "Settle Duration (ms)", "Percent Smoothing"]
-        dict_labels = ["Delay", "Ramp_falling" , "Duty", "Smoothing"]
+        hi_lo_labels = [
+            "Delay (ms)",
+            "Fly Back Time (ms)",
+            "Settle Duration (ms)",
+            "Percent Smoothing",
+        ]
+        dict_labels = ["Delay", "Ramp_falling", "Duty", "Smoothing"]
         for i in range(len(dict_labels)):
             self.inputs[dict_labels[i]] = LabelInput(
                 parent=self.high_low_frame,

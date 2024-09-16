@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -363,16 +363,16 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
         None
         """
         super().pre_func_data()
-        self.result_sent_flag = False    
-        
+        self.result_sent_flag = False
+
     def signal_response_func(self):
         """Return the result if there is an tissue"""
         if self.scan_num >= self.planes:
-            self.model.logger.debug(f"detection signal waiting for result!")
+            self.model.logger.debug("detection signal waiting for result!")
             has_tissue = self.detect_tissue_queue.get()
             self.model.logger.debug(f"detection signal get result: {has_tissue}")
             return has_tissue
-        
+
     def in_func_data(self, frame_ids):
         """Data processing function to analyze image frames for tissue presence.
 
@@ -393,7 +393,9 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
         super().in_func_data(frame_ids)
 
         if self.has_tissue_flag and not self.result_sent_flag:
-            self.model.logger.debug(f"detection data send result: {self.has_tissue_flag}")
+            self.model.logger.debug(
+                f"detection data send result: {self.has_tissue_flag}"
+            )
             self.detect_tissue_queue.put(True)
             self.result_sent_flag = True
         return self.has_tissue_flag
@@ -411,10 +413,13 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
         """
         if self.received_frames >= self.planes:
             if not self.result_sent_flag:
-                self.model.logger.debug(f"detection data send result: {self.has_tissue_flag}")
+                self.model.logger.debug(
+                    f"detection data send result: {self.has_tissue_flag}"
+                )
                 self.detect_tissue_queue.put(self.has_tissue_flag)
             return True
         return False
+
 
 class DetectTissueInStackAndRecord(DetectTissueInStack):
     """Detect Tissue in a Stack of Images and Record Positions.

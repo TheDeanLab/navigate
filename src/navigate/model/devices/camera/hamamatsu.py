@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -122,6 +122,31 @@ class HamamatsuBase(CameraBase):
         self.camera_controller.set_property_value(
             "trigger_source", self.camera_parameters["trigger_source"]
         )
+
+    def __repr__(self):
+        """Return representation of HamamatsuBase class.
+
+        Returns
+        -------
+        str
+            Representation of HamamatsuBase class.
+        """
+        return (
+            f"HamamatsuBase("
+            f"{self.microscope_name}, "
+            f"{self.device_connection}, "
+            f"{self.configuration})"
+        )
+
+    def __str__(self):
+        """Return string representation of HamamatsuOrca class.
+
+        Returns
+        -------
+        str
+            String representation of HamamatsuOrca class.
+        """
+        return "HamamatsuBase"
 
     def __del__(self):
         """Delete HamamatsuOrca class."""
@@ -461,6 +486,16 @@ class HamamatsuOrcaLightning(HamamatsuBase):
             f"{self.configuration})"
         )
 
+    def __str__(self):
+        """Return string representation of HamamatsuOrcaLightning class.
+
+        Returns
+        -------
+        str
+            String representation of HamamatsuOrcaLightning class.
+        """
+        return "HamamatsuOrcaLightning"
+
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
@@ -540,6 +575,16 @@ class HamamatsuOrcaFire(HamamatsuBase):
             f"{self.configuration})"
         )
 
+    def __str__(self):
+        """Return string representation of HamamatsuOrcaFire class.
+
+        Returns
+        -------
+        str
+            String representation of HamamatsuOrcaFire class.
+        """
+        return "HamamatsuOrcaFire"
+
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
@@ -608,12 +653,29 @@ class HamamatsuOrca(HamamatsuBase):
         logger.info(self.__repr__())
 
     def __repr__(self):
+        """Return representation of HamamatsuOrca class.
+
+        Returns
+        -------
+        str
+            Representation of HamamatsuOrca class.
+        """
         return (
             f"HamamatsuOrca("
             f"{self.microscope_name}, "
             f"{self.device_connection}, "
             f"{self.configuration})"
         )
+
+    def __str__(self):
+        """Return string representation of HamamatsuOrca class.
+
+        Returns
+        -------
+        str
+            String representation of HamamatsuOrca class.
+        """
+        return "HamamatsuOrca"
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
@@ -686,6 +748,16 @@ class HamamatsuOrcaFusion(HamamatsuBase):
             f"{self.device_connection}, "
             f"{self.configuration})"
         )
+
+    def __str__(self):
+        """Return string representation of HamamatsuOrcaFusion class.
+
+        Returns
+        -------
+        str
+            String representation of HamamatsuOrcaFusion class.
+        """
+        return "HamamatsuOrcaFusion"
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width

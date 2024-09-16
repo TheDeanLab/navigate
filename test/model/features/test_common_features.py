@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,11 @@ class TestZStack:
         if mode == "per_z":
             z_should_move_times = len(positions) * int(self.config["number_z_steps"])
         else:
-            z_should_move_times = len(selected_channels) * len(positions) * int(self.config["number_z_steps"])
+            z_should_move_times = (
+                len(selected_channels)
+                * len(positions)
+                * int(self.config["number_z_steps"])
+            )
 
         has_ni_galvo_stage = self.model.configuration["configuration"]["microscopes"][
             self.config["microscope_name"]
@@ -142,7 +146,7 @@ class TestZStack:
 
             # x, y, theta
             pos_moved = self.model.signal_records[idx][1][0]
-            for i, axis in [(0,"x"), (1,"y"), (3,"theta")]:
+            for i, axis in [(0, "x"), (1, "y"), (3, "theta")]:
                 assert pos[i] == pos_moved[axis + "_abs"], (
                     f"should move to {axis}: {pos[i]}, "
                     f"but moved to {pos_moved[axis + '_abs']}"
@@ -169,7 +173,8 @@ class TestZStack:
                     )
                     z_moved_times += 1
 
-                    # if the system has NIGalvo stage, should close the DAQ tasks and then create new tasks to override the new waveforms
+                    # if the system has NIGalvo stage, should close the DAQ tasks and
+                    # then create new tasks to override the new waveforms
                     if has_ni_galvo_stage and prepared_next_channel:
                         idx = self.get_next_record(close_daq_tasks_str, idx)
                         pre_change_channel_idx = idx
@@ -261,9 +266,10 @@ class TestZStack:
             pos_moved["f_abs"] == restore_f
         ), f"should restore f to {restore_f}, but moved to {pos_moved['f_abs']}"
 
-        assert (
-            z_moved_times == z_should_move_times
-        ), f"should verify all the stage movements! {z_moved_times} -- {z_should_move_times}"
+        assert z_moved_times == z_should_move_times, (
+            f"should verify all the stage movements! {z_moved_times} -- "
+            f"{z_should_move_times}"
+        )
 
     @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_single_position_one_channel_per_z(self, has_ni_galvo_stage):

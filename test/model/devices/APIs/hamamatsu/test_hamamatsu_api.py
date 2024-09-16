@@ -1,8 +1,9 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -28,9 +29,13 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
 
+# Standard library imports
+
+# Third party imports
 import pytest
+
+# Local application imports
 
 
 @pytest.mark.hardware
@@ -47,7 +52,7 @@ def open_camera():
                 break
             camera.dev_close()
             camera = None
-        except:
+        except Exception:
             continue
     yield camera
     if camera is not None:
@@ -95,7 +100,7 @@ class TestHamamatsuAPI:
 
         # set a non-exist property
         assert (
-            self.camera.set_property_value("non-exist-property", 100) == False
+            self.camera.set_property_value("non-exist-property", 100) is False
         ), "can't handle non-exist property name"
 
     def test_ROI(self):
@@ -162,7 +167,7 @@ class TestHamamatsuAPI:
             time.sleep(0.1)
 
             frames = self.camera.get_frames()
-            assert len(frames) == trigger_num, "can not get all the frames back!"
+            assert len(frames) == trigger_num, "can not get all frames back!"
 
         self.camera.stop_acquisition()
 

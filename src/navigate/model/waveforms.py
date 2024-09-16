@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,9 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=0.001):
+def camera_exposure(
+    sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=0.001
+):
     """Calculates timing and duration of camera exposure.
     Not actually used to trigger the camera.  Only meant for visualization.
 
@@ -190,8 +192,7 @@ def remote_focus_ramp(
     # 10-7.5 -> 1.025 * .2
     #
     ramp_samples = int(
-        (exposure_time + camera_delay - remote_focus_delay)
-        * sample_rate
+        (exposure_time + camera_delay - remote_focus_delay) * sample_rate
     )
     ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
 
@@ -209,19 +210,18 @@ def remote_focus_ramp(
     else:
         waveform = np.hstack([delay_array, ramp_array, fall_array])
 
-
     return waveform
 
 
 def remote_focus_ramp_triangular(
-        sample_rate=100000,
-        exposure_time=0.2,
-        sweep_time=0.24,
-        remote_focus_delay=0.005,
-        camera_delay=0.001,
-        amplitude=1,
-        offset=0,
-        ramp_type='Rising'
+    sample_rate=100000,
+    exposure_time=0.2,
+    sweep_time=0.24,
+    remote_focus_delay=0.005,
+    camera_delay=0.001,
+    amplitude=1,
+    offset=0,
+    ramp_type="Rising",
 ):
     """Returns a numpy array with a triangular ramp typically used for remote focusing
 
@@ -262,31 +262,46 @@ def remote_focus_ramp_triangular(
     """
     # create an array just containing the negative amplitude voltage:
     # In theory, delay here should be 4H.
-    delay_samples = int(remote_focus_delay  * sample_rate)
+    delay_samples = int(remote_focus_delay * sample_rate)
     delay_array = np.zeros(delay_samples) + offset
 
     # ramp samples
     ramp_samples = int(
-        (exposure_time + camera_delay - remote_focus_delay)
-        * sample_rate
+        (exposure_time + camera_delay - remote_focus_delay) * sample_rate
     )
     rise_ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
     fall_ramp_array = np.linspace(offset + amplitude, offset - amplitude, ramp_samples)
 
     settle_samples = int(
-        int(np.multiply(sample_rate, sweep_time))
-        - (delay_samples + ramp_samples)
+        int(np.multiply(sample_rate, sweep_time)) - (delay_samples + ramp_samples)
     )
     settle_array = np.zeros(settle_samples) + offset
 
-    if ramp_type == 'Rising':
-        waveform = np.hstack([delay_array - amplitude, rise_ramp_array, settle_array + amplitude,
-                                delay_array + amplitude, fall_ramp_array, settle_array - amplitude])
-    elif ramp_type == 'Falling':
-        waveform = np.hstack([delay_array + amplitude, fall_ramp_array, settle_array - amplitude,
-                                delay_array - amplitude, rise_ramp_array, settle_array + amplitude])
+    if ramp_type == "Rising":
+        waveform = np.hstack(
+            [
+                delay_array - amplitude,
+                rise_ramp_array,
+                settle_array + amplitude,
+                delay_array + amplitude,
+                fall_ramp_array,
+                settle_array - amplitude,
+            ]
+        )
+    elif ramp_type == "Falling":
+        waveform = np.hstack(
+            [
+                delay_array + amplitude,
+                fall_ramp_array,
+                settle_array - amplitude,
+                delay_array - amplitude,
+                rise_ramp_array,
+                settle_array + amplitude,
+            ]
+        )
 
     return waveform
+
 
 def sawtooth(
     sample_rate=100000,

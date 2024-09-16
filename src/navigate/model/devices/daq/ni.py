@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,9 @@ class NIDAQ(DAQBase):
         """
         super().__init__(configuration)
 
+        #: dict: Configuration dictionary.
+        self.configuration = configuration
+
         #: obj: NI DAQmx task for camera trigger
         self.camera_trigger_task = None
 
@@ -97,6 +100,16 @@ class NIDAQ(DAQBase):
 
         #: bool: Flag for waiting to run.
         self.wait_to_run_lock = Lock()
+
+        logger.info(self.__repr__())
+
+    def __str__(self):
+        """String representation of the class."""
+        return "NIDAQ"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return f'NIDAQ("{self.configuration}")'
 
     def __del__(self):
         """Destructor."""

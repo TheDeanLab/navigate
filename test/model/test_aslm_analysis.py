@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,9 @@ def test_fast_normalized_dct_shannon_entropy_tent():
     from scipy.ndimage import gaussian_filter
     from scipy.optimize import least_squares
 
-    from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
+    from navigate.model.analysis.image_contrast import (
+        fast_normalized_dct_shannon_entropy,
+    )
 
     im = box(0.5)
 
@@ -86,7 +88,9 @@ def test_fast_normalized_dct_shannon_entropy_tent():
 
 
 def test_fast_normalized_dct_shannon_entropy():
-    from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
+    from navigate.model.analysis.image_contrast import (
+        fast_normalized_dct_shannon_entropy,
+    )
 
     # image_array = np.ones((np.random.randint(1,4),128,128)).squeeze()
     image_array = np.ones((128, 128)).squeeze()

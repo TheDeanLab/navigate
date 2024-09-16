@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,9 @@ class SyntheticDAQ(DAQBase):
         """
         super().__init__(configuration)
 
+        #: dict: Configuration dictionary.
+        self.configuration = configuration
+
         #: dict: Camera object.
         self.camera = {}
 
@@ -72,6 +75,17 @@ class SyntheticDAQ(DAQBase):
 
         #: str: Trigger mode. Self-trigger or external-trigger.
         self.trigger_mode = "self-trigger"
+
+        # logger.info(self.__repr__())
+        logger.info(self.__repr__())
+
+    def __str__(self):
+        """String representation of the class."""
+        return "SyntheticDAQ"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return f'SyntheticDAQ("{self.configuration}")'
 
     def create_camera_task(self):
         """Set up the camera trigger task."""

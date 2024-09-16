@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
         return self.image[setup][z, y, x]
 
     def set_metadata_from_configuration_experiment(
-        self, configuration: DictProxy, microscope_name: str=None
+        self, configuration: DictProxy, microscope_name: str = None
     ) -> None:
         """Sets the metadata from according to the microscope configuration.
 
@@ -125,7 +125,9 @@ class BigDataViewerDataSource(PyramidalDataSource):
         """
         # Set rotation and affine transform information in metadata.
         self.metadata.get_affine_parameters(configuration=configuration)
-        return super().set_metadata_from_configuration_experiment(configuration, microscope_name)
+        return super().set_metadata_from_configuration_experiment(
+            configuration, microscope_name
+        )
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
         """Writes 2D image to the data source.

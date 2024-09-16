@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -63,9 +63,7 @@ class PluginsPopup:
         # Creating popup window with this name and size/placement, PopUp is a Toplevel
         # window
         #: PopUp: The popup window
-        self.popup = PopUp(
-            root, "Plugins", "+320+180", transient=True
-        )
+        self.popup = PopUp(root, "Plugins", "+320+180", transient=True)
 
         # Storing the content frame of the popup, this will be the parent of the widgets
         content_frame = self.popup.get_frame()
@@ -89,10 +87,9 @@ class PluginsPopup:
 
         self.plugins_frame = ttk.Frame(content_frame)
         self.plugins_frame.grid(row=2, columnspan=3, sticky=tk.NSEW)
-        
+
         self.uninstall_btn = ttk.Button(content_frame, text="Uninstall")
         self.uninstall_btn.grid(row=3, column=2, sticky=tk.NE)
-
 
     def build_widgets(self, plugin_config):
         """List all plugins"""
@@ -102,10 +99,12 @@ class PluginsPopup:
 
         for i, plugin_name in enumerate(plugin_config.keys()):
             var = tk.StringVar()
-            check = ttk.Checkbutton(self.plugins_frame, variable=var, onvalue=plugin_name, offvalue="")
+            check = ttk.Checkbutton(
+                self.plugins_frame, variable=var, onvalue=plugin_name, offvalue=""
+            )
             check.grid(row=i, column=0, sticky=tk.NW)
             label = ttk.Label(self.plugins_frame, text=plugin_name)
-            label.grid(row=i, column=1, padx=(5,10), sticky=tk.NSEW)
+            label.grid(row=i, column=1, padx=(5, 10), sticky=tk.NSEW)
             label = ttk.Label(self.plugins_frame, text=plugin_config[plugin_name])
             label.grid(row=i, column=2, sticky=tk.NSEW)
             self.variables.append(var)

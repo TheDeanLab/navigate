@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ class CameraBase:
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
 
         Raises
@@ -67,6 +67,9 @@ class CameraBase:
         """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
             raise NameError(f"Microscope {microscope_name} does not exist!")
+
+        #: str: Name of microscope in configuration
+        self.microscope_name = microscope_name
 
         #: dict: Global configuration of the microscope
         self.configuration = configuration
@@ -83,18 +86,25 @@ class CameraBase:
         self.is_acquiring = False
 
         # Initialize Pixel Information
+
         #: int: Minimum image width
         self.min_image_width = 4
+
         #: int: Minimum image height
         self.min_image_height = 4
+
         #: int: Minimum step size for image width.
         self.step_image_width = 4
+
         #: int: Minimum step size for image height.
         self.step_image_height = 4
+
         #: int: Number of pixels in the x direction
         self.x_pixels = 2048
+
         #: int: Number of pixels in the y direction
         self.y_pixels = 2048
+
         #: float: minimum exposure time
         self.minimum_exposure_time = 0.001
         self.camera_parameters["x_pixels"] = 2048

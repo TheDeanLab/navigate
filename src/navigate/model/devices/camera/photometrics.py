@@ -160,12 +160,29 @@ class PhotometricsBase(CameraBase):
         logger.info(self.__repr__())
 
     def __repr__(self):
+        """Return PhotometricsBase object representation.
+
+        Returns
+        -------
+        str
+            Representation of PhotometricsBase object.
+        """
         return (
             f"PhotometricsBase("
             f"{self.microscope_name}, "
             f"{self.device_connection}, "
             f"{self.configuration})"
         )
+
+    def __str__(self):
+        """Return string representation of PhotometricsBase object.
+
+        Returns
+        -------
+        str
+            String representation of PhotometricsBase object.
+        """
+        return "PhotometricsBase"
 
     def __del__(self):
         """Delete PhotometricsBase object."""

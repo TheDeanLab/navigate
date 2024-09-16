@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -1290,7 +1290,6 @@ class Model:
         img_width = self.configuration["experiment"]["CameraParameters"][
             microscope_name
         ]["img_x_pixels"]
-
 
         # create databuffer
         data_buffer = [

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ import ast
 from functools import reduce
 from threading import Lock
 
+# Third party imports
 
 # Local application imports
 from .image_writer import ImageWriter
@@ -204,7 +205,7 @@ class Snap:
 
 
 class WaitForExternalTrigger:
-    """WaitForExternalTrigger class to time parts of the feature list using external input.
+    """WaitForExternalTrigger class to time features using external input.
 
     This class waits for either an external trigger (or the timeout) before continuing
     on to the next feature block in the list. Useful when combined with LoopByCounts
@@ -710,8 +711,9 @@ class MoveToNextPositionInMultiPositionTable:
                         )
                     except (ValueError, KeyError):
                         print(
-                            f"*** Offsets from {self.zoom_value} to {curr_zoom} are not implemented!"
-                            "There aren't enough information in the configuration.yaml file!"
+                            f"*** Offsets from {self.zoom_value} to {curr_zoom} are "
+                            f"not implemented! There is not enough information in the "
+                            f"configuration.yaml file!"
                         )
         self.model.logger.debug(f"Using stage offset {self.offset}")
 
@@ -978,7 +980,7 @@ class ZStackAcquisition:
         self.image_writer = None
         if saving_flag:
             self.image_writer = ImageWriter(model, sub_dir=saving_dir)
-        
+
         self.prepare_next_channel = PrepareNextChannel(model)
 
         #: dict: A dictionary defining the configuration for the z-stack acquisition

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -47,7 +47,9 @@ class TextExperimentFile(unittest.TestCase):
     def setUp(self):
         current_path = os.path.abspath(os.path.dirname(__file__))
         root_path = os.path.dirname(os.path.dirname(current_path))
-        yaml_path = os.path.join(root_path, "src", "navigate", "config", "experiment.yml")
+        yaml_path = os.path.join(
+            root_path, "src", "navigate", "config", "experiment.yml"
+        )
 
         with open(yaml_path) as file:
             self.data = yaml.safe_load(file)

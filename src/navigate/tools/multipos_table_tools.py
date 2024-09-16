@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@ import numpy as np
 import pandas as pd
 
 # Local application imports
-
 
 
 def sign(x):
@@ -159,13 +158,9 @@ def compute_tiles_from_bounding_box(
     ys = dim_vector(y_start, y_tiles, y_step)
 
     # z-coordinate is centered on local z-stack origin
-    zs = dim_vector(
-        z_start, z_tiles, z_step
-    )
+    zs = dim_vector(z_start, z_tiles, z_step)
 
-    thetas = dim_vector(
-        theta_start, theta_tiles, theta_step
-    )
+    thetas = dim_vector(theta_start, theta_tiles, theta_step)
 
     # we assume theta FOVs have no thickness
     fs = dim_vector(f_start, f_tiles, f_step)

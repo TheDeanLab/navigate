@@ -1078,6 +1078,7 @@ class MenuController(GUIController):
         folder_path = filedialog.askdirectory()
         if not folder_path:
             return
+
         if os.path.exists(os.path.join(folder_path, "plugin_config.yml")):
             plugin_config = load_yaml_file(
                 os.path.join(folder_path, "plugin_config.yml")

@@ -299,6 +299,9 @@ class UninstallPluginController(GUIController):
             os.path.join(self.plugin_config_path, "plugins_config.yml")
         )
 
+        if self.plugin_config is None:
+            self.plugin_config = {}
+
         self.popup.build_widgets(self.plugin_config)
 
     def uninstall_plugins(self, *args):

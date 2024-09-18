@@ -1088,11 +1088,7 @@ class MenuController(GUIController):
                 os.path.join(get_navigate_path(), "config", "plugins_config.yml")
             )
             if plugins_dict is None:
-                messagebox.showwarning(
-                    title="Warning",
-                    message="plugins_config.yml not found.",
-                )
-                return
+                plugins_dict = {}
 
             plugin_name = plugin_config["name"]
             if plugin_name in plugins_dict:

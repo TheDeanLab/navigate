@@ -1082,17 +1082,26 @@ class MenuController(GUIController):
             plugin_config = load_yaml_file(
                 os.path.join(folder_path, "plugin_config.yml")
             )
+
             plugins_dict = load_yaml_file(
                 os.path.join(get_navigate_path(), "config", "plugins_config.yml")
             )
+            if plugins_dict is None:
+                messagebox.showwarning(
+                    title="Warning",
+                    message="plugins_config.yml not found.",
+                )
+                return
+
             plugin_name = plugin_config["name"]
             if plugin_name in plugins_dict:
                 messagebox.showwarning(
                     title="Warning",
-                    message=f"Plugin {plugin_name} already exists,"
+                    message=f"{plugin_name} already exists as a plugin,"
                     "Cannot install the selected one.",
                 )
                 return
+
             else:
                 plugins_dict[plugin_name] = folder_path
                 save_yaml_file(

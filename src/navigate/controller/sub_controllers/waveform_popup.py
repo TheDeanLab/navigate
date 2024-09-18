@@ -39,6 +39,7 @@ import logging
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.file_functions import save_yaml_file
 from navigate.tools.common_functions import combine_funcs
+from navigate.view.popups.waveform_parameter_popup_window import AdvancedWaveformParameterPopupWindow
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -183,6 +184,10 @@ class WaveformPopupController(GUIController):
         # Temporarily disable waveforms
         self.view.get_buttons()["toggle_waveform_button"].configure(
             command=self.toggle_waveform_state
+        )
+        
+        self.view.get_buttons()["advanced_galvo_setting"].configure(
+            command=self.display_advanced_setting_window
         )
 
         # Save waveform constants upon closing the popup window
@@ -748,3 +753,7 @@ class WaveformPopupController(GUIController):
             ] = self.amplitude_dict[galvo]
             self.widgets[galvo + " Amp"].widget.config(state="normal")
         self.amplitude_dict = None
+
+    def display_advanced_setting_window(self):
+        self.advanced_setting_popup = AdvancedWaveformParameterPopupWindow(self.view)
+        print("**** advanced galvo setting popup!")

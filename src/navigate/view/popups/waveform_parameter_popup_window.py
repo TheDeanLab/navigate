@@ -78,16 +78,19 @@ class WaveformParameterPopupWindow:
         self.mode_mag_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
         #: ttk.Frame: Frame for saving waveform parameters
         self.save_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
-        #: ttk.Frame: Frame for laser parameters
-        self.laser_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
-        #: ttk.Frame: Frame for high/low resolution
-        self.high_low_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        #: ttk.LabelFrame: Frame for remote focus parameters
+        self.remote_focus_frame = ttk.LabelFrame(content_frame, text="Remote Focus", padding=(0, 0, 0, 0))
+        #: ttk.LabelFrame: Frame for galvo parameters
+        self.galvo_frame = ttk.LabelFrame(content_frame, text="Galvo", padding=(0, 0, 0, 0))
+        #: ttk.LabelFrame: Frame for waveform
+        self.waveform_frame = ttk.LabelFrame(content_frame, text="Waveform Setting", padding=(0, 0, 0, 0))
 
         # Griding Frames
-        self.mode_mag_frame.grid(row=0, column=0, sticky=tk.NSEW)
-        self.save_frame.grid(row=0, column=1, sticky=tk.NSEW)
-        self.laser_frame.grid(row=2, column=0, columnspan=2, sticky=tk.NSEW)
-        self.high_low_frame.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW)
+        self.mode_mag_frame.grid(row=0, column=0, sticky=tk.NSEW, pady=(10, 0))
+        self.save_frame.grid(row=0, column=3, sticky=tk.NE, padx=10, pady=(10, 0))
+        self.remote_focus_frame.grid(row=2, column=0, columnspan=4, sticky=tk.NSEW, padx=10, pady=(10, 0))
+        self.galvo_frame.grid(row=3, column=0, columnspan=4, sticky=tk.NSEW, padx=10, pady=(10, 0))
+        self.waveform_frame.grid(row=4, column=0, columnspan=4, sticky=tk.NSEW, padx=10, pady=10)
 
         # Filling Frames with widgets
         # Mode/Mag Frame
@@ -98,7 +101,8 @@ class WaveformParameterPopupWindow:
             input_var=tk.StringVar(),
             label_args={"padding": (2, 5, 48, 0)},
         )
-        self.inputs["Mode"].grid(row=0, column=0)
+        self.inputs["Mode"].grid(row=0, column=0, padx=10)
+        self.inputs["Mode"].pad_input(50, 5, 0, 0)
         self.inputs["Mode"].state(["readonly"])
 
         self.inputs["Mag"] = LabelInput(
@@ -108,7 +112,8 @@ class WaveformParameterPopupWindow:
             input_var=tk.StringVar(),
             label_args={"padding": (2, 5, 5, 0)},
         )
-        self.inputs["Mag"].grid(row=1, column=0)
+        self.inputs["Mag"].grid(row=1, column=0, padx=10)
+        self.inputs["Mag"].pad_input(50, 5, 0, 0)
         self.inputs["Mag"].state(["readonly"])
 
         # Save Waveform Parameters Frame
@@ -128,24 +133,24 @@ class WaveformParameterPopupWindow:
 
         # Laser Frame
         laser_labels = self.configuration_controller.lasers_info
-        title_labels = ["Laser", "Amplitude", "Offset"]
+        title_labels = ["Laser", "Amplitude", "Offset", "Frequency"]
         # Loop for widgets
-        for i in range(3):
+        for i in range(len(title_labels)):
             # Title labels
             title = ttk.Label(
-                self.laser_frame, text=title_labels[i], padding=(2, 5, 0, 0)
+                self.remote_focus_frame, text=title_labels[i], padding=(2, 5, 60, 0)
             )
             title.grid(row=0, column=i, sticky=tk.NSEW, padx=(0, 5))
         for i, label in enumerate(laser_labels):
             # Laser labels
             laser = ttk.Label(
-                self.laser_frame, text=laser_labels[i], padding=(2, 5, 0, 0)
+                self.remote_focus_frame, text=laser_labels[i], padding=(2, 5, 0, 0)
             )
             laser.grid(row=i + 1, column=0, sticky=tk.NSEW)
 
             # Entry Widgets
             self.inputs[laser_labels[i] + " Amp"] = LabelInput(
-                parent=self.laser_frame,
+                parent=self.remote_focus_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
             )
@@ -155,7 +160,7 @@ class WaveformParameterPopupWindow:
             )
 
             self.inputs[laser_labels[i] + " Off"] = LabelInput(
-                parent=self.laser_frame,
+                parent=self.remote_focus_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
             )
@@ -168,87 +173,119 @@ class WaveformParameterPopupWindow:
             map(lambda i: f"Galvo {i}", range(self.configuration_controller.galvo_num))
         )
 
-        prev = len(laser_labels)
-
         for i, label in enumerate(galvo_labels):
             galvo = ttk.Label(
-                self.laser_frame, text=galvo_labels[i], padding=(2, 5, 0, 0)
+                self.galvo_frame, text=galvo_labels[i], padding=(2, 5, 53, 0)
             )
 
-            galvo.grid(row=prev + 1, column=0, sticky=tk.NSEW)
+            galvo.grid(row=i, column=0, sticky=tk.NSEW)
 
             self.inputs[galvo_labels[i] + " Amp"] = LabelInput(
-                parent=self.laser_frame,
+                parent=self.galvo_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
             )
 
             self.inputs[galvo_labels[i] + " Amp"].grid(
-                row=prev + 1, column=1, sticky=tk.NSEW, pady=(20, 0), padx=(0, 5)
+                row=i, column=1, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
             )
 
             self.inputs[galvo_labels[i] + " Off"] = LabelInput(
-                parent=self.laser_frame,
+                parent=self.galvo_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
             )
 
             self.inputs[galvo_labels[i] + " Off"].grid(
-                row=prev + 1, column=2, sticky=tk.NSEW, pady=(20, 0)
+                row=i, column=2, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
             )
-
-            galvo_freq = ttk.Label(
-                self.laser_frame,
-                text=galvo_labels[i] + " Freq (Hz)",
-                padding=(2, 5, 0, 0),
-            )
-
-            galvo_freq.grid(row=prev + 2, column=0, sticky=tk.NSEW)
 
             self.inputs[galvo_labels[i] + " Freq"] = LabelInput(
-                parent=self.laser_frame,
+                parent=self.galvo_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
                 input_args={"from_": 0, "to": 1000, "increment": 0.1},
             )
 
             self.inputs[galvo_labels[i] + " Freq"].grid(
-                row=prev + 2, column=1, sticky=tk.NSEW, pady=(20, 0)
+                row=i, column=3, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
             )
 
             # Button for automatic estimate of galvo frequency
             self.buttons[galvo_labels[i] + " Freq"] = ttk.Button(
-                self.laser_frame,
+                self.galvo_frame,
                 text="Estimate Frequency",
+                padding=(2, 0, 2, 0)
             )
 
             self.buttons[galvo_labels[i] + " Freq"].grid(
-                row=prev + 2, column=2, sticky=tk.NSEW, pady=(20, 0)
+                row=i, column=4, sticky=tk.NE, pady=(10, 0)
             )
 
-            prev = prev + 2
+        self.inputs["all_channels"] = LabelInput(
+            parent=self.galvo_frame,
+            input_class=ttk.Checkbutton,
+            input_var=tk.BooleanVar(),
+            label="Applied To All Channels",
+        )
+        self.inputs["all_channels"].grid(row=len(galvo_labels), column=2, columnspan=2, sticky=tk.NE, pady=(10, 0), padx=20)
+        self.inputs["all_channels"].set(True)
+        self.inputs["all_channels"].widget.config(state="disabled")
 
-        # High/Low Resolution
-        hi_lo_labels = ["Delay (ms)", "Fly Back Time (ms)", "Settle Duration (ms)", "Percent Smoothing"]
+        self.buttons["advanced_galvo_setting"] = ttk.Button(
+            self.galvo_frame,
+            text="Advance Setting",
+            padding=(5, 0, 5, 0)
+        )
+        self.buttons["advanced_galvo_setting"].grid(
+            row=len(galvo_labels), 
+            column=4, 
+            sticky=tk.NSEW, 
+            pady=(10, 0),
+        )
+
+        # other remote focus waveform setting
+        label = ttk.Label(self.waveform_frame, text="Remote Focus")
+        label.grid(row=0, columnspan=4, padx=5, sticky=tk.NW, pady=(10, 0))
+        separator = ttk.Separator(self.waveform_frame)
+        separator.grid(row=1, columnspan=4, sticky=tk.NSEW)
+        rf_waveform_labels = ["Delay (ms)", "Fly Back Time (ms)", "Settle Duration (ms)", "Percent Smoothing"]
         dict_labels = ["Delay", "Ramp_falling" , "Duty", "Smoothing"]
         for i in range(len(dict_labels)):
+            label = ttk.Label(self.waveform_frame, text=rf_waveform_labels[i], padding=(2, 5, 5, 0))
+            label.grid(row=i//2+2, column=(i%2)*2, padx=(2+(i%2)*40, 20), sticky=tk.NSEW)
             self.inputs[dict_labels[i]] = LabelInput(
-                parent=self.high_low_frame,
+                parent=self.waveform_frame,
                 input_class=ValidatedSpinbox,
-                label=hi_lo_labels[i],
+                # label=rf_waveform_labels[i],
                 input_var=tk.StringVar(),
-                label_args={"padding": (2, 5, 5, 0)},
+                # label_args={"padding": (2, 5, 5, 0)},
                 input_args={"from_": 0, "to": 100, "increment": 0.1},
             )
             self.inputs[dict_labels[i]].grid(
-                row=i, column=0, sticky=tk.NSEW, padx=(2, 5)
+                row=i//2+2, column=(i%2)*2+1, sticky=tk.NSEW
             )
-
-        # Padding Entry Widgets
-        self.inputs["Delay"].pad_input(75, 0, 0, 0)
-        self.inputs["Ramp_falling"].pad_input(30, 0, 0, 0)
-        self.inputs["Smoothing"].pad_input(30, 0, 0, 0)
-        self.inputs["Duty"].pad_input(25, 0, 0, 0)
+        row_id = 2 + len(rf_waveform_labels)//2
+        label = ttk.Label(self.waveform_frame, text="Camera")
+        label.grid(row=row_id, column=0, padx=5, pady=(10, 0), sticky=tk.NW)
+        separator = ttk.Separator(self.waveform_frame)
+        separator.grid(row=row_id+1, columnspan=4, sticky=tk.NSEW)
+        camera_waveform_labels = ["Delay (ms)", "Settle Duration (ms)"]
+        dict_labels =["camera_delay", "camera_settle_duration"]
+        for i in range(len(camera_waveform_labels)):
+            label = ttk.Label(self.waveform_frame, text=camera_waveform_labels[i], padding=(2, 5, 5, 0))
+            label.grid(row=i//2+row_id+2, column=(i%2)*2, padx=(2+(i%2)*40, 20), sticky=tk.NSEW)
+            self.inputs[dict_labels[i]] = LabelInput(
+                parent=self.waveform_frame,
+                input_class=ValidatedSpinbox,
+                # label=rf_waveform_labels[i],
+                input_var=tk.StringVar(),
+                # label_args={"padding": (2, 5, 5, 0)},
+                input_args={"from_": 0, "to": 100, "increment": 0.1},
+            )
+            self.inputs[dict_labels[i]].grid(
+                row=i//2+row_id+2, column=(i%2)*2+1, sticky=tk.NSEW
+            )
 
     # Getters
     def get_variables(self):
@@ -305,3 +342,123 @@ class WaveformParameterPopupWindow:
         >>> self.get_buttons()
         """
         return self.buttons
+
+class AdvancedWaveformParameterPopupWindow:
+
+    def __init__(self, root, *args, **kwargs):
+        # Creating popup window with this name and size/placement, PopUp is a
+        # Toplevel window
+        #: PopUp: The popup window
+        self.popup = PopUp(
+            root, "Advanced Galvo Setting", "+320+180", top=False, transient=False
+        )
+
+        content_frame = self.popup.get_frame()
+        # Formatting
+        tk.Grid.columnconfigure(content_frame, "all", weight=1)
+        tk.Grid.rowconfigure(content_frame, "all", weight=1)
+
+        self.inputs = {}
+        self.buttons = {}
+        self.variables = {}
+
+        self.top_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        self.parameter_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+
+        self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=(10, 0))
+        self.parameter_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=10, pady=(10, 0))
+
+        label = ttk.Label(self.top_frame, text="Galvo Parameters Associate with:")
+        label.grid(row=0, column=0, columnspan=4, sticky=tk.NW)
+        self.variables["galvo_factor"] = tk.StringVar()
+
+        laser = ttk.Radiobutton(
+            master=self.top_frame,
+            text="Laser Wavelength",
+            value="laser",
+            variable=self.variables["galvo_factor"],
+        )
+        channel = ttk.Radiobutton(
+            master=self.top_frame,
+            text="Channel",
+            value="channel",
+            variable=self.variables["galvo_factor"],
+        )
+        none_factor = ttk.Radiobutton(
+            master=self.top_frame,
+            text="None",
+            value="none",
+            variable=self.variables["galvo_factor"],
+        )
+        self.top_frame.grid_columnconfigure(0, minsize=50)
+        laser.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=(10, 0))
+        channel.grid(row=1, column=2, sticky=tk.NSEW, padx=5, pady=(10, 0))
+        none_factor.grid(row=1, column=3, sticky=tk.NSEW, padx=5, pady=(10, 0))
+
+        # TODO: this is a demo
+        self.variables["galvo_factor"].trace_add("write", self.demo_func)
+        self.variables["galvo_factor"].set("laser")
+        
+    def generate_paramter_frame(self, factors=["All"], galvos=[]):
+        # remove all widgets
+        for child in self.parameter_frame.winfo_children():
+            child.destroy()
+
+        self.parameters = {}
+
+        if len(galvos) < 3:
+            self.parameter_frame.grid_columnconfigure(0, minsize=50)
+            for i in range(len(galvos)):
+                label = ttk.Label(self.parameter_frame, text=f"Galvo {i}")
+                label.grid(row=0, column=i*2+1, columnspan=2, padx=20)
+
+                label = ttk.Label(self.parameter_frame, text="Amplitude")
+                label.grid(row=1, column=i*2+1, sticky=tk.NSEW, padx=10, pady=(5, 0))
+                label = ttk.Label(self.parameter_frame, text="Offset")
+                label.grid(row=1, column=i*2+2, sticky=tk.NSEW, padx=10, pady=(5, 0))
+
+            for i in range(len(factors)):
+                label = ttk.Label(self.parameter_frame, text=factors[i])
+                label.grid(row=i+2, column=0, sticky=tk.NSEW, padx=20, pady=5)
+
+                for j in range(len(galvos)):
+                    self.parameters[f"galvo_{i}_{j}_amp"] = ValidatedSpinbox(
+                        master=self.parameter_frame,
+                    )
+                    self.parameters[f"galvo_{i}_{j}_amp"].grid(row=i+2, column=j*2+1, sticky=tk.NSEW, padx=(0, 5), pady=(0, 5))
+
+                    self.parameters[f"galvo_{i}_{j}_off"] = ValidatedSpinbox(
+                        master=self.parameter_frame,
+                    )
+                    self.parameters[f"galvo_{i}_{j}_off"].grid(row=i+2, column=j*2+2, sticky=tk.NSEW, padx=(0, 5), pady=(0, 5))
+        else:
+            # using tabs
+            notebook = ttk.Notebook(self.parameter_frame)
+            notebook.grid(row=0, column=0, padx=10, pady=10)
+
+            for i in range(len(factors)):
+                tab = tk.Frame(notebook, width=200)
+                notebook.add(tab, text=factors[i])
+                tab.grid_columnconfigure(0, minsize=50)
+                label = ttk.Label(tab, text="Amplitude")
+                label.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=5)
+                label = ttk.Label(tab, text="Offset")
+                label.grid(row=0, column=2, sticky=tk.NSEW, padx=10, pady=5)
+
+                for j in range(len(galvos)):
+                    label = ttk.Label(tab, text=f"Galvo {j}")
+                    label.grid(row=j+1, column=0, sticky=tk.NSEW, padx=10, pady=(0, 5))
+
+                    self.parameters[f"galvo_{i}_{j}_amp"] = ValidatedSpinbox(tab)
+                    self.parameters[f"galvo_{i}_{j}_amp"].grid(row=j+1, column=1, sticky=tk.NSEW, padx=10, pady=(0, 5))
+                    self.parameters[f"galvo_{i}_{j}_off"] = ValidatedSpinbox(tab)
+                    self.parameters[f"galvo_{i}_{j}_off"].grid(row=j+1, column=2, sticky=tk.NSEW, padx=10, pady=(0, 5))
+
+    def demo_func(self, *args, **kwargs):
+        factor = self.variables["galvo_factor"].get()
+        if factor == "laser":
+            self.generate_paramter_frame(["488nm", "561nm", "642nm"], [(10, 0.1), (20, 0.2)])
+        elif factor == "channel":
+            self.generate_paramter_frame(["Channel 1", "Channel 2", "Channel 3", "Channel 4", "Channel 5"], [(10, 0.1), (20, 0.2), (30, 0.2)])
+        else:
+            self.generate_paramter_frame(["All"], [(10, 0.1), (20, 0.2)])

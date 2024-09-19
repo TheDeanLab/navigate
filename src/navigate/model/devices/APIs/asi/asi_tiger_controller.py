@@ -179,6 +179,10 @@ class TigerController:
     def get_default_motor_axis_sequence(self) -> None:
         """Get the default motor axis sequence from the ASI device
 
+        Only returns stage types XYMotor, ZMotor, Theta. Avoids problems associated
+        with other tiger controller cards, which could include piezos, filter wheels,
+        logic cards, etc.
+
         Returns
         -------
         list[str]
@@ -189,13 +193,23 @@ class TigerController:
         lines = response.split("\r")
         for line in lines:
             if line.startswith("Motor Axes:"):
-                default_axes_sequence = line[line.index(":") + 2 :].split(" ")[:-2]
-                self.report_to_console(
-                    "Get the default axes sequence from the ASI device " "successfully!"
-                )
-                break
+                motor_axes = line.split("Motor Axes:")[1].split()
 
-        return default_axes_sequence
+            if line.startswith("Axis Types:"):
+                axis_types = line.split("Axis Types:")[1].split()
+
+        if motor_axes is None or axis_types is None:
+            raise TigerException(":N-5")
+
+        if len(motor_axes) != len(axis_types):
+            raise TigerException(":N-5")
+
+        for i in range(len(axis_types) - 1, -1, -1):
+            # Iterate in reverse to safely remove elements by index.
+            if axis_types[i] not in ["x", "z", "t"]:
+                motor_axes.pop(i)
+
+        return motor_axes
 
     ##### TODO: Modify these to accept dictionaries and send a
     #           single command for all axes

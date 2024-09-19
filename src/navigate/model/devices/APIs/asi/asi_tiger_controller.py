@@ -176,7 +176,7 @@ class TigerController:
             #: list[str]: Default axes sequence of the Tiger Controller
             self.default_axes_sequence = self.get_default_motor_axis_sequence()
 
-    def get_default_motor_axis_sequence(self) -> None:
+    def get_default_motor_axis_sequence(self) -> list[str]:
         """Get the default motor axis sequence from the ASI device
 
         Only returns stage types XYMotor, ZMotor, Theta. Avoids problems associated
@@ -191,24 +191,22 @@ class TigerController:
         self.send_command("BU X")
         response = self.read_response()
         lines = response.split("\r")
+        motor_axes, axis_types = [], []
         for line in lines:
             if line.startswith("Motor Axes:"):
                 motor_axes = line.split("Motor Axes:")[1].split()
-
             if line.startswith("Axis Types:"):
                 axis_types = line.split("Axis Types:")[1].split()
 
-        if motor_axes is None or axis_types is None:
+        if len(motor_axes) == 0 or len(axis_types) == 0:
             raise TigerException(":N-5")
 
         if len(motor_axes) != len(axis_types):
             raise TigerException(":N-5")
 
         for i in range(len(axis_types) - 1, -1, -1):
-            # Iterate in reverse to safely remove elements by index.
             if axis_types[i] not in ["x", "z", "t"]:
                 motor_axes.pop(i)
-
         return motor_axes
 
     ##### TODO: Modify these to accept dictionaries and send a
@@ -340,12 +338,12 @@ class TigerController:
         if self.verbose:
             print(message)
 
-    def send_command(self, cmd: bytes) -> None:
+    def send_command(self, cmd: str) -> None:
         """Send a serial command to the device.
 
         Parameters
         ----------
-        cmd : bytes
+        cmd : str
             Serial command to send to the device
         """
         # always reset the buffers before a new command is sent

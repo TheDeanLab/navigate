@@ -498,9 +498,7 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks = {}
 
         self.camera_delay = (
-            self.configuration["configuration"]["microscopes"][microscope_name][
-                "camera"
-            ]["delay"]
+            float(self.waveform_constants["other_constants"].get("camera_delay", 5))
             / 1000
         )
         self.sample_rate = self.configuration["configuration"]["microscopes"][

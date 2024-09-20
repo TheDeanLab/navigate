@@ -179,6 +179,12 @@ class WaveformPopupController(GUIController):
         self.variables["Ramp_falling"].trace_add(
             "write", self.update_waveform_parameters
         )
+        self.variables["camera_delay"].trace_add(
+            "write", self.update_waveform_parameters
+        )
+        self.variables["camera_settle_duration"].trace_add(
+            "write", self.update_waveform_parameters
+        )
 
         # Save waveform constants
         self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
@@ -435,6 +441,15 @@ class WaveformPopupController(GUIController):
             self.resolution_info["other_constants"]["remote_focus_ramp_falling"]
         )
         self.widgets["Ramp_falling"].widget.trigger_focusout_validation()
+        self.widgets["camera_delay"].set(
+            self.resolution_info["other_constants"].get("camera_delay", 2)
+        )
+        self.widgets["camera_delay"].widget.trigger_focusout_validation()
+        self.widgets["camera_settle_duration"].set(
+            self.resolution_info["other_constants"]["camera_settle_duration"]
+        )
+        self.widgets["camera_settle_duration"].widget.trigger_focusout_validation()
+
         self.update_waveform_parameters_flag = True
 
         # update resolution value in central controller (menu)
@@ -530,6 +545,10 @@ class WaveformPopupController(GUIController):
             duty_cycle = float(self.widgets["Duty"].widget.get())
             smoothing = float(self.widgets["Smoothing"].widget.get())
             ramp_falling = float(self.widgets["Ramp_falling"].widget.get())
+            camera_delay = float(self.widgets["camera_delay"].widget.get())
+            camera_settle_duration = float(
+                self.widgets["camera_settle_duration"].widget.get()
+            )
         except ValueError:
             return
 
@@ -543,6 +562,10 @@ class WaveformPopupController(GUIController):
         ] = ramp_falling
         self.resolution_info["other_constants"]["remote_focus_delay"] = delay
         self.resolution_info["other_constants"]["percent_smoothing"] = smoothing
+        self.resolution_info["other_constants"]["camera_delay"] = camera_delay
+        self.resolution_info["other_constants"][
+            "camera_settle_duration"
+        ] = camera_settle_duration
 
         # Pass the values to the parent controller.
         self.event_id = self.view.popup.after(

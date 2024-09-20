@@ -1,0 +1,36 @@
+name: test_plugins
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+        operating-system: [windows-latest]
+    env:
+      MPLBACKEND: Agg  # https://github.com/microsoft/azure-pipelines-tasks/issues/16426
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install navigate-micro
+          pip install navigate-at-scale
+          pip install navigate-constant-velocity
+          pip install navigate-confocal-projection
+          pip install navigate-mmcore-plugin
+          pip install pytest
+      - name: Test with pytest
+        run: |
+          python3 -m pytest test/model/test_model.py -m "not hardware"

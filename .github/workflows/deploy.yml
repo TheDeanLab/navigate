@@ -1,7 +1,9 @@
 name: deploy
-
+# https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow
+#  -runs/events-that-trigger-workflows#release
 on:
   release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -24,12 +26,12 @@ jobs:
             index-servers =
               pypi
               navigate-micro
-    
+
             [pypi]
             repository: https://upload.pypi.org/legacy/
             username: $env:PYPI_USERNAME
             password: $env:PYPI_PASSWORD
-            
+
             [navigate-micro]
             repository: https://upload.pypi.org/legacy/
             username: $env:PYPI_USERNAME
@@ -50,4 +52,4 @@ jobs:
           run: |
             git tag
             python -m build
-            twine upload -r navigate-micro dist/* 
+            twine upload -r navigate-micro dist/*

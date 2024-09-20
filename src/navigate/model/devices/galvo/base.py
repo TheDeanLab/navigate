@@ -130,7 +130,7 @@ class GalvoBase:
         microscope_name = microscope_state["microscope_name"]
         zoom_value = microscope_state["zoom"]
         galvo_factor = self.configuration["waveform_constants"]["other_constants"].get(
-            "galvo_factor", "channel"
+            "galvo_factor", "none"
         )
         galvo_parameters = self.configuration["waveform_constants"]["galvo_constants"][
             self.galvo_name

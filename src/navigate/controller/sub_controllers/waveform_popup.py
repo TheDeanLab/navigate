@@ -342,11 +342,6 @@ class WaveformPopupController(GUIController):
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
 
-        galvo_factor = self.resolution_info["other_constants"].get(
-            "galvo_factor", "none"
-        )
-        self.set_galvo_factor(galvo_factor)
-
     def showup(self):
         """This function will let the popup window show in front."""
         self.view.popup.deiconify()
@@ -462,6 +457,10 @@ class WaveformPopupController(GUIController):
         # update advanced setting
         if hasattr(self, "advanced_setting_popup"):
             self.display_galvo_advanced_setting()
+        galvo_factor = self.resolution_info["other_constants"].get(
+            "galvo_factor", "none"
+        )
+        self.set_galvo_factor(galvo_factor)
 
     def update_remote_focus_settings(self, name, laser, remote_focus_name):
         """Update remote focus settings in memory.
@@ -994,11 +993,20 @@ class WaveformPopupController(GUIController):
             )
             self.view.inputs["all_channels"].widget.configure(state="normal")
             self.view.inputs["all_channels"].set(False)
+            # disable galvo widgets in the main popup window
+            for i in range(len(self.galvos)):
+                galvo_name = f"Galvo {i}"
+                self.widgets[galvo_name + " Amp"].widget["state"] = "disabled"
+                self.widgets[galvo_name + " Off"].widget["state"] = "disabled"
         else:
             self.view.inputs["galvo_info"].widget.configure(text="")
             self.view.inputs["all_channels"].widget.configure(state="disabled")
             self.view.inputs["all_channels"].set(True)
-
+            # enable galvo widgets in the main popup window
+            for i in range(len(self.galvos)):
+                galvo_name = f"Galvo {i}"
+                self.widgets[galvo_name + " Amp"].widget["state"] = "normal"
+                self.widgets[galvo_name + " Off"].widget["state"] = "normal"
         self.resolution_info["other_constants"]["galvo_factor"] = galvo_factor
         if self.event_id:
             self.view.popup.after_cancel(self.event_id)

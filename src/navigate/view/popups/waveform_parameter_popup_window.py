@@ -30,13 +30,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
 import tkinter as tk
 from tkinter import ttk
+import logging
+
+# Third-party imports
+
+# Local application imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
-import logging
 
+# Logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
@@ -70,25 +76,29 @@ class WaveformParameterPopupWindow:
 
         #: dict: Dictionary for all the variables
         self.inputs = {}
+
         #: dict: Dictionary for all the buttons
         self.buttons = {}
 
-        # Frames for widgets
         #: ttk.Frame: Frame for mode and magnification
         self.mode_mag_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+
         #: ttk.Frame: Frame for saving waveform parameters
         self.save_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+
         #: ttk.LabelFrame: Frame for remote focus parameters
         self.remote_focus_frame = ttk.LabelFrame(
-            content_frame, text="Remote Focus", padding=(0, 0, 0, 0)
+            content_frame, text="Remote Focus Settings", padding=(0, 0, 0, 0)
         )
+
         #: ttk.LabelFrame: Frame for galvo parameters
         self.galvo_frame = ttk.LabelFrame(
-            content_frame, text="Galvo", padding=(0, 0, 0, 0)
+            content_frame, text="Galvo Settings", padding=(0, 0, 0, 0)
         )
+
         #: ttk.LabelFrame: Frame for waveform
         self.waveform_frame = ttk.LabelFrame(
-            content_frame, text="Waveform Setting", padding=(0, 0, 0, 0)
+            content_frame, text="Waveform Parameters", padding=(0, 0, 0, 0)
         )
 
         # Griding Frames
@@ -105,21 +115,25 @@ class WaveformParameterPopupWindow:
         )
 
         # Filling Frames with widgets
-        # Mode/Mag Frame
+        max_length = max(len("Microscope"), len("Magnification"))
+        padded_text = "Microscope"
+        padded_text = padded_text.ljust(max_length)
         self.inputs["Mode"] = LabelInput(
             parent=self.mode_mag_frame,
-            label="Mode",
+            label=padded_text,
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
-            label_args={"padding": (2, 5, 48, 0)},
+            label_args={"padding": (2, 5, 5, 0)},
         )
         self.inputs["Mode"].grid(row=0, column=0, padx=10)
         self.inputs["Mode"].pad_input(50, 5, 0, 0)
         self.inputs["Mode"].state(["readonly"])
 
+        padded_text = "Magnification"
+        padded_text = padded_text.ljust(max_length)
         self.inputs["Mag"] = LabelInput(
             parent=self.mode_mag_frame,
-            label="Magnification",
+            label=padded_text,
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
             label_args={"padding": (2, 5, 5, 0)},
@@ -145,7 +159,7 @@ class WaveformParameterPopupWindow:
 
         # Laser Frame
         laser_labels = self.configuration_controller.lasers_info
-        title_labels = ["Laser", "Amplitude", "Offset", "Frequency"]
+        title_labels = ["Laser", "Amplitude", "Offset"]
         # Loop for widgets
         for i in range(len(title_labels)):
             # Title labels
@@ -185,12 +199,21 @@ class WaveformParameterPopupWindow:
             map(lambda i: f"Galvo {i}", range(self.configuration_controller.galvo_num))
         )
 
+        title_labels = ["Galvo", "Amplitude", "Offset", "Frequency"]
+        # Loop for widgets
+        for i in range(len(title_labels)):
+            # Title labels
+            title = ttk.Label(
+                self.galvo_frame, text=title_labels[i], padding=(2, 5, 53, 0)
+            )
+            title.grid(row=0, column=i, sticky=tk.NSEW, padx=(0, 5))
+
         for i, label in enumerate(galvo_labels):
             galvo = ttk.Label(
                 self.galvo_frame, text=galvo_labels[i], padding=(2, 5, 53, 0)
             )
 
-            galvo.grid(row=i, column=0, sticky=tk.NSEW)
+            galvo.grid(row=i + 1, column=0, sticky=tk.NSEW)
 
             self.inputs[galvo_labels[i] + " Amp"] = LabelInput(
                 parent=self.galvo_frame,
@@ -199,7 +222,7 @@ class WaveformParameterPopupWindow:
             )
 
             self.inputs[galvo_labels[i] + " Amp"].grid(
-                row=i, column=1, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
+                row=i + 1, column=1, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
             )
 
             self.inputs[galvo_labels[i] + " Off"] = LabelInput(
@@ -209,7 +232,7 @@ class WaveformParameterPopupWindow:
             )
 
             self.inputs[galvo_labels[i] + " Off"].grid(
-                row=i, column=2, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
+                row=i + 1, column=2, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
             )
 
             self.inputs[galvo_labels[i] + " Freq"] = LabelInput(
@@ -220,7 +243,7 @@ class WaveformParameterPopupWindow:
             )
 
             self.inputs[galvo_labels[i] + " Freq"].grid(
-                row=i, column=3, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
+                row=i + 1, column=3, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
             )
 
             # Button for automatic estimate of galvo frequency
@@ -229,7 +252,7 @@ class WaveformParameterPopupWindow:
             )
 
             self.buttons[galvo_labels[i] + " Freq"].grid(
-                row=i, column=4, sticky=tk.NE, pady=(10, 0)
+                row=i + 1, column=4, sticky=tk.NE, pady=(10, 0)
             )
 
         self.inputs["galvo_info"] = LabelInput(
@@ -239,7 +262,7 @@ class WaveformParameterPopupWindow:
             input_args={"text": "", "state": "disabled"},
         )
         self.inputs["galvo_info"].grid(
-            row=len(galvo_labels), column=1, sticky=tk.NW, pady=(10, 0)
+            row=len(galvo_labels) + 1, column=1, sticky=tk.NW, pady=(10, 0)
         )
 
         self.inputs["all_channels"] = LabelInput(
@@ -249,7 +272,7 @@ class WaveformParameterPopupWindow:
             label="Apply To All Channels",
         )
         self.inputs["all_channels"].grid(
-            row=len(galvo_labels),
+            row=len(galvo_labels) + 1,
             column=2,
             columnspan=2,
             sticky=tk.NE,
@@ -259,17 +282,17 @@ class WaveformParameterPopupWindow:
         self.inputs["all_channels"].widget.config(state="disabled")
 
         self.buttons["advanced_galvo_setting"] = ttk.Button(
-            self.galvo_frame, text="Advanced Setting", padding=(5, 0, 5, 0)
+            self.galvo_frame, text="Advanced Settings", padding=(5, 0, 5, 0)
         )
         self.buttons["advanced_galvo_setting"].grid(
-            row=len(galvo_labels),
+            row=len(galvo_labels) + 1,
             column=4,
             sticky=tk.NSEW,
             pady=(10, 0),
         )
 
         # other remote focus waveform setting
-        label = ttk.Label(self.waveform_frame, text="Remote Focus")
+        label = ttk.Label(self.waveform_frame, text="Remote Focus Settings")
         label.grid(row=0, columnspan=4, padx=5, sticky=tk.NW, pady=(10, 0))
         separator = ttk.Separator(self.waveform_frame)
         separator.grid(row=1, columnspan=4, sticky=tk.NSEW)
@@ -302,7 +325,7 @@ class WaveformParameterPopupWindow:
                 row=i // 2 + 2, column=(i % 2) * 2 + 1, sticky=tk.NSEW
             )
         row_id = 2 + len(rf_waveform_labels) // 2
-        label = ttk.Label(self.waveform_frame, text="Camera")
+        label = ttk.Label(self.waveform_frame, text="Camera Settings")
         label.grid(row=row_id, column=0, padx=5, pady=(10, 0), sticky=tk.NW)
         separator = ttk.Separator(self.waveform_frame)
         separator.grid(row=row_id + 1, columnspan=4, sticky=tk.NSEW)
@@ -344,10 +367,6 @@ class WaveformParameterPopupWindow:
         -------
         dict
             Dictionary of all the variables tied to each widget name
-
-        Examples
-        --------
-        >>> self.get_variables()
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -364,10 +383,6 @@ class WaveformParameterPopupWindow:
         -------
         dict
             Dictionary of all the widgets
-
-        Examples
-        --------
-        >>> self.get_widgets()
         """
         return self.inputs
 
@@ -381,18 +396,26 @@ class WaveformParameterPopupWindow:
         -------
         dict
             Dictionary of all the buttons
-
-        Examples
-        --------
-        >>> self.get_buttons()
         """
         return self.buttons
 
 
 class AdvancedWaveformParameterPopupWindow:
+    """Popup window with advanced waveform parameters for galvos, remote focusing,
+    etc."""
+
     def __init__(self, root, *args, **kwargs):
+        """Initialize the AdvancedWaveformParameterPopupWindow
+
+        Parameters
+        ----------
+        root : tk.Tk
+            The root window
+        """
+
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
+
         #: PopUp: The popup window
         self.popup = PopUp(
             root, "Advanced Galvo Setting", "+320+180", top=False, transient=False
@@ -403,11 +426,22 @@ class AdvancedWaveformParameterPopupWindow:
         tk.Grid.columnconfigure(content_frame, "all", weight=1)
         tk.Grid.rowconfigure(content_frame, "all", weight=1)
 
+        #: dict: Dictionary for all of the inputs
         self.inputs = {}
+
+        #: dict: Dictionary for all the buttons
         self.buttons = {}
+
+        #: dict: Dictionary for all the variables
         self.variables = {}
 
+        #: dict: Dictionary for all the parameters
+        self.parameters = {}
+
+        #: ttk.Frame: Frame for top
         self.top_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+
+        #: ttk.Frame: Frame for parameters
         self.parameter_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
 
         self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=(10, 0))
@@ -442,7 +476,7 @@ class AdvancedWaveformParameterPopupWindow:
         channel.grid(row=1, column=2, sticky=tk.NSEW, padx=5, pady=(10, 0))
         none_factor.grid(row=1, column=3, sticky=tk.NSEW, padx=5, pady=(10, 0))
 
-    def generate_paramter_frame(self, factors=["All"], galvos=[]):
+    def generate_parameter_frame(self, factors=["All"], galvos=[]):
         """Generate galvo widgets
 
         Parameters

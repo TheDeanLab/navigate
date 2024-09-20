@@ -875,7 +875,7 @@ class WaveformPopupController(GUIController):
                     )
                 galvos.append(temp)
 
-        self.advanced_setting_popup.generate_paramter_frame(factors, galvos)
+        self.advanced_setting_popup.generate_parameter_frame(factors, galvos)
         # set values
         for i in range(len(factors)):
             for j in range(len(galvos)):

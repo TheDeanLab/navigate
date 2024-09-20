@@ -129,6 +129,7 @@ class GalvoBase:
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         microscope_name = microscope_state["microscope_name"]
         zoom_value = microscope_state["zoom"]
+        galvo_factor = self.configuration["waveform_constants"]["other_constants"]["galvo_factor"]
         galvo_parameters = self.configuration["waveform_constants"]["galvo_constants"][
             self.galvo_name
         ][microscope_name][zoom_value]
@@ -155,6 +156,15 @@ class GalvoBase:
                     galvo_frequency = (
                         float(galvo_parameters.get("frequency", 0)) / exposure_time
                     )
+                    factor_name = None
+                    if galvo_factor == "channel":
+                        factor_name = f"Channel {channel_key[channel_key.index('_')+1:]}"
+                    elif galvo_factor == "laser":
+                        factor_name = channel["laser"]
+                    if factor_name and factor_name in galvo_parameters.keys():
+                        galvo_amplitude = float(galvo_parameters[factor_name].get("amplitude", 0))
+                        galvo_offset = float(galvo_parameters[factor_name].get("offset", 0))
+
                 except ValueError as e:
                     logger.error(
                         f"{e} waveform constants.yml doesn't have parameter "

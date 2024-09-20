@@ -39,7 +39,9 @@ import logging
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.file_functions import save_yaml_file
 from navigate.tools.common_functions import combine_funcs
-from navigate.view.popups.waveform_parameter_popup_window import AdvancedWaveformParameterPopupWindow
+from navigate.view.popups.waveform_parameter_popup_window import (
+    AdvancedWaveformParameterPopupWindow,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -185,7 +187,7 @@ class WaveformPopupController(GUIController):
         self.view.get_buttons()["toggle_waveform_button"].configure(
             command=self.toggle_waveform_state
         )
-        
+
         self.view.get_buttons()["advanced_galvo_setting"].configure(
             command=self.display_advanced_setting_window
         )
@@ -199,6 +201,11 @@ class WaveformPopupController(GUIController):
                 self.view.popup.dismiss,
                 lambda: delattr(self.parent_controller, "waveform_popup_controller"),
             ),
+        )
+
+        # All channels use the same galvo parameters
+        self.widgets["all_channels"].widget.configure(
+            command=self.set_galvo_to_all_channels
         )
 
         # Populate widgets
@@ -236,23 +243,23 @@ class WaveformPopupController(GUIController):
                 "precision", 0
             )
         )
-        increment = int(
+        self.increment = int(
             self.configuration_controller.remote_focus_dict["hardware"].get("step", 0)
         )
         if precision == 0:
             precision = -4 if self.laser_max < 1 else -3
         elif precision > 0:
             precision = -precision
-        if increment == 0:
-            increment = 0.0001 if self.laser_max < 1 else 0.001
-        elif increment < 0:
-            increment = -increment
+        if self.increment == 0:
+            self.increment = 0.0001 if self.laser_max < 1 else 0.001
+        elif self.increment < 0:
+            self.increment = -self.increment
 
         # set ranges of value for those lasers
         for laser in self.lasers:
             self.widgets[laser + " Amp"].widget.configure(from_=self.laser_min)
             self.widgets[laser + " Amp"].widget.configure(to=self.laser_max)
-            self.widgets[laser + " Amp"].widget.configure(increment=increment)
+            self.widgets[laser + " Amp"].widget.configure(increment=self.increment)
             self.widgets[laser + " Amp"].widget.set_precision(precision)
             self.widgets[laser + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
@@ -260,7 +267,7 @@ class WaveformPopupController(GUIController):
             #       in update_remote_focus_settings()
             self.widgets[laser + " Off"].widget.configure(from_=self.laser_min)
             self.widgets[laser + " Off"].widget.configure(to=self.laser_max)
-            self.widgets[laser + " Off"].widget.configure(increment=increment)
+            self.widgets[laser + " Off"].widget.configure(increment=self.increment)
             self.widgets[laser + " Off"].widget.set_precision(precision)
             self.widgets[laser + " Off"].widget.trigger_focusout_validation()
 
@@ -269,7 +276,7 @@ class WaveformPopupController(GUIController):
             galvo_max = d["hardware"]["max"]
             self.widgets[galvo + " Amp"].widget.configure(from_=galvo_min)
             self.widgets[galvo + " Amp"].widget.configure(to=galvo_max)
-            self.widgets[galvo + " Amp"].widget.configure(increment=increment)
+            self.widgets[galvo + " Amp"].widget.configure(increment=self.increment)
             self.widgets[galvo + " Amp"].widget.set_precision(precision)
             self.widgets[galvo + " Amp"].widget["state"] = "normal"
             self.widgets[galvo + " Amp"].widget.trigger_focusout_validation()
@@ -278,13 +285,13 @@ class WaveformPopupController(GUIController):
             #       in update_remote_focus_settings()
             self.widgets[galvo + " Off"].widget.configure(from_=galvo_min)
             self.widgets[galvo + " Off"].widget.configure(to=galvo_max)
-            self.widgets[galvo + " Off"].widget.configure(increment=increment)
+            self.widgets[galvo + " Off"].widget.configure(increment=self.increment)
             self.widgets[galvo + " Off"].widget.set_precision(precision)
             self.widgets[galvo + " Off"].widget["state"] = "normal"
             self.widgets[galvo + " Off"].widget.trigger_focusout_validation()
 
             self.widgets[galvo + " Freq"].widget.configure(from_=0)
-            self.widgets[galvo + " Freq"].widget.configure(increment=increment)
+            self.widgets[galvo + " Freq"].widget.configure(increment=self.increment)
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
             self.widgets[galvo + " Freq"].widget["state"] = "normal"
             self.widgets[galvo + " Freq"].widget.trigger_focusout_validation()
@@ -328,6 +335,11 @@ class WaveformPopupController(GUIController):
         self.galvo_setting = self.resolution_info["galvo_constants"]
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
+
+        galvo_factor = self.resolution_info["other_constants"].get(
+            "galvo_factor", "none"
+        )
+        self.set_galvo_factor(galvo_factor)
 
     def showup(self):
         """This function will let the popup window show in front."""
@@ -432,6 +444,9 @@ class WaveformPopupController(GUIController):
 
         # reconfigure widgets
         self.configure_widget_range()
+        # update advanced setting
+        if hasattr(self, "advanced_setting_popup"):
+            self.display_galvo_advanced_setting()
 
     def update_remote_focus_settings(self, name, laser, remote_focus_name):
         """Update remote focus settings in memory.
@@ -755,5 +770,216 @@ class WaveformPopupController(GUIController):
         self.amplitude_dict = None
 
     def display_advanced_setting_window(self):
-        self.advanced_setting_popup = AdvancedWaveformParameterPopupWindow(self.view)
-        print("**** advanced galvo setting popup!")
+        """Display advanced galvo setting window"""
+        if hasattr(self, "advanced_setting_popup"):
+            galvo_factor = self.resolution_info["other_constants"].get(
+                "galvo_factor", "none"
+            )
+            self.advanced_setting_popup.variables["galvo_factor"].set(galvo_factor)
+            self.advanced_setting_popup.popup.deiconify()
+            self.advanced_setting_popup.popup.attributes("-topmost", 1)
+        else:
+            self.advanced_setting_popup = AdvancedWaveformParameterPopupWindow(
+                self.view
+            )
+            # close the window
+            self.advanced_setting_popup.popup.protocol(
+                "WM_DELETE_WINDOW",
+                combine_funcs(
+                    # save parameters
+                    self.advanced_setting_popup.popup.dismiss,
+                    lambda: delattr(self, "advanced_setting_popup"),
+                ),
+            )
+            # register functioons
+            self.advanced_setting_popup.variables["galvo_factor"].trace_add(
+                "write", self.display_galvo_advanced_setting
+            )
+            galvo_factor = self.resolution_info["other_constants"].get(
+                "galvo_factor", "none"
+            )
+            self.advanced_setting_popup.variables["galvo_factor"].set(galvo_factor)
+
+    def display_galvo_advanced_setting(self, *args, **kwargs):
+        """Generate dynamic galvo advanced setting widgets"""
+        galvo_factor = self.advanced_setting_popup.variables["galvo_factor"].get()
+        if galvo_factor == "none":
+            factors = ["All"]
+            galvos = []
+            for i in range(self.configuration_controller.galvo_num):
+                galvo_name = f"Galvo {i}"
+                if self.resolution not in self.galvo_setting[galvo_name].keys():
+                    continue
+                galvos.append(
+                    [
+                        (
+                            self.galvo_setting[galvo_name][self.resolution][self.mag][
+                                "amplitude"
+                            ],
+                            self.galvo_setting[galvo_name][self.resolution][self.mag][
+                                "offset"
+                            ],
+                        )
+                    ]
+                )
+        else:
+            if galvo_factor == "channel":
+                channel_num = self.configuration_controller.number_of_channels
+                factors = [f"Channel {i+1}" for i in range(channel_num)]
+            else:  # laser
+                factors = list(
+                    self.resolution_info["remote_focus_constants"][self.resolution][
+                        self.mag
+                    ].keys()
+                )
+            galvos = []
+            for i in range(self.configuration_controller.galvo_num):
+                galvo_name = f"Galvo {i}"
+                temp = []
+                if self.resolution not in self.galvo_setting[galvo_name].keys():
+                    continue
+                galvo_setting = self.galvo_setting[galvo_name][self.resolution][
+                    self.mag
+                ]
+                for fid in factors:
+                    if fid not in galvo_setting.keys():
+                        galvo_setting[fid] = {
+                            "amplitude": galvo_setting["amplitude"],
+                            "offset": galvo_setting["offset"],
+                        }
+                    temp.append(
+                        (galvo_setting[fid]["amplitude"], galvo_setting[fid]["offset"])
+                    )
+                galvos.append(temp)
+
+        self.advanced_setting_popup.generate_paramter_frame(factors, galvos)
+        # set values
+        for i in range(len(factors)):
+            for j in range(len(galvos)):
+                self.advanced_setting_popup.parameters[f"galvo_{i}_{j}_amp"].set(
+                    galvos[j][i][0]
+                )
+                self.advanced_setting_popup.parameters[f"galvo_{i}_{j}_off"].set(
+                    galvos[j][i][1]
+                )
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_amp"
+                ].widget.configure(from_=self.galvo_dict[j]["hardware"]["min"])
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_amp"
+                ].widget.configure(to=self.galvo_dict[j]["hardware"]["max"])
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_amp"
+                ].widget.configure(increment=self.increment)
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_off"
+                ].widget.configure(from_=self.galvo_dict[j]["hardware"]["min"])
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_off"
+                ].widget.configure(to=self.galvo_dict[j]["hardware"]["max"])
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_off"
+                ].widget.configure(increment=self.increment)
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_amp"
+                ].get_variable().trace_add(
+                    "write", self.update_galvo_advanced_setting(i, j, factors[i], "amp")
+                )
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_off"
+                ].get_variable().trace_add(
+                    "write", self.update_galvo_advanced_setting(i, j, factors[i], "off")
+                )
+
+        # update galvo factor
+        if galvo_factor != self.resolution_info["other_constants"].get(
+            "galvo_factor", "none"
+        ):
+            self.set_galvo_factor(galvo_factor)
+
+    def update_galvo_advanced_setting(
+        self, factor_id, galvo_id, factor_name, amp_or_off
+    ):
+        """Update galvo setting parameters
+
+        Parameters
+        ----------
+        factor_id : int
+            The index of the galvo factor
+        galvo_id : int
+            The index of the galvo device
+        factor_name : str
+            The name of galvo associated factor
+        amp_or_off : str
+            Amplitude or Offset: the value should be "amp" or "off
+
+        Returns
+        -------
+        func : Function
+            A widget function
+        """
+
+        def func(*args, **kwargs):
+            try:
+                value = float(
+                    self.advanced_setting_popup.parameters[
+                        f"galvo_{factor_id}_{galvo_id}_{amp_or_off}"
+                    ].get()
+                )
+            except ValueError:
+                return
+
+            if self.event_id:
+                self.view.popup.after_cancel(self.event_id)
+
+            parameter_name = "amplitude" if amp_or_off == "amp" else "offset"
+            galvo_name = f"Galvo {galvo_id}"
+            if factor_name == "All":
+                self.galvo_setting[galvo_name][self.resolution][self.mag][
+                    parameter_name
+                ] = value
+            else:
+                self.galvo_setting[galvo_name][self.resolution][self.mag][factor_name][
+                    parameter_name
+                ] = value
+
+            self.event_id = self.view.popup.after(
+                500,
+                lambda: self.parent_controller.execute("update_setting", "galvo"),
+            )
+
+        return func
+
+    def set_galvo_to_all_channels(self):
+        """Set galvo factor to 'none' and use galvo parameters in all channels"""
+        self.set_galvo_factor("none")
+        self.resolution_info["other_constants"]["galvo_factor"] = "none"
+        if hasattr(self, "advanced_setting_popup"):
+            self.advanced_setting_popup.variables["galvo_factor"].set("none")
+
+    def set_galvo_factor(self, galvo_factor="none"):
+        """Set galvo factor and display information
+
+        Parameters
+        ----------
+        galvo_factor : str
+            The name of galvo factor: 'laser', 'channel', or 'none'
+        """
+        if galvo_factor != "none":
+            self.view.inputs["galvo_info"].widget.configure(
+                text=f"Associate with {galvo_factor}"
+            )
+            self.view.inputs["all_channels"].widget.configure(state="normal")
+            self.view.inputs["all_channels"].set(False)
+        else:
+            self.view.inputs["galvo_info"].widget.configure(text="")
+            self.view.inputs["all_channels"].widget.configure(state="disabled")
+            self.view.inputs["all_channels"].set(True)
+
+        self.resolution_info["other_constants"]["galvo_factor"] = galvo_factor
+        if self.event_id:
+            self.view.popup.after_cancel(self.event_id)
+        self.event_id = self.view.popup.after(
+            500,
+            lambda: self.parent_controller.execute("update_setting", "galvo"),
+        )

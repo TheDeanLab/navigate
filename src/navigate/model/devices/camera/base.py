@@ -66,7 +66,8 @@ class CameraBase:
             If microscope name is not in configuration
         """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
-            raise NameError(f"Microscope {microscope_name} does not exist!")
+            logger.error(f"Microscope {microscope_name} does not exist.")
+            raise NameError(f"Microscope {microscope_name} does not exist.")
 
         #: str: Name of microscope in configuration
         self.microscope_name = microscope_name
@@ -157,6 +158,7 @@ class CameraBase:
                 os.path.join(map_path, f"{serial_number}_var.tiff")
             )
         except FileNotFoundError:
+            logger.warning(f"Offset or variance map not found in {map_path}")
             self._offset, self._variance = None, None
         return self._offset, self._variance
 

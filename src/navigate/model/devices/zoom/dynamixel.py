@@ -67,7 +67,7 @@ def build_dynamixel_zoom_connection(configuration):
 
     # Open port and set baud rate
     if not dynamixel.openPort(port_num):
-        logger.debug("Unable to open DynamixelZoom")
+        logger.error(f"Communication Error with Port {port_num}")
         raise RuntimeError(f"Unable to open port {port_num}.")
 
     dynamixel.setBaudRate(port_num, baudrate)

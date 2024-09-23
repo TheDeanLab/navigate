@@ -291,7 +291,10 @@ class Microscope:
             )
 
             if device_ref_name not in devices_dict["stages"]:
-                logger.debug(f"{device_ref_name} stage not found in the devices_dict!")
+                logger.error(
+                    f"{device_ref_name} is not in the devices_dict."
+                    f"Defined stages include {devices_dict['stages'].keys()}"
+                )
                 raise Exception(
                     "Stage not found. "
                     "This often arises when the configuration.yaml file is "

@@ -55,6 +55,11 @@ class FilterWheelBase:
         device_config : dict
             Dictionary of device configuration parameters.
         """
+        #: object: Device connection object.
+        self.device_connection = device_connection
+
+        #: dict: Dictionary of device configuration parameters.
+        self.device_config = device_config
 
         #: dict: Dictionary of filters available on the filter wheel.
         self.filter_dictionary = device_config["available_filters"]
@@ -65,7 +70,17 @@ class FilterWheelBase:
         #: int: index of filter wheel
         self.filter_wheel_number = device_config["hardware"]["wheel_number"]
 
-    def check_if_filter_in_filter_dictionary(self, filter_name):
+        logger.info(self.__repr__())
+
+    def __str__(self) -> str:
+        """String representation of the FilterWheelBase class."""
+        return "FilterWheelBase"
+
+    def __repr__(self) -> str:
+        """Representation of the FilterWheelBase class."""
+        return f"FilterWheelBase({self.device_connection}, {self.device_config})"
+
+    def check_if_filter_in_filter_dictionary(self, filter_name: str) -> bool:
         """Checks if the filter designation (string) given exists in the
         filter dictionary
 
@@ -83,12 +98,11 @@ class FilterWheelBase:
         ------
         ValueError
             If filter name is not in the filter dictionary.
-
         """
+
         if filter_name in self.filter_dictionary:
             filter_exists = True
         else:
-            filter_exists = False
-            logger.debug("Filter Name not in the Filter Dictionary")
-            raise ValueError("Filter Name not in the Filter Dictionary.")
+            logger.error(f"Unknown filter name: {filter_name}")
+            raise ValueError(f"Unknown filter name: {filter_name}")
         return filter_exists

@@ -92,6 +92,7 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
                     val = None
                 time.sleep(0.5)  # TODO: 0.5 reached by trial and error. Better value?
             else:
+                logger.error(f"Device startup error: {e}")
                 raise exception
         else:
             break
@@ -1360,8 +1361,10 @@ def device_not_found(*args):
     devices : class
         Device class.
     """
-    print("Device Not Found in Configuration.YML:", args)
-    raise RuntimeError(f"Device not found in configuration: {args}")
+    error_statement = f"Device not found in configuration: {args}"
+    logger.error(error_statement)
+    print(error_statement)
+    raise RuntimeError()
 
 
 def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
@@ -1397,7 +1400,9 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
                         configuration, id, is_synthetic
                     )
                 else:
-                    raise e
+                    error_statement = f"Error loading camera: {e}"
+                    logger.error(error_statement)
+                    raise error_statement
 
             if (not is_synthetic) and device["type"].startswith("Hamamatsu"):
                 camera_serial_number = str(camera._serial_number)
@@ -1409,6 +1414,7 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
                         oct_num = int(camera_serial_number, 8)
                         device_ref_name = str(oct_num)
                     except ValueError:
+                        logger.debug("Error converting camera serial number to octal")
                         pass
             else:
                 device_ref_name = str(device["serial_number"])

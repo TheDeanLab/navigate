@@ -99,6 +99,16 @@ class DAQBase:
         #: int: Number of times to expand the waveform
         self.waveform_expand_num = 1
 
+        logger.info(self.__repr__())
+
+    def __repr__(self) -> str:
+        """Returns the string representation of the DAQBase class"""
+        return f"DAQBase({self.configuration})"
+
+    def __str__(self) -> str:
+        """Returns the string representation of the DAQBase class"""
+        return "DAQBase"
+
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in
         a dictionary format.

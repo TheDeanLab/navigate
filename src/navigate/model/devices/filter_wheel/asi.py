@@ -66,6 +66,7 @@ def build_filter_wheel_connection(comport, baudrate=115200, timeout=0.25):
     tiger_controller = TigerController(comport, baudrate)
     tiger_controller.connect_to_serial()
     if not tiger_controller.is_open():
+        logger.error("ASI stage connection failed.")
         raise Exception("ASI stage connection failed.")
     return tiger_controller
 

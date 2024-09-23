@@ -67,6 +67,7 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
     asi_stage = MS2000Controller(com_port, baud_rate)
     asi_stage.connect_to_serial()
     if not asi_stage.is_open():
+        logger.error("ASI stage connection failed.")
         raise Exception("ASI stage connection failed.")
 
     return asi_stage
@@ -165,7 +166,7 @@ class ASIStage(StageBase):
                 self.ms2000_controller.disconnect_from_serial()
                 logger.debug("ASI stage connection closed")
         except (AttributeError, BaseException) as e:
-            logger.exception("ASI Stage Exception", e)
+            logger.error("ASI Stage Exception", e)
             raise
 
     def get_axis_position(self, axis):

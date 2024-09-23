@@ -32,6 +32,7 @@
 #  Standard Imports
 import os
 from multiprocessing.managers import DictProxy
+import logging
 
 # Third Party Imports
 import h5py
@@ -41,6 +42,10 @@ import numpy.typing as npt
 # Local imports
 from .pyramidal_data_source import PyramidalDataSource
 from ..metadata_sources.bdv_metadata import BigDataViewerMetadata
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class BigDataViewerDataSource(PyramidalDataSource):
@@ -69,7 +74,9 @@ class BigDataViewerDataSource(PyramidalDataSource):
         #: str: The file type.
         self.__file_type = os.path.splitext(os.path.basename(file_name))[-1][1:].lower()
         if self.__file_type not in ["h5", "n5"]:
-            raise ValueError(f"Unknown file type {self.__file_type}.")
+            error_statement = f"Unknown file type {self.__file_type}."
+            logger.error(error_statement)
+            raise ValueError(error_statement)
         if self.__file_type == "h5":
             self.setup = self._setup_h5
             self.ds_name = self._h5_ds_name

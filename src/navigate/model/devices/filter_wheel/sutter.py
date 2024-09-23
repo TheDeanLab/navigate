@@ -72,7 +72,7 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     try:
         return serial.Serial(comport, baudrate, timeout=timeout)
     except serial.SerialException:
-        logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
+        logger.error("SutterFilterWheel - Could not establish Serial Port Connection")
         raise UserWarning(
             "Could not communicate with Sutter Lambda 10-B via COMPORT", comport
         )

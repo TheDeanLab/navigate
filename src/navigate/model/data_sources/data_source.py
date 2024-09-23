@@ -39,6 +39,10 @@ import numpy.typing as npt
 # Local Imports
 from multiprocessing.managers import DictProxy
 
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
+
 
 class DataSource:
     def __init__(self, file_name: str = "", mode: str = "w") -> None:
@@ -49,7 +53,7 @@ class DataSource:
 
         file_name  stores the name of the file to read/write from
         data       stores a pointer to the actual data in the data source and
-        metdata    stores a pointer to the metadata.
+        metsdata    stores a pointer to the metadata.
 
         Concept and some of the code borrowed from python-microscopy
         (https://github.com/python-microscopy/python-microscopy/).
@@ -63,17 +67,23 @@ class DataSource:
         """
         #: logging.Logger: Logger for this class.
         self.logger = logging.getLogger(__name__.split(".")[1])
+
         #: str: Name of the file to read/write from.
         self.file_name = file_name
+
         if not hasattr(self, "metadata"):
             #: npt.ArrayLike: Pointer to the metadata.
             self.metadata = None  # Expect a metadata object
+
         #: str: Mode to open the file in. Can be 'r' or 'w'.
         self._mode = None
+
         #: bool: Has the data source been closed?
         self._closed = True
+
         #: int: Number of bits per pixel.
         self.bits = 16
+
         if not hasattr(self, "dtype"):
             self.dtype = "uint16"
 
@@ -176,6 +186,7 @@ class DataSource:
         NotImplementedError
             If not implemented in a derived class.
         """
+        logger.error("DataSource.data implemented in a derived class.")
         raise NotImplementedError("Implemented in a derived class.")
 
     @property
@@ -187,7 +198,7 @@ class DataSource:
         tuple
             Voxel size in x, y, z dimensions.
         """
-        return (self.dx, self.dy, self.dz)
+        return self.dx, self.dy, self.dz
 
     @property
     def shape(self) -> tuple:
@@ -198,7 +209,7 @@ class DataSource:
         tuple
             Shape of the data source in XYCZT format.
         """
-        return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
+        return self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t
 
     def setup(self):
         """Additional steps for establishing the initial file setup."""
@@ -361,6 +372,7 @@ class DataSource:
         NotImplementedError
             If not implemented in a derived class.
         """
+        logger.error("DataSource.write implemented in a derived class.")
         raise NotImplementedError("Implemented in a derived class.")
 
     def read(self) -> None:
@@ -371,6 +383,7 @@ class DataSource:
         NotImplementedError
             If not implemented in a derived class.
         """
+        logger.error("DataSource.read implemented in a derived class.")
         raise NotImplementedError("Implemented in a derived class.")
 
     def close(self) -> None:

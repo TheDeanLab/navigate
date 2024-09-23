@@ -69,7 +69,7 @@ def build_photometrics_connection(camera_connection):
         camera_to_open.open()
         return camera_to_open
     except Exception as e:
-        logger.debug(f"Could not establish connection with camera: {e}")
+        logger.error(f"Could not establish connection with camera: {e}")
         raise UserWarning(
             "Could not establish connection with camera", camera_connection
         )

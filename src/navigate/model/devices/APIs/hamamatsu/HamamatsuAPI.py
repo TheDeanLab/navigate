@@ -719,6 +719,7 @@ class camReg(object):
                 # this class in startup functions. This really makes no sense as an
                 # attribute error.
                 dcamapi_uninit()
+                logger.error("DCAM initialization failed.")
                 raise Exception("DCAM initialization failed.")
             cls.maxCameras = paraminit.iDeviceCount
             cls.numCameras = 0

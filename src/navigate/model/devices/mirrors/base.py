@@ -59,7 +59,8 @@ class MirrorBase:
             Global configuration of the microscope
         """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
-            raise NameError(f"Microscope {microscope_name} does not exist!")
+            logger.error(f"Microscope {microscope_name} does not exist.")
+            raise NameError(f"Microscope {microscope_name} does not exist.")
 
         #: dict: Configuration of the microscope
         self.configuration = configuration

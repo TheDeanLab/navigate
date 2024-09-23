@@ -33,6 +33,7 @@
 import os
 from typing import Optional, Union
 import xml.etree.ElementTree as ET
+import logging
 
 # Third Party Imports
 import numpy as np
@@ -41,6 +42,10 @@ import numpy.typing as npt
 # Local imports
 from .metadata import XMLMetadata
 from navigate.tools.linear_algebra import affine_rotation, affine_shear
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class BigDataViewerMetadata(XMLMetadata):
@@ -59,22 +64,29 @@ class BigDataViewerMetadata(XMLMetadata):
         # Affine Transform Parameters
         #: bool: Shear the data.
         self.shear_data = False
+
         #: str: Dimension to shear the data.
         self.shear_dimension = "YZ"
+
         #: float: Angle in degrees to shear the data.
         self.shear_angle = 0
+
         #: npt.NDArray: Shear transform matrix.
         self.shear_transform = np.eye(3, 4)
 
         # Rotation Transform Parameters
         #: bool: Rotate the data.
         self.rotate_data = False
+
         #: float: Angle in degrees to rotate the data in X.
         self.rotate_angle_x = 0
+
         #: float: Angle in degrees to rotate the data in Y.
         self.rotate_angle_y = 0
+
         #: float: Angle in degrees to rotate the data in Z.
         self.rotate_angle_z = 0
+
         #: npt.NDArray: Rotation transform matrix.
         self.rotate_transform = np.eye(3, 4)
 
@@ -432,11 +444,13 @@ class BigDataViewerMetadata(XMLMetadata):
                 root = ET.fromstring(example)
 
         if root.tag != "SpimData":
+            logger.error(f"Unknown Format: {root.tag}.")
             raise NotImplementedError(f"Unknown format {root.tag} failed to load.")
 
         # Check if we are loading a BigDataViewer hdf5
         image_loader = root.find("SequenceDescription/ImageLoader")
         if image_loader.attrib["format"] not in ["bdv.hdf5", "bdv.n5"]:
+            logger.error(f"Unknown Format: {image_loader.attrib['format']}.")
             raise NotImplementedError(
                 f"Unknown format {image_loader.attrib['format']} failed to load."
             )

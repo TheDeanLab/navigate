@@ -62,6 +62,7 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
     asi_stage = MFCTwoThousand(com_port, baud_rate)
     asi_stage.connect_to_serial()
     if not asi_stage.is_open():
+        logger.error("ASI stage connection failed.")
         raise Exception("ASI stage connection failed.")
 
     return asi_stage

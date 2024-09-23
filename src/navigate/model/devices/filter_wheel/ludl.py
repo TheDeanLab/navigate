@@ -79,7 +79,7 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
             stopbits=serial.STOPBITS_TWO,
         )
     except serial.SerialException:
-        logger.warning("LUDLFilterWheel - Could not establish Serial Port Connection")
+        logger.error("LUDLFilterWheel - Could not establish Serial Port Connection")
         raise UserWarning(
             "Could not communicate with LUDL MAC6000 via COMPORT", comport
         )

@@ -134,7 +134,7 @@ class MicroscopePopupController(GUIController):
                     for k in self.microscope_info[microscope_name].keys():
                         if (
                             self.microscope_info[microscope_name][k]
-                            == self.microscope_info[microscope][k]
+                            == self.microscope_info[microscope].get(k, "")
                         ):
                             self.variables[f"{microscope_name} {k}"].set("")
 

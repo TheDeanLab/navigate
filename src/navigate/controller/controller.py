@@ -1185,8 +1185,10 @@ class Controller:
 
         # destroy all additional microscopes
         for microscope_name in list(self.additional_microscopes.keys()):
-            self.destroy_virtual_microscope(microscope_name)
-        self.additional_microscopes = {}
+            destroy_window = False
+            if microscope_name not in self.additional_microscopes_configs:
+                destroy_window = True
+            self.destroy_virtual_microscope(microscope_name, destroy_window)
 
         # show additional camera view popup
         for microscope_name in self.additional_microscopes_configs:
@@ -1196,32 +1198,31 @@ class Controller:
                 self.additional_microscopes_configs[microscope_name],
             )
 
-            self.additional_microscopes[microscope_name] = {
-                "show_img_pipe": show_img_pipe,
-                "data_buffer": data_buffer,
-            }
-            popup_window = CameraViewPopupWindow(self.view, microscope_name)
-            camera_view_controller = CameraViewController(
-                popup_window.camera_view, self
-            )
-            camera_view_controller.data_buffer = self.additional_microscopes[
-                microscope_name
-            ]["data_buffer"]
-            camera_view_controller.microscope_name = microscope_name
-            popup_window.popup.bind("<Configure>", camera_view_controller.resize)
-            self.additional_microscopes[microscope_name]["popup_window"] = popup_window
-            self.additional_microscopes[microscope_name][
-                "camera_view_controller"
-            ] = camera_view_controller
-            popup_window.popup.protocol(
-                "WM_DELETE_WINDOW",
-                combine_funcs(
-                    popup_window.popup.dismiss,
-                    lambda: self.additional_microscopes[microscope_name].pop(
-                        "camera_view_controller"
+            if microscope_name not in self.additional_microscopes:
+                self.additional_microscopes[microscope_name] = {}
+
+                popup_window = CameraViewPopupWindow(self.view, microscope_name)
+                camera_view_controller = CameraViewController(
+                    popup_window.camera_view, self
+                )
+                camera_view_controller.microscope_name = microscope_name
+                popup_window.popup.bind("<Configure>", camera_view_controller.resize)
+                self.additional_microscopes[microscope_name]["popup_window"] = popup_window
+                self.additional_microscopes[microscope_name][
+                    "camera_view_controller"
+                ] = camera_view_controller
+                popup_window.popup.protocol(
+                    "WM_DELETE_WINDOW",
+                    combine_funcs(
+                        popup_window.popup.dismiss,
+                        lambda: self.additional_microscopes[microscope_name].pop(
+                            "camera_view_controller"
+                        ),
                     ),
-                ),
-            )
+                )
+
+            self.additional_microscopes[microscope_name]["show_img_pipe"] = show_img_pipe
+            self.additional_microscopes[microscope_name]["data_buffer"] = data_buffer
 
             # start thread
             capture_img_thread = threading.Thread(
@@ -1237,13 +1238,15 @@ class Controller:
             )
             capture_img_thread.start()
 
-    def destroy_virtual_microscope(self, microscope_name):
+    def destroy_virtual_microscope(self, microscope_name, destroy_window=True):
         """Destroy virtual microscopes.
 
         Parameters
         ----------
         microscope_name : str
             The microscope name
+        destroy_window : bool
+            The flag to dismiss window.
         """
         if microscope_name not in self.additional_microscopes:
             return
@@ -1253,9 +1256,10 @@ class Controller:
         self.model.release_pipe(f"{microscope_name}_show_img_pipe")
         del self.additional_microscopes[microscope_name]["show_img_pipe"]
         # destroy the popup window
-        self.additional_microscopes[microscope_name]["popup_window"].popup.dismiss()
-        self.additional_microscopes[microscope_name]["camera_view_controller"] = None
-        del self.additional_microscopes[microscope_name]
+        if destroy_window:
+            self.additional_microscopes[microscope_name]["popup_window"].popup.dismiss()
+            self.additional_microscopes[microscope_name]["camera_view_controller"] = None
+            del self.additional_microscopes[microscope_name]
 
     def move_stage(self, pos_dict):
         """Trigger the model to move the stage.

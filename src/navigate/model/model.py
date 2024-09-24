@@ -953,7 +953,6 @@ class Model:
             Function to run on the acquired data.
         """
 
-        wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
         while not self.stop_acquisition:
@@ -966,14 +965,7 @@ class Model:
             )
             # if there is at least one frame available
             if not frame_ids:
-                self.logger.info(f"Navigate Model - Waiting {wait_num}")
-                wait_num -= 1
-                if wait_num <= 0:
-                    # Camera timeout, abort acquisition.
-                    break
                 continue
-
-            wait_num = self.camera_wait_iterations
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later

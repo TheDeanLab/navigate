@@ -84,9 +84,7 @@ class DAQBase:
         # Camera Parameters
         #: float: Camera delay percentage
         self.camera_delay = (
-            self.configuration["configuration"]["microscopes"][self.microscope_name][
-                "camera"
-            ]["delay"]
+            float(self.waveform_constants["other_constants"].get("camera_delay", 5))
             / 1000
         )
 
@@ -167,9 +165,7 @@ class DAQBase:
             self.microscope_name = microscope_name
 
         self.camera_delay = (
-            self.configuration["configuration"]["microscopes"][microscope_name][
-                "camera"
-            ]["delay"]
+            float(self.waveform_constants["other_constants"].get("camera_delay", 5))
             / 1000
         )
         self.sample_rate = self.configuration["configuration"]["microscopes"][

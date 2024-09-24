@@ -878,11 +878,16 @@ def verify_waveform_constants(manager, configuration):
 
     # other_constants
     waveform_dict = configuration["waveform_constants"]
+    microscope_name = configuration["configuration"]["microscopes"].keys()[0]
     other_constants_dict = {
         "remote_focus_settle_duration": "0",
         "percent_smoothing": "0",
         "remote_focus_delay": "0",
         "remote_focus_ramp_falling": "5",
+        "camera_settle_duration": "0",
+        "camera_delay": configuration["configuration"]["microscopes"][microscope_name][
+            "camera"
+        ]["delay"],
     }
     if (
         "other_constants" not in waveform_dict.keys()
@@ -898,7 +903,7 @@ def verify_waveform_constants(manager, configuration):
         try:
             float(waveform_dict["other_constants"][k])
         except (ValueError, KeyError):
-            waveform_dict["other_constants"][k] = "0"
+            waveform_dict["other_constants"][k] = other_constants_dict[k]
 
 
 def verify_configuration(manager, configuration):

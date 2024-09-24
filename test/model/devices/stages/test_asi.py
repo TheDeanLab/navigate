@@ -148,6 +148,14 @@ class TestStageASI:
         port = self.stage_configuration["stage"]["hardware"]["port"]
         baudrate = self.stage_configuration["stage"]["hardware"]["baudrate"]
 
+        # Patch TigerController.get_default_motor_axis_sequence
+        TigerController.get_default_motor_axis_sequence = lambda self: [
+            "X",
+            "Y",
+            "Z",
+            "M",
+            "N",
+        ]
         asi_stage = TigerController(port, baudrate)
         asi_stage.serial_port = self.asi_serial_device
         asi_stage.connect_to_serial()

@@ -85,7 +85,7 @@ class SyntheticDAQ(DAQBase):
 
     def __repr__(self):
         """String representation of the class."""
-        return f'SyntheticDAQ("{self.configuration}")'
+        return f"SyntheticDAQ({self.configuration})"
 
     def create_camera_task(self):
         """Set up the camera trigger task."""

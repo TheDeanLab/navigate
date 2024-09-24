@@ -132,7 +132,7 @@ class LUDLFilterWheel(FilterWheelBase):
 
     def __repr__(self):
         """String representation of the class."""
-        return f'LUDLFilterWheel("{self.serial}", "{self.device_config}")'
+        return f"LUDLFilterWheel({self.serial}, {self.device_config})"
 
     def set_filter(self, filter_name, wait_until_done=True):
         """Set the filter wheel to a specific filter position.

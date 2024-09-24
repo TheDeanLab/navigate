@@ -200,13 +200,13 @@ class PyramidalDataSource(DataSource):
 
         if length < 1:
             error_statement = (
-                "Too few indices. Indices may be (x, y, c, z, t, p, " "subdiv)."
+                "Too few indices. Indices may be (x, y, c, z, t, p, subdivisions)."
             )
             logger.error(error_statement)
             raise IndexError(error_statement)
         elif length > 7:
             error_statement = (
-                "Too many indices. Indices may be (x, y, c, z, t, p, " "subdiv)."
+                "Too many indices. Indices may be (x, y, c, z, t, p, subdivisions)."
             )
             logger.error(error_statement)
             raise IndexError(error_statement)

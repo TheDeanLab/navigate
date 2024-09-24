@@ -109,7 +109,7 @@ class NIDAQ(DAQBase):
 
     def __repr__(self):
         """String representation of the class."""
-        return f'NIDAQ("{self.configuration}")'
+        return f"NIDAQ({self.configuration})"
 
     def __del__(self):
         """Destructor."""

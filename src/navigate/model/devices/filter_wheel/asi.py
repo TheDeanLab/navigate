@@ -120,7 +120,7 @@ class ASIFilterWheel(FilterWheelBase):
 
     def __repr__(self):
         """String representation of the class."""
-        return f'ASIFilterWheel("{self.filter_wheel}", "{self.device_config}")'
+        return f"ASIFilterWheel({self.filter_wheel}, {self.device_config})"
 
     def filter_change_delay(self, filter_name):
         """Estimate duration of time necessary to move the filter wheel

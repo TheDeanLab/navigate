@@ -72,8 +72,7 @@ class SyntheticFilterWheel(FilterWheelBase):
     def __repr__(self):
         """String representation of the class."""
         return (
-            f'SyntheticFilterWheel("{self.device_connection}",'
-            f' "{self.device_config}")'
+            f"SyntheticFilterWheel({self.device_connection}," f"{self.device_config})"
         )
 
     def filter_change_delay(self, filter_name):

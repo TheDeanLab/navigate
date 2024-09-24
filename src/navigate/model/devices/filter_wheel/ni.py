@@ -97,7 +97,7 @@ class DAQFilterWheel(FilterWheelBase):
 
     def __repr__(self):
         """String representation of the class."""
-        return f'DAQFilterWheel("{self.device_connection}", ' f'"{self.device_config}")'
+        return f"DAQFilterWheel({self.device_connection}, {self.device_config})"
 
     def __enter__(self):
         """Enter the ASI Filter Wheel context manager."""

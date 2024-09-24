@@ -83,6 +83,6 @@ class SyntheticGalvo(GalvoBase):
     def __repr__(self):
         """String representation of the class."""
         return (
-            f'SyntheticGalvo("{self.microscope_name}", "{self.device_connection}",'
-            f' "{self.configuration}", "{self.galvo_id}")'
+            f"SyntheticGalvo({self.microscope_name}, {self.device_connection},"
+            f" {self.configuration}, {self.galvo_id})"
         )

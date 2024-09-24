@@ -146,7 +146,7 @@ class MS2000Controller:
 
     def __repr__(self) -> str:
         """Returns the string representation of the MS2000 Controller class"""
-        return f"MS2000Controller({self.com_port}, {self.baud_rate}), {self.verbose})"
+        return f"MS2000Controller({self.com_port}, {self.baud_rate}, {self.verbose})"
 
     @staticmethod
     def scan_ports() -> list[str]:

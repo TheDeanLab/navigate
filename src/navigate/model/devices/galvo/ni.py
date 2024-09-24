@@ -89,8 +89,8 @@ class GalvoNI(GalvoBase):
     def __repr__(self):
         """String representation of the class."""
         return (
-            f'GalvoNI("{self.microscope_name}", "{self.daq}",'
-            f' "{self.configuration}", "{self.galvo_id}")'
+            f"GalvoNI({self.microscope_name}, {self.daq},"
+            f"{self.configuration}, {self.galvo_id})"
         )
 
     def adjust(self, exposure_times, sweep_times):

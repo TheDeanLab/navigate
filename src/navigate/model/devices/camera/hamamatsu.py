@@ -123,21 +123,6 @@ class HamamatsuBase(CameraBase):
             "trigger_source", self.camera_parameters["trigger_source"]
         )
 
-    def __repr__(self):
-        """Return representation of HamamatsuBase class.
-
-        Returns
-        -------
-        str
-            Representation of HamamatsuBase class.
-        """
-        return (
-            f"HamamatsuBase("
-            f"{self.microscope_name}, "
-            f"{self.device_connection}, "
-            f"{self.configuration})"
-        )
-
     def __str__(self):
         """Return string representation of HamamatsuOrca class.
 

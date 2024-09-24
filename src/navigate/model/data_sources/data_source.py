@@ -53,7 +53,7 @@ class DataSource:
 
         file_name  stores the name of the file to read/write from
         data       stores a pointer to the actual data in the data source and
-        metsdata    stores a pointer to the metadata.
+        metadata    stores a pointer to the metadata.
 
         Concept and some of the code borrowed from python-microscopy
         (https://github.com/python-microscopy/python-microscopy/).

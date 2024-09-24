@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 # Standard Library Imports
 import logging
@@ -59,6 +59,10 @@ class ShutterBase:
         """
         #: bool: Shutter state
         self.shutter_state = False
+
+    def __str__(self):
+        """Return the string representation of the Shutter."""
+        return "ShutterBase"
 
     def __del__(self):
         """Close the Shutter at exit."""

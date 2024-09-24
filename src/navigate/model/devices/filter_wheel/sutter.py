@@ -151,7 +151,7 @@ class SutterFilterWheel(FilterWheelBase):
 
     def __repr__(self):
         """String representation of the class."""
-        return f'SutterFilterWheel("{self.serial}", "{self.device_config}")'
+        return f"SutterFilterWheel({self.serial}, {self.device_config})"
 
     def __enter__(self):
         """Enter the SutterFilterWheel context manager."""

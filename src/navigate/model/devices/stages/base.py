@@ -108,6 +108,10 @@ class StageBase:
         #: bool: Whether the stage has limits enabled or not. Default is True.
         self.stage_limits = True
 
+    def __str__(self):
+        """Return a string representation of the stage."""
+        return "StageBase"
+
     def get_position_dict(self):
         """Return a dictionary with the saved stage positions.
 

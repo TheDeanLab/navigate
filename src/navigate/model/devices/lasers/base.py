@@ -69,6 +69,10 @@ class LaserBase:
             microscope_name
         ]["lasers"][laser_id]
 
+    def __str__(self):
+        """Return string representation of the class"""
+        return "LaserBase"
+
     def set_power(self, laser_intensity):
         """Set laser power
 

@@ -70,15 +70,9 @@ class FilterWheelBase:
         #: int: index of filter wheel
         self.filter_wheel_number = device_config["hardware"]["wheel_number"]
 
-        logger.info(self.__repr__())
-
-    def __str__(self) -> str:
-        """String representation of the FilterWheelBase class."""
+    def __str__(self):
+        """Return the string representation of the FilterWheelBase class."""
         return "FilterWheelBase"
-
-    def __repr__(self) -> str:
-        """Representation of the FilterWheelBase class."""
-        return f"FilterWheelBase({self.device_connection}, {self.device_config})"
 
     def check_if_filter_in_filter_dictionary(self, filter_name: str) -> bool:
         """Checks if the filter designation (string) given exists in the

@@ -100,6 +100,10 @@ class RemoteFocusBase:
         #: dict: Waveform dictionary.
         self.waveform_dict = {}
 
+    def __str__(self):
+        """String representation of the RemoteFocusBase class."""
+        return "RemoteFocusBase"
+
     def __del__(self):
         """Destructor"""
         pass

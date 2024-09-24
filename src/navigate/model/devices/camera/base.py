@@ -133,6 +133,10 @@ class CameraBase:
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
+    def __str__(self):
+        """Return string representation of CameraBase."""
+        return "CameraBase"
+
     def get_offset_variance_maps(self):
         """Get offset and variance maps from file.
 

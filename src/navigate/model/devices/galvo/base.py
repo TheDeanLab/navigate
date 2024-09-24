@@ -104,6 +104,10 @@ class GalvoBase:
         #: dict: Dictionary of galvo waveforms.
         self.waveform_dict = {}
 
+    def __str__(self):
+        """Returns the string representation of the GalvoBase class."""
+        return "GalvoBase"
+
     def __del__(self):
         """Destructor"""
         pass

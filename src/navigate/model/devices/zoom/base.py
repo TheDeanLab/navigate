@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 # Standard Library Imports
 import logging
@@ -69,6 +69,10 @@ class ZoomBase:
 
         #: float: the desired zoom setting
         self.zoomvalue = None
+
+    def __str__(self):
+        """Return the string representation of the ZoomBase object."""
+        return "ZoomBase"
 
     def build_stage_dict(self):
         """

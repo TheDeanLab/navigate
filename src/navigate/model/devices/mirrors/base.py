@@ -75,3 +75,7 @@ class MirrorBase:
 
         #: bool: Is the mirror synthetic?
         self.is_synthetic = False
+
+    def __str__(self):
+        """Return the string representation of the mirror."""
+        return "MirrorBase"

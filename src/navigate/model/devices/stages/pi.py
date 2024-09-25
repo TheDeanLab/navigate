@@ -140,7 +140,7 @@ class PIStage(StageBase):
         except (AttributeError, GCSError) as e:  # except BaseException:
             print("Error while disconnecting the PI stage")
             logger.error(f"Error while disconnecting the PI stage - {e}")
-            raise
+            raise e
 
     def report_position(self):
         """Reports the position for all axes, and create position dictionary.

@@ -167,7 +167,7 @@ class ASIStage(StageBase):
                 logger.debug("ASI stage connection closed")
         except (AttributeError, BaseException) as e:
             logger.error("ASI Stage Exception", e)
-            raise
+            raise e
 
     def get_axis_position(self, axis):
         """Get position of specific axis

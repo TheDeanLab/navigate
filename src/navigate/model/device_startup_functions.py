@@ -1402,7 +1402,7 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
                 else:
                     error_statement = f"Error loading camera: {e}"
                     logger.error(error_statement)
-                    raise error_statement
+                    raise Exception(error_statement)
 
             if (not is_synthetic) and device["type"].startswith("Hamamatsu"):
                 camera_serial_number = str(camera._serial_number)

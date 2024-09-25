@@ -998,7 +998,7 @@ def verify_configuration(manager, configuration):
                     f"{device_name} is not defined in configuration.yaml for "
                     f"microscope {microscope_name}"
                 )
-                raise Exception()
+                raise Exception(f"No {device_name} defined for microscope {microscope_name}")
         camera_config = device_config[microscope_name]["camera"]
         if "delay" not in camera_config.keys():
             camera_config["delay"] = camera_config.get("delay_percent", 2)

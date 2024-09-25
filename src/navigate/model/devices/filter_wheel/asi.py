@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -66,6 +66,7 @@ def build_filter_wheel_connection(comport, baudrate=115200, timeout=0.25):
     tiger_controller = TigerController(comport, baudrate)
     tiger_controller.connect_to_serial()
     if not tiger_controller.is_open():
+        logger.error("ASI stage connection failed.")
         raise Exception("ASI stage connection failed.")
     return tiger_controller
 
@@ -95,6 +96,9 @@ class ASIFilterWheel(FilterWheelBase):
         #: obj: ASI Tiger Controller object.
         self.filter_wheel = device_connection
 
+        #: dict: Configuration dictionary.
+        self.device_config = device_config
+
         #: float: Delay for filter wheel to change positions.
         self.wait_until_done_delay = device_config["filter_wheel_delay"]
 
@@ -107,6 +111,16 @@ class ASIFilterWheel(FilterWheelBase):
 
         #: int: Filter wheel position.
         self.filter_wheel_position = 0
+
+        logger.info(self.__repr__())
+
+    def __str__(self):
+        """String representation of the class."""
+        return "ASIFilterWheel"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return f"ASIFilterWheel({self.filter_wheel}, {self.device_config})"
 
     def filter_change_delay(self, filter_name):
         """Estimate duration of time necessary to move the filter wheel

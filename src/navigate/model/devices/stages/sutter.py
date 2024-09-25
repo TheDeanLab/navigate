@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ def build_MP285_connection(com_port, baud_rate, timeout=0.25):
         mp285_stage.connect_to_serial()
         return mp285_stage
     except SerialException as e:
-        logger.debug(f"Sutter MP-285 - Could not establish Serial Port Connection: {e}")
+        logger.error(f"Communication Error: {e}")
         raise UserWarning(
             "Could not communicate with Sutter MP-285 via COMPORT", com_port
         )
@@ -99,8 +99,8 @@ class SutterStage(StageBase):
 
         # Device Connection
         if device_connection is None:
-            logger.error("The MP285 stage is unavailable!")
-            raise UserWarning("The MP285 stage is unavailable!")
+            logger.error("The MP285 stage is unavailable.")
+            raise UserWarning("The MP285 stage is unavailable.")
 
         #: object: MP285 stage.
         self.stage = device_connection
@@ -137,22 +137,20 @@ class SutterStage(StageBase):
                 resolution=self.resolution, speed=self.speed
             )
         except Exception as e:
-            logger.debug(f"Sutter MP-285 - Error setting resolution and velocity: {e}")
+            logger.error(f"Communication Error: {e}")
             raise UserWarning("Sutter MP-285 - Error setting resolution and velocity")
 
         # Set the operating mode of the stage.
         try:
             self.stage.set_absolute_mode()
         except Exception as e:
-            logger.debug(f"Sutter MP-285 - Error setting absolute operation mode: {e}")
+            logger.error(f"Communication Error: {e}")
             raise UserWarning("Sutter MP-285 - Error setting absolute operation mode")
 
         self.report_position()
 
     def __del__(self):
         """Delete SutterStage Serial Port.
-
-
 
         Raises
         ------
@@ -185,8 +183,8 @@ class SutterStage(StageBase):
             position = self.get_position_dict()
             logger.debug(f"MP-285 - Position: {position}")
         except SerialException as e:
-            print("MP-285: Failed to report position: {e}")
-            logger.debug(f"MP-285 - Error: {e}")
+            print("Communication Error: {e}")
+            logger.error(f"Communication Error: {e}")
             time.sleep(0.01)
 
         return position

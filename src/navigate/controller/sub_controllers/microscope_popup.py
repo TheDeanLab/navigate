@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -237,7 +237,9 @@ class MicroscopePopupController(GUIController):
                 )
                 controller_name = f"{microscope_name.lower()}_camera_setting_controller"
                 if hasattr(self.parent_controller, controller_name):
-                    camera_setting_controller = getattr(self.parent_controller, controller_name)
+                    camera_setting_controller = getattr(
+                        self.parent_controller, controller_name
+                    )
                     camera_setting_controller.popup.popup.dismiss()
                     delattr(self.parent_controller, controller_name)
             else:

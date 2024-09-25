@@ -32,6 +32,7 @@
 
 # Standard library imports
 from typing import Optional, Union, List, Dict
+import logging
 
 # Third-party imports
 import numpy.typing as npt
@@ -41,8 +42,13 @@ from .metadata import Metadata
 
 NGFF_VERSION = "0.4"
 
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
+
 
 class OMEZarrMetadata(Metadata):
+    """Class to generate OME-Zarr metadata."""
+
     @property
     def _axes(self) -> Dict:
         """Return tczyx axes in navigate units.
@@ -160,6 +166,7 @@ class OMEZarrMetadata(Metadata):
             or len(scale) != len(self._axes)
         ):
             if translation is not None:
+                logger.error("Translation cannot be provided without scale.")
                 raise UserWarning("Translation cannot be provided without scale.")
             return transformation
         else:

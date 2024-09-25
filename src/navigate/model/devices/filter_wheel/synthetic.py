@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -43,28 +43,35 @@ logger = logging.getLogger(p)
 
 
 class SyntheticFilterWheel(FilterWheelBase):
-    """SyntheticFilterWheel Class
-
-    Attributes
-    ----------
-    comport : str
-        Comport for communicating with the filter wheel, e.g., COM1.
-    baudrate : int
-        Baud rate for communicating with the filter wheel, e.g., 9600.
-    filter_dictionary : dict
-        Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
-    number_of_filter_wheels : int
-        Number of installed filter wheels.
-    wheel_position : int
-        Default filter wheel position
-    wait_until_done_delay = float
-        Duration of time to wait for a filter wheel change.
-    wait_until_done = bool
-        Flag for enabling the wait period for a filter wheel change.
-    """
+    """SyntheticFilterWheel Class"""
 
     def __init__(self, device_connection, device_config):
+        """Initialize the SyntheticFilterWheel.
+
+        Parameters
+        ----------
+        device_connection : dict
+            Device connection information.
+        device_config : dict
+            Device configuration information.
+        """
         super().__init__(device_connection, device_config)
+
+        #: dict: Dummy device connection.
+        self.device_connection = device_connection
+
+        #: dict: Device configuration information.
+        self.device_config = device_config
+
+        logger.info(self.__repr__())
+
+    def __str__(self):
+        """Return string representation of the SyntheticFilterWheel."""
+        return "SyntheticFilterWheel"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return f"SyntheticFilterWheel({self.device_connection}, {self.device_config})"
 
     def filter_change_delay(self, filter_name):
         """Calculate duration of time necessary to change filter wheel positions

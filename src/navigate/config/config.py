@@ -38,12 +38,17 @@ import platform
 from pathlib import Path
 from os.path import isfile
 from multiprocessing.managers import ListProxy, DictProxy
+import logging
 
 # Third Party Imports
 import yaml
 
 # Local Imports
 from navigate.tools.common_functions import build_ref_name
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 def get_navigate_path():
@@ -944,6 +949,10 @@ def verify_configuration(manager, configuration):
             continue
         parent_microscope_name = inherited_microscope_dict[microscope_name]
         if parent_microscope_name not in device_config.keys():
+            logger.error(
+                f"Microscope {parent_microscope_name} is not defined in "
+                f"configuration.yaml"
+            )
             raise Exception(
                 f"Microscope {parent_microscope_name} is not "
                 f"defined in configuration.yaml"
@@ -981,11 +990,15 @@ def verify_configuration(manager, configuration):
         for device_name in required_devices:
             if device_name not in device_config[microscope_name]:
                 print(
-                    f"*** Please make sure you have {device_name} "
+                    f"Please make sure you have {device_name} "
                     f"in the configuration for microscope {microscope_name}, or "
                     f"{microscope_name} is inherited from another valid microscope!"
                 )
-                raise Exception()
+                logger.error(
+                    f"{device_name} is not defined in configuration.yaml for "
+                    f"microscope {microscope_name}"
+                )
+                raise Exception(f"No {device_name} defined for microscope {microscope_name}")
         camera_config = device_config[microscope_name]["camera"]
         if "delay" not in camera_config.keys():
             camera_config["delay"] = camera_config.get("delay_percent", 2)

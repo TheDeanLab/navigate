@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,7 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
     asi_stage = MS2000Controller(com_port, baud_rate)
     asi_stage.connect_to_serial()
     if not asi_stage.is_open():
+        logger.error("ASI stage connection failed.")
         raise Exception("ASI stage connection failed.")
 
     return asi_stage
@@ -165,8 +166,8 @@ class ASIStage(StageBase):
                 self.ms2000_controller.disconnect_from_serial()
                 logger.debug("ASI stage connection closed")
         except (AttributeError, BaseException) as e:
-            logger.exception("ASI Stage Exception", e)
-            raise
+            logger.error("ASI Stage Exception", e)
+            raise e
 
     def get_axis_position(self, axis):
         """Get position of specific axis

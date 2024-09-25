@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -139,8 +139,8 @@ class PIStage(StageBase):
             logger.debug("PI connection closed")
         except (AttributeError, GCSError) as e:  # except BaseException:
             print("Error while disconnecting the PI stage")
-            logger.exception(f"Error while disconnecting the PI stage - {e}")
-            raise
+            logger.error(f"Error while disconnecting the PI stage - {e}")
+            raise e
 
     def report_position(self):
         """Reports the position for all axes, and create position dictionary.

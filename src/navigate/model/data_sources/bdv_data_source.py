@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 #  Standard Imports
 import os
 from multiprocessing.managers import DictProxy
+import logging
 
 # Third Party Imports
 import h5py
@@ -41,6 +42,10 @@ import numpy.typing as npt
 # Local imports
 from .pyramidal_data_source import PyramidalDataSource
 from ..metadata_sources.bdv_metadata import BigDataViewerMetadata
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class BigDataViewerDataSource(PyramidalDataSource):
@@ -69,7 +74,9 @@ class BigDataViewerDataSource(PyramidalDataSource):
         #: str: The file type.
         self.__file_type = os.path.splitext(os.path.basename(file_name))[-1][1:].lower()
         if self.__file_type not in ["h5", "n5"]:
-            raise ValueError(f"Unknown file type {self.__file_type}.")
+            error_statement = f"Unknown file type {self.__file_type}."
+            logger.error(error_statement)
+            raise ValueError(error_statement)
         if self.__file_type == "h5":
             self.setup = self._setup_h5
             self.ds_name = self._h5_ds_name
@@ -112,7 +119,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
         return self.image[setup][z, y, x]
 
     def set_metadata_from_configuration_experiment(
-        self, configuration: DictProxy, microscope_name: str=None
+        self, configuration: DictProxy, microscope_name: str = None
     ) -> None:
         """Sets the metadata from according to the microscope configuration.
 
@@ -125,7 +132,9 @@ class BigDataViewerDataSource(PyramidalDataSource):
         """
         # Set rotation and affine transform information in metadata.
         self.metadata.get_affine_parameters(configuration=configuration)
-        return super().set_metadata_from_configuration_experiment(configuration, microscope_name)
+        return super().set_metadata_from_configuration_experiment(
+            configuration, microscope_name
+        )
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
         """Writes 2D image to the data source.

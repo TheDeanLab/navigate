@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -217,9 +217,9 @@ class TonyWilson:
                 self.change_coef += [i]
         self.n_coefs = len(self.change_coef)
 
-        self.start_from = self.model.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "TonyWilson"
-        ]["from"]
+        self.start_from = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]["TonyWilson"]["from"]
 
         self.metric = self.model.configuration["experiment"][
             "AdaptiveOpticsParameters"
@@ -469,7 +469,7 @@ class TonyWilson:
             return True
 
         return self.signal_id >= self.total_frame_num or self.done_all
-        
+
     def pre_func_data(self):
         """Prepare the data"""
         self.f_frame_id = (

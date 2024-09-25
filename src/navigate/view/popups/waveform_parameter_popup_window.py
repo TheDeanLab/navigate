@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,10 @@
 # Standard library imports
 import tkinter as tk
 from tkinter import ttk
-import logging
-
-# Third-party imports
-
-# Local application imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
+import logging
 
 # Logging
 p = __name__.split(".")[1]

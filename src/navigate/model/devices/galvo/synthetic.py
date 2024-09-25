@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -61,4 +61,28 @@ class SyntheticGalvo(GalvoBase):
             Galvo ID.
         """
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
-        pass
+
+        #: str: Name of the microscope.
+        self.microscope_name = microscope_name
+
+        #: object: Device connection.
+        self.device_connection = device_connection
+
+        #: dict: Configuration parameters.
+        self.configuration = configuration
+
+        #: int: Galvo ID.
+        self.galvo_id = galvo_id
+
+        logger.info(self.__repr__())
+
+    def __str__(self):
+        """Return string representation of the GalvoNI."""
+        return "SyntheticGalvo"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return (
+            f"SyntheticGalvo({self.microscope_name}, {self.device_connection},"
+            f" {self.configuration}, {self.galvo_id})"
+        )

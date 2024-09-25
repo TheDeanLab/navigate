@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -188,7 +188,7 @@ class Configurator:
                                     print(
                                         f"Notice: {hardware_name} has an empty value {ref}! Please double check if it's okay!"
                                     )
-                                    
+
                                 if k_idx in value_dict:
                                     k = value_dict[k_idx][v]
                                 v = variables[v_idx].get()
@@ -218,7 +218,7 @@ class Configurator:
         if warning_info:
             messagebox.showwarning(
                 title="Configuration",
-                message=f"There are empty value(s) with {', '.join(warning_info.keys())}. Please double check!"
+                message=f"There are empty value(s) with {', '.join(warning_info.keys())}. Please double check!",
             )
 
     def write_to_yaml(self, config, filename):
@@ -305,15 +305,19 @@ class Configurator:
                     continue
                 value = get_widget_value(key, value_dict)
                 # widgets[key][3] is the value mapping dict
-                if widgets[key][1] != "Spinbox"and widgets[key][3]:
+                if widgets[key][1] != "Spinbox" and widgets[key][3]:
                     # if the value is not valid, return the last valid value
                     if type(widgets[key][3]) == list:
-                        reverse_value_dict = dict(map(lambda v: (v, v), widgets[key][3]))
+                        reverse_value_dict = dict(
+                            map(lambda v: (v, v), widgets[key][3])
+                        )
                     else:
                         reverse_value_dict = dict(
                             map(lambda v: (v[1], v[0]), widgets[key][3].items())
                         )
-                    temp[key] = reverse_value_dict.get(value, list(reverse_value_dict.values())[-1])
+                    temp[key] = reverse_value_dict.get(
+                        value, list(reverse_value_dict.values())[-1]
+                    )
                 else:
                     temp[key] = value
             return temp
@@ -358,6 +362,7 @@ class Configurator:
                 result.append(get_widgets_value(widgets, value_dict))
 
             return result
+
         # ask file name
         file_name = filedialog.askopenfilename(
             defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
@@ -370,10 +375,10 @@ class Configurator:
         if config_dict is None or "microscopes" not in config_dict:
             messagebox.showerror(
                 title="Configuration",
-                message="It's not a valid configuration.yaml file!"
+                message="It's not a valid configuration.yaml file!",
             )
             return
-        
+
         self.delete_microscopes()
 
         for i, microscope_name in enumerate(config_dict["microscopes"].keys()):
@@ -387,7 +392,7 @@ class Configurator:
                 sticky=tk.NSEW,
             )
             self.view.microscope_window.tab_list.append(microscope_name)
-            
+
             for hardware_type, widgets in hardwares_dict.items():
                 hardware_ref_name = hardwares_config_name_dict[hardware_type]
                 # build dictionary values for widgets

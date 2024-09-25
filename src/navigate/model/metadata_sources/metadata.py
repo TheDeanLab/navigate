@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -152,7 +152,9 @@ class Metadata:
             and self.configuration.get("configuration") is not None
         ):
             if self.active_microscope is None:
-                self.active_microscope = self.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+                self.active_microscope = self.configuration["experiment"][
+                    "MicroscopeState"
+                ]["microscope_name"]
             self.set_shape_from_configuration_experiment()
             self.set_stack_order_from_configuration_experiment()
 

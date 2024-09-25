@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ class CameraBase:
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
 
         Raises
@@ -66,7 +66,11 @@ class CameraBase:
             If microscope name is not in configuration
         """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
-            raise NameError(f"Microscope {microscope_name} does not exist!")
+            logger.error(f"Microscope {microscope_name} does not exist.")
+            raise NameError(f"Microscope {microscope_name} does not exist.")
+
+        #: str: Name of microscope in configuration
+        self.microscope_name = microscope_name
 
         #: dict: Global configuration of the microscope
         self.configuration = configuration
@@ -83,18 +87,25 @@ class CameraBase:
         self.is_acquiring = False
 
         # Initialize Pixel Information
+
         #: int: Minimum image width
         self.min_image_width = 4
+
         #: int: Minimum image height
         self.min_image_height = 4
+
         #: int: Minimum step size for image width.
         self.step_image_width = 4
+
         #: int: Minimum step size for image height.
         self.step_image_height = 4
+
         #: int: Number of pixels in the x direction
         self.x_pixels = 2048
+
         #: int: Number of pixels in the y direction
         self.y_pixels = 2048
+
         #: float: minimum exposure time
         self.minimum_exposure_time = 0.001
         self.camera_parameters["x_pixels"] = 2048
@@ -122,6 +133,10 @@ class CameraBase:
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
+    def __str__(self):
+        """Return string representation of CameraBase."""
+        return "CameraBase"
+
     def get_offset_variance_maps(self):
         """Get offset and variance maps from file.
 
@@ -147,6 +162,7 @@ class CameraBase:
                 os.path.join(map_path, f"{serial_number}_var.tiff")
             )
         except FileNotFoundError:
+            logger.warning(f"Offset or variance map not found in {map_path}")
             self._offset, self._variance = None, None
         return self._offset, self._variance
 

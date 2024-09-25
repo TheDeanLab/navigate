@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 # Standard Library Imports
 import logging
@@ -69,6 +69,10 @@ class ZoomBase:
 
         #: float: the desired zoom setting
         self.zoomvalue = None
+
+    def __str__(self):
+        """Return the string representation of the ZoomBase object."""
+        return "ZoomBase"
 
     def build_stage_dict(self):
         """

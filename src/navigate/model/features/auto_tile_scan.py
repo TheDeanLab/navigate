@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -138,7 +138,9 @@ class CalculateFocusRange:
                 microscope_state = self.model.configuration["experiment"][
                     "MicroscopeState"
                 ]
-                microscope_state["start_focus"] = self.focus_start_pos - self.current_f_pos
+                microscope_state["start_focus"] = (
+                    self.focus_start_pos - self.current_f_pos
+                )
                 microscope_state["end_focus"] = (
                     float(microscope_state["start_focus"])
                     + self.focus_end_pos
@@ -166,7 +168,9 @@ class CalculateFocusRange:
                 self.autofocus.pre_func_signal()
         if self.autofocus_count >= 2:
             # move stage back
-            self.model.move_stage({"z_abs": self.current_z_pos, "f_abs": self.current_f_pos})
+            self.model.move_stage(
+                {"z_abs": self.current_z_pos, "f_abs": self.current_f_pos}
+            )
             return True
         return False
 

@@ -32,6 +32,7 @@
 
 # Standard library imports
 from multiprocessing.managers import DictProxy
+import logging
 
 # Third-party imports
 import numpy as np
@@ -40,6 +41,10 @@ import numpy.typing as npt
 # Local application imports
 from .data_source import DataSource
 from ...tools.slicing import ensure_slice, ensure_iter, slice_len
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class PyramidalDataSource(DataSource):
@@ -149,7 +154,7 @@ class PyramidalDataSource(DataSource):
         ).sum()
 
     def set_metadata_from_configuration_experiment(
-        self, configuration: DictProxy, microscope_name: str=None
+        self, configuration: DictProxy, microscope_name: str = None
     ) -> None:
         """Sets the metadata from according to the microscope configuration.
 
@@ -163,7 +168,9 @@ class PyramidalDataSource(DataSource):
         self._subdivisions = None
         self._shapes = None
 
-        return super().set_metadata_from_configuration_experiment(configuration, microscope_name)
+        return super().set_metadata_from_configuration_experiment(
+            configuration, microscope_name
+        )
 
     def __getitem__(self, keys):
         """Magic method to get slice requests passed by, e.g., ds[:,2:3,...].
@@ -192,13 +199,17 @@ class PyramidalDataSource(DataSource):
             length = len(keys)
 
         if length < 1:
-            raise IndexError(
-                "Too few indices. Indices may be (x, y, c, z, t, p, subdiv)."
+            error_statement = (
+                "Too few indices. Indices may be (x, y, c, z, t, p, subdivisions)."
             )
+            logger.error(error_statement)
+            raise IndexError(error_statement)
         elif length > 7:
-            raise IndexError(
-                "Too many indices. Indices may be (x, y, c, z, t, p, subdiv)."
+            error_statement = (
+                "Too many indices. Indices may be (x, y, c, z, t, p, subdivisions)."
             )
+            logger.error(error_statement)
+            raise IndexError(error_statement)
 
         # Get indices as slices/ranges
         xs = ensure_slice(keys, 0)
@@ -271,4 +282,6 @@ class PyramidalDataSource(DataSource):
         NotImplementedError
             If the method is not implemented in a derived class.
         """
-        raise NotImplementedError("Implemented in a derived class.")
+        error_statement = "Implemented in a derived class."
+        logger.error(error_statement)
+        raise NotImplementedError(error_statement)

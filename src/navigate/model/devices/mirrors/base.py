@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,8 @@ class MirrorBase:
             Global configuration of the microscope
         """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
-            raise NameError(f"Microscope {microscope_name} does not exist!")
+            logger.error(f"Microscope {microscope_name} does not exist.")
+            raise NameError(f"Microscope {microscope_name} does not exist.")
 
         #: dict: Configuration of the microscope
         self.configuration = configuration
@@ -74,3 +75,7 @@ class MirrorBase:
 
         #: bool: Is the mirror synthetic?
         self.is_synthetic = False
+
+    def __str__(self):
+        """Return the string representation of the mirror."""
+        return "MirrorBase"

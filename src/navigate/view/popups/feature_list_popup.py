@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ class FeatureIcon(ttk.Button):
         style.configure("Custom.TButton", background="red")
         if set_bg:
             self.configure(style="Custom.TButton")
-        
+
         self.configure(padding=(10, 20))
 
 
@@ -134,18 +134,18 @@ class FeatureConfigPopup:
             self.preview_btn_true = ttk.Button(content_frame, text="Preview (True)")
             self.preview_btn_true.grid(row=row, column=0, sticky=tk.NSEW)
             separator = ttk.Separator(content_frame)
-            separator.grid(row=row+1, column=0, sticky=tk.NSEW, pady=(0,10))
+            separator.grid(row=row + 1, column=0, sticky=tk.NSEW, pady=(0, 10))
             self.feature_list_true_frame = FeatureListFrame(content_frame)
-            self.feature_list_true_frame.grid(row=row+2, column=0, sticky=tk.NSEW)
+            self.feature_list_true_frame.grid(row=row + 2, column=0, sticky=tk.NSEW)
             row += 3
 
         if "false" in kwargs:
             self.preview_btn_false = ttk.Button(content_frame, text="Preview (False)")
             self.preview_btn_false.grid(row=row, column=0, sticky=tk.NSEW)
             separator = ttk.Separator(content_frame)
-            separator.grid(row=row+1, column=0, sticky=tk.NSEW, pady=(0,10))
+            separator.grid(row=row + 1, column=0, sticky=tk.NSEW, pady=(0, 10))
             self.feature_list_false_frame = FeatureListFrame(content_frame)
-            self.feature_list_false_frame.grid(row=row+2, column=0, sticky=tk.NSEW)
+            self.feature_list_false_frame.grid(row=row + 2, column=0, sticky=tk.NSEW)
 
         self.build_widgets(args_name, args_value, kwargs.get("parameter_config", {}))
 
@@ -292,8 +292,10 @@ class FeatureListPopup:
         self.buttons["cancel"] = ttk.Button(button_frame, text="Cancel")
         self.buttons["cancel"].grid(row=0, column=2, sticky=tk.SE, padx=3, pady=3)
 
+
 class FeatureListFrame(ttk.Frame):
     """Feature list graph frame"""
+
     def __init__(self, root, *args, width=800, height=200, **kwargs):
         super().__init__(root)
 
@@ -316,7 +318,6 @@ class FeatureListFrame(ttk.Frame):
 
         self.content = tk.Text(self, width=100, height=5)
         self.content.grid(row=2, column=0, sticky=tk.NSEW, padx=10, pady=3)
-
 
 
 class FeatureAdvancedSettingPopup:

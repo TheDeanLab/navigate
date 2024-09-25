@@ -79,7 +79,7 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
             stopbits=serial.STOPBITS_TWO,
         )
     except serial.SerialException:
-        logger.warning("LUDLFilterWheel - Could not establish Serial Port Connection")
+        logger.error("LUDLFilterWheel - Could not establish Serial Port Connection")
         raise UserWarning(
             "Could not communicate with LUDL MAC6000 via COMPORT", comport
         )
@@ -115,11 +115,24 @@ class LUDLFilterWheel(FilterWheelBase):
         #: obj: Serial port connection to the filter wheel.
         self.serial = device_connection
 
+        #: dict: Configuration dictionary.
+        self.device_config = device_config
+
         #: io.TextIOWrapper: Text I/O wrapper for the serial port.
         self.sio = io.TextIOWrapper(io.BufferedRWPair(self.serial, self.serial))
 
         #: float: Delay for filter wheel to change positions.
         self.wait_until_done_delay = device_config["filter_wheel_delay"]
+
+        logger.info(self.__repr__())
+
+    def __str__(self):
+        """String representation of the class."""
+        return "LUDLFilterWheel"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return f"LUDLFilterWheel({self.serial}, {self.device_config})"
 
     def set_filter(self, filter_name, wait_until_done=True):
         """Set the filter wheel to a specific filter position.

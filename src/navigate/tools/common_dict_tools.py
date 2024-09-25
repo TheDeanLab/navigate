@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 
 
 def update_nested_dict(d, find_func, apply_func):
-    """ Update a nested dictionary by applying a function to a value
+    """Update a nested dictionary by applying a function to a value
 
     Loops through a nested dictionary and if find_func() conditions are met,
     run apply_func on that key.

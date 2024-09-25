@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,10 @@ class LaserBase:
         self.device_config = configuration["configuration"]["microscopes"][
             microscope_name
         ]["lasers"][laser_id]
+
+    def __str__(self):
+        """Return string representation of the class"""
+        return "LaserBase"
 
     def set_power(self, laser_intensity):
         """Set laser power

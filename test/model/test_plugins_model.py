@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ from navigate.model.plugins_model import PluginsModel
 
 
 class TestPluginsModel(unittest.TestCase):
-    
+
     # comment this testcase since plugin_model doesn't have plugins_path now
     # @patch("os.path.join")
     # @patch("pathlib.Path.resolve")

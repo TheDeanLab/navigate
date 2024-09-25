@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,11 @@ class FilterWheelBase:
         device_config : dict
             Dictionary of device configuration parameters.
         """
+        #: object: Device connection object.
+        self.device_connection = device_connection
+
+        #: dict: Dictionary of device configuration parameters.
+        self.device_config = device_config
 
         #: dict: Dictionary of filters available on the filter wheel.
         self.filter_dictionary = device_config["available_filters"]
@@ -65,7 +70,11 @@ class FilterWheelBase:
         #: int: index of filter wheel
         self.filter_wheel_number = device_config["hardware"]["wheel_number"]
 
-    def check_if_filter_in_filter_dictionary(self, filter_name):
+    def __str__(self):
+        """Return the string representation of the FilterWheelBase class."""
+        return "FilterWheelBase"
+
+    def check_if_filter_in_filter_dictionary(self, filter_name: str) -> bool:
         """Checks if the filter designation (string) given exists in the
         filter dictionary
 
@@ -83,12 +92,11 @@ class FilterWheelBase:
         ------
         ValueError
             If filter name is not in the filter dictionary.
-
         """
+
         if filter_name in self.filter_dictionary:
             filter_exists = True
         else:
-            filter_exists = False
-            logger.debug("Filter Name not in the Filter Dictionary")
-            raise ValueError("Filter Name not in the Filter Dictionary.")
+            logger.error(f"Unknown filter name: {filter_name}")
+            raise ValueError(f"Unknown filter name: {filter_name}")
         return filter_exists

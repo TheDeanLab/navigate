@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,15 @@ class GalvoNI(GalvoBase):
         """
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
 
+        #: str: Name of the microscope.
+        self.microscope_name = microscope_name
+
+        #: dict: Configuration parameters.
+        self.configuration = configuration
+
+        #: int: Galvo ID.
+        self.galvo_id = galvo_id
+
         #: str: Name of the NI port for galvo control.
         self.trigger_source = configuration["configuration"]["microscopes"][
             microscope_name
@@ -70,6 +79,19 @@ class GalvoNI(GalvoBase):
 
         #: obj: NI DAQ device connection.
         self.daq = device_connection
+
+        logger.info(self.__repr__())
+
+    def __str__(self):
+        """Return string representation of the GalvoNI."""
+        return "GalvoNI"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return (
+            f"GalvoNI({self.microscope_name}, {self.daq},"
+            f"{self.configuration}, {self.galvo_id})"
+        )
 
     def adjust(self, exposure_times, sweep_times):
         """Adjust the galvo to the readout time

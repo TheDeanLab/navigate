@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@ def build_dynamixel_zoom_connection(configuration):
 
     # Open port and set baud rate
     if not dynamixel.openPort(port_num):
-        logger.debug("Unable to open DynamixelZoom")
+        logger.error(f"Communication Error with Port {port_num}")
         raise RuntimeError(f"Unable to open port {port_num}.")
 
     dynamixel.setBaudRate(port_num, baudrate)

@@ -78,10 +78,26 @@ class DAQFilterWheel(FilterWheelBase):
 
         super().__init__(device_connection, device_config)
 
+        #: object: Dummy device connection.
+        self.device_connection = device_connection
+
+        #: dict: Dictionary of filter names and corresponding digital port.
+        self.device_config = device_config
+
         #: float: Delay for filter wheel to change positions.
         self.wait_until_done_delay = device_config["filter_wheel_delay"]
 
         self.filter_wheel_task = None
+
+        logger.info(self.__repr__())
+
+    def __str__(self):
+        """String representation of the class."""
+        return "DAQFilterWheel"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return f"DAQFilterWheel({self.device_connection}, {self.device_config})"
 
     def __enter__(self):
         """Enter the ASI Filter Wheel context manager."""

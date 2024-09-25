@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     try:
         return serial.Serial(comport, baudrate, timeout=timeout)
     except serial.SerialException:
-        logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
+        logger.error("SutterFilterWheel - Could not establish Serial Port Connection")
         raise UserWarning(
             "Could not communicate with Sutter Lambda 10-B via COMPORT", comport
         )
@@ -102,6 +102,9 @@ class SutterFilterWheel(FilterWheelBase):
         #: obj: Serial port connection to the filter wheel.
         self.serial = device_connection
 
+        #: dict: Dictionary of filter names and corresponding filter wheel positions.
+        self.device_config = device_config
+
         #: bool: Wait until filter wheel has completed movement.
         self.wait_until_done = True
 
@@ -116,7 +119,7 @@ class SutterFilterWheel(FilterWheelBase):
 
         # Delay in s for the wait until done function
         #: np.matrix: Delay matrix for filter wheel.
-        self.delay_matrix = np.matrix(
+        self.delay_matrix = np.array(
             [
                 [0, 0.031, 0.051, 0.074, 0.095, 0.115],
                 [0, 0.040, 0.065, 0.095, 0.120, 0.148],
@@ -129,22 +132,26 @@ class SutterFilterWheel(FilterWheelBase):
             ]
         )
 
-        logger.debug("SutterFilterWheel - Placing device In Online Mode")
-
         self.serial.write(bytes.fromhex("ee"))
 
         if self.read_on_init:
             self.read(2)  # class 'bytes'
             #: bool: Software initialization complete flag.
             self.init_finished = True
-            logger.debug("SutterFilterWheel - Initialized.")
         else:
             self.init_finished = False
 
         # Set filter to the 0th position by default upon initialization.
         self.set_filter(list(self.filter_dictionary.keys())[0])
+        logger.info(self.__repr__())
 
-        logger.debug("SutterFilterWheel -  Placed in Default Filter Position.")
+    def __str__(self):
+        """String representation of the class."""
+        return "SutterFilterWheel"
+
+    def __repr__(self):
+        """String representation of the class."""
+        return f"SutterFilterWheel({self.serial}, {self.device_config})"
 
     def __enter__(self):
         """Enter the SutterFilterWheel context manager."""
@@ -187,9 +194,8 @@ class SutterFilterWheel(FilterWheelBase):
         self.wheel_position = self.filter_dictionary[filter_name]
         delta_position = int(abs(old_position - self.wheel_position))
         try:
-            self.wait_until_done_delay = self.delay_matrix[delta_position, self.speed]
+            self.wait_until_done_delay = self.delay_matrix[self.speed, delta_position]
         except IndexError:
-            # Murdered by the hard coded delay matrix - Guess a value
             self.wait_until_done_delay = 0.01
 
     def set_filter(self, filter_name, wait_until_done=True):
@@ -243,7 +249,7 @@ class SutterFilterWheel(FilterWheelBase):
             #  Wheel Position Change Delay
             if wait_until_done:
                 time.sleep(self.wait_until_done_delay)
-                # read 0D back. 
+                # read 0D back.
                 self.read(1)
 
     def read(self, num_bytes):

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -103,6 +103,10 @@ class GalvoBase:
 
         #: dict: Dictionary of galvo waveforms.
         self.waveform_dict = {}
+
+    def __str__(self):
+        """Returns the string representation of the GalvoBase class."""
+        return "GalvoBase"
 
     def __del__(self):
         """Destructor"""

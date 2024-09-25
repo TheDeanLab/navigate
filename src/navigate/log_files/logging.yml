@@ -46,6 +46,10 @@ loggers:
     level: DEBUG
     handlers: [console, vc_info, vc_debug, performance]
     propagate: no
+  config:
+    level: DEBUG
+    handlers: [console, vc_info, vc_debug, performance]
+    propagate: no
 
 
 # https://docs.python.org/3/library/logging.html#logrecord-objects

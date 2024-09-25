@@ -62,6 +62,7 @@ class LuxxLaser(LaserBase):
             logger.debug(f"Laser max power: {power_max}")
 
         except serial.SerialException:
+            logger.error(f"Could not open port {self.comport}")
             raise OSError(
                 'Port "%s" is unavailable.\n' % self.comport
                 + "Maybe the laser is not connected, the wrong"

@@ -17,11 +17,16 @@ logger = logging.getLogger(p)
 
 class ObisLaser(LaserBase):
     def __init__(self, port="COM4"):
+
+        #: float: The timeout for the laser in seconds.
         self.timeout = 0.05
+
+        #: str: The end of line character for the laser
         self.end_of_line = "\r"
 
         try:
             # Open serial port
+            #: serial.Serial: The serial port for the laser.
             self.laser = serial.Serial()
             self.laser.port = port
             self.laser.baudrate = 115200
@@ -32,6 +37,7 @@ class ObisLaser(LaserBase):
             self.laser.open()
 
         except serial.SerialException:
+            logger.error(f"Could not open port {port}")
             raise OSError(
                 'Port "%s" is unavailable.\n' % port
                 + "Maybe the laser is not connected, the wrong"

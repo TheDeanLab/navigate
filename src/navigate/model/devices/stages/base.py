@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -107,6 +107,10 @@ class StageBase:
 
         #: bool: Whether the stage has limits enabled or not. Default is True.
         self.stage_limits = True
+
+    def __str__(self):
+        """Return a string representation of the stage."""
+        return "StageBase"
 
     def get_position_dict(self):
         """Return a dictionary with the saved stage positions.

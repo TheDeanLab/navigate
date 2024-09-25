@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -148,12 +148,29 @@ class SyntheticCamera(CameraBase):
         logger.info(self.__repr__())
 
     def __repr__(self):
+        """Representation of SyntheticCamera class.
+
+        Returns
+        -------
+        str
+            Representation of SyntheticCamera class.
+        """
         return (
             f"SyntheticCamera("
             f"{self.microscope_name}, "
             f"{self.device_connection}, "
             f"{self.configuration})"
         )
+
+    def __str__(self):
+        """String representation of SyntheticCamera class.
+
+        Returns
+        -------
+        str
+            String representation of SyntheticCamera class.
+        """
+        return "SyntheticCamera"
 
     def __del__(self):
         """Delete SyntheticCamera class."""

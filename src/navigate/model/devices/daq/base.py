@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,10 @@ class DAQBase:
 
         #: int: Number of times to expand the waveform
         self.waveform_expand_num = 1
+
+    def __str__(self) -> str:
+        """Returns the string representation of the DAQBase class"""
+        return "DAQBase"
 
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in

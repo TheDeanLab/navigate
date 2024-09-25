@@ -1,8 +1,9 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,40 +30,99 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
 
+# Third party imports
 import pytest
 
-#local imports
-from navigate.model.features.feature_related_functions import *
+# local imports
+from navigate.model.features.feature_related_functions import (
+    convert_str_to_feature_list,
+    convert_feature_list_to_str,
+)
+from navigate.model.features.common_features import (
+    PrepareNextChannel,
+    LoopByCount,
+    ZStackAcquisition,
+)
+
 
 @pytest.mark.parametrize(
     "feature_list_str, expected_list",
-    [("", None),
-     ("[]", []),
-     ("[{'name': PrepareNextChannel}]", [{"name": PrepareNextChannel}]),
-     ("[{'name': NonExistFeature}]", None),
-     ("[({'name': PrepareNextChannel}, {'name': LoopByCount})]", [({"name": PrepareNextChannel}, {"name": LoopByCount})]),
-     ("[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3,)})]", [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})]),
-     ("[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': 3})]", [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})]),
-     ("[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3)})]", [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})]),
-     ("[(({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3)}))]", [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})]),
-     ("[{'name': ZStackAcquisition, 'args': (True, False, 'zstack',)}]", [{"name": ZStackAcquisition, "args": (True, False, "zstack",)}])
-    ]
+    [
+        ("", None),
+        ("[]", []),
+        ("[{'name': PrepareNextChannel}]", [{"name": PrepareNextChannel}]),
+        ("[{'name': NonExistFeature}]", None),
+        (
+            "[({'name': PrepareNextChannel}, {'name': LoopByCount})]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount})],
+        ),
+        (
+            "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3,)})]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+        ),
+        (
+            "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': 3})]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+        ),
+        (
+            "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3)})]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+        ),
+        (
+            "[(({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3)}))]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+        ),
+        (
+            "[{'name': ZStackAcquisition, 'args': (True, False, 'zstack',)}]",
+            [
+                {
+                    "name": ZStackAcquisition,
+                    "args": (
+                        True,
+                        False,
+                        "zstack",
+                    ),
+                }
+            ],
+        ),
+    ],
 )
 def test_convert_str_to_feature_list(feature_list_str, expected_list):
     feature_list = convert_str_to_feature_list(feature_list_str)
 
     assert feature_list == expected_list
 
+
 @pytest.mark.parametrize(
     "feature_list, expected_str",
-    [(None, "[]"),
-     ([], "[]"),
-     ([{"name": PrepareNextChannel}], '[{"name": PrepareNextChannel,},]'),
-     ([({"name": PrepareNextChannel}, {"name": LoopByCount})], '[({"name": PrepareNextChannel,},{"name": LoopByCount,},),]'),
-     ([({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})], '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,),},),]'),
-     ([{"name": ZStackAcquisition, "args": (True, False, "zstack",)}], '[{"name": ZStackAcquisition,"args": (True,False,"zstack",),},]')
-    ]
+    [
+        (None, "[]"),
+        ([], "[]"),
+        ([{"name": PrepareNextChannel}], '[{"name": PrepareNextChannel,},]'),
+        (
+            [({"name": PrepareNextChannel}, {"name": LoopByCount})],
+            '[({"name": PrepareNextChannel,},{"name": LoopByCount,},),]',
+        ),
+        (
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+            '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,),},),]',
+        ),
+        (
+            [
+                {
+                    "name": ZStackAcquisition,
+                    "args": (
+                        True,
+                        False,
+                        "zstack",
+                    ),
+                }
+            ],
+            '[{"name": ZStackAcquisition,"args": (True,False,"zstack",),},]',
+        ),
+    ],
 )
 def test_convert_feature_list_to_str(feature_list, expected_str):
     feature_str = convert_feature_list_to_str(feature_list)

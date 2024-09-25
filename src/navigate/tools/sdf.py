@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -109,9 +109,10 @@ def box(p, w):
         np.maximum(q[0, :], np.maximum(q[1, :], q[2, :])), 0.0
     )
 
+
 def ellipsoid(p, r):
     """Signed distance function for an ellipsoid.
-    
+
     p : npt.ArrayLike
         (3, N) array of points on which to evaluate the sdf.
     w : tuple
@@ -120,7 +121,7 @@ def ellipsoid(p, r):
 
     r = np.array(r)
 
-    k0 = np.linalg.norm(p/(r[:,None]), axis=0)
-    k1 = np.linalg.norm(p/((r*r)[:,None]), axis=0)
+    k0 = np.linalg.norm(p / (r[:, None]), axis=0)
+    k1 = np.linalg.norm(p / ((r * r)[:, None]), axis=0)
 
-    return k0*(k0-1.0)/k1
+    return k0 * (k0 - 1.0) / k1

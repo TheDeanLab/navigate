@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -52,14 +52,14 @@ from navigate.model.features.common_features import (
     StackPause,  # noqa
     ZStackAcquisition,  # noqa
     FindTissueSimple2D,  # noqa
-    SetCameraParameters, # noqa
+    SetCameraParameters,  # noqa
 )
 from navigate.model.features.image_writer import ImageWriter  # noqa
 from navigate.model.features.restful_features import IlastikSegmentation  # noqa
 from navigate.model.features.volume_search import VolumeSearch  # noqa
 from navigate.model.features.remove_empty_tiles import (
     DetectTissueInStack,  # noqa
-    DetectTissueInStackAndReturn, #noqa
+    DetectTissueInStackAndReturn,  # noqa
     DetectTissueInStackAndRecord,  # noqa
     RemoveEmptyPositions,  # noqa
 )
@@ -269,12 +269,18 @@ def convert_feature_list_to_str(feature_list):
                     if type(item["true"]) == str:
                         result += f'"true": "{item["true"]}",'
                     else:
-                        result += '"true":' + convert_feature_list_to_str(item["true"]) + ','
+                        result += (
+                            '"true":' + convert_feature_list_to_str(item["true"]) + ","
+                        )
                 if "false" in item:
                     if type(item["false"]) == str:
                         result += f'"false": "{item["false"]}",'
                     else:
-                        result += '"false":' + convert_feature_list_to_str(item["false"]) + ','
+                        result += (
+                            '"false":'
+                            + convert_feature_list_to_str(item["false"])
+                            + ","
+                        )
                 result += "},"
             elif type(item) is tuple:
                 result += "("
@@ -360,9 +366,7 @@ def load_dynamic_parameter_functions(
         if type(item) is dict:
             if "args" in item:
                 feature = item["name"]
-                config_path = (
-                    f"{feature_parameter_setting_path}/{feature.__name__}.yml"
-                )
+                config_path = f"{feature_parameter_setting_path}/{feature.__name__}.yml"
                 parameter_config = None
                 if os.path.exists(config_path):
                     parameter_config = load_yaml_file(config_path)

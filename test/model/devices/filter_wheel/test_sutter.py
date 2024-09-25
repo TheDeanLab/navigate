@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ class TestSutterFilterWheel(unittest.TestCase):
             )
             self.assertEqual(
                 self.filter_wheel.wait_until_done_delay,
-                self.filter_wheel.delay_matrix[delta, self.speed],
+                self.filter_wheel.delay_matrix[self.speed, delta],
             )
 
     def test_set_filter_does_not_exist(self):

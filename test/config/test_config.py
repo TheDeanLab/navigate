@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -79,6 +79,9 @@ def test_config_methods():
         "verify_waveform_constants",
         "verify_configuration",
         "yaml",
+        "logging",
+        "logger",
+        "p",
     ]
     for method in methods:
         assert method in desired_methods

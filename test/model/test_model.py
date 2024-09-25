@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,17 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
+# Standard Library Imports
 import random
 import pytest
 import os
 from multiprocessing import Manager
 from unittest.mock import MagicMock
 
-# from time import sleep
+# Third Party Imports
+
+# Local Imports
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
@@ -46,7 +49,6 @@ def model():
     from pathlib import Path
 
     from navigate.model.model import Model
-    from multiprocessing import Queue
     from navigate.config.config import (
         load_configs,
         verify_experiment_config,
@@ -242,7 +244,10 @@ def test_multiposition_acquisition(model):
 
     # Multiposition is selected but not actually  True
     update_config_dict(
-        model.__test_manager, model.configuration["experiment"], "MultiPositions", []  # noqa
+        model.__test_manager,
+        model.configuration["experiment"],
+        "MultiPositions",
+        [],  # noqa
     )
 
     model.run_command("acquire")

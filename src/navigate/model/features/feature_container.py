@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -991,7 +991,11 @@ def load_features(model, feature_list):
                             node[2].sibling = data_head
                         break_list.pop()
             # handle "true": break and "false": break
-            if len(break_list) > 1 and break_list[-1][1] == pre_signal and break_list[-1][0] == pre_signal:
+            if (
+                len(break_list) > 1
+                and break_list[-1][1] == pre_signal
+                and break_list[-1][0] == pre_signal
+            ):
                 continue
 
             if pre_signal:
@@ -1011,7 +1015,7 @@ def load_features(model, feature_list):
             pre_data2 = data_tail2
 
         return signal_root, data_root, pre_signal, pre_data
-    
+
     break_list = []
     signal_root, data_root, pre_signal, pre_data = build_feature_tree(
         feature_list, [], break_list
@@ -1074,8 +1078,8 @@ def dummy_func(*args):
 
     pass
 
+
 class DummyFeature:
     def __init__(self, model, *args):
         self.model = model
         self.config_table = {}
-

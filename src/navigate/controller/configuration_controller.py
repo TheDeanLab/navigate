@@ -37,12 +37,12 @@ import logging
 # Third Party Imports
 
 # Local Imports
-
+from navigate.tools.decorators import log_initialization
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class ConfigurationController:
     """Configuration Controller - Used to get the configuration of the microscope."""
 

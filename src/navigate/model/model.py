@@ -72,6 +72,7 @@ from navigate.model.features.feature_related_functions import (
 from navigate.log_files.log_functions import log_setup
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.common_functions import load_module_from_file, VariableWithLock
+from navigate.tools.decorators import log_initialization
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.device_startup_functions import load_devices
 from navigate.model.microscope import Microscope
@@ -82,7 +83,7 @@ from navigate.model.plugins_model import PluginsModel
 # Logger Setup
 p = __name__.split(".")[1]
 
-
+@log_initialization
 class Model:
     """Navigate Model Class
 

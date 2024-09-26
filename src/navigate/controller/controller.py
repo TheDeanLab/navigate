@@ -40,6 +40,7 @@ import sys
 import os
 import time
 import platform
+import reprlib
 
 # Third Party Imports
 
@@ -86,6 +87,7 @@ from navigate.tools.file_functions import create_save_path, save_yaml_file
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.multipos_table_tools import update_table
 from navigate.tools.common_functions import combine_funcs
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 import logging
@@ -94,9 +96,9 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class Controller:
     """Navigate Controller"""
-
     def __init__(
         self,
         root,
@@ -139,7 +141,6 @@ class Controller:
             Command line input arguments for non-default
             file paths or using synthetic hardware modes.
         """
-
         #: Tk top-level widget: Tk.tk GUI instance.
         self.root = root
 
@@ -148,24 +149,31 @@ class Controller:
 
         #: string: Path to the configuration yaml file.
         self.configuration_path = configuration_path
+        logger.info(f"Configuration Path: {self.configuration_path}")
 
         #: string: Path to the experiment yaml file.
         self.experiment_path = experiment_path
+        logger.info(f"Experiment Path: {self.experiment_path}")
 
         #: string: Path to the waveform constants yaml file.
         self.waveform_constants_path = waveform_constants_path
+        logger.info(f"Waveform Constants Path: {self.waveform_constants_path}")
 
         #: string: Path to the REST API yaml file.
         self.rest_api_path = rest_api_path
+        logger.info(f"REST API Path: {self.rest_api_path}")
 
         #: string: Path to the waveform templates yaml file.
         self.waveform_templates_path = waveform_templates_path
+        logger.info(f"Waveform Templates Path: {self.waveform_templates_path}")
 
         #: string: Path to the GUI configuration yaml file.
         self.gui_configuration_path = gui_configuration_path
+        logger.info(f"GUI Configuration Path: {self.gui_configuration_path}")
 
         #: iterable: Non-default command line input arguments for
         self.args = args
+        logger.info(f"Variable Input Arguments: {self.args}")
 
         #: Object: Thread pool for the controller.
         self.threads_pool = SynchronizedThreadPool()
@@ -318,15 +326,20 @@ class Controller:
         if platform.system() == "Windows":
             self.view.root.bind("<Configure>", self.resize)
 
-        logger.info(self.__repr__())
+        # logger.info(self.__repr__())
 
     def __repr__(self):
         return (
-            f'Controller("{self.root}", "{self.splash_screen}", '
-            f'"{self.configuration_path}", "{self.experiment_path}", '
-            f'"{self.waveform_constants_path}", "{self.rest_api_path}", '
-            f'"{self.waveform_templates_path}", "{self.gui_configuration_path}", '
-            f'"{self.args}")'
+            f'Controller('
+            f'{reprlib.repr(self.root)}, '
+            f'{reprlib.repr(self.splash_screen)}, '
+            f'{reprlib.repr(self.configuration_path)}, '
+            f'{reprlib.repr(self.experiment_path)}, '
+            f'{reprlib.repr(self.waveform_constants_path)}, '
+            f'{reprlib.repr(self.rest_api_path)}, '
+            f'{reprlib.repr(self.waveform_templates_path)}, '
+            f'{reprlib.repr(self.gui_configuration_path)}, '
+            f'{reprlib.repr(self.args)})'
         )
 
     def update_buffer(self):

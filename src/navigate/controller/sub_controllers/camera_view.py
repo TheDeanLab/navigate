@@ -51,6 +51,7 @@ import abc
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.analysis.camera import compute_signal_to_noise
 from navigate.tools.common_functions import VariableWithLock
+from navigate.tools.decorators import log_initialization
 from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path
 
@@ -58,7 +59,7 @@ from navigate.config import get_navigate_path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class ABaseViewController(metaclass=abc.ABCMeta):
     """Abstract Base View Controller Class."""
 
@@ -91,7 +92,7 @@ class ABaseViewController(metaclass=abc.ABCMeta):
         """Try to display an image."""
         pass
 
-
+@log_initialization
 class BaseViewController(GUIController, ABaseViewController):
     """Base View Controller Class."""
 
@@ -1017,7 +1018,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         self.process_image()
 
-
+@log_initialization
 class CameraViewController(BaseViewController):
     """Camera View Controller Class."""
 
@@ -1368,7 +1369,7 @@ class CameraViewController(BaseViewController):
         """dict: Custom events for this controller"""
         return {"ilastik_mask": self.display_mask}
 
-
+@log_initialization
 class MIPViewController(BaseViewController):
     """MIP View Controller Class."""
 
@@ -1641,7 +1642,7 @@ class MIPViewController(BaseViewController):
             self.canvas_height_scale = 1
         return down_sampled_image
 
-
+@log_initialization
 class SpooledImageLoader:
     """A class to lazily load images from disk using a spooled temporary file."""
 

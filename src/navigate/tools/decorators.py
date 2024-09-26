@@ -30,8 +30,56 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 from time import time
+from functools import wraps
+import logging
+import reprlib
 
+from jupyter_lsp.serverextension import initialize
+
+# Third Party Imports
+
+# Local Imports
+
+def log_initialization(cls):
+    """Decorator for logging the initialization of a class.
+
+    Parameters
+    ----------
+    cls : class
+        The class to be logged.
+
+    Returns
+    -------
+    cls : class
+        The class with the logging decorator.
+    """
+    # Set up the reprlib object
+    mod_repr = reprlib.Repr()
+    mod_repr.indent = 4
+    mod_repr.maxstring = 50
+    mod_repr.maxother = 50
+
+    # Get the original __init__ method
+    original_init = cls.__init__
+
+    @wraps(original_init)
+    def new_init(self, *args, **kwargs):
+        module_location = cls.__module__
+        logger = logging.getLogger(module_location.split(".")[1])
+        try:
+            original_init(self, *args, **kwargs)
+            logger.info(f"{mod_repr.repr(cls.__name__)} Initialized")
+        except Exception as e:
+            logger.error(f"{mod_repr.repr(cls.__name__)} Initialization Failed")
+            logger.error(f"Input args & kwargs: {args}, {kwargs}")
+            logger.error(f"Error: {e}")
+            raise e
+
+    # Replace the original __init__ method with the new one
+    cls.__init__ = new_init
+    return cls
 
 def function_timer(func):
     """Decorator for evaluating the duration of time necessary to execute a statement.

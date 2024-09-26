@@ -40,12 +40,13 @@ from tkinter import NSEW
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class WaveformTabController(GUIController):
     """Controller for the waveform tab"""
 

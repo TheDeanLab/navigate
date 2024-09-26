@@ -65,7 +65,7 @@ from navigate.controller.sub_controllers import (
     UninstallPluginController,
 )
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
-from navigate.tools.decorators import FeatureList
+from navigate.tools.decorators import FeatureList, log_initialization
 from navigate.tools.common_functions import load_module_from_file, combine_funcs
 
 
@@ -103,7 +103,7 @@ class FakeEvent:
         #: int: The state of the keyboard.
         self.state = 0
 
-
+@log_initialization
 class MenuController(GUIController):
     """Menu controller class."""
 

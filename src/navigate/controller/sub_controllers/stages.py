@@ -39,12 +39,13 @@ import logging
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class StageController(GUIController):
     """StageController
 

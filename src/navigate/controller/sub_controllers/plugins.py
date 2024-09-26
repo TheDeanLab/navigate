@@ -46,10 +46,10 @@ from navigate.tools.common_functions import combine_funcs
 from navigate.tools.decorators import AcquisitionMode
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.plugins_popup import PluginsPopup
-
+from navigate.tools.decorators import log_initialization
 from navigate.plugins.plugin_manager import PluginFileManager, PluginPackageManager
 
-
+@log_initialization
 class PluginsController:
     """Plugins manager in the controller side"""
 
@@ -258,7 +258,7 @@ class PluginsController:
                 getattr(module, acquisition_mode[0]),
             )
 
-
+@log_initialization
 class UninstallPluginController(GUIController):
     """Uninstall plugin controller"""
 

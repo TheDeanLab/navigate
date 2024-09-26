@@ -48,6 +48,7 @@ from navigate.tools.decorators import log_initialization
 # Logger Setup
 p = __name__.split(".")[1]
 
+
 @log_initialization
 class MainApp(ttk.Frame):
     """Creates the frame that will hold the GUI content, its parent is the main window
@@ -167,6 +168,3 @@ class MainApp(ttk.Frame):
 
         #: AcquireBar: The acquire bar for the application
         self.acqbar = AcquireBar(self.top_frame, self.root)
-
-    def __str__(self):
-        return "MainApp"

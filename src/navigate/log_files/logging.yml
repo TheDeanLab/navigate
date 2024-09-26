@@ -34,7 +34,7 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: view_performance.log
+    filename: view_controller_performance.log
     filters: [performance_specs]
     mode: a
 loggers:

@@ -60,4 +60,4 @@ def test_log_setup(logging_configuration, logging_path):
 
     log_setup(logging_configuration, logging_path)
 
-    assert Path.joinpath(todays_path, "view_controller_performance.log").is_file()
+    assert Path.joinpath(todays_path, "view_controller_debug.log").is_file()

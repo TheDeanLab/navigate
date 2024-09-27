@@ -39,15 +39,16 @@ handlers:
     filename: model_error.log
     filters: [not_performance]
     mode: a
-  model_performance:
-    class: logging.handlers.RotatingFileHandler
-    level: DEBUG
-    formatter: base
-    filename: model_performance.log
-    filters: [performance_specs]
-    mode: a
+#  model_performance:
+#    class: logging.handlers.RotatingFileHandler
+#    level: DEBUG
+#    formatter: base
+#    filename: model_performance.log
+#    filters: [performance_specs]
+#    mode: a
 loggers:
   model:
     level: DEBUG
-    handlers: [console, model_info, model_debug, model_performance]
+    handlers: [console, model_info, model_debug]
+#    handlers: [console, model_info, model_debug, model_performance]
     propagate: no

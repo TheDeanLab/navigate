@@ -303,6 +303,9 @@ class Controller:
         #: bool: Flag for stopping acquisition.
         self.stop_acquisition_flag = False
 
+        #: int: current image id in the buffer
+        self.current_image_id = -1
+
         # Set view based on model.experiment
         self.populate_experiment_setting(in_initialize=True)
 
@@ -928,6 +931,8 @@ class Controller:
             while self.show_img_pipe.poll():
                 self.show_img_pipe.recv()
 
+            self.current_image_id = -1
+
         elif command == "exit":
             """Exit the program.
 
@@ -1068,7 +1073,11 @@ class Controller:
             logger.info(f"Navigate Controller - Received Image: {image_id}")
 
             if image_id == "stop":
+                self.current_image_id = -1
                 break
+
+            self.current_image_id = image_id
+
             if not isinstance(image_id, int):
                 logger.debug(
                     f"Navigate Controller - Something wrong happened, stop the model!, "

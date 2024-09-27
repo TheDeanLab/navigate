@@ -422,7 +422,7 @@ class TigerController:
         # Remove leading and trailing empty spaces
         self.report_to_console(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
-            logger.error(f"Error code received: {response}")
+            logger.error(f"{str(self)}, Error code received: {response}")
             raise TigerException(response)
         return response  # in case we want to read the response
 
@@ -662,7 +662,8 @@ class TigerController:
             Percentage of the maximum speed
         """
         if self.default_axes_sequence is None:
-            logger.error("Default axes sequence is not set. Cannot set speed.")
+            logger.error(f"{str(self)}, Default axes sequence is not set. "
+            f"Cannot set speed.")
             raise TigerException(
                 "Unable to query system for axis sequence. Cannot set speed."
             )

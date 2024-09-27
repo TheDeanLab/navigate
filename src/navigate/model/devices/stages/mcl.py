@@ -29,10 +29,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import importlib
 import logging
 import time
 
+# Third Party Imports
+
+# Local Imports
+from navigate.model.devices import log_initialization
 from navigate.model.devices.stages.base import StageBase
 
 # Logger Setup
@@ -65,6 +70,7 @@ def build_MCLStage_connection(serialnum):
     return stage_connection
 
 
+@log_initialization
 class MCLStage(StageBase):
     """Mad City Lab stage class."""
 

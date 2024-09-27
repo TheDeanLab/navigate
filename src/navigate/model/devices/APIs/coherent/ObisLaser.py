@@ -37,7 +37,7 @@ class ObisLaser(LaserBase):
             self.laser.open()
 
         except serial.SerialException:
-            logger.error(f"Could not open port {port}")
+            logger.error(f"{str(self)}, Could not open port {port}")
             raise OSError(
                 'Port "%s" is unavailable.\n' % port
                 + "Maybe the laser is not connected, the wrong"

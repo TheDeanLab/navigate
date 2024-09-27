@@ -39,12 +39,13 @@ import tifffile
 
 # Local Imports
 from navigate.config import get_navigate_path
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class CameraBase:
     """CameraBase - Parent camera class."""
 
@@ -162,7 +163,8 @@ class CameraBase:
                 os.path.join(map_path, f"{serial_number}_var.tiff")
             )
         except FileNotFoundError:
-            logger.warning(f"Offset or variance map not found in {map_path}")
+            logger.info(f"{str(self)}, Offset or variance map not found in"
+                        f" {map_path}")
             self._offset, self._variance = None, None
         return self._offset, self._variance
 
@@ -201,7 +203,7 @@ class CameraBase:
         mode : str
             'Top-to-Bottom', 'Bottom-to-Top', 'bytrigger', or 'diverge'.
         """
-        logger.debug(f"set camera readout direction to: {mode}")
+        logger.info(f"Camera readout direction set to: {mode}.")
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width

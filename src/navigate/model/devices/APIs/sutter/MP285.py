@@ -113,8 +113,8 @@ class MP285:
         try:
             self.serial.open()
         except serial.SerialException as e:
-            print("MP285 serial connection failed!")
-            logger.error(f"Could not open port {self.serial.port}")
+            print("MP285 serial connection failed.")
+            logger.error(f"{str(self)}, Could not open port {self.serial.port}")
             raise e
 
     def disconnect_from_serial(self):
@@ -200,7 +200,7 @@ class MP285:
             if len(position_information) == 13:
                 break
         if len(position_information) != 13:
-            logger.error(f"Encountered response {position_information}.")
+            logger.error(f"{str(self)}, Encountered response {position_information}.")
             raise UserWarning(
                 f"Encountered response {position_information}. "
                 "You need to power cycle the stage."
@@ -282,8 +282,7 @@ class MP285:
             else:
                 self.safe_to_write.set()
                 # self.flush_buffers()
-                # print(f"Uh oh: {response}")
-                logger.error(f"Encountered response {response}.")
+                logger.error(f"{str(self)}, Encountered response {response}.")
                 raise UserWarning(
                     f"Encountered response {response}. "
                     "You probably need to power cycle the stage."
@@ -330,7 +329,7 @@ class MP285:
             resolution_bit = 1
             if speed > 1310:
                 speed = 1310
-                logger.error(f"High resolution mode of Sutter MP285 speed too high.")
+                logger.error(f"Speed for the high-resolution mode is too fast.")
                 raise UserWarning(
                     "High resolution mode of Sutter MP285 speed too "
                     "high. Setting to 1310 microns/sec."
@@ -339,7 +338,7 @@ class MP285:
             resolution_bit = 0
             if speed > 3000:
                 speed = 3000
-                logger.error(f"Low resolution mode of Sutter MP285 speed too high.")
+                logger.error(f"Speed for the low-resolution mode is too fast.")
                 raise UserWarning(
                     "Low resolution mode of Sutter MP285 speed too "
                     "high. Setting to 3000 microns/sec."

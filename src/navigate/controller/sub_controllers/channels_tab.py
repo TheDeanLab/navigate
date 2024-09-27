@@ -47,7 +47,6 @@ from navigate.controller.sub_controllers.channels_settings import (
 from navigate.controller.sub_controllers.tiling import (
     TilingWizardController,
 )
-from navigate.tools.decorators import log_initialization
 
 # View Imports that are not called on startup
 from navigate.view.popups.tiling_wizard_popup2 import TilingWizardPopup
@@ -56,7 +55,7 @@ from navigate.view.popups.tiling_wizard_popup2 import TilingWizardPopup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-@log_initialization
+
 class ChannelsTabController(GUIController):
     """Controller for the channels tab in the main window."""
 

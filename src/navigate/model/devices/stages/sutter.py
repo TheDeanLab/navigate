@@ -37,6 +37,7 @@ from serial import SerialException
 # Local Imports
 from navigate.model.devices.stages.base import StageBase
 from navigate.model.devices.APIs.sutter.MP285 import MP285
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -71,6 +72,7 @@ def build_MP285_connection(com_port, baud_rate, timeout=0.25):
         )
 
 
+@log_initialization
 class SutterStage(StageBase):
     """SutterStage Class for MP-285."""
 

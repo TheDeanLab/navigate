@@ -262,10 +262,6 @@ class LabelInput(ttk.Frame):
         ----------
         values : list
             list of values to be set in the widget
-
-        Examples
-        --------
-        >>> widget.set_values(['a', 'b', 'c'])
         """
         if self.input_class in (
             ttk.Combobox,
@@ -276,12 +272,8 @@ class LabelInput(ttk.Frame):
         ):
             self.widget["values"] = values
         else:
-            print(
-                "This widget class does not support list options: "
-                + str(self.input_class)
-            )
-            logger.info(
-                f"This widget class does not support list options: {self.input_class}"
+            logger.debug(
+                f"Widget class does not support list options: {self.input_class}"
             )
 
     def pad_input(self, left, up, right, down):

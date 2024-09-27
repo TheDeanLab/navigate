@@ -38,12 +38,13 @@ import logging
 
 # Local Imports
 from navigate.model.devices.zoom.base import ZoomBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class SyntheticZoom(ZoomBase):
     """SyntheticZoom Class - Controls the SyntheticZoom Servo."""
 
@@ -60,9 +61,7 @@ class SyntheticZoom(ZoomBase):
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)
-        logger.debug("SyntheticZoom Servo Initialized")
 
     def __del__(self):
         """Delete the SyntheticZoom Servo."""
-        logger.debug("SyntheticZoom Servo instance Deleted")
         pass

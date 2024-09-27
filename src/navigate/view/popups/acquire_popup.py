@@ -35,6 +35,7 @@ import logging
 from tkinter import ttk
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
+import platform
 
 # Third Party Imports
 
@@ -68,9 +69,14 @@ class AcquirePopUp:
         # Creating popup window with this name and size/placement, PopUp is a Toplevel
         # window
         #: PopUp: The popup window
-        self.popup = PopUp(
-            root, "File Saving Dialog", "450x390+320+180", transient=True
-        )
+        if platform.system() == "Windows":
+            self.popup = PopUp(
+                root, "File Saving Dialog", "450x390+320+180", transient=True
+            )
+        else:
+            self.popup = PopUp(
+                root, "File Saving Dialog", "600x430+320+180", transient=True
+            )
 
         # Storing the content frame of the popup, this will be the parent of the widgets
         content_frame = self.popup.get_frame()
@@ -117,6 +123,8 @@ class AcquirePopUp:
             "File Type",
             "Notes",
         ]
+        max_length = max([len(s) for s in entry_labels])
+        # TODO: Make labels have equal spacing.
 
         # Loop for each entry and label
         for i in range(len(entry_names)):

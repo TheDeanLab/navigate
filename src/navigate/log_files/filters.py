@@ -97,3 +97,10 @@ class NonPerfFilter(logging.Filter):
         if record.getMessage().startswith("Spec"):
             return False
         return True
+
+class DebugFilter(logging.Filter):
+    """
+    A custom logging filter to include only DEBUG level messages.
+    """
+    def filter(self, record):
+        return record.levelno == logging.DEBUG

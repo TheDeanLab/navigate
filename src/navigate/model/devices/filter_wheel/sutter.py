@@ -40,6 +40,7 @@ import serial
 
 # Local Imports
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -78,6 +79,7 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
         )
 
 
+@log_initialization
 class SutterFilterWheel(FilterWheelBase):
     """SutterFilterWheel - Class for controlling Sutter Lambda Filter Wheels
 
@@ -143,15 +145,10 @@ class SutterFilterWheel(FilterWheelBase):
 
         # Set filter to the 0th position by default upon initialization.
         self.set_filter(list(self.filter_dictionary.keys())[0])
-        logger.info(self.__repr__())
 
     def __str__(self):
         """String representation of the class."""
         return "SutterFilterWheel"
-
-    def __repr__(self):
-        """String representation of the class."""
-        return f"SutterFilterWheel({self.serial}, {self.device_config})"
 
     def __enter__(self):
         """Enter the SutterFilterWheel context manager."""

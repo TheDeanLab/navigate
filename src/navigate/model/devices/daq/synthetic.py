@@ -39,12 +39,13 @@ from threading import Lock
 
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class SyntheticDAQ(DAQBase):
     """SyntheticDAQ class for Data Acquisition (DAQ)."""
 
@@ -76,16 +77,9 @@ class SyntheticDAQ(DAQBase):
         #: str: Trigger mode. Self-trigger or external-trigger.
         self.trigger_mode = "self-trigger"
 
-        # logger.info(self.__repr__())
-        logger.info(self.__repr__())
-
     def __str__(self):
         """String representation of the class."""
         return "SyntheticDAQ"
-
-    def __repr__(self):
-        """String representation of the class."""
-        return f"SyntheticDAQ({self.configuration})"
 
     def create_camera_task(self):
         """Set up the camera trigger task."""

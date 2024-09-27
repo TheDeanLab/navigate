@@ -39,7 +39,7 @@ import logging
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
-from navigate.tools.decorators import log_initialization
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -262,27 +262,22 @@ class StageController(GUIController):
                 if axis == "x":
                     self.view.xy_frame.up_x_btn.config(state=state)
                     self.view.xy_frame.down_x_btn.config(state=state)
-                    logger.info(f"X axis buttons set to {state}")
 
                 elif axis == "y":
                     self.view.xy_frame.up_y_btn.config(state=state)
                     self.view.xy_frame.down_y_btn.config(state=state)
-                    logger.info(f"Y axis buttons set to {state}")
 
                 elif axis == "z":
                     self.view.z_frame.down_btn.config(state=state)
                     self.view.z_frame.up_btn.config(state=state)
-                    logger.info(f"Z axis buttons set to {state}")
 
                 elif axis == "theta":
                     self.view.theta_frame.down_btn.config(state=state)
                     self.view.theta_frame.up_btn.config(state=state)
-                    logger.info(f"Theta axis buttons set to {state}")
 
                 elif axis == "f":
                     self.view.f_frame.down_btn.config(state=state)
                     self.view.f_frame.up_btn.config(state=state)
-                    logger.info(f"Focus axis buttons set to {state}")
             else:
                 pass
 

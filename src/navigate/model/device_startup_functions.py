@@ -92,7 +92,7 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
                     val = None
                 time.sleep(0.5)  # TODO: 0.5 reached by trial and error. Better value?
             else:
-                logger.error(f"Device startup error: {e}")
+                logger.error(f"Device startup failed: {e}")
                 raise exception
         else:
             break

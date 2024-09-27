@@ -1081,10 +1081,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         -------
         bool
             True if the spinbox is valid, False if not
-
-        Examples
-        --------
-        >>> spinbox._focusout_validate()
         """
         valid = True
         value = self.get()
@@ -1096,7 +1092,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             min_val = Decimal(str(min_val))
         except InvalidOperation:
             err_str = f"Either {min_val} or {max_val} couldn't be cast to a Decimal."
-            logger.warning(err_str)
+            logger.debug(err_str)
             print(err_str)
 
         # Check for error upon leaving widget

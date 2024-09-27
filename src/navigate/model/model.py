@@ -72,7 +72,6 @@ from navigate.model.features.feature_related_functions import (
 from navigate.log_files.log_functions import log_setup
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.common_functions import load_module_from_file, VariableWithLock
-from navigate.tools.decorators import log_initialization
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.device_startup_functions import load_devices
 from navigate.model.microscope import Microscope
@@ -83,7 +82,7 @@ from navigate.model.plugins_model import PluginsModel
 # Logger Setup
 p = __name__.split(".")[1]
 
-@log_initialization
+
 class Model:
     """Navigate Model Class
 
@@ -123,6 +122,7 @@ class Model:
 
         #: dict: Dictionary of virtual microscopes.
         self.virtual_microscopes = {}
+
         #: dict: Dictionary of physical microscopes.
         self.microscopes = {}
         for microscope_name in configuration["configuration"]["microscopes"].keys():
@@ -134,6 +134,7 @@ class Model:
 
         #: str: Name of the active microscope.
         self.active_microscope = None
+
         #: str: Name of the active microscope.
         self.active_microscope_name = None
         self.get_active_microscope()
@@ -141,52 +142,70 @@ class Model:
         # Acquisition Housekeeping
         #: str: Imaging mode.
         self.imaging_mode = None
+
         #: int: Number of images acquired.
         self.image_count = 0
+
         #: int: Number of acquisitions.
         self.acquisition_count = 0
+
         #: int: Total number of acquisitions.
         self.total_acquisition_count = None
+
         #: int: Total number of images.
         self.total_image_count = None
+
         #: float: Current exposure time in milliseconds
         self.current_exposure_time = 0  # milliseconds
+
         #: float: Pre-exposure time in milliseconds
         self.pre_exposure_time = 0  # milliseconds
+
         #: int: Number of timeouts before aborting acquisition.
         self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
+
         #: float: Time before acquisition.
         self.start_time = None
+
         #: object: Data buffer.
         self.data_buffer = None
+
         #: int: Number of active pixels in the x-dimension.
         self.img_width = int(
             self.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
         )
+
         #: int: Number of active pixels in the y-dimension.
         self.img_height = int(
             self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
         )
+
         #: str: Binning mode.
         self.binning = "1x1"
+
         #: array: stage positions.
         self.data_buffer_positions = None
+
         #: array: saving flags for a frame
         self.data_buffer_saving_flags = None
+
         #: bool: Is the model acquiring?
         self.is_acquiring = False
 
         # Autofocusing
         #: float: Current focus position.
         self.f_position = None
+
         #: float: Autofocus maximum entropy.
         self.max_entropy = None
+
         #: float: Autofocus maximum entropy position.
         self.focus_pos = None
 
         # Threads
         #: threading.Thread: Signal thread.
         self.signal_thread = None
+
         #: threading.Thread: Data thread.
         self.data_thread = None
 
@@ -209,18 +228,25 @@ class Model:
         # flags
         #: bool: Inject a feature list?
         self.injected_flag = VariableWithLock(bool)  # autofocus
+
         #: bool: Is the model live?
         self.is_live = False  # need to clear up data buffer after acquisition
+
         #: bool: Is the model saving the data?
         self.is_save = False  # save data
+
         #: bool: Stop signal and data threads?
         self.stop_acquisition = False  # stop signal and data threads
+
         #: bool: Stop signal thread?
         self.stop_send_signal = False  # stop signal thread
+
         #: event: Pause data event.
         self.pause_data_event = threading.Event()
+
         #: threading.Lock: Pause data ready lock.
         self.pause_data_ready_lock = threading.Lock()
+
         #: bool: Ask to pause data thread?
         self.ask_to_pause_data_thread = False
 
@@ -238,8 +264,10 @@ class Model:
         # feature list
         #: list: add on feature in customized mode
         self.addon_feature = None
+
         #: list: List of features.
         self.feature_list = []
+
         # automatically switch resolution
         self.feature_list.append(
             [
@@ -249,10 +277,13 @@ class Model:
         )
         # z stack acquisition
         self.feature_list.append([{"name": ZStackAcquisition}])
+
         # threshold and tile
         self.feature_list.append([{"name": FindTissueSimple2D}])
+
         # Ilastik segmentation
         self.feature_list.append([{"name": IlastikSegmentation}])
+
         # volume search
         self.feature_list.append(
             [
@@ -494,11 +525,9 @@ class Model:
         **kwargs : dict
             Dictionary of keyword arguments to pass to the command.
         """
-        logging.info(
-            "Navigate Model - Received command from controller:", command, args
-        )
+        logging.info(f"Received command: {command}, {args}, {kwargs}")
         if not self.data_buffer:
-            logging.debug("Navigate Model - Shared Memory Buffer Not Set Up.")
+            logging.debug("Shared Memory Not Set Up.")
             return
 
         if command == "acquire":
@@ -716,7 +745,7 @@ class Model:
                         )
                 except KeyError:
                     self.logger.debug(
-                        f"run_command - load_feature - Unknown feature {args[0]}."
+                        f"Attempted to load an unknown feature: {args}."
                     )
         elif command == "stage_limits":
             for microscope_name in self.microscopes:
@@ -725,7 +754,6 @@ class Model:
             """
             Called when user halts the acquisition
             """
-            self.logger.info("Navigate Model - Stopping with stop command.")
             self.stop_acquisition = True
 
             if hasattr(self, "signal_container"):
@@ -797,8 +825,10 @@ class Model:
         """
         try:
             r = self.active_microscope.move_stage(pos_dict, wait_until_done)
+            self.logger.info(f"Stage moved to:, {pos_dict}, "
+                             f"Wait until done: {wait_until_done}")
         except Exception as e:
-            self.logger.debug(f"*** stage move failed: {e}")
+            self.logger.debug(f"Stage move failed: {e}")
             return False
         return r
 
@@ -872,15 +902,19 @@ class Model:
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
             frame_ids = self.active_microscope.camera.get_new_frame()
-            self.logger.info(
-                f"Navigate Model - Running data process, get frames {frame_ids}"
-            )
+            self.logger.info(f"Running data process, getting frames {frame_ids}")
             # if there is at least one frame available
             if not frame_ids:
-                self.logger.info(f"Navigate Model - Waiting {wait_num}")
+                self.logger.debug(f"Frame not received. Waiting {wait_num}"
+                f"/{self.camera_wait_iterations} iterations")
                 wait_num -= 1
                 if wait_num <= 0:
-                    # Camera timeout, abort acquisition.
+                    error_statement = ("Acquisition aborted due to camera time out "
+                                       "error. Please verify that the external "
+                                       "trigger is connected and configured properly.")
+
+                    self.logger.debug(error_statement)
+                    print(error_statement)
                     break
                 continue
 
@@ -890,7 +924,7 @@ class Model:
 
             if hasattr(self, "data_container") and not self.data_container.end_flag:
                 if self.data_container.is_closed:
-                    self.logger.info("Navigate Model - Data container is closed.")
+                    self.logger.info("Data container is closed.")
                     self.stop_acquisition = True
                     break
 
@@ -901,18 +935,16 @@ class Model:
                 data_func(frame_ids)
 
             # show image
-            self.logger.info(f"Navigate Model - Sent through pipe{frame_ids[0]}")
+            self.logger.info(f"Image delivered to controller: {frame_ids[0]}")
             self.show_img_pipe.send(frame_ids[-1])
 
             if count_frame and acquired_frame_num >= num_of_frames:
-                self.logger.info("Navigate Model - Loop stop condition met.")
+                self.logger.info("Loop stop condition met.")
                 self.stop_acquisition = True
 
         self.show_img_pipe.send("stop")
-        self.logger.info("Navigate Model - Data thread stopped.")
-        self.logger.info(
-            f"Navigate Model - Received frames in total: {acquired_frame_num}"
-        )
+        self.logger.info("Data thread stopped.")
+        self.logger.info(f"Received frames in total: {acquired_frame_num}")
 
         # release the lock when data thread ends
         if self.pause_data_ready_lock.locked():
@@ -961,7 +993,7 @@ class Model:
                 microscope.camera.get_new_frame()
             )  # This is the 500 ms wait for Hamamatsu
             self.logger.info(
-                f"Navigate Model - Running data process, get frames {frame_ids} from "
+                f"Running data process, getting frames {frame_ids} from "
                 f"{microscope.microscope_name}"
             )
             # if there is at least one frame available
@@ -982,10 +1014,8 @@ class Model:
             acquired_frame_num += len(frame_ids)
 
         show_img_pipe.send("stop")
-        self.logger.info("Navigate Model - Data thread stopped.")
-        self.logger.info(
-            f"Navigate Model - Received frames in total: {acquired_frame_num}"
-        )
+        self.logger.info("Data thread stopped.")
+        self.logger.info(f"Received frames in total: {acquired_frame_num}")
 
     def prepare_acquisition(self, turn_off_flags=True):
         """Prepare the acquisition.
@@ -1103,7 +1133,7 @@ class Model:
             if not hasattr(self, "signal_container"):
                 return
             if self.signal_container.is_closed:
-                self.logger.info("Navigate Model - Signal container is closed.")
+                self.logger.info("Signal container is closed.")
                 self.stop_acquisition = True
                 return
         if self.imaging_mode != "live":
@@ -1161,7 +1191,7 @@ class Model:
             curr_zoom = self.active_microscope.zoom.zoomvalue
             zoom_value = self.configuration["experiment"]["MicroscopeState"]["zoom"]
             self.active_microscope.zoom.set_zoom(zoom_value)
-            self.logger.debug(
+            self.logger.info(
                 f"Change zoom of {self.active_microscope_name} to {zoom_value}"
             )
 
@@ -1186,7 +1216,8 @@ class Model:
             self.stop_stage()
 
         except ValueError as e:
-            self.logger.debug(f"{self.active_microscope_name} - {e}")
+            self.logger.debug(f"Error changing microscope resolution:"
+                              f".{self.active_microscope_name} - {e}")
 
         self.active_microscope.ask_stage_for_position = True
 
@@ -1244,8 +1275,10 @@ class Model:
         """
         #: bool: Display segmentation.
         self.display_ilastik_segmentation = display_segmentation
+
         #: bool: Mark position.
         self.mark_ilastik_position = mark_position
+
         #: list: Target labels.
         self.ilastik_target_labels = target_labels
 

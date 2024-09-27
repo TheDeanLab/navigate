@@ -39,6 +39,7 @@ import time
 # Local Imports
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -71,6 +72,7 @@ def build_filter_wheel_connection(comport, baudrate=115200, timeout=0.25):
     return tiger_controller
 
 
+@log_initialization
 class ASIFilterWheel(FilterWheelBase):
     """ASIFilterWheel - Class for controlling ASI Filter Wheels
 
@@ -112,15 +114,9 @@ class ASIFilterWheel(FilterWheelBase):
         #: int: Filter wheel position.
         self.filter_wheel_position = 0
 
-        logger.info(self.__repr__())
-
     def __str__(self):
         """String representation of the class."""
         return "ASIFilterWheel"
-
-    def __repr__(self):
-        """String representation of the class."""
-        return f"ASIFilterWheel({self.filter_wheel}, {self.device_config})"
 
     def filter_change_delay(self, filter_name):
         """Estimate duration of time necessary to move the filter wheel
@@ -174,7 +170,7 @@ class ASIFilterWheel(FilterWheelBase):
             logger.debug("ASI Filter Wheel - Closing Device.")
             self.filter_wheel.disconnect_from_serial()
 
-
+@log_initialization
 class ASICubeSlider(FilterWheelBase):
     """ASICubeSlider - Class for controlling the C60 Cube Slider from ASI.
 

@@ -36,12 +36,14 @@ import logging
 # Third Party Imports
 
 # Local Imports
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class FilterWheelBase:
     """FilterWheelBase - Parent class for controlling filter wheels."""
 

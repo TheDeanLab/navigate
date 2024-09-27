@@ -43,13 +43,11 @@ from navigate.view.main_window_content.display_notebook import CameraNotebook
 from navigate.view.main_window_content.acquire_notebook import AcquireBar
 from navigate.view.main_window_content.menus import Menubar
 from navigate.view.custom_widgets.scrollbars import ScrolledFrame
-from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 
 
-@log_initialization
 class MainApp(ttk.Frame):
     """Creates the frame that will hold the GUI content, its parent is the main window
     or root Tk object

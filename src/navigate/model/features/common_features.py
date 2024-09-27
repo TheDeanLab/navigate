@@ -35,6 +35,7 @@ import time
 import ast
 from functools import reduce
 from threading import Lock
+import logging
 
 # Third party imports
 
@@ -42,6 +43,9 @@ from threading import Lock
 from .image_writer import ImageWriter
 from navigate.tools.common_functions import VariableWithLock
 
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 class ChangeResolution:
     """
@@ -122,8 +126,8 @@ class ChangeResolution:
             "zoom"
         ] = self.zoom_value
         self.model.change_resolution(self.resolution_mode)
-        self.model.logger.debug(f"current resolution is {self.resolution_mode}")
-        self.model.logger.debug(
+        logger.debug(f"current resolution is {self.resolution_mode}")
+        logger.debug(
             f"current active microscope is {self.model.active_microscope_name}"
         )
         # prepare active microscope
@@ -198,7 +202,7 @@ class Snap:
         """
         if self.saving_flag:
             self.model.mark_saving_flags(frame_ids)
-        self.model.logger.info(
+        logger.info(
             f"the camera is:{self.model.active_microscope_name}, {frame_ids}"
         )
         return True
@@ -330,7 +334,7 @@ class WaitToContinue:
         """
         with self.first_enter_node as first_enter_node:
             if first_enter_node.value == "":
-                self.model.logger.debug("*** wait to continue enters signal " "first!")
+                logger.debug("*** wait to continue enters signal " "first!")
                 first_enter_node.value = "signal"
                 if not self.pause_signal_lock.locked():
                     self.pause_signal_lock.acquire()
@@ -348,13 +352,13 @@ class WaitToContinue:
         bool
            A boolean value indicating the success of the synchronization process.
         """
-        self.model.logger.debug(f"--wait to continue: {self.model.frame_id}")
+        logger.debug(f"--wait to continue: {self.model.frame_id}")
         if self.pause_signal_lock.locked():
             self.pause_signal_lock.acquire()
         elif self.pause_data_lock.locked():
             self.pause_data_lock.release()
         self.first_enter_node.value = ""
-        self.model.logger.debug(f"--wait to continue is done!: {self.model.frame_id}")
+        logger.debug(f"--wait to continue is done!: {self.model.frame_id}")
         return True
 
     def pre_data_func(self):
@@ -366,7 +370,7 @@ class WaitToContinue:
         """
         with self.first_enter_node as first_enter_node:
             if first_enter_node.value == "":
-                self.model.logger.debug(
+                logger.debug(
                     "*** wait to continue enters data " "node first!"
                 )
                 first_enter_node.value = "data"
@@ -391,13 +395,13 @@ class WaitToContinue:
         bool
             A boolean value indicating the success of the synchronization process.
         """
-        self.model.logger.debug(f"**wait to continue? {frame_ids}")
+        logger.debug(f"**wait to continue? {frame_ids}")
         if self.pause_data_lock.locked():
             self.pause_data_lock.acquire()
         elif self.pause_signal_lock.locked():
             self.pause_signal_lock.release()
         self.first_enter_node.value = ""
-        self.model.logger.debug(f"**wait to continue is done! {frame_ids}")
+        logger.debug(f"**wait to continue is done! {frame_ids}")
         return True
 
     def cleanup(self):
@@ -715,7 +719,7 @@ class MoveToNextPositionInMultiPositionTable:
                             f"not implemented! There is not enough information in the "
                             f"configuration.yaml file!"
                         )
-        self.model.logger.debug(f"Using stage offset {self.offset}")
+        logger.debug(f"Using stage offset {self.offset}")
 
     def signal_func(self):
         """Move to the next position in the multi-position table and control the data
@@ -730,7 +734,7 @@ class MoveToNextPositionInMultiPositionTable:
         bool
             A boolean value indicating whether to continue the position control process.
         """
-        self.model.logger.debug(
+        logger.debug(
             f"multi-position current idx: {self.current_idx}, {self.position_count}"
         )
         if self.current_idx >= self.position_count:
@@ -782,10 +786,10 @@ class MoveToNextPositionInMultiPositionTable:
             self.current_idx = 0
 
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
-        self.model.logger.debug(f"MoveToNextPositionInMultiPosition: " f"{pos_dict}")
+        logger.debug(f"MoveToNextPositionInMultiPosition: " f"{pos_dict}")
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
 
-        self.model.logger.debug("MoveToNextPositionInMultiPosition: move done")
+        logger.debug("MoveToNextPositionInMultiPosition: move done")
 
         # resume data thread
         if should_pause_data_thread:
@@ -1031,9 +1035,10 @@ class ZStackAcquisition:
 
         # restore z, f
         pos_dict = self.model.get_stage_position()
-        self.model.logger.debug(f"**** ZStack get stage position: {pos_dict}")
+
         #: float: The z position of the channel being acquired in the z-stack
         self.restore_z = pos_dict["z_pos"]
+
         #: float: The f position of the channel being acquired in the z-stack
         self.restore_f = pos_dict["f_pos"]
 
@@ -1074,9 +1079,10 @@ class ZStackAcquisition:
         # prepare next channel
         self.prepare_next_channel.signal_func()
 
-        self.model.logger.debug(
-            f"*** ZStack pre_signal_func: {self.positions}, {self.start_focus}, "
-            f"{self.start_z_position}"
+        logger.info(
+            f"ZStackAcquisition. Positions {self.positions}, "
+            f"Starting Focus {self.start_focus}, "
+            f"Starting Z-Position {self.start_z_position}"
         )
         self.current_position_idx = 0
         self.current_position = dict(
@@ -1180,19 +1186,14 @@ class ZStackAcquisition:
                 data_thread_is_paused = True
 
             self.model.move_stage(pos_dict, wait_until_done=True)
-            self.model.logger.debug(f"*** ZStack move stage: {pos_dict}")
 
         if self.need_to_move_z_position:
             # move z, f
             # self.model.pause_data_thread()
 
-            self.model.logger.debug(
-                f"*** Zstack move stage: (z: {self.current_z_position}), "
-                f"(f: {self.current_focus_position})"
-            )
-
             if self.should_pause_data_thread and not data_thread_is_paused:
                 self.model.pause_data_thread()
+                logger.info("Data thread paused.")
 
             self.model.move_stage(
                 {

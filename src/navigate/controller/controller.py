@@ -83,11 +83,10 @@ from navigate.config.config import (
     verify_configuration,
     get_navigate_path,
 )
-from navigate.tools.file_functions import create_save_path, save_yaml_file
+from navigate.tools.file_functions import create_save_path, save_yaml_file, get_ram_info
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.multipos_table_tools import update_table
 from navigate.tools.common_functions import combine_funcs
-from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 import logging
@@ -96,7 +95,6 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-@log_initialization
 class Controller:
     """Navigate Controller"""
     def __init__(
@@ -199,6 +197,10 @@ class Controller:
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
 
+        total_ram, available_ram = get_ram_info()
+        logger.info(f"Total RAM: {total_ram / 1024**3:.2f} GB. "
+                    f"Available RAM: {available_ram / 1024**3:.2f} GB.")
+
         #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
             Model, args, self.configuration, event_queue=self.event_queue
@@ -277,9 +279,6 @@ class Controller:
         t = threading.Thread(target=self.update_event)
         t.start()
 
-        # self.microscope = self.configuration['configuration']
-        # ['microscopes'].keys()[0]  # Default to the first microscope
-
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
@@ -325,22 +324,6 @@ class Controller:
         self.resize_event_id = None
         if platform.system() == "Windows":
             self.view.root.bind("<Configure>", self.resize)
-
-        # logger.info(self.__repr__())
-
-    def __repr__(self):
-        return (
-            f'Controller('
-            f'{reprlib.repr(self.root)}, '
-            f'{reprlib.repr(self.splash_screen)}, '
-            f'{reprlib.repr(self.configuration_path)}, '
-            f'{reprlib.repr(self.experiment_path)}, '
-            f'{reprlib.repr(self.waveform_constants_path)}, '
-            f'{reprlib.repr(self.rest_api_path)}, '
-            f'{reprlib.repr(self.waveform_templates_path)}, '
-            f'{reprlib.repr(self.gui_configuration_path)}, '
-            f'{reprlib.repr(self.args)})'
-        )
 
     def update_buffer(self):
         """Update the buffer size according to the camera

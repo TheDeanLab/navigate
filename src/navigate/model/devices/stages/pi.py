@@ -39,6 +39,7 @@ from pipython import GCSDevice, pitools, GCSError
 
 # Local Imports
 from navigate.model.devices.stages.base import StageBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -85,6 +86,7 @@ def build_PIStage_connection(controller_name, serial_number, stages, reference_m
     return stage_connection
 
 
+@log_initialization
 class PIStage(StageBase):
     """Physik Instrumente (PI) Stage Class
 

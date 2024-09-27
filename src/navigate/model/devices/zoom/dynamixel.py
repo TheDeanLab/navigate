@@ -38,6 +38,7 @@ import time
 # Local Imports
 from navigate.model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
 from navigate.model.devices.zoom.base import ZoomBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -71,11 +72,10 @@ def build_dynamixel_zoom_connection(configuration):
         raise RuntimeError(f"Unable to open port {port_num}.")
 
     dynamixel.setBaudRate(port_num, baudrate)
-    logger.debug("DynamixelZoom Initialized")
-
     return port_num
 
 
+@log_initialization
 class DynamixelZoom(ZoomBase):
     """DynamixelZoom Class - Controls the Dynamixel Servo."""
 
@@ -143,7 +143,6 @@ class DynamixelZoom(ZoomBase):
 
     def __del__(self):
         """Delete the DynamixelZoom Instance"""
-        logger.debug("DynamixelZoom Instance Deleted")
         self.dynamixel.closePort(self.port_num)
 
     def set_zoom(self, zoom, wait_until_done=False):
@@ -172,8 +171,6 @@ class DynamixelZoom(ZoomBase):
         else:
             logger.error(f"Zoom designation, {zoom}, not in the configuration")
             raise ValueError("Zoom designation not in the configuration")
-        logger.debug(f"Changed DynamixelZoom to {zoom}")
-        logger.debug(f"DynamixelZoom position: {self.read_position()}")
 
     def move(self, position, wait_until_done=False):
         """Move the DynamixelZoom Servo
@@ -215,11 +212,7 @@ class DynamixelZoom(ZoomBase):
         if wait_until_done:
             start_time = time.time()
             upper_limit = position + self.goal_position_offset
-            logger.debug(f"DynamixelZoom Upper Limit: {upper_limit}")
-
             lower_limit = position - self.goal_position_offset
-            logger.debug(f"DynamixelZoom Lower Limit: {lower_limit}")
-
             cur_position = self.dynamixel.read4ByteTxRx(
                 self.port_num, 1, self.id, self.addr_mx_present_position
             )
@@ -233,7 +226,6 @@ class DynamixelZoom(ZoomBase):
                 cur_position = self.dynamixel.read4ByteTxRx(
                     self.port_num, 1, self.id, self.addr_mx_present_position
                 )
-                logger.debug(f"DynamixelZoom Current Position: {cur_position}")
 
     def read_position(self):
         """Read the position of the Zoom Servo.

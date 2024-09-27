@@ -56,6 +56,7 @@ from numpy import round
 
 # Local Imports
 from navigate.model.devices.stages.base import StageBase
+from navigate.model.devices import log_initialization
 
 
 # Logger Setup
@@ -95,7 +96,7 @@ def build_TLKSTStage_connection(serialnum):
     kst_controller.KST_Open(str(serialnum))
     return kst_controller
 
-
+@log_initialization
 class TLKSTStage(StageBase):
     """Thorlabs KST Stage"""
 
@@ -144,11 +145,6 @@ class TLKSTStage(StageBase):
             self.kst_controller = device_connection
         else:
             self.kst_controller = build_TLKSTStage_connection(self.serial_number)
-
-        logger.debug(
-            f"Connected to Thorlabs KST Stage with serial number "
-            f"{self.serial_number}"
-        )
 
     def __del__(self):
         """Delete the KST Connection"""

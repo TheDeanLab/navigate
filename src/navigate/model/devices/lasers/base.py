@@ -33,13 +33,20 @@
 """
 Laser Base Class
 """
+# Standard Library Imports
 import logging
+
+# Third Party Imports
+
+# Local Imports
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class LaserBase:
     """Laser Base Class"""
 

@@ -62,10 +62,6 @@ def find_filename(k, v):
     -------
     bool
         True if k == 'filename', False otherwise
-
-    Examples
-    --------
-    >>> find_filename('filename', 'test')
     """
     if k == "filename":
         return True

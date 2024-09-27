@@ -550,8 +550,9 @@ class SignalContainer(Container):
             return
         if not self.curr_node:
             self.curr_node = self.root
+
+        logger.info(f"Running signal node: {self.curr_node.node_name}")
         while self.curr_node:
-            logger.debug(f"running signal node: {self.curr_node.node_name}")
             try:
                 result, is_end = self.curr_node.run(*args, wait_response=wait_response)
             except Exception:

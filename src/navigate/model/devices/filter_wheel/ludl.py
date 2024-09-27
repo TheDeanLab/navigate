@@ -124,15 +124,9 @@ class LUDLFilterWheel(FilterWheelBase):
         #: float: Delay for filter wheel to change positions.
         self.wait_until_done_delay = device_config["filter_wheel_delay"]
 
-        logger.info(self.__repr__())
-
     def __str__(self):
         """String representation of the class."""
         return "LUDLFilterWheel"
-
-    def __repr__(self):
-        """String representation of the class."""
-        return f"LUDLFilterWheel({self.serial}, {self.device_config})"
 
     def set_filter(self, filter_name, wait_until_done=True):
         """Set the filter wheel to a specific filter position.

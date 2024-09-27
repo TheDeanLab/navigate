@@ -37,12 +37,13 @@ import logging
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
-
+from navigate.model.devices import log_initialization
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class HamamatsuBase(CameraBase):
     """HamamatsuOrca camera class.
 
@@ -440,6 +441,7 @@ class HamamatsuBase(CameraBase):
         return self.camera_controller.get_frames()
 
 
+@log_initialization
 class HamamatsuOrcaLightning(HamamatsuBase):
     """HamamatsuOrcaLightning camera class."""
 
@@ -460,16 +462,6 @@ class HamamatsuOrcaLightning(HamamatsuBase):
         self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
 
         # self.minimum_exposure_time = 6.304 * 10 ** -6
-
-        logger.info(self.__repr__())
-
-    def __repr__(self):
-        return (
-            f"HamamatsuOrcaLightning("
-            f"{self.microscope_name}, "
-            f"{self.device_connection}, "
-            f"{self.configuration})"
-        )
 
     def __str__(self):
         """Return string representation of HamamatsuOrcaLightning class.
@@ -519,6 +511,7 @@ class HamamatsuOrcaLightning(HamamatsuBase):
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
+@log_initialization
 class HamamatsuOrcaFire(HamamatsuBase):
     def __init__(self, microscope_name, device_connection, configuration):
         """Initialize HamamatsuOrcaFire class.
@@ -548,16 +541,6 @@ class HamamatsuOrcaFire(HamamatsuBase):
 
         self.camera_parameters["y_pixels"] = self.camera_controller.get_property_value(
             "image_height"
-        )
-
-        logger.info(self.__repr__())
-
-    def __repr__(self):
-        return (
-            f"HamamatsuOrcaFire("
-            f"{self.microscope_name}, "
-            f"{self.device_connection}, "
-            f"{self.configuration})"
         )
 
     def __str__(self):
@@ -611,6 +594,7 @@ class HamamatsuOrcaFire(HamamatsuBase):
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
+@log_initialization
 class HamamatsuOrca(HamamatsuBase):
     def __init__(self, microscope_name, device_connection, configuration):
         """Initialize HamamatsuOrca class.
@@ -634,23 +618,6 @@ class HamamatsuOrca(HamamatsuBase):
         ]
 
         # self.minimum_exposure_time = 9.74436 * 10 ** -6
-
-        logger.info(self.__repr__())
-
-    def __repr__(self):
-        """Return representation of HamamatsuOrca class.
-
-        Returns
-        -------
-        str
-            Representation of HamamatsuOrca class.
-        """
-        return (
-            f"HamamatsuOrca("
-            f"{self.microscope_name}, "
-            f"{self.device_connection}, "
-            f"{self.configuration})"
-        )
 
     def __str__(self):
         """Return string representation of HamamatsuOrca class.
@@ -702,6 +669,7 @@ class HamamatsuOrca(HamamatsuBase):
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
+@log_initialization
 class HamamatsuOrcaFusion(HamamatsuBase):
     """HamamatsuOrcaFusion camera class."""
 
@@ -723,16 +691,6 @@ class HamamatsuOrcaFusion(HamamatsuBase):
             "Top-to-Bottom",
             "Bottom-to-Top",
         ]
-
-        logger.info(self.__repr__())
-
-    def __repr__(self):
-        return (
-            f"HamamatsuOrcaFusion("
-            f"{self.microscope_name}, "
-            f"{self.device_connection}, "
-            f"{self.configuration})"
-        )
 
     def __str__(self):
         """Return string representation of HamamatsuOrcaFusion class.

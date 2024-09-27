@@ -33,8 +33,6 @@ class LuxxLaser(LaserBase):
                 self.comport, self.baudrate, timeout=self.timeout
             )
 
-            logger.debug(f"The laser is connected via {self.comport}")
-
             # Confirm the Laser Wavelength
             # Must remove non-standard ASCII codes that cause errors in the utf-8 codec
             wavelength = self.ask("GSI")
@@ -42,27 +40,23 @@ class LuxxLaser(LaserBase):
             wavelength = wavelength.replace(b"\xa7140", str(" ").encode())
             wavelength = float(wavelength.decode())
             self.wavelength = wavelength
-            logger.debug(f"The Wavelength is: {wavelength}")
 
             # Confirm the Laser Serial Number
             serial_number = self.ask("GSN")
             serial_number = serial_number.decode()
             self.serial = serial_number
-            logger.debug(f"The laser Serial Number: {serial_number}")
 
             # Confirm the Laser Working Hours
             laser_working_hours = self.ask("GWH")
             laser_working_hours = laser_working_hours.decode()
             self.hours = laser_working_hours
-            logger.debug(f"Laser working hours: {laser_working_hours}")
 
             # Confirm the Laser Maximum Power
             power_max = float(self.ask("GMP"))
             self.pmax = power_max
-            logger.debug(f"Laser max power: {power_max}")
 
         except serial.SerialException:
-            logger.error(f"Could not open port {self.comport}")
+            logger.error(f"{str(self)}, Could not open port {self.comport}")
             raise OSError(
                 'Port "%s" is unavailable.\n' % self.comport
                 + "Maybe the laser is not connected, the wrong"
@@ -79,7 +73,6 @@ class LuxxLaser(LaserBase):
 
             # Close the port
             self.laser.close()
-            logger.debug("Port closed")
 
         except serial.SerialException:
             print("Could not close the port")
@@ -296,10 +289,6 @@ class LuxxLaser(LaserBase):
         self.set_power(self.pmax)
         self.set_mode("CW-APC")
         self.start()
-        logger.debug(
-            f"{self.wavelength}nm Laser Initialized - Max Power: {self.pmax}mW"
-        )
-
 
 def stopwatch(func, *func_args, **func_kwargs):
     """

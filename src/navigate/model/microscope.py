@@ -33,12 +33,15 @@
 import logging
 import importlib  # noqa: F401
 from multiprocessing.managers import ListProxy
+import reprlib
 
-from navigate.model.device_startup_functions import (
-    start_stage,
-)
+# Third-party imports
+
+# Local application imports
+from navigate.model.device_startup_functions import start_stage
 from navigate.tools.common_functions import build_ref_name
 
+# Set up logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
@@ -402,6 +405,16 @@ class Microscope:
         waveform : dict
             Dictionary of all the waveforms.
         """
+        camera_info = reprlib.Repr()
+        camera_info.indent = '---'
+        camera_info.maxdict = 20
+        camera_info = camera_info.repr(
+            dict(self.configuration['experiment']['CameraParameters'][
+                self.microscope_name]
+                 )
+        )
+        logger.info(f"Preparing Acquisition. Camera Parameters: {camera_info}")
+
         self.current_channel = 0
         self.central_focus = None
         self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
@@ -469,13 +482,16 @@ class Microscope:
             self.lasers[k].turn_off()
         self.current_channel = 0
         self.central_focus = None
+        logger.info("Acquisition Ended")
 
     def turn_on_laser(self):
         """Turn on the current laser."""
+        logger.info(f"Turning on laser {self.laser_wavelength[self.current_laser_index]}")
         self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
     def turn_off_lasers(self):
         """Turn off current laser."""
+        logger.info(f"Turning off laser {self.laser_wavelength[self.current_laser_index]}")
         self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_off()
 
     def calculate_all_waveform(self):
@@ -530,8 +546,11 @@ class Microscope:
         exposure_times = {}
         sweep_times = {}
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        # zoom = microscope_state["zoom"] # assigned but not used?
         waveform_constants = self.configuration["waveform_constants"]
+
+        logger.info(f"Microscope state: {repr(dict(microscope_state))}")
+        logger.info(f"Waveform constants: {repr(dict(waveform_constants))}")
+
         camera_delay = (
             self.configuration["configuration"]["microscopes"][self.microscope_name][
                 "camera"
@@ -559,6 +578,7 @@ class Microscope:
         readout_mode = self.configuration["experiment"]["CameraParameters"][
             self.microscope_name
         ]["sensor_mode"]
+
         if readout_mode == "Normal":
             readout_time = self.camera.calculate_readout_time()
         elif self.configuration["experiment"]["CameraParameters"][self.microscope_name][
@@ -792,7 +812,6 @@ class Microscope:
             Dictionary of stage positions.
         """
         if self.ask_stage_for_position:
-            # self.ret_pos_dict = {}
             for stage, axes in self.stages_list:
                 temp_pos = stage.report_position()
                 self.ret_pos_dict.update(temp_pos)
@@ -818,6 +837,7 @@ class Microscope:
         limits_flag : bool, optional
             Limits flag, by default True
         """
+        logger.info(f"Stage limits enabled: {limits_flag}")
         self.ask_stage_for_position = True
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
@@ -950,10 +970,20 @@ class Microscope:
         pass
 
     def run_command(self, command, *args):
+        """Run command.
+
+        Parameters
+        ----------
+        command : str
+            Command.
+        *args : list
+            Variable input arguments.
+        """
+        logger.info(f"Running Command: {command}, {args}")
         if command in self.commands:
             result = self.commands[command][1](*args)
             if result:
                 device_name = self.commands[command][0]
                 self.output_event_queue.put((device_name, result))
         else:
-            print("unknown command in the Microscope:", command)
+            logger.debug(f"Unknown Command: {command}")

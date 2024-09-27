@@ -9,6 +9,8 @@ filters:
     (): ext://navigate.log_files.filters.PerformanceFilter
   not_performance:
     (): ext://navigate.log_files.filters.NonPerfFilter
+  only_debug:
+    (): ext://navigate.log_files.filters.DebugFilter
 handlers:
   console:
     class: logging.StreamHandler
@@ -28,27 +30,30 @@ handlers:
     level: DEBUG
     formatter: base
     filename: view_controller_debug.log
-    filters: [not_performance]
+    filters: [not_performance, only_debug]
     mode: a
-  performance:
-    class: logging.handlers.RotatingFileHandler
-    level: DEBUG
-    formatter: base
-    filename: performance.log
-    filters: [performance_specs]
-    mode: a
+#  performance:
+#    class: logging.handlers.RotatingFileHandler
+#    level: DEBUG
+#    formatter: base
+#    filename: view_controller_performance.log
+#    filters: [performance_specs]
+#    mode: a
 loggers:
   view:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug, performance]
+#    handlers: [console, vc_info, vc_debug, performance]
+    handlers: [console, vc_info, vc_debug]
     propagate: no
   controller:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug, performance]
+#    handlers: [console, vc_info, vc_debug, performance]
+    handlers: [console, vc_info, vc_debug]
     propagate: no
   config:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug, performance]
+#    handlers: [console, vc_info, vc_debug, performance]
+    handlers: [console, vc_info, vc_debug]
     propagate: no
 
 

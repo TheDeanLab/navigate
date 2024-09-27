@@ -37,12 +37,13 @@ import logging
 
 # Local Imports
 from navigate.model.devices.galvo.base import GalvoBase
+from navigate.model.devices import log_initialization
 
 # # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class SyntheticGalvo(GalvoBase):
     """SyntheticGalvo Class"""
 
@@ -74,15 +75,7 @@ class SyntheticGalvo(GalvoBase):
         #: int: Galvo ID.
         self.galvo_id = galvo_id
 
-        logger.info(self.__repr__())
-
     def __str__(self):
         """Return string representation of the GalvoNI."""
         return "SyntheticGalvo"
 
-    def __repr__(self):
-        """String representation of the class."""
-        return (
-            f"SyntheticGalvo({self.microscope_name}, {self.device_connection},"
-            f" {self.configuration}, {self.galvo_id})"
-        )

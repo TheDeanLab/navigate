@@ -30,8 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 from time import time
 
+from jupyter_lsp.serverextension import initialize
+
+# Third Party Imports
+
+# Local Imports
 
 def function_timer(func):
     """Decorator for evaluating the duration of time necessary to execute a statement.

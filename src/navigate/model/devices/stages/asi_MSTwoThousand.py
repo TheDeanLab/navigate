@@ -41,6 +41,7 @@ from navigate.model.devices.APIs.asi.asi_MS2000_controller import (
     MS2000Controller,
     MS2000Exception,
 )
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -73,6 +74,7 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
     return asi_stage
 
 
+@log_initialization
 class ASIStage(StageBase):
     """Applied Scientific Instrumentation (ASI) Stage Class
 

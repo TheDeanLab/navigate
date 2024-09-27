@@ -44,7 +44,6 @@ from navigate.view.popups.acquire_popup import AcquirePopUp
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
 class AcquireBarController(GUIController):
     """Acquire Bar Controller."""
 

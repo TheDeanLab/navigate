@@ -36,12 +36,13 @@ import logging
 # Third Party Imports
 
 # Local Imports
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class ZoomBase:
     """ZoomBase parent class."""
 
@@ -135,8 +136,6 @@ class ZoomBase:
         else:
             logger.error(f"Zoom designation, {zoom}, not in the configuration")
             raise ValueError("Zoom designation not in the configuration")
-        logger.debug(f"Changed Zoom to {zoom}")
-        logger.debug(f"Zoom position: {self.read_position()}")
 
     def move(self, position=0, wait_until_done=False):
         """Move the Zoom Servo
@@ -148,7 +147,6 @@ class ZoomBase:
         wait_until_done : bool
             Delay parameter
         """
-        logger.debug(f"Changing Zoom to {position}")
         pass
 
     def read_position(self):
@@ -160,5 +158,4 @@ class ZoomBase:
             Current position of Zoom
         """
         cur_position = None
-        logger.debug(f"Zoom position: {cur_position}")
         return cur_position

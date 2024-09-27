@@ -37,12 +37,13 @@ import logging
 
 # Local Imports
 from navigate.model.waveforms import camera_exposure
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class DAQBase:
     """DAQBase - Parent class for Data Acquisition (DAQ) classes."""
 

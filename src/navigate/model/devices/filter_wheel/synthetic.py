@@ -36,12 +36,14 @@ import logging
 
 # Local Imports
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class SyntheticFilterWheel(FilterWheelBase):
     """SyntheticFilterWheel Class"""
 
@@ -63,15 +65,9 @@ class SyntheticFilterWheel(FilterWheelBase):
         #: dict: Device configuration information.
         self.device_config = device_config
 
-        logger.info(self.__repr__())
-
     def __str__(self):
         """Return string representation of the SyntheticFilterWheel."""
         return "SyntheticFilterWheel"
-
-    def __repr__(self):
-        """String representation of the class."""
-        return f"SyntheticFilterWheel({self.device_connection}, {self.device_config})"
 
     def filter_change_delay(self, filter_name):
         """Calculate duration of time necessary to change filter wheel positions

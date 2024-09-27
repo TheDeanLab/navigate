@@ -45,12 +45,13 @@ import numpy as np
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
 from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
+@log_initialization
 class NIDAQ(DAQBase):
     """NIDAQ class for Control of NI Data Acquisition Cards."""
 
@@ -101,15 +102,9 @@ class NIDAQ(DAQBase):
         #: bool: Flag for waiting to run.
         self.wait_to_run_lock = Lock()
 
-        logger.info(self.__repr__())
-
     def __str__(self):
         """String representation of the class."""
         return "NIDAQ"
-
-    def __repr__(self):
-        """String representation of the class."""
-        return f"NIDAQ({self.configuration})"
 
     def __del__(self):
         """Destructor."""
@@ -141,7 +136,7 @@ class NIDAQ(DAQBase):
                 self.camera_trigger_task.stop()
             except Exception:
                 logger.debug(
-                    f"DAQ NI - Error switching the camera trigger source: "
+                    f"Error switching the camera trigger source: "
                     f"{traceback.format_exc()}"
                 )
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
@@ -154,7 +149,7 @@ class NIDAQ(DAQBase):
                     self.analog_output_tasks[board_name].stop()
                 except Exception:
                     logger.debug(
-                        f"DAQ NI - Error stopping analog output tasks: "
+                        f"Error stopping analog output tasks: "
                         f"{traceback.format_exc()}"
                     )
                 self.analog_output_tasks[
@@ -164,7 +159,7 @@ class NIDAQ(DAQBase):
                     self.analog_output_tasks[board_name].register_done_event(None)
                 except Exception:
                     logger.debug(
-                        f"DAQ NI - Error Registering Done Event: "
+                        f"Error Registering Done Event: "
                         f"{traceback.format_exc()}"
                     )
         else:
@@ -175,7 +170,7 @@ class NIDAQ(DAQBase):
                     self.master_trigger_task.close()
                 except Exception:
                     logger.debug(
-                        f"DAQ NI - Error stopping master trigger task: "
+                        f"Error stopping master trigger task: "
                         f"{traceback.format_exc()}"
                     )
             self.master_trigger_task = None
@@ -265,7 +260,7 @@ class NIDAQ(DAQBase):
                 task.start()
             except Exception:
                 logger.debug(
-                    f"DAQ NI - Analog task restart failed {traceback.format_exc()}"
+                    f"Analog task restart failed {traceback.format_exc()}"
                 )
             return status
 
@@ -462,7 +457,7 @@ class NIDAQ(DAQBase):
             # when triggered from external triggers, sometimes the camera trigger task
             # is done but not actually done, there will a DAQ WARNING message
             logger.debug(
-                f"DAQ NI - Wait until tasks done failed - {traceback.format_exc()}"
+                f"Wait until tasks done failed - {traceback.format_exc()}"
             )
             pass
         try:
@@ -581,7 +576,7 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[board_name].write(waveforms)
         except Exception:
             logger.debug(
-                f"DAQ NI - Could not update analog task: {traceback.format_exc()}"
+                f"Could not update analog task: {traceback.format_exc()}"
             )
             for board in self.analog_output_tasks.keys():
                 try:
@@ -589,7 +584,7 @@ class NIDAQ(DAQBase):
                     self.analog_output_tasks[board].close()
                 except Exception:
                     logger.debug(
-                        f"DAQ NI - Could not stop analog tasks: "
+                        f"Could not stop analog tasks: "
                         f"{traceback.format_exc()}"
                     )
 

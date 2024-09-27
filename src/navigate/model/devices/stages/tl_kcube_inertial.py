@@ -37,6 +37,7 @@ from multiprocessing.managers import ListProxy
 
 # Local Imports
 from navigate.model.devices.stages.base import StageBase
+from navigate.model.devices import log_initialization
 
 
 # Logger Setup
@@ -77,6 +78,7 @@ def build_TLKIMStage_connection(serialnum):
     return kim_controller
 
 
+@log_initialization
 class TLKIMStage(StageBase):
     """Thorlabs KIM Stage"""
 

@@ -37,11 +37,16 @@ import importlib.resources
 import pkgutil
 import os
 import inspect
+import logging
 
 # Local application imports
 from navigate.tools.file_functions import load_yaml_file
 from navigate.tools.common_functions import load_module_from_file
 from navigate.model.features import feature_related_functions
+
+# Logger setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 def register_features(module):
@@ -73,11 +78,12 @@ class PluginPackageManager:
         for entry_point in entry_points().get("navigate.plugins", []):
             plugin_package_name = entry_point.module.split(".")[0]
             if plugin_package_name in plugins:
-                print(
-                    f"*** Warning: plugin {plugin_package_name} exists!"
-                    "Can't load twice!"
-                    "Please double-check the installed plugins!"
+                error_statement = (
+                    f"Warning: plugin {plugin_package_name} exists and cannot be "
+                    f"loaded more than once. Please double-check the installed plugins."
                 )
+                logger.debug(error_statement)
+                print(error_statement)
                 continue
             plugins[plugin_package_name] = plugin_package_name
         return plugins
@@ -124,6 +130,7 @@ class PluginPackageManager:
             )
             return getattr(controller_module, controller_class_name)
         except (ImportError, AttributeError):
+            logger.debug("Plugin controller not found.")
             return None
 
     @staticmethod
@@ -150,6 +157,7 @@ class PluginPackageManager:
             )
             return getattr(view_module, frame_class_name)
         except (ImportError, AttributeError):
+            logger.debug("Plugin view not found.")
             return None
 
     @staticmethod
@@ -170,6 +178,7 @@ class PluginPackageManager:
                 module,
             )
         except (ImportError, AttributeError):
+            logger.debug("Plugin feature list not found.")
             pass
 
     @staticmethod
@@ -189,6 +198,7 @@ class PluginPackageManager:
                 try:
                     module = importlib.import_module(full_module_name)
                 except (ImportError, AttributeError):
+                    logger.debug("Plugin feature not found.")
                     continue
                 register_features(module)
 
@@ -210,6 +220,7 @@ class PluginPackageManager:
             try:
                 module = importlib.import_module(f"{package_name}.{acquisition_file}")
             except (ImportError, AttributeError):
+                logger.debug("Plugin acquisition mode not found.")
                 continue
             if module:
                 register_func(acquisition_mode_config["name"], module)
@@ -236,6 +247,7 @@ class PluginPackageManager:
                 try:
                     module = importlib.import_module(full_module_name)
                 except (ImportError, AttributeError):
+                    logger.debug("Plugin device not found.")
                     continue
                 register_func(module_name, module)
 
@@ -286,6 +298,7 @@ class PluginFileManager:
                 and os.path.isdir(plugin_path)
             ):
                 plugins[plugin_name] = plugin_path
+                logger.info(f"Plugin {plugin_name} found.")
 
         return plugins
 
@@ -440,5 +453,6 @@ class PluginFileManager:
                         os.path.join(device_path, "device_startup_functions.py"),
                     )
                 except FileNotFoundError:
+                    logger.debug(f"Plugin device {device} not found.")
                     continue
                 register_func(device, module)

@@ -42,12 +42,14 @@ from tifffile import TiffFile, TiffFileError
 # Local Imports
 from navigate.model.analysis import camera
 from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class SyntheticCameraController:
     """SyntheticCameraController. Synthetic Camera API."""
 
@@ -80,9 +82,10 @@ class SyntheticCameraController:
         value : int
             Value to set the property to.
         """
-        logger.debug(f"set camera property {name}: {value}")
+        logger.info(f"Camera property {name} set to {value}")
 
 
+@log_initialization
 class SyntheticCamera(CameraBase):
     """SyntheticCamera camera class."""
 
@@ -145,23 +148,6 @@ class SyntheticCamera(CameraBase):
         #: int: height
         self.y_pixels = self.camera_parameters["y_pixels"]
 
-        logger.info(self.__repr__())
-
-    def __repr__(self):
-        """Representation of SyntheticCamera class.
-
-        Returns
-        -------
-        str
-            Representation of SyntheticCamera class.
-        """
-        return (
-            f"SyntheticCamera("
-            f"{self.microscope_name}, "
-            f"{self.device_connection}, "
-            f"{self.configuration})"
-        )
-
     def __str__(self):
         """String representation of SyntheticCamera class.
 
@@ -174,7 +160,6 @@ class SyntheticCamera(CameraBase):
 
     def __del__(self):
         """Delete SyntheticCamera class."""
-        logger.info("SyntheticCamera Shutdown")
         pass
 
     def report_settings(self):
@@ -336,7 +321,6 @@ class SyntheticCamera(CameraBase):
             frames = list(range(self.pre_frame_idx, self.num_of_frame))
             frames += list(range(0, self.current_frame_idx))
         self.pre_frame_idx = self.current_frame_idx
-        logger.debug(f"Get a new frame from camera, {frames}")
         return frames
 
     def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024):

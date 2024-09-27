@@ -36,12 +36,14 @@ from multiprocessing.managers import ListProxy
 # Third Party Imports
 
 # Local Imports
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class StageBase:
     """Stage Parent Class"""
 
@@ -88,10 +90,9 @@ class StageBase:
         if len(self.axes) > len(device_axes):
             log_string = (
                 f"{microscope_name}: Stage axes mapping is not specified in "
-                "the configuration file, will use default settings!"
+                "the configuration file, will use default settings."
             )
             logger.debug(log_string)
-            print(log_string)
 
         #: dict: Dictionary of stage axes and their corresponding hardware axes.
         self.axes_mapping = dict(zip(self.axes, device_axes))

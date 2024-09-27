@@ -37,12 +37,14 @@ import logging
 
 # Local Imports
 from navigate.model.waveforms import sawtooth, sine_wave
+from navigate.model.devices import log_initialization
 
 # # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class GalvoBase:
     """GalvoBase Class - Parent class for galvanometers."""
 
@@ -178,7 +180,7 @@ class GalvoBase:
                         )
 
                 except ValueError as e:
-                    logger.error(
+                    logger.debug(
                         f"{e} waveform constants.yml doesn't have parameter "
                         f"amplitude/offset/frequency for {self.galvo_name}"
                     )

@@ -41,12 +41,15 @@ from navigate.model.waveforms import (
     smooth_waveform,
     remote_focus_ramp_triangular,
 )
+from navigate.model.devices import log_initialization
+
 
 # # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class RemoteFocusBase:
     """RemoteFocusBase Class - Parent class for Remote Focusing Device."""
 

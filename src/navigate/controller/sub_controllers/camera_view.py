@@ -38,6 +38,7 @@ import threading
 from typing import Dict
 import tempfile
 import os
+import time
 
 # Third Party Imports
 import cv2
@@ -57,7 +58,6 @@ from navigate.config import get_navigate_path
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
 
 class ABaseViewController(metaclass=abc.ABCMeta):
     """Abstract Base View Controller Class."""
@@ -428,6 +428,16 @@ class BaseViewController(GUIController, ABaseViewController):
 
         display_thread = threading.Thread(target=self.display_image, args=(image,))
         display_thread.start()
+
+    def display_image(self, image):
+        """Display an image.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image data.
+        """
+        pass
 
     def apply_lut(self, image):
         """Applies a LUT to an image.
@@ -978,7 +988,7 @@ class BaseViewController(GUIController, ABaseViewController):
             self.max_counts = float(self.image_palette["Max"].get())
         if display and self.image is not None:
             self.process_image()
-        logger.debug(
+        logger.info(
             f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}"
         )
 
@@ -1321,6 +1331,7 @@ class CameraViewController(BaseViewController):
         image : numpy.ndarray
             Image data.
         """
+        start_time = time.time()
         self.image = self.flip_image(image)
         self.max_intensity_history.append(np.max(image))
         if self._snr_selected:
@@ -1331,6 +1342,7 @@ class CameraViewController(BaseViewController):
         self.update_max_counts()
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
+        logger.info(f"Displaying image took {time.time() - start_time:.4f} seconds")
 
     def set_mask_color_table(self, colors):
         """Set up segmentation mask color table
@@ -1677,21 +1689,11 @@ class SpooledImageLoader:
                 dir=default_directory,
             )
 
-        logger.info(self.__repr__())
-
     def __del__(self):
         """Delete the temporary files."""
         if self.temp_files is not None:
             for temp_file in self.temp_files.values():
                 temp_file.close()
-
-    def __repr__(self):
-        """Return the string representation of the SpooledImageLoader."""
-        return (
-            f"SpooledImageLoader(channels={len(self.temp_files)}, "
-            f"size_y={self.size_y}, "
-            f"size_x={self.size_x})"
-        )
 
     @staticmethod
     def get_default_max_size() -> int:

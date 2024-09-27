@@ -36,6 +36,7 @@ import serial
 import logging
 
 # Third Party Imports
+from navigate.model.devices import log_initialization
 
 # Local Imports
 from navigate.model.devices.remote_focus.ni import RemoteFocusNI
@@ -45,6 +46,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class RemoteFocusEquipmentSolutions(RemoteFocusNI):
     """RemoteFocusEquipmentSolutions Class
 

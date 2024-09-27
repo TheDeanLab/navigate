@@ -41,6 +41,7 @@ from pyvcam.camera import Camera
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -69,12 +70,13 @@ def build_photometrics_connection(camera_connection):
         camera_to_open.open()
         return camera_to_open
     except Exception as e:
-        logger.error(f"Could not establish connection with camera: {e}")
+        logger.error(f"Could not establish connection with camera: {e}.")
         raise UserWarning(
             "Could not establish connection with camera", camera_connection
         )
 
 
+@log_initialization
 class PhotometricsBase(CameraBase):
     """Photometrics Base camera class.
 
@@ -156,23 +158,6 @@ class PhotometricsBase(CameraBase):
             "speed_table_index"
         ]
         self.camera_controller.gain = self.camera_parameters["gain"]
-
-        logger.info(self.__repr__())
-
-    def __repr__(self):
-        """Return PhotometricsBase object representation.
-
-        Returns
-        -------
-        str
-            Representation of PhotometricsBase object.
-        """
-        return (
-            f"PhotometricsBase("
-            f"{self.microscope_name}, "
-            f"{self.device_connection}, "
-            f"{self.configuration})"
-        )
 
     def __str__(self):
         """Return string representation of PhotometricsBase object.

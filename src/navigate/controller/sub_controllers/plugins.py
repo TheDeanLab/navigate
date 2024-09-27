@@ -46,7 +46,6 @@ from navigate.tools.common_functions import combine_funcs
 from navigate.tools.decorators import AcquisitionMode
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.plugins_popup import PluginsPopup
-
 from navigate.plugins.plugin_manager import PluginFileManager, PluginPackageManager
 
 

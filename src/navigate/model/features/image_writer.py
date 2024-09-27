@@ -35,6 +35,7 @@
 import os
 import logging
 import shutil
+import time
 
 # Third Party Imports
 import numpy as np
@@ -76,7 +77,9 @@ class ImageWriter:
         image_name : str
             Name of the image to be saved. If None, a name will be generated
         """
+        #: str: Name of the microscope.
         self.microscope_name = microscope_name
+
         #: navigate.model.model.Model: Navigate Model class for controlling
         # hardware/acquisition.
         self.model = model
@@ -115,6 +118,7 @@ class ImageWriter:
             self.model.configuration["experiment"]["Saving"]["save_directory"],
             self.sub_dir,
         )
+        logger.info(f"Save Directory: {self.save_directory}")
         try:
             if not os.path.exists(self.save_directory):
                 try:
@@ -131,8 +135,7 @@ class ImageWriter:
                     )
                     return
         except FileNotFoundError as e:
-            logger.debug(f"Unable to Create Save Directory - {self.save_directory}")
-            logger.exception(e)
+            logger.error(f"Unable to Create Save Directory - {self.save_directory}")
 
         # create the MIP directory if it doesn't already exist
         #: np.ndarray : Maximum intensity projection image.
@@ -156,12 +159,13 @@ class ImageWriter:
                     )
                     return
         except FileNotFoundError as e:
-            logger.debug("Image Writer: Unable to create MIP directory.")
-            logger.exception(e)
+            logger.error("Image Writer: Unable to create MIP directory.")
 
         # Set up the file name and path in the save directory
         #: str : File type for saving data.
         self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
+        logger.info(f"Saving Data as File Type: {self.file_type}")
+
         current_channel = self.model.active_microscope.current_channel
         ext = "." + self.file_type.lower().replace(" ", ".").replace("-", ".")
         if image_name is None:
@@ -207,8 +211,7 @@ class ImageWriter:
 
             if (idx < 0) or (idx > (self.number_of_frames - 1)):
                 msg = f"Received invalid index {idx}. Skipping this frame."
-                logger.debug(msg)
-                print(msg)
+                logger.debug(f"Received invalid index: {msg}.")
                 continue
 
             # check the saving flag
@@ -243,6 +246,7 @@ class ImageWriter:
                 image = self.data_buffer[idx]
             # Save data to disk
             try:
+                start_time = time.time()
                 self.data_source.write(
                     image,
                     x=self.model.data_buffer_positions[idx][0],
@@ -251,6 +255,8 @@ class ImageWriter:
                     theta=self.model.data_buffer_positions[idx][3],
                     f=self.model.data_buffer_positions[idx][4],
                 )
+                logger.info(f"C: {c_idx}, Z:{z_idx}, T:{t_idx}, P:{p_idx}, Write Time:"
+                            f" {time.time() - start_time}")
 
                 # Update MIP
                 self.mip[c_idx, :, :] = np.maximum(self.mip[c_idx, :, :], image)
@@ -316,10 +322,6 @@ class ImageWriter:
 
     def close(self):
         """Close the data source we are writing to.
-
-        Examples
-        --------
-        >>> self.close()
         """
         self.data_source.close()
 
@@ -333,9 +335,11 @@ class ImageWriter:
 
         # Return disk usage statistics in bytes
         _, _, free = shutil.disk_usage(self.save_directory)
+        logger.info(f"Free Disk Space: {free}")
 
         # Calculate the size in bytes.
         image_size = self.data_source.nbytes
+        logger.info(f"Anticipated Image Size: {image_size}")
 
         # Confirm that there is enough disk space to save the data.
         if free < image_size:
@@ -350,5 +354,6 @@ class ImageWriter:
         if (self.file_type == "TIFF") or (self.file_type == "OME-TIFF"):
             if image_size > 2**32:
                 self.data_source.set_bigtiff(True)
+                logger.info("Big-TIFF Format Selected.")
             else:
                 self.data_source.set_bigtiff(False)

@@ -40,6 +40,7 @@ import sys
 import os
 import time
 import platform
+import reprlib
 
 # Third Party Imports
 
@@ -82,7 +83,7 @@ from navigate.config.config import (
     verify_configuration,
     get_navigate_path,
 )
-from navigate.tools.file_functions import create_save_path, save_yaml_file
+from navigate.tools.file_functions import create_save_path, save_yaml_file, get_ram_info
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.multipos_table_tools import update_table
 from navigate.tools.common_functions import combine_funcs
@@ -96,7 +97,6 @@ logger = logging.getLogger(p)
 
 class Controller:
     """Navigate Controller"""
-
     def __init__(
         self,
         root,
@@ -139,7 +139,6 @@ class Controller:
             Command line input arguments for non-default
             file paths or using synthetic hardware modes.
         """
-
         #: Tk top-level widget: Tk.tk GUI instance.
         self.root = root
 
@@ -148,24 +147,31 @@ class Controller:
 
         #: string: Path to the configuration yaml file.
         self.configuration_path = configuration_path
+        logger.info(f"Configuration Path: {self.configuration_path}")
 
         #: string: Path to the experiment yaml file.
         self.experiment_path = experiment_path
+        logger.info(f"Experiment Path: {self.experiment_path}")
 
         #: string: Path to the waveform constants yaml file.
         self.waveform_constants_path = waveform_constants_path
+        logger.info(f"Waveform Constants Path: {self.waveform_constants_path}")
 
         #: string: Path to the REST API yaml file.
         self.rest_api_path = rest_api_path
+        logger.info(f"REST API Path: {self.rest_api_path}")
 
         #: string: Path to the waveform templates yaml file.
         self.waveform_templates_path = waveform_templates_path
+        logger.info(f"Waveform Templates Path: {self.waveform_templates_path}")
 
         #: string: Path to the GUI configuration yaml file.
         self.gui_configuration_path = gui_configuration_path
+        logger.info(f"GUI Configuration Path: {self.gui_configuration_path}")
 
         #: iterable: Non-default command line input arguments for
         self.args = args
+        logger.info(f"Variable Input Arguments: {self.args}")
 
         #: Object: Thread pool for the controller.
         self.threads_pool = SynchronizedThreadPool()
@@ -190,6 +196,10 @@ class Controller:
         verify_configuration(self.manager, self.configuration)
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
+
+        total_ram, available_ram = get_ram_info()
+        logger.info(f"Total RAM: {total_ram / 1024**3:.2f} GB. "
+                    f"Available RAM: {available_ram / 1024**3:.2f} GB.")
 
         #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
@@ -269,9 +279,6 @@ class Controller:
         t = threading.Thread(target=self.update_event)
         t.start()
 
-        # self.microscope = self.configuration['configuration']
-        # ['microscopes'].keys()[0]  # Default to the first microscope
-
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
@@ -320,17 +327,6 @@ class Controller:
         self.resize_event_id = None
         if platform.system() == "Windows":
             self.view.root.bind("<Configure>", self.resize)
-
-        logger.info(self.__repr__())
-
-    def __repr__(self):
-        return (
-            f'Controller("{self.root}", "{self.splash_screen}", '
-            f'"{self.configuration_path}", "{self.experiment_path}", '
-            f'"{self.waveform_constants_path}", "{self.rest_api_path}", '
-            f'"{self.waveform_templates_path}", "{self.gui_configuration_path}", '
-            f'"{self.args}")'
-        )
 
     def update_buffer(self):
         """Update the buffer size according to the camera

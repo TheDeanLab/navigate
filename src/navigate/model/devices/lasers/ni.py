@@ -40,12 +40,14 @@ from nidaqmx.constants import LineGrouping
 
 # Local Imports
 from navigate.model.devices.lasers.base import LaserBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class LaserNI(LaserBase):
     """LaserNI Class
 
@@ -100,7 +102,6 @@ class LaserNI(LaserBase):
         except (KeyError, DaqError) as e:
             self.laser_do_task = None
             if isinstance(e, DaqError):
-                logger.exception(e)
                 logger.debug(e.error_code)
                 logger.debug(e.error_type)
                 print(e)
@@ -126,12 +127,8 @@ class LaserNI(LaserBase):
                 laser_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao
             )
         except DaqError as e:
-            logger.exception(e)
-            logger.debug(e.error_code)
-            logger.debug(e.error_type)
-            print(e)
-            print(e.error_code)
-            print(e.error_type)
+            logger.debug(f"{str(self)} error:, {e}, {e.error_type}, {e.error_code}")
+            print(f"{str(self)} error:, {e}, {e.error_type}, {e.error_code}")
 
     def set_power(self, laser_intensity):
         """Sets the laser power.

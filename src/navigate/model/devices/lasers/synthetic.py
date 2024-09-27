@@ -30,9 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
+# Standard Library Imports
 import logging
 
+# Third Party Imports
+
+# Local Imports
+from navigate.model.devices import log_initialization
 from navigate.model.devices.lasers.base import LaserBase
 
 # Logger Setup
@@ -40,6 +44,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+@log_initialization
 class SyntheticLaser(LaserBase):
     """SyntheticLaser Class"""
 

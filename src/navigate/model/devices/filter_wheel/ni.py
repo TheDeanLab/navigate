@@ -41,6 +41,7 @@ from nidaqmx.constants import LineGrouping
 
 # Local Imports
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
+from navigate.model.devices import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -62,6 +63,7 @@ def build_filter_wheel_connection():
     return daq_fw_controller
 
 
+@log_initialization
 class DAQFilterWheel(FilterWheelBase):
     """DAQFilterWheel - Class for controlling filter wheels with a DAQ."""
 
@@ -89,15 +91,9 @@ class DAQFilterWheel(FilterWheelBase):
 
         self.filter_wheel_task = None
 
-        logger.info(self.__repr__())
-
     def __str__(self):
         """String representation of the class."""
         return "DAQFilterWheel"
-
-    def __repr__(self):
-        """String representation of the class."""
-        return f"DAQFilterWheel({self.device_connection}, {self.device_config})"
 
     def __enter__(self):
         """Enter the ASI Filter Wheel context manager."""

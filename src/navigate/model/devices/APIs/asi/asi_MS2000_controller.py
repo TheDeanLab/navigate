@@ -144,10 +144,6 @@ class MS2000Controller:
         """Returns the string representation of the MS2000 Controller class"""
         return "MS2000Controller"
 
-    def __repr__(self) -> str:
-        """Returns the string representation of the MS2000 Controller class"""
-        return f"MS2000Controller({self.com_port}, {self.baud_rate}, {self.verbose})"
-
     @staticmethod
     def scan_ports() -> list[str]:
         """Scans for available COM ports
@@ -620,7 +616,7 @@ class MS2000Controller:
             Percentage of the maximum speed
         """
         if self.default_axes_sequence is None:
-            logger.error("Unknown default axes sequence.")
+            logger.error(f"{str(self)}, Unknown default axes sequence.")
             raise MS2000Exception(
                 "Unable to query system for axis sequence. Cannot set speed."
             )

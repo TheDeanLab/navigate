@@ -36,7 +36,7 @@ import serial
 import logging
 
 # Third Party Imports
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Local Imports
 from navigate.model.devices.remote_focus.ni import RemoteFocusNI

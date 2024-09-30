@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
@@ -32,12 +31,13 @@
 
 # Standard Library Imports
 from time import time
-
-from jupyter_lsp.serverextension import initialize
+import logging
+from functools import wraps
 
 # Third Party Imports
 
 # Local Imports
+
 
 def function_timer(func):
     """Decorator for evaluating the duration of time necessary to execute a statement.
@@ -80,3 +80,38 @@ class AcquisitionMode(object):
 
     def __call__(self, *args):
         return self.__obj_class(*args)
+
+
+def log_initialization(cls):
+    """Decorator for logging the initialization of a device class.
+
+    Parameters
+    ----------
+    cls : class
+        The class to be logged.
+
+    Returns
+    -------
+    cls : class
+        The class with the logging decorator.
+    """
+
+    # Get the original __init__ method
+    original_init = cls.__init__
+
+    @wraps(original_init)
+    def new_init(self, *args, **kwargs):
+        module_location = cls.__module__
+        logger = logging.getLogger(module_location.split(".")[1])
+        try:
+            original_init(self, *args, **kwargs)
+            logger.info(f"{cls.__name__}, " f"{args}, " f"{kwargs}")
+        except Exception as e:
+            logger.error(f"{cls.__name__} Initialization Failed")
+            logger.error(f"Input args & kwargs: {args}, {kwargs}")
+            logger.error(f"Error: {e}")
+            raise e
+
+    # Replace the original __init__ method with the new one
+    cls.__init__ = new_init
+    return cls

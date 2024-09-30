@@ -40,7 +40,7 @@ from nidaqmx.constants import LineGrouping
 
 # Local Imports
 from navigate.model.devices.lasers.base import LaserBase
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]

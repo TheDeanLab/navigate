@@ -45,11 +45,12 @@ import numpy as np
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
 from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 @log_initialization
 class NIDAQ(DAQBase):
@@ -159,8 +160,7 @@ class NIDAQ(DAQBase):
                     self.analog_output_tasks[board_name].register_done_event(None)
                 except Exception:
                     logger.debug(
-                        f"Error Registering Done Event: "
-                        f"{traceback.format_exc()}"
+                        f"Error Registering Done Event: {traceback.format_exc()}"
                     )
         else:
             # close master trigger task
@@ -259,9 +259,7 @@ class NIDAQ(DAQBase):
                 task.stop()
                 task.start()
             except Exception:
-                logger.debug(
-                    f"Analog task restart failed {traceback.format_exc()}"
-                )
+                logger.debug(f"Analog task restart failed {traceback.format_exc()}")
             return status
 
         return callback_func
@@ -456,9 +454,7 @@ class NIDAQ(DAQBase):
         except Exception:
             # when triggered from external triggers, sometimes the camera trigger task
             # is done but not actually done, there will a DAQ WARNING message
-            logger.debug(
-                f"Wait until tasks done failed - {traceback.format_exc()}"
-            )
+            logger.debug(f"Wait until tasks done failed - {traceback.format_exc()}")
             pass
         try:
             self.camera_trigger_task.stop()
@@ -575,17 +571,14 @@ class NIDAQ(DAQBase):
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
         except Exception:
-            logger.debug(
-                f"Could not update analog task: {traceback.format_exc()}"
-            )
+            logger.debug(f"Could not update analog task: {traceback.format_exc()}")
             for board in self.analog_output_tasks.keys():
                 try:
                     self.analog_output_tasks[board].stop()
                     self.analog_output_tasks[board].close()
                 except Exception:
                     logger.debug(
-                        f"Could not stop analog tasks: "
-                        f"{traceback.format_exc()}"
+                        f"Could not stop analog tasks: {traceback.format_exc()}"
                     )
 
             self.create_analog_output_tasks(self.current_channel_key)

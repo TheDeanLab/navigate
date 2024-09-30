@@ -41,7 +41,7 @@ from pyvcam.camera import Camera
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]

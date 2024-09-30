@@ -39,7 +39,7 @@ import time
 # Local Imports
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -169,6 +169,7 @@ class ASIFilterWheel(FilterWheelBase):
             self.filter_wheel.move_filter_wheel_to_home()
             logger.debug("ASI Filter Wheel - Closing Device.")
             self.filter_wheel.disconnect_from_serial()
+
 
 @log_initialization
 class ASICubeSlider(FilterWheelBase):

@@ -39,7 +39,7 @@ from pipython import GCSDevice, pitools, GCSError
 
 # Local Imports
 from navigate.model.devices.stages.base import StageBase
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]

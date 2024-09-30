@@ -39,11 +39,12 @@ from threading import Lock
 
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 @log_initialization
 class SyntheticDAQ(DAQBase):

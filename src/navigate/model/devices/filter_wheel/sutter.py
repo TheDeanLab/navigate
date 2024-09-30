@@ -40,7 +40,7 @@ import serial
 
 # Local Imports
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]

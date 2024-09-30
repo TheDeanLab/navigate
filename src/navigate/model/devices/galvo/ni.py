@@ -38,7 +38,7 @@ import nidaqmx
 
 # Local Imports
 from navigate.model.devices.galvo.base import GalvoBase
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # # Logger Setup
 p = __name__.split(".")[1]

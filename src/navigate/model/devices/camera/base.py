@@ -39,11 +39,12 @@ import tifffile
 
 # Local Imports
 from navigate.config import get_navigate_path
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 @log_initialization
 class CameraBase:
@@ -163,8 +164,9 @@ class CameraBase:
                 os.path.join(map_path, f"{serial_number}_var.tiff")
             )
         except FileNotFoundError:
-            logger.info(f"{str(self)}, Offset or variance map not found in"
-                        f" {map_path}")
+            logger.info(
+                f"{str(self)}, Offset or variance map not found in" f" {map_path}"
+            )
             self._offset, self._variance = None, None
         return self._offset, self._variance
 

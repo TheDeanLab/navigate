@@ -56,8 +56,7 @@ from numpy import round
 
 # Local Imports
 from navigate.model.devices.stages.base import StageBase
-from navigate.model.devices import log_initialization
-
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -95,6 +94,7 @@ def build_TLKSTStage_connection(serialnum):
         raise RuntimeError
     kst_controller.KST_Open(str(serialnum))
     return kst_controller
+
 
 @log_initialization
 class TLKSTStage(StageBase):

@@ -37,7 +37,7 @@ import time
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 from navigate.model.devices.stages.base import StageBase
 
 # Logger Setup

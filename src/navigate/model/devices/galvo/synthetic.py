@@ -37,11 +37,12 @@ import logging
 
 # Local Imports
 from navigate.model.devices.galvo.base import GalvoBase
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 
 # # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 @log_initialization
 class SyntheticGalvo(GalvoBase):
@@ -78,4 +79,3 @@ class SyntheticGalvo(GalvoBase):
     def __str__(self):
         """Return string representation of the GalvoNI."""
         return "SyntheticGalvo"
-

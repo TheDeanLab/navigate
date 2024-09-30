@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices import log_initialization
+from navigate.tools.decorators import log_initialization
 from navigate.model.devices.lasers.base import LaserBase
 
 # Logger Setup

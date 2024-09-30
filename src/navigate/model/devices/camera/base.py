@@ -165,7 +165,7 @@ class CameraBase:
             )
         except FileNotFoundError:
             logger.info(
-                f"{str(self)}, Offset or variance map not found in" f" {map_path}"
+                f"{str(self)}, Offset or variance map not found in {map_path}"
             )
             self._offset, self._variance = None, None
         return self._offset, self._variance

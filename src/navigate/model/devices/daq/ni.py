@@ -160,7 +160,7 @@ class NIDAQ(DAQBase):
                     self.analog_output_tasks[board_name].register_done_event(None)
                 except Exception:
                     logger.debug(
-                        f"Error Registering Done Event: " f"{traceback.format_exc()}"
+                        f"Error Registering Done Event: {traceback.format_exc()}"
                     )
         else:
             # close master trigger task
@@ -578,7 +578,7 @@ class NIDAQ(DAQBase):
                     self.analog_output_tasks[board].close()
                 except Exception:
                     logger.debug(
-                        f"Could not stop analog tasks: " f"{traceback.format_exc()}"
+                        f"Could not stop analog tasks: {traceback.format_exc()}"
                     )
 
             self.create_analog_output_tasks(self.current_channel_key)

@@ -72,6 +72,8 @@ class PluginsController:
         #: dict: installed plugins with GUI
         self.plugins_dict = {}
 
+        self.popup_funcs = {}
+
     def populate_experiment_setting(self):
         """populate experiment values to plugin GUI"""
         for plugin_name in self.plugins_dict:
@@ -119,12 +121,12 @@ class PluginsController:
             if plugin_frame and plugin_controller:
                 if plugin_config["view"] == "Popup":
                     # menu
+                    popup_func = self.build_popup_window(plugin_name, plugin_frame, plugin_controller)
                     self.parent_controller.view.menubar.menu_plugins.add_command(
                         label=plugin_name,
-                        command=self.build_popup_window(
-                            plugin_name, plugin_frame, plugin_controller
-                        ),
+                        command=popup_func,
                     )
+                    self.popup_funcs[plugin_name] = popup_func
                 else:
                     self.build_tab_window(plugin_name, plugin_frame, plugin_controller)
             # feature
@@ -215,17 +217,22 @@ class PluginsController:
             popup.deiconify()
             self.plugins_dict[controller_name] = plugin_controller
 
-            popup.protocol(
-                "WM_DELETE_WINDOW",
-                combine_funcs(
+            popup_delete_funcs = combine_funcs(
                     popup.dismiss, lambda: self.plugins_dict.pop(controller_name)
-                ),
-            )
+                )
+            if "close" in plugin_controller.custom_events:
+                close_func = plugin_controller.custom_events.pop("close")               
+                popup_delete_funcs = combine_funcs(
+                    popup.dismiss, lambda: self.plugins_dict.pop(controller_name), close_func
+                )    
+
+            popup.protocol("WM_DELETE_WINDOW", popup_delete_funcs)
 
         def func_with_wrapper(*args, **kwargs):
             try:
                 func(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                print(e)
                 messagebox.showwarning(
                     title="Warning",
                     message=(

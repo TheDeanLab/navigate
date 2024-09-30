@@ -676,10 +676,11 @@ class TonyWilson:
         print("end_func_data() called!!!")
 
         if self.done_all:
+            # Need to comment this out to get it to work in feature list for some reason...?
             self.best_coefs = self.best_coefs_overall
-            # self.model.stop_acquisition = True
-            # self.model.end_acquisition()
-            # print("Ending acquisition...")
+            self.model.stop_acquisition = True
+            self.model.end_acquisition()
+            print("Ending acquisition...")
             try:
                 stop_time = time.time()
                 print(f"Total runtime:\t{(stop_time - self.start_time):.3f} sec")

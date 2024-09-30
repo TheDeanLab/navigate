@@ -404,6 +404,72 @@ class WaitToContinue:
         if self.pause_data_lock.locked():
             self.pause_data_lock.release()
 
+class FlexibleLoopByParameter:
+    """FlexibleLoopByParameter class for flexible parameter-based looping.
+
+    This class only loops via the signal thread, but refreshes the number of steps
+    each time it is entered via an outer loop. This is useful if some previous feature
+    changes, for example, the multiposition table.
+    
+    Notes:
+    ------
+    - LoopByCount establishes self.steps in the __init__, so it is fixed even if the user
+    wants to change it for each iteration of an outer loop. FlexibleLoopByParameter gets
+    around this by only using the signal thread and parsing the parameter string on 
+    self.initialize. To reset, just set self.steps back to a string.
+
+    - Of course, this means this can only work on the signal thread. Ideally, LoopByCount
+    would be able to do this, but also having the data thread complicates things. But, if
+    you're only using this to loop by some parameter, maybe signal is all you need?
+
+    - USE CASE: I have an outer loop which annotates all tumor positions in a fish, and an
+    inner loop which is the standard MoveToNextPosition... The number of positions will be
+    different for each new fish, so something like this is neeeded.
+    """
+    def __init__(self, model, par_string="experiment.MicroscopeState.multiposition_count"):
+        """Initialize the FlexibleLoopByParameter class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for loop control.
+        par_string : str, optional
+            String defining a reference to a parameter in the configuration.
+            Default is multiposition_count.
+        """        
+        self.model = model
+
+        self.par_string = par_string
+        self.steps = par_string
+        self.signal = 1
+
+        self.loop_start = True
+
+        self.config_table = {
+            "signal": {
+                "init": self.initialize,
+                "main": self.signal_func,
+                },
+            }
+
+    def initialize(self):
+        if type(self.steps) is str:
+            try:
+                parameters = self.steps.split(".")
+                config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
+                exec(f"self.steps = int(self.model.configuration{config_ref})")
+            except:  # noqa
+                self.steps = 1
+
+            self.signal = self.steps
+
+    def signal_func(self):
+        self.signal -= 1
+        if self.signal <= 0:
+            self.steps = self.par_string
+            return False
+        return True
+
 
 class LoopByCount:
     """LoopByCount class for controlling signal and data acquisition loops.
@@ -627,16 +693,6 @@ class MoveToNextPositionInMultiPositionTable:
         #: int: The current index of the position being acquired in the multi-position
         self.current_idx = 0
 
-        #: dict: A dictionary defining the configuration for the position control
-        self.multiposition_table = self.model.configuration["experiment"][
-            "MultiPositions"
-        ]
-
-        #: int: The total number of positions in the multi-position table.
-        self.position_count = self.model.configuration["experiment"]["MicroscopeState"][
-            "multiposition_count"
-        ]
-
         #: int: The stage distance threshold for pausing the data thread.
         self.stage_distance_threshold = 1000
 
@@ -650,6 +706,21 @@ class MoveToNextPositionInMultiPositionTable:
         self.initialized = False
 
     def pre_signal_func(self):
+        """
+            Moving the multiposition_table initialization from __init__ to 
+            pre_func_signal allows earlier features in the chain to modify
+            them on-the-fly in a loop, but unsure if this breaks anything...
+        """
+        #: dict: A dictionary defining the configuration for the position control
+        self.multiposition_table = self.model.configuration["experiment"][
+            "MultiPositions"
+        ]
+
+        #: int: The total number of positions in the multi-position table.
+        self.position_count = self.model.configuration["experiment"]["MicroscopeState"][
+            "multiposition_count"
+        ]
+
         """Calculate stage offset if applicable."""
         if self.initialized:
             return

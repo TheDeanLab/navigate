@@ -52,6 +52,7 @@ from navigate.model.features.common_features import (
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
+    FlexibleLoopByParameter,
     StackPause,
     MoveToNextPositionInMultiPositionTable,
     WaitToContinue,

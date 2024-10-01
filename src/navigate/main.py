@@ -52,7 +52,7 @@ os.environ["http_proxy"] = ""
 os.environ["https_proxy"] = ""
 
 
-def main():
+def main() -> None:
     """Light-sheet Microscopy (Navigate).
     Microscope control software built in a Model-View-Controller architecture.
     Provides control of cameras, data acquisition cards, filter wheels, lasers

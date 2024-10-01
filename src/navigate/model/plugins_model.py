@@ -33,6 +33,7 @@
 # Standard library imports
 import os
 from pathlib import Path
+from typing import Type
 
 # Third-party imports
 
@@ -48,7 +49,11 @@ class PluginsModel:
 
     def __init__(self):
         """Initialize plugins manager class"""
+
+        #: dict: devices dictionary
         self.devices_dict = {}
+
+        #: dict: plugin acquisition modes dictionary
         self.plugin_acquisition_modes = {}
 
     def load_plugins(self):
@@ -68,12 +73,14 @@ class PluginsModel:
 
         return self.devices_dict, self.plugin_acquisition_modes
 
-    def load_plugins_through_manager(self, plugin_manager):
+    def load_plugins_through_manager(
+        self, plugin_manager: Type[PluginPackageManager, PluginFileManager]
+    ):
         """Load plugins through plugin manager
 
         Parameters
         ----------
-        plugin_manager : object
+        plugin_manager : PluginPackageManager or PluginFileManager
             PluginManager object
         """
         plugins = plugin_manager.get_plugins()

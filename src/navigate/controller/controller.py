@@ -40,7 +40,6 @@ import sys
 import os
 import time
 import platform
-import reprlib
 
 # Third Party Imports
 
@@ -97,17 +96,18 @@ logger = logging.getLogger(p)
 
 class Controller:
     """Navigate Controller"""
+
     def __init__(
         self,
-        root,
-        splash_screen,
-        configuration_path,
-        experiment_path,
-        waveform_constants_path,
-        rest_api_path,
-        waveform_templates_path,
-        gui_configuration_path,
-        args,
+        root: tkinter.Tk,
+        splash_screen: tkinter.Toplevel,
+        configuration_path: str,
+        experiment_path: str,
+        waveform_constants_path: str,
+        rest_api_path: str,
+        waveform_templates_path: str,
+        gui_configuration_path: str,
+        args: tuple,
     ):
         """Initialize the Navigate Controller.
 
@@ -198,8 +198,10 @@ class Controller:
         verify_waveform_constants(self.manager, self.configuration)
 
         total_ram, available_ram = get_ram_info()
-        logger.info(f"Total RAM: {total_ram / 1024**3:.2f} GB. "
-                    f"Available RAM: {available_ram / 1024**3:.2f} GB.")
+        logger.info(
+            f"Total RAM: {total_ram / 1024**3:.2f} GB. "
+            f"Available RAM: {available_ram / 1024**3:.2f} GB."
+        )
 
         #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
@@ -363,13 +365,13 @@ class Controller:
         self.img_width = img_width
         self.img_height = img_height
 
-    def update_acquire_control(self):
+    def update_acquire_control(self) -> None:
         """Update the acquire control based on the current experiment parameters."""
         self.view.acqbar.stop_stage.config(
             command=self.stage_controller.stop_button_handler
         )
 
-    def change_microscope(self, microscope_name, zoom=None):
+    def change_microscope(self, microscope_name, zoom=None) -> None:
         """Change the microscope configuration.
 
         Parameters
@@ -399,7 +401,7 @@ class Controller:
         ):
             self.waveform_popup_controller.populate_experiment_values()
 
-    def initialize_cam_view(self):
+    def initialize_cam_view(self) -> None:
         """Populate view and maximum intensity projection tabs.
 
         Communicates with the camera view controller and mip setting controller to
@@ -410,7 +412,7 @@ class Controller:
         self.mip_setting_controller.initialize("minmax", [0, 2**16 - 1])
         self.camera_view_controller.initialize("image", [1, 0, 0])
 
-    def populate_experiment_setting(self, file_name=None, in_initialize=False):
+    def populate_experiment_setting(self, file_name=None, in_initialize=False) -> None:
         """Load experiment file and populate model.experiment and configure view.
 
         Confirms that the experiment file exists.
@@ -532,12 +534,12 @@ class Controller:
             return warning_message
         return ""
 
-    def resize(self, event):
+    def resize(self, event: tkinter.Event) -> None:
         """Resize the GUI.
 
         Parameters
         __________
-        event : event
+        event : tkinter.Event
             event = <Configure x=0 y=0 width=1200 height=600>
         """
 
@@ -566,7 +568,7 @@ class Controller:
             1000, lambda: refresh(event.width, event.height)
         )
 
-    def prepare_acquire_data(self):
+    def prepare_acquire_data(self) -> bool:
         """Prepare the acquisition data.
 
         Updates model.experiment.
@@ -590,12 +592,12 @@ class Controller:
         self.update_buffer()
         return True
 
-    def set_mode_of_sub(self, mode):
+    def set_mode_of_sub(self, mode: str) -> None:
         """Communicates imaging mode to sub-controllers.
 
         Parameters
         __________
-        mode : string
+        mode : str
             string = 'live', 'stop'
         """
         self.channels_tab_controller.set_mode(mode)
@@ -616,7 +618,7 @@ class Controller:
             self.acquire_bar_controller.stop_acquire()
             # self.menu_controller.feature_id_val.set(0)
 
-    def execute(self, command, *args):
+    def execute(self, command: str, *args) -> None:
         """Functions listens to the Sub_Gui_Controllers.
 
         The controller.experiment is passed as an argument to the model, which then
@@ -624,7 +626,7 @@ class Controller:
 
         Parameters
         __________
-        command : string
+        command : str
             string = 'stage', 'stop_stage', 'move_stage_and_update_info',
         args* : function-specific passes.
         """
@@ -1212,7 +1214,9 @@ class Controller:
                 )
                 camera_view_controller.microscope_name = microscope_name
                 popup_window.popup.bind("<Configure>", camera_view_controller.resize)
-                self.additional_microscopes[microscope_name]["popup_window"] = popup_window
+                self.additional_microscopes[microscope_name][
+                    "popup_window"
+                ] = popup_window
                 self.additional_microscopes[microscope_name][
                     "camera_view_controller"
                 ] = camera_view_controller
@@ -1226,7 +1230,9 @@ class Controller:
                     ),
                 )
 
-            self.additional_microscopes[microscope_name]["show_img_pipe"] = show_img_pipe
+            self.additional_microscopes[microscope_name][
+                "show_img_pipe"
+            ] = show_img_pipe
             self.additional_microscopes[microscope_name]["data_buffer"] = data_buffer
 
             # start thread
@@ -1243,7 +1249,7 @@ class Controller:
             )
             capture_img_thread.start()
 
-    def destroy_virtual_microscope(self, microscope_name, destroy_window=True):
+    def destroy_virtual_microscope(self, microscope_name, destroy_window=True) -> None:
         """Destroy virtual microscopes.
 
         Parameters
@@ -1263,10 +1269,12 @@ class Controller:
         # destroy the popup window
         if destroy_window:
             self.additional_microscopes[microscope_name]["popup_window"].popup.dismiss()
-            self.additional_microscopes[microscope_name]["camera_view_controller"] = None
+            self.additional_microscopes[microscope_name][
+                "camera_view_controller"
+            ] = None
             del self.additional_microscopes[microscope_name]
 
-    def move_stage(self, pos_dict):
+    def move_stage(self, pos_dict) -> None:
         """Trigger the model to move the stage.
 
         Parameters
@@ -1280,7 +1288,7 @@ class Controller:
         # Pass to model
         self.model.move_stage(pos_dict)
 
-    def stop_stage(self):
+    def stop_stage(self) -> None:
         """Stop the stage.
 
         Grab the stopped position from the stage
@@ -1288,7 +1296,7 @@ class Controller:
         """
         self.model.stop_stage()
 
-    def update_stage_controller_silent(self, ret_pos_dict):
+    def update_stage_controller_silent(self, ret_pos_dict) -> None:
         """Send updates to the stage GUI
 
         Parameters
@@ -1302,7 +1310,7 @@ class Controller:
             stage_gui_dict[ax] = val
         self.stage_controller.set_position_silent(stage_gui_dict)
 
-    def update_event(self):
+    def update_event(self) -> None:
         """Update the View/Controller based on events from the Model."""
         while True:
             event, value = self.event_queue.get()
@@ -1338,7 +1346,7 @@ class Controller:
                 except Exception:
                     print(f"*** unhandled event: {event}, {value}")
 
-    def add_acquisition_mode(self, name, acquisition_obj):
+    def add_acquisition_mode(self, name, acquisition_obj) -> None:
         """Add and Acquisition Mode.
 
         Parameters
@@ -1354,7 +1362,7 @@ class Controller:
         self.plugin_acquisition_modes[name] = acquisition_obj(name)
         self.acquire_bar_controller.add_mode(name)
 
-    def register_event_listener(self, event_name, event_handler):
+    def register_event_listener(self, event_name, event_handler) -> None:
         """Register an event listener.
 
         Parameters
@@ -1366,7 +1374,7 @@ class Controller:
         """
         self.event_listeners[event_name] = event_handler
 
-    def register_event_listeners(self, events):
+    def register_event_listeners(self, events) -> None:
         """Register multiple event listeners.
 
         Parameters

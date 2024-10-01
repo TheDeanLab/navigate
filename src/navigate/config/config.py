@@ -4,7 +4,6 @@
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
-
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
 
@@ -37,6 +36,7 @@ import shutil
 import platform
 from pathlib import Path
 from os.path import isfile
+import multiprocessing
 from multiprocessing.managers import ListProxy, DictProxy
 import logging
 
@@ -122,7 +122,7 @@ def get_configuration_paths():
     return [path for path in paths]
 
 
-def load_configs(manager, **kwargs):
+def load_configs(manager: multiprocessing.Manager, **kwargs) -> dict:
     """Load configuration files.
 
     Parameters
@@ -906,7 +906,7 @@ def verify_waveform_constants(manager, configuration):
             waveform_dict["other_constants"][k] = other_constants_dict[k]
 
 
-def verify_configuration(manager, configuration):
+def verify_configuration(manager: multiprocessing.Manager, configuration) -> None:
     """Verify configuration files.
 
     Supports old version of configurations.
@@ -998,7 +998,9 @@ def verify_configuration(manager, configuration):
                     f"{device_name} is not defined in configuration.yaml for "
                     f"microscope {microscope_name}"
                 )
-                raise Exception(f"No {device_name} defined for microscope {microscope_name}")
+                raise Exception(
+                    f"No {device_name} defined for microscope {microscope_name}"
+                )
         camera_config = device_config[microscope_name]["camera"]
         if "delay" not in camera_config.keys():
             camera_config["delay"] = camera_config.get("delay_percent", 2)

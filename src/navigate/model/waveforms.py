@@ -36,6 +36,7 @@ import logging
 # Third Party Imports
 import numpy as np
 from scipy import signal
+from numpy.typing import NDArray
 
 # Local Imports
 
@@ -46,37 +47,31 @@ logger = logging.getLogger(p)
 
 def camera_exposure(
     sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=0.001
-):
+) -> NDArray:
     """Calculates timing and duration of camera exposure.
     Not actually used to trigger the camera.  Only meant for visualization.
 
     Parameters
     ----------
-    sample_rate : Integer
+    sample_rate : int
         Unit - Hz
-    sweep_time : Float
+    sweep_time : float
         Unit - Seconds
-    exposure : Float
+    exposure : float
         Unit - Seconds
-    camera_delay : Float
+    camera_delay : float
         Unit - Seconds
 
     Returns
     -------
-    exposure_start : Float
+    exposure_start : float
         Unit - Seconds
-    exposure_end : Float
+    exposure_end : float
         Unit - Seconds
-
-    Examples
-    --------
-        >>> exposure_start, exposure_end = camera_exposure(sample_rate, sweep_time,
-        exposure, camera_delay)
-
     """
     amplitude = 5
 
-    # get an integer number of samples
+    # get an int number of samples
     samples = int(np.multiply(sample_rate, sweep_time))
 
     # create an array just containing the offset voltage:
@@ -93,7 +88,7 @@ def camera_exposure(
 
 def single_pulse(
     sample_rate=100000, sweep_time=0.4, delay=10, pulse_width=1, amplitude=1, offset=0
-):
+) -> NDArray:
     """
     Returns a numpy array with a single pulse
     Used for creating TTL pulses out of analog outputs and laser intensity
@@ -101,28 +96,25 @@ def single_pulse(
 
     Parameters
     ----------
-    sample_rate : Integer
+    sample_rate : int
         Unit - Hz
-    sweep_time : Float
+    sweep_time : float
         Unit - Seconds
-    delay : Float
+    delay : float
         Unit - Percent
-    pulse_width : Float
+    pulse_width : float
         Unit - Percent
-    amplitude : Float
+    amplitude : float
         Unit - Volts
-    offset : Float
+    offset : float
         Unit - Volts
 
     Returns
     -------
-    waveform : np.array
-
-    Examples
-    --------
-    >>> typical_TTL_pulse = single_pulse(sample_rate, sweep_time, 10, 1, 1, 0)
+    waveform : NDArray
+        Single pulse waveform
     """
-    # get an integer number of samples
+    # get an int number of samples
     samples = int(np.floor(np.multiply(sample_rate, sweep_time)))
 
     # create an array just containing the offset voltage:
@@ -146,7 +138,7 @@ def remote_focus_ramp(
     fall=0.05,
     amplitude=1,
     offset=0,
-):
+) -> NDArray:
     """Returns a numpy array with a sawtooth ramp - typically used for remote focusing.
 
     The waveform starts at offset and stays there for the delay period, then
@@ -158,39 +150,33 @@ def remote_focus_ramp(
 
     Parameters
     ----------
-    sample_rate : Integer
+    sample_rate : int
         Unit - Hz
-    exposure_time : Float
+    exposure_time : float
         Unit - Seconds
-    sweep_time : Float
+    sweep_time : float
         Unit - Seconds
-    remote_focus_delay : Float
+    remote_focus_delay : float
         Unit - seconds
-    camera_delay : Float
+    camera_delay : float
         Unit - seconds
-    fall : Float
+    fall : float
         Unit - seconds
-    amplitude : Float
+    amplitude : float
         Unit - Volts
-    offset : Float
+    offset : float
         Unit - Volts
 
     Returns
     -------
-    waveform : np.array
-
-    Examples
-    --------
-    >>> etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
-        camera_delay, fall, amplitude, offset)
-
+    waveform : NDArray
+        Remote focus ramp waveform
     """
     # create an array just containing the negative amplitude voltage:
     delay_samples = int(remote_focus_delay * sample_rate)
     delay_array = np.zeros(delay_samples) + offset - amplitude
 
     # 10-7.5 -> 1.025 * .2
-    #
     ramp_samples = int(
         (exposure_time + camera_delay - remote_focus_delay) * sample_rate
     )
@@ -222,7 +208,7 @@ def remote_focus_ramp_triangular(
     amplitude=1,
     offset=0,
     ramp_type="Rising",
-):
+) -> NDArray:
     """Returns a numpy array with a triangular ramp typically used for remote focusing
 
     The waveform starts at offset and stays there for the delay period, then
@@ -233,32 +219,26 @@ def remote_focus_ramp_triangular(
 
     Parameters
     ----------
-    sample_rate : Integer
+    sample_rate : int
         Unit - Hz
-    exposure_time : Float
+    exposure_time : float
         Unit - Seconds
-    sweep_time : Float
+    sweep_time : float
         Unit - Seconds
-    remote_focus_delay : Float
+    remote_focus_delay : float
         Unit - Seconds
-    camera_delay : Float
+    camera_delay : float
         Unit - Seconds
-    amplitude : Float
+    amplitude : float
         Unit - Volts
-    offset : Float
+    offset : float
         Unit - Volts
     ramp_type : String
 
-
     Returns
     -------
-    waveform : np.array
-
-    Examples
-    --------
-    >>> etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
-        camera_delay, fall, amplitude, offset)
-
+    waveform : NDArray
+        Remote focus ramp waveform
     """
     # create an array just containing the negative amplitude voltage:
     # In theory, delay here should be 4H.
@@ -311,68 +291,59 @@ def sawtooth(
     offset=0,
     duty_cycle=50,
     phase=np.pi / 2,
-):
+) -> NDArray:
     """
     Returns a numpy array with a sawtooth function.
     Used for creating the galvo signal.
 
     Parameters
     ----------
-    sample_rate : Integer
+    sample_rate : int
         Unit - Hz
-    sweep_time : Float
+    sweep_time : float
         Unit - Seconds
-    frequency : Float
+    frequency : float
         Unit - Hz
-    amplitude : Float
+    amplitude : float
         Unit - Volts
-    offset : Float
+    offset : float
         Unit - Volts
-    duty_cycle : Float
+    duty_cycle : float
         Unit - Percent
-    phase : Float
+    phase : float
         Unit - Radians
 
     Returns
     -------
-    waveform : np.array
-
-    Examples
-    --------
-    >>> typical_galvo = sawtooth(sample_rate, sweep_time, 10, 1, 0, 50, np.pi/2)
+    waveform : NDArray
+        Sawtooth waveform
     """
-
     samples = int(np.multiply(sample_rate, sweep_time))
     duty_cycle = duty_cycle / 100
     t = np.linspace(0, sweep_time, samples)
     waveform = signal.sawtooth(2 * np.pi * frequency * (t - phase), width=duty_cycle)
     waveform = amplitude * waveform + offset
-
     return waveform
 
 
-def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
+def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1) -> NDArray:
     """
     Returns a numpy array with a DC value
     Used for creating the resonant galvo drive voltage.
 
     Parameters
     ----------
-    sample_rate : Integer
+    sample_rate : int
         Unit - Hz
-    sweep_time : Float
+    sweep_time : float
         Unit - Seconds
-    amplitude : Float
+    amplitude : float
         Unit - Volts
 
     Returns
     -------
     waveform : np.array
-
-    Examples
-    --------
-    >>> typical_galvo = dc_value(sample_rate, sweep_time, 1)
-
+        DC value waveform
     """
     samples = np.multiply(float(sample_rate), sweep_time)
     waveform = np.zeros(int(samples))
@@ -388,34 +359,31 @@ def square(
     offset=0,
     duty_cycle=50,
     phase=np.pi,
-):
+) -> NDArray:
     """Returns a numpy array with a square function.
     Used for creating analog laser drive voltage.
 
     Parameters
     ----------
-    sample_rate : Integer
+    sample_rate : int
         Unit - Hz
-    sweep_time : Float
+    sweep_time : float
         Unit - Seconds
-    frequency : Float
+    frequency : float
         Unit - Hz
-    amplitude : Float
+    amplitude : float
         Unit - Volts
-    offset : Float
+    offset : float
         Unit - Volts
-    duty_cycle : Float
+    duty_cycle : float
         Unit - Percent
-    phase : Float
+    phase : float
         Unit - Radians
 
     Returns
     -------
-    waveform : np.array
-
-    Examples
-    --------
-    >>> typical_laser = square(sample_rate, sweep_time, 10, 1, 0, 50, np.pi)
+    waveform : NDArray
+        Square waveform
     """
     samples = int(sample_rate * sweep_time)
     duty_cycle = duty_cycle / 100
@@ -427,7 +395,7 @@ def square(
 
 def sine_wave(
     sample_rate=100000, sweep_time=0.4, frequency=10, amplitude=1, offset=0, phase=0
-):
+) -> NDArray:
     """Returns a numpy array with a sine waveform
 
     Used for creating analog laser drive voltage.
@@ -449,12 +417,8 @@ def sine_wave(
 
     Returns
     -------
-    waveform : np.array
-
-    Examples
-    --------
-    >>> typical_laser = sine_wave(sample_rate, sweep_time, 10, 1, 0, 0)
-
+    waveform : NDArray
+        Sine waveform
     """
     samples = int(sample_rate * sweep_time)
     t = np.linspace(0, sweep_time, samples)
@@ -462,25 +426,20 @@ def sine_wave(
     return waveform
 
 
-def smooth_waveform(waveform, percent_smoothing=10):
+def smooth_waveform(waveform: NDArray, percent_smoothing=10) -> NDArray:
     """Smooths a numpy array via convolution
 
     Parameters
     ----------
-    waveform : np.array
+    waveform : NDArray
         The waveform to be smoothed
     percent_smoothing : int
         The percentage of the waveform to be smoothed
 
     Returns
     -------
-    smoothed_waveform : np.array
+    smoothed_waveform : NDArray
         The smoothed waveform
-
-    Examples
-    --------
-    >>> smoothed_waveform = smooth_waveform(waveform, percent_smoothing)
-
     """
     waveform_length = np.size(waveform)
     window_length = int(np.ceil(waveform_length * percent_smoothing / 100))
@@ -491,5 +450,4 @@ def smooth_waveform(waveform, percent_smoothing=10):
     smoothed_waveform = (
         np.convolve(waveform_padded, np.ones(window_length), "valid") / window_length
     )
-
     return smoothed_waveform

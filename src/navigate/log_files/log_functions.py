@@ -68,7 +68,7 @@ def find_filename(k, v):
     return False
 
 
-def log_setup(logging_configuration, logging_path=None):
+def log_setup(logging_configuration, logging_path=None) -> None:
     """Setup logging configuration
 
     Initialize a logger from a YAML file containing information in the Python logging

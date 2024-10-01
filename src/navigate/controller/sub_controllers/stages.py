@@ -34,6 +34,7 @@
 import tkinter as tk
 from multiprocessing.managers import ListProxy, DictProxy
 import logging
+from typing import Union, Dict
 
 # Third Party Imports
 
@@ -347,7 +348,7 @@ class StageController(GUIController):
             self.stage_setting_dict[axis] = position.get(axis, 0)
         self.show_verbose_info("Set stage position")
 
-    def get_position(self):
+    def get_position(self) -> Union[Dict[str, float], None]:
         """This function returns current position from the view.
 
         Returns

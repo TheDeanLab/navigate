@@ -40,7 +40,7 @@ from pathlib import Path
 from navigate.config import get_configuration_paths
 
 
-def evaluate_parser_input_arguments(args):
+def evaluate_parser_input_arguments(args) -> tuple:
     """If non-default configuration, experiment, or ETL constant file is provided as an
     input argument.
 
@@ -148,12 +148,12 @@ def evaluate_parser_input_arguments(args):
     )
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     """Add Parser Input Arguments to ArgumentParser Object.
 
     Returns
     -------
-    parser : object
+    parser : argparse.ArgumentParser
         ArgumentParserObject with Added Input Arguments"""
 
     parser = argparse.ArgumentParser(description="navigate Command Line Arguments")

@@ -232,7 +232,6 @@ class PluginsController:
             try:
                 func(*args, **kwargs)
             except Exception as e:
-                print(e)
                 messagebox.showwarning(
                     title="Warning",
                     message=(
@@ -241,6 +240,7 @@ class PluginsController:
                         "from navigate!"
                     ),
                 )
+                raise e
 
         return func_with_wrapper
 

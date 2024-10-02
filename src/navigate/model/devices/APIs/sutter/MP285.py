@@ -102,6 +102,7 @@ class MP285:
         self.last_command_idx = 0
         self.is_interrupted = False
         self.is_moving = False
+        self.unreceived_bytes = 0
         self.commands_buffer = [1] * self.commands_num
 
 
@@ -124,19 +125,35 @@ class MP285:
         if idx != self.top_command_idx:
             return None
         
+        l = self.commands_buffer[self.top_command_idx]
+        r = ""
         for _ in range(self.n_waits):
-            if self.serial.in_waiting >= self.commands_buffer[self.top_command_idx]:
+            if self.unreceived_bytes > 0 and self.serial.in_waiting >= l + self.unreceived_bytes:
+                r = self.serial.read(l + self.unreceived_bytes)
+                logger.debug(f"MP285 read response {r}")
+                if r[self.unreceived_bytes-1] == 13: #b'\r'
+                    r = r[self.unreceived_bytes:]
+                else:
+                    r = r[:l]
+                logger.debug(f"MP285 valid response: {r}")
+                self.unreceived_bytes = 0
+                self.n_waits -= 5
+                break
+            elif self.serial.in_waiting >= self.commands_buffer[self.top_command_idx]:
                 r = self.serial.read(self.commands_buffer[self.top_command_idx])
                 logger.debug(f"MP285 read response {r}")
-                self.top_command_idx = (self.top_command_idx + 1) % self.commands_num
-                self.safe_to_write.set()
-                return r
+                break
             time.sleep(self.wait_time)
         
-        logger.error("Haven't received any responses from MP285! Please check the stage device!")
+        if r == "":
+            logger.error("Haven't received any responses from MP285! Please check the stage device!")
+            self.unreceived_bytes += self.commands_buffer[self.top_command_idx]
+            logger.error(f"MP285 unreceived bytes: {self.unreceived_bytes}")
+            # let the waiting time a little bit longer
+            self.n_waits += 5
         self.top_command_idx = (self.top_command_idx + 1) % self.commands_num
         self.safe_to_write.set()
-        return ""
+        return r
         # raise TimeoutError("Haven't received any responses from MP285! Please check the stage device!")
 
     def connect_to_serial(self):

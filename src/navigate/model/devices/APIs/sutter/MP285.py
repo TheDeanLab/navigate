@@ -206,25 +206,7 @@ class MP285:
         # print("calling get_current_position")
         # self.flush_buffers()
         command = bytes.fromhex("63") + bytes.fromhex("0d")
-        if not self.is_moving:
-            idx = self.send_command(command, 13)
-        elif not self.is_interrupted:
-            # send commands: interrupt and get position
-            self.write_done_flag.acquire()
-            # TODO: maybe need a short waiting time depends on the device
-            if self.serial.in_waiting == 0:
-                self.serial.write(bytes.fromhex("03630d"))
-                logger.debug("MP285 write command 03630d")
-                idx = (self.top_command_idx - 1) % self.commands_num
-                self.commands_buffer[idx] = 14
-                self.top_command_idx = idx
-                self.is_interrupted = True
-                self.write_done_flag.release()
-            else:
-                self.write_done_flag.release()
-                idx = self.send_command(command, 13)
-        else:
-            return None, None, None
+        idx = self.send_command(command, 13)
 
         while True:
             position_information = self.read_response(idx)
@@ -232,19 +214,15 @@ class MP285:
                 break
             time.sleep(self.wait_time)
 
-        # print(f"received: {position_information}")
-        self.is_interrupted = False
-        l = self.commands_buffer[idx]
-        if len(position_information) < l:
+        if len(position_information) < 13:
             return None, None, None
         xs = int.from_bytes(position_information[l-13:l-9], byteorder="little", signed=True)
         ys = int.from_bytes(position_information[l-9:l-5], byteorder="little", signed=True)
         zs = int.from_bytes(position_information[l-5:-1], byteorder="little", signed=True)
-        # print(f"converted to microsteps: {xs} {ys} {zs}")
         x_pos = self.convert_microsteps_to_microns(xs)
         y_pos = self.convert_microsteps_to_microns(ys)
         z_pos = self.convert_microsteps_to_microns(zs)
-        # print(f"converted to position: {x_pos} {y_pos} {z_pos}")
+
         return x_pos, y_pos, z_pos
 
     def move_to_specified_position(self, x_pos, y_pos, z_pos):
@@ -363,8 +341,7 @@ class MP285:
             command_complete = True
         else:
             command_complete = False
-        # print(f"Command complete? {command_complete}")
-        self.safe_to_write.set()
+
         return command_complete
 
     def interrupt_move(self):
@@ -382,40 +359,31 @@ class MP285:
         stage_stopped : bool
             True if move was successful, False if not.
         """
-        # print("calling interrupt_move")
-        if not self.is_moving:
-            return
+        if not self.is_moving or self.is_interrupted:
+            return True
 
-        # Send Command
-        self.is_interrupted = True
-        idx = self.send_command(bytes.fromhex("03"))
+        # send commands: interrupt and get position
+        if self.serial.in_waiting == 0:
+            self.is_interrupted = True
+            self.write_done_flag.acquire()
+            self.serial.write(bytes.fromhex("03630d"))
+            logger.debug("MP285 write command 03630d")
+            idx = (self.top_command_idx - 1) % self.commands_num
+            self.commands_buffer[idx] = 14
+            self.top_command_idx = idx
+            self.write_done_flag.release()
 
-        # Get Response
-        for _ in range(self.n_waits):
-            # time.sleep(time_to_move)
-            response = self.serial.read(1)
-            # print(f"move response: {response}")
-            if response == b"":
+            while True:
+                position_information = self.read_response(idx)
+                if position_information is not None:
+                    break
                 time.sleep(self.wait_time)
-            elif response == bytes.fromhex("0d"):
-                self.top_command_idx = (idx + 1) % self.commands_num
-                self.safe_to_write.set()
-                self.is_interrupted = False
-                return True
-            elif response == bytes.fromhex("3d"):
-                for _ in range(self.n_waits):
-                    response2 = self.serial.read(1)
-                    if response2 == b"":
-                        time.sleep(self.wait_time)
-                    elif response2 == bytes.fromhex("0d"):
-                        self.top_command_idx = (idx + 1) % self.commands_num
-                        self.safe_to_write.set()
-                        self.is_interrupted = False
-                        return True
 
-        self.safe_to_write.set()
-        self.is_interrupted = False
-        return False
+            if len(position_information) < 14:
+                logger.error("MP285 didn't get full position information after interruption")
+            self.is_interrupted = False
+
+        return True
 
     def set_absolute_mode(self):
         """Set MP285 to Absolute Position Mode.

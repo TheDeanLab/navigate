@@ -274,7 +274,10 @@ class SutterStage(StageBase):
 
     def stop(self):
         """Stop all stage movement abruptly."""
-        pass
+        try:
+            self.stage.interrupt_move()
+        except SerialException as error:
+            logger.exception(f"MP-285 - Stage stop failed: {error}")
 
     def close(self):
         """Close the stage."""

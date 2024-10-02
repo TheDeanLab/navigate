@@ -37,14 +37,20 @@ import json
 import yaml
 from pathlib import Path
 import psutil
+from typing import Union
+import logging
 
 # Third party imports
 
 # Local application imports
 from navigate.tools.common_functions import copy_proxy_object
 
+# Logger setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
-def get_ram_info():
+
+def get_ram_info() -> tuple:
     """Get computer RAM information.
 
     This function retrieves the total and available RAM on the computer.
@@ -67,7 +73,7 @@ def get_ram_info():
     return total_ram, available_ram
 
 
-def create_save_path(saving_settings):
+def create_save_path(saving_settings: dict) -> str:
     """Create path to save the data to.
 
     This function retrieves the user inputs from the popup save window.
@@ -112,7 +118,6 @@ def create_save_path(saving_settings):
     # Cell1/Position1/1_CH00_000000.tif
     prefix_num = len(prefix_string)
     cell_directories = list(
-        # filter(lambda v: v[:5] == "Cell_", os.listdir(save_directory))
         filter(lambda v: v[:prefix_num] == prefix_string, os.listdir(save_directory))
     )
     if len(cell_directories) != 0:
@@ -133,7 +138,7 @@ def create_save_path(saving_settings):
     return save_directory
 
 
-def load_yaml_file(file_path):
+def load_yaml_file(file_path: str) -> Union[dict, None]:
     """Load YAML file from Disk
 
     Parameters
@@ -143,8 +148,8 @@ def load_yaml_file(file_path):
 
     Returns
     -------
-    config_data: dict/list/None
-        A dictionary/list of the yaml file content.
+    config_data: dict/None
+        A dictionary of the yaml file content.
         None: if the yaml file has error or not exist.
     """
     file_path = Path(file_path)
@@ -154,12 +159,16 @@ def load_yaml_file(file_path):
         try:
             config_data = yaml.load(f, Loader=yaml.FullLoader)
         except yaml.YAMLError as yaml_error:
-            print(f"Can't load yaml file: {file_path} - {yaml_error}")
+            error_statement = f"Can't load yaml file: {file_path} - {yaml_error}"
+            logger.debug(error_statement)
+            print(error_statement)
             return None
     return config_data
 
 
-def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
+def save_yaml_file(
+    file_directory: str, content_dict: dict, filename="experiment.yml"
+) -> bool:
     """Same YAML file to Disk
 
     Parameters
@@ -195,7 +204,7 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
     return True
 
 
-def delete_folder(top):
+def delete_folder(top: str) -> None:
     """Delete folder and all sub-folders.
 
     https://docs.python.org/3/library/os.html#os.walk

@@ -60,8 +60,8 @@ variable_types = {
 
 
 class ConfigurationAssistantWindow(ttk.Frame):
-    def __init__(self, root, *args, **kwargs):
-        """Initiates the main application window
+    def __init__(self, root, *args, **kwargs) -> None:
+        """Initiates the main configuration assistant ttk.Frame.
 
         Parameters
         ----------

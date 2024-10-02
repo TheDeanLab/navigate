@@ -89,7 +89,7 @@ class PluginPackageManager:
         return plugins
 
     @staticmethod
-    def load_config(package_name):
+    def load_config(package_name: str) -> dict:
         """Load plugin_config.yml
 
         Parameters

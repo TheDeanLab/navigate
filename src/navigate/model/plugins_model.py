@@ -33,7 +33,7 @@
 # Standard library imports
 import os
 from pathlib import Path
-from typing import Type
+from typing import Union
 
 # Third-party imports
 
@@ -74,8 +74,8 @@ class PluginsModel:
         return self.devices_dict, self.plugin_acquisition_modes
 
     def load_plugins_through_manager(
-        self, plugin_manager: Type[PluginPackageManager, PluginFileManager]
-    ):
+        self, plugin_manager: Union[PluginPackageManager, PluginFileManager]
+    ) -> None:
         """Load plugins through plugin manager
 
         Parameters

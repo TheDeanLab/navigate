@@ -34,6 +34,7 @@ import sys
 import time
 import shutil
 import platform
+from os import PathLike
 from pathlib import Path
 from os.path import isfile
 import multiprocessing
@@ -51,7 +52,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def get_navigate_path():
+def get_navigate_path() -> str:
     """Establish a program home directory in AppData/Local/.navigate for Windows
     or ~/.navigate for Mac and Linux.
 
@@ -72,7 +73,7 @@ def get_navigate_path():
     return navigate_path
 
 
-def get_configuration_paths():
+def get_configuration_paths() -> list[PathLike]:
     """Get the paths of the various configuration files used by Navigate.
 
     Returns

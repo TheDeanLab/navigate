@@ -45,7 +45,7 @@ class SplashScreen(tk.Toplevel):
     Centered depending upon the host computer being used.
     """
 
-    def __init__(self, root, image_path, *args, **kargs):
+    def __init__(self, root, image_path, *args, **kwargs):
         """Initialize the SplashScreen.
 
         Parameters
@@ -56,7 +56,7 @@ class SplashScreen(tk.Toplevel):
             Path to the image to display on the splash screen.
         *args
             Additional arguments to pass to the tk.Toplevel constructor.
-        **kargs
+        **kwargs
             Additional keyword arguments to pass to the tk.Toplevel constructor.
         """
 

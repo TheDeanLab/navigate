@@ -58,7 +58,7 @@ logger = logging.getLogger(p)
 class Configurator:
     """Navigate Configurator"""
 
-    def __init__(self, root, splash_screen):
+    def __init__(self, root, splash_screen) -> None:
         """Initiates the configurator application window.
 
         Parameters
@@ -68,13 +68,19 @@ class Configurator:
         splash_screen : SplashScreen
             The splash screen of the application
         """
+
+        #: tk.Tk: The main window of the application
         self.root = root
 
         # Show the splash screen for 1 second and then destroy it.
         sleep(1)
         splash_screen.destroy()
         self.root.deiconify()
+
+        #: ConfigurationAssistantWindow: The configuration assistant window
         self.view = ConfigurationAssistantWindow(root)
+
+        #: MicroscopeWindow: The microscope window
         self.view.microscope_window = MicroscopeWindow(
             self.view.microscope_frame, self.view.root
         )
@@ -84,25 +90,27 @@ class Configurator:
         self.view.top_window.load_button.config(command=self.load_configuration)
         self.view.top_window.save_button.config(command=self.save)
         self.view.top_window.cancel_button.config(command=self.on_cancel)
+
+        #: int: The microscope ID
         self.microscope_id = 0
         self.create_config_window(0)
 
         print(
-            "WARNING: The Configuration Assistant is not fully implemented. "
-            "Users are still required to manually configure their system."
+            "WARNING: The Configuration Assistant is actively being developed. "
+            "Please report any issues encountered as an issue on GitHub. "
         )
 
-    def on_cancel(self):
+    def on_cancel(self) -> None:
         """Closes the window and exits the program"""
         self.root.destroy()
         exit()
 
-    def add_microscope(self):
+    def add_microscope(self) -> None:
         """Add a new microscope tab"""
         self.microscope_id += 1
         self.create_config_window(self.microscope_id)
 
-    def delete_microscopes(self):
+    def delete_microscopes(self) -> None:
         """Delete all microscopes"""
         # delete microscopes
         for tab_id in self.view.microscope_window.tabs():
@@ -186,11 +194,14 @@ class Configurator:
                                 if k.strip() == "":
                                     warning_info[hardware_name] = True
                                     print(
-                                        f"Notice: {hardware_name} has an empty value {ref}! Please double check if it's okay!"
+                                        f"Notice: {hardware_name} has an empty "
+                                        f"value {ref}! Please double check "
+                                        f"if it's okay!"
                                     )
 
                                 if k_idx in value_dict:
-                                    k = value_dict[k_idx][v]
+                                    # TODO: is v referenced before assignment?
+                                    k = value_dict[k_idx][v]  # noqa: F821
                                 v = variables[v_idx].get()
                                 if v_idx in value_dict:
                                     v = value_dict[v_idx][v]
@@ -208,7 +219,8 @@ class Configurator:
                         except tk._tkinter.TclError:
                             v = ""
                             print(
-                                f"Notice: {hardware_name} has an empty value {k}! Please double check!"
+                                f"Notice: {hardware_name} has an empty value {k}! "
+                                f"Please double check!"
                             )
                             warning_info[hardware_name] = True
                         set_value(temp_dict, k.split("/"), v)
@@ -218,7 +230,9 @@ class Configurator:
         if warning_info:
             messagebox.showwarning(
                 title="Configuration",
-                message=f"There are empty value(s) with {', '.join(warning_info.keys())}. Please double check!",
+                message=f"There are empty value(s) with "
+                f"{', '.join(warning_info.keys())}. "
+                f"Please double check!",
             )
 
     def write_to_yaml(self, config, filename):
@@ -404,7 +418,7 @@ class Configurator:
                                 hardware_ref_name
                             ],
                         )
-                    except Exception as e:
+                    except Exception:
                         widgets_value = [None]
                     microscope_tab.create_hardware_tab(
                         hardware_type, widgets, hardware_widgets_value=widgets_value
@@ -425,7 +439,7 @@ class Configurator:
                                 ],
                             ),
                         ]
-                    except:
+                    except Exception:
                         widgets_value = [[None], [None]]
                     microscope_tab.create_hardware_tab(
                         hardware_type,

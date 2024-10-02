@@ -53,23 +53,17 @@ os.environ["https_proxy"] = ""
 
 
 def main() -> None:
-    """Light-sheet Microscopy (Navigate).
+    """Navigate: an open-source platform for smart light-sheet microscopy
+
     Microscope control software built in a Model-View-Controller architecture.
     Provides control of cameras, data acquisition cards, filter wheels, lasers
     stages, voice coils, and zoom servos.
 
-    Parameters
-    ----------
-    *args : iterable
-        --synthetic-hardware
-        --sh
-        --config-file
-        --experiment-file
-        --waveform_constants-path
-        --rest-api-file
-        --waveform-templates-file
-        --logging-confi
-        --configurator
+    Note
+    ----
+        Please find the original
+        manuscript outlining navigate's
+        functionality here: https://www.nature.com/articles/s41592-024-02413-4
     """
     if platform.system() != "Windows":
         print(

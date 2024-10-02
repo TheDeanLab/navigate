@@ -216,9 +216,9 @@ class MP285:
 
         if len(position_information) < 13:
             return None, None, None
-        xs = int.from_bytes(position_information[l-13:l-9], byteorder="little", signed=True)
-        ys = int.from_bytes(position_information[l-9:l-5], byteorder="little", signed=True)
-        zs = int.from_bytes(position_information[l-5:-1], byteorder="little", signed=True)
+        xs = int.from_bytes(position_information[0:4], byteorder="little", signed=True)
+        ys = int.from_bytes(position_information[4:8], byteorder="little", signed=True)
+        zs = int.from_bytes(position_information[8:12], byteorder="little", signed=True)
         x_pos = self.convert_microsteps_to_microns(xs)
         y_pos = self.convert_microsteps_to_microns(ys)
         z_pos = self.convert_microsteps_to_microns(zs)

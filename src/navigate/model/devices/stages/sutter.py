@@ -174,13 +174,19 @@ class SutterStage(StageBase):
         position = {}
         try:
             (
-                self.stage_x_pos,
-                self.stage_y_pos,
-                self.stage_z_pos,
+                stage_x_pos,
+                stage_y_pos,
+                stage_z_pos,
             ) = self.stage.get_current_position()
-            for axis, hardware_axis in self.axes_mapping.items():
-                hardware_position = getattr(self, f"stage_{hardware_axis}_pos")
-                self.__setattr__(f"{axis}_pos", hardware_position)
+            if stage_x_pos and stage_y_pos and stage_z_pos:
+                self.stage_x_pos = stage_x_pos
+                self.stage_y_pos = stage_y_pos
+                self.stage_z_pos = stage_z_pos
+                for axis, hardware_axis in self.axes_mapping.items():
+                    hardware_position = getattr(self, f"stage_{hardware_axis}_pos")
+                    self.__setattr__(f"{axis}_pos", hardware_position)
+            else:
+                logger.debug(f"MP-285 didn't return current position, using previous position!")
 
             position = self.get_position_dict()
             logger.debug(f"MP-285 - Position: {position}")
@@ -268,10 +274,7 @@ class SutterStage(StageBase):
 
     def stop(self):
         """Stop all stage movement abruptly."""
-        try:
-            self.stage.interrupt_move()
-        except SerialException as error:
-            logger.exception(f"MP-285 - Stage stop failed: {error}")
+        pass
 
     def close(self):
         """Close the stage."""

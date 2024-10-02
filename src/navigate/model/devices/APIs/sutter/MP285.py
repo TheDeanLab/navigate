@@ -354,7 +354,7 @@ class MP285:
         idx = self.send_command(command, 1)
         while True:
             response = self.read_response(idx)
-            if response:
+            if response is not None:
                 break
             time.sleep(self.wait_time)
         if response == bytes.fromhex("0d"):
@@ -437,7 +437,7 @@ class MP285:
         idx = self.send_command(abs_cmd)
         while True:
             r = self.read_response(idx)
-            if r:
+            if r is not None:
                 break
             time.sleep(self.wait_time)
         return False
@@ -484,7 +484,7 @@ class MP285:
         idx = self.send_command(bytes.fromhex("6E") + bytes.fromhex("0d"))
         while True:
             response = self.read_response(idx)
-            if response:
+            if response is not None:
                 break
             time.sleep(self.wait_time)
 

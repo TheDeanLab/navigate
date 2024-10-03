@@ -197,6 +197,32 @@ class Snap:
         )
         return True
 
+class SendExternalTrigger:
+
+    def __init__(self, model, trigger_channel="/PCIe-6738-B/ctr0", timeout=10):
+
+        self.model = model
+
+        self.trigger_channel = trigger_channel
+        self.timeout = timeout
+
+        self.config_table = {
+            "signal": {
+                "main": self.signal_func,
+            }
+        }
+
+    def signal_func(self):
+
+        self.model.pause_data_thread()
+
+        result = self.model.active_microscope.daq.send_external_trigger(
+            self.trigger_channel, self.timeout
+        )
+
+        self.model.resume_data_thread()
+
+        return result
 
 class WaitForExternalTrigger:
     """WaitForExternalTrigger class to time parts of the feature list using external input.
@@ -213,7 +239,7 @@ class WaitForExternalTrigger:
     - Only digital triggers are handeled at this time: use the PFI inputs on the DAQ.
     """
 
-    def __init__(self, model, trigger_channel="/PCIe-6738/PFI4", timeout=-1):
+    def __init__(self, model, trigger_channel="/PCIe-6738-B/PFI4", timeout=-1):
         """Initialize the WaitForExternalTrigger class.
 
         Parameters:

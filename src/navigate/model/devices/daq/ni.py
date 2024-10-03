@@ -39,6 +39,7 @@ import time
 # Third Party Imports
 import nidaqmx
 import nidaqmx.constants
+import nidaqmx.stream_writers
 import nidaqmx.task
 import numpy as np
 
@@ -177,6 +178,39 @@ class NIDAQ(DAQBase):
                 )
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
+
+    def send_external_trigger(
+            self, trigger_channel, timeout=100
+    ):
+        """When called, sends a single external trigger for device control.
+        """
+        if not trigger_channel:
+            logger.info(
+                "No external trigger channel is specified! Return from waiting!"
+            )
+            return False        
+
+        try:
+            with nidaqmx.Task() as task:
+                task.co_channels.add_co_pulse_chan_time(trigger_channel)
+
+                task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS)
+
+                counter_writer = nidaqmx.stream_writers.CounterWriter(
+                    task_out_stream=task.out_stream,
+                    auto_start=True
+                    )
+                
+                task.start()
+
+                counter_writer.write_one_sample_pulse_time(high_time=50, low_time=50, timeout=timeout)
+        except Exception as e:
+            logger.info(
+                f"Trigger send failed: {e}"
+            )
+            return False
+        
+        return True
 
     def wait_for_external_trigger(
         self, trigger_channel, wait_internal=0.001, timeout=-1

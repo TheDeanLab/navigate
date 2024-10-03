@@ -45,6 +45,7 @@ from navigate.model.features.common_features import (
     ChangeResolution,  # noqa
     Snap,  # noqa
     WaitToContinue,  # noqa
+    SendExternalTrigger, # noqa
     WaitForExternalTrigger,  # noqa
     LoopByCount,  # noqa
     FlexibleLoopByParameter,  # noqa

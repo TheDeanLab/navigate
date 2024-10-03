@@ -325,6 +325,15 @@ class AdaptiveOpticsPopup:
         }
         ttk.Label(save_frame, text="Save detailed report?").grid(row=0, column=1)
 
+        headless_var = tk.BooleanVar()
+        headless_check = ttk.Checkbutton(save_frame, variable=headless_var)
+        headless_check.grid(row=1, column=0)
+        self.inputs["headless"] = {
+            "button": headless_check,
+            "variable": headless_var
+        }
+        ttk.Label(save_frame, text="Running in Feature List?").grid(row=1, column=1)
+
         #: ttk.Frame: Plot Frame
         self.plot_frame = ttk.Frame(master=content_frame)
         self.plot_frame.grid(row=0, column=1, rowspan=2)

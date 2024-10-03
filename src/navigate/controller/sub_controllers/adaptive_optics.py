@@ -129,6 +129,9 @@ class AdaptiveOpticsPopupController(GUIController):
                 "<Leave>", lambda evt: evt.widget.config(background="SystemButtonFace")
             )
 
+        self.widgets['save_report']['button'].configure(command=self.update_experiment_values)
+        self.widgets['headless']['button'].configure(command=self.update_experiment_values)
+
         self.populate_experiment_values()
 
     def change_camera(self, evt):
@@ -181,6 +184,11 @@ class AdaptiveOpticsPopupController(GUIController):
             self.parent_controller.configuration["experiment"][
                 "AdaptiveOpticsParameters"
             ].get("save_report", False)
+        )
+        self.widgets["headless"]["variable"].set(
+            self.parent_controller.configuration["experiment"][
+                "AdaptiveOpticsParameters"
+            ].get("headless", False)
         )
         coefs_dict = self.parent_controller.configuration["experiment"][
             "MirrorParameters"
@@ -245,6 +253,9 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
             "save_report"
         ] = self.widgets["save_report"]["variable"].get()
+        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
+            "headless"
+        ] = self.widgets["headless"]["variable"].get()
 
         for k in self.modes_armed.keys():
             self.parent_controller.configuration["experiment"][

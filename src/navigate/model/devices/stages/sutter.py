@@ -131,7 +131,7 @@ class SutterStage(StageBase):
         #: float: Position of the stage along the x-axis.
         #: float: Position of the stage along the y-axis.
         #: float: Position of the stage along the z-axis.
-        self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = None, None, None
+        self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = 0, 0, 0
 
         # Set the resolution and velocity of the stage
         try:
@@ -178,7 +178,7 @@ class SutterStage(StageBase):
                 stage_y_pos,
                 stage_z_pos,
             ) = self.stage.get_current_position()
-            if stage_x_pos and stage_y_pos and stage_z_pos:
+            if stage_x_pos is not None:
                 self.stage_x_pos = stage_x_pos
                 self.stage_y_pos = stage_y_pos
                 self.stage_z_pos = stage_z_pos

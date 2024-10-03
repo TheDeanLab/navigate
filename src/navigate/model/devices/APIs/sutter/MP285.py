@@ -110,9 +110,12 @@ class MP285:
         self.safe_to_write.wait()
         self.safe_to_write.clear()
         self.write_done_flag.acquire()
-        # wait_num = self.serial.in_waiting
-        # if wait_num > 0:
-        #     self.serial.read(wait_num)
+        if self.top_command_idx == self.last_command_idx:
+            waiting_bytes = min(self.serial.in_waiting, self.unreceived_bytes)
+            if waiting_bytes > 0:
+                self.serial.read(waiting_bytes)
+                self.unreceived_bytes -= waiting_bytes
+                # self.n_waits -= 5
         self.serial.write(command)
         logger.debug(f"MP285 send command {command}")
         self.commands_buffer[self.last_command_idx] = response_num
@@ -128,19 +131,26 @@ class MP285:
         l = self.commands_buffer[self.top_command_idx]
         r = ""
         for _ in range(self.n_waits):
-            if self.unreceived_bytes > 0 and self.serial.in_waiting >= l + self.unreceived_bytes:
-                r = self.serial.read(l + self.unreceived_bytes)
+            if self.unreceived_bytes > 0 and self.serial.in_waiting > l:
+                unreceived = min(self.unreceived_bytes, self.serial.in_waiting - l)
+                r = self.serial.read(l + unreceived)
+                self.unreceived_bytes -= unreceived
                 logger.debug(f"MP285 read response {r}")
-                if r[self.unreceived_bytes-1] == 13: #b'\r'
-                    r = r[self.unreceived_bytes:]
-                else:
-                    r = r[:l]
+                start, end = 0, l+unreceived
+                while unreceived > 0:
+                    if r[start] == 13: # b'\r'
+                        start += 1
+                        unreceived -= 1
+                while unreceived > 0 and end-2 >= start:
+                    if r[end-1] == 13 and r[end-2] == 13:
+                        end -= 1
+                        unreceived -= 1
+                r = r[start : end]
                 logger.debug(f"MP285 valid response: {r}")
-                self.unreceived_bytes = 0
                 self.n_waits -= 5
                 break
-            elif self.serial.in_waiting >= self.commands_buffer[self.top_command_idx]:
-                r = self.serial.read(self.commands_buffer[self.top_command_idx])
+            elif self.serial.in_waiting == l:
+                r = self.serial.read(l)
                 logger.debug(f"MP285 read response {r}")
                 break
             time.sleep(self.wait_time)

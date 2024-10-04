@@ -35,6 +35,7 @@ import time
 import serial
 import threading
 import logging
+from typing import Optional, Tuple, Union
 
 # Third-party imports
 import numpy as np
@@ -69,8 +70,22 @@ class MP285:
     If a command returns data, the last byte returned is the task-completed indicator.
     """
 
-    def __init__(self, com_port, baud_rate, timeout=0.25):
+    def __init__(self, com_port: str, baud_rate: int, timeout=0.25) -> None:
+        """Initialize the MP-285 stage.
+
+        Parameters
+        ----------
+        com_port : str
+            COM port of the MP-285 stage.
+        baud_rate : int
+            Baud rate of the MP-285 stage.
+        timeout : float
+            Timeout for the serial connection.
+        """
+
+        #: serial.Serial: Serial connection to the MP-285 stage
         self.serial = serial.Serial()
+
         self.serial.port = com_port
         self.serial.baudrate = baud_rate
         self.serial.timeout = timeout
@@ -80,32 +95,72 @@ class MP285:
         self.serial.xonxoff = False
         self.serial.rtscts = True
 
+        #: int: Speed of the stage in microns/sec
         self.speed = 1000  # None
+
+        #: str: Resolution of the stage. High or Low.
         self.resolution = "high"  # None
+
+        #: bool: Wait until the stage is done moving before returning
         self.wait_until_done = True
 
+        #: float: Time to wait between checking if the stage is done moving
         self.wait_time = 0.002
+
+        #: int: Number of times to check if the stage is done moving
         self.n_waits = max(int(timeout / self.wait_time), 1)
 
         # Thread blocking here to prevent calls to get_current_position()
         # while move_to_specified_position is waiting for a response. Serial
         # commands must complete or the MP-285A completely locks up and has
         # to be power cycled.
+
+        #: threading.Event: Event to prevent writing to the serial port
         self.safe_to_write = threading.Event()
         self.safe_to_write.set()
+
+        #: threading.Lock: Lock to prevent writing to the serial port
         self.write_done_flag = threading.Lock()
+
+        #: bool: Flag to indicate if the stage is moving
         self.is_moving = False
+
+        #: time.time: Time of the last write to the serial port
         self.last_write_time = time.time()
 
+        #: int: Number of commands to buffer
         self.commands_num = 10
+
+        #: int: Index of the top command in the buffer
         self.top_command_idx = 0
+
+        #: int: Index of the last command in the buffer
         self.last_command_idx = 0
+
+        #: bool: Flag to indicate if the stage is interrupted
         self.is_interrupted = False
+
+        #: bool: Flat to indicate of the stage is moving.
         self.is_moving = False
+
+        #: list: Buffer to store the number of bytes to read for each command
         self.commands_buffer = [1] * self.commands_num
 
+    def send_command(self, command: bytes, response_num=1) -> int:
+        """Send a command to the MP-285 stage.
 
-    def send_command(self, command, response_num=1):
+        Parameters
+        ----------
+        command : bytes
+            Command to send to the MP-285 stage.
+        response_num : int
+            Number of bytes to read for the response.
+
+        Returns
+        -------
+        idx : int
+            Index of the command in the buffer.
+        """
         self.safe_to_write.wait()
         self.safe_to_write.clear()
         self.write_done_flag.acquire()
@@ -119,11 +174,23 @@ class MP285:
         self.last_command_idx = (self.last_command_idx + 1) % self.commands_num
         self.write_done_flag.release()
         return idx
-    
-    def read_response(self, idx):
+
+    def read_response(self, idx: int) -> Union[bytes, str, None]:
+        """Read the response from the MP-285 stage.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the command in the buffer.
+
+        Returns
+        -------
+        response : bytes, str, None
+            Response from the MP-285 stage.
+        """
         if idx != self.top_command_idx:
             return None
-        
+
         for _ in range(self.n_waits):
             if self.serial.in_waiting >= self.commands_buffer[self.top_command_idx]:
                 r = self.serial.read(self.commands_buffer[self.top_command_idx])
@@ -132,14 +199,25 @@ class MP285:
                 self.safe_to_write.set()
                 return r
             time.sleep(self.wait_time)
-        
-        logger.error("Haven't received any responses from MP285! Please check the stage device!")
+
+        logger.error(
+            "Haven't received any responses from MP285! "
+            "Please check the stage device!"
+        )
         self.top_command_idx = (self.top_command_idx + 1) % self.commands_num
         self.safe_to_write.set()
         return ""
-        # raise TimeoutError("Haven't received any responses from MP285! Please check the stage device!")
+        # raise TimeoutError("Haven't received any responses
+        # from MP285! Please check the stage device!")
 
-    def connect_to_serial(self):
+    def connect_to_serial(self) -> None:
+        """Connect to the serial port of the MP-285 stage.
+
+        Raises
+        ------
+        serial.SerialException
+            If the serial connection fails.
+        """
         try:
             self.serial.open()
         except serial.SerialException as e:
@@ -147,11 +225,12 @@ class MP285:
             logger.error(f"{str(self)}, Could not open port {self.serial.port}")
             raise e
 
-    def disconnect_from_serial(self):
+    def disconnect_from_serial(self) -> None:
+        """Disconnect from the serial port of the MP-285 stage."""
         self.serial.close()
 
     @staticmethod
-    def convert_microsteps_to_microns(microsteps):
+    def convert_microsteps_to_microns(microsteps: float) -> float:
         """Converts microsteps to microns
 
         Parameters
@@ -169,7 +248,7 @@ class MP285:
         return microns
 
     @staticmethod
-    def convert_microns_to_microsteps(microns):
+    def convert_microns_to_microsteps(microns: float) -> float:
         """Converts microsteps to microns.
 
         Parameters
@@ -186,7 +265,9 @@ class MP285:
         microsteps = np.divide(microns, 0.04)
         return microsteps
 
-    def get_current_position(self):
+    def get_current_position(
+        self,
+    ) -> Tuple[Optional[float], Optional[float], Optional[float]]:
         """Get the current stage position.
 
         Gets the stage position. The data returned consists of 13 bytes:
@@ -234,12 +315,19 @@ class MP285:
 
         # print(f"received: {position_information}")
         self.is_interrupted = False
-        l = self.commands_buffer[idx]
+        l = self.commands_buffer[idx]  # noqa
         if len(position_information) < l:
             return None, None, None
-        xs = int.from_bytes(position_information[l-13:l-9], byteorder="little", signed=True)
-        ys = int.from_bytes(position_information[l-9:l-5], byteorder="little", signed=True)
-        zs = int.from_bytes(position_information[l-5:-1], byteorder="little", signed=True)
+        xs = int.from_bytes(
+            position_information[l - 13 : l - 9], byteorder="little", signed=True
+        )
+        ys = int.from_bytes(
+            position_information[l - 9 : l - 5], byteorder="little", signed=True
+        )
+        zs = int.from_bytes(
+            position_information[l - 5 : -1], byteorder="little", signed=True
+        )
+
         # print(f"converted to microsteps: {xs} {ys} {zs}")
         x_pos = self.convert_microsteps_to_microns(xs)
         y_pos = self.convert_microsteps_to_microns(ys)
@@ -247,7 +335,9 @@ class MP285:
         # print(f"converted to position: {x_pos} {y_pos} {z_pos}")
         return x_pos, y_pos, z_pos
 
-    def move_to_specified_position(self, x_pos, y_pos, z_pos):
+    def move_to_specified_position(
+        self, x_pos: float, y_pos: float, z_pos: float
+    ) -> bool:
         """Move to Specified Position (‘m’) Command
 
         This command instructs the controller to move all three axes to the position
@@ -297,7 +387,7 @@ class MP285:
 
         return r == bytes.fromhex("0d")
 
-    def set_resolution_and_velocity(self, speed, resolution):
+    def set_resolution_and_velocity(self, speed: int, resolution: str) -> bool:
         """Sets the MP-285 stage speed and resolution.
 
         This command instructs the controller to move all three axes to the position
@@ -325,7 +415,7 @@ class MP285:
             resolution_bit = 1
             if speed > 1310:
                 speed = 1310
-                logger.error(f"Speed for the high-resolution mode is too fast.")
+                logger.error("Speed for the high-resolution mode is too fast.")
                 raise UserWarning(
                     "High resolution mode of Sutter MP285 speed too "
                     "high. Setting to 1310 microns/sec."
@@ -334,13 +424,13 @@ class MP285:
             resolution_bit = 0
             if speed > 3000:
                 speed = 3000
-                logger.error(f"Speed for the low-resolution mode is too fast.")
+                logger.error("Speed for the low-resolution mode is too fast.")
                 raise UserWarning(
                     "Low resolution mode of Sutter MP285 speed too "
                     "high. Setting to 3000 microns/sec."
                 )
         else:
-            logger.error(f"MP-285 resolution must be 'high' or 'low'")
+            logger.error("MP-285 resolution must be 'high' or 'low'")
             raise UserWarning("MP-285 resolution must be 'high' or 'low'")
 
         speed_and_res = int(resolution_bit * 32768 + speed)
@@ -367,7 +457,7 @@ class MP285:
         self.safe_to_write.set()
         return command_complete
 
-    def interrupt_move(self):
+    def interrupt_move(self) -> Union[bool, None]:
         """Interrupt stage movement.
 
         This command interrupts and stops a move in progress that originally
@@ -417,7 +507,7 @@ class MP285:
         self.is_interrupted = False
         return False
 
-    def set_absolute_mode(self):
+    def set_absolute_mode(self) -> bool:
         """Set MP285 to Absolute Position Mode.
 
         This command sets the nature of the positional values specified with the Move
@@ -442,32 +532,7 @@ class MP285:
             time.sleep(self.wait_time)
         return False
 
-    # def set_relative_mode(self):
-    #     """Set MP285 to Relative Position Mode.
-    #
-    #     This command sets the nature of the positional values specified with the Move
-    #     (‘m’) command as relative positions as measured from the current position
-    #     (absolute position returned by the Get Current Position (‘c’) command).
-    #     The command sequence consists of 2 bytes: Command byte, followed by the
-    #     terminator. Return data consists of 1 byte (task-complete indicator).
-    #
-    #     Returns
-    #     -------
-    #     command_complete : bool
-    #         True if command was successful, False if not.
-    #     """
-    #     # print("calling set_relative_mode")
-    #     self.flush_buffers()
-    #     self.safe_write(bytes.fromhex("62") + bytes.fromhex("0d"))
-    #     response = self.serial.read(1)
-    #     if response == bytes.fromhex("0d"):
-    #         command_complete = True
-    #     else:
-    #         command_complete = False
-    #     self.safe_to_write.set()
-    #     return command_complete
-
-    def refresh_display(self):
+    def refresh_display(self) -> bool:
         """Refresh the display on the MP-285 controller.
 
         This command refreshes the VFD (Vacuum Fluorescent Display) of the controller.
@@ -490,7 +555,7 @@ class MP285:
 
         return response == bytes.fromhex("0d")
 
-    def reset_controller(self):
+    def reset_controller(self) -> bool:
         """Reset the MP-285 controller.
 
         This command resets the controller. The command sequence consists of 2 bytes:
@@ -503,7 +568,7 @@ class MP285:
             True if command was successful, False if not.
         """
         idx = self.send_command(bytes.fromhex("72") + bytes.fromhex("0d"))
-        
+
         response = self.read_response(idx)
         if response == bytes.fromhex("0d"):
             command_complete = True
@@ -511,7 +576,7 @@ class MP285:
             command_complete = False
         return command_complete
 
-    def get_controller_status(self):
+    def get_controller_status(self) -> bool:
         """Get the status of the MP-285 controller.
 
         This command gets status information from the controller and returns it in
@@ -526,7 +591,9 @@ class MP285:
         """
         # print("calling get_controller_status")
         # self.flush_buffers()
-        idx = self.send_command(bytes.fromhex("73") + bytes.fromhex("0d"), response_num=33)
+        idx = self.send_command(
+            bytes.fromhex("73") + bytes.fromhex("0d"), response_num=33
+        )
         response = self.read_response(idx)
         if len(response) == 33 and response[-1] == bytes.fromhex("0d"):
             command_complete = True
@@ -536,6 +603,6 @@ class MP285:
         # not implemented yet. See page 74 of documentation.
         return command_complete
 
-    def close(self):
+    def close(self) -> None:
         """Close the serial connection to the stage"""
         self.serial.close()

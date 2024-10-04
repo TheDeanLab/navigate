@@ -44,7 +44,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_MP285_connection(com_port, baud_rate, timeout=0.25):
+def build_MP285_connection(com_port: str, baud_rate: int, timeout=0.25) -> MP285:
     """Build Sutter Stage Serial Port connection
 
     Parameters
@@ -59,7 +59,7 @@ def build_MP285_connection(com_port, baud_rate, timeout=0.25):
     Returns
     -------
     MP285
-        MP285 SutterStage.
+        Serial connection to the MP285.
     """
     try:
         mp285_stage = MP285(com_port, baud_rate, timeout)
@@ -151,7 +151,7 @@ class SutterStage(StageBase):
 
         self.report_position()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete SutterStage Serial Port.
 
         Raises
@@ -161,7 +161,7 @@ class SutterStage(StageBase):
         """
         self.close()
 
-    def report_position(self):
+    def report_position(self) -> dict:
         """Reports the position for all axes, and creates a position dictionary.
 
         Positions from the MP-285 are converted to microns.
@@ -186,7 +186,9 @@ class SutterStage(StageBase):
                     hardware_position = getattr(self, f"stage_{hardware_axis}_pos")
                     self.__setattr__(f"{axis}_pos", hardware_position)
             else:
-                logger.debug(f"MP-285 didn't return current position, using previous position!")
+                logger.debug(
+                    "MP-285 didn't return current position, using previous position!"
+                )
 
             position = self.get_position_dict()
             logger.debug(f"MP-285 - Position: {position}")
@@ -197,7 +199,9 @@ class SutterStage(StageBase):
 
         return position
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done=False
+    ) -> bool:
         """Implement movement logic along a single axis.
 
         Parameters
@@ -217,7 +221,7 @@ class SutterStage(StageBase):
         move_dictionary = {f"{axis}_abs": abs_pos}
         return self.move_absolute(move_dictionary, wait_until_done)
 
-    def move_absolute(self, move_dictionary, wait_until_done=True):
+    def move_absolute(self, move_dictionary: dict, wait_until_done=True) -> bool:
         """Move stage along a single axis.
 
         Parameters
@@ -272,11 +276,11 @@ class SutterStage(StageBase):
 
         return True
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop all stage movement abruptly."""
         pass
 
-    def close(self):
+    def close(self) -> None:
         """Close the stage."""
 
         try:

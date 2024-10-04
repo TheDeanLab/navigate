@@ -501,7 +501,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         else:
             channel_idx = 0
-            slice_idx = self.image_count
+            slice_idx = self.image_count % self.number_of_slices
 
         self.image_count += 1
         return channel_idx, slice_idx

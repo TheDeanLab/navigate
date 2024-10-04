@@ -1143,8 +1143,8 @@ class MenuController(GUIController):
                 popup.popup.protocol(
                     "WM_DELETE_WINDOW",
                     combine_funcs(
+                        camera_setting_controller.update_experiment_values,
                         popup.popup.dismiss,
-                        camera_setting_controller.update_experiment_values(),
                         lambda: delattr(self.parent_controller, controller_name),
                     ),
                 )

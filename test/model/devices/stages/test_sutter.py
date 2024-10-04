@@ -48,6 +48,7 @@ class MockMP285Stage:
             setattr(self, f"{axis}_abs", 0)
         self.input_buffer = []
         self.output_buffer = []
+        self.in_waiting = 0
         self.ignore_obj = ignore_obj
 
     def open(self):
@@ -68,6 +69,7 @@ class MockMP285Stage:
                 + self.z_abs.to_bytes(4, byteorder="little", signed=True)
                 + bytes.fromhex("0d")
             )
+            self.in_waiting += 13
         elif (
             command[0] == int("6d", 16)
             and len(command) == 14
@@ -78,6 +80,7 @@ class MockMP285Stage:
             self.y_abs = int.from_bytes(command[5:9], byteorder="little", signed=True)
             self.z_abs = int.from_bytes(command[9:13], byteorder="little", signed=True)
             self.output_buffer.append(bytes.fromhex("0d"))
+            self.in_waiting += 1
         elif (
             command[0] == int("56", 16)
             and len(command) == 4
@@ -85,20 +88,25 @@ class MockMP285Stage:
         ):
             # set resolution and velocity
             self.output_buffer.append(bytes.fromhex("0d"))
+            self.in_waiting += 1
         elif command[0] == int("03", 16) and len(command) == 1:
             # interrupt move
             self.output_buffer.append(bytes.fromhex("0d"))
+            self.in_waiting += 1
         elif command == bytes.fromhex("61") + bytes.fromhex("0d"):
             # set absolute mode
             self.output_buffer.append(bytes.fromhex("0d"))
+            self.in_waiting += 1
         elif command == bytes.fromhex("62") + bytes.fromhex("0d"):
             # set relative mode
+            self.in_waiting += 1
             self.output_buffer.append(bytes.fromhex("0d"))
 
     def read_until(self, expected, size=100):
         return self.output_buffer.pop(0)
 
     def read(self, byte_num=1):
+        self.in_waiting -= len(self.output_buffer[0])
         return self.output_buffer.pop(0)
 
     def __getattr__(self, __name: str):

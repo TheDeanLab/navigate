@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 import traceback
+import inspect
 
 # Third Party Imports
 
@@ -827,7 +828,12 @@ def load_features(model, feature_list):
                     if variable_name not in shared_variables:
                         shared_variables[variable_name] = list(arg["value"])
                     args[i] = shared_variables[variable_name]
-        feature = feature_dict["name"](model, *args)
+        
+        parameter_num = len(inspect.signature(feature_dict["name"].__init__).parameters) - 2
+        if len(args) > parameter_num:
+            feature = feature_dict["name"](model, *args[:parameter_num])
+        else:
+            feature = feature_dict["name"](model, *args)
 
         node_config = feature.config_table.get("node", {})
         # if signal function has a waiting func,

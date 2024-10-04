@@ -1485,15 +1485,16 @@ class Model:
                     }
                 )
 
-        i = 0
-        while i < len(feature_records):
+        i = len(feature_records) - 1
+        while i >= 0:
             temp = feature_records[i]
             if not os.path.exists(f"{feature_lists_path}/{temp['yaml_file_name']}"):
                 del feature_records[i]
                 continue
             item = load_yaml_file(f"{feature_lists_path}/{temp['yaml_file_name']}")
             if item is None:
-                i += 1
+                del feature_records[i]
+                i -= 1
                 continue
 
             if item["module_name"]:
@@ -1512,7 +1513,7 @@ class Model:
             else:
                 del feature_records[i]
                 continue
-            i += 1
+            i -= 1
         save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
 
     def get_feature_list(self, idx):

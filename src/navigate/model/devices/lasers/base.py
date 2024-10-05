@@ -57,8 +57,8 @@ class LaserBase:
         ----------
         microscope_name : str
             Name of the microscope
-        device_connection : str
-            Connection string for the device
+        device_connection : object
+            Communication instance with the device.
         configuration : dict
             Configuration dictionary
         laser_id : int

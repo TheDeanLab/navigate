@@ -54,7 +54,13 @@ class LaserNI(LaserBase):
     This class is used to control a laser connected to a National Instruments DAQ.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, laser_id):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: object,
+        configuration: dict,
+        laser_id: int,
+    ) -> None:
         """Initialize the LaserNI class.
 
         Parameters
@@ -65,7 +71,7 @@ class LaserNI(LaserBase):
             The device connection object.
         configuration : dict
             The device configuration.
-        laser_id : str
+        laser_id : int
             The laser id.
         """
         super().__init__(microscope_name, device_connection, configuration, laser_id)
@@ -130,7 +136,7 @@ class LaserNI(LaserBase):
             logger.debug(f"{str(self)} error:, {e}, {e.error_type}, {e.error_code}")
             print(f"{str(self)} error:, {e}, {e.error_type}, {e.error_code}")
 
-    def set_power(self, laser_intensity):
+    def set_power(self, laser_intensity: float) -> None:
         """Sets the laser power.
 
         Parameters
@@ -145,7 +151,7 @@ class LaserNI(LaserBase):
         except DaqError as e:
             logger.exception(e)
 
-    def turn_on(self):
+    def turn_on(self) -> None:
         """Turns on the laser."""
         try:
             self.set_power(self._current_intensity)
@@ -157,7 +163,7 @@ class LaserNI(LaserBase):
         except DaqError as e:
             logger.exception(e)
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         """Turns off the laser."""
         try:
             tmp = self._current_intensity
@@ -171,7 +177,7 @@ class LaserNI(LaserBase):
         except DaqError as e:
             logger.exception(e)
 
-    def close(self):
+    def close(self) -> None:
         """Close the NI Task before exit."""
         try:
             self.laser_ao_task.close()

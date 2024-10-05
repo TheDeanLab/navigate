@@ -46,7 +46,11 @@ class MS2000Exception(Exception):
         self.code = code
 
         #: str: Error message
-        self.message = self.error_codes[code]
+        try:
+            self.message = self.error_codes[code]
+        except KeyError:
+            # if the exception is not a standard ASI Error Code:
+            self.message = code
 
         # Gets the proper message based on error code received.
         super().__init__(self.message)
@@ -330,9 +334,11 @@ class MS2000Controller:
         self.safe_to_write.set()
         response = response.decode(encoding="ascii")
         # Remove leading and trailing empty spaces
-        self.report_to_console(f"Received Response: {response.strip()}")
+        response = response.strip()
+        self.report_to_console(f"Received Response: {response}")
         if response.startswith(":N"):
-            raise MS2000Exception(response)
+            if not response.endswith("-21"): # we can ignore HALT command exceptions
+                raise MS2000Exception(response)
 
         return response  # in case we want to read the response
 

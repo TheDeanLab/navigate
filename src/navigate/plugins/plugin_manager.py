@@ -38,6 +38,7 @@ import pkgutil
 import os
 import inspect
 import logging
+from typing import Optional
 
 # Local application imports
 from navigate.tools.file_functions import load_yaml_file
@@ -49,7 +50,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def register_features(module):
+def register_features(module) -> None:
     """Register features
 
     Parameters
@@ -66,7 +67,7 @@ class PluginPackageManager:
     """Plugin package manager"""
 
     @staticmethod
-    def get_plugins():
+    def get_plugins() -> dict:
         """Get plugins
 
         Returns
@@ -89,7 +90,7 @@ class PluginPackageManager:
         return plugins
 
     @staticmethod
-    def load_config(package_name):
+    def load_config(package_name: str) -> dict:
         """Load plugin_config.yml
 
         Parameters
@@ -107,7 +108,7 @@ class PluginPackageManager:
         return plugin_config
 
     @staticmethod
-    def load_controller(package_name, controller_name):
+    def load_controller(package_name: str, controller_name: str) -> Optional[type]:
         """Load controller
 
         Parameters
@@ -119,8 +120,12 @@ class PluginPackageManager:
 
         Returns
         -------
-        controller_class : class
-            controller class
+        controller_class : type or None
+            The dynamically loaded controller class, or `None` if the controller
+            module or class cannot be found. The return type can be:
+
+            - `type` : If the controller class is found, the class type is returned.
+            - `None` : If the module or class cannot be found, `None` is returned.
         """
         controller_file_name = "_".join(controller_name.lower().split()) + "_controller"
         controller_class_name = "".join(controller_name.title().split()) + "Controller"
@@ -134,7 +139,7 @@ class PluginPackageManager:
             return None
 
     @staticmethod
-    def load_view(package_name, frame_name):
+    def load_view(package_name: str, frame_name: str) -> Optional[type]:
         """Load view
 
         Parameters
@@ -146,8 +151,12 @@ class PluginPackageManager:
 
         Returns
         -------
-        frame_class : class
-            frame class
+        view_class : type or None
+            The dynamically loaded view class, or `None` if the view module or
+            class cannot be found. The return type can be:
+
+            - `type` : If the view class is found, the class type is returned.
+            - `None` : If the module or class cannot be found, `None` is returned.
         """
         frame_file_name = "_".join(frame_name.lower().split()) + "_frame"
         frame_class_name = "".join(frame_name.title().split()) + "Frame"
@@ -161,7 +170,7 @@ class PluginPackageManager:
             return None
 
     @staticmethod
-    def load_feature_lists(package_name, register_func):
+    def load_feature_lists(package_name, register_func) -> None:
         """Load feature lists
 
         Parameters
@@ -255,7 +264,7 @@ class PluginPackageManager:
 class PluginFileManager:
     """Plugin file manager"""
 
-    def __init__(self, plugins_path, plugins_config_path):
+    def __init__(self, plugins_path: str, plugins_config_path: str) -> None:
         """Initialize PluginFileManager
 
         Parameters

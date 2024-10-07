@@ -36,6 +36,7 @@ import time
 from threading import Lock
 
 # Third Party Imports
+from multiprocessing.managers import DictProxy
 
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
@@ -50,12 +51,12 @@ logger = logging.getLogger(p)
 class SyntheticDAQ(DAQBase):
     """SyntheticDAQ class for Data Acquisition (DAQ)."""
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: DictProxy) -> None:
         """Initialize the Synthetic DAQ.
 
         Parameters
         ----------
-        configuration : dict
+        configuration : DictProxy
             Configuration dictionary.
         """
         super().__init__(configuration)
@@ -78,7 +79,7 @@ class SyntheticDAQ(DAQBase):
         #: str: Trigger mode. Self-trigger or external-trigger.
         self.trigger_mode = "self-trigger"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the class."""
         return "SyntheticDAQ"
 
@@ -109,7 +110,7 @@ class SyntheticDAQ(DAQBase):
         """Close the tasks for triggering, analog, and counter outputs."""
         pass
 
-    def prepare_acquisition(self, channel_key):
+    def prepare_acquisition(self, channel_key: str):
         """Prepare the acquisition.
 
         Parameters
@@ -146,14 +147,14 @@ class SyntheticDAQ(DAQBase):
         """Write the galvo, remote focus, and laser waveforms to each task."""
         pass
 
-    def add_camera(self, microscope_name, camera):
+    def add_camera(self, microscope_name: str, camera: object):
         """Connect camera with daq: only in syntheticDAQ.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope.
-        camera : Camera
+        camera : navigate.model.devices.camera.base.CameraBase
             Camera object.
         """
         self.camera[microscope_name] = camera

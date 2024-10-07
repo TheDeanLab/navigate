@@ -32,6 +32,7 @@
 
 # Standard Imports
 import logging
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 
@@ -48,12 +49,12 @@ logger = logging.getLogger(p)
 class DAQBase:
     """DAQBase - Parent class for Data Acquisition (DAQ) classes."""
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: DictProxy):
         """Initializes the DAQBase class.
 
         Parameters
         ----------
-        configuration : dict
+        configuration : DictProxy
             Dictionary of configuration parameters
         """
 

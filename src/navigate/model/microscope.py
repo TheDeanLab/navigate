@@ -32,7 +32,7 @@
 # Standard Library imports
 import logging
 import importlib  # noqa: F401
-from multiprocessing.managers import ListProxy
+from multiprocessing.managers import ListProxy, DictProxy
 import reprlib
 
 # Third-party imports
@@ -50,7 +50,12 @@ class Microscope:
     """Microscope Class - Used to control the microscope."""
 
     def __init__(
-        self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False
+        self,
+        name: str,
+        configuration: DictProxy,
+        devices_dict: dict,
+        is_synthetic=False,
+        is_virtual=False,
     ):
         """Initialize the microscope.
 
@@ -58,7 +63,7 @@ class Microscope:
         ----------
         name : str
             Name of the microscope.
-        configuration : dict
+        configuration : DictProxy
             Configuration dictionary.
         devices_dict : dict
             Dictionary of devices.
@@ -71,6 +76,9 @@ class Microscope:
         # Initialize microscope object
         #: str: Name of the microscope.
         self.microscope_name = name
+
+        #: Queue: Output event queue.
+        self.output_event_queue = None
 
         #: dict: Configuration dictionary.
         self.configuration = configuration
@@ -86,6 +94,9 @@ class Microscope:
 
         #: bool: Ask stage for position.
         self.ask_stage_for_position = True
+
+        #: obj: Camera object.
+        self.camera = None
 
         #: dict: Dictionary of lasers.
         self.lasers = {}
@@ -342,7 +353,7 @@ class Microscope:
             self.stages_list.append((stage, list(device_config["axes"])))
 
         # connect daq and camera in synthetic mode
-        if is_synthetic:
+        if is_synthetic and self.daq is not None:
             self.daq.add_camera(self.microscope_name, self.camera)
 
     def update_data_buffer(self, data_buffer, number_of_frames):
@@ -850,7 +861,9 @@ class Microscope:
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
 
-    def assemble_device_config_lists(self, device_name: str, device_name_dict: dict):
+    def assemble_device_config_lists(
+        self, device_name: str, device_name_dict: dict
+    ) -> tuple:
         """Assemble device config lists.
 
         Parameters
@@ -866,6 +879,8 @@ class Microscope:
             Device configuration list.
         device_name_list : list
             Device name list.
+        is_list : bool
+            Is list.
         """
         device_config_list = []
         device_name_list = []

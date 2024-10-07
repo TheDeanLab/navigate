@@ -35,7 +35,7 @@ import platform
 import logging
 import time
 import importlib
-from multiprocessing.managers import ListProxy
+from multiprocessing.managers import ListProxy, DictProxy
 
 # Third Party Imports
 
@@ -1013,7 +1013,7 @@ def start_daq(configuration, is_synthetic=False):
 
     Parameters
     ----------
-    configuration : multiprocesing.managers.DictProxy
+    configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
     is_synthetic : bool
         Run synthetic version of hardware?
@@ -1367,12 +1367,14 @@ def device_not_found(*args):
     raise RuntimeError()
 
 
-def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
+def load_devices(
+    configuration: DictProxy, is_synthetic=False, plugin_devices=None
+) -> dict:
     """Load devices from configuration.
 
     Parameters
     ----------
-    configuration : dict
+    configuration : DictProxy
         Configuration dictionary
     is_synthetic : bool
         Run synthetic version of hardware?
@@ -1382,8 +1384,11 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
     Returns
     -------
     devices : dict
-        Dictionary of devices
+        Dictionary of devcies
     """
+
+    if plugin_devices is None:
+        plugin_devices = {}
 
     devices = {}
     # load camera

@@ -33,6 +33,7 @@
 # Standard library imports
 import os
 from pathlib import Path
+from typing import Union
 
 # Third-party imports
 
@@ -46,15 +47,19 @@ from navigate.plugins.plugin_manager import PluginFileManager, PluginPackageMana
 class PluginsModel:
     """Plugins manager in the model side"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize plugins manager class"""
+        #: dict: devices dictionary
         self.devices_dict = {}
+
+        #: dict: plugin acquisition modes dictionary
         self.plugin_acquisition_modes = {}
 
-    def load_plugins(self):
-        """Load plugins"""
-
+        #: str: feature lists path
         self.feature_lists_path = os.path.join(get_navigate_path(), "feature_lists")
+
+    def load_plugins(self) -> tuple:
+        """Load plugins"""
         if not os.path.exists(self.feature_lists_path):
             os.makedirs(self.feature_lists_path)
 
@@ -65,16 +70,19 @@ class PluginsModel:
         plugin_file_manager = PluginFileManager(plugins_path, plugins_config_path)
         self.load_plugins_through_manager(plugin_file_manager)
         self.load_plugins_through_manager(PluginPackageManager)
-
         return self.devices_dict, self.plugin_acquisition_modes
 
-    def load_plugins_through_manager(self, plugin_manager):
+    def load_plugins_through_manager(
+        self, plugin_manager: Union[PluginFileManager, PluginPackageManager]
+    ) -> None:
         """Load plugins through plugin manager
 
         Parameters
-        ----------
-        plugin_manager : object
-            PluginManager object
+        -------
+        plugin_manager : PluginFileManager or PluginPackageManager
+            - PluginFileManager
+            - PluginPackageManager
+
         """
         plugins = plugin_manager.get_plugins()
 

@@ -1632,7 +1632,7 @@ class SetCameraParameters:
         #: int: The number of pixels for the rolling shutter.
         try:
             self.rolling_shutter_width = int(rolling_shutter_width)
-        except ValueError:
+        except (ValueError, TypeError):
             self.rolling_shutter_width = None
 
     def signal_func(self):

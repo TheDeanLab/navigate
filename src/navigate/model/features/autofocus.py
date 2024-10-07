@@ -372,8 +372,9 @@ class Autofocus:
         frame_ids : list
             List of frame ids to be processed.
         """
-
-        self.get_frames_num += len(frame_ids)
+        # self.get_frames_num += len(frame_ids)
+        if self.get_frames_num == self.total_frame_num:
+            self.get_frames_num += len(frame_ids)
         while True:
             try:
                 if self.f_frame_id < 0:
@@ -386,6 +387,8 @@ class Autofocus:
                     break
             except Exception:
                 break
+
+            self.get_frames_num += 1
 
             entropy = fast_normalized_dct_shannon_entropy(
                 input_array=self.model.data_buffer[self.f_frame_id],
@@ -409,8 +412,6 @@ class Autofocus:
                 self.focus_pos = self.f_pos
                 self.target_frame_id = self.f_frame_id
 
-            self.f_frame_id = -1
-
             if self.frame_num == 1:
                 self.frame_num = 10  # any value but not 1
                 self.model.logger.info(
@@ -420,6 +421,10 @@ class Autofocus:
                 # find out the focus
                 self.autofocus_pos_queue.put(self.focus_pos)
                 # return [self.target_frame_id]
+                if frame_ids.index(self.f_frame_id) < len(frame_ids) - 1:
+                    self.get_frames_num += 1
+            
+            self.f_frame_id = -1
 
         if self.get_frames_num > self.total_frame_num:
             return frame_ids

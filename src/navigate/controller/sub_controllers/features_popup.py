@@ -463,6 +463,8 @@ class FeatureListGraphController:
             # if there is any parameters
             if args_value is not None and "args" in feature:
                 for i, a in enumerate(feature["args"]):
+                    if i >= len(args_value):
+                        break
                     args_value[i] = a
             kwargs = {}
             if "true" in feature:

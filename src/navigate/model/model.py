@@ -1493,7 +1493,7 @@ class Model:
                 continue
             item = load_yaml_file(f"{feature_lists_path}/{temp['yaml_file_name']}")
             if item is None:
-                i += 1
+                del feature_records[i]
                 continue
 
             if item["module_name"]:

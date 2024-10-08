@@ -50,6 +50,7 @@ class TestLaserNI(unittest.TestCase):
                 device_connection=self.device_connection,
                 configuration=self.configuration,
                 laser_id=laser_id,
+                modulation_type="mixed",
             )
 
     def tearDown(self):

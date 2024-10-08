@@ -1151,21 +1151,21 @@ def start_lasers(
         Trigger class.
     """
 
+    analog, digital, modulation = None, None, None
+
     if is_synthetic:
         device_type = "SyntheticLaser"
 
     else:
         analog = configuration["configuration"]["microscopes"][microscope_name][
             "lasers"
-        ][id]["power"]["hardware"]["type"]
+        ][id]["power"]["hardware"].get("type", None)
 
         digital = configuration["configuration"]["microscopes"][microscope_name][
             "lasers"
-        ][id]["onoff"]["hardware"]["type"]
+        ][id]["onoff"]["hardware"].get("type", None)
 
         device_type = analog
-
-        print("Analog: ", analog, "Digital: ", digital, "Device Type: ", device_type)
 
     if analog == "NI" or digital == "NI":
         if device_connection is not None:
@@ -1179,11 +1179,13 @@ def start_lasers(
         elif digital == "NI":
             modulation = "digital"
 
-        return LaserNI(microscope_name=microscope_name,
-                       device_connection=device_connection,
-                       configuration=configuration,
-                       laser_id=id,
-                       modulation_type=modulation)
+        return LaserNI(
+            microscope_name=microscope_name,
+            device_connection=device_connection,
+            configuration=configuration,
+            laser_id=id,
+            modulation_type=modulation,
+        )
 
     elif device_type.lower() == "syntheticlaser" or device_type.lower() == "synthetic":
         if device_connection is not None:

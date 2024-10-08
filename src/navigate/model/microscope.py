@@ -746,6 +746,10 @@ class Microscope:
         self.lasers[str(self.laser_wavelength[self.current_laser_index])].set_power(
             channel["laser_power"]
         )
+        logger.info(
+            f"{self.laser_wavelength[self.current_laser_index]} "
+            f"nm laser power set to {channel['laser_power']}"
+        )
         # self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
         # stop daq before writing new waveform

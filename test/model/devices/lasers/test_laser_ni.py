@@ -50,6 +50,7 @@ class TestLaserNI(unittest.TestCase):
                 device_connection=self.device_connection,
                 configuration=self.configuration,
                 laser_id=laser_id,
+                modulation_type="mixed",
             )
 
     def tearDown(self):
@@ -67,11 +68,11 @@ class TestLaserNI(unittest.TestCase):
         assert self.laser._current_intensity == self.current_intensity
 
     def test_turn_on(self):
-        self.laser.on_off_type = "digital"
+        self.laser.digital_port_type = "digital"
         self.laser.turn_on()
         self.laser.laser_do_task.write.assert_called_with(True, auto_start=True)
 
-        self.laser.on_off_type = "analog"
+        self.laser.digital_port_type = "analog"
         self.laser.turn_on()
         self.laser.laser_do_task.write.assert_called_with(
             self.laser.laser_max_do, auto_start=True
@@ -81,13 +82,13 @@ class TestLaserNI(unittest.TestCase):
         self.current_intensity = random.randint(1, 100)
         self.laser._current_intensity = self.current_intensity
 
-        self.laser.on_off_type = "digital"
+        self.laser.digital_port_type = "digital"
         self.laser.turn_off()
         self.laser.laser_do_task.write.assert_called_with(False, auto_start=True)
 
         assert self.laser._current_intensity == self.current_intensity
 
-        self.laser.on_off_type = "analog"
+        self.laser.digital_port_type = "analog"
         self.laser.turn_off()
         self.laser.laser_do_task.write.assert_called_with(
             self.laser.laser_min_do, auto_start=True

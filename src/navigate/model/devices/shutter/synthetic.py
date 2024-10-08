@@ -33,6 +33,7 @@
 
 # Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -49,16 +50,21 @@ logger = logging.getLogger(p)
 class SyntheticShutter(ShutterBase):
     """SyntheticShutter Class - Triggering for shutters delivered from synthetically."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize the SyntheticShutter.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)

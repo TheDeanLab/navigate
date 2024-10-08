@@ -30,11 +30,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Laser Base Class
-"""
 # Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -50,20 +48,28 @@ logger = logging.getLogger(p)
 class LaserBase:
     """Laser Base Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration, laser_id):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        laser_id: int,
+    ) -> None:
         """Initialize Laser Base Class
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope
-        device_connection : str
-            Connection string for the device
-        configuration : dict
+        device_connection : Any
+            Communication instance with the device.
+        configuration : Dict[str, Any]
             Configuration dictionary
         laser_id : int
             Laser ID
         """
+        #: Any: Communication instance with the device
+        self.device_connection = device_connection
 
         #: dict: Configuration dictionary
         self.configuration = configuration
@@ -76,11 +82,11 @@ class LaserBase:
             microscope_name
         ]["lasers"][laser_id]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of the class"""
         return "LaserBase"
 
-    def set_power(self, laser_intensity):
+    def set_power(self, laser_intensity: int) -> None:
         """Set laser power
 
         Parameters
@@ -90,20 +96,20 @@ class LaserBase:
         """
         pass
 
-    def turn_on(self):
+    def turn_on(self) -> None:
         """Turn on the laser"""
         pass
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         """Turn off the laser"""
         pass
 
-    def close(self):
+    def close(self) -> None:
         """
         Close the laser before exit.
         """
         pass
 
-    def initialize_laser(self):
+    def initialize_laser(self) -> None:
         """Initialize lasers."""
         pass

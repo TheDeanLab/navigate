@@ -28,10 +28,11 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 #  Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -48,22 +49,28 @@ logger = logging.getLogger(p)
 class SyntheticRemoteFocus(RemoteFocusBase):
     """SyntheticRemoteFocus Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize the SyntheticRemoteFocus class.
 
         Parameters
         ----------
         microscope_name : str
             The microscope name.
-        device_connection : object
+        device_connection : Any
             The device connection object.
-        configuration : dict
+        configuration : Dict[str, Any]
             The device configuration.
         """
         super().__init__(microscope_name, device_connection, configuration)
         pass
 
-    def move(self, readout_time, offset=None):
+    @staticmethod
+    def move(readout_time, offset=None):
         """Moves the remote focus.
 
         This method moves the remote focus.
@@ -75,4 +82,4 @@ class SyntheticRemoteFocus(RemoteFocusBase):
         offset : float
             The offset of the signal in volts.
         """
-        logger.debug(f"move remote focus offset: {offset}")
+        logger.debug(f"Remote focus offset and readout time: {offset}, {readout_time}")

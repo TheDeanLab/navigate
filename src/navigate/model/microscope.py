@@ -34,6 +34,7 @@ import logging
 import importlib  # noqa: F401
 from multiprocessing.managers import ListProxy
 import reprlib
+from typing import Any, Dict
 
 # Third-party imports
 
@@ -50,7 +51,12 @@ class Microscope:
     """Microscope Class - Used to control the microscope."""
 
     def __init__(
-        self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False
+        self,
+        name: str,
+        configuration: Dict[str, Any],
+        devices_dict: dict,
+        is_synthetic=False,
+        is_virtual=False,
     ):
         """Initialize the microscope.
 
@@ -58,7 +64,7 @@ class Microscope:
         ----------
         name : str
             Name of the microscope.
-        configuration : dict
+        configuration : Dict[str, Any]
             Configuration dictionary.
         devices_dict : dict
             Dictionary of devices.
@@ -71,6 +77,9 @@ class Microscope:
         # Initialize microscope object
         #: str: Name of the microscope.
         self.microscope_name = name
+
+        #: Queue: Output event queue.
+        self.output_event_queue = None
 
         #: dict: Configuration dictionary.
         self.configuration = configuration
@@ -86,6 +95,9 @@ class Microscope:
 
         #: bool: Ask stage for position.
         self.ask_stage_for_position = True
+
+        #: obj: Camera object.
+        self.camera = None
 
         #: dict: Dictionary of lasers.
         self.lasers = {}
@@ -342,7 +354,7 @@ class Microscope:
             self.stages_list.append((stage, list(device_config["axes"])))
 
         # connect daq and camera in synthetic mode
-        if is_synthetic:
+        if is_synthetic and self.daq is not None:
             self.daq.add_camera(self.microscope_name, self.camera)
 
     def update_data_buffer(self, data_buffer, number_of_frames):
@@ -406,12 +418,14 @@ class Microscope:
             Dictionary of all the waveforms.
         """
         camera_info = reprlib.Repr()
-        camera_info.indent = '---'
+        camera_info.indent = "---"
         camera_info.maxdict = 20
         camera_info = camera_info.repr(
-            dict(self.configuration['experiment']['CameraParameters'][
-                self.microscope_name]
-                 )
+            dict(
+                self.configuration["experiment"]["CameraParameters"][
+                    self.microscope_name
+                ]
+            )
         )
         logger.info(f"Preparing Acquisition. Camera Parameters: {camera_info}")
 
@@ -486,12 +500,16 @@ class Microscope:
 
     def turn_on_laser(self):
         """Turn on the current laser."""
-        logger.info(f"Turning on laser {self.laser_wavelength[self.current_laser_index]}")
+        logger.info(
+            f"Turning on laser {self.laser_wavelength[self.current_laser_index]}"
+        )
         self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
     def turn_off_lasers(self):
         """Turn off current laser."""
-        logger.info(f"Turning off laser {self.laser_wavelength[self.current_laser_index]}")
+        logger.info(
+            f"Turning off laser {self.laser_wavelength[self.current_laser_index]}"
+        )
         self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_off()
 
     def calculate_all_waveform(self):
@@ -728,8 +746,10 @@ class Microscope:
         self.lasers[str(self.laser_wavelength[self.current_laser_index])].set_power(
             channel["laser_power"]
         )
-        logger.info(f"{self.laser_wavelength[self.current_laser_index]} "
-                    f"nm laser power set to {channel['laser_power']}")
+        logger.info(
+            f"{self.laser_wavelength[self.current_laser_index]} "
+            f"nm laser power set to {channel['laser_power']}"
+        )
         # self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
@@ -752,7 +772,9 @@ class Microscope:
                 update_focus=False,
             )
 
-    def move_stage(self, pos_dict, wait_until_done=False, update_focus=True):
+    def move_stage(
+        self, pos_dict: dict, wait_until_done=False, update_focus=True
+    ) -> bool:
         """Move stage to a position.
 
         Parameters
@@ -795,7 +817,7 @@ class Microscope:
 
         return success
 
-    def stop_stage(self):
+    def stop_stage(self) -> None:
         """Stop stage."""
 
         self.ask_stage_for_position = True
@@ -805,7 +827,7 @@ class Microscope:
 
         self.central_focus = self.get_stage_position().get("f_pos", self.central_focus)
 
-    def get_stage_position(self):
+    def get_stage_position(self) -> dict:
         """Get stage position.
 
         Returns
@@ -820,7 +842,7 @@ class Microscope:
             self.ask_stage_for_position = False
         return self.ret_pos_dict
 
-    def move_remote_focus(self, offset=None):
+    def move_remote_focus(self, offset=None) -> None:
         """Move remote focus.
 
         Parameters
@@ -831,7 +853,7 @@ class Microscope:
         exposure_times, sweep_times = self.calculate_exposure_sweep_times()
         self.remote_focus_device.move(exposure_times, sweep_times, offset)
 
-    def update_stage_limits(self, limits_flag=True):
+    def update_stage_limits(self, limits_flag=True) -> None:
         """Update stage limits.
 
         Parameters
@@ -844,7 +866,9 @@ class Microscope:
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
 
-    def assemble_device_config_lists(self, device_name, device_name_dict):
+    def assemble_device_config_lists(
+        self, device_name: str, device_name_dict: dict
+    ) -> tuple:
         """Assemble device config lists.
 
         Parameters
@@ -860,6 +884,8 @@ class Microscope:
             Device configuration list.
         device_name_list : list
             Device name list.
+        is_list : bool
+            Is list.
         """
         device_config_list = []
         device_name_list = []
@@ -894,15 +920,15 @@ class Microscope:
 
     def load_and_start_devices(
         self,
-        device_name,
-        is_list,
-        device_name_list,
-        device_ref_name,
+        device_name: str,
+        is_list: bool,
+        device_name_list: list,
+        device_ref_name: str,
         device_connection,
-        name,
-        i,
-        plugin_devices,
-    ):
+        name: str,
+        i: int,
+        plugin_devices: dict,
+    ) -> None:
         """Load and start devices.
 
         Parameters
@@ -923,6 +949,8 @@ class Microscope:
             Index.
         plugin_devices : dict
             Plugin Devices
+
+        TODO: Remove uncalled parameters (device_connection, name, plugin_devices)?
         """
         # Import start_device classes
         try:
@@ -951,7 +979,7 @@ class Microscope:
             )
             self.info[device_name] = device_ref_name
 
-    def terminate(self):
+    def terminate(self) -> None:
         """Close hardware explicitly."""
         self.camera.close_camera()
 
@@ -971,7 +999,7 @@ class Microscope:
             print(f"Stage delete failure: {e}")
         pass
 
-    def run_command(self, command, *args):
+    def run_command(self, command: str, *args) -> None:
         """Run command.
 
         Parameters

@@ -32,6 +32,7 @@
 
 #  Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -52,18 +53,26 @@ logger = logging.getLogger(p)
 class RemoteFocusBase:
     """RemoteFocusBase Class - Parent class for Remote Focusing Device."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initializes the RemoteFocusBase Class.
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : str
-            Connection string for the remote focus device.
-        configuration : dict
+        device_connection : Any
+            Device connection object.
+        configuration : Dict[str, Any]
             Configuration dictionary.
         """
+
+        #: Any: Device connection object.
+        self.device_connection = device_connection
 
         #: dict: Configuration dictionary.
         self.configuration = configuration
@@ -119,6 +128,8 @@ class RemoteFocusBase:
             Dictionary of exposure times for each selected channel
         sweep_times : dict
             Dictionary of sweep times for each selected channel
+        offset : float, optional
+            Offset value for the remote focus waveform, by default None
 
         Returns
         -------
@@ -237,7 +248,7 @@ class RemoteFocusBase:
                         percent_smoothing=percent_smoothing,
                     )[:samples]
 
-                # Clip any values outside of the hardware limits
+                # Clip any values outside the hardware limits
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.remote_focus_max_voltage
                 ] = self.remote_focus_max_voltage

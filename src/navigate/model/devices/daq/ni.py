@@ -35,6 +35,7 @@ import logging
 from threading import Lock
 import traceback
 import time
+from typing import Union, Dict, Any
 
 # Third Party Imports
 import nidaqmx
@@ -56,12 +57,12 @@ logger = logging.getLogger(p)
 class NIDAQ(DAQBase):
     """NIDAQ class for Control of NI Data Acquisition Cards."""
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: Dict[str, Any]) -> None:
         """Initialize NIDAQ class.
 
         Parameters
         ----------
-        configuration : dict
+        configuration : Dict[str, Any]
             Configuration dictionary.
         """
         super().__init__(configuration)
@@ -103,16 +104,16 @@ class NIDAQ(DAQBase):
         #: bool: Flag for waiting to run.
         self.wait_to_run_lock = Lock()
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the class."""
         return "NIDAQ"
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor."""
         if self.camera_trigger_task is not None:
             self.stop_acquisition()
 
-    def set_external_trigger(self, external_trigger=None):
+    def set_external_trigger(self, external_trigger=None) -> None:
         """Set trigger mode.
 
         Parameters
@@ -191,9 +192,10 @@ class NIDAQ(DAQBase):
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
 
+    @staticmethod
     def wait_for_external_trigger(
-        self, trigger_channel, wait_internal=0.001, timeout=-1
-    ):
+        trigger_channel: str, wait_internal=0.001, timeout=-1
+    ) -> bool:
         """Wait for a digital external trigger.
 
         Parameters
@@ -228,24 +230,23 @@ class NIDAQ(DAQBase):
             time.sleep(wait_internal)
             total_wait_time += wait_internal
 
-            if timeout > 0 and total_wait_time >= timeout:
+            if 0 < timeout <= total_wait_time:
                 result = False
                 break
 
         # Close the task
         external_trigger_task.stop()
         external_trigger_task.close()
-
         return result
 
     @staticmethod
-    def restart_analog_task_callback_func(task):
+    def restart_analog_task_callback_func(task: nidaqmx.Task) -> callable:
         """Restart analog task callback function.
 
         Parameters
         ----------
         task : nidaqmx.Task
-            Task for analog output
+            Analog output task.
 
         Returns
         -------
@@ -264,7 +265,7 @@ class NIDAQ(DAQBase):
 
         return callback_func
 
-    def create_camera_task(self, channel_key):
+    def create_camera_task(self, channel_key: str) -> None:
         """Set up the camera trigger task.
 
         TTL for triggering the camera. TTL is 4 ms in duration.
@@ -309,7 +310,7 @@ class NIDAQ(DAQBase):
             samps_per_chan=camera_waveform_repeat_num,
         )
 
-    def create_master_trigger_task(self):
+    def create_master_trigger_task(self) -> None:
         """Set up the DO master trigger task."""
         self.master_trigger_task = nidaqmx.Task()
         master_trigger_out_line = self.configuration["configuration"]["microscopes"][
@@ -320,7 +321,7 @@ class NIDAQ(DAQBase):
             line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
         )
 
-    def create_analog_output_tasks(self, channel_key):
+    def create_analog_output_tasks(self, channel_key: str) -> None:
         """Create analog output tasks for each board.
 
         Create a single analog output task for all channels per board. Most NI DAQ cards
@@ -386,7 +387,7 @@ class NIDAQ(DAQBase):
             ).squeeze()
             self.analog_output_tasks[board].write(waveforms)
 
-    def prepare_acquisition(self, channel_key):
+    def prepare_acquisition(self, channel_key: str) -> None:
         """Prepare the acquisition.
 
         Creates and configures the DAQ tasks.
@@ -422,7 +423,7 @@ class NIDAQ(DAQBase):
         # Specify ports, timing, and triggering
         self.set_external_trigger(self.external_trigger)
 
-    def run_acquisition(self):
+    def run_acquisition(self) -> None:
         """Run DAQ Acquisition.
 
         Run the tasks for triggering, analog and counter outputs.
@@ -463,7 +464,7 @@ class NIDAQ(DAQBase):
         except nidaqmx.DaqError:
             pass
 
-    def stop_acquisition(self):
+    def stop_acquisition(self) -> None:
         """Stop Acquisition.
 
         Stop all tasks and close them.
@@ -488,7 +489,7 @@ class NIDAQ(DAQBase):
 
         self.analog_output_tasks = {}
 
-    def enable_microscope(self, microscope_name):
+    def enable_microscope(self, microscope_name: str) -> None:
         """Enable microscope.
 
         Parameters
@@ -528,7 +529,7 @@ class NIDAQ(DAQBase):
         except KeyError:
             pass
 
-    def update_analog_task(self, board_name):
+    def update_analog_task(self, board_name: str) -> Union[bool, None]:
         """Update analog task.
 
         Parameters
@@ -538,7 +539,7 @@ class NIDAQ(DAQBase):
 
         Returns
         -------
-        bool
+        bool, None
             True if task is updated, False otherwise.
         """
         # if there is no such analog task,

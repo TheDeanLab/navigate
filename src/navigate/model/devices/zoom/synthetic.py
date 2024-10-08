@@ -29,10 +29,10 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
 # Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -49,20 +49,25 @@ logger = logging.getLogger(p)
 class SyntheticZoom(ZoomBase):
     """SyntheticZoom Class - Controls the SyntheticZoom Servo."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize the SyntheticZoom Servo.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the SyntheticZoom Servo."""
         pass

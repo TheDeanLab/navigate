@@ -32,6 +32,7 @@
 # Standard Imports
 import logging
 import time
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -78,9 +79,9 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
 class ASIStage(StageBase):
     """Applied Scientific Instrumentation (ASI) Stage Class
 
-    ASI Documentation: http://asiimaging.com/docs/products/serial_commands
+    ASI Documentation: https://asiimaging.com/docs/products/serial_commands
 
-    ASI Quick Start Guide: http://asiimaging.com/docs/command_quick_start
+    ASI Quick Start Guide: https://asiimaging.com/docs/command_quick_start
 
     Note
     ----
@@ -93,17 +94,25 @@ class ASIStage(StageBase):
         change both stilt positions simultaneously.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        device_id: int = 0,
+    ):
         """Initialize the ASI Stage connection.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
+        device_id : int
+            Device ID for the stage, defaults to 0
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
@@ -426,8 +435,9 @@ class ASIStage(StageBase):
                 start_position_mm, end_position_mm, enc_divide, axis
             )
         except TigerException as e:
-            logger.exception(f"TigerException: {e}")
-            print(logger.exception())
+            error_statement = f"TigerException: {e}"
+            logger.exception(error_statement)
+            print(error_statement)
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")
@@ -449,7 +459,7 @@ class ASIStage(StageBase):
             scan start position
         end_position_mm: float
             scan end position
-        number of lines: int
+        number_of_lines: int
             number of steps.
         overshoot: float
             overshoot_time ms
@@ -467,8 +477,9 @@ class ASIStage(StageBase):
                 start_position_mm, end_position_mm, number_of_lines, overshoot, axis
             )
         except TigerException as e:
-            logger.exception(f"TigerException: {e}")
-            print(logger.exception())
+            error_statement = f"TigerException: {e}"
+            logger.exception(error_statement)
+            print(error_statement)
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")

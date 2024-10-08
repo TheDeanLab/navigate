@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -48,27 +49,33 @@ logger = logging.getLogger(p)
 class SyntheticLaser(LaserBase):
     """SyntheticLaser Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration, laser_id):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        laser_id: int,
+    ) -> None:
         """Initialize the SyntheticLaser class.
 
         Parameters
         ----------
         microscope_name : str
             The microscope name.
-        device_connection : object
+        device_connection : Any
             The device connection object.
-        configuration : dict
+        configuration : Dict[str, Any]
             The device configuration.
-        laser_id : str
+        laser_id : int
             The laser ID.
         """
         super().__init__(microscope_name, device_connection, configuration, laser_id)
 
-    def close(self):
+    def close(self) -> None:
         """Close the port before exit."""
         pass
 
-    def initialize_laser(self):
+    def initialize_laser(self) -> None:
         """
         Initialize lasers.
         """

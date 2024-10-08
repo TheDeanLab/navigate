@@ -34,7 +34,7 @@ import logging
 
 # from idlelib.debugger_r import DictProxy
 from multiprocessing.managers import ListProxy
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -55,7 +55,7 @@ class StageBase:
         microscope_name: str,
         device_connection: Any,
         configuration: Dict[str, Any],
-        device_id: Union[int, Optional] = 0,
+        device_id: int = 0,
     ) -> None:
         """Initialize the stage.
 
@@ -67,7 +67,7 @@ class StageBase:
             Hardware device to connect to
         configuration : Dict[str, Any]
             Global configuration of the microscope
-        device_id : int, Optional
+        device_id : int
             Device ID. Default is 0.
         """
         #: Any: Device connection object.

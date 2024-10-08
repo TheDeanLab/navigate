@@ -98,7 +98,7 @@ class SutterStage(StageBase):
             MP285 stage connection.
         configuration : Dict[str, Any]
             Configuration dictionary for the SutterStage.
-        device_id : int, Optional
+        device_id : int
             Device ID for the SutterStage.
 
         Raises

@@ -34,7 +34,7 @@
 import logging
 from multiprocessing.managers import ListProxy
 import time
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 # Third Party Imports
 import numpy as np
@@ -65,7 +65,7 @@ class GalvoNIStage(StageBase):
         microscope_name: str,
         device_connection: Any,
         configuration: Dict[str, Any],
-        device_id: Union[int, Optional] = 0,
+        device_id: int = 0,
     ) -> None:
         """Initialize the Galvo Stage.
 
@@ -77,7 +77,7 @@ class GalvoNIStage(StageBase):
             Hardware device to connect to
         configuration : Dict[str, Any]
             Global configuration of the microscope
-        device_id : Union[int, Optional]
+        device_id : int
             Device ID of the stage
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)

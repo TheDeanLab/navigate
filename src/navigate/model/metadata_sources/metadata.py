@@ -103,7 +103,7 @@ class Metadata:
 
         Returns
         -------
-        Optional[DictProxy]
+        configuration : Optional[DictProxy]
             Configuration dictionary
         """
         return self._configuration
@@ -289,7 +289,7 @@ class XMLMetadata(Metadata):
             File name
         file_type : str
             File type
-        root : Optional[str], optional
+        root : Optional[str]
             Root, by default None
         """
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n'  # XML file header
@@ -313,7 +313,7 @@ class XMLMetadata(Metadata):
         ----------
         file_type : str
             File type
-        root : Optional[str], optional
+        root : Optional[str]
             Root, by default None
         **kw
             Keyword arguments

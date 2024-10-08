@@ -33,7 +33,7 @@
 # Standard Imports
 import logging
 import time
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 # Third Party Imports
 from pipython import GCSDevice, pitools, GCSError
@@ -96,7 +96,7 @@ class PIStage(StageBase):
         microscope_name: str,
         device_connection: Any,
         configuration: Dict[str, Any],
-        device_id: Union[int, Optional] = 0,
+        device_id: int = 0,
     ):
         """
         Initialize the Physik Instrumente (PI) Stage Class
@@ -109,7 +109,7 @@ class PIStage(StageBase):
             Hardware device to connect to
         configuration : Dict[str, Any]
             Global configuration of the microscope
-        device_id : int, Optional
+        device_id : int
             Unique identifier for the device, by default 0
         """
 

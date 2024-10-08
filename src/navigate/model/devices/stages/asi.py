@@ -32,7 +32,7 @@
 # Standard Imports
 import logging
 import time
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -99,7 +99,7 @@ class ASIStage(StageBase):
         microscope_name: str,
         device_connection: Any,
         configuration: Dict[str, Any],
-        device_id: Union[int, Optional] = 0,
+        device_id: int = 0,
     ):
         """Initialize the ASI Stage connection.
 
@@ -111,7 +111,7 @@ class ASIStage(StageBase):
             Hardware device to connect to
         configuration : Dict[str, Any]
             Global configuration of the microscope
-        device_id : Union[int, Optional]
+        device_id : int
             Device ID for the stage, defaults to 0
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)

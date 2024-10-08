@@ -38,7 +38,7 @@ import pkgutil
 import os
 import inspect
 import logging
-from typing import Optional
+from typing import Optional, Any
 
 # Local application imports
 from navigate.tools.file_functions import load_yaml_file
@@ -108,7 +108,7 @@ class PluginPackageManager:
         return plugin_config
 
     @staticmethod
-    def load_controller(package_name: str, controller_name: str) -> Optional[type]:
+    def load_controller(package_name: str, controller_name: str) -> Optional[Any]:
         """Load controller
 
         Parameters
@@ -120,7 +120,7 @@ class PluginPackageManager:
 
         Returns
         -------
-        controller_class : type or None
+        controller_class : Optional[Any]
             The dynamically loaded controller class, or `None` if the controller
             module or class cannot be found. The return type can be:
 
@@ -139,7 +139,7 @@ class PluginPackageManager:
             return None
 
     @staticmethod
-    def load_view(package_name: str, frame_name: str) -> Optional[type]:
+    def load_view(package_name: str, frame_name: str) -> Optional[Any]:
         """Load view
 
         Parameters
@@ -151,7 +151,7 @@ class PluginPackageManager:
 
         Returns
         -------
-        view_class : type or None
+        view_class : Optional[Any]
             The dynamically loaded view class, or `None` if the view module or
             class cannot be found. The return type can be:
 

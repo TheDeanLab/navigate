@@ -32,7 +32,7 @@
 # Standard Imports
 import logging
 import time
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -86,7 +86,6 @@ class ASIStage(StageBase):
     Note
     ----
         ASI firmware requires all distances to be in a 10th of a micron.
-
     """
 
     def __init__(
@@ -94,7 +93,7 @@ class ASIStage(StageBase):
         microscope_name: str,
         device_connection: Any,
         configuration: Dict[str, Any],
-        device_id: Union[int, Optional] = 0,
+        device_id: int = 0,
     ):
         """Initialize the ASI Stage connection.
 
@@ -106,7 +105,7 @@ class ASIStage(StageBase):
             Hardware device to connect to
         configuration : Dict[str, Any]
             Global configuration of the microscope
-        device_id : Union[int, Optional]
+        device_id : int
             Device ID for the stage, by default 0
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
@@ -475,7 +474,7 @@ class ASIStage(StageBase):
         distance : float
             The distance to move relative to the current position,
             in micrometers for XYZ axes.
-        wait_until_done : bool, optional
+        wait_until_done : bool
             Whether to wait until the stage has moved to its new position,
             by default False.
 
@@ -525,7 +524,7 @@ class ASIStage(StageBase):
             The desired end position of the stage along the specified axis.
         axis : str
             The axis along which the stage will be moved (e.g., 'x', 'y', 'z').
-        ttl_triggered : bool, optional
+        ttl_triggered : bool
             Whether to trigger the move using TTL signal, by default False.
 
         Returns

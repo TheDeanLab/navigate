@@ -35,7 +35,7 @@ import logging
 import time
 import importlib
 from multiprocessing.managers import ListProxy
-from typing import Callable, Tuple, Any, Type, Dict, Union, Optional
+from typing import Callable, Tuple, Any, Type, Dict, Optional
 
 # Third Party Imports
 
@@ -84,9 +84,9 @@ def auto_redial(
         The function or class (`__init__()` method) that connects to a device.
     args : Tuple[Any, ...]
         Positional arguments to pass to the `func`.
-    n_tries : int, Optional
+    n_tries : int
         The number of attempts to retry the connection. Default is 10.
-    exception : Type[Exception], Optional
+    exception : Type[Exception]
         The exception type to catch and handle during connection attempts.
         Default is `Exception`.
     **kwargs : Any
@@ -158,7 +158,7 @@ class SerialConnectionFactory:
             Function that builds the connection to the device.
         args : Tuple
             Arguments to the build_connection_function
-        exception : Exception, Optional
+        exception : Type[Exception]
             Exception to catch when building the connection
 
         Returns
@@ -193,9 +193,9 @@ def load_camera_connection(
     ----------
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    camera_id : int, Optional
+    camera_id : int
         Device ID (0, 1...)
-    is_synthetic: bool, Optional
+    is_synthetic: bool
         Whether it is a synthetic hardware
 
     Returns
@@ -250,7 +250,7 @@ def start_camera(
     device_connection: Any,
     configuration: Dict[str, Any],
     is_synthetic: bool = False,
-    plugin_devices=None,
+    plugin_devices: dict = None,
 ) -> CameraBase:
     """Initialize the camera class.
 
@@ -262,9 +262,9 @@ def start_camera(
         Hardware device to connect to
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : dict
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -339,7 +339,7 @@ def load_mirror(configuration: Dict[str, Any], is_synthetic: bool = False) -> An
     ----------
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
 
     Returns
@@ -369,7 +369,7 @@ def start_mirror(
     device_connection: Any,
     configuration: Dict[str, Any],
     is_synthetic: bool = False,
-    plugin_devices: Union[Dict, None, Optional] = None,
+    plugin_devices: Optional[Dict] = None,
 ) -> MirrorBase:
     """Initialize the mirror class.
 
@@ -381,9 +381,9 @@ def start_mirror(
         Hardware device to connect to
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[Dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -421,7 +421,9 @@ def start_mirror(
 
 
 def load_stages(
-    configuration: Dict[str, Any], is_synthetic: bool = False, plugin_devices=None
+    configuration: Dict[str, Any],
+    is_synthetic: bool = False,
+    plugin_devices: Optional[Dict] = None,
 ) -> Any:
     """Initialize the stage API.
 
@@ -432,9 +434,9 @@ def load_stages(
     ----------
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[Dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -646,7 +648,7 @@ def start_stage(
     configuration: Dict[str, Any],
     id: int = 0,
     is_synthetic: bool = False,
-    plugin_devices=None,
+    plugin_devices: Optional[Dict] = None,
 ) -> StageBase:
     """Initialize the Stage class.
 
@@ -661,11 +663,11 @@ def start_stage(
         Hardware device to connect to
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    id : int, Optional
+    id : int
         ID of the stage. Default is 0.
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[Dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -759,7 +761,9 @@ def start_stage(
 
 
 def load_zoom_connection(
-    configuration: Dict[str, Any], is_synthetic: bool = False, plugin_devices=None
+    configuration: Dict[str, Any],
+    is_synthetic: bool = False,
+    plugin_devices: Optional[Dict] = None,
 ) -> Any:
     """Initializes the Zoom class on a dedicated thread.
 
@@ -772,12 +776,12 @@ def load_zoom_connection(
         Global configuration of the microscope
     is_synthetic : bool
         Run synthetic version of hardware?
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[Dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Zoom : class
+    Zoom : Any
         Zoom class.
     """
 
@@ -820,7 +824,7 @@ def start_zoom(
     device_connection: Any,
     configuration: Dict[str, Any],
     is_synthetic: bool = False,
-    plugin_devices=None,
+    plugin_devices: Optional[dict] = None,
 ) -> ZoomBase:
     """Initializes the zoom class on a dedicated thread.
 
@@ -834,9 +838,9 @@ def start_zoom(
         Hardware device to connect to
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -895,7 +899,9 @@ def start_zoom(
 
 
 def load_filter_wheel_connection(
-    device_info: Dict[str, Any], is_synthetic=False, plugin_devices=None
+    device_info: Dict[str, Any],
+    is_synthetic: bool = False,
+    plugin_devices: Optional[dict] = None,
 ) -> Any:
     """Initializes the Filter Wheel class on a dedicated thread.
 
@@ -906,9 +912,9 @@ def load_filter_wheel_connection(
     ----------
     device_info : Dict[str, Any]
         filter wheel device configuration
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware, Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -987,7 +993,7 @@ def start_filter_wheel(
     configuration: Dict[str, Any],
     id: int = 0,
     is_synthetic: bool = False,
-    plugin_devices=None,
+    plugin_devices: Optional[dict] = None,
 ) -> FilterWheelBase:
     """Initialize the filter wheel class.
 
@@ -1001,11 +1007,11 @@ def start_filter_wheel(
         Device connection
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    id : int, Optional
+    id : int
         Index of filter_wheel in the configuration dictionary. Default is 0.
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices :  Optional[dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -1091,7 +1097,7 @@ def start_daq(configuration: Dict[str, Any], is_synthetic: bool = False) -> DAQB
     ----------
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
 
     Returns
@@ -1124,11 +1130,11 @@ def start_shutter(
     device_connection: Any,
     configuration: Dict[str, Any],
     is_synthetic: bool = False,
-    plugin_devices: dict = None,
+    plugin_devices: Optional[dict] = None,
 ) -> ShutterBase:
     """Initializes the shutter class on a dedicated thread.
 
-    Initializes the shutters: ThorlabsShutter or SyntheticShutter
+    Initializes the shutters: Thorlabs, Shutter or SyntheticShutter
     Shutters are triggered via digital outputs on the NI DAQ Card
     Thus, requires both to be enabled.
 
@@ -1140,9 +1146,9 @@ def start_shutter(
         Hardware device to connect to
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -1201,7 +1207,7 @@ def start_lasers(
     configuration: Dict[str, Any],
     id: int = 0,
     is_synthetic: bool = False,
-    plugin_devices: dict = None,
+    plugin_devices: Optional[dict] = None,
 ) -> LaserBase:
     """Initializes the lasers.
 
@@ -1216,11 +1222,11 @@ def start_lasers(
         Hardware device to connect to
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    id : int, Optional
+    id : int
         Index of laser in laser list in configuration dictionary. Default is 0.
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -1278,7 +1284,7 @@ def start_remote_focus_device(
     device_connection: Any,
     configuration: Dict[str, Any],
     is_synthetic: bool = False,
-    plugin_devices=None,
+    plugin_devices: Optional[dict] = None,
 ) -> RemoteFocusBase:
     """Initializes the remote focus class.
 
@@ -1293,9 +1299,9 @@ def start_remote_focus_device(
         Hardware device to connect to
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[dict]
         Dictionary of plugin devices. Default is None.
 
     Returns
@@ -1363,7 +1369,7 @@ def start_galvo(
     configuration: Dict[str, Any],
     id: int = 0,
     is_synthetic: bool = False,
-    plugin_devices=None,
+    plugin_devices: Optional[dict] = None,
 ) -> GalvoBase:
     """Initializes the Galvo class.
 
@@ -1377,11 +1383,11 @@ def start_galvo(
         Hardware device to connect to
     configuration : Dict[str, Any]
         Global configuration of the microscope
-    id : int, Optional
+    id : int
         Index of galvo in the configuration dictionary. Default is 0.
-    is_synthetic : bool, Optional
+    is_synthetic : bool
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict, Optional
+    plugin_devices : Optional[dict]
         Dictionary of plugin devices. Default is None.
 
     Returns

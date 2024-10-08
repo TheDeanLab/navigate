@@ -1155,16 +1155,35 @@ def start_lasers(
         device_type = "SyntheticLaser"
 
     else:
-        device_type = configuration["configuration"]["microscopes"][microscope_name][
+        analog = configuration["configuration"]["microscopes"][microscope_name][
             "lasers"
         ][id]["power"]["hardware"]["type"]
 
-    if device_type == "NI":
+        digital = configuration["configuration"]["microscopes"][microscope_name][
+            "lasers"
+        ][id]["onoff"]["hardware"]["type"]
+
+        device_type = analog
+
+        print("Analog: ", analog, "Digital: ", digital, "Device Type: ", device_type)
+
+    if analog == "NI" or digital == "NI":
         if device_connection is not None:
             return device_connection
         from navigate.model.devices.lasers.ni import LaserNI
 
-        return LaserNI(microscope_name, device_connection, configuration, id)
+        if analog == "NI" and digital == "NI":
+            modulation = "mixed"
+        elif analog == "NI":
+            modulation = "analog"
+        elif digital == "NI":
+            modulation = "digital"
+
+        return LaserNI(microscope_name=microscope_name,
+                       device_connection=device_connection,
+                       configuration=configuration,
+                       laser_id=id,
+                       modulation_type=modulation)
 
     elif device_type.lower() == "syntheticlaser" or device_type.lower() == "synthetic":
         if device_connection is not None:

@@ -54,7 +54,8 @@ class LaserNI(LaserBase):
     This class is used to control a laser connected to a National Instruments DAQ.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, laser_id):
+    def __init__(self, microscope_name, device_connection, configuration,
+                 laser_id, modulation_type="digital"):
         """Initialize the LaserNI class.
 
         Parameters
@@ -67,13 +68,75 @@ class LaserNI(LaserBase):
             The device configuration.
         laser_id : str
             The laser id.
+        modulation_type : str
+            The modulation type of the laser - Analog, Digital, or Mixed.
         """
         super().__init__(microscope_name, device_connection, configuration, laser_id)
 
-        #: str: Modulation type of the laser - Analog or Digital.
-        self.on_off_type = None
+        #: str: The modulation type of the laser - Analog, Digital, or Mixed.
+        self.modulation_type = modulation_type
 
-        # Digital out (if using mixed modulation mode)
+        #: str: Modulation type of the laser - Analog or Digital.
+        self.digital_port_type = None
+
+        #: float: The minimum digital modulation voltage.
+        self.laser_min_do = None
+
+        #: float: The maximum digital modulation voltage.
+        self.laser_max_do = None
+
+        #: nidaqmx.Task: The laser digital modulation task.
+        self.laser_do_task = None
+
+        #: float: The minimum analog modulation voltage.
+        self.laser_min_ao = None
+
+        #: float: The maximum analog modulation voltage.
+        self.laser_max_ao = None
+
+        #: nidaqmx.Task: The laser analog modulation task.
+        self.laser_ao_task = None
+
+        #: float: Current laser intensity.
+        self._current_intensity = 0
+
+        # Initialize the laser modulation type.
+        if self.modulation_type == "mixed":
+            self.initialize_digital_modulation()
+            self.initialize_analog_modulation()
+            logger.info(f"{str(self)} initialized with mixed modulation.")
+
+        elif self.modulation_type == "analog":
+            self.initialize_analog_modulation()
+            logger.info(f"{str(self)} initialized with analog modulation.")
+
+        elif self.modulation_type == "digital":
+            self.initialize_digital_modulation()
+            logger.info(f"{str(self)} initialized with digital modulation.")
+
+    def initialize_analog_modulation(self):
+        try:
+            laser_ao_port = self.device_config["power"]["hardware"]["channel"]
+
+            #: float: The minimum analog modulation voltage.
+            self.laser_min_ao = self.device_config["power"]["hardware"]["min"]
+
+            #: float: The maximum analog modulation voltage.
+            self.laser_max_ao = self.device_config["power"]["hardware"]["max"]
+
+            #: object: The laser analog modulation task.
+            self.laser_ao_task = nidaqmx.Task()
+            self.laser_ao_task.ao_channels.add_ao_voltage_chan(
+                laser_ao_port, min_val=self.laser_min_ao,
+                max_val=self.laser_max_ao
+            )
+        except DaqError as e:
+            logger.debug(
+                f"{str(self)} error:, {e}, {e.error_type}, {e.error_code}")
+            print(f"{str(self)} error:, {e}, {e.error_type}, {e.error_code}")
+
+    def initialize_digital_modulation(self):
+        """Initialize the digital modulation of the laser."""
         try:
             laser_do_port = self.device_config["onoff"]["hardware"]["channel"]
 
@@ -87,18 +150,20 @@ class LaserNI(LaserBase):
             self.laser_do_task = nidaqmx.Task()
 
             if "/ao" in laser_do_port:
-                # Artificial Digital Modulation via an Analog Port
+                # Perform the digital modulation with an analog output port.
                 self.laser_do_task.ao_channels.add_ao_voltage_chan(
-                    laser_do_port, min_val=self.laser_min_do, max_val=self.laser_max_do
+                    laser_do_port, min_val=self.laser_min_do,
+                    max_val=self.laser_max_do
                 )
-                self.on_off_type = "analog"
+                self.digital_port_type = "analog"
 
             else:
                 # Digital Modulation via a Digital Port
                 self.laser_do_task.do_channels.add_do_chan(
-                    laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES
+                    laser_do_port,
+                    line_grouping=LineGrouping.CHAN_FOR_ALL_LINES
                 )
-                self.on_off_type = "digital"
+                self.digital_port_type = "digital"
         except (KeyError, DaqError) as e:
             self.laser_do_task = None
             if isinstance(e, DaqError):
@@ -108,28 +173,6 @@ class LaserNI(LaserBase):
                 print(e.error_code)
                 print(e.error_type)
 
-        #: float: Current laser intensity.
-        self._current_intensity = 0
-
-        # Analog out
-        try:
-            laser_ao_port = self.device_config["power"]["hardware"]["channel"]
-
-            #: float: The minimum analog modulation voltage.
-            self.laser_min_ao = self.device_config["power"]["hardware"]["min"]
-
-            #: float: The maximum analog modulation voltage.
-            self.laser_max_ao = self.device_config["power"]["hardware"]["max"]
-
-            #: object: The laser analog modulation task.
-            self.laser_ao_task = nidaqmx.Task()
-            self.laser_ao_task.ao_channels.add_ao_voltage_chan(
-                laser_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao
-            )
-        except DaqError as e:
-            logger.debug(f"{str(self)} error:, {e}, {e.error_type}, {e.error_code}")
-            print(f"{str(self)} error:, {e}, {e.error_type}, {e.error_code}")
-
     def set_power(self, laser_intensity):
         """Sets the laser power.
 
@@ -138,6 +181,8 @@ class LaserNI(LaserBase):
         laser_intensity : float
             The laser intensity.
         """
+        if self.laser_ao_task is None:
+            return
         try:
             scaled_laser_voltage = (int(laser_intensity) / 100) * self.laser_max_ao
             self.laser_ao_task.write(scaled_laser_voltage, auto_start=True)
@@ -147,32 +192,39 @@ class LaserNI(LaserBase):
 
     def turn_on(self):
         """Turns on the laser."""
+        if self.laser_do_task is None:
+            return
         try:
             self.set_power(self._current_intensity)
             if self.laser_do_task is not None:
-                if self.on_off_type == "digital":
+                if self.digital_port_type == "digital":
                     self.laser_do_task.write(True, auto_start=True)
-                elif self.on_off_type == "analog":
+                elif self.digital_port_type == "analog":
                     self.laser_do_task.write(self.laser_max_do, auto_start=True)
         except DaqError as e:
             logger.exception(e)
 
     def turn_off(self):
         """Turns off the laser."""
+        if self.laser_do_task is None:
+            return
+
         try:
             tmp = self._current_intensity
             self.set_power(0)
             self._current_intensity = tmp
             if self.laser_do_task is not None:
-                if self.on_off_type == "digital":
+                if self.digital_port_type == "digital":
                     self.laser_do_task.write(False, auto_start=True)
-                elif self.on_off_type == "analog":
+                elif self.digital_port_type == "analog":
                     self.laser_do_task.write(self.laser_min_do, auto_start=True)
         except DaqError as e:
             logger.exception(e)
 
     def close(self):
         """Close the NI Task before exit."""
+        if self.laser_ao_task is None:
+            return
         try:
             self.laser_ao_task.close()
             if self.laser_do_task is not None:

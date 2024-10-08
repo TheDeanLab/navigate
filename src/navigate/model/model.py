@@ -1,5 +1,6 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
+import argparse
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
@@ -88,37 +89,39 @@ class Model:
 
     Model for Model-View-Controller Software Architecture."""
 
-    def __init__(self, args, configuration=None, event_queue=None):
+    def __init__(self, args: argparse.Namespace, configuration=None, event_queue=None):
         """Initialize the Model.
 
         Parameters
         ----------
         args : argparse.Namespace
             Command line arguments.
-        configuration : dict
+        configuration : multiprocessing.managers.DictProxy
             Configuration dictionary.
         event_queue : multiprocessing.Queue
-            Queue for events.
+            Event queue. Receives events from the controller.
         """
-
+        # Set up logging
         log_setup("model_logging.yml")
+
         #: object: Logger object.
         self.logger = logging.getLogger(p)
 
-        # Loads the YAML file for all of the microscope parameters
         #: dict: Configuration dictionary.
         self.configuration = configuration
 
+        # Plugins
         plugins = PluginsModel()
-        # load plugin feature and devices
         plugin_devices, plugin_acquisition_modes = plugins.load_plugins()
+
+        #: dict: Dictionary of plugin acquisition modes
+        self.plugin_acquisition_modes = plugin_acquisition_modes
+
+        # Devices
         devices_dict = load_devices(
             configuration, args.synthetic_hardware, plugin_devices
         )
         devices_dict["__plugins__"] = plugin_devices
-
-        #: dict: Dictionary of plugin acquisition modes
-        self.plugin_acquisition_modes = plugin_acquisition_modes
 
         #: dict: Dictionary of virtual microscopes.
         self.virtual_microscopes = {}
@@ -744,9 +747,7 @@ class Model:
                             self, self.addon_feature
                         )
                 except KeyError:
-                    self.logger.debug(
-                        f"Attempted to load an unknown feature: {args}."
-                    )
+                    self.logger.debug(f"Attempted to load an unknown feature: {args}.")
         elif command == "stage_limits":
             for microscope_name in self.microscopes:
                 self.microscopes[microscope_name].update_stage_limits(args[0])
@@ -825,8 +826,9 @@ class Model:
         """
         try:
             r = self.active_microscope.move_stage(pos_dict, wait_until_done)
-            self.logger.info(f"Stage moved to:, {pos_dict}, "
-                             f"Wait until done: {wait_until_done}")
+            self.logger.info(
+                f"Stage moved to:, {pos_dict}, " f"Wait until done: {wait_until_done}"
+            )
         except Exception as e:
             self.logger.debug(f"Stage move failed: {e}")
             return False
@@ -905,13 +907,17 @@ class Model:
             self.logger.info(f"Running data process, getting frames {frame_ids}")
             # if there is at least one frame available
             if not frame_ids:
-                self.logger.debug(f"Frame not received. Waiting {wait_num}"
-                f"/{self.camera_wait_iterations} iterations")
+                self.logger.debug(
+                    f"Frame not received. Waiting {wait_num}"
+                    f"/{self.camera_wait_iterations} iterations"
+                )
                 wait_num -= 1
                 if wait_num <= 0:
-                    error_statement = ("Acquisition aborted due to camera time out "
-                                       "error. Please verify that the external "
-                                       "trigger is connected and configured properly.")
+                    error_statement = (
+                        "Acquisition aborted due to camera time out "
+                        "error. Please verify that the external "
+                        "trigger is connected and configured properly."
+                    )
 
                     self.logger.debug(error_statement)
                     print(error_statement)
@@ -1216,8 +1222,10 @@ class Model:
             self.stop_stage()
 
         except ValueError as e:
-            self.logger.debug(f"Error changing microscope resolution:"
-                              f".{self.active_microscope_name} - {e}")
+            self.logger.debug(
+                f"Error changing microscope resolution:"
+                f".{self.active_microscope_name} - {e}"
+            )
 
         self.active_microscope.ask_stage_for_position = True
 

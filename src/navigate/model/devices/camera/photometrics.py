@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 from ctypes import *  # noqa
@@ -91,19 +92,22 @@ class PhotometricsBase(CameraBase):
         python setup.py install
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize the Photometrics class.
 
         Parameters
         ---------
         microscope_name : str
                 Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
                 Hardware device to connect to. will be saved in camera_controller
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
                 Global configuration of the microscope
-        -------
-
         """
         super().__init__(microscope_name, device_connection, configuration)
 

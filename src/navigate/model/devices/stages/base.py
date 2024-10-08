@@ -31,7 +31,10 @@
 
 # Standard Imports
 import logging
+
+# from idlelib.debugger_r import DictProxy
 from multiprocessing.managers import ListProxy
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -47,20 +50,29 @@ logger = logging.getLogger(p)
 class StageBase:
     """Stage Parent Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the stage.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
-        device_id : int, optional
-            Device ID, by default 0
+        device_id : int
+            Device ID. Default is 0.
         """
+        #: Any: Device connection object.
+        self.device_connection = device_connection
+
         stage_configuration = configuration["configuration"]["microscopes"][
             microscope_name
         ]["stage"]
@@ -144,7 +156,7 @@ class StageBase:
         """
         try:
             # Get all necessary attributes.
-            # If we can't we'll move to the error case (e.g., -1e50).
+            # If we can't, we'll move to the error case (e.g., -1e50).
             axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
                 self, f"{axis}_max"
             )

@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 import os
+from typing import Any, Dict
 
 # Third Party Imports
 import tifffile
@@ -50,16 +51,21 @@ logger = logging.getLogger(p)
 class CameraBase:
     """CameraBase - Parent camera class."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ):
         """Initialize CameraBase class.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
 
         Raises
@@ -155,8 +161,8 @@ class CameraBase:
             If offset or variance map is not found.
         """
         serial_number = self.camera_parameters["hardware"]["serial_number"]
+        map_path = os.path.join(get_navigate_path(), "camera_maps")
         try:
-            map_path = os.path.join(get_navigate_path(), "camera_maps")
             self._offset = tifffile.imread(
                 os.path.join(map_path, f"{serial_number}_off.tiff")
             )
@@ -164,9 +170,7 @@ class CameraBase:
                 os.path.join(map_path, f"{serial_number}_var.tiff")
             )
         except FileNotFoundError:
-            logger.info(
-                f"{str(self)}, Offset or variance map not found in {map_path}"
-            )
+            logger.info(f"{str(self)}, Offset or variance map not found in {map_path}")
             self._offset, self._variance = None, None
         return self._offset, self._variance
 
@@ -197,7 +201,7 @@ class CameraBase:
             self.get_offset_variance_maps()
         return self._variance
 
-    def set_readout_direction(self, mode):
+    def set_readout_direction(self, mode) -> None:
         """Set HamamatsuOrca readout direction.
 
         Parameters
@@ -239,11 +243,11 @@ class CameraBase:
         exposure_time = camera_line_interval * shutter_width
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
-    def close_camera(self):
+    def close_camera(self) -> None:
         """Close camera."""
         pass
 
-    def get_line_interval(self):
+    def get_line_interval(self) -> float:
         """Return stored camera line interval.
 
         Returns

@@ -32,6 +32,11 @@
 # Standard Imports
 import logging
 import time
+
+# from idlelib.debugger_r import DictProxy
+from typing import Any, Dict
+
+# Third-Party Imports
 from serial import SerialException
 
 # Local Imports
@@ -76,17 +81,25 @@ def build_MP285_connection(com_port: str, baud_rate: int, timeout=0.25) -> MP285
 class SutterStage(StageBase):
     """SutterStage Class for MP-285."""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the SutterStage.
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : MP285
-            MP285 stage.
-        configuration : dict
+        device_connection : Any
+            MP285 stage connection.
+        configuration : Dict[str, Any]
             Configuration dictionary for the SutterStage.
+        device_id : int
+            Device ID for the SutterStage.
 
         Raises
         ------
@@ -125,13 +138,17 @@ class SutterStage(StageBase):
         #: str: Resolution of the stage.
         self.resolution = "low"  # "high"
 
-        #: int: Speed of the stage.
-        self.speed = 3000  # 1300  # in units microns/s.
+        #: int: Speed of the stage in units microns/s.
+        self.speed = 3000
 
         #: float: Position of the stage along the x-axis.
+        self.stage_x_pos = 0
+
         #: float: Position of the stage along the y-axis.
+        self.stage_y_pos = 0
+
         #: float: Position of the stage along the z-axis.
-        self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = 0, 0, 0
+        self.stage_z_pos = 0
 
         # Set the resolution and velocity of the stage
         try:

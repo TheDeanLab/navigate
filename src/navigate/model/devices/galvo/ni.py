@@ -32,6 +32,7 @@
 
 #  Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 import nidaqmx
@@ -49,19 +50,25 @@ logger = logging.getLogger(p)
 class GalvoNI(GalvoBase):
     """GalvoNI Class - NI DAQ Control of Galvanometers"""
 
-    def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        galvo_id: int = 0,
+    ) -> None:
         """Initialize the GalvoNI class.
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : dict
-            Dictionary of device connections.
-        configuration : dict
+        device_connection : Any
+            Connection to the NI DAQ device.
+        configuration : Dict[str, Any]
             Dictionary of configuration parameters.
         galvo_id : int
-            Galvo ID.
+            Galvo ID. Default is 0.
         """
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
 
@@ -82,11 +89,11 @@ class GalvoNI(GalvoBase):
         #: obj: NI DAQ device connection.
         self.daq = device_connection
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of the GalvoNI."""
         return "GalvoNI"
 
-    def adjust(self, exposure_times, sweep_times):
+    def adjust(self, exposure_times, sweep_times) -> Dict[str, Any]:
         """Adjust the galvo to the readout time
 
         Parameters
@@ -109,7 +116,7 @@ class GalvoNI(GalvoBase):
         }
         return waveform_dict
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         """Turn off the galvo.
         Turns off the galvo. NOTE: This will only work if there isn't another task
         bound to this channel. This should only be called in microscope.terminate().

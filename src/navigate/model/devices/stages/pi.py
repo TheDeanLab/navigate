@@ -33,6 +33,7 @@
 # Standard Imports
 import logging
 import time
+from typing import Any, Dict
 
 # Third Party Imports
 from pipython import GCSDevice, pitools, GCSError
@@ -88,20 +89,30 @@ def build_PIStage_connection(controller_name, serial_number, stages, reference_m
 
 @log_initialization
 class PIStage(StageBase):
-    """Physik Instrumente (PI) Stage Class
+    """Physik Instrumente (PI) Stage Class"""
 
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
-        Global configuration of the microscope
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        device_id: int = 0,
+    ):
+        """
+        Initialize the Physik Instrumente (PI) Stage Class
 
-    """
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : Any
+            Hardware device to connect to
+        configuration : Dict[str, Any]
+            Global configuration of the microscope
+        device_id : int
+            Unique identifier for the device, by default 0
+        """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Default mapping from self.axes to corresponding PI axis labelling
@@ -127,8 +138,6 @@ class PIStage(StageBase):
 
     def __del__(self):
         """Delete the PI Connection
-
-
 
         Raises
         ------

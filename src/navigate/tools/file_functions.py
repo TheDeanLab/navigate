@@ -37,6 +37,7 @@ import json
 import yaml
 from pathlib import Path
 import psutil
+from typing import Union
 
 # Third party imports
 
@@ -44,7 +45,7 @@ import psutil
 from navigate.tools.common_functions import copy_proxy_object
 
 
-def get_ram_info():
+def get_ram_info() -> tuple:
     """Get computer RAM information.
 
     This function retrieves the total and available RAM on the computer.
@@ -67,7 +68,7 @@ def get_ram_info():
     return total_ram, available_ram
 
 
-def create_save_path(saving_settings):
+def create_save_path(saving_settings: dict) -> str:
     """Create path to save the data to.
 
     This function retrieves the user inputs from the popup save window.
@@ -98,21 +99,22 @@ def create_save_path(saving_settings):
     label_string = label_string.replace(" ", "-")
 
     # Create the save directory on disk.
-    save_directory = os.path.join(
-        root_directory,
-        user_string,
-        tissue_string,
-        cell_type_string,
-        label_string,
-        date_string,
+    save_directory = str(
+        os.path.join(
+            root_directory,
+            user_string,
+            tissue_string,
+            cell_type_string,
+            label_string,
+            date_string,
+        )
     )
 
     os.makedirs(save_directory, exist_ok=True)
-    # Determine Number of Cells in Directory
-    # Cell1/Position1/1_CH00_000000.tif
+
+    # Determine Number of Acquisitions in Directory
     prefix_num = len(prefix_string)
     cell_directories = list(
-        # filter(lambda v: v[:5] == "Cell_", os.listdir(save_directory))
         filter(lambda v: v[:prefix_num] == prefix_string, os.listdir(save_directory))
     )
     if len(cell_directories) != 0:
@@ -120,7 +122,6 @@ def create_save_path(saving_settings):
         cell_index = int(cell_directories[-1][prefix_num:]) + 1
     else:
         cell_index = 1
-    # cell_string = "Cell_" + str(cell_index).zfill(3)
     cell_string = prefix_string + str(cell_index).zfill(3)
 
     save_directory = os.path.join(save_directory, cell_string)
@@ -133,19 +134,19 @@ def create_save_path(saving_settings):
     return save_directory
 
 
-def load_yaml_file(file_path):
+def load_yaml_file(file_path: str) -> Union[dict, None]:
     """Load YAML file from Disk
 
     Parameters
     ----------
-    file_path : str/os.path
+    file_path : str
         String or path of the yaml file.
 
     Returns
     -------
     config_data: dict/list/None
-        A dictionary/list of the yaml file content.
-        None: if the yaml file has error or not exist.
+        - A dictionary/list of the yaml file content.
+        - None: if the yaml file has error or not exist.
     """
     file_path = Path(file_path)
     if not file_path.exists():
@@ -159,7 +160,9 @@ def load_yaml_file(file_path):
     return config_data
 
 
-def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
+def save_yaml_file(
+    file_directory: str, content_dict: dict, filename="experiment.yml"
+) -> bool:
     """Same YAML file to Disk
 
     Parameters
@@ -195,7 +198,7 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
     return True
 
 
-def delete_folder(top):
+def delete_folder(top: str) -> None:
     """Delete folder and all sub-folders.
 
     https://docs.python.org/3/library/os.html#os.walk

@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -52,16 +53,21 @@ class HamamatsuBase(CameraBase):
     This includes the ORCA Flash 4.0, Fusion, Lightning, and Fire.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize HamamatsuOrca class.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)
@@ -252,18 +258,12 @@ class HamamatsuBase(CameraBase):
             logger.debug("Camera readout direction not supported")
 
     def calculate_readout_time(self):
-        """Calculate duration of time needed to readout an image.
-
-        Calculates the readout time and maximum frame rate according to the camera
-        configuration settings.
-        Assumes model C13440 with Camera Link communication from Hamamatsu.
-        Currently pulling values directly from the camera.
+        """Get the duration of time needed to read out an image.
 
         Returns
         -------
         readout_time : float
-            Duration of time needed to readout an image.
-
+            Duration of time needed to read out an image.
         """
         readout_time = self.camera_controller.get_property_value("readout_time")
 
@@ -446,16 +446,21 @@ class HamamatsuBase(CameraBase):
 class HamamatsuOrcaLightning(HamamatsuBase):
     """HamamatsuOrcaLightning camera class."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize HamamatsuOrcaLightning class.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
@@ -514,16 +519,21 @@ class HamamatsuOrcaLightning(HamamatsuBase):
 
 @log_initialization
 class HamamatsuOrcaFire(HamamatsuBase):
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize HamamatsuOrcaFire class.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
@@ -597,7 +607,12 @@ class HamamatsuOrcaFire(HamamatsuBase):
 
 @log_initialization
 class HamamatsuOrca(HamamatsuBase):
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize HamamatsuOrca class.
 
         This is for controlling the Orca Flash 4.0.
@@ -606,9 +621,9 @@ class HamamatsuOrca(HamamatsuBase):
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
@@ -674,16 +689,21 @@ class HamamatsuOrca(HamamatsuBase):
 class HamamatsuOrcaFusion(HamamatsuBase):
     """HamamatsuOrcaFusion camera class."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize HamamatsuOrcaFusion class.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)

@@ -32,6 +32,7 @@
 
 #  Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -48,20 +49,28 @@ logger = logging.getLogger(p)
 class GalvoBase:
     """GalvoBase Class - Parent class for galvanometers."""
 
-    def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        galvo_id: int = 0,
+    ) -> None:
         """Initialize the GalvoBase class.
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : dict
-            Dictionary of device connections.
-        configuration : dict
+        device_connection : Any
+            Device connection.
+        configuration : Dict[str, Any]
             Dictionary of configuration parameters.
         galvo_id : int
-            Galvo ID.
+            Galvo ID. Default is 0.
         """
+        #: Any: Device connection.
+        self.device_connection = device_connection
 
         #: dict: Dictionary of microscope configuration parameters.
         self.configuration = configuration

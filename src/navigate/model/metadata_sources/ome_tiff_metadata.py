@@ -66,7 +66,7 @@ class OMETIFFMetadata(XMLMetadata):
             Time point index, by default 0
         file_name : Union[str, list, None], optional
             File name or list of file names, by default None
-        uid : Union[str, list, None], optional
+        uid : Union[str, list, None]
             Unique identifier or list of unique identifiers, by default None
         views : Optional[list], optional
             List of views, by default None

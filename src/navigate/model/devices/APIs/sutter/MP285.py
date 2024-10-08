@@ -304,12 +304,12 @@ class MP285:
 
         Returns
         -------
-        x_pos : float
-            X position in microns
-        y_pos : float
-            Y position in microns
-        z_pos : float
-            Z position in microns
+        position : Tuple[Optional[float], Optional[float], Optional[float]]
+            The x, y, and z positions in microns if available.
+
+            - x_pos is the X position in microns. None if the position is not available.
+            - y_pos is the Y position in microns. None if the position is not available.
+            - z_pos is the Z position in microns. None if the position is not available.
 
         """
         # print("calling get_current_position")

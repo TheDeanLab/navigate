@@ -32,13 +32,15 @@
 #  Standard Imports
 import os
 import logging
-from typing import Optional
+from typing import Optional, Dict, Any
+from multiprocessing.managers import DictProxy
+
+# Third-party Imports
 
 # Local Imports
 from navigate.tools import xml_tools
 from navigate import __version__, __commit__
 
-from multiprocessing.managers import DictProxy
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -101,18 +103,18 @@ class Metadata:
 
         Returns
         -------
-        Optional[DictProxy]
+        configuration : Optional[DictProxy]
             Configuration dictionary
         """
         return self._configuration
 
     @configuration.setter
-    def configuration(self, configuration: DictProxy) -> None:
+    def configuration(self, configuration: Dict[str, Any]) -> None:
         """Set configuration dictionary
 
         Parameters
         ----------
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Configuration dictionary
         """
         self._configuration = configuration
@@ -287,7 +289,7 @@ class XMLMetadata(Metadata):
             File name
         file_type : str
             File type
-        root : Optional[str], optional
+        root : Optional[str]
             Root, by default None
         """
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n'  # XML file header
@@ -311,7 +313,7 @@ class XMLMetadata(Metadata):
         ----------
         file_type : str
             File type
-        root : Optional[str], optional
+        root : Optional[str]
             Root, by default None
         **kw
             Keyword arguments

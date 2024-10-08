@@ -334,7 +334,7 @@ class BigDataViewerMetadata(XMLMetadata):
             The z position of the stage.
         theta : float
             The theta position of the stage.
-        f : Optional[float], optional
+        f : Optional[float]
             The focus position of the stage, by default None
 
         Returns

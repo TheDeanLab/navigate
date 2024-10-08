@@ -34,6 +34,8 @@
 import time
 import serial
 import logging
+from typing import Any
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 from navigate.tools.decorators import log_initialization
@@ -60,16 +62,18 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
         sent. Once the character is received the next character can be processed.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self, microscope_name: str, device_connection: Any, configuration: DictProxy
+    ) -> None:
         """Initialize the RemoteFocusEquipmentSolutions Class
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope
-        device_connection : str
-            Name of the device connection
-        configuration : dict
+        device_connection : Any
+            Connection to the device
+        configuration : DictProxy
             Configuration dictionary
         """
         super().__init__(microscope_name, device_connection, configuration)

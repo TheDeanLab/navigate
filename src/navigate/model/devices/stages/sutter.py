@@ -32,6 +32,12 @@
 # Standard Imports
 import logging
 import time
+
+# from idlelib.debugger_r import DictProxy
+from multiprocessing.managers import DictProxy
+from typing import Any
+
+# Third-Party Imports
 from serial import SerialException
 
 # Local Imports
@@ -76,17 +82,25 @@ def build_MP285_connection(com_port: str, baud_rate: int, timeout=0.25) -> MP285
 class SutterStage(StageBase):
     """SutterStage Class for MP-285."""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: DictProxy,
+        device_id: int = 0,
+    ) -> None:
         """Initialize the SutterStage.
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : MP285
-            MP285 stage.
-        configuration : dict
+        device_connection : Any
+            MP285 stage connection.
+        configuration : DictProxy
             Configuration dictionary for the SutterStage.
+        device_id : int, Optional
+            Device ID for the SutterStage.
 
         Raises
         ------

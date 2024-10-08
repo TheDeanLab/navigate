@@ -32,6 +32,8 @@
 
 #  Standard Library Imports
 import logging
+from typing import Any
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 
@@ -52,16 +54,18 @@ logger = logging.getLogger(p)
 class RemoteFocusBase:
     """RemoteFocusBase Class - Parent class for Remote Focusing Device."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self, microscope_name: str, device_connection: Any, configuration: DictProxy
+    ) -> None:
         """Initializes the RemoteFocusBase Class.
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : str
-            Connection string for the remote focus device.
-        configuration : dict
+        device_connection : Any
+            Device connection object.
+        configuration : DictProxy
             Configuration dictionary.
         """
 

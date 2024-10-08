@@ -32,6 +32,7 @@
 
 # Standard Imports
 import logging
+import multiprocessing.managers
 from threading import Lock
 import traceback
 import time
@@ -57,12 +58,12 @@ logger = logging.getLogger(p)
 class NIDAQ(DAQBase):
     """NIDAQ class for Control of NI Data Acquisition Cards."""
 
-    def __init__(self, configuration: dict) -> None:
+    def __init__(self, configuration: multiprocessing.managers.DictProxy) -> None:
         """Initialize NIDAQ class.
 
         Parameters
         ----------
-        configuration : dict
+        configuration : multiprocessing.managers.DictProxy
             Configuration dictionary.
         """
         super().__init__(configuration)

@@ -32,6 +32,8 @@
 
 #  Standard Library Imports
 import logging
+from typing import Any
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 
@@ -48,22 +50,25 @@ logger = logging.getLogger(p)
 class SyntheticRemoteFocus(RemoteFocusBase):
     """SyntheticRemoteFocus Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self, microscope_name: str, device_connection: Any, configuration: DictProxy
+    ) -> None:
         """Initialize the SyntheticRemoteFocus class.
 
         Parameters
         ----------
         microscope_name : str
             The microscope name.
-        device_connection : object
+        device_connection : Any
             The device connection object.
-        configuration : dict
+        configuration : DictProxy
             The device configuration.
         """
         super().__init__(microscope_name, device_connection, configuration)
         pass
 
-    def move(self, readout_time, offset=None):
+    @staticmethod
+    def move(readout_time, offset=None):
         """Moves the remote focus.
 
         This method moves the remote focus.

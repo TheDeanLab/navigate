@@ -29,18 +29,28 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
 # Standard Library Imports
 import platform
 import logging
 import time
 import importlib
 from multiprocessing.managers import ListProxy, DictProxy
+from typing import Callable, Tuple, Any, Type
 
 # Third Party Imports
 
 # Local Imports
 from navigate.tools.common_functions import build_ref_name
+from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices.daq.base import DAQBase
+from navigate.model.devices.filter_wheel.base import FilterWheelBase
+from navigate.model.devices.galvo.base import GalvoBase
+from navigate.model.devices.lasers.base import LaserBase
+from navigate.model.devices.mirrors.base import MirrorBase
+from navigate.model.devices.shutter.base import ShutterBase
+from navigate.model.devices.stages.base import StageBase
+from navigate.model.devices.remote_focus.base import RemoteFocusBase
+from navigate.model.devices.zoom.base import ZoomBase
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -53,24 +63,44 @@ class DummyDeviceConnection:
     pass
 
 
-def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
-    """Retries connections to a startup device defined by func n_tries times.
+def auto_redial(
+    func: Callable[..., Any],
+    args: Tuple[Any, ...],
+    n_tries: int = 10,
+    exception: Type[Exception] = Exception,
+    **kwargs: Any,
+) -> Any:
+    """Retries connections to a startup device defined by `func` for a specified
+    number of attempts.
+
+    This function attempts to execute the connection function `func` up to `n_tries`
+    times. If an exception occurs, it retries the connection after a brief pause,
+    logging each failure. If the connection partially succeeds, it cleans up any objects
+    before retrying.
 
     Parameters
     ----------
-    func : function or class
-        The function or class (__init__() function) that connects to a device.
-    args : tuple
-        Arguments to function or class
-    n_tries : int
-        The number of tries to redial.
-    exception : inherits from BaseException
-        An exception type to check on each connection attempt.
+    func : Callable[..., Any]
+        The function or class (`__init__()` method) that connects to a device.
+    args : Tuple[Any, ...]
+        Positional arguments to pass to the `func`.
+    n_tries : int, Optional
+        The number of attempts to retry the connection. Default is 10.
+    exception : Type[Exception], Optional
+        The exception type to catch and handle during connection attempts.
+        Default is `Exception`.
+    **kwargs : Any
+        Additional keyword arguments passed to `func`.
 
     Returns
     -------
-    val : object
-        Result of func
+    Any
+        The result of the successful execution of `func`.
+
+    Raises
+    ------
+    exception
+        If all connection attempts fail, the specified `exception` is raised.
     """
     val = None
 
@@ -109,22 +139,38 @@ class SerialConnectionFactory:
     _connections = {}
 
     @classmethod
-    def build_connection(cls, build_connection_function, args, exception=Exception):
-        """Builds a serial connection to a device.
+    def build_connection(
+        cls,
+        build_connection_function: Callable[..., Any],
+        args: Tuple[Any, ...],
+        exception: Type[Exception] = Exception,
+    ) -> Any:
+        """
+        Builds a serial connection to a device.
+
+        This method establishes a connection to a device using the provided
+        connection-building function and arguments. If the connection does not exist,
+        it will be created and stored.
 
         Parameters
         ----------
-        build_connection_function : function
+        build_connection_function : Callable
             Function that builds the connection to the device.
-        args : tuple
+        args : Tuple
             Arguments to the build_connection_function
-        exception : Exception
+        exception : Exception, Optional
             Exception to catch when building the connection
 
         Returns
         -------
-        connection : object
+        connection : Any
             Connection to the device
+
+        Raises
+        ------
+        exception : Exception
+            If the connection building process fails, the specified `exception` is
+            raised.
         """
         port = args[0]
         if str(port) not in cls._connections:
@@ -135,25 +181,27 @@ class SerialConnectionFactory:
         return cls._connections[str(port)]
 
 
-def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
-    """Initializes the camera api class.
+def load_camera_connection(
+    configuration: DictProxy, camera_id: int = 0, is_synthetic: bool = False
+) -> Any:
+    """Initialize the camera API class.
 
     Load camera information from the configuration file. Proper camera types include
     HamamatsuOrca, HamamatsuOrcaLightning, Photometrics, and SyntheticCamera.
 
     Parameters
     ----------
-    configuration : multiprocessing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    camera_id : int
+    camera_id : int, Optional
         Device ID (0, 1...)
-    is_synthetic: bool
+    is_synthetic: bool, Optional
         Whether it is a synthetic hardware
 
     Returns
     -------
-    Camera controller: class
-        Camera api class.
+    Camera_controller: Any
+        The initialized camera API class instance.
     """
 
     if is_synthetic:
@@ -198,32 +246,35 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
 
 
 def start_camera(
-    microscope_name,
-    device_connection,
-    configuration,
-    is_synthetic=False,
-    plugin_devices={},
-):
-    """Initializes the camera class.
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    is_synthetic: bool = False,
+    plugin_devices=None,
+) -> CameraBase:
+    """Initialize the camera class.
 
     Parameters
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
+    device_connection : Any
         Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Camera : class
-        Camera class.
+    Camera : CameraBase
+        Instantiated camera class.
     """
+    if plugin_devices is None:
+        plugin_devices = {}
+
     if device_connection is None:
         device_not_found(microscope_name, "camera")
 
@@ -281,27 +332,25 @@ def start_camera(
         device_not_found(microscope_name, "camera", cam_type)
 
 
-def load_mirror(configuration, is_synthetic=False):
-    """Initializes the deformable mirror class on a dedicated thread.
+def load_mirror(configuration: DictProxy, is_synthetic: bool = False) -> Any:
+    """Initializes the deformable mirror API.
 
     Parameters
     ----------
-    configuration : multiprocesing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    is_synthetic : bool
-        Run synthetic version of hardware?
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
 
     Returns
     -------
-    Mirror : class
-        Mirror class.
+    mirror : Any
+        Instantiated .
     """
     if is_synthetic:
         mirror_type = "SyntheticMirror"
     else:
-        mirror_type = configuration["configuration"]["hardware"]["mirror"][
-            "type"
-        ]  # only one mirror for now...
+        mirror_type = configuration["configuration"]["hardware"]["mirror"]["type"]
 
     if mirror_type == "ImagineOpticsMirror":
         from navigate.model.devices.APIs.imagineoptics.imop import IMOP_Mirror
@@ -316,32 +365,30 @@ def load_mirror(configuration, is_synthetic=False):
 
 
 def start_mirror(
-    microscope_name,
-    device_connection,
-    configuration,
-    is_synthetic=False,
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    is_synthetic: bool = False,
     plugin_devices={},
-):
-    """Initializes the mirror class.
+) -> MirrorBase:
+    """Initialize the mirror class.
 
-    Parameters
-    ----------
     Parameters
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
+    device_connection : Any
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    is_synthetic : bool
-        Run synthetic version of hardware?
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
     plugin_devices : dict
         Dictionary of plugin devices
 
     Returns
     -------
-    Mirror : class
+    mirror : Any
         Mirror class.
     """
     if device_connection is None or is_synthetic:
@@ -371,26 +418,31 @@ def start_mirror(
         device_not_found(microscope_name, "mirror", mirror_type)
 
 
-def load_stages(configuration, is_synthetic=False, plugin_devices={}):
-    """Initializes the stage class on a dedicated thread.
+def load_stages(
+    configuration: DictProxy, is_synthetic: bool = False, plugin_devices=None
+) -> Any:
+    """Initialize the stage API.
 
     Stage information is pulled from the configuration file. Proper stage types include
     PI, MP285, Thorlabs, MCL, ASI, GalvoNIStage, and SyntheticStage.
 
     Parameters
     ----------
-    configuration : multiprocessing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Stage : class
+    Stage : Any
         Stage class.
     """
+    if plugin_devices is None:
+        plugin_devices = {}
+
     stage_devices = []
 
     stages = configuration["configuration"]["hardware"]["stage"]
@@ -587,36 +639,42 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
 
 
 def start_stage(
-    microscope_name,
-    device_connection,
-    configuration,
-    id=0,
-    is_synthetic=False,
-    plugin_devices={},
-):
-    """Initializes the Stage class. Proper stage types include PI, MP285, Thorlabs, MCL,
-    ASI, GalvoNIStage, and SyntheticStage.
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    id: int = 0,
+    is_synthetic: bool = False,
+    plugin_devices=None,
+) -> StageBase:
+    """Initialize the Stage class.
+
+    Proper stage types include PI, MP285, Thorlabs, MCL, ASI, GalvoNIStage,
+    and SyntheticStage.
 
     Parameters
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
+    device_connection : Any
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    id : int
-        ID of the stage
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    id : int, Optional
+        ID of the stage. Default is 0.
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Stage : class
-        Stage class.
+    Stage : StageBase
+        An instance of the appropriate stage class depending on the device
+        configuration.
     """
+    if plugin_devices is None:
+        plugin_devices = {}
+
     device_config = configuration["configuration"]["microscopes"][microscope_name][
         "stage"
     ]["hardware"]
@@ -698,7 +756,9 @@ def start_stage(
         device_not_found(microscope_name, "stage", device_type, id)
 
 
-def load_zoom_connection(configuration, is_synthetic=False, plugin_devices={}):
+def load_zoom_connection(
+    configuration: DictProxy, is_synthetic: bool = False, plugin_devices=None
+) -> Any:
     """Initializes the Zoom class on a dedicated thread.
 
     Load zoom information from the configuration file. Proper zoom types include
@@ -706,18 +766,21 @@ def load_zoom_connection(configuration, is_synthetic=False, plugin_devices={}):
 
     Parameters
     ----------
-    configuration : multiprocesing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
     is_synthetic : bool
         Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
     Zoom : class
         Zoom class.
     """
+
+    if plugin_devices is None:
+        plugin_devices = {}
 
     device_info = configuration["configuration"]["hardware"]["zoom"]
     if is_synthetic:
@@ -751,12 +814,12 @@ def load_zoom_connection(configuration, is_synthetic=False, plugin_devices={}):
 
 
 def start_zoom(
-    microscope_name,
-    device_connection,
-    configuration,
-    is_synthetic=False,
-    plugin_devices={},
-):
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    is_synthetic: bool = False,
+    plugin_devices=None,
+) -> ZoomBase:
     """Initializes the zoom class on a dedicated thread.
 
     Initializes the zoom: DynamixelZoom and SyntheticZoom.
@@ -765,20 +828,23 @@ def start_zoom(
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
+    device_connection : Any
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Zoom : class
+    Zoom : ZoomBase
         Zoom class.
     """
+    if plugin_devices is None:
+        plugin_devices = {}
+
     if is_synthetic:
         device_type = "SyntheticZoom"
 
@@ -826,7 +892,9 @@ def start_zoom(
         device_not_found("Zoom", device_type)
 
 
-def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices={}):
+def load_filter_wheel_connection(
+    device_info: DictProxy, is_synthetic=False, plugin_devices=None
+) -> Any:
     """Initializes the Filter Wheel class on a dedicated thread.
 
     Load filter wheel information from the configuration file. Proper filter wheel types
@@ -834,18 +902,21 @@ def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices
 
     Parameters
     ----------
-    device_info : multiprocesing.managers.DictProxy
+    device_info : DictProxy
         filter wheel device configuration
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware, Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Filter : class
+    Filter : Any
         Filter class.
     """
+    if plugin_devices is None:
+        plugin_devices = {}
+
     if is_synthetic:
         device_type = "SyntheticFilterWheel"
 
@@ -909,14 +980,14 @@ def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices
 
 
 def start_filter_wheel(
-    microscope_name,
-    device_connection,
-    configuration,
-    id=0,
-    is_synthetic=False,
-    plugin_devices={},
-):
-    """Initializes the filter wheel class on a dedicated thread.
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    id: int = 0,
+    is_synthetic: bool = False,
+    plugin_devices=None,
+) -> FilterWheelBase:
+    """Initialize the filter wheel class.
 
     Initializes the filter wheel: SutterFilterWheel, ASI, and SyntheticFilterWheel.
 
@@ -924,22 +995,25 @@ def start_filter_wheel(
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    device_connection : Any
+        Device connection
+    configuration : DictProxy
         Global configuration of the microscope
-    id : int
-        Index of filter_wheel in the configuration dictionary
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    id : int, Optional
+        Index of filter_wheel in the configuration dictionary. Default is 0.
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    FilterWheel : class
+    FilterWheel : FilterWheelBase
         FilterWheel class.
     """
+    if plugin_devices is None:
+        plugin_devices = {}
+
     if device_connection is None:
         device_not_found(microscope_name, "filter_wheel")
 
@@ -1005,7 +1079,7 @@ def start_filter_wheel(
         device_not_found(microscope_name, "filter_wheel", device_type)
 
 
-def start_daq(configuration, is_synthetic=False):
+def start_daq(configuration: DictProxy, is_synthetic: bool = False) -> DAQBase:
     """Initializes the data acquisition (DAQ) class on a dedicated thread.
 
     Load daq information from the configuration file. Proper daq types include NI and
@@ -1013,14 +1087,14 @@ def start_daq(configuration, is_synthetic=False):
 
     Parameters
     ----------
-    configuration : multiprocessing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    is_synthetic : bool
-        Run synthetic version of hardware?
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
 
     Returns
     -------
-    DAQ : class
+    DAQ : DAQBase
         DAQ class.
     """
     if is_synthetic:
@@ -1044,12 +1118,12 @@ def start_daq(configuration, is_synthetic=False):
 
 
 def start_shutter(
-    microscope_name,
-    device_connection,
-    configuration,
-    is_synthetic=False,
-    plugin_devices={},
-):
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    is_synthetic: bool = False,
+    plugin_devices: dict = None,
+) -> ShutterBase:
     """Initializes the shutter class on a dedicated thread.
 
     Initializes the shutters: ThorlabsShutter or SyntheticShutter
@@ -1060,21 +1134,23 @@ def start_shutter(
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
+    device_connection : Any
         Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Shutter : class
+    Shutter : ShutterBase
         Shutter class.
     """
 
+    if plugin_devices is None:
+        plugin_devices = {}
     if is_synthetic:
         device_type = "SyntheticShutter"
 
@@ -1118,13 +1194,13 @@ def start_shutter(
 
 
 def start_lasers(
-    microscope_name,
-    device_connection,
-    configuration,
-    id=0,
-    is_synthetic=False,
-    plugin_devices={},
-):
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    id: int = 0,
+    is_synthetic: bool = False,
+    plugin_devices: dict = None,
+) -> LaserBase:
     """Initializes the lasers.
 
     Loads the lasers from the configuration file. Proper laser types include NI and
@@ -1134,22 +1210,25 @@ def start_lasers(
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
+    device_connection : Any
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    id : int
-        Index of laser in laser list in configuration dictionary
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    id : int, Optional
+        Index of laser in laser list in configuration dictionary. Default is 0.
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Triggers : class
-        Trigger class.
+    laser : LaserBase
+        Laser class.
     """
+
+    if plugin_devices is None:
+        plugin_devices = {}
 
     if is_synthetic:
         device_type = "SyntheticLaser"
@@ -1193,12 +1272,12 @@ def start_lasers(
 
 
 def start_remote_focus_device(
-    microscope_name,
-    device_connection,
-    configuration,
-    is_synthetic=False,
-    plugin_devices={},
-):
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    is_synthetic: bool = False,
+    plugin_devices=None,
+) -> RemoteFocusBase:
     """Initializes the remote focus class.
 
     Initializes the Remote Focusing Device. Proper remote focus types include
@@ -1208,20 +1287,23 @@ def start_remote_focus_device(
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
+    device_connection : Any
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Remote Focus : class
+    remote_focus : RemoteFocusBase
         Remote focusing class.
     """
+
+    if plugin_devices is None:
+        plugin_devices = {}
 
     if is_synthetic:
         device_type = "SyntheticRemoteFocus"
@@ -1274,13 +1356,13 @@ def start_remote_focus_device(
 
 
 def start_galvo(
-    microscope_name,
-    device_connection,
-    configuration,
-    id=0,
-    is_synthetic=False,
-    plugin_devices={},
-):
+    microscope_name: str,
+    device_connection: Any,
+    configuration: DictProxy,
+    id: int = 0,
+    is_synthetic: bool = False,
+    plugin_devices=None,
+) -> GalvoBase:
     """Initializes the Galvo class.
 
     Initializes the Galvo Device. Proper galvo types include NI and SyntheticGalvo.
@@ -1289,22 +1371,25 @@ def start_galvo(
     ----------
     microscope_name : str
         Name of microscope in configuration
-    device_connection : object
+    device_connection : Any
         Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
+    configuration : DictProxy
         Global configuration of the microscope
-    id : int
-        Index of galvo in the configuration dictionary
-    is_synthetic : bool
-        Run synthetic version of hardware?
-    plugin_devices : dict
-        Dictionary of plugin devices
+    id : int, Optional
+        Index of galvo in the configuration dictionary. Default is 0.
+    is_synthetic : bool, Optional
+        Run synthetic version of hardware. Default is False.
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
-    Galvo : class
+    Galvo : GalvoBase
         Galvo scanning class.
     """
+
+    if plugin_devices is None:
+        plugin_devices = {}
 
     if is_synthetic:
         device_type = "SyntheticGalvo"
@@ -1343,23 +1428,28 @@ def start_galvo(
         device_not_found(microscope_name, "galvo", id, device_type)
 
 
-def device_not_found(*args):
-    """Display error message if device not found.
+def device_not_found(*args: Any) -> None:
+    """
+    Display an error message and raise an exception if the device is not found.
 
-    Raises error if the configuration is incorrect and/or the device is not found.
+    This function logs an error message and raises a `RuntimeError` when the
+    specified device cannot be found in the configuration or the configuration is
+    incorrect.
 
     Parameters
     ----------
-    *args
-        microscope_name
-        device
-        device id
-        device type
+    args : tuple
+        A list of arguments representing the device details. These are typically:
 
-    Returns
-    -------
-    devices : class
-        Device class.
+        - microscope_name (str): The name of the microscope.
+        - device (str): The name of the device.
+        - device id (int): The ID of the device.
+        - device type (str): The type of the device.
+
+    Raises
+    ------
+    RuntimeError
+        If the device cannot be found or the configuration is incorrect.
     """
     error_statement = f"Device not found in configuration: {args}"
     logger.error(error_statement)

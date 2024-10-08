@@ -32,6 +32,8 @@
 
 #  Standard Library Imports
 import logging
+from typing import Any
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 
@@ -48,19 +50,25 @@ logger = logging.getLogger(p)
 class SyntheticGalvo(GalvoBase):
     """SyntheticGalvo Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: DictProxy,
+        galvo_id: int = 0,
+    ) -> None:
         """Initialize the SyntheticGalvo class.
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : dict
-            Dictionary of device connections.
-        configuration : dict
+        device_connection : Any
+            Device connection.
+        configuration : DictProxy
             Dictionary of configuration parameters.
         galvo_id : int
-            Galvo ID.
+            Galvo ID. Default is 0.
         """
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
 

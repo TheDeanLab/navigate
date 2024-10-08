@@ -30,11 +30,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Laser Base Class
-"""
 # Standard Library Imports
 import logging
+from typing import Any
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 
@@ -50,16 +49,22 @@ logger = logging.getLogger(p)
 class LaserBase:
     """Laser Base Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration, laser_id):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: DictProxy,
+        laser_id: int,
+    ) -> None:
         """Initialize Laser Base Class
 
         Parameters
         ----------
         microscope_name : str
             Name of the microscope
-        device_connection : object
+        device_connection : Any
             Communication instance with the device.
-        configuration : dict
+        configuration : DictProxy
             Configuration dictionary
         laser_id : int
             Laser ID

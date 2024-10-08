@@ -32,6 +32,8 @@
 
 # Standard Library Imports
 import logging
+from typing import Any
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 import nidaqmx
@@ -57,8 +59,8 @@ class LaserNI(LaserBase):
     def __init__(
         self,
         microscope_name: str,
-        device_connection: object,
-        configuration: dict,
+        device_connection: Any,
+        configuration: DictProxy,
         laser_id: int,
     ) -> None:
         """Initialize the LaserNI class.
@@ -67,9 +69,9 @@ class LaserNI(LaserBase):
         ----------
         microscope_name : str
             The microscope name.
-        device_connection : object
+        device_connection : Any
             The device connection object.
-        configuration : dict
+        configuration : DictProxy
             The device configuration.
         laser_id : int
             The laser id.

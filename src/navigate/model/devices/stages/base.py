@@ -31,7 +31,10 @@
 
 # Standard Imports
 import logging
-from multiprocessing.managers import ListProxy
+
+# from idlelib.debugger_r import DictProxy
+from multiprocessing.managers import ListProxy, DictProxy
+from typing import Any
 
 # Third Party Imports
 
@@ -47,19 +50,25 @@ logger = logging.getLogger(p)
 class StageBase:
     """Stage Parent Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: DictProxy,
+        device_id: int = 0,
+    ) -> None:
         """Initialize the stage.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : DictProxy
             Global configuration of the microscope
-        device_id : int, optional
-            Device ID, by default 0
+        device_id : int, Optional
+            Device ID. Default is 0.
         """
         stage_configuration = configuration["configuration"]["microscopes"][
             microscope_name

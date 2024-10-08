@@ -32,6 +32,8 @@
 
 # Standard Library Imports
 import logging
+from typing import Any
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 
@@ -48,18 +50,24 @@ logger = logging.getLogger(p)
 class SyntheticLaser(LaserBase):
     """SyntheticLaser Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration, laser_id):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: DictProxy,
+        laser_id: int,
+    ) -> None:
         """Initialize the SyntheticLaser class.
 
         Parameters
         ----------
         microscope_name : str
             The microscope name.
-        device_connection : object
+        device_connection : Any
             The device connection object.
-        configuration : dict
+        configuration : DictProxy
             The device configuration.
-        laser_id : str
+        laser_id : int
             The laser ID.
         """
         super().__init__(microscope_name, device_connection, configuration, laser_id)

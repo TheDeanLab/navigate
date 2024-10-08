@@ -192,41 +192,41 @@ class LaserNI(LaserBase):
 
     def turn_on(self):
         """Turns on the laser."""
+        # set ao power
+        self.set_power(self._current_intensity)
+
         if self.laser_do_task is None:
             return
         try:
-            self.set_power(self._current_intensity)
-            if self.laser_do_task is not None:
-                if self.digital_port_type == "digital":
-                    self.laser_do_task.write(True, auto_start=True)
-                elif self.digital_port_type == "analog":
-                    self.laser_do_task.write(self.laser_max_do, auto_start=True)
+            if self.digital_port_type == "digital":
+                self.laser_do_task.write(True, auto_start=True)
+            elif self.digital_port_type == "analog":
+                self.laser_do_task.write(self.laser_max_do, auto_start=True)
         except DaqError as e:
             logger.exception(e)
 
     def turn_off(self):
         """Turns off the laser."""
+        # set ao power to zero
+        tmp = self._current_intensity
+        self.set_power(0)
+        self._current_intensity = tmp
+
         if self.laser_do_task is None:
             return
-
         try:
-            tmp = self._current_intensity
-            self.set_power(0)
-            self._current_intensity = tmp
-            if self.laser_do_task is not None:
-                if self.digital_port_type == "digital":
-                    self.laser_do_task.write(False, auto_start=True)
-                elif self.digital_port_type == "analog":
-                    self.laser_do_task.write(self.laser_min_do, auto_start=True)
+            if self.digital_port_type == "digital":
+                self.laser_do_task.write(False, auto_start=True)
+            elif self.digital_port_type == "analog":
+                self.laser_do_task.write(self.laser_min_do, auto_start=True)
         except DaqError as e:
             logger.exception(e)
 
     def close(self):
         """Close the NI Task before exit."""
-        if self.laser_ao_task is None:
-            return
         try:
-            self.laser_ao_task.close()
+            if self.laser_ao_task is not None:
+                self.laser_ao_task.close()
             if self.laser_do_task is not None:
                 self.laser_do_task.close()
         except DaqError as e:

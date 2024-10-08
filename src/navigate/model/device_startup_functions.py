@@ -34,8 +34,8 @@ import platform
 import logging
 import time
 import importlib
-from multiprocessing.managers import ListProxy, DictProxy
-from typing import Callable, Tuple, Any, Type
+from multiprocessing.managers import ListProxy
+from typing import Callable, Tuple, Any, Type, Dict, Union, Optional
 
 # Third Party Imports
 
@@ -182,7 +182,7 @@ class SerialConnectionFactory:
 
 
 def load_camera_connection(
-    configuration: DictProxy, camera_id: int = 0, is_synthetic: bool = False
+    configuration: Dict[str, Any], camera_id: int = 0, is_synthetic: bool = False
 ) -> Any:
     """Initialize the camera API class.
 
@@ -191,7 +191,7 @@ def load_camera_connection(
 
     Parameters
     ----------
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     camera_id : int, Optional
         Device ID (0, 1...)
@@ -248,7 +248,7 @@ def load_camera_connection(
 def start_camera(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     is_synthetic: bool = False,
     plugin_devices=None,
 ) -> CameraBase:
@@ -260,7 +260,7 @@ def start_camera(
         Name of microscope in configuration
     device_connection : Any
         Hardware device to connect to
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool, Optional
         Run synthetic version of hardware. Default is False.
@@ -332,12 +332,12 @@ def start_camera(
         device_not_found(microscope_name, "camera", cam_type)
 
 
-def load_mirror(configuration: DictProxy, is_synthetic: bool = False) -> Any:
+def load_mirror(configuration: Dict[str, Any], is_synthetic: bool = False) -> Any:
     """Initializes the deformable mirror API.
 
     Parameters
     ----------
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool, Optional
         Run synthetic version of hardware. Default is False.
@@ -367,9 +367,9 @@ def load_mirror(configuration: DictProxy, is_synthetic: bool = False) -> Any:
 def start_mirror(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     is_synthetic: bool = False,
-    plugin_devices={},
+    plugin_devices: Union[Dict, None, Optional] = None,
 ) -> MirrorBase:
     """Initialize the mirror class.
 
@@ -379,18 +379,20 @@ def start_mirror(
         Name of microscope in configuration
     device_connection : Any
         Hardware device to connect to
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool, Optional
         Run synthetic version of hardware. Default is False.
-    plugin_devices : dict
-        Dictionary of plugin devices
+    plugin_devices : dict, Optional
+        Dictionary of plugin devices. Default is None.
 
     Returns
     -------
     mirror : Any
         Mirror class.
     """
+    if plugin_devices is None:
+        plugin_devices = {}
     if device_connection is None or is_synthetic:
         mirror_type = "SyntheticMirror"
 
@@ -419,7 +421,7 @@ def start_mirror(
 
 
 def load_stages(
-    configuration: DictProxy, is_synthetic: bool = False, plugin_devices=None
+    configuration: Dict[str, Any], is_synthetic: bool = False, plugin_devices=None
 ) -> Any:
     """Initialize the stage API.
 
@@ -428,7 +430,7 @@ def load_stages(
 
     Parameters
     ----------
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool, Optional
         Run synthetic version of hardware. Default is False.
@@ -641,7 +643,7 @@ def load_stages(
 def start_stage(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     id: int = 0,
     is_synthetic: bool = False,
     plugin_devices=None,
@@ -657,7 +659,7 @@ def start_stage(
         Name of microscope in configuration
     device_connection : Any
         Hardware device to connect to
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     id : int, Optional
         ID of the stage. Default is 0.
@@ -757,7 +759,7 @@ def start_stage(
 
 
 def load_zoom_connection(
-    configuration: DictProxy, is_synthetic: bool = False, plugin_devices=None
+    configuration: Dict[str, Any], is_synthetic: bool = False, plugin_devices=None
 ) -> Any:
     """Initializes the Zoom class on a dedicated thread.
 
@@ -766,7 +768,7 @@ def load_zoom_connection(
 
     Parameters
     ----------
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool
         Run synthetic version of hardware?
@@ -816,7 +818,7 @@ def load_zoom_connection(
 def start_zoom(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     is_synthetic: bool = False,
     plugin_devices=None,
 ) -> ZoomBase:
@@ -830,7 +832,7 @@ def start_zoom(
         Name of microscope in configuration
     device_connection : Any
         Hardware device to connect to
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool, Optional
         Run synthetic version of hardware. Default is False.
@@ -893,7 +895,7 @@ def start_zoom(
 
 
 def load_filter_wheel_connection(
-    device_info: DictProxy, is_synthetic=False, plugin_devices=None
+    device_info: Dict[str, Any], is_synthetic=False, plugin_devices=None
 ) -> Any:
     """Initializes the Filter Wheel class on a dedicated thread.
 
@@ -902,7 +904,7 @@ def load_filter_wheel_connection(
 
     Parameters
     ----------
-    device_info : DictProxy
+    device_info : Dict[str, Any]
         filter wheel device configuration
     is_synthetic : bool, Optional
         Run synthetic version of hardware, Default is False.
@@ -982,7 +984,7 @@ def load_filter_wheel_connection(
 def start_filter_wheel(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     id: int = 0,
     is_synthetic: bool = False,
     plugin_devices=None,
@@ -997,7 +999,7 @@ def start_filter_wheel(
         Name of microscope in configuration
     device_connection : Any
         Device connection
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     id : int, Optional
         Index of filter_wheel in the configuration dictionary. Default is 0.
@@ -1079,7 +1081,7 @@ def start_filter_wheel(
         device_not_found(microscope_name, "filter_wheel", device_type)
 
 
-def start_daq(configuration: DictProxy, is_synthetic: bool = False) -> DAQBase:
+def start_daq(configuration: Dict[str, Any], is_synthetic: bool = False) -> DAQBase:
     """Initializes the data acquisition (DAQ) class on a dedicated thread.
 
     Load daq information from the configuration file. Proper daq types include NI and
@@ -1087,7 +1089,7 @@ def start_daq(configuration: DictProxy, is_synthetic: bool = False) -> DAQBase:
 
     Parameters
     ----------
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool, Optional
         Run synthetic version of hardware. Default is False.
@@ -1120,7 +1122,7 @@ def start_daq(configuration: DictProxy, is_synthetic: bool = False) -> DAQBase:
 def start_shutter(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     is_synthetic: bool = False,
     plugin_devices: dict = None,
 ) -> ShutterBase:
@@ -1136,7 +1138,7 @@ def start_shutter(
         Name of microscope in configuration
     device_connection : Any
         Hardware device to connect to
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool, Optional
         Run synthetic version of hardware. Default is False.
@@ -1196,7 +1198,7 @@ def start_shutter(
 def start_lasers(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     id: int = 0,
     is_synthetic: bool = False,
     plugin_devices: dict = None,
@@ -1212,7 +1214,7 @@ def start_lasers(
         Name of microscope in configuration
     device_connection : Any
         Hardware device to connect to
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     id : int, Optional
         Index of laser in laser list in configuration dictionary. Default is 0.
@@ -1274,7 +1276,7 @@ def start_lasers(
 def start_remote_focus_device(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     is_synthetic: bool = False,
     plugin_devices=None,
 ) -> RemoteFocusBase:
@@ -1289,7 +1291,7 @@ def start_remote_focus_device(
         Name of microscope in configuration
     device_connection : Any
         Hardware device to connect to
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     is_synthetic : bool, Optional
         Run synthetic version of hardware. Default is False.
@@ -1358,7 +1360,7 @@ def start_remote_focus_device(
 def start_galvo(
     microscope_name: str,
     device_connection: Any,
-    configuration: DictProxy,
+    configuration: Dict[str, Any],
     id: int = 0,
     is_synthetic: bool = False,
     plugin_devices=None,
@@ -1373,7 +1375,7 @@ def start_galvo(
         Name of microscope in configuration
     device_connection : Any
         Hardware device to connect to
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Global configuration of the microscope
     id : int, Optional
         Index of galvo in the configuration dictionary. Default is 0.
@@ -1458,13 +1460,13 @@ def device_not_found(*args: Any) -> None:
 
 
 def load_devices(
-    configuration: DictProxy, is_synthetic=False, plugin_devices=None
+    configuration: Dict[str, Any], is_synthetic=False, plugin_devices=None
 ) -> dict:
     """Load devices from configuration.
 
     Parameters
     ----------
-    configuration : DictProxy
+    configuration : Dict[str, Any]
         Configuration dictionary
     is_synthetic : bool
         Run synthetic version of hardware?
@@ -1474,7 +1476,7 @@ def load_devices(
     Returns
     -------
     devices : dict
-        Dictionary of devcies
+        Dictionary of devices
     """
 
     if plugin_devices is None:

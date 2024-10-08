@@ -34,6 +34,7 @@
 import logging
 from multiprocessing.managers import ListProxy
 import time
+from typing import Any, Dict, Optional, Union
 
 # Third Party Imports
 import numpy as np
@@ -52,25 +53,32 @@ logger = logging.getLogger(p)
 class GalvoNIStage(StageBase):
     """Galvo Stage Class (only supports one axis)
 
-    Generic analog controlled stage. Could be used to control piezos, galvos,
-    etc. Currently set up to handle National Instruments data acquisition cards.
+    Generic analog controlled stage. Could be used to control piezoelectric devices,
+    galvos, etc. Currently set up to handle National Instruments data acquisition cards.
 
     Retrieves the volts per micron from the configuration file and uses that to
     determine the correct voltage to send to the stage.
-
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        device_id: Union[int, Optional] = 0,
+    ) -> None:
         """Initialize the Galvo Stage.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
+        device_id : Union[int, Optional]
+            Device ID of the stage
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 

@@ -32,11 +32,10 @@
 
 # Standard Imports
 import logging
-import multiprocessing.managers
 from threading import Lock
 import traceback
 import time
-from typing import Union
+from typing import Union, Dict, Any
 
 # Third Party Imports
 import nidaqmx
@@ -58,12 +57,12 @@ logger = logging.getLogger(p)
 class NIDAQ(DAQBase):
     """NIDAQ class for Control of NI Data Acquisition Cards."""
 
-    def __init__(self, configuration: multiprocessing.managers.DictProxy) -> None:
+    def __init__(self, configuration: Dict[str, Any]) -> None:
         """Initialize NIDAQ class.
 
         Parameters
         ----------
-        configuration : multiprocessing.managers.DictProxy
+        configuration : Dict[str, Any]
             Configuration dictionary.
         """
         super().__init__(configuration)

@@ -32,8 +32,7 @@
 
 # Standard Library Imports
 import logging
-from typing import Any
-from multiprocessing.managers import DictProxy
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -54,7 +53,7 @@ class SyntheticLaser(LaserBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: DictProxy,
+        configuration: Dict[str, Any],
         laser_id: int,
     ) -> None:
         """Initialize the SyntheticLaser class.
@@ -65,18 +64,18 @@ class SyntheticLaser(LaserBase):
             The microscope name.
         device_connection : Any
             The device connection object.
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             The device configuration.
         laser_id : int
             The laser ID.
         """
         super().__init__(microscope_name, device_connection, configuration, laser_id)
 
-    def close(self):
+    def close(self) -> None:
         """Close the port before exit."""
         pass
 
-    def initialize_laser(self):
+    def initialize_laser(self) -> None:
         """
         Initialize lasers.
         """

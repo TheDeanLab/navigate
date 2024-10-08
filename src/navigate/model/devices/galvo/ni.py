@@ -32,8 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any
-from multiprocessing.managers import DictProxy
+from typing import Any, Dict
 
 # Third Party Imports
 import nidaqmx
@@ -55,7 +54,7 @@ class GalvoNI(GalvoBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: DictProxy,
+        configuration: Dict[str, Any],
         galvo_id: int = 0,
     ) -> None:
         """Initialize the GalvoNI class.
@@ -66,7 +65,7 @@ class GalvoNI(GalvoBase):
             Name of the microscope.
         device_connection : Any
             Connection to the NI DAQ device.
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Dictionary of configuration parameters.
         galvo_id : int
             Galvo ID. Default is 0.
@@ -90,11 +89,11 @@ class GalvoNI(GalvoBase):
         #: obj: NI DAQ device connection.
         self.daq = device_connection
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of the GalvoNI."""
         return "GalvoNI"
 
-    def adjust(self, exposure_times, sweep_times):
+    def adjust(self, exposure_times, sweep_times) -> Dict[str, Any]:
         """Adjust the galvo to the readout time
 
         Parameters
@@ -117,7 +116,7 @@ class GalvoNI(GalvoBase):
         }
         return waveform_dict
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         """Turn off the galvo.
         Turns off the galvo. NOTE: This will only work if there isn't another task
         bound to this channel. This should only be called in microscope.terminate().

@@ -31,8 +31,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard library imports
-from multiprocessing.managers import DictProxy
 import logging
+from typing import Any, Dict
 
 # Third-party imports
 import numpy as np
@@ -154,13 +154,13 @@ class PyramidalDataSource(DataSource):
         ).sum()
 
     def set_metadata_from_configuration_experiment(
-        self, configuration: DictProxy, microscope_name: str = None
+        self, configuration: Dict[str, Any], microscope_name: str = None
     ) -> None:
         """Sets the metadata from according to the microscope configuration.
 
         Parameters
         ----------
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             The configuration experiment.
         microscope_name : str
             The microscope name

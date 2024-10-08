@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -47,44 +48,58 @@ logger = logging.getLogger(p)
 class ShutterBase:
     """ShutterBase Class - Parent class for the laser shutters."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize the Shutter.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         #: bool: Shutter state
         self.shutter_state = False
 
-    def __str__(self):
+        #: str: Name of the microscope
+        self.microscope_name = microscope_name
+
+        #: Any: Hardware device to connect to
+        self.device_connection = device_connection
+
+        #: Dict[str, Any]: Global configuration of the microscope
+        self.configuration = configuration
+
+    def __str__(self) -> str:
         """Return the string representation of the Shutter."""
         return "ShutterBase"
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Close the Shutter at exit."""
         pass
 
-    def open_shutter(self):
+    def open_shutter(self) -> None:
         """Open the Shutter."""
         self.shutter_state = True
 
-    def close_shutter(self):
+    def close_shutter(self) -> None:
         """Close the Shutter."""
         self.shutter_state = False
 
     @property
-    def state(self):
+    def state(self) -> bool:
         """Get the Shutter state.
 
         Returns
         -------
         bool
-            Shutter state
+            Shutter state. True if open, False if closed.
         """
         return self.shutter_state

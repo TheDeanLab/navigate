@@ -32,8 +32,9 @@
 # Standard Library imports
 import logging
 import importlib  # noqa: F401
-from multiprocessing.managers import ListProxy, DictProxy
+from multiprocessing.managers import ListProxy
 import reprlib
+from typing import Any, Dict
 
 # Third-party imports
 
@@ -52,7 +53,7 @@ class Microscope:
     def __init__(
         self,
         name: str,
-        configuration: DictProxy,
+        configuration: Dict[str, Any],
         devices_dict: dict,
         is_synthetic=False,
         is_virtual=False,
@@ -63,7 +64,7 @@ class Microscope:
         ----------
         name : str
             Name of the microscope.
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Configuration dictionary.
         devices_dict : dict
             Dictionary of devices.

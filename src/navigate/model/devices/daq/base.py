@@ -32,7 +32,7 @@
 
 # Standard Imports
 import logging
-from multiprocessing.managers import DictProxy
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -49,12 +49,12 @@ logger = logging.getLogger(p)
 class DAQBase:
     """DAQBase - Parent class for Data Acquisition (DAQ) classes."""
 
-    def __init__(self, configuration: DictProxy):
+    def __init__(self, configuration: Dict[str, Any]) -> None:
         """Initializes the DAQBase class.
 
         Parameters
         ----------
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Dictionary of configuration parameters
         """
 
@@ -150,7 +150,7 @@ class DAQBase:
 
         return self.waveform_dict
 
-    def enable_microscope(self, microscope_name):
+    def enable_microscope(self, microscope_name: str) -> None:
         """Enables the microscope.
 
         Parameters

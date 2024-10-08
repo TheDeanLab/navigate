@@ -34,8 +34,7 @@
 import time
 import serial
 import logging
-from typing import Any
-from multiprocessing.managers import DictProxy
+from typing import Any, Dict
 
 # Third Party Imports
 from navigate.tools.decorators import log_initialization
@@ -63,7 +62,10 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
     """
 
     def __init__(
-        self, microscope_name: str, device_connection: Any, configuration: DictProxy
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
     ) -> None:
         """Initialize the RemoteFocusEquipmentSolutions Class
 
@@ -73,7 +75,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
             Name of the microscope
         device_connection : Any
             Connection to the device
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Configuration dictionary
         """
         super().__init__(microscope_name, device_connection, configuration)
@@ -171,7 +173,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
 
         """
         for i in range(100):
-            num_waiting = self.serial.inWaiting()
+            num_waiting = self.serial.in_waiting
             if num_waiting == num_bytes:
                 break
             time.sleep(0.02)

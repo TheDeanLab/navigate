@@ -34,9 +34,9 @@
 import logging
 import time
 from threading import Lock
+from typing import Any, Dict
 
 # Third Party Imports
-from multiprocessing.managers import DictProxy
 
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
@@ -51,12 +51,12 @@ logger = logging.getLogger(p)
 class SyntheticDAQ(DAQBase):
     """SyntheticDAQ class for Data Acquisition (DAQ)."""
 
-    def __init__(self, configuration: DictProxy) -> None:
+    def __init__(self, configuration: Dict[str, Any]) -> None:
         """Initialize the Synthetic DAQ.
 
         Parameters
         ----------
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Configuration dictionary.
         """
         super().__init__(configuration)

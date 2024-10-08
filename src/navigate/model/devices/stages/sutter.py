@@ -34,8 +34,7 @@ import logging
 import time
 
 # from idlelib.debugger_r import DictProxy
-from multiprocessing.managers import DictProxy
-from typing import Any
+from typing import Any, Dict
 
 # Third-Party Imports
 from serial import SerialException
@@ -86,7 +85,7 @@ class SutterStage(StageBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: DictProxy,
+        configuration: Dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the SutterStage.
@@ -97,7 +96,7 @@ class SutterStage(StageBase):
             Name of the microscope.
         device_connection : Any
             MP285 stage connection.
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Configuration dictionary for the SutterStage.
         device_id : int, Optional
             Device ID for the SutterStage.
@@ -139,13 +138,17 @@ class SutterStage(StageBase):
         #: str: Resolution of the stage.
         self.resolution = "low"  # "high"
 
-        #: int: Speed of the stage.
-        self.speed = 3000  # 1300  # in units microns/s.
+        #: int: Speed of the stage in units microns/s.
+        self.speed = 3000
 
         #: float: Position of the stage along the x-axis.
+        self.stage_x_pos = 0
+
         #: float: Position of the stage along the y-axis.
+        self.stage_y_pos = 0
+
         #: float: Position of the stage along the z-axis.
-        self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = 0, 0, 0
+        self.stage_z_pos = 0
 
         # Set the resolution and velocity of the stage
         try:

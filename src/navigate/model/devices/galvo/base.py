@@ -32,8 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any
-from multiprocessing.managers import DictProxy
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -54,7 +53,7 @@ class GalvoBase:
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: DictProxy,
+        configuration: Dict[str, Any],
         galvo_id: int = 0,
     ) -> None:
         """Initialize the GalvoBase class.
@@ -65,11 +64,13 @@ class GalvoBase:
             Name of the microscope.
         device_connection : Any
             Device connection.
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Dictionary of configuration parameters.
         galvo_id : int
             Galvo ID. Default is 0.
         """
+        #: Any: Device connection.
+        self.device_connection = device_connection
 
         #: dict: Dictionary of microscope configuration parameters.
         self.configuration = configuration

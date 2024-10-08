@@ -32,12 +32,12 @@
 
 # Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 import numpy.typing as npt
 
 # Local Imports
-from multiprocessing.managers import DictProxy
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -75,10 +75,10 @@ class DataSource:
             #: npt.ArrayLike: Pointer to the metadata.
             self.metadata = None  # Expect a metadata object
 
-        #: str: Mode to open the file in. Can be 'r' or 'w'.
+        # str: Mode to open the file in. Can be 'r' or 'w'.
         self._mode = None
 
-        #: bool: Has the data source been closed?
+        # bool: Has the data source been closed?
         self._closed = True
 
         #: int: Number of bits per pixel.
@@ -99,17 +99,20 @@ class DataSource:
         self.dc = 1  # step size between channels, should always be 1
 
         #: int: Size of the data source in x dimension.
+        self.shape_x = 1
+
         #: int: Size of the data source in y dimension.
+        self.shape_y = 1
+
         #: int: Size of the data source in z dimension.
+        self.shape_z = 1
+
         #: int: Size of the data source in t dimension.
+        self.shape_t = 1
+
         #: int: Size of the data source in c dimension.
-        self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = (
-            1,
-            1,
-            1,
-            1,
-            1,
-        )
+        self.shape_c = 1
+
         #: int: Number of positions in the data source.
         self.positions = 1
 
@@ -121,14 +124,14 @@ class DataSource:
 
     @property
     def nbytes(self) -> int:
-        """Getter for the size of this data source in bytes."
+        """Getter for the size of this data source in bytes.
 
         Does not account for pyramidal data sources. That process is handled by the
         bdv_data_source class, which is a child of this class.
 
         Returns
         -------
-        int
+        total_bytes : int
             Size of this data source in bytes.
         """
         total_bits = (
@@ -216,13 +219,13 @@ class DataSource:
         pass
 
     def set_metadata_from_configuration_experiment(
-        self, configuration: DictProxy, microscope_name: str = None
+        self, configuration: Dict[str, Any], microscope_name: str = None
     ) -> None:
         """Sets the metadata from according to the microscope configuration.
 
         Parameters
         ----------
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Configuration experiment.
         microscope_name : str
             The microscope name

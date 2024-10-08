@@ -32,13 +32,15 @@
 #  Standard Imports
 import os
 import logging
-from typing import Optional
+from typing import Optional, Dict, Any
+from multiprocessing.managers import DictProxy
+
+# Third-party Imports
 
 # Local Imports
 from navigate.tools import xml_tools
 from navigate import __version__, __commit__
 
-from multiprocessing.managers import DictProxy
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -107,12 +109,12 @@ class Metadata:
         return self._configuration
 
     @configuration.setter
-    def configuration(self, configuration: DictProxy) -> None:
+    def configuration(self, configuration: Dict[str, Any]) -> None:
         """Set configuration dictionary
 
         Parameters
         ----------
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             Configuration dictionary
         """
         self._configuration = configuration

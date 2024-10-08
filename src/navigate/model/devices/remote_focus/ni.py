@@ -32,8 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any
-from multiprocessing.managers import DictProxy
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -51,7 +50,10 @@ class RemoteFocusNI(RemoteFocusBase):
     """RemoteFocusNI Class - Analog control of the remote focus device."""
 
     def __init__(
-        self, microscope_name: str, device_connection: Any, configuration: DictProxy
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
     ) -> None:
         """Initialize the RemoteFocusNI class.
 
@@ -61,7 +63,7 @@ class RemoteFocusNI(RemoteFocusBase):
             The microscope name.
         device_connection : Any
             The device connection object.
-        configuration : DictProxy
+        configuration : Dict[str, Any]
             The configuration dictionary.
 
         """

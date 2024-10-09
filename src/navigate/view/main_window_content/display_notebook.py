@@ -52,13 +52,13 @@ class CameraNotebook(DockableNotebook):
     """This class is the notebook that holds the camera view and waveform settings
     tabs."""
 
-    def __init__(self, frame_top_right, *args, **kwargs):
+    def __init__(self, frame, *args, **kwargs):
         """Init function for the CameraNotebook class.
 
 
         Parameters
         ----------
-        frame_top_right : tk.Frame
+        frame : tk.Frame
             The frame that will hold the notebook.
         *args : tuple
             Variable length argument list.
@@ -66,7 +66,7 @@ class CameraNotebook(DockableNotebook):
             Arbitrary keyword arguments.
         """
         # Init notebook
-        DockableNotebook.__init__(self, frame_top_right, *args, **kwargs)
+        DockableNotebook.__init__(self, frame, *args, **kwargs)
 
         # Putting notebook 2 into top right frame
         self.grid(row=0, column=0)
@@ -192,8 +192,10 @@ class CameraTab(tk.Frame):
         self.is_docked = True
 
         #: int: The width of the canvas.
+        self.canvas_width = 512
+
         #: int: The height of the canvas.
-        self.canvas_width, self.canvas_height = 512, 512
+        self.canvas_height = 512
 
         #: tk.Canvas: The canvas that will hold the camera image.
         self.canvas = tk.Canvas(
@@ -225,6 +227,31 @@ class CameraTab(tk.Frame):
         self.slider.grid(row=3, column=0, sticky=tk.NSEW, padx=5, pady=5)
         self.slider.grid_remove()
 
+        ###############
+
+        # Histogram.
+        # self.histogram_frame.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        #: tk.Canvas: The canvas that will hold the camera image.
+        # self.histogram_canvas = tk.Canvas(
+        #     self.histogram_frame,
+        #     width=self.canvas_width,
+        #     height=self.canvas_height // 5
+        # )
+        # self.histogram_canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        #: matplotlib.figure.Figure: The figure that will hold the histogram.
+        # self.histogram_figure = Figure(figsize=[1, 1], tight_layout=True)
+        #
+        # #: FigureCanvasTkAgg: The canvas that will hold the camera image.
+        # self.histogram_figure_canvas = FigureCanvasTkAgg(self.histogram_figure,
+        #                                              self.histogram_canvas)
+
+        self.histogram = HistogramFrame(self)
+        self.histogram.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        ###########
+
         #: MetricsFrame: The frame that will hold the camera selection and counts.
         self.image_metrics = MetricsFrame(self)
         self.image_metrics.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
@@ -232,6 +259,24 @@ class CameraTab(tk.Frame):
         #: RenderFrame: The frame that will hold the live display functionality.
         self.live_frame = RenderFrame(self)
         self.live_frame.grid(row=2, column=1, sticky=tk.NSEW, padx=5, pady=5)
+
+
+class HistogramFrame(ttk.Labelframe):
+    def __init__(self, cam_view, *args, **kwargs):
+
+        text_label = "Intensity Histogram"
+        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+
+        self.frame = ttk.Frame(self)
+        self.frame.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        self.canvas = tk.Canvas(self.frame, width=512, height=512 // 5)
+        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        # Matplotlib figure for the histogram
+        self.figure = Figure(figsize=(3, 1), tight_layout=True)
+        self.figure_canvas = FigureCanvasTkAgg(self.figure, self.frame)
+        self.figure_canvas.get_tk_widget().grid(row=0, column=0, sticky=tk.NSEW)
 
 
 class RenderFrame(ttk.Labelframe):

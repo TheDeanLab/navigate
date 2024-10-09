@@ -33,6 +33,7 @@
 import logging
 import tkinter as tk
 from tkinter import ttk
+from typing import Iterable, Dict, Any
 
 # Third Party Imports
 
@@ -51,18 +52,24 @@ class AcquireBar(ttk.Frame):
     level window
     """
 
-    def __init__(self, top_frame, root, *args, **kwargs):
+    def __init__(
+        self,
+        top_frame: ttk.Frame,
+        root: tk.Tk,
+        *args: Iterable,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         """Initialize Acquire Bar.
 
         Parameters
         ----------
-        top_frame : tk.Frame
-            Frame to place the acquire bar in.
+        top_frame : ttk.Frame
+            The frame to place the acquire bar in.
         root : tk.Tk
             Root window of the application.
-        *args
+        *args: Iterable
             Variable length argument list.
-        **kwargs
+        **kwargs: Dict[str, Any]
             Arbitrary keyword arguments.
         """
         #  Init bar with frame attr
@@ -82,6 +89,7 @@ class AcquireBar(ttk.Frame):
         # Read Only Pull down menu: continuous, z-stack, single acquisition, projection.
         #: tk.StringVar: Variable to hold the current option selected
         self.options = tk.StringVar()
+
         #: ttk.Combobox: Pull down menu to select acquisition type
         self.pull_down = ttk.Combobox(self, textvariable=self.options)
 

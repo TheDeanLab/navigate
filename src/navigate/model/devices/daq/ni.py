@@ -356,17 +356,6 @@ class NIDAQ(DAQBase):
                 samps_per_chan=max_sample * self.waveform_repeat_num,
             )
 
-            # triggers = list(
-            #     set([v["trigger_source"] for v in self.analog_outputs.values()])
-            # )
-            # if len(triggers) > 1:
-            #     logger.debug(
-            #         "NI DAQ - Different triggers provided for each analog channel."
-            #         "Defaulting to the first trigger provided."
-            #     )
-            # self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
-            #     triggers[0]
-            # )
             # TODO: may change this later to automatically expand the waveform to the
             #  longest
             for k, v in self.analog_outputs.items():

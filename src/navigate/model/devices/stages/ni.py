@@ -39,6 +39,7 @@ from typing import Any, Dict
 # Third Party Imports
 import numpy as np
 import nidaqmx
+import nidaqmx.constants
 
 # Local Imports
 from navigate.model.devices.stages.base import StageBase
@@ -105,10 +106,10 @@ class GalvoNIStage(StageBase):
                 "distance_threshold", None
             )  # microns
 
-            #: float: Stage settle duration in milliseconds.
+            #: float: Stage settle duration in seconds.
             self.stage_settle_duration = (
                 device_config[device_id].get("settle_duration_ms", 20) / 1000
-            )  # convert to seconds
+            )
         else:
             self.volts_per_micron = device_config["volts_per_micron"]
             self.axes_channels = device_config["axes_mapping"]
@@ -251,8 +252,18 @@ class GalvoNIStage(StageBase):
 
         try:
             self.ao_task.write(volts, auto_start=True)
+        #
+        # except nidaqmx.DaqError as e:
+        #     self.ao_task.cfg_samp_clk_timing(
+        #         rate=self.sample_rate,
+        #         sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
+        #     )
+        #     pass
+
         except Exception as e:
-            logger.debug(f"Error moving {axis} to {axis_abs} volts: {volts}")
+            error_statement = f"Error moving {axis} to {axis_abs} volts: {volts}"
+            print(error_statement)
+            logger.debug(error_statement)
             logger.exception(e)
         # Stage Settle Duration in Milliseconds
         if (
@@ -296,6 +307,10 @@ class GalvoNIStage(StageBase):
     def switch_mode(self, mode="normal", exposure_times=None, sweep_times=None):
         """Switch Galvo stage working mode.
 
+        If the mode is "normal", it creates the task and positions the stage
+        according to its last known position according to the experiment.yaml file.
+        Otherwise, it stops the task and closes it.
+
         Parameters
         ----------
         mode : str
@@ -312,6 +327,11 @@ class GalvoNIStage(StageBase):
             if self.ao_task is None:
                 self.ao_task = nidaqmx.Task()
                 self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
+                self.ao_task.cfg_samp_clk_timing(
+                    rate=self.sample_rate,
+                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                    samps_per_chan=1,
+                )
             self.move_axis_absolute(
                 self.axes[0],
                 float(

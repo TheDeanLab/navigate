@@ -49,6 +49,38 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+class CommonMethods:
+    """This class is a collection of common methods."""
+
+    def get_variables(self) -> Dict[str, Any]:
+        """This function returns a dictionary of all the variables that are tied to
+        each  widget name.
+
+        The key is the widget name, value is the variable associated.
+
+        Returns
+        -------
+        variables : dict
+            The dictionary that holds the variables.
+        """
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get()
+        return variables
+
+    def get_widgets(self) -> Dict[str, Any]:
+        """This function returns the dictionary that holds the widgets.
+
+        The key is the widget name, value is the LabelInput class that has all the data.
+
+        Returns
+        -------
+        widgets : dict
+            The dictionary that holds the widgets.
+        """
+        return self.inputs
+
+
 class CameraNotebook(DockableNotebook):
     """This class is the notebook that holds the camera view and waveform settings
     tabs."""
@@ -329,35 +361,8 @@ class RenderFrame(ttk.Labelframe):
         self.channel.grid(row=1, column=0)
         self.channel.state = "readonly"
 
-    def get_variables(self) -> Dict[str, Any]:
-        """Function to get the variables.
 
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : Dict[str, Any]
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self) -> Dict[str, Any]:
-        """Function to get the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        widgets : Dict[str, Any]
-            The dictionary that holds the widgets.
-        """
-        return self.inputs
-
-
-class MipRenderFrame(ttk.Labelframe):
+class MipRenderFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the live display functionality."""
 
     def __init__(
@@ -408,33 +413,6 @@ class MipRenderFrame(ttk.Labelframe):
         self.inputs["channel"].grid(row=1, column=0, sticky=tk.EW, padx=3, pady=3)
         self.columnconfigure(0, weight=1)
 
-    def get_variables(self) -> Dict[str, Any]:
-        """Function to get the variables.
-
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : Dict[str, Any]
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """Function to get the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        widgets : Dict[str, Any]
-            The dictionary that holds the widgets.
-        """
-        return self.inputs
-
 
 class WaveformTab(tk.Frame):
     """This class is the frame that holds the waveform tab."""
@@ -483,7 +461,7 @@ class WaveformTab(tk.Frame):
         self.waveform_settings.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
 
-class WaveformSettingsFrame(ttk.Labelframe):
+class WaveformSettingsFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the waveform settings."""
 
     def __init__(
@@ -532,30 +510,8 @@ class WaveformSettingsFrame(ttk.Labelframe):
             row=0, column=1, sticky=tk.NSEW, padx=3, pady=3
         )
 
-    def get_variables(self) -> Dict[str, Any]:
-        """Function to get the variables.
 
-        Returns
-        -------
-        variables : Dict[str, Any]
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self) -> Dict[str, Any]:
-        """Function to get the widgets.
-
-        Returns
-        -------
-        widgets : Dict[str, Any]
-            The dictionary that holds the widgets."""
-        return self.inputs
-
-
-class MetricsFrame(ttk.Labelframe):
+class MetricsFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the image metrics."""
 
     def __init__(
@@ -614,36 +570,8 @@ class MetricsFrame(ttk.Labelframe):
                 )
                 self.inputs[self.names[i]].configure(width=5)
 
-    def get_variables(self) -> Dict[str, Any]:
-        """This function returns a dictionary of all the variables that are tied to
-        each  widget name.
 
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : Dict[str, Any]
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self) -> Dict[str, Any]:
-        """This function returns the dictionary that holds the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        widgets : Dict[str, Any]
-            The dictionary that holds the widgets.
-        """
-        return self.inputs
-
-
-class IntensityFrame(ttk.Labelframe):
+class IntensityFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the intensity controls."""
 
     def __init__(
@@ -753,31 +681,3 @@ class IntensityFrame(ttk.Labelframe):
                 padx=3,
                 pady=3,
             )
-
-    def get_variables(self) -> Dict[str, Any]:
-        """This function returns a dictionary of all the variables that are tied to
-        each  widget name.
-
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : dict
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self) -> Dict[str, Any]:
-        """This function returns the dictionary that holds the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        widgets : dict
-            The dictionary that holds the widgets.
-        """
-        return self.inputs

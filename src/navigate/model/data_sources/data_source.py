@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 from typing import Any, Dict
+import abc
 
 # Third Party Imports
 import numpy.typing as npt
@@ -78,7 +79,10 @@ class DataSource:
         # str: Mode to open the file in. Can be 'r' or 'w'.
         self._mode = None
 
-        # bool: Has the data source been closed?
+        #: bool: Is write mode
+        self._write_mode = False
+
+        #: bool: Has the data source been closed?
         self._closed = True
 
         #: int: Number of bits per pixel.
@@ -293,12 +297,14 @@ class DataSource:
                 c = frame_id % self.shape_c
                 z = (frame_id // self.shape_c) % self.shape_z
 
-            t = (frame_id // (self.shape_c * self.shape_z)) % self.shape_t
-            p = frame_id // (self.shape_c * self.shape_z * self.shape_t)
+            # NOTE: Uncomment this if we want time to vary faster than positions
+            # t = (frame_id // (self.shape_c * self.shape_z)) % self.shape_t
+            # p = frame_id // (self.shape_c * self.shape_z * self.shape_t)
 
+            # TODO: current ZStack positions vary faster than time
             # NOTE: Uncomment this if we want positions to vary faster than time
-            # t = frame_id // (self.shape_c * self.shape_z * self.positions)
-            # p = (frame_id // (self.shape_c * self.shape_z)) % self.positions
+            t = frame_id // (self.shape_c * self.shape_z * self.positions)
+            p = (frame_id // (self.shape_c * self.shape_z)) % self.positions
 
         else:
             # Timepoint acquisition, only c varies faster than t
@@ -388,6 +394,37 @@ class DataSource:
         """
         logger.error("DataSource.read implemented in a derived class.")
         raise NotImplementedError("Implemented in a derived class.")
+    
+    def get_data(self, timepoint: int=0, position: int=0, channel: int=0, z: int=-1, resolution: int=1) -> npt.ArrayLike:
+        """Get data according to timepoint, position, channel and z-axis id
+
+        Parameters
+        ----------
+        timepoint : int
+            The timepoint value
+        position : int
+            The position id in multi-position table
+        channel : int
+            The channel id
+        z : int
+            The index of Z in a Z-stack. 
+            Return all z if -1.
+        resolution : int
+            values from 1, 2, 4, 8
+
+        Returns
+        -------
+        data : npt.ArrayLike
+            Image data
+        
+        Raises
+        ------
+        NotImplementedError
+            If not implemented in a derived class.
+        """
+        logger.error("DataSource.get_data is not implemented in a derived class.")
+        raise NotImplementedError(f"get_data is not implemented in a derived class {self.__class__}.")
+
 
     def close(self) -> None:
         """Clean up any leftover file pointers, etc."""
@@ -397,3 +434,14 @@ class DataSource:
         """Destructor"""
         if not self._closed:
             self.close()
+
+class DataReader(metaclass=abc.ABCMeta):
+
+    @abc.abstractmethod
+    def __init__(self, *args, **kwargs):
+        pass
+
+    @property
+    @abc.abstractmethod
+    def shape(self):
+        pass

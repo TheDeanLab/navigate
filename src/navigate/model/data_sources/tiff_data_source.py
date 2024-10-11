@@ -34,16 +34,22 @@
 import os
 import uuid
 from pathlib import Path
+import logging
 
 # Third Party Imports
 import tifffile
 import numpy.typing as npt
+from numpy import stack
 
 # Local imports
-from .data_source import DataSource
+from .data_source import DataSource, DataReader
 from ..metadata_sources.metadata import Metadata
 from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 class TiffDataSource(DataSource):
     """Data source for TIFF files."""
@@ -64,7 +70,6 @@ class TiffDataSource(DataSource):
         """
         #: np.ndarray: Image data
         self.image = None
-        self._write_mode = None
         self._views = []
 
         super().__init__(file_name, mode)
@@ -144,6 +149,7 @@ class TiffDataSource(DataSource):
 
     def read(self) -> None:
         """Read a tiff file."""
+        self.mode = "r"
         self.image = tifffile.TiffFile(self.file_name)
 
         # TODO: Parse metadata
@@ -152,6 +158,48 @@ class TiffDataSource(DataSource):
                 # TODO: This is a hack for tifffile. Find a way to remove this.
                 ax = "Z"
             setattr(self, f"shape_{ax.lower()}", self.data.shape[i])
+
+    def get_data(self, timepoint: int=0, position: int=0, channel: int=0, z: int=-1, resolution: int=1) -> npt.ArrayLike:
+        """Get data according to timepoint, position, channel and z-axis id
+
+        Parameters
+        ----------
+        timepoint : int
+            The timepoint value
+        position : int
+            The position id in multi-position table
+        channel : int
+            The channel id
+        z : int
+            The index of Z in a Z-stack. 
+            Return all z if -1.
+        resolution : int
+            values from 1, 2, 4, 8
+            Not supported for now.
+
+        Returns
+        -------
+        data : npt.ArrayLike
+            Image data
+        """
+        # TODO: may need to support .tif
+        file_suffix = ".ome.tiff" if self.is_ome else ".tiff"
+        filename = os.path.join(self.save_directory, f"Position{position}", f"CH{channel:02d}-{timepoint:06d}{file_suffix}")
+
+        if not os.path.exists(filename):
+            return None
+        
+        self.mode = "r"
+
+        image = tifffile.TiffFile(filename)
+        if z < 0:
+            return TiffReader(image)
+        
+        z_num = len(image.pages)
+        if z < z_num:
+            return image.pages[z].asarray()
+        
+        return None
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
         """Writes 2D image to the data source.
@@ -190,7 +238,7 @@ class TiffDataSource(DataSource):
             self.image[c].write(data, description=ome_xml, contiguous=True)
         else:
             dx, dy, dz = self.metadata.voxel_size
-            md = {"spacing": dz, "unit": "um", "axes": "ZYX"}
+            md = {"spacing": dz, "unit": "um", "axes": "ZYX", "channel": c, "timepoint": self._current_time}
             self.image[c].write(
                 data,
                 resolution=(1e4 / dx, 1e4 / dy, "CENTIMETER"),
@@ -281,7 +329,7 @@ class TiffDataSource(DataSource):
         if self.image is None:
             return
         # internal flag needed to avoid _check_shape call until last file is written
-        if self._write_mode:
+        if self.mode == "w":
             if not internal:
                 self._check_shape(self._current_frame - 1, self.metadata.per_stack)
             for ch in range(len(self.image)):
@@ -302,3 +350,49 @@ class TiffDataSource(DataSource):
             self.image.close()
         if not internal:
             self._closed = True
+
+
+class TiffReader(DataReader):
+    def __init__(self, tiff_file: tifffile.TiffFile):
+        self.tiff = tiff_file
+
+    @property
+    def shape(self):
+        page_number = len(self.tiff.pages)
+
+        x, y = self.tiff.pages[0].shape
+
+        return (page_number, x, y)
+    
+    def __getitem__(self, index):
+
+        if isinstance(index, int):
+            # Return the entire page as a NumPy array
+            return self.tiff.pages[index].asarray()
+        
+        elif isinstance(index, slice):
+            # Handle case for slicing all pages
+            pages = [self.tiff.pages[i].asarray() for i in range(index.start, index.stop)]
+            return stack(pages, axis=0)
+        
+        elif isinstance(index, tuple):
+            # Check if the first index is an integer (page index)
+            if isinstance(index[0], int):
+                page_index = index[0]
+                if len(index) == 2:
+                    return self.tiff.pages[page_index].asarray()[index[1]]
+                elif len(index) == 3:
+                    return self.tiff.pages[page_index].asarray()[index[1], index[2]]
+            elif isinstance(index[0], slice):
+                if len(index) == 2:
+                    pages = [self.tiff.pages[i].asarray()[index[1]] for i in range(index.start, index.stop)]
+                    
+                elif len(index) == 3:
+                    pages = [self.tiff.pages[i].asarray()[index[1], index[2]] for i in range(index.start, index.stop)]
+                return stack(pages, axis=0)
+        
+        logger.debug(f"TiffReader: Invalid indexing format. {index}")
+        return None
+    
+    def __array__(self):
+        return self.tiff.asarray()

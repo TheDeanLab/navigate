@@ -63,6 +63,7 @@ from navigate.controller.sub_controllers import (
     FeaturePopupController,
     MenuController,
     PluginsController,
+    HistogramController,
     # MicroscopePopupController,
     # AdaptiveOpticsPopupController,
 )
@@ -242,6 +243,10 @@ class Controller:
         #: CameraViewController: Camera View Tab Sub-Controller.
         self.camera_view_controller = CameraViewController(
             self.view.camera_waveform.camera_tab, self
+        )
+
+        self.histogram_controller = HistogramController(
+            self.view.camera_waveform.camera_tab.histogram, self
         )
 
         #: MIPSettingController: MIP Settings Tab Sub-Controller.
@@ -1083,11 +1088,14 @@ class Controller:
                 )
                 self.execute("stop_acquire")
 
-            # Display the Image in the View
+            # Display the image and update the histogram
             self.camera_view_controller.try_to_display_image(
                 image=self.data_buffer[image_id]
             )
             self.mip_setting_controller.try_to_display_image(
+                image=self.data_buffer[image_id]
+            )
+            self.histogram_controller.populate_histogram(
                 image=self.data_buffer[image_id]
             )
             images_received += 1

@@ -1047,10 +1047,6 @@ class CameraViewController(BaseViewController):
         # SpooledImageLoader: The spooled image loader.
         self.spooled_images = None
 
-        self.histogram_canvas = view.histogram.figure_canvas
-        self.figure = view.histogram.figure.add_subplot(111)
-        self.populate_histogram(image=np.random.normal(100, 20, 1000))
-
         #: dict: The dictionary of image metrics widgets.
         self.image_metrics = view.image_metrics.get_widgets()
 
@@ -1090,31 +1086,6 @@ class CameraViewController(BaseViewController):
 
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
-
-    def populate_histogram(self, image):
-        """Populate the histogram."""
-        self.figure.clear()
-
-        data = image.flatten()
-
-        self.figure.hist(data, bins=30, color="black")
-
-        # X-axis
-        xmin, xmax = 0, np.max(data)
-        self.figure.set_xlim([xmin, xmax])
-        self.figure.set_xlabel("", fontsize=9)
-
-        num_ticks = 5
-        ticks = np.linspace(xmin, xmax, num_ticks)
-        self.figure.set_xticks(ticks)
-        self.figure.set_xticklabels(
-            [f"{tick:.2f}" for tick in ticks]
-        )  # Format labels as needed
-
-        # Y-axis
-        self.figure.set_ylabel("", fontsize=9)
-        self.figure.set_yticks([])
-        self.histogram_canvas.draw()
 
     def try_to_display_image(self, image):
         """Try to display an image.
@@ -1361,8 +1332,6 @@ class CameraViewController(BaseViewController):
         image : numpy.ndarray
             Image data.
         """
-        self.populate_histogram(image)
-
         start_time = time.time()
         self.image = self.flip_image(image)
         self.max_intensity_history.append(np.max(image))

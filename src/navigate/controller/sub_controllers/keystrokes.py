@@ -60,25 +60,9 @@ class KeystrokeController(GUIController):
         """
         super().__init__(main_view, parent_controller)
 
-        # References to all sub frames
-        #: tk.Frame: Camera View
-        self.camera_view = main_view.camera_waveform.camera_tab  # Camera View
-
-        #: tk.Frame: MIP View
-        self.mip_view = main_view.camera_waveform.mip_tab  # MIP View
-
-        # Multiposition Table
-        #: MultipositionTable: Multiposition Table
-        self.multi_table = main_view.settings.multiposition_tab.multipoint_list
-
-        # Main view
-        #: tk.Frame: Main view
-        self.main_view = main_view.root
-
         #: tk.Notebook: Main tabs
         self.main_tabs = main_view.settings
 
-        # Controllers for all sub frames
         #: CameraViewController: Camera View Controller
         self.camera_controller = parent_controller.camera_view_controller
 
@@ -91,42 +75,10 @@ class KeystrokeController(GUIController):
         #: StageController: Stage Controller
         self.stage_controller = parent_controller.stage_controller
 
-        """Keystrokes for Camera & MIP View"""
-        # Left Click binding
-        self.camera_view.canvas.bind("<Button-1>", self.camera_controller.left_click)
-        self.mip_view.canvas.bind("<Button-1>", self.mip_controller.left_click)
-
-        # MouseWheel Binding
+        """Keystrokes for Main View"""
+        #: tk.Tk: Main view
+        self.main_view = main_view.root
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
-        self.camera_view.canvas.bind(
-            "<Enter>", self.camera_controller_mouse_wheel_enter
-        )
-        self.camera_view.canvas.bind(
-            "<Leave>", self.camera_controller_mouse_wheel_leave
-        )
-        self.mip_view.canvas.bind("<Enter>", self.mip_controller_mouse_wheel_enter)
-        self.mip_view.canvas.bind("<Leave>", self.mip_controller_mouse_wheel_leave)
-
-        # Right Click Binding
-        if platform.system() == "Darwin":
-            self.camera_view.canvas.bind(
-                "<Button-2>", self.camera_controller.popup_menu
-            )
-            self.mip_view.canvas.bind("<Button-2>", self.mip_controller.popup_menu)
-        else:
-            self.camera_view.canvas.bind(
-                "<Button-3>", self.camera_controller.popup_menu
-            )
-            self.mip_view.canvas.bind("<Button-3>", self.mip_controller.popup_menu)
-
-        """Keystrokes for MultiTable"""
-        #: MultiPositionTable: Multiposition Table
-        self.mp_table = self.multi_table.pt
-        self.mp_table.rowheader.bind(
-            "<Double-Button-1>", self.multi_controller.handle_double_click
-        )
-
-        """Keystrokes for Main Window"""
         self.main_view.bind(
             "<Control-KeyRelease-j>", self.stage_controller.joystick_button_handler
         )
@@ -136,6 +88,45 @@ class KeystrokeController(GUIController):
         self.main_view.bind("<Control-Key-4>", self.switch_tab)
         self.main_view.bind_all("<Control-Key-z>", self.widget_undo)
         self.main_view.bind_all("<Control-Key-y>", self.widget_redo)
+
+        """Keystrokes for Camera View"""
+        #: CameraTab: Camera View
+        self.camera_view = main_view.camera_waveform.camera_tab
+        self.camera_view.canvas.bind("<Button-1>", self.camera_controller.left_click)
+        self.camera_view.canvas.bind(
+            "<Enter>", self.camera_controller_mouse_wheel_enter
+        )
+        self.camera_view.canvas.bind(
+            "<Leave>", self.camera_controller_mouse_wheel_leave
+        )
+        if platform.system() == "Darwin":
+            self.camera_view.canvas.bind(
+                "<Button-2>", self.camera_controller.popup_menu
+            )
+        else:
+            self.camera_view.canvas.bind(
+                "<Button-3>", self.camera_controller.popup_menu
+            )
+
+        """Keystrokes for MIP View"""
+        #: MIPTab: MIP View
+        self.mip_view = main_view.camera_waveform.mip_tab
+        self.mip_view.canvas.bind("<Button-1>", self.mip_controller.left_click)
+        self.mip_view.canvas.bind("<Enter>", self.mip_controller_mouse_wheel_enter)
+        self.mip_view.canvas.bind("<Leave>", self.mip_controller_mouse_wheel_leave)
+        if platform.system() == "Darwin":
+            self.mip_view.canvas.bind("<Button-2>", self.mip_controller.popup_menu)
+        else:
+            self.mip_view.canvas.bind("<Button-3>", self.mip_controller.popup_menu)
+
+        """Keystrokes for Multi-Position Table"""
+        #: MultipositionTable: Multiposition Table
+        self.multi_table = main_view.settings.multiposition_tab.multipoint_list.pt
+
+        #: MultiPositionTable: Multiposition Table
+        self.multi_table.rowheader.bind(
+            "<Double-Button-1>", self.multi_controller.handle_double_click
+        )
 
     def camera_controller_mouse_wheel_enter(self, event):
         """Mouse wheel binding for camera view

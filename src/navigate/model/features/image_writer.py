@@ -121,6 +121,8 @@ class ImageWriter:
         self.data_source = None
 
         # camera flip flags
+        if self.microscope_name is None:
+            self.microscope_name = self.model.active_microscope_name
         camera_config = self.model.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["camera"]
@@ -130,7 +132,7 @@ class ImageWriter:
         }
 
         # initialize saving
-        self.initialize_saving(sub_dir)
+        self.initialize_saving(sub_dir, image_name)
 
     def save_image(self, frame_ids):
         """Save the data to disk.
@@ -292,7 +294,7 @@ class ImageWriter:
             else:
                 self.data_source.set_bigtiff(False)
 
-    def get_saving_file_name(self, sub_dir):
+    def get_saving_file_name(self, sub_dir="", image_name=None):
         self.sub_dir = sub_dir
         # create the save directory if it doesn't already exist
         self.save_directory = os.path.join(
@@ -335,13 +337,16 @@ class ImageWriter:
 
         return file_name
 
-    def initialize_saving(self, sub_dir=""):
+    def initialize_saving(self, sub_dir="", image_name=None):
 
         if self.data_source is not None:
             self.data_source.close()
             self.data_source = None
 
-        file_name = self.get_saving_file_name(sub_dir)
+        self.current_time_point = 0
+
+        file_name = self.get_saving_file_name(sub_dir, image_name)
+        print("saving to new file:", file_name)
 
         # create the MIP directory if it doesn't already exist
         #: np.ndarray : Maximum intensity projection image.

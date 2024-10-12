@@ -184,12 +184,10 @@ class TiffDataSource(DataSource):
         """
         # TODO: may need to support .tif
         file_suffix = ".ome.tiff" if self.is_ome else ".tiff"
-        filename = os.path.join(self.save_directory, f"Position{position}", f"CH{channel:02d}-{timepoint:06d}{file_suffix}")
+        filename = os.path.join(self.save_directory, f"Position{position}", f"CH{channel:02d}_{timepoint:06d}{file_suffix}")
 
         if not os.path.exists(filename):
             return None
-        
-        self.mode = "r"
 
         image = tifffile.TiffFile(filename)
         if z < 0:
@@ -332,6 +330,7 @@ class TiffDataSource(DataSource):
         if self.mode == "w":
             if not internal:
                 self._check_shape(self._current_frame - 1, self.metadata.per_stack)
+        if type(self.image) == list:
             for ch in range(len(self.image)):
                 self.image[ch].close()
                 if self.is_ome and len(self._views) > 0:

@@ -959,7 +959,7 @@ class BaseViewController(GUIController, ABaseViewController):
         if width == self.width and height == self.height:
             return
         self.canvas_width = width - self.view.lut.winfo_width() - 24
-        self.canvas_height = height - 85
+        self.canvas_height = height - 153
         self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
         self.view.update_idletasks()
 

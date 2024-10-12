@@ -304,7 +304,7 @@ class HistogramFrame(ttk.Labelframe):
         self.frame.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
         #: tk.Canvas: The canvas for the histogram.
-        self.canvas = tk.Canvas(self.frame, width=512, height=512 // 5)
+        self.canvas = tk.Canvas(self.frame, width=512, height=512 // 8)
         self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
         #: matplotlib.figure.Figure: The figure for the histogram.

@@ -79,39 +79,39 @@ class HistogramController(GUIController):
         self.x_axis_var = tk.StringVar(value="linear")
         self.y_axis_var = tk.StringVar(value="linear")
 
-        #: tk.Menu: Histogram popup menu
-        self.menu = tk.Menu(widget, tearoff=0)
-        self.menu.add_radiobutton(
-            label="Log X",
-            variable=self.x_axis_var,
-            value="log",
-            command=self.update_scale,
-        )
-        self.menu.add_radiobutton(
-            label="Linear X",
-            variable=self.x_axis_var,
-            value="linear",
-            command=self.update_scale,
-        )
-        self.menu.add_separator()
-        self.menu.add_radiobutton(
-            label="Log Y",
-            variable=self.y_axis_var,
-            value="log",
-            command=self.update_scale,
-        )
-        self.menu.add_radiobutton(
-            label="Linear Y",
-            variable=self.y_axis_var,
-            value="linear",
-            command=self.update_scale,
-        )
+        # #: tk.Menu: Histogram popup menu
+        # self.menu = tk.Menu(widget, tearoff=0)
+        # self.menu.add_radiobutton(
+        #     label="Log X",
+        #     variable=self.x_axis_var,
+        #     value="log",
+        #     command=self.update_scale,
+        # )
+        # self.menu.add_radiobutton(
+        #     label="Linear X",
+        #     variable=self.x_axis_var,
+        #     value="linear",
+        #     command=self.update_scale,
+        # )
+        # self.menu.add_separator()
+        # self.menu.add_radiobutton(
+        #     label="Log Y",
+        #     variable=self.y_axis_var,
+        #     value="log",
+        #     command=self.update_scale,
+        # )
+        # self.menu.add_radiobutton(
+        #     label="Linear Y",
+        #     variable=self.y_axis_var,
+        #     value="linear",
+        #     command=self.update_scale,
+        # )
 
         #: bool: Logarithmic X-axis
         self.log_x = False
 
         #: bool: Logarithmic Y-axis
-        self.log_y = False
+        self.log_y = True
 
         self.populate_histogram(image=np.random.normal(100, 20, 1000))
 
@@ -143,7 +143,7 @@ class HistogramController(GUIController):
         """
         data = image.flatten()
         self.figure.clear()
-        self.figure.hist(data, color="black")
+        self.figure.hist(data, color="black", bins=50)
 
         # Limits
         std_dev = np.std(data)

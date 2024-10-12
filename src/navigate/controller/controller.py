@@ -558,12 +558,14 @@ class Controller:
             height : int
                 Height of the GUI.
             """
-            if width < 1200 or height < 600:
+            if width < 1300 or height < 800:
                 return
             self.view.camera_waveform["width"] = (
-                width - self.view.left_frame.winfo_width() - 81
-            )
-            self.view.camera_waveform["height"] = height - 110
+                width - self.view.left_frame.winfo_width() - 35
+            )  #
+            self.view.camera_waveform["height"] = height - 117
+
+            print("camera_waveform height", self.view.camera_waveform["height"])
 
         if event.widget != self.view.scroll_frame:
             return

@@ -912,7 +912,7 @@ class ZStackAcquisition:
     """
 
     def __init__(
-        self, model, get_origin=False, saving_flag=False, saving_dir="z-stack"
+        self, model, get_origin=False, saving_flag=False, saving_dir="z-stack", force_multiposition=False
     ):
         """Initialize the ZStackAcquisition class.
 
@@ -980,6 +980,9 @@ class ZStackAcquisition:
         #: int: The number of channels in the z-stack.
         self.channels = 1
 
+        #: bool: Force multiposition
+        self.force_multiposition = force_multiposition
+
         #: ImageWriter: An image writer object for saving z-stack images.
         self.image_writer = None
         if saving_flag:
@@ -1043,7 +1046,7 @@ class ZStackAcquisition:
         self.restore_f = pos_dict["f_pos"]
 
         # position: x, y, z, theta, f
-        if bool(microscope_state["is_multiposition"]):
+        if bool(microscope_state["is_multiposition"]) or self.force_multiposition:
             self.positions = self.model.configuration["experiment"]["MultiPositions"]
         else:
             self.positions = [
@@ -1207,6 +1210,8 @@ class ZStackAcquisition:
             self.model.resume_data_thread()
             self.should_pause_data_thread = False
 
+        self.model.mark_saving_flags([self.model.frame_id])
+
         return True
 
     def signal_end(self):
@@ -1315,7 +1320,6 @@ class ZStackAcquisition:
             A list of frame IDs received during data acquisition.
 
         """
-        self.model.mark_saving_flags(frame_ids)
         self.received_frames += len(frame_ids)
         if self.image_writer is not None:
             self.image_writer.save_image(frame_ids)

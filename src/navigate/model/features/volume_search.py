@@ -35,6 +35,7 @@ from navigate.model.analysis.boundary_detect import (
     find_tissue_boundary_2d,
     binary_detect,
     map_boundary,
+    find_cell_boundary_3d,
 )
 import numpy as np
 
@@ -461,3 +462,86 @@ class VolumeSearch:
     def cleanup(self):
         """Cleanup function"""
         self.has_tissue_queue.put(False)
+
+
+class VolumeSearch3D:
+
+    def __init__(
+        self,
+        model,
+        target_resolution="Nanoscale",
+        target_zoom="N/A",
+        threshold_value=462,
+        analysis_function=None
+    ):
+        """Initialize VolumeSearch
+
+        Parameters
+        ----------
+        model : navigate.model.model.Model
+            Navigate Model
+        target_resolution : str
+            Name of microscope to use for tiled imaging of tissue
+        target_zoom : str
+            Resolution of microscope (target_resolution) to use for tiled imaging
+            of tissue
+        flipx : bool
+            Flip the direction in which new tiles are added.
+        flipy : bool
+            Flip the direction in which new tiles are added.
+        overlap : float
+            Value between 0 and 1 indicating percent overlap of tiles.
+        debug : bool
+            If True, save debug images to disk.
+        """
+
+        #: navigate.model.model.Model: Navigate Model
+        self.model = model
+
+        #: str: Name of microscope to use for tiled imaging of tissue
+        self.target_resolution = target_resolution
+
+        #: str: Resolution of microscope (target_resolution) to use for tiled imaging
+        self.target_zoom = target_zoom
+
+        #: int: threshold value
+        self.threshold_value = threshold_value
+
+        #: function: analysis function
+        self.analysis_function = analysis_function if analysis_function else find_cell_boundary_3d
+
+        #: dict: Feature configuration
+        self.config_table = {
+            "data": {
+                "main": self.data_func,
+                "cleanup": self.cleanup,
+            }
+        }
+
+    def data_func(self, frame_ids):
+
+        self.model.logger.debug("Starting 3D Volume Search")
+
+        z_stack_data = self.model.image_writer.data_source.get_data()
+        # boundaries = self.analysis_function(z_stack_data, self.threshold_value)
+
+        # TODO: map boundaries to positions
+        # TODO: remove this, it's used for feature pipeline tests.
+        positions = [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]
+
+        self.model.event_queue.put(("multiposition", positions))
+        self.model.configuration["experiment"]["MultiPositions"] = positions
+        self.model.configuration["experiment"]["MicroscopeState"][
+            "multiposition_count"
+        ] = len(positions)
+        if len(positions) > 0:
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "is_multiposition"
+            ] = True
+
+        self.model.image_writer.initialize_saving(sub_dir=str(self.target_resolution))
+        
+        self.model.logger.debug(f"Volume Search 3D completed!")
+
+    def cleanup(self):
+        pass

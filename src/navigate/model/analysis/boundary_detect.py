@@ -36,6 +36,10 @@ from typing import Optional
 # Third party imports
 from skimage import filters
 from skimage.transform import downscale_local_mean
+from skimage.measure import label
+from skimage.segmentation import find_boundaries
+from scipy.ndimage import binary_fill_holes
+
 import numpy as np
 import numpy.typing as npt
 
@@ -446,3 +450,20 @@ def map_boundary(boundary, direction=True):
 
     result = dp_shortest_path(start, end, step, offset)
     return result
+
+
+def find_cell_boundary_3d(z_stack_image, threshold_value):
+
+    z, x, y = z_stack_image.shape
+    binary_images = []
+    
+    for i in range(z):
+        thresh_img = z_stack_image[i] > threshold_value
+        binary_images.append(thresh_img.astype(np.uint8))
+
+    filled_images = binary_fill_holes(binary_images)
+    cell_labels = label(filled_images)
+    boundaries = find_boundaries(cell_labels > 0, connectivity=1)
+
+    return boundaries
+        

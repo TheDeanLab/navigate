@@ -928,6 +928,10 @@ class Model:
 
             wait_num = self.camera_wait_iterations
 
+            # ImageWriter to save images
+            if data_func:
+                data_func(frame_ids)
+
             if hasattr(self, "data_container") and not self.data_container.end_flag:
                 if self.data_container.is_closed:
                     self.logger.info("Data container is closed.")
@@ -935,10 +939,6 @@ class Model:
                     break
 
                 self.data_container.run(frame_ids)
-
-            # ImageWriter to save images
-            if data_func:
-                data_func(frame_ids)
 
             # show image
             self.logger.info(f"Image delivered to controller: {frame_ids[0]}")

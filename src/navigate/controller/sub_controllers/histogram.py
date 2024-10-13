@@ -35,9 +35,13 @@ import tkinter as tk
 
 # Third Party Imports
 import numpy as np
+from matplotlib.ticker import FuncFormatter
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.model.concurrency.concurrency_tools import SharedNDArray
+from navigate.view.main_window_content.display_notebook import HistogramFrame
+
 
 # Logger Setup
 # p = __name__.split(".")[1]
@@ -47,7 +51,7 @@ from navigate.controller.sub_controllers.gui import GUIController
 class HistogramController(GUIController):
     """Histogram controller"""
 
-    def __init__(self, histogram, parent_controller) -> None:
+    def __init__(self, histogram: HistogramFrame, parent_controller) -> None:
         """Initialize the histogram controller
 
         Parameters
@@ -65,7 +69,10 @@ class HistogramController(GUIController):
         self.parent_controller = parent_controller
 
         #: FigureBase: The histogram figure.
-        self.figure = self.histogram.figure.add_subplot(111)
+        self.ax = self.histogram.figure.add_axes([0.075, 0.25, 0.88, 0.65])
+        self.ax.tick_params(
+            axis="both", which="both", direction="inout", labelsize=8, reset=True
+        )
 
         # Event Bindings
         widget = self.histogram.figure_canvas.get_tk_widget()
@@ -77,43 +84,41 @@ class HistogramController(GUIController):
 
         # Default axis values
         self.x_axis_var = tk.StringVar(value="linear")
-        self.y_axis_var = tk.StringVar(value="linear")
+        self.y_axis_var = tk.StringVar(value="log")
 
-        # #: tk.Menu: Histogram popup menu
-        # self.menu = tk.Menu(widget, tearoff=0)
-        # self.menu.add_radiobutton(
-        #     label="Log X",
-        #     variable=self.x_axis_var,
-        #     value="log",
-        #     command=self.update_scale,
-        # )
-        # self.menu.add_radiobutton(
-        #     label="Linear X",
-        #     variable=self.x_axis_var,
-        #     value="linear",
-        #     command=self.update_scale,
-        # )
-        # self.menu.add_separator()
-        # self.menu.add_radiobutton(
-        #     label="Log Y",
-        #     variable=self.y_axis_var,
-        #     value="log",
-        #     command=self.update_scale,
-        # )
-        # self.menu.add_radiobutton(
-        #     label="Linear Y",
-        #     variable=self.y_axis_var,
-        #     value="linear",
-        #     command=self.update_scale,
-        # )
+        #: tk.Menu: Histogram popup menu
+        self.menu = tk.Menu(widget, tearoff=0)
+        self.menu.add_radiobutton(
+            label="Log X",
+            variable=self.x_axis_var,
+            value="log",
+            command=self.update_scale,
+        )
+        self.menu.add_radiobutton(
+            label="Linear X",
+            variable=self.x_axis_var,
+            value="linear",
+            command=self.update_scale,
+        )
+        self.menu.add_separator()
+        self.menu.add_radiobutton(
+            label="Log Y",
+            variable=self.y_axis_var,
+            value="log",
+            command=self.update_scale,
+        )
+        self.menu.add_radiobutton(
+            label="Linear Y",
+            variable=self.y_axis_var,
+            value="linear",
+            command=self.update_scale,
+        )
 
         #: bool: Logarithmic X-axis
         self.log_x = False
 
         #: bool: Logarithmic Y-axis
         self.log_y = True
-
-        self.populate_histogram(image=np.random.normal(100, 20, 1000))
 
     def update_scale(self) -> None:
         """Update the scale of the histogram"""
@@ -133,47 +138,36 @@ class HistogramController(GUIController):
         finally:
             self.menu.grab_release()
 
-    def populate_histogram(self, image: np.ndarray) -> None:
+    def populate_histogram(self, image: SharedNDArray) -> None:
         """Populate the histogram.
 
         Parameters
         ----------
-        image : np.ndarray
+        image : SharedNDArray
             Image data
         """
         data = image.flatten()
-        self.figure.clear()
-        self.figure.hist(data, color="black", bins=50)
+        self.ax.cla()
+        counts, _, _ = self.ax.hist(data, bins=20, color="black", rwidth=1)
 
-        # Limits
-        std_dev = np.std(data)
-        xmin, xmax = np.min(data) - std_dev, np.max(data) + std_dev
-        xmin = 0 if xmin < 0 else xmin
+        x_maximum = np.max(data) + np.std(data)
+        x_minimum = np.min(data) - np.std(data)
+        x_minimum = 1 if x_minimum < 1 else x_minimum
+        y_maximum = 10**6
 
-        # Tick marks.
-        num_ticks = 5
-        if self.log_x:
-            ticks = np.log10(np.logspace(np.log10(xmin), np.log10(xmax), num_ticks))
-            self.figure.set_xscale("log", nonpositive="clip", subs=[])
-            self.figure.set_xticks(ticks)
-            self.figure.set_xticklabels(
-                [f"{10**tick:.2f}" for tick in ticks], fontsize=6
-            )
-        else:
-            ticks = np.linspace(xmin, xmax, num_ticks)
-            self.figure.set_xticks(ticks)
-            self.figure.set_xticklabels([f"{tick:.2f}" for tick in ticks], fontsize=6)
+        self.ax.set_xlim(x_minimum, x_maximum)
+        self.ax.set_ylim(1, y_maximum)
 
-        self.figure.set_xlim([xmin, xmax])
-        self.figure.set_xlabel("", fontsize=4)
-
-        # Y-axis
         if self.log_y:
-            self.figure.set_yscale("log")
+            self.ax.set_yscale("log")
 
-        self.figure.set_ylabel("", fontsize=6)
-        self.figure.set_yticks([])
+        if self.log_x:
+            self.ax.set_xscale("log")
 
-        # Draw the figure
+        self.ax.yaxis.set_major_formatter(
+            FuncFormatter(
+                lambda val, pos: f"$10^{{{int(np.log10(val))}}}$" if val > 0 else ""
+            )
+        )
 
         self.histogram.figure_canvas.draw()

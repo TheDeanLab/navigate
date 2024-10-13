@@ -43,42 +43,11 @@ from matplotlib.figure import Figure
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.common import CommonMethods
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
-
-class CommonMethods:
-    """This class is a collection of common methods."""
-
-    def get_variables(self) -> Dict[str, Any]:
-        """This function returns a dictionary of all the variables that are tied to
-        each  widget name.
-
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : dict
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self) -> Dict[str, Any]:
-        """This function returns the dictionary that holds the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        widgets : dict
-            The dictionary that holds the widgets.
-        """
-        return self.inputs
 
 
 class CameraNotebook(DockableNotebook):
@@ -304,11 +273,11 @@ class HistogramFrame(ttk.Labelframe):
         self.frame.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
         #: tk.Canvas: The canvas for the histogram.
-        self.canvas = tk.Canvas(self.frame, width=512, height=512 // 8)
+        self.canvas = tk.Canvas(self.frame, width=512, height=512 // 6)
         self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
         #: matplotlib.figure.Figure: The figure for the histogram.
-        self.figure = Figure(figsize=(3, 1), tight_layout=True)
+        self.figure = Figure(figsize=(3, 1))
 
         #: FigureCanvasTkAgg: The canvas for the histogram.
         self.figure_canvas = FigureCanvasTkAgg(self.figure, self.frame)

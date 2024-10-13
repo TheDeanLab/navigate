@@ -44,6 +44,7 @@ from navigate.view.popups.acquire_popup import AcquirePopUp
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class AcquireBarController(GUIController):
     """Acquire Bar Controller."""
 
@@ -58,6 +59,9 @@ class AcquireBarController(GUIController):
             Instance of the Main Controller.
         """
         super().__init__(view, parent_controller)
+
+        #: AcquirePopUp: Instance of the popup window.
+        self.acquire_pop = None
 
         #: str: Acquisition image mode.
         self.mode = "live"
@@ -303,8 +307,8 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
-            #: object: Instance of the popup save dialog.
             self.acquire_pop = AcquirePopUp(self.view)
+
             buttons = self.acquire_pop.get_buttons()
             widgets = self.acquire_pop.get_widgets()
 
@@ -312,6 +316,9 @@ class AcquireBarController(GUIController):
             buttons["Cancel"].config(command=lambda: self.acquire_pop.popup.dismiss())
             buttons["Done"].config(
                 command=lambda: self.launch_acquisition(self.acquire_pop)
+            )
+            self.acquire_pop.popup.bind(
+                "<Escape>", lambda e: self.acquire_pop.popup.dismiss()
             )
 
             # Configure drop down callbacks, will update save settings when file type is
@@ -326,9 +333,7 @@ class AcquireBarController(GUIController):
         else:
             self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
-            # self.view.pull_down.configure(state="disabled")
             self.view.pull_down.state(["disabled", "readonly"])
-
             self.parent_controller.execute("acquire")
 
     def update_microscope_mode(self, *args):

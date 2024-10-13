@@ -40,18 +40,13 @@ from matplotlib.ticker import FuncFormatter
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
-from navigate.view.main_window_content.display_notebook import HistogramFrame
-
-
-# Logger Setup
-# p = __name__.split(".")[1]
-# logger = logging.getLogger(p)
+from navigate.view.main_window_content.misc_notebook import HistogramTab
 
 
 class HistogramController(GUIController):
     """Histogram controller"""
 
-    def __init__(self, histogram: HistogramFrame, parent_controller) -> None:
+    def __init__(self, histogram: HistogramTab, parent_controller) -> None:
         """Initialize the histogram controller
 
         Parameters

@@ -36,6 +36,8 @@ import logging
 from pathlib import Path
 from typing import Iterable, Dict, Any
 
+from navigate.view.main_window_content.misc_notebook import MiscNotebook
+
 # Third Party Imports
 
 # Local Imports
@@ -146,6 +148,9 @@ class MainApp(ttk.Frame):
         #: ttk.Frame: The top right frame of the application
         self.right_frame = ttk.Frame(self)
 
+        #: ttk.Frame: The bottom right frame of the application
+        self.bottom_right_frame = ttk.Frame(self)
+
         # Grid out foundational frames
         self.grid(column=0, row=0, sticky=tk.NSEW)
         self.top_frame.grid(
@@ -153,6 +158,7 @@ class MainApp(ttk.Frame):
         )
         self.left_frame.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
         self.right_frame.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        self.bottom_right_frame.grid(row=2, column=1, sticky=tk.NSEW, padx=3, pady=3)
 
         #: SettingsNotebook: The settings notebook for the application
         self.settings = SettingsNotebook(self.left_frame, self.root)
@@ -162,3 +168,5 @@ class MainApp(ttk.Frame):
 
         #: AcquireBar: The acquire bar for the application
         self.acquire_bar = AcquireBar(self.top_frame, self.root)
+
+        self.misc = MiscNotebook(self.bottom_right_frame, self.root)

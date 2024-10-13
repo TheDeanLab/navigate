@@ -234,10 +234,6 @@ class CameraTab(tk.Frame):
         self.slider.grid(row=3, column=0, sticky=tk.NSEW, padx=5, pady=5)
         self.slider.grid_remove()
 
-        #: HistogramFrame: The frame that will hold the histogram.
-        self.histogram = HistogramFrame(self)
-        self.histogram.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
-
         #: MetricsFrame: The frame that will hold the camera selection and counts.
         self.image_metrics = MetricsFrame(self)
         self.image_metrics.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
@@ -245,43 +241,6 @@ class CameraTab(tk.Frame):
         #: RenderFrame: The frame that will hold the live display functionality.
         self.live_frame = RenderFrame(self)
         self.live_frame.grid(row=2, column=1, sticky=tk.NSEW, padx=5, pady=5)
-
-
-class HistogramFrame(ttk.Labelframe):
-    """This class is the frame that holds the histogram."""
-
-    def __init__(
-        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
-    ) -> None:
-        """Initialize the HistogramFrame class.
-
-        Parameters
-        ----------
-        camera_tab : CameraTab
-            The frame that will hold the histogram.
-        *args : Iterable
-            Variable length argument list.
-        **kwargs : dict
-            Arbitrary keyword arguments.
-        """
-
-        text_label = "Intensity Histogram"
-        ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
-
-        #: ttk.Frame: The frame for the histogram.
-        self.frame = ttk.Frame(self)
-        self.frame.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
-
-        #: tk.Canvas: The canvas for the histogram.
-        self.canvas = tk.Canvas(self.frame, width=512, height=512 // 6)
-        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
-
-        #: matplotlib.figure.Figure: The figure for the histogram.
-        self.figure = Figure(figsize=(3, 1))
-
-        #: FigureCanvasTkAgg: The canvas for the histogram.
-        self.figure_canvas = FigureCanvasTkAgg(self.figure, self.frame)
-        self.figure_canvas.get_tk_widget().grid(row=0, column=0, sticky=tk.NSEW)
 
 
 class RenderFrame(ttk.Labelframe):

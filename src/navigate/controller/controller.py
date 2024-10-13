@@ -245,8 +245,9 @@ class Controller:
             self.view.camera_waveform.camera_tab, self
         )
 
+        #: HistogramController: Histogram Tab Sub-Controller.
         self.histogram_controller = HistogramController(
-            self.view.camera_waveform.camera_tab.histogram, self
+            self.view.misc.histogram_tab, self
         )
 
         #: MIPSettingController: MIP Settings Tab Sub-Controller.

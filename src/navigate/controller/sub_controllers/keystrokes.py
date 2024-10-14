@@ -33,12 +33,15 @@
 # Standard Library Imports
 import logging
 import platform
+import tkinter
+from typing import Any
 
 # Third Party Imports
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
+from navigate.view.main_application_window import MainApp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,28 +51,28 @@ logger = logging.getLogger(p)
 class KeystrokeController(GUIController):
     """Keystroke controller"""
 
-    def __init__(self, main_view, parent_controller):
+    def __init__(self, main_view: MainApp, parent_controller: Any) -> None:
         """Initialize the keystroke controller
 
         Parameters
         ----------
-        main_view : MainView
+        main_view : MainApp
             Main view
-        parent_controller : MainController
+        parent_controller : Any
             Main controller
         """
         super().__init__(main_view, parent_controller)
 
-        #: tk.Notebook: Main tabs
+        #: SettingsNotebook: Settings Notebook
         self.main_tabs = main_view.settings
 
         #: CameraViewController: Camera View Controller
         self.camera_controller = parent_controller.camera_view_controller
 
-        #: MIPSettingController: MIP Setting Controller
+        #: MIPViewController: MIP Setting Controller
         self.mip_controller = parent_controller.mip_setting_controller
 
-        #: MultipositionTableController: Multiposition Table Controller
+        #: MultiPositionController: Multiposition Table Controller
         self.multi_controller = parent_controller.multiposition_tab_controller
 
         #: StageController: Stage Controller
@@ -128,12 +131,12 @@ class KeystrokeController(GUIController):
             "<Double-Button-1>", self.multi_controller.handle_double_click
         )
 
-    def camera_controller_mouse_wheel_enter(self, event):
+    def camera_controller_mouse_wheel_enter(self, event: tkinter.Event) -> None:
         """Mouse wheel binding for camera view
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Mouse wheel event
         """
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
@@ -149,12 +152,12 @@ class KeystrokeController(GUIController):
                 "<Button-5>", self.camera_controller.mouse_wheel
             )
 
-    def mip_controller_mouse_wheel_enter(self, event):
+    def mip_controller_mouse_wheel_enter(self, event: tkinter.Event) -> None:
         """Mouse wheel binding for MIP view
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Mouse wheel event
         """
         self.view.root.unbind("<MouseWheel>")
@@ -164,12 +167,12 @@ class KeystrokeController(GUIController):
             self.mip_view.canvas.bind("<Button-4>", self.mip_controller.mouse_wheel)
             self.mip_view.canvas.bind("<Button-5>", self.mip_controller.mouse_wheel)
 
-    def camera_controller_mouse_wheel_leave(self, event):
+    def camera_controller_mouse_wheel_leave(self, event: tkinter.Event) -> None:
         """Mouse wheel binding for camera view
 
         Parameters
         ----------
-        event : tkinter event
+        event : tKinter.Event
             Mouse wheel event
         """
 
@@ -182,12 +185,12 @@ class KeystrokeController(GUIController):
             "<MouseWheel>", self.view.scroll_frame.mouse_wheel
         )  # reinstate scrollbar mousewheel
 
-    def mip_controller_mouse_wheel_leave(self, event):
+    def mip_controller_mouse_wheel_leave(self, event: tkinter.Event) -> None:
         """Mouse wheel binding for MIP view
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Mouse wheel event
         """
 
@@ -198,12 +201,12 @@ class KeystrokeController(GUIController):
             self.mip_view.canvas.unbind("<Button-5>")
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
 
-    def switch_tab(self, event):
+    def switch_tab(self, event: tkinter.Event) -> None:
         """Switches between tabs
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Tab key event
         """
 
@@ -211,12 +214,12 @@ class KeystrokeController(GUIController):
         if (key_val > 0) and (self.main_tabs.index("end") >= key_val):
             self.main_tabs.select(key_val - 1)
 
-    def widget_undo(self, event):
+    def widget_undo(self, event: tkinter.Event) -> None:
         """Undo widget changes
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Undo key event
         """
         if isinstance(event.widget, ValidatedEntry) or isinstance(
@@ -224,12 +227,12 @@ class KeystrokeController(GUIController):
         ):  # Add all widgets that you want to be able to undo here
             event.widget.undo(event)
 
-    def widget_redo(self, event):
+    def widget_redo(self, event: tkinter.Event) -> None:
         """Redo widget changes
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Redo key event
         """
 

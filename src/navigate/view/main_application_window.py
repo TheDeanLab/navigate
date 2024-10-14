@@ -63,7 +63,7 @@ class MainApp(ttk.Frame):
     Finally, it uses the notebook classes to put them into the respective frames on the
     tk.Grid. Each of the notebook classes includes tab classes and inits those etc.
 
-    The second parameter in each classes __init__ function is the parent.
+    The second parameter in each class __init__ function is the parent.
 
     I used the name of the parent so that it would be easier to keep track of
     inheritances.

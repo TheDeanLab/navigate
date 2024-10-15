@@ -418,6 +418,8 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                         stage_config["serial_number"],
                         stage_config["stages"],
                         stage_config["refmode"],
+                        stage_config.get("connection", "USB"),
+                        stage_config.get("port", None)
                     ),
                     exception=GCSError,
                 )

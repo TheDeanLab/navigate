@@ -46,7 +46,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_PIStage_connection(controller_name, serial_number, stages, reference_modes):
+def build_PIStage_connection(controller_name, serial_number, stages, reference_modes, connection_type, port):
     """Connect to the Physik Instrumente (PI) Stage
 
     Parameters
@@ -59,17 +59,40 @@ def build_PIStage_connection(controller_name, serial_number, stages, reference_m
         Stages to connect to, e.g., "M-111.1DG"
     reference_modes : str
         Reference modes for the stages, e.g., "FRF"
+    connection_type : str
+        The communication protocol for the Physik Instrumente controller.
+            - USB
+            - serial
+    port : int
+        The comport to communicate over for RS232 commands. Default is None.
 
     Returns
     -------
     stage_connection : dict
         Dictionary containing the pi_tools and pi_device objects
+
+    Note
+    ----
+        Please see https://pipython.physikinstrumente.com/connect.html
     """
     pi_stages = stages.split()
     pi_reference_modes = reference_modes.split()
     pi_tools = pitools
     pi_device = GCSDevice(controller_name)
-    pi_device.ConnectUSB(serialnum=serial_number)
+
+    if connection_type.lower() == "usb":
+        pi_device.ConnectUSB(serialnum=serial_number)
+    elif connection_type.lower() == "serial":
+        if port is None:
+            Raise: Exception("Please configure the COMPORT in your configuration.yaml file.")
+        if "com" in port.lower():
+            port = port.lower().split("com")[1]
+        pi_device.ConnectRS232(comport=int(port), baudrate=115200)
+    elif connection_type.lower() == "tcpip":
+        Raise: NotImplementedError
+    elif connection_type.lower() == "gpib":
+        Raise: NotImplementedError
+
     pi_tools.startup(
         pi_device, stages=list(pi_stages), refmodes=list(pi_reference_modes)
     )

@@ -34,9 +34,10 @@ import logging
 import importlib  # noqa: F401
 from multiprocessing.managers import ListProxy
 import reprlib
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 # Third-party imports
+import numpy as np
 
 # Local application imports
 from navigate.model.device_startup_functions import start_stage
@@ -357,12 +358,14 @@ class Microscope:
         if is_synthetic and self.daq is not None:
             self.daq.add_camera(self.microscope_name, self.camera)
 
-    def update_data_buffer(self, data_buffer, number_of_frames):
+    def update_data_buffer(
+        self, data_buffer: List[np.ndarray], number_of_frames: int
+    ) -> None:
         """Update the data buffer for the camera.
 
         Parameters
         ----------
-        data_buffer : numpy.ndarray
+        data_buffer : List[np.ndarray]
             Data buffer for the camera.
         number_of_frames : int
             Number of frames to be acquired.

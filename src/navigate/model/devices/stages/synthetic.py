@@ -32,6 +32,9 @@
 # Standard Imports
 import logging
 import time
+from typing import Any, Dict
+
+from typing_extensions import Optional
 
 # Third Party Imports
 
@@ -48,7 +51,13 @@ logger = logging.getLogger(p)
 class SyntheticStage(StageBase):
     """Synthetically generated stage for testing purposes."""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Optional[Any],
+        configuration: Dict[str, Any],
+        device_id: int = 0,
+    ):
         """Initialize the stage.
 
         Parameters

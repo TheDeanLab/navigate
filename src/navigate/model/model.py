@@ -35,7 +35,7 @@ import logging
 import multiprocessing
 import time
 import os
-from typing import Tuple, Iterable, Any, Dict, List, Optional
+from typing import Tuple, Any, Dict, List, Optional, Union
 import argparse
 
 # Third Party Imports
@@ -525,7 +525,7 @@ class Model:
         return self.active_microscope.camera.get_offset_variance_maps()
 
     def run_command(
-        self, command: str, *args: Iterable[str, int], **kwargs: Dict[str, Any]
+        self, command: str, *args: List[Union[str, int]], **kwargs: Dict[str, Any]
     ):
         """Receives commands from the controller.
 
@@ -533,7 +533,7 @@ class Model:
         ----------
         command : str
             Type of command to run.
-        *args : Iterable
+        *args : List[Union[str, int]]
             List of arguments to pass to the command.
         **kwargs : Dict[str, Any]
             Dictionary of keyword arguments to pass to the command.

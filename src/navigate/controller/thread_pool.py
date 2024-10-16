@@ -412,7 +412,6 @@ class SynchronizedThreadPool:
         """
 
         if event == "exception":
-            logger.exception("****in local trace: exception stops the thread")
             if os.getenv("GITHUB_ACTIONS") == "true":
                 return
             raise SystemExit()

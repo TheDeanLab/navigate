@@ -34,6 +34,7 @@
 import tkinter as tk
 from tkinter import ttk, Grid
 import logging
+from typing import Iterable, Dict, Any
 
 # Third Party Imports
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -42,6 +43,7 @@ from matplotlib.figure import Figure
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.common import CommonMethods
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -52,21 +54,22 @@ class CameraNotebook(DockableNotebook):
     """This class is the notebook that holds the camera view and waveform settings
     tabs."""
 
-    def __init__(self, frame_top_right, *args, **kwargs):
+    def __init__(
+        self, frame: ttk.Frame, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
         """Init function for the CameraNotebook class.
-
 
         Parameters
         ----------
-        frame_top_right : tk.Frame
+        frame : ttk.Frame
             The frame that will hold the notebook.
-        *args : tuple
+        *args : Iterable
             Variable length argument list.
-        **kwargs : dict
+        **kwargs : Dict[str, Any]
             Arbitrary keyword arguments.
         """
         # Init notebook
-        DockableNotebook.__init__(self, frame_top_right, *args, **kwargs)
+        DockableNotebook.__init__(self, frame, *args, **kwargs)
 
         # Putting notebook 2 into top right frame
         self.grid(row=0, column=0)
@@ -74,17 +77,15 @@ class CameraNotebook(DockableNotebook):
         #: CameraTab: The camera tab.
         self.camera_tab = CameraTab(self)
 
-        #: CameraTab: The maximum intensity projection tab.
+        #: MIPTab: The maximum intensity projection tab.
         self.mip_tab = MIPTab(self)
 
         #: WaveformTab: The waveform settings tab.
         self.waveform_tab = WaveformTab(self)
 
-        # Tab list
+        # Set tab list
         tab_list = [self.camera_tab, self.mip_tab, self.waveform_tab]
         self.set_tablist(tab_list)
-
-        # Adding tabs to self notebook
         self.add(self.camera_tab, text="Camera", sticky=tk.NSEW)
         self.add(self.mip_tab, text="MIP", sticky=tk.NSEW)
         self.add(self.waveform_tab, text="Waveforms", sticky=tk.NSEW)
@@ -93,16 +94,18 @@ class CameraNotebook(DockableNotebook):
 class MIPTab(tk.Frame):
     """MipTab class."""
 
-    def __init__(self, cam_wave, *args, **kwargs):
+    def __init__(
+        self, cam_wave: CameraNotebook, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
         """Initialize the MIPTab class.
 
         Parameters
         ----------
-        cam_wave : tk.Frame
+        cam_wave : CameraNotebook
             The frame that will hold the camera tab.
-        *args : tuple
+        *args : Iterable
             Variable length argument list.
-        **kwargs : dict
+        **kwargs : Dict[str, Any]
             Arbitrary keyword arguments.
         """
         #  Init Frame
@@ -121,19 +124,21 @@ class MIPTab(tk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        #: tk.Frame: The frame that will hold the camera image.
+        #: ttk.Frame: The frame that will hold the camera image.
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
 
-        #: Bool: The popup flag.
+        #: bool: The popup flag.
         self.is_popup = False
 
-        #: Bool: The docked flag.
+        #: bool: The docked flag.
         self.is_docked = True
 
         #: int: The width of the canvas.
+        self.canvas_width = 512
+
         #: int: The height of the canvas.
-        self.canvas_width, self.canvas_height = 512, 512
+        self.canvas_height = 512
 
         #: tk.Canvas: The canvas that will hold the camera image.
         self.canvas = tk.Canvas(
@@ -144,7 +149,7 @@ class MIPTab(tk.Frame):
         #: matplotlib.figure.Figure: The figure that will hold the camera image.
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
 
-        #: FigureCanvasTkAgg: The canvas that will hold the camera image.
+        #:  FigureCanvasTkAgg: The canvas that will hold the camera image.
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
@@ -159,16 +164,18 @@ class MIPTab(tk.Frame):
 class CameraTab(tk.Frame):
     """CameraTab class."""
 
-    def __init__(self, cam_wave, *args, **kwargs):
+    def __init__(
+        self, cam_wave: CameraNotebook, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
         """Initialize the CameraTab class.
 
         Parameters
         ----------
-        cam_wave : tk.Frame
+        cam_wave : CameraNotebook
             The frame that will hold the camera tab.
-        *args : tuple
+        *args : Iterable
             Variable length argument list.
-        **kwargs : dict
+        **kwargs : Dict[str, Any]
             Arbitrary keyword arguments.
         """
         #  Init Frame
@@ -181,19 +188,21 @@ class CameraTab(tk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        #: tk.Frame: The frame that will hold the camera image.
+        #: ttk.Frame: The frame that will hold the camera image.
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
 
-        #: Bool: The popup flag.
+        #: bool: The popup flag.
         self.is_popup = False
 
-        #: Bool: The docked flag.
+        #: bool: The docked flag.
         self.is_docked = True
 
         #: int: The width of the canvas.
+        self.canvas_width = 512
+
         #: int: The height of the canvas.
-        self.canvas_width, self.canvas_height = 512, 512
+        self.canvas_height = 512
 
         #: tk.Canvas: The canvas that will hold the camera image.
         self.canvas = tk.Canvas(
@@ -225,6 +234,10 @@ class CameraTab(tk.Frame):
         self.slider.grid(row=3, column=0, sticky=tk.NSEW, padx=5, pady=5)
         self.slider.grid_remove()
 
+        #: HistogramFrame: The frame that will hold the histogram.
+        self.histogram = HistogramFrame(self)
+        self.histogram.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
         #: MetricsFrame: The frame that will hold the camera selection and counts.
         self.image_metrics = MetricsFrame(self)
         self.image_metrics.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
@@ -234,24 +247,63 @@ class CameraTab(tk.Frame):
         self.live_frame.grid(row=2, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
 
-class RenderFrame(ttk.Labelframe):
-    """This class is the frame that holds the live display functionality."""
+class HistogramFrame(ttk.Labelframe):
+    """This class is the frame that holds the histogram."""
 
-    def __init__(self, cam_view, *args, **kwargs):
-        """Initialize the RenderFrame class.
+    def __init__(
+        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
+        """Initialize the HistogramFrame class.
 
         Parameters
         ----------
-        cam_view : tk.Frame
-            The frame that will hold the live display functionality.
-        *args : tuple
+        camera_tab : CameraTab
+            The frame that will hold the histogram.
+        *args : Iterable
             Variable length argument list.
         **kwargs : dict
             Arbitrary keyword arguments.
         """
+
+        text_label = "Intensity Histogram"
+        ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
+
+        #: ttk.Frame: The frame for the histogram.
+        self.frame = ttk.Frame(self)
+        self.frame.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        #: tk.Canvas: The canvas for the histogram.
+        self.canvas = tk.Canvas(self.frame, width=512, height=512 // 6)
+        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        #: matplotlib.figure.Figure: The figure for the histogram.
+        self.figure = Figure(figsize=(3, 1))
+
+        #: FigureCanvasTkAgg: The canvas for the histogram.
+        self.figure_canvas = FigureCanvasTkAgg(self.figure, self.frame)
+        self.figure_canvas.get_tk_widget().grid(row=0, column=0, sticky=tk.NSEW)
+
+
+class RenderFrame(ttk.Labelframe):
+    """This class is the frame that holds the live display functionality."""
+
+    def __init__(
+        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
+        """Initialize the RenderFrame class.
+
+        Parameters
+        ----------
+        camera_tab : CameraTab
+            The frame that will hold the live display functionality.
+        *args : Iterable
+            Variable length argument list.
+        **kwargs : Dict[str, Any]
+            Arbitrary keyword arguments.
+        """
         # Init Frame
         text_label = "Image Display"
-        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         # Formatting
         Grid.columnconfigure(self, "all", weight=1)
@@ -278,47 +330,27 @@ class RenderFrame(ttk.Labelframe):
         self.channel.grid(row=1, column=0)
         self.channel.state = "readonly"
 
-    def get_variables(self):
-        """Function to get the variables.
 
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : dict
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """Function to get the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-        """
-        return self.inputs
-
-
-class MipRenderFrame(ttk.Labelframe):
+class MipRenderFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the live display functionality."""
 
-    def __init__(self, cam_view, *args, **kwargs):
-        """Initialize the RenderFrame class.
+    def __init__(
+        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
+        """Initialize the MipRenderFrame class.
 
         Parameters
         ----------
-        cam_view : tk.Frame
-            The frame that will hold the live display functionality.
-        *args : tuple
+        camera_tab : CameraTab
+            The frame that will hold the MIP display functionality.
+        *args : Iterable
             Variable length argument list.
-        **kwargs : dict
+        **kwargs : Dict[str, Any]
             Arbitrary keyword arguments.
         """
         # Init Frame
         text_label = "Image Display"
-        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         # Formatting
         Grid.columnconfigure(self, "all", weight=1)
@@ -350,47 +382,27 @@ class MipRenderFrame(ttk.Labelframe):
         self.inputs["channel"].grid(row=1, column=0, sticky=tk.EW, padx=3, pady=3)
         self.columnconfigure(0, weight=1)
 
-    def get_variables(self):
-        """Function to get the variables.
-
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : dict
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """Function to get the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-        """
-        return self.inputs
-
 
 class WaveformTab(tk.Frame):
     """This class is the frame that holds the waveform tab."""
 
-    def __init__(self, cam_wave, *args, **kwargs):
+    def __init__(
+        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
         """Initialize the WaveformTab class.
 
         Parameters
         ----------
-        cam_wave : tk.Frame
+        camera_tab : CameraTab
             The frame that will hold the waveform tab.
-        *args : tuple
+        *args : Iterable
             Variable length argument list.
-        **kwargs : dict
+        **kwargs : Dict[str, Any]
             Arbitrary keyword arguments.
 
         """
         # Init Frame
-        tk.Frame.__init__(self, cam_wave, *args, **kwargs)
+        tk.Frame.__init__(self, camera_tab, *args, **kwargs)
 
         #: int: The index of the tab.
         self.index = 2
@@ -402,7 +414,7 @@ class WaveformTab(tk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        #: tk.Frame: The frame that will hold the waveform plots.
+        #: ttk.Frame: The frame that will hold the waveform plots.
         self.waveform_plots = ttk.Frame(self)
         self.waveform_plots.grid(row=0, column=0, sticky=tk.NSEW)
 
@@ -413,29 +425,31 @@ class WaveformTab(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.waveform_plots)
         self.canvas.draw()
 
-        #: tk.Frame: The frame that will hold the waveform settings.
+        #: WaveformSettingsFrame: The frame that will hold the waveform settings.
         self.waveform_settings = WaveformSettingsFrame(self)
         self.waveform_settings.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
 
-class WaveformSettingsFrame(ttk.Labelframe):
+class WaveformSettingsFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the waveform settings."""
 
-    def __init__(self, wav_view, *args, **kwargs):
+    def __init__(
+        self, waveform_tab: WaveformTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
         """Initialize the WaveformSettingsFrame class.
 
         Parameters
         ----------
-        wav_view : tk.Frame
+        waveform_tab : WaveformTab
             The frame that will hold the waveform settings.
-        *args : tuple
+        *args : Iterable
             Variable length argument list.
-        **kwargs : dict
+        **kwargs : Dict[str, Any]
             Arbitrary keyword arguments.
         """
         # Init Frame
         text_label = "Settings"
-        ttk.Labelframe.__init__(self, wav_view, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, waveform_tab, text=text_label, *args, **kwargs)
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
@@ -465,41 +479,26 @@ class WaveformSettingsFrame(ttk.Labelframe):
             row=0, column=1, sticky=tk.NSEW, padx=3, pady=3
         )
 
-    def get_variables(self):
-        """Function to get the variables.
 
-        Returns
-        -------
-        variables : dict
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """Function to get the widgets."""
-        return self.inputs
-
-
-class MetricsFrame(ttk.Labelframe):
+class MetricsFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the image metrics."""
 
-    def __init__(self, cam_view, *args, **kwargs):
+    def __init__(
+        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
         """Initialize the MetricsFrame class.
 
         Parameters
         ----------
-        cam_view : tk.Frame
+        camera_tab : CameraTab
             The frame that will hold the image metrics.
-        *args : tuple
+        *args : Iterable
             Variable length argument list.
-        **kwargs : dict
+        **kwargs : Dict[str, Any]
             Arbitrary keyword arguments.
         """
         text_label = "Image Metrics"
-        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
@@ -540,39 +539,18 @@ class MetricsFrame(ttk.Labelframe):
                 )
                 self.inputs[self.names[i]].configure(width=5)
 
-    def get_variables(self):
-        """This function returns a dictionary of all the variables that are tied to
-        each  widget name.
 
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : dict
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """This function returns the dictionary that holds the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-        """
-        return self.inputs
-
-
-class IntensityFrame(ttk.Labelframe):
+class IntensityFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the intensity controls."""
 
-    def __init__(self, cam_view, *args, **kwargs):
+    def __init__(
+        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
         """Initialize the IntensityFrame class.
 
          Parameters
         ----------
-        cam_view : tk.Frame
+        camera_tab : CameraTab
             The frame that will hold the intensity controls.
         *args : tuple
             Variable length argument list.
@@ -581,7 +559,7 @@ class IntensityFrame(ttk.Labelframe):
         """
         # Init Frame
         text_label = "LUT"
-        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
@@ -672,26 +650,3 @@ class IntensityFrame(ttk.Labelframe):
                 padx=3,
                 pady=3,
             )
-
-    def get_variables(self):
-        """This function returns a dictionary of all the variables that are tied to
-        each  widget name.
-
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : dict
-            The dictionary that holds the variables.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """This function returns the dictionary that holds the widgets.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-        """
-        return self.inputs

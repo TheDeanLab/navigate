@@ -58,7 +58,7 @@ logger = logging.getLogger(p)
 class Configurator:
     """Navigate Configurator"""
 
-    def __init__(self, root, splash_screen):
+    def __init__(self, root: tk.Tk, splash_screen):
         """Initiates the configurator application window.
 
         Parameters
@@ -186,11 +186,12 @@ class Configurator:
                                 if k.strip() == "":
                                     warning_info[hardware_name] = True
                                     print(
-                                        f"Notice: {hardware_name} has an empty value {ref}! Please double check if it's okay!"
+                                        f"Notice: {hardware_name} has an empty value "
+                                        f"{ref}! Please double check if it's okay!"
                                     )
 
                                 if k_idx in value_dict:
-                                    k = value_dict[k_idx][v]
+                                    k = value_dict[k_idx][v]  # noqa
                                 v = variables[v_idx].get()
                                 if v_idx in value_dict:
                                     v = value_dict[v_idx][v]
@@ -208,7 +209,8 @@ class Configurator:
                         except tk._tkinter.TclError:
                             v = ""
                             print(
-                                f"Notice: {hardware_name} has an empty value {k}! Please double check!"
+                                f"Notice: {hardware_name} has an empty value {k}! "
+                                f"Please double check!"
                             )
                             warning_info[hardware_name] = True
                         set_value(temp_dict, k.split("/"), v)
@@ -218,7 +220,9 @@ class Configurator:
         if warning_info:
             messagebox.showwarning(
                 title="Configuration",
-                message=f"There are empty value(s) with {', '.join(warning_info.keys())}. Please double check!",
+                message=f"There are empty value(s) with "
+                f"{', '.join(warning_info.keys())}"
+                f". Please double check!",
             )
 
     def write_to_yaml(self, config, filename):
@@ -404,7 +408,7 @@ class Configurator:
                                 hardware_ref_name
                             ],
                         )
-                    except Exception as e:
+                    except Exception:
                         widgets_value = [None]
                     microscope_tab.create_hardware_tab(
                         hardware_type, widgets, hardware_widgets_value=widgets_value
@@ -425,7 +429,7 @@ class Configurator:
                                 ],
                             ),
                         ]
-                    except:
+                    except Exception:
                         widgets_value = [[None], [None]]
                     microscope_tab.create_hardware_tab(
                         hardware_type,

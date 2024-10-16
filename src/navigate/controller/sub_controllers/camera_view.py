@@ -59,6 +59,7 @@ from navigate.config import get_navigate_path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class ABaseViewController(metaclass=abc.ABCMeta):
     """Abstract Base View Controller Class."""
 
@@ -958,7 +959,7 @@ class BaseViewController(GUIController, ABaseViewController):
         if width == self.width and height == self.height:
             return
         self.canvas_width = width - self.view.lut.winfo_width() - 24
-        self.canvas_height = height - 85
+        self.canvas_height = height - 153
         self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
         self.view.update_idletasks()
 
@@ -1036,8 +1037,8 @@ class CameraViewController(BaseViewController):
 
         Parameters
         ----------
-        view : tkinter.Frame
-            The tkinter frame that contains the widgets.
+        view : CameraTab
+            The Camera tkinter frame that contains the widgets.
         parent_controller : Controller
             The parent controller of the camera view controller.
         """
@@ -1389,8 +1390,8 @@ class MIPViewController(BaseViewController):
 
         Parameters
         ----------
-        view : tkinter.Frame
-            The tkinter frame that contains the widgets.
+        view : MIPTab
+            The MIP tkinter frame that contains the widgets.
         parent_controller : Controller
             The parent controller of the camera view controller.
         """

@@ -44,13 +44,14 @@ from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedCombobox
 from navigate.model.data_sources import FILE_TYPES
+from navigate.view.custom_widgets.common import CommonMethods
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class AcquirePopUp:
+class AcquirePopUp(CommonMethods):
     """Class creates the popup that is generated when the Acquire button is pressed and
     Save File checkbox is selected."""
 
@@ -123,8 +124,6 @@ class AcquirePopUp:
             "File Type",
             "Notes",
         ]
-        max_length = max([len(s) for s in entry_labels])
-        # TODO: Make labels have equal spacing.
 
         # Loop for each entry and label
         for i in range(len(entry_names)):
@@ -141,7 +140,7 @@ class AcquirePopUp:
                     label=entry_labels[i],
                     input_class=ValidatedCombobox,
                     input_var=tk.StringVar(),
-                    label_args={"padding": [0, 0, 30, 0]}
+                    label_args={"padding": [0, 0, 30, 0]},
                 )
                 self.inputs[entry_names[i]].set_values(tuple(FILE_TYPES))
                 self.inputs[entry_names[i]].set("TIFF")
@@ -152,7 +151,7 @@ class AcquirePopUp:
                     label=entry_labels[i],
                     input_class=ValidatedCombobox,
                     input_var=tk.StringVar(),
-                    label_args={"padding": [0, 0, 36, 0]}
+                    label_args={"padding": [0, 0, 36, 0]},
                 )
                 self.inputs[entry_names[i]].set_values(
                     ("BABB", "Water", "CUBIC", "CLARITY", "uDISCO", "eFLASH")
@@ -186,47 +185,3 @@ class AcquirePopUp:
 
         self.buttons["Done"] = ttk.Button(content_frame, text="Acquire Data")
         self.buttons["Done"].grid(row=10, column=1, padx=(0, 5), sticky=tk.NSEW)
-
-    def get_variables(self):
-        """Get the variables of the popup
-
-        This function returns a dictionary of all the variables that are tied to each
-        widget name.
-
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        dict
-            Dictionary of all the variables
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """Get the widgets of the popup
-
-        This function returns the dictionary that holds the input widgets.
-        The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        dict
-            Dictionary of all the widgets
-        """
-        return self.inputs
-
-    def get_buttons(self):
-        """Get the buttons of the popup
-
-        This function returns the dictionary that holds the buttons.
-        The key is the button name, value is the button.
-
-        Returns
-        -------
-        dict
-            Dictionary of all the buttons
-        """
-        return self.buttons

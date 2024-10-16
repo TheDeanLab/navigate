@@ -32,32 +32,43 @@
 
 # Standard Library Imports
 import logging
+import tkinter as tk
 from tkinter import messagebox
+from typing import Dict, Any, Iterable
 
 # Third Party Imports
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.acquire_popup import AcquirePopUp
+from navigate.view.main_window_content.acquire_notebook import AcquireBar
+
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class AcquireBarController(GUIController):
     """Acquire Bar Controller."""
 
-    def __init__(self, view, parent_controller):
+    def __init__(self, view: AcquireBar, parent_controller: Any) -> None:
         """Initialize the Acquire Bar Controller.
 
         Parameters
         ----------
-        view : object
+        view : AcquireBar
             Instance of the View.
-        parent_controller : object
+        parent_controller : Any
             Instance of the Main Controller.
         """
         super().__init__(view, parent_controller)
+
+        #: AcquirePopUp: Instance of the popup window.
+        self.acquire_pop = None
+
+        #: dict: Saving settings.
+        self.saving_settings = None
 
         #: str: Acquisition image mode.
         self.mode = "live"
@@ -88,7 +99,13 @@ class AcquireBarController(GUIController):
         # framerate information.
         self.framerate = 0
 
-    def progress_bar(self, images_received, microscope_state, mode, stop=False):
+    def progress_bar(
+        self,
+        images_received: int,
+        microscope_state: Dict[str, Any],
+        mode: str,
+        stop=False,
+    ):
         """Update progress bars.
 
         Parameters
@@ -197,12 +214,12 @@ class AcquireBarController(GUIController):
                 self.update_progress_label(seconds_left=0)
                 self.stop_progress_bar()
 
-    def stop_progress_bar(self):
+    def stop_progress_bar(self) -> None:
         """Stop moving the continuous progress bar."""
         self.view.CurAcq.stop()
         self.view.OvrAcq.stop()
 
-    def update_progress_label(self, seconds_left):
+    def update_progress_label(self, seconds_left: int) -> None:
         """Update the progress label in the Acquire Bar.
 
         Formatted time is in HH:MM:SS.
@@ -218,7 +235,7 @@ class AcquireBarController(GUIController):
             text=f"{int(hours):02}" f":{int(minutes):02}" f":{int(seconds):02}"
         )
 
-    def set_mode(self, mode):
+    def set_mode(self, mode: str) -> None:
         """Set imaging mode.
 
         Parameters
@@ -237,7 +254,7 @@ class AcquireBarController(GUIController):
         ] = mode
         self.show_verbose_info("Image mode is set to", mode)
 
-    def get_mode(self):
+    def get_mode(self) -> str:
         """Get the current imaging mode.
 
         Returns
@@ -247,7 +264,7 @@ class AcquireBarController(GUIController):
         """
         return self.mode
 
-    def add_mode(self, mode):
+    def add_mode(self, mode: str) -> None:
         """Add a new mode to the mode dictionary.
 
         Parameters
@@ -259,7 +276,7 @@ class AcquireBarController(GUIController):
             self.mode_dict[mode] = mode
             self.view.pull_down["values"] = list(self.mode_dict.keys())
 
-    def stop_acquire(self):
+    def stop_acquire(self) -> None:
         """Stop the acquisition.
 
         Stop the progress bar, set the acquire button back to "Acquire", place pull
@@ -271,7 +288,7 @@ class AcquireBarController(GUIController):
         self.view.pull_down.state(["!disabled", "readonly"])
         self.is_acquiring = False
 
-    def set_save_option(self, is_save):
+    def set_save_option(self, is_save: bool) -> None:
         """Set whether the image will be saved.
 
         Parameters
@@ -285,7 +302,7 @@ class AcquireBarController(GUIController):
         ] = is_save
         self.show_verbose_info("set save data option:", is_save)
 
-    def launch_popup_window(self):
+    def launch_popup_window(self) -> None:
         """Launch the Save Dialog Popup Window
 
         The popup window should only be launched if the microscope is set to save the
@@ -303,8 +320,8 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
-            #: object: Instance of the popup save dialog.
             self.acquire_pop = AcquirePopUp(self.view)
+
             buttons = self.acquire_pop.get_buttons()
             widgets = self.acquire_pop.get_widgets()
 
@@ -312,6 +329,9 @@ class AcquireBarController(GUIController):
             buttons["Cancel"].config(command=lambda: self.acquire_pop.popup.dismiss())
             buttons["Done"].config(
                 command=lambda: self.launch_acquisition(self.acquire_pop)
+            )
+            self.acquire_pop.popup.bind(
+                "<Escape>", lambda e: self.acquire_pop.popup.dismiss()
             )
 
             # Configure drop down callbacks, will update save settings when file type is
@@ -326,12 +346,10 @@ class AcquireBarController(GUIController):
         else:
             self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
-            # self.view.pull_down.configure(state="disabled")
             self.view.pull_down.state(["disabled", "readonly"])
-
             self.parent_controller.execute("acquire")
 
-    def update_microscope_mode(self, *args):
+    def update_microscope_mode(self, *args: Iterable) -> None:
         """Gets the state of the pull-down menu and tells the central controller
 
         Will additionally call functions to disable and enable widgets based on mode
@@ -350,17 +368,17 @@ class AcquireBarController(GUIController):
         # Update state status of other widgets in the GUI based on what mode is set
         self.parent_controller.channels_tab_controller.set_mode("stop")
 
-    def update_file_type(self, file_type):
-        """Updates the file type when the drop down in save dialog is changed.
+    def update_file_type(self, file_type: tk.StringVar) -> None:
+        """Updates the file type when the drop-down in save dialog is changed.
 
         Parameters
         ----------
-        file_type : str
+        file_type : tk.StringVar
             File type.
         """
         self.saving_settings["file_type"] = file_type.get()
 
-    def launch_acquisition(self, popup_window):
+    def launch_acquisition(self, popup_window: AcquirePopUp) -> None:
         """Launch the Acquisition.
 
         Once the popup window has been filled out, we first create the save path using
@@ -371,7 +389,7 @@ class AcquireBarController(GUIController):
 
         Parameters
         ----------
-        popup_window : object
+        popup_window : AcquirePopUp
             Instance of the popup save dialog.
         """
         # update saving settings according to user's input
@@ -393,14 +411,14 @@ class AcquireBarController(GUIController):
             # tell central controller, save the image/data
             self.parent_controller.execute("acquire_and_save")
 
-    def exit_program(self):
+    def exit_program(self) -> None:
         """Exit Button to close the program."""
         if messagebox.askyesno("Exit", "Are you sure?"):
             self.show_verbose_info("Exiting Program")
             # call the central controller to stop all the threads
             self.parent_controller.execute("exit")
 
-    def populate_experiment_values(self):
+    def populate_experiment_values(self) -> None:
         """Populate the experiment values from the config file."""
         #: dict: Saving settings.
         self.saving_settings = self.parent_controller.configuration["experiment"][
@@ -416,13 +434,13 @@ class AcquireBarController(GUIController):
         ]
         self.set_save_option(is_save)
 
-    def update_experiment_values(self, popup_window):
+    def update_experiment_values(self, popup_window: AcquirePopUp) -> None:
         """Gets the entries from the popup save dialog and overwrites the
         saving_settings dictionary.
 
         Parameters
         ----------
-        popup_window : object
+        popup_window : AcquirePopUp
             Instance of the popup save dialog.
         """
         popup_vals = popup_window.get_variables()

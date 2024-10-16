@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+from typing import Any
 
 # Third Party Imports
 
@@ -45,12 +46,12 @@ logger = logging.getLogger(p)
 class GUIController:
     """Base class for GUI controllers"""
 
-    def __init__(self, view, parent_controller=None):
+    def __init__(self, view: Any, parent_controller=None) -> None:
         """Initializes GUI controller
 
         Parameters
         ----------
-        view : tkinter.Tk
+        view : Any
             GUI view
         parent_controller : Controller
             parent controller

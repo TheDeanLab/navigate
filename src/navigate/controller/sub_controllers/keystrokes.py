@@ -33,12 +33,15 @@
 # Standard Library Imports
 import logging
 import platform
+import tkinter
+from typing import Any
 
 # Third Party Imports
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
+from navigate.view.main_application_window import MainApp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,85 +51,37 @@ logger = logging.getLogger(p)
 class KeystrokeController(GUIController):
     """Keystroke controller"""
 
-    def __init__(self, main_view, parent_controller):
+    def __init__(self, main_view: MainApp, parent_controller: Any) -> None:
         """Initialize the keystroke controller
 
         Parameters
         ----------
-        main_view : MainView
+        main_view : MainApp
             Main view
-        parent_controller : MainController
+        parent_controller : Any
             Main controller
         """
         super().__init__(main_view, parent_controller)
 
-        # References to all sub frames
-        #: tk.Frame: Camera View
-        self.camera_view = main_view.camera_waveform.camera_tab  # Camera View
-
-        #: tk.Frame: MIP View
-        self.mip_view = main_view.camera_waveform.mip_tab  # MIP View
-
-        # Multiposition Table
-        #: MultipositionTable: Multiposition Table
-        self.multi_table = main_view.settings.multiposition_tab.multipoint_list
-
-        # Main view
-        #: tk.Frame: Main view
-        self.main_view = main_view.root
-
-        #: tk.Notebook: Main tabs
+        #: SettingsNotebook: Settings Notebook
         self.main_tabs = main_view.settings
 
-        # Controllers for all sub frames
         #: CameraViewController: Camera View Controller
         self.camera_controller = parent_controller.camera_view_controller
 
-        #: MIPSettingController: MIP Setting Controller
+        #: MIPViewController: MIP Setting Controller
         self.mip_controller = parent_controller.mip_setting_controller
 
-        #: MultipositionTableController: Multiposition Table Controller
+        #: MultiPositionController: Multiposition Table Controller
         self.multi_controller = parent_controller.multiposition_tab_controller
 
         #: StageController: Stage Controller
         self.stage_controller = parent_controller.stage_controller
 
-        """Keystrokes for Camera & MIP View"""
-        # Left Click binding
-        self.camera_view.canvas.bind("<Button-1>", self.camera_controller.left_click)
-        self.mip_view.canvas.bind("<Button-1>", self.mip_controller.left_click)
-
-        # MouseWheel Binding
+        """Keystrokes for Main View"""
+        #: tk.Tk: Main view
+        self.main_view = main_view.root
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
-        self.camera_view.canvas.bind(
-            "<Enter>", self.camera_controller_mouse_wheel_enter
-        )
-        self.camera_view.canvas.bind(
-            "<Leave>", self.camera_controller_mouse_wheel_leave
-        )
-        self.mip_view.canvas.bind("<Enter>", self.mip_controller_mouse_wheel_enter)
-        self.mip_view.canvas.bind("<Leave>", self.mip_controller_mouse_wheel_leave)
-
-        # Right Click Binding
-        if platform.system() == "Darwin":
-            self.camera_view.canvas.bind(
-                "<Button-2>", self.camera_controller.popup_menu
-            )
-            self.mip_view.canvas.bind("<Button-2>", self.mip_controller.popup_menu)
-        else:
-            self.camera_view.canvas.bind(
-                "<Button-3>", self.camera_controller.popup_menu
-            )
-            self.mip_view.canvas.bind("<Button-3>", self.mip_controller.popup_menu)
-
-        """Keystrokes for MultiTable"""
-        #: MultiPositionTable: Multiposition Table
-        self.mp_table = self.multi_table.pt
-        self.mp_table.rowheader.bind(
-            "<Double-Button-1>", self.multi_controller.handle_double_click
-        )
-
-        """Keystrokes for Main Window"""
         self.main_view.bind(
             "<Control-KeyRelease-j>", self.stage_controller.joystick_button_handler
         )
@@ -137,12 +92,51 @@ class KeystrokeController(GUIController):
         self.main_view.bind_all("<Control-Key-z>", self.widget_undo)
         self.main_view.bind_all("<Control-Key-y>", self.widget_redo)
 
-    def camera_controller_mouse_wheel_enter(self, event):
+        """Keystrokes for Camera View"""
+        #: CameraTab: Camera View
+        self.camera_view = main_view.camera_waveform.camera_tab
+        self.camera_view.canvas.bind("<Button-1>", self.camera_controller.left_click)
+        self.camera_view.canvas.bind(
+            "<Enter>", self.camera_controller_mouse_wheel_enter
+        )
+        self.camera_view.canvas.bind(
+            "<Leave>", self.camera_controller_mouse_wheel_leave
+        )
+        if platform.system() == "Darwin":
+            self.camera_view.canvas.bind(
+                "<Button-2>", self.camera_controller.popup_menu
+            )
+        else:
+            self.camera_view.canvas.bind(
+                "<Button-3>", self.camera_controller.popup_menu
+            )
+
+        """Keystrokes for MIP View"""
+        #: MIPTab: MIP View
+        self.mip_view = main_view.camera_waveform.mip_tab
+        self.mip_view.canvas.bind("<Button-1>", self.mip_controller.left_click)
+        self.mip_view.canvas.bind("<Enter>", self.mip_controller_mouse_wheel_enter)
+        self.mip_view.canvas.bind("<Leave>", self.mip_controller_mouse_wheel_leave)
+        if platform.system() == "Darwin":
+            self.mip_view.canvas.bind("<Button-2>", self.mip_controller.popup_menu)
+        else:
+            self.mip_view.canvas.bind("<Button-3>", self.mip_controller.popup_menu)
+
+        """Keystrokes for Multi-Position Table"""
+        #: MultipositionTable: Multiposition Table
+        self.multi_table = main_view.settings.multiposition_tab.multipoint_list.pt
+
+        #: MultiPositionTable: Multiposition Table
+        self.multi_table.rowheader.bind(
+            "<Double-Button-1>", self.multi_controller.handle_double_click
+        )
+
+    def camera_controller_mouse_wheel_enter(self, event: tkinter.Event) -> None:
         """Mouse wheel binding for camera view
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Mouse wheel event
         """
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
@@ -158,12 +152,12 @@ class KeystrokeController(GUIController):
                 "<Button-5>", self.camera_controller.mouse_wheel
             )
 
-    def mip_controller_mouse_wheel_enter(self, event):
+    def mip_controller_mouse_wheel_enter(self, event: tkinter.Event) -> None:
         """Mouse wheel binding for MIP view
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Mouse wheel event
         """
         self.view.root.unbind("<MouseWheel>")
@@ -173,12 +167,12 @@ class KeystrokeController(GUIController):
             self.mip_view.canvas.bind("<Button-4>", self.mip_controller.mouse_wheel)
             self.mip_view.canvas.bind("<Button-5>", self.mip_controller.mouse_wheel)
 
-    def camera_controller_mouse_wheel_leave(self, event):
+    def camera_controller_mouse_wheel_leave(self, event: tkinter.Event) -> None:
         """Mouse wheel binding for camera view
 
         Parameters
         ----------
-        event : tkinter event
+        event : tKinter.Event
             Mouse wheel event
         """
 
@@ -191,12 +185,12 @@ class KeystrokeController(GUIController):
             "<MouseWheel>", self.view.scroll_frame.mouse_wheel
         )  # reinstate scrollbar mousewheel
 
-    def mip_controller_mouse_wheel_leave(self, event):
+    def mip_controller_mouse_wheel_leave(self, event: tkinter.Event) -> None:
         """Mouse wheel binding for MIP view
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Mouse wheel event
         """
 
@@ -207,12 +201,12 @@ class KeystrokeController(GUIController):
             self.mip_view.canvas.unbind("<Button-5>")
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
 
-    def switch_tab(self, event):
+    def switch_tab(self, event: tkinter.Event) -> None:
         """Switches between tabs
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Tab key event
         """
 
@@ -220,12 +214,12 @@ class KeystrokeController(GUIController):
         if (key_val > 0) and (self.main_tabs.index("end") >= key_val):
             self.main_tabs.select(key_val - 1)
 
-    def widget_undo(self, event):
+    def widget_undo(self, event: tkinter.Event) -> None:
         """Undo widget changes
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Undo key event
         """
         if isinstance(event.widget, ValidatedEntry) or isinstance(
@@ -233,12 +227,12 @@ class KeystrokeController(GUIController):
         ):  # Add all widgets that you want to be able to undo here
             event.widget.undo(event)
 
-    def widget_redo(self, event):
+    def widget_redo(self, event: tkinter.Event) -> None:
         """Redo widget changes
 
         Parameters
         ----------
-        event : tkinter event
+        event : tkinter.Event
             Redo key event
         """
 

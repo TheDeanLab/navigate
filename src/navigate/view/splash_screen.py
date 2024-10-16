@@ -45,12 +45,12 @@ class SplashScreen(tk.Toplevel):
     Centered depending upon the host computer being used.
     """
 
-    def __init__(self, root, image_path, *args, **kargs):
+    def __init__(self, root: tk.Tk, image_path, *args, **kargs):
         """Initialize the SplashScreen.
 
         Parameters
         ----------
-        root : Tk top-level widget
+        root : tk.Tk
             Tkinter GUI instance to which this SplashScreen belongs.
         image_path : str
             Path to the image to display on the splash screen.

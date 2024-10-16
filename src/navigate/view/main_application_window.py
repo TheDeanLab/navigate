@@ -34,6 +34,7 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from pathlib import Path
+from typing import Iterable, Dict, Any
 
 # Third Party Imports
 
@@ -62,7 +63,7 @@ class MainApp(ttk.Frame):
     Finally, it uses the notebook classes to put them into the respective frames on the
     tk.Grid. Each of the notebook classes includes tab classes and inits those etc.
 
-    The second parameter in each classes __init__ function is the parent.
+    The second parameter in each class __init__ function is the parent.
 
     I used the name of the parent so that it would be easier to keep track of
     inheritances.
@@ -88,16 +89,16 @@ class MainApp(ttk.Frame):
     spots 1 & 2
     """
 
-    def __init__(self, root, *args, **kwargs):
+    def __init__(self, root: tk.Tk, *args: Iterable, **kwargs: Dict[str, Any]) -> None:
         """Initiates the main application window
 
         Parameters
         ----------
         root : tk.Tk
             The main window of the application
-        *args
+        *args : iterable
             Variable length argument list
-        **kwargs
+        **kwargs : dict
             Arbitrary keyword arguments
         """
 
@@ -139,30 +140,25 @@ class MainApp(ttk.Frame):
 
         # Left Frame Notebook 1 setup
         #: ttk.Frame: The left frame of the application
-        self.frame_left = ttk.Frame(self)
+        self.left_frame = ttk.Frame(self)
 
         # Top right Frame Notebook 2 setup
         #: ttk.Frame: The top right frame of the application
-        self.frame_top_right = ttk.Frame(self)
-
-        # Bottom right Frame Notebook 3 setup
-        #: ttk.Frame: The bottom right frame of the application
-        self.frame_bottom_right = ttk.Frame(self)
+        self.right_frame = ttk.Frame(self)
 
         # Grid out foundational frames
         self.grid(column=0, row=0, sticky=tk.NSEW)
         self.top_frame.grid(
             row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3
         )
-        self.frame_left.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
-        self.frame_top_right.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
-        self.frame_bottom_right.grid(row=2, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        self.left_frame.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        self.right_frame.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
 
         #: SettingsNotebook: The settings notebook for the application
-        self.settings = SettingsNotebook(self.frame_left, self.root)
+        self.settings = SettingsNotebook(self.left_frame, self.root)
 
         #: CameraNotebook: The camera notebook for the application
-        self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
+        self.camera_waveform = CameraNotebook(self.right_frame, self.root)
 
         #: AcquireBar: The acquire bar for the application
-        self.acqbar = AcquireBar(self.top_frame, self.root)
+        self.acquire_bar = AcquireBar(self.top_frame, self.root)

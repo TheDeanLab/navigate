@@ -34,6 +34,7 @@
 import logging
 import time
 import ctypes
+from typing import Optional, Any, Dict, List
 
 # Third Party Imports
 import numpy as np
@@ -41,6 +42,7 @@ from tifffile import TiffFile, TiffFileError
 
 # Local Imports
 from navigate.model.analysis import camera
+from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.model.devices.camera.base import CameraBase
 from navigate.tools.decorators import log_initialization
 
@@ -53,16 +55,17 @@ logger = logging.getLogger(p)
 class SyntheticCameraController:
     """SyntheticCameraController. Synthetic Camera API."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize SyntheticCameraController class."""
         pass
 
-    def get_property_value(self, name):
-        """Provides the idprop value after looking it up in the property_dict
+    @staticmethod
+    def get_property_value(_: str) -> Any:
+        """Provides the property value after looking it up in the property_dict
 
         Parameters
         ----------
-        name : str
+        _ : str
             Not currently used.
 
         Returns
@@ -72,7 +75,8 @@ class SyntheticCameraController:
         """
         return -1
 
-    def set_property_value(self, name, value):
+    @staticmethod
+    def set_property_value(name, value):
         """Set the value of a camera property.
 
         Parameters
@@ -89,16 +93,21 @@ class SyntheticCameraController:
 class SyntheticCamera(CameraBase):
     """SyntheticCamera camera class."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+    ) -> None:
         """Initialize SyntheticCamera class.
 
         Parameters
         ----------
         microscope_name : str
             Name of microscope in configuration
-        device_connection : object
+        device_connection : Any
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : Dict[str, Any]
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)
@@ -106,10 +115,10 @@ class SyntheticCamera(CameraBase):
         #: str: Name of the microscope
         self.microscope_name = microscope_name
 
-        #: object: Device connection
+        #: Any: Device connection
         self.device_connection = device_connection
 
-        #: dict: Configuration settings
+        #: Dict[str, Any]: Configuration settings
         self.configuration = configuration
 
         #: bool: Whether the camera is currently acquiring
@@ -142,35 +151,56 @@ class SyntheticCamera(CameraBase):
         #: float: exposure time
         self.camera_exposure_time = 0.2
 
+        #: int: x binning
+        self.x_binning = 1
+
+        #: int: y binning
+        self.y_binning = 1
+
         #: int: width
         self.x_pixels = self.camera_parameters["x_pixels"]
 
         #: int: height
         self.y_pixels = self.camera_parameters["y_pixels"]
 
-    def __str__(self):
+        #: int: center x
+        self.center_x = self.x_pixels // 2
+
+        #: int: center y
+        self.center_y = self.y_pixels // 2
+
+        #: int: current image id
+        self.img_id = 0
+
+        #: int: current tif id
+        self.current_tif_id = 0
+
+        #: list: list of tif images
+        self.tif_images = []
+
+    def __str__(self) -> str:
         """String representation of SyntheticCamera class.
 
         Returns
         -------
-        str
+        representation : str
             String representation of SyntheticCamera class.
         """
         return "SyntheticCamera"
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete SyntheticCamera class."""
         pass
 
-    def report_settings(self):
+    def report_settings(self) -> None:
         """Print Camera Settings."""
         pass
 
-    def close_camera(self):
+    def close_camera(self) -> None:
         """Close SyntheticCamera Camera"""
         pass
 
-    def set_sensor_mode(self, mode):
+    def set_sensor_mode(self, mode: str) -> None:
         """Set SyntheticCamera sensor mode.
 
         Parameters
@@ -180,7 +210,7 @@ class SyntheticCamera(CameraBase):
         """
         pass
 
-    def set_exposure_time(self, exposure_time):
+    def set_exposure_time(self, exposure_time: float) -> None:
         """Set SyntheticCamera exposure time.
 
         All of our units are in milliseconds. Function converts to seconds.
@@ -189,11 +219,10 @@ class SyntheticCamera(CameraBase):
         ----------
         exposure_time : float
             Exposure time in seconds.
-
         """
         self.camera_exposure_time = exposure_time
 
-    def set_line_interval(self, line_interval_time):
+    def set_line_interval(self, line_interval_time: float) -> None:
         """Set SyntheticCamera line interval.
 
         Parameters
@@ -203,7 +232,7 @@ class SyntheticCamera(CameraBase):
         """
         pass
 
-    def set_binning(self, binning_string):
+    def set_binning(self, binning_string: str) -> None:
         """Set SyntheticCamera binning mode.
 
         Parameters
@@ -211,20 +240,22 @@ class SyntheticCamera(CameraBase):
         binning_string : str
             Desired binning properties (e.g., '2x2', '4x4', '8x8'
         """
-        #: int: x binning
         self.x_binning = int(binning_string[0])
-        #: int: y binning
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
-    def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+    def initialize_image_series(
+        self,
+        data_buffer: Optional[List[SharedNDArray]] = None,
+        number_of_frames: int = 100,
+    ):
         """Initialize SyntheticCamera image series.
 
         Parameters
         ----------
-        data_buffer : int
-            Size of the data to buffer.  Default is None.
+        data_buffer : Optional[List[SharedNDArray]]
+            The shared data buffer. Default is None.
         number_of_frames : int
             Number of frames.  Default is 100.
         """
@@ -234,7 +265,7 @@ class SyntheticCamera(CameraBase):
         self.pre_frame_idx = 0
         self.is_acquiring = True
 
-    def close_image_series(self):
+    def close_image_series(self) -> None:
         """Close image series.
 
         Stops the acquisition and sets is_acquiring flag to False.
@@ -243,7 +274,7 @@ class SyntheticCamera(CameraBase):
         self.current_frame_idx = 0
         self.is_acquiring = False
 
-    def load_images(self, filenames=None, ds=None):
+    def load_images(self, filenames: Optional[str] = None, ds=None) -> None:
         """Pre-populate the buffer with images. Can either come from TIFF files or
         Numpy stacks."""
         self.random_image = False
@@ -279,7 +310,7 @@ class SyntheticCamera(CameraBase):
         else:
             self.random_image = True
 
-    def generate_new_frame(self):
+    def generate_new_frame(self) -> None:
         """Generate a synthetic image."""
         if not self.is_acquiring:
             return
@@ -305,7 +336,7 @@ class SyntheticCamera(CameraBase):
 
         self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
 
-    def get_new_frame(self):
+    def get_new_frame(self) -> List[int]:
         """Get frame from SyntheticCamera camera."""
 
         time.sleep(self.camera_exposure_time)
@@ -323,7 +354,13 @@ class SyntheticCamera(CameraBase):
         self.pre_frame_idx = self.current_frame_idx
         return frames
 
-    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024):
+    def set_ROI(
+        self,
+        roi_width: int = 2048,
+        roi_height: int = 2048,
+        center_x: int = 1024,
+        center_y: int = 1024,
+    ) -> None:
         """Change the size of the active region on the camera.
 
         Parameters
@@ -342,15 +379,17 @@ class SyntheticCamera(CameraBase):
         self.center_x = center_x
         self.center_y = center_y
 
-    def calculate_readout_time(self):
-        """Calculate duration of time needed to readout an image. Calculates the readout
-        time and maximum frame rate according to the camera configuration settings.
+    @staticmethod
+    def calculate_readout_time() -> float:
+        """Calculate duration of time needed to read out an image.
+
+        Calculates the readout time and maximum frame rate according to the camera
+        configuration settings.
 
         Returns
         -------
         readout_time : float
-            Duration of time needed to readout an image.
-
+            Duration of time needed to read out an image.
         """
         readout_time = 0.01  # 10 milliseconds.
         return readout_time

@@ -80,7 +80,7 @@ class CameraMapSettingPopup(PopUp):
         self.inputs = {}
 
         title = ttk.Label(self.content_frame, text="File: ", padding=(2, 5, 0, 0))
-        title.grid(row=0, column=0, sticky=(tk.NSEW))
+        title.grid(row=0, column=0, sticky=tk.NSEW)
 
         #: tk.StringVar: File name.
         self.file_name = tk.StringVar()
@@ -98,7 +98,7 @@ class CameraMapSettingPopup(PopUp):
         title = ttk.Label(self.content_frame, text="Camera: ", padding=(2, 5, 0, 0))
         #: tk.StringVar: Camera name.
         self.camera = tk.StringVar()
-        title.grid(row=0, column=3, sticky=(tk.NSEW))
+        title.grid(row=0, column=3, sticky=tk.NSEW)
         self.inputs["camera"] = ttk.OptionMenu(self.content_frame, self.camera)
         self.inputs["camera"].grid(
             row=0, column=4, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)

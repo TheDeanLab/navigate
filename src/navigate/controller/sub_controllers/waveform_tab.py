@@ -146,7 +146,7 @@ class WaveformTabController(GUIController):
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
         self.view.canvas.get_tk_widget().grid(
-            row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5, 5), pady=(5, 5)
+            row=5, column=0, columnspan=3, sticky=NSEW, padx=(5, 5), pady=(5, 5)
         )
 
     def plot_waveforms(self, event):

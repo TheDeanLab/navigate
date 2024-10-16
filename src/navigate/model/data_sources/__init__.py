@@ -65,7 +65,7 @@ def get_data_source(file_type: str):
 
         return TiffDataSource
 
-    elif (file_type == "H5") or file_type == ("N5"):
+    elif (file_type == "H5") or file_type == "N5":
         from .bdv_data_source import BigDataViewerDataSource
 
         return BigDataViewerDataSource

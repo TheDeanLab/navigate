@@ -100,7 +100,7 @@ def test_feature_config_popup(feature_name, args_name, args_value, tk_root):
         assert w.get() == str(args_value[i])
 
 
-@pytest.mark.parametrize("title", [("Add Feature List"), ("Edit Feature Parameters")])
+@pytest.mark.parametrize("title", ["Add Feature List", "Edit Feature Parameters"])
 def test_feature_list_popup(title, tk_root):
     feature_list_popup = FeatureListPopup(tk_root, title=title)
     tk_root.update()

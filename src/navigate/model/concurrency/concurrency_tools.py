@@ -161,7 +161,7 @@ class SharedNDArray(np.ndarray):
             self.strides,
             None,
         )
-        return (SharedNDArray, args)
+        return SharedNDArray, args
 
 
 class ResultThread(threading.Thread):

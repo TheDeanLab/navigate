@@ -406,7 +406,7 @@ class TonyWilson:
 
         applied_coefs = coef_arr + self.best_coefs
 
-        out_str += f"\tApply:\t[{' '.join([f'{c:.2f}' for c in (applied_coefs)])}]\n"
+        out_str += f"\tApply:\t[{' '.join([f'{c:.2f}' for c in applied_coefs])}]\n"
 
         # Update the mirror...
         self.mirror_controller.flat()
@@ -421,7 +421,7 @@ class TonyWilson:
         try:
             curr_mirror_coefs = self.mirror_controller.get_modal_coefs()[0]
             out_str += (
-                f"\tCoefs:\t[{' '.join([f'{c:.2f}' for c in (curr_mirror_coefs)])}]\n"
+                f"\tCoefs:\t[{' '.join([f'{c:.2f}' for c in curr_mirror_coefs])}]\n"
             )
         except Exception as e:
             print(e)

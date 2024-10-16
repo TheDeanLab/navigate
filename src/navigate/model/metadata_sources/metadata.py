@@ -248,7 +248,7 @@ class Metadata:
         tuple
             Voxel size
         """
-        return (self.dx, self.dy, self.dz)
+        return self.dx, self.dy, self.dz
 
     @property
     def shape(self) -> tuple:
@@ -259,7 +259,7 @@ class Metadata:
         tuple
             Shape as XYCZT
         """
-        return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
+        return self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t
 
 
 class XMLMetadata(Metadata):

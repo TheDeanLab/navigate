@@ -342,7 +342,7 @@ class AdaptiveOpticsPopup:
         canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=0, column=0, sticky=(tk.NSEW), padx=(5, 5), pady=(5, 5)
+            row=0, column=0, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
         )
 
         #: matplotlib.figure.Figure: Figure
@@ -358,7 +358,7 @@ class AdaptiveOpticsPopup:
         canvas = FigureCanvasTkAgg(self.fig_tw, master=self.tab_tw)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=0, column=0, sticky=(tk.NSEW), padx=(5, 5), pady=(5, 5)
+            row=0, column=0, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
         )
 
         camera_var = tk.StringVar()

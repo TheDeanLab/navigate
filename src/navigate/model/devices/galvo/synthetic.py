@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 # Third Party Imports
 
@@ -52,7 +52,7 @@ class SyntheticGalvo(GalvoBase):
     def __init__(
         self,
         microscope_name: str,
-        device_connection: Any,
+        device_connection: Optional[Any],
         configuration: Dict[str, Any],
         galvo_id: int = 0,
     ) -> None:

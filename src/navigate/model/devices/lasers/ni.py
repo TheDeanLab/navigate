@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+import traceback
 from typing import Any, Dict
 
 # Third Party Imports
@@ -234,3 +235,17 @@ class LaserNI(LaserBase):
                 self.laser_do_task.close()
         except DaqError as e:
             logger.exception(e)
+
+    def __del__(self):
+        """Delete the NI Task before exit."""
+        if self.laser_ao_task:
+            try:
+                self.laser_ao_task.close()
+            except Exception as e:
+                logger.exception(f"Error stopping task: {traceback.format_exc()}")
+
+        if self.laser_do_task:
+            try:
+                self.laser_do_task.close()
+            except Exception as e:
+                logger.exception(f"Error stopping task: {traceback.format_exc()}")

@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+import traceback
 from multiprocessing.managers import ListProxy
 import time
 from typing import Any, Dict
@@ -322,3 +323,12 @@ class GalvoNIStage(StageBase):
             self.ao_task.stop()
             self.ao_task.close()
             self.ao_task = None
+
+    def close(self) -> None:
+        """Close the Galvo stage."""
+        if self.ao_task:
+            try:
+                self.ao_task.stop()
+                self.ao_task.close()
+            except Exception:
+                logger.exception(f"Error stopping task: {traceback.format_exc()}")

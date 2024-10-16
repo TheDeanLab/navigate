@@ -32,6 +32,7 @@
 
 #  Standard Library Imports
 import logging
+import traceback
 from typing import Any, Dict
 
 # Third Party Imports
@@ -129,5 +130,9 @@ class GalvoNI(GalvoBase):
             task.write([0], auto_start=True)
             task.stop()
             task.close()
-        except Exception as e:
-            print(f"Galvo turn_off error: {e}")
+        except Exception:
+            logger.exception(f"Error stopping task: {traceback.format_exc()}")
+
+    def __del__(self):
+        """Close the GalvoNI at exit."""
+        self.turn_off()

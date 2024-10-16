@@ -80,6 +80,12 @@ class RemoteFocusNI(RemoteFocusBase):
         #: str: The board name.
         self.board_name = self.device_config["hardware"]["channel"].split("/")[0]
 
+    def __del__(self):
+        """Delete the RemoteFocusNI object.
+
+        Deletion of the NIDAQ task is handled by the NIDAQ object."""
+        pass
+
     def adjust(self, exposure_times, sweep_times, offset=None):
         """Adjust the waveform.
 

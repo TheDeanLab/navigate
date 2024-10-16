@@ -33,6 +33,7 @@
 #  Standard Library Imports
 import logging
 import time
+import traceback
 
 # Third Party Imports
 import nidaqmx
@@ -150,3 +151,12 @@ class DAQFilterWheel(FilterWheelBase):
         Sets the filter wheel to the home position and then closes the port.
         """
         pass
+
+    def __del__(self):
+        """Delete the DAQFilterWheel object."""
+        if self.filter_wheel_task:
+            try:
+                self.filter_wheel_task.stop()
+                self.filter_wheel_task.close()
+            except Exception:
+                logger.exception(f"Error stopping task: {traceback.format_exc()}")

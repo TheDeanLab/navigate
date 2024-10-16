@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+import traceback
 from typing import Any, Dict
 
 # Third Party Imports
@@ -88,7 +89,13 @@ class ShutterTTL(ShutterBase):
 
     def __del__(self):
         """Close the ShutterTTL at exit."""
-        self.shutter_task.close()
+        if self.shutter_task:
+            try:
+                self.shutter_task.stop()
+                self.shutter_task.close()
+            except Exception:
+                logger.exception(f"Error stopping task: {traceback.format_exc()}")
+
 
     def open_shutter(self):
         """Open the shutter"""

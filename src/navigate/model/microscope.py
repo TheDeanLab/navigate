@@ -99,11 +99,17 @@ class Microscope:
         #: obj: Camera object.
         self.camera = None
 
+        #: Any: Shutter device.
+        self.shutter = None
+
         #: dict: Dictionary of lasers.
         self.lasers = {}
 
         #: dict: Dictionary of galvanometers.
         self.galvo = {}
+
+        #: Any: Remote focus device.
+        self.remote_focus_device = None
 
         #: dict: Dictionary of filter_wheels
         self.filter_wheel = {}
@@ -981,16 +987,21 @@ class Microscope:
 
     def terminate(self) -> None:
         """Close hardware explicitly."""
+
         self.camera.close_camera()
+        del self.daq
 
-        for k in self.galvo:
-            self.galvo[k].turn_off()
+        for key in list(self.lasers.keys()):
+            del self.lasers[key]
 
-        try:
-            # Currently only for RemoteFocusEquipmentSolutions
-            self.remote_focus_device.close_connection()
-        except AttributeError:
-            pass
+        for key in list(self.galvo.keys()):
+            del self.galvo[key]
+
+        # filter wheels too?
+
+        del self.shutter
+
+        del self.remote_focus_device
 
         try:
             for stage, _ in self.stages_list:

@@ -87,15 +87,15 @@ class ASIFilterWheel(FilterWheelBase):
 
         Parameters
         ----------
-        device_connection : dict
-            Dictionary of device connections.
+        device_connection : TigerController
+            Communication object for the ASI Filter Wheel.
         device_config : dict
             Dictionary of device configuration parameters.
         """
 
         super().__init__(device_connection, device_config)
 
-        #: obj: ASI Tiger Controller object.
+        #: TigerController: ASI Tiger Controller object.
         self.filter_wheel = device_connection
 
         #: dict: Configuration dictionary.

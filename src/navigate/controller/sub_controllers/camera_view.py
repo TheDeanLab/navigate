@@ -101,7 +101,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         Parameters
         ----------
-        view : self.view.camera_waveform.camera_tab
+        view : tkinter.Frame
             The tkinter frame that contains the widgets.
         parent_controller : Controller
             The parent controller of the camera view controller.
@@ -1037,8 +1037,8 @@ class CameraViewController(BaseViewController):
 
         Parameters
         ----------
-        view : self.view.camera_waveform.camera_tab
-            The tkinter frame that contains the widgets.
+        view : CameraTab
+            The Camera tkinter frame that contains the widgets.
         parent_controller : Controller
             The parent controller of the camera view controller.
         """
@@ -1390,8 +1390,8 @@ class MIPViewController(BaseViewController):
 
         Parameters
         ----------
-        view : tkinter.Frame
-            The tkinter frame that contains the widgets.
+        view : MIPTab
+            The MIP tkinter frame that contains the widgets.
         parent_controller : Controller
             The parent controller of the camera view controller.
         """

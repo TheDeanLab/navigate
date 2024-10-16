@@ -72,7 +72,11 @@ class ZoomBase:
         #: float: the desired zoom setting
         self.zoomvalue = None
 
-    def __str__(self):
+    def __del__(self) -> None:
+        """Delete the ZoomBase object."""
+        pass
+
+    def __str__(self) -> str:
         """Return the string representation of the ZoomBase object."""
         return "ZoomBase"
 

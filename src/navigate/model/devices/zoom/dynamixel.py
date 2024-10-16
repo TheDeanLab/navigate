@@ -143,7 +143,10 @@ class DynamixelZoom(ZoomBase):
 
     def __del__(self):
         """Delete the DynamixelZoom Instance"""
-        self.dynamixel.closePort(self.port_num)
+        try:
+            self.dynamixel.closePort(self.port_num)
+        except Exception as e:
+            logger.exception(e)
 
     def set_zoom(self, zoom, wait_until_done=False):
         """Change the DynamixelZoom Servo.

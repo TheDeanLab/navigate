@@ -161,3 +161,8 @@ class LUDLFilterWheel(FilterWheelBase):
         logger.debug("LUDLFilterWheel - Closing the Filter Wheel Serial Port")
         self.set_filter(list(self.filter_dictionary.keys())[0])
         self.serial.close()
+
+    def __del__(self):
+        """Destructor for the LUDLFilterWheel class."""
+        if self.serial.is_open:
+            self.close()

@@ -108,3 +108,7 @@ class SyntheticFilterWheel(FilterWheelBase):
         Sets the filter wheel to the Empty-Alignment position and then closes the port.
         """
         pass
+
+    def __del__(self):
+        """Delete the SyntheticFilterWheel."""
+        pass

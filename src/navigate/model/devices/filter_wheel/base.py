@@ -32,6 +32,7 @@
 
 #  Standard Library Imports
 import logging
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -47,20 +48,20 @@ logger = logging.getLogger(p)
 class FilterWheelBase:
     """FilterWheelBase - Parent class for controlling filter wheels."""
 
-    def __init__(self, device_connection, device_config):
+    def __init__(self, device_connection: Any, device_config: Dict[str, Any]) -> None:
         """Initialize the FilterWheelBase class.
 
         Parameters
         ----------
-        device_connection : dict
-            Dictionary of device connections.
-        device_config : dict
+        device_connection : Any
+            The communication instance with the device.
+        device_config : Dict[str, Any]
             Dictionary of device configuration parameters.
         """
-        #: object: Device connection object.
+        #: Any: Device connection object.
         self.device_connection = device_connection
 
-        #: dict: Dictionary of device configuration parameters.
+        #: Dict[str, Any]: Dictionary of device configuration parameters.
         self.device_config = device_config
 
         #: dict: Dictionary of filters available on the filter wheel.
@@ -72,9 +73,13 @@ class FilterWheelBase:
         #: int: index of filter wheel
         self.filter_wheel_number = device_config["hardware"]["wheel_number"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return the string representation of the FilterWheelBase class."""
         return "FilterWheelBase"
+
+    def __del__(self) -> None:
+        """Destructor for the FilterWheelBase class."""
+        pass
 
     def check_if_filter_in_filter_dictionary(self, filter_name: str) -> bool:
         """Checks if the filter designation (string) given exists in the

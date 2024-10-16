@@ -149,9 +149,11 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
 
     def __del__(self):
         """Close the RemoteFocusEquipmentSolutions Class"""
-        logger.debug("Closing RemoteFocusEquipmentSolutions Serial Port")
-        self.close_connection()
-
+        try:
+            self.send_command("k0\r")
+            self.serial.close()
+        except Exception:
+            pass
     def read_bytes(self, num_bytes: int) -> bytes:
         """Read the specified number of bytes from RemoteFocusEquipmentSolutions.
 
@@ -222,13 +224,6 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
                 "Error in communicating with Voice Coil via COMPORT", self.comport
             )
 
-    def close_connection(self):
-        """Close RemoteFocusEquipmentSolutions class"""
-        try:
-            self.send_command("k0\r")
-            self.serial.close()
-        except Exception:
-            pass
 
 
 if __name__ == "__main__":

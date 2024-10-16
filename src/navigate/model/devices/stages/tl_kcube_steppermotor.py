@@ -151,8 +151,8 @@ class TLKSTStage(StageBase):
         try:
             self.stop()
             self.kst_controller.KST_Close(self.serial_number)
-        except AttributeError:
-            pass
+        except Exception as e:
+            logger.exception(e)
 
     def report_position(self):
         """

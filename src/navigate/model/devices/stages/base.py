@@ -121,6 +121,10 @@ class StageBase:
         #: bool: Whether the stage has limits enabled or not. Default is True.
         self.stage_limits = True
 
+    def __del__(self):
+        """Destructor for the StageBase class."""
+        pass
+
     def __str__(self):
         """Return a string representation of the stage."""
         return "StageBase"

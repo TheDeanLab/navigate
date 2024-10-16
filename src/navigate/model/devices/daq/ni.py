@@ -110,8 +110,23 @@ class NIDAQ(DAQBase):
 
     def __del__(self) -> None:
         """Destructor."""
-        if self.camera_trigger_task is not None:
-            self.stop_acquisition()
+        for task in [self.camera_trigger_task, self.master_trigger_task, self.laser_switching_task]:
+            if task:
+                try:
+                    task.stop()
+                    task.close()
+                except Exception:
+                    logger.exception(f"Error stopping task: {traceback.format_exc()}")
+
+        if self.analog_output_tasks:
+            for k, task in self.analog_output_tasks.items():
+                if task:
+                    try:
+                        task.stop()
+                        task.close()
+                    except Exception:
+                        logger.exception(f"Error stopping task: {traceback.format_exc()}")
+
 
     def set_external_trigger(self, external_trigger=None) -> None:
         """Set trigger mode.
@@ -220,7 +235,7 @@ class NIDAQ(DAQBase):
             return False
         # Create a digital input task and wait until either a trigger is detected,
         # or the timeout is exceeded. If timeout < 0, wait forever...
-        external_trigger_task = nidaqmx.Task("WaitDigitalEdge")
+        external_trigger_task = nidaqmx.Task()
         external_trigger_task.di_channels.add_di_chan(trigger_channel)
 
         total_wait_time = 0.0

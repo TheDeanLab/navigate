@@ -111,7 +111,7 @@ class TLKIMStage(StageBase):
         self.kim_axes = list(self.axes_mapping.values())
 
         if device_connection is not None:
-            #: object: Thorlabs KIM Stage controller
+            #: navigate.model.devices.APIs.thorlabs.kcube_inertial: Thorlabs KIM Stage
             self.kim_controller = device_connection
 
         device_config = configuration["configuration"]["microscopes"][microscope_name][
@@ -128,8 +128,8 @@ class TLKIMStage(StageBase):
         try:
             self.stop()
             self.kim_controller.KIM_Close(self.serial_number)
-        except AttributeError:
-            pass
+        except Exception as e:
+            logger.exception(e)
 
     def report_position(self):
         """Report the position of the stage.

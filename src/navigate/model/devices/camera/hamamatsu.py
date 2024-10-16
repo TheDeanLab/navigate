@@ -143,7 +143,7 @@ class HamamatsuBase(CameraBase):
 
     def __del__(self):
         """Delete HamamatsuOrca class."""
-        pass
+        self.close_camera()
 
     @property
     def serial_number(self):

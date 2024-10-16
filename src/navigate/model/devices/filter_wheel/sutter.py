@@ -285,7 +285,7 @@ class SutterFilterWheel(FilterWheelBase):
             )
         return self.serial.read(num_bytes)
 
-    def close(self):
+    def close(self) -> None:
         """Close the SutterFilterWheel serial port.
 
         Sets the filter wheel to the Empty-Alignment position and then closes the port.
@@ -293,3 +293,8 @@ class SutterFilterWheel(FilterWheelBase):
         logger.debug("SutterFilterWheel - Closing the Filter Wheel Serial Port")
         self.set_filter(list(self.filter_dictionary.keys())[0])
         self.serial.close()
+
+    def __del__(self) -> None:
+        """Delete the SutterFilterWheel class."""
+        if self.serial.is_open():
+            self.close()

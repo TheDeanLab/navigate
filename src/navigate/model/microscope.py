@@ -988,27 +988,30 @@ class Microscope:
     def terminate(self) -> None:
         """Close hardware explicitly."""
 
+        # TODO: I get a DCAM warning if I call the __del__ method.
         self.camera.close_camera()
+
         del self.daq
 
-        for key in list(self.lasers.keys()):
-            del self.lasers[key]
+        for key in list(self.filter_wheel.keys()):
+            del self.filter_wheel[key]
 
         for key in list(self.galvo.keys()):
             del self.galvo[key]
 
-        # filter wheels too?
+        for key in list(self.lasers.keys()):
+            del self.lasers[key]
 
-        del self.shutter
+        # mirrors?
 
         del self.remote_focus_device
 
-        try:
-            for stage, _ in self.stages_list:
-                stage.close()
-        except Exception as e:
-            print(f"Stage delete failure: {e}")
-        pass
+        del self.shutter
+
+        for stage, _ in self.stages_list:
+            del stage
+
+        # zoom?
 
     def run_command(self, command: str, *args) -> None:
         """Run command.

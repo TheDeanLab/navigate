@@ -170,6 +170,10 @@ class ASIFilterWheel(FilterWheelBase):
             logger.debug("ASI Filter Wheel - Closing Device.")
             self.filter_wheel.disconnect_from_serial()
 
+    def __del__(self):
+        """Destructor for the ASIFilterWheel class."""
+        self.close()
+
 
 @log_initialization
 class ASICubeSlider(FilterWheelBase):

@@ -145,14 +145,14 @@ class DAQFilterWheel(FilterWheelBase):
             except DaqError as e:
                 logger.debug(e)
 
-    def close(self):
+    def close(self) -> None:
         """Close the DAQ Filter Wheel
 
         Sets the filter wheel to the home position and then closes the port.
         """
         pass
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the DAQFilterWheel object."""
         if self.filter_wheel_task:
             try:

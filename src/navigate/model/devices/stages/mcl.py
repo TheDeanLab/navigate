@@ -109,6 +109,13 @@ class MCLStage(StageBase):
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
 
+    def __del__(self):
+        """Close the connection to the stage."""
+        try:
+            self.mcl_controller.MCL_ReleaseHandle(self.handle)
+        except self.mcl_controller.MadlibError as e:
+            logger.exception(f"{e}")
+
     def report_position(self):
         """Report the position of the stage.
 

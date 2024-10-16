@@ -169,14 +169,14 @@ class ASIStage(StageBase):
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the ASI Stage connection."""
         try:
             if self.ms2000_controller is not None:
                 self.ms2000_controller.disconnect_from_serial()
                 logger.debug("ASI stage connection closed")
         except (AttributeError, BaseException) as e:
-            logger.error("ASI Stage Exception", e)
+            logger.exception("ASI Stage Exception", e)
             raise e
 
     def get_axis_position(self, axis):

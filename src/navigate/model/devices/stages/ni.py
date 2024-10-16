@@ -332,3 +332,7 @@ class GalvoNIStage(StageBase):
                 self.ao_task.close()
             except Exception:
                 logger.exception(f"Error stopping task: {traceback.format_exc()}")
+
+    def __del__(self) -> None:
+        """Close the Galvo stage."""
+        self.close()

@@ -57,7 +57,7 @@ class MirrorBase:
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
         """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
@@ -81,3 +81,7 @@ class MirrorBase:
     def __str__(self):
         """Return the string representation of the mirror."""
         return "MirrorBase"
+
+    def __del__(self) -> None:
+        """Delete the MirrorBase class."""
+        pass

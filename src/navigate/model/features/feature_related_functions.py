@@ -42,7 +42,6 @@ from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from navigate.model.features.autofocus import Autofocus  # noqa
 from navigate.model.features.adaptive_optics import TonyWilson  # noqa
 from navigate.model.features.common_features import (
-    ChangeResolution,  # noqa
     Snap,  # noqa
     WaitToContinue,  # noqa
     WaitForExternalTrigger,  # noqa
@@ -52,7 +51,6 @@ from navigate.model.features.common_features import (
     StackPause,  # noqa
     ZStackAcquisition,  # noqa
     FindTissueSimple2D,  # noqa
-    SetCameraParameters,  # noqa
 )
 from navigate.model.features.image_writer import ImageWriter  # noqa
 from navigate.model.features.restful_features import IlastikSegmentation  # noqa
@@ -66,6 +64,11 @@ from navigate.model.features.remove_empty_tiles import (
     DetectTissueInStackAndRecord,  # noqa
     RemoveEmptyPositions,  # noqa
 )
+from navigate.model.features.update_setting import (
+    ChangeResolution,  # noqa
+    SetCameraParameters,  # noqa
+)
+
 from navigate.tools.file_functions import load_yaml_file
 from navigate.tools.common_functions import load_module_from_file
 

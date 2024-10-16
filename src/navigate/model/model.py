@@ -47,7 +47,6 @@ from navigate.model.features.adaptive_optics import TonyWilson
 from navigate.model.features.image_writer import ImageWriter
 from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from navigate.model.features.common_features import (
-    ChangeResolution,
     Snap,
     ZStackAcquisition,
     FindTissueSimple2D,
@@ -270,16 +269,6 @@ class Model:
 
         #: list: List of features.
         self.feature_list = []
-
-        # automatically switch resolution
-        self.feature_list.append(
-            [
-                {"name": ChangeResolution, "args": ("Mesoscale", "1x")},
-                {"name": Snap},
-            ]
-        )
-        # z stack acquisition
-        self.feature_list.append([{"name": ZStackAcquisition}])
 
         # threshold and tile
         self.feature_list.append([{"name": FindTissueSimple2D}])

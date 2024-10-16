@@ -40,7 +40,6 @@ import sys
 import os
 import time
 import platform
-import reprlib
 
 # Third Party Imports
 
@@ -64,6 +63,7 @@ from navigate.controller.sub_controllers import (
     FeaturePopupController,
     MenuController,
     PluginsController,
+    HistogramController,
     # MicroscopePopupController,
     # AdaptiveOpticsPopupController,
 )
@@ -97,6 +97,7 @@ logger = logging.getLogger(p)
 
 class Controller:
     """Navigate Controller"""
+
     def __init__(
         self,
         root,
@@ -198,8 +199,10 @@ class Controller:
         verify_waveform_constants(self.manager, self.configuration)
 
         total_ram, available_ram = get_ram_info()
-        logger.info(f"Total RAM: {total_ram / 1024**3:.2f} GB. "
-                    f"Available RAM: {available_ram / 1024**3:.2f} GB.")
+        logger.info(
+            f"Total RAM: {total_ram / 1024**3:.2f} GB. "
+            f"Available RAM: {available_ram / 1024**3:.2f} GB."
+        )
 
         #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
@@ -225,7 +228,7 @@ class Controller:
         self.event_listeners = {}
 
         #: AcquireBarController: Acquire Bar Sub-Controller.
-        self.acquire_bar_controller = AcquireBarController(self.view.acqbar, self)
+        self.acquire_bar_controller = AcquireBarController(self.view.acquire_bar, self)
 
         #: ChannelsTabController: Channels Tab Sub-Controller.
         self.channels_tab_controller = ChannelsTabController(
@@ -240,6 +243,10 @@ class Controller:
         #: CameraViewController: Camera View Tab Sub-Controller.
         self.camera_view_controller = CameraViewController(
             self.view.camera_waveform.camera_tab, self
+        )
+
+        self.histogram_controller = HistogramController(
+            self.view.camera_waveform.camera_tab.histogram, self
         )
 
         #: MIPSettingController: MIP Settings Tab Sub-Controller.
@@ -365,7 +372,7 @@ class Controller:
 
     def update_acquire_control(self):
         """Update the acquire control based on the current experiment parameters."""
-        self.view.acqbar.stop_stage.config(
+        self.view.acquire_bar.stop_stage.config(
             command=self.stage_controller.stop_button_handler
         )
 
@@ -551,12 +558,14 @@ class Controller:
             height : int
                 Height of the GUI.
             """
-            if width < 1200 or height < 600:
+            if width < 1300 or height < 800:
                 return
             self.view.camera_waveform["width"] = (
-                width - self.view.frame_left.winfo_width() - 81
-            )
-            self.view.camera_waveform["height"] = height - 110
+                width - self.view.left_frame.winfo_width() - 35
+            )  #
+            self.view.camera_waveform["height"] = height - 117
+
+            print("camera_waveform height", self.view.camera_waveform["height"])
 
         if event.widget != self.view.scroll_frame:
             return
@@ -1081,11 +1090,14 @@ class Controller:
                 )
                 self.execute("stop_acquire")
 
-            # Display the Image in the View
+            # Display the image and update the histogram
             self.camera_view_controller.try_to_display_image(
                 image=self.data_buffer[image_id]
             )
             self.mip_setting_controller.try_to_display_image(
+                image=self.data_buffer[image_id]
+            )
+            self.histogram_controller.populate_histogram(
                 image=self.data_buffer[image_id]
             )
             images_received += 1
@@ -1212,7 +1224,9 @@ class Controller:
                 )
                 camera_view_controller.microscope_name = microscope_name
                 popup_window.popup.bind("<Configure>", camera_view_controller.resize)
-                self.additional_microscopes[microscope_name]["popup_window"] = popup_window
+                self.additional_microscopes[microscope_name][
+                    "popup_window"
+                ] = popup_window
                 self.additional_microscopes[microscope_name][
                     "camera_view_controller"
                 ] = camera_view_controller
@@ -1226,7 +1240,9 @@ class Controller:
                     ),
                 )
 
-            self.additional_microscopes[microscope_name]["show_img_pipe"] = show_img_pipe
+            self.additional_microscopes[microscope_name][
+                "show_img_pipe"
+            ] = show_img_pipe
             self.additional_microscopes[microscope_name]["data_buffer"] = data_buffer
 
             # start thread
@@ -1263,7 +1279,9 @@ class Controller:
         # destroy the popup window
         if destroy_window:
             self.additional_microscopes[microscope_name]["popup_window"].popup.dismiss()
-            self.additional_microscopes[microscope_name]["camera_view_controller"] = None
+            self.additional_microscopes[microscope_name][
+                "camera_view_controller"
+            ] = None
             del self.additional_microscopes[microscope_name]
 
     def move_stage(self, pos_dict):

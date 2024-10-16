@@ -59,7 +59,7 @@ class TestAcquireBarController:
         c = dummy_controller
         v = dummy_controller.view
 
-        self.acquire_bar_controller = AcquireBarController(v.acqbar, c)
+        self.acquire_bar_controller = AcquireBarController(v.acquire_bar, c)
         self.acquire_bar_controller.populate_experiment_values()
 
     def test_init(self):

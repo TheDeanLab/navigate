@@ -414,6 +414,9 @@ class SynchronizedThreadPool:
         if event == "exception":
             if os.getenv("GITHUB_ACTIONS") == "true":
                 return
+
+            # Silence traceback to avoid printing to console.
+            sys.tracebacklimit = 0
             raise SystemExit()
         return self.localtrace
 

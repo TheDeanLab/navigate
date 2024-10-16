@@ -67,6 +67,7 @@ from navigate.model.features.remove_empty_tiles import (
 from navigate.model.features.update_setting import (
     ChangeResolution,  # noqa
     SetCameraParameters,  # noqa
+    UpdateExperimentSetting, # noqa
 )
 
 from navigate.tools.file_functions import load_yaml_file

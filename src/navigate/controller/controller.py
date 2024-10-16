@@ -524,7 +524,7 @@ class Controller:
             self.channels_tab_controller.is_multiposition_val.set(False)
 
         # TODO: validate experiment dict
-
+        self.channels_tab_controller.update_experiment_values()
         warning_message += self.channels_tab_controller.verify_experiment_values()
 
         # additional microscopes

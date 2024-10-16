@@ -32,6 +32,7 @@
 
 # Standard library imports
 import logging
+from functools import reduce
 
 # Third party imports
 
@@ -127,6 +128,8 @@ class ChangeResolution:
         # prepare active microscope
         waveform_dict = self.model.active_microscope.prepare_acquisition()
         self.model.event_queue.put(("waveform", waveform_dict))
+        # prepare channel
+        self.model.active_microscope.prepare_next_channel()
         # resume data thread
         self.model.resume_data_thread()
         return True
@@ -263,6 +266,61 @@ class SetCameraParameters:
         waveform_dict = self.model.active_microscope.prepare_acquisition()
         self.model.event_queue.put(("waveform", waveform_dict))
         self.model.event_queue.put(("display_camera_parameters", updated_value))
+        # prepare channel
+        self.model.active_microscope.prepare_next_channel()
+        # resume data thread
+        self.model.resume_data_thread()
+        return True
+
+    def cleanup(self):
+        self.model.resume_data_thread()
+
+
+class UpdateExperimentSetting:
+
+    def __init__(self, model, experiment_parameters={}):
+        self.model = model
+
+        #: dict: A dictionary defining the configuration for the resolution change
+        self.config_table = {
+            "signal": {"main": self.signal_func, "cleanup": self.cleanup},
+            "node": {"device_related": True},
+        }
+
+        self.experiment_parameters = experiment_parameters
+
+    def signal_func(self):
+        """Perform actions to change the resolution mode and update the active
+         microscope.
+
+        This method carries out actions to change the resolution mode of the microscope
+         by reconfiguring the microscope settings, updating the active microscope, and
+         resuming data acquisition.
+
+        Returns:
+        -------
+        bool
+            A boolean value indicating the success of the resolution change process.
+        """
+        if type(self.experiment_parameters) != dict:
+            return False
+        # pause data thread
+        self.model.pause_data_thread()
+        # end active microscope
+        self.model.active_microscope.end_acquisition()
+
+        # update experiment values
+        for k, v in self.experiment_parameters.items():
+            try:
+                parameters = k.split(".")
+                config_ref = reduce(lambda pre, n: f"{pre}['{n}']", parameters, "")
+                exec(f"self.model.configuration['experiment']{config_ref} = {v}")
+            except Exception as e:
+                logger.error(f"*** parameter {k} failed to update to value {v}")
+                logger.error(e)
+        # set parameters and prepare active microscope
+        waveform_dict = self.model.active_microscope.prepare_acquisition()
+        self.model.event_queue.put(("waveform", waveform_dict))
         # prepare channel
         self.model.active_microscope.prepare_next_channel()
         # resume data thread

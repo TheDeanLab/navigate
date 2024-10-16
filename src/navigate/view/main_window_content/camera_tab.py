@@ -129,7 +129,7 @@ class CameraMode(ttk.Labelframe):
         # different frame, these can be grouped together
         #: ttk.Frame: The parent frame for any widgets you add.
         content_frame = ttk.Frame(self)
-        content_frame.grid(row=0, column=0, sticky=(tk.NSEW), pady=5)
+        content_frame.grid(row=0, column=0, sticky=tk.NSEW, pady=5)
 
         # Formatting
         tk.Grid.columnconfigure(content_frame, "all", weight=1)
@@ -232,7 +232,7 @@ class FramerateInfo(ttk.LabelFrame):
         #  Holds widgets, this is done in case more widgets are to be
         #  added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
-        content_frame.grid(row=0, column=0, sticky=(tk.NSEW), pady=5, padx=5)
+        content_frame.grid(row=0, column=0, sticky=tk.NSEW, pady=5, padx=5)
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)

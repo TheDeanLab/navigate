@@ -422,7 +422,7 @@ class TestClass:
         return getattr(self, attr, None)
 
     def mirror(self, *args, **kwargs):
-        return (args, kwargs)
+        return args, kwargs
 
     def black_hole(self, *args, **kwargs):
         return None

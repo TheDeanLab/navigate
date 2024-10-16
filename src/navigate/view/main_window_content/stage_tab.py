@@ -170,13 +170,13 @@ class StageControlTab(tk.Frame):
         tk.Grid.rowconfigure(self.stop_frame, "all", weight=1)
 
         # Griding out frames
-        self.position_frame.grid(row=0, column=0, sticky=(tk.NSEW), padx=3, pady=3)
-        self.xy_frame.grid(row=0, column=1, sticky=(tk.NSEW), padx=3, pady=3)
-        self.z_frame.grid(row=0, column=2, sticky=(tk.NSEW), padx=3, pady=3)
-        self.f_frame.grid(row=1, column=0, sticky=(tk.NSEW), padx=3, pady=3)
-        self.theta_frame.grid(row=1, column=2, sticky=(tk.NSEW), padx=3, pady=3)
-        # self.goto_frame.grid(row=0, column=4, sticky=(tk.NSEW))
-        self.stop_frame.grid(row=1, column=1, sticky=(tk.NSEW), padx=3, pady=3)
+        self.position_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        self.xy_frame.grid(row=0, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        self.z_frame.grid(row=0, column=2, sticky=tk.NSEW, padx=3, pady=3)
+        self.f_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        self.theta_frame.grid(row=1, column=2, sticky=tk.NSEW, padx=3, pady=3)
+        # self.goto_frame.grid(row=0, column=4, sticky=tk.NSEW)
+        self.stop_frame.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
 
         # example hover description
         self.xy_frame.up_y_btn.hover.setdescription(

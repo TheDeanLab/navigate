@@ -221,10 +221,10 @@ class DetectTissueInStack:
             self.current_f_pos = self.current_f_pos + f_pos_range / 2
         else:
             #: float: The Z stage step size.
-            self.z_step = (z_pos_range) / (self.planes - 1)
+            self.z_step = z_pos_range / (self.planes - 1)
 
             #: float: The F stage step size.
-            self.f_step = (f_pos_range) / (self.planes - 1)
+            self.f_step = f_pos_range / (self.planes - 1)
 
         #: int: The current scan number.
         self.scan_num = 0

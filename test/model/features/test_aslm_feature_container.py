@@ -254,7 +254,7 @@ def print_feature_list(feature_list):
             if "args" in node:
                 temp.append(node["args"])
             else:
-                temp.append((node["name"].__name__))
+                temp.append(node["name"].__name__)
         if type(features) is tuple:
             temp = tuple(temp)
         result.append(temp)

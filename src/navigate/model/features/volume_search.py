@@ -597,7 +597,7 @@ class VolumeSearch3D:
         microscope_state_config["step_size"] = self.z_step
         microscope_state_config["number_z_steps"] = z_range * z_step // self.z_step
 
-        self.model.logger.info(f"New Z range would be {microscope_state_config["end_position"]}"
+        self.model.logger.info(f"New Z range would be {microscope_state_config['end_position']}"
                                f" with step_size {self.z_step}")
 
         self.model.image_writer.initialize_saving(sub_dir=str(self.target_resolution))

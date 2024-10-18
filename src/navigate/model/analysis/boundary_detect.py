@@ -32,13 +32,13 @@
 # Standard library imports
 import math
 from typing import Optional
+from itertools import product
 
 # Third party imports
 from skimage import filters
 from skimage.transform import downscale_local_mean
-from skimage.measure import label
-from skimage.segmentation import find_boundaries
-from scipy.ndimage import binary_fill_holes
+from skimage import measure
+from scipy.ndimage import median_filter, binary_fill_holes
 
 import numpy as np
 import numpy.typing as npt
@@ -452,18 +452,120 @@ def map_boundary(boundary, direction=True):
     return result
 
 
-def find_cell_boundary_3d(z_stack_image, threshold_value):
+def find_cell_boundary_3d(z_stack_image):
+    """A default label volume image function
 
-    z, x, y = z_stack_image.shape
-    binary_images = []
-    
-    for i in range(z):
-        thresh_img = z_stack_image[i] > threshold_value
-        binary_images.append(thresh_img.astype(np.uint8))
+    Parameters
+    ----------
+    z_stack_image : ndarray
+        A 3d array image data
 
-    filled_images = binary_fill_holes(binary_images)
-    cell_labels = label(filled_images)
-    boundaries = find_boundaries(cell_labels > 0, connectivity=1)
+    Returns
+    -------
+    labels : ndarray
+        Labeled array
+    """
+    denoised_image = median_filter(z_stack_image, size=3)
+    thresholded_image = denoised_image > filters.threshold_otsu(denoised_image)
+    filled_images = binary_fill_holes(thresholded_image)
+    cell_labels = measure.label(filled_images)
 
-    return boundaries
-        
+    return cell_labels
+
+
+def map_labels(
+    labeled_image,
+    position,
+    z_start,
+    z_step,
+    current_pixel_size,
+    current_image_width,
+    current_image_height,
+    target_pixel_size,
+    target_image_width,
+    target_image_height,
+    overlap=0.05,
+):
+    """Map labels to positions
+
+    Parameters
+    ----------
+    labeled_image : ndarray
+        Labeled image data
+    position : array[int]
+        position of x, y, z, theta, f
+    z_start : float
+        Z start position
+    z_step : float
+        step of Z
+    current_pixel_size : float
+        Current camera pixel size
+    current_image_width : int
+        Current image width
+    current_image_height : int
+        Current image height
+    target_pixel_size : float
+        Target camera pixel size
+    target_image_width : int
+        Target image width
+    target_image_height : int
+        Target image height
+    overlap : float
+        Overlap ratio
+
+    Returns
+    -------
+    z_range : int
+        The maximum number of z steps
+    positions : array
+        Array of positions
+    """
+    if target_pixel_size >= current_pixel_size:
+        return 0, [position]
+    if overlap < 0:
+        overlap = 0
+
+    target_num = np.max(labeled_image)
+    position_table = []
+    x, y, z, theta, f = position
+    center_x = current_image_width // 2
+    center_y = current_image_height // 2
+
+    x_pixel = int(target_image_width * target_pixel_size / current_pixel_size)
+    y_pixel = int(target_image_height * target_pixel_size / current_pixel_size)
+
+    regionprops = measure.regionprops(labeled_image)
+    z_range = 1
+
+    for i in range(target_num):
+        min_z, min_y, min_x, max_z, max_y, max_x = regionprops[i].bbox
+
+        num_x = math.ceil((max_x - min_x) / (x_pixel * (1 - overlap))) + 1
+        shift_x = (num_x * x_pixel - (max_x - min_x)) // 2
+
+        num_y = math.ceil((max_y - min_y) / (y_pixel * (1 - overlap))) + 1
+        shift_y = (num_y * y_pixel - (max_y - min_y)) // 2
+
+        z_range = max(z_range, (max_z - min_z))
+
+        min_x -= shift_x
+        min_y -= shift_y
+
+        z_pos = z + z_start + min_z * z_step
+
+        x_start = x + (min_x + x_pixel / 2 - center_x) * current_pixel_size
+        x_positions = [x_start]
+        for _ in range(1, num_x):
+            x_positions.append(x_start + (x_pixel * (1 - overlap) * current_pixel_size))
+
+        y_start = y + (min_y + y_pixel / 2 - center_y) * current_pixel_size
+        y_positions = [y_start]
+        for _ in range(1, num_y):
+            y_positions.append(y_start + (y_pixel * (1 - overlap) * current_pixel_size))
+
+        position_table += [
+            [x_pos, y_pos] + [z_pos, theta, f]
+            for x_pos, y_pos in product(x_positions, y_positions)
+        ]
+
+    return z_range, position_table

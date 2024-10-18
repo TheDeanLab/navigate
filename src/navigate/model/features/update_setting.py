@@ -128,6 +128,7 @@ class ChangeResolution:
         # prepare active microscope
         waveform_dict = self.model.active_microscope.prepare_acquisition()
         self.model.event_queue.put(("waveform", waveform_dict))
+        self.model.frame_id = 0
         # prepare channel
         self.model.active_microscope.prepare_next_channel()
         # resume data thread
@@ -266,6 +267,7 @@ class SetCameraParameters:
         waveform_dict = self.model.active_microscope.prepare_acquisition()
         self.model.event_queue.put(("waveform", waveform_dict))
         self.model.event_queue.put(("display_camera_parameters", updated_value))
+        self.model.frame_id = 0
         # prepare channel
         self.model.active_microscope.prepare_next_channel()
         # resume data thread
@@ -321,6 +323,7 @@ class UpdateExperimentSetting:
         # set parameters and prepare active microscope
         waveform_dict = self.model.active_microscope.prepare_acquisition()
         self.model.event_queue.put(("waveform", waveform_dict))
+        self.model.frame_id = 0
         # prepare channel
         self.model.active_microscope.prepare_next_channel()
         # resume data thread

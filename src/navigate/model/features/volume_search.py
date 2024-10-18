@@ -36,6 +36,7 @@ from navigate.model.analysis.boundary_detect import (
     binary_detect,
     map_boundary,
     find_cell_boundary_3d,
+    map_labels,
 )
 import numpy as np
 
@@ -465,14 +466,15 @@ class VolumeSearch:
 
 
 class VolumeSearch3D:
-
     def __init__(
         self,
         model,
         target_resolution="Nanoscale",
         target_zoom="N/A",
-        threshold_value=462,
-        analysis_function=None
+        position_id=0,
+        z_step_size=0.1,
+        overlap=0.5,
+        analysis_function=None,
     ):
         """Initialize VolumeSearch
 
@@ -485,14 +487,14 @@ class VolumeSearch3D:
         target_zoom : str
             Resolution of microscope (target_resolution) to use for tiled imaging
             of tissue
-        flipx : bool
-            Flip the direction in which new tiles are added.
-        flipy : bool
-            Flip the direction in which new tiles are added.
+        position_id : int
+            The index of position in multiposition table
+        z_step_size : float
+            Target z step size
         overlap : float
-            Value between 0 and 1 indicating percent overlap of tiles.
-        debug : bool
-            If True, save debug images to disk.
+            The overlap ratio
+        analysis_function : callable
+            An analysis function return a labeled object
         """
 
         #: navigate.model.model.Model: Navigate Model
@@ -504,11 +506,19 @@ class VolumeSearch3D:
         #: str: Resolution of microscope (target_resolution) to use for tiled imaging
         self.target_zoom = target_zoom
 
-        #: int: threshold value
-        self.threshold_value = threshold_value
+        #: int: The index of position
+        self.position_id = position_id
+
+        #: float: The Z step size
+        self.z_step = z_step_size
+
+        #: float: The overlap ratio
+        self.overlap = overlap
 
         #: function: analysis function
-        self.analysis_function = analysis_function if analysis_function else find_cell_boundary_3d
+        self.analysis_function = (
+            analysis_function if analysis_function else find_cell_boundary_3d
+        )
 
         #: dict: Feature configuration
         self.config_table = {
@@ -520,28 +530,79 @@ class VolumeSearch3D:
 
     def data_func(self, frame_ids):
 
-        self.model.logger.debug("Starting 3D Volume Search")
+        self.model.logger.info("Starting 3D Volume Search")
 
-        z_stack_data = self.model.image_writer.data_source.get_data()
-        # boundaries = self.analysis_function(z_stack_data, self.threshold_value)
+        microscope_state_config = self.model.configuration["experiment"][
+            "MicroscopeState"
+        ]
 
-        # TODO: map boundaries to positions
-        # TODO: remove this, it's used for feature pipeline tests.
-        positions = [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]
+        if self.position_id > microscope_state_config["multiposition_count"]:
+            self.position_id = 0
+
+        z_stack_data = self.model.image_writer.data_source.get_data(
+            position=self.position_id
+        )
+        labeled_image = self.analysis_function(z_stack_data)
+
+        # map labeled cells
+        z_start = microscope_state_config["start_position"]
+        z_step = microscope_state_config["step_size"]
+        position = self.model.configuration["experiment"]["MultiPositions"][
+            self.position_id
+        ]
+        current_microscope_name = self.model.active_microscope_name
+        current_zoom_value = microscope_state_config["zoom"]
+        current_pixel_size = self.model.configuration["configuration"]["microscopes"][
+            current_microscope_name
+        ]["zoom"]["pixel_size"][current_zoom_value]
+        current_image_width = self.model.configuration["experiment"][
+            "CameraParameters"
+        ][current_microscope_name]["img_x_pixels"]
+        current_image_height = self.model.configuration["experiment"][
+            "CameraParameters"
+        ][current_microscope_name]["img_y_pixels"]
+
+        target_pixel_size = self.model.configuration["configuration"]["microscopes"][
+            self.target_resolution
+        ]["zoom"]["pixel_size"][self.target_zoom]
+        target_image_width = self.model.configuration["experiment"]["CameraParameters"][
+            self.target_resolution
+        ]["img_x_pixels"]
+        target_image_height = self.model.configuration["experiment"][
+            "CameraParameters"
+        ][self.target_resolution]["img_y_pixels"]
+
+        z_range, positions = map_labels(
+            labeled_image,
+            position,
+            z_start,
+            z_step,
+            current_pixel_size,
+            current_image_width,
+            current_image_height,
+            target_pixel_size,
+            target_image_width,
+            target_image_height,
+            overlap=self.overlap,
+        )
 
         self.model.event_queue.put(("multiposition", positions))
         self.model.configuration["experiment"]["MultiPositions"] = positions
-        self.model.configuration["experiment"]["MicroscopeState"][
-            "multiposition_count"
-        ] = len(positions)
+        microscope_state_config["multiposition_count"] = len(positions)
         if len(positions) > 0:
-            self.model.configuration["experiment"]["MicroscopeState"][
-                "is_multiposition"
-            ] = True
+            microscope_state_config["is_multiposition"] = True
+
+        microscope_state_config["start_position"] = 0
+        microscope_state_config["end_position"] = z_range * z_step
+        microscope_state_config["step_size"] = self.z_step
+        microscope_state_config["number_z_steps"] = z_range * z_step // self.z_step
+
+        self.model.logger.info(f"New Z range would be {microscope_state_config["end_position"]}"
+                               f" with step_size {self.z_step}")
 
         self.model.image_writer.initialize_saving(sub_dir=str(self.target_resolution))
-        
-        self.model.logger.debug(f"Volume Search 3D completed!")
+
+        self.model.logger.info(f"Volume Search 3D completed!")
 
     def cleanup(self):
         pass

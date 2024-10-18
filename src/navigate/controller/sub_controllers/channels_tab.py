@@ -799,6 +799,12 @@ class ChannelsTabController(GUIController):
 
         self.show_verbose_info("Received command from child", command, args)
 
+    def update_experiment_values(self):
+        """Update experiment values"""
+        self.channel_setting_controller.update_experiment_values()
+        self.update_z_steps()
+        
+
     def verify_experiment_values(self):
         """Verify channel tab settings and return warning info
 

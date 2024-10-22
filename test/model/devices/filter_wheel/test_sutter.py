@@ -167,7 +167,7 @@ class TestSutterFilterWheel(unittest.TestCase):
 
     def test_exit(self):
         self.mock_device_connection.reset_mock()
-        self.filter_wheel.__exit__()
+        del self.filter_wheel
         self.mock_device_connection.close.assert_called()
 
 

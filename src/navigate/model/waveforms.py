@@ -126,7 +126,7 @@ def single_pulse(
     samples = int(np.floor(np.multiply(sample_rate, sweep_time)))
 
     # create an array just containing the offset voltage:
-    array = np.zeros((samples)) + offset
+    array = np.zeros(samples) + offset
 
     # convert pulse width and delay in % into number of samples
     pulsedelay_samples = int(samples * delay / 100)

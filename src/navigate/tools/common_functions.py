@@ -33,6 +33,8 @@
 import importlib
 from threading import Lock
 
+from typing_extensions import Optional
+
 
 def combine_funcs(*funclist):
     """this function will combine a list of functions to a new function
@@ -105,7 +107,7 @@ def copy_proxy_object(content):
     return func(content)
 
 
-def load_module_from_file(module_name, file_path):
+def load_module_from_file(module_name: str, file_path: str) -> Optional[any]:
     """This function will load python file from file path as a module
 
     Parameters
@@ -117,7 +119,8 @@ def load_module_from_file(module_name, file_path):
 
     Returns
     -------
-    module: class of module
+    module: Optional[Any]
+        The module. None if the module is not found.
     """
     try:
         spec = importlib.util.spec_from_file_location(module_name, file_path)

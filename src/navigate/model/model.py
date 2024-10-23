@@ -1,7 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-import argparse
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -34,11 +32,14 @@ import argparse
 # Standard Library Imports
 import threading
 import logging
-import multiprocessing as mp
+import multiprocessing
 import time
 import os
+from typing import Tuple, Any, Dict, List, Optional, Union
+import argparse
 
 # Third Party Imports
+import numpy as np
 
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
@@ -89,15 +90,20 @@ class Model:
 
     Model for Model-View-Controller Software Architecture."""
 
-    def __init__(self, args: argparse.Namespace, configuration=None, event_queue=None):
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        configuration: Optional[Dict[str, Any]] = None,
+        event_queue: multiprocessing.Queue = None,
+    ) -> None:
         """Initialize the Model.
 
         Parameters
         ----------
         args : argparse.Namespace
             Command line arguments.
-        configuration : multiprocessing.managers.DictProxy
-            Configuration dictionary.
+        configuration : Optional[Dict[str, Any]]
+            Configuration dictionary. Defaults to None.
         event_queue : multiprocessing.Queue
             Event queue. Receives events from the controller.
         """
@@ -170,7 +176,7 @@ class Model:
         #: float: Time before acquisition.
         self.start_time = None
 
-        #: object: Data buffer.
+        #: List[SharedNDArray]: Data buffer for image frames.
         self.data_buffer = None
 
         #: int: Number of active pixels in the x-dimension.
@@ -401,7 +407,7 @@ class Model:
 
         self.load_feature_records()
 
-    def update_data_buffer(self, img_width=512, img_height=512):
+    def update_data_buffer(self, img_width: int = 512, img_height: int = 512) -> None:
         """Update the Data Buffer
 
         Parameters
@@ -415,7 +421,7 @@ class Model:
         self.img_height = img_height
         self.data_buffer = [
             SharedNDArray(shape=(img_height, img_width), dtype="uint16")
-            for i in range(self.number_of_frames)
+            for _ in range(self.number_of_frames)
         ]
         self.data_buffer_positions = SharedNDArray(
             shape=(self.number_of_frames, 5), dtype=float
@@ -426,7 +432,9 @@ class Model:
                 self.number_of_frames,
             )
 
-    def get_data_buffer(self, img_width=512, img_height=512):
+    def get_data_buffer(
+        self, img_width: int = 512, img_height: int = 512
+    ) -> List[SharedNDArray]:
         """Get the data buffer.
 
         If the number of active pixels in x and y changes, updates the data buffer and
@@ -441,7 +449,7 @@ class Model:
 
         Returns
         -------
-        data_buffer : SharedNDArray
+        data_buffer : List[SharedNDArray]
             Shared memory object.
         """
         if (
@@ -455,7 +463,7 @@ class Model:
             self.update_data_buffer(img_width, img_height)
         return self.data_buffer
 
-    def create_pipe(self, pipe_name):
+    def create_pipe(self, pipe_name: str) -> multiprocessing.Pipe:
         """Create a data pipe.
 
         Creates a pair of connection objects connected by a pipe which by default is
@@ -468,15 +476,15 @@ class Model:
 
         Returns
         -------
-        end1 : object
+        end1 : multiprocessing.Pipe
             Connection object.
         """
         self.release_pipe(pipe_name)
-        end1, end2 = mp.Pipe()
+        end1, end2 = multiprocessing.Pipe()
         setattr(self, pipe_name, end2)
         return end1
 
-    def release_pipe(self, pipe_name):
+    def release_pipe(self, pipe_name: str) -> None:
         """Close a data pipe.
 
         Parameters
@@ -490,7 +498,7 @@ class Model:
                 pipe.close()
             delattr(self, pipe_name)
 
-    def get_active_microscope(self):
+    def get_active_microscope(self) -> Microscope:
         """Get the active microscope.
 
         Returns
@@ -505,27 +513,29 @@ class Model:
         self.active_microscope = self.microscopes[self.active_microscope_name]
         return self.active_microscope
 
-    def get_offset_variance_maps(self):
+    def get_offset_variance_maps(self) -> Tuple[np.ndarray, np.ndarray]:
         """Get the offset variance maps.
 
         Returns
         -------
-        offset_variance_maps : dict
+        offset_variance_maps : Tuple[np.ndarray, np.ndarray]
             Offset variance maps.
         """
 
         return self.active_microscope.camera.get_offset_variance_maps()
 
-    def run_command(self, command, *args, **kwargs):
+    def run_command(
+        self, command: str, *args: List[Union[str, int]], **kwargs: Dict[str, Any]
+    ):
         """Receives commands from the controller.
 
         Parameters
         ----------
         command : str
             Type of command to run.
-        *args : list
+        *args : List[Union[str, int]]
             List of arguments to pass to the command.
-        **kwargs : dict
+        **kwargs : Dict[str, Any]
             Dictionary of keyword arguments to pass to the command.
         """
         logging.info(f"Received command: {command}, {args}, {kwargs}")
@@ -693,15 +703,15 @@ class Model:
         elif command == "zero_mirror":
             self.active_microscope.mirror.zero_flatness()
         elif command == "set_mirror":
-            coef = list(
+            coefficients = list(
                 self.configuration["experiment"]["MirrorParameters"]["modes"].values()
             )
-            self.update_mirror(coef=coef)
+            self.update_mirror(coef=coefficients)
         elif command == "save_wcs_file":
             self.active_microscope.mirror.save_wcs_file(path=args[0])
         elif command == "set_mirror_from_wcs":
-            coef = self.active_microscope.mirror.set_from_wcs_file(path=args[0])
-            self.update_mirror(coef=coef)
+            coefficients = self.active_microscope.mirror.set_from_wcs_file(path=args[0])
+            self.update_mirror(coef=coefficients)
         elif command == "tony_wilson":
             tony_wilson = TonyWilson(self)
             tony_wilson.run(*args)
@@ -783,15 +793,15 @@ class Model:
             self.active_microscope.run_command(command, *args)
 
     # main function to update mirror/set experiment mode values
-    def update_mirror(self, coef=[], flatten=False):
+    def update_mirror(self, coef: list = [], flatten: bool = False) -> None:
         """Update the mirror.
 
         Parameters
         ----------
         coef : list
-            List of coefficients.
+            The list of coefficients. Default is [].
         flatten : bool
-            Flatten the mirror?
+            Flatten the mirror? Default is False.
         """
         if coef:
             self.active_microscope.mirror.display_modes(coef)
@@ -806,7 +816,7 @@ class Model:
 
         # print(self.configuration['experiment']['MirrorParameters']['modes'])
 
-    def move_stage(self, pos_dict, wait_until_done=False):
+    def move_stage(self, pos_dict: Dict[str, Any], wait_until_done=False) -> bool:
         """Moves the stages.
 
         Updates the stage dictionary, moves to the desired position, and reports
@@ -814,7 +824,7 @@ class Model:
 
         Parameters
         ----------
-        pos_dict : dict
+        pos_dict : Dict[str, Any]
             Dictionary of stage positions.
         wait_until_done : bool
             Checks "on target state" after command and waits until done.
@@ -834,7 +844,7 @@ class Model:
             return False
         return r
 
-    def get_stage_position(self):
+    def get_stage_position(self) -> Dict[str, Any]:
         """Get the position of the stage.
 
         Returns
@@ -844,14 +854,14 @@ class Model:
         """
         return self.active_microscope.get_stage_position()
 
-    def stop_stage(self):
+    def stop_stage(self) -> None:
         """Stop the stages."""
         self.active_microscope.stop_stage()
         ret_pos_dict = self.get_stage_position()
         update_stage_dict(self, ret_pos_dict)
         self.event_queue.put(("update_stage", ret_pos_dict))
 
-    def end_acquisition(self):
+    def end_acquisition(self) -> None:
         """End the acquisition.
 
         Sets the current channel to 0, clears the signal and data containers,
@@ -880,17 +890,19 @@ class Model:
         #: obj: Add on feature.
         self.addon_feature = None
 
-    def run_data_process(self, num_of_frames=0, data_func=None):
+    def run_data_process(
+        self, num_of_frames: Optional[int] = 0, data_func: Optional[callable] = None
+    ) -> None:
         """Run the data process.
 
         This function is the structure of data thread.
 
         Parameters
         ----------
-        num_of_frames : int
-            Number of frames to acquire.
-        data_func : object
-            Function to run on the acquired data.
+        num_of_frames : Optional[int]
+            Number of frames to acquire. Default is 0.
+        data_func : Optional[callable]
+            Function to run on the acquired data. Default is None.
         """
         wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
@@ -958,7 +970,7 @@ class Model:
 
         self.end_acquisition()  # Need this to turn off the lasers/close the shutters
 
-    def pause_data_thread(self):
+    def pause_data_thread(self) -> None:
         """Pause the data thread.
 
         Function is called when user pauses the acquisition.
@@ -968,7 +980,7 @@ class Model:
         self.ask_to_pause_data_thread = True
         self.pause_data_ready_lock.acquire()
 
-    def resume_data_thread(self):
+    def resume_data_thread(self) -> None:
         """Resume the data thread.
 
         Function is called when user resumes the acquisition.
@@ -979,16 +991,21 @@ class Model:
         if self.pause_data_ready_lock.locked():
             self.pause_data_ready_lock.release()
 
-    def simplified_data_process(self, microscope, show_img_pipe, data_func=None):
+    def simplified_data_process(
+        self,
+        microscope: Microscope,
+        show_img_pipe: multiprocessing.Pipe,
+        data_func: callable = None,
+    ) -> None:
         """Run the data process.
 
         Parameters
         ----------
         microscope : Microscope
-            Microscope object.
-        show_img_pipe : multiprocessing.connection.Connection
-            Pipe for showing images.
-        data_func : object
+            Instance of the Microscope object.
+        show_img_pipe : multiprocessing.Pipe
+            The pipe for delivering images to the Controller.
+        data_func : callable
             Function to run on the acquired data.
         """
 
@@ -1023,11 +1040,11 @@ class Model:
         self.logger.info("Data thread stopped.")
         self.logger.info(f"Received frames in total: {acquired_frame_num}")
 
-    def prepare_acquisition(self, turn_off_flags=True):
+    def prepare_acquisition(self, turn_off_flags: bool = True) -> None:
         """Prepare the acquisition.
 
         This function is called when user starts the acquisition.
-        Sets flags. Calculates all of the waveforms. Sets the Camera Sensor Mode
+        Sets flags. Calculates all the waveforms. Sets the Camera Sensor Mode
         Initializes the data buffer and starts camera. Opens Shutters
 
         Parameters
@@ -1058,7 +1075,7 @@ class Model:
 
         self.frame_id = 0
 
-    def snap_image(self):
+    def snap_image(self) -> None:
         """Acquire an image after updating the waveforms.
 
         Can be used in acquisitions where changing waveforms are required,
@@ -1106,7 +1123,7 @@ class Model:
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
 
-    def run_live_acquisition(self):
+    def run_live_acquisition(self) -> None:
         """Stream live image to the GUI.
 
         Recalculates the waveforms for each image, thereby allowing people to adjust
@@ -1124,7 +1141,7 @@ class Model:
         # Allows the user to externally move the stage in the continuous mode.
         self.get_stage_position()
 
-    def run_acquisition(self):
+    def run_acquisition(self) -> None:
         """Run acquisition along with a feature list one time."""
         if not hasattr(self, "signal_container"):
             self.snap_image()
@@ -1145,10 +1162,10 @@ class Model:
         if self.imaging_mode != "live":
             self.stop_acquisition = True
 
-    def reset_feature_list(self):
+    def reset_feature_list(self) -> None:
         """Reset live mode feature list."""
         with self.injected_flag as injected_flag:
-            # wait for datathread ends
+            # wait for the data thread to end
             waiting_num = 30
             while (
                 hasattr(self, "data_container")
@@ -1177,7 +1194,7 @@ class Model:
             )
             injected_flag.value = False
 
-    def change_resolution(self, resolution_value):
+    def change_resolution(self, resolution_value: str) -> None:
         """Switch resolution mode of the microscope.
 
         Parameters
@@ -1230,9 +1247,10 @@ class Model:
         self.active_microscope.ask_stage_for_position = True
 
     def get_camera_line_interval_and_exposure_time(
-        self, exposure_time, number_of_pixel
-    ):
-        """Get camera line interval time and light sheet exposure time
+        self, exposure_time: float, number_of_pixel: int
+    ) -> Tuple[float, float, float]:
+        """Get camera line interval time, light sheet exposure, and full chip exposure
+        times.
 
         Parameters
         ----------
@@ -1243,23 +1261,26 @@ class Model:
 
         Returns
         -------
-        exposure_time : float
-            Light-sheet mode exposure time (ms).
-        camera_line_interval : float
-            line interval duration (s).
+        camera_times : Tuple[float, float, float]
 
+            - camera_exposure_time : float
+                camera exposure time (s)
+            - camera_line_interval : float
+                camera line interval (s)
+            - full_chip_exposure_time : float
+                Updated full chip exposure time (s).
         """
         return self.active_microscope.camera.calculate_light_sheet_exposure_time(
             exposure_time, number_of_pixel
         )
 
-    def load_images(self, filenames=None):
+    def load_images(self, filenames: Optional[list[str]] = None) -> None:
         """Load/Unload images to the Synthetic Camera
 
         Parameters
         ----------
-        filenames : list
-            List of filenames to load.
+        filenames : Optional[list[str]]
+            The list of filenames to load.
         """
         self.active_microscope.camera.initialize_image_series(
             self.data_buffer, self.number_of_frames
@@ -1268,18 +1289,21 @@ class Model:
         self.active_microscope.camera.close_image_series()
 
     def update_ilastik_setting(
-        self, display_segmentation=False, mark_position=True, target_labels=[1]
-    ):
+        self,
+        display_segmentation: Optional[bool] = False,
+        mark_position: Optional[bool] = True,
+        target_labels: Optional[list[int]] = [1],
+    ) -> None:
         """Update the ilastik setting.
 
         Parameters
         ----------
-        display_segmentation : bool
-            Display segmentation.
-        mark_position : bool
-            Mark position.
-        target_labels : list
-            Target labels.
+        display_segmentation : Optional[bool]
+            Display segmentation. Default is False.
+        mark_position : Optional[bool]
+            Mark position. Default is True.
+        target_labels : Optional[list[int]]
+            Target labels. Default is [1].
         """
         #: bool: Display segmentation.
         self.display_ilastik_segmentation = display_segmentation
@@ -1290,12 +1314,12 @@ class Model:
         #: list: Target labels.
         self.ilastik_target_labels = target_labels
 
-    def get_microscope_info(self):
+    def get_microscope_info(self) -> Dict[str, Any]:
         """Return Microscopes device information.
 
         Returns
         -------
-        microscope_info : dict
+        microscope_info : Dict[str, Any]
             Microscope device information.
         """
         microscope_info = {}
@@ -1303,7 +1327,9 @@ class Model:
             microscope_info[microscope_name] = self.microscopes[microscope_name].info
         return microscope_info
 
-    def launch_virtual_microscope(self, microscope_name, microscope_config):
+    def launch_virtual_microscope(
+        self, microscope_name: str, microscope_config: Dict[str, Any]
+    ) -> List[SharedNDArray]:
         """Launch a virtual microscope.
 
         Parameters
@@ -1325,10 +1351,10 @@ class Model:
             microscope_name
         ]["img_x_pixels"]
 
-        # create databuffer
+        # create data buffer
         data_buffer = [
             SharedNDArray(shape=(img_height, img_width), dtype="uint16")
-            for i in range(self.number_of_frames)
+            for _ in range(self.number_of_frames)
         ]
 
         # create virtual microscope
@@ -1405,7 +1431,7 @@ class Model:
         self.virtual_microscopes[microscope_name] = microscope
         return data_buffer
 
-    def destroy_virtual_microscope(self, microscope_name):
+    def destroy_virtual_microscope(self, microscope_name: str) -> None:
         """Destroy a virtual microscope.
 
         Parameters
@@ -1421,43 +1447,43 @@ class Model:
             data_buffer[i].shared_memory.unlink()
         del data_buffer
 
-    def terminate(self):
+    def terminate(self) -> None:
         """Terminate the model."""
         self.active_microscope.terminate()
         for microscope_name in self.virtual_microscopes:
             self.virtual_microscopes[microscope_name].terminate()
 
-    def load_feature_list_from_file(self, filename, features):
+    def load_feature_list_from_file(self, filename: str, features: list[str]) -> None:
         """Append feature list from file
 
         Parameters
         ----------
         filename: str
-            filename of the feature list
-        features: list
-            list of feature names
+            filename of the feature list.
+        features: list[str]
+            list of feature names to load from file.
         """
         module = load_module_from_file(filename[filename.rindex("/") + 1 :], filename)
         for name in features:
             feature = getattr(module, name)
             self.feature_list.append(feature())
 
-    def load_feature_list_from_str(self, feature_list_str):
+    def load_feature_list_from_str(self, feature_list_str: str) -> None:
         """Append feature list from feature_list_str
 
         Parameters
         ----------
         feature_list_str: str
-            str of a feature list
+            the str of a feature list
         """
         self.feature_list.append(convert_str_to_feature_list(feature_list_str))
 
-    def load_feature_records(self):
+    def load_feature_records(self) -> None:
         """Load installed feature lists from system folder
 
         Note
         ----
-            System folcer can be found at '..../.navigate/feature_lists'
+            System folder can be found at '..../.navigate/feature_lists'
         """
         feature_lists_path = get_navigate_path() + "/feature_lists"
         if not os.path.exists(feature_lists_path):
@@ -1523,7 +1549,7 @@ class Model:
             i += 1
         save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
 
-    def get_feature_list(self, idx):
+    def get_feature_list(self, idx: int) -> str:
         """Get feature list str by index
 
         Parameters
@@ -1534,19 +1560,20 @@ class Model:
         Returns
         -------
         feature_list_str: str
-            "" if not exist
-            string of the feature list
+
+            - Any empty string if the feature is not found
+            - The name of the feature if it is found
         """
-        if idx > 0 and idx <= len(self.feature_list):
+        if 0 < idx <= len(self.feature_list):
             return convert_feature_list_to_str(self.feature_list[idx - 1])
         return ""
 
-    def mark_saving_flags(self, frame_ids):
+    def mark_saving_flags(self, frame_ids: list):
         """Mark saving flags for the ImageWriter
 
         Parameters
         ----------
-        frame_ids: array
+        frame_ids: list
             a list of frame ids
         """
         if not self.data_buffer_saving_flags:

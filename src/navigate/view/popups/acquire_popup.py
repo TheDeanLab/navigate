@@ -142,6 +142,7 @@ class AcquirePopUp(CommonMethods):
                     input_var=tk.StringVar(),
                     label_args={"padding": [0, 0, 30, 0]},
                 )
+                self.inputs[entry_names[i]].widget.state(["!disabled", "readonly"])
                 self.inputs[entry_names[i]].set_values(tuple(FILE_TYPES))
                 self.inputs[entry_names[i]].set("TIFF")
 
@@ -153,6 +154,7 @@ class AcquirePopUp(CommonMethods):
                     input_var=tk.StringVar(),
                     label_args={"padding": [0, 0, 36, 0]},
                 )
+                self.inputs[entry_names[i]].widget.state(["!disabled", "readonly"])
                 self.inputs[entry_names[i]].set_values(
                     ("BABB", "Water", "CUBIC", "CLARITY", "uDISCO", "eFLASH")
                 )

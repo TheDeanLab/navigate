@@ -33,6 +33,7 @@ import tkinter as tk
 from tkinter import ttk, simpledialog
 import logging
 from pathlib import Path
+from typing import Optional, Callable
 
 # Third Party Imports
 
@@ -396,6 +397,8 @@ class HardwareTab(ttk.Frame):
                     self.values_dict[k] = v[3]
                     temp = list(v[3].keys())
                     widget.config(values=temp)
+                    widget.state(["!disabled", "readonly"])
+
                     if v[2] == "bool":
                         widget.set(str(temp[-1]))
                     else:
@@ -443,7 +446,7 @@ class HardwareTab(ttk.Frame):
         parent : frame
             parent frame to put widgets
         widgets_value : dict
-            valude dict of widgets
+            value_dict of widgets
         *args
             Variable length argument list.
         **kwargs
@@ -465,9 +468,9 @@ class HardwareTab(ttk.Frame):
             temp_ref = widgets["frame_config"].get("ref", None)
             direction = widgets["frame_config"].get("direction", "vertical")
         if collapsible:
-            self.foldAllFrames()
+            self.fold_all_frames()
             frame = CollapsibleFrame(parent=parent, title=title)
-            # only display one callapsible frame at a time
+            # only display one collapsible frame at a time
             frame.label.bind("<Button-1>", self.create_toggle_function(frame))
         else:
             frame = ttk.Frame(parent)
@@ -493,12 +496,12 @@ class HardwareTab(ttk.Frame):
                 except tk._tkinter.TclError:
                     pass
 
-    def foldAllFrames(self, except_frame=None):
+    def fold_all_frames(self, except_frame: Optional[tk.Frame] = None) -> None:
         """Fold all collapsible frames except one frame
 
         Parameters
         ----------
-        except_frame : tk.Frame
+        except_frame : Optional[tk.Frame]
             the unfold frame
         """
         for child in self.hardware_frame.winfo_children():
@@ -508,7 +511,7 @@ class HardwareTab(ttk.Frame):
             if isinstance(child, CollapsibleFrame) and child is not except_frame:
                 child.fold()
 
-    def create_toggle_function(self, frame):
+    def create_toggle_function(self, frame: tk.Frame) -> Callable[..., None]:
         """Toggle collapsible frame
 
         Parameters
@@ -518,12 +521,14 @@ class HardwareTab(ttk.Frame):
         """
 
         def func(event):
-            self.foldAllFrames(frame)
+            self.fold_all_frames(frame)
             frame.toggle_visibility()
 
         return func
 
-    def build_event_handler(self, hardware_widgets, key, frame, frame_id):
+    def build_event_handler(
+        self, hardware_widgets: dict, key: str, frame: tk.Frame, frame_id: int
+    ) -> Callable[..., None]:
         """Build button event handler
 
         Parameters
@@ -536,6 +541,11 @@ class HardwareTab(ttk.Frame):
             the frame to put/delete widgets
         frame_id : int
             index of the frame
+
+        Returns
+        -------
+        func : Callable
+            event handler function
         """
 
         def func(*args, **kwargs):
@@ -559,7 +569,7 @@ class HardwareTab(ttk.Frame):
                     ref=v[2].get("ref", None),
                     direction=v[2].get("direction", "vertical"),
                 )
-                # collaps other frame
+                # collapse other frame
             elif v[2].get("delete", False):
                 frame.grid_remove()
                 self.variables_list[frame_id - self.row_offset] = None

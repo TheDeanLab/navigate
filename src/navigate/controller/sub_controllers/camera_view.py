@@ -1631,7 +1631,6 @@ class MIPViewController(BaseViewController):
             "XY_image_width",
             "XY_image_height",
             "Z_image_value",
-            "XY_image_height",
         ]
         if any(
             not hasattr(self, attr) or getattr(self, attr) is None

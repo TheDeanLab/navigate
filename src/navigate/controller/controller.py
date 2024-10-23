@@ -604,8 +604,8 @@ class Controller:
 
         Parameters
         __________
-        mode : string
-            string = 'live', 'stop'
+        mode : str
+            The string = 'live', 'stop'
         """
         self.channels_tab_controller.set_mode(mode)
         self.camera_view_controller.set_mode(mode)
@@ -634,8 +634,9 @@ class Controller:
         Parameters
         __________
         command : string
-            string = 'stage', 'stop_stage', 'move_stage_and_update_info',
-        args* : function-specific passes.
+            The string includes 'stage', 'stop_stage', 'move_stage_and_update_info',
+        args* : Iterable.
+            Function-specific passes
         """
 
         if command == "joystick_toggle":
@@ -1163,10 +1164,10 @@ class Controller:
             camera_view_controller : CameraViewController
                 Camera View Controller object.
             show_img_pipe : multiprocessing.Pipe
-                Pipe for showing images.
+                The pipe for showing images.
             data_buffer : SharedNDArray
                 Pre-allocated shared memory array.
-                Size dictated by x_pixels, y_pixels, an number_of_frames in
+                Size dictated by x_pixels, y_pixels, and number_of_frames in
                 configuration file.
             """
             camera_view_controller.initialize_non_live_display(
@@ -1379,8 +1380,8 @@ class Controller:
         ----------
         event_name : string
             Name of the event.
-        event_handler : function
-            Function to handle the event.
+        event_handler : callable
+            The function to handle the event.
         """
         self.event_listeners[event_name] = event_handler
 

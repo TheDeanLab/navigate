@@ -33,6 +33,7 @@
 import tkinter as tk
 from time import sleep
 from tkinter import filedialog, messagebox
+from typing import Optional
 
 # Third Party Imports
 
@@ -87,22 +88,17 @@ class Configurator:
         self.microscope_id = 0
         self.create_config_window(0)
 
-        print(
-            "WARNING: The Configuration Assistant is not fully implemented. "
-            "Users are still required to manually configure their system."
-        )
-
-    def on_cancel(self):
+    def on_cancel(self) -> None:
         """Closes the window and exits the program"""
         self.root.destroy()
         exit()
 
-    def add_microscope(self):
+    def add_microscope(self) -> None:
         """Add a new microscope tab"""
         self.microscope_id += 1
         self.create_config_window(self.microscope_id)
 
-    def delete_microscopes(self):
+    def delete_microscopes(self) -> None:
         """Delete all microscopes"""
         # delete microscopes
         for tab_id in self.view.microscope_window.tabs():
@@ -110,12 +106,12 @@ class Configurator:
         self.view.microscope_window.tab_list = []
         self.microscope_id = 0
 
-    def new_configuration(self):
+    def new_configuration(self) -> None:
         """Create new configurations"""
         self.delete_microscopes()
         self.create_config_window(self.microscope_id)
 
-    def save(self):
+    def save(self) -> None:
         """Save configuration file"""
 
         def set_value(temp_dict, key_list, value):
@@ -225,7 +221,7 @@ class Configurator:
                 f". Please double check!",
             )
 
-    def write_to_yaml(self, config, filename):
+    def write_to_yaml(self, config: dict, filename: str) -> None:
         """write yaml file
 
         Parameters
@@ -256,8 +252,14 @@ class Configurator:
             f.write("microscopes:\n")
             write_func("  ", config, f)
 
-    def create_config_window(self, id):
-        """Creates the configuration window tabs."""
+    def create_config_window(self, id: int) -> None:
+        """Creates the configuration window tabs.
+
+        Parameters
+        ----------
+        id : int
+            The id of the microscope
+        """
 
         tab_name = "Microscope-" + str(id)
         microscope_tab = MicroscopeTab(
@@ -285,11 +287,26 @@ class Configurator:
             sticky=tk.NSEW,
         )
 
-    def load_configuration(self):
+    def load_configuration(self) -> None:
         """Load configuration"""
 
-        def get_widget_value(name, value_dict):
-            """Get the value from a dict"""
+        def get_widget_value(name, value_dict) -> Optional[str]:
+            """Get the value from a dict
+
+            Parameters
+            ----------
+            name: str
+                key name
+            value_dict: dict
+                value dictionary
+
+            Returns
+            -------
+            value : Optional[str]
+
+                - The value of the key if it exists
+                - None if the key does not exist
+            """
             value = value_dict
             for key in name.split("/"):
                 if key.strip() == "":
@@ -300,7 +317,7 @@ class Configurator:
             return value
 
         def get_widgets_value(widgets, value_dict):
-            """Get all key-value from valude_dict, keys are from widgets"""
+            """Get all key-value from value_dict, keys are from widgets"""
             temp = {}
             for key in widgets:
                 if key == "frame_config":
@@ -327,7 +344,7 @@ class Configurator:
             return temp
 
         def build_widgets_value(widgets, value_dict):
-            """According to valude_dict build values for widgets"""
+            """According to value_dict build values for widgets"""
             if widgets is None or value_dict is None:
                 return [None]
             result = []

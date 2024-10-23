@@ -313,22 +313,18 @@ class RenderFrame(ttk.Labelframe):
         self.live_var = tk.StringVar()
 
         #: ttk.Combobox: The combobox that holds the live display functionality.
-        self.live = ttk.Combobox(
-            self, textvariable=self.live_var, state="readonly", width=6
-        )
+        self.live = ttk.Combobox(self, textvariable=self.live_var, width=6)
         self.live["values"] = ("Live", "Slice")
         self.live.set("Live")
         self.live.grid(row=0, column=0)
-        self.live.state = "readonly"
+        self.live.state(["!disabled", "readonly"])
 
         self.channel_var = tk.StringVar()
-        self.channel = ttk.Combobox(
-            self, textvariable=self.channel_var, state="readonly", width=6
-        )
+        self.channel = ttk.Combobox(self, textvariable=self.channel_var, width=6)
         self.channel["values"] = "CH1"
         self.channel.set("CH1")
         self.channel.grid(row=1, column=0)
-        self.channel.state = "readonly"
+        self.channel.state(["disabled", "readonly"])
 
 
 class MipRenderFrame(ttk.Labelframe, CommonMethods):
@@ -377,7 +373,8 @@ class MipRenderFrame(ttk.Labelframe, CommonMethods):
                 input_args={"width": 5},
             ),
         }
-
+        self.inputs["perspective"].widget.state(["!disabled", "readonly"])
+        self.inputs["channel"].widget.state(["!disabled", "readonly"])
         self.inputs["perspective"].grid(row=0, column=0, sticky=tk.EW, padx=3, pady=3)
         self.inputs["channel"].grid(row=1, column=0, sticky=tk.EW, padx=3, pady=3)
         self.columnconfigure(0, weight=1)

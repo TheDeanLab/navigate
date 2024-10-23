@@ -40,6 +40,7 @@ from typing import Dict, Any, Iterable
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.tools.file_functions import create_save_path
 from navigate.view.popups.acquire_popup import AcquirePopUp
 from navigate.view.main_window_content.acquire_notebook import AcquireBar
 
@@ -404,12 +405,24 @@ class AcquireBarController(GUIController):
         )
 
         if is_valid:
+            # Verify that the path is valid.
+            try:
+                file_directory = create_save_path(self.saving_settings)
+            except Exception:
+                messagebox.showwarning(
+                    title="Directory Not Found.",
+                    message="\r\n The directory specified is invalid. \r\n "
+                    "This commonly occurs when the Root Directory is "
+                    "improperly specified. \r\n "
+                    "Please double-check and try again.",
+                    parent=popup_window.popup,
+                )
+                return
+
             self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
-            # Close the window
             popup_window.popup.dismiss()
-            # tell central controller, save the image/data
-            self.parent_controller.execute("acquire_and_save")
+            self.parent_controller.execute("acquire_and_save", file_directory)
 
     def exit_program(self) -> None:
         """Exit Button to close the program."""

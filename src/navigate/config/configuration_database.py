@@ -273,6 +273,13 @@ stage_hardware_widgets = {
         None,
         "*Physik Instrumente only. Example: FRF FRF",
     ],
+    "connection_type": [
+        "Connection Type",
+        "Input",
+        "string",
+        None,
+        "*Physik Instrumente only. Example: USB, Serial.",
+    ],
     "port": ["Serial Port", "Input", "string", None, "Example: COM1"],
     "baudrate": ["Baudrate", "Input", "int", None, "Example: 9600"],
     "timeout": ["Serial Timeout", "Input", "float", None, "Example: 0.25", 0.25],

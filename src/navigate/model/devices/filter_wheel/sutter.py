@@ -62,7 +62,7 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     Returns
     -------
     serial.Serial
-        Serial port connection to the filter wheel.
+        The serial port connection to the filter wheel.
 
     Raises
     ------
@@ -94,17 +94,18 @@ class SutterFilterWheel(FilterWheelBase):
 
         Parameters
         ----------
-        device_connection : dict
-            Dictionary of device connections.
-        device_config : dict
+        device_connection : serial.Serial
+            The communication instance with the filter wheel.
+        device_config : Dict[str, Any]
             Dictionary of device configuration parameters.
         """
         super().__init__(device_connection, device_config)
 
-        #: obj: Serial port connection to the filter wheel.
+        #: serial.Serial: Serial port connection to the filter wheel.
         self.serial = device_connection
 
-        #: dict: Dictionary of filter names and corresponding filter wheel positions.
+        #: Dict[str, Any]: Dictionary of filter names and corresponding filter wheel
+        # positions.
         self.device_config = device_config
 
         #: bool: Wait until filter wheel has completed movement.
@@ -146,20 +147,11 @@ class SutterFilterWheel(FilterWheelBase):
         # Set filter to the 0th position by default upon initialization.
         self.set_filter(list(self.filter_dictionary.keys())[0])
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the class."""
         return "SutterFilterWheel"
 
-    def __enter__(self):
-        """Enter the SutterFilterWheel context manager."""
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        """Exit the SutterFilterWheel context manager."""
-        logger.debug("SutterFilterWheel - Closing Device.")
-        self.close()
-
-    def filter_change_delay(self, filter_name):
+    def filter_change_delay(self, filter_name: str) -> None:
         """Calculate duration of time necessary to change filter wheel positions.
 
         Calculate duration of time necessary to change filter wheel positions.
@@ -195,7 +187,7 @@ class SutterFilterWheel(FilterWheelBase):
         except IndexError:
             self.wait_until_done_delay = 0.01
 
-    def set_filter(self, filter_name, wait_until_done=True):
+    def set_filter(self, filter_name: str, wait_until_done: bool = True):
         """Change the filter wheel to the filter designated by the filter
         position argument.
 
@@ -249,7 +241,7 @@ class SutterFilterWheel(FilterWheelBase):
                 # read 0D back.
                 self.read(1)
 
-    def read(self, num_bytes):
+    def read(self, num_bytes: int) -> bytes:
         """Reads the specified number of bytes from the serial port.
 
         Parameters
@@ -259,8 +251,8 @@ class SutterFilterWheel(FilterWheelBase):
 
         Returns
         -------
-        bytes
-            Bytes read from the serial port.
+        response : bytes
+            The bytes read from the serial port.
 
         Raises
         ------
@@ -285,7 +277,7 @@ class SutterFilterWheel(FilterWheelBase):
             )
         return self.serial.read(num_bytes)
 
-    def close(self):
+    def close(self) -> None:
         """Close the SutterFilterWheel serial port.
 
         Sets the filter wheel to the Empty-Alignment position and then closes the port.
@@ -293,3 +285,8 @@ class SutterFilterWheel(FilterWheelBase):
         logger.debug("SutterFilterWheel - Closing the Filter Wheel Serial Port")
         self.set_filter(list(self.filter_dictionary.keys())[0])
         self.serial.close()
+
+    def __del__(self) -> None:
+        """Delete the SutterFilterWheel class."""
+        if self.serial.is_open:
+            self.close()

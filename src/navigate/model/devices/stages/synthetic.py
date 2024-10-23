@@ -79,6 +79,10 @@ class SyntheticStage(StageBase):
         self.volts_per_micron = "0.1 * x"
         self.camera_delay = 0.01
 
+    def __del__(self) -> None:
+        """Destructor."""
+        pass
+
     def report_position(self):
         """Report the current position of the stage.
 

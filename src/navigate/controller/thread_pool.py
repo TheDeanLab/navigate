@@ -97,11 +97,7 @@ class SelfLockThread(threading.Thread):
             try:
                 self._target(*self._args, **self._kwargs)
             except Exception as e:
-                print(
-                    f"{self.name} thread ended because of exception!: {e}",
-                    traceback.format_exc(),
-                )
-                logger.debug(
+                logger.exception(
                     f"{self.name} thread ended because of exception!: {e}",
                     traceback.format_exc(),
                 )
@@ -251,13 +247,7 @@ class SynchronizedThreadPool:
                 try:
                     target(*args, **kwargs)
                 except Exception as e:
-                    print(
-                        threading.current_thread().name,
-                        "thread exception happened!",
-                        e,
-                        traceback.format_exc(),
-                    )
-                    logger.debug(
+                    logger.exception(
                         threading.current_thread().name,
                         "thread exception happened!",
                         e,
@@ -422,10 +412,11 @@ class SynchronizedThreadPool:
         """
 
         if event == "exception":
-            print("****in local trace: exception stops the thread")
-            logger.debug("****in local trace: exception stops the thread")
             if os.getenv("GITHUB_ACTIONS") == "true":
                 return
+
+            # Silence traceback to avoid printing to console.
+            sys.tracebacklimit = 0
             raise SystemExit()
         return self.localtrace
 

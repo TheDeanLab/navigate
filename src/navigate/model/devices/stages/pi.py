@@ -136,7 +136,7 @@ class PIStage(StageBase):
         #: list: List of PI axes available.
         self.pi_axes = list(self.axes_mapping.values())
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the PI Connection
 
         Raises
@@ -147,10 +147,11 @@ class PIStage(StageBase):
         try:
             if hasattr(self, "pi_device"):
                 self.stop()
+                self.pi_device.CloseConnection()
             logger.debug("PI connection closed")
-        except (AttributeError, GCSError) as e:  # except BaseException:
+        except (AttributeError, GCSError) as e:
             print("Error while disconnecting the PI stage")
-            logger.error(f"Error while disconnecting the PI stage - {e}")
+            logger.exception(f"Error while disconnecting the PI stage - {e}")
             raise e
 
     def report_position(self):

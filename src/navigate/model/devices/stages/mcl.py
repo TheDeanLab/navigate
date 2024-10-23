@@ -81,8 +81,8 @@ class MCLStage(StageBase):
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : dict
-            Dictionary containing the connection information for the device.
+        device_connection : mcl_controller
+            Communication object for the stage.
         configuration : dict
             Dictionary containing the configuration information for the device.
         device_id : int
@@ -94,7 +94,8 @@ class MCLStage(StageBase):
 
         # Mapping from self.axes to corresponding MCL channels
         if device_connection is not None:
-            #: object: MCL controller object.
+
+            #: mcl_controller: MCL controller object.
             self.mcl_controller = device_connection["controller"]
 
             #: int: MCL handle.
@@ -108,6 +109,13 @@ class MCLStage(StageBase):
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
+
+    def __del__(self):
+        """Close the connection to the stage."""
+        try:
+            self.mcl_controller.MCL_ReleaseHandle(self.handle)
+        except self.mcl_controller.MadlibError as e:
+            logger.exception(f"{e}")
 
     def report_position(self):
         """Report the position of the stage.

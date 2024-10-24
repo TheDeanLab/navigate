@@ -1219,6 +1219,7 @@ class Controller:
             if microscope_name not in self.additional_microscopes:
                 self.additional_microscopes[microscope_name] = {}
 
+            if "camera_view_controller" not in self.additional_microscopes[microscope_name]:
                 popup_window = CameraViewPopupWindow(self.view, microscope_name)
                 camera_view_controller = CameraViewController(
                     popup_window.camera_view, self

@@ -906,12 +906,15 @@ class BaseViewController(GUIController, ABaseViewController):
             Image data.
         """
         temp_img = self.array_to_image(image)
-        if self.image_cache_flag:
-            self.tk_image = ImageTk.PhotoImage(temp_img)
-            self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
-        else:
-            self.tk_image2 = ImageTk.PhotoImage(temp_img)
-            self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
+        try:
+            if self.image_cache_flag:
+                self.tk_image = ImageTk.PhotoImage(temp_img)
+                self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
+            else:
+                self.tk_image2 = ImageTk.PhotoImage(temp_img)
+                self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
+        except tk.TclError:
+            return
         self.image_cache_flag = not self.image_cache_flag
 
     def process_image(self):

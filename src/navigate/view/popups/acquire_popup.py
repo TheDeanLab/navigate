@@ -75,7 +75,7 @@ class AcquirePopUp(CommonMethods):
         #: PopUp: The popup window
         if platform.system() == "Windows":
             self.popup = PopUp(
-                root, "File Saving Dialog", "450x390+320+180", transient=True
+                root, "File Saving Dialog", "450x450+320+180", transient=True
             )
         else:
             self.popup = PopUp(

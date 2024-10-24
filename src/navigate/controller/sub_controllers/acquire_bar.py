@@ -35,6 +35,7 @@ import logging
 import tkinter as tk
 from tkinter import messagebox
 from typing import Dict, Any, Iterable
+import re
 
 # Third Party Imports
 
@@ -396,6 +397,24 @@ class AcquireBarController(GUIController):
         # update saving settings according to user's input
         self.update_experiment_values(popup_window)
 
+        entry_names = [
+            "user",
+            "tissue",
+            "celltype",
+            "label",
+            "prefix",
+        ]
+
+        for name in entry_names:
+            if not self.is_valid_string(self.saving_settings[name]):
+                messagebox.showwarning(
+                    title="Invalid Entry",
+                    message="Only alphanumeric characters, hyphens, "
+                            "and underscores are allowed. \n",
+                    parent=popup_window.popup,
+                )
+                return
+
         # Verify user's input is non-zero.
         is_valid = (
             self.saving_settings["user"]
@@ -411,10 +430,9 @@ class AcquireBarController(GUIController):
             except Exception:
                 messagebox.showwarning(
                     title="Directory Not Found.",
-                    message="\r\n The directory specified is invalid. \r\n "
-                    "This commonly occurs when the Root Directory is "
-                    "improperly specified. \r\n "
-                    "Please double-check and try again.",
+                    message="The directory specified is invalid. \n"
+                            "This commonly occurs when the Root Directory is "
+                            "incorrect. Please double-check and try again.",
                     parent=popup_window.popup,
                 )
                 return
@@ -460,3 +478,20 @@ class AcquireBarController(GUIController):
         for name in popup_vals:
             # remove leading and tailing whitespaces
             self.saving_settings[name] = popup_vals[name].strip()
+
+    @staticmethod
+    def is_valid_string(string: str) -> bool:
+        """Check if the string is valid.
+
+        Parameters
+        ----------
+        string : str
+            String to check.
+
+        Returns
+        -------
+        bool
+            True if the string is valid.
+        """
+        pattern = r'^[\w\-\ ]+$'
+        return bool(re.match(pattern, string))

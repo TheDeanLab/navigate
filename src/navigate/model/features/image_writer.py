@@ -36,6 +36,7 @@ import os
 import logging
 import shutil
 import time
+from datetime import datetime
 
 # Third Party Imports
 import numpy as np
@@ -113,90 +114,25 @@ class ImageWriter:
         #: bool: Is 32 vs 64-bit file format.
         self.big_tiff = False
 
-        # create the save directory if it doesn't already exist
-        self.save_directory = os.path.join(
-            self.model.configuration["experiment"]["Saving"]["save_directory"],
-            self.sub_dir,
-        )
-        logger.info(f"Save Directory: {self.save_directory}")
-        try:
-            if not os.path.exists(self.save_directory):
-                try:
-                    os.makedirs(self.save_directory)
-                    logger.debug(f"Save Directory Created - {self.save_directory}")
-                except OSError:
-                    logger.debug(
-                        f"Unable to Create Save Directory - {self.save_directory}"
-                    )
-                    self.model.stop_acquisition = True
-                    self.model.event_queue.put(
-                        "warning",
-                        "Unable to Create Save Directory. Acquisition Terminated",
-                    )
-                    return
-        except FileNotFoundError as e:
-            logger.error(f"Unable to Create Save Directory - {self.save_directory}")
+        #: dict: Saving config
+        self.saving_config = saving_config
 
-        # create the MIP directory if it doesn't already exist
-        #: np.ndarray : Maximum intensity projection image.
-        self.mip = None
-
-        #: str : Directory for saving maximum intensity projection images.
-        self.mip_directory = os.path.join(self.save_directory, "MIP")
-        try:
-            if not os.path.exists(self.mip_directory):
-                try:
-                    os.makedirs(self.mip_directory)
-                    logger.debug(f"MIP Directory Created - {self.mip_directory}")
-                except OSError:
-                    logger.debug(
-                        f"Unable to Create MIP Directory - {self.mip_directory}"
-                    )
-                    self.model.stop_acquisition = True
-                    self.model.event_queue.put(
-                        "warning",
-                        "Unable to create MIP Directory. Acquisition Terminated.",
-                    )
-                    return
-        except FileNotFoundError as e:
-            logger.error("Image Writer: Unable to create MIP directory.")
-
-        # Set up the file name and path in the save directory
-        #: str : File type for saving data.
-        self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
-        logger.info(f"Saving Data as File Type: {self.file_type}")
-
-        current_channel = self.model.active_microscope.current_channel
-        ext = "." + self.file_type.lower().replace(" ", ".").replace("-", ".")
-        if image_name is None:
-            image_name = self.generate_image_name(current_channel, ext=ext)
-        file_name = os.path.join(self.save_directory, image_name)
-
-        # Initialize data source, pointing to the new file name
-        #: navigate.model.data_sources.DataSource : Data source for saving data to disk.
-        self.data_source = data_sources.get_data_source(self.file_type)(
-            file_name=file_name
-        )
-
-        # Pass experiment and configuration to metadata
-        self.data_source.set_metadata_from_configuration_experiment(
-            self.model.configuration, microscope_name
-        )
-
-        self.data_source.set_metadata(saving_config)
-
-        # Make sure that there is enough disk space to save the data.
-        self.calculate_and_check_disk_space()
+        #: DataSource: Data source
+        self.data_source = None
 
         # camera flip flags
-        microscope_name = self.model.active_microscope_name
+        if self.microscope_name is None:
+            self.microscope_name = self.model.active_microscope_name
         camera_config = self.model.configuration["configuration"]["microscopes"][
-            microscope_name
+            self.microscope_name
         ]["camera"]
         self.flip_flags = {
             "x": camera_config.get("flip_x", False),
             "y": camera_config.get("flip_y", False),
         }
+
+        # initialize saving
+        self.initialize_saving(sub_dir, image_name)
 
     def save_image(self, frame_ids):
         """Save the data to disk.
@@ -357,3 +293,99 @@ class ImageWriter:
                 logger.info("Big-TIFF Format Selected.")
             else:
                 self.data_source.set_bigtiff(False)
+
+    def get_saving_file_name(self, sub_dir="", image_name=None):
+        self.sub_dir = sub_dir
+        # create the save directory if it doesn't already exist
+        self.save_directory = os.path.join(
+            self.model.configuration["experiment"]["Saving"]["save_directory"],
+            self.sub_dir,
+        )
+        logger.info(f"Save Directory: {self.save_directory}")
+        try:
+            if not os.path.exists(self.save_directory):
+                try:
+                    os.makedirs(self.save_directory)
+                    logger.debug(f"Save Directory Created - {self.save_directory}")
+                except OSError:
+                    logger.debug(
+                        f"Unable to Create Save Directory - {self.save_directory}"
+                    )
+                    self.model.stop_acquisition = True
+                    self.model.event_queue.put(
+                        "warning",
+                        "Unable to Create Save Directory. Acquisition Terminated",
+                    )
+                    return
+        except FileNotFoundError as e:
+            logger.error(f"Unable to Create Save Directory - {self.save_directory}")
+
+        # Set up the file name and path in the save directory
+        #: str : File type for saving data.
+        self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
+        logger.info(f"Saving Data as File Type: {self.file_type}")
+
+        current_channel = self.model.active_microscope.current_channel
+        ext = "." + self.file_type.lower().replace(" ", ".").replace("-", ".")
+        if image_name is None:
+            image_name = self.generate_image_name(current_channel, ext=ext)
+        file_name = os.path.join(self.save_directory, image_name)
+
+        if os.path.exists(file_name):
+            current_time = datetime.now().strftime("%H-%M")
+            return self.create_saving_directory(f"{sub_dir}-{current_time}")
+
+        return file_name
+
+    def initialize_saving(self, sub_dir="", image_name=None):
+
+        if self.data_source is not None:
+            self.data_source.close()
+            self.data_source = None
+
+        self.current_time_point = 0
+
+        file_name = self.get_saving_file_name(sub_dir, image_name)
+        print("saving to new file:", file_name)
+
+        # create the MIP directory if it doesn't already exist
+        #: np.ndarray : Maximum intensity projection image.
+        self.mip = None
+
+        #: str : Directory for saving maximum intensity projection images.
+        self.mip_directory = os.path.join(self.save_directory, "MIP")
+        try:
+            if not os.path.exists(self.mip_directory):
+                try:
+                    os.makedirs(self.mip_directory)
+                    logger.debug(f"MIP Directory Created - {self.mip_directory}")
+                except OSError:
+                    logger.debug(
+                        f"Unable to Create MIP Directory - {self.mip_directory}"
+                    )
+                    self.model.stop_acquisition = True
+                    self.model.event_queue.put(
+                        "warning",
+                        "Unable to create MIP Directory. Acquisition Terminated.",
+                    )
+                    return
+        except FileNotFoundError as e:
+            logger.error("Image Writer: Unable to create MIP directory.")
+
+        
+
+        # Initialize data source, pointing to the new file name
+        #: navigate.model.data_sources.DataSource : Data source for saving data to disk.
+        self.data_source = data_sources.get_data_source(self.file_type)(
+            file_name=file_name
+        )
+
+        # Pass experiment and configuration to metadata
+        self.data_source.set_metadata_from_configuration_experiment(
+            self.model.configuration, self.microscope_name
+        )
+
+        self.data_source.set_metadata(self.saving_config)
+
+        # Make sure that there is enough disk space to save the data.
+        self.calculate_and_check_disk_space()

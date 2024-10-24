@@ -35,6 +35,8 @@ from navigate.model.analysis.boundary_detect import (
     find_tissue_boundary_2d,
     binary_detect,
     map_boundary,
+    find_cell_boundary_3d,
+    map_labels,
 )
 import numpy as np
 
@@ -461,3 +463,183 @@ class VolumeSearch:
     def cleanup(self):
         """Cleanup function"""
         self.has_tissue_queue.put(False)
+
+
+class VolumeSearch3D:
+    def __init__(
+        self,
+        model,
+        target_resolution="Nanoscale",
+        target_zoom="N/A",
+        position_id=0,
+        z_step_size=0.1,
+        overlap=0.5,
+        analysis_function=None,
+    ):
+        """Initialize VolumeSearch
+
+        Parameters
+        ----------
+        model : navigate.model.model.Model
+            Navigate Model
+        target_resolution : str
+            Name of microscope to use for tiled imaging of tissue
+        target_zoom : str
+            Resolution of microscope (target_resolution) to use for tiled imaging
+            of tissue
+        position_id : int
+            The index of position in multiposition table
+        z_step_size : float
+            Target z step size
+        overlap : float
+            The overlap ratio
+        analysis_function : callable
+            An analysis function return a labeled object
+        """
+
+        #: navigate.model.model.Model: Navigate Model
+        self.model = model
+
+        #: str: Name of microscope to use for tiled imaging of tissue
+        self.target_resolution = target_resolution
+
+        #: str: Resolution of microscope (target_resolution) to use for tiled imaging
+        self.target_zoom = target_zoom
+
+        #: int: The index of position
+        self.position_id = position_id
+
+        #: float: The Z step size
+        self.z_step = z_step_size
+
+        #: float: The overlap ratio
+        self.overlap = overlap
+
+        #: function: analysis function
+        self.analysis_function = (
+            analysis_function if analysis_function else find_cell_boundary_3d
+        )
+
+        #: dict: Feature configuration
+        self.config_table = {
+            "data": {
+                "main": self.data_func,
+                "cleanup": self.cleanup,
+            }
+        }
+
+    def data_func(self, frame_ids):
+
+        self.model.logger.info("Starting 3D Volume Search")
+
+        microscope_state_config = self.model.configuration["experiment"][
+            "MicroscopeState"
+        ]
+
+        if self.position_id > microscope_state_config["multiposition_count"]:
+            self.position_id = 0
+
+        z_stack_data = self.model.image_writer.data_source.get_data(
+            position=self.position_id
+        )
+        labeled_image = self.analysis_function(z_stack_data)
+
+        # map labeled cells
+        z_start = microscope_state_config["start_position"]
+        z_step = microscope_state_config["step_size"]
+        
+        if microscope_state_config["multiposition_count"] == 0:
+            pos_dict = self.model.get_stage_position()
+            position = [
+                pos_dict[f"{axis}_pos"] for axis in ["x", 'y', "z", "theta", "f"]
+            ]
+        else:
+            position = self.model.configuration["experiment"]["MultiPositions"][
+                self.position_id
+            ]
+
+        current_microscope_name = self.model.active_microscope_name
+        current_zoom_value = self.model.active_microscope.zoom.zoomvalue
+        # offset
+        if self.target_resolution != current_microscope_name:
+            current_stage_offset = self.model.configuration["configuration"]["microscopes"][
+                current_microscope_name
+            ]["stage"]
+            target_stage_offset = self.model.configuration["configuration"]["microscopes"][
+                self.target_resolution
+            ]["stage"]
+            for i, axis in enumerate(["x", "y", "z", "theta", "f"]):
+                position[i] += target_stage_offset[f"{axis}_offset"] - current_stage_offset[f"{axis}_offset"]
+        else:
+            solvent = self.model.configuration["experiment"]["Saving"]["solvent"]
+            stage_solvent_offsets = self.model.active_microscope.zoom.stage_offsets
+            if solvent in stage_solvent_offsets.keys():
+                stage_offset = stage_solvent_offsets[solvent]
+                for i, axis in enumerate(["x", "y", "z", "theta", "f"]):
+                    if axis not in stage_offset.keys():
+                        continue
+                    try:
+                        position[i] += float(
+                            stage_offset[axis][self.target_zoom][current_zoom_value]
+                        )
+                    except (ValueError, KeyError):
+                        self.model.logger.info(
+                            f"*** Offsets from {self.target_zoom} to {current_zoom_value} are "
+                            f"not implemented! There is not enough information in the "
+                            f"configuration.yaml file!"
+                        )
+        
+        current_pixel_size = self.model.configuration["configuration"]["microscopes"][
+            current_microscope_name
+        ]["zoom"]["pixel_size"][current_zoom_value]
+        current_image_width = self.model.configuration["experiment"][
+            "CameraParameters"
+        ][current_microscope_name]["img_x_pixels"]
+        current_image_height = self.model.configuration["experiment"][
+            "CameraParameters"
+        ][current_microscope_name]["img_y_pixels"]
+
+        target_pixel_size = self.model.configuration["configuration"]["microscopes"][
+            self.target_resolution
+        ]["zoom"]["pixel_size"][self.target_zoom]
+        target_image_width = self.model.configuration["experiment"]["CameraParameters"][
+            self.target_resolution
+        ]["img_x_pixels"]
+        target_image_height = self.model.configuration["experiment"][
+            "CameraParameters"
+        ][self.target_resolution]["img_y_pixels"]
+
+        z_range, positions = map_labels(
+            labeled_image,
+            position,
+            z_start,
+            z_step,
+            current_pixel_size,
+            current_image_width,
+            current_image_height,
+            target_pixel_size,
+            target_image_width,
+            target_image_height,
+            overlap=self.overlap,
+        )
+
+        self.model.event_queue.put(("multiposition", positions))
+        self.model.configuration["experiment"]["MultiPositions"] = positions
+        microscope_state_config["multiposition_count"] = len(positions)
+        if len(positions) > 0:
+            microscope_state_config["is_multiposition"] = True
+
+        microscope_state_config["start_position"] = 0
+        microscope_state_config["end_position"] = z_range * z_step
+        microscope_state_config["step_size"] = self.z_step
+        microscope_state_config["number_z_steps"] = z_range * z_step // self.z_step
+
+        self.model.logger.info(f"New Z range would be {microscope_state_config['end_position']}"
+                               f" with step_size {self.z_step}")
+
+        self.model.image_writer.initialize_saving(sub_dir=str(self.target_resolution))
+
+        self.model.logger.info(f"Volume Search 3D completed!")
+
+    def cleanup(self):
+        pass

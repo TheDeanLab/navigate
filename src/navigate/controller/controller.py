@@ -510,7 +510,12 @@ class Controller:
 
         # update multi-positions
         positions = self.multiposition_tab_controller.get_positions()
-        self.configuration["experiment"]["MultiPositions"] = positions
+        update_config_dict(
+            self.manager,
+            self.configuration["experiment"],
+            "MultiPositions",
+            positions
+        )
         self.configuration["experiment"]["MicroscopeState"][
             "multiposition_count"
         ] = len(positions)
@@ -526,7 +531,7 @@ class Controller:
             self.channels_tab_controller.is_multiposition_val.set(False)
 
         # TODO: validate experiment dict
-
+        self.channels_tab_controller.update_experiment_values()
         warning_message += self.channels_tab_controller.verify_experiment_values()
 
         # additional microscopes

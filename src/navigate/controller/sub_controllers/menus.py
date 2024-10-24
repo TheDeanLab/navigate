@@ -497,8 +497,6 @@ class MenuController(GUIController):
         # add-on features
         self.feature_list_names = [
             "None",
-            "Switch Resolution",
-            "Z Stack Acquisition",
             "Threshold",
             "Ilastik Segmentation",
             "Volume Search",

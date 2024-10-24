@@ -1568,9 +1568,12 @@ class MIPViewController(BaseViewController):
         z_range = microscope_state["abs_z_end"] - microscope_state["abs_z_start"]
 
         # TODO: may stretch by the value of binning.
-        self.Z_image_value = int(
-            self.XY_image_width * camera_parameters["fov_x"] / z_range
-        )
+        if z_range == 0:
+            self.Z_image_value = 1
+        else:
+            self.Z_image_value = int(
+                self.XY_image_width * camera_parameters["fov_x"] / z_range
+            )
         self.prepare_mip_view()
         self.update_perspective()
 
@@ -1583,6 +1586,9 @@ class MIPViewController(BaseViewController):
             Image data.
         """
         channel_idx, slice_idx = self.identify_channel_index_and_slice()
+
+        if self.image_mode in ["live", "single"]:
+            return
 
         # Orthogonal maximum intensity projections.
         self.xy_mip[channel_idx] = np.maximum(self.xy_mip[channel_idx], image)

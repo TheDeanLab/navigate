@@ -35,11 +35,13 @@ import logging
 import tkinter as tk
 from tkinter import messagebox
 from typing import Dict, Any, Iterable
+import re
 
 # Third Party Imports
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.tools.file_functions import create_save_path
 from navigate.view.popups.acquire_popup import AcquirePopUp
 from navigate.view.main_window_content.acquire_notebook import AcquireBar
 
@@ -395,6 +397,24 @@ class AcquireBarController(GUIController):
         # update saving settings according to user's input
         self.update_experiment_values(popup_window)
 
+        entry_names = [
+            "user",
+            "tissue",
+            "celltype",
+            "label",
+            "prefix",
+        ]
+
+        for name in entry_names:
+            if not self.is_valid_string(self.saving_settings[name]):
+                messagebox.showwarning(
+                    title="Invalid Entry",
+                    message="Only alphanumeric characters, hyphens, "
+                            "and underscores are allowed. \n",
+                    parent=popup_window.popup,
+                )
+                return
+
         # Verify user's input is non-zero.
         is_valid = (
             self.saving_settings["user"]
@@ -404,12 +424,23 @@ class AcquireBarController(GUIController):
         )
 
         if is_valid:
+            # Verify that the path is valid.
+            try:
+                file_directory = create_save_path(self.saving_settings)
+            except Exception:
+                messagebox.showwarning(
+                    title="Directory Not Found.",
+                    message="The directory specified is invalid. \n"
+                            "This commonly occurs when the Root Directory is "
+                            "incorrect. Please double-check and try again.",
+                    parent=popup_window.popup,
+                )
+                return
+
             self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
-            # Close the window
             popup_window.popup.dismiss()
-            # tell central controller, save the image/data
-            self.parent_controller.execute("acquire_and_save")
+            self.parent_controller.execute("acquire_and_save", file_directory)
 
     def exit_program(self) -> None:
         """Exit Button to close the program."""
@@ -447,3 +478,20 @@ class AcquireBarController(GUIController):
         for name in popup_vals:
             # remove leading and tailing whitespaces
             self.saving_settings[name] = popup_vals[name].strip()
+
+    @staticmethod
+    def is_valid_string(string: str) -> bool:
+        """Check if the string is valid.
+
+        Parameters
+        ----------
+        string : str
+            String to check.
+
+        Returns
+        -------
+        bool
+            True if the string is valid.
+        """
+        pattern = r'^[\w\-\ ]+$'
+        return bool(re.match(pattern, string))

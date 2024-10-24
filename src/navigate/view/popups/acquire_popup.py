@@ -51,54 +51,105 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+SOLVENTS = ("BABB", "Water", "CUBIC", "CLARITY", "uDISCO", "eFLASH")
+
+
 class AcquirePopUp(CommonMethods):
     """Class creates the popup that is generated when the Acquire button is pressed and
     Save File checkbox is selected."""
 
-    def __init__(self, root, *args, **kwargs):
+    def __init__(self, root: tk.Tk) -> None:
         """Initialize the AcquirePopUp class
 
         Parameters
         ----------
         root : tk.Tk
             The root window
-        *args
-            Variable length argument list
-        **kwargs
-            Arbitrary keyword arguments
         """
-        # Creating popup window with this name and size/placement, PopUp is a Toplevel
-        # window
+        #: int: Width of the first column
+        self.column1_width = 20
+
+        #: int: Width of the second column
+        self.column2_width = 40
+
         #: PopUp: The popup window
         if platform.system() == "Windows":
             self.popup = PopUp(
-                root, "File Saving Dialog", "450x390+320+180", transient=True
+                root, "File Saving Dialog", "450x450+320+180", transient=True
             )
         else:
             self.popup = PopUp(
-                root, "File Saving Dialog", "600x430+320+180", transient=True
+                root, "File Saving Dialog", "600x500+320+180", transient=True
             )
+
+        #: dict: Button dictionary.
+        self.buttons = {}
+
+        #: dict: Input dictionary.
+        self.inputs = {}
 
         # Storing the content frame of the popup, this will be the parent of the widgets
         content_frame = self.popup.get_frame()
 
-        # Formatting
-        tk.Grid.columnconfigure(content_frame, "all", weight=1)
-        tk.Grid.rowconfigure(content_frame, "all", weight=1)
+        path_entries = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        tab_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        button_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        separator1 = ttk.Separator(content_frame, orient="horizontal")
+        separator2 = ttk.Separator(content_frame, orient="horizontal")
 
-        # Dictionary for all the variables
-        #: dict: Dictionary of all the variables
-        self.inputs = {}
+        path_entries.grid(row=0, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        separator1.grid(row=1, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        tab_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        separator2.grid(row=3, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        button_frame.grid(row=4, column=0, sticky=tk.NSEW, padx=0, pady=3)
 
-        #: dict: Dictionary of all the buttons
-        self.buttons = {}
+        #: ButtonFrame: ButtonFrame object
+        self.button_frame = ButtonFrame(parent=self, frame=button_frame)
 
-        # Label for entries
-        #: ttk.Label: Label for the entries
-        self.entries_label = ttk.Label(
-            content_frame, text="Please fill out the fields below"
+        #: EntryFrame: EntryFrame object
+        self.path_frame = EntryFrame(parent=self, frame=path_entries)
+
+        #: TabFrame: TabFrame object
+        self.tab_frame = TabFrame(parent=self, frame=tab_frame)
+
+
+class ButtonFrame:
+    def __init__(self, parent: AcquirePopUp, frame: ttk.Frame) -> None:
+        """Initialize the ButtonFrame
+
+        Parameters
+        ----------
+        parent : AcquirePopUp
+            The AcquirePopup window.
+        frame : ttk.Frame
+            The AcquirePopup Window.
+        """
+
+        width = int((parent.column1_width + parent.column2_width - 10) / 2)
+        parent.buttons["Cancel"] = ttk.Button(
+            frame, text="Cancel Acquisition", width=width
         )
-        self.entries_label.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW, pady=5)
+        parent.buttons["Done"] = ttk.Button(frame, text="Acquire Data", width=width)
+        parent.buttons["Cancel"].grid(row=0, column=0, padx=5, sticky=tk.NSEW)
+        parent.buttons["Done"].grid(row=0, column=1, padx=5, sticky=tk.NSEW)
+
+
+class EntryFrame:
+    def __init__(self, parent: AcquirePopUp, frame: ttk.Frame) -> None:
+        """Initialize the EntryFrame
+
+        Parameters
+        ----------
+        parent : AcquirePopUp
+            The AcquirePopup window.
+        frame : ttk.Frame
+            The EntryFrame Window.
+        """
+        text = "Please Fill Out the Fields Below"
+
+        #: ttk.Label: Label for the entries
+        label = ttk.Label(frame, text=text)
+        label.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW, pady=5, padx=5)
 
         # Creating Entry Widgets
         entry_names = [
@@ -110,7 +161,6 @@ class AcquirePopUp(CommonMethods):
             "prefix",
             "solvent",
             "file_type",
-            "misc",
         ]
 
         entry_labels = [
@@ -122,68 +172,90 @@ class AcquirePopUp(CommonMethods):
             "Prefix",
             "Solvent",
             "File Type",
-            "Notes",
         ]
 
         # Loop for each entry and label
         for i in range(len(entry_names)):
-            if entry_names[i] == "misc":
-                self.inputs[entry_names[i]] = LabelInput(
-                    parent=content_frame,
-                    label=entry_labels[i],
-                    input_class=ScrolledText,
-                    input_args={"wrap": tk.WORD, "width": 40, "height": 10},
-                )
-            elif entry_names[i] == "file_type":
-                self.inputs[entry_names[i]] = LabelInput(
-                    parent=content_frame,
+            if entry_names[i] == "file_type":
+                parent.inputs[entry_names[i]] = LabelInput(
+                    parent=frame,
                     label=entry_labels[i],
                     input_class=ValidatedCombobox,
                     input_var=tk.StringVar(),
-                    label_args={"padding": [0, 0, 30, 0]},
                 )
-                self.inputs[entry_names[i]].widget.state(["!disabled", "readonly"])
-                self.inputs[entry_names[i]].set_values(tuple(FILE_TYPES))
-                self.inputs[entry_names[i]].set("TIFF")
+                parent.inputs[entry_names[i]].widget.state(["!disabled", "readonly"])
+                parent.inputs[entry_names[i]].set_values(tuple(FILE_TYPES))
+                parent.inputs[entry_names[i]].set("TIFF")
 
             elif entry_names[i] == "solvent":
-                self.inputs[entry_names[i]] = LabelInput(
-                    parent=content_frame,
+                parent.inputs[entry_names[i]] = LabelInput(
+                    parent=frame,
                     label=entry_labels[i],
                     input_class=ValidatedCombobox,
                     input_var=tk.StringVar(),
-                    label_args={"padding": [0, 0, 36, 0]},
                 )
-                self.inputs[entry_names[i]].widget.state(["!disabled", "readonly"])
-                self.inputs[entry_names[i]].set_values(
-                    ("BABB", "Water", "CUBIC", "CLARITY", "uDISCO", "eFLASH")
-                )
-                self.inputs[entry_names[i]].set("BABB")
+                parent.inputs[entry_names[i]].widget.state(["!disabled", "readonly"])
+                parent.inputs[entry_names[i]].set_values(SOLVENTS)
+                parent.inputs[entry_names[i]].set("BABB")
 
             else:
-                self.inputs[entry_names[i]] = LabelInput(
-                    parent=content_frame,
+                parent.inputs[entry_names[i]] = LabelInput(
+                    parent=frame,
                     label=entry_labels[i],
                     input_class=ttk.Entry,
                     input_var=tk.StringVar(),
-                    input_args={"width": 50},
+                    input_args={"width": parent.column2_width},
                 )
-            self.inputs[entry_names[i]].grid(
-                row=i + 1, column=0, columnspan=2, sticky=tk.NSEW, padx=5
+
+            # Widgets
+            parent.inputs[entry_names[i]].grid(
+                row=i + 1, column=0, columnspan=1, sticky=tk.NSEW
             )
-            self.inputs[entry_names[i]].label.grid(padx=(0, 20))
+
+            # Labels
+            parent.inputs[entry_names[i]].label.grid(padx=(5, 0))
+            parent.inputs[entry_names[i]].label.config(width=parent.column1_width)
 
         # Formatting
-        self.inputs["user"].widget.grid(padx=(53, 0))
-        self.inputs["tissue"].widget.grid(padx=(16, 0))
-        self.inputs["celltype"].widget.grid(padx=(28, 0))
-        self.inputs["prefix"].widget.grid(padx=(46, 0))
-        self.inputs["label"].widget.grid(padx=(48, 0))
-        self.inputs["misc"].widget.grid(padx=(40, 0))
+        parent.inputs["user"].widget.grid(padx=(0, 0))
+        parent.inputs["tissue"].widget.grid(padx=(0, 0))
+        parent.inputs["celltype"].widget.grid(padx=(0, 0))
+        parent.inputs["prefix"].widget.grid(padx=(0, 0))
+        parent.inputs["label"].widget.grid(padx=(0, 0))
 
-        # Done and Cancel Buttons
-        self.buttons["Cancel"] = ttk.Button(content_frame, text="Cancel Acquisition")
-        self.buttons["Cancel"].grid(row=10, column=0, padx=5, sticky=tk.NSEW)
 
-        self.buttons["Done"] = ttk.Button(content_frame, text="Acquire Data")
-        self.buttons["Done"].grid(row=10, column=1, padx=(0, 5), sticky=tk.NSEW)
+class TabFrame:
+    def __init__(self, parent: AcquirePopUp, frame: ttk.Frame) -> None:
+        """Initialize the TabFrame
+
+        Parameters
+        ----------
+        parent : AcquirePopUp
+            The AcquirePopup window.
+        frame : ttk.Frame
+            The TabFrame Window.
+        """
+
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_columnconfigure(1, weight=1)
+
+        parent.inputs["misc"] = LabelInput(
+            parent=frame,
+            label="Notes",
+            input_class=ScrolledText,
+            input_args={
+                "wrap": tk.WORD,
+                "width": parent.column2_width + 10,
+                "height": 10,
+            },
+        )
+
+        # LabelInput
+        parent.inputs["misc"].grid(row=0, column=1, columnspan=2, sticky=tk.NSEW)
+
+        # Label
+        parent.inputs["misc"].label.grid(padx=(5, 0))
+        parent.inputs["misc"].label.config(width=parent.column1_width)
+
+        # Widget
+        parent.inputs["misc"].widget.grid(padx=(0, 0), sticky=tk.NSEW)

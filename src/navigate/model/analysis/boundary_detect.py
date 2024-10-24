@@ -521,7 +521,7 @@ def map_labels(
         Array of positions
     """
     if target_pixel_size >= current_pixel_size:
-        return 0, [position]
+        return 1, [position]
     if overlap < 0:
         overlap = 0
 

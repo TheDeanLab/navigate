@@ -547,11 +547,48 @@ class VolumeSearch3D:
         # map labeled cells
         z_start = microscope_state_config["start_position"]
         z_step = microscope_state_config["step_size"]
-        position = self.model.configuration["experiment"]["MultiPositions"][
-            self.position_id
-        ]
+        
+        if microscope_state_config["multiposition_count"] == 0:
+            pos_dict = self.model.get_stage_position
+            position = [
+                pos_dict[f"{axis}_pos"] for axis in ["x", 'y', "z", "theta", "f"]
+            ]
+        else:
+            position = self.model.configuration["experiment"]["MultiPositions"][
+                self.position_id
+            ]
+
         current_microscope_name = self.model.active_microscope_name
-        current_zoom_value = microscope_state_config["zoom"]
+        current_zoom_value = self.model.active_microscope.zoom.zoomvalue
+        # offset
+        if self.target_resolution != current_microscope_name:
+            current_stage_offset = self.model.configuration["configuration"]["microscopes"][
+                current_microscope_name
+            ]["stage"]
+            target_stage_offset = self.model.configuration["configuration"]["microscopes"][
+                self.target_resolution
+            ]["stage"]
+            for i, axis in enumerate(["x", "y", "z", "theta", "f"]):
+                position[i] += target_stage_offset[f"{axis}_offset"] - current_stage_offset[f"{axis}_offset"]
+        else:
+            solvent = self.model.configuration["experiment"]["Saving"]["solvent"]
+            stage_solvent_offsets = self.model.active_microscope.zoom.stage_offsets
+            if solvent in stage_solvent_offsets.keys():
+                stage_offset = stage_solvent_offsets[solvent]
+                for i, axis in enumerate(["x", "y", "z", "theta", "f"]):
+                    if axis not in stage_offset.keys():
+                        continue
+                    try:
+                        position[i] += float(
+                            stage_offset[axis][self.target_zoom][current_zoom_value]
+                        )
+                    except (ValueError, KeyError):
+                        self.model.logger.info(
+                            f"*** Offsets from {self.target_zoom} to {current_zoom_value} are "
+                            f"not implemented! There is not enough information in the "
+                            f"configuration.yaml file!"
+                        )
+        
         current_pixel_size = self.model.configuration["configuration"]["microscopes"][
             current_microscope_name
         ]["zoom"]["pixel_size"][current_zoom_value]

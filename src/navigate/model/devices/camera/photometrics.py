@@ -157,11 +157,12 @@ class PhotometricsBase(CameraBase):
         self.camera_controller.prog_scan_dir = 0
 
         # Photometrics camera settings from config file
-        self.camera_controller.readout_port = self.camera_parameters["readout_port"]
-        self.camera_controller.speed_table_index = self.camera_parameters[
-            "speed_table_index"
-        ]
-        self.camera_controller.gain = self.camera_parameters["gain"]
+        self.camera_controller.readout_port = self.camera_parameters.get(
+            "readout_port", 0)
+        self.camera_controller.speed_table_index = self.camera_parameters.get(
+            "speed_table_index", 0)
+        self.camera_controller.gain = self.camera_parameters.get(
+            "gain", 1)
 
     def __str__(self):
         """Return string representation of PhotometricsBase object.

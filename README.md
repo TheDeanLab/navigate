@@ -12,7 +12,7 @@ navigate
 [![codecov](https://codecov.io/gh/TheDeanLab/navigate/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/navigate)
 
 **navigate** is an open source Python package for control of light-sheet microscopes.
-It allows for easily reconfigurable hardware setups and automated acquisition rotuines.
+It allows for easily reconfigurable hardware setups and automated acquisition routines.
 
 ### Quick install
 

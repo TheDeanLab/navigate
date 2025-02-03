@@ -3,11 +3,12 @@ requires = ["setuptools>=43.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "navigate-micro"
+name = "navigate"
 description = "Open source, smart, light-sheet microscopy control software."
 authors = [{name = "The Dean Lab, UT Southwestern Medical Center"}]
 readme = "README.md"
 license = {file = "LICENSE.md"}
+version = "0.0.9"
 dynamic = ["version"]
 classifiers = [
     "Intended Audience :: Developers",
@@ -19,28 +20,23 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
-requires-python = ">=3.9.7"
+requires-python = ">3.11, <3.14"
 dependencies = [
-    'matplotlib-inline==0.1.3',
-    'PyYAML==6.0',
-    'pyserial==3.5',
-    'PIPython==2.6.0.1',
-    'nidaqmx==0.5.7',
-    'tifffile==2021.11.2',
-    'scipy==1.7.3',
-    'pyusb==1.2.1',
-    'pandas==1.3.5',
-    'pandastable==0.12.2.post1',
-    'opencv-python==4.5.5.62',
-    'numpy==1.22.0; sys_platform != "darwin"',
-    'numpy==1.21.6; sys_platform == "darwin"',
-    'scikit-image==0.19.1',
-    'zarr==2.14.2',
-    'fsspec==2022.8.2; sys_platform != "darwin"',
-    'fsspec==2022.5.0; sys_platform == "darwin"',
-    'h5py==3.7.0',
-    'requests==2.28.1',
-    'psutil==6.0.0'
+    'PyYAML',
+    'pyserial',
+    'PIPython',
+    'nidaqmx',
+    'tifffile',
+    'scipy',
+    'pandas',
+    'pandastable',
+    'opencv-python',
+    'numpy',
+    'scikit-image',
+    'zarr',
+    'h5py',
+    'requests',
+    'psutil'
     ]
 
 [project.scripts]
@@ -54,19 +50,25 @@ dev = [
     "pre-commit",
     "ipykernel",
     "jupyterlab",
-    "pydantic-ome-ngff==0.5.3"
+    "pydantic-ome-ngff"
     ]
+
+spurious = [
+    'matplotlib-inline',
+    'pyusb',
+    'fsspec',
+]
 
 docs = [
     "numpydoc",
     "nbconvert",
-    "sphinx<6.0.0",
+    "sphinx",
     "sphinx_rtd_theme",
     "sphinx-copybutton",
     "sphinx-issues",
     "sphinx-design",
     "pyyaml",
-    "pydata_sphinx_theme==0.10.0rc2",
+    "pydata_sphinx_theme",
     "sphinx-toolbox"
 ]
 
@@ -77,5 +79,5 @@ robot = [
 [project.urls]
 Source = "https://github.com/TheDeanLab/navigate"
 
-[tool.setuptools.dynamic]
-version = {file = "src/navigate/VERSION"}
+#[tool.setuptools.dynamic]
+#version = {file = "src/navigate/VERSION"}

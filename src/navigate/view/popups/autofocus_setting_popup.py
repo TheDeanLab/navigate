@@ -122,7 +122,7 @@ class AutofocusPopup:
         setting_labels = ["Coarse", "Fine", "Inverse Power Tent Fit"]
         for i in range(2):
             # Column 0 - Checkboxes
-            variable = tk.BooleanVar(False)
+            variable = tk.BooleanVar(value=False)
             widget = ttk.Checkbutton(
                 content_frame, text=setting_labels[i], variable=variable
             )
@@ -170,7 +170,7 @@ class AutofocusPopup:
             row=starting_row_id + 4, column=2, padx=(0, 25), pady=(10, 10), sticky=tk.E
         )
 
-        variable = tk.BooleanVar(False)
+        variable = tk.BooleanVar(value=False)
         robust_fit = ttk.Checkbutton(
             content_frame, text=setting_labels[2], variable=variable
         )

@@ -76,7 +76,12 @@ class PluginPackageManager:
             plugins dict
         """
         plugins = {}
-        for entry_point in entry_points().get("navigate.plugins", []):
+        eps = entry_points()
+        if hasattr(eps, "select"):
+            plugin_eps = eps.select(group="navigate.plugins")
+        else:
+            plugin_eps = eps.get("navigate.plugins", [])
+        for entry_point in plugin_eps:
             plugin_package_name = entry_point.module.split(".")[0]
             if plugin_package_name in plugins:
                 error_statement = (

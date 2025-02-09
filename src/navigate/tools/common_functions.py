@@ -28,20 +28,25 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
+
+# Standard Library Imports
 import importlib
 from threading import Lock
+from typing import Optional, Any
 
-from typing_extensions import Optional
+
+# Third Party Imports
+
+# Local Imports
 
 
-def combine_funcs(*funclist):
+def combine_funcs(*function_list):
     """this function will combine a list of functions to a new function
 
     Parameters
     ----------
-    funclist: list
+    function_list: list
         a list of functions
 
     Returns
@@ -51,7 +56,7 @@ def combine_funcs(*funclist):
     """
 
     def new_func():
-        for func in funclist:
+        for func in function_list:
             if callable(func):
                 func()
 
@@ -132,13 +137,48 @@ def load_module_from_file(module_name: str, file_path: str) -> Optional[any]:
 
 
 class VariableWithLock:
-    def __init__(self, VariableType):
+    def __init__(self,
+                 variable_type: type
+                 ) -> None:
+        """Initialize the variable with lock
+
+        Parameters
+        ----------
+        variable_type: type
+            The variable type
+        """
+
+        #: Lock: The lock
         self.lock = Lock()
-        self.value = VariableType()
+
+        #: variable_type: The variable type
+        self.value = variable_type()
 
     def __enter__(self):
+        """Acquire the lock
+
+        Returns
+        -------
+        self: VariableWithLock
+            The variable with lock
+        """
         self.lock.acquire()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self,
+                 exc_type: Any,
+                 exc_val: Any,
+                 exc_tb: Any) -> None:
+        """Release the lock
+
+        Parameters
+        ----------
+        exc_type: Any
+            The exception type
+        exc_val: Any
+            The exception value
+        exc_tb: Any
+            The exception traceback
+        """
+
         self.lock.release()

@@ -45,6 +45,7 @@ from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.validation import ValidatedEntry
 import navigate
+# from navigate.view.main_window_content.settings_notebook import SettingsNotebook
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -86,13 +87,16 @@ class StageControlTab(tk.Frame):
     """Stage Control Tab for stage control notebook."""
 
     def __init__(
-        self, note3: StageControlNotebook, *args: Iterable, **kwargs: dict
+            self,
+            note3,
+            *args: Iterable,
+            **kwargs: dict
     ) -> None:
         """Initialize the stage control tab.
 
         Parameters
         ----------
-        note3 : StageControlNotebook
+        note3 : SettingsNotebook
             Stage control notebook.
         *args : Iterable
             Arguments for tk.Frame

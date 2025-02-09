@@ -32,9 +32,7 @@
 # Standard Imports
 import logging
 import time
-from typing import Any, Dict
-
-from typing_extensions import Optional
+from typing import Any, Dict, Optional
 
 # Third Party Imports
 

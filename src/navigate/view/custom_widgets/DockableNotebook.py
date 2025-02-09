@@ -45,9 +45,130 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+class ScrollableContainer(ttk.Frame):
+    """ Scrollable container with left/right arrow buttons
+
+    A container frame that holds:
+      - A left arrow button
+      - A DockableNotebook (scrollable or not)
+      - A right arrow button
+
+    If `scrollable=False` is given, this container simply places the
+    DockableNotebook without showing arrow buttons or hiding tabs.
+    """
+
+    def __init__(self, parent, root, scrollable=False, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        parent : tk or ttk container
+            The parent widget for this container frame.
+        root : tk.Tk
+            The root window (used by the DockableNotebook).
+        scrollable : bool
+            If True, enable tab scrolling (default=False).
+        """
+        super().__init__(parent, *args, **kwargs)
+
+        self.root = root
+
+        self.notebook = DockableNotebook(self, root)
+
+        self.scrollable = scrollable
+
+        if not self.scrollable:
+            self.notebook.grid(row=0, column=0, sticky="nsew")
+            self.rowconfigure(0, weight=1)
+            self.columnconfigure(0, weight=1)
+            return
+
+        self.arrow_frame = ttk.Frame(self)
+        self.arrow_frame.grid(row=0, column=0, sticky="w")
+        self._left_arrow = ttk.Button(
+            self.arrow_frame, text="◀", width=1, command=self._scroll_left
+        )
+        self._left_arrow.pack(side="left", padx=1, pady=1)
+
+        self._right_arrow = ttk.Button(
+            self.arrow_frame, text="▶", width=1, command=self._scroll_right
+        )
+        self._right_arrow.pack(side="left", padx=1, pady=1)
+
+        self.notebook.grid(row=1, column=0, sticky="nsew")
+        self.rowconfigure(1, weight=1)
+        self.columnconfigure(0, weight=1)
+
+        # Bind events to update arrow states
+        self.notebook.bind("<<NotebookTabChanged>>", self._update_scrollable_tabs)
+        self.notebook.bind("<Configure>", self._update_scrollable_tabs)
+
+    def _scroll_left(self):
+        """
+        Move the 'visible window' of tabs one step to the left.
+        """
+        self.notebook.scroll_left()
+        self._update_scrollable_tabs()
+
+    def _scroll_right(self):
+        """
+        Move the 'visible window' of tabs one step to the right.
+        """
+        self.notebook.scroll_right()
+        self._update_scrollable_tabs()
+
+    def _update_scrollable_tabs(self, event=None):
+        """
+        Calls the notebook's internal method to recalc visible tabs,
+        then updates arrow states.
+        """
+        self.notebook.update_scrollable_tabs()
+        # Example: if the notebook is at the leftmost possible view, disable left arrow
+        if self.notebook.at_left_edge:
+            self._left_arrow.configure(state="disabled")
+        else:
+            self._left_arrow.configure(state="normal")
+
+        # If the notebook is at the rightmost possible view, disable right arrow
+        if self.notebook.at_right_edge:
+            self._right_arrow.configure(state="disabled")
+        else:
+            self._right_arrow.configure(state="normal")
+
+    def add(self, child, **kwargs):
+        """Pass-through to DockableNotebook.add()"""
+        return self.notebook.add(child, **kwargs)
+
+    def insert(self, index, child, **kwargs):
+        """Pass-through to DockableNotebook.insert()"""
+        return self.notebook.insert(index, child, **kwargs)
+
+    def hide(self, tab_id):
+        """Pass-through to DockableNotebook.hide()"""
+        self.notebook.hide(tab_id)
+
+    def select(self, tab_id=None):
+        """Pass-through to DockableNotebook.select()"""
+        return self.notebook.select(tab_id)
+
+    def tabs(self):
+        """Return all tab IDs"""
+        return self.notebook.tabs()
+
+    def index(self, tab_id):
+        return self.notebook.index(tab_id)
+
+    @property
+    def tab_list(self):
+        return self.notebook.tab_list
+
+    def set_tablist(self, tab_list):
+        self.notebook.set_tablist(tab_list)
+
+
+
 class DockableNotebook(ttk.Notebook):
     """Dockable Notebook that allows for tabs to be popped out into a separate
-    windows by right clicking on the tab. The tab must be selected before
+    windows by right-clicking on the tab. The tab must be selected before
     right-clicking.
     """
 
@@ -66,15 +187,13 @@ class DockableNotebook(ttk.Notebook):
         **kwargs:
             Keyword options for the ttk.Notebook class
         """
-        ttk.Notebook.__init__(self, parent, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
+
         #: tk.Tk: Tkinter root
         self.root = root
+
         #: list: List of tab variables
         self.tab_list = []
-
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Popup setup
         #: tk.Menu: Tkinter menu
@@ -86,6 +205,28 @@ class DockableNotebook(ttk.Notebook):
             self.bind("<ButtonPress-2>", self.find)
         else:
             self.bind("<ButtonPress-3>", self.find)
+
+        # Internal indexes for scrolling
+        self._start_index = 0  # first visible tab index
+        self._visible_count = None  # how many tabs can fit at once?
+
+        # Track edges to know when to disable arrow buttons
+        self.at_left_edge = True
+        self.at_right_edge = False
+
+        # Add your pop-out logic’s Menu
+        self.menu = tk.Menu(self, tearoff=0)
+        self.menu.add_command(label="Popout Tab", command=self.popout)
+
+        # Bind right-click or middle-click on Mac
+        if platform.system() == "Darwin":
+            self.bind("<ButtonPress-2>", self._on_tab_rightclick)
+        else:
+            self.bind("<ButtonPress-3>", self._on_tab_rightclick)
+
+        # Setup grid formatting if needed
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
     def set_tablist(self, tab_list):
         """Setter for tab list
@@ -110,6 +251,15 @@ class DockableNotebook(ttk.Notebook):
         x = self.root.winfo_pointerx()
         y = self.root.winfo_pointery()
         return x, y
+
+    def _on_tab_rightclick(self, event):
+        element = event.widget.identify(event.x, event.y)
+        if "label" in element:
+            try:
+                x, y = self.get_absolute_position()
+                self.menu.tk_popup(x, y)
+            finally:
+                self.menu.grab_release()
 
     def find(self, event):
         """Find the widget that was clicked on.
@@ -187,3 +337,74 @@ class DockableNotebook(ttk.Notebook):
             tab.is_docked = True
         elif tab_text == "Waveform Settings":
             tab.is_docked = True
+
+    def add(self, child, **kwargs):
+        """
+        Override to recalc scroll positions after new tab is added.
+        """
+        super().add(child, **kwargs)
+        self.update_scrollable_tabs()
+
+    def insert(self, index, child, **kwargs):
+        """
+        Override to recalc scroll positions after new tab is inserted.
+        """
+        super().insert(index, child, **kwargs)
+        self.update_scrollable_tabs()
+
+    def scroll_left(self):
+        """
+        Shift the visible tab range to the left (start_index -= 1).
+        """
+        if self._start_index > 0:
+            self._start_index -= 1
+        self.update_scrollable_tabs()
+
+    def scroll_right(self):
+        """
+        Shift the visible tab range to the right (start_index += 1).
+        """
+        max_index = len(self.tabs()) - 1
+        if self._start_index < max_index:
+            self._start_index += 1
+        self.update_scrollable_tabs()
+
+    def update_scrollable_tabs(self, event=None):
+        """
+        Hide/show tabs so that only the subset of tabs that fit are visible.
+        This is a simplistic approach. You can improve it by measuring actual
+        pixel widths and/or the total available space for the tab row.
+        """
+        all_tabs = self.tabs()
+        if not all_tabs:
+            return
+
+        # For example, you might guess that each tab's label is about 100 px wide
+        # or measure them precisely with winfo_reqwidth. We'll do a rough approach:
+        total_width = self.winfo_width()
+        if total_width < 1:
+            # If not mapped yet, skip
+            return
+
+        # In a real approach, you'd measure each tab label's width. For simplicity,
+        # assume 120px per tab.
+        approx_tab_width = 120
+        self._visible_count = max(1, total_width // approx_tab_width)
+
+        # compute end index = start index + how many tabs fit - 1
+        end_index = self._start_index + self._visible_count - 1
+
+        # clamp if end_index goes beyond available tabs
+        end_index = min(end_index, len(all_tabs) - 1)
+
+        # Hide all tabs, then re-show only the range
+        for i, tab_id in enumerate(all_tabs):
+            if i < self._start_index or i > end_index:
+                self.tab(tab_id, state="hidden")
+            else:
+                self.tab(tab_id, state="normal")
+
+        # Check if we are at the leftmost edge
+        self.at_left_edge = (self._start_index == 0)
+        # Check if we are at the rightmost edge
+        self.at_right_edge = (end_index == len(all_tabs) - 1)

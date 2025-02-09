@@ -38,9 +38,10 @@ from tkinter import ttk
 # Third Party Imports
 
 # Local Imports
-from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
-
-# Import Sub-Frames
+from navigate.view.custom_widgets.DockableNotebook import (
+    DockableNotebook,
+    ScrollableContainer
+)
 from navigate.view.main_window_content.camera_tab import CameraSettingsTab
 from navigate.view.main_window_content.channels_tab import ChannelsTab
 from navigate.view.main_window_content.stage_tab import StageControlTab
@@ -81,34 +82,38 @@ class SettingsNotebook(DockableNotebook):
         """
 
         # Init notebook
-        DockableNotebook.__init__(self, frame_left, root, *args, **kwargs)
+        super().__init__(frame_left, root, *args, **kwargs)
 
         # Putting notebook 1 into left frame
-        self.grid(row=0, column=0)
+        self.grid(row=0, column=0, sticky="nsew")
+
+        #: ScrollableContainer: The scrollable container for the notebook
+        self.notebook_container = ScrollableContainer(self, root, scrollable=True)
+        self.notebook_container.pack(fill="both", expand=True)
 
         #: ChannelsTab: Channels tab
-        self.channels_tab = ChannelsTab(self)
+        self.channels_tab = ChannelsTab(self.notebook_container.notebook)
 
         #: CameraSettingsTab: Camera settings tab
-        self.camera_settings_tab = CameraSettingsTab(self)
+        self.camera_settings_tab = CameraSettingsTab(self.notebook_container.notebook)
 
         #: StageControlTab: Stage control tab
-        self.stage_control_tab = StageControlTab(self)
+        self.stage_control_tab = StageControlTab(self.notebook_container.notebook)
 
         # MultiPositionTab: MultiPositionTab tab
-        self.multiposition_tab = MultiPositionTab(self)
+        self.multiposition_tab = MultiPositionTab(self.notebook_container.notebook)
 
-        # Tab list
-        tab_list = [
+        # Adding tabs to settings notebook
+        self.notebook_container.add(self.channels_tab, text="Channels", sticky=tk.NSEW)
+        self.notebook_container.add(self.camera_settings_tab, text="Camera Settings", sticky=tk.NSEW)
+        self.notebook_container.add(self.stage_control_tab, text="Stage Control", sticky=tk.NSEW)
+        self.notebook_container.add(self.multiposition_tab, text="Multiposition", sticky=tk.NSEW)
+
+        # If you rely on self.tab_list for pop-out logic, set it now:
+        all_tabs = [
             self.channels_tab,
             self.camera_settings_tab,
             self.stage_control_tab,
-            self.multiposition_tab,
+            self.multiposition_tab
         ]
-        self.set_tablist(tab_list)
-
-        # Adding tabs to settings notebook
-        self.add(self.channels_tab, text="Channels", sticky=tk.NSEW)
-        self.add(self.camera_settings_tab, text="Camera Settings", sticky=tk.NSEW)
-        self.add(self.stage_control_tab, text="Stage Control", sticky=tk.NSEW)
-        self.add(self.multiposition_tab, text="Multiposition", sticky=tk.NSEW)
+        self.notebook_container.set_tablist(all_tabs)

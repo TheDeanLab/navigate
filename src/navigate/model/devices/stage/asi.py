@@ -124,6 +124,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             # pixel size is in microns, finishing accuracy is in mm
             # TODO: check this over all microscopes sharing this stage,
             #       not just the current one
+
             finishing_accuracy = (
                 0.001
                 * min(
@@ -144,6 +145,27 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 else:
                     self.asi_controller.set_finishing_accuracy(ax, finishing_accuracy)
                     self.asi_controller.set_error(ax, 1.2 * finishing_accuracy)
+
+            # finishing_accuracy = (
+            #     0.000084
+            #     * min(
+            #         list(
+            #             configuration["configuration"]["microscopes"][microscope_name][
+            #                 "zoom"
+            #             ]["pixel_size"].values()
+            #         )
+            #     )
+            #     / 2
+            # )
+            # # If this is changing, the stage must be power cycled for these changes to
+            # # take effect.
+            # for ax in self.asi_axes.keys():
+            #     if self.asi_axes[ax] == "theta":
+            #         self.tiger_controller.set_finishing_accuracy(ax, 0.000084)
+            #         self.tiger_controller.set_error(ax, 0.000101)
+            #     else:
+            #         self.tiger_controller.set_finishing_accuracy(ax, 0.000084)
+            #         self.tiger_controller.set_error(ax, 0.000101)
 
             # Set backlash to 0 (less accurate)
             for ax in self.asi_axes.keys():

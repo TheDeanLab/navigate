@@ -44,7 +44,7 @@ import numpy as np
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.model.features.autofocus import Autofocus
-from navigate.model.features.adaptive_optics import TonyWilson
+from navigate.model.features.adaptive_optics import TonyWilson, ProjectionAO
 from navigate.model.features.image_writer import ImageWriter
 from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from navigate.model.features.common_features import (
@@ -727,6 +727,9 @@ class Model:
         elif command == "tony_wilson":
             tony_wilson = TonyWilson(self)
             tony_wilson.run(*args)
+        elif command == "projection_ao":
+            proj_ao = ProjectionAO(self)
+            proj_ao.run(*args)
 
         elif command == "load_feature":
             """

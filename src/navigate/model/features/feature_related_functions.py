@@ -42,7 +42,7 @@ from typing import Optional, Union
 # Local application imports
 from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from navigate.model.features.autofocus import Autofocus  # noqa
-from navigate.model.features.adaptive_optics import TonyWilson  # noqa
+from navigate.model.features.adaptive_optics import TonyWilson, ProjectionAO  # noqa
 from navigate.model.features.common_features import (
     Snap,  # noqa
     WaitToContinue,  # noqa

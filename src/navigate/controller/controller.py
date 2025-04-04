@@ -1034,6 +1034,15 @@ class Controller:
                     "live",
                 ),
             )
+        elif command == "projection_ao":
+            self.threads_pool.createThread(
+                "camera",
+                self.capture_image,
+                args=(
+                    "projection_ao",
+                    "live",
+                ),
+            )            
         else:
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command(command, *args)

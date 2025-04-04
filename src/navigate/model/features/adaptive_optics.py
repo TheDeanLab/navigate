@@ -152,6 +152,35 @@ def fourier_annulus(im, radius_1=0, radius_2=64):
 
     return np.mean(IM_mask), IM_mask
 
+class ProjectionAO:
+
+    def __init__(self, model):
+
+        self.model = model
+
+        self.f_frame_id = None
+
+        self.tw_frame_queue = Queue()
+        self.tw_data_queue = Queue()
+        
+        #: dict: Configuration table
+        self.config_table = {
+            "signal": {
+                "init": self.pre_func_signal,
+                "main": self.in_func_signal,
+                "end": self.end_func_signal,
+            },
+            "data": {
+                "init": self.pre_func_data,
+                "main": self.in_func_data,
+                "end": self.end_func_data,
+            },
+            "node": {"node_type": "multi-step", "device_related": True},
+        }        
+
+    def run(self, *args):
+
+        print("Running Projection AO!")
 
 class TonyWilson:
     """Tony Wilson iterative AO routine"""

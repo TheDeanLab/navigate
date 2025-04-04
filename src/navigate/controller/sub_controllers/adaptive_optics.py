@@ -116,7 +116,10 @@ class AdaptiveOpticsPopupController(GUIController):
         self.view.from_wcs_button.configure(command=self.set_from_wcs_file)
         self.view.select_all_modes.configure(command=self.select_all_modes)
         self.view.deselect_all_modes.configure(command=self.deselect_all_modes)
-        self.view.tony_wilson_button.configure(command=self.run_tony_wilson)
+        
+        # add toggle box later...
+        # self.view.tony_wilson_button.configure(command=self.run_tony_wilson)
+        self.view.tony_wilson_button.configure(command=self.run_projection_ao)
 
         for k in self.modes_armed.keys():
             self.modes_armed[k]["button"].configure(
@@ -327,6 +330,9 @@ class AdaptiveOpticsPopupController(GUIController):
                 filetypes=[("JSON", "*.json")],
             )
         self.parent_controller.execute("tony_wilson")
+    
+    def run_projection_ao(self):
+        self.parent_controller.execute("projection_ao")
 
     def save_report_to_file(self, report):
         print("Saving report!")

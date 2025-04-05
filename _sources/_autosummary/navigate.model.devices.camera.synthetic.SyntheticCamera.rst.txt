@@ -29,11 +29,13 @@ navigate.model.devices.camera.synthetic.SyntheticCamera
       ~SyntheticCamera.load_images
       ~SyntheticCamera.report_settings
       ~SyntheticCamera.set_ROI
+      ~SyntheticCamera.set_ROI_and_binning
       ~SyntheticCamera.set_binning
       ~SyntheticCamera.set_exposure_time
       ~SyntheticCamera.set_line_interval
       ~SyntheticCamera.set_readout_direction
       ~SyntheticCamera.set_sensor_mode
+      ~SyntheticCamera.set_trigger_mode
    
    
 

@@ -19,6 +19,8 @@ navigate.model.devices.filter\_wheel.asi.ASIFilterWheel
       ~ASIFilterWheel.__init__
       ~ASIFilterWheel.check_if_filter_in_filter_dictionary
       ~ASIFilterWheel.close
+      ~ASIFilterWheel.connect
+      ~ASIFilterWheel.disconnect
       ~ASIFilterWheel.filter_change_delay
       ~ASIFilterWheel.set_filter
    
@@ -30,8 +32,6 @@ navigate.model.devices.filter\_wheel.asi.ASIFilterWheel
 
    .. autosummary::
    
-      ~ASIFilterWheel.filter_wheel
-      ~ASIFilterWheel.device_config
       ~ASIFilterWheel.wait_until_done_delay
       ~ASIFilterWheel.filter_wheel_position
       ~ASIFilterWheel.device_connection

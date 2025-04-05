@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.stages.StageController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.stages.StageController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.stages.StageController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-stages-stagecontroller">
+<h1>navigate.controller.sub_controllers.stages.StageController<a class="headerlink" href="#navigate-controller-sub-controllers-stages-stagecontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.stages.</span></span><span class="sig-name descname"><span class="pre">StageController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_window_content.stage_tab.StageControlTab.html#navigate.view.main_window_content.stage_tab.StageControlTab" title="navigate.view.main_window_content.stage_tab.StageControlTab"><span class="pre">StageControlTab</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_application_window.MainApp.html#navigate.view.main_application_window.MainApp" title="navigate.view.main_application_window.MainApp"><span class="pre">MainApp</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><span class="pre">Controller</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>This class is the controller for the stage GUI. It handles the stage movement
+and the stage limits. It also handles the stage movement buttons and the
+stage movement limits.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_window_content.stage_tab.StageControlTab.html#navigate.view.main_window_content.stage_tab.StageControlTab" title="navigate.view.main_window_content.stage_tab.StageControlTab"><span class="pre">StageControlTab</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_application_window.MainApp.html#navigate.view.main_application_window.MainApp" title="navigate.view.main_application_window.MainApp"><span class="pre">MainApp</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><span class="pre">Controller</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes the StageController</p>
+<dl class="simple">
+<dt>Parameters</dt><dd><dl class="simple">
+<dt>view<span class="classifier">navigate.view.stage_view.StageView</span></dt><dd><p>The stage view</p>
+</dd>
+<dt>main_view<span class="classifier">tkinter.Tk</span></dt><dd><p>The main view of the microscope</p>
+</dd>
+<dt>canvas<span class="classifier">tkinter.Canvas</span></dt><dd><p>The canvas of the microscope</p>
+</dd>
+<dt>parent_controller<span class="classifier">navigate.controller.Controller</span></dt><dd><p>The parent controller of the stage controller</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.__init__" title="navigate.controller.sub_controllers.stages.StageController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, main_view, canvas, ...)</p></td>
+<td><p>Initializes the StageController</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.bind_position_callbacks" title="navigate.controller.sub_controllers.stages.StageController.bind_position_callbacks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bind_position_callbacks</span></code></a>()</p></td>
+<td><p>Binds position_callback() to each axis, records the trace name so we can unbind later.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.disable_synthetic_stages" title="navigate.controller.sub_controllers.stages.StageController.disable_synthetic_stages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable_synthetic_stages</span></code></a>(config)</p></td>
+<td><p>Disable synthetic stages.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.down_btn_handler" title="navigate.controller.sub_controllers.stages.StageController.down_btn_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">down_btn_handler</span></code></a>(axis[, large_step])</p></td>
+<td><p>This function generates command functions according to the desired axis to move.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.execute" title="navigate.controller.sub_controllers.stages.StageController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.force_enable_all_axes" title="navigate.controller.sub_controllers.stages.StageController.force_enable_all_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">force_enable_all_axes</span></code></a>([event])</p></td>
+<td><p>Enables all buttons and entries on the stage tab.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.get_position" title="navigate.controller.sub_controllers.stages.StageController.get_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position</span></code></a>()</p></td>
+<td><p>This function returns current position from the view.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.initialize" title="navigate.controller.sub_controllers.stages.StageController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>Initialize the Stage limits of steps and positions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.joystick_button_handler" title="navigate.controller.sub_controllers.stages.StageController.joystick_button_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">joystick_button_handler</span></code></a>([event])</p></td>
+<td><p>Toggle the joystick operation mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.populate_experiment_values" title="navigate.controller.sub_controllers.stages.StageController.populate_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_values</span></code></a>()</p></td>
+<td><p>This function sets all the position and step values</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.position_callback" title="navigate.controller.sub_controllers.stages.StageController.position_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">position_callback</span></code></a>(axis, *args, **kwargs)</p></td>
+<td><p>Callback functions bind to position variables.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.register_event_listener" title="navigate.controller.sub_controllers.stages.StageController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.set_experiment_values" title="navigate.controller.sub_controllers.stages.StageController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.set_hover_descriptions" title="navigate.controller.sub_controllers.stages.StageController.set_hover_descriptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_hover_descriptions</span></code></a>()</p></td>
+<td><p>Set hover descriptions for the stage tab</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.set_position" title="navigate.controller.sub_controllers.stages.StageController.set_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_position</span></code></a>(position)</p></td>
+<td><p>This function is to populate(set) position in the View</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.set_position_silent" title="navigate.controller.sub_controllers.stages.StageController.set_position_silent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_position_silent</span></code></a>(position)</p></td>
+<td><p>This function is to populate(set) position in the View without a trace.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.show_verbose_info" title="navigate.controller.sub_controllers.stages.StageController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.stage_key_press" title="navigate.controller.sub_controllers.stages.StageController.stage_key_press"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_key_press</span></code></a>(event)</p></td>
+<td><p>The stage key press.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.stop_button_handler" title="navigate.controller.sub_controllers.stages.StageController.stop_button_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_button_handler</span></code></a>(*args)</p></td>
+<td><p>This function stops the stage after a 250 ms debouncing period of time.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.unbind_position_callbacks" title="navigate.controller.sub_controllers.stages.StageController.unbind_position_callbacks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unbind_position_callbacks</span></code></a>()</p></td>
+<td><p>Unbinds position callbacks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.up_btn_handler" title="navigate.controller.sub_controllers.stages.StageController.up_btn_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up_btn_handler</span></code></a>(axis[, large_step])</p></td>
+<td><p>This function generates command functions according to the desired axis to move.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.update_experiment_values" title="navigate.controller.sub_controllers.stages.StageController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Collects all the values of widgets</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.update_step_size_handler" title="navigate.controller.sub_controllers.stages.StageController.update_step_size_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_step_size_handler</span></code></a>(axis)</p></td>
+<td><p>Callback functions bind to step size variables</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.custom_events" title="navigate.controller.sub_controllers.stages.StageController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for the controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.new_joystick_axes" title="navigate.controller.sub_controllers.stages.StageController.new_joystick_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_joystick_axes</span></code></a></p></td>
+<td><p>The joystick axes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.default_microscope" title="navigate.controller.sub_controllers.stages.StageController.default_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_microscope</span></code></a></p></td>
+<td><p>The default microscope</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.joystick_is_on" title="navigate.controller.sub_controllers.stages.StageController.joystick_is_on"><code class="xref py py-obj docutils literal notranslate"><span class="pre">joystick_is_on</span></code></a></p></td>
+<td><p>The joystick mode is on.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.joystick_axes" title="navigate.controller.sub_controllers.stages.StageController.joystick_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">joystick_axes</span></code></a></p></td>
+<td><p>The joystick axes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.stage_setting_dict" title="navigate.controller.sub_controllers.stages.StageController.stage_setting_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_setting_dict</span></code></a></p></td>
+<td><p>The stage setting dictionary</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.event_id" title="navigate.controller.sub_controllers.stages.StageController.event_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_id</span></code></a></p></td>
+<td><p>The event id</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.position_min" title="navigate.controller.sub_controllers.stages.StageController.position_min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">position_min</span></code></a></p></td>
+<td><p>The minimum stage positions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.position_max" title="navigate.controller.sub_controllers.stages.StageController.position_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">position_max</span></code></a></p></td>
+<td><p>The maximum stage positions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.widget_vals" title="navigate.controller.sub_controllers.stages.StageController.widget_vals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">widget_vals</span></code></a></p></td>
+<td><p>The widget values for the stage position and step sizes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.position_callback_traces" title="navigate.controller.sub_controllers.stages.StageController.position_callback_traces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">position_callback_traces</span></code></a></p></td>
+<td><p>The position callback traces</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.position_callbacks_bound" title="navigate.controller.sub_controllers.stages.StageController.position_callbacks_bound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">position_callbacks_bound</span></code></a></p></td>
+<td><p>The position callbacks are bound</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.stage_limits" title="navigate.controller.sub_controllers.stages.StageController.stage_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_limits</span></code></a></p></td>
+<td><p>The stage limits are on</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.stages.StageController.flip_flags" title="navigate.controller.sub_controllers.stages.StageController.flip_flags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flip_flags</span></code></a></p></td>
+<td><p>The stage flip flags</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.bind_position_callbacks">
+<span class="sig-name descname"><span class="pre">bind_position_callbacks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.bind_position_callbacks" title="Permalink to this definition"></a></dt>
+<dd><p>Binds position_callback() to each axis, records the trace name so we can
+unbind later.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.disable_synthetic_stages">
+<span class="sig-name descname"><span class="pre">disable_synthetic_stages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.controller.configuration_controller.ConfigurationController.html#navigate.controller.configuration_controller.ConfigurationController" title="navigate.controller.configuration_controller.ConfigurationController"><span class="pre">ConfigurationController</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.disable_synthetic_stages" title="Permalink to this definition"></a></dt>
+<dd><p>Disable synthetic stages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="navigate.controller.configuration_controller.ConfigurationController.html#navigate.controller.configuration_controller.ConfigurationController" title="navigate.controller.configuration_controller.ConfigurationController"><em>ConfigurationController</em></a>) – The configuration controller</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.down_btn_handler">
+<span class="sig-name descname"><span class="pre">down_btn_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">large_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.down_btn_handler" title="Permalink to this definition"></a></dt>
+<dd><p>This function generates command functions according to the desired axis
+to move.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Should be one of ‘x’, ‘y’, ‘z’, ‘theta’, ‘f’
+position_axis += step_axis</p></li>
+<li><p><strong>large_step</strong> (<em>bool</em>) – If True, the step size is 5x the normal step size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>handler</strong> – Function for setting desired stage positions in the View.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable[[], None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.force_enable_all_axes">
+<span class="sig-name descname"><span class="pre">force_enable_all_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Event</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.force_enable_all_axes" title="Permalink to this definition"></a></dt>
+<dd><p>Enables all buttons and entries on the stage tab.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event</strong> (<em>Optional</em><em>[</em><em>tk.Event</em><em>]</em>) – The tkinter event (currently unused)</p></li>
+<li><p><strong>*args</strong> (<em>Iterable</em>) – Variable length argument list</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.get_position">
+<span class="sig-name descname"><span class="pre">get_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.get_position" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns current position from the view.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> – Dictionary of x, y, z, theta, and f values. None if the value is not valid.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[dict[str, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the Stage limits of steps and positions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.joystick_button_handler">
+<span class="sig-name descname"><span class="pre">joystick_button_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Event</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.joystick_button_handler" title="Permalink to this definition"></a></dt>
+<dd><p>Toggle the joystick operation mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event</strong> (<em>Optional</em><em>[</em><em>tk.Event</em><em>]</em>) – The tkinter event</p></li>
+<li><p><strong>*args</strong> (<em>Iterable</em>) – Variable length argument list</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.populate_experiment_values">
+<span class="sig-name descname"><span class="pre">populate_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.populate_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>This function sets all the position and step values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.position_callback">
+<span class="sig-name descname"><span class="pre">position_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.position_callback" title="Permalink to this definition"></a></dt>
+<dd><p>Callback functions bind to position variables.</p>
+<p>Implements debounce functionality for user inputs (or click buttons) to reduce
+time costs of moving stage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – axis can be ‘x’, ‘y’, ‘z’, ‘theta’, ‘f’</p></li>
+<li><p><strong>*args</strong> (<em>Iterable</em>) – Variable length argument list</p></li>
+<li><p><strong>kwargs</strong> (<em>Iterable</em>) – Variable length keyword argument list</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>handler</strong> – Function for moving stage to the desired position with debounce
+functionality.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable[[], None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.set_hover_descriptions">
+<span class="sig-name descname"><span class="pre">set_hover_descriptions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.set_hover_descriptions" title="Permalink to this definition"></a></dt>
+<dd><p>Set hover descriptions for the stage tab</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.set_position">
+<span class="sig-name descname"><span class="pre">set_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.set_position" title="Permalink to this definition"></a></dt>
+<dd><p>This function is to populate(set) position in the View</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em>) – {‘x’: value, ‘y’: value, ‘z’: value, ‘theta’: value, ‘f’: value}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.set_position_silent">
+<span class="sig-name descname"><span class="pre">set_position_silent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.set_position_silent" title="Permalink to this definition"></a></dt>
+<dd><p>This function is to populate(set) position in the View without a trace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em>) – {‘x’: value, ‘y’: value, ‘z’: value, ‘theta’: value, ‘f’: value}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.stage_key_press">
+<span class="sig-name descname"><span class="pre">stage_key_press</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.stage_key_press" title="Permalink to this definition"></a></dt>
+<dd><p>The stage key press.</p>
+<p>This function is called when a W, A, S, or D is
+pressed and initializes a stage movement..</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – The tkinter event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.stop_button_handler">
+<span class="sig-name descname"><span class="pre">stop_button_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.stop_button_handler" title="Permalink to this definition"></a></dt>
+<dd><p>This function stops the stage after a 250 ms debouncing period of time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>Iterable</em>) – Variable length argument list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.unbind_position_callbacks">
+<span class="sig-name descname"><span class="pre">unbind_position_callbacks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.unbind_position_callbacks" title="Permalink to this definition"></a></dt>
+<dd><p>Unbinds position callbacks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.up_btn_handler">
+<span class="sig-name descname"><span class="pre">up_btn_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">large_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.up_btn_handler" title="Permalink to this definition"></a></dt>
+<dd><p>This function generates command functions according to the desired axis
+to move.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Should be one of ‘x’, ‘y’, ‘z’, ‘theta’, ‘f’
+position_axis += step_axis</p></li>
+<li><p><strong>large_step</strong> (<em>bool</em>) – If True, the step size is 5x the normal step size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>handler</strong> – Function for setting desired stage positions in the View.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable[[], None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Collects all the values of widgets</p>
+<p>setting_dict is a reference of experiment dictionary
+update the dictionary directly</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.update_step_size_handler">
+<span class="sig-name descname"><span class="pre">update_step_size_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.update_step_size_handler" title="Permalink to this definition"></a></dt>
+<dd><p>Callback functions bind to step size variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – axis can be ‘xy’, ‘z’, ‘theta’, ‘f’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>handler</strong> – Function to update step size in experiment.yml.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable[[], None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for the controller</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.default_microscope">
+<span class="sig-name descname"><span class="pre">default_microscope</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.default_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>The default microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.event_id">
+<span class="sig-name descname"><span class="pre">event_id</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.event_id" title="Permalink to this definition"></a></dt>
+<dd><p>The event id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.flip_flags">
+<span class="sig-name descname"><span class="pre">flip_flags</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.flip_flags" title="Permalink to this definition"></a></dt>
+<dd><p>The stage flip flags</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.joystick_axes">
+<span class="sig-name descname"><span class="pre">joystick_axes</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.joystick_axes" title="Permalink to this definition"></a></dt>
+<dd><p>The joystick axes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.joystick_is_on">
+<span class="sig-name descname"><span class="pre">joystick_is_on</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.joystick_is_on" title="Permalink to this definition"></a></dt>
+<dd><p>The joystick mode is on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.new_joystick_axes">
+<span class="sig-name descname"><span class="pre">new_joystick_axes</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.new_joystick_axes" title="Permalink to this definition"></a></dt>
+<dd><p>The joystick axes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.position_callback_traces">
+<span class="sig-name descname"><span class="pre">position_callback_traces</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.position_callback_traces" title="Permalink to this definition"></a></dt>
+<dd><p>The position callback traces</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.position_callbacks_bound">
+<span class="sig-name descname"><span class="pre">position_callbacks_bound</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.position_callbacks_bound" title="Permalink to this definition"></a></dt>
+<dd><p>The position callbacks are bound</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.position_max">
+<span class="sig-name descname"><span class="pre">position_max</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.position_max" title="Permalink to this definition"></a></dt>
+<dd><p>The maximum stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.position_min">
+<span class="sig-name descname"><span class="pre">position_min</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.position_min" title="Permalink to this definition"></a></dt>
+<dd><p>The minimum stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.stage_limits">
+<span class="sig-name descname"><span class="pre">stage_limits</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.stage_limits" title="Permalink to this definition"></a></dt>
+<dd><p>The stage limits are on</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.stage_setting_dict">
+<span class="sig-name descname"><span class="pre">stage_setting_dict</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.stage_setting_dict" title="Permalink to this definition"></a></dt>
+<dd><p>The stage setting dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.stages.StageController.widget_vals">
+<span class="sig-name descname"><span class="pre">widget_vals</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.stages.StageController.widget_vals" title="Permalink to this definition"></a></dt>
+<dd><p>The widget values for the stage position and step sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

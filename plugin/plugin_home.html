@@ -248,13 +248,13 @@ and indicating the reference name of the device to be used in <code class="docut
 </pre></div>
 </div>
 <p>A function to load the device connection should be given,</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_device</span><span class="p">(</span><span class="n">hardware_configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">load_device</span><span class="p">(</span><span class="n">hardware_configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="c1"># ...</span>
     <span class="k">return</span> <span class="n">device_connection</span>
 </pre></div>
 </div>
 <p>A function to start the device should be given,</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">start_device</span><span class="p">(</span><span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">start_device</span><span class="p">(</span><span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="c1"># ...</span>
     <span class="k">return</span> <span class="n">device_object</span>
 </pre></div>
@@ -278,8 +278,8 @@ of a plugin. Features and feature lists are automatically loaded into <strong>na
 <li><p>Update the <code class="docutils literal notranslate"><span class="pre">feature_list</span></code>.</p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@AcquisitionMode</span>
-<span class="k">class</span> <span class="nc">PluginAcquisitionMode</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PluginAcquisitionMode</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_mode</span> <span class="o">=</span> <span class="n">name</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_list</span> <span class="o">=</span> <span class="p">[</span>
@@ -291,16 +291,16 @@ of a plugin. Features and feature lists are automatically loaded into <strong>na
 <li><p>Update the functions.</p></li>
 </ol>
 <p>Users should tell <strong>navigate</strong> what to do before and after acquisition using the following functions.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">prepare_acquisition_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">prepare_acquisition_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">):</span>
     <span class="c1"># update here</span>
 
-<span class="k">def</span> <span class="nf">end_acquisition_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">end_acquisition_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">):</span>
     <span class="c1"># update here</span>
 
-<span class="k">def</span> <span class="nf">prepare_acquisition_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_acquisition_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
     <span class="c1"># update here</span>
 
-<span class="k">def</span> <span class="nf">end_acquisition_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">end_acquisition_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
     <span class="c1"># update here</span>
 </pre></div>
 </div>

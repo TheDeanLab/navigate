@@ -18,6 +18,8 @@ navigate.model.devices.zoom.dynamixel.DynamixelZoom
    
       ~DynamixelZoom.__init__
       ~DynamixelZoom.build_stage_dict
+      ~DynamixelZoom.connect
+      ~DynamixelZoom.disconnect
       ~DynamixelZoom.move
       ~DynamixelZoom.read_position
       ~DynamixelZoom.set_zoom

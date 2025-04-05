@@ -1,0 +1,6 @@
+navigate.model.devices.APIs.asi.asi\_tiger\_controller.ASIException
+===================================================================
+
+.. currentmodule:: navigate.model.devices.APIs.asi.asi_tiger_controller
+
+.. autoexception:: ASIException

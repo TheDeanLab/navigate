@@ -9,13 +9,6 @@ navigate.model.devices.filter\_wheel.asi
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-   
-      build_filter_wheel_connection
-   
    
 
    
@@ -26,7 +19,7 @@ navigate.model.devices.filter\_wheel.asi
       :toctree:
       :template: custom_class.rst
    
-      ASICubeSlider
+      ASICubeSliderFilterWheel
       ASIFilterWheel
    
    

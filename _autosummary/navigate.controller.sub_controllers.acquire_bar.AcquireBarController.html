@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.acquire_bar.AcquireBarController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.acquire_bar.AcquireBarController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.acquire_bar.AcquireBarController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-acquire-bar-acquirebarcontroller">
+<h1>navigate.controller.sub_controllers.acquire_bar.AcquireBarController<a class="headerlink" href="#navigate-controller-sub-controllers-acquire-bar-acquirebarcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.acquire_bar.</span></span><span class="sig-name descname"><span class="pre">AcquireBarController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_window_content.acquire_notebook.AcquireBar.html#navigate.view.main_window_content.acquire_notebook.AcquireBar" title="navigate.view.main_window_content.acquire_notebook.AcquireBar"><span class="pre">AcquireBar</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Acquire Bar Controller.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_window_content.acquire_notebook.AcquireBar.html#navigate.view.main_window_content.acquire_notebook.AcquireBar" title="navigate.view.main_window_content.acquire_notebook.AcquireBar"><span class="pre">AcquireBar</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the Acquire Bar Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<a class="reference internal" href="navigate.view.main_window_content.acquire_notebook.AcquireBar.html#navigate.view.main_window_content.acquire_notebook.AcquireBar" title="navigate.view.main_window_content.acquire_notebook.AcquireBar"><em>AcquireBar</em></a>) – Instance of the View.</p></li>
+<li><p><strong>parent_controller</strong> (<em>Any</em>) – Instance of the Main Controller.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.__init__" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, parent_controller)</p></td>
+<td><p>Initialize the Acquire Bar Controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.add_mode" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.add_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_mode</span></code></a>(mode)</p></td>
+<td><p>Add a new mode to the mode dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.execute" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.exit_program" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.exit_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exit_program</span></code></a>()</p></td>
+<td><p>Exit Button to close the program.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.get_mode" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.get_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_mode</span></code></a>()</p></td>
+<td><p>Get the current imaging mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.initialize" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>This function is called when the controller is initialized</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_valid_string" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_valid_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_valid_string</span></code></a>(string)</p></td>
+<td><p>Check if the string is valid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.launch_acquisition" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.launch_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_acquisition</span></code></a>(popup_window)</p></td>
+<td><p>Launch the Acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.launch_popup_window" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.launch_popup_window"><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_popup_window</span></code></a>()</p></td>
+<td><p>Launch the Save Dialog Popup Window</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.populate_experiment_values" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.populate_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_values</span></code></a>()</p></td>
+<td><p>Populate the experiment values from the config file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.progress_bar" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.progress_bar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">progress_bar</span></code></a>(images_received, ...[, stop])</p></td>
+<td><p>Update progress bars.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.register_event_listener" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_bdv_settings" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_bdv_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_bdv_settings</span></code></a>()</p></td>
+<td><p>Set the BDV Settings from the configuration file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_experiment_values" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_mode" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mode</span></code></a>(mode)</p></td>
+<td><p>Set imaging mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_save_option" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_save_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_save_option</span></code></a>(is_save)</p></td>
+<td><p>Set whether the image will be saved.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.show_verbose_info" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.stop_acquire" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.stop_acquire"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_acquire</span></code></a>()</p></td>
+<td><p>Stop the acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.stop_progress_bar" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.stop_progress_bar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_progress_bar</span></code></a>()</p></td>
+<td><p>Stop moving the continuous progress bar.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.toggle_bdv_widgets" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.toggle_bdv_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_bdv_widgets</span></code></a>(main_widget, ...)</p></td>
+<td><p>Toggles the state of the dependent widgets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_bdv_settings" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_bdv_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_bdv_settings</span></code></a>()</p></td>
+<td><p>Update the BDV settings.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_experiment_values" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>(popup_window)</p></td>
+<td><p>Gets the entries from the popup save dialog and overwrites the saving_settings dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_file_type" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_file_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_file_type</span></code></a>(file_type)</p></td>
+<td><p>Updates the file type when the drop-down in save dialog is changed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_microscope_mode" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_microscope_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_microscope_mode</span></code></a>(*args)</p></td>
+<td><p>Gets the state of the pull-down menu and tells the central controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_progress_label" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_progress_label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_progress_label</span></code></a>(seconds_left)</p></td>
+<td><p>Update the progress label in the Acquire Bar.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.custom_events" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for the controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.acquire_pop" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.acquire_pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">acquire_pop</span></code></a></p></td>
+<td><p>Instance of the popup window.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.saving_settings" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.saving_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">saving_settings</span></code></a></p></td>
+<td><p>Saving settings.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.mode" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code></a></p></td>
+<td><p>Acquisition image mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_save" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_save</span></code></a></p></td>
+<td><p>Whether the image will be saved.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_acquiring" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_acquiring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_acquiring</span></code></a></p></td>
+<td><p>Whether the microscope is acquiring.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.mode_dict" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.mode_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode_dict</span></code></a></p></td>
+<td><p>Dictionary of different operating modes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.bdv_configuration" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.bdv_configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bdv_configuration</span></code></a></p></td>
+<td><p>The ProxyDict for the BDV configuration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.bdv_widgets" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.bdv_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bdv_widgets</span></code></a></p></td>
+<td><p>BDV Widgets.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.add_mode">
+<span class="sig-name descname"><span class="pre">add_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.add_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Add a new mode to the mode dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em>) – Mode to add to the dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.exit_program">
+<span class="sig-name descname"><span class="pre">exit_program</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.exit_program" title="Permalink to this definition"></a></dt>
+<dd><p>Exit Button to close the program.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.get_mode">
+<span class="sig-name descname"><span class="pre">get_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.get_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Get the current imaging mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> – Current imaging mode.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the controller is initialized</p>
+<p>This function initializes GUI based on configuration setting parameter:
+configuration_controller set range value for entry or spinbox widgets;
+add values to combobox get other necessary information for configuration.yml</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_valid_string">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_valid_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_valid_string" title="Permalink to this definition"></a></dt>
+<dd><p>Check if the string is valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – String to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the string is valid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.launch_acquisition">
+<span class="sig-name descname"><span class="pre">launch_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popup_window</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.popups.acquire_popup.AcquirePopUp.html#navigate.view.popups.acquire_popup.AcquirePopUp" title="navigate.view.popups.acquire_popup.AcquirePopUp"><span class="pre">AcquirePopUp</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.launch_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Launch the Acquisition.</p>
+<p>Once the popup window has been filled out, we first create the save path using
+the create_save_path function.
+This automatically removes spaces and replaces them with underscores.
+Then it makes the directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>popup_window</strong> (<a class="reference internal" href="navigate.view.popups.acquire_popup.AcquirePopUp.html#navigate.view.popups.acquire_popup.AcquirePopUp" title="navigate.view.popups.acquire_popup.AcquirePopUp"><em>AcquirePopUp</em></a>) – Instance of the popup save dialog.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.launch_popup_window">
+<span class="sig-name descname"><span class="pre">launch_popup_window</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.launch_popup_window" title="Permalink to this definition"></a></dt>
+<dd><p>Launch the Save Dialog Popup Window</p>
+<p>The popup window should only be launched if the microscope is set to save the
+data, except the continuous acquisition mode. The popup window provides the
+user with the opportunity to fill in fields that describe the experiment and
+also dictate the save path of the data in a standardized format.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.populate_experiment_values">
+<span class="sig-name descname"><span class="pre">populate_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.populate_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Populate the experiment values from the config file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.progress_bar">
+<span class="sig-name descname"><span class="pre">progress_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images_received</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.progress_bar" title="Permalink to this definition"></a></dt>
+<dd><p>Update progress bars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_state</strong> (<em>dict</em>) – State of the microscope.  Positions, channels, z-steps, etc.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – Imaging mode.  ‘live’, ‘z-stack’, …</p></li>
+<li><p><strong>images_received</strong> (<em>int</em>) – Number of images received in the controller.</p></li>
+<li><p><strong>stop</strong> (<em>bool</em>) – Stop flag to set back to 0.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_bdv_settings">
+<span class="sig-name descname"><span class="pre">set_bdv_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_bdv_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Set the BDV Settings from the configuration file.</p>
+<p>If the settings are not in the configuration file, they will be added.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_mode">
+<span class="sig-name descname"><span class="pre">set_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Set imaging mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em>) – Mode could be: ‘live’, ‘z-stack’, ‘single’, ‘projection’,</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_save_option">
+<span class="sig-name descname"><span class="pre">set_save_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.set_save_option" title="Permalink to this definition"></a></dt>
+<dd><p>Set whether the image will be saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_save</strong> (<em>bool</em>) – True if we will save the data.  False if we will not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.stop_acquire">
+<span class="sig-name descname"><span class="pre">stop_acquire</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.stop_acquire" title="Permalink to this definition"></a></dt>
+<dd><p>Stop the acquisition.</p>
+<p>Stop the progress bar, set the acquire button back to “Acquire”, place pull
+down menu in non-disabled format.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.stop_progress_bar">
+<span class="sig-name descname"><span class="pre">stop_progress_bar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.stop_progress_bar" title="Permalink to this definition"></a></dt>
+<dd><p>Stop moving the continuous progress bar.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.toggle_bdv_widgets">
+<span class="sig-name descname"><span class="pre">toggle_bdv_widgets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_widget</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependent_widgets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.toggle_bdv_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>Toggles the state of the dependent widgets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>main_widget</strong> (<em>str</em>) – The main widget that is being toggled.</p></li>
+<li><p><strong>dependent_widgets</strong> (<em>list</em>) – A list of dependent widgets that will be toggled.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_bdv_settings">
+<span class="sig-name descname"><span class="pre">update_bdv_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_bdv_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Update the BDV settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popup_window</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.popups.acquire_popup.AcquirePopUp.html#navigate.view.popups.acquire_popup.AcquirePopUp" title="navigate.view.popups.acquire_popup.AcquirePopUp"><span class="pre">AcquirePopUp</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the entries from the popup save dialog and overwrites the
+saving_settings dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>popup_window</strong> (<a class="reference internal" href="navigate.view.popups.acquire_popup.AcquirePopUp.html#navigate.view.popups.acquire_popup.AcquirePopUp" title="navigate.view.popups.acquire_popup.AcquirePopUp"><em>AcquirePopUp</em></a>) – Instance of the popup save dialog.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_file_type">
+<span class="sig-name descname"><span class="pre">update_file_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StringVar</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_file_type" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the file type when the drop-down in save dialog is changed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_type</strong> (<em>tk.StringVar</em>) – File type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_microscope_mode">
+<span class="sig-name descname"><span class="pre">update_microscope_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_microscope_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the state of the pull-down menu and tells the central controller</p>
+<p>Will additionally call functions to disable and enable widgets based on mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>str</em>) – Imaging Mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_progress_label">
+<span class="sig-name descname"><span class="pre">update_progress_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.update_progress_label" title="Permalink to this definition"></a></dt>
+<dd><p>Update the progress label in the Acquire Bar.</p>
+<p>Formatted time is in HH:MM:SS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>seconds_left</strong> (<em>int</em>) – Seconds left in the acquisition.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.acquire_pop">
+<span class="sig-name descname"><span class="pre">acquire_pop</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.acquire_pop" title="Permalink to this definition"></a></dt>
+<dd><p>Instance of the popup window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.view.popups.acquire_popup.AcquirePopUp.html#navigate.view.popups.acquire_popup.AcquirePopUp" title="navigate.view.popups.acquire_popup.AcquirePopUp">AcquirePopUp</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.bdv_configuration">
+<span class="sig-name descname"><span class="pre">bdv_configuration</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.bdv_configuration" title="Permalink to this definition"></a></dt>
+<dd><p>The ProxyDict for the BDV configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.bdv_widgets">
+<span class="sig-name descname"><span class="pre">bdv_widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.bdv_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>BDV Widgets. Keys are primary widgets, values are lists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for the controller</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_acquiring">
+<span class="sig-name descname"><span class="pre">is_acquiring</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_acquiring" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the microscope is acquiring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_save">
+<span class="sig-name descname"><span class="pre">is_save</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.is_save" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the image will be saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.mode" title="Permalink to this definition"></a></dt>
+<dd><p>Acquisition image mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.mode_dict">
+<span class="sig-name descname"><span class="pre">mode_dict</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.mode_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of different operating modes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.saving_settings">
+<span class="sig-name descname"><span class="pre">saving_settings</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.saving_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Saving settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.acquire_bar.AcquireBarController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.plugins.PluginsController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.plugins.PluginsController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.plugins.PluginsController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-plugins-pluginscontroller">
+<h1>navigate.controller.sub_controllers.plugins.PluginsController<a class="headerlink" href="#navigate-controller-sub-controllers-plugins-pluginscontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.plugins.</span></span><span class="sig-name descname"><span class="pre">PluginsController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Plugins manager in the controller side</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize plugins manager class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<em>object</em>) – tkinter frame object.</p></li>
+<li><p><strong>parent_controller</strong> (<em>object</em>) – navigate controller.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.__init__" title="navigate.controller.sub_controllers.plugins.PluginsController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, parent_controller)</p></td>
+<td><p>Initialize plugins manager class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.build_popup_window" title="navigate.controller.sub_controllers.plugins.PluginsController.build_popup_window"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_popup_window</span></code></a>(plugin_name, frame, ...)</p></td>
+<td><p>Build popup window for a plugin</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.build_tab_window" title="navigate.controller.sub_controllers.plugins.PluginsController.build_tab_window"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_tab_window</span></code></a>(plugin_name, frame, controller)</p></td>
+<td><p>Build tab for a plugin</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.load_plugins" title="navigate.controller.sub_controllers.plugins.PluginsController.load_plugins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_plugins</span></code></a>()</p></td>
+<td><p>Load plugins</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.load_plugins_through_manager" title="navigate.controller.sub_controllers.plugins.PluginsController.load_plugins_through_manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_plugins_through_manager</span></code></a>(plugin_manager)</p></td>
+<td><p>Load plugins through plugin manager</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.populate_experiment_setting" title="navigate.controller.sub_controllers.plugins.PluginsController.populate_experiment_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_setting</span></code></a>()</p></td>
+<td><p>populate experiment values to plugin GUI</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.register_acquisition_mode" title="navigate.controller.sub_controllers.plugins.PluginsController.register_acquisition_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_acquisition_mode</span></code></a>(...)</p></td>
+<td><p>Register acquisition mode</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.view" title="navigate.controller.sub_controllers.plugins.PluginsController.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a></p></td>
+<td><p>tkinter frame object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.parent_controller" title="navigate.controller.sub_controllers.plugins.PluginsController.parent_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parent_controller</span></code></a></p></td>
+<td><p>navigate controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.plugins.PluginsController.plugins_dict" title="navigate.controller.sub_controllers.plugins.PluginsController.plugins_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plugins_dict</span></code></a></p></td>
+<td><p>installed plugins with GUI</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.build_popup_window">
+<span class="sig-name descname"><span class="pre">build_popup_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.build_popup_window" title="Permalink to this definition"></a></dt>
+<dd><p>Build popup window for a plugin</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plugin_name</strong> (<em>str</em>) – plugin name.</p></li>
+<li><p><strong>frame</strong> (<em>object</em>) – navigate frame object</p></li>
+<li><p><strong>controller</strong> (<em>object</em>) – navigate controller</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.build_tab_window">
+<span class="sig-name descname"><span class="pre">build_tab_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.build_tab_window" title="Permalink to this definition"></a></dt>
+<dd><p>Build tab for a plugin</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plugin_name</strong> (<em>str</em>) – plugin name.</p></li>
+<li><p><strong>frame</strong> (<em>object</em>) – navigate frame object</p></li>
+<li><p><strong>controller</strong> (<em>object</em>) – Controller Class</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.load_plugins">
+<span class="sig-name descname"><span class="pre">load_plugins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.load_plugins" title="Permalink to this definition"></a></dt>
+<dd><p>Load plugins</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.load_plugins_through_manager">
+<span class="sig-name descname"><span class="pre">load_plugins_through_manager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.load_plugins_through_manager" title="Permalink to this definition"></a></dt>
+<dd><p>Load plugins through plugin manager</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>plugin_manager</strong> (<em>object</em>) – PluginManager object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.populate_experiment_setting">
+<span class="sig-name descname"><span class="pre">populate_experiment_setting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.populate_experiment_setting" title="Permalink to this definition"></a></dt>
+<dd><p>populate experiment values to plugin GUI</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.register_acquisition_mode">
+<span class="sig-name descname"><span class="pre">register_acquisition_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisition_mode_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.register_acquisition_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Register acquisition mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>acquisition_mode_name</strong> (<em>str</em>) – The name of an acquisition mode</p></li>
+<li><p><strong>module</strong> (<em>module</em>) – acquisition mode module</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>navigate controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.plugins_dict">
+<span class="sig-name descname"><span class="pre">plugins_dict</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.plugins_dict" title="Permalink to this definition"></a></dt>
+<dd><p>installed plugins with GUI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.plugins.PluginsController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.plugins.PluginsController.view" title="Permalink to this definition"></a></dt>
+<dd><p>tkinter frame object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

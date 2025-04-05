@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.channels_tab.ChannelsTabController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.channels_tab.ChannelsTabController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.channels_tab.ChannelsTabController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-channels-tab-channelstabcontroller">
+<h1>navigate.controller.sub_controllers.channels_tab.ChannelsTabController<a class="headerlink" href="#navigate-controller-sub-controllers-channels-tab-channelstabcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.channels_tab.</span></span><span class="sig-name descname"><span class="pre">ChannelsTabController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_window_content.channels_tab.ChannelsTab.html#navigate.view.main_window_content.channels_tab.ChannelsTab" title="navigate.view.main_window_content.channels_tab.ChannelsTab"><span class="pre">ChannelsTab</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><span class="pre">Controller</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Controller for the channels tab in the main window.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_window_content.channels_tab.ChannelsTab.html#navigate.view.main_window_content.channels_tab.ChannelsTab" title="navigate.view.main_window_content.channels_tab.ChannelsTab"><span class="pre">ChannelsTab</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><span class="pre">Controller</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the ChannelsTabController.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<a class="reference internal" href="navigate.view.main_window_content.channels_tab.ChannelsTab.html#navigate.view.main_window_content.channels_tab.ChannelsTab" title="navigate.view.main_window_content.channels_tab.ChannelsTab"><em>ChannelsTab</em></a>) – The ChannelsTab Window.</p></li>
+<li><p><strong>parent_controller</strong> (<a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><em>navigate.controller.controller.Controller</em></a>) – The parent controller of this controller.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.__init__" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, parent_controller)</p></td>
+<td><p>Initialize the ChannelsTabController.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.disable_multiposition_btn" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.disable_multiposition_btn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable_multiposition_btn</span></code></a>()</p></td>
+<td><p>Disable multi-position button</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.enable_multiposition_btn" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.enable_multiposition_btn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enable_multiposition_btn</span></code></a>()</p></td>
+<td><p>Enable multi-position button</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.execute" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>Execute Command in the parent controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.initialize" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>Initializes widgets and gets other necessary configuration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_autofocus_settings" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_autofocus_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_autofocus_settings</span></code></a>()</p></td>
+<td><p>Launches autofocus settings popup.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_tiling_wizard" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_tiling_wizard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_tiling_wizard</span></code></a>()</p></td>
+<td><p>Launches tiling wizard popup.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_waveform_parameters" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_waveform_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_waveform_parameters</span></code></a>()</p></td>
+<td><p>Launches waveform parameters popup.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.populate_experiment_values" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.populate_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_values</span></code></a>()</p></td>
+<td><p>Distribute initial MicroscopeState values to this and sub-controllers and associated views.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.register_event_listener" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_experiment_values" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_exposure_time" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_exposure_time</span></code></a>(channel_exposure_time)</p></td>
+<td><p>Set exposure time for a specified channel</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_info" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_info</span></code></a>(vals, values)</p></td>
+<td><p>Set values to a list of variables.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_mode" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mode</span></code></a>(mode)</p></td>
+<td><p>Change acquisition mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_spinbox_range_limits" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_spinbox_range_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_spinbox_range_limits</span></code></a>(settings)</p></td>
+<td><p>Sets range limits for various spinbox widgets based on the provided settings.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.show_verbose_info" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.toggle_multiposition" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.toggle_multiposition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_multiposition</span></code></a>(*_)</p></td>
+<td><p>Toggle Multi-position Acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_cycling_setting" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_cycling_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_cycling_setting</span></code></a>(*_)</p></td>
+<td><p>Update the cycling settings in the model and the GUI.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_end_position" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_end_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_end_position</span></code></a>(*_)</p></td>
+<td><p>Get new z ending position from current stage parameters</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_experiment_values" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Update experiment values</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_save_setting" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_save_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_save_setting</span></code></a>(*_)</p></td>
+<td><p>Tell the parent controller 'save_data' is selected.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_start_position" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_start_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_start_position</span></code></a>(*_)</p></td>
+<td><p>Get new z starting position from current stage parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_timepoint_setting" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_timepoint_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_timepoint_setting</span></code></a>()</p></td>
+<td><p>Automatically calculates the stack acquisition time based on the number of time points, channels, and exposure time.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_z_steps" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_z_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_z_steps</span></code></a>(*_)</p></td>
+<td><p>Recalculates the number of slices that will be acquired in a z-stack.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.verify_experiment_values" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.verify_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_experiment_values</span></code></a>()</p></td>
+<td><p>Verify channel tab settings and return warning info</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.custom_events" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for the channels tab.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_save" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_save</span></code></a></p></td>
+<td><p>Whether the user has selected to save the data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.mode" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code></a></p></td>
+<td><p>The current acquisition mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.in_initialization" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.in_initialization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_initialization</span></code></a></p></td>
+<td><p>Whether the controller is in the initialization phase.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_widgets" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack_acq_widgets</span></code></a></p></td>
+<td><p>The widgets in the stack acquisition settings frame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_vals" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_vals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack_acq_vals</span></code></a></p></td>
+<td><p>The values in the stack acquisition settings frame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_buttons" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_buttons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack_acq_buttons</span></code></a></p></td>
+<td><p>The buttons in the stack acquisition settings frame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.z_origin" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.z_origin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_origin</span></code></a></p></td>
+<td><p>The z origin of the stack.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.focus_origin" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.focus_origin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">focus_origin</span></code></a></p></td>
+<td><p>The focus origin of the stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.filter_wheel_delay" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.filter_wheel_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_wheel_delay</span></code></a></p></td>
+<td><p>The filter wheel delay.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.microscope_state_dict" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.microscope_state_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_state_dict</span></code></a></p></td>
+<td><p>The microscope state dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.timepoint_vals" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.timepoint_vals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timepoint_vals</span></code></a></p></td>
+<td><p>Dictionary of time point settings.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_multiposition</span></code></a></p></td>
+<td><p>Whether the user has selected to use multi-position.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition_cache" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition_cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_multiposition_cache</span></code></a></p></td>
+<td><p>cache multi-position flag</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition_val" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition_val"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_multiposition_val</span></code></a></p></td>
+<td><p>Whether the user has selected to use multi-position.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.disable_multiposition_btn">
+<span class="sig-name descname"><span class="pre">disable_multiposition_btn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.disable_multiposition_btn" title="Permalink to this definition"></a></dt>
+<dd><p>Disable multi-position button</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.enable_multiposition_btn">
+<span class="sig-name descname"><span class="pre">enable_multiposition_btn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.enable_multiposition_btn" title="Permalink to this definition"></a></dt>
+<dd><p>Enable multi-position button</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Execute Command in the parent controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – recalculate_timepoint, channel, move_stage_and_update_info,
+get_stage_position</p></li>
+<li><p><strong>args</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – A tuple of arguments to pass to the command.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes widgets and gets other necessary configuration.</p>
+<p>The <cite>initialize</cite> method in the <cite>ChannelsTabController</cite> class is responsible
+for setting up the initial configuration and state of the channels tab in the
+main window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_autofocus_settings">
+<span class="sig-name descname"><span class="pre">launch_autofocus_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_autofocus_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Launches autofocus settings popup.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_tiling_wizard">
+<span class="sig-name descname"><span class="pre">launch_tiling_wizard</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_tiling_wizard" title="Permalink to this definition"></a></dt>
+<dd><p>Launches tiling wizard popup.</p>
+<p>Will only launch when button in GUI is pressed, and will not duplicate.
+Pressing button again brings popup to top</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_waveform_parameters">
+<span class="sig-name descname"><span class="pre">launch_waveform_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.launch_waveform_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Launches waveform parameters popup.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.populate_experiment_values">
+<span class="sig-name descname"><span class="pre">populate_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.populate_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Distribute initial MicroscopeState values to this and sub-controllers and
+associated views.</p>
+<p>The populate_experiment_values method in the ChannelsTabController class is
+responsible for distributing initial MicroscopeState values to this and
+sub-controllers and associated views. It sets the initial values for various
+settings, validates the configuration for multi-position settings,
+and updates the GUI accordingly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_exposure_time">
+<span class="sig-name descname"><span class="pre">set_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_exposure_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>Set exposure time for a specified channel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>channel_exposure_time</strong> (<em>tuple</em><em>(</em><em>str</em><em>, </em><em>float</em><em>)</em>) – (channel_name, exposure_time)
+Channel name, such as “channel_1”, “channel_2”,…
+Exposure time in milliseconds.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_info">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_info" title="Permalink to this definition"></a></dt>
+<dd><p>Set values to a list of variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vals</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – A dictionary of variables to set.</p></li>
+<li><p><strong>values</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – A dictionary of values to set to variables.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_mode">
+<span class="sig-name descname"><span class="pre">set_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Change acquisition mode.</p>
+<p>The set_mode method changes the acquisition mode and updates the state of
+various widgets accordingly</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em>) – acquisition mode</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_spinbox_range_limits">
+<span class="sig-name descname"><span class="pre">set_spinbox_range_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.set_spinbox_range_limits" title="Permalink to this definition"></a></dt>
+<dd><p>Sets range limits for various spinbox widgets based on the provided settings.</p>
+<p>This method configures the minimum, maximum, and increment values for the spinbox
+widgets in the stack acquisition settings frame and the time point settings
+frame based on the provided configuration settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>settings</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – dictionary of settings from configuration file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.toggle_multiposition">
+<span class="sig-name descname"><span class="pre">toggle_multiposition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.toggle_multiposition" title="Permalink to this definition"></a></dt>
+<dd><p>Toggle Multi-position Acquisition.</p>
+<p>Recalculates the experiment duration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – Values is a tuple of strings. e.g., (‘PY_VAR0’, ‘’, ‘write’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_cycling_setting">
+<span class="sig-name descname"><span class="pre">update_cycling_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_cycling_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Update the cycling settings in the model and the GUI.</p>
+<p>You can collect different channels in different formats.
+In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc.
+in the perStack format: Slice 0/Ch0, Slice1/Ch0… SliceN/Ch0.  Then it repeats
+with Ch1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – Values is a tuple of strings. e.g., (‘PY_VAR0’, ‘’, ‘write’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_end_position">
+<span class="sig-name descname"><span class="pre">update_end_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_end_position" title="Permalink to this definition"></a></dt>
+<dd><p>Get new z ending position from current stage parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – Values is a tuple of strings. e.g., (‘PY_VAR0’, ‘’, ‘write’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Update experiment values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_save_setting">
+<span class="sig-name descname"><span class="pre">update_save_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_save_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Tell the parent controller ‘save_data’ is selected.</p>
+<p>Does not do any calculation when initializing the software.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – Values is a tuple of strings. e.g., (‘PY_VAR0’, ‘’, ‘write’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_start_position">
+<span class="sig-name descname"><span class="pre">update_start_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_start_position" title="Permalink to this definition"></a></dt>
+<dd><p>Get new z starting position from current stage parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – Values is a tuple of strings. e.g., (‘PY_VAR0’, ‘’, ‘write’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_timepoint_setting">
+<span class="sig-name descname"><span class="pre">update_timepoint_setting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_timepoint_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Automatically calculates the stack acquisition time based on the number of
+time points, channels, and exposure time.</p>
+<p>TODO: Add necessary computation for ‘Stack Acq.Time’, ‘Time point Interval’,
+‘Experiment Duration’?</p>
+<p>Does not do any calculation when initializing the software.
+Order of priority for per_stack: timepoints &gt; positions &gt; channels &gt; z-steps</p>
+<blockquote>
+<div><p>&gt; delay</p>
+</div></blockquote>
+<p>Order of priority for perZ: timepoints &gt; positions &gt; z-steps &gt; delays &gt; channels</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_z_steps">
+<span class="sig-name descname"><span class="pre">update_z_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.update_z_steps" title="Permalink to this definition"></a></dt>
+<dd><p>Recalculates the number of slices that will be acquired in a z-stack.</p>
+<p>Requires GUI to have start position, end position, or step size changed.
+Sets the number of slices in the model and the GUI. Sends the current values
+to central/parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – Values is a tuple of strings. e.g., (‘PY_VAR0’, ‘’, ‘write’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.verify_experiment_values">
+<span class="sig-name descname"><span class="pre">verify_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.verify_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Verify channel tab settings and return warning info</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> – Warning info</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">callable</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for the channels tab.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.filter_wheel_delay">
+<span class="sig-name descname"><span class="pre">filter_wheel_delay</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.filter_wheel_delay" title="Permalink to this definition"></a></dt>
+<dd><p>The filter wheel delay.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.focus_origin">
+<span class="sig-name descname"><span class="pre">focus_origin</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.focus_origin" title="Permalink to this definition"></a></dt>
+<dd><p>The focus origin of the stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.in_initialization">
+<span class="sig-name descname"><span class="pre">in_initialization</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.in_initialization" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the controller is in the initialization phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition">
+<span class="sig-name descname"><span class="pre">is_multiposition</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the user has selected to use multi-position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition_cache">
+<span class="sig-name descname"><span class="pre">is_multiposition_cache</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition_cache" title="Permalink to this definition"></a></dt>
+<dd><p>cache multi-position flag</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition_val">
+<span class="sig-name descname"><span class="pre">is_multiposition_val</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_multiposition_val" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the user has selected to use multi-position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_save">
+<span class="sig-name descname"><span class="pre">is_save</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.is_save" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the user has selected to save the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.microscope_state_dict">
+<span class="sig-name descname"><span class="pre">microscope_state_dict</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.microscope_state_dict" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope state dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.mode" title="Permalink to this definition"></a></dt>
+<dd><p>The current acquisition mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_buttons">
+<span class="sig-name descname"><span class="pre">stack_acq_buttons</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_buttons" title="Permalink to this definition"></a></dt>
+<dd><p>The buttons in the stack acquisition settings frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_vals">
+<span class="sig-name descname"><span class="pre">stack_acq_vals</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_vals" title="Permalink to this definition"></a></dt>
+<dd><p>The values in the stack acquisition settings frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_widgets">
+<span class="sig-name descname"><span class="pre">stack_acq_widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.stack_acq_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>The widgets in the stack acquisition settings frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.timepoint_vals">
+<span class="sig-name descname"><span class="pre">timepoint_vals</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.timepoint_vals" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of time point settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.z_origin">
+<span class="sig-name descname"><span class="pre">z_origin</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.channels_tab.ChannelsTabController.z_origin" title="Permalink to this definition"></a></dt>
+<dd><p>The z origin of the stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -33,8 +33,9 @@ navigate.model.microscope.Microscope
       ~Microscope.report_camera_settings
       ~Microscope.run_command
       ~Microscope.set_camera_exposure_time
-      ~Microscope.set_camera_roi
+      ~Microscope.set_camera_roi_and_binning
       ~Microscope.set_camera_sensor_mode
+      ~Microscope.set_camera_trigger_mode
       ~Microscope.stop_stage
       ~Microscope.terminate
       ~Microscope.turn_off_lasers
@@ -59,11 +60,10 @@ navigate.model.microscope.Microscope
       ~Microscope.ask_stage_for_position
       ~Microscope.camera
       ~Microscope.shutter
-      ~Microscope.lasers
+      ~Microscope.laser
       ~Microscope.galvo
-      ~Microscope.remote_focus_device
+      ~Microscope.remote_focus
       ~Microscope.filter_wheel
-      ~Microscope.daq
       ~Microscope.info
       ~Microscope.current_channel
       ~Microscope.current_laser_index
@@ -76,5 +76,6 @@ navigate.model.microscope.Microscope
       ~Microscope.ret_pos_dict
       ~Microscope.commands
       ~Microscope.plugin_devices
+      ~Microscope.daq
    
    

@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.camera_view.CameraViewController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.camera_view.CameraViewController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.camera_view.CameraViewController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-camera-view-cameraviewcontroller">
+<h1>navigate.controller.sub_controllers.camera_view.CameraViewController<a class="headerlink" href="#navigate-controller-sub-controllers-camera-view-cameraviewcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.camera_view.</span></span><span class="sig-name descname"><span class="pre">CameraViewController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.camera_view.BaseViewController.html#navigate.controller.sub_controllers.camera_view.BaseViewController" title="navigate.controller.sub_controllers.camera_view.BaseViewController"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseViewController</span></code></a></p>
+<p>Camera View Controller Class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the Camera View Controller Class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<a class="reference internal" href="navigate.view.main_window_content.display_notebook.CameraTab.html#navigate.view.main_window_content.display_notebook.CameraTab" title="navigate.view.main_window_content.display_notebook.CameraTab"><em>CameraTab</em></a>) – The Camera tkinter frame that contains the widgets.</p></li>
+<li><p><strong>parent_controller</strong> (<a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><em>Controller</em></a>) – The parent controller of the camera view controller.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.__init__" title="navigate.controller.sub_controllers.camera_view.CameraViewController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view[, parent_controller])</p></td>
+<td><p>Initialize the Camera View Controller Class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.add_crosshair" title="navigate.controller.sub_controllers.camera_view.CameraViewController.add_crosshair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_crosshair</span></code></a>(image)</p></td>
+<td><p>Adds a cross-hair to the image.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.apply_lut" title="navigate.controller.sub_controllers.camera_view.CameraViewController.apply_lut"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_lut</span></code></a>(image)</p></td>
+<td><p>Applies a LUT to an image.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.array_to_image" title="navigate.controller.sub_controllers.camera_view.CameraViewController.array_to_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array_to_image</span></code></a>(image)</p></td>
+<td><p>Convert a numpy array to a PIL Image.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.calculate_offset" title="navigate.controller.sub_controllers.camera_view.CameraViewController.calculate_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_offset</span></code></a>()</p></td>
+<td><p>Calculates the offset of the image.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.detect_saturation" title="navigate.controller.sub_controllers.camera_view.CameraViewController.detect_saturation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">detect_saturation</span></code></a>(image)</p></td>
+<td><p>Look for any pixels at the maximum intensity allowable for the camera.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.digital_zoom" title="navigate.controller.sub_controllers.camera_view.CameraViewController.digital_zoom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">digital_zoom</span></code></a>()</p></td>
+<td><p>Apply digital zoom.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.display_image" title="navigate.controller.sub_controllers.camera_view.CameraViewController.display_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_image</span></code></a>(image)</p></td>
+<td><p>Display an image using the LUT specified in the View.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.display_mask" title="navigate.controller.sub_controllers.camera_view.CameraViewController.display_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_mask</span></code></a>(mask)</p></td>
+<td><p>Display segmentation mask</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.down_sample_image" title="navigate.controller.sub_controllers.camera_view.CameraViewController.down_sample_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">down_sample_image</span></code></a>(image)</p></td>
+<td><p>Down-sample the data for image display according to widget size.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.execute" title="navigate.controller.sub_controllers.camera_view.CameraViewController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.flip_image" title="navigate.controller.sub_controllers.camera_view.CameraViewController.flip_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flip_image</span></code></a>(image)</p></td>
+<td><p>Flip the image according to the flip flags.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.get_absolute_position" title="navigate.controller.sub_controllers.camera_view.CameraViewController.get_absolute_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_absolute_position</span></code></a>()</p></td>
+<td><p>Gets the absolute position of the computer mouse.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.get_selected_channels" title="navigate.controller.sub_controllers.camera_view.CameraViewController.get_selected_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_selected_channels</span></code></a>([microscope_state])</p></td>
+<td><p>Get the selected microscope channels from the MicroscopeState.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.identify_channel_index_and_slice" title="navigate.controller.sub_controllers.camera_view.CameraViewController.identify_channel_index_and_slice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">identify_channel_index_and_slice</span></code></a>()</p></td>
+<td><p>As images arrive, identify channel index and slice.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.initialize" title="navigate.controller.sub_controllers.camera_view.CameraViewController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>(name, data)</p></td>
+<td><p>Sets widgets based on data given from main controller/config.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.initialize_non_live_display" title="navigate.controller.sub_controllers.camera_view.CameraViewController.initialize_non_live_display"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_non_live_display</span></code></a>(...)</p></td>
+<td><p>Initialize the non-live display.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.left_click" title="navigate.controller.sub_controllers.camera_view.CameraViewController.left_click"><code class="xref py py-obj docutils literal notranslate"><span class="pre">left_click</span></code></a>(*_)</p></td>
+<td><p>Toggles cross-hair on image upon left click event.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.mark_position" title="navigate.controller.sub_controllers.camera_view.CameraViewController.mark_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark_position</span></code></a>()</p></td>
+<td><p>Marks the current position of the microscope in the multi-position acquisition table.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.mouse_wheel" title="navigate.controller.sub_controllers.camera_view.CameraViewController.mouse_wheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mouse_wheel</span></code></a>(event)</p></td>
+<td><p>Digitally zooms in or out on the image upon scroll wheel event.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.move_crosshair" title="navigate.controller.sub_controllers.camera_view.CameraViewController.move_crosshair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_crosshair</span></code></a>()</p></td>
+<td><p>Move the crosshair to a non-default position.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.move_stage" title="navigate.controller.sub_controllers.camera_view.CameraViewController.move_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_stage</span></code></a>()</p></td>
+<td><p>Move the stage according to the position the user clicked.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.populate_image" title="navigate.controller.sub_controllers.camera_view.CameraViewController.populate_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_image</span></code></a>(image)</p></td>
+<td><p>Converts image to an ImageTk.PhotoImage and populates the Tk Canvas</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.popup_menu" title="navigate.controller.sub_controllers.camera_view.CameraViewController.popup_menu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popup_menu</span></code></a>(event)</p></td>
+<td><p>Right-Click Popup Menu</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.process_image" title="navigate.controller.sub_controllers.camera_view.CameraViewController.process_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_image</span></code></a>()</p></td>
+<td><p>Process the image to be displayed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.refresh" title="navigate.controller.sub_controllers.camera_view.CameraViewController.refresh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refresh</span></code></a>(width, height)</p></td>
+<td><p>Refresh the window.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.register_event_listener" title="navigate.controller.sub_controllers.camera_view.CameraViewController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.reset_display" title="navigate.controller.sub_controllers.camera_view.CameraViewController.reset_display"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_display</span></code></a>([display_flag, reset_crosshair])</p></td>
+<td><p>Set the display back to the original digital zoom.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.resize" title="navigate.controller.sub_controllers.camera_view.CameraViewController.resize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resize</span></code></a>(event)</p></td>
+<td><p>Resize the window.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.scale_image_intensity" title="navigate.controller.sub_controllers.camera_view.CameraViewController.scale_image_intensity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_image_intensity</span></code></a>(image)</p></td>
+<td><p>Scale the data to the min/max counts, and adjust bit-depth.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.set_experiment_values" title="navigate.controller.sub_controllers.camera_view.CameraViewController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.set_mask_color_table" title="navigate.controller.sub_controllers.camera_view.CameraViewController.set_mask_color_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mask_color_table</span></code></a>(colors)</p></td>
+<td><p>Set up segmentation mask color table</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.set_mode" title="navigate.controller.sub_controllers.camera_view.CameraViewController.set_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mode</span></code></a>([mode])</p></td>
+<td><p>Sets mode of camera_view_controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.show_verbose_info" title="navigate.controller.sub_controllers.camera_view.CameraViewController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.slider_update" title="navigate.controller.sub_controllers.camera_view.CameraViewController.slider_update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slider_update</span></code></a>(*_)</p></td>
+<td><p>Updates the image when the slider is moved.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.toggle_min_max_buttons" title="navigate.controller.sub_controllers.camera_view.CameraViewController.toggle_min_max_buttons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_min_max_buttons</span></code></a>([display])</p></td>
+<td><p>Checks the value of the autoscale widget.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.transpose_image" title="navigate.controller.sub_controllers.camera_view.CameraViewController.transpose_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transpose_image</span></code></a>(image)</p></td>
+<td><p>Transpose the image according to the flip flags.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.try_to_display_image" title="navigate.controller.sub_controllers.camera_view.CameraViewController.try_to_display_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_to_display_image</span></code></a>(image)</p></td>
+<td><p>Try to display an image.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_canvas_size" title="navigate.controller.sub_controllers.camera_view.CameraViewController.update_canvas_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_canvas_size</span></code></a>()</p></td>
+<td><p>Update the canvas size.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_display_state" title="navigate.controller.sub_controllers.camera_view.CameraViewController.update_display_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_display_state</span></code></a>(*_)</p></td>
+<td><p>Image Display Combobox Called.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_experiment_values" title="navigate.controller.sub_controllers.camera_view.CameraViewController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Collects all the values of widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_lut" title="navigate.controller.sub_controllers.camera_view.CameraViewController.update_lut"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_lut</span></code></a>(target)</p></td>
+<td><p>Update the LUT in the Camera View.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_max_counts" title="navigate.controller.sub_controllers.camera_view.CameraViewController.update_max_counts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_max_counts</span></code></a>()</p></td>
+<td><p>Update the max counts in the camera view.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_min_max_counts" title="navigate.controller.sub_controllers.camera_view.CameraViewController.update_min_max_counts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_min_max_counts</span></code></a>([display])</p></td>
+<td><p>Get min and max count values from the View.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_snr" title="navigate.controller.sub_controllers.camera_view.CameraViewController.update_snr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_snr</span></code></a>()</p></td>
+<td><p>Updates the signal-to-noise ratio.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_transpose_state" title="navigate.controller.sub_controllers.camera_view.CameraViewController.update_transpose_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_transpose_state</span></code></a>([display])</p></td>
+<td><p>Get Flip XY widget value from the View.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.custom_events" title="navigate.controller.sub_controllers.camera_view.CameraViewController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for this controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.image_metrics" title="navigate.controller.sub_controllers.camera_view.CameraViewController.image_metrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_metrics</span></code></a></p></td>
+<td><p>The dictionary of image metrics widgets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.display_state" title="navigate.controller.sub_controllers.camera_view.CameraViewController.display_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_state</span></code></a></p></td>
+<td><p>The display state.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.rolling_frames" title="navigate.controller.sub_controllers.camera_view.CameraViewController.rolling_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rolling_frames</span></code></a></p></td>
+<td><p>The number of frames to average.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.max_intensity_history" title="navigate.controller.sub_controllers.camera_view.CameraViewController.max_intensity_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_intensity_history</span></code></a></p></td>
+<td><p>The list of maximum intensity values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.display_mask_flag" title="navigate.controller.sub_controllers.camera_view.CameraViewController.display_mask_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_mask_flag</span></code></a></p></td>
+<td><p>The flag for displaying the mask.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.mask_color_table" title="navigate.controller.sub_controllers.camera_view.CameraViewController.mask_color_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask_color_table</span></code></a></p></td>
+<td><p>The display mask flag.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.ilastik_mask_ready_lock" title="navigate.controller.sub_controllers.camera_view.CameraViewController.ilastik_mask_ready_lock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ilastik_mask_ready_lock</span></code></a></p></td>
+<td><p>The lock for the ilastik mask.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.ilastik_seg_mask" title="navigate.controller.sub_controllers.camera_view.CameraViewController.ilastik_seg_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ilastik_seg_mask</span></code></a></p></td>
+<td><p>The ilastik mask.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.add_crosshair">
+<span class="sig-name descname"><span class="pre">add_crosshair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.add_crosshair" title="Permalink to this definition"></a></dt>
+<dd><p>Adds a cross-hair to the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>image</strong> – Image data with cross-hair.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.apply_lut">
+<span class="sig-name descname"><span class="pre">apply_lut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.apply_lut" title="Permalink to this definition"></a></dt>
+<dd><p>Applies a LUT to an image.</p>
+<p>Red is reserved for saturated pixels.
+self.color_values = [‘gray’, ‘gradient’, ‘rainbow’]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>image</strong> – Image data with LUT applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.array_to_image">
+<span class="sig-name descname"><span class="pre">array_to_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/opt/hostedtoolcache/Python/3.9.21/x64/lib/python3.9/site-packages/PIL/Image.py'&gt;</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.array_to_image" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a numpy array to a PIL Image.</p>
+<p>If a color mask is present, it will apply the mask to the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>image</strong> – A PIL Image</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.calculate_offset">
+<span class="sig-name descname"><span class="pre">calculate_offset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.calculate_offset" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the offset of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>offset_x</strong> (<em>int</em>) – The offset of the image in x.</p></li>
+<li><p><strong>offset_y</strong> (<em>int</em>) – The offset of the image in y.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.detect_saturation">
+<span class="sig-name descname"><span class="pre">detect_saturation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.detect_saturation" title="Permalink to this definition"></a></dt>
+<dd><p>Look for any pixels at the maximum intensity allowable for the camera.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The camera is set to 16-bit depth, so the maximum intensity is 2^16 - 1. If
+another camera is used, this function should be updated to reflect the maximum
+intensity value.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.digital_zoom">
+<span class="sig-name descname"><span class="pre">digital_zoom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.digital_zoom" title="Permalink to this definition"></a></dt>
+<dd><p>Apply digital zoom.</p>
+<p>The x and y positions are between 0 and the canvas width and height
+respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> – Image after digital zoom applied</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.display_image">
+<span class="sig-name descname"><span class="pre">display_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.display_image" title="Permalink to this definition"></a></dt>
+<dd><p>Display an image using the LUT specified in the View.</p>
+<p>If Autoscale is selected, automatically calculates
+the min and max values for the data.</p>
+<p>If Autoscale is not selected, takes the user values
+as specified in the min and max counts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.display_mask">
+<span class="sig-name descname"><span class="pre">display_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.display_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Display segmentation mask</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mask</strong> (<em>np.ndarray</em>) – Segmentation mask to display</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.down_sample_image">
+<span class="sig-name descname"><span class="pre">down_sample_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.down_sample_image" title="Permalink to this definition"></a></dt>
+<dd><p>Down-sample the data for image display according to widget size.</p>
+<p>Interpolation type is cv2.INTER_LINEAR by default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>down_sampled_image</strong> – Down-sampled image data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.flip_image">
+<span class="sig-name descname"><span class="pre">flip_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.flip_image" title="Permalink to this definition"></a></dt>
+<dd><p>Flip the image according to the flip flags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>image</strong> – Flipped and/or transposed image data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.get_absolute_position">
+<span class="sig-name descname"><span class="pre">get_absolute_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.get_absolute_position" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the absolute position of the computer mouse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>x</strong> (<em>int</em>) – The x position of the mouse.</p></li>
+<li><p><strong>y</strong> (<em>int</em>) – The y position of the mouse.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.get_selected_channels">
+<span class="sig-name descname"><span class="pre">get_selected_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.get_selected_channels" title="Permalink to this definition"></a></dt>
+<dd><p>Get the selected microscope channels from the MicroscopeState.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>microscope_state</strong> (<em>Optional</em><em>[</em><em>dict</em><em>]</em>) – The microscope state dictionary object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.identify_channel_index_and_slice">
+<span class="sig-name descname"><span class="pre">identify_channel_index_and_slice</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.identify_channel_index_and_slice" title="Permalink to this definition"></a></dt>
+<dd><p>As images arrive, identify channel index and slice.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>channel_idx</strong> (<em>int</em>) – The channel index.</p></li>
+<li><p><strong>slice_idx</strong> (<em>int</em>) – The slice index.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>Sets widgets based on data given from main controller/config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – ‘minmax’, ‘image’.</p></li>
+<li><p><strong>data</strong> (<em>list</em>) – Min and max intensity values.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.initialize_non_live_display">
+<span class="sig-name descname"><span class="pre">initialize_non_live_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.initialize_non_live_display" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the non-live display.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_state</strong> (<em>dict</em>) – Microscope state.</p></li>
+<li><p><strong>camera_parameters</strong> (<em>dict</em>) – Camera parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.left_click">
+<span class="sig-name descname"><span class="pre">left_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.left_click" title="Permalink to this definition"></a></dt>
+<dd><p>Toggles cross-hair on image upon left click event.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.mark_position">
+<span class="sig-name descname"><span class="pre">mark_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.mark_position" title="Permalink to this definition"></a></dt>
+<dd><p>Marks the current position of the microscope in
+the multi-position acquisition table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.mouse_wheel">
+<span class="sig-name descname"><span class="pre">mouse_wheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.mouse_wheel" title="Permalink to this definition"></a></dt>
+<dd><p>Digitally zooms in or out on the image upon scroll wheel event.</p>
+<p>Sets the self.zoom_value between 0.05 and 1 in .05 unit steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – num = 4 is zoom out.
+num = 5 is zoom in.
+x, y location.  0,0 is top left corner.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.move_crosshair">
+<span class="sig-name descname"><span class="pre">move_crosshair</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.move_crosshair" title="Permalink to this definition"></a></dt>
+<dd><p>Move the crosshair to a non-default position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.move_stage">
+<span class="sig-name descname"><span class="pre">move_stage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.move_stage" title="Permalink to this definition"></a></dt>
+<dd><p>Move the stage according to the position the user clicked.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.populate_image">
+<span class="sig-name descname"><span class="pre">populate_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.populate_image" title="Permalink to this definition"></a></dt>
+<dd><p>Converts image to an ImageTk.PhotoImage and populates the Tk Canvas</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When calling ImageTk.PhotoImage() to generate a new image, it will destroy
+what the canvas is showing, causing it to blink. This problem is solved by
+creating two images and alternating between them.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.popup_menu">
+<span class="sig-name descname"><span class="pre">popup_menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.popup_menu" title="Permalink to this definition"></a></dt>
+<dd><p>Right-Click Popup Menu</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – x, y location.  0,0 is top left corner.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.process_image">
+<span class="sig-name descname"><span class="pre">process_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.process_image" title="Permalink to this definition"></a></dt>
+<dd><p>Process the image to be displayed.</p>
+<p>Applies digital zoom, detects saturation, down-samples the image, scales the
+image intensity, adds a crosshair, applies the lookup table, and populates the
+image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.refresh">
+<span class="sig-name descname"><span class="pre">refresh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.refresh" title="Permalink to this definition"></a></dt>
+<dd><p>Refresh the window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<em>int</em>) – Width of the window.</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height of the window.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.reset_display">
+<span class="sig-name descname"><span class="pre">reset_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_flag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_crosshair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.reset_display" title="Permalink to this definition"></a></dt>
+<dd><p>Set the display back to the original digital zoom.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>display_flag</strong> (<em>bool</em>) – Flag for refreshing the image display. Default True.</p></li>
+<li><p><strong>reset_crosshair</strong> (<em>bool</em>) – Flag for resetting the crosshair. Default True.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.resize">
+<span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.resize" title="Permalink to this definition"></a></dt>
+<dd><p>Resize the window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – Tkinter event.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.scale_image_intensity">
+<span class="sig-name descname"><span class="pre">scale_image_intensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.scale_image_intensity" title="Permalink to this definition"></a></dt>
+<dd><p>Scale the data to the min/max counts, and adjust bit-depth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>image</strong> – Scaled image data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.set_mask_color_table">
+<span class="sig-name descname"><span class="pre">set_mask_color_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.set_mask_color_table" title="Permalink to this definition"></a></dt>
+<dd><p>Set up segmentation mask color table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>colors</strong> (<em>list</em>) – The list of colors to use for the segmentation mask</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.set_mode">
+<span class="sig-name descname"><span class="pre">set_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.set_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Sets mode of camera_view_controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em>) – camera_view_controller mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.slider_update">
+<span class="sig-name descname"><span class="pre">slider_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.slider_update" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the image when the slider is moved.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.toggle_min_max_buttons">
+<span class="sig-name descname"><span class="pre">toggle_min_max_buttons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.toggle_min_max_buttons" title="Permalink to this definition"></a></dt>
+<dd><p>Checks the value of the autoscale widget.</p>
+<p>If enabled, the min and max widgets are disabled and the image intensity is
+autoscaled. If disabled, miu and max widgets are enabled, and image intensity
+scaled.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.transpose_image">
+<span class="sig-name descname"><span class="pre">transpose_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.transpose_image" title="Permalink to this definition"></a></dt>
+<dd><p>Transpose the image according to the flip flags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>image</strong> – Flipped and/or transposed image data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.try_to_display_image">
+<span class="sig-name descname"><span class="pre">try_to_display_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.try_to_display_image" title="Permalink to this definition"></a></dt>
+<dd><p>Try to display an image.</p>
+<p>In the live mode, images are automatically passed to the display function.</p>
+<p>In the slice mode, images are passed to a spooled temporary file. However,
+when the same slice and channel index is acquired again, the image is
+updated. In all other cases, the image is only displayed upon slider events.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>np.ndarray</em>) – Image data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.update_canvas_size">
+<span class="sig-name descname"><span class="pre">update_canvas_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_canvas_size" title="Permalink to this definition"></a></dt>
+<dd><p>Update the canvas size.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.update_display_state">
+<span class="sig-name descname"><span class="pre">update_display_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_display_state" title="Permalink to this definition"></a></dt>
+<dd><p>Image Display Combobox Called.</p>
+<p>Sets self.display_state to desired display format. Toggles state of slider
+widget. Sets number of positions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Collects all the values of widgets</p>
+<p>setting_dict is a reference of experiment dictionary
+update the dictionary directly</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.update_lut">
+<span class="sig-name descname"><span class="pre">update_lut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_lut" title="Permalink to this definition"></a></dt>
+<dd><p>Update the LUT in the Camera View.</p>
+<p>When the LUT is changed in the GUI, this function is called.
+Updates the LUT.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.update_max_counts">
+<span class="sig-name descname"><span class="pre">update_max_counts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_max_counts" title="Permalink to this definition"></a></dt>
+<dd><p>Update the max counts in the camera view.</p>
+<p>Function gets the number of frames to average from the VIEW.</p>
+<p>If frames to average == 0 or 1, provides the maximum value from the last
+acquired data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.update_min_max_counts">
+<span class="sig-name descname"><span class="pre">update_min_max_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_min_max_counts" title="Permalink to this definition"></a></dt>
+<dd><p>Get min and max count values from the View.</p>
+<p>When the min and max counts are toggled in the GUI, this function is called.
+Updates the min and max values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>display</strong> (<em>bool</em>) – Flag to display the image.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.update_snr">
+<span class="sig-name descname"><span class="pre">update_snr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_snr" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the signal-to-noise ratio.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.update_transpose_state">
+<span class="sig-name descname"><span class="pre">update_transpose_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.update_transpose_state" title="Permalink to this definition"></a></dt>
+<dd><p>Get Flip XY widget value from the View.</p>
+<p>If True, transpose the image.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.apply_cross_hair">
+<span class="sig-name descname"><span class="pre">apply_cross_hair</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.apply_cross_hair" title="Permalink to this definition"></a></dt>
+<dd><p>The flag for the display of the cross-hair.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.autoscale">
+<span class="sig-name descname"><span class="pre">autoscale</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.autoscale" title="Permalink to this definition"></a></dt>
+<dd><p>The flag for autoscaling the image intensity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.bit_depth">
+<span class="sig-name descname"><span class="pre">bit_depth</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.bit_depth" title="Permalink to this definition"></a></dt>
+<dd><p>The bit depth of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.canvas">
+<span class="sig-name descname"><span class="pre">canvas</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.canvas" title="Permalink to this definition"></a></dt>
+<dd><p>The tkinter canvas that displays the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Canvas</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.canvas_height">
+<span class="sig-name descname"><span class="pre">canvas_height</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.canvas_height" title="Permalink to this definition"></a></dt>
+<dd><p>The height of the canvas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.canvas_height_scale">
+<span class="sig-name descname"><span class="pre">canvas_height_scale</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.canvas_height_scale" title="Permalink to this definition"></a></dt>
+<dd><p>The scaling factor for the height of the canvas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.canvas_width">
+<span class="sig-name descname"><span class="pre">canvas_width</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.canvas_width" title="Permalink to this definition"></a></dt>
+<dd><p>The width of the canvas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.canvas_width_scale">
+<span class="sig-name descname"><span class="pre">canvas_width_scale</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.canvas_width_scale" title="Permalink to this definition"></a></dt>
+<dd><p>The scaling factor for the width of the canvas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.colormap">
+<span class="sig-name descname"><span class="pre">colormap</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.colormap" title="Permalink to this definition"></a></dt>
+<dd><p>The colormap for the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.crosshair_x">
+<span class="sig-name descname"><span class="pre">crosshair_x</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.crosshair_x" title="Permalink to this definition"></a></dt>
+<dd><p>Percentage of crosshair in x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.crosshair_y">
+<span class="sig-name descname"><span class="pre">crosshair_y</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.crosshair_y" title="Permalink to this definition"></a></dt>
+<dd><p>Percentage of crosshair in y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for this controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.display_mask_flag">
+<span class="sig-name descname"><span class="pre">display_mask_flag</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.display_mask_flag" title="Permalink to this definition"></a></dt>
+<dd><p>The flag for displaying the mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.display_state">
+<span class="sig-name descname"><span class="pre">display_state</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.display_state" title="Permalink to this definition"></a></dt>
+<dd><p>The display state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.flip_flags">
+<span class="sig-name descname"><span class="pre">flip_flags</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.flip_flags" title="Permalink to this definition"></a></dt>
+<dd><p>The flip flags for the camera.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.height">
+<span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.height" title="Permalink to this definition"></a></dt>
+<dd><p>The height of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.ilastik_mask_ready_lock">
+<span class="sig-name descname"><span class="pre">ilastik_mask_ready_lock</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.ilastik_mask_ready_lock" title="Permalink to this definition"></a></dt>
+<dd><p>The lock for the ilastik mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>threading.Lock</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.ilastik_seg_mask">
+<span class="sig-name descname"><span class="pre">ilastik_seg_mask</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.ilastik_seg_mask" title="Permalink to this definition"></a></dt>
+<dd><p>The ilastik mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.image">
+<span class="sig-name descname"><span class="pre">image</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.image" title="Permalink to this definition"></a></dt>
+<dd><p>The image data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.image_cache_flag">
+<span class="sig-name descname"><span class="pre">image_cache_flag</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.image_cache_flag" title="Permalink to this definition"></a></dt>
+<dd><p>The flag for the image cache.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.image_count">
+<span class="sig-name descname"><span class="pre">image_count</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.image_count" title="Permalink to this definition"></a></dt>
+<dd><p>The count of images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.image_metrics">
+<span class="sig-name descname"><span class="pre">image_metrics</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.image_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>The dictionary of image metrics widgets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.image_mode">
+<span class="sig-name descname"><span class="pre">image_mode</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.image_mode" title="Permalink to this definition"></a></dt>
+<dd><p>The imaging mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.image_palette">
+<span class="sig-name descname"><span class="pre">image_palette</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.image_palette" title="Permalink to this definition"></a></dt>
+<dd><p>The dictionary of image palette widgets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.is_displaying_image">
+<span class="sig-name descname"><span class="pre">is_displaying_image</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.is_displaying_image" title="Permalink to this definition"></a></dt>
+<dd><p>The lock for displaying the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.tools.common_functions.VariableWithLock.html#navigate.tools.common_functions.VariableWithLock" title="navigate.tools.common_functions.VariableWithLock">VariableWithLock</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.logger" title="Permalink to this definition"></a></dt>
+<dd><p>The logger for the camera view controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>logging.Logger</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.mask_color_table">
+<span class="sig-name descname"><span class="pre">mask_color_table</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.mask_color_table" title="Permalink to this definition"></a></dt>
+<dd><p>The display mask flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.max_counts">
+<span class="sig-name descname"><span class="pre">max_counts</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.max_counts" title="Permalink to this definition"></a></dt>
+<dd><p>The maximum counts of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.max_intensity_history">
+<span class="sig-name descname"><span class="pre">max_intensity_history</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.max_intensity_history" title="Permalink to this definition"></a></dt>
+<dd><p>The list of maximum intensity values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.microscope_name" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.min_counts">
+<span class="sig-name descname"><span class="pre">min_counts</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.min_counts" title="Permalink to this definition"></a></dt>
+<dd><p>The minimum counts of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.mode" title="Permalink to this definition"></a></dt>
+<dd><p>The mode of the camera view controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.move_to_x">
+<span class="sig-name descname"><span class="pre">move_to_x</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.move_to_x" title="Permalink to this definition"></a></dt>
+<dd><p>The x position of the mouse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.move_to_y">
+<span class="sig-name descname"><span class="pre">move_to_y</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.move_to_y" title="Permalink to this definition"></a></dt>
+<dd><p>The y position of the mouse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.number_of_channels">
+<span class="sig-name descname"><span class="pre">number_of_channels</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.number_of_channels" title="Permalink to this definition"></a></dt>
+<dd><p>The number of channels in the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.number_of_slices">
+<span class="sig-name descname"><span class="pre">number_of_slices</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.number_of_slices" title="Permalink to this definition"></a></dt>
+<dd><p>The number of slices in the image volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.offset_crosshair">
+<span class="sig-name descname"><span class="pre">offset_crosshair</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.offset_crosshair" title="Permalink to this definition"></a></dt>
+<dd><p>the flag for offsetting the crosshair</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.original_image_height">
+<span class="sig-name descname"><span class="pre">original_image_height</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.original_image_height" title="Permalink to this definition"></a></dt>
+<dd><p>The original height of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.original_image_width">
+<span class="sig-name descname"><span class="pre">original_image_width</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.original_image_width" title="Permalink to this definition"></a></dt>
+<dd><p>The original width of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.resize_event_id">
+<span class="sig-name descname"><span class="pre">resize_event_id</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.resize_event_id" title="Permalink to this definition"></a></dt>
+<dd><p>The resize event ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.rolling_frames">
+<span class="sig-name descname"><span class="pre">rolling_frames</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.rolling_frames" title="Permalink to this definition"></a></dt>
+<dd><p>The number of frames to average.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.saturated_pixels">
+<span class="sig-name descname"><span class="pre">saturated_pixels</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.saturated_pixels" title="Permalink to this definition"></a></dt>
+<dd><p>The saturated pixels in the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.selected_channels">
+<span class="sig-name descname"><span class="pre">selected_channels</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.selected_channels" title="Permalink to this definition"></a></dt>
+<dd><p>The selected channels being acquired.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.slice_index">
+<span class="sig-name descname"><span class="pre">slice_index</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.slice_index" title="Permalink to this definition"></a></dt>
+<dd><p>The index of the slice in the image volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.stack_cycling_mode">
+<span class="sig-name descname"><span class="pre">stack_cycling_mode</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.stack_cycling_mode" title="Permalink to this definition"></a></dt>
+<dd><p>The stack cycling mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.tk_image">
+<span class="sig-name descname"><span class="pre">tk_image</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.tk_image" title="Permalink to this definition"></a></dt>
+<dd><p>The tkinter image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ImageTk.PhotoImage</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.tk_image2">
+<span class="sig-name descname"><span class="pre">tk_image2</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.tk_image2" title="Permalink to this definition"></a></dt>
+<dd><p>The tkinter image 2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ImageTk.PhotoImage</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.total_images_per_volume">
+<span class="sig-name descname"><span class="pre">total_images_per_volume</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.total_images_per_volume" title="Permalink to this definition"></a></dt>
+<dd><p>The total number of images per volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.transpose">
+<span class="sig-name descname"><span class="pre">transpose</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.transpose" title="Permalink to this definition"></a></dt>
+<dd><p>The flag for transposing the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.width">
+<span class="sig-name descname"><span class="pre">width</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.width" title="Permalink to this definition"></a></dt>
+<dd><p>The width of the canvas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_height">
+<span class="sig-name descname"><span class="pre">zoom_height</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_height" title="Permalink to this definition"></a></dt>
+<dd><p>The zoom scale of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_offset">
+<span class="sig-name descname"><span class="pre">zoom_offset</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_offset" title="Permalink to this definition"></a></dt>
+<dd><p>The zoom offset of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_rect">
+<span class="sig-name descname"><span class="pre">zoom_rect</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_rect" title="Permalink to this definition"></a></dt>
+<dd><p>The zoom rectangle of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_scale">
+<span class="sig-name descname"><span class="pre">zoom_scale</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_scale" title="Permalink to this definition"></a></dt>
+<dd><p>The zoom scale of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_value">
+<span class="sig-name descname"><span class="pre">zoom_value</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_value" title="Permalink to this definition"></a></dt>
+<dd><p>The zoom value of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_width">
+<span class="sig-name descname"><span class="pre">zoom_width</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_view.CameraViewController.zoom_width" title="Permalink to this definition"></a></dt>
+<dd><p>The zoom width of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

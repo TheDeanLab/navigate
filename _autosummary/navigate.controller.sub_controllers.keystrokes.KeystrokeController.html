@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.keystrokes.KeystrokeController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.keystrokes.KeystrokeController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.keystrokes.KeystrokeController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-keystrokes-keystrokecontroller">
+<h1>navigate.controller.sub_controllers.keystrokes.KeystrokeController<a class="headerlink" href="#navigate-controller-sub-controllers-keystrokes-keystrokecontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.keystrokes.</span></span><span class="sig-name descname"><span class="pre">KeystrokeController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_application_window.MainApp.html#navigate.view.main_application_window.MainApp" title="navigate.view.main_application_window.MainApp"><span class="pre">MainApp</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Keystroke controller</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.main_application_window.MainApp.html#navigate.view.main_application_window.MainApp" title="navigate.view.main_application_window.MainApp"><span class="pre">MainApp</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the keystroke controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>main_view</strong> (<a class="reference internal" href="navigate.view.main_application_window.MainApp.html#navigate.view.main_application_window.MainApp" title="navigate.view.main_application_window.MainApp"><em>MainApp</em></a>) – Main view</p></li>
+<li><p><strong>parent_controller</strong> (<em>Any</em>) – Main controller</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.__init__" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(main_view, parent_controller)</p></td>
+<td><p>Initialize the keystroke controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller_mouse_wheel_enter" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller_mouse_wheel_enter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_controller_mouse_wheel_enter</span></code></a>(event)</p></td>
+<td><p>Mouse wheel binding for camera view</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller_mouse_wheel_leave" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller_mouse_wheel_leave"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_controller_mouse_wheel_leave</span></code></a>(event)</p></td>
+<td><p>Mouse wheel binding for camera view</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.execute" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.initialize" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>This function is called when the controller is initialized</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller_mouse_wheel_enter" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller_mouse_wheel_enter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip_controller_mouse_wheel_enter</span></code></a>(event)</p></td>
+<td><p>Mouse wheel binding for MIP view</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller_mouse_wheel_leave" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller_mouse_wheel_leave"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip_controller_mouse_wheel_leave</span></code></a>(event)</p></td>
+<td><p>Mouse wheel binding for MIP view</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.register_event_listener" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.set_experiment_values" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.show_verbose_info" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.switch_tab" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.switch_tab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">switch_tab</span></code></a>(event)</p></td>
+<td><p>Switches between tabs</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.update_experiment_values" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Collects all the values of widgets</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.widget_redo" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.widget_redo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">widget_redo</span></code></a>(event)</p></td>
+<td><p>Redo widget changes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.widget_undo" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.widget_undo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">widget_undo</span></code></a>(event)</p></td>
+<td><p>Undo widget changes</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.custom_events" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for the controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.main_tabs" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.main_tabs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_tabs</span></code></a></p></td>
+<td><p>Settings Notebook</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_controller</span></code></a></p></td>
+<td><p>Camera View Controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip_controller</span></code></a></p></td>
+<td><p>MIP Setting Controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.multi_controller" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.multi_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multi_controller</span></code></a></p></td>
+<td><p>Multiposition Table Controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.stage_controller" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.stage_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_controller</span></code></a></p></td>
+<td><p>Keystrokes for Main View</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.main_view" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.main_view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_view</span></code></a></p></td>
+<td><p>Main view</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_view" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_view</span></code></a></p></td>
+<td><p>Camera View</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_view" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip_view</span></code></a></p></td>
+<td><p>MIP View</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.multi_table" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController.multi_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multi_table</span></code></a></p></td>
+<td><p>Multiposition Table</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller_mouse_wheel_enter">
+<span class="sig-name descname"><span class="pre">camera_controller_mouse_wheel_enter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller_mouse_wheel_enter" title="Permalink to this definition"></a></dt>
+<dd><p>Mouse wheel binding for camera view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tkinter.Event</em>) – Mouse wheel event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller_mouse_wheel_leave">
+<span class="sig-name descname"><span class="pre">camera_controller_mouse_wheel_leave</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller_mouse_wheel_leave" title="Permalink to this definition"></a></dt>
+<dd><p>Mouse wheel binding for camera view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tKinter.Event</em>) – Mouse wheel event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the controller is initialized</p>
+<p>This function initializes GUI based on configuration setting parameter:
+configuration_controller set range value for entry or spinbox widgets;
+add values to combobox get other necessary information for configuration.yml</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller_mouse_wheel_enter">
+<span class="sig-name descname"><span class="pre">mip_controller_mouse_wheel_enter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller_mouse_wheel_enter" title="Permalink to this definition"></a></dt>
+<dd><p>Mouse wheel binding for MIP view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tkinter.Event</em>) – Mouse wheel event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller_mouse_wheel_leave">
+<span class="sig-name descname"><span class="pre">mip_controller_mouse_wheel_leave</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller_mouse_wheel_leave" title="Permalink to this definition"></a></dt>
+<dd><p>Mouse wheel binding for MIP view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tkinter.Event</em>) – Mouse wheel event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.switch_tab">
+<span class="sig-name descname"><span class="pre">switch_tab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.switch_tab" title="Permalink to this definition"></a></dt>
+<dd><p>Switches between tabs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tkinter.Event</em>) – Tab key event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Collects all the values of widgets</p>
+<p>setting_dict is a reference of experiment dictionary
+update the dictionary directly</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.widget_redo">
+<span class="sig-name descname"><span class="pre">widget_redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.widget_redo" title="Permalink to this definition"></a></dt>
+<dd><p>Redo widget changes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tkinter.Event</em>) – Redo key event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.widget_undo">
+<span class="sig-name descname"><span class="pre">widget_undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.widget_undo" title="Permalink to this definition"></a></dt>
+<dd><p>Undo widget changes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tkinter.Event</em>) – Undo key event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller">
+<span class="sig-name descname"><span class="pre">camera_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Camera View Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.camera_view.CameraViewController.html#navigate.controller.sub_controllers.camera_view.CameraViewController" title="navigate.controller.sub_controllers.camera_view.CameraViewController">CameraViewController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_view">
+<span class="sig-name descname"><span class="pre">camera_view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.camera_view" title="Permalink to this definition"></a></dt>
+<dd><p>Camera View</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.view.main_window_content.display_notebook.CameraTab.html#navigate.view.main_window_content.display_notebook.CameraTab" title="navigate.view.main_window_content.display_notebook.CameraTab">CameraTab</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for the controller</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.main_tabs">
+<span class="sig-name descname"><span class="pre">main_tabs</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.main_tabs" title="Permalink to this definition"></a></dt>
+<dd><p>Settings Notebook</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.view.main_window_content.settings_notebook.SettingsNotebook.html#navigate.view.main_window_content.settings_notebook.SettingsNotebook" title="navigate.view.main_window_content.settings_notebook.SettingsNotebook">SettingsNotebook</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.main_view">
+<span class="sig-name descname"><span class="pre">main_view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.main_view" title="Permalink to this definition"></a></dt>
+<dd><p>Main view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tk.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller">
+<span class="sig-name descname"><span class="pre">mip_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_controller" title="Permalink to this definition"></a></dt>
+<dd><p>MIP Setting Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.camera_view.MIPViewController.html#navigate.controller.sub_controllers.camera_view.MIPViewController" title="navigate.controller.sub_controllers.camera_view.MIPViewController">MIPViewController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_view">
+<span class="sig-name descname"><span class="pre">mip_view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.mip_view" title="Permalink to this definition"></a></dt>
+<dd><p>MIP View</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.view.main_window_content.display_notebook.MIPTab.html#navigate.view.main_window_content.display_notebook.MIPTab" title="navigate.view.main_window_content.display_notebook.MIPTab">MIPTab</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.multi_controller">
+<span class="sig-name descname"><span class="pre">multi_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.multi_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Multiposition Table Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.multiposition.MultiPositionController.html#navigate.controller.sub_controllers.multiposition.MultiPositionController" title="navigate.controller.sub_controllers.multiposition.MultiPositionController">MultiPositionController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.multi_table">
+<span class="sig-name descname"><span class="pre">multi_table</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.multi_table" title="Permalink to this definition"></a></dt>
+<dd><p>Multiposition Table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MultipositionTable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.stage_controller">
+<span class="sig-name descname"><span class="pre">stage_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.stage_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Keystrokes for Main View</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.keystrokes.KeystrokeController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.keystrokes.KeystrokeController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

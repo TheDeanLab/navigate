@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.view.custom_widgets.hover.Hover &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.view.custom_widgets.hover.HoverButton" href="navigate.view.custom_widgets.hover.HoverButton.html" />
+    <link rel="prev" title="navigate.view.custom_widgets.hover" href="navigate.view.custom_widgets.hover.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.model.html">navigate.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.view.html">navigate.view</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.configurator_application_window.html">navigate.view.configurator_application_window</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.view.custom_widgets.html">navigate.view.custom_widgets</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.ArrowLabel.html">navigate.view.custom_widgets.ArrowLabel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.CollapsibleFrame.html">navigate.view.custom_widgets.CollapsibleFrame</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.DockableNotebook.html">navigate.view.custom_widgets.DockableNotebook</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.LabelInputWidgetFactory.html">navigate.view.custom_widgets.LabelInputWidgetFactory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.common.html">navigate.view.custom_widgets.common</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.view.custom_widgets.hover.html">navigate.view.custom_widgets.hover</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.popup.html">navigate.view.custom_widgets.popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.scrollbars.html">navigate.view.custom_widgets.scrollbars</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.validation.html">navigate.view.custom_widgets.validation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.main_application_window.html">navigate.view.main_application_window</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.main_window_content.html">navigate.view.main_window_content</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.popups.html">navigate.view.popups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.splash_screen.html">navigate.view.splash_screen</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Software API</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.html">navigate.view</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.custom_widgets.html">navigate.view.custom_widgets</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.custom_widgets.hover.html">navigate.view.custom_widgets.hover</a></li>
+      <li class="breadcrumb-item active">navigate.view.custom_widgets.hover.Hover</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.view.custom_widgets.hover.Hover.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-view-custom-widgets-hover-hover">
+<h1>navigate.view.custom_widgets.hover.Hover<a class="headerlink" href="#navigate-view-custom-widgets-hover-hover" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.view.custom_widgets.hover.</span></span><span class="sig-name descname"><span class="pre">Hover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'free'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Hover that allows for information to be displayed additionally without
+interrupting the GUI</p>
+<p>Each instance of hover is intended to be an attribute of a tk or ttk widget
+(see validated fields or hovermixins), and by default is set only to show error
+messages</p>
+<p>In this case, the parent widget is the Stage Control GUI y position label.
+To instantiate the description, widget.hover.setdescription(“Y position of the
+stage”)</p>
+<p>Please note: when dealing with LabelInput widgets, be sure to use
+LabelInput.widget.hover.setdescription(), which will target the specific widget
+and not the LabelInput frame</p>
+<p>Examples of proper usage are within stage_control_tab.py for both LabelInput and
+regular usage</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'free'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the Hover class</p>
+<p>Initializes attributes and binds events.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>widget</strong> (<em>bound widget.</em>) – The widget to which the hover instance is bound, usually the one on which
+information is being provided</p></li>
+<li><p><strong>text</strong> (<em>str variable</em>) – Text to be displayed when the hover is shown (default set to None so the
+hover will not show at all)</p></li>
+<li><p><strong>type</strong> (<em>str variable</em>) – Represents the current state of the hover and whether it is in use at any
+given moment</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.__init__" title="navigate.view.custom_widgets.hover.Hover.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([widget, text, type])</p></td>
+<td><p>Initialize the Hover class</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.get_type" title="navigate.view.custom_widgets.hover.Hover.get_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_type</span></code></a>()</p></td>
+<td><p>Getter for the type</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.getdescription" title="navigate.view.custom_widgets.hover.Hover.getdescription"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getdescription</span></code></a>()</p></td>
+<td><p>Getter for description text</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.hide" title="navigate.view.custom_widgets.hover.Hover.hide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hide</span></code></a>(event)</p></td>
+<td><p>Event handler to hide the hover</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.hidetip" title="navigate.view.custom_widgets.hover.Hover.hidetip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hidetip</span></code></a>()</p></td>
+<td><p>Hides the hover and resets type.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.setdescription" title="navigate.view.custom_widgets.hover.Hover.setdescription"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setdescription</span></code></a>(text)</p></td>
+<td><p>Setter for description text</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.seterror" title="navigate.view.custom_widgets.hover.Hover.seterror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">seterror</span></code></a>(text)</p></td>
+<td><p>Setter for the error message</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.show" title="navigate.view.custom_widgets.hover.Hover.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a>(event)</p></td>
+<td><p>Event handler to show the hover</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.showtip" title="navigate.view.custom_widgets.hover.Hover.showtip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showtip</span></code></a>(text)</p></td>
+<td><p>Displays the hover</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.update_type" title="navigate.view.custom_widgets.hover.Hover.update_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_type</span></code></a>(newtype)</p></td>
+<td><p>Setter for the type</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.widget" title="navigate.view.custom_widgets.hover.Hover.widget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">widget</span></code></a></p></td>
+<td><p>The widget to which the hover instance is bound</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.tipwindow" title="navigate.view.custom_widgets.hover.Hover.tipwindow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tipwindow</span></code></a></p></td>
+<td><p>The hover window</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.id" title="navigate.view.custom_widgets.hover.Hover.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
+<td><p>The id of the widget</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.x" title="navigate.view.custom_widgets.hover.Hover.x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code></a></p></td>
+<td><p>The x position of the widget int: The y position of the widget</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.y" title="navigate.view.custom_widgets.hover.Hover.y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y</span></code></a></p></td>
+<td><p>The x position of the widget int: The y position of the widget</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.text" title="navigate.view.custom_widgets.hover.Hover.text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">text</span></code></a></p></td>
+<td><p>The text to be displayed when the hover is shown</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.description" title="navigate.view.custom_widgets.hover.Hover.description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code></a></p></td>
+<td><p>The current state of the hover</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.hover.Hover.type" title="navigate.view.custom_widgets.hover.Hover.type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></a></p></td>
+<td><p>The current state of the hover</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.get_type">
+<span class="sig-name descname"><span class="pre">get_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.get_type" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for the type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>type</strong> – The current state of the hover</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.getdescription">
+<span class="sig-name descname"><span class="pre">getdescription</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.getdescription" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for description text</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>type</strong> – The description text</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.hide">
+<span class="sig-name descname"><span class="pre">hide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.hide" title="Permalink to this definition"></a></dt>
+<dd><p>Event handler to hide the hover</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>event</em>) – The event instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.hidetip">
+<span class="sig-name descname"><span class="pre">hidetip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.hidetip" title="Permalink to this definition"></a></dt>
+<dd><p>Hides the hover and resets type.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.setdescription">
+<span class="sig-name descname"><span class="pre">setdescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.setdescription" title="Permalink to this definition"></a></dt>
+<dd><p>Setter for description text</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – Text to be displayed when hover is shown as a description</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.seterror">
+<span class="sig-name descname"><span class="pre">seterror</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.seterror" title="Permalink to this definition"></a></dt>
+<dd><p>Setter for the error message</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – Error message to be displayed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.show">
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.show" title="Permalink to this definition"></a></dt>
+<dd><p>Event handler to show the hover</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>event</em>) – The event instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.showtip">
+<span class="sig-name descname"><span class="pre">showtip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.showtip" title="Permalink to this definition"></a></dt>
+<dd><p>Displays the hover</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The text to be displayed on the hover</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.update_type">
+<span class="sig-name descname"><span class="pre">update_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newtype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.update_type" title="Permalink to this definition"></a></dt>
+<dd><p>Setter for the type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>newtype</strong> (<em>str</em>) – The new state of the hover</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.description" title="Permalink to this definition"></a></dt>
+<dd><p>The current state of the hover</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.id" title="Permalink to this definition"></a></dt>
+<dd><p>The id of the widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.text">
+<span class="sig-name descname"><span class="pre">text</span></span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.text" title="Permalink to this definition"></a></dt>
+<dd><p>The text to be displayed when the hover is shown</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.tipwindow">
+<span class="sig-name descname"><span class="pre">tipwindow</span></span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.tipwindow" title="Permalink to this definition"></a></dt>
+<dd><p>The hover window</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tk.Toplevel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.type">
+<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.type" title="Permalink to this definition"></a></dt>
+<dd><p>The current state of the hover</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.widget">
+<span class="sig-name descname"><span class="pre">widget</span></span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.widget" title="Permalink to this definition"></a></dt>
+<dd><p>The widget to which the hover instance is bound</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tk.Widget</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.x">
+<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.x" title="Permalink to this definition"></a></dt>
+<dd><p>The x position of the widget
+int: The y position of the widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.hover.Hover.y">
+<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#navigate.view.custom_widgets.hover.Hover.y" title="Permalink to this definition"></a></dt>
+<dd><p>The x position of the widget
+int: The y position of the widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.view.custom_widgets.hover.html" class="btn btn-neutral float-left" title="navigate.view.custom_widgets.hover" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.view.custom_widgets.hover.HoverButton.html" class="btn btn-neutral float-right" title="navigate.view.custom_widgets.hover.HoverButton" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

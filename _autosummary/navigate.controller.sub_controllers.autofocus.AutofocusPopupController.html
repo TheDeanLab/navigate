@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.autofocus.AutofocusPopupController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.autofocus.AutofocusPopupController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.autofocus.AutofocusPopupController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-autofocus-autofocuspopupcontroller">
+<h1>navigate.controller.sub_controllers.autofocus.AutofocusPopupController<a class="headerlink" href="#navigate-controller-sub-controllers-autofocus-autofocuspopupcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.autofocus.</span></span><span class="sig-name descname"><span class="pre">AutofocusPopupController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.popups.autofocus_setting_popup.AutofocusPopup.html#navigate.view.popups.autofocus_setting_popup.AutofocusPopup" title="navigate.view.popups.autofocus_setting_popup.AutofocusPopup"><span class="pre">AutofocusPopup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><span class="pre">Controller</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Class creates the popup to configure autofocus parameters.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.popups.autofocus_setting_popup.AutofocusPopup.html#navigate.view.popups.autofocus_setting_popup.AutofocusPopup" title="navigate.view.popups.autofocus_setting_popup.AutofocusPopup"><span class="pre">AutofocusPopup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><span class="pre">Controller</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<a class="reference internal" href="navigate.view.popups.autofocus_setting_popup.AutofocusPopup.html#navigate.view.popups.autofocus_setting_popup.AutofocusPopup" title="navigate.view.popups.autofocus_setting_popup.AutofocusPopup"><em>AutofocusPopup</em></a>) – The view of the autofocus popup.</p></li>
+<li><p><strong>parent_controller</strong> (<a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><em>navigate.controller.controller.Controller</em></a>) – The parent controller of the autofocus popup.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.__init__" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, parent_controller)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">param view<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The view of the autofocus popup.</p>
+</dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.close_popup" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.close_popup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_popup</span></code></a>(*_)</p></td>
+<td><p>Closes the popup window</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.display_plot" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.display_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_plot</span></code></a>(data_and_flags)</p></td>
+<td><p>Displays the autofocus plot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.execute" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.initialize" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>This function is called when the controller is initialized</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.populate_experiment_values" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.populate_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_values</span></code></a>()</p></td>
+<td><p>Populate Experiment Values</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.register_event_listener" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.set_experiment_values" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.show_autofocus_setting" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.show_autofocus_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_autofocus_setting</span></code></a>(*_)</p></td>
+<td><p>Show Autofocus Parameters</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.show_verbose_info" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.showup" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.showup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showup</span></code></a>()</p></td>
+<td><p>Shows the popup window</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.start_autofocus" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.start_autofocus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_autofocus</span></code></a>()</p></td>
+<td><p>Starts the autofocus process.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_device_ref" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_device_ref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_device_ref</span></code></a>(*_)</p></td>
+<td><p>Update device reference name</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_experiment_values" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Collects all the values of widgets</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_setting_dict" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_setting_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_setting_dict</span></code></a>(parameter)</p></td>
+<td><p>Show Autofocus Parameters</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.custom_events" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for this controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.widgets" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">widgets</span></code></a></p></td>
+<td><p>The autofocus setting dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.microscope_name" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>The microscope name.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.setting_dict" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.setting_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setting_dict</span></code></a></p></td>
+<td><p>The autofocus setting dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.autofocus_fig" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.autofocus_fig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">autofocus_fig</span></code></a></p></td>
+<td><p>The autofocus figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.autofocus_coarse" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.autofocus_coarse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">autofocus_coarse</span></code></a></p></td>
+<td><p>The autofocus coarse plot.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.coarse_plot" title="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.coarse_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coarse_plot</span></code></a></p></td>
+<td><p>The autofocus coarse plot.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.close_popup">
+<span class="sig-name descname"><span class="pre">close_popup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.close_popup" title="Permalink to this definition"></a></dt>
+<dd><p>Closes the popup window</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – The event arguments.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.display_plot">
+<span class="sig-name descname"><span class="pre">display_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_and_flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.display_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Displays the autofocus plot</p>
+<dl>
+<dt>data<span class="classifier">tuple[np.ndarray, bool, bool]</span></dt><dd><p>(data, line_plot, clear_data)
+data: The data to be plotted.
+line_plot:</p>
+<blockquote>
+<div><p>If True, the plot will be a line plot.
+If False, the plot will be a scatter plot.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>clear_data:</dt><dd><p>If True, the plot will be cleared before plotting.
+If False, the plot will be added to the existing plot.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the controller is initialized</p>
+<p>This function initializes GUI based on configuration setting parameter:
+configuration_controller set range value for entry or spinbox widgets;
+add values to combobox get other necessary information for configuration.yml</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.populate_experiment_values">
+<span class="sig-name descname"><span class="pre">populate_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.populate_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Populate Experiment Values</p>
+<p>Populates the experiment values from the experiment settings dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.show_autofocus_setting">
+<span class="sig-name descname"><span class="pre">show_autofocus_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.show_autofocus_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Show Autofocus Parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – The event arguments.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.showup">
+<span class="sig-name descname"><span class="pre">showup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.showup" title="Permalink to this definition"></a></dt>
+<dd><p>Shows the popup window</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.start_autofocus">
+<span class="sig-name descname"><span class="pre">start_autofocus</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.start_autofocus" title="Permalink to this definition"></a></dt>
+<dd><p>Starts the autofocus process.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_device_ref">
+<span class="sig-name descname"><span class="pre">update_device_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_device_ref" title="Permalink to this definition"></a></dt>
+<dd><p>Update device reference name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em>) – The event arguments.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Collects all the values of widgets</p>
+<p>setting_dict is a reference of experiment dictionary
+update the dictionary directly</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_setting_dict">
+<span class="sig-name descname"><span class="pre">update_setting_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">callable</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.update_setting_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Show Autofocus Parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameter</strong> (<em>str</em>) – The parameter to be updated.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function to update the parameter</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.autofocus_coarse">
+<span class="sig-name descname"><span class="pre">autofocus_coarse</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.autofocus_coarse" title="Permalink to this definition"></a></dt>
+<dd><p>The autofocus coarse plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.autofocus_fig">
+<span class="sig-name descname"><span class="pre">autofocus_fig</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.autofocus_fig" title="Permalink to this definition"></a></dt>
+<dd><p>The autofocus figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.coarse_plot">
+<span class="sig-name descname"><span class="pre">coarse_plot</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.coarse_plot" title="Permalink to this definition"></a></dt>
+<dd><p>The autofocus coarse plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">callable</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for this controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The custom events for this controller.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, callable]</p>
+</dd>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.microscope_name" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.setting_dict">
+<span class="sig-name descname"><span class="pre">setting_dict</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.setting_dict" title="Permalink to this definition"></a></dt>
+<dd><p>The autofocus setting dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.autofocus.AutofocusPopupController.widgets">
+<span class="sig-name descname"><span class="pre">widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.autofocus.AutofocusPopupController.widgets" title="Permalink to this definition"></a></dt>
+<dd><p>The autofocus setting dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

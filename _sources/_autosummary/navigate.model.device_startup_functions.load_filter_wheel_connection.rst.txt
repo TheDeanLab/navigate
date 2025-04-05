@@ -1,6 +1,0 @@
-navigate.model.device\_startup\_functions.load\_filter\_wheel\_connection
-=========================================================================
-
-.. currentmodule:: navigate.model.device_startup_functions
-
-.. autofunction:: load_filter_wheel_connection

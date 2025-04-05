@@ -9,13 +9,6 @@ navigate.model.devices.zoom.dynamixel
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-   
-      build_dynamixel_zoom_connection
-   
    
 
    

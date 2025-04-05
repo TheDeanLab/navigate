@@ -9,13 +9,6 @@ navigate.model.devices.filter\_wheel.sutter
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-   
-      build_filter_wheel_connection
-   
    
 
    

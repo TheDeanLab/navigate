@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.ilastik.IlastikPopupController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.ilastik.IlastikPopupController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.ilastik.IlastikPopupController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-ilastik-ilastikpopupcontroller">
+<h1>navigate.controller.sub_controllers.ilastik.IlastikPopupController<a class="headerlink" href="#navigate-controller-sub-controllers-ilastik-ilastikpopupcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.ilastik.</span></span><span class="sig-name descname"><span class="pre">IlastikPopupController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Ilastik popup controller</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the ilastik popup controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<em>IlastikPopupView</em>) – ilastik popup view</p></li>
+<li><p><strong>parent_controller</strong> (<em>MainController</em>) – main controller</p></li>
+<li><p><strong>service_url</strong> (<em>str</em>) – url of the navigate_server for ilastik</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.__init__" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, parent_controller, service_url)</p></td>
+<td><p>Initialize the ilastik popup controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.confirm_setting" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.confirm_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">confirm_setting</span></code></a>()</p></td>
+<td><p>Confirm settings</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.execute" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.initialize" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>This function is called when the controller is initialized</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.load_project" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.load_project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_project</span></code></a>()</p></td>
+<td><p>Load ilastik project file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.register_event_listener" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.set_experiment_values" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.show_verbose_info" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.showup" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.showup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showup</span></code></a>([popup_window])</p></td>
+<td><p>Show the ilastik popup window</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_display" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_display"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_display</span></code></a>()</p></td>
+<td><p>Toggle display of ilastik segmentation results</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_label" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_label</span></code></a>(label_id)</p></td>
+<td><p>Toggle label status</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_mark_position" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_mark_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_mark_position</span></code></a>()</p></td>
+<td><p>Toggle mark position of ilastik segmentation results</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.update_experiment_values" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Collects all the values of widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.update_project" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.update_project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_project</span></code></a>(filename, label_dict)</p></td>
+<td><p>Update project file name and labels</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.custom_events" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for the controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.service_url" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.service_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">service_url</span></code></a></p></td>
+<td><p>url of the navigate_server for ilastik</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.project_filename" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.project_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_filename</span></code></a></p></td>
+<td><p>ilastik project file name</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.show_segmentation_flag" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.show_segmentation_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_segmentation_flag</span></code></a></p></td>
+<td><p>show segmentation flag</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.mark_position_flag" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.mark_position_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark_position_flag</span></code></a></p></td>
+<td><p>mark position flag</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.label_dict" title="navigate.controller.sub_controllers.ilastik.IlastikPopupController.label_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">label_dict</span></code></a></p></td>
+<td><p>label dictionary</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.confirm_setting">
+<span class="sig-name descname"><span class="pre">confirm_setting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.confirm_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Confirm settings</p>
+<p>Tell the model which labels will be used activate features containing ilastik</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the controller is initialized</p>
+<p>This function initializes GUI based on configuration setting parameter:
+configuration_controller set range value for entry or spinbox widgets;
+add values to combobox get other necessary information for configuration.yml</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.load_project">
+<span class="sig-name descname"><span class="pre">load_project</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.load_project" title="Permalink to this definition"></a></dt>
+<dd><p>Load ilastik project file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.showup">
+<span class="sig-name descname"><span class="pre">showup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popup_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.showup" title="Permalink to this definition"></a></dt>
+<dd><p>Show the ilastik popup window</p>
+<p>This function will let the popup window show in front.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>popup_window</strong> (<em>IlastikPopupView</em><em>, </em><em>optional</em>) – ilastik popup window, by default None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_display">
+<span class="sig-name descname"><span class="pre">toggle_display</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_display" title="Permalink to this definition"></a></dt>
+<dd><p>Toggle display of ilastik segmentation results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_label">
+<span class="sig-name descname"><span class="pre">toggle_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_label" title="Permalink to this definition"></a></dt>
+<dd><p>Toggle label status</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>label_id</strong> (<em>int</em>) – label id</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_mark_position">
+<span class="sig-name descname"><span class="pre">toggle_mark_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.toggle_mark_position" title="Permalink to this definition"></a></dt>
+<dd><p>Toggle mark position of ilastik segmentation results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Collects all the values of widgets</p>
+<p>setting_dict is a reference of experiment dictionary
+update the dictionary directly</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.update_project">
+<span class="sig-name descname"><span class="pre">update_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.update_project" title="Permalink to this definition"></a></dt>
+<dd><p>Update project file name and labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – project file name</p></li>
+<li><p><strong>label_dict</strong> (<em>dict</em>) – label dictionary</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for the controller</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.label_dict">
+<span class="sig-name descname"><span class="pre">label_dict</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.label_dict" title="Permalink to this definition"></a></dt>
+<dd><p>label dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.mark_position_flag">
+<span class="sig-name descname"><span class="pre">mark_position_flag</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.mark_position_flag" title="Permalink to this definition"></a></dt>
+<dd><p>mark position flag</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.project_filename">
+<span class="sig-name descname"><span class="pre">project_filename</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.project_filename" title="Permalink to this definition"></a></dt>
+<dd><p>ilastik project file name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.service_url">
+<span class="sig-name descname"><span class="pre">service_url</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.service_url" title="Permalink to this definition"></a></dt>
+<dd><p>url of the navigate_server for ilastik</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.show_segmentation_flag">
+<span class="sig-name descname"><span class="pre">show_segmentation_flag</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.show_segmentation_flag" title="Permalink to this definition"></a></dt>
+<dd><p>show segmentation flag</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.ilastik.IlastikPopupController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.ilastik.IlastikPopupController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

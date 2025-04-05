@@ -84,6 +84,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
@@ -701,7 +702,7 @@ the position.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.model.Model.prepare_acquisition">
-<span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_off_flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.model.Model.prepare_acquisition" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_off_flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#navigate.model.model.Model.prepare_acquisition" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the acquisition.</p>
 <p>This function is called when user starts the acquisition.
 Sets flags. Calculates all the waveforms. Sets the Camera Sensor Mode
@@ -709,6 +710,12 @@ Initializes the data buffer and starts camera. Opens Shutters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>turn_off_flags</strong> (<em>bool</em>) – Turn off the flags.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Was the preparation successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>

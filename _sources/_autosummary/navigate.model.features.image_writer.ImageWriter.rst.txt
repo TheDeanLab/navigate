@@ -47,5 +47,6 @@ navigate.model.features.image\_writer.ImageWriter
       ~ImageWriter.disk_space_check_interval
       ~ImageWriter.min_disk_space
       ~ImageWriter.last_disk_space_check
+      ~ImageWriter.initialized
    
    

@@ -32,7 +32,6 @@ navigate.model.devices.filter\_wheel.synthetic.SyntheticFilterWheel
    .. autosummary::
    
       ~SyntheticFilterWheel.device_connection
-      ~SyntheticFilterWheel.device_config
       ~SyntheticFilterWheel.filter_dictionary
       ~SyntheticFilterWheel.wheel_position
       ~SyntheticFilterWheel.filter_wheel_number

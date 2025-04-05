@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.view.popups.microscope_setting_popup_window" href="navigate.view.popups.microscope_setting_popup_window.html" />
+    <link rel="prev" title="navigate.view.popups.ilastik_setting_popup" href="navigate.view.popups.ilastik_setting_popup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.model.html">navigate.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.view.html">navigate.view</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.configurator_application_window.html">navigate.view.configurator_application_window</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.custom_widgets.html">navigate.view.custom_widgets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.main_application_window.html">navigate.view.main_application_window</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.main_window_content.html">navigate.view.main_window_content</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.view.popups.html">navigate.view.popups</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.acquire_popup.html">navigate.view.popups.acquire_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.adaptiveoptics_popup.html">navigate.view.popups.adaptiveoptics_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.autofocus_setting_popup.html">navigate.view.popups.autofocus_setting_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.camera_map_setting_popup.html">navigate.view.popups.camera_map_setting_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.camera_setting_popup.html">navigate.view.popups.camera_setting_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.camera_view_popup_window.html">navigate.view.popups.camera_view_popup_window</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.feature_list_popup.html">navigate.view.popups.feature_list_popup</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.view.popups.ilastik_setting_popup.html">navigate.view.popups.ilastik_setting_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.microscope_setting_popup_window.html">navigate.view.popups.microscope_setting_popup_window</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.plugins_popup.html">navigate.view.popups.plugins_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.tiling_wizard_popup.html">navigate.view.popups.tiling_wizard_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.tiling_wizard_popup2.html">navigate.view.popups.tiling_wizard_popup2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.waveform_parameter_popup_window.html">navigate.view.popups.waveform_parameter_popup_window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.splash_screen.html">navigate.view.splash_screen</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Software API</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.html">navigate.view</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.popups.html">navigate.view.popups</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.popups.ilastik_setting_popup.html">navigate.view.popups.ilastik_setting_popup</a></li>
+      <li class="breadcrumb-item active">navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-view-popups-ilastik-setting-popup-ilastik-setting-popup">
+<h1>navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup<a class="headerlink" href="#navigate-view-popups-ilastik-setting-popup-ilastik-setting-popup" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.view.popups.ilastik_setting_popup.</span></span><span class="sig-name descname"><span class="pre">ilastik_setting_popup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Popup window for setting up ilastik segmentation settings.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the popup window</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root</strong> (<em>tkinter.Tk</em>) – Root window</p></li>
+<li><p><strong>*args</strong> – Variable length argument list</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.__init__" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(root, *args, **kwargs)</p></td>
+<td><p>Initialize the popup window</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_buttons" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_buttons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_buttons</span></code></a>()</p></td>
+<td><p>Get all buttons</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_variables" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_variables</span></code></a>()</p></td>
+<td><p>Get all variables</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_widgets" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_widgets</span></code></a>()</p></td>
+<td><p>Get all widgets</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.popup" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.popup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popup</span></code></a></p></td>
+<td><p>PopUp window class</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.project_name_var" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.project_name_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_name_var</span></code></a></p></td>
+<td><p>Variable for project name</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.load_project_btn" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.load_project_btn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_project_btn</span></code></a></p></td>
+<td><p>Button for loading ilastik project</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.label_frame" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.label_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">label_frame</span></code></a></p></td>
+<td><p>Frame for labels</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.show_on_gui" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.show_on_gui"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_on_gui</span></code></a></p></td>
+<td><p>Checkbutton for showing segmentation</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.mark_position" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.mark_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark_position</span></code></a></p></td>
+<td><p>Checkbutton for marking position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.confirm_btn" title="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.confirm_btn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">confirm_btn</span></code></a></p></td>
+<td><p>Button for confirming setting</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_buttons">
+<span class="sig-name descname"><span class="pre">get_buttons</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_buttons" title="Permalink to this definition"></a></dt>
+<dd><p>Get all buttons</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of all buttons</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_variables">
+<span class="sig-name descname"><span class="pre">get_variables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_variables" title="Permalink to this definition"></a></dt>
+<dd><p>Get all variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of all variables</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_widgets">
+<span class="sig-name descname"><span class="pre">get_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.get_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>Get all widgets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of all widgets</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.confirm_btn">
+<span class="sig-name descname"><span class="pre">confirm_btn</span></span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.confirm_btn" title="Permalink to this definition"></a></dt>
+<dd><p>Button for confirming setting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.label_frame">
+<span class="sig-name descname"><span class="pre">label_frame</span></span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.label_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Frame for labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.load_project_btn">
+<span class="sig-name descname"><span class="pre">load_project_btn</span></span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.load_project_btn" title="Permalink to this definition"></a></dt>
+<dd><p>Button for loading ilastik project</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.mark_position">
+<span class="sig-name descname"><span class="pre">mark_position</span></span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.mark_position" title="Permalink to this definition"></a></dt>
+<dd><p>Checkbutton for marking position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Checkbutton</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.popup">
+<span class="sig-name descname"><span class="pre">popup</span></span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.popup" title="Permalink to this definition"></a></dt>
+<dd><p>PopUp window class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.view.custom_widgets.popup.PopUp.html#navigate.view.custom_widgets.popup.PopUp" title="navigate.view.custom_widgets.popup.PopUp">PopUp</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.project_name_var">
+<span class="sig-name descname"><span class="pre">project_name_var</span></span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.project_name_var" title="Permalink to this definition"></a></dt>
+<dd><p>Variable for project name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.StringVar</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.show_on_gui">
+<span class="sig-name descname"><span class="pre">show_on_gui</span></span><a class="headerlink" href="#navigate.view.popups.ilastik_setting_popup.ilastik_setting_popup.show_on_gui" title="Permalink to this definition"></a></dt>
+<dd><p>Checkbutton for showing segmentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Checkbutton</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.view.popups.ilastik_setting_popup.html" class="btn btn-neutral float-left" title="navigate.view.popups.ilastik_setting_popup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.view.popups.microscope_setting_popup_window.html" class="btn btn-neutral float-right" title="navigate.view.popups.microscope_setting_popup_window" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

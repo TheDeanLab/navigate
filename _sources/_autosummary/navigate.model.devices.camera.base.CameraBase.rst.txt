@@ -21,7 +21,9 @@ navigate.model.devices.camera.base.CameraBase
       ~CameraBase.close_camera
       ~CameraBase.get_line_interval
       ~CameraBase.get_offset_variance_maps
+      ~CameraBase.set_ROI_and_binning
       ~CameraBase.set_readout_direction
+      ~CameraBase.set_trigger_mode
    
    
 

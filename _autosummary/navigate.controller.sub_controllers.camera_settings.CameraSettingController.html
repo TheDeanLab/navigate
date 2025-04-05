@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.camera_settings.CameraSettingController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.camera_settings.CameraSettingController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.camera_settings.CameraSettingController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-camera-settings-camerasettingcontroller">
+<h1>navigate.controller.sub_controllers.camera_settings.CameraSettingController<a class="headerlink" href="#navigate-controller-sub-controllers-camera-settings-camerasettingcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.camera_settings.</span></span><span class="sig-name descname"><span class="pre">CameraSettingController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Controller for the camera settings.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the camera setting controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<em>tkinter.Frame</em>) – The view for the camera settings.</p></li>
+<li><p><strong>parent_controller</strong> (<em>navigate.controller.main_controller.MainController</em>) – The parent controller.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.__init__" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view[, parent_controller, ...])</p></td>
+<td><p>Initialize the camera setting controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.calculate_physical_dimensions" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.calculate_physical_dimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_physical_dimensions</span></code></a>()</p></td>
+<td><p>Calculate size of the FOV in microns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.execute" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.initialize" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>Sets widgets based on data given from main controller/config.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.populate_experiment_values" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.populate_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values in View according to the experiment yaml file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.register_event_listener" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_experiment_values" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_mode" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mode</span></code></a>(mode)</p></td>
+<td><p>Set widget configuration based upon imaging mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_roi_widgets_state" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_roi_widgets_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_roi_widgets_state</span></code></a>()</p></td>
+<td><p>Set the status of ROI widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.show_verbose_info" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_camera_device_related_setting" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_camera_device_related_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_camera_device_related_setting</span></code></a>()</p></td>
+<td><p>Update caramera device related parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_camera_parameters_silent" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_camera_parameters_silent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_camera_parameters_silent</span></code></a>(value)</p></td>
+<td><p>Update GUI camera parameters</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_experiment_values" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>(*args)</p></td>
+<td><p>Updates experiment yaml file according to the values in View.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_exposure_time" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_exposure_time</span></code></a>(exposure_time)</p></td>
+<td><p>When camera exposure time is changed, recalculate readout time</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_fov" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_fov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_fov</span></code></a>(*args)</p></td>
+<td><p>Recalculate fov and update the widgets: FOV_X and FOV_Y</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_number_of_pixels" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_number_of_pixels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_number_of_pixels</span></code></a>(*args)</p></td>
+<td><p>Update the number of pixels in the ROI.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_readout_time" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_readout_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_readout_time</span></code></a>()</p></td>
+<td><p>Update camera readout time.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_roi" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_roi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_roi</span></code></a>(btn_name)</p></td>
+<td><p>Update ROI width and height.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_sensor_mode" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_sensor_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_sensor_mode</span></code></a>(*args)</p></td>
+<td><p>Updates the camera sensor mode.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.custom_events" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for this controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.microscope_name" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>Camera name</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.in_initialization" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.in_initialization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_initialization</span></code></a></p></td>
+<td><p>True if in initialization</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.resolution_value" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.resolution_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution_value</span></code></a></p></td>
+<td><p>Resolution value</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.mode" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code></a></p></td>
+<td><p>Mode value</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.solvent" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.solvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solvent</span></code></a></p></td>
+<td><p>Solvent type</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.mode_widgets" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.mode_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode_widgets</span></code></a></p></td>
+<td><p>Mode widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.framerate_widgets" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.framerate_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">framerate_widgets</span></code></a></p></td>
+<td><p>Framerate widgets</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.roi_widgets" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.roi_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">roi_widgets</span></code></a></p></td>
+<td><p>ROI widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.roi_btns" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.roi_btns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">roi_btns</span></code></a></p></td>
+<td><p>ROI buttons</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_pixel_size" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_pixel_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_pixel_size</span></code></a></p></td>
+<td><p>Default pixel size</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_width" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_width</span></code></a></p></td>
+<td><p>Default width int: Default height</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_height" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_height</span></code></a></p></td>
+<td><p>Default width int: Default height</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.step_width" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.step_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step_width</span></code></a></p></td>
+<td><p>Camera width step interval</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.step_height" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.step_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step_height</span></code></a></p></td>
+<td><p>Camera height step interval</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.min_width" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.min_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_width</span></code></a></p></td>
+<td><p>Camera width minimum</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.min_height" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.min_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_height</span></code></a></p></td>
+<td><p>Camera height minimum</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.pixel_event_id" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController.pixel_event_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pixel_event_id</span></code></a></p></td>
+<td><p>True if pixel event id</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.calculate_physical_dimensions">
+<span class="sig-name descname"><span class="pre">calculate_physical_dimensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.calculate_physical_dimensions" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate size of the FOV in microns.</p>
+<p>Calculates the size of the field of view according to the magnification of the
+system, the physical size of the pixel, and the number of pixels.
+update FOV_X and FOV_Y</p>
+<p>TODO: Should make sure that this is updated before we run the tiling wizard.
+Also can probably be done more elegantly in a configuration file and
+dictionary structure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>Sets widgets based on data given from main controller/config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.populate_experiment_values">
+<span class="sig-name descname"><span class="pre">populate_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.populate_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values in View according to the experiment yaml file.</p>
+<p>Experiment yaml filed passed by controller.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_mode">
+<span class="sig-name descname"><span class="pre">set_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Set widget configuration based upon imaging mode.</p>
+<p>This function will change state of widgets according to different mode
+‘stop’ mode will let the editable widget be ‘normal’
+in ‘live’ and ‘stack’ mode, some widgets are disabled</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em>) – One of ‘live’, ‘z-stack’, ‘stop’, ‘single’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_roi_widgets_state">
+<span class="sig-name descname"><span class="pre">set_roi_widgets_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.set_roi_widgets_state" title="Permalink to this definition"></a></dt>
+<dd><p>Set the status of ROI widgets</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_camera_device_related_setting">
+<span class="sig-name descname"><span class="pre">update_camera_device_related_setting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_camera_device_related_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Update caramera device related parameters.</p>
+<p>This function will update default width and height according to microscope name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_camera_parameters_silent">
+<span class="sig-name descname"><span class="pre">update_camera_parameters_silent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_camera_parameters_silent" title="Permalink to this definition"></a></dt>
+<dd><p>Update GUI camera parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>tuple</em>) – (sensor_mode, readout_direction, number_of_pixels)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Updates experiment yaml file according to the values in View.</p>
+<p>Update the dictionary so that it can be combined with all the other
+sub-controllers, and then sent to the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – Variable length argument list.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_exposure_time">
+<span class="sig-name descname"><span class="pre">update_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>When camera exposure time is changed, recalculate readout time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exposure_time</strong> (<em>float</em>) – exposure time in seconds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_fov">
+<span class="sig-name descname"><span class="pre">update_fov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_fov" title="Permalink to this definition"></a></dt>
+<dd><p>Recalculate fov and update the widgets: FOV_X and FOV_Y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>Variable length argument list.</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_number_of_pixels">
+<span class="sig-name descname"><span class="pre">update_number_of_pixels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_number_of_pixels" title="Permalink to this definition"></a></dt>
+<dd><p>Update the number of pixels in the ROI.</p>
+<p>In live mode, we should let the device know the number of pixels changed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>tuple</em>) – Unused</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_readout_time">
+<span class="sig-name descname"><span class="pre">update_readout_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_readout_time" title="Permalink to this definition"></a></dt>
+<dd><p>Update camera readout time.</p>
+<p>TODO: Highly specific to Hamamatsu Orca Flash 4.0.
+Should find a way to pass this from the camera to here.
+This should be moved to the camera device/API,
+ideally by calling a command from the camera.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_roi">
+<span class="sig-name descname"><span class="pre">update_roi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">btn_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_roi" title="Permalink to this definition"></a></dt>
+<dd><p>Update ROI width and height.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>btn_name</strong> (<em>roi button name</em>) – width of roi in pixels: “All”, 1600, 1024, 512</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_sensor_mode">
+<span class="sig-name descname"><span class="pre">update_sensor_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.update_sensor_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the camera sensor mode.</p>
+<p>Updates text in readout widget based on what sensor mode is selected
+If we are in the Light Sheet mode, then we want the camera
+self.model[‘CameraParameters’][‘sensor_mode’]) == 12</p>
+<p>If we are in thef normal mode, then we want the camera
+self.model[‘CameraParameters’][‘sensor_mode’]) == 1</p>
+<p>Should initialize from the configuration file to the default version</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>Variable length argument list.</em>) – usually args[0] is tkinter.Event or a str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for this controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_height">
+<span class="sig-name descname"><span class="pre">default_height</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_height" title="Permalink to this definition"></a></dt>
+<dd><p>Default width
+int: Default height</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_pixel_size">
+<span class="sig-name descname"><span class="pre">default_pixel_size</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_pixel_size" title="Permalink to this definition"></a></dt>
+<dd><p>Default pixel size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_width">
+<span class="sig-name descname"><span class="pre">default_width</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.default_width" title="Permalink to this definition"></a></dt>
+<dd><p>Default width
+int: Default height</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.framerate_widgets">
+<span class="sig-name descname"><span class="pre">framerate_widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.framerate_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>Framerate widgets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.in_initialization">
+<span class="sig-name descname"><span class="pre">in_initialization</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.in_initialization" title="Permalink to this definition"></a></dt>
+<dd><p>True if in initialization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.microscope_name" title="Permalink to this definition"></a></dt>
+<dd><p>Camera name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.min_height">
+<span class="sig-name descname"><span class="pre">min_height</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.min_height" title="Permalink to this definition"></a></dt>
+<dd><p>Camera height minimum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.min_width">
+<span class="sig-name descname"><span class="pre">min_width</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.min_width" title="Permalink to this definition"></a></dt>
+<dd><p>Camera width minimum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.mode" title="Permalink to this definition"></a></dt>
+<dd><p>Mode value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.mode_widgets">
+<span class="sig-name descname"><span class="pre">mode_widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.mode_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>Mode widgets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.pixel_event_id">
+<span class="sig-name descname"><span class="pre">pixel_event_id</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.pixel_event_id" title="Permalink to this definition"></a></dt>
+<dd><p>True if pixel event id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.resolution_value">
+<span class="sig-name descname"><span class="pre">resolution_value</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.resolution_value" title="Permalink to this definition"></a></dt>
+<dd><p>Resolution value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.roi_btns">
+<span class="sig-name descname"><span class="pre">roi_btns</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.roi_btns" title="Permalink to this definition"></a></dt>
+<dd><p>ROI buttons</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.roi_widgets">
+<span class="sig-name descname"><span class="pre">roi_widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.roi_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>ROI widgets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.solvent">
+<span class="sig-name descname"><span class="pre">solvent</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.solvent" title="Permalink to this definition"></a></dt>
+<dd><p>Solvent type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.step_height">
+<span class="sig-name descname"><span class="pre">step_height</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.step_height" title="Permalink to this definition"></a></dt>
+<dd><p>Camera height step interval</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.step_width">
+<span class="sig-name descname"><span class="pre">step_width</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.step_width" title="Permalink to this definition"></a></dt>
+<dd><p>Camera width step interval</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.camera_settings.CameraSettingController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.camera_settings.CameraSettingController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

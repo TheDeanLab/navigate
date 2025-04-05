@@ -207,13 +207,13 @@ linter may complain about a line of code that is actually fine. For example, in
 the example code below, Ruff linter complains that the start_stage class is
 imported but not used. However, it is actually used in as part of an
 <code class="docutils literal notranslate"><span class="pre">exec</span></code> statement.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">navigate.model.device_startup_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">start_stage</span>
 <span class="n">device_name</span> <span class="o">=</span> <span class="n">stage</span>
 <span class="n">exec</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;self.</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> = start_</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">(name, device_connection, configuration, i, is_synthetic)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To avoid this error, add a <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">noqa</span></code> comment to the end of the line to tell Ruff to ignore the error.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>  <span class="c1"># noqa</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">navigate.model.device_startup_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">start_stage</span>  <span class="c1"># noqa</span>
 </pre></div>
 </div>
 </section>

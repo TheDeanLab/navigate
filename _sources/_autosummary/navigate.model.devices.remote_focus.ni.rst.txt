@@ -19,7 +19,7 @@ navigate.model.devices.remote\_focus.ni
       :toctree:
       :template: custom_class.rst
    
-      RemoteFocusNI
+      NIRemoteFocus
    
    
 

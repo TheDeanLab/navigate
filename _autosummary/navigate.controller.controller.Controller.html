@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.controller.Controller &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.controller.Controller</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.controller.Controller.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-controller-controller">
+<h1>navigate.controller.controller.Controller<a class="headerlink" href="#navigate-controller-controller-controller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.controller.</span></span><span class="sig-name descname"><span class="pre">Controller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splash_screen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_constants_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_api_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_templates_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gui_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_positions_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Navigate Controller</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splash_screen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_constants_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_api_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_templates_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gui_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_positions_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the Navigate Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root</strong> (<em>Tk top-level widget.</em>) – Tk.tk GUI instance.</p></li>
+<li><p><strong>splash_screen</strong> (<em>Tk top-level widget.</em>) – Tk.tk GUI instance.</p></li>
+<li><p><strong>configuration_path</strong> (<em>string</em>) – Path to the configuration yaml file.
+Provides global microscope configuration parameters.</p></li>
+<li><p><strong>experiment_path</strong> (<em>string</em>) – Path to the experiment yaml file.
+Provides experiment-specific microscope configuration.</p></li>
+<li><p><strong>waveform_constants_path</strong> (<em>string</em>) – Path to the waveform constants yaml file.
+Provides magnification and wavelength-specific parameters.</p></li>
+<li><p><strong>rest_api_path</strong> (<em>string</em>) – Path to the REST API yaml file.
+Provides REST API configuration parameters.</p></li>
+<li><p><strong>waveform_templates_path</strong> (<em>string</em>) – Path to the waveform templates yaml file.
+Provides waveform templates for each channel.</p></li>
+<li><p><strong>gui_configuration_path</strong> (<em>string</em>) – Path to the GUI configuration yaml file.
+Provides GUI configuration parameters.</p></li>
+<li><p><strong>*args</strong> – Command line input arguments for non-default
+file paths or using synthetic hardware modes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.__init__" title="navigate.controller.controller.Controller.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(root, splash_screen, ...)</p></td>
+<td><p>Initialize the Navigate Controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.add_acquisition_mode" title="navigate.controller.controller.Controller.add_acquisition_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_acquisition_mode</span></code></a>(name, acquisition_obj)</p></td>
+<td><p>Add and Acquisition Mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.capture_image" title="navigate.controller.controller.Controller.capture_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">capture_image</span></code></a>(command, mode, *args)</p></td>
+<td><p>Trigger the model to capture images.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.change_microscope" title="navigate.controller.controller.Controller.change_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_microscope</span></code></a>(microscope_name[, zoom])</p></td>
+<td><p>Change the microscope configuration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.destroy_virtual_microscope" title="navigate.controller.controller.Controller.destroy_virtual_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">destroy_virtual_microscope</span></code></a>(microscope_name)</p></td>
+<td><p>Destroy virtual microscopes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.execute" title="navigate.controller.controller.Controller.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>Functions listens to the Sub_Gui_Controllers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.initialize_cam_view" title="navigate.controller.controller.Controller.initialize_cam_view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_cam_view</span></code></a>()</p></td>
+<td><p>Populate view and maximum intensity projection tabs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.launch_additional_microscopes" title="navigate.controller.controller.Controller.launch_additional_microscopes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_additional_microscopes</span></code></a>()</p></td>
+<td><p>Launch additional microscopes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.move_stage" title="navigate.controller.controller.Controller.move_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_stage</span></code></a>(pos_dict)</p></td>
+<td><p>Trigger the model to move the stage.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.populate_experiment_setting" title="navigate.controller.controller.Controller.populate_experiment_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_setting</span></code></a>([file_name, ...])</p></td>
+<td><p>Load experiment file and populate model.experiment and configure view.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.prepare_acquire_data" title="navigate.controller.controller.Controller.prepare_acquire_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_acquire_data</span></code></a>()</p></td>
+<td><p>Prepare the acquisition data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.register_event_listener" title="navigate.controller.controller.Controller.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register an event listener.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.register_event_listeners" title="navigate.controller.controller.Controller.register_event_listeners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listeners</span></code></a>(events)</p></td>
+<td><p>Register multiple event listeners.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.resize" title="navigate.controller.controller.Controller.resize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resize</span></code></a>(event)</p></td>
+<td><p>Resize the GUI.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.set_mode_of_sub" title="navigate.controller.controller.Controller.set_mode_of_sub"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mode_of_sub</span></code></a>(mode)</p></td>
+<td><p>Communicates imaging mode to sub-controllers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.sloppy_stop" title="navigate.controller.controller.Controller.sloppy_stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sloppy_stop</span></code></a>()</p></td>
+<td><p>Keep trying to stop the model until successful.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.stop_stage" title="navigate.controller.controller.Controller.stop_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_stage</span></code></a>()</p></td>
+<td><p>Stop the stage.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.update_acquire_control" title="navigate.controller.controller.Controller.update_acquire_control"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_acquire_control</span></code></a>()</p></td>
+<td><p>Update the acquire control based on the current experiment parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.update_buffer" title="navigate.controller.controller.Controller.update_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_buffer</span></code></a>()</p></td>
+<td><p>Update the buffer size according to the camera dimensions listed in the experimental parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.update_event" title="navigate.controller.controller.Controller.update_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_event</span></code></a>()</p></td>
+<td><p>Update the View/Controller based on events from the Model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.update_experiment_setting" title="navigate.controller.controller.Controller.update_experiment_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_setting</span></code></a>()</p></td>
+<td><p>Update model.experiment according to values in the GUI</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.update_stage_controller_silent" title="navigate.controller.controller.Controller.update_stage_controller_silent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_stage_controller_silent</span></code></a>(ret_pos_dict)</p></td>
+<td><p>Send updates to the stage GUI</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.root" title="navigate.controller.controller.Controller.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></a></p></td>
+<td><p>Tk.tk GUI instance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.splash_screen" title="navigate.controller.controller.Controller.splash_screen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">splash_screen</span></code></a></p></td>
+<td><p>Tk.tk GUI instance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.configuration_path" title="navigate.controller.controller.Controller.configuration_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration_path</span></code></a></p></td>
+<td><p>Path to the configuration yaml file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.experiment_path" title="navigate.controller.controller.Controller.experiment_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">experiment_path</span></code></a></p></td>
+<td><p>Path to the experiment yaml file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.waveform_constants_path" title="navigate.controller.controller.Controller.waveform_constants_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_constants_path</span></code></a></p></td>
+<td><p>Path to the waveform constants yaml file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.rest_api_path" title="navigate.controller.controller.Controller.rest_api_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rest_api_path</span></code></a></p></td>
+<td><p>Path to the REST API yaml file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.waveform_templates_path" title="navigate.controller.controller.Controller.waveform_templates_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_templates_path</span></code></a></p></td>
+<td><p>Path to the waveform templates yaml file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.gui_configuration_path" title="navigate.controller.controller.Controller.gui_configuration_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gui_configuration_path</span></code></a></p></td>
+<td><p>Path to the GUI configuration yaml file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.args" title="navigate.controller.controller.Controller.args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></a></p></td>
+<td><p>Non-default command line input arguments for</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.threads_pool" title="navigate.controller.controller.Controller.threads_pool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">threads_pool</span></code></a></p></td>
+<td><p>Thread pool for the controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.event_queue" title="navigate.controller.controller.Controller.event_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_queue</span></code></a></p></td>
+<td><p>Queue for retrieving events ('event_name', value) from model</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.manager" title="navigate.controller.controller.Controller.manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">manager</span></code></a></p></td>
+<td><p>A shared memory manager</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.configuration" title="navigate.controller.controller.Controller.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Configuration dictionary</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.model" title="navigate.controller.controller.Controller.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>Model object in MVC architecture.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.show_img_pipe" title="navigate.controller.controller.Controller.show_img_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_img_pipe</span></code></a></p></td>
+<td><p>Pipe for sending images from model to view.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.default_experiment_file" title="navigate.controller.controller.Controller.default_experiment_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_experiment_file</span></code></a></p></td>
+<td><p>Path to the default experiment yaml file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.configuration_controller" title="navigate.controller.controller.Controller.configuration_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration_controller</span></code></a></p></td>
+<td><p>Configuration Controller object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.view" title="navigate.controller.controller.Controller.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a></p></td>
+<td><p>View object in MVC architecture.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.event_listeners" title="navigate.controller.controller.Controller.event_listeners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_listeners</span></code></a></p></td>
+<td><p>Event listeners for the controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.acquire_bar_controller" title="navigate.controller.controller.Controller.acquire_bar_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">acquire_bar_controller</span></code></a></p></td>
+<td><p>Acquire Bar Sub-Controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.channels_tab_controller" title="navigate.controller.controller.Controller.channels_tab_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">channels_tab_controller</span></code></a></p></td>
+<td><p>Channels Tab Sub-Controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.multiposition_tab_controller" title="navigate.controller.controller.Controller.multiposition_tab_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiposition_tab_controller</span></code></a></p></td>
+<td><p>Multi-Position Tab Sub-Controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.camera_view_controller" title="navigate.controller.controller.Controller.camera_view_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_view_controller</span></code></a></p></td>
+<td><p>Camera View Tab Sub-Controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.mip_setting_controller" title="navigate.controller.controller.Controller.mip_setting_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip_setting_controller</span></code></a></p></td>
+<td><p>MIP Settings Tab Sub-Controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.camera_setting_controller" title="navigate.controller.controller.Controller.camera_setting_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_setting_controller</span></code></a></p></td>
+<td><p>Camera Settings Tab Sub-Controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.stage_controller" title="navigate.controller.controller.Controller.stage_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_controller</span></code></a></p></td>
+<td><p>Stage Sub-Controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.waveform_tab_controller" title="navigate.controller.controller.Controller.waveform_tab_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_tab_controller</span></code></a></p></td>
+<td><p>Waveform Display Sub-Controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.keystroke_controller" title="navigate.controller.controller.Controller.keystroke_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">keystroke_controller</span></code></a></p></td>
+<td><p>Keystroke Sub-Controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.menu_controller" title="navigate.controller.controller.Controller.menu_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">menu_controller</span></code></a></p></td>
+<td><p>Menu Sub-Controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.plugin_acquisition_modes" title="navigate.controller.controller.Controller.plugin_acquisition_modes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plugin_acquisition_modes</span></code></a></p></td>
+<td><p>acquisition modes from plugins</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.plugin_controller" title="navigate.controller.controller.Controller.plugin_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plugin_controller</span></code></a></p></td>
+<td><p>Plugin Sub-Controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.img_width" title="navigate.controller.controller.Controller.img_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">img_width</span></code></a></p></td>
+<td><p>Number of x_pixels from microscope configuration file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.img_height" title="navigate.controller.controller.Controller.img_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">img_height</span></code></a></p></td>
+<td><p>Number of y_pixels from microscope configuration file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.data_buffer" title="navigate.controller.controller.Controller.data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_buffer</span></code></a></p></td>
+<td><p>Pre-allocated shared memory array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.additional_microscopes" title="navigate.controller.controller.Controller.additional_microscopes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_microscopes</span></code></a></p></td>
+<td><p>Additional microscopes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.additional_microscopes_configs" title="navigate.controller.controller.Controller.additional_microscopes_configs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_microscopes_configs</span></code></a></p></td>
+<td><p>Additional microscope configurations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.stop_acquisition_flag" title="navigate.controller.controller.Controller.stop_acquisition_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_acquisition_flag</span></code></a></p></td>
+<td><p>Flag for stopping acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.current_image_id" title="navigate.controller.controller.Controller.current_image_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_image_id</span></code></a></p></td>
+<td><p>current image id in the buffer</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.controller.Controller.resize_event_id" title="navigate.controller.controller.Controller.resize_event_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resize_event_id</span></code></a></p></td>
+<td><p>ID for the resize event.Only works on Windows OS.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.add_acquisition_mode">
+<span class="sig-name descname"><span class="pre">add_acquisition_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.add_acquisition_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Add and Acquisition Mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>string</em>) – Name of the acquisition mode.</p></li>
+<li><p><strong>acquisition_obj</strong> (<em>object</em>) – Object of the acquisition mode.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.capture_image">
+<span class="sig-name descname"><span class="pre">capture_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.capture_image" title="Permalink to this definition"></a></dt>
+<dd><p>Trigger the model to capture images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>string</em>) – ‘acquire’ or ‘autofocus’</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘continuous’, ‘z-stack’, ‘single’, or ‘projection’</p></li>
+<li><p><strong>args</strong> (<em>function-specific passes.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.change_microscope">
+<span class="sig-name descname"><span class="pre">change_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.change_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Change the microscope configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>string</em>) – Name of the microscope to change to.</p></li>
+<li><p><strong>zoom</strong> (<em>string</em>) – Name of the zoom value to change to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.destroy_virtual_microscope">
+<span class="sig-name descname"><span class="pre">destroy_virtual_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destroy_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.destroy_virtual_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Destroy virtual microscopes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – The microscope name</p></li>
+<li><p><strong>destroy_window</strong> (<em>bool</em>) – The flag to dismiss window.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Functions listens to the Sub_Gui_Controllers.</p>
+<p>The controller.experiment is passed as an argument to the model, which then
+overwrites the model.experiment. Workaround due to model being in a sub-process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>string</em>) – The string includes ‘stage’, ‘stop_stage’, ‘move_stage_and_update_info’,</p></li>
+<li><p><strong>args*</strong> (<em>Iterable.</em>) – Function-specific passes</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.initialize_cam_view">
+<span class="sig-name descname"><span class="pre">initialize_cam_view</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.initialize_cam_view" title="Permalink to this definition"></a></dt>
+<dd><p>Populate view and maximum intensity projection tabs.</p>
+<p>Communicates with the camera view controller and mip setting controller to
+set the minimum and maximum counts, as well as the default channel settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.launch_additional_microscopes">
+<span class="sig-name descname"><span class="pre">launch_additional_microscopes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.launch_additional_microscopes" title="Permalink to this definition"></a></dt>
+<dd><p>Launch additional microscopes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.move_stage">
+<span class="sig-name descname"><span class="pre">move_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.move_stage" title="Permalink to this definition"></a></dt>
+<dd><p>Trigger the model to move the stage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pos_dict</strong> (<em>dict</em>) – Dictionary of axis positions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.populate_experiment_setting">
+<span class="sig-name descname"><span class="pre">populate_experiment_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_initialize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.populate_experiment_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Load experiment file and populate model.experiment and configure view.</p>
+<p>Confirms that the experiment file exists.
+Sends the experiment file to the model and the controller.
+Populates the GUI with these settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_name</strong> (<em>string</em>) – file_name = path to the non-default experiment yaml file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.prepare_acquire_data">
+<span class="sig-name descname"><span class="pre">prepare_acquire_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.prepare_acquire_data" title="Permalink to this definition"></a></dt>
+<dd><p>Prepare the acquisition data.</p>
+<p>Updates model.experiment.
+Sets sub-controller’s mode to ‘live’ when ‘continuous is selected, or ‘stop’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if all settings are valid, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register an event listener.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>string</em>) – Name of the event.</p></li>
+<li><p><strong>event_handler</strong> (<em>callable</em>) – The function to handle the event.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.register_event_listeners">
+<span class="sig-name descname"><span class="pre">register_event_listeners</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.register_event_listeners" title="Permalink to this definition"></a></dt>
+<dd><p>Register multiple event listeners.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>events</strong> (<em>dict</em>) – Dictionary of event names and handlers.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.resize">
+<span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.resize" title="Permalink to this definition"></a></dt>
+<dd><p>Resize the GUI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>event</em>) – event = &lt;Configure x=0 y=0 width=1200 height=600&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.set_mode_of_sub">
+<span class="sig-name descname"><span class="pre">set_mode_of_sub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.set_mode_of_sub" title="Permalink to this definition"></a></dt>
+<dd><p>Communicates imaging mode to sub-controllers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em>) – The string = ‘live’, ‘stop’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.sloppy_stop">
+<span class="sig-name descname"><span class="pre">sloppy_stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.sloppy_stop" title="Permalink to this definition"></a></dt>
+<dd><p>Keep trying to stop the model until successful.</p>
+<p>TODO: Delete this function!!!</p>
+<p>This is set up to get around the conflict between
+self.threads_pool.createThread(‘model’, target)
+commands and the need to stop as abruptly as
+possible when the user hits stop. Here we leverage
+ObjectInSubprocess’ refusal to let us access
+the model from two threads to our advantage, and just
+try repeatedly until we get a command in front
+of the next command in the model threads_pool resource.
+We should instead pause the model thread pool
+and interject our stop command, or clear the queue
+in threads_pool.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.stop_stage">
+<span class="sig-name descname"><span class="pre">stop_stage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.stop_stage" title="Permalink to this definition"></a></dt>
+<dd><p>Stop the stage.</p>
+<p>Grab the stopped position from the stage
+and update the GUI control values accordingly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.update_acquire_control">
+<span class="sig-name descname"><span class="pre">update_acquire_control</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.update_acquire_control" title="Permalink to this definition"></a></dt>
+<dd><p>Update the acquire control based on the current experiment parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.update_buffer">
+<span class="sig-name descname"><span class="pre">update_buffer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.update_buffer" title="Permalink to this definition"></a></dt>
+<dd><p>Update the buffer size according to the camera
+dimensions listed in the experimental parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>self.img_width</strong> (<em>int</em>) – Number of x_pixels from microscope configuration file.</p></li>
+<li><p><strong>self.image_height</strong> (<em>int</em>) – Number of y_pixels from microscope configuration file.</p></li>
+<li><p><strong>self.data_buffer</strong> (<em>SharedNDArray</em>) – Pre-allocated shared memory array.
+Size dictated by x_pixels, y_pixels, an number_of_frames in
+configuration file.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.update_event">
+<span class="sig-name descname"><span class="pre">update_event</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.update_event" title="Permalink to this definition"></a></dt>
+<dd><p>Update the View/Controller based on events from the Model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.update_experiment_setting">
+<span class="sig-name descname"><span class="pre">update_experiment_setting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.update_experiment_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Update model.experiment according to values in the GUI</p>
+<p>Collect settings from sub-controllers will validate the value, if something
+is wrong, it will return False</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Warning info if any</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.update_stage_controller_silent">
+<span class="sig-name descname"><span class="pre">update_stage_controller_silent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ret_pos_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.controller.Controller.update_stage_controller_silent" title="Permalink to this definition"></a></dt>
+<dd><p>Send updates to the stage GUI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ret_pos_dict</strong> (<em>dict</em>) – Dictionary of axis positions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.acquire_bar_controller">
+<span class="sig-name descname"><span class="pre">acquire_bar_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.acquire_bar_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Acquire Bar Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.acquire_bar.AcquireBarController.html#navigate.controller.sub_controllers.acquire_bar.AcquireBarController" title="navigate.controller.sub_controllers.acquire_bar.AcquireBarController">AcquireBarController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.additional_microscopes">
+<span class="sig-name descname"><span class="pre">additional_microscopes</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.additional_microscopes" title="Permalink to this definition"></a></dt>
+<dd><p>Additional microscopes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.additional_microscopes_configs">
+<span class="sig-name descname"><span class="pre">additional_microscopes_configs</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.additional_microscopes_configs" title="Permalink to this definition"></a></dt>
+<dd><p>Additional microscope configurations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.args" title="Permalink to this definition"></a></dt>
+<dd><p>Non-default command line input arguments for</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>iterable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.camera_setting_controller">
+<span class="sig-name descname"><span class="pre">camera_setting_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.camera_setting_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Camera Settings Tab Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.camera_settings.CameraSettingController.html#navigate.controller.sub_controllers.camera_settings.CameraSettingController" title="navigate.controller.sub_controllers.camera_settings.CameraSettingController">CameraSettingController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.camera_view_controller">
+<span class="sig-name descname"><span class="pre">camera_view_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.camera_view_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Camera View Tab Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.camera_view.CameraViewController.html#navigate.controller.sub_controllers.camera_view.CameraViewController" title="navigate.controller.sub_controllers.camera_view.CameraViewController">CameraViewController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.channels_tab_controller">
+<span class="sig-name descname"><span class="pre">channels_tab_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.channels_tab_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Channels Tab Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.channels_tab.ChannelsTabController.html#navigate.controller.sub_controllers.channels_tab.ChannelsTabController" title="navigate.controller.sub_controllers.channels_tab.ChannelsTabController">ChannelsTabController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.configuration_controller">
+<span class="sig-name descname"><span class="pre">configuration_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.configuration_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration Controller object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.configuration_controller.ConfigurationController.html#navigate.controller.configuration_controller.ConfigurationController" title="navigate.controller.configuration_controller.ConfigurationController">ConfigurationController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.configuration_path">
+<span class="sig-name descname"><span class="pre">configuration_path</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.configuration_path" title="Permalink to this definition"></a></dt>
+<dd><p>Path to the configuration yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.current_image_id">
+<span class="sig-name descname"><span class="pre">current_image_id</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.current_image_id" title="Permalink to this definition"></a></dt>
+<dd><p>current image id in the buffer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.data_buffer">
+<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.data_buffer" title="Permalink to this definition"></a></dt>
+<dd><p>Pre-allocated shared memory array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.model.concurrency.concurrency_tools.SharedNDArray.html#navigate.model.concurrency.concurrency_tools.SharedNDArray" title="navigate.model.concurrency.concurrency_tools.SharedNDArray">SharedNDArray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.default_experiment_file">
+<span class="sig-name descname"><span class="pre">default_experiment_file</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.default_experiment_file" title="Permalink to this definition"></a></dt>
+<dd><p>Path to the default experiment yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.event_listeners">
+<span class="sig-name descname"><span class="pre">event_listeners</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.event_listeners" title="Permalink to this definition"></a></dt>
+<dd><p>Event listeners for the controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.event_queue">
+<span class="sig-name descname"><span class="pre">event_queue</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.event_queue" title="Permalink to this definition"></a></dt>
+<dd><p>Queue for retrieving events (‘event_name’, value) from model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mp.Queue</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.experiment_path">
+<span class="sig-name descname"><span class="pre">experiment_path</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.experiment_path" title="Permalink to this definition"></a></dt>
+<dd><p>Path to the experiment yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.gui_configuration_path">
+<span class="sig-name descname"><span class="pre">gui_configuration_path</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.gui_configuration_path" title="Permalink to this definition"></a></dt>
+<dd><p>Path to the GUI configuration yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.img_height">
+<span class="sig-name descname"><span class="pre">img_height</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.img_height" title="Permalink to this definition"></a></dt>
+<dd><p>Number of y_pixels from microscope configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.img_width">
+<span class="sig-name descname"><span class="pre">img_width</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.img_width" title="Permalink to this definition"></a></dt>
+<dd><p>Number of x_pixels from microscope configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.keystroke_controller">
+<span class="sig-name descname"><span class="pre">keystroke_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.keystroke_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Keystroke Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.keystrokes.KeystrokeController.html#navigate.controller.sub_controllers.keystrokes.KeystrokeController" title="navigate.controller.sub_controllers.keystrokes.KeystrokeController">KeystrokeController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.manager">
+<span class="sig-name descname"><span class="pre">manager</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.manager" title="Permalink to this definition"></a></dt>
+<dd><p>A shared memory manager</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Manager</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.menu_controller">
+<span class="sig-name descname"><span class="pre">menu_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.menu_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Menu Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.menus.MenuController.html#navigate.controller.sub_controllers.menus.MenuController" title="navigate.controller.sub_controllers.menus.MenuController">MenuController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.mip_setting_controller">
+<span class="sig-name descname"><span class="pre">mip_setting_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.mip_setting_controller" title="Permalink to this definition"></a></dt>
+<dd><p>MIP Settings Tab Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MIPSettingController</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.model" title="Permalink to this definition"></a></dt>
+<dd><p>Model object in MVC architecture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.model.concurrency.concurrency_tools.ObjectInSubprocess.html#navigate.model.concurrency.concurrency_tools.ObjectInSubprocess" title="navigate.model.concurrency.concurrency_tools.ObjectInSubprocess">ObjectInSubprocess</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.multiposition_tab_controller">
+<span class="sig-name descname"><span class="pre">multiposition_tab_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.multiposition_tab_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Multi-Position Tab Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.multiposition.MultiPositionController.html#navigate.controller.sub_controllers.multiposition.MultiPositionController" title="navigate.controller.sub_controllers.multiposition.MultiPositionController">MultiPositionController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.plugin_acquisition_modes">
+<span class="sig-name descname"><span class="pre">plugin_acquisition_modes</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.plugin_acquisition_modes" title="Permalink to this definition"></a></dt>
+<dd><p>acquisition modes from plugins</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.plugin_controller">
+<span class="sig-name descname"><span class="pre">plugin_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.plugin_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Plugin Sub-Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.plugins.PluginsController.html#navigate.controller.sub_controllers.plugins.PluginsController" title="navigate.controller.sub_controllers.plugins.PluginsController">PluginsController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.resize_event_id">
+<span class="sig-name descname"><span class="pre">resize_event_id</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.resize_event_id" title="Permalink to this definition"></a></dt>
+<dd><p>ID for the resize event.Only works on Windows OS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.rest_api_path">
+<span class="sig-name descname"><span class="pre">rest_api_path</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.rest_api_path" title="Permalink to this definition"></a></dt>
+<dd><p>Path to the REST API yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.root">
+<span class="sig-name descname"><span class="pre">root</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.root" title="Permalink to this definition"></a></dt>
+<dd><p>Tk.tk GUI instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tk top-level widget</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.show_img_pipe">
+<span class="sig-name descname"><span class="pre">show_img_pipe</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.show_img_pipe" title="Permalink to this definition"></a></dt>
+<dd><p>Pipe for sending images from model to view.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mp.Pipe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.splash_screen">
+<span class="sig-name descname"><span class="pre">splash_screen</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.splash_screen" title="Permalink to this definition"></a></dt>
+<dd><p>Tk.tk GUI instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tk top-level widget</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.stage_controller">
+<span class="sig-name descname"><span class="pre">stage_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.stage_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Stage Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.stages.StageController.html#navigate.controller.sub_controllers.stages.StageController" title="navigate.controller.sub_controllers.stages.StageController">StageController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.stop_acquisition_flag">
+<span class="sig-name descname"><span class="pre">stop_acquisition_flag</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.stop_acquisition_flag" title="Permalink to this definition"></a></dt>
+<dd><p>Flag for stopping acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.threads_pool">
+<span class="sig-name descname"><span class="pre">threads_pool</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.threads_pool" title="Permalink to this definition"></a></dt>
+<dd><p>Thread pool for the controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.view" title="Permalink to this definition"></a></dt>
+<dd><p>View object in MVC architecture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>View</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.waveform_constants_path">
+<span class="sig-name descname"><span class="pre">waveform_constants_path</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.waveform_constants_path" title="Permalink to this definition"></a></dt>
+<dd><p>Path to the waveform constants yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.waveform_tab_controller">
+<span class="sig-name descname"><span class="pre">waveform_tab_controller</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.waveform_tab_controller" title="Permalink to this definition"></a></dt>
+<dd><p>Waveform Display Sub-Controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.sub_controllers.waveform_tab.WaveformTabController.html#navigate.controller.sub_controllers.waveform_tab.WaveformTabController" title="navigate.controller.sub_controllers.waveform_tab.WaveformTabController">WaveformTabController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.controller.Controller.waveform_templates_path">
+<span class="sig-name descname"><span class="pre">waveform_templates_path</span></span><a class="headerlink" href="#navigate.controller.controller.Controller.waveform_templates_path" title="Permalink to this definition"></a></dt>
+<dd><p>Path to the waveform templates yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

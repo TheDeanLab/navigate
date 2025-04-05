@@ -30,7 +30,7 @@ navigate.model.devices.APIs.asi.asi\_tiger\_controller
    .. autosummary::
       :toctree:
    
-      TigerException
+      ASIException
    
    
 

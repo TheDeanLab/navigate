@@ -28,7 +28,6 @@ navigate.model.devices.filter\_wheel.base.FilterWheelBase
    .. autosummary::
    
       ~FilterWheelBase.device_connection
-      ~FilterWheelBase.device_config
       ~FilterWheelBase.filter_dictionary
       ~FilterWheelBase.wheel_position
       ~FilterWheelBase.filter_wheel_number

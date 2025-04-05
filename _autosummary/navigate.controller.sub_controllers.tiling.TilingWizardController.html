@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.tiling.TilingWizardController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.tiling.TilingWizardController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.tiling.TilingWizardController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-tiling-tilingwizardcontroller">
+<h1>navigate.controller.sub_controllers.tiling.TilingWizardController<a class="headerlink" href="#navigate-controller-sub-controllers-tiling-tilingwizardcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.tiling.</span></span><span class="sig-name descname"><span class="pre">TilingWizardController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Tiling Wizard Controller</p>
+<p>Controller for tiling wizard parameters.
+Gathers the FOV from the camera settings tab and will
+update when user changes this value.
+Set start/end position buttons will grab the stage
+values for the respective axis when pressed and display in popup
+Number of images we need to acquire with our desired
+percent overlap is calculated and then displayed in third column</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize Tiling Wizard Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<em>object</em>) – GUI element containing widgets and variables to control.
+Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py</p></li>
+<li><p><strong>parent_controller</strong> (<em>channels_tab_controller</em>) – The controller that creates the popup/this controller.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.__init__" title="navigate.controller.sub_controllers.tiling.TilingWizardController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, parent_controller)</p></td>
+<td><p>Initialize Tiling Wizard Controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.calculate_distance" title="navigate.controller.sub_controllers.tiling.TilingWizardController.calculate_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_distance</span></code></a>(axis)</p></td>
+<td><p>Calculate the distance for a given axis</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.calculate_tiles" title="navigate.controller.sub_controllers.tiling.TilingWizardController.calculate_tiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_tiles</span></code></a>([axis])</p></td>
+<td><p>Calculate the number of tiles for a given axis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.close_window" title="navigate.controller.sub_controllers.tiling.TilingWizardController.close_window"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_window</span></code></a>(*args)</p></td>
+<td><p>Save multiposition information and close the tiling wizard popup</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.execute" title="navigate.controller.sub_controllers.tiling.TilingWizardController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.initialize" title="navigate.controller.sub_controllers.tiling.TilingWizardController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>This function is called when the controller is initialized</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.load_settings" title="navigate.controller.sub_controllers.tiling.TilingWizardController.load_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_settings</span></code></a>()</p></td>
+<td><p>Load positions from yaml file</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.position_handler" title="navigate.controller.sub_controllers.tiling.TilingWizardController.position_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">position_handler</span></code></a>(axis, start_end)</p></td>
+<td><p>Set the start or end position for a given axis</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.register_event_listener" title="navigate.controller.sub_controllers.tiling.TilingWizardController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.set_experiment_values" title="navigate.controller.sub_controllers.tiling.TilingWizardController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.set_table" title="navigate.controller.sub_controllers.tiling.TilingWizardController.set_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_table</span></code></a>()</p></td>
+<td><p>Set the multipoint table to the values in the tiling wizard</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.show_verbose_info" title="navigate.controller.sub_controllers.tiling.TilingWizardController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.showup" title="navigate.controller.sub_controllers.tiling.TilingWizardController.showup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showup</span></code></a>()</p></td>
+<td><p>Show the tiling wizard</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.update_experiment_values" title="navigate.controller.sub_controllers.tiling.TilingWizardController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Collects all the values of widgets</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.update_fov" title="navigate.controller.sub_controllers.tiling.TilingWizardController.update_fov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_fov</span></code></a>([axis])</p></td>
+<td><p>Update the FOV for the tiling wizard</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.update_overlap" title="navigate.controller.sub_controllers.tiling.TilingWizardController.update_overlap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_overlap</span></code></a>()</p></td>
+<td><p>Update the overlay percentage for the tiling wizard</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.update_total_tiles" title="navigate.controller.sub_controllers.tiling.TilingWizardController.update_total_tiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_total_tiles</span></code></a>()</p></td>
+<td><p>Update the total number of tiles in the tiling wizard</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.custom_events" title="navigate.controller.sub_controllers.tiling.TilingWizardController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for the controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.widgets" title="navigate.controller.sub_controllers.tiling.TilingWizardController.widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">widgets</span></code></a></p></td>
+<td><p>Dictionary of widgets in the view</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.buttons" title="navigate.controller.sub_controllers.tiling.TilingWizardController.buttons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">buttons</span></code></a></p></td>
+<td><p>Dictionary of buttons in the view</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.variables" title="navigate.controller.sub_controllers.tiling.TilingWizardController.variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variables</span></code></a></p></td>
+<td><p>Dictionary of variables in the view</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.is_validated" title="navigate.controller.sub_controllers.tiling.TilingWizardController.is_validated"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_validated</span></code></a></p></td>
+<td><p>flags indicating if all the value are correct to set the table</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.calculate_distance">
+<span class="sig-name descname"><span class="pre">calculate_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.calculate_distance" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the distance for a given axis</p>
+<p>This function will calculate the distance for a given
+axis of the stage when the start or end position is changed
+via the Set buttons</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – x, y, z axis of stage to calculate</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.calculate_tiles">
+<span class="sig-name descname"><span class="pre">calculate_tiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.calculate_tiles" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the number of tiles for a given axis</p>
+<p>Calculates the number of tiles of the acquisition for
+each axis or an individual axis
+Num of Tiles = dist - (overlay * FOV)  /  FOV * (1 - overlay)
+(D-OF)/(F-OF) = N</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – x, y, z, f axis of stage to calculate.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.close_window">
+<span class="sig-name descname"><span class="pre">close_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.close_window" title="Permalink to this definition"></a></dt>
+<dd><p>Save multiposition information and close the tiling wizard popup</p>
+<p>Save multiposition information to yaml file, and close tiling wizard.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the controller is initialized</p>
+<p>This function initializes GUI based on configuration setting parameter:
+configuration_controller set range value for entry or spinbox widgets;
+add values to combobox get other necessary information for configuration.yml</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.load_settings">
+<span class="sig-name descname"><span class="pre">load_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.load_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Load positions from yaml file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.position_handler">
+<span class="sig-name descname"><span class="pre">position_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.position_handler" title="Permalink to this definition"></a></dt>
+<dd><p>Set the start or end position for a given axis</p>
+<p>When the Set [axis] Start/End button is pressed then the
+stage position is polled from the stage controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – x, y, z, f axis that corresponds to stage axis</p></li>
+<li><p><strong>start_end</strong> (<em>str</em>) – start or end will signify which spinbox gets updated upon button press</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>handler</strong> – Function for setting positional spinbox based on parameters passed in</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>func</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.set_table">
+<span class="sig-name descname"><span class="pre">set_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.set_table" title="Permalink to this definition"></a></dt>
+<dd><p>Set the multipoint table to the values in the tiling wizard</p>
+<p>Sets multiposition table with values from tiling wizard after
+populate Multiposition Table button is pressed
+Compute grid will return a list of all position combinations.
+This list is then converted to a
+pandas dataframe which is then set as the new table data.
+The table is then redrawn.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.showup">
+<span class="sig-name descname"><span class="pre">showup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.showup" title="Permalink to this definition"></a></dt>
+<dd><p>Show the tiling wizard</p>
+<p>Brings popup window to front of screen</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Collects all the values of widgets</p>
+<p>setting_dict is a reference of experiment dictionary
+update the dictionary directly</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.update_fov">
+<span class="sig-name descname"><span class="pre">update_fov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.update_fov" title="Permalink to this definition"></a></dt>
+<dd><p>Update the FOV for the tiling wizard</p>
+<p>Grabs the updated FOV if changed by user,
+will recalculate num of tiles for each axis after</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Axis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.update_overlap">
+<span class="sig-name descname"><span class="pre">update_overlap</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.update_overlap" title="Permalink to this definition"></a></dt>
+<dd><p>Update the overlay percentage for the tiling wizard</p>
+<p>Updates percent overlay when a user changes the widget in the popup.
+This value is used for backend calculations.
+The number of tiles will then be recalculated</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.update_total_tiles">
+<span class="sig-name descname"><span class="pre">update_total_tiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.update_total_tiles" title="Permalink to this definition"></a></dt>
+<dd><p>Update the total number of tiles in the tiling wizard</p>
+<p>Sums the tiles for each axis in the tiling wizard.
+Will update when any axis has a tile amount change.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.buttons">
+<span class="sig-name descname"><span class="pre">buttons</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.buttons" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of buttons in the view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for the controller</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.is_validated">
+<span class="sig-name descname"><span class="pre">is_validated</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.is_validated" title="Permalink to this definition"></a></dt>
+<dd><p>flags indicating if all the value are correct to set the table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.variables">
+<span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.variables" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of variables in the view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.tiling.TilingWizardController.widgets">
+<span class="sig-name descname"><span class="pre">widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.tiling.TilingWizardController.widgets" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of widgets in the view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

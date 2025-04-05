@@ -18,6 +18,7 @@ navigate.config.config
       get_configuration_paths
       get_navigate_path
       load_configs
+      support_deceased_configuration
       update_config_dict
       verify_configuration
       verify_experiment_config

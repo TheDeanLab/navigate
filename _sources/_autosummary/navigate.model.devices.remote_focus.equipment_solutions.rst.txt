@@ -19,7 +19,7 @@ navigate.model.devices.remote\_focus.equipment\_solutions
       :toctree:
       :template: custom_class.rst
    
-      RemoteFocusEquipmentSolutions
+      EquipmentSolutionsRemoteFocus
    
    
 

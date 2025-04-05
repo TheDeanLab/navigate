@@ -84,6 +84,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
@@ -94,14 +95,15 @@
 <li class="toctree-l4 current"><a class="reference internal" href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.camera.html">navigate.model.devices.camera</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.daq.html">navigate.model.devices.daq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.device_types.html">navigate.model.devices.device_types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.filter_wheel.html">navigate.model.devices.filter_wheel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.galvo.html">navigate.model.devices.galvo</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.lasers.html">navigate.model.devices.lasers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.mirrors.html">navigate.model.devices.mirrors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.laser.html">navigate.model.devices.laser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.mirror.html">navigate.model.devices.mirror</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.objectives.html">navigate.model.devices.objectives</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.remote_focus.html">navigate.model.devices.remote_focus</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.shutter.html">navigate.model.devices.shutter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.stages.html">navigate.model.devices.stages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.stage.html">navigate.model.devices.stage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.zoom.html">navigate.model.devices.zoom</a></li>
 </ul>
 </li>
@@ -154,7 +156,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.APIs.coherent.ObisLaser.</span></span><span class="sig-name descname"><span class="pre">ObisLaser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'COM4'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="navigate.model.devices.lasers.base.LaserBase.html#navigate.model.devices.lasers.base.LaserBase" title="navigate.model.devices.lasers.base.LaserBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaserBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.devices.laser.base.LaserBase.html#navigate.model.devices.laser.base.LaserBase" title="navigate.model.devices.laser.base.LaserBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaserBase</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'COM4'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser.__init__" title="Permalink to this definition"></a></dt>
@@ -165,7 +167,7 @@
 <li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the microscope</p></li>
 <li><p><strong>device_connection</strong> (<em>Any</em>) – Communication instance with the device.</p></li>
 <li><p><strong>configuration</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Configuration dictionary</p></li>
-<li><p><strong>laser_id</strong> (<em>int</em>) – Laser ID</p></li>
+<li><p><strong>device_id</strong> (<em>int</em>) – Laser ID</p></li>
 </ul>
 </dd>
 </dl>

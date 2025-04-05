@@ -19,3 +19,11 @@ Photometrics Drivers
     in in srcs/model/devices/APIs/photo_metrics/PyVCAM-master. To install this API, go to this
     folder in the command line and from within your **navigate** environment, run
     ``python setup.py install``.
+
+.. Note::
+
+    The most up-to-date version of PVCAM can be found on `GitHub <https://github.com/Photometrics/PyVCAM>`_.
+
+
+
+

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.waveform_popup.WaveformPopupController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.waveform_popup.WaveformPopupController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-waveform-popup-waveformpopupcontroller">
+<h1>navigate.controller.sub_controllers.waveform_popup.WaveformPopupController<a class="headerlink" href="#navigate-controller-sub-controllers-waveform-popup-waveformpopupcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.waveform_popup.</span></span><span class="sig-name descname"><span class="pre">WaveformPopupController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.custom_widgets.popup.PopUp.html#navigate.view.custom_widgets.popup.PopUp" title="navigate.view.custom_widgets.popup.PopUp"><span class="pre">PopUp</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_constants_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Controller for the waveform popup window.</p>
+<p>This controller is responsible for the waveform popup window. It is responsible for
+updating the waveform constants in the configuration file and saving the waveform
+constants to a file.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="navigate.view.custom_widgets.popup.PopUp.html#navigate.view.custom_widgets.popup.PopUp" title="navigate.view.custom_widgets.popup.PopUp"><span class="pre">PopUp</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_constants_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the WaveformPopupController.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<em>WaveformPopup</em>) – The view for the controller.</p></li>
+<li><p><strong>parent_controller</strong> (<a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><em>Controller</em></a>) – The parent controller.</p></li>
+<li><p><strong>waveform_constants_path</strong> (<em>str</em>) – The path to the waveform constants file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.__init__" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, parent_controller, ...)</p></td>
+<td><p>Initialize the WaveformPopupController.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.close_window" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.close_window"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_window</span></code></a>(*args)</p></td>
+<td><p>Close the window.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.configure_widget_range" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.configure_widget_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configure_widget_range</span></code></a>()</p></td>
+<td><p>Update widget ranges and precisions based on the current resolution mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.display_advanced_setting_window" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.display_advanced_setting_window"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_advanced_setting_window</span></code></a>()</p></td>
+<td><p>Display advanced galvo setting window</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.display_galvo_advanced_setting" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.display_galvo_advanced_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_galvo_advanced_setting</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Generate dynamic galvo advanced setting widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.estimate_galvo_setting" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.estimate_galvo_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_galvo_setting</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Digitally scanned light-sheet frequency estimation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.execute" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.initialize" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>This function is called when the controller is initialized</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.populate_experiment_values" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.populate_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_values</span></code></a>([force_update])</p></td>
+<td><p>Set experiment values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.register_event_listener" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.restore_amplitude" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.restore_amplitude"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restore_amplitude</span></code></a>()</p></td>
+<td><p>Restore amplitude values to previous values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.save_waveform_constants" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.save_waveform_constants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_waveform_constants</span></code></a>()</p></td>
+<td><p>Save updated waveform parameters to yaml file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_experiment_values" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_galvo_factor" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_galvo_factor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_galvo_factor</span></code></a>([galvo_factor])</p></td>
+<td><p>Set galvo factor and display information</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_galvo_to_all_channels" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_galvo_to_all_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_galvo_to_all_channels</span></code></a>()</p></td>
+<td><p>Set galvo factor to 'none' and use galvo parameters in all channels</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_laser_info" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_laser_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_laser_info</span></code></a>(*args)</p></td>
+<td><p>Show laser info when the user changes magnification setting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_magnification" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_magnification"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_magnification</span></code></a>(*args)</p></td>
+<td><p>Show magnification options when the user changes the focus mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_verbose_info" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.showup" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.showup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showup</span></code></a>()</p></td>
+<td><p>This function will let the popup window show in front.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.toggle_waveform_state" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.toggle_waveform_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_waveform_state</span></code></a>()</p></td>
+<td><p>Temporarily disable waveform amplitude for quick alignment on stationary beam.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_experiment_values" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Collects all the values of widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_advanced_setting" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_advanced_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_galvo_advanced_setting</span></code></a>(factor_id, ...)</p></td>
+<td><p>Update galvo setting parameters</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_setting" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_galvo_setting</span></code></a>(galvo_name, ...)</p></td>
+<td><p>Update galvo settings in memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_remote_focus_settings" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_remote_focus_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_remote_focus_settings</span></code></a>(name, laser, ...)</p></td>
+<td><p>Update remote focus settings in memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_waveform_parameters" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_waveform_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_waveform_parameters</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Update the waveform parameters for delay, duty cycle, and smoothing.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.custom_events" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for the controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.resolution_info" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.resolution_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution_info</span></code></a></p></td>
+<td><p>Waveform constants for the microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_setting" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo_setting</span></code></a></p></td>
+<td><p>Galvo constants for the microscope.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.configuration_controller" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.configuration_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration_controller</span></code></a></p></td>
+<td><p>The configuration controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.waveform_constants_path" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.waveform_constants_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_constants_path</span></code></a></p></td>
+<td><p>The path to the waveform constants file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.widgets" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">widgets</span></code></a></p></td>
+<td><p>The widgets for the mode and magnification.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.variables" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variables</span></code></a></p></td>
+<td><p>The variables for the mode and magnification.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.lasers" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.lasers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lasers</span></code></a></p></td>
+<td><p>The lasers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.resolution" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution</span></code></a></p></td>
+<td><p>The current resolution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.mag" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.mag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mag</span></code></a></p></td>
+<td><p>The current magnification.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.mode" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code></a></p></td>
+<td><p>The current microscope operation mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.remote_focus_experiment_dict" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.remote_focus_experiment_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_experiment_dict</span></code></a></p></td>
+<td><p>Remote focus experiment dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_device_flag" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_device_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_galvo_device_flag</span></code></a></p></td>
+<td><p>Flag to update galvo device.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_waveform_parameters_flag" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_waveform_parameters_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_waveform_parameters_flag</span></code></a></p></td>
+<td><p>Flag to update waveform parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.waveforms_enabled" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.waveforms_enabled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveforms_enabled</span></code></a></p></td>
+<td><p>Flag to enable/disable waveforms.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.amplitude_dict" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.amplitude_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amplitude_dict</span></code></a></p></td>
+<td><p>Dictionary of amplitude values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.laser_min" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.laser_min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">laser_min</span></code></a></p></td>
+<td><p>the minimum value of remote focus device</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.laser_max" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.laser_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">laser_max</span></code></a></p></td>
+<td><p>the maximum value of remote focus device</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_min" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo_min</span></code></a></p></td>
+<td><p>Dictionary of galvo minimum values</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_max" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo_max</span></code></a></p></td>
+<td><p>Dictionary of galvo maximum values</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.event_id" title="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.event_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_id</span></code></a></p></td>
+<td><p>The event id.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.close_window">
+<span class="sig-name descname"><span class="pre">close_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.close_window" title="Permalink to this definition"></a></dt>
+<dd><p>Close the window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.configure_widget_range">
+<span class="sig-name descname"><span class="pre">configure_widget_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.configure_widget_range" title="Permalink to this definition"></a></dt>
+<dd><p>Update widget ranges and precisions based on the current resolution mode.</p>
+<p>TODO: Other parameters we wish to enable/disable based on configuration?</p>
+<p>TODO: Should we instead change galvo amp/offset behavior based on a waveform
+type passed in the configuration? That is, should we pass galvo_l_waveform:
+sawtooth and galvo_r_waveform: dc_value? And then adjust the
+ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.</p>
+<p>This function updates the widget ranges and precisions based on the current
+resolution mode. The precision is set to -3 for high and nanoscale modes and -2
+for low mode. The increment is set to 0.001 for high and nanoscale modes and
+0.01 for low mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.display_advanced_setting_window">
+<span class="sig-name descname"><span class="pre">display_advanced_setting_window</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.display_advanced_setting_window" title="Permalink to this definition"></a></dt>
+<dd><p>Display advanced galvo setting window</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.display_galvo_advanced_setting">
+<span class="sig-name descname"><span class="pre">display_galvo_advanced_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.display_galvo_advanced_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Generate dynamic galvo advanced setting widgets</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.estimate_galvo_setting">
+<span class="sig-name descname"><span class="pre">estimate_galvo_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.estimate_galvo_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Digitally scanned light-sheet frequency estimation.</p>
+<p>When imaging in a digitally scanned light-sheet mode, the galvo must
+operate at a specific frequency, otherwise periodic lines will appear in
+the image. This function estimates the frequency of the galvo based on the
+line interval and the number of pixels in the light-sheet mode.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Will only work if all channels have the same exposure duration.
+The framerate widget doesn’t update unless you change the
+exposure time in the channel settings. Default is 100ms.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>tuple</em>) – The first element is the name of the galvo.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – The key is the name of the galvo and the value is the galvo setting.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the controller is initialized</p>
+<p>This function initializes GUI based on configuration setting parameter:
+configuration_controller set range value for entry or spinbox widgets;
+add values to combobox get other necessary information for configuration.yml</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.populate_experiment_values">
+<span class="sig-name descname"><span class="pre">populate_experiment_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.populate_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Set experiment values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>force_update</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, the experiment values will be updated, by default False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.restore_amplitude">
+<span class="sig-name descname"><span class="pre">restore_amplitude</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.restore_amplitude" title="Permalink to this definition"></a></dt>
+<dd><p>Restore amplitude values to previous values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.save_waveform_constants">
+<span class="sig-name descname"><span class="pre">save_waveform_constants</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.save_waveform_constants" title="Permalink to this definition"></a></dt>
+<dd><p>Save updated waveform parameters to yaml file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_galvo_factor">
+<span class="sig-name descname"><span class="pre">set_galvo_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galvo_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_galvo_factor" title="Permalink to this definition"></a></dt>
+<dd><p>Set galvo factor and display information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>galvo_factor</strong> (<em>str</em>) – The name of galvo factor: ‘laser’, ‘channel’, or ‘none’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_galvo_to_all_channels">
+<span class="sig-name descname"><span class="pre">set_galvo_to_all_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.set_galvo_to_all_channels" title="Permalink to this definition"></a></dt>
+<dd><p>Set galvo factor to ‘none’ and use galvo parameters in all channels</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_laser_info">
+<span class="sig-name descname"><span class="pre">show_laser_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_laser_info" title="Permalink to this definition"></a></dt>
+<dd><p>Show laser info when the user changes magnification setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>tuple</em>) – The first element is the new magnification setting.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_magnification">
+<span class="sig-name descname"><span class="pre">show_magnification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_magnification" title="Permalink to this definition"></a></dt>
+<dd><p>Show magnification options when the user changes the focus mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>tuple</em>) – The first element is the new focus mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.showup">
+<span class="sig-name descname"><span class="pre">showup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.showup" title="Permalink to this definition"></a></dt>
+<dd><p>This function will let the popup window show in front.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.toggle_waveform_state">
+<span class="sig-name descname"><span class="pre">toggle_waveform_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.toggle_waveform_state" title="Permalink to this definition"></a></dt>
+<dd><p>Temporarily disable waveform amplitude for quick alignment on stationary
+beam.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Collects all the values of widgets</p>
+<p>setting_dict is a reference of experiment dictionary
+update the dictionary directly</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_advanced_setting">
+<span class="sig-name descname"><span class="pre">update_galvo_advanced_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">galvo_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp_or_off</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_advanced_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Update galvo setting parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>factor_id</strong> (<em>int</em>) – The index of the galvo factor</p></li>
+<li><p><strong>galvo_id</strong> (<em>int</em>) – The index of the galvo device</p></li>
+<li><p><strong>factor_name</strong> (<em>str</em>) – The name of galvo associated factor</p></li>
+<li><p><strong>amp_or_off</strong> (<em>str</em>) – Amplitude or Offset: the value should be “amp” or “off</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A widget function</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_setting">
+<span class="sig-name descname"><span class="pre">update_galvo_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galvo_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widget_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Update galvo settings in memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>galvo_name</strong> (<em>str</em>) – The name of the galvo.</p></li>
+<li><p><strong>widget_name</strong> (<em>str</em>) – The name of the widget.</p></li>
+<li><p><strong>parameter</strong> (<em>str</em>) – The name of the parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func_galvo</strong> – The function to update the galvo setting.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_remote_focus_settings">
+<span class="sig-name descname"><span class="pre">update_remote_focus_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_focus_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_remote_focus_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Update remote focus settings in memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable.</p></li>
+<li><p><strong>laser</strong> (<em>str</em>) – The name of the laser.</p></li>
+<li><p><strong>remote_focus_name</strong> (<em>str</em>) – The name of the remote focus setting.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_waveform_parameters">
+<span class="sig-name descname"><span class="pre">update_waveform_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_waveform_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Update the waveform parameters for delay, duty cycle, and smoothing.</p>
+<p>Communicate changes to the parent controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>tuple</em>) – The first element is the new waveform.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – The key is the name of the waveform and the value is the waveform</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.amplitude_dict">
+<span class="sig-name descname"><span class="pre">amplitude_dict</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.amplitude_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of amplitude values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.configuration_controller">
+<span class="sig-name descname"><span class="pre">configuration_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.configuration_controller" title="Permalink to this definition"></a></dt>
+<dd><p>The configuration controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.configuration_controller.ConfigurationController.html#navigate.controller.configuration_controller.ConfigurationController" title="navigate.controller.configuration_controller.ConfigurationController">ConfigurationController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for the controller</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.event_id">
+<span class="sig-name descname"><span class="pre">event_id</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.event_id" title="Permalink to this definition"></a></dt>
+<dd><p>The event id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_max">
+<span class="sig-name descname"><span class="pre">galvo_max</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_max" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of galvo maximum values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_min">
+<span class="sig-name descname"><span class="pre">galvo_min</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_min" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of galvo minimum values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_setting">
+<span class="sig-name descname"><span class="pre">galvo_setting</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.galvo_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Galvo constants for the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.laser_max">
+<span class="sig-name descname"><span class="pre">laser_max</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.laser_max" title="Permalink to this definition"></a></dt>
+<dd><p>the maximum value of remote focus device</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.laser_min">
+<span class="sig-name descname"><span class="pre">laser_min</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.laser_min" title="Permalink to this definition"></a></dt>
+<dd><p>the minimum value of remote focus device</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.lasers">
+<span class="sig-name descname"><span class="pre">lasers</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.lasers" title="Permalink to this definition"></a></dt>
+<dd><p>The lasers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.mag">
+<span class="sig-name descname"><span class="pre">mag</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.mag" title="Permalink to this definition"></a></dt>
+<dd><p>The current magnification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.mode" title="Permalink to this definition"></a></dt>
+<dd><p>The current microscope operation mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.remote_focus_experiment_dict">
+<span class="sig-name descname"><span class="pre">remote_focus_experiment_dict</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.remote_focus_experiment_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Remote focus experiment dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.resolution">
+<span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.resolution" title="Permalink to this definition"></a></dt>
+<dd><p>The current resolution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.resolution_info">
+<span class="sig-name descname"><span class="pre">resolution_info</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.resolution_info" title="Permalink to this definition"></a></dt>
+<dd><p>Waveform constants for the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_device_flag">
+<span class="sig-name descname"><span class="pre">update_galvo_device_flag</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_galvo_device_flag" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to update galvo device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_waveform_parameters_flag">
+<span class="sig-name descname"><span class="pre">update_waveform_parameters_flag</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.update_waveform_parameters_flag" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to update waveform parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.variables">
+<span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.variables" title="Permalink to this definition"></a></dt>
+<dd><p>The variables for the mode and magnification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.waveform_constants_path">
+<span class="sig-name descname"><span class="pre">waveform_constants_path</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.waveform_constants_path" title="Permalink to this definition"></a></dt>
+<dd><p>The path to the waveform constants file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.waveforms_enabled">
+<span class="sig-name descname"><span class="pre">waveforms_enabled</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.waveforms_enabled" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to enable/disable waveforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.widgets">
+<span class="sig-name descname"><span class="pre">widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.waveform_popup.WaveformPopupController.widgets" title="Permalink to this definition"></a></dt>
+<dd><p>The widgets for the mode and magnification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

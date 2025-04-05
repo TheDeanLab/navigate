@@ -1,0 +1,35 @@
+navigate.model.devices.mirror.synthetic.SyntheticMirror
+=======================================================
+
+.. currentmodule:: navigate.model.devices.mirror.synthetic
+
+.. autoclass:: SyntheticMirror
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticMirror.__init__
+      ~SyntheticMirror.flat
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticMirror.is_synthetic
+      ~SyntheticMirror.configuration
+      ~SyntheticMirror.mirror_controller
+      ~SyntheticMirror.mirror_parameters
+   
+   

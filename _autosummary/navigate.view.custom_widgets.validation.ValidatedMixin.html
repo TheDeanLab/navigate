@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.view.custom_widgets.validation.ValidatedMixin &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.view.custom_widgets.validation.ValidatedSpinbox" href="navigate.view.custom_widgets.validation.ValidatedSpinbox.html" />
+    <link rel="prev" title="navigate.view.custom_widgets.validation.ValidatedEntry" href="navigate.view.custom_widgets.validation.ValidatedEntry.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.model.html">navigate.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.view.html">navigate.view</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.configurator_application_window.html">navigate.view.configurator_application_window</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.view.custom_widgets.html">navigate.view.custom_widgets</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.ArrowLabel.html">navigate.view.custom_widgets.ArrowLabel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.CollapsibleFrame.html">navigate.view.custom_widgets.CollapsibleFrame</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.DockableNotebook.html">navigate.view.custom_widgets.DockableNotebook</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.LabelInputWidgetFactory.html">navigate.view.custom_widgets.LabelInputWidgetFactory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.common.html">navigate.view.custom_widgets.common</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.hover.html">navigate.view.custom_widgets.hover</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.popup.html">navigate.view.custom_widgets.popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.custom_widgets.scrollbars.html">navigate.view.custom_widgets.scrollbars</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.view.custom_widgets.validation.html">navigate.view.custom_widgets.validation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.main_application_window.html">navigate.view.main_application_window</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.main_window_content.html">navigate.view.main_window_content</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.popups.html">navigate.view.popups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.splash_screen.html">navigate.view.splash_screen</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Software API</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.html">navigate.view</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.custom_widgets.html">navigate.view.custom_widgets</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.custom_widgets.validation.html">navigate.view.custom_widgets.validation</a></li>
+      <li class="breadcrumb-item active">navigate.view.custom_widgets.validation.ValidatedMixin</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.view.custom_widgets.validation.ValidatedMixin.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-view-custom-widgets-validation-validatedmixin">
+<h1>navigate.view.custom_widgets.validation.ValidatedMixin<a class="headerlink" href="#navigate-view-custom-widgets-validation-validatedmixin" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.view.custom_widgets.validation.</span></span><span class="sig-name descname"><span class="pre">ValidatedMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Validation functions</p>
+<p>These functions are used to validate the input of the widget. They are called
+by the validatecommand attribute of the widget. They return True if the input
+is valid and False if it is not. They also set the error string to be displayed
+in the widget.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the ValidatedMixin</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Variable length argument list</p></li>
+<li><p><strong>error_var</strong> (<em>tk.StringVar</em>) – The variable to store the error message in
+if error_var = None, creates its own variable</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments to pass to the parent class</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.__init__" title="navigate.view.custom_widgets.validation.ValidatedMixin.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args[, error_var])</p></td>
+<td><p>Initialize the ValidatedMixin</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.add_history" title="navigate.view.custom_widgets.validation.ValidatedMixin.add_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_history</span></code></a>(event)</p></td>
+<td><p>Add the current value to the history of the widget.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.redo" title="navigate.view.custom_widgets.validation.ValidatedMixin.redo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">redo</span></code></a>(event)</p></td>
+<td><p>Redo the last change that was undone.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.trigger_focusout_validation" title="navigate.view.custom_widgets.validation.ValidatedMixin.trigger_focusout_validation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trigger_focusout_validation</span></code></a>()</p></td>
+<td><p>Trigger the focusout validation of the widget</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.undo" title="navigate.view.custom_widgets.validation.ValidatedMixin.undo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">undo</span></code></a>(event)</p></td>
+<td><p>Undo the last change to the widget.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.error" title="navigate.view.custom_widgets.validation.ValidatedMixin.error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">error</span></code></a></p></td>
+<td><p>The variable to store the error message in</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.undo_history" title="navigate.view.custom_widgets.validation.ValidatedMixin.undo_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">undo_history</span></code></a></p></td>
+<td><p>The undo history of the widget</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.redo_history" title="navigate.view.custom_widgets.validation.ValidatedMixin.redo_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">redo_history</span></code></a></p></td>
+<td><p>The redo history of the widget</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.custom_widgets.validation.ValidatedMixin.hover" title="navigate.view.custom_widgets.validation.ValidatedMixin.hover"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hover</span></code></a></p></td>
+<td><p>The hover bubble for the widget</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.add_history">
+<span class="sig-name descname"><span class="pre">add_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.add_history" title="Permalink to this definition"></a></dt>
+<dd><p>Add the current value to the history of the widget.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – The event that triggered the history addition</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.redo" title="Permalink to this definition"></a></dt>
+<dd><p>Redo the last change that was undone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – The event that triggered the redo</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.trigger_focusout_validation">
+<span class="sig-name descname"><span class="pre">trigger_focusout_validation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.trigger_focusout_validation" title="Permalink to this definition"></a></dt>
+<dd><p>Trigger the focusout validation of the widget</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.undo" title="Permalink to this definition"></a></dt>
+<dd><p>Undo the last change to the widget.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – The event that triggered the undo</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.error">
+<span class="sig-name descname"><span class="pre">error</span></span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.error" title="Permalink to this definition"></a></dt>
+<dd><p>The variable to store the error message in</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tk.StringVar</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.hover">
+<span class="sig-name descname"><span class="pre">hover</span></span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.hover" title="Permalink to this definition"></a></dt>
+<dd><p>The hover bubble for the widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.view.custom_widgets.hover.Hover.html#navigate.view.custom_widgets.hover.Hover" title="navigate.view.custom_widgets.hover.Hover">Hover</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.redo_history">
+<span class="sig-name descname"><span class="pre">redo_history</span></span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.redo_history" title="Permalink to this definition"></a></dt>
+<dd><p>The redo history of the widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.custom_widgets.validation.ValidatedMixin.undo_history">
+<span class="sig-name descname"><span class="pre">undo_history</span></span><a class="headerlink" href="#navigate.view.custom_widgets.validation.ValidatedMixin.undo_history" title="Permalink to this definition"></a></dt>
+<dd><p>The undo history of the widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.view.custom_widgets.validation.ValidatedEntry.html" class="btn btn-neutral float-left" title="navigate.view.custom_widgets.validation.ValidatedEntry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.view.custom_widgets.validation.ValidatedSpinbox.html" class="btn btn-neutral float-right" title="navigate.view.custom_widgets.validation.ValidatedSpinbox" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

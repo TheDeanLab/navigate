@@ -266,11 +266,11 @@ the <code class="docutils literal notranslate"><span class="pre">config_table</s
 position in <strong>navigate</strong>’s multi-position table and calculates the sharpness of the image
 at this position using the Normalized DCT Shannon Entropy metric. An example
 <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function for our <code class="docutils literal notranslate"><span class="pre">FeatureExample</span></code> class is below.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.analysis.image_contrast</span> <span class="kn">import</span> <span class="n">fast_normalized_dct_shannon_entropy</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">navigate.model.analysis.image_contrast</span><span class="w"> </span><span class="kn">import</span> <span class="n">fast_normalized_dct_shannon_entropy</span>
 
-<span class="k">class</span> <span class="nc">FeatureExample</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FeatureExample</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">position_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">position_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">position_id</span> <span class="o">=</span> <span class="n">position_id</span>
 
@@ -294,7 +294,7 @@ at this position using the Normalized DCT Shannon Entropy metric. An example
 runtime. Below, we create a function to get all the position stored at
 <code class="docutils literal notranslate"><span class="pre">position_id</span></code> from the multi-position table in the GUI when we launch our
 feature.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pre_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pre_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">configuration</span><span class="p">[</span><span class="s2">&quot;experiment&quot;</span><span class="p">][</span><span class="s2">&quot;MultiPositions&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">position_id</span><span class="p">]</span>
@@ -308,7 +308,7 @@ feature.</p>
 <li><p>Use the stage to move to this position.</p>
 <p>Now, we move stage to the <code class="docutils literal notranslate"><span class="pre">target_position</span></code> we grabbed from the multi-position
 table.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">in_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">pos</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">_abs&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">move_stage</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">wait_until_done</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -322,7 +322,7 @@ The image captured by the camera will be stored in the <code class="docutils lit
 The <code class="docutils literal notranslate"><span class="pre">data</span></code> functions run after an image is  acquired. We add code to deal with
 this image in the <code class="docutils literal notranslate"><span class="pre">&quot;main&quot;</span></code> data function. Here, we calculate the Shannon entropy
 of the image.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_func_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">in_func_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">):</span>
     <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">frame_ids</span><span class="p">:</span>
         <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">data_buffer</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
         <span class="n">entropy</span> <span class="o">=</span> <span class="n">fast_normalized_dct_shannon_entropy</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
@@ -375,8 +375,8 @@ acquisition workflows.</p>
 <li><p>Import the necessary modules:</p></li>
 </ol>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.tools.decorators</span> <span class="kn">import</span> <span class="n">FeatureList</span>
-<span class="kn">from</span> <span class="nn">navigate.model.features.feature_related_functions</span> <span class="kn">import</span> <span class="o">*</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">navigate.tools.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FeatureList</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">navigate.model.features.feature_related_functions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">FeatureList</span></code> is a decorator that registers the list of features.
@@ -390,7 +390,7 @@ These functions make for more readable code.</p>
 </ol>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@FeatureList</span>
-<span class="k">def</span> <span class="nf">feature_example</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">feature_example</span><span class="p">():</span>
     <span class="k">return</span> <span class="p">[</span>
         <span class="p">(</span>
             <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">},</span>

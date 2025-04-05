@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-controller-sub-controllers-adaptive-optics-adaptiveopticspopupcontroller">
+<h1>navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController<a class="headerlink" href="#navigate-controller-sub-controllers-adaptive-optics-adaptiveopticspopupcontroller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.controller.sub_controllers.adaptive_optics.</span></span><span class="sig-name descname"><span class="pre">AdaptiveOpticsPopupController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.controller.sub_controllers.gui.GUIController.html#navigate.controller.sub_controllers.gui.GUIController" title="navigate.controller.sub_controllers.gui.GUIController"><code class="xref py py-class docutils literal notranslate"><span class="pre">GUIController</span></code></a></p>
+<p>Controller for the Adaptive Optics popup window</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_controller</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the Adaptive Optics popup controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> (<em>AdaptiveOpticsPopupView</em>) – The view for this controller</p></li>
+<li><p><strong>parent_controller</strong> (<a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller"><em>Controller</em></a>) – The parent controller for this controller</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.__init__" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view, parent_controller)</p></td>
+<td><p>Initialize the Adaptive Optics popup controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.change_camera" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.change_camera"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_camera</span></code></a>(evt)</p></td>
+<td><p>Change the camera to the selected camera</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.clear_all_coefs" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.clear_all_coefs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_all_coefs</span></code></a>()</p></td>
+<td><p>Clear all coefficients</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.deselect_all_modes" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.deselect_all_modes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deselect_all_modes</span></code></a>()</p></td>
+<td><p>Deselect all modes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.execute" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command, *args)</p></td>
+<td><p>This function is called when a command is passed from a child process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.flatten_mirror" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.flatten_mirror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flatten_mirror</span></code></a>()</p></td>
+<td><p>Flatten the mirror</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.get_coef_from_widgets" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.get_coef_from_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_coef_from_widgets</span></code></a>()</p></td>
+<td><p>Get the coefficients from the widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.initialize" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize</span></code></a>()</p></td>
+<td><p>This function is called when the controller is initialized</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_mirror" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_mirror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_mirror</span></code></a>(data)</p></td>
+<td><p>Plot the mirror data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_tonywilson" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_tonywilson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_tonywilson</span></code></a>(data)</p></td>
+<td><p>Plot the tony wilson data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_tw_trace" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_tw_trace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_tw_trace</span></code></a>()</p></td>
+<td><p>Plot the tony wilson trace data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.populate_experiment_values" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.populate_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_experiment_values</span></code></a>()</p></td>
+<td><p>Populate the experiment values</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.register_event_listener" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.register_event_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_event_listener</span></code></a>(event_name, ...)</p></td>
+<td><p>Register event listener in the parent_controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.run_tony_wilson" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.run_tony_wilson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_tony_wilson</span></code></a>()</p></td>
+<td><p>Run the tony wilson routine</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_report_to_file</span></code>(report)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.save_wcs_file" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.save_wcs_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_wcs_file</span></code></a>()</p></td>
+<td><p>Save the wcs file</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.select_all_modes" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.select_all_modes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_all_modes</span></code></a>()</p></td>
+<td><p>Select all modes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_experiment_values" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_experiment_values</span></code></a>()</p></td>
+<td><p>Sets values of widgets based on experiment setting</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_from_wcs_file" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_from_wcs_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_from_wcs_file</span></code></a>()</p></td>
+<td><p>Set the mirror from the wcs file</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_highlighted_mode" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_highlighted_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_highlighted_mode</span></code></a>(evt, mode)</p></td>
+<td><p>Set the highlighted mode</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_mirror" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_mirror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mirror</span></code></a>()</p></td>
+<td><p>Set the mirror</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_widgets_from_coef" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_widgets_from_coef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_widgets_from_coef</span></code></a>(coef)</p></td>
+<td><p>Set the widgets from the coefficients</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.show_verbose_info" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.show_verbose_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_verbose_info</span></code></a>(*info)</p></td>
+<td><p>Prints verbose information to the console</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.showup" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.showup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showup</span></code></a>([popup_window])</p></td>
+<td><p>Show the popup window.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.update_experiment_values" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.update_experiment_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_experiment_values</span></code></a>()</p></td>
+<td><p>Update the experiment values</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.zero_mirror" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.zero_mirror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_mirror</span></code></a>()</p></td>
+<td><p>Zero the mirror</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.custom_events" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.custom_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_events</span></code></a></p></td>
+<td><p>Custom events for this controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.trace_list" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.trace_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace_list</span></code></a></p></td>
+<td><p>list of dicts containing trace data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.widgets" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">widgets</span></code></a></p></td>
+<td><p>dictionary of widgets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.modes_armed" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.modes_armed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modes_armed</span></code></a></p></td>
+<td><p>dictionary of armed modes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.mode_labels" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.mode_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode_labels</span></code></a></p></td>
+<td><p>dictionary of mode labels</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.camera_list" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.camera_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_list</span></code></a></p></td>
+<td><p>list of cameras</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.fig" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.fig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fig</span></code></a></p></td>
+<td><p>figure for mirror plot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.fig_tw" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.fig_tw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fig_tw</span></code></a></p></td>
+<td><p>figure for tony wilson plot</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.peaks_plot" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.peaks_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">peaks_plot</span></code></a></p></td>
+<td><p>figure for peaks plot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.trace_plot" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.trace_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace_plot</span></code></a></p></td>
+<td><p>figure for trace plot</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.mirror_img" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.mirror_img"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mirror_img</span></code></a></p></td>
+<td><p>figure for mirror image</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.coefs_bar" title="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.coefs_bar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coefs_bar</span></code></a></p></td>
+<td><p>figure for coefs bar</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.change_camera">
+<span class="sig-name descname"><span class="pre">change_camera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.change_camera" title="Permalink to this definition"></a></dt>
+<dd><p>Change the camera to the selected camera</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>evt</strong> (<em>Event</em>) – The event that triggered this function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.clear_all_coefs">
+<span class="sig-name descname"><span class="pre">clear_all_coefs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.clear_all_coefs" title="Permalink to this definition"></a></dt>
+<dd><p>Clear all coefficients</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.deselect_all_modes">
+<span class="sig-name descname"><span class="pre">deselect_all_modes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.deselect_all_modes" title="Permalink to this definition"></a></dt>
+<dd><p>Deselect all modes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.execute" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when a command is passed from a child process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – command name</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – command arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.flatten_mirror">
+<span class="sig-name descname"><span class="pre">flatten_mirror</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.flatten_mirror" title="Permalink to this definition"></a></dt>
+<dd><p>Flatten the mirror</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.get_coef_from_widgets">
+<span class="sig-name descname"><span class="pre">get_coef_from_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.get_coef_from_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>Get the coefficients from the widgets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The coefficients</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.initialize" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the controller is initialized</p>
+<p>This function initializes GUI based on configuration setting parameter:
+configuration_controller set range value for entry or spinbox widgets;
+add values to combobox get other necessary information for configuration.yml</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_mirror">
+<span class="sig-name descname"><span class="pre">plot_mirror</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_mirror" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the mirror data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>dict</em>) – The data to plot</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_tonywilson">
+<span class="sig-name descname"><span class="pre">plot_tonywilson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_tonywilson" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the tony wilson data.</p>
+<p>Displays a plot of [focus, entropy] with data from autofocus routine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>dict</em>) – The data to plot</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_tw_trace">
+<span class="sig-name descname"><span class="pre">plot_tw_trace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.plot_tw_trace" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the tony wilson trace data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.populate_experiment_values">
+<span class="sig-name descname"><span class="pre">populate_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.populate_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Populate the experiment values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.register_event_listener">
+<span class="sig-name descname"><span class="pre">register_event_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.register_event_listener" title="Permalink to this definition"></a></dt>
+<dd><p>Register event listener in the parent_controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_name</strong> (<em>str</em>) – event name</p></li>
+<li><p><strong>event_handler</strong> (<em>function</em>) – event handler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.run_tony_wilson">
+<span class="sig-name descname"><span class="pre">run_tony_wilson</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.run_tony_wilson" title="Permalink to this definition"></a></dt>
+<dd><p>Run the tony wilson routine</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.save_wcs_file">
+<span class="sig-name descname"><span class="pre">save_wcs_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.save_wcs_file" title="Permalink to this definition"></a></dt>
+<dd><p>Save the wcs file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.select_all_modes">
+<span class="sig-name descname"><span class="pre">select_all_modes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.select_all_modes" title="Permalink to this definition"></a></dt>
+<dd><p>Select all modes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_experiment_values">
+<span class="sig-name descname"><span class="pre">set_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Sets values of widgets based on experiment setting</p>
+<p>setting_dict is a dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_from_wcs_file">
+<span class="sig-name descname"><span class="pre">set_from_wcs_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_from_wcs_file" title="Permalink to this definition"></a></dt>
+<dd><p>Set the mirror from the wcs file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_highlighted_mode">
+<span class="sig-name descname"><span class="pre">set_highlighted_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_highlighted_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Set the highlighted mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evt</strong> (<em>Event</em>) – The event that triggered this function</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – The mode to highlight</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_mirror">
+<span class="sig-name descname"><span class="pre">set_mirror</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_mirror" title="Permalink to this definition"></a></dt>
+<dd><p>Set the mirror</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_widgets_from_coef">
+<span class="sig-name descname"><span class="pre">set_widgets_from_coef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coef</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.set_widgets_from_coef" title="Permalink to this definition"></a></dt>
+<dd><p>Set the widgets from the coefficients</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coef</strong> (<em>list</em>) – The coefficients</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.show_verbose_info">
+<span class="sig-name descname"><span class="pre">show_verbose_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.show_verbose_info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints verbose information to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>tuple</em>) – information to be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.showup">
+<span class="sig-name descname"><span class="pre">showup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popup_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.showup" title="Permalink to this definition"></a></dt>
+<dd><p>Show the popup window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.update_experiment_values">
+<span class="sig-name descname"><span class="pre">update_experiment_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.update_experiment_values" title="Permalink to this definition"></a></dt>
+<dd><p>Update the experiment values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.zero_mirror">
+<span class="sig-name descname"><span class="pre">zero_mirror</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.zero_mirror" title="Permalink to this definition"></a></dt>
+<dd><p>Zero the mirror</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.camera_list">
+<span class="sig-name descname"><span class="pre">camera_list</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.camera_list" title="Permalink to this definition"></a></dt>
+<dd><p>list of cameras</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.coefs_bar">
+<span class="sig-name descname"><span class="pre">coefs_bar</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.coefs_bar" title="Permalink to this definition"></a></dt>
+<dd><p>figure for coefs bar</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.custom_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_events</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.custom_events" title="Permalink to this definition"></a></dt>
+<dd><p>Custom events for this controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.fig">
+<span class="sig-name descname"><span class="pre">fig</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.fig" title="Permalink to this definition"></a></dt>
+<dd><p>figure for mirror plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.fig_tw">
+<span class="sig-name descname"><span class="pre">fig_tw</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.fig_tw" title="Permalink to this definition"></a></dt>
+<dd><p>figure for tony wilson plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.mirror_img">
+<span class="sig-name descname"><span class="pre">mirror_img</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.mirror_img" title="Permalink to this definition"></a></dt>
+<dd><p>figure for mirror image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.mode_labels">
+<span class="sig-name descname"><span class="pre">mode_labels</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.mode_labels" title="Permalink to this definition"></a></dt>
+<dd><p>dictionary of mode labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.modes_armed">
+<span class="sig-name descname"><span class="pre">modes_armed</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.modes_armed" title="Permalink to this definition"></a></dt>
+<dd><p>dictionary of armed modes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.parent_controller">
+<span class="sig-name descname"><span class="pre">parent_controller</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.parent_controller" title="Permalink to this definition"></a></dt>
+<dd><p>parent controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.controller.controller.Controller.html#navigate.controller.controller.Controller" title="navigate.controller.controller.Controller">Controller</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.peaks_plot">
+<span class="sig-name descname"><span class="pre">peaks_plot</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.peaks_plot" title="Permalink to this definition"></a></dt>
+<dd><p>figure for peaks plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.trace_list">
+<span class="sig-name descname"><span class="pre">trace_list</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.trace_list" title="Permalink to this definition"></a></dt>
+<dd><p>list of dicts containing trace data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of dicts</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.trace_plot">
+<span class="sig-name descname"><span class="pre">trace_plot</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.trace_plot" title="Permalink to this definition"></a></dt>
+<dd><p>figure for trace plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.view" title="Permalink to this definition"></a></dt>
+<dd><p>GUI view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tkinter.Tk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.widgets">
+<span class="sig-name descname"><span class="pre">widgets</span></span><a class="headerlink" href="#navigate.controller.sub_controllers.adaptive_optics.AdaptiveOpticsPopupController.widgets" title="Permalink to this definition"></a></dt>
+<dd><p>dictionary of widgets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

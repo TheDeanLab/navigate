@@ -18,6 +18,7 @@ navigate.tools.common\_functions
       combine_funcs
       copy_proxy_object
       load_module_from_file
+      load_param_from_module
    
    
 

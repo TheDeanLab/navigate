@@ -1,0 +1,225 @@
+navigate.view.splash\_screen.SplashScreen
+=========================================
+
+.. currentmodule:: navigate.view.splash_screen
+
+.. autoclass:: SplashScreen
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SplashScreen.__init__
+      ~SplashScreen.after
+      ~SplashScreen.after_cancel
+      ~SplashScreen.after_idle
+      ~SplashScreen.anchor
+      ~SplashScreen.aspect
+      ~SplashScreen.attributes
+      ~SplashScreen.bbox
+      ~SplashScreen.bell
+      ~SplashScreen.bind
+      ~SplashScreen.bind_all
+      ~SplashScreen.bind_class
+      ~SplashScreen.bindtags
+      ~SplashScreen.cget
+      ~SplashScreen.client
+      ~SplashScreen.clipboard_append
+      ~SplashScreen.clipboard_clear
+      ~SplashScreen.clipboard_get
+      ~SplashScreen.colormapwindows
+      ~SplashScreen.columnconfigure
+      ~SplashScreen.command
+      ~SplashScreen.config
+      ~SplashScreen.configure
+      ~SplashScreen.deiconify
+      ~SplashScreen.deletecommand
+      ~SplashScreen.destroy
+      ~SplashScreen.event_add
+      ~SplashScreen.event_delete
+      ~SplashScreen.event_generate
+      ~SplashScreen.event_info
+      ~SplashScreen.focus
+      ~SplashScreen.focus_displayof
+      ~SplashScreen.focus_force
+      ~SplashScreen.focus_get
+      ~SplashScreen.focus_lastfor
+      ~SplashScreen.focus_set
+      ~SplashScreen.focusmodel
+      ~SplashScreen.forget
+      ~SplashScreen.frame
+      ~SplashScreen.geometry
+      ~SplashScreen.getboolean
+      ~SplashScreen.getdouble
+      ~SplashScreen.getint
+      ~SplashScreen.getvar
+      ~SplashScreen.grab_current
+      ~SplashScreen.grab_release
+      ~SplashScreen.grab_set
+      ~SplashScreen.grab_set_global
+      ~SplashScreen.grab_status
+      ~SplashScreen.grid
+      ~SplashScreen.grid_anchor
+      ~SplashScreen.grid_bbox
+      ~SplashScreen.grid_columnconfigure
+      ~SplashScreen.grid_location
+      ~SplashScreen.grid_propagate
+      ~SplashScreen.grid_rowconfigure
+      ~SplashScreen.grid_size
+      ~SplashScreen.grid_slaves
+      ~SplashScreen.group
+      ~SplashScreen.iconbitmap
+      ~SplashScreen.iconify
+      ~SplashScreen.iconmask
+      ~SplashScreen.iconname
+      ~SplashScreen.iconphoto
+      ~SplashScreen.iconposition
+      ~SplashScreen.iconwindow
+      ~SplashScreen.image_names
+      ~SplashScreen.image_types
+      ~SplashScreen.keys
+      ~SplashScreen.lift
+      ~SplashScreen.lower
+      ~SplashScreen.mainloop
+      ~SplashScreen.manage
+      ~SplashScreen.maxsize
+      ~SplashScreen.minsize
+      ~SplashScreen.nametowidget
+      ~SplashScreen.option_add
+      ~SplashScreen.option_clear
+      ~SplashScreen.option_get
+      ~SplashScreen.option_readfile
+      ~SplashScreen.overrideredirect
+      ~SplashScreen.pack_propagate
+      ~SplashScreen.pack_slaves
+      ~SplashScreen.place_slaves
+      ~SplashScreen.positionfrom
+      ~SplashScreen.propagate
+      ~SplashScreen.protocol
+      ~SplashScreen.quit
+      ~SplashScreen.register
+      ~SplashScreen.resizable
+      ~SplashScreen.rowconfigure
+      ~SplashScreen.selection_clear
+      ~SplashScreen.selection_get
+      ~SplashScreen.selection_handle
+      ~SplashScreen.selection_own
+      ~SplashScreen.selection_own_get
+      ~SplashScreen.send
+      ~SplashScreen.setvar
+      ~SplashScreen.size
+      ~SplashScreen.sizefrom
+      ~SplashScreen.slaves
+      ~SplashScreen.state
+      ~SplashScreen.title
+      ~SplashScreen.tk_bisque
+      ~SplashScreen.tk_focusFollowsMouse
+      ~SplashScreen.tk_focusNext
+      ~SplashScreen.tk_focusPrev
+      ~SplashScreen.tk_setPalette
+      ~SplashScreen.tk_strictMotif
+      ~SplashScreen.tkraise
+      ~SplashScreen.transient
+      ~SplashScreen.unbind
+      ~SplashScreen.unbind_all
+      ~SplashScreen.unbind_class
+      ~SplashScreen.update
+      ~SplashScreen.update_idletasks
+      ~SplashScreen.wait_variable
+      ~SplashScreen.wait_visibility
+      ~SplashScreen.wait_window
+      ~SplashScreen.waitvar
+      ~SplashScreen.winfo_atom
+      ~SplashScreen.winfo_atomname
+      ~SplashScreen.winfo_cells
+      ~SplashScreen.winfo_children
+      ~SplashScreen.winfo_class
+      ~SplashScreen.winfo_colormapfull
+      ~SplashScreen.winfo_containing
+      ~SplashScreen.winfo_depth
+      ~SplashScreen.winfo_exists
+      ~SplashScreen.winfo_fpixels
+      ~SplashScreen.winfo_geometry
+      ~SplashScreen.winfo_height
+      ~SplashScreen.winfo_id
+      ~SplashScreen.winfo_interps
+      ~SplashScreen.winfo_ismapped
+      ~SplashScreen.winfo_manager
+      ~SplashScreen.winfo_name
+      ~SplashScreen.winfo_parent
+      ~SplashScreen.winfo_pathname
+      ~SplashScreen.winfo_pixels
+      ~SplashScreen.winfo_pointerx
+      ~SplashScreen.winfo_pointerxy
+      ~SplashScreen.winfo_pointery
+      ~SplashScreen.winfo_reqheight
+      ~SplashScreen.winfo_reqwidth
+      ~SplashScreen.winfo_rgb
+      ~SplashScreen.winfo_rootx
+      ~SplashScreen.winfo_rooty
+      ~SplashScreen.winfo_screen
+      ~SplashScreen.winfo_screencells
+      ~SplashScreen.winfo_screendepth
+      ~SplashScreen.winfo_screenheight
+      ~SplashScreen.winfo_screenmmheight
+      ~SplashScreen.winfo_screenmmwidth
+      ~SplashScreen.winfo_screenvisual
+      ~SplashScreen.winfo_screenwidth
+      ~SplashScreen.winfo_server
+      ~SplashScreen.winfo_toplevel
+      ~SplashScreen.winfo_viewable
+      ~SplashScreen.winfo_visual
+      ~SplashScreen.winfo_visualid
+      ~SplashScreen.winfo_visualsavailable
+      ~SplashScreen.winfo_vrootheight
+      ~SplashScreen.winfo_vrootwidth
+      ~SplashScreen.winfo_vrootx
+      ~SplashScreen.winfo_vrooty
+      ~SplashScreen.winfo_width
+      ~SplashScreen.winfo_x
+      ~SplashScreen.winfo_y
+      ~SplashScreen.withdraw
+      ~SplashScreen.wm_aspect
+      ~SplashScreen.wm_attributes
+      ~SplashScreen.wm_client
+      ~SplashScreen.wm_colormapwindows
+      ~SplashScreen.wm_command
+      ~SplashScreen.wm_deiconify
+      ~SplashScreen.wm_focusmodel
+      ~SplashScreen.wm_forget
+      ~SplashScreen.wm_frame
+      ~SplashScreen.wm_geometry
+      ~SplashScreen.wm_grid
+      ~SplashScreen.wm_group
+      ~SplashScreen.wm_iconbitmap
+      ~SplashScreen.wm_iconify
+      ~SplashScreen.wm_iconmask
+      ~SplashScreen.wm_iconname
+      ~SplashScreen.wm_iconphoto
+      ~SplashScreen.wm_iconposition
+      ~SplashScreen.wm_iconwindow
+      ~SplashScreen.wm_manage
+      ~SplashScreen.wm_maxsize
+      ~SplashScreen.wm_minsize
+      ~SplashScreen.wm_overrideredirect
+      ~SplashScreen.wm_positionfrom
+      ~SplashScreen.wm_protocol
+      ~SplashScreen.wm_resizable
+      ~SplashScreen.wm_sizefrom
+      ~SplashScreen.wm_state
+      ~SplashScreen.wm_title
+      ~SplashScreen.wm_transient
+      ~SplashScreen.wm_withdraw
+   
+   
+
+   
+   
+   

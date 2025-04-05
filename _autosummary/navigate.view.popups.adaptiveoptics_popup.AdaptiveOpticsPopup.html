@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.view.popups.adaptiveoptics_popup.ScrollFrame" href="navigate.view.popups.adaptiveoptics_popup.ScrollFrame.html" />
+    <link rel="prev" title="navigate.view.popups.adaptiveoptics_popup" href="navigate.view.popups.adaptiveoptics_popup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.model.html">navigate.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.view.html">navigate.view</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.configurator_application_window.html">navigate.view.configurator_application_window</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.custom_widgets.html">navigate.view.custom_widgets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.main_application_window.html">navigate.view.main_application_window</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.main_window_content.html">navigate.view.main_window_content</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.view.popups.html">navigate.view.popups</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.acquire_popup.html">navigate.view.popups.acquire_popup</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.view.popups.adaptiveoptics_popup.html">navigate.view.popups.adaptiveoptics_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.autofocus_setting_popup.html">navigate.view.popups.autofocus_setting_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.camera_map_setting_popup.html">navigate.view.popups.camera_map_setting_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.camera_setting_popup.html">navigate.view.popups.camera_setting_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.camera_view_popup_window.html">navigate.view.popups.camera_view_popup_window</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.feature_list_popup.html">navigate.view.popups.feature_list_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.ilastik_setting_popup.html">navigate.view.popups.ilastik_setting_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.microscope_setting_popup_window.html">navigate.view.popups.microscope_setting_popup_window</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.plugins_popup.html">navigate.view.popups.plugins_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.tiling_wizard_popup.html">navigate.view.popups.tiling_wizard_popup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.tiling_wizard_popup2.html">navigate.view.popups.tiling_wizard_popup2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.view.popups.waveform_parameter_popup_window.html">navigate.view.popups.waveform_parameter_popup_window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.view.splash_screen.html">navigate.view.splash_screen</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Software API</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.html">navigate.view</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.popups.html">navigate.view.popups</a></li>
+          <li class="breadcrumb-item"><a href="navigate.view.popups.adaptiveoptics_popup.html">navigate.view.popups.adaptiveoptics_popup</a></li>
+      <li class="breadcrumb-item active">navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-view-popups-adaptiveoptics-popup-adaptiveopticspopup">
+<h1>navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup<a class="headerlink" href="#navigate-view-popups-adaptiveoptics-popup-adaptiveopticspopup" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.view.popups.adaptiveoptics_popup.</span></span><span class="sig-name descname"><span class="pre">AdaptiveOpticsPopup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Adaptive Optics Popup</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize AdaptiveOpticsPopup</p>
+<p>Creating popup window with this name and size/placement, PopUp is a
+Toplevel window</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>root</strong> (<em>tk.Tk</em>) – Root window</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.__init__" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(root, *args, **kwargs)</p></td>
+<td><p>Initialize AdaptiveOpticsPopup</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_labels" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_labels</span></code></a>()</p></td>
+<td><p>Get labels</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_modes_armed" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_modes_armed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_modes_armed</span></code></a>()</p></td>
+<td><p>Get armed modes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_widgets" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_widgets</span></code></a>()</p></td>
+<td><p>Get widgets</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.onFrameConfigure" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.onFrameConfigure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">onFrameConfigure</span></code></a>(event)</p></td>
+<td><p>Reset the scroll region to encompass the inner frame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.set_widgets" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.set_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_widgets</span></code></a>(coefs)</p></td>
+<td><p>Set widgets</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.popup" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.popup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popup</span></code></a></p></td>
+<td><p>Popup</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mode_names" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mode_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode_names</span></code></a></p></td>
+<td><p>List of mode names</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.n_modes" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.n_modes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_modes</span></code></a></p></td>
+<td><p>Number of modes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.inputs" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.inputs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inputs</span></code></a></p></td>
+<td><p>Dictionary of all the variables</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.modes_armed" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.modes_armed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modes_armed</span></code></a></p></td>
+<td><p>Dictionary of all the armed modes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mode_labels" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mode_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode_labels</span></code></a></p></td>
+<td><p>Dictionary of all the mode labels</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.ao_notebook" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.ao_notebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ao_notebook</span></code></a></p></td>
+<td><p>Notebook</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tab_tw" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tab_tw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tab_tw</span></code></a></p></td>
+<td><p>Tony Wilson Tab</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tab_cnn" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tab_cnn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tab_cnn</span></code></a></p></td>
+<td><p>CNN-AO Tab</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tony_wilson_button" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tony_wilson_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tony_wilson_button</span></code></a></p></td>
+<td><p>Tony Wilson Button</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.set_button" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.set_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_button</span></code></a></p></td>
+<td><p>Set Button</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.flat_button" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.flat_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flat_button</span></code></a></p></td>
+<td><p>Flat Button</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.zero_button" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.zero_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_button</span></code></a></p></td>
+<td><p>Zero Button</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.clear_button" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.clear_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_button</span></code></a></p></td>
+<td><p>Clear Button</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.save_wcs_button" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.save_wcs_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_wcs_button</span></code></a></p></td>
+<td><p>Save Button</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.from_wcs_button" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.from_wcs_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_wcs_button</span></code></a></p></td>
+<td><p>Load Button</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.select_all_modes" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.select_all_modes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_all_modes</span></code></a></p></td>
+<td><p>Select All Button</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.deselect_all_modes" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.deselect_all_modes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deselect_all_modes</span></code></a></p></td>
+<td><p>Deselect All Button</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.plot_frame" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.plot_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_frame</span></code></a></p></td>
+<td><p>Plot Frame</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.fig" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.fig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fig</span></code></a></p></td>
+<td><p>Figure</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mirror_img" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mirror_img"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mirror_img</span></code></a></p></td>
+<td><p>Mirror Image</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.coefs_bar" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.coefs_bar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coefs_bar</span></code></a></p></td>
+<td><p>Coefficients Bar</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.fig_tw" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.fig_tw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fig_tw</span></code></a></p></td>
+<td><p>Figure</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.peaks_plot" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.peaks_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">peaks_plot</span></code></a></p></td>
+<td><p>Peaks Plot</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.trace_plot" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.trace_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace_plot</span></code></a></p></td>
+<td><p>Trace Plot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.camera_list" title="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.camera_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_list</span></code></a></p></td>
+<td><p>Camera List</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_labels">
+<span class="sig-name descname"><span class="pre">get_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_labels" title="Permalink to this definition"></a></dt>
+<dd><p>Get labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of labels</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_modes_armed">
+<span class="sig-name descname"><span class="pre">get_modes_armed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_modes_armed" title="Permalink to this definition"></a></dt>
+<dd><p>Get armed modes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of armed modes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_widgets">
+<span class="sig-name descname"><span class="pre">get_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.get_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>Get widgets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of widgets</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.onFrameConfigure">
+<span class="sig-name descname"><span class="pre">onFrameConfigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.onFrameConfigure" title="Permalink to this definition"></a></dt>
+<dd><p>Reset the scroll region to encompass the inner frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – Event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.set_widgets">
+<span class="sig-name descname"><span class="pre">set_widgets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.set_widgets" title="Permalink to this definition"></a></dt>
+<dd><p>Set widgets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coefs</strong> (<em>list</em>) – List of coefficients</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.ao_notebook">
+<span class="sig-name descname"><span class="pre">ao_notebook</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.ao_notebook" title="Permalink to this definition"></a></dt>
+<dd><p>Notebook</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Notebook</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.camera_list">
+<span class="sig-name descname"><span class="pre">camera_list</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.camera_list" title="Permalink to this definition"></a></dt>
+<dd><p>Camera List</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Combobox</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.clear_button">
+<span class="sig-name descname"><span class="pre">clear_button</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.clear_button" title="Permalink to this definition"></a></dt>
+<dd><p>Clear Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.coefs_bar">
+<span class="sig-name descname"><span class="pre">coefs_bar</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.coefs_bar" title="Permalink to this definition"></a></dt>
+<dd><p>Coefficients Bar</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.axes.Axes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.deselect_all_modes">
+<span class="sig-name descname"><span class="pre">deselect_all_modes</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.deselect_all_modes" title="Permalink to this definition"></a></dt>
+<dd><p>Deselect All Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.fig">
+<span class="sig-name descname"><span class="pre">fig</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.fig" title="Permalink to this definition"></a></dt>
+<dd><p>Figure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.figure.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.fig_tw">
+<span class="sig-name descname"><span class="pre">fig_tw</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.fig_tw" title="Permalink to this definition"></a></dt>
+<dd><p>Figure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.figure.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.flat_button">
+<span class="sig-name descname"><span class="pre">flat_button</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.flat_button" title="Permalink to this definition"></a></dt>
+<dd><p>Flat Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.from_wcs_button">
+<span class="sig-name descname"><span class="pre">from_wcs_button</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.from_wcs_button" title="Permalink to this definition"></a></dt>
+<dd><p>Load Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.inputs">
+<span class="sig-name descname"><span class="pre">inputs</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of all the variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mirror_img">
+<span class="sig-name descname"><span class="pre">mirror_img</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mirror_img" title="Permalink to this definition"></a></dt>
+<dd><p>Mirror Image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.axes.Axes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mode_labels">
+<span class="sig-name descname"><span class="pre">mode_labels</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mode_labels" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of all the mode labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mode_names">
+<span class="sig-name descname"><span class="pre">mode_names</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.mode_names" title="Permalink to this definition"></a></dt>
+<dd><p>List of mode names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.modes_armed">
+<span class="sig-name descname"><span class="pre">modes_armed</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.modes_armed" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of all the armed modes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.n_modes">
+<span class="sig-name descname"><span class="pre">n_modes</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.n_modes" title="Permalink to this definition"></a></dt>
+<dd><p>Number of modes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.peaks_plot">
+<span class="sig-name descname"><span class="pre">peaks_plot</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.peaks_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Peaks Plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.axes.Axes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.plot_frame">
+<span class="sig-name descname"><span class="pre">plot_frame</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.plot_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Plot Frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.popup">
+<span class="sig-name descname"><span class="pre">popup</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.popup" title="Permalink to this definition"></a></dt>
+<dd><p>Popup</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.view.custom_widgets.popup.PopUp.html#navigate.view.custom_widgets.popup.PopUp" title="navigate.view.custom_widgets.popup.PopUp">PopUp</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.save_wcs_button">
+<span class="sig-name descname"><span class="pre">save_wcs_button</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.save_wcs_button" title="Permalink to this definition"></a></dt>
+<dd><p>Save Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.select_all_modes">
+<span class="sig-name descname"><span class="pre">select_all_modes</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.select_all_modes" title="Permalink to this definition"></a></dt>
+<dd><p>Select All Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.set_button">
+<span class="sig-name descname"><span class="pre">set_button</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.set_button" title="Permalink to this definition"></a></dt>
+<dd><p>Set Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tab_cnn">
+<span class="sig-name descname"><span class="pre">tab_cnn</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tab_cnn" title="Permalink to this definition"></a></dt>
+<dd><p>CNN-AO Tab</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tab_tw">
+<span class="sig-name descname"><span class="pre">tab_tw</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tab_tw" title="Permalink to this definition"></a></dt>
+<dd><p>Tony Wilson Tab</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tony_wilson_button">
+<span class="sig-name descname"><span class="pre">tony_wilson_button</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.tony_wilson_button" title="Permalink to this definition"></a></dt>
+<dd><p>Tony Wilson Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.trace_plot">
+<span class="sig-name descname"><span class="pre">trace_plot</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.trace_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Trace Plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.axes.Axes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.zero_button">
+<span class="sig-name descname"><span class="pre">zero_button</span></span><a class="headerlink" href="#navigate.view.popups.adaptiveoptics_popup.AdaptiveOpticsPopup.zero_button" title="Permalink to this definition"></a></dt>
+<dd><p>Zero Button</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ttk.Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.view.popups.adaptiveoptics_popup.html" class="btn btn-neutral float-left" title="navigate.view.popups.adaptiveoptics_popup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.view.popups.adaptiveoptics_popup.ScrollFrame.html" class="btn btn-neutral float-right" title="navigate.view.popups.adaptiveoptics_popup.ScrollFrame" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.devices.daq.ni.NIDAQ &mdash; navigate 0.0.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.devices.daq.synthetic" href="navigate.model.devices.daq.synthetic.html" />
+    <link rel="prev" title="navigate.model.devices.daq.ni" href="navigate.model.devices.daq.ni.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-constant-velocity-acquisition">navigate Constant Velocity Acquisition</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-photoactivation">navigate Photoactivation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.camera.html">navigate.model.devices.camera</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.devices.daq.html">navigate.model.devices.daq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.device_types.html">navigate.model.devices.device_types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.filter_wheel.html">navigate.model.devices.filter_wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.galvo.html">navigate.model.devices.galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.laser.html">navigate.model.devices.laser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.mirror.html">navigate.model.devices.mirror</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.objectives.html">navigate.model.devices.objectives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.remote_focus.html">navigate.model.devices.remote_focus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.shutter.html">navigate.model.devices.shutter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.stage.html">navigate.model.devices.stage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.zoom.html">navigate.model.devices.zoom</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Software API</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.html">navigate.model.devices</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.daq.html">navigate.model.devices.daq</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.daq.ni.html">navigate.model.devices.daq.ni</a></li>
+      <li class="breadcrumb-item active">navigate.model.devices.daq.ni.NIDAQ</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.devices.daq.ni.NIDAQ.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-devices-daq-ni-nidaq">
+<h1>navigate.model.devices.daq.ni.NIDAQ<a class="headerlink" href="#navigate-model-devices-daq-ni-nidaq" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.daq.ni.</span></span><span class="sig-name descname"><span class="pre">NIDAQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.devices.daq.base.DAQBase.html#navigate.model.devices.daq.base.DAQBase" title="navigate.model.devices.daq.base.DAQBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAQBase</span></code></a></p>
+<p>NIDAQ class for Control of NI Data Acquisition Cards.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize NIDAQ class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>configuration</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Configuration dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.__init__" title="navigate.model.devices.daq.ni.NIDAQ.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(configuration)</p></td>
+<td><p>Initialize NIDAQ class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.calculate_all_waveforms" title="navigate.model.devices.daq.ni.NIDAQ.calculate_all_waveforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_all_waveforms</span></code></a>(microscope_name, ...)</p></td>
+<td><p>Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.create_analog_output_tasks" title="navigate.model.devices.daq.ni.NIDAQ.create_analog_output_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_analog_output_tasks</span></code></a>(channel_key)</p></td>
+<td><p>Create analog output tasks for each board.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.create_camera_task" title="navigate.model.devices.daq.ni.NIDAQ.create_camera_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_camera_task</span></code></a>(channel_key)</p></td>
+<td><p>Set up the camera trigger task.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.create_master_trigger_task" title="navigate.model.devices.daq.ni.NIDAQ.create_master_trigger_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_master_trigger_task</span></code></a>()</p></td>
+<td><p>Set up the DO master trigger task.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.enable_microscope" title="navigate.model.devices.daq.ni.NIDAQ.enable_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enable_microscope</span></code></a>(microscope_name)</p></td>
+<td><p>Enable microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.prepare_acquisition" title="navigate.model.devices.daq.ni.NIDAQ.prepare_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_acquisition</span></code></a>(channel_key)</p></td>
+<td><p>Prepare the acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.restart_analog_task_callback_func" title="navigate.model.devices.daq.ni.NIDAQ.restart_analog_task_callback_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restart_analog_task_callback_func</span></code></a>(task)</p></td>
+<td><p>Restart analog task callback function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.run_acquisition" title="navigate.model.devices.daq.ni.NIDAQ.run_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_acquisition</span></code></a>()</p></td>
+<td><p>Run DAQ Acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.set_external_trigger" title="navigate.model.devices.daq.ni.NIDAQ.set_external_trigger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_external_trigger</span></code></a>([external_trigger])</p></td>
+<td><p>Set trigger mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.stop_acquisition" title="navigate.model.devices.daq.ni.NIDAQ.stop_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_acquisition</span></code></a>()</p></td>
+<td><p>Stop Acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.update_analog_task" title="navigate.model.devices.daq.ni.NIDAQ.update_analog_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_analog_task</span></code></a>(board_name)</p></td>
+<td><p>Update analog task.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.wait_for_external_trigger" title="navigate.model.devices.daq.ni.NIDAQ.wait_for_external_trigger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_for_external_trigger</span></code></a>(trigger_channel[, ...])</p></td>
+<td><p>Wait for a digital external trigger.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.configuration" title="navigate.model.devices.daq.ni.NIDAQ.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Configuration dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.camera_trigger_task" title="navigate.model.devices.daq.ni.NIDAQ.camera_trigger_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_trigger_task</span></code></a></p></td>
+<td><p>NI DAQmx task for camera trigger</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.master_trigger_task" title="navigate.model.devices.daq.ni.NIDAQ.master_trigger_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">master_trigger_task</span></code></a></p></td>
+<td><p>NI DAQmx task for master trigger</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.laser_switching_task" title="navigate.model.devices.daq.ni.NIDAQ.laser_switching_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">laser_switching_task</span></code></a></p></td>
+<td><p>NI DAQmx task for laser switching</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.trigger_mode" title="navigate.model.devices.daq.ni.NIDAQ.trigger_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trigger_mode</span></code></a></p></td>
+<td><p>Trigger mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.external_trigger" title="navigate.model.devices.daq.ni.NIDAQ.external_trigger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">external_trigger</span></code></a></p></td>
+<td><p>NI DAQmx port for laser switching</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.analog_outputs" title="navigate.model.devices.daq.ni.NIDAQ.analog_outputs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">analog_outputs</span></code></a></p></td>
+<td><p>Analog outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.analog_output_tasks" title="navigate.model.devices.daq.ni.NIDAQ.analog_output_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">analog_output_tasks</span></code></a></p></td>
+<td><p>NI DAQmx tasks for analog output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.n_sample" title="navigate.model.devices.daq.ni.NIDAQ.n_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_sample</span></code></a></p></td>
+<td><p>Number of samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.current_channel_key" title="navigate.model.devices.daq.ni.NIDAQ.current_channel_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_channel_key</span></code></a></p></td>
+<td><p>Current channel key.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.is_updating_analog_task" title="navigate.model.devices.daq.ni.NIDAQ.is_updating_analog_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_updating_analog_task</span></code></a></p></td>
+<td><p>Flag for updating analog task.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.daq.ni.NIDAQ.wait_to_run_lock" title="navigate.model.devices.daq.ni.NIDAQ.wait_to_run_lock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_to_run_lock</span></code></a></p></td>
+<td><p>Flag for waiting to run.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.calculate_all_waveforms">
+<span class="sig-name descname"><span class="pre">calculate_all_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_times</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.calculate_all_waveforms" title="Permalink to this definition"></a></dt>
+<dd><p>Pre-calculates all waveforms necessary for the acquisition and organizes in
+a dictionary format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the active microscope</p></li>
+<li><p><strong>exposure_times</strong> (<em>dict</em>) – Dictionary of exposure times for each selected channel</p></li>
+<li><p><strong>sweep_times</strong> (<em>dict</em>) – Dictionary of sweep times for each selected channel</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self.waveform_dict</strong> – Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for
+display purposes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.create_analog_output_tasks">
+<span class="sig-name descname"><span class="pre">create_analog_output_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.create_analog_output_tasks" title="Permalink to this definition"></a></dt>
+<dd><p>Create analog output tasks for each board.</p>
+<p>Create a single analog output task for all channels per board. Most NI DAQ cards
+have only one clock for analog output sample timing, and as such all channels
+must be grouped here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>channel_key</strong> (<em>str</em>) – Channel key for analog output.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.create_camera_task">
+<span class="sig-name descname"><span class="pre">create_camera_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.create_camera_task" title="Permalink to this definition"></a></dt>
+<dd><p>Set up the camera trigger task.</p>
+<p>TTL for triggering the camera. TTL is 4 ms in duration.
+Channel that the TTL is delivered from, and its delay (typically ~10 ms), are
+specified in the configuration.yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>channel_key</strong> (<em>str</em>) – Channel key for current channel.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.create_master_trigger_task">
+<span class="sig-name descname"><span class="pre">create_master_trigger_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.create_master_trigger_task" title="Permalink to this definition"></a></dt>
+<dd><p>Set up the DO master trigger task.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.enable_microscope">
+<span class="sig-name descname"><span class="pre">enable_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.enable_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Enable microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope to enable.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.prepare_acquisition">
+<span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.prepare_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Prepare the acquisition.</p>
+<p>Creates and configures the DAQ tasks.
+Writes the waveforms to each task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>channel_key</strong> (<em>str</em>) – Channel key for current channel.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.restart_analog_task_callback_func">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">restart_analog_task_callback_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Task</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">callable</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.restart_analog_task_callback_func" title="Permalink to this definition"></a></dt>
+<dd><p>Restart analog task callback function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>task</strong> (<em>nidaqmx.Task</em>) – Analog output task.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>callback_func</strong> – Callback function</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.run_acquisition">
+<span class="sig-name descname"><span class="pre">run_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.run_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Run DAQ Acquisition.</p>
+<p>Run the tasks for triggering, analog and counter outputs.
+The master trigger initiates all other tasks via a shared trigger
+For this to work, all analog output and counter tasks have to be started so that
+they are waiting for the trigger signal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.set_external_trigger">
+<span class="sig-name descname"><span class="pre">set_external_trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">external_trigger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.set_external_trigger" title="Permalink to this definition"></a></dt>
+<dd><p>Set trigger mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>external_trigger</strong> (<em>nidaqmx.Task</em>) – Task for external triggering</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.stop_acquisition">
+<span class="sig-name descname"><span class="pre">stop_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.stop_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Stop Acquisition.</p>
+<p>Stop all tasks and close them.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.update_analog_task">
+<span class="sig-name descname"><span class="pre">update_analog_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">board_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.update_analog_task" title="Permalink to this definition"></a></dt>
+<dd><p>Update analog task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>board_name</strong> (<em>str</em>) – Name of board to update.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if task is updated, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool, None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.wait_for_external_trigger">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wait_for_external_trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_internal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.wait_for_external_trigger" title="Permalink to this definition"></a></dt>
+<dd><p>Wait for a digital external trigger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trigger_channel</strong> (<em>str</em>) – The name of the DAQ PFI digital input.</p></li>
+<li><p><strong>wait_internal</strong> (<em>float</em>) – The internal waiting time to check the trigger</p></li>
+<li><p><strong>timeout</strong> (<em>float</em>) – Continue on anyway if timeout is reached. timeout &lt; 0 will
+run forever.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – True for the trigger, False for no trigger.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.analog_output_tasks">
+<span class="sig-name descname"><span class="pre">analog_output_tasks</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.analog_output_tasks" title="Permalink to this definition"></a></dt>
+<dd><p>NI DAQmx tasks for analog output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.analog_outputs">
+<span class="sig-name descname"><span class="pre">analog_outputs</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.analog_outputs" title="Permalink to this definition"></a></dt>
+<dd><p>Analog outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.camera_delay">
+<span class="sig-name descname"><span class="pre">camera_delay</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.camera_delay" title="Permalink to this definition"></a></dt>
+<dd><p>Camera delay percentage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.camera_trigger_task">
+<span class="sig-name descname"><span class="pre">camera_trigger_task</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.camera_trigger_task" title="Permalink to this definition"></a></dt>
+<dd><p>NI DAQmx task for camera trigger</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.current_channel_key">
+<span class="sig-name descname"><span class="pre">current_channel_key</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.current_channel_key" title="Permalink to this definition"></a></dt>
+<dd><p>Current channel key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.daq_parameters">
+<span class="sig-name descname"><span class="pre">daq_parameters</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.daq_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of DAQ parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.exposure_times">
+<span class="sig-name descname"><span class="pre">exposure_times</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.exposure_times" title="Permalink to this definition"></a></dt>
+<dd><p>exposure times for different channels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.external_trigger">
+<span class="sig-name descname"><span class="pre">external_trigger</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.external_trigger" title="Permalink to this definition"></a></dt>
+<dd><p>NI DAQmx port for laser switching</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.is_updating_analog_task">
+<span class="sig-name descname"><span class="pre">is_updating_analog_task</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.is_updating_analog_task" title="Permalink to this definition"></a></dt>
+<dd><p>Flag for updating analog task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.laser_switching_task">
+<span class="sig-name descname"><span class="pre">laser_switching_task</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.laser_switching_task" title="Permalink to this definition"></a></dt>
+<dd><p>NI DAQmx task for laser switching</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.master_trigger_task">
+<span class="sig-name descname"><span class="pre">master_trigger_task</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.master_trigger_task" title="Permalink to this definition"></a></dt>
+<dd><p>NI DAQmx task for master trigger</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.microscope_name" title="Permalink to this definition"></a></dt>
+<dd><p>Name of the active microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.n_sample">
+<span class="sig-name descname"><span class="pre">n_sample</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.n_sample" title="Permalink to this definition"></a></dt>
+<dd><p>Number of samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.sample_rate">
+<span class="sig-name descname"><span class="pre">sample_rate</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.sample_rate" title="Permalink to this definition"></a></dt>
+<dd><p>Sample rate of the DAQ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.sweep_times">
+<span class="sig-name descname"><span class="pre">sweep_times</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.sweep_times" title="Permalink to this definition"></a></dt>
+<dd><p>Sweep times for different channels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.trigger_mode">
+<span class="sig-name descname"><span class="pre">trigger_mode</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.trigger_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Trigger mode. Self-trigger or external-trigger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.wait_to_run_lock">
+<span class="sig-name descname"><span class="pre">wait_to_run_lock</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.wait_to_run_lock" title="Permalink to this definition"></a></dt>
+<dd><p>Flag for waiting to run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.waveform_constants">
+<span class="sig-name descname"><span class="pre">waveform_constants</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.waveform_constants" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of waveform constants</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.waveform_dict">
+<span class="sig-name descname"><span class="pre">waveform_dict</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.waveform_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of waveforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.waveform_expand_num">
+<span class="sig-name descname"><span class="pre">waveform_expand_num</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.waveform_expand_num" title="Permalink to this definition"></a></dt>
+<dd><p>Number of times to expand the waveform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.daq.ni.NIDAQ.waveform_repeat_num">
+<span class="sig-name descname"><span class="pre">waveform_repeat_num</span></span><a class="headerlink" href="#navigate.model.devices.daq.ni.NIDAQ.waveform_repeat_num" title="Permalink to this definition"></a></dt>
+<dd><p>Number of times to repeat the waveform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.devices.daq.ni.html" class="btn btn-neutral float-left" title="navigate.model.devices.daq.ni" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.devices.daq.synthetic.html" class="btn btn-neutral float-right" title="navigate.model.devices.daq.synthetic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

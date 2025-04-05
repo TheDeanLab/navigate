@@ -84,6 +84,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
@@ -213,28 +214,31 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.set_camera_exposure_time" title="navigate.model.microscope.Microscope.set_camera_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_camera_exposure_time</span></code></a>(channel)</p></td>
 <td><p>Set the camera exposure time.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.set_camera_roi" title="navigate.model.microscope.Microscope.set_camera_roi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_camera_roi</span></code></a>()</p></td>
-<td><p>Set the camera ROI.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.set_camera_roi_and_binning" title="navigate.model.microscope.Microscope.set_camera_roi_and_binning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_camera_roi_and_binning</span></code></a>()</p></td>
+<td><p>Set the camera ROI and binning.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.set_camera_sensor_mode" title="navigate.model.microscope.Microscope.set_camera_sensor_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_camera_sensor_mode</span></code></a>()</p></td>
 <td><p>Set the camera sensor mode.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.stop_stage" title="navigate.model.microscope.Microscope.stop_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_stage</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.set_camera_trigger_mode" title="navigate.model.microscope.Microscope.set_camera_trigger_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_camera_trigger_mode</span></code></a>()</p></td>
+<td><p>Set the camera trigger mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.stop_stage" title="navigate.model.microscope.Microscope.stop_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_stage</span></code></a>()</p></td>
 <td><p>Stop stage.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.terminate" title="navigate.model.microscope.Microscope.terminate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">terminate</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.terminate" title="navigate.model.microscope.Microscope.terminate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">terminate</span></code></a>()</p></td>
 <td><p>Close hardware explicitly.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.turn_off_lasers" title="navigate.model.microscope.Microscope.turn_off_lasers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_off_lasers</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.turn_off_lasers" title="navigate.model.microscope.Microscope.turn_off_lasers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_off_lasers</span></code></a>()</p></td>
 <td><p>Turn off current laser.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.turn_on_laser" title="navigate.model.microscope.Microscope.turn_on_laser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_on_laser</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.turn_on_laser" title="navigate.model.microscope.Microscope.turn_on_laser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_on_laser</span></code></a>()</p></td>
 <td><p>Turn on the current laser.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.update_data_buffer" title="navigate.model.microscope.Microscope.update_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data_buffer</span></code></a>(data_buffer, number_of_frames)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.update_data_buffer" title="navigate.model.microscope.Microscope.update_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data_buffer</span></code></a>(data_buffer, number_of_frames)</p></td>
 <td><p>Update the data buffer for the camera.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.update_stage_limits" title="navigate.model.microscope.Microscope.update_stage_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_stage_limits</span></code></a>([limits_flag])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.update_stage_limits" title="navigate.model.microscope.Microscope.update_stage_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_stage_limits</span></code></a>([limits_flag])</p></td>
 <td><p>Update stage limits.</p></td>
 </tr>
 </tbody>
@@ -269,56 +273,56 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.shutter" title="navigate.model.microscope.Microscope.shutter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shutter</span></code></a></p></td>
 <td><p>Shutter device.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.lasers" title="navigate.model.microscope.Microscope.lasers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lasers</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.laser" title="navigate.model.microscope.Microscope.laser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">laser</span></code></a></p></td>
 <td><p>Dictionary of lasers.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.galvo" title="navigate.model.microscope.Microscope.galvo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo</span></code></a></p></td>
 <td><p>Dictionary of galvanometers.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.remote_focus_device" title="navigate.model.microscope.Microscope.remote_focus_device"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_device</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.remote_focus" title="navigate.model.microscope.Microscope.remote_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus</span></code></a></p></td>
 <td><p>Remote focus device.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.filter_wheel" title="navigate.model.microscope.Microscope.filter_wheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_wheel</span></code></a></p></td>
 <td><p>Dictionary of filter_wheels</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.daq" title="navigate.model.microscope.Microscope.daq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">daq</span></code></a></p></td>
-<td><p>Dictionary of data acquisition devices.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.info" title="navigate.model.microscope.Microscope.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">info</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.info" title="navigate.model.microscope.Microscope.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">info</span></code></a></p></td>
 <td><p>Dictionary of microscope info.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.current_channel" title="navigate.model.microscope.Microscope.current_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_channel</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.current_channel" title="navigate.model.microscope.Microscope.current_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_channel</span></code></a></p></td>
 <td><p>Current channel.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.current_laser_index" title="navigate.model.microscope.Microscope.current_laser_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_laser_index</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.current_laser_index" title="navigate.model.microscope.Microscope.current_laser_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_laser_index</span></code></a></p></td>
 <td><p>Current laser index.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.channels" title="navigate.model.microscope.Microscope.channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">channels</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.channels" title="navigate.model.microscope.Microscope.channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">channels</span></code></a></p></td>
 <td><p>List of all channels.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.available_channels" title="navigate.model.microscope.Microscope.available_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_channels</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.available_channels" title="navigate.model.microscope.Microscope.available_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_channels</span></code></a></p></td>
 <td><p>List of available channels.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.number_of_frames" title="navigate.model.microscope.Microscope.number_of_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_frames</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.number_of_frames" title="navigate.model.microscope.Microscope.number_of_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_frames</span></code></a></p></td>
 <td><p>Number of images.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.central_focus" title="navigate.model.microscope.Microscope.central_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">central_focus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.central_focus" title="navigate.model.microscope.Microscope.central_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">central_focus</span></code></a></p></td>
 <td><p>Central focus position.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.is_synthetic" title="navigate.model.microscope.Microscope.is_synthetic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_synthetic</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.is_synthetic" title="navigate.model.microscope.Microscope.is_synthetic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_synthetic</span></code></a></p></td>
 <td><p>Is a synthetic microscope.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.laser_wavelength" title="navigate.model.microscope.Microscope.laser_wavelength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">laser_wavelength</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.laser_wavelength" title="navigate.model.microscope.Microscope.laser_wavelength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">laser_wavelength</span></code></a></p></td>
 <td><p>Dictionary of laser configurations.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.ret_pos_dict" title="navigate.model.microscope.Microscope.ret_pos_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ret_pos_dict</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.ret_pos_dict" title="navigate.model.microscope.Microscope.ret_pos_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ret_pos_dict</span></code></a></p></td>
 <td><p>Dictionary of returned stage positions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.commands" title="navigate.model.microscope.Microscope.commands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">commands</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.commands" title="navigate.model.microscope.Microscope.commands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">commands</span></code></a></p></td>
 <td><p>Dictionary of commands</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.plugin_devices" title="navigate.model.microscope.Microscope.plugin_devices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plugin_devices</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.plugin_devices" title="navigate.model.microscope.Microscope.plugin_devices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plugin_devices</span></code></a></p></td>
 <td><p>Dictionary of plugin devices</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.daq" title="navigate.model.microscope.Microscope.daq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">daq</span></code></a></p></td>
+<td><p>Dictionary of data acquisition devices.</p></td>
 </tr>
 </tbody>
 </table>
@@ -505,10 +509,11 @@ series, calculating all the waveforms required for the acquisition process,
 and opens the shutter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>waveform</strong> – Dictionary of all the waveforms.</p>
+<dd class="field-odd"><p><strong>waveform</strong> – Dictionary of all the waveforms. None if the camera ROI and binning are
+not set successfully.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dict</p>
+<dd class="field-even"><p>dict/None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -569,14 +574,22 @@ camera line interval if the sensor mode is set to the Light-Sheet mode.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.set_camera_roi">
-<span class="sig-name descname"><span class="pre">set_camera_roi</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.set_camera_roi" title="Permalink to this definition"></a></dt>
-<dd><p>Set the camera ROI.</p>
+<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.set_camera_roi_and_binning">
+<span class="sig-name descname"><span class="pre">set_camera_roi_and_binning</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.set_camera_roi_and_binning" title="Permalink to this definition"></a></dt>
+<dd><p>Set the camera ROI and binning.</p>
 <p>This function sets the camera region of interest (ROI) based on the camera
 parameters specified in the configuration file. It sets the image width,
 image height, and the center of the image. The camera ROI is used to define
 the area of the image sensor that will be used to capture images during the
-acquisition process.</p>
+acquisition process. The function also sets the camera binning value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the camera ROI and binning are set successfully, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -586,6 +599,13 @@ acquisition process.</p>
 <p>This function sets the camera sensor mode based on the camera parameters
 specified in the configuration file. It sets the sensor mode and the readout
 direction for the camera if it is in the light-sheet imaging mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.set_camera_trigger_mode">
+<span class="sig-name descname"><span class="pre">set_camera_trigger_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.set_camera_trigger_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Set the camera trigger mode.</p>
+<p>This function sets the camera trigger source, trigger mode.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -804,9 +824,9 @@ direction for the camera if it is in the light-sheet imaging mode.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.laser_wavelength">
-<span class="sig-name descname"><span class="pre">laser_wavelength</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.laser_wavelength" title="Permalink to this definition"></a></dt>
-<dd><p>Dictionary of laser configurations.</p>
+<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.laser">
+<span class="sig-name descname"><span class="pre">laser</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.laser" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of lasers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
@@ -815,9 +835,9 @@ direction for the camera if it is in the light-sheet imaging mode.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.lasers">
-<span class="sig-name descname"><span class="pre">lasers</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.lasers" title="Permalink to this definition"></a></dt>
-<dd><p>Dictionary of lasers.</p>
+<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.laser_wavelength">
+<span class="sig-name descname"><span class="pre">laser_wavelength</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.laser_wavelength" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of laser configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
@@ -870,8 +890,8 @@ direction for the camera if it is in the light-sheet imaging mode.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.remote_focus_device">
-<span class="sig-name descname"><span class="pre">remote_focus_device</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.remote_focus_device" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.remote_focus">
+<span class="sig-name descname"><span class="pre">remote_focus</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.remote_focus" title="Permalink to this definition"></a></dt>
 <dd><p>Remote focus device.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>

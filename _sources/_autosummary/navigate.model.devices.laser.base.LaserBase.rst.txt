@@ -1,0 +1,39 @@
+navigate.model.devices.laser.base.LaserBase
+===========================================
+
+.. currentmodule:: navigate.model.devices.laser.base
+
+.. autoclass:: LaserBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LaserBase.__init__
+      ~LaserBase.close
+      ~LaserBase.initialize_laser
+      ~LaserBase.set_power
+      ~LaserBase.turn_off
+      ~LaserBase.turn_on
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LaserBase.device_connection
+      ~LaserBase.configuration
+      ~LaserBase.microscope_name
+      ~LaserBase.device_config
+   
+   

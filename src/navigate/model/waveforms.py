@@ -67,12 +67,6 @@ def camera_exposure(
         Unit - Seconds
     exposure_end : Float
         Unit - Seconds
-
-    Examples
-    --------
-        >>> exposure_start, exposure_end = camera_exposure(sample_rate, sweep_time,
-        exposure, camera_delay)
-
     """
     amplitude = 5
 
@@ -117,10 +111,6 @@ def single_pulse(
     Returns
     -------
     waveform : np.array
-
-    Examples
-    --------
-    >>> typical_TTL_pulse = single_pulse(sample_rate, sweep_time, 10, 1, 1, 0)
     """
     # get an integer number of samples
     samples = int(np.floor(np.multiply(sample_rate, sweep_time)))
@@ -178,25 +168,16 @@ def remote_focus_ramp(
     Returns
     -------
     waveform : np.array
-
-    Examples
-    --------
-    >>> etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
-        camera_delay, fall, amplitude, offset)
-
     """
     # create an array just containing the negative amplitude voltage:
     delay_samples = int(remote_focus_delay * sample_rate)
     delay_array = np.zeros(delay_samples) + offset - amplitude
 
-    # 10-7.5 -> 1.025 * .2
-    #
     ramp_samples = int(
         (exposure_time + camera_delay - remote_focus_delay) * sample_rate
     )
     ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
 
-    # fall_samples = .025 * .2 * 100000 = 500
     fall_samples = int(fall * sample_rate)
     fall_array = np.linspace(offset + amplitude, offset - amplitude, fall_samples)
 
@@ -253,12 +234,6 @@ def remote_focus_ramp_triangular(
     Returns
     -------
     waveform : np.array
-
-    Examples
-    --------
-    >>> etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
-        camera_delay, fall, amplitude, offset)
-
     """
     # create an array just containing the negative amplitude voltage:
     # In theory, delay here should be 4H.
@@ -336,10 +311,6 @@ def sawtooth(
     Returns
     -------
     waveform : np.array
-
-    Examples
-    --------
-    >>> typical_galvo = sawtooth(sample_rate, sweep_time, 10, 1, 0, 50, np.pi/2)
     """
 
     samples = int(np.multiply(sample_rate, sweep_time))
@@ -368,11 +339,6 @@ def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
     Returns
     -------
     waveform : np.array
-
-    Examples
-    --------
-    >>> typical_galvo = dc_value(sample_rate, sweep_time, 1)
-
     """
     samples = np.multiply(float(sample_rate), sweep_time)
     waveform = np.zeros(int(samples))
@@ -412,10 +378,6 @@ def square(
     Returns
     -------
     waveform : np.array
-
-    Examples
-    --------
-    >>> typical_laser = square(sample_rate, sweep_time, 10, 1, 0, 50, np.pi)
     """
     samples = int(sample_rate * sweep_time)
     duty_cycle = duty_cycle / 100
@@ -450,11 +412,6 @@ def sine_wave(
     Returns
     -------
     waveform : np.array
-
-    Examples
-    --------
-    >>> typical_laser = sine_wave(sample_rate, sweep_time, 10, 1, 0, 0)
-
     """
     samples = int(sample_rate * sweep_time)
     t = np.linspace(0, sweep_time, samples)

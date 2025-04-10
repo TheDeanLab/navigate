@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -262,7 +262,7 @@ class SyntheticCamera(CameraBase):
             logger.debug(f"can't set binning to {binning_string}")
             print(f"can't set binning to {binning_string}")
             return False
-        
+
         self.x_binning = int(binning_string[0])
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
@@ -397,7 +397,7 @@ class SyntheticCamera(CameraBase):
             X position of the center of view
         center_y : int
             Y position of the center of view
-        
+
         Returns
         -------
         bool
@@ -424,7 +424,7 @@ class SyntheticCamera(CameraBase):
         readout_time = 0.01  # 10 milliseconds.
         return readout_time
 
-    def set_trigger_mode(self, trigger_source: str="External") -> None:
+    def set_trigger_mode(self, trigger_source: str = "External") -> None:
         """Set camera trigger mode.
         Parameters
         ----------

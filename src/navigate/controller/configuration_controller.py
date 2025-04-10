@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -255,7 +255,9 @@ class ConfigurationController:
         if self.microscope_config is not None:
             stage_dict = self.microscope_config["stage"]
             for a in axes:
-                position_limits[a] = stage_dict.get(a + suffix, 0 if suffix == "_min" else 100)
+                position_limits[a] = stage_dict.get(
+                    a + suffix, 0 if suffix == "_min" else 100
+                )
         else:
             for a in axes:
                 position_limits[a] = 0 if suffix == "_min" else 100
@@ -279,7 +281,7 @@ class ConfigurationController:
         for axis in self.stage_axes:
             flip_flags[axis] = stage_dict.get(f"flip_{axis}", False)
         return flip_flags
-    
+
     @property
     def stage_axes(self):
         """Return the axes of the stage
@@ -298,9 +300,9 @@ class ConfigurationController:
             else:
                 axes = list(stage_config["axes"])
             return axes
-        
+
         return ["x", "y"]
-    
+
     @property
     def all_stage_axes(self):
         """Return all the axes of the stage

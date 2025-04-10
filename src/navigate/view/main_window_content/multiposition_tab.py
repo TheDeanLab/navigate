@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -351,19 +351,9 @@ class MultiPositionColumnHeader(ColumnHeader):
                 columnIndex=multicols, ascending=[1 for i in multicols]
             ),
         )
-        popupmenu.add_command(
-            label="Rename",
-            command=self.renameColumn
-        )
-        popupmenu.add_command(
-            label="Add",
-            command=self.table.addColumn
-        )
-        popupmenu.add_command(
-            label="Delete Column(s)", 
-            command=self.table.deleteColumn
-        )
-
+        popupmenu.add_command(label="Rename", command=self.renameColumn)
+        popupmenu.add_command(label="Add", command=self.table.addColumn)
+        popupmenu.add_command(label="Delete Column(s)", command=self.table.deleteColumn)
 
         popupmenu.bind("<FocusOut>", popupFocusOut)
         popupmenu.focus_set()

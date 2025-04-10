@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ from unittest.mock import MagicMock
 # Third party imports
 
 # Local application imports
-from navigate.model.device_startup_functions import auto_redial, start_device
+from navigate.model.device_startup_functions import auto_redial
 
 
 class TestAutoRedial(unittest.TestCase):
@@ -82,4 +82,3 @@ class TestAutoRedial(unittest.TestCase):
         mock_func = MagicMock()
         auto_redial(mock_func, (1, 2), n_tries=1, kwarg1="test")
         mock_func.assert_called_with(1, 2, kwarg1="test")
-

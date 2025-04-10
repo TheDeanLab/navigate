@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -87,10 +87,7 @@ class DockableNotebook(ttk.Notebook):
         else:
             self.bind("<ButtonPress-3>", self.find)
 
-    def set_tablist(
-            self,
-            tab_list: list
-    ) -> None:
+    def set_tablist(self, tab_list: list) -> None:
         """Setter for tab list
 
         Parameters
@@ -167,11 +164,7 @@ class DockableNotebook(ttk.Notebook):
         self.root.wm_manage(tab_widget)
 
         tk.Wm.title(tab_widget, selected_text)
-        tk.Wm.protocol(
-            tab_widget,
-            "WM_DELETE_WINDOW",
-            lambda: self.dismiss(tab_widget)
-        )
+        tk.Wm.protocol(tab_widget, "WM_DELETE_WINDOW", lambda: self.dismiss(tab_widget))
 
         if selected_text == "Camera View":
             tk.Wm.minsize(tab_widget, 663, 597)

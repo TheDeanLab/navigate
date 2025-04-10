@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,9 @@ def dummy_microscope(dummy_model):
     from navigate.model.microscope import Microscope
     from navigate.model.device_startup_functions import load_devices
 
-    devices_dict = load_devices(dummy_model.active_microscope_name, dummy_model.configuration, is_synthetic=True)
+    devices_dict = load_devices(
+        dummy_model.active_microscope_name, dummy_model.configuration, is_synthetic=True
+    )
 
     return Microscope(
         dummy_model.active_microscope_name,

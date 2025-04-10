@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -315,7 +315,7 @@ class TestCameraSettingController:
                 set_height // 4
             ) - (set_height // 4 % step_height)
             binning = 4
-        
+
         # make sure x, y pixels are img_x, img_y pixels * binning
         assert (
             self.camera_settings.camera_setting_dict["x_pixels"]

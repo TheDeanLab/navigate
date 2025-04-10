@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -129,6 +129,7 @@ def load_module_from_file(module_name: str, file_path: str) -> Optional[any]:
     except ModuleNotFoundError:
         return None
     return module
+
 
 def load_param_from_module(module_name: str, param_name: str) -> Optional[any]:
     """This function will load a parameter from a module

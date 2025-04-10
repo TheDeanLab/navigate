@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -53,9 +53,9 @@ class TestChannelSettingController:
             self.ctc,
             dummy_controller.configuration_controller,
         )
-        self.channel_setting.populate_experiment_values(dummy_controller.configuration[
-            "experiment"
-        ]["MicroscopeState"]["channels"])
+        self.channel_setting.populate_experiment_values(
+            dummy_controller.configuration["experiment"]["MicroscopeState"]["channels"]
+        )
 
     @pytest.mark.parametrize(
         "mode,state,state_readonly",
@@ -77,7 +77,7 @@ class TestChannelSettingController:
                     == state_readonly
                 )
             else:
-                assert(
+                assert (
                     str(self.channel_setting.view.laser_pulldowns[i]["state"])
                     == "disabled"
                 )

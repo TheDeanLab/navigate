@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ import numpy as np
 from matplotlib.ticker import FuncFormatter
 
 from navigate.config import update_config_dict
+
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.view.main_window_content.display_notebook import HistogramFrame
@@ -142,18 +143,25 @@ class HistogramController:
 
         # Default location for communicating with the plugin in the model.
         if "histogram" not in self.parent_controller.configuration["gui"].keys():
-            update_config_dict(manager=self.parent_controller.manager,
-                               parent_dict=self.parent_controller.configuration["gui"],
-                               config_name="histogram",
-                               new_config={"enabled": True}
-                               )
+            update_config_dict(
+                manager=self.parent_controller.manager,
+                parent_dict=self.parent_controller.configuration["gui"],
+                config_name="histogram",
+                new_config={"enabled": True},
+            )
 
         # Set histogram according to the experiment.yaml file. If disabled, stays disabled upon restart.
-        self.histogram_enabled.set(self.parent_controller.configuration["gui"]["histogram"].get("enabled", True))
+        self.histogram_enabled.set(
+            self.parent_controller.configuration["gui"]["histogram"].get(
+                "enabled", True
+            )
+        )
 
     def update_experiment(self) -> None:
         """Update the experiment.yaml file"""
-        self.parent_controller.configuration["gui"]["histogram"]["enabled"] = self.histogram_enabled.get()
+        self.parent_controller.configuration["gui"]["histogram"][
+            "enabled"
+        ] = self.histogram_enabled.get()
 
     def update_scale(self) -> None:
         """Update the scale of the histogram"""
@@ -187,7 +195,9 @@ class HistogramController:
         if self.histogram_thread and self.histogram_thread.is_alive():
             return
 
-        self.histogram_thread = threading.Thread(target=self._populate_histogram, args=(image,))
+        self.histogram_thread = threading.Thread(
+            target=self._populate_histogram, args=(image,)
+        )
         self.histogram_thread.start()
 
     def _populate_histogram(self, image: SharedNDArray) -> None:

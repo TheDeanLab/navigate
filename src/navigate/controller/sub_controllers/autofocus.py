@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,10 @@ class AutofocusPopupController(GUIController):
     """Class creates the popup to configure autofocus parameters."""
 
     def __init__(
-            self,
-            view: AutofocusPopup,
-            parent_controller: 'navigate.controller.controller.Controller') -> None:
+        self,
+        view: AutofocusPopup,
+        parent_controller: "navigate.controller.controller.Controller",
+    ) -> None:
         """
         Parameters
         ----------
@@ -224,16 +225,13 @@ class AutofocusPopupController(GUIController):
         def func(*_: tuple[str]) -> None:
             device = self.widgets["device"].widget.get()
             device_ref = self.widgets["device_ref"].widget.get()
-            self.setting_dict[self.microscope_name][device][device_ref][
-                parameter
-            ] = self.view.setting_vars[parameter].get()
+            self.setting_dict[self.microscope_name][device][device_ref][parameter] = (
+                self.view.setting_vars[parameter].get()
+            )
 
         return func
 
-    def display_plot(
-            self,
-            data_and_flags: tuple[np.ndarray, bool, bool]
-    ) -> None:
+    def display_plot(self, data_and_flags: tuple[np.ndarray, bool, bool]) -> None:
         """Displays the autofocus plot
 
         data : tuple[np.ndarray, bool, bool]

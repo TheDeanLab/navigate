@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -167,7 +167,9 @@ class PluginsModel:
                 self.devices_dict[device_type_name] = {}
                 self.devices_dict[device_type_name]["ref_list"] = module.DEVICE_REF_LIST
                 self.devices_dict[device_type_name]["load_device"] = module.load_device
-                self.devices_dict[device_type_name][ "start_device"] = module.start_device
+                self.devices_dict[device_type_name][
+                    "start_device"
+                ] = module.start_device
 
     def register_acquisition_mode(self, acquisition_mode_name, module):
         """Register acquisition mode

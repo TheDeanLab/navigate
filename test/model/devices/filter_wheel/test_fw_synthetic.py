@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -44,12 +44,7 @@ def test_synthetic_filter_wheel_functions():
     microscope_name = model.configuration["experiment"]["MicroscopeState"][
         "microscope_name"
     ]
-    fw = SyntheticFilterWheel(
-        microscope_name,
-        None,
-        model.configuration,
-        0
-    )
+    fw = SyntheticFilterWheel(microscope_name, None, model.configuration, 0)
 
     funcs = ["filter_change_delay", "set_filter", "read", "close"]
     args = [["channel_dummy"], ["channel_dummy"], [int(random.random() * 100)], None]

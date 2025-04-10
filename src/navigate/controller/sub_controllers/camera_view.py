@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -315,7 +315,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         pass
 
-    def set_mode(self, mode: str="") -> None:
+    def set_mode(self, mode: str = "") -> None:
         """Sets mode of camera_view_controller.
 
         Parameters
@@ -379,7 +379,7 @@ class BaseViewController(GUIController, ABaseViewController):
             self.process_image()
             logger.debug(f"Updating the LUT, {cmap_name}")
 
-    def update_transpose_state(self, display: bool=False) -> None:
+    def update_transpose_state(self, display: bool = False) -> None:
         """Get Flip XY widget value from the View.
 
         If True, transpose the image.
@@ -389,7 +389,7 @@ class BaseViewController(GUIController, ABaseViewController):
             self.image = self.flip_image(self.image)
             self.process_image()
 
-    def toggle_min_max_buttons(self, display: bool=False) -> None:
+    def toggle_min_max_buttons(self, display: bool = False) -> None:
         """Checks the value of the autoscale widget.
 
         If enabled, the min and max widgets are disabled and the image intensity is
@@ -516,9 +516,9 @@ class BaseViewController(GUIController, ABaseViewController):
         self.image_count += 1
         return channel_idx, slice_idx
 
-    def initialize_non_live_display(self,
-                                    microscope_state: dict,
-                                    camera_parameters: dict) -> None:
+    def initialize_non_live_display(
+        self, microscope_state: dict, camera_parameters: dict
+    ) -> None:
         """Initialize the non-live display.
 
         Parameters
@@ -575,9 +575,9 @@ class BaseViewController(GUIController, ABaseViewController):
                 channel_idx = channel_name.split("_")[-1]
                 self.selected_channels.append(f"CH{channel_idx}")
 
-    def reset_display(self,
-                      display_flag: bool=True,
-                      reset_crosshair: bool=True) -> None:
+    def reset_display(
+        self, display_flag: bool = True, reset_crosshair: bool = True
+    ) -> None:
         """Set the display back to the original digital zoom.
 
         Parameters
@@ -629,8 +629,12 @@ class BaseViewController(GUIController, ABaseViewController):
             )
 
             # get the pixel offsets
-            stage_position["x_pixel"] = self.move_to_x / self.zoom_scale * self.canvas_width_scale
-            stage_position["y_pixel"] = self.move_to_y / self.zoom_scale * self.canvas_height_scale
+            stage_position["x_pixel"] = (
+                self.move_to_x / self.zoom_scale * self.canvas_width_scale
+            )
+            stage_position["y_pixel"] = (
+                self.move_to_y / self.zoom_scale * self.canvas_height_scale
+            )
 
             # Place the stage position in the multi-position table.
             self.parent_controller.execute("mark_position", stage_position)
@@ -996,7 +1000,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.update_canvas_size()
         self.reset_display(False)
 
-    def update_min_max_counts(self, display: bool=False):
+    def update_min_max_counts(self, display: bool = False):
         """Get min and max count values from the View.
 
         When the min and max counts are toggled in the GUI, this function is called.
@@ -1146,9 +1150,9 @@ class CameraViewController(BaseViewController):
             if slice_idx == requested_slice and channel_idx == requested_channel:
                 super().try_to_display_image(image)
 
-    def initialize_non_live_display(self,
-                                    microscope_state: dict,
-                                    camera_parameters: dict) -> None:
+    def initialize_non_live_display(
+        self, microscope_state: dict, camera_parameters: dict
+    ) -> None:
         """Initialize the non-live display.
 
         Parameters
@@ -1259,7 +1263,7 @@ class CameraViewController(BaseViewController):
             # Populating defaults
             self.image_metrics["Frames"].set(frames)
 
-    def set_mode(self, mode: str=""):
+    def set_mode(self, mode: str = ""):
         """Sets mode of camera_view_controller.
 
         Parameters
@@ -1465,20 +1469,25 @@ class MIPViewController(BaseViewController):
 
         # Default location for communicating with the plugin in the model.
         if "mip_display" not in self.parent_controller.configuration["gui"].keys():
-            update_config_dict(manager=self.parent_controller.manager,
-                               parent_dict=self.parent_controller.configuration["gui"],
-                               config_name="mip_display",
-                               new_config={"enabled": True}
-                               )
+            update_config_dict(
+                manager=self.parent_controller.manager,
+                parent_dict=self.parent_controller.configuration["gui"],
+                config_name="mip_display",
+                new_config={"enabled": True},
+            )
 
         # Set histogram according to the experiment.yaml file. If disabled, stays disabled upon restart.
         self.display_enabled.set(
-            self.parent_controller.configuration["gui"]["mip_display"].get("enabled", True)
+            self.parent_controller.configuration["gui"]["mip_display"].get(
+                "enabled", True
+            )
         )
 
     def update_experiment(self) -> None:
         """Update the experiment.yaml file"""
-        self.parent_controller.configuration["gui"]["mip_display"]["enabled"] = self.display_enabled.get()
+        self.parent_controller.configuration["gui"]["mip_display"][
+            "enabled"
+        ] = self.display_enabled.get()
 
     def initialize(self, name: str, data: list) -> None:
         """Initialize the MIP view.
@@ -1594,9 +1603,9 @@ class MIPViewController(BaseViewController):
         image = self.down_sample_image(image, True)
         return image
 
-    def initialize_non_live_display(self,
-                                    microscope_state: dict,
-                                    camera_parameters: dict) -> None:
+    def initialize_non_live_display(
+        self, microscope_state: dict, camera_parameters: dict
+    ) -> None:
         """Initialize the non-live display.
 
         Parameters
@@ -1709,9 +1718,9 @@ class MIPViewController(BaseViewController):
         self.update_canvas_size()
         self.reset_display(False)
 
-    def down_sample_image(self,
-                          image: np.ndarray,
-                          reset_original: bool=False) -> np.ndarray:
+    def down_sample_image(
+        self, image: np.ndarray, reset_original: bool = False
+    ) -> np.ndarray:
         """Down-sample the data for image display according to widget size.
 
         Parameters

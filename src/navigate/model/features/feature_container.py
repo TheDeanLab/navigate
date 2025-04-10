@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -828,8 +828,10 @@ def load_features(model, feature_list):
                     if variable_name not in shared_variables:
                         shared_variables[variable_name] = list(arg["value"])
                     args[i] = shared_variables[variable_name]
-        
-        parameter_num = len(inspect.signature(feature_dict["name"].__init__).parameters) - 2
+
+        parameter_num = (
+            len(inspect.signature(feature_dict["name"].__init__).parameters) - 2
+        )
         if len(args) > parameter_num:
             feature = feature_dict["name"](model, *args[:parameter_num])
         else:

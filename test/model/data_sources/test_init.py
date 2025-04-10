@@ -3,6 +3,7 @@ import types
 import pytest
 from navigate.model.data_sources import get_data_source
 
+
 # Dummy classes for data source tests
 class DummyTiffDataSource:
     pass

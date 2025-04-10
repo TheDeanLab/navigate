@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -423,7 +423,7 @@ class Autofocus:
                 # return [self.target_frame_id]
                 if frame_ids.index(self.f_frame_id) < len(frame_ids) - 1:
                     self.get_frames_num += 1
-            
+
             self.f_frame_id = -1
 
         if self.get_frames_num > self.total_frame_num:

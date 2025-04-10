@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -575,7 +575,7 @@ def map_labels(
 
         target_labels_index.append(i)
         # find the start and end position
-        centroid_z, centroid_y, centroid_x = regionprops[i].centroid 
+        centroid_z, centroid_y, centroid_x = regionprops[i].centroid
         if start < 0:
             start = len(target_labels_index) - 1
             start_weight = centroid_x + centroid_y
@@ -590,15 +590,26 @@ def map_labels(
             end_weight = centroid_x + centroid_y
 
     # build a graph
-    weight_graph = [[0 for i in range(len(target_labels_index))] for _ in range(len(target_labels_index))]
+    weight_graph = [
+        [0 for i in range(len(target_labels_index))]
+        for _ in range(len(target_labels_index))
+    ]
     for i in range(len(target_labels_index)):
-        centroid_z_i, centroid_y_i, centroid_x_i = regionprops[target_labels_index[i]].centroid
+        centroid_z_i, centroid_y_i, centroid_x_i = regionprops[
+            target_labels_index[i]
+        ].centroid
         for j in range(len(target_labels_index)):
             if i == j:
-                weight_graph[j][i] = weight_graph[i][j] = current_image_width + current_image_height
+                weight_graph[j][i] = weight_graph[i][j] = (
+                    current_image_width + current_image_height
+                )
                 continue
-            centroid_z_j, centroid_y_j, centroid_x_j = regionprops[target_labels_index[j]].centroid
-            weight_graph[i][j] = abs(centroid_x_i - centroid_x_j) + abs(centroid_y_i - centroid_y_j)
+            centroid_z_j, centroid_y_j, centroid_x_j = regionprops[
+                target_labels_index[j]
+            ].centroid
+            weight_graph[i][j] = abs(centroid_x_i - centroid_x_j) + abs(
+                centroid_y_i - centroid_y_j
+            )
             weight_graph[j][i] = weight_graph[i][j]
     # find the appoximation shortest path in (x, y).
     visited_num = 1
@@ -609,14 +620,16 @@ def map_labels(
     while visited_num < len(target_labels_index):
         while True:
             idx = weight_graph[pre].index(min(weight_graph[pre]))
-            weight_graph[pre][idx] = weight_graph[idx][pre] = current_image_width + current_image_height
+            weight_graph[pre][idx] = weight_graph[idx][pre] = (
+                current_image_width + current_image_height
+            )
             if not visited[idx]:
                 break
         target_labels.append(target_labels_index[idx])
         pre = idx
         visited[idx] = True
         visited_num += 1
-    
+
     for i in target_labels:
         min_z, min_y, min_x, max_z, max_y, max_x = regionprops[i].bbox
 

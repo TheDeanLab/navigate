@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,7 @@ from navigate.model.analysis.boundary_detect import (
     find_cell_boundary_3d,
     map_labels,
 )
-from navigate.tools.multipos_table_tools import(
-    write_to_csv_file
-)
+from navigate.tools.multipos_table_tools import write_to_csv_file
 
 
 def draw_box(img, xl, yl, xu, yu, fill=65535):
@@ -589,9 +587,7 @@ class VolumeSearch3D:
                 pos_dict[f"{axis}_pos"] for axis in ["x", "y", "z", "theta", "f"]
             ]
         else:
-            position = self.model.configuration["multi_positions"][
-                self.position_id
-            ]
+            position = self.model.configuration["multi_positions"][self.position_id]
         # current stage position is the end of z
         position[2] -= z_end
 
@@ -670,14 +666,17 @@ class VolumeSearch3D:
         )
 
         # save positions
-        write_to_csv_file(positions, path.join(
-            self.model.configuration["experiment"]["Saving"]["save_directory"],
-            "positions.csv",
-        ),)
+        write_to_csv_file(
+            positions,
+            path.join(
+                self.model.configuration["experiment"]["Saving"]["save_directory"],
+                "positions.csv",
+            ),
+        )
         # save target label index sequences
         target_labels_file = path.join(
             self.model.configuration["experiment"]["Saving"]["save_directory"],
-            "target_labels.txt"
+            "target_labels.txt",
         )
         with open(target_labels_file, "w") as f:
             for idx in target_labels:
@@ -700,7 +699,7 @@ class VolumeSearch3D:
 
         self.model.image_writer.initialize_saving(sub_dir=str(self.target_resolution))
 
-        self.model.logger.info(f"Volume Search 3D completed!")
+        self.model.logger.info("Volume Search 3D completed!")
 
     def cleanup(self):
         pass

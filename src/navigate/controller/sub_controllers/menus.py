@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -244,13 +244,7 @@ class MenuController(GUIController):
                     None,
                 ],
                 "add_separator_1": [None, None, None, None, None],
-                "Open Log Files": [
-                    "standard",
-                    self.open_log_files,
-                    None,
-                    None,
-                    None
-                ],
+                "Open Log Files": ["standard", self.open_log_files, None, None, None],
                 "Open Configuration Files": [
                     "standard",
                     self.open_configuration_files,
@@ -264,7 +258,7 @@ class MenuController(GUIController):
                     lambda *args: self.parent_controller.acquire_bar_controller.exit_program(),
                     "Control+q",
                     "<Control-q>",
-                    "<Control_L-q>"
+                    "<Control_L-q>",
                 ],
             }
         }

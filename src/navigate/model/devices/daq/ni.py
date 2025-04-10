@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,11 @@ class NIDAQ(DAQBase):
 
     def __del__(self) -> None:
         """Destructor."""
-        for task in [self.camera_trigger_task, self.master_trigger_task, self.laser_switching_task]:
+        for task in [
+            self.camera_trigger_task,
+            self.master_trigger_task,
+            self.laser_switching_task,
+        ]:
             if task:
                 try:
                     task.stop()
@@ -125,8 +129,9 @@ class NIDAQ(DAQBase):
                         task.stop()
                         task.close()
                     except Exception:
-                        logger.exception(f"Error stopping task: {traceback.format_exc()}")
-
+                        logger.exception(
+                            f"Error stopping task: {traceback.format_exc()}"
+                        )
 
     def set_external_trigger(self, external_trigger=None) -> None:
         """Set trigger mode.

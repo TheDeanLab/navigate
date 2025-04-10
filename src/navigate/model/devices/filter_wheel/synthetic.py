@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,6 @@ class SyntheticFilterWheel(FilterWheelBase):
             The ID of the device. Default is 0.
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
-
 
     def __str__(self):
         """Return string representation of the SyntheticFilterWheel."""

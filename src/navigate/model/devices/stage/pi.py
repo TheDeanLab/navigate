@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -114,7 +114,7 @@ class PIStage(StageBase, IntegratedDevice):
             print("Error while disconnecting the PI stage")
             logger.exception(f"Error while disconnecting the PI stage - {e}")
             raise e
-    
+
     @classmethod
     def get_connect_params(cls):
         """Register the parameters required to connect to the stage.
@@ -259,9 +259,9 @@ class PIStage(StageBase, IntegratedDevice):
             return False
 
         pos_dict = {
-            self.axes_mapping[axis]: abs_pos_dict[axis] / 1000
-            if axis != "theta"
-            else abs_pos_dict[axis]
+            self.axes_mapping[axis]: (
+                abs_pos_dict[axis] / 1000 if axis != "theta" else abs_pos_dict[axis]
+            )
             for axis in abs_pos_dict
         }
 

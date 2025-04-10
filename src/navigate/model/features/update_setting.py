@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -140,7 +140,7 @@ class ChangeResolution:
             or camera_config[self.resolution_mode]["img_y_pixels"]
             != camera_config[self.model.active_microscope_name]["img_y_pixels"]
         ):
-            error_message = f"Can't change resolution: Image sizes are different!"
+            error_message = "Can't change resolution: Image sizes are different!"
             # logger.exception(error_message) doesn't work
             print(error_message)
             raise Exception(error_message)
@@ -376,8 +376,14 @@ class UpdateExperimentSetting:
                 [v["is_selected"] is True for k, v in state["channels"].items()]
             )
             timepoints = state["timepoints"]
-            if pre_z_steps != z_steps or pre_channels != channels or pre_timepoints != timepoints:
-                self.model.image_writer.initialize_saving(sub_dir=time.strftime("%H%M%S"))
+            if (
+                pre_z_steps != z_steps
+                or pre_channels != channels
+                or pre_timepoints != timepoints
+            ):
+                self.model.image_writer.initialize_saving(
+                    sub_dir=time.strftime("%H%M%S")
+                )
             try:
                 self.model.image_writer.data_source.set_metadata_from_configuration_experiment(
                     self.model.configuration

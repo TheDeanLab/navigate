@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ import tkinter as tk
 from multiprocessing.managers import ListProxy, DictProxy
 import logging
 from typing import Dict, Optional, Callable, Iterable
-import re
 
 # Third Party Imports
 
@@ -45,7 +44,7 @@ from navigate.controller.configuration_controller import ConfigurationController
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.decorators import log_initialization
 from navigate.view.main_application_window import MainApp
-from navigate.view.main_window_content.stage_tab import StageControlTab, OtherAxisFrame
+from navigate.view.main_window_content.stage_tab import StageControlTab
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -179,8 +178,6 @@ class StageController(GUIController):
             command=self.parent_controller.channels_tab_controller.update_end_position
         )
 
-
-
     def stage_key_press(self, event: tk.Event) -> None:
         """The stage key press.
 
@@ -310,7 +307,7 @@ class StageController(GUIController):
                 elif axis == "y":
                     self.view.xy_frame.toggle_button_states(flag, ["y"])
                     self.view.position_frame.inputs["y"].widget.config(state=state)
-                
+
                 else:
                     stage_frame = getattr(self.view, f"{axis}_frame")
                     stage_frame.toggle_button_states(flag, [axis])
@@ -621,6 +618,7 @@ class StageController(GUIController):
         handler : Callable[[], None]
             Function to update step size in experiment.yml.
         """
+
         def func(*args):
             """Callback functions bind to step size variables."""
             microscope_name = self.parent_controller.configuration["experiment"][
@@ -654,20 +652,24 @@ class StageController(GUIController):
                 btn_suffix = "btn"
 
             if axis == "theta":
-                description = f"\N{DEGREE SIGN} in \N{GREEK CAPITAL LETTER THETA}."
+                description = "\N{DEGREE SIGN} in \N{GREEK CAPITAL LETTER THETA}."
             else:
                 description = f"\N{GREEK SMALL LETTER MU}m in {axis.upper()}."
 
             for i in range(len(btn_prefix)):
-                exec(f"self.view.{frame_prefix}_frame.{btn_prefix[i]}_{btn_suffix}.hover."
-                     f"setdescription('Move {step_multiple[i] * step_value} {description}')")
+                exec(
+                    f"self.view.{frame_prefix}_frame.{btn_prefix[i]}_{btn_suffix}.hover."
+                    f"setdescription('Move {step_multiple[i] * step_value} {description}')"
+                )
 
         # Position Frame
         for axis in self.stage_axes:
             if axis == "theta":
                 description = "Theta stage position in degrees."
             else:
-                description = f"{axis.upper()} stage position in \N{GREEK SMALL LETTER MU}m."
+                description = (
+                    f"{axis.upper()} stage position in \N{GREEK SMALL LETTER MU}m."
+                )
             self.view.position_frame.inputs[axis].widget.hover.setdescription(
                 description
             )

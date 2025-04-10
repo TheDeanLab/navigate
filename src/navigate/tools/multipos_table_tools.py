@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -247,9 +247,10 @@ def update_table(table, pos, append=False):
     table.redraw()
     table.tableChanged()
 
+
 def write_to_csv_file(positions, file_path):
     """Write positions to a csv file.
-    
+
     Parameters
     ----------
     pos: list or np.array

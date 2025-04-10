@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,9 @@ def model():
             configuration_directory, "waveform_constants.yml"
         )
         rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
-        multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
+        multi_positions_path = Path.joinpath(
+            configuration_directory, "multi_positions.yml"
+        )
 
         event_queue = MagicMock()
 
@@ -111,7 +113,9 @@ def test_single_acquisition(model):
     state["image_mode"] = "single"
     state["is_save"] = False
 
-    n_frames = len(list(filter(lambda channel: channel["is_selected"], state["channels"].values())))
+    n_frames = len(
+        list(filter(lambda channel: channel["is_selected"], state["channels"].values()))
+    )
 
     show_img_pipe = model.create_pipe("show_img_pipe")
 

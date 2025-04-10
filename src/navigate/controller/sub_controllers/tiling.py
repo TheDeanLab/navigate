@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@ from navigate.tools.multipos_table_tools import (
     update_table,
 )
 from navigate.controller.sub_controllers.gui import GUIController
-from navigate.tools.common_functions import combine_funcs
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.config.config import get_navigate_path
 
@@ -100,7 +99,9 @@ class TilingWizardController(GUIController):
 
         # Initialize widgets to previous values
         #: list: List of axes to iterate over
-        stage_axes = self.parent_controller.parent_controller.configuration_controller.stage_axes
+        stage_axes = (
+            self.parent_controller.parent_controller.configuration_controller.stage_axes
+        )
         self._axes = [axis for axis in stage_axes if axis != "theta"]
         self.load_settings()
 

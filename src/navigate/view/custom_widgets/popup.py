@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -71,14 +71,16 @@ class PopUp(tk.Toplevel):
 
     """
 
-    def __init__(self,
-                 root: tk.Tk,
-                 name: str,
-                 size: str,
-                 top: bool = True,
-                 transient: bool = True,
-                 *args,
-                 **kwargs) -> None:
+    def __init__(
+        self,
+        root: tk.Tk,
+        name: str,
+        size: str,
+        top: bool = True,
+        transient: bool = True,
+        *args,
+        **kwargs,
+    ) -> None:
         """Initialize Generic Popup Window class
 
         Parameters

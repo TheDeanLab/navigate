@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -57,10 +57,9 @@ class WaveformPopupController(GUIController):
     constants to a file.
     """
 
-    def __init__(self,
-                 view: PopUp,
-                 parent_controller,
-                 waveform_constants_path: str) -> None:
+    def __init__(
+        self, view: PopUp, parent_controller, waveform_constants_path: str
+    ) -> None:
         """Initialize the WaveformPopupController.
 
         Parameters
@@ -208,7 +207,8 @@ class WaveformPopupController(GUIController):
 
         # All channels use the same galvo parameters
         self.widgets["all_channels"].widget.configure(
-            command=self.set_galvo_to_all_channels)
+            command=self.set_galvo_to_all_channels
+        )
 
         # Populate widgets
         self.widgets["Mode"].widget["values"] = list(
@@ -419,7 +419,9 @@ class WaveformPopupController(GUIController):
                 self.galvo_setting[galvo][self.resolution][self.mag].get("offset", 0)
             )
             self.variables[galvo + " Rising"].set(
-                self.galvo_setting[galvo][self.resolution][self.mag].get("rising_ramp", 50)
+                self.galvo_setting[galvo][self.resolution][self.mag].get(
+                    "rising_ramp", 50
+                )
             )
             self.variables[galvo + " Freq"].set(
                 self.galvo_setting[galvo][self.resolution][self.mag].get("frequency", 0)
@@ -473,10 +475,9 @@ class WaveformPopupController(GUIController):
         )
         self.set_galvo_factor(galvo_factor)
 
-    def update_remote_focus_settings(self,
-                                     name: str,
-                                     laser: str,
-                                     remote_focus_name: str) -> None:
+    def update_remote_focus_settings(
+        self, name: str, laser: str, remote_focus_name: str
+    ) -> None:
         """Update remote focus settings in memory.
 
         Parameters
@@ -535,9 +536,7 @@ class WaveformPopupController(GUIController):
 
         return func_laser
 
-    def update_waveform_parameters(self,
-                                   *args: tuple,
-                                   **kwargs: dict) -> None:
+    def update_waveform_parameters(self, *args: tuple, **kwargs: dict) -> None:
         """Update the waveform parameters for delay, duty cycle, and smoothing.
 
         Communicate changes to the parent controller.
@@ -649,10 +648,9 @@ class WaveformPopupController(GUIController):
         # Update the GUI
         self.view.inputs[galvo_name].widget.set(round(frequency, 3))
 
-    def update_galvo_setting(self,
-                             galvo_name: str,
-                             widget_name: str,
-                             parameter: str) -> None:
+    def update_galvo_setting(
+        self, galvo_name: str, widget_name: str, parameter: str
+    ) -> None:
         """Update galvo settings in memory.
 
         Parameters
@@ -841,9 +839,7 @@ class WaveformPopupController(GUIController):
             )
             self.advanced_setting_popup.variables["galvo_factor"].set(galvo_factor)
 
-    def display_galvo_advanced_setting(self,
-                                       *args: tuple,
-                                       **kwargs: dict) -> None:
+    def display_galvo_advanced_setting(self, *args: tuple, **kwargs: dict) -> None:
         """Generate dynamic galvo advanced setting widgets"""
         galvo_factor = self.advanced_setting_popup.variables["galvo_factor"].get()
         if galvo_factor == "none":
@@ -941,11 +937,7 @@ class WaveformPopupController(GUIController):
             self.set_galvo_factor(galvo_factor)
 
     def update_galvo_advanced_setting(
-            self,
-            factor_id: int,
-            galvo_id: int,
-            factor_name: str,
-            amp_or_off: str
+        self, factor_id: int, galvo_id: int, factor_name: str, amp_or_off: str
     ) -> None:
         """Update galvo setting parameters
 

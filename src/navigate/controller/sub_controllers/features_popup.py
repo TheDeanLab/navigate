@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -490,23 +490,23 @@ class FeatureListGraphController:
             )
 
             if "true" in feature:
-                self.feature_list_graph_controllers_true[
-                    idx
-                ] = FeatureListGraphController(
-                    popup.feature_list_true_frame.feature_view_frame,
-                    popup.feature_list_true_frame.content,
-                    popup.preview_btn_true,
-                    self.child_popups,
+                self.feature_list_graph_controllers_true[idx] = (
+                    FeatureListGraphController(
+                        popup.feature_list_true_frame.feature_view_frame,
+                        popup.feature_list_true_frame.content,
+                        popup.preview_btn_true,
+                        self.child_popups,
+                    )
                 )
                 self.feature_list_graph_controllers_true[idx].update(feature["true"])
             if "false" in feature:
-                self.feature_list_graph_controllers_false[
-                    idx
-                ] = FeatureListGraphController(
-                    popup.feature_list_false_frame.feature_view_frame,
-                    popup.feature_list_false_frame.content,
-                    popup.preview_btn_false,
-                    self.child_popups,
+                self.feature_list_graph_controllers_false[idx] = (
+                    FeatureListGraphController(
+                        popup.feature_list_false_frame.feature_view_frame,
+                        popup.feature_list_false_frame.content,
+                        popup.preview_btn_false,
+                        self.child_popups,
+                    )
                 )
                 self.feature_list_graph_controllers_false[idx].update(feature["false"])
 
@@ -566,11 +566,11 @@ class FeatureListGraphController:
                             feature["args"][i] = ast.literal_eval(a.replace("'", '"'))
                         except (SyntaxError, ValueError):
                             spec = inspect.getfullargspec(feature["name"])
-                            arg_name = spec.args[i+2]
+                            arg_name = spec.args[i + 2]
                             messagebox.showerror(
                                 title="Upate Feature Parameter Error",
                                 message=f"The argument {arg_name} has something wrong!\n"
-                                    "Please make sure you input a correct value!"
+                                "Please make sure you input a correct value!",
                             )
                             return
                     elif a == "None":
@@ -709,9 +709,11 @@ class FeatureListGraphController:
             """
             self.features.insert(
                 idx,
-                dict(self.features[idx])
-                if type(self.features[idx]) == dict
-                else self.features[idx],
+                (
+                    dict(self.features[idx])
+                    if type(self.features[idx]) == dict
+                    else self.features[idx]
+                ),
             )
             i = self.feature_structure.index(idx)
             for _, c in enumerate(self.feature_structure):

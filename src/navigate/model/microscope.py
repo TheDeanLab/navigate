@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -178,9 +178,19 @@ class Microscope:
             devices_dict["__plugins__"] = {}
 
         devices_dict = load_devices(
-            self.microscope_name, configuration, is_synthetic, devices_dict, devices_dict["__plugins__"]
+            self.microscope_name,
+            configuration,
+            is_synthetic,
+            devices_dict,
+            devices_dict["__plugins__"],
         )
-        daq_type = "Synthetic" if is_synthetic else self.configuration["configuration"]["microscopes"][self.microscope_name]["daq"]["hardware"]["type"]
+        daq_type = (
+            "Synthetic"
+            if is_synthetic
+            else self.configuration["configuration"]["microscopes"][
+                self.microscope_name
+            ]["daq"]["hardware"]["type"]
+        )
         #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict["daq"].get(daq_type, None)
 
@@ -225,7 +235,9 @@ class Microscope:
                         device["hardware"][k] for k in device_ref_dict[device_name]
                     ]
                 except Exception as e:
-                    logger.error(f"Can't get the device attributes in configuration file: {e}")
+                    logger.error(
+                        f"Can't get the device attributes in configuration file: {e}"
+                    )
 
                 device_ref_name = build_ref_name("_", *ref_list)
                 if (
@@ -267,7 +279,6 @@ class Microscope:
                         self.commands[command] = (device_name, commands_dict[command])
                     continue
 
-
                 # LOAD AND START DEVICES
                 self.load_and_start_devices(
                     device_name=device_name,
@@ -307,9 +318,9 @@ class Microscope:
                 "_", device_config["type"], device_config["serial_number"]
             )
             if device_config["type"] == "NIStage":
-                self.configuration["configuration"]["microscopes"][self.microscope_name][
-                    "stage"
-                ]["has_ni_galvo_stage"] = True
+                self.configuration["configuration"]["microscopes"][
+                    self.microscope_name
+                ]["stage"]["has_ni_galvo_stage"] = True
 
             try:
                 stage = start_device(
@@ -321,7 +332,7 @@ class Microscope:
                     daq_connection=self.daq,
                     plugin_devices=devices_dict["__plugins__"],
                 )
-            except Exception as e:
+            except Exception:
                 raise Exception(
                     "Stage not found. "
                     "This often arises when the configuration.yaml file is "
@@ -476,7 +487,7 @@ class Microscope:
 
     def set_camera_trigger_mode(self) -> None:
         """Set the camera trigger mode.
-        
+
         This function sets the camera trigger source, trigger mode."""
         trigger_source = self.configuration["experiment"]["CameraParameters"][
             self.microscope_name
@@ -537,7 +548,7 @@ class Microscope:
             center_y,
             self.configuration["experiment"]["CameraParameters"][self.microscope_name][
                 "binning"
-            ]
+            ],
         )
 
     def end_acquisition(self) -> None:
@@ -588,9 +599,7 @@ class Microscope:
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, exposure_times, sweep_times
         )
-        remote_focus_waveform = self.remote_focus.adjust(
-            exposure_times, sweep_times
-        )
+        remote_focus_waveform = self.remote_focus.adjust(exposure_times, sweep_times)
         galvo_waveform = [
             self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
         ]
@@ -1058,8 +1067,13 @@ class Microscope:
         Closes all devices other than plugin devices and deformable mirrors.
         """
 
-        for device in [self.camera, self.daq, self.remote_focus,
-                       self.shutter, self.zoom]:
+        for device in [
+            self.camera,
+            self.daq,
+            self.remote_focus,
+            self.shutter,
+            self.zoom,
+        ]:
             del device
 
         for key in list(self.filter_wheel.keys()):

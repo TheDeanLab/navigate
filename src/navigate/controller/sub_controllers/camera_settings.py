@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -393,9 +393,9 @@ class CameraSettingController(GUIController):
                 self.camera_setting_dict["readout_direction"]
                 not in self.camera_readout_directions
             ):
-                self.camera_setting_dict[
-                    "readout_direction"
-                ] = self.camera_readout_directions[0]
+                self.camera_setting_dict["readout_direction"] = (
+                    self.camera_readout_directions[0]
+                )
             self.mode_widgets["Readout"].widget.set(
                 self.camera_setting_dict["readout_direction"]
             )
@@ -699,10 +699,20 @@ class CameraSettingController(GUIController):
         self.mode_widgets["Trigger"].widget["values"] = camera_config_dict.get(
             "supported_trigger_sources", ["External"]
         )
-        if self.mode_widgets["Trigger"].get() not in self.mode_widgets["Trigger"].widget["values"]:
-            self.mode_widgets["Trigger"].set(self.mode_widgets["Trigger"].widget["values"][0])
-        self.mode_widgets["Sensor"].widget["values"] = camera_config_dict.get("supported_sensor_modes", ["Normal"])
-        if self.mode_widgets["Sensor"].get() not in self.mode_widgets["Sensor"].widget["values"]:
+        if (
+            self.mode_widgets["Trigger"].get()
+            not in self.mode_widgets["Trigger"].widget["values"]
+        ):
+            self.mode_widgets["Trigger"].set(
+                self.mode_widgets["Trigger"].widget["values"][0]
+            )
+        self.mode_widgets["Sensor"].widget["values"] = camera_config_dict.get(
+            "supported_sensor_modes", ["Normal"]
+        )
+        if (
+            self.mode_widgets["Sensor"].get()
+            not in self.mode_widgets["Sensor"].widget["values"]
+        ):
             self.update_sensor_mode(self.mode_widgets["Sensor"].widget["values"][0])
 
     def update_camera_parameters_silent(self, value):

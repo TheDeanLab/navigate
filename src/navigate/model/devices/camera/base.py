@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -124,11 +124,11 @@ class CameraBase:
         #  trigger_active, trigger_mode and trigger_polarity
         # can be removed after updating how we get the
         # readout time in model and controller
-        self.camera_parameters["trigger_source"] = 2.0 # external trigger
+        self.camera_parameters["trigger_source"] = 2.0  # external trigger
         self.camera_parameters["readout_speed"] = 1.0
         self.camera_parameters["pixel_size_in_microns"] = 6.5
         self.camera_parameters["trigger_active"] = 1.0
-        self.camera_parameters["trigger_mode"] = 1.0 # standard trigger mode
+        self.camera_parameters["trigger_mode"] = 1.0  # standard trigger mode
         self.camera_parameters["trigger_polarity"] = 2.0
         self.camera_parameters["supported_sensor_modes"] = ["Normal", "Light-Sheet"]
         self.camera_parameters["supported_readout_directions"] = [
@@ -260,9 +260,15 @@ class CameraBase:
             line interval duration (s).
         """
         return self.camera_parameters.get("line_interval", None)
-    
 
-    def set_ROI_and_binning(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024, binning='1x1') -> bool:
+    def set_ROI_and_binning(
+        self,
+        roi_width=2048,
+        roi_height=2048,
+        center_x=1024,
+        center_y=1024,
+        binning="1x1",
+    ) -> bool:
         """Change the size of the active region on the camera and set the binning mode.
 
         Parameters
@@ -278,7 +284,7 @@ class CameraBase:
         binning : str
             Desired binning properties (e.g., '1x1', '2x2', '4x4', '8x8', '16x16',
             '1x2', '2x4')
-        
+
         Returns
         -------
         result: bool
@@ -292,8 +298,8 @@ class CameraBase:
         # Set Binning
         result = self.set_binning(binning)
         return result
-    
-    def set_trigger_mode(self, trigger_source:str="External") -> None:
+
+    def set_trigger_mode(self, trigger_source: str = "External") -> None:
         """Set the camera trigger source to external or internal free run mode.
         Parameters
         ----------

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -134,7 +134,9 @@ class KIM001Stage(StageBase, IntegratedDevice):
         # Open the same serial number device if there are several devices connected to the
         # computer
         available_serialnum = kim_controller.TLI_GetDeviceListExt()
-        if not list(filter(lambda s: str(s) == str(serial_number), available_serialnum)):
+        if not list(
+            filter(lambda s: str(s) == str(serial_number), available_serialnum)
+        ):
             print(
                 f"** Please make sure Thorlabs stage with serial number {serial_number} "
                 f"is connected to the computer!"
@@ -248,6 +250,7 @@ class KIM001Stage(StageBase, IntegratedDevice):
         """Stop all stage channels move"""
         for i in self.kim_axes:
             self.kim_controller.KIM_MoveStop(self.serial_number, i)
+
 
 @log_initialization
 class KST101Stage(StageBase):

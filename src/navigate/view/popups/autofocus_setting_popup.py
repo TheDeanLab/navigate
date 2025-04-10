@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,7 @@ class AutofocusPopup:
         title_labels = [
             "Select",
             "Range  (" + "\N{GREEK SMALL LETTER MU}" + "m)",
-            "Step Size  (" + "\N{GREEK SMALL LETTER MU}" + "m)"
+            "Step Size  (" + "\N{GREEK SMALL LETTER MU}" + "m)",
         ]
         for i in range(3):
             title = ttk.Label(content_frame, text=title_labels[i], padding=(2, 5, 0, 0))

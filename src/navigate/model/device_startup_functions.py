@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-import platform
 import logging
 import time
 import importlib
@@ -371,7 +370,7 @@ def start_device(
     if is_synthetic or device_type.lower().startswith("synthetic"):
         device_type = "Synthetic"
     elif device_type.endswith(class_name_suffix):
-        device_type = device_type[:-len(class_name_suffix)]
+        device_type = device_type[: -len(class_name_suffix)]
 
     # device type naming rules: manufacturer(file_name).device_model
     # if the device is currrently supported in Navigate, you can use device_model as device type.
@@ -382,15 +381,21 @@ def start_device(
     else:
         device_manufacturer = None
 
-    if device_manufacturer is not None and importlib.util.find_spec(f"navigate.model.devices.{device_category}.{device_manufacturer}"):
+    if device_manufacturer is not None and importlib.util.find_spec(
+        f"navigate.model.devices.{device_category}.{device_manufacturer}"
+    ):
         module = importlib.import_module(
             f"navigate.model.devices.{device_category}.{device_manufacturer}"
         )
         try:
             _class = getattr(module, device_type + class_name_suffix)
         except (KeyError, AttributeError):
-            logger.error(f"There is no device class {device_type + class_name_suffix} in the file: {device_manufacturer}.py")
-            return device_not_found(microscope_name, device_category, device_type, device_id)
+            logger.error(
+                f"There is no device class {device_type + class_name_suffix} in the file: {device_manufacturer}.py"
+            )
+            return device_not_found(
+                microscope_name, device_category, device_type, device_id
+            )
         if issubclass(_class, SerialDevice):
             device_connection = SerialConnectionFactory.build_connection(
                 _class.connect,
@@ -459,25 +464,31 @@ def start_device(
     elif device_category in plugin_devices:
         # device_category in ["stage", "shutter", "filter_wheel", "remote_focus", "camera", "galvo", "zoom", "laser"]
         if device_category == "stage":
-            hardware_configuration = configuration["configuration"]["microscopes"][microscope_name][
-                device_category]["hardware"][device_id]
+            hardware_configuration = configuration["configuration"]["microscopes"][
+                microscope_name
+            ][device_category]["hardware"][device_id]
         else:
-            hardware_configuration = configuration["configuration"]["microscopes"][microscope_name][
-                device_category][device_id]["hardware"]
+            hardware_configuration = configuration["configuration"]["microscopes"][
+                microscope_name
+            ][device_category][device_id]["hardware"]
         # find the device in plugins
         if device_type + class_name_suffix in plugin_devices[device_category]:
             device_type += class_name_suffix
         elif device_type not in plugin_devices[device_category]:
             device_not_found(microscope_name, device_category, device_type, device_id)
-        
+
         try:
-            
-            device_connection = plugin_devices[device_category][device_type]["load_device"](
+
+            device_connection = plugin_devices[device_category][device_type][
+                "load_device"
+            ](
                 hardware_configuration,
                 is_synthetic,
-                device_type = device_category,
+                device_type=device_category,
             )
-            start_function = plugin_devices[device_category][device_type]["start_device"]
+            start_function = plugin_devices[device_category][device_type][
+                "start_device"
+            ]
             return start_function(
                 microscope_name,
                 device_connection,
@@ -487,8 +498,10 @@ def start_device(
                 device_type=device_category,
             )
         except RuntimeError:
-            print(f"{device_category}:{device_type} can't be loaded correctly, "
-                  f"make sure you have specify SUPPORTED_DEVICE_TYPES in your plugin!")
+            print(
+                f"{device_category}:{device_type} can't be loaded correctly, "
+                f"make sure you have specify SUPPORTED_DEVICE_TYPES in your plugin!"
+            )
     device_not_found(microscope_name, device_category, device_type, device_id)
 
 

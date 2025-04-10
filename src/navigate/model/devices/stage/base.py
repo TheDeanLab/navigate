@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -115,7 +115,10 @@ class StageBase:
         """
         for ax in self.axes:
             setattr(self, f"{ax}_pos", 0)
-            if f"{ax}_min" not in stage_configuration or f"{ax}_max" not in stage_configuration:
+            if (
+                f"{ax}_min" not in stage_configuration
+                or f"{ax}_max" not in stage_configuration
+            ):
                 logger.warning(f"Stage {ax} limits not set in configuration file.")
             setattr(self, f"{ax}_min", stage_configuration.get(f"{ax}_min", -10000))
             setattr(self, f"{ax}_max", stage_configuration.get(f"{ax}_max", 10000))

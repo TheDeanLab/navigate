@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -757,7 +757,9 @@ class ChannelsTabController(GUIController):
             return
         stage_axes = self.parent_controller.configuration_controller.stage_axes
         # not tiling on theta axis right now
-        tiling_wizard = TilingWizardPopup(self.view, axes=[axis.upper() for axis in stage_axes if axis != "theta"])
+        tiling_wizard = TilingWizardPopup(
+            self.view, axes=[axis.upper() for axis in stage_axes if axis != "theta"]
+        )
         self.tiling_wizard_controller = TilingWizardController(tiling_wizard, self)
 
     @staticmethod

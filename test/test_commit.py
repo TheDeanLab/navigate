@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ class TestGetGitRevisionHash(unittest.TestCase):
         mock_check_output.side_effect = [
             b"true",
             # Mock the return value for ["git", "rev-parse", "--is-inside-work-tree"]
-            b"dummy_commit_hash"
+            b"dummy_commit_hash",
             # Mock the return value for ["git", "rev-parse", "HEAD"]
         ]
         result = get_git_revision_hash()

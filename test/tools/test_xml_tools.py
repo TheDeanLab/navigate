@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ import unittest
 # Local application imports
 from navigate.tools import xml_tools
 from navigate.tools.xml_tools import parse_xml
+
 
 def test_xml_parse_write():
 
@@ -139,53 +140,54 @@ class TestParseXml(unittest.TestCase):
         self.assertEqual(parse_xml(root), expected_dict)
 
     def test_parse_xml_nested_elements(self):
-        xml_string = '''
+        xml_string = """
         <root>
             <person name="John" age="30" city="New York"/>
             <address street="123 Main St" zipcode="10001"/>
         </root>
-        '''
+        """
         root = ET.fromstring(xml_string)
         expected_dict = {
             "person": {"name": "John", "age": "30", "city": "New York"},
-            "address": {"street": "123 Main St", "zipcode": "10001"}
+            "address": {"street": "123 Main St", "zipcode": "10001"},
         }
         self.assertEqual(parse_xml(root), expected_dict)
 
     def test_parse_xml_with_text(self):
-        xml_string = '''
+        xml_string = """
         <root>
             <person name="John" age="30" city="New York">Hello, world!</person>
         </root>
-        '''
+        """
         root = ET.fromstring(xml_string)
         expected_dict = {
             "person": {
                 "name": "John",
                 "age": "30",
                 "city": "New York",
-                "text": "Hello, world!"
+                "text": "Hello, world!",
             }
         }
         self.assertEqual(parse_xml(root), expected_dict)
 
     def test_parse_xml_with_repeated_elements(self):
-        xml_string = '''
+        xml_string = """
         <class>
             <student name="Alice" age="20"/>
             <student name="Bob" age="22"/>
             <student name="Charlie" age="21"/>
         </class>
-        '''
+        """
         root = ET.fromstring(xml_string)
         expected_dict = {
             "student": [
                 {"name": "Alice", "age": "20"},
                 {"name": "Bob", "age": "22"},
-                {"name": "Charlie", "age": "21"}
+                {"name": "Charlie", "age": "21"},
             ]
         }
         self.assertEqual(parse_xml(root), expected_dict)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

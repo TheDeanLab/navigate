@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@ from navigate.tools.common_functions import VariableWithLock
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class Snap:
     """Snap class for capturing data frames using a microscope.
@@ -380,17 +381,14 @@ class LoopByCount:
                 "init": self.pre_func,
                 "main": self.signal_func,
             },
-            "data": {
-                "init": self.pre_func,
-                "main": self.data_func
-            },
+            "data": {"init": self.pre_func, "main": self.data_func},
         }
 
     def pre_func(self):
         """Initialize loop parameters"""
         if self.initialized.value:
             return
-        
+
         with self.initialized as initialized:
             if initialized.value:
                 return
@@ -631,7 +629,9 @@ class MoveToNextPositionInMultiPositionTable:
 
         # assert offset has values for each axis
         if len(self.offset) < axes_num:
-            self.offset[len(self.offset) : axes_num] = [0] * (axes_num - len(self.offset))
+            self.offset[len(self.offset) : axes_num] = [0] * (
+                axes_num - len(self.offset)
+            )
         for i in range(axes_num):
             try:
                 self.offset[i] = float(self.offset[i])
@@ -701,7 +701,8 @@ class MoveToNextPositionInMultiPositionTable:
             zip(
                 self.stage_axes,
                 [
-                    self.multiposition_table[self.current_idx][self.axes_index[i]] + self.offset[i]
+                    self.multiposition_table[self.current_idx][self.axes_index[i]]
+                    + self.offset[i]
                     for i in range(len(self.axes_index))
                 ],
             )
@@ -720,16 +721,19 @@ class MoveToNextPositionInMultiPositionTable:
                 zip(
                     self.stage_axes,
                     [
-                        self.multiposition_table[self.current_idx - 1][self.axes_index[i]]
+                        self.multiposition_table[self.current_idx - 1][
+                            self.axes_index[i]
+                        ]
                         + self.offset[i]
                         for i in range(len(self.axes_index))
                     ],
                 )
             )
-        delta_distances = [abs(pos_dict[axis] - pre_stage_pos[axis]) for axis in self.stage_axes]
+        delta_distances = [
+            abs(pos_dict[axis] - pre_stage_pos[axis]) for axis in self.stage_axes
+        ]
         should_pause_data_thread = any(
-            distance > self.stage_distance_threshold
-            for distance in delta_distances
+            distance > self.stage_distance_threshold for distance in delta_distances
         )
         if should_pause_data_thread:
             self.model.pause_data_thread()
@@ -866,7 +870,12 @@ class ZStackAcquisition:
     """
 
     def __init__(
-        self, model, get_origin=False, saving_flag=False, saving_dir="z-stack", force_multiposition=False
+        self,
+        model,
+        get_origin=False,
+        saving_flag=False,
+        saving_dir="z-stack",
+        force_multiposition=False,
     ):
         """Initialize the ZStackAcquisition class.
 
@@ -1036,7 +1045,10 @@ class ZStackAcquisition:
                     ),
                 ]
             ]
-        self.axes_index = [self.position_headers.index(axis.upper()) for axis in ["x", "y", "z", "theta", "f"]]
+        self.axes_index = [
+            self.position_headers.index(axis.upper())
+            for axis in ["x", "y", "z", "theta", "f"]
+        ]
 
         # Setup next channel down here, to ensure defocus isn't merged into
         # restore f_pos, positions
@@ -1054,7 +1066,10 @@ class ZStackAcquisition:
         )
         self.current_position_idx = 0
         self.current_position = dict(
-            zip(["x", "y", "z", "theta", "f"], [self.positions[0][i] for i in self.axes_index])
+            zip(
+                ["x", "y", "z", "theta", "f"],
+                [self.positions[0][i] for i in self.axes_index],
+            )
         )
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
@@ -1096,7 +1111,10 @@ class ZStackAcquisition:
             self.current_position = dict(
                 zip(
                     ["x", "y", "z", "theta", "f"],
-                    [self.positions[self.current_position_idx][i] for i in self.axes_index],
+                    [
+                        self.positions[self.current_position_idx][i]
+                        for i in self.axes_index
+                    ],
                 )
             )
 
@@ -1543,4 +1561,3 @@ class FindTissueSimple2D:
             )
 
             self.model.event_queue.put(("multiposition", table_values))
-

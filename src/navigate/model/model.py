@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
@@ -74,7 +74,6 @@ from navigate.log_files.log_functions import log_setup
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.common_functions import load_module_from_file, VariableWithLock
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
-from navigate.model.device_startup_functions import load_devices
 from navigate.model.microscope import Microscope
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel
@@ -395,9 +394,9 @@ class Model:
         }
         # append plugin acquisition mode
         for mode in self.plugin_acquisition_modes:
-            self.acquisition_modes_feature_setting[
-                mode
-            ] = self.plugin_acquisition_modes[mode].feature_list
+            self.acquisition_modes_feature_setting[mode] = (
+                self.plugin_acquisition_modes[mode].feature_list
+            )
 
         self.load_feature_records()
 
@@ -558,11 +557,13 @@ class Model:
             r = self.prepare_acquisition()
             if not r:
                 self.show_img_pipe.send("stop")
-                self.event_queue.put((
-                    "warning", 
-                    "Acquisition aborted because of camera ROI setting failed.\n"
-                    "Please do not use center ROI for the Ximea Camera."
-                    ))
+                self.event_queue.put(
+                    (
+                        "warning",
+                        "Acquisition aborted because of camera ROI setting failed.\n"
+                        "Please do not use center ROI for the Ximea Camera.",
+                    )
+                )
                 return
 
             # load features
@@ -1090,7 +1091,7 @@ class Model:
         waveform_dict = self.active_microscope.prepare_acquisition()
         if waveform_dict is None:
             return False
-        
+
         self.event_queue.put(("waveform", waveform_dict))
 
         self.frame_id = 0

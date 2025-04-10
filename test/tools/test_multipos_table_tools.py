@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -228,33 +228,23 @@ class UpdateTableTestCase(unittest.TestCase):
         update_table(self.table, pos=new_positions, append=True)
         assert self.table.currentrow == 4
         np.testing.assert_array_equal(
-            self.table.model.df["X"][
-                3:,
-            ],
+            self.table.model.df["X"][3:,],
             new_positions[:, 0],
         )
         np.testing.assert_array_equal(
-            self.table.model.df["Y"][
-                3:,
-            ],
+            self.table.model.df["Y"][3:,],
             new_positions[:, 1],
         )
         np.testing.assert_array_equal(
-            self.table.model.df["Z"][
-                3:,
-            ],
+            self.table.model.df["Z"][3:,],
             new_positions[:, 2],
         )
         np.testing.assert_array_equal(
-            self.table.model.df["R"][
-                3:,
-            ],
+            self.table.model.df["R"][3:,],
             new_positions[:, 3],
         )
         np.testing.assert_array_equal(
-            self.table.model.df["F"][
-                3:,
-            ],
+            self.table.model.df["F"][3:,],
             new_positions[:, 4],
         )
 

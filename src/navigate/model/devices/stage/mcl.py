@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,6 @@ from navigate.model.devices.device_types import IntegratedDevice
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
 
 
 @log_initialization
@@ -118,7 +117,9 @@ class MCLStage(StageBase, IntegratedDevice):
         stage_connection : dict
             Dictionary containing the connection information for the stage.
         """
-        mcl_controller = importlib.import_module("navigate.model.devices.APIs.mcl.madlib")
+        mcl_controller = importlib.import_module(
+            "navigate.model.devices.APIs.mcl.madlib"
+        )
 
         # Initialize
         mcl_controller.MCL_GrabAllHandles()

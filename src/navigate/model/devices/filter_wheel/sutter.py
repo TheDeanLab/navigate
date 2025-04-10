@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -144,7 +144,9 @@ class SutterFilterWheel(FilterWheelBase, SerialDevice):
         try:
             return serial.Serial(comport, baudrate, timeout=timeout)
         except serial.SerialException:
-            logger.error("SutterFilterWheel - Could not establish Serial Port Connection")
+            logger.error(
+                "SutterFilterWheel - Could not establish Serial Port Connection"
+            )
             raise UserWarning(
                 "Could not communicate with Sutter Lambda 10-B via COMPORT", comport
             )

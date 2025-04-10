@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -152,7 +152,9 @@ class MP285Stage(StageBase, SerialDevice):
         self.close()
 
     @classmethod
-    def connect(cls, port: str, baud_rate: int=115200, timeout: float=0.25) -> MP285:
+    def connect(
+        cls, port: str, baud_rate: int = 115200, timeout: float = 0.25
+    ) -> MP285:
         """Connect to the MP285Stage."""
         try:
             mp285_stage = MP285(port, baud_rate, timeout)
@@ -163,7 +165,6 @@ class MP285Stage(StageBase, SerialDevice):
             raise UserWarning(
                 "Could not communicate with Sutter MP-285 via COMPORT", port
             )
-        
 
     def report_position(self) -> dict:
         """Reports the position for all axes, and creates a position dictionary.

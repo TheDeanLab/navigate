@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -667,8 +667,9 @@ class TigerController:
             Percentage of the maximum speed
         """
         if self.default_axes_sequence is None:
-            logger.error(f"{str(self)}, Default axes sequence is not set. "
-            f"Cannot set speed.")
+            logger.error(
+                f"{str(self)}, Default axes sequence is not set. " f"Cannot set speed."
+            )
             raise ASIException(
                 "Unable to query system for axis sequence. Cannot set speed."
             )

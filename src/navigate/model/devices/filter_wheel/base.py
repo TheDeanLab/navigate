@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 # Third Party Imports
 
@@ -48,7 +48,13 @@ logger = logging.getLogger(p)
 class FilterWheelBase:
     """FilterWheelBase - Parent class for controlling filter wheels."""
 
-    def __init__(self, microscope_name: str, device_connection: Any, configuration: Dict[str, Any], device_id: int = 0) -> None:
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: Dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the FilterWheelBase class.
 
         Parameters
@@ -66,7 +72,9 @@ class FilterWheelBase:
         self.device_connection = device_connection
 
         #: Dict[str, Any]: Dictionary of device configuration parameters.
-        device_config = configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"][device_id]
+        device_config = configuration["configuration"]["microscopes"][microscope_name][
+            "filter_wheel"
+        ][device_id]
         self.device_config = device_config
 
         #: dict: Dictionary of filters available on the filter wheel.

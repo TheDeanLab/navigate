@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ from navigate.model.features.image_writer import ImageWriter  # noqa
 from navigate.model.features.restful_features import IlastikSegmentation  # noqa
 from navigate.model.features.volume_search import (
     VolumeSearch,  # noqa
-    VolumeSearch3D, # noqa
+    VolumeSearch3D,  # noqa
 )
 from navigate.model.features.remove_empty_tiles import (
     DetectTissueInStack,  # noqa
@@ -69,7 +69,7 @@ from navigate.model.features.remove_empty_tiles import (
 from navigate.model.features.update_setting import (
     ChangeResolution,  # noqa
     SetCameraParameters,  # noqa
-    UpdateExperimentSetting, # noqa
+    UpdateExperimentSetting,  # noqa
 )
 
 from navigate.tools.file_functions import load_yaml_file

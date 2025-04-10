@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -128,9 +128,14 @@ class MultiPositionController(GUIController):
             start_index = 1
         # if there are some missing headers, add them
         if len(headers) < len(positions[start_index]):
-            headers = headers + ["col-" + str(i) for i in range(len(positions[start_index]) - len(headers))]
+            headers = headers + [
+                "col-" + str(i)
+                for i in range(len(positions[start_index]) - len(headers))
+            ]
         for i, name in enumerate(headers):
-            data[name] = list(pos[i] if i < len(pos) else np.nan for pos in positions[start_index:])
+            data[name] = list(
+                pos[i] if i < len(pos) else np.nan for pos in positions[start_index:]
+            )
         self.table.model.df = pd.DataFrame(data)
         self.table.currentrow = 0
         self.table.redraw()
@@ -155,17 +160,14 @@ class MultiPositionController(GUIController):
         rows = self.table.model.df.shape[0]
         for i in range(rows):
             temp = list(self.table.model.df.iloc[i])
-            if (
-                len(
-                    list(
-                        filter(
-                            lambda v: isinstance(v, (float, int)) and not math.isnan(v),
-                            [temp[i] for i in axes_index],
-                        )
+            if len(
+                list(
+                    filter(
+                        lambda v: isinstance(v, (float, int)) and not math.isnan(v),
+                        [temp[i] for i in axes_index],
                     )
                 )
-                == len(axes_index)
-            ):
+            ) == len(axes_index):
                 positions.append(temp)
         return positions
 
@@ -190,10 +192,19 @@ class MultiPositionController(GUIController):
         # df.iloc uses position index
         temp = list(df.iloc[rowclicked])
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        axes_index = [df.columns.get_loc(axis) for axis in [axis.upper() for axis in stage_axes]]
+        axes_index = [
+            df.columns.get_loc(axis) for axis in [axis.upper() for axis in stage_axes]
+        ]
         # validate position
         # we currently only move to a position doesn't contain nan
-        if len(list(filter(lambda v: isinstance(v, (float, int)) and not math.isnan(v), [temp[i] for i in axes_index]))) != len(stage_axes):
+        if len(
+            list(
+                filter(
+                    lambda v: isinstance(v, (float, int)) and not math.isnan(v),
+                    [temp[i] for i in axes_index],
+                )
+            )
+        ) != len(stage_axes):
             messagebox.showwarning(
                 title="Warning",
                 message="The selected position is invalid, can't go to this position!",
@@ -231,13 +242,17 @@ class MultiPositionController(GUIController):
         # validate the csv file
         df.columns = map(lambda v: v.upper(), df.columns)
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        cmp_header = [axis in df.columns for axis in [axis.upper() for axis in stage_axes]]
+        cmp_header = [
+            axis in df.columns for axis in [axis.upper() for axis in stage_axes]
+        ]
         if not all(cmp_header):
             messagebox.showwarning(
                 title="Warning",
                 message=f"The csv file isn't right, it should contain {[axis.upper() for axis in stage_axes]}",
             )
-            logger.info(f"The csv file isn't right, it should contain {[axis.upper() for axis in stage_axes]}")
+            logger.info(
+                f"The csv file isn't right, it should contain {[axis.upper() for axis in stage_axes]}"
+            )
             return
         self.table.model.df = df
         self.table.currentrow = 0

@@ -3,7 +3,6 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
-
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
 
@@ -34,12 +33,16 @@ from tkinter import ttk, simpledialog
 import logging
 from pathlib import Path
 from typing import Optional, Callable
+import os
+from PIL import Image, ImageTk
 
 # Third Party Imports
 
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.CollapsibleFrame import CollapsibleFrame
+from navigate.view.custom_widgets.common import uniform_grid
+from navigate.view.style import apply_styles
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -76,6 +79,7 @@ class ConfigurationAssistantWindow(ttk.Frame):
         #: tk.Tk: The main window of the application
         self.root = root
         self.root.title("Configuration Assistant")
+        apply_styles(self.root)
 
         ttk.Frame.__init__(self, self.root, *args, **kwargs)
 
@@ -100,14 +104,15 @@ class ConfigurationAssistantWindow(ttk.Frame):
         #: ttk.Frame: The main frame of the application
         self.microscope_frame = ttk.Frame(self.root)
 
-        self.grid(column=0, row=0, sticky=tk.NSEW)
+        # self.grid(column=0, row=0, sticky=tk.NSEW)
         self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
         self.microscope_frame.grid(
-            row=1, column=0, columnspan=5, sticky=tk.NSEW, padx=3, pady=3
+            row=1, column=0, columnspan=6, sticky=tk.NSEW, padx=3, pady=3
         )
 
         #: ttk.Frame: The top frame of the application
         self.top_window = TopWindow(self.top_frame, self.root)
+        uniform_grid(self.root)
 
 
 class TopWindow(ttk.Frame):
@@ -137,32 +142,55 @@ class TopWindow(ttk.Frame):
 
         #: ttk.Frame: The main frame of the application
         self.microscope_frame = main_frame
-        ttk.Frame.__init__(self, self.microscope_frame, *args, **kwargs)
+        super().__init__(root, *args, **kwargs)
 
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
+        column = 0
+        try:
+            # Load the logo image
+            logo_path = os.path.join(os.path.dirname(__file__), "icon", "mic.png")
+            pil_image = Image.open(logo_path)
+            resized_image = pil_image.resize((110, 110), Image.Resampling.BILINEAR)
 
-        self.new_button = tk.Button(root, text="New Configuration")
-        self.new_button.grid(row=0, column=0, sticky=tk.NE, padx=3, pady=(10, 1))
+            # Override default style
+            style = ttk.Style()
+            style.configure("Logo.TLabel", background="#fafafa")
+
+            self.logo_image = ImageTk.PhotoImage(resized_image)
+            self.logo_label = ttk.Label(
+                root, image=self.logo_image, style="Logo.TLabel"
+            )
+            self.logo_label.grid(row=0, column=column, sticky=tk.NSEW, padx=3, pady=0)
+            column += 1
+        except tk.TclError:
+            pass
+
+        self.new_button = ttk.Button(root, text="New Configuration")
+        self.new_button.grid(row=0, column=column, sticky=tk.EW, padx=3, pady=(10, 1))
         self.new_button.config(width=15)
+        column += 1
 
-        self.load_button = tk.Button(root, text="Load Configuration")
-        self.load_button.grid(row=0, column=1, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.load_button = ttk.Button(root, text="Load Configuration")
+        self.load_button.grid(row=0, column=column, sticky=tk.EW, padx=3, pady=(10, 1))
         self.load_button.config(width=15)
+        column += 1
 
-        self.add_button = tk.Button(root, text="Add A Microscope")
-        self.add_button.grid(row=0, column=2, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.add_button = ttk.Button(root, text="Add A Microscope")
+        self.add_button.grid(row=0, column=column, sticky=tk.EW, padx=3, pady=(10, 1))
         self.add_button.config(width=15)
+        column += 1
 
-        self.save_button = tk.Button(root, text="Save")
-        self.save_button.grid(row=0, column=3, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.save_button = ttk.Button(root, text="Save")
+        self.save_button.grid(row=0, column=column, sticky=tk.EW, padx=3, pady=(10, 1))
         self.save_button.config(width=15)
+        column += 1
 
-        #: tk.Button: The button to cancel the application.
-        self.cancel_button = tk.Button(root, text="Cancel")
-        self.cancel_button.grid(row=0, column=4, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.cancel_button = ttk.Button(root, text="Cancel")
+        self.cancel_button.grid(
+            row=0, column=column, sticky=tk.EW, padx=3, pady=(10, 1)
+        )
         self.cancel_button.config(width=15)
+
+        # uniform_grid(self)
 
 
 class MicroscopeWindow(DockableNotebook):
@@ -228,9 +256,7 @@ class MicroscopeTab(DockableNotebook):
         # Init Frame
         DockableNotebook.__init__(self, parent, root, *args, **kwargs)
 
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
+        uniform_grid(self)
 
     def create_hardware_tab(
         self, name, hardware_widgets, widgets=None, top_widgets=None, **kwargs
@@ -296,10 +322,6 @@ class HardwareTab(ttk.Frame):
         tk.Frame.__init__(self, *args, **kwargs)
 
         self.name = name
-
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
         scroll_frame = ttk.Frame(self)
         scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
         canvas = tk.Canvas(scroll_frame, width=1000, height=500)
@@ -344,6 +366,8 @@ class HardwareTab(ttk.Frame):
 
         for widgets_value in constants_widgets_value:
             self.build_widgets(widgets, widgets_value=widgets_value)
+
+        uniform_grid(self.hardware_frame)
 
     def create_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
         """create widgets

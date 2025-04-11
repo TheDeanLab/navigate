@@ -79,6 +79,10 @@ class ConfigurationAssistantWindow(ttk.Frame):
         #: tk.Tk: The main window of the application
         self.root = root
         self.root.title("Configuration Assistant")
+        self.root.resizable(False, False)
+        self.root.geometry("")
+        self.root.rowconfigure(0, weight=1)
+        self.root.columnconfigure(0, weight=1)
         apply_styles(self.root)
 
         ttk.Frame.__init__(self, self.root, *args, **kwargs)
@@ -93,18 +97,12 @@ class ConfigurationAssistantWindow(ttk.Frame):
         except tk.TclError:
             pass
 
-        self.root.resizable(False, False)
-        self.root.geometry("")
-        self.root.rowconfigure(0, weight=1)
-        self.root.columnconfigure(0, weight=1)
-
         #: ttk.Frame: The top frame of the application
         self.top_frame = ttk.Frame(self.root)
 
         #: ttk.Frame: The main frame of the application
         self.microscope_frame = ttk.Frame(self.root)
 
-        # self.grid(column=0, row=0, sticky=tk.NSEW)
         self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
         self.microscope_frame.grid(
             row=1, column=0, columnspan=6, sticky=tk.NSEW, padx=3, pady=3
@@ -190,7 +188,7 @@ class TopWindow(ttk.Frame):
         )
         self.cancel_button.config(width=15)
 
-        # uniform_grid(self)
+        uniform_grid(self)
 
 
 class MicroscopeWindow(DockableNotebook):
@@ -211,7 +209,6 @@ class MicroscopeWindow(DockableNotebook):
 
         DockableNotebook.__init__(self, frame, root, *args, **kwargs)
         self.grid(row=0, column=0, sticky=tk.NSEW)
-
         self.menu.delete("Popout Tab")
         self.menu.add_command(label="Rename", command=self.rename_microscope)
         self.menu.add_command(label="Delete", command=self.delete_microscope)
@@ -255,7 +252,6 @@ class MicroscopeTab(DockableNotebook):
 
         # Init Frame
         DockableNotebook.__init__(self, parent, root, *args, **kwargs)
-
         uniform_grid(self)
 
     def create_hardware_tab(
@@ -319,28 +315,45 @@ class HardwareTab(ttk.Frame):
             Arbitrary keyword arguments
         """
         # Init Frame
-        tk.Frame.__init__(self, *args, **kwargs)
+        ttk.Frame.__init__(self, *args, **kwargs)
+
+        # Configure the frame to expand properly
+        self.columnconfigure(index=0, weight=1)
+        self.rowconfigure(index=3, weight=1)
 
         self.name = name
-        scroll_frame = ttk.Frame(self)
+        scroll_frame = ttk.Frame(self, height=500)
         scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
-        canvas = tk.Canvas(scroll_frame, width=1000, height=500)
+
+        # Canvas without fixed height to allow proper expansion
+        canvas = tk.Canvas(scroll_frame)
         scrollbar = ttk.Scrollbar(scroll_frame, orient="vertical", command=canvas.yview)
         content_frame = ttk.Frame(canvas)
 
+        # Configure content_frame to expand horizontally
+        content_frame.columnconfigure(index=0, weight=1)
         content_frame.bind(
             "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
 
         canvas.create_window((0, 0), window=content_frame, anchor="nw")
-
         canvas.configure(yscrollcommand=scrollbar.set)
-
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        self.top_frame = ttk.Frame(content_frame)
+        # Add binding to handle canvas resize and update content_frame width
+        def _configure_canvas(event):
+            # Update the width of content_frame to fill canvas
+            canvas.itemconfigure("win", width=event.width)
 
+            # Ensure the scrollregion is updated
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        # Add tag to canvas window for easier reference
+        canvas.create_window((0, 0), window=content_frame, anchor="nw", tags="win")
+        canvas.bind("<Configure>", _configure_canvas)
+
+        self.top_frame = ttk.Frame(content_frame)
         self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10)
 
         self.hardware_frame = ttk.Frame(content_frame)
@@ -348,6 +361,7 @@ class HardwareTab(ttk.Frame):
 
         self.bottom_frame = ttk.Frame(content_frame)
         self.bottom_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=10)
+
         self.frame_row = 0
         self.row_offset = self.frame_row + 1
 
@@ -367,7 +381,9 @@ class HardwareTab(ttk.Frame):
         for widgets_value in constants_widgets_value:
             self.build_widgets(widgets, widgets_value=widgets_value)
 
-        uniform_grid(self.hardware_frame)
+        print(content_frame.winfo_geometry())
+        uniform_grid(scroll_frame)
+        uniform_grid(self.bottom_frame)
 
     def create_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
         """create widgets

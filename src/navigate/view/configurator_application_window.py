@@ -322,15 +322,30 @@ class HardwareTab(ttk.Frame):
         self.rowconfigure(index=3, weight=1)
 
         self.name = name
-        scroll_frame = ttk.Frame(self, height=500)
+        scroll_frame = ttk.Frame(self)
         scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
 
-        # Canvas without fixed height to allow proper expansion
-        canvas = tk.Canvas(scroll_frame)
+        # Prevent the scroll_frame from resizing to fit contents
+        scroll_frame.grid_propagate(False)
+
+        # Set minimum size for scroll_frame
+        scroll_frame.grid_rowconfigure(0, weight=1, minsize=400)
+        scroll_frame.grid_columnconfigure(0, weight=1, minsize=600)
+
+        # Create canvas with specific dimensions, explicitly define background.
+        style = ttk.Style()
+        frame_bg = style.lookup(style="TFrame", option="background")
+        canvas = tk.Canvas(scroll_frame, height=500, width=600, background=frame_bg)
         scrollbar = ttk.Scrollbar(scroll_frame, orient="vertical", command=canvas.yview)
-        content_frame = ttk.Frame(canvas)
+        canvas.grid(row=0, column=0, sticky=tk.NSEW)
+        scrollbar.grid(row=0, column=1, sticky=tk.NS)
+
+        # Configure grid weights in scroll_frame
+        scroll_frame.rowconfigure(0, weight=1)
+        scroll_frame.columnconfigure(0, weight=1)
 
         # Configure content_frame to expand horizontally
+        content_frame = ttk.Frame(canvas)
         content_frame.columnconfigure(index=0, weight=1)
         content_frame.bind(
             "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
@@ -346,7 +361,7 @@ class HardwareTab(ttk.Frame):
             # Update the width of content_frame to fill canvas
             canvas.itemconfigure("win", width=event.width)
 
-            # Ensure the scrollregion is updated
+            # Ensure the scroll region is updated
             canvas.configure(scrollregion=canvas.bbox("all"))
 
         # Add tag to canvas window for easier reference
@@ -380,10 +395,6 @@ class HardwareTab(ttk.Frame):
 
         for widgets_value in constants_widgets_value:
             self.build_widgets(widgets, widgets_value=widgets_value)
-
-        print(content_frame.winfo_geometry())
-        uniform_grid(scroll_frame)
-        uniform_grid(self.bottom_frame)
 
     def create_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
         """create widgets

@@ -505,47 +505,72 @@ class HardwareTab(ttk.Frame):
         """
         if not widgets:
             return
+
         if parent is None:
             parent = self.bottom_frame
-        collapsible = False
-        title = "Hardware"
-        format = None
-        temp_ref = None
-        direction = "vertical"
-        if "frame_config" in widgets:
-            collapsible = widgets["frame_config"].get("collapsible", False)
-            title = widgets["frame_config"].get("title", "Hardware")
-            format = widgets["frame_config"].get("format", None)
-            temp_ref = widgets["frame_config"].get("ref", None)
-            direction = widgets["frame_config"].get("direction", "vertical")
-        if collapsible:
-            self.fold_all_frames()
-            frame = CollapsibleFrame(parent=parent, title=title)
-            # only display one collapsible frame at a time
-            frame.label.bind("<Button-1>", self.create_toggle_function(frame))
-        else:
-            frame = ttk.Frame(parent)
-        frame.grid(row=self.frame_row, column=0, sticky=tk.NSEW, padx=20)
-        self.frame_row += 1
 
-        ref = None
-        if kwargs:
-            ref = kwargs.get("ref", None)
-            direction = kwargs.get("direction", "vertical")
-        ref = ref or temp_ref
+        # Extract frame configuration
+        collapsible, title, frame_format, ref, direction = self.extract_frame_config(
+            widgets, kwargs
+        )
+
+        # Create the frame
+        frame = self.create_frame(parent, collapsible, title)
+
+        # Initialize variables
+        self.initialize_variables(ref, frame_format)
+
+        # Create hardware widgets
+        self.create_hardware_widgets(widgets, frame=frame, direction=direction)
+
+        # Set widget values
+        self.set_widget_values(widgets_value)
+
+    def set_widget_values(self, widgets_value):
+        """Set values for widgets if widgets_value is provided."""
+        if widgets_value:
+            for k, v in widgets_value.items():
+                if k in self.variables:
+                    self.variables[k].set(v)
+
+    def initialize_variables(self, ref, format):
+        """Initialize variables and values dictionary for the widgets."""
         self.variables = {}
         self.values_dict = {}
         self.variables_list.append((self.variables, self.values_dict, ref, format))
-        self.create_hardware_widgets(widgets, frame=frame, direction=direction)
 
-        if widgets_value:
-            for k, v in widgets_value.items():
-                try:
-                    self.variables[k].set(str(v))
-                except (TypeError, ValueError):
-                    pass
-                except tk._tkinter.TclError:
-                    pass
+    def extract_frame_config(self, widgets, kwargs):
+        """Extract frame configuration from widgets and kwargs."""
+        collapsible = False
+        title = "Hardware"
+        frame_format = None
+        temp_ref = None
+        direction = "vertical"
+
+        if "frame_config" in widgets:
+            collapsible = widgets["frame_config"].get("collapsible", False)
+            title = widgets["frame_config"].get("title", "Hardware")
+            frame_format = widgets["frame_config"].get("format", None)
+            temp_ref = widgets["frame_config"].get("ref", None)
+            direction = widgets["frame_config"].get("direction", "vertical")
+
+        ref = kwargs.get("ref", None) or temp_ref
+        direction = kwargs.get("direction", direction)
+
+        return collapsible, title, frame_format, ref, direction
+
+    def create_frame(self, parent, collapsible, title):
+        """Create a frame (collapsible or regular) and place it in the grid."""
+        if collapsible:
+            self.fold_all_frames()
+            frame = CollapsibleFrame(parent=parent, title=title)
+            frame.label.bind("<Button-1>", self.create_toggle_function(frame))
+        else:
+            frame = ttk.Frame(parent)
+
+        frame.grid(row=self.frame_row, column=0, sticky=tk.NSEW, padx=20)
+        self.frame_row += 1
+        return frame
 
     def fold_all_frames(self, except_frame: Optional[tk.Frame] = None) -> None:
         """Fold all collapsible frames except one frame

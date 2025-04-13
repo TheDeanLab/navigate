@@ -64,7 +64,7 @@ variable_types = {
 
 
 class ConfigurationAssistantWindow(ttk.Frame):
-    def __init__(self, root, *args, **kwargs):
+    def __init__(self, root: tk.Tk, *args: list, **kwargs: dict) -> None:
         """Initiates the main application window
 
         Parameters
@@ -123,7 +123,9 @@ class TopWindow(ttk.Frame):
     - Cancel button
     """
 
-    def __init__(self, main_frame, root, *args, **kwargs):
+    def __init__(
+        self, main_frame: ttk.Frame, root: tk.Tk, *args: list, **kwargs: dict
+    ) -> None:
         """Initialize Top Frame.
 
         Parameters
@@ -192,7 +194,9 @@ class TopWindow(ttk.Frame):
 
 
 class MicroscopeWindow(DockableNotebook):
-    def __init__(self, frame, root, *args, **kwargs):
+    def __init__(
+        self, frame: ttk.Frame, root: tk.Tk, *args: list, **kwargs: dict
+    ) -> None:
         """Initialize Microscope Frame.
 
         Parameters
@@ -213,7 +217,7 @@ class MicroscopeWindow(DockableNotebook):
         self.menu.add_command(label="Rename", command=self.rename_microscope)
         self.menu.add_command(label="Delete", command=self.delete_microscope)
 
-    def rename_microscope(self):
+    def rename_microscope(self) -> None:
         """Rename microscope"""
 
         if self.selected_tab_id is None:
@@ -225,7 +229,7 @@ class MicroscopeWindow(DockableNotebook):
             self.tab_list.remove(tab_name)
             self.tab_list.append(result)
 
-    def delete_microscope(self):
+    def delete_microscope(self) -> None:
         """Delete selected microscope"""
         if self.selected_tab_id is None:
             return
@@ -235,7 +239,9 @@ class MicroscopeWindow(DockableNotebook):
 
 
 class MicroscopeTab(DockableNotebook):
-    def __init__(self, parent, root, *args, **kwargs):
+    def __init__(
+        self, parent: ttk.Frame, root: tk.Tk, *args: list, **kwargs: dict
+    ) -> None:
         """Initialize Microscope Tab.
 
         Parameters
@@ -249,14 +255,17 @@ class MicroscopeTab(DockableNotebook):
         **kwargs
             Arbitrary keyword arguments.
         """
-
-        # Init Frame
         DockableNotebook.__init__(self, parent, root, *args, **kwargs)
         uniform_grid(self)
 
     def create_hardware_tab(
-        self, name, hardware_widgets, widgets=None, top_widgets=None, **kwargs
-    ):
+        self,
+        name: str,
+        hardware_widgets: dict,
+        widgets: Optional[dict] = None,
+        top_widgets: Optional[dict] = None,
+        **kwargs,
+    ) -> None:
         """Create hardware tab
 
         Parameters
@@ -284,15 +293,15 @@ class MicroscopeTab(DockableNotebook):
 class HardwareTab(ttk.Frame):
     def __init__(
         self,
-        name,
-        hardware_widgets,
-        *args,
-        widgets=None,
-        top_widgets=None,
-        hardware_widgets_value=[None],
-        constants_widgets_value=[None],
+        name: str,
+        hardware_widgets: dict,
+        *args: list,
+        widgets: Optional[dict] = None,
+        top_widgets: Optional[dict] = None,
+        hardware_widgets_value: Optional[list[dict]] = None,
+        constants_widgets_value: Optional[list[dict]] = None,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize Microscope Tab.
 
         Parameters
@@ -316,6 +325,12 @@ class HardwareTab(ttk.Frame):
         """
         # Init Frame
         ttk.Frame.__init__(self, *args, **kwargs)
+
+        if constants_widgets_value is None:
+            constants_widgets_value = [None]
+
+        if hardware_widgets_value is None:
+            hardware_widgets_value = [None]
 
         # Configure the frame to expand properly
         self.columnconfigure(index=0, weight=1)
@@ -357,7 +372,7 @@ class HardwareTab(ttk.Frame):
         scrollbar.pack(side="right", fill="y")
 
         # Add binding to handle canvas resize and update content_frame width
-        def _configure_canvas(event):
+        def _configure_canvas(event: tk.Event) -> None:
             # Update the width of content_frame to fill canvas
             canvas.itemconfigure("win", width=event.width)
 
@@ -396,112 +411,312 @@ class HardwareTab(ttk.Frame):
         for widgets_value in constants_widgets_value:
             self.build_widgets(widgets, widgets_value=widgets_value)
 
-    def create_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
-        """create widgets
+    def create_hardware_widgets(
+        self,
+        hardware_widgets: dict,
+        frame: ttk.Frame,
+        direction: Optional[str] = "vertical",
+    ) -> None:
+        """Create UI widgets for hardware configuration.
 
         Parameters
         ----------
         hardware_widgets : dict
-            name: (display_name, widget_type, value_type, values, info)
-        frame : tk.Frame
-            the parent frame for widgets
-        direction : str
-            direction of the widget layouts
+            Dictionary where keys are setting names and values are tuples
+            containing (display_name, widget_type, value_type, values, info, default).
+        frame : ttk.Frame
+            The parent frame to which widgets are added.
+        direction : str, optional
+            Layout direction: "vertical" or "horizontal", by default "vertical".
         """
         if hardware_widgets is None:
             return
-        if type(frame) is CollapsibleFrame:
-            content_frame = frame.content_frame
-        else:
-            content_frame = frame
-        i = 0
-        for k, v in hardware_widgets.items():
-            if k == "frame_config":
-                continue
-            if v[1] == "Label":
-                label = ttk.Label(content_frame, text=v[0])
-                label.grid(row=i, column=0, sticky=tk.NW, padx=3)
-                seperator = ttk.Separator(content_frame)
-                seperator.grid(row=i + 1, columnspan=2, sticky=tk.NSEW, padx=3)
-                i += 2
-                continue
-            elif v[1] != "Button":
-                self.variables[k] = variable_types[v[2]]()
-                label_text = v[0] + "  :" if v[0][-1] != ":" else v[0]
-                label = ttk.Label(content_frame, text=label_text)
-                if direction == "vertical":
-                    label.grid(row=i, column=0, sticky=tk.NW, padx=(3, 10), pady=3)
-                else:
-                    label.grid(row=0, column=i, sticky=tk.NW, padx=(5, 3), pady=3)
-                    i += 1
-                if v[1] == "Checkbutton":
-                    widget = widget_types[v[1]](
-                        content_frame, text="", variable=self.variables[k]
-                    )
-                else:
-                    widget = widget_types[v[1]](
-                        content_frame, textvariable=self.variables[k], width=30
-                    )
-                if v[1] == "Combobox":
-                    if type(v[3]) == list:
-                        v[3] = dict([(t, t) for t in v[3]])
-                    self.values_dict[k] = v[3]
-                    temp = list(v[3].keys())
-                    widget.config(values=temp)
-                    widget.state(["!disabled", "readonly"])
 
-                    if v[2] == "bool":
-                        widget.set(str(temp[-1]))
-                    else:
-                        widget.set(temp[-1])
-                elif v[1] == "Spinbox":
-                    if type(v[3]) != dict:
-                        v[3] = {}
-                    widget.config(from_=v[3].get("from", 0))
-                    widget.config(to=v[3].get("to", 100000))
-                    widget.config(increment=v[3].get("step", 1))
-                    widget.set(v[3].get("from", 0))
+        content_frame = (
+            frame.content_frame if isinstance(frame, CollapsibleFrame) else frame
+        )
+        row_index = 0
 
-                # set default value
-                if len(v) >= 6 and v[5] is not None:
-                    self.variables[k].set(str(v[5]))
-            else:
-                widget = ttk.Button(
-                    content_frame,
-                    text=v[0],
-                    command=self.build_event_handler(
-                        hardware_widgets, k, frame, self.frame_row
-                    ),
+        for key, config in hardware_widgets.items():
+            if key == "frame_config":
+                continue
+
+            display_name, widget_type, value_type = config[0], config[1], config[2]
+            values = config[3] if len(config) > 3 else None
+            info_text = config[4] if len(config) > 4 else None
+            default_value = config[5] if len(config) > 5 else None
+
+            if widget_type == "Label":
+                row_index = self._create_section_label(
+                    content_frame, display_name, row_index
                 )
-            if direction == "vertical":
-                widget.grid(row=i, column=1, sticky=tk.NSEW, padx=5, pady=3)
+                continue
+
+            if widget_type == "Button":
+                widget = self._create_button_widget(
+                    content_frame, display_name, hardware_widgets, key, frame
+                )
             else:
-                widget.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=(3, 0))
+                widget, label = self._create_labeled_input_widget(
+                    content_frame,
+                    key,
+                    display_name,
+                    widget_type,
+                    value_type,
+                    values,
+                    default_value,
+                    direction,
+                    row_index,
+                )
 
-            # display info label
-            if len(v) >= 5 and v[4]:
-                label = ttk.Label(content_frame, text=v[4])
-                if direction == "vertical":
-                    label.grid(row=i, column=2, sticky=tk.NW, padx=(10, 10), pady=3)
-                else:
-                    label.grid(row=1, column=i, sticky=tk.NW, padx=(10, 3), pady=0)
-            i += 1
+            self._place_widget(widget, direction, row_index, is_info=False)
 
-    def build_widgets(self, widgets, *args, parent=None, widgets_value=None, **kwargs):
-        """Build widgets
+            if info_text:
+                self._place_info_label(content_frame, info_text, direction, row_index)
+
+            row_index += 1
+
+    @staticmethod
+    def _create_section_label(parent: ttk.Frame, text: str, row_index: int) -> int:
+        """Create a section label and separator in the widget layout.
+
+        Parameters
+        ----------
+        parent : ttk.Frame
+            The parent frame to which the label and separator are added.
+        text : str
+            The text for the section label.
+        row_index : int
+            The current row index for placing the label and separator.
+
+        Returns
+        -------
+        int
+            The updated row index after adding the label and separator.
+        """
+        label = ttk.Label(parent, text=text)
+        label.grid(row=row_index, column=0, sticky=tk.NW, padx=3)
+
+        separator = ttk.Separator(parent)
+        separator.grid(row=row_index + 1, columnspan=2, sticky=tk.NSEW, padx=3)
+
+        return row_index + 2
+
+    def _create_button_widget(
+        self,
+        parent: ttk.Frame,
+        text: str,
+        widgets_dict: dict,
+        key: str,
+        frame: ttk.Frame,
+    ) -> ttk.Button:
+        """Create a button widget.
+
+        Parameters
+        ----------
+        parent : ttk.Frame
+            The parent frame to which the button is added.
+        text : str
+            The text for the button.
+        widgets_dict : dict
+            Dictionary containing the button's configuration.
+        key : str
+            The key for the button in the widgets_dict.
+        frame : ttk.Frame
+            The parent frame for the button.
+
+        Returns
+        -------
+        ttk.Button
+            The created button widget.
+        """
+
+        return ttk.Button(
+            parent,
+            text=text,
+            command=self.build_event_handler(widgets_dict, key, frame, self.frame_row),
+        )
+
+    def _create_labeled_input_widget(
+        self,
+        parent: ttk.Frame,
+        key: str,
+        label_text: str,
+        widget_type: str,
+        value_type: str,
+        values: dict,
+        default_value: str,
+        direction: str,
+        row_index: int,
+    ) -> tuple:
+        """Create a labeled input widget (Checkbutton, Entry, Combobox, Spinbox).
+
+        Parameters
+        ----------
+        parent : tk.Frame
+            The parent frame to which the widget and label are added.
+        key : str
+            The key for the widget in the widgets_dict.
+        label_text : str
+            The text for the label.
+        widget_type : str
+            The type of widget to create (Checkbutton, Entry, Combobox, Spinbox).
+        value_type : str
+            The type of value the widget will hold (string, float, bool, int).
+        values : dict
+            The values for the widget (e.g., options for Combobox).
+        default_value : str
+            The default value for the widget.
+        direction : str
+            The layout direction: "vertical" or "horizontal".
+        row_index : int
+            The current row index for placing the widget and label.
+
+        Returns
+        -------
+        tuple
+            The widget and associated label.
+        """
+        self.variables[key] = variable_types[value_type]()
+        label_text = label_text if label_text.endswith(":") else label_text + " :"
+        label = ttk.Label(parent, text=label_text)
+
+        if direction == "vertical":
+            label.grid(row=row_index, column=0, sticky=tk.NW, padx=(3, 10), pady=3)
+        else:
+            label.grid(row=0, column=row_index, sticky=tk.NW, padx=(5, 3), pady=3)
+
+        if widget_type == "Checkbutton":
+            widget = widget_types[widget_type](
+                parent, text="", variable=self.variables[key]
+            )
+        else:
+            widget = widget_types[widget_type](
+                parent, textvariable=self.variables[key], width=30
+            )
+
+        if widget_type == "Combobox":
+            self._configure_combobox(widget, key, values, value_type)
+        elif widget_type == "Spinbox":
+            self._configure_spinbox(widget, values)
+
+        if default_value is not None:
+            self.variables[key].set(str(default_value))
+
+        return widget, label
+
+    def _configure_combobox(
+        self, widget: ttk.Combobox, key: str, values: dict, value_type: str
+    ) -> None:
+        """Configure a combobox widget.
+
+        Parameters
+        ----------
+        widget : ttk.Combobox
+            The combobox widget to configure.
+        key : str
+            The key for the combobox in the widgets_dict.
+        values : dict
+            The values for the combobox options.
+        value_type : str
+            The type of value the combobox will hold (string, float, bool, int).
+        """
+        if isinstance(values, list):
+            values = {v: v for v in values}
+        self.values_dict[key] = values
+        options = list(values.keys())
+
+        widget.config(values=options)
+        widget.state(["!disabled", "readonly"])
+        widget.set(str(options[-1]) if value_type == "bool" else options[-1])
+
+    @staticmethod
+    def _configure_spinbox(widget: ttk.Spinbox, values: dict) -> None:
+        """Configure a spinbox widget with range and increment.
+
+        Parameters
+        ----------
+        widget : ttk.Spinbox
+            The spinbox widget to configure.
+        values : dict
+            The values for the spinbox range and increment.
+        """
+
+        if not isinstance(values, dict):
+            values = {}
+        widget.config(
+            from_=values.get("from", 0),
+            to=values.get("to", 100000),
+            increment=values.get("step", 1),
+        )
+        widget.set(values.get("from", 0))
+
+    @staticmethod
+    def _place_widget(
+        widget: ttk.Widget,
+        direction: str,
+        row_index: int,
+        is_info: Optional[bool] = False,
+    ) -> None:
+        """Place a widget in the grid layout based on direction and type.
+
+        Parameters
+        ----------
+        widget : ttk.Widget
+            The widget to place in the grid.
+        direction : str
+            The layout direction: "vertical" or "horizontal".
+        row_index : int
+            The current row index for placing the widget.
+        is_info : bool
+            Whether the widget is an info/help label.
+        """
+        column = 2 if is_info else 1
+        row = row_index if direction == "vertical" else 0
+        padx = (10, 10) if is_info else (10, 3)
+        pady = 3 if direction == "vertical" else (3, 0)
+        sticky = tk.NW if is_info else tk.NSEW
+
+        widget.grid(row=row, column=column, sticky=sticky, padx=padx, pady=pady)
+
+    def _place_info_label(
+        self, parent: ttk.Frame, info_text: str, direction: str, row_index: int
+    ) -> None:
+        """Place an info/help label next to the widget.
+
+        Parameters
+        ----------
+        parent : ttk.Frame
+            The parent frame to which the info label is added.
+        info_text : str
+            The text for the info/help label.
+        direction : str
+            The layout direction: "vertical" or "horizontal".
+        """
+        info_label = ttk.Label(parent, text=info_text)
+        self._place_widget(info_label, direction, row_index, is_info=True)
+
+    def build_widgets(
+        self,
+        widgets: dict,
+        parent: Optional[ttk.Frame] = None,
+        widgets_value: Optional[dict] = None,
+        **kwargs: dict,
+    ) -> None:
+        """
+        Build widgets for the UI.
 
         Parameters
         ----------
         widgets : dict
-            widget dict
-        parent : frame
-            parent frame to put widgets
-        widgets_value : dict
-            value_dict of widgets
-        *args
-            Variable length argument list.
-        **kwargs
-            Arbitrary keyword arguments, ref="reference name", direction="vertical"
+            Dictionary containing widget configurations.
+        parent : Optional[ttk.Frame], optional
+            Parent frame to place the widgets, by default None.
+        widgets_value : Optional[dict], optional
+            Dictionary containing initial values for the widgets, by default None.
+        **kwargs : dict
+            Additional keyword arguments, such as `ref` (reference name) or `direction`
+            (layout direction, e.g., "vertical").
         """
         if not widgets:
             return
@@ -526,21 +741,54 @@ class HardwareTab(ttk.Frame):
         # Set widget values
         self.set_widget_values(widgets_value)
 
-    def set_widget_values(self, widgets_value):
-        """Set values for widgets if widgets_value is provided."""
+    def set_widget_values(self, widgets_value: Optional[dict] = None) -> None:
+        """Set values for widgets if widgets_value is provided.
+
+        Parameters
+        ----------
+        widgets_value : dict
+            Dictionary containing widget values.
+        """
+
         if widgets_value:
             for k, v in widgets_value.items():
                 if k in self.variables:
                     self.variables[k].set(v)
 
-    def initialize_variables(self, ref, format):
-        """Initialize variables and values dictionary for the widgets."""
+    def initialize_variables(self, ref: str, widget_format):
+        """Initialize variables and values dictionary for the widgets.
+
+        Parameters
+        ----------
+        ref : str
+            Reference name for the widgets.
+        widget_format : str
+            Format for the widgets.
+        """
         self.variables = {}
         self.values_dict = {}
-        self.variables_list.append((self.variables, self.values_dict, ref, format))
+        self.variables_list.append(
+            (self.variables, self.values_dict, ref, widget_format)
+        )
 
-    def extract_frame_config(self, widgets, kwargs):
-        """Extract frame configuration from widgets and kwargs."""
+    @staticmethod
+    def extract_frame_config(widgets: dict, kwargs: dict) -> tuple:
+        """Extract frame configuration from widgets and kwargs.
+
+        Parameters
+        ----------
+        widgets : dict
+            Widget configuration dictionary.
+        kwargs : dict
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the frame configuration parameters:
+            collapsible (bool), title (str), frame_format (str), ref (str), direction
+            (str).
+        """
         collapsible = False
         title = "Hardware"
         frame_format = None
@@ -559,8 +807,24 @@ class HardwareTab(ttk.Frame):
 
         return collapsible, title, frame_format, ref, direction
 
-    def create_frame(self, parent, collapsible, title):
-        """Create a frame (collapsible or regular) and place it in the grid."""
+    def create_frame(self, parent: ttk.Frame, collapsible: bool, title: str) -> (
+            ttk.Frame):
+        """Create a frame (collapsible or regular) and place it in the grid.
+
+        Parameters
+        ----------
+        parent : ttk.Frame
+            The parent frame to which the new frame is added.
+        collapsible : bool
+            Whether the frame should be collapsible.
+        title : str
+            The title for the frame if it is collapsible.
+
+        Returns
+        -------
+        tk.Frame
+            The created frame.
+        """
         if collapsible:
             self.fold_all_frames()
             frame = CollapsibleFrame(parent=parent, title=title)
@@ -603,7 +867,7 @@ class HardwareTab(ttk.Frame):
         return func
 
     def build_event_handler(
-        self, hardware_widgets: dict, key: str, frame: tk.Frame, frame_id: int
+        self, hardware_widgets: dict, key: str, frame: ttk.Frame, frame_id: int
     ) -> Callable[..., None]:
         """Build button event handler
 

@@ -459,15 +459,3 @@ class Configurator:
                         hardware_widgets_value=widgets_value[0],
                         constants_widgets_value=widgets_value[1],
                     )
-
-    def device_selected(self, event):
-        """Handle the event when a device is selected from the dropdown."""
-        # # Get the selected device name
-        # selected_device_name = self.view.microscope_frame.get()
-        # # Find the key in the dictionary that corresponds to the selected value
-        # selected_key = next(
-        #     key for key, value in device_types.items()
-        #     if value == selected_device_name)
-        # print(f"Selected Device Key: {selected_key}")
-        # print(f"Selected Device Name: {selected_device_name}")
-        pass

@@ -4,6 +4,7 @@ camera_device_types = {
     "Hamamatsu ORCA Fusion": ("HamamatsuOrcaFusion", "hamamatsu"),
     "Hamamatsu Flash 4.0": ("HamamatsuOrca", "hamamatsu"),
     "Photometrics Iris 15B": ("Photometrics", "photometrics"),
+    "Ximea MU196XR": ("MU196XRCamera", "ximea"),
     "Virtual Device": ("Synthetic", "synthetic"),
 }
 
@@ -463,7 +464,10 @@ remote_focus_hardware_widgets = {
     "frame_config": {"ref": "hardware"},
 }
 
-galvo_device_types = {"Analog Device": ("NI", "ni"), "Virtual Device": ("Synthetic", "synthetic")}
+galvo_device_types = {
+    "Analog Device": ("NI", "ni"),
+    "Virtual Device": ("Synthetic", "synthetic"),
+}
 
 waveform_types = {
     "Sine": "sine",
@@ -520,7 +524,10 @@ galvo_top_widgets = {
     ],
 }
 
-zoom_device_types = {"Dynamixel": ("Dynamixel", "dynamixel"), "Virtual Device": ("Synthetic", "synthetic")}
+zoom_device_types = {
+    "Dynamixel": ("Dynamixel", "dynamixel"),
+    "Virtual Device": ("Synthetic", "synthetic"),
+}
 
 zoom_position_widgets = {
     "zoom_value": ["Zoom Value", "Input", "string", None, "Example: 16x"],
@@ -569,7 +576,10 @@ mirror_hardware_widgets = {
     "n_modes": ["Number of Modes", "Input", "int", None, "Example: 32", 32],
 }
 
-laser_device_types = {"Analog Device": ("NI", "ni"), "Virtual Device": ("Synthetic", "synthetic")}
+laser_device_types = {
+    "Analog Device": ("NI", "ni"),
+    "Virtual Device": ("Synthetic", "synthetic"),
+}
 
 laser_hardware_widgets = {
     "wavelength": ["Wavelength", "Input", "int", None, "Example: 488", 488],

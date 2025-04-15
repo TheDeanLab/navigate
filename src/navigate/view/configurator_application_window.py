@@ -278,14 +278,16 @@ class MicroscopeTab(DockableNotebook):
             constants widgets dict
         top_widgets : dict
             button widgets dict
-        *args
+        *args : list
             Variable length argument list.
-        **kwargs
+        **kwargs : dict
             Arbitrary keyword arguments
         """
         tab = HardwareTab(
             name, hardware_widgets, widgets=widgets, top_widgets=top_widgets, **kwargs
         )
+
+        tab.widgets = hardware_widgets
         self.tab_list.append(tab)
         self.add(tab, text=name, sticky=tk.NSEW)
 
@@ -331,6 +333,12 @@ class HardwareTab(ttk.Frame):
 
         if hardware_widgets_value is None:
             hardware_widgets_value = [None]
+
+        self.hardware_widgets = hardware_widgets
+        self.widgets = widgets
+        self.top_widgets = top_widgets
+        self.constants_widgets_value = constants_widgets_value
+        self.hardware_widgets_value = hardware_widgets_value
 
         # Configure the frame to expand properly
         self.columnconfigure(index=0, weight=1)
@@ -416,6 +424,7 @@ class HardwareTab(ttk.Frame):
         hardware_widgets: dict,
         frame: ttk.Frame,
         direction: Optional[str] = "vertical",
+        synthetic: Optional[bool] = False,
     ) -> None:
         """Create UI widgets for hardware configuration.
 
@@ -428,6 +437,8 @@ class HardwareTab(ttk.Frame):
             The parent frame to which widgets are added.
         direction : str, optional
             Layout direction: "vertical" or "horizontal", by default "vertical".
+        synthetic : bool, optional
+            If True, only create the first widget and return, by default False.
         """
         if hardware_widgets is None:
             return
@@ -474,6 +485,8 @@ class HardwareTab(ttk.Frame):
             if info_text:
                 self._place_info_label(content_frame, info_text, direction, row_index)
 
+            if row_index == 0 and synthetic:
+                return
             row_index += 1
 
     @staticmethod
@@ -630,6 +643,100 @@ class HardwareTab(ttk.Frame):
         widget.state(["!disabled", "readonly"])
         widget.set(str(options[-1]) if value_type == "bool" else options[-1])
 
+        # Add binding for device type changes
+        if key.endswith("/type") or key == "type":
+            widget.bind(
+                "<<ComboboxSelected>>", lambda e: self._on_device_type_changed(e, key)
+            )
+
+    def _on_device_type_changed(self, event, key):
+        """Handle device type change event.
+
+        Parameters
+        ----------
+        event : tk.Event
+            The event that triggered this callback.
+        key : str
+            The key of the combobox that changed.
+        """
+        # Get the selected device type
+        event_widget = event.widget
+        selected_value = event_widget.get()
+        is_virtual = "Virtual Device" in selected_value
+
+        # Determine which widgets to rebuild
+        if key.startswith("hardware/"):
+            # For hardware/type fields, rebuild entire hardware section
+            self.variables_list = [
+                vl for vl in self.variables_list if vl[2] != "hardware"
+            ]
+
+            # Clear hardware frame
+            for widget in list(self.hardware_frame.winfo_children()):
+                widget.destroy()
+
+            # Rebuild hardware widgets
+            self.build_widgets(
+                self.hardware_widgets, parent=self.hardware_frame, synthetic=is_virtual
+            )
+        else:
+            # For nested device types, find the appropriate frame to rebuild
+            # (like zoom, galvo, or laser components)
+            current_frame = event_widget.master
+            while current_frame is not None:
+                # Find the nearest parent frame or collapsible frame
+                if (
+                    isinstance(current_frame, (ttk.Frame, CollapsibleFrame))
+                    and current_frame != event_widget.master
+                ):
+                    # Found a suitable parent frame
+                    break
+                current_frame = current_frame.master
+
+            if current_frame is None or current_frame == self:
+                # Fallback to rebuilding the entire hardware section
+                for widget in list(self.hardware_frame.winfo_children()):
+                    widget.destroy()
+                self.build_widgets(
+                    self.hardware_widgets,
+                    parent=self.hardware_frame,
+                    synthetic=is_virtual,
+                )
+            else:
+                # Create a parent frame to replace the one we're rebuilding
+                parent = current_frame.master
+
+                if parent is not None:
+                    # Remember the grid options
+                    grid_info = current_frame.grid_info()
+
+                    # Remove old frame but don't destroy until we're done with it
+                    current_frame.grid_forget()
+
+                    # Create a new frame in the same position
+                    new_frame = ttk.Frame(parent)
+                    new_frame.grid(**grid_info)
+
+                    # For complex widgets or Lasers which might have list structure
+                    if key == "type" or key.endswith("/type"):
+                        # Find appropriate configuration to rebuild
+                        for (
+                            hardware_key,
+                            widgets_config,
+                        ) in self.hardware_widgets.items():
+                            if hardware_key == key or hardware_key.endswith("/" + key):
+                                if isinstance(widgets_config, dict):
+                                    self.build_widgets(widgets_config, parent=new_frame)
+                                elif isinstance(widgets_config, list):
+                                    # Handle special case for lasers or complex widgets
+                                    self.build_widgets(
+                                        widgets_config[0], parent=new_frame
+                                    )
+                                break
+
+                    # Now destroy the old frame
+                    current_frame.destroy()
+
     @staticmethod
     def _configure_spinbox(widget: ttk.Spinbox, values: dict) -> None:
         """Configure a spinbox widget with range and increment.
@@ -701,6 +808,7 @@ class HardwareTab(ttk.Frame):
         widgets: dict,
         parent: Optional[ttk.Frame] = None,
         widgets_value: Optional[dict] = None,
+        synthetic: Optional[bool] = False,
         **kwargs: dict,
     ) -> None:
         """
@@ -714,6 +822,8 @@ class HardwareTab(ttk.Frame):
             Parent frame to place the widgets, by default None.
         widgets_value : Optional[dict], optional
             Dictionary containing initial values for the widgets, by default None.
+        synthetic : bool, optional
+            If True, only create the first widget and return, by default False.
         **kwargs : dict
             Additional keyword arguments, such as `ref` (reference name) or `direction`
             (layout direction, e.g., "vertical").
@@ -736,7 +846,9 @@ class HardwareTab(ttk.Frame):
         self.initialize_variables(ref, frame_format)
 
         # Create hardware widgets
-        self.create_hardware_widgets(widgets, frame=frame, direction=direction)
+        self.create_hardware_widgets(
+            widgets, frame=frame, direction=direction, synthetic=synthetic
+        )
 
         # Set widget values
         self.set_widget_values(widgets_value)
@@ -807,8 +919,9 @@ class HardwareTab(ttk.Frame):
 
         return collapsible, title, frame_format, ref, direction
 
-    def create_frame(self, parent: ttk.Frame, collapsible: bool, title: str) -> (
-            ttk.Frame):
+    def create_frame(
+        self, parent: ttk.Frame, collapsible: bool, title: str
+    ) -> ttk.Frame:
         """Create a frame (collapsible or regular) and place it in the grid.
 
         Parameters

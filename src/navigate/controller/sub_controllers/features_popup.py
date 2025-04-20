@@ -95,6 +95,9 @@ class FeaturePopupController(GUIController):
             self.view.popup.protocol("WM_DELETE_WINDOW", self.cancel_acquisition)
             self.view.buttons["cancel"].configure(command=self.cancel_acquisition)
 
+        # Dismiss popup.
+        self.view.popup.bind("<Escape>", self.exit_func)
+
     def populate_feature_list(self, feature_list_id):
         """Populate the feature list
 
@@ -180,7 +183,7 @@ class FeaturePopupController(GUIController):
         content = self.view.inputs["content"].get("1.0", "end-1c")
         return verify_feature_list(content)
 
-    def exit_func(self):
+    def exit_func(self, *args):
         """Exit the popup"""
         self.close_child_popups()
         self.view.popup.dismiss()

@@ -230,6 +230,9 @@ class FeatureListPopup:
         )
         # Change background of popup window to white
         self.popup.configure(bg="white")
+        self.popup.resizable(tk.TRUE, tk.TRUE)
+        self.popup.grid_columnconfigure(0, weight=1)
+        self.popup.grid_rowconfigure(0, weight=1)
         #: bool: Flag to indicate if the popup is for adding new list
         self.add_new_list_flag = False
         if kwargs["title"].startswith("Add"):
@@ -237,6 +240,7 @@ class FeatureListPopup:
 
         # Creating content frame
         content_frame = self.popup.get_frame()
+        content_frame.grid_columnconfigure(0, weight=1)
 
         #: dict: Dictionary of input widgets
         self.inputs = {}
@@ -251,6 +255,9 @@ class FeatureListPopup:
         self.inputs["feature_list_name"].grid(
             row=0, column=0, sticky=tk.NSEW, padx=3, pady=3
         )
+        self.inputs["feature_list_name"].grid_columnconfigure(0, weight=0)
+        self.inputs["feature_list_name"].grid_columnconfigure(1, weight=1)
+        self.inputs["feature_list_name"].grid_rowconfigure(0, weight=1)
 
         separator = ttk.Separator(content_frame)
         separator.grid(row=2, column=0, sticky=tk.NSEW, padx=3, pady=3)
@@ -258,7 +265,9 @@ class FeatureListPopup:
         scroll_frame = ttk.Frame(content_frame)
         scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
         canvas = tk.Canvas(scroll_frame, width=800, height=350)
-        scrollbar = ttk.Scrollbar(scroll_frame, orient="horizon", command=canvas.xview)
+        scrollbar = ttk.Scrollbar(
+            scroll_frame, orient="horizontal", command=canvas.xview
+        )
         self.feature_view_frame = ttk.Frame(canvas)
 
         self.feature_view_frame.bind(

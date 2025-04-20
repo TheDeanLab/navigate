@@ -345,7 +345,7 @@ class LoopByCount:
     dynamically determining it from configuration references.
     """
 
-    def __init__(self, model, steps=1):
+    def __init__(self, model, steps=1, step_by_frame=False, is_nested=False):
         """Initialize the LoopByCount class.
 
         Parameters:
@@ -355,15 +355,22 @@ class LoopByCount:
         steps : int or str, optional
             The number of steps or a configuration reference to determine the loop
             count. Default is 1.
+        step_by_frame : bool
+            Count by number of frames received/ the number of entering this node.
+        is_nested : bool
+            The flag indicates whether the loop is nested within another loop.
         """
         #: MicroscopeModel: The microscope model associated with the loop control.
         self.model = model
 
         #: bool: A boolean value indicating whether to step by frame or by step.
-        self.step_by_frame = False if type(steps) is str else True
+        self.step_by_frame = step_by_frame
 
         #: int: The remaining number of steps or frames.
         self.steps = steps
+
+        #: bool: Flags indicate if nested loops
+        self.is_nested = is_nested
 
         #: int: The remaining number of steps.
         self.signals = 1
@@ -374,6 +381,10 @@ class LoopByCount:
         #: bool: Initialization flag
         self.initialized = VariableWithLock(bool)
         self.initialized.value = False
+
+        #: int: signal/data end num
+        self.end_count = VariableWithLock(int)
+        self.end_count.value = 0
 
         #: dict: A dictionary defining the configuration for the loop control process.
         self.config_table = {
@@ -393,10 +404,10 @@ class LoopByCount:
             if initialized.value:
                 return
 
-            self.get_steps()
+            steps = self.get_steps()
 
-            self.signals = self.steps
-            self.data_frames = self.steps
+            self.signals = steps
+            self.data_frames = steps
             initialized.value = True
 
             logger.debug(f"LoopByCount-initialize: {self.signals}, {self.data_frames}")
@@ -415,8 +426,8 @@ class LoopByCount:
         """
         self.signals -= 1
         if self.signals <= 0:
-            self.signals = self.steps
-            # self.initialized.value = False
+            if self.is_nested:
+                self.synchronize("signal")
             return False
         return True
 
@@ -442,8 +453,8 @@ class LoopByCount:
         else:
             self.data_frames -= 1
         if self.data_frames <= 0:
-            self.data_frames = self.steps
-            # self.initialized.value = False
+            if self.is_nested:
+                self.synchronize("data")
             return False
         return True
 
@@ -455,25 +466,50 @@ class LoopByCount:
         int
             Number of steps.
         """
-        if type(self.steps) is int:
-            return self.steps
-        if self.steps == "channels":
-            self.steps = len(self.model.active_microscope.available_channels)
-        elif self.steps == "positions":
-            self.steps = len(self.model.configuration["multi_positions"]) - 1
+        steps = self.steps
+
+        if type(steps) is int:
+            return steps
+        if steps == "channels":
+            return len(self.model.active_microscope.available_channels)
+        elif steps == "positions":
+            return len(self.model.configuration["multi_positions"]) - 1
         else:
             try:
-                parameters = self.steps.split(".")
+                parameters = steps.split(".")
                 config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
-                exec(f"self.steps = self.model.configuration{config_ref}")
+                steps = eval(f"self.model.configuration{config_ref}")
             except:  # noqa
-                self.steps = 1
+                return 1
 
-            if type(self.steps) in [list, ListProxy]:
-                self.steps = len(self.steps)
+            if type(steps) in [list, ListProxy]:
+                return len(steps)
             else:
-                self.steps = int(self.steps)
-        return self.steps
+                return int(steps)
+    
+    def synchronize(self, thread_name):
+        """Synchronize signal and data function
+        
+        Parameters:
+        ----------
+        thread_name : bool
+            Signal or Data
+        """
+        logger.debug(f"LoopByCount-Synchronize {thread_name}")
+        with self.end_count as end_count:
+            if end_count.value == 1:
+                self.initialized.value = False
+                end_count.value += 1
+                return
+            end_count.value += 1
+
+        while self.end_count.value < 2:
+            time.sleep(0.001)
+
+        self.end_count.value = 0
+
+        logger.debug(f"LoopByCount-Synchronize {thread_name} ends.")
+        
 
 
 class PrepareNextChannel:

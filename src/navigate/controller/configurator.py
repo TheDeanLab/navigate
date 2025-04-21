@@ -33,7 +33,7 @@
 import tkinter as tk
 from time import sleep
 from tkinter import filedialog, messagebox
-from typing import Optional
+from typing import Optional, Any, Dict, List, IO
 
 # Third Party Imports
 
@@ -59,15 +59,19 @@ logger = logging.getLogger(p)
 class Configurator:
     """Navigate Configurator"""
 
-    def __init__(self, root: tk.Tk, splash_screen):
-        """Initiates the configurator application window.
+    def __init__(self, root: tk.Tk, splash_screen: tk.Toplevel) -> None:
+        """Initialize the Configurator application window.
 
         Parameters
         ----------
         root : tk.Tk
-            The main window of the application
-        splash_screen : SplashScreen
-            The splash screen of the application
+            The main Tkinter root window of the application.
+        splash_screen : tk.Toplevel
+            The splash screen to display before showing the main window.
+
+        Returns
+        -------
+        None
         """
         self.root = root
 
@@ -89,50 +93,90 @@ class Configurator:
         self.create_config_window(0)
 
     def on_cancel(self) -> None:
-        """Closes the window and exits the program"""
+        """Close the configurator window and exit the application.
+
+        Returns
+        -------
+        None
+        """
         self.root.destroy()
         exit()
 
     def add_microscope(self) -> None:
-        """Add a new microscope tab"""
+        """Add a new microscope tab to the configurator.
+
+        Returns
+        -------
+        None
+        """
+        # Increment microscope ID and create a new configuration tab
         self.microscope_id += 1
         self.create_config_window(self.microscope_id)
 
     def delete_microscopes(self) -> None:
-        """Delete all microscopes"""
-        # delete microscopes
+        """Delete all microscope tabs and reset the microscope counter.
+
+        Returns
+        -------
+        None
+        """
+        # Remove all microscope tabs from the notebook
         for tab_id in self.view.microscope_window.tabs():
             self.view.microscope_window.forget(tab_id)
+        # Clear internal tracking of tabs and reset ID counter
         self.view.microscope_window.tab_list = []
         self.microscope_id = 0
 
     def new_configuration(self) -> None:
-        """Create new configurations"""
+        """Reset to a new, empty microscope configuration.
+
+        Deletes existing microscopes and initializes a fresh configuration tab.
+
+        Returns
+        -------
+        None
+        """
+        # Remove all existing tabs and create an initial microscope tab
         self.delete_microscopes()
         self.create_config_window(self.microscope_id)
 
     def save(self) -> None:
-        """Save configuration file"""
+        """Save the current configuration to a YAML file.
 
-        def set_value(temp_dict, key_list, value):
-            """Set value
+        Opens a file dialog to select the save path, collects values from all
+        microscope and hardware tabs, constructs a nested dictionary, and
+        writes it out in YAML format.
+
+        Returns
+        -------
+        None
+        """
+
+        def set_value(temp_dict: Dict[str, Any], key_list: List[str], value: Any) -> None:
+            """Set a nested value in a dictionary given a list of keys.
 
             Parameters
             ----------
-            temp_dict: dict
-                Target dictionary
-            key_list: list
-                keyword list
-            value: any
-                value of the item
+            temp_dict : Dict[str, Any]
+                The dictionary in which to set the value.
+            key_list : List[str]
+                List of keys representing the nested path.
+            value : Any
+                The value to set at the final key.
+
+            Returns
+            -------
+            None
             """
-            if type(key_list) is list:
-                for i in range(len(key_list) - 1):
-                    k = key_list[i]
-                    temp_dict[k] = temp_dict.get(k, {})
-                    temp_dict = temp_dict[k]
+            # Traverse or create nested dictionaries up to the last key
+            if isinstance(key_list, list):
+                for key in key_list[:-1]:
+                    temp_dict[key] = temp_dict.get(key, {})
+                    temp_dict = temp_dict[key]
+            # Assign the value at the final key in the nested dictionary
             temp_dict[key_list[-1]] = value
 
+        # Prompt user for filename to save configuration
         filename = filedialog.asksaveasfilename(
             defaultextension=".yaml", filetypes=[("Yaml file", "*.yml *.yaml")]
         )
@@ -140,7 +184,8 @@ class Configurator:
             return
         # warning_info
         warning_info = {}
-        config_dict = {}
+        config_dict: Dict[str, Any] = {}
+        # Iterate over each microscope tab and collect hardware settings
         for tab_index in self.view.microscope_window.tabs():
             microscope_name = self.view.microscope_window.tab(tab_index, "text")
             microscope_tab = self.view.microscope_window.nametowidget(tab_index)
@@ -224,23 +269,41 @@ class Configurator:
                 f". Please double check!",
             )
 
-    def write_to_yaml(self, config: dict, filename: str) -> None:
-        """write yaml file
+    def write_to_yaml(self, config: Dict[str, Any], filename: str) -> None:
+        """Write configuration dictionary to a YAML file.
 
         Parameters
         ----------
-        config: dict
-            configuration dictionary
-        filename: str
-            yaml file name
+        config : Dict[str, Any]
+            Nested dictionary representing the microscope configurations.
+        filename : str
+            Path to the YAML file to write.
+
+        Returns
+        -------
+        None
         """
 
-        def write_func(prefix, config_dict, f):
+        def write_func(prefix: str, config_dict: Dict[str, Any], f: IO[str]) -> None:
+            """Recursively write nested configuration dictionaries and lists to the YAML file.
+
+            Parameters
+            ----------
+            prefix : str
+                Current indentation prefix.
+            config_dict : Dict[str, Any]
+                Partial configuration dictionary to write.
+            f : IO[str]
+                File-like object to write YAML content.
+            """
+            # Iterate over keys in the current configuration dictionary
             for k in config_dict:
-                if type(config_dict[k]) == dict:
+                if isinstance(config_dict[k], dict):
+                    # Nested dictionary: write key and recurse
                     f.write(f"{prefix}{k}:\n")
                     write_func(prefix + " " * 2, config_dict[k], f)
                 elif type(config_dict[k]) == list:
+                    # List of items: write each item under a dash
                     list_prefix = " "
                     if k != "None":
                         f.write(f"{prefix}{k}:\n")
@@ -249,6 +312,7 @@ class Configurator:
                         f.write(f"{prefix}{list_prefix}-\n")
                         write_func(prefix + list_prefix * 2, list_item, f)
                 elif k != "":
+                    # Scalar value: write key and its value
                     f.write(f"{prefix}{k}: {config_dict[k]}\n")
 
         with open(filename, "w") as f:
@@ -256,13 +320,18 @@ class Configurator:
             write_func("  ", config, f)
 
     def create_config_window(self, id: int) -> None:
-        """Creates the configuration window tabs.
+        """Create configuration window tabs for a microscope.
 
         Parameters
         ----------
         id : int
-            The id of the microscope
+            Identifier for the new microscope tab.
+
+        Returns
+        -------
+        None
         """
+        # Construct tab name and instantiate a new MicroscopeTab
 
         tab_name = "Microscope-" + str(id)
         microscope_tab = MicroscopeTab(
@@ -291,7 +360,12 @@ class Configurator:
         )
 
     def load_configuration(self) -> None:
-        """Load configuration"""
+        """Load configuration from a YAML file and populate GUI tabs.
+
+        Returns
+        -------
+        None
+        """
 
         def get_widget_value(name, value_dict) -> Optional[str]:
             """Get the value from a dict

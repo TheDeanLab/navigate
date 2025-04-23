@@ -91,6 +91,140 @@ class Configurator:
         self.view.top_window.cancel_button.config(command=self.on_cancel)
         self.microscope_id = 0
         self.create_config_window(0)
+    
+    def _set_nested_value(self, base: Dict[str, Any], keys: List[str], value: Any) -> None:
+        """
+        Set a value in a nested dictionary given a list of keys.
+
+        Parameters
+        ----------
+        base : Dict[str, Any]
+            The dictionary in which to set the nested value.
+        keys : List[str]
+            Sequence of keys defining the nested path.
+        value : Any
+            The value to assign at the final nested key.
+        """
+        # Traverse or create nested dictionaries up to the last key
+        for key in keys[:-1]:
+            base = base.setdefault(key, {})  # type: ignore
+        # Assign the value at the final key
+        base[keys[-1]] = value
+    
+    def _get_widget_value(self, path: str, data: Dict[str, Any]) -> Optional[Any]:
+        """
+        Retrieve a nested value from a dictionary given a slash-separated key path.
+
+        Parameters
+        ----------
+        path : str
+            Slash-separated keys specifying the nested path.
+        data : Dict[str, Any]
+            The dictionary to search.
+
+        Returns
+        -------
+        Optional[Any]
+            The value found at the end of the path, or None if any key is missing.
+        """
+        current = data
+        for key in path.split("/"):
+            if not key.strip():
+                return current
+            if not isinstance(current, dict):
+                return None
+            current = current.get(key)
+            if current is None:
+                return None
+        return current
+
+    def _extract_widgets_values(self, widgets: Dict[str, Any], value_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract flat widget key/value pairs from a nested value dictionary.
+
+        Parameters
+        ----------
+        widgets : Dict[str, Any]
+            Widget definition mapping keys to metadata (including type and mapping).
+        value_dict : Dict[str, Any]
+            The nested configuration values for these widgets.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Mapping of widget keys to their corresponding values.
+        """
+        result: Dict[str, Any] = {}
+        for key, meta in widgets.items():
+            if key == "frame_config":
+                continue
+            widget_type = meta[1]
+            if widget_type in ("Button", "Label"):
+                continue
+            raw_value = self._get_widget_value(key, value_dict)
+            mapping = meta[3]
+            if widget_type != "Spinbox" and mapping:
+                # Create reverse lookup for valid mapping
+                if isinstance(mapping, list):
+                    rev_map = {v: v for v in mapping}
+                else:
+                    rev_map = {v: k for k, v in mapping.items()}
+                # Default to last valid if missing
+                mapped = rev_map.get(raw_value, list(rev_map.values())[-1])
+                result[key] = mapped
+            else:
+                result[key] = raw_value
+        return result
+
+    def _build_widgets_values(
+        self,
+        widgets: Optional[Dict[str, Any]],
+        data: Optional[Dict[str, Any]],
+    ) -> List[Optional[Dict[str, Any]]]:
+        """
+        Build a list of widget-value dictionaries based on formatting rules.
+
+        Parameters
+        ----------
+        widgets : Optional[Dict[str, Any]]
+            Widget definitions including format and reference metadata.
+        data : Optional[Dict[str, Any]]
+            The nested values to populate the widgets.
+
+        Returns
+        -------
+        List[Optional[Dict[str, Any]]]
+            A list of mappings for each widget instance, or [None] if unavailable.
+        """
+        if widgets is None or data is None:
+            return [None]
+        values: List[Optional[Dict[str, Any]]] = []
+        ref = widgets.get("frame_config", {}).get("ref", "")
+        fmt = widgets.get("frame_config", {}).get("format", "")
+        if fmt.startswith("list"):
+            raw = self._get_widget_value(ref, data) if ref and ref.lower() != "none" else data
+            if not isinstance(raw, list):
+                return [None]
+            for item in raw:
+                values.append(self._extract_widgets_values(widgets, item))
+        elif fmt.startswith("item"):
+            fmt_list = fmt.split(";")
+            ref_list = ref.split(";")
+            for fmt_item in fmt_list:
+                k_idx = fmt_item[fmt_item.index("(") + 1 : fmt_item.index(",")].strip()
+                v_idx = fmt_item[fmt_item.index(",") + 1 : fmt_item.index(")")].strip()
+                temp = self._get_widget_value(ref_list[fmt_list.index(fmt_item)], data)
+                if isinstance(temp, dict):
+                    for j, k in enumerate(temp.keys()):
+                        if len(values) <= j:
+                            values.append({k_idx: k, v_idx: temp[k]})
+                        else:
+                            values[j][k_idx] = k  # type: ignore
+                            values[j][v_idx] = temp[k]  # type: ignore
+        else:
+            raw = self._get_widget_value(ref, data) if ref and ref.lower() != "none" else data
+            values.append(self._extract_widgets_values(widgets, raw or {}))
+        return values
 
     def on_cancel(self) -> None:
         """Close the configurator window and exit the application.
@@ -152,29 +286,6 @@ class Configurator:
         None
         """
 
-        def set_value(temp_dict: Dict[str, Any], key_list: List[str], value: Any) -> None:
-            """Set a nested value in a dictionary given a list of keys.
-
-            Parameters
-            ----------
-            temp_dict : Dict[str, Any]
-                The dictionary in which to set the value.
-            key_list : List[str]
-                List of keys representing the nested path.
-            value : Any
-                The value to set at the final key.
-
-            Returns
-            -------
-            None
-            """
-            # Traverse or create nested dictionaries up to the last key
-            if isinstance(key_list, list):
-                for key in key_list[:-1]:
-                    temp_dict[key] = temp_dict.get(key, {})
-                    temp_dict = temp_dict[key]
-            # Assign the value at the final key in the nested dictionary
-            temp_dict[key_list[-1]] = value
 
         # Prompt user for filename to save configuration
         filename = filedialog.asksaveasfilename(
@@ -257,7 +368,8 @@ class Configurator:
                                 f"Please double check!"
                             )
                             warning_info[hardware_name] = True
-                        set_value(temp_dict, k.split("/"), v)
+                        # Assign nested configuration entries
+                        self._set_nested_value(temp_dict, k.split("/"), v)
 
         self.write_to_yaml(config_dict, filename)
         # display warning
@@ -367,101 +479,8 @@ class Configurator:
         None
         """
 
-        def get_widget_value(name, value_dict) -> Optional[str]:
-            """Get the value from a dict
 
-            Parameters
-            ----------
-            name: str
-                key name
-            value_dict: dict
-                value dictionary
-
-            Returns
-            -------
-            value : Optional[str]
-
-                - The value of the key if it exists
-                - None if the key does not exist
-            """
-            value = value_dict
-            for key in name.split("/"):
-                if key.strip() == "":
-                    return value
-                value = value.get(key, None)
-                if value is None:
-                    return None
-            return value
-
-        def get_widgets_value(widgets, value_dict):
-            """Get all key-value from value_dict, keys are from widgets"""
-            temp = {}
-            for key in widgets:
-                if key == "frame_config":
-                    continue
-                if widgets[key][1] in ["Button", "Label"]:
-                    continue
-                value = get_widget_value(key, value_dict)
-                # widgets[key][3] is the value mapping dict
-                if widgets[key][1] != "Spinbox" and widgets[key][3]:
-                    # if the value is not valid, return the last valid value
-                    if type(widgets[key][3]) == list:
-                        reverse_value_dict = dict(
-                            map(lambda v: (v, v), widgets[key][3])
-                        )
-                    else:
-                        reverse_value_dict = dict(
-                            map(lambda v: (v[1], v[0]), widgets[key][3].items())
-                        )
-                    temp[key] = reverse_value_dict.get(
-                        value, list(reverse_value_dict.values())[-1]
-                    )
-                else:
-                    temp[key] = value
-            return temp
-
-        def build_widgets_value(widgets, value_dict):
-            """According to value_dict build values for widgets"""
-            if widgets is None or value_dict is None:
-                return [None]
-            result = []
-            ref = ""
-            format = ""
-            if "frame_config" in widgets:
-                ref = widgets["frame_config"].get("ref", "")
-                format = widgets["frame_config"].get("format", "")
-            if format.startswith("list"):
-                if ref != "" and ref.lower() != "none":
-                    value_dict = get_widget_value(ref, value_dict)
-                if type(value_dict) is not list:
-                    return [None]
-                for i in range(len(value_dict)):
-                    result.append(get_widgets_value(widgets, value_dict[i]))
-            elif format.startswith("item"):
-                format_list = format.split(";")
-                ref_list = ref.split(";")
-                for i, format_item in enumerate(format_list):
-                    k_idx = format_item[
-                        format_item.index("(") + 1 : format_item.index(",")
-                    ].strip()
-                    v_idx = format_item[
-                        format_item.index(",") + 1 : format_item.index(")")
-                    ].strip()
-                    temp_widget_values = get_widget_value(ref_list[i], value_dict)
-                    for j, k in enumerate(temp_widget_values.keys()):
-                        if len(result) < j + 1:
-                            result.append({k_idx: k, v_idx: temp_widget_values[k]})
-                        else:
-                            result[j][k_idx] = k
-                            result[j][v_idx] = temp_widget_values[k]
-            else:
-                if ref != "" and ref.lower() != "none":
-                    value_dict = get_widget_value(ref, value_dict)
-                result.append(get_widgets_value(widgets, value_dict))
-
-            return result
-
-        # ask file name
+        # Prompt user to select a configuration YAML file
         file_name = filedialog.askopenfilename(
             defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
         )
@@ -494,33 +513,29 @@ class Configurator:
             for hardware_type, widgets in hardwares_dict.items():
                 hardware_ref_name = hardwares_config_name_dict[hardware_type]
                 # build dictionary values for widgets
-                if type(widgets) == dict:
+                if isinstance(widgets, dict):
                     try:
-                        widgets_value = build_widgets_value(
+                        widgets_value = self._build_widgets_values(
                             widgets,
-                            config_dict["microscopes"][microscope_name][
-                                hardware_ref_name
-                            ],
+                            config_dict["microscopes"][microscope_name][hardware_ref_name],
                         )
                     except Exception:
                         widgets_value = [None]
                     microscope_tab.create_hardware_tab(
-                        hardware_type, widgets, hardware_widgets_value=widgets_value
+                        hardware_type,
+                        widgets,
+                        hardware_widgets_value=widgets_value,
                     )
                 else:
                     try:
                         widgets_value = [
-                            build_widgets_value(
+                            self._build_widgets_values(
                                 widgets[1],
-                                config_dict["microscopes"][microscope_name][
-                                    hardware_ref_name
-                                ],
+                                config_dict["microscopes"][microscope_name][hardware_ref_name],
                             ),
-                            build_widgets_value(
+                            self._build_widgets_values(
                                 widgets[2],
-                                config_dict["microscopes"][microscope_name][
-                                    hardware_ref_name
-                                ],
+                                config_dict["microscopes"][microscope_name][hardware_ref_name],
                             ),
                         ]
                     except Exception:

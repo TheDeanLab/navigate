@@ -45,7 +45,7 @@ from scipy.optimize import curve_fit
 from navigate.model.features.feature_container import load_features
 import navigate.model.analysis.image_contrast as img_contrast
 from navigate.model.features.image_writer import ImageWriter
-
+from navigate.model.waveforms import remote_focus_ramp
 
 def poly2(x, a, b, c):
     """Second order polynomial function
@@ -285,6 +285,7 @@ class TonyWilson:
 
         # Opens correct shutter and puts all signals to false
         self.model.prepare_acquisition()
+        self.setup_projection()
         self.model.active_microscope.prepare_next_channel()
 
         # load signal and data containers
@@ -338,6 +339,65 @@ class TonyWilson:
         steps = ranges // step_size + 1
         pos_offset = (steps // 2) * step_size + step_size
         return steps, pos_offset
+
+    def setup_projection(self):
+
+        microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+
+        # CONFIGURE GALVO STAGE
+        galvo_stage = self.model.active_microscope.stages["z"]
+        (
+            exposure_times,
+            sweep_times,
+        ) = self.model.active_microscope.get_exposure_sweep_times()
+        remote_focus_delay = float(self.model.configuration["waveform_constants"][
+            "other_constants"
+        ]["remote_focus_delay"]) / 1000
+        remote_focus_ramp_falling = float(self.model.configuration["waveform_constants"][
+            "other_constants"
+        ]["remote_focus_ramp_falling"]) / 1000
+
+        # calculate waveforms
+        waveform_dict = {}
+        for channel_key in microscope_state["channels"].keys():
+            # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
+            channel = microscope_state["channels"][channel_key]
+
+            # Only proceed if it is enabled in the GUI
+            if channel["is_selected"] is True:
+
+                # Get the Waveform Parameters
+                # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
+                exposure_time = exposure_times[channel_key]
+                sweep_time = sweep_times[channel_key]
+
+                z_range = microscope_state["scanrange"]
+
+                waveforms = []
+                amp = eval(galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)})
+                waveforms.append(remote_focus_ramp(
+                        sample_rate=galvo_stage.sample_rate,
+                        exposure_time=exposure_time,
+                        sweep_time=sweep_time,
+                        remote_focus_delay=remote_focus_delay,
+                        camera_delay=galvo_stage.camera_delay,
+                        fall=remote_focus_ramp_falling,
+                        amplitude=amp,
+                    ))
+        waveform_dict[channel_key] = np.hstack(waveforms)
+        galvo_stage.update_waveform(waveform_dict)
+
+        galvo_num = 0
+
+        # CONFIGURE SHEAR GALVO
+        self.model.configuration["waveform_constants"]["galvo_constants"][
+            f"Galvo {galvo_num}"
+        ][microscope_state["microscope_name"]][microscope_state["zoom"]]["amplitude"] = microscope_state["shear_amp"]
+
+        self.model.active_microscope.galvo[f"galvo_{galvo_num}"].adjust(
+            exposure_times,
+            sweep_times
+        )
 
     def pre_func_signal(self):
         """Prepare the signal"""
@@ -452,6 +512,9 @@ class TonyWilson:
             out_str += "\tMirror update failed...\n"
 
         print(out_str)
+
+        if self.model.stop_acquisition:
+            return False
 
         return self.signal_id >= self.total_frame_num
 
@@ -677,9 +740,9 @@ class TonyWilson:
 
         if self.done_all:
             self.best_coefs = self.best_coefs_overall
-            # self.model.stop_acquisition = True
-            # self.model.end_acquisition()
-            # print("Ending acquisition...")
+            self.model.stop_acquisition = True
+            self.model.end_acquisition()
+            print("Ending acquisition...")
             try:
                 stop_time = time.time()
                 print(f"Total runtime:\t{(stop_time - self.start_time):.3f} sec")

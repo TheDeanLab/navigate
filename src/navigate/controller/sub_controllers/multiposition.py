@@ -138,7 +138,7 @@ class MultiPositionController(GUIController):
             ]
         for i, name in enumerate(headers):
             data[name] = list(
-                pos[i] if i < len(pos) else np.nan for pos in positions[start_index:]
+                pos[i] if i < len(pos) else 0.0 for pos in positions[start_index:]
             )
         self.table.model.df = pd.DataFrame(data)
         self.table.currentrow = 0

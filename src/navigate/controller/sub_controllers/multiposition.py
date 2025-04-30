@@ -41,6 +41,7 @@ import numpy as np
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from typing import Any, Dict, List, Optional, Callable
 
 
 # Logger Setup
@@ -51,7 +52,7 @@ logger = logging.getLogger(p)
 class MultiPositionController(GUIController):
     """Controller for the Multi-Position Acquisition Interface."""
 
-    def __init__(self, view, parent_controller=None):
+    def __init__(self, view: Any, parent_controller: Optional[Any] = None) -> None:
         """Initialize the Multi-Position Acquisition Interface.
 
         Parameters
@@ -87,30 +88,32 @@ class MultiPositionController(GUIController):
             command=self.eliminate_tiles
         )
 
-    def eliminate_tiles(self):
+    def eliminate_tiles(self) -> None:
         """Eliminate tiles that do not contain tissue."""
         self.parent_controller.execute("eliminate_tiles")
 
-    def set_positions(self, positions):
-        """Set positions to multi-position's table
+    def set_positions(self, positions: List[List[Any]]) -> None:
+        """Set positions to the multi-position table
 
         Parameters
         ----------
         positions : [[]]
-            positions to be set
+            The positions to be set to the multi-position table.
         """
         stage_axes = self.parent_controller.configuration_controller.stage_axes
         data = {}
         if len(positions) == 0:
-            # add current stage position to the table
+            # add the current stage position to the table
             stage_position = self.parent_controller.configuration["experiment"][
                 "StageParameters"
             ]
             # get the current stage position
             positions = [[stage_position[axis] for axis in stage_axes]]
+
         # check if the positions contain the headers (column names)
         cmp_header = [axis.upper() in positions[0] for axis in stage_axes]
-        # if positions[0] contains ["X", "Y", "Z", "R", "F"], then consider it as headers
+
+        # if positions[0] contain ["X", "Y", "Z", "R", "F"], then consider it as headers
         # else add headers to the table
         if not all(cmp_header):
             # if the first row contains some headers, update the headers
@@ -126,18 +129,24 @@ class MultiPositionController(GUIController):
         else:
             headers = positions[0]
             start_index = 1
+
         # if there are some missing headers, add them
         if len(headers) < len(positions[start_index]):
-            headers = headers + ["col-" + str(i) for i in range(len(positions[start_index]) - len(headers))]
+            headers = headers + [
+                "col-" + str(i)
+                for i in range(len(positions[start_index]) - len(headers))
+            ]
         for i, name in enumerate(headers):
-            data[name] = list(pos[i] if i < len(pos) else np.nan for pos in positions[start_index:])
+            data[name] = list(
+                pos[i] if i < len(pos) else np.nan for pos in positions[start_index:]
+            )
         self.table.model.df = pd.DataFrame(data)
         self.table.currentrow = 0
         self.table.redraw()
         self.table.tableChanged()
         self.show_verbose_info("loaded new positions")
 
-    def get_positions(self):
+    def get_positions(self) -> List[List[Any]]:
         """Return all positions from the Multi-Position Acquisition Interface.
 
         Returns
@@ -155,30 +164,27 @@ class MultiPositionController(GUIController):
         rows = self.table.model.df.shape[0]
         for i in range(rows):
             temp = list(self.table.model.df.iloc[i])
-            if (
-                len(
-                    list(
-                        filter(
-                            lambda v: isinstance(v, (float, int)) and not math.isnan(v),
-                            [temp[i] for i in axes_index],
-                        )
+            if len(
+                list(
+                    filter(
+                        lambda v: isinstance(v, (float, int)) and not math.isnan(v),
+                        [temp[i] for i in axes_index],
                     )
                 )
-                == len(axes_index)
-            ):
+            ) == len(axes_index):
                 positions.append(temp)
         return positions
 
-    def handle_double_click(self, event):
+    def handle_double_click(self, event: Any) -> None:
         """Move to a position within the Multi-Position Acquisition Interface.
 
-        When double-clicked the row head, it will call the parent/central controller
+        When double-clicking the row head, it will call the parent/central controller
         to move stage and update stage view
 
         Parameters
         ----------
         event : tkinter event
-            event that triggers the function
+            An event that triggers the function
         """
         # it is calculated based on the GUI position
         rowclicked = self.table.get_row_clicked(event)
@@ -190,10 +196,19 @@ class MultiPositionController(GUIController):
         # df.iloc uses position index
         temp = list(df.iloc[rowclicked])
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        axes_index = [df.columns.get_loc(axis) for axis in [axis.upper() for axis in stage_axes]]
+        axes_index = [
+            df.columns.get_loc(axis) for axis in [axis.upper() for axis in stage_axes]
+        ]
         # validate position
         # we currently only move to a position doesn't contain nan
-        if len(list(filter(lambda v: isinstance(v, (float, int)) and not math.isnan(v), [temp[i] for i in axes_index]))) != len(stage_axes):
+        if len(
+            list(
+                filter(
+                    lambda v: isinstance(v, (float, int)) and not math.isnan(v),
+                    [temp[i] for i in axes_index],
+                )
+            )
+        ) != len(stage_axes):
             messagebox.showwarning(
                 title="Warning",
                 message="The selected position is invalid, can't go to this position!",
@@ -206,7 +221,7 @@ class MultiPositionController(GUIController):
         self.parent_controller.execute("move_stage_and_update_info", position)
         self.show_verbose_info("move stage to", position)
 
-    def get_position_num(self):
+    def get_position_num(self) -> int:
         """Return the number of positions in the Multi-Position Acquisition Interface.
 
         Returns
@@ -216,7 +231,7 @@ class MultiPositionController(GUIController):
         """
         return self.table.model.df.shape[0]
 
-    def load_positions(self):
+    def load_positions(self) -> None:
         """Load a csv file.
 
         The valid csv file should contain the line of headers: stage axes
@@ -231,13 +246,17 @@ class MultiPositionController(GUIController):
         # validate the csv file
         df.columns = map(lambda v: v.upper(), df.columns)
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        cmp_header = [axis in df.columns for axis in [axis.upper() for axis in stage_axes]]
+        cmp_header = [
+            axis in df.columns for axis in [axis.upper() for axis in stage_axes]
+        ]
         if not all(cmp_header):
             messagebox.showwarning(
                 title="Warning",
                 message=f"The csv file isn't right, it should contain {[axis.upper() for axis in stage_axes]}",
             )
-            logger.info(f"The csv file isn't right, it should contain {[axis.upper() for axis in stage_axes]}")
+            logger.info(
+                f"The csv file isn't right, it should contain {[axis.upper() for axis in stage_axes]}"
+            )
             return
         self.table.model.df = df
         self.table.currentrow = 0
@@ -247,12 +266,12 @@ class MultiPositionController(GUIController):
         self.table.tableChanged()
         self.show_verbose_info("loaded csv file", filename)
 
-    def export_positions(self):
+    def export_positions(self) -> None:
         """Export the positions in the Multi-Position Acquisition Interface to a
         csv file.
 
-        This function opens a dialog that let the user input a filename
-        Then, it will export positions to that csv file
+        This function opens a dialog that lets the user input a filename.
+        Then, it will export positions to that csv file.
         """
         filename = filedialog.asksaveasfilename(
             defaultextension=".csv",
@@ -263,13 +282,13 @@ class MultiPositionController(GUIController):
         self.table.model.df.to_csv(filename, index=False)
         self.show_verbose_info("exporting csv file", filename)
 
-    def move_to_position(self):
+    def move_to_position(self) -> None:
         """Move to a position within the Multi-Position Acquisition Interface."""
         event = type("MyEvent", (object,), {})
         event.x, event.y = 0, 0
         self.handle_double_click(event)
 
-    def insert_row_func(self):
+    def insert_row_func(self) -> None:
         """Insert a row in the Multi-Position Acquisition Interface."""
         self.table.model.addRow(self.table.currentrow)
         self.table.update_rowcolors()
@@ -277,16 +296,16 @@ class MultiPositionController(GUIController):
         self.table.tableChanged()
         self.show_verbose_info("insert a row before current row")
 
-    def add_stage_position(self):
+    def add_stage_position(self) -> None:
         """Add the current stage position to the Multi-Position Acquisition Interface.
 
         This function will get the stage's current position,
-        Then add it to position list
+        Then add it to the position list
         """
         position = self.parent_controller.execute("get_stage_position")
         self.append_position(position)
 
-    def append_position(self, position):
+    def append_position(self, position: Dict[str, Any]) -> None:
         """Append a position to the Multi-Position Acquisition Interface.
 
         Parameters
@@ -320,7 +339,7 @@ class MultiPositionController(GUIController):
         self.table.tableChanged()
         self.show_verbose_info("add current stage position to position list")
 
-    def remove_positions(self, position_flag_list):
+    def remove_positions(self, position_flag_list: List[bool]) -> None:
         """Remove positions according to position_flag_list
 
         Parameters
@@ -337,6 +356,12 @@ class MultiPositionController(GUIController):
         self.set_positions(new_positions)
 
     @property
-    def custom_events(self):
-        """Return custom events for the Multi-Position Controller."""
+    def custom_events(self) -> Dict[str, Callable[..., Any]]:
+        """Return custom events for the Multi-Position Controller.
+
+        Returns
+        -------
+        Dict[str, Callable[..., Any]]
+            Mapping of event names to handler functions.
+        """
         return {"remove_positions": self.remove_positions}

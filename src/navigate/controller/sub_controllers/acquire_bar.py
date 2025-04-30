@@ -161,9 +161,9 @@ class AcquireBarController(GUIController):
             number_of_positions = 1
         else:
             # The first row is a header that describes stage axis designation.
-            number_of_positions = len(
-                self.parent_controller.configuration["multi_positions"]
-            ) - 1
+            number_of_positions = (
+                len(self.parent_controller.configuration["multi_positions"]) - 1
+            )
 
         if mode == "single":
             number_of_slices = 1
@@ -209,10 +209,13 @@ class AcquireBarController(GUIController):
                         else top_percent_complete
                     )
 
-                    bottom_anticipated_images = 100 * (
-                        images_received / bottom_anticipated_images
-                    )
-                    self.view.OvrAcq["value"] = bottom_anticipated_images
+                    try:
+                        bottom_anticipated_images = 100 * (
+                            images_received / bottom_anticipated_images
+                        )
+                        self.view.OvrAcq["value"] = bottom_anticipated_images
+                    except ZeroDivisionError:
+                        pass
 
                 elif mode == "single":
                     top_percent_complete = 100 * (

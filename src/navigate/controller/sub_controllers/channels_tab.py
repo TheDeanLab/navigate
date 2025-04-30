@@ -427,7 +427,7 @@ class ChannelsTabController(GUIController):
 
         # Shift the start/stop positions by the relative position
         flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
-        if flip_flags["z"]:
+        if flip_flags.get("z", False):
             self.stack_acq_vals["abs_z_start"].set(self.z_origin + end_position)
             self.stack_acq_vals["abs_z_end"].set(self.z_origin + start_position)
         else:
@@ -438,7 +438,7 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict["start_position"] = start_position
         self.microscope_state_dict["end_position"] = end_position
         self.microscope_state_dict["step_size"] = step_size * (
-            -1 if flip_flags["z"] else 1
+            -1 if flip_flags.get("z", False) else 1
         )
         self.microscope_state_dict["number_z_steps"] = number_z_steps
         self.microscope_state_dict["abs_z_start"] = self.stack_acq_vals[
@@ -757,7 +757,9 @@ class ChannelsTabController(GUIController):
             return
         stage_axes = self.parent_controller.configuration_controller.stage_axes
         # not tiling on theta axis right now
-        tiling_wizard = TilingWizardPopup(self.view, axes=[axis.upper() for axis in stage_axes if axis != "theta"])
+        tiling_wizard = TilingWizardPopup(
+            self.view, axes=[axis.upper() for axis in stage_axes if axis != "theta"]
+        )
         self.tiling_wizard_controller = TilingWizardController(tiling_wizard, self)
 
     @staticmethod

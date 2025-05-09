@@ -285,7 +285,6 @@ class TonyWilson:
 
         # Opens correct shutter and puts all signals to false
         self.model.prepare_acquisition()
-        self.setup_projection()
         self.model.active_microscope.prepare_next_channel()
 
         # load signal and data containers
@@ -371,7 +370,8 @@ class TonyWilson:
                 exposure_time = exposure_times[channel_key]
                 sweep_time = sweep_times[channel_key]
 
-                z_range = microscope_state["scanrange"]
+                # z_range = microscope_state["scanrange"]
+                z_range = 100
 
                 waveforms = []
                 amp = eval(galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)})
@@ -389,10 +389,13 @@ class TonyWilson:
 
         galvo_num = 0
 
+        # shear_amp = microscope_state["shear_amp"]
+        shear_amp = -0.3
+
         # CONFIGURE SHEAR GALVO
         self.model.configuration["waveform_constants"]["galvo_constants"][
             f"Galvo {galvo_num}"
-        ][microscope_state["microscope_name"]][microscope_state["zoom"]]["amplitude"] = microscope_state["shear_amp"]
+        ][microscope_state["microscope_name"]][microscope_state["zoom"]]["amplitude"] = shear_amp
 
         self.model.active_microscope.galvo[f"galvo_{galvo_num}"].adjust(
             exposure_times,
@@ -439,6 +442,8 @@ class TonyWilson:
         self.best_coefs_overall = deepcopy(self.best_coefs)
         self.best_metric = 0.0
         self.best_peaks = []
+
+        # self.setup_projection()
 
     def in_func_signal(self):
         """Run the signal.

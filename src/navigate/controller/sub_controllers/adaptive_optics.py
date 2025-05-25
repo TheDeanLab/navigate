@@ -81,13 +81,13 @@ class AdaptiveOpticsPopupController(GUIController):
 
         # TODO: just for testing, remove later...
         #: list: list of cameras
-        self.camera_list = self.view.camera_list
-        self.camera_list[
-            "values"
-        ] = self.parent_controller.configuration_controller.microscope_list
-        self.camera_list.bind(
-            "<<ComboboxSelected>>", lambda evt: self.change_camera(evt)
-        )
+        # self.camera_list = self.view.camera_list
+        # self.camera_list[
+        #     "values"
+        # ] = self.parent_controller.configuration_controller.microscope_list
+        # self.camera_list.bind(
+        #     "<<ComboboxSelected>>", lambda evt: self.change_camera(evt)
+        # )
 
         #: Figure: figure for mirror plot
         self.fig = self.view.fig
@@ -131,18 +131,18 @@ class AdaptiveOpticsPopupController(GUIController):
 
         self.populate_experiment_values()
 
-    def change_camera(self, evt):
-        """Change the camera to the selected camera
+    # def change_camera(self, evt):
+    #     """Change the camera to the selected camera
 
-        Parameters
-        ----------
-        evt : Event
-            The event that triggered this function
-        """
-        # cam_id = evt.widget.get().split("_")[-1]
-        # self.parent_controller.execute("change_camera", int(cam_id))
-        cam_name = evt.widget.get()
-        self.parent_controller.execute("resolution", cam_name)
+    #     Parameters
+    #     ----------
+    #     evt : Event
+    #         The event that triggered this function
+    #     """
+    #     # cam_id = evt.widget.get().split("_")[-1]
+    #     # self.parent_controller.execute("change_camera", int(cam_id))
+    #     cam_name = evt.widget.get()
+    #     self.parent_controller.execute("resolution", cam_name)
 
     def set_highlighted_mode(self, evt, mode):
         """Set the highlighted mode
@@ -172,11 +172,11 @@ class AdaptiveOpticsPopupController(GUIController):
 
     def populate_experiment_values(self):
         """Populate the experiment values"""
-        self.camera_list.set(
-            self.parent_controller.configuration["experiment"]["MicroscopeState"][
-                "microscope_name"
-            ]
-        )
+        # self.camera_list.set(
+        #     self.parent_controller.configuration["experiment"]["MicroscopeState"][
+        #         "microscope_name"
+        #     ]
+        # )
         self.widgets["save_report"]["variable"].set(
             self.parent_controller.configuration["experiment"][
                 "AdaptiveOpticsParameters"
@@ -232,6 +232,12 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
             "TonyWilson"
         ]["amplitude"] = float(self.widgets["amplitude"].get())
+        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
+            "TonyWilson"
+        ]["proj-z_range"] = float(self.widgets["proj-z_range"].get())
+        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
+            "TonyWilson"
+        ]["proj-shear_amp"] = float(self.widgets["proj-shear_amp"].get())        
         self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
             "TonyWilson"
         ]["from"] = self.widgets["from"]["variable"].get()

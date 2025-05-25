@@ -45,7 +45,7 @@ from scipy.optimize import curve_fit
 from navigate.model.features.feature_container import load_features
 import navigate.model.analysis.image_contrast as img_contrast
 from navigate.model.features.image_writer import ImageWriter
-
+from navigate.model.waveforms import remote_focus_ramp
 
 def poly2(x, a, b, c):
     """Second order polynomial function
@@ -283,6 +283,19 @@ class TonyWilson:
         if frame_num < 1:
             return
 
+        # set up projection mode:
+        z_range = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]["TonyWilson"]["proj-z_range"]
+        shear_amp = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]["TonyWilson"]["proj-shear_amp"]
+
+        self.setup_projection(
+            z_range=z_range,
+            shear_amp=shear_amp
+        )
+
         # Opens correct shutter and puts all signals to false
         self.model.prepare_acquisition()
         self.model.active_microscope.prepare_next_channel()
@@ -379,6 +392,63 @@ class TonyWilson:
         self.best_coefs_overall = deepcopy(self.best_coefs)
         self.best_metric = 0.0
         self.best_peaks = []
+
+    def setup_projection(self, z_range=0.0, shear_amp=0.0):
+
+        microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+
+        galvo_stage = self.model.active_microscope.stages['z']
+        sample_rate = galvo_stage.sample_rate
+        (
+            self.proj_exposure_times,
+            self.proj_sweep_times,
+        ) = self.model.active_microscope.get_exposure_sweep_times()
+        remote_focus_delay = float(self.model.configuration["waveform_constants"][
+            "other_constants"
+        ]["remote_focus_delay"]) / 1000
+        remote_focus_ramp_falling = float(self.model.configuration["waveform_constants"][
+            "other_constants"
+        ]["remote_focus_ramp_falling"]) / 1000
+
+        waveform_dict = {}
+        for channel_key in microscope_state["channels"].keys():
+            channel = microscope_state["channels"][channel_key]
+
+            if channel["is_selected"]:
+
+                exposure_time = self.proj_exposure_times[channel_key]
+                sweep_time = self.proj_sweep_times[channel_key]
+
+                amp = eval(galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)})
+
+                waveform = remote_focus_ramp(
+                    sample_rate=sample_rate,
+                    exposure_time=exposure_time,
+                    sweep_time=sweep_time,
+                    remote_focus_delay=remote_focus_delay,
+                    camera_delay=galvo_stage.camera_delay,
+                    fall=remote_focus_ramp_falling,
+                    amplitude=amp
+                )
+                waveform_dict[channel_key] = waveform
+
+            galvo_stage.update_waveform(waveform_dict)
+
+            self.set_shear_amplitude(shear_amp)
+
+    def set_shear_amplitude(self, amp, galvo_num=0):
+
+        zoom = self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
+        microscope_name = self.model.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        
+        self.model.configuration["waveform_constants"]["galvo_constants"][
+            f"Galvo {galvo_num}"
+        ][microscope_name][zoom]["amplitude"] = amp
+
+        self.model.active_microscope.galvo[f"galvo_{galvo_num}"].adjust(
+            self.proj_exposure_times, 
+            self.proj_sweep_times
+            )
 
     def in_func_signal(self):
         """Run the signal.
@@ -677,14 +747,17 @@ class TonyWilson:
 
         if self.done_all:
             self.best_coefs = self.best_coefs_overall
-            # self.model.stop_acquisition = True
-            # self.model.end_acquisition()
-            # print("Ending acquisition...")
+            self.model.stop_acquisition = True
+            self.model.end_acquisition()
+            print("Ending acquisition...")
             try:
                 stop_time = time.time()
                 print(f"Total runtime:\t{(stop_time - self.start_time):.3f} sec")
             except Exception as e:
                 print(e)
+
+            # reset projection
+            self.setup_projection()
 
         try:
             if self.done_itr:

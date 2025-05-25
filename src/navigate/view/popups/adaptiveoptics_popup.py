@@ -42,6 +42,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # Local application imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
 import logging
 
@@ -169,8 +170,8 @@ class AdaptiveOpticsPopup:
         self.ao_notebook.add(self.tab_tw, text="Tony Wilson")
 
         #: ttk.Frame: CNN-AO Tab
-        self.tab_cnn = ttk.Frame(master=self.ao_notebook)
-        self.ao_notebook.add(self.tab_cnn, text="CNN-AO")
+        self.tab_proj = ttk.Frame(master=self.ao_notebook)
+        self.ao_notebook.add(self.tab_proj, text="Projection Mode")
 
         #: ttk.Frame: Tony Wilson Widget Frame
         tw_widget_frame = ttk.Frame(master=self.tab_tw)
@@ -361,12 +362,33 @@ class AdaptiveOpticsPopup:
             row=0, column=0, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
         )
 
-        camera_var = tk.StringVar()
-        #: ttk.Combobox: Camera List
-        self.camera_list = ttk.Combobox(master=self.tab_cnn, textvariable=camera_var)
-        # self.camera_list["values"] = ("cam_0", "cam_1")
-        self.camera_list.grid(row=0, column=0, padx=10, pady=10)
-        # self.camera_list.current(0)
+
+        proj_frame = ttk.Frame(self.tab_proj)
+        proj_frame.grid(row=0, column=0)
+
+        #: tkinter.Label: The label for the scan range spinbox
+        self.inputs["proj-z_range"] = LabelInput(
+            proj_frame,
+            label="Scan Range:",
+            label_pos="top",
+            input_args={"width": 15},
+        )
+        self.inputs["proj-z_range"].grid(row=0, column=1, pady=5)
+        
+        self.inputs["proj-shear_amp"] = LabelInput(
+            proj_frame,
+            label="Shear Amp:",
+            label_pos="top",
+            input_args={"width": 15},
+        )
+        self.inputs["proj-shear_amp"].grid(row=1, column=1, pady=5)
+
+        # camera_var = tk.StringVar()
+        # #: ttk.Combobox: Camera List
+        # self.camera_list = ttk.Combobox(master=self.tab_proj, textvariable=camera_var)
+        # # self.camera_list["values"] = ("cam_0", "cam_1")
+        # self.camera_list.grid(row=0, column=0, padx=10, pady=10)
+        # # self.camera_list.current(0)
 
     def onFrameConfigure(self, event):
         """Reset the scroll region to encompass the inner frame.

@@ -199,6 +199,11 @@ class TonyWilson:
         #: int: Number of modes
         self.n_modes = self.mirror_controller.n_modes
 
+        self.z_galvo_waveform_dict = {}
+
+        # get access to z-galvo for projection mode
+        self.galvo_stage = self.model.active_microscope.stages['z']
+
         #: bool: whether to save report at the end of run
         self.save_report = self.model.configuration["experiment"][
             "AdaptiveOpticsParameters"
@@ -396,9 +401,11 @@ class TonyWilson:
     def setup_projection(self, z_range=0.0, shear_amp=0.0):
 
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+        microscope_state["waveform_template"] = "Confocal-Projection"
 
-        galvo_stage = self.model.active_microscope.stages['z']
-        sample_rate = galvo_stage.sample_rate
+        self.z_galvo_waveform_dict = deepcopy(self.galvo_stage.waveform_dict)
+
+        sample_rate = self.galvo_stage.sample_rate
         (
             self.proj_exposure_times,
             self.proj_sweep_times,
@@ -414,27 +421,27 @@ class TonyWilson:
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
 
-            if channel["is_selected"]:
+            if channel["is_selected"] is True:
 
                 exposure_time = self.proj_exposure_times[channel_key]
                 sweep_time = self.proj_sweep_times[channel_key]
 
-                amp = eval(galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)})
+                amp = eval(self.galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)})
 
                 waveform = remote_focus_ramp(
                     sample_rate=sample_rate,
                     exposure_time=exposure_time,
                     sweep_time=sweep_time,
                     remote_focus_delay=remote_focus_delay,
-                    camera_delay=galvo_stage.camera_delay,
+                    camera_delay=self.galvo_stage.camera_delay,
                     fall=remote_focus_ramp_falling,
                     amplitude=amp
                 )
                 waveform_dict[channel_key] = waveform
 
-            galvo_stage.update_waveform(waveform_dict)
+        self.galvo_stage.update_waveform(waveform_dict)
 
-            self.set_shear_amplitude(shear_amp)
+        self.set_shear_amplitude(shear_amp)
 
     def set_shear_amplitude(self, amp, galvo_num=0):
 
@@ -758,6 +765,13 @@ class TonyWilson:
 
             # reset projection
             self.setup_projection()
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "waveform_template"
+            ] = "Default"
+            # self.galvo_stage.hard_reset()
+
+            self.galvo_stage.switch_mode("normal")
+            # self.reset_galvo_stage()
 
         try:
             if self.done_itr:

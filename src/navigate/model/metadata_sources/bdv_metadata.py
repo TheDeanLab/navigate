@@ -51,10 +51,12 @@ logger = logging.getLogger(p)
 class BigDataViewerMetadata(XMLMetadata):
     """Metadata for BigDataViewer files.
 
+    Supports HDF5 (.h5), N5 (.n5), and TIFF filelists (.tif/.tiff) via
+    the SPIM-reconstruction filelist loader (format="spimreconstruction.filelist").
+
     Note
     ----
-        XML spec in section 2.3 of https://arxiv.org/abs/1412.0488.
-
+    XML spec in section 2.3 of https://arxiv.org/abs/1412.0488.
     """
 
     def __init__(self) -> None:
@@ -124,22 +126,23 @@ class BigDataViewerMetadata(XMLMetadata):
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw
     ) -> dict:
-        """Create a BigDataViewer XML dictionary from a list of views.
+        """Create a BigDataViewer XML metadata dictionary from a list of views.
 
         Parameters
         ----------
-        file_name : str
-            The file name of the file to be written.
-        views : list
-            A list of dictionaries containing metadata for each view.
+        file_name : str or list of str
+            For HDF5/N5, the path to the dataset file (.h5 or .n5).
+            For TIFF, either a directory path containing .tif/.tiff files,
+            or an explicit list of TIFF file paths.
+        views : list of dict
+            A list of dictionaries containing stage/transform metadata for each view.
         **kw
-            Additional keyword arguments.
+            Additional keyword arguments (not used directly).
 
         Returns
         -------
         dict
-            A dictionary containing the XML metadata.
-
+            Nested dictionary representing the BigDataViewer XML structure.
         """
         # Header
         bdv_dict = {
@@ -162,24 +165,33 @@ class BigDataViewerMetadata(XMLMetadata):
                 "text": file_name,
             }
 
-        # TODO: Consider adding support for tiff/tif files. Needs evaluation.
-        # elif ext == "tiff" or ext == "tif":
-        #     """
-        #     Need to iterate through the time points, etc.
-        #     <ImageLoader format="spimreconstruction.filelist">
-        #         <imglib2container>ArrayImgFactory</imglib2container>
-        #         <ZGrouped>false</ZGrouped>
-        #         <files>
-        #             <FileMapping view_setup="0" timepoint="0" series="0" channel="0">
-        #                 <file type="relative">1_CH00_000000.tif</file>
-        #             </FileMapping>
-        #             <FileMapping view_setup="1" timepoint="0" series="0" channel="0">
-        #                 <file type="relative">1_CH01_000000.tif</file>
-        #             </FileMapping>
-        #         </files>
-        #     </ImageLoader>
-        #     """
-        #     pass
+        elif ext in ("tiff", "tif"):
+            # SPIM-reconstruction filelist loader for TIFF files.
+            # file_name may be a directory or a list of TIFF paths.
+            if isinstance(file_name, str) and os.path.isdir(file_name):
+                import glob
+
+                files = sorted(glob.glob(os.path.join(file_name, "*.tif")))
+                files += sorted(glob.glob(os.path.join(file_name, "*.tiff")))
+            else:
+                files = list(file_name) if isinstance(file_name, (list, tuple)) else [file_name]
+
+            loader = {"format": "spimreconstruction.filelist"}
+            loader["imglib2container"] = {"text": "ArrayImgFactory"}
+            loader["ZGrouped"] = {"text": "false"}
+
+            mappings = []
+            for idx, fname in enumerate(files):
+                mappings.append({
+                    "view_setup": str(idx),
+                    "timepoint": "0",
+                    "series": "0",
+                    "channel": "0",
+                    "file": {"type": "relative", "text": os.path.basename(fname)},
+                })
+            loader["files"] = {"FileMapping": mappings}
+
+            bdv_dict["SequenceDescription"]["ImageLoader"] = loader
 
         elif ext == "n5":
             """
@@ -445,13 +457,18 @@ class BigDataViewerMetadata(XMLMetadata):
 
         Parameters
         ----------
-        root : Union[str, ET.Element]
-            The root of the XML tree.
+        root : str or xml.etree.ElementTree.Element
+            Path to a BigDataViewer XML file or an ElementTree root element.
 
         Returns
         -------
-        tuple
-            A tuple containing the file path, setups, and transforms.
+        file_path : str or list of str
+            HDF5/N5 dataset path, or list of TIFF file paths if using the
+            SPIM-reconstruction filelist loader.
+        setups : list of str
+            View setup identifiers as strings.
+        transforms : list of array-like
+            List of affine transform matrices corresponding to each view.
         """
 
         # Open the file, if present
@@ -466,16 +483,26 @@ class BigDataViewerMetadata(XMLMetadata):
 
         # Check if we are loading a BigDataViewer hdf5
         image_loader = root.find("SequenceDescription/ImageLoader")
-        if image_loader.attrib["format"] not in ["bdv.hdf5", "bdv.n5"]:
-            logger.error(f"Unknown Format: {image_loader.attrib['format']}.")
-            raise NotImplementedError(
-                f"Unknown format {image_loader.attrib['format']} failed to load."
-            )
-
-        # Parse the file path
-        base_path = root.find("BasePath")
-        file = root.find("SequenceDescription/ImageLoader/hdf5")
-        file_path = os.path.join(base_path.text, file.text)
+        fmt = image_loader.attrib.get("format", "")
+        if fmt in ("bdv.hdf5", "bdv.n5"):
+            # HDF5 or N5 dataset loader
+            tag = "hdf5" if fmt == "bdv.hdf5" else "n5"
+            base_path = root.find("BasePath").text or "."
+            file = root.find(f"SequenceDescription/ImageLoader/{tag}")
+            file_path = os.path.join(base_path, file.text)
+        elif fmt == "spimreconstruction.filelist":
+            # SPIM-reconstruction TIFF filelist loader
+            base = root.find("BasePath").text or "."
+            files = []
+            for fm in root.findall(
+                "SequenceDescription/ImageLoader/files/FileMapping"
+            ):
+                fnode = fm.find("file")
+                files.append(os.path.join(base, fnode.text))
+            file_path = files
+        else:
+            logger.error(f"Unknown Format: {fmt}.")
+            raise NotImplementedError(f"Unknown format {fmt} failed to load.")
 
         # Get setups. Each setup represents a visualisation data source in the viewer
         # that provides one image volume per timepoint

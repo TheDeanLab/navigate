@@ -35,6 +35,7 @@ import os
 import uuid
 from pathlib import Path
 import logging
+from typing import Dict, Any
 
 # Third Party Imports
 import tifffile
@@ -45,6 +46,7 @@ from numpy import stack
 from .data_source import DataSource, DataReader
 from ..metadata_sources.metadata import Metadata
 from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
+from ..metadata_sources.bdv_metadata import BigDataViewerMetadata
 
 
 # Logger Setup
@@ -81,19 +83,20 @@ class TiffDataSource(DataSource):
         #: str: Directory to save the data to.
         self.save_directory = Path(self.file_name).parent
 
-        # Is this an OME-TIFF?
-        # TODO: check the header, rather than use the file extension
+        # Check if the file is OME-TIFF and create the appropriate metadata object
         if self.file_name.endswith(".ome.tiff") or self.file_name.endswith(".ome.tif"):
             self._is_ome = True
             #: Metadata: Metadata object
             self.metadata = OMETIFFMetadata()
         else:
             self._is_ome = False
+            # Metadata: Metadata object
             self.metadata = Metadata()
 
+        #: bool: Is this a bigtiff file?
         self._is_bigtiff = is_bigtiff
 
-        # For file writing, do we assume all files end with tiff or tif?
+        #: bool: For file writing, do we assume all files end with tiff or tif?
         self.__double_f = self.file_name.endswith("tiff")
 
         # Keep track of z, time, channel indices
@@ -170,7 +173,7 @@ class TiffDataSource(DataSource):
         channel: int = 0,
         z: int = -1,
         resolution: int = 1,
-    ) -> npt.ArrayLike:
+    ) -> npt.ArrayLike or None:
         """Get data according to timepoint, position, channel and z-axis id
 
         Parameters
@@ -369,6 +372,25 @@ class TiffDataSource(DataSource):
                     )
         else:
             self.image.close()
+
+        # Write BigDataViewer XML alongside TIFF filelist if requested
+        bdv_params = None
+        try:
+            bdv_params = self.metadata.configuration.get("experiment", {}).get(
+                "BDVParameters"
+            )
+            print("*** BDVParameters", bdv_params)
+        except Exception:
+            pass
+        if bdv_params is not None and len(self._views) > 0:
+            # Write BigDataViewer XML in the dataset subdirectory (e.g. Cell_006/Cell_006.xml)
+            bdv_meta = BigDataViewerMetadata()
+            bdv_meta.configuration = self.metadata.configuration
+            bdv_meta.set_from_dict(bdv_params)
+            folder = self.save_directory.name
+            xml_base = os.path.join(self.save_directory, folder)
+            # Pass BDVParameters through to the XML builder
+            bdv_meta.write_xml(xml_base, self._views)
         if not internal:
             self._closed = True
 

@@ -60,13 +60,7 @@ class BigDataViewerMetadata(XMLMetadata):
     """
 
     def __init__(self) -> None:
-        """Initialize the BigDataViewer metadata object.
-
-        Parameters
-        ----------
-        configuration : Optional[Dict[str, Any]]
-            Configuration dictionary.
-        """
+        """Initialize the BigDataViewer metadata object."""
         super().__init__()
 
         # Affine Transform Parameters
@@ -150,8 +144,6 @@ class BigDataViewerMetadata(XMLMetadata):
             "BasePath": {"type": "relative", "text": "."},
             "SequenceDescription": {},
         }
-
-        # File path
         ext = os.path.basename(file_name).split(".")[-1]
         if ext == "h5":
             """
@@ -165,34 +157,6 @@ class BigDataViewerMetadata(XMLMetadata):
                 "text": file_name,
             }
 
-        elif ext in ("tiff", "tif"):
-            # SPIM-reconstruction filelist loader for TIFF files.
-            # file_name may be a directory or a list of TIFF paths.
-            if isinstance(file_name, str) and os.path.isdir(file_name):
-                import glob
-
-                files = sorted(glob.glob(os.path.join(file_name, "*.tif")))
-                files += sorted(glob.glob(os.path.join(file_name, "*.tiff")))
-            else:
-                files = list(file_name) if isinstance(file_name, (list, tuple)) else [file_name]
-
-            loader = {"format": "spimreconstruction.filelist"}
-            loader["imglib2container"] = {"text": "ArrayImgFactory"}
-            loader["ZGrouped"] = {"text": "false"}
-
-            mappings = []
-            for idx, fname in enumerate(files):
-                mappings.append({
-                    "view_setup": str(idx),
-                    "timepoint": "0",
-                    "series": "0",
-                    "channel": "0",
-                    "file": {"type": "relative", "text": os.path.basename(fname)},
-                })
-            loader["files"] = {"FileMapping": mappings}
-
-            bdv_dict["SequenceDescription"]["ImageLoader"] = loader
-
         elif ext == "n5":
             """
             <ImageLoader format="bdv.n5" version="1.0">
@@ -205,6 +169,51 @@ class BigDataViewerMetadata(XMLMetadata):
                 "text": file_name,
             }
 
+        else:
+            # File type is assumed to be TIFF or TIF
+            ext = "tif"
+            """
+            <ImageLoader format="spimreconstruction.stack.ij">
+                <imagedirectory type="relative">.</imagedirectory>
+                <filePattern>Position{x}/CH0{c}_000000.tif</filePattern>
+                <layoutTimepoints>0</layoutTimepoints>
+                <layoutChannels>number_of_channels</layoutChannels>
+                <layoutIlluminations>0</layoutIlluminations>
+                <layoutAngles>0</layoutAngles>
+                <layoutTiles>1</layoutTiles>
+                <imglib2container>ArrayImgFactory</imglib2container>
+            </ImageLoader>
+            """
+            # TODO: Add support for multiple channels, illuminations, angles, and tiles.
+            loader = {
+                "format": "spimreconstruction.stack.ij",
+                "imagedirectory": {
+                    "type": "relative",
+                    "text": ".",
+                },
+                "filePattern": {
+                    "text": "Position{x}/CH0{c}_000000.tif",
+                },
+                "layoutTimepoints": {
+                    "text": "0",
+                },
+                "layoutChannels": {
+                    "text": str(self.shape_c),
+                },
+                "layoutIlluminations": {
+                    "text": "0",
+                },
+                "layoutAngles": {
+                    "text": "0",
+                },
+                "layoutTiles": {"text": "1"},
+                "imglib2container": {
+                    "text": "ArrayImgFactory",
+                },
+            }
+
+            bdv_dict["SequenceDescription"]["ImageLoader"] = loader
+
         # Calculate shear and rotation transforms
         self.bdv_shear_transform()
         self.bdv_rotate_transform()
@@ -212,6 +221,7 @@ class BigDataViewerMetadata(XMLMetadata):
         # Populate ViewSetups
         bdv_dict["SequenceDescription"]["ViewSetups"] = {}
         bdv_dict["SequenceDescription"]["ViewSetups"]["ViewSetup"] = []
+
         # Attributes are necessary for BigStitcher
         bdv_dict["SequenceDescription"]["ViewSetups"]["Attributes"] = [
             {
@@ -222,6 +232,7 @@ class BigDataViewerMetadata(XMLMetadata):
             {"name": "tile", "Tile": []},
             {"name": "angle", "Angle": {"id": {"text": 0}, "name": {"text": 0}}},
         ]
+
         # The actual loop that populates ViewSetup
         view_id = 0
         for c in range(self.shape_c):
@@ -250,7 +261,8 @@ class BigDataViewerMetadata(XMLMetadata):
 
                 bdv_dict["SequenceDescription"]["ViewSetups"]["ViewSetup"].append(d)
                 view_id += 1
-        # Finish up the Tile Attributes outside of the channels loop so we have
+
+        # Finish up the Tile Attributes outside the channels loop so we have
         # one per tile
         for pos in range(self.positions):
             tile = {"id": {"text": str(pos)}, "name": {"text": str(pos)}}
@@ -271,28 +283,34 @@ class BigDataViewerMetadata(XMLMetadata):
             for p in range(self.positions):
                 for c in range(self.shape_c):
                     view_id = c * self.positions + p
-                    mat = np.zeros((3, 4), dtype=float)
-                    for z in range(self.shape_z):
-                        matrix_id = (
-                            z
-                            + self.shape_z * c
-                            + p * self.shape_c * self.shape_z
-                            + t * self.shape_c * self.shape_z * self.positions
-                        )
+                    mat = np.zeros(shape=(3, 4), dtype=float)
 
-                        # Construct centroid of volume matrix
-                        # print(matrix_id, views[matrix_id])
-                        try:
-                            mat += (
-                                self.stage_positions_to_affine_matrix(
-                                    **views[matrix_id]
-                                )
-                                / self.shape_z
+                    if ext == "n5" or ext == "h5":
+                        for z in range(self.shape_z):
+                            matrix_id = (
+                                z
+                                + self.shape_z * c
+                                + p * self.shape_c * self.shape_z
+                                + t * self.shape_c * self.shape_z * self.positions
                             )
-                        except IndexError:
-                            # We have most likely canceled in the middle of
-                            # an acquisition.
-                            pass
+
+                            # Construct centroid of volume matrix
+                            try:
+                                mat += (
+                                    self.stage_positions_to_affine_matrix(
+                                        **views[matrix_id]
+                                    )
+                                    / self.shape_z
+                                )
+                            except IndexError:
+                                # We have most likely canceled in the middle of
+                                # an acquisition.
+                                pass
+
+                    else:
+                        # Tiff files.
+                        for view in views:
+                            mat += self.stage_positions_to_affine_matrix(**view)
 
                     view_transforms = [
                         {
@@ -304,47 +322,41 @@ class BigDataViewerMetadata(XMLMetadata):
                         }
                     ]
 
-                    if self.shear_data:
-                        view_transforms.append(
-                            {
-                                "type": "affine",
-                                "Name": "Shearing Transform",
-                                "affine": {
-                                    "text": " ".join(
-                                        [
-                                            f"{x:.6f}"
-                                            for x in self.shear_transform.ravel()
-                                        ]
-                                    )
-                                },
-                            }
-                        )
-
-                    if self.rotate_data:
-                        view_transforms.append(
-                            {
-                                "type": "affine",
-                                "Name": "Rotation Transform",
-                                "affine": {
-                                    "text": " ".join(
-                                        [
-                                            f"{x:.6f}"
-                                            for x in self.rotate_transform.ravel()
-                                        ]
-                                    )
-                                },
-                            }
-                        )
-
-                    d = dict(timepoint=t, setup=view_id, ViewTransform=view_transforms)
+                    d = self.shear_and_rotate_transform(t, view_id, view_transforms)
 
                     bdv_dict["ViewRegistrations"]["ViewRegistration"].append(d)
 
-        bdv_dict["Misc"] = {
-            "Entry": {"Key": "Note", "text": self.misc}
-        }
+        bdv_dict["Misc"] = {"Entry": {"Key": "Note", "text": self.misc}}
 
         return bdv_dict
+
+    def shear_and_rotate_transform(self, t, view_id, view_transforms):
+        if self.shear_data:
+            view_transforms.append(
+                {
+                    "type": "affine",
+                    "Name": "Shearing Transform",
+                    "affine": {
+                        "text": " ".join(
+                            [f"{x:.6f}" for x in self.shear_transform.ravel()]
+                        )
+                    },
+                }
+            )
+        if self.rotate_data:
+            view_transforms.append(
+                {
+                    "type": "affine",
+                    "Name": "Rotation Transform",
+                    "affine": {
+                        "text": " ".join(
+                            [f"{x:.6f}" for x in self.rotate_transform.ravel()]
+                        )
+                    },
+                }
+            )
+        d = dict(timepoint=t, setup=view_id, ViewTransform=view_transforms)
+        return d
 
     def stage_positions_to_affine_matrix(
         self, x: float, y: float, z: float, theta: float, f: Optional[float] = None
@@ -494,9 +506,7 @@ class BigDataViewerMetadata(XMLMetadata):
             # SPIM-reconstruction TIFF filelist loader
             base = root.find("BasePath").text or "."
             files = []
-            for fm in root.findall(
-                "SequenceDescription/ImageLoader/files/FileMapping"
-            ):
+            for fm in root.findall("SequenceDescription/ImageLoader/files/FileMapping"):
                 fnode = fm.find("file")
                 files.append(os.path.join(base, fnode.text))
             file_path = files

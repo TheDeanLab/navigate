@@ -70,9 +70,11 @@ class BigDataViewerDataSource(PyramidalDataSource):
         Parameters
         ----------
         file_name : str
-            The name of the file to write to.
-        mode : str
-            The mode to open the file in. Must be "w" for write or "r" for read.
+            Path to the output. For BDV/HDF5 use a ".h5" file; for BDV/N5 use a
+            ".n5" file; for TIFF-based filelist export use a directory containing
+            ".tif" or ".tiff" files.
+        mode : {'w', 'r'}
+            Mode to open the file in. Must be 'w' for write (export) or 'r' for read.
         """
         #: np.array: The image.
         self.image = None
@@ -86,7 +88,8 @@ class BigDataViewerDataSource(PyramidalDataSource):
         #: str: The file type.
         self.__file_type = os.path.splitext(os.path.basename(file_name))[-1][1:].lower()
 
-        if self.__file_type not in ["h5", "n5"]:
+        # Allow HDF5, N5, and TIFF (filelist) outputs for BigDataViewer metadata
+        if self.__file_type not in ["h5", "n5", "tif", "tiff"]:
             error_statement = f"Unknown file type {self.__file_type}."
             logger.error(error_statement)
             raise ValueError(error_statement)

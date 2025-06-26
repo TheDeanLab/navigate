@@ -327,6 +327,13 @@ class BigDataViewerMetadata(XMLMetadata):
 
                     bdv_dict["ViewRegistrations"]["ViewRegistration"].append(d)
 
+                    # Add housekeeping metadata
+                    bdv_dict["ViewRegistrations"]["ViewInterestPoints"] = {}
+                    bdv_dict["ViewRegistrations"]["BoundingBoxes"] = {}
+                    bdv_dict["ViewRegistrations"]["PointSpreadFunctions"] = {}
+                    bdv_dict["ViewRegistrations"]["StitchingResults"] = {}
+                    bdv_dict["ViewRegistrations"]["IntensityAdjustments"] = {}
+
         bdv_dict["Misc"] = {"Entry": {"Key": "Note", "text": self.misc}}
 
         return bdv_dict

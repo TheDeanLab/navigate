@@ -173,43 +173,43 @@ class BigDataViewerMetadata(XMLMetadata):
             # File type is assumed to be TIFF or TIF
             ext = "tif"
             """
-            <ImageLoader format="spimreconstruction.stack.ij">
-                <imagedirectory type="relative">.</imagedirectory>
-                <filePattern>Position{x}/CH0{c}_000000.tif</filePattern>
-                <layoutTimepoints>0</layoutTimepoints>
-                <layoutChannels>number_of_channels</layoutChannels>
-                <layoutIlluminations>0</layoutIlluminations>
-                <layoutAngles>0</layoutAngles>
-                <layoutTiles>1</layoutTiles>
-                <imglib2container>ArrayImgFactory</imglib2container>
-            </ImageLoader>
+               <ImageLoader format="spimreconstruction.filelist">
+                  <ZGrouped>false</ZGrouped>
+                  <files>
+                    <FileMapping view_setup="0" timepoint="0" series="0" channel="0">
+                      <file type="relative">Position0/CH00_000000.tiff</file>
+                    </FileMapping>
+                    ...
+                    <FileMapping view_setup="11" timepoint="0" series="0" channel="0">
+                      <file type="relative">Position11/CH00_000000.tiff</file>
+                    </FileMapping>
+                  </files>
+                </ImageLoader>
             """
-            # TODO: Add support for multiple channels, illuminations, angles, and tiles.
+            # Iterate through FileMapping and populate the file paths
+            file_mapping = []
+            view_id = 0
+
+            for c in range(self.shape_c):
+                for pos in range(self.positions - 1):
+                    file_mapping.append(
+                        {
+                            "view_setup": str(view_id),
+                            "timepoint": "0",
+                            "series": "0",
+                            "channel": str(c),
+                            "file": {
+                                "type": "relative",
+                                "text": f"Position{pos}/CH{c:02d}_000000.tiff",
+                            },
+                        }
+                    )
+                    view_id += 1
+
             loader = {
-                "format": "spimreconstruction.stack.ij",
-                "imagedirectory": {
-                    "type": "relative",
-                    "text": ".",
-                },
-                "filePattern": {
-                    "text": "Position{x}/CH0{c}_000000.tif",
-                },
-                "layoutTimepoints": {
-                    "text": "0",
-                },
-                "layoutChannels": {
-                    "text": str(self.shape_c),
-                },
-                "layoutIlluminations": {
-                    "text": "0",
-                },
-                "layoutAngles": {
-                    "text": "0",
-                },
-                "layoutTiles": {"text": "1"},
-                "imglib2container": {
-                    "text": "ArrayImgFactory",
-                },
+                "format": "spimreconstruction.filemap2",
+                "ZGrouped": {"text": "false"},
+                "files": {"FileMapping": file_mapping},
             }
 
             bdv_dict["SequenceDescription"]["ImageLoader"] = loader
@@ -242,7 +242,7 @@ class BigDataViewerMetadata(XMLMetadata):
                 "Channel"
             ].append(ch)
 
-            for pos in range(self.positions):
+            for pos in range(self.positions - 1):
                 d = {
                     "id": {"text": view_id},
                     "name": {"text": view_id},
@@ -264,7 +264,7 @@ class BigDataViewerMetadata(XMLMetadata):
 
         # Finish up the Tile Attributes outside the channels loop so we have
         # one per tile
-        for pos in range(self.positions):
+        for pos in range(self.positions - 1):
             tile = {"id": {"text": str(pos)}, "name": {"text": str(pos)}}
             bdv_dict["SequenceDescription"]["ViewSetups"]["Attributes"][2][
                 "Tile"
@@ -276,11 +276,12 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict["SequenceDescription"]["Timepoints"]["last"] = {
             "text": self.shape_t - 1
         }
+        bdv_dict["SequenceDescription"]["MissingViews"] = {}
 
         # View registrations
         bdv_dict["ViewRegistrations"] = {"ViewRegistration": []}
         for t in range(self.shape_t):
-            for p in range(self.positions):
+            for p in range(self.positions - 1):
                 for c in range(self.shape_c):
                     view_id = c * self.positions + p
                     mat = np.zeros(shape=(3, 4), dtype=float)
@@ -315,7 +316,7 @@ class BigDataViewerMetadata(XMLMetadata):
                     view_transforms = [
                         {
                             "type": "affine",
-                            "Name": "Translation to Regular Grid",
+                            "Name": {"text": "Translation to Regular Grid"},
                             "affine": {
                                 "text": " ".join([f"{x:.6f}" for x in mat.ravel()])
                             },

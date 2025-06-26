@@ -379,7 +379,6 @@ class TiffDataSource(DataSource):
             bdv_params = self.metadata.configuration.get("experiment", {}).get(
                 "BDVParameters"
             )
-            print("*** BDVParameters", bdv_params)
         except Exception:
             pass
         if bdv_params is not None and len(self._views) > 0:

@@ -63,7 +63,6 @@ class BigDataViewerMetadata(XMLMetadata):
         """Initialize the BigDataViewer metadata object."""
         super().__init__()
 
-        # Affine Transform Parameters
         #: bool: Shear the data.
         self.shear_data = False
 
@@ -76,7 +75,6 @@ class BigDataViewerMetadata(XMLMetadata):
         #: npt.NDArray: Shear transform matrix.
         self.shear_transform = np.eye(3, 4)
 
-        # Rotation Transform Parameters
         #: bool: Rotate the data.
         self.rotate_data = False
 
@@ -138,6 +136,8 @@ class BigDataViewerMetadata(XMLMetadata):
         dict
             Nested dictionary representing the BigDataViewer XML structure.
         """
+        view_transforms = []
+
         # Header
         bdv_dict = {
             "version": 0.2,
@@ -248,7 +248,7 @@ class BigDataViewerMetadata(XMLMetadata):
                     "name": {"text": view_id},
                     "size": {"text": f"{self.shape_x} {self.shape_y} {self.shape_z}"},
                     "voxelSize": {
-                        "unit": {"text": "um"},
+                        "unit": {"text": "µm"},
                         "size": {"text": f"{self.dx} {self.dy} {self.dz}"},
                     },
                     "attributes": {
@@ -276,7 +276,8 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict["SequenceDescription"]["Timepoints"]["last"] = {
             "text": self.shape_t - 1
         }
-        bdv_dict["SequenceDescription"]["MissingViews"] = {}
+        bdv_dict["SequenceDescription"]["MissingViews "] = {}
+        bdv_dict["SequenceDescription"]["BoundingBoxes "] = {}
 
         # View registrations
         bdv_dict["ViewRegistrations"] = {"ViewRegistration": []}
@@ -286,54 +287,55 @@ class BigDataViewerMetadata(XMLMetadata):
                     view_id = c * self.positions + p
                     mat = np.zeros(shape=(3, 4), dtype=float)
 
-                    if ext == "n5" or ext == "h5":
-                        for z in range(self.shape_z):
-                            matrix_id = (
-                                z
-                                + self.shape_z * c
-                                + p * self.shape_c * self.shape_z
-                                + t * self.shape_c * self.shape_z * self.positions
-                            )
+                    # if ext == "n5" or ext == "h5":
+                    for z in range(self.shape_z):
+                        matrix_id = (
+                            z
+                            + self.shape_z * c
+                            + p * self.shape_c * self.shape_z
+                            + t * self.shape_c * self.shape_z * self.positions
+                        )
 
-                            # Construct centroid of volume matrix
-                            try:
-                                mat += (
-                                    self.stage_positions_to_affine_matrix(
-                                        **views[matrix_id]
-                                    )
-                                    / self.shape_z
+                        # Construct centroid of volume matrix
+                        try:
+                            mat += (
+                                self.stage_positions_to_affine_matrix(
+                                    **views[matrix_id]
                                 )
-                            except IndexError:
-                                # We have most likely canceled in the middle of
-                                # an acquisition.
-                                pass
+                                / self.shape_z
+                            )
+                        except IndexError:
+                            # We have most likely canceled in the middle of
+                            # an acquisition.
+                            pass
 
-                    else:
-                        # Tiff files.
-                        for view in views:
-                            mat += self.stage_positions_to_affine_matrix(**view)
+                        view_transforms = [
+                            {
+                                "type": "affine",
+                                "Name": {"text": "Translation to Regular Grid"},
+                                "affine": {
+                                    "text": " ".join([f"{x:.6f}" for x in mat.ravel()])
+                                },
+                            }
+                        ]
 
-                    view_transforms = [
-                        {
-                            "type": "affine",
-                            "Name": {"text": "Translation to Regular Grid"},
-                            "affine": {
-                                "text": " ".join([f"{x:.6f}" for x in mat.ravel()])
-                            },
-                        }
-                    ]
+                        d = self.shear_and_rotate_transform(t, view_id, view_transforms)
 
-                    d = self.shear_and_rotate_transform(t, view_id, view_transforms)
+                        if ext == "n5" or ext == "h5":
+                            bdv_dict["ViewRegistrations"]["ViewRegistration"].append(d)
 
-                    bdv_dict["ViewRegistrations"]["ViewRegistration"].append(d)
+                        else:
+                            # Only add once per volume.
+                            if view_id == 0:
+                                bdv_dict["ViewRegistrations"][
+                                    "ViewRegistration"
+                                ].append(d)
 
-                    # Add housekeeping metadata
-                    bdv_dict["ViewRegistrations"]["ViewInterestPoints"] = {}
-                    bdv_dict["ViewRegistrations"]["BoundingBoxes"] = {}
-                    bdv_dict["ViewRegistrations"]["PointSpreadFunctions"] = {}
-                    bdv_dict["ViewRegistrations"]["StitchingResults"] = {}
-                    bdv_dict["ViewRegistrations"]["IntensityAdjustments"] = {}
-
+        # Add housekeeping metadata
+        bdv_dict["ViewInterestPoints "] = {}
+        bdv_dict["PointSpreadFunctions "] = {}
+        bdv_dict["StitchingResults "] = {}
+        bdv_dict["IntensityAdjustments "] = {}
         bdv_dict["Misc"] = {"Entry": {"Key": "Note", "text": self.misc}}
 
         return bdv_dict

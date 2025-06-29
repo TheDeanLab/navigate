@@ -76,6 +76,8 @@ class TiffDataSource(DataSource):
         """
         #: np.ndarray: Image data
         self.image = None
+
+        #: list: List of positions on a per-slice basis.
         self._views = []
 
         super().__init__(file_name=file_name, mode=mode)
@@ -85,13 +87,20 @@ class TiffDataSource(DataSource):
 
         # Check if the file is OME-TIFF and create the appropriate metadata object
         if self.file_name.endswith(".ome.tiff") or self.file_name.endswith(".ome.tif"):
+            #: bool: Is this an OME-TIFF file?
             self._is_ome = True
+
             #: Metadata: Metadata object
             self.metadata = OMETIFFMetadata()
         else:
+            #: bool: Is this an OME-TIFF file?
             self._is_ome = False
+
             # Metadata: Metadata object
             self.metadata = Metadata()
+
+        #: BigDataViewerMetadata: Metadata for BigDataViewer
+        self.bdv_metadata = BigDataViewerMetadata()
 
         #: bool: Is this a bigtiff file?
         self._is_bigtiff = is_bigtiff
@@ -229,13 +238,18 @@ class TiffDataSource(DataSource):
         data : npt.ArrayLike
             Data to write to file.
         kw : dict
-            Keyword arguments to pass to tifffile.imsave.
+            Keyword arguments to pass to tifffile.imsave. Includes stage coordinates
+            in format {'x': 11259.4, 'y': 11759.4, 'z': 68.0, 'theta': 0.0, 'f': 100.0}
         """
         self.mode = "w"
 
+        # Get the current frame and position
         c, z, self._current_time, self._current_position = self._cztp_indices(
             self._current_frame, self.metadata.per_stack
-        )  # find current channel
+        )
+
+        # If it is the first frame of the stack, create a new image file.
+        ome_xml = None
         if z == 0:
             if c == 0:
                 # Make sure we're set up for writing
@@ -244,10 +258,10 @@ class TiffDataSource(DataSource):
                 ome_xml = self.metadata.to_xml(
                     c=c, t=self._current_time, file_name=self.file_name, uid=self.uid
                 ).encode()
-        else:
-            ome_xml = None
 
         if len(kw) > 0:
+            # On a per-stack basis, we store the stage coordinates.
+            # Resets for each stack.
             self._views.append(kw)
 
         if self.is_ome:
@@ -272,8 +286,7 @@ class TiffDataSource(DataSource):
         self._current_frame += 1
 
         # Check if this was the last frame to write
-        # print("Switch")
-        c, z, _, _ = self._cztp_indices(self._current_frame, self.metadata.per_stack)
+        c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)
         if (z == 0) and (c == 0):
             self.close(True)
 
@@ -373,25 +386,47 @@ class TiffDataSource(DataSource):
         else:
             self.image.close()
 
-        # Write BigDataViewer XML alongside TIFF filelist if requested
-        bdv_params = None
-        try:
-            bdv_params = self.metadata.configuration.get("experiment", {}).get(
-                "BDVParameters"
-            )
-        except Exception:
-            pass
-        if bdv_params is not None and len(self._views) > 0:
-            # Write BigDataViewer XML in the dataset subdirectory (e.g. Cell_006/Cell_006.xml)
-            bdv_meta = BigDataViewerMetadata()
-            bdv_meta.configuration = self.metadata.configuration
-            bdv_meta.set_from_dict(bdv_params)
-            folder = self.save_directory.name
-            xml_base = os.path.join(self.save_directory, folder)
-            # Pass BDVParameters through to the XML builder
-            bdv_meta.write_xml(xml_base, self._views)
         if not internal:
             self._closed = True
+
+        # Write the metadata to XML
+        if len(self._views) > 0:
+            self.bdv_metadata.write_xml(
+                os.path.join(self.save_directory, "dataset.xml"), self._views
+            )
+
+    def set_metadata_from_configuration_experiment(
+        self, configuration: Dict[str, Any], microscope_name: str = None
+    ) -> None:
+        """Sets the metadata from according to the microscope configuration.
+
+        Child method also provides information to the BigDataViewerMetadata.
+
+        Parameters
+        ----------
+        configuration : Dict[str, Any]
+            Configuration experiment.
+        microscope_name : str
+            The microscope name
+        """
+        self.metadata.active_microscope = microscope_name
+        self.metadata.configuration = configuration
+        self.get_shape_from_metadata()
+
+        self.bdv_metadata.active_microscope = microscope_name
+        self.bdv_metadata.configuration = configuration
+
+    def set_metadata(self, metadata_config: dict) -> None:
+        """Sets the metadata
+
+        Parameters
+        ----------
+        metadata_config : dict
+            shape configuration: "c", "z", "t", "p", "is_dynamic", "per_stack"
+        """
+        self.metadata.set_from_dict(metadata_config)
+        self.bdv_metadata.set_from_dict(metadata_config)
+        self.get_shape_from_metadata()
 
 
 class TiffReader(DataReader):

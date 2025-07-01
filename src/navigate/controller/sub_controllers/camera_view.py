@@ -978,7 +978,7 @@ class BaseViewController(GUIController, ABaseViewController):
             width = max(
                 w_width - left_width - 16, 560 + self.view.lut.winfo_width()
             )
-            height = max(w_height - top_height - 38, 670)
+            height = max(w_height - top_height - 50, 670)
         else:
             width = event.width
             height = event.height - 24
@@ -1010,6 +1010,9 @@ class BaseViewController(GUIController, ABaseViewController):
             if widget != self.view.canvas:
                 if self.view.is_docked or widget.winfo_ismapped():
                     widget_height += widget.winfo_height() + 5
+                    if widget.winfo_height() < 30:
+                        widget_height += 30
+                    
         self.canvas_height = (
             height - widget_height - (50 if self.view.is_docked else -5)
         )
@@ -1113,8 +1116,7 @@ class CameraViewController(BaseViewController):
         # Slider Binding
         self.view.slider.bind("<Motion>", self.slider_update)
 
-        if platform.system() == "Windows":
-            self.resize_event_id = self.view.bind("<Configure>", self.resize)
+        self.resize_event_id = self.view.bind("<Configure>", self.resize)
 
         #: str: The display state.
         self.display_state = "Live"
@@ -1472,8 +1474,7 @@ class MIPViewController(BaseViewController):
         #: dict: The render widgets.
         self.render_widgets = self.view.render.get_widgets()
 
-        if platform.system() == "Windows":
-            self.resize_event_id = self.view.bind("<Configure>", self.resize)
+        self.resize_event_id = self.view.bind("<Configure>", self.resize)
 
         #: bool: The display enabled flag.
         self.display_enabled = tk.BooleanVar()

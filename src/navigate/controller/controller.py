@@ -152,6 +152,8 @@ class Controller:
 
         #: Tk top-level widget: Tk.tk GUI instance.
         self.root = root
+        #: bool: Flag to indicate if the GUI is ready for resizing.
+        self.resize_ready_flag = False
 
         #: Tk top-level widget: Tk.tk GUI instance.
         self.splash_screen = splash_screen
@@ -346,12 +348,10 @@ class Controller:
 
         #: int: ID for the resize event.Only works on Windows OS.
         self.resize_event_id = None
-        self.resize_ready_flag = False
         self.window_width = 0
         self.window_height = 0
         self.view.root.after(5000, self.enable_resize)
-        if platform.system() == "Windows":
-            self.view.root.bind("<Configure>", self.resize)
+        self.view.root.bind("<Configure>", self.resize)
 
     def update_buffer(self):
         """Update the buffer size according to the camera

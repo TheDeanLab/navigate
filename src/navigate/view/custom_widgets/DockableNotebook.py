@@ -161,6 +161,7 @@ class DockableNotebook(ttk.Notebook):
         # Save the original index and the tab's text
         tab_widget._original_index = self.selected_tab_id
         tab_widget._saved_text: str = selected_text
+        tab_widget.is_docked = False
 
         # Remove the tab from the notebook
         if tab_widget in self.tab_list:
@@ -173,9 +174,6 @@ class DockableNotebook(ttk.Notebook):
 
         if selected_text == "Camera View":
             tk.Wm.minsize(tab_widget, 663, 597)
-            tab_widget.is_docked = False
-        elif selected_text == "Waveform Settings":
-            tab_widget.is_docked = False
 
     def dismiss(self, tab_widget):
         """Dismiss the popout window.
@@ -203,6 +201,7 @@ class DockableNotebook(ttk.Notebook):
         # Retrieve the original index and the saved text
         original_index = getattr(tab_widget, "_original_index", None)
         saved_text = getattr(tab_widget, "_saved_text", "Untitled")
+        tab_widget.is_docked = True
 
         if original_index is not None:
             current_count = self.index("end")

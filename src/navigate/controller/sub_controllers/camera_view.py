@@ -964,15 +964,28 @@ class BaseViewController(GUIController, ABaseViewController):
         event : tk.Event
             Tkinter event.
         """
-        if self.view.is_popup is False and event.widget != self.view:
+        if not self.parent_controller.resize_ready_flag:
             return
-        if self.view.is_popup is True and event.widget.widgetName != "toplevel":
+        if event.width < 512 or event.height < 512:
             return
+        if event.widget != self.view:
+            return
+        if self.view.is_docked:
+            left_width = self.parent_controller.view.left_frame.winfo_width()
+            top_height = self.parent_controller.view.top_frame.winfo_height()
+            w_width = self.parent_controller.view.winfo_width()
+            w_height = self.parent_controller.view.winfo_height()
+            width = max(
+                w_width - left_width - 16, 560 + self.view.lut.winfo_width()
+            )
+            height = max(w_height - top_height - 38, 670)
+        else:
+            width = event.width
+            height = event.height - 24
+
         if self.resize_event_id:
             self.view.after_cancel(self.resize_event_id)
-        self.resize_event_id = self.view.after(
-            1000, lambda: self.refresh(event.width, event.height)
-        )
+        self.resize_event_id = self.view.after(300, lambda: self.refresh(width, height))
 
     def refresh(self, width: int, height: int) -> None:
         """Refresh the window.
@@ -984,17 +997,26 @@ class BaseViewController(GUIController, ABaseViewController):
         height : int
             Height of the window.
         """
-        if width == self.width and height == self.height:
+        if (
+            self.width
+            and self.height
+            and abs(width - self.width) < 10
+            and abs(height - self.height) < 10
+        ):
             return
         self.canvas_width = width - self.view.lut.winfo_width() - 24
-        self.canvas_height = height - 153
+        widget_height = 0
+        for widget in self.view.cam_image.winfo_children():
+            if widget != self.view.canvas:
+                if self.view.is_docked or widget.winfo_ismapped():
+                    widget_height += widget.winfo_height() + 5
+        self.canvas_height = (
+            height - widget_height - (50 if self.view.is_docked else -5)
+        )
         self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
         self.view.update_idletasks()
 
-        if self.view.is_popup:
-            self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
-        else:
-            self.width, self.height = width, height
+        self.width, self.height = width, height
 
         # if resize the window during acquisition, the image showing should be updated
         self.update_canvas_size()

@@ -346,6 +346,10 @@ class Controller:
 
         #: int: ID for the resize event.Only works on Windows OS.
         self.resize_event_id = None
+        self.resize_ready_flag = False
+        self.window_width = 0
+        self.window_height = 0
+        self.view.root.after(5000, self.enable_resize)
         if platform.system() == "Windows":
             self.view.root.bind("<Configure>", self.resize)
 
@@ -566,6 +570,12 @@ class Controller:
             return warning_message
         return ""
 
+    def enable_resize(self):
+        """Enable window resizing.
+        
+        """
+        self.resize_ready_flag = True
+
     def resize(self, event):
         """Resize the GUI.
 
@@ -584,22 +594,27 @@ class Controller:
                 Width of the GUI.
             height : int
                 Height of the GUI.
-            """
-            if width < 1300 or height < 800:
-                return
-            self.view.camera_waveform["width"] = (
-                width - self.view.left_frame.winfo_width() - 35
-            )  #
-            self.view.camera_waveform["height"] = height - 117
+            """         
+            self.view.scroll_frame.resize(width, height)
+            self.view.right_frame.config(
+                width=width-self.view.left_frame.winfo_width()-3,
+                height=height-self.view.left_frame.winfo_height()
+            )
+            
 
-            print("camera_waveform height", self.view.camera_waveform["height"])
-
-        if event.widget != self.view.scroll_frame:
+        if not self.resize_ready_flag:
             return
+        if event.widget != self.root:
+            return
+        if event.width == self.window_width and event.height == self.window_height:
+            return
+
         if self.resize_event_id:
             self.view.after_cancel(self.resize_event_id)
+        self.window_width = event.width
+        self.window_height = event.height
         self.resize_event_id = self.view.after(
-            1000, lambda: refresh(event.width, event.height)
+            300, lambda: refresh(event.width, event.height)
         )
 
     def prepare_acquire_data(self):

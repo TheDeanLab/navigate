@@ -84,6 +84,8 @@ class CameraViewPopupWindow:
         # Formatting
         tk.Grid.columnconfigure(content_frame, "all", weight=1)
         tk.Grid.rowconfigure(content_frame, "all", weight=1)
+        content_frame.grid_rowconfigure(0, weight=1)
+        content_frame.grid_columnconfigure(0, weight=1)
 
         #: dict: Dictionary of all the input widgets.
         self.inputs = {}

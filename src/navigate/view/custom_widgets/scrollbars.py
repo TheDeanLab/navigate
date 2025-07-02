@@ -58,28 +58,28 @@ class ScrolledFrame(ttk.Frame):
         ttk.Frame.__init__(self, parent, *args, **kw)
 
         # Create a canvas object and a vertical scrollbar for scrolling it.
-        vscrollbar = ttk.Scrollbar(self, orient=tk.constants.VERTICAL)
-        vscrollbar.pack(
-            fill=tk.constants.Y, side=tk.constants.RIGHT, expand=tk.constants.FALSE
+        self.vscrollbar = ttk.Scrollbar(self, orient=tk.constants.VERTICAL)
+        self.vscrollbar.pack(
+            fill=tk.constants.Y, side=tk.constants.RIGHT, expand=tk.constants.TRUE
         )
-        hscrollbar = ttk.Scrollbar(self, orient=tk.constants.HORIZONTAL)
-        hscrollbar.pack(
-            fill=tk.constants.X, side=tk.constants.BOTTOM, expand=tk.constants.FALSE
+        self.hscrollbar = ttk.Scrollbar(self, orient=tk.constants.HORIZONTAL)
+        self.hscrollbar.pack(
+            fill=tk.constants.X, side=tk.constants.BOTTOM, expand=tk.constants.TRUE
         )
         #: tk.Canvas: The canvas object for the ScrolledFrame.
         self.canvas = tk.Canvas(
             self,
             bd=0,
             highlightthickness=0,
-            yscrollcommand=vscrollbar.set,
-            xscrollcommand=hscrollbar.set,
+            yscrollcommand=self.vscrollbar.set,
+            xscrollcommand=self.hscrollbar.set,
             scrollregion=(0, 0, 100, 100),
         )
         self.canvas.pack(
             side=tk.constants.LEFT, fill=tk.constants.BOTH, expand=tk.constants.TRUE
         )
-        vscrollbar.config(command=self.canvas.yview)
-        hscrollbar.config(command=self.canvas.xview)
+        self.vscrollbar.config(command=self.canvas.yview)
+        self.hscrollbar.config(command=self.canvas.xview)
 
         # Reset the view
         self.canvas.xview_moveto(0)
@@ -88,7 +88,7 @@ class ScrolledFrame(ttk.Frame):
         # Create a frame inside the canvas which will be scrolled with it.
         #: ttk.Frame: The interior frame of the ScrolledFrame.
         self.interior = interior = ttk.Frame(self.canvas)
-        _ = self.canvas.create_window(0, 0, window=interior, anchor=tk.constants.NW)
+        self.interior_window = self.canvas.create_window(0, 0, window=interior, anchor=tk.constants.NW)
 
         # Track changes to the canvas and frame width and sync them,
         # also updating the scrollbar.
@@ -110,7 +110,20 @@ class ScrolledFrame(ttk.Frame):
             if interior.winfo_reqheight() != self.canvas.winfo_reqheight():
                 self.canvas.config(height=interior.winfo_reqheight())
 
-        interior.bind("<Configure>", _configure_interior)
+        self.bind_id = interior.bind("<Configure>", _configure_interior)
+
+    def unbind_autosize(self):
+        if self.bind_id:
+            self.interior.unbind("<Configure>", self.bind_id)
+            self.bind_id = 0
+
+    def resize(self, width, height):
+        self.unbind_autosize()
+        width = width-self.vscrollbar.winfo_width()
+        height = height-self.hscrollbar.winfo_height()
+        self.canvas.config(width=width)
+        self.canvas.config(height=height)
+        self.canvas.itemconfig(self.interior_window, width=width, height=height)
 
     def mouse_wheel(self, event):
         """Handle the mouse wheel event for scrolling.

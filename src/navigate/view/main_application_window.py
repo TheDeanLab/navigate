@@ -44,6 +44,7 @@ from navigate.view.main_window_content.display_notebook import CameraNotebook
 from navigate.view.main_window_content.acquire_notebook import AcquireBar
 from navigate.view.main_window_content.menus import Menubar
 from navigate.view.custom_widgets.scrollbars import ScrolledFrame
+from navigate.view.custom_widgets.common import uniform_grid
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -114,6 +115,8 @@ class MainApp(ttk.Frame):
         #: tk.Tk: The main window of the application
         self.root = root
         self.root.title("navigate")
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
 
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent
@@ -124,6 +127,7 @@ class MainApp(ttk.Frame):
             pass
 
         self.root.resizable(True, True)
+        self.root.minsize(1350, 750)
         self.root.geometry("")
 
         #: Menubar: The menu bar for the application
@@ -144,7 +148,7 @@ class MainApp(ttk.Frame):
             row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3
         )
         self.left_frame.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
-        self.right_frame.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        self.right_frame.grid(row=1, column=1, sticky=tk.NW, padx=3, pady=3)
 
         #: SettingsNotebook: The settings notebook for the application
         self.settings = SettingsNotebook(self.left_frame, self.root)
@@ -154,3 +158,10 @@ class MainApp(ttk.Frame):
 
         #: AcquireBar: The acquire bar for the application
         self.acquire_bar = AcquireBar(self.top_frame, self.root)
+
+        uniform_grid(self.scroll_frame.interior)
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        uniform_grid(self.right_frame)

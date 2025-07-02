@@ -122,6 +122,9 @@ class DummyController:
             configuration_directory, "waveform_constants.yml"
         )
 
+        #: bool: Flag to indicate if the resize is ready.
+        self.resize_ready_flag = True
+
     def execute(self, str, *args, sec=None):
         """Execute a command.
 

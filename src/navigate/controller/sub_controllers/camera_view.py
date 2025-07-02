@@ -1647,7 +1647,8 @@ class MIPViewController(BaseViewController):
         if self.image_mode in ["live", "single"]:
             return
 
-        if self.display_enabled.get() is False:
+        if not self.display_enabled.get():
+            self._clear_mip()
             return
 
         # Orthogonal maximum intensity projections.
@@ -1660,6 +1661,20 @@ class MIPViewController(BaseViewController):
         )
 
         super().try_to_display_image(image)
+
+    def _clear_mip(self) -> None:
+        """Clear the mip but keep canvas interactive."""
+        self.canvas.delete("all")
+        self.tk_image = None
+        self.canvas.create_text(
+            self.canvas_width // 2,
+            self.canvas_height // 2,
+            text="Maximum Intensity Projection Disabled\nRight Click to Enable",
+            font=("Arial", 14, "italic"),
+            fill="gray",
+            anchor="center",
+            justify="center",
+        )
 
     def display_image(self, image: np.ndarray) -> None:
         """Display an image using the LUT specified in the View.

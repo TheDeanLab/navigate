@@ -160,7 +160,6 @@ class HistogramController:
     def update_experiment(self) -> None:
         """Update the experiment.yaml file. Also communicate any changes to the menu
         controller."""
-        print("histogram controller updated the experiment.yaml file")
         # Get the state of the histogram enabled variable.
         histogram_state = self.histogram_enabled.get()
 
@@ -268,12 +267,19 @@ class HistogramController:
         """Clear the histogram but keep canvas interactive."""
         self.ax.cla()
         self.ax.text(
-            0.5,
-            0.5,
-            "Histogram Disabled\nRight Click to Enable",
-            fontstyle="italic",
+            x=0.5,
+            y=0.5,
+            s="Intensity Histogram Disabled\nRight Click to Enable",
+            fontdict={
+                "family": "Arial",
+                "size": 10,
+                "style": "italic",
+                "color": "gray",
+            },
+            # fontstyle="italic",
             ha="center",
             va="center",
+            bbox=dict(facecolor="white", edgecolor="none", boxstyle="round,pad=0.5"),
             transform=self.ax.transAxes,
         )
         self.ax.set_xticks([])

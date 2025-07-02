@@ -276,7 +276,6 @@ class HistogramController:
                 "style": "italic",
                 "color": "gray",
             },
-            # fontstyle="italic",
             ha="center",
             va="center",
             bbox=dict(facecolor="white", edgecolor="none", boxstyle="round,pad=0.5"),

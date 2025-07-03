@@ -624,11 +624,6 @@ def load_devices(
         ]["hardware"]["type"]
 
     if device_type not in devices_dict["daq"]:
-        if device_type == "asi.ASI":
-            devices_dict["daq"][device_type] = start_daq(
-                configuration, device_type, microscope_name
-            )
-        else:
-            devices_dict["daq"][device_type] = start_daq(configuration, device_type)
+        devices_dict["daq"][device_type] = start_daq(configuration, device_type, microscope_name)
 
     return devices_dict

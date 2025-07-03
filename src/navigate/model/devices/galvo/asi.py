@@ -199,14 +199,7 @@ class ASIGalvo(GalvoBase, SerialDevice):
                     # Duty cycle must be either 0, 50, or 100
                     # If the duty cycle is not 0, 50, or 100, it will round to the nearest value
                     if duty_cycle not in (0, 50, 100):
-                        temp = duty_cycle
-                        remainder = duty_cycle % 100
-                        if remainder < 25:
-                            duty_cycle = temp - remainder
-                        elif remainder < 75:
-                            duty_cycle = temp - remainder + 50
-                        else:
-                            duty_cycle = 100
+                        duty_cycle = round(duty_cycle / 50) * 50
                         logger.debug(
                             f"Invalid duty cycle given. Duty cycle value corrected to {duty_cycle}"
                         )

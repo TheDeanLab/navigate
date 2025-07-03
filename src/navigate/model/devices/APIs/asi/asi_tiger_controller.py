@@ -33,7 +33,6 @@
 import threading
 import time
 import logging
-from typing import Union
 
 # Third Party Imports
 from serial import Serial
@@ -923,7 +922,7 @@ class TigerController:
         self.send_filter_wheel_command(f"SV {speed}")
         self.read_response()
 
-    def halt_filter_wheel(self):
+    def halt_filter_wheel(self) -> None:
         """Halt filter wheel"""
         self.send_filter_wheel_command("HA")
         self.read_response()
@@ -947,7 +946,7 @@ class TigerController:
     def square_wave(self, on_time: int, delay_time: int) -> None:
         """Square wave modulation.
 
-        For testing only.
+        For testing only. Can be used to implement precise laser control.
 
         Parameters
         ----------
@@ -1013,28 +1012,64 @@ class TigerController:
         self.send_command(f"6 CCA Z=0\r")
         self.read_response()
 
+    def logic_cell_on(self, axis : str):
+        """Turn on internal logic cell
+
+        Parameters
+        ----------
+        axis : str
+            The axis of the internal logic cell
+        """
+        self.send_command(f'6 M E = {axis}\r')
+        self.read_response()
+        self.send_command(f'6 CCA Z=1\r')
+        self.read_response()
+
+    def logic_cell_off(self, axis :str):
+        """Turn off internal logic cell
+
+        Parameters
+        ----------
+        axis : str
+            The axis of the internal logic cell
+        """
+        self.send_command(f'6 M E = {axis}\r')
+        self.read_response()
+        self.send_command(f'6 CCA Z=0\r')
+        self.read_response()
+
     def SA_waveform(
-        self, axis: str, waveform: int = 0, amplitude: int = 1000, offset: int = 500
+        self, axis: str, waveform: int = 0, amplitude: int = 1000, offset: int = 500, period: int = 10 
     ) -> None:
-        """Programs the analog waveforms using SAA, SAO, and SAP
-        Default waveform is a sawtooth waveform with an amplitude of 1V with an offset of 0.5V
+        """Programs the analog waveforms using SAA, SAO, SAP, and SAF
+        Default waveform is a sawtooth waveform with an amplitude of 1V, an offset of 0.5V and period of 10 ms
 
         Parameters
         ----------
         axis: str
-            Laser axis
+            Tiger Controller axis
         waveform: int
             Type of waveform pattern according to https://asiimaging.com/docs/commands/sap
         amplitude: int
-            amplitude of the waveform
+            amplitude of the waveform in mV
         offset: int
-            sets the center position of the waveform
+            sets the center position of the waveform in mV
+        period: int
+            sets the period of the waveform in ms
         """
-        self.send_command(f"SAP {axis}={waveform}")
+        print(f"Period (ms): {period}")
+        # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
+        if (waveform % 128 == 3):
+            offset = .5*(offset+amplitude)
+        amplitude = amplitude*2
+        # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
+        self.send_command(f"3 SAP {axis}={waveform}")
         self.read_response()
-        self.send_command(f"SAA {axis}={amplitude}")
+        self.send_command(f"3 SAA {axis}={amplitude}")
         self.read_response()
-        self.send_command(f"SAO {axis}={offset}")
+        self.send_command(f"3 SAO {axis}={offset}")
+        self.read_response()
+        self.send_command(f"3 SAF {axis}={period}")
         self.read_response()
 
     def SAM(self, axis: str, mode: int) -> None:
@@ -1053,7 +1088,7 @@ class TigerController:
         mode: int
             Integer code.
         """
-        self.send_command(f"SAM {axis}={mode}")
+        self.send_command(f"3 SAM {axis}={mode}")
         self.read_response()
 
     def setup_control_loop(

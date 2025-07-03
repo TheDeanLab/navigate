@@ -75,15 +75,6 @@ class ASIGalvo(GalvoBase, SerialDevice):
         #: Any: Device connection.
         self.galvo = device_connection
 
-        #: dict: Dictionary of microscope configuration parameters.
-        self.configuration = configuration
-
-        #: str: Name of the microscope.
-        self.microscope_name = microscope_name
-
-        #: int: Galvo ID.
-        self.galvo_id = device_id
-
         #: str: Galvo Axis
         self.axis = self.device_config["hardware"]["axis"]  # .get("axis","B")
         logger.debug(f"galvo axis: {self.axis}")

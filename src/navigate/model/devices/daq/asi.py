@@ -80,23 +80,14 @@ class ASIDaq(DAQBase, SerialDevice):
         """
         super().__init__(configuration)
 
-        #: dict: Configuration dictionary.
-        self.configuration = configuration
-
-        #: dict: Camera object.
-        self.camera = {}
-
         #: Lock: Lock for waiting to run.
         self.wait_to_run_lock = Lock()
-
-        #: dict: Analog output tasks.
-        self.analog_outputs = {}
 
         #: bool: Flag for updating analog task.
         self.is_updating_analog_task = False
 
-        #: str: Trigger mode. Self-trigger or external-trigger.
-        self.trigger_mode = "self-trigger"
+        #: dict: Analog output tasks.
+        self.analog_outputs = {}
 
         #: Any: Device connection.
         self.daq = device_connection

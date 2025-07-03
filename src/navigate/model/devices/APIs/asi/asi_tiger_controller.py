@@ -1061,15 +1061,18 @@ class TigerController:
         # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
         if (waveform % 128 == 3):
             offset = .5*(offset+amplitude)
+
         amplitude = amplitude*2
+
+        print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
-        self.send_command(f"3 SAP {axis}={waveform}")
+        self.send_command(f"3 SAP {axis}={round(waveform)}")
         self.read_response()
-        self.send_command(f"3 SAA {axis}={amplitude}")
+        self.send_command(f"3 SAA {axis}={round(amplitude)}")
         self.read_response()
-        self.send_command(f"3 SAO {axis}={offset}")
+        self.send_command(f"3 SAO {axis}={round(offset)}")
         self.read_response()
-        self.send_command(f"3 SAF {axis}={period}")
+        self.send_command(f"3 SAF {axis}={round(period)}")
         self.read_response()
 
     def SAM(self, axis: str, mode: int) -> None:

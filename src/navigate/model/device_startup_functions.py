@@ -513,7 +513,9 @@ def start_device(
     device_not_found(microscope_name, device_category, device_type, device_id)
 
 
-def start_daq(configuration: Dict[str, Any], device_type: str = "NI") -> DAQBase:
+def start_daq(
+    configuration: Dict[str, Any], device_type: str = "NI", name: str = "name"
+) -> DAQBase:
     """Initializes the data acquisition (DAQ) class on a dedicated thread.
 
     Load daq information from the configuration file. Proper daq types include NI and
@@ -536,7 +538,12 @@ def start_daq(configuration: Dict[str, Any], device_type: str = "NI") -> DAQBase
         from navigate.model.devices.daq.ni import NIDAQ
 
         return NIDAQ(configuration)
-    
+
+    elif device_type == "asi.ASI":
+        # from navigate.model.devices.daq.asi import ASIDaq
+        # name = "Microscope-0"
+        return start_device(name, configuration, "daq")
+
     elif device_type.lower().startswith("synthetic"):
         from navigate.model.devices.daq.synthetic import SyntheticDAQ
 
@@ -578,9 +585,9 @@ def device_not_found(*args: Any) -> None:
 def load_devices(
     microscope_name: str,
     configuration: Dict[str, Any],
-    is_synthetic=False,
-    devices_dict={},
-    plugin_devices=None,
+    is_synthetic: bool = False,
+    devices_dict: dict = {},
+    plugin_devices: Optional[dict] = None,
 ) -> dict:
     """Load devices from configuration.
 
@@ -592,6 +599,8 @@ def load_devices(
         Configuration dictionary
     is_synthetic : bool
         Run synthetic version of hardware?
+    devices_dict : dict
+        Dictionary of devices to load
     plugin_devices : dict
         Dictionary of plugin devices
 
@@ -615,6 +624,11 @@ def load_devices(
         ]["hardware"]["type"]
 
     if device_type not in devices_dict["daq"]:
-        devices_dict["daq"][device_type] = start_daq(configuration, device_type)
+        if device_type == "asi.ASI":
+            devices_dict["daq"][device_type] = start_daq(
+                configuration, device_type, microscope_name
+            )
+        else:
+            devices_dict["daq"][device_type] = start_daq(configuration, device_type)
 
     return devices_dict

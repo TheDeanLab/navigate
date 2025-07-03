@@ -77,40 +77,6 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         #: Any: Device connection object.
         self.remote_focus = device_connection
 
-        #: dict: Configuration dictionary.
-        self.configuration = configuration
-
-        #: str: Name of the microscope.
-        self.microscope_name = microscope_name
-
-        #: dict: Remote focus device parameters.
-        self.device_config = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["remote_focus"]
-
-        #: float: Sweep time of the DAQ.
-        self.sweep_time = 0
-
-        #: float: Camera delay percent.
-        self.camera_delay = (
-            configuration["configuration"]["microscopes"][microscope_name]["camera"][
-                "delay"
-            ]
-            / 1000
-        )
-
-        # Waveform Parameters
-        #: float: Remote focus max voltage.
-        self.remote_focus_max_voltage = self.device_config["hardware"]["max"]
-
-        #: float: Remote focus min voltage.
-        self.remote_focus_min_voltage = self.device_config["hardware"]["min"]
-
-        #: str: The trigger source (e.g., physical channel).
-        self.trigger_source = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["daq"]["trigger_source"]
-
         #: str: Output axis on Tiger Controller
         self.axis = self.device_config["hardware"]["axis"]
 

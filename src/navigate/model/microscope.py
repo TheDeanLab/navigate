@@ -559,8 +559,18 @@ class Microscope:
         turning off the lasers, and moving the stage to the central focus
         position if it was moved during the acquisition. It also stops the stage if
         it is moving.
+
+        For ASI daq systems, it also stops the ASI galvos (TG-1000 waveforms in SAM mode
+        4 must be manually shut off).
         """
         self.daq.stop_acquisition()
+        galvo_type = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["galvo"][0]["hardware"]["type"]
+        if galvo_type == "asi.ASI":
+            for k in self.galvo:
+                self.galvo[k].turn_off()
+
         self.stop_stage()
         if self.central_focus is not None:
             self.move_stage({"f_abs": self.central_focus})

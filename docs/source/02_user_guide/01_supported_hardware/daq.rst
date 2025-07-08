@@ -144,6 +144,7 @@ outputs can be wired up as is most convenient.
     .. image:: images/6723_pinout.png
 
 ------------------
+
 Applied Scientific Instrumentation
 ----------------------------------
 
@@ -192,6 +193,9 @@ to communicate with the Tiger Controller
               type: ASI
               port: COM4
 
+|
+
+------------------
 
 Synthetic Data Acquisition Card
 -------------------------------

@@ -80,7 +80,7 @@ class ASILaser(LaserBase, SerialDevice):
             "laser"
         ][device_id]["onoff"]["hardware"].get("type", None)
 
-        if analog == "asi.ASI" and digital == "asi.ASI":
+        if "ASI" in analog and "ASI" in digital:
             modulation_type = "mixed"
             #: float: The minimum digital modulation voltage.
             self.laser_min_do = self.device_config["onoff"]["hardware"]["min"]
@@ -93,7 +93,7 @@ class ASILaser(LaserBase, SerialDevice):
             #: str: Output axes on Tiger Controller
             self.analog_axis = self.device_config["power"]["hardware"]["axis"]
             self.digital_axis = self.device_config["onoff"]["hardware"]["axis"]
-        elif analog == "asi.ASI":
+        elif "ASI" in analog:
             modulation_type = "analog"
             #: float: The minimum analog modulation voltage.
             self.laser_min_ao = self.device_config["power"]["hardware"]["min"]
@@ -101,7 +101,7 @@ class ASILaser(LaserBase, SerialDevice):
             self.laser_max_ao = self.device_config["power"]["hardware"]["max"]
             #: str: Output axis on Tiger Controller
             self.analog_axis = self.device_config["power"]["hardware"]["axis"]
-        elif digital == "asi.ASI":
+        elif "ASI" in digital:
             modulation_type = "digital"
             #: float: The minimum digital modulation voltage.
             self.laser_min_do = self.device_config["onoff"]["hardware"]["min"]

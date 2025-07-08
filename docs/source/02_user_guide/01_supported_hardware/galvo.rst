@@ -41,7 +41,7 @@ Multiple types of galvanometers have been used, including Cambridge Technologies
 ------------
 
 Applied Scientific Instrumentation
----
+----------------------------------
 
 In principle, this hardware type can support any analog-controlled galvanometer,
 including those from Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX. 

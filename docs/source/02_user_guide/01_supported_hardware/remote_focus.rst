@@ -113,7 +113,7 @@ Optotune Focus Tunable Lens
 ------------------
 
 Applied Scientific Instrumentation
----
+----------------------------------
 
 In principle, this hardware type can support any analog-controlled voice coil or tunable lens. 
 The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ and the `Optotune Focus Tunable Lens <https://www.optotune.com/tunable-lenses>`_ 
@@ -140,6 +140,7 @@ the ramp time will be rounded to the nearest whole number.
               min: 0
               max: 5
               port: COM4
+
 |
 
 ------------------

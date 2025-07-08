@@ -160,6 +160,10 @@ a multi-purpose controller for ASI stages, filter wheels, and dichroic sliders.
 It can also control lasers, shutters, remote focusing devices, and galvanometers. More info 
 for these devices can be found on their respective documention pages.
 
+Remote focus device, galvanometer, and analog laser control is done by the `TGGALVO <https://asiimaging.com/docs/tggalvo>`_ control card. 
+Shutter and digital laser control is done by the `TGPLC <https://asiimaging.com/docs/tiger_programmable_logic_card>`_ control card.
+TGPLC output 1 delivers the camera trigger signal (equivalent to camera_trigger_out_line for the NI Card).
+
 We communicate with Tiger Controllers via a serial port. It is recommended that you
 first establish communication with the device using `ASI provided software <https://asiimaging.com/docs/products/tiger>`_.
 If not, simply install the `USB driver <https://www.asiimaging.com/support/downloads/usb-support-on-ms-2000-wk-controllers/>`_ 
@@ -185,7 +189,7 @@ to communicate with the Tiger Controller
         microscope_name:
           daq:
             hardware:
-              type: asi.ASI
+              type: ASI
               port: COM4
 
 

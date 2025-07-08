@@ -77,10 +77,10 @@ and for the triangle wave, the period will be rounded to the nearest even number
                 hardware:
                   type: ASI
                   axis: B
-                  min: 0
-                  max: 1.0
-                waveform: sine
-                phase: 1.57079632679
+                  min: -5.0
+                  max: 5.0
+                waveform: sawtooth
+                phase: 1.57
 
 |
 

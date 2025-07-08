@@ -539,9 +539,7 @@ def start_daq(
 
         return NIDAQ(configuration)
 
-    elif device_type == "asi.ASI":
-        # from navigate.model.devices.daq.asi import ASIDaq
-        # name = "Microscope-0"
+    elif device_type == "ASI":
         return start_device(name, configuration, "daq")
 
     elif device_type.lower().startswith("synthetic"):

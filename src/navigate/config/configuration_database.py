@@ -108,7 +108,7 @@ filter_wheel_hardware_widgets = {
 
 daq_device_types = {
     "National Instruments": "NI",
-    "Applied Scientific Instrumentation": "ASI",
+    "Applied Scientific Instrumentation": ("ASI", "asi"),
     "Virtual Device": "Synthetic",
 }
 

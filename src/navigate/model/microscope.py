@@ -564,10 +564,10 @@ class Microscope:
         4 must be manually shut off).
         """
         self.daq.stop_acquisition()
-        for k in self.galvo:
+        for i, k in enumerate(self.galvo):
             galvo_type = self.configuration["configuration"]["microscopes"][
                 self.microscope_name
-            ]["galvo"][k]["hardware"]["type"]
+            ]["galvo"][i]["hardware"]["type"]            
             if galvo_type in ("asi.ASI", "ASI"):
                 self.galvo[k].turn_off()
 

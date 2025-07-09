@@ -8,6 +8,7 @@ Software API
 
    navigate.config
    navigate.controller
+   navigate.controller.configurator
    navigate.log_files
    navigate.model
    navigate.tools

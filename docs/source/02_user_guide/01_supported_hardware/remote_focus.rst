@@ -112,15 +112,20 @@ Optotune Focus Tunable Lens
 
 ------------------
 
-ASI
----
+Applied Scientific Instrumentation
+----------------------------------
 
-The ASI Tiger Controller has a few limitations for the analog signals. First, the 
-minimum voltage must be zero volts. Second, the period value needs to be a whole number.
+In principle, this hardware type can support any analog-controlled voice coil or tunable lens. 
+The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ and the `Optotune Focus Tunable Lens <https://www.optotune.com/tunable-lenses>`_ 
+can be controlled with an analog signal from the ASI Tiger Controller (`TG-1000 <https://asiimaging.com/docs/products/tiger>`_).
 
-There are two analog waveforms offered, triangle and ramp waves. The triangle waveform is 
-a periodic analog waveform, with no delay periods. The sawtooth waveform is a periodic 
-analog waveform with a delay period between each cycle. 
+The ASI Tiger Controller has a few limitations for the analog signals. 
+The remote focus waveform is a periodic ramp waveform with a delay period between each ramp. 
+The ramp lasts for the exposure time, falls very quickly and rests until the next exposure time.
+Fall time is not configurable so there is no 'gentle' fall with this hardware.
+
+The ramp waveform must last a whole number of milliseconds. If exposure time is not a whole number, 
+the ramp time will be rounded to the nearest whole number.
 
 .. collapse:: Configuration File
 
@@ -134,8 +139,8 @@ analog waveform with a delay period between each cycle.
               axis: A
               min: 0
               max: 5
-              port: COM2
-              baudrate: 9600
+              port: COM4
+
 |
 
 ------------------

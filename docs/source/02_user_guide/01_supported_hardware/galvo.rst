@@ -40,23 +40,22 @@ Multiple types of galvanometers have been used, including Cambridge Technologies
 
 ------------
 
-ASI
----
+Applied Scientific Instrumentation
+----------------------------------
 
-Multiple types of galvanometers have been used, including Cambridge
-Technologies/Novanta, Thorlabs, and ScannerMAX. Each of these devices
-are externally controlled via analog signals delivered from the ASI 
-Tiger Controller.
-
-The ASI Tiger Controller has a few limitations for the analog signals. First, the 
-minimum voltage must be zero volts. Second, the period value needs to be a whole number.
-Third, there are three analog waveforms offered, sawtooth,  
-triangle, and sine waves.
-
+In principle, this hardware type can support any analog-controlled galvanometer,
+including those from Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX. 
+Each of these devices are externally controlled via analog signals delivered from the ASI Tiger Controller (`TG-1000 <https://asiimaging.com/docs/products/tiger>`_).
+ 
+Galvanometers can take two types of analog waveforms: sawtooth and sine.
 The sawtooth waveform is a periodic analog waveform. There are three duty cycle values 
 accepted, 0, 50, and 100. If the duty cycle is 0, the waveform is a falling sawtooth 
 waveform. If the duty cycle is 50, then it is a triangle wave. If the duty cycle is 100, 
-the waveform is a rising sawtooth waveform. 
+the waveform is a rising sawtooth waveform. The duty cycle will be rounded to the nearest acceptable value.
+
+The ASI Tiger Controller has a few limitations for the analog signals.
+The period value will be rounded to the nearest whole number of milliseconds,
+and for the triangle wave, the period will be rounded to the nearest even number.
 
 
 .. collapse:: Configuration File
@@ -78,10 +77,10 @@ the waveform is a rising sawtooth waveform.
                 hardware:
                   type: ASI
                   axis: B
-                  min: 0
-                  max: 1.0
-                waveform: sine
-                phase: 1.57079632679
+                  min: -5.0
+                  max: 5.0
+                waveform: sawtooth
+                phase: 1.57
 
 |
 

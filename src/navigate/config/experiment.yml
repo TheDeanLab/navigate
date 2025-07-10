@@ -1,12 +1,12 @@
 User:
-  name: Kevin_Dean
+  name: Steven_Sheppard
 Saving:
-  root_directory: C:\Users\MicroscopyInnovation\Desktop\Data
-  save_directory: E://Kevin\Lung\MV3\GFP\2022-02-18\Cell000
-  user: Kevin
-  tissue: Lung
-  celltype: MV3
-  label: GFP
+  root_directory: ~/data/
+  save_directory: /mnt/data/
+  user: Steven
+  tissue: NA
+  celltype: NA
+  label: NA
   file_type: TIFF
   date: 2022-06-07
   solvent: BABB

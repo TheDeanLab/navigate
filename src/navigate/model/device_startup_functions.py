@@ -450,7 +450,6 @@ def load_stages(
     stage_devices = []
 
     stages = configuration["configuration"]["hardware"]["stage"]
-
     if type(stages) != ListProxy:
         stages = [stages]
 
@@ -461,7 +460,6 @@ def load_stages(
 
         else:
             stage_type = stage_config["type"]
-
         if stage_type == "PI" and platform.system() == "Windows":
             from navigate.model.devices.stages.pi import build_PIStage_connection
             from pipython.pidevice.gcserror import GCSError
@@ -1424,7 +1422,6 @@ def start_galvo(
     Galvo : GalvoBase
         Galvo scanning class.
     """
-
     if plugin_devices is None:
         plugin_devices = {}
 

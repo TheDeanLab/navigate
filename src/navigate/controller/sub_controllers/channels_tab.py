@@ -30,6 +30,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+DEBUGGING = True
+
 # Standard Library Imports
 import logging
 import datetime
@@ -195,12 +197,19 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
         ]
+        # NOTE: If the step size is negative, this forces a positive step size.
+        #       So if the z start/stop is decreasing it will not run as expected.
         if self.microscope_state_dict["step_size"] < 0:
             self.microscope_state_dict["step_size"] = -self.microscope_state_dict[
                 "step_size"
             ]
+            if DEBUGGING:
+                print('--ChannelsTab-- step size reversed')
+                
+        if DEBUGGING:
+            print(f'--ChannelsTab-- stack acq vals:\n  {self.stack_acq_vals}')
+            
         self.set_info(self.stack_acq_vals, self.microscope_state_dict)
-        # self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
         self.set_info(self.timepoint_vals, self.microscope_state_dict)
 
         # check configuration for multiposition settings
@@ -229,6 +238,7 @@ class ChannelsTabController(GUIController):
         # after initialization
         self.in_initialization = False
         self.channel_setting_controller.in_initialization = False
+        
         # update z and f position
         self.z_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
@@ -375,6 +385,7 @@ class ChannelsTabController(GUIController):
         # Calculate the number of slices and set GUI
         try:
             # validate the spinbox's value
+            # NOTE: start/end position are relative, not absolute
             start_position = float(self.stack_acq_vals["start_position"].get())
             end_position = float(self.stack_acq_vals["end_position"].get())
             step_size = float(self.stack_acq_vals["step_size"].get())
@@ -391,11 +402,7 @@ class ChannelsTabController(GUIController):
         except (KeyError, AttributeError):
             logger.error("Error caught: updating z_steps")
             return
-
-        # if step_size < 0.001:
-        #     step_size = 0.001
-        #     self.stack_acq_vals['step_size'].set(step_size)
-
+        
         number_z_steps = int(
             np.ceil(np.abs((end_position - start_position) / step_size))
         )
@@ -421,6 +428,14 @@ class ChannelsTabController(GUIController):
             "abs_z_start"
         ].get()
         self.microscope_state_dict["abs_z_end"] = self.stack_acq_vals["abs_z_end"].get()
+        
+        if DEBUGGING:
+            print(
+                f"--ChannelsTab--\n",
+                f"  f start: {self.stack_acq_vals['start_focus'].get()}\n",
+                f"  f end: {self.stack_acq_vals['end_focus'].get()}\n",
+                f"  f origin: {self.focus_origin}\n",
+                )
         try:
             self.microscope_state_dict["start_focus"] = self.stack_acq_vals[
                 "start_focus"
@@ -451,7 +466,7 @@ class ChannelsTabController(GUIController):
             Values is a dict as follows {'start_position': , 'abs_z_start': ,
             'stack_z_origin': }
         """
-
+        # NOTE: pressing the set start/stop button sets the z/f origins. and sets the start and end positions to 0. So when setting up the zstack it should be done by first pressing start, then go to the end and press end?
         # We have a new origin
         self.z_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
@@ -489,6 +504,7 @@ class ChannelsTabController(GUIController):
             "StageParameters"
         ]["f"]
 
+        # NOTE: Here we are setting the z/f start as the origin
         z_start = self.z_origin
         focus_start = self.focus_origin
 
@@ -497,6 +513,9 @@ class ChannelsTabController(GUIController):
             z_start, z_end = z_end, z_start
             focus_start, focus_end = focus_end, focus_start
 
+        # NOTE: Now after making sure we are moving forward, we redefine the origin at the middle of the stack.
+        #       This means when first setting start, then setting end, origin is going to be calculated as the middle between the 2,
+        #       and the start positions are the old origins. This logic is why the z-stack setup is so specific.
         # set origin to be in the middle of start and end
         self.z_origin = (z_start + z_end) / 2
         self.focus_origin = (focus_start + focus_end) / 2
@@ -507,6 +526,7 @@ class ChannelsTabController(GUIController):
         end_pos = z_end - self.z_origin
         start_focus = focus_start - self.focus_origin
         end_focus = focus_end - self.focus_origin
+        # NOTE: The parameters in the GUI are relative to origin which is 1/2 way between the start/end positions, when pressed
         if flip_flags["z"]:
             start_pos, end_pos = end_pos, start_pos
             start_focus, end_focus = end_focus, start_focus
@@ -797,7 +817,6 @@ class ChannelsTabController(GUIController):
         self.channel_setting_controller.update_experiment_values()
         self.update_z_steps()
         
-
     def verify_experiment_values(self):
         """Verify channel tab settings and return warning info
 

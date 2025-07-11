@@ -29,6 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+DEBUGGING = True
 
 # Standard Imports
 import logging
@@ -140,7 +141,10 @@ class NIDAQ(DAQBase):
             "self-trigger" if external_trigger is None else "external-trigger"
         )
         self.external_trigger = external_trigger
-
+        
+        if DEBUGGING:
+            print(f'--DAQ-- trigger_mode:{self.trigger_mode}')
+        
         # change trigger mode during acquisition in a feature
         if self.trigger_mode == "self-trigger":
             self.create_master_trigger_task()
@@ -159,6 +163,7 @@ class NIDAQ(DAQBase):
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
                 trigger_source
             )
+            # TODO: Is this a spot to ad a check for if it needs to be reprogrammed?
             self.camera_trigger_task.triggers.start_trigger.retriggerable = False
             # set analog task trigger source
             for board_name in self.analog_output_tasks.keys():
@@ -172,6 +177,7 @@ class NIDAQ(DAQBase):
                 self.analog_output_tasks[
                     board_name
                 ].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
+                
                 # NOTE: this was causing an error for me using PCIe-6343 in Linux. Not sure if it was board or OS related.
                 # try:
                 #     # print(board_name)
@@ -302,6 +308,9 @@ class NIDAQ(DAQBase):
         # apply waveform templates
         camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
 
+        if DEBUGGING:
+            print(f'--DAQ-- camera waveform repeat:{camera_waveform_repeat_num}')
+            
         if self.analog_outputs:
             camera_high_time = 0.004
             camera_low_time = self.sweep_times[channel_key] - camera_high_time
@@ -352,6 +361,9 @@ class NIDAQ(DAQBase):
         """
         self.n_sample = int(self.sample_rate * self.sweep_times[channel_key])
         max_sample = self.n_sample * self.waveform_expand_num
+        
+        if DEBUGGING:
+            print(f'--DAQ-- analog waveform max sample:{max_sample}, repeat num:{self.waveform_repeat_num}')
         # TODO: GalvoStage and remote_focus waveform are not calculated based on a
         #  same sweep time. There needs some fix.
 

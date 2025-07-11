@@ -793,9 +793,10 @@ class Microscope:
             self.daq.stop_acquisition()
             self.daq.prepare_acquisition(channel_key)
 
+        # TODO: Here is the logic for adding the defocus for each channel. This runs before imaging each channel
+        # NOTE: We are using the current stage position for the central focus
         # Add Defocus term
         # Assume wherever we start is the central focus
-        # TODO: is this the correct assumption?
         if self.central_focus is None:
             self.central_focus = self.get_stage_position().get("f_pos")
         if self.central_focus is not None:
@@ -895,7 +896,8 @@ class Microscope:
         for stage, axes in self.stages_list:
             stage.stop()
 
-        self.central_focus = self.get_stage_position().get("f_pos", self.central_focus)
+        # NOTE: removed extra arg in get from dictionary
+        self.central_focus = self.get_stage_position().get("f_pos")
 
     def get_stage_position(self) -> dict:
         """Get stage position.

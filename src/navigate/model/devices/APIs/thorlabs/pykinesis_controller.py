@@ -84,6 +84,7 @@ class KinesisStage():
         distance = position - position_um
         # convert total distance to steps
         steps = steps_per_um * distance
+        # TODO: Does steps need to be an int?
         self.stage.move_by(steps, channel=1, scale=False)
         if wait_till_done:
             self.stage.wait_move(channel=1)

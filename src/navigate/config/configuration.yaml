@@ -1,60 +1,53 @@
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
 microscopes:
   Mesoscale:
     daq:
       hardware:
         type: NI
+      # Sampling rate in Hz
       sample_rate: 100000
+
+      # triggers
       master_trigger_out_line: Dev1/port0/line10
       camera_trigger_out_line: /Dev1/ctr0
       trigger_source: /Dev1/PFI3
+
+      # Digital Laser Outputs
       laser_port_switcher: Dev1/port0/line11
       laser_switch_state: False
-    
-    zoom:
-      hardware:
-        type: synthetic
-        servo_id: 1
-        port: None
-        baudrate: 
-      position:
-        N/A: 0.0
-      pixel_size:
-        N/A: 2.125
-    
-    shutter:
-      hardware:
-        type: synthetic
-        channel: Dev1/port0/line16
-        min: 0.0
-        max: 5.0
-
+      
     camera:
       hardware:
         type: Photometrics
         serial_number: A17K631096
-        camera_connection: pvcamPCIE_0
-      speed_table_index: 0
-      readout_port: 0
-      gain: 1
-      defect_correct_mode: 1.0
-      delay: 1.0
-      settle_down: 0.0
+        camera_connection: pvcamPCIE_0 
+      delay: 0.002 #ms
+      settle_down: 0 #ms
       flip_x: False
       flip_y: False
-      supported_channel_count: 4
-    
+      subsampling: [1, 2, 4]
+      readout_port: 0
+      delay_percent: 10
+      gain: 1
+      speed_table_index: 0
+      exposure_time_range:
+        min: 1
+        max: 1000
+        step: 1
+      unitforlinedelay: 10.26    
+
     remote_focus_device:
       hardware:
         type: NI
-        channel: Dev1/ao2
-        min: 0.0
-        max: 10.0
-        port: None
-        baudrate: 0   
-    
+        channel: Dev1/ao1
+        min: 0
+        max: 10
+        port: 
+        baudrate: 0
+
     galvo:
       -
-        name: 0
+        name: GM1
         hardware:
           type: NI
           channel: Dev1/ao1
@@ -63,7 +56,7 @@ microscopes:
         waveform: sine
         phase: 1.57079
       - 
-        name: 1
+        name: GM2
         hardware:
           type: NI
           channel: Dev1/ao0
@@ -76,81 +69,14 @@ microscopes:
       hardware:
         type: NI
         wheel_number: 1
-        port: None
-        baudrate: 
-        name: None
-      filter_wheel_delay: 0.05
+      filter_wheel_delay: 0.050 # in seconds
       available_filters:
         473nm: Dev1/port0/line3
         532nm: Dev1/port0/line2
         561nm: Dev1/port0/line1
         638nm: Dev1/port0/line0
-    
-    lasers:
-      -
-        wavelength: 473
-        onoff:
-          hardware:
-            type: NI
-            channel: Dev1/port0/line7
-            min: 0.0
-            max: 5.0
-        power:
-          hardware:
-            type: synthetic
-            channel: none/ao4
-            min: 0.0
-            max: 5.0
-      -
-        wavelength: 532
-        onoff:
-          hardware:
-            type: NI
-            channel: Dev1/port0/line6
-            min: 0.0
-            max: 5.0
-        power:
-          hardware:
-            type: synthetic
-            channel: none/ao3
-            min: 0.0
-            max: 5.0
-      -
-        wavelength: 561
-        onoff:
-          hardware:
-            type: NI
-            channel: Dev1/port0/line5
-            min: 0.0
-            max: 5.0
-        power:
-          hardware:
-            type: synthetic
-            channel: none/ao2
-            min: 0.0
-            max: 5.0
-      -
-        wavelength: 638
-        onoff:
-          hardware:
-            type: NI
-            channel: Dev1/port0/line4
-            min: 0.0
-            max: 5.0
-        power:
-          hardware:
-            type: synthetic
-            channel: none/ao1
-            min: 0.0
-            max: 5.0
-    
-    mirror:
-      hardware:
-        type: SyntheticMirror
-        flat_path: 
-      n_modes: 32
-    
-    stage:    
+
+    stage:
       hardware:
         -
           type: MS2000
@@ -170,61 +96,165 @@ microscopes:
           axes_mapping: [1]
           steps_per_um: 2008.623
           axes_channels: autofocus
+          max: 0
+          min: 25
           start: 14800
-          max: 25
-          min: 0
         -
-          type: synthetic
+          type: SyntheticStage
           serial_number: 123
-          axes: ['theta']
-          axes_mapping: ['xylophone']
-          feedback_alignment: None
-          device_units_per_mm: 
+          axes: [theta]
+          axes_mapping: [xylophone]
           volts_per_micron: None
-          min: 
-          max: 
-          distance_threshold: 
-          settle_duration_ms: 
-          controllername: None
-          stages: None
-          refmode: None
-          stagesport: None
-          baudrate: 
-          timeout: 
-      joystick_axes: ['x', 'y', 'z']
-      x_min: -100000.0
-      x_max: 100000.0
-      y_min: -100000.0
-      y_max: 100000.0
-      z_min: -100000.0
-      y_max: 100000.0
-      z_min: -100000.0
-      z_max: 100000.0
-      theta_min: 0.0
-      theta_max: 360.0
-      f_min: -100000.0
-      f_max: 100000.0
-      x_offset: 0.0
-      y_offset: 0.0
-      z_offset: 0.0
-      theta_offset: 0.0
-      f_offset: 0.0
+          axes_channels: None
+          max: None
+          min: None
+
+      joystick_axes: [x, y, z]
+      x_max: 100000
+      x_min: -100000
+      y_max: 100000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
+      f_max: 100000
+      f_min: -100000
+      theta_max: 360
+      theta_min: 0
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      theta_offset: 0
+      f_offset: 0
       flip_x: False
       flip_y: False
       flip_z: False
-      flip_f: True
-    
+      flip_f: False
+
     zoom:
       hardware:
         type: synthetic
         servo_id: 1
-        port: None
-        baudrate: 
       position:
-        N/A: 0.0
+        N/A: 0
       pixel_size:
-        N/A: 2.12500
+        N/A: 2.125
+
+    shutter:
+      hardware:
+        name: daq
+        type: synthetic
+        channel: Dev1/port0/line16
+        min: 0.0
+        max: 5.0
+
+    lasers:
+      # Oxxius L4CC [473, 532, 561, 638]
+      - wavelength: 473
+        onoff:
+          hardware:
+            type: NI
+            channel: Dev1/port0/line7
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: synthetic
+            channel: Dev1/ao3
+            min: 0
+            max: 5
+        type: LBX
+      - wavelength: 532
+        onoff:
+          hardware:
+            type: NI
+            channel: Dev1/port0/line6
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: synthetic
+            channel: Dev1/ao3
+            min: 0
+            max: 5
+      #   type: LCX
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: Dev1/port0/line5
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: synthetic
+            channel: Dev1/ao3
+            min: 0
+            max: 5
+        type: LCX
+      - wavelength: 638
+        onoff:
+          hardware:
+            type: NI
+            channel: Dev1/port0/line4
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: synthetic
+            channel: Dev1/ao2
+            min: 0
+            max: 5
+        type: LBX
 
 gui:
   channels:
     count: 4
+    laser_power:
+      min: 0
+      max: 100
+      step: 10
+    exposure_time:
+      min: 1
+      max: 1000
+      step: 5
+    interval_time:
+      min: 0
+      max: 1000
+      step: 5
+  stack_acquisition:
+    step_size:
+      min: 0.100
+      max: 1000
+      step: 0.1
+    start_pos:
+      min: -5000
+      max: 5000
+      step: 1
+    end_pos:
+      min: -5000
+      max: 10000
+      step: 1
+  timepoint:
+    timepoints:
+      min: 1
+      max: 1000
+      step: 1
+    stack_pause:
+      min: 0
+      max: 1000
+      step: 1
+      
+BDVParameters:
+# The following parameters are used to configure the BigDataViewer
+  # visualization. See the BigDataViewer documentation for more details.
+  # https://imagej.net/BigDataViewer
+  shear:
+    shear_data: False
+    shear_dimension: YZ # XZ, YZ, or XY
+    shear_angle: 45
+  rotate:
+    rotate_data: False
+    X: 0
+    Y: 0
+    Z: 0

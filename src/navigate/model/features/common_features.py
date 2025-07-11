@@ -29,7 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-
+DEBUGGING = True
 # Standard library imports
 import time
 import ast
@@ -988,12 +988,17 @@ class ZStackAcquisition:
         self.z_stack_distance = abs(
             self.start_z_position - float(microscope_state["end_position"])
         )
-        # NOTE: added a quick fix for the focus stage moving in a negative direction during z-stack acquisitions. Somehow a negative step needs to be allowed. Flipping the axes direction did not have the desired outcome.
+        # NOTE: To allow for the focus stage to move in a negative direction while the z-stage is
+        #       moving in a positive direction, check the focus start/stop and modify the step size
         self.start_focus = float(microscope_state["start_focus"])
         end_focus = float(microscope_state["end_focus"])
-        self.focus_step_size = -(end_focus - self.start_focus) / self.number_z_steps
-        #: float: The focus stack distance for the z-stack.
+        if self.start_focus > end_focus:
+            focus_direction = -1
+        else:
+            focus_direction = 1
         self.f_stack_distance = abs(end_focus - self.start_focus)
+        self.focus_step_size = focus_direction * self.f_stack_distance / self.number_z_steps
+        #: float: The focus stack distance for the z-stack.
 
         # restore z, f
         pos_dict = self.model.get_stage_position()
@@ -1055,8 +1060,7 @@ class ZStackAcquisition:
         self.need_to_move_z_position = True
         #: bool: Flag to determine whether to pause the data thread.
         self.should_pause_data_thread = False
-        # TODO: distance > 1000 should not be hardcoded and somehow related to
-        #  different kinds of stage devices.
+        # NOTE: For large acquisitions this ight be a fault if not near the starting point?
         self.stage_distance_threshold = 1000
 
         self.defocus = [
@@ -1157,6 +1161,8 @@ class ZStackAcquisition:
                 self.model.pause_data_thread()
                 logger.info("Data thread paused.")
 
+            if DEBUGGING:
+                print(f'--CommonFeatures-- current_focus_position:{self.current_focus_position}')
             self.model.move_stage(
                 {
                     "z_abs": self.current_z_position,

@@ -1172,79 +1172,54 @@ class TigerController:
             "6 CCA X=0",
             # Cell 2, a one-shot triggered by the rising edge of Cell 1
             "6 m e = 2",
-            "6 cca y = 8",
-            "6 cca z = 10",
-            "6 ccb x = 1",
-            "6 ccb y = 192",
+            "6 cca y = 8 z = 10",
+            "6 ccb x = 1 y = 192",
             # Cell 3, delay cell that is used to sync up the loop after Galvo initialization
             # Delay time is based on the start delay variable (in 1/4 ms)
             "6 m e = 3",
-            "6 cca y = 9",
-            f"6 cca z = {start_delay}",
-            "6 ccb x = 1",
-            "6 ccb y = 192",
+            f"6 cca y = 9 z = {start_delay}",
+            "6 ccb x = 1 y = 192",
             # Cell 4, JK flop used for toggling on and off state of the loop
             # Cells 3 and 8 serve as the inputs of this cell
             "6 m e = 4",
             "6 cca y = 13",
-            "6 ccb x = 3",
-            "6 ccb y = 8",
-            "6 ccb z = 192",
+            "6 ccb x = 3 y = 8 z = 192",
             # Cell 5, AND cell used to check if the loop is still operating
             # Cell inputs are the output of cell 4 and the inverse of cell 7 (64+7)
             "6 m e = 5",
             "6 cca y = 5",
-            "6 ccb x = 4",
-            "6 ccb y = 71",
+            "6 ccb x = 4 y = 71",
             # Cell 6, a one-shot triggered by the rising edge of Cell 5
             "6 m e = 6",
-            "6 cca y = 8",
-            "6 cca z = 10",
-            "6 ccb x = 5",
-            "6 ccb y = 192",
+            "6 cca y = 8 z = 10",
+            "6 ccb x = 5 y = 192",
             # Cell 7, delay cell that waits for the sweep time until retriggering.
             # Used for the main loop. Timing is dependent on the sweep_time variable
             "6 m e = 7",
-            "6 cca y = 9",
-            f"6 cca z= {sweep_time}",
-            "6 ccb x = 6",
-            "6 ccb y = 192",
+            f"6 cca y = 9 z= {sweep_time}",
+            "6 ccb x = 6 y = 192",
             # Cell 9, delay used to sync the phase of the Galvos
             # This is because the Tiger Controller can not arbitrarily start waveforms
             "6 m e = 9",
-            "6 cca y = 9",
-            f"6 cca z = {galvo2_delay}",
-            "6 ccb x = 2",
-            "6 ccb y = 192",
+            f"6 cca y = 9 z = {galvo2_delay}",
+            "6 ccb x = 2 y = 192",
             # Cell 10, a one-shot triggered by the rising edge of Cell 9
             "6 m e = 10",
-            "6 cca y = 8",
-            "6 cca z = 10",
-            "6 ccb x = 9",
-            "6 ccb y = 192",
+            "6 cca y = 8 z = 10",
+            "6 ccb x = 9 y = 192",
             # Cell 11, delay cell used to sync up the camera trigger and remote focus
             # output based on configuration
             "6 m e = 11",
-            "6 cca y = 9",
-            f"6 cca z = {difference_delay}",
-            "6 ccb x = 6",
-            "6 ccb y = 192",
+            f"6 cca y = 9 z = {difference_delay}",
+            "6 ccb x = 6 y = 192",
             # Cell 12, a one-shot triggered by the rising edge of Cell 11
             "6 m e = 12",
-            "6 cca y = 8",
-            "6 cca z = 10",
-            "6 ccb x = 11",
-            "6 ccb y = 192",
+            "6 cca y = 8 z = 10",
+            "6 ccb x = 11 y = 192",
             # Routes the output of the remote focus trigger to the TTL output from the
             # PLC
-            f"6 m e = {ttls[remote_focus_axis]+1}",
-            "6 cca y = 1",
-            f"6 cca z = {remote_focus_output}",
-            # Routes the TTL output from the previous section to a different TTL to
-            # actually trigger the waveform
             f"6 m e = {ttls[remote_focus_axis]}",
-            "6 cca y = 1",
-            f"6 cca z = {ttls[remote_focus_axis]+1}",
+            f"6 cca y = 2 z = {remote_focus_output}",
             # Sets the camera signal output to the first physical PLC output
             "6 m e = 33",
             f"6 cca z = {camera_output}",
@@ -1256,14 +1231,8 @@ class TigerController:
             galvo_commands = [
                 # Sets the output of Cell 2 as the input to the TTL corresponding to
                 # the first Galvo pair
-                f"6 m e = {ttls[galvo1_axis]+1}",
-                "6 cca y = 1",
-                "6 cca z = 2",
-                # Sets the output of the first Galvo TTL to the Galvo TTL that
-                # actually triggers it
                 f"6 m e = {ttls[galvo1_axis]}",
-                "6 cca y = 1",
-                f"6 cca z = {ttls[galvo1_axis]+1}",
+                "6 cca y = 1 z = 2",
             ]
         # Multiple Galvo case, has the first set of commands and the commands for the
         # second Galvo
@@ -1271,24 +1240,13 @@ class TigerController:
             galvo_commands = [
                 # Sets the output of Cell 2 as the input to the TTL corresponding to
                 # the first Galvo pair
-                f"6 m e = {ttls[galvo1_axis]+1}",
-                "6 cca y = 1",
-                "6 cca z = 2",
-                # Sets the output of the first Galvo TTL to the Galvo TTL that
-                # actually triggers it
                 f"6 m e = {ttls[galvo1_axis]}",
-                "6 cca y = 1",
-                f"6 cca z = {ttls[galvo1_axis]+1}",
+                "6 cca y = 2 z = 2",
                 # Sets the output of Cell 10 as the input to the TTL corresponding to
                 # the second Galvo pair
-                f"6 m e = {ttls[galvo2_axis]+1}",
-                "6 cca y = 1",
-                "6 cca z = 10",
-                # Sets the output of the second Galvo TTL to the Galvo TTL that
-                # actually triggers it
                 f"6 m e = {ttls[galvo2_axis]}",
-                "6 cca y = 1",
-                f"6 cca z = {ttls[galvo2_axis]+1}",
+                #"6 m e = 43"
+                "6 cca y = 2 z = 10",
             ]
 
         # TODO: Evaluate if commands can be combined to reduce the number of commands

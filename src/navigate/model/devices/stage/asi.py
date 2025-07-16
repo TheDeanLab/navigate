@@ -94,17 +94,17 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         # Default axes mapping
         axes_mapping = {"x": "Z", "y": "Y", "z": "X", "f": "M"}
         if not self.axes_mapping:
+            #: dict: Mapping of software axes to hardware axes
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
-        #: Mapping of axes to ASI axes
-        else:
-            # Force cast axes to uppercase
-            self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
 
+        else:
+            #: dict: Mapping of software axes to hardware axes
+            self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
-        # Set feedback alignment values - Default to 85 if not specified
+        # Set feedback alignment values. Default 85 if not specified.
         if self.stage_feedback is None:
             feedback_alignment = {axis: 85 for axis in self.asi_axes}
         else:
@@ -115,10 +115,19 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
         self.asi_controller = device_connection
         if device_connection is not None:
-            # Set feedback alignment values
+
             for ax, aa in feedback_alignment.items():
-                self.asi_controller.set_feedback_alignment(ax, aa)
-            logger.debug("ASI Stage Feedback Alignment Settings:", feedback_alignment)
+                # Get current feedback alignment values
+                current_aa = self.asi_controller.get_feedback_alignment(ax)
+                logger.debug(f"ASI Stage - Current Feedback Alignment for "
+                             f"{ax} is {current_aa}")
+
+                # Set feedback alignment values only if they differ
+                if aa != current_aa:
+                    self.asi_controller.set_feedback_alignment(ax, aa)
+                    logger.debug(f"ASI Stage - UPdated Feedback Alignment for "
+                                 f"{ax} to {aa}")
+
 
             # Set finishing accuracy to half of the minimum pixel size we will use
             # pixel size is in microns, finishing accuracy is in mm
@@ -135,24 +144,81 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 )
                 / 2
             )
-            # If this is changing, the stage must be power cycled for these changes to
-            # take effect.
+
+            # Set finishing accuracy and error for each axis
+            # If this changes, the stage must be power cycled for these
+            # changes to take effect. Track with updated_values variable.
+            updated_values = False
             for ax in self.asi_axes.keys():
                 if self.asi_axes[ax] == "theta":
-                    self.asi_controller.set_finishing_accuracy(ax, 0.003013)
-                    self.asi_controller.set_error(ax, 0.1)
+
+                    # Get current finishing accuracy and error values
+                    accuracy = self.asi_controller.get_finishing_accuracy(ax)
+                    logger.debug(f"ASI Stage - Accuracy for {ax} is {accuracy}")
+
+                    # Set finishing accuracy if it differs. Rotational
+                    # finishing accuracy differs from translation stages.
+                    if abs(accuracy - 0.003013) > 0.0001:
+                        logger.debug(f"ASI Stage - Setting Finishing Accuracy for "
+                                     f"{ax} to {finishing_accuracy}")
+                        self.asi_controller.set_finishing_accuracy(ax, 0.003013)
+                        updated_values = True
+
+                    # Get current error value
+                    error = self.asi_controller.get_error(ax)
+                    logger.debug(f"ASI Stage - Error for {ax} is {error}")
+
+                    # Set error if it differs
+                    if abs(error - 0.1) > 0.0001:
+                        logger.debug(f"ASI Stage - Setting Error for {ax} to 0.1")
+                        self.asi_controller.set_error(ax, 0.1)
+                        updated_values = True
                 else:
-                    self.asi_controller.set_finishing_accuracy(ax, finishing_accuracy)
-                    self.asi_controller.set_error(ax, 1.2 * finishing_accuracy)
+                    # Get current finishing accuracy and error values
+                    accuracy = self.asi_controller.get_finishing_accuracy(ax)
+                    logger.debug(f"ASI Stage - Accuracy for {ax} is {accuracy}")
+
+                    # Set finishing accuracy if it differs
+                    if abs(accuracy - finishing_accuracy) > 0.0001:
+                        logger.debug(f"ASI Stage - Setting Finishing Accuracy for "
+                                     f"{ax} to {finishing_accuracy}")
+                        self.asi_controller.set_finishing_accuracy(ax, finishing_accuracy)
+                        updated_values = True
+
+                    # Get current error value
+                    error = self.asi_controller.get_error(ax)
+                    logger.debug(f"ASI Stage - Error for {ax} is {error}")
+
+                    # Set error if it differs
+                    if abs(error - 1.2 * finishing_accuracy) > 0.0001:
+                        logger.debug(f"ASI Stage - Setting Error for {ax} to "
+                                     f"{1.2 * finishing_accuracy}")
+                        self.asi_controller.set_error(ax, 1.2 * finishing_accuracy)
+                        updated_values = True
+
+                if updated_values:
+                    print("The finishing accuracy or error settings for the ASI stage "
+                          "have been updated. You will need to power cycle "
+                          "the Tiger Controller for these changes to take effect.")
 
             # Set backlash to 0 (less accurate)
             for ax in self.asi_axes.keys():
-                if self.asi_axes[ax] == "theta":
-                    self.asi_controller.set_backlash(ax, 0.1)
-                self.asi_controller.set_backlash(ax, 0.0)
+                # Get the current backlash value for the axis
+                backlash = self.asi_controller.get_backlash(ax)
+                logger.debug(f"ASI Stage - Backlash for {ax} is {backlash}")
 
-            # Speed optimizations - Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.9)
+                if self.asi_axes[ax] == "theta" and abs(backlash - 0.1) > 0.0001:
+                    logger.debug(f"ASI Stage - Setting Backlash for {ax} to 0.1")
+                    self.asi_controller.set_backlash(ax, 0.1)
+
+                elif self.asi_axes[ax] != "theta" and abs(backlash) > 0.0001:
+                    logger.debug(f"ASI Stage - Setting Backlash for {ax} to 0.0")
+                    self.asi_controller.set_backlash(ax, 0.0)
+
+            # Speed optimizations - Set speed to 30% of maximum on each axis.
+            # Previously set to 90%, but we suspect this may be causing the
+            # observed jitter.
+            self.set_speed(percent=0.3)
 
     def __del__(self):
         """Delete the ASI Stage connection."""

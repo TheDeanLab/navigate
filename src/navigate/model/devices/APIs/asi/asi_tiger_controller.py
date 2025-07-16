@@ -276,6 +276,36 @@ class TigerController:
         self.send_command(f"AZ {axis}\r")
         self.read_response()
 
+    def get_feedback_alignment(self, axis: str) -> float:
+        """Get the stage feedback alignment.
+
+        Returns the current value of the feedback alignment for the
+        specified axis. The value is in the range of 0 to 1000, where 0 is the lowest
+        drive strength and 1000 is the highest drive strength.
+
+        Currently only set to handle one axis at a time.
+
+        Multi-axis command example:
+            Output command: AA X? Y? Z? T? V? W?
+            Response: :A X=88 Y=91 Z=91 T=85 V=91 W=88
+        Single-axis command example:
+            Output command: AA X?
+            Response: :A X=88
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+
+        Returns
+        -------
+        float
+            Feedback alignment value
+        """
+        self.send_command(f"AA {axis}?\r")
+        response = self.read_response()
+        return float(response.split("=")[1])
+
     def set_backlash(self, axis: str, val: float) -> None:
         """Enable/disable stage backlash correction.
 
@@ -302,6 +332,33 @@ class TigerController:
         self.send_command(f"B {axis}={val:.7f}\r")
         self.read_response()
 
+    def get_backlash(self, axis: str) -> float:
+        """Get the stage backlash correction value.
+
+        Currently only set to handle one axis at a time.
+
+        Multi-axis command example:
+            Output command: B X? Y? Z? T? V?
+            Response: :X=0.000000 Y=0.000000 Z=0.000000 T=0.000000 V=0.000000 A
+
+        Single-axis command example:
+            Output command: B X?
+            Response: :X=0.000000 A
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+
+        Returns
+        -------
+        float
+            Distance of anti-backlash motion [mm]
+        """
+        self.send_command(f"B {axis}?\r")
+        response = self.read_response()
+        return float(response.split("=")[1].split()[0])
+
     def set_finishing_accuracy(self, axis: str, ac: float) -> None:
         """Set the stage finishing accuracy.
 
@@ -324,6 +381,32 @@ class TigerController:
         self.send_command(f"PC {axis}={ac:.7f}\r")
         self.read_response()
 
+    def get_finishing_accuracy(self, axis: str) -> float:
+        """Get the stage finishing accuracy.
+
+        Currently only set to handle one axis at a time.
+
+        Multi-axis command example:
+            Output command: PC X? Y? Z? T? V? W?
+            Response: :A X=88 Y=91 Z=91 T=85 V=91 W=88
+        Single-axis command example:
+            Output command: PC X?
+            Response: :A X=88
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+
+        Returns
+        -------
+        float
+            Position error [mm]
+        """
+        self.send_command(f"PC {axis}?\r")
+        response = self.read_response()
+        return float(response.split("=")[1])
+
     def set_error(self, axis: str, ac: float) -> None:
         """Set the stage drift error
 
@@ -344,6 +427,34 @@ class TigerController:
         """
         self.send_command(f"E {axis}={ac:.7f}\r")
         self.read_response()
+
+    def get_error(self, axis: str) -> float:
+        """Get the current stage error
+
+        Get the current Drift Error setting. Currently only set to handle
+        one axis at a time.
+
+        Multi-axis command example:
+            Output command: E X? Y? Z? T? V?
+            Response: :X=0.000780 Y=0.000780 Z=0.000780 T=0.100000 V=0.000780 A
+        Single-axis command example:
+            Output command: E X?
+            Response: :X=0.000780 A
+
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+
+        Returns
+        -------
+        float
+            Position error [mm]
+        """
+        self.send_command(f"E {axis}?\r")
+        response = self.read_response()
+        return float(response.split("=")[1].split()[0])
 
     ##### END TODO #####
 

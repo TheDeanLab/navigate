@@ -880,7 +880,6 @@ class Microscope:
             True if stage is successfully moved, False otherwise.
         """
         self.ask_stage_for_position = True
-
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
@@ -904,6 +903,7 @@ class Microscope:
             self.central_focus = None
 
         return success
+
 
     def stop_stage(self) -> None:
         """Stop stage."""

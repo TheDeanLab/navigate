@@ -118,7 +118,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             # Set feedback alignment values
             for ax, aa in feedback_alignment.items():
                 self.asi_controller.set_feedback_alignment(ax, aa)
-            logger.debug("ASI Stage Feedback Alignment Settings:", feedback_alignment)
+            logger.debug(f"ASI Stage Feedback Alignment Settings: {feedback_alignment}")
 
             # Set finishing accuracy to half of the minimum pixel size we will use
             # pixel size is in microns, finishing accuracy is in mm
@@ -152,7 +152,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 self.asi_controller.set_backlash(ax, 0.0)
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.9)
+            self.set_speed(percent=0.2)
 
     def __del__(self):
         """Delete the ASI Stage connection."""
@@ -628,7 +628,8 @@ class MS2000Stage(ASIStage):
                 self.asi_controller.set_backlash(ax, 0.02)
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.9)
+            self.set_speed(percent=0.4)
+            # self.set_speed(percent=0.9)
 
     @classmethod
     def connect(cls, port, baudrate=115200, timeout=0.25):

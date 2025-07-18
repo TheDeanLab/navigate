@@ -110,6 +110,7 @@ class StageController(GUIController):
             if axis in ["x", "y", "z", "theta", "f"]:
                 continue
             view.add_additional_stage(axis)
+
         #: dict: The event id
         self.event_id = dict(zip(all_stage_axes, [None] * len(all_stage_axes)))
 
@@ -155,6 +156,14 @@ class StageController(GUIController):
         buttons["joystick"].configure(
             command=lambda: self.view.after(250, self.joystick_button_handler)
         )
+
+        # Home button. If all items in dictionary are None, disable button.
+        buttons["home"].configure(command=self.home_button_handler)
+        home_dict = self.parent_controller.configuration_controller.stage_home_position
+        empty_home_dict = all(value is None for value in home_dict.values())
+        if empty_home_dict:
+            # buttons["home"].configure(state="disabled")
+            buttons["home"].destroy()
 
         #: dict: The position callback traces
         self.position_callback_traces = {}
@@ -511,6 +520,18 @@ class StageController(GUIController):
             Variable length argument list
         """
         self.view.after(250, lambda *args: self.parent_controller.execute("stop_stage"))
+
+    #    Tai's home button
+    def home_button_handler(self, *args: Iterable) -> None:
+        """This function calls the home method of the stage.
+
+        Parameters
+        ----------
+        *args : Iterable
+            Variable length argument list
+        """
+        home = self.parent_controller.configuration_controller.stage_home_position
+        self.set_position(home)
 
     def joystick_button_handler(
         self, event: Optional[tk.Event] = None, *args: Iterable

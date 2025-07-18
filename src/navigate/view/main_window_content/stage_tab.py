@@ -944,11 +944,17 @@ class StopFrame(ttk.Labelframe):
 
         #: HoverTkButton: Joystick button.
         self.joystick_btn = HoverTkButton(
-            self, bg="white", fg="black", text="Enable Joystick", width=15, height=2
+            self, bg="white", fg="black", text="Enable Joystick", width=20, height=2
+        )
+
+        # Home button
+        self.home_btn = tk.Button(
+            self, bg="palegreen2", fg="black", text="GO HOME", width=20, height=2
         )
 
         # Griding out buttons
         self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
+        self.home_btn.grid(row=1, column=0, rowspan=2, pady=2)
         self.joystick_btn.grid(row=2, column=0, rowspan=2, pady=2)
 
         uniform_grid(self)
@@ -961,7 +967,10 @@ class StopFrame(ttk.Labelframe):
         buttons: dict
             A dictionary of the buttons
         """
-        return {"stop": self.stop_btn, "joystick": self.joystick_btn}
+        return {"stop": self.stop_btn,
+                "joystick": self.joystick_btn,
+                "home": self.home_btn
+                }
 
     def toggle_button_states(
         self, joystick_is_on: bool = False, joystick_axes: Optional[list] = None

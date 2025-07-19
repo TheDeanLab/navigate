@@ -43,7 +43,7 @@ from typing import Callable
 
 # Third Party Imports
 
-# Local Imports
+# Local View Imports
 from navigate.view.popups.ilastik_setting_popup import ilastik_setting_popup
 from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
 from navigate.view.popups.adaptiveoptics_popup import AdaptiveOpticsPopup
@@ -53,6 +53,9 @@ from navigate.view.popups.waveform_parameter_popup_window import (
 )
 from navigate.view.popups.feature_list_popup import FeatureListPopup
 from navigate.view.popups.camera_setting_popup import CameraSettingPopup
+from navigate.view.popups.stages_advanced_popup import StageLimitsPopup
+
+# Local Controller Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.controller.sub_controllers import (
     AutofocusPopupController,
@@ -65,7 +68,10 @@ from navigate.controller.sub_controllers import (
     FeatureAdvancedSettingController,
     AdaptiveOpticsPopupController,
     UninstallPluginController,
+    StageLimitsController,
 )
+
+# Local Tools Imports
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.tools.decorators import FeatureList
 from navigate.tools.common_functions import load_module_from_file, combine_funcs
@@ -359,6 +365,13 @@ class MenuController(GUIController):
                     None,
                 ],
                 "add_separator_1": [None, None, None, None, None],
+                "Set Stage Limits": [
+                    "standard",
+                    self.stage_limits_popup,
+                    None,
+                    None,
+                    None,
+                ],
             },
         }
         self.populate_menu(stage_control_menu)
@@ -1422,3 +1435,16 @@ class MenuController(GUIController):
                 )
 
         return func
+
+    def stage_limits_popup(self, *args, **kwargs) -> None:
+        """Pop up the Stage Limits setting window."""
+        if hasattr(self.parent_controller, "stage_limits_popup_controller"):
+            self.parent_controller.stage_limits_popup_controller.showup()
+            return
+        popup = StageLimitsPopup(self.view)
+        stage_limits_controller = StageLimitsController(popup, self.parent_controller)
+        setattr(
+            self.parent_controller,
+            "stage_limits_popup_controller",
+            stage_limits_controller,
+        )

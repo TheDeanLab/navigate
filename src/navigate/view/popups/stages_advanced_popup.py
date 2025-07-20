@@ -31,8 +31,11 @@
 # Standard Library Imports
 import tkinter as tk
 
+from navigate.view.custom_widgets.hover import HoverButton
+
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
 
 class StageLimitsPopup:
@@ -80,10 +83,22 @@ class StageLimitsPopup:
             row=0, column=3, columnspan=2, padx=5, pady=5, sticky="NSEW"
         )
 
-        # Trace for when the popup is closed
-        self.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
+        #: dict: Dictionary to hold the buttons for updating limits.
+        self.buttons = {}
 
-    def populate_view(self, stages):
+        #: dict: Dictionary to hold the spinboxes for stage limits.
+        self.spinboxes = {}
+
+        #: BooleanVar: Variable to hold the state of the stage limits checkbox.
+        self.enable_stage_limits_var = None
+
+        #: Checkbutton: Checkbox for the stage limits.
+        self.stage_limits_enabled = None
+
+        #: HoverButton: Button to save the limits.
+        self.save_button = None
+
+    def populate_view(self, stages, min, max):
         """Populate the view with the stages.
 
         Add the widgets to the view for each stage in alphabetical order.
@@ -93,20 +108,27 @@ class StageLimitsPopup:
         Parameters
         ----------
         stages : list
-            List of stage names as strings.
+            The list of stage names as strings.
+        min : dict
+            A dictionary containing the minimum limits for each stage.
+        max : dict
+            A dictionary containing the maximum limits for each stage.
         """
+        button_width = 6
+
         # Sort stages alphabetically
         sorted_stages = sorted(stages)
 
         # Create a row for each stage
         for i, stage_name in enumerate(sorted_stages, start=1):
+
             # Column 1: Stage name label
             tk.Label(self.frame, text=stage_name).grid(
                 row=i, column=0, padx=5, pady=2, sticky="w"
             )
 
             # Column 2: Minimum limit spinbox
-            min_spinbox = tk.Spinbox(
+            self.spinboxes[stage_name + "_min"] = ValidatedSpinbox(
                 self.frame,
                 from_=-10000,
                 to=10000,
@@ -114,14 +136,24 @@ class StageLimitsPopup:
                 format="%.3f",
                 increment=0.1,
             )
-            min_spinbox.grid(row=i, column=1, padx=5, pady=2)
+            self.spinboxes[stage_name + "_min"].set(min.get(stage_name, 0.0))
+            self.spinboxes[stage_name + "_min"].grid(row=i, column=1, padx=5, pady=2)
+            self.spinboxes[stage_name + "_min"].hover.setdescription(
+                "The desired minimum limit for the stage."
+            )
 
             # Column 3: Update minimum button
-            update_min_btn = tk.Button(self.frame, text="Update", width=8)
-            update_min_btn.grid(row=i, column=2, padx=5, pady=2)
+            self.buttons[stage_name + "_min"] = HoverButton(
+                self.frame, text="Update", width=button_width
+            )
+            self.buttons[stage_name + "_min"].grid(row=i, column=2, padx=5, pady=2)
+            self.buttons[stage_name + "_min"].hover.setdescription(
+                "Click to update the minimum limit for this stage to the current "
+                "position."
+            )
 
             # Column 4: Maximum limit spinbox
-            max_spinbox = tk.Spinbox(
+            self.spinboxes[stage_name + "_max"] = ValidatedSpinbox(
                 self.frame,
                 from_=-10000,
                 to=10000,
@@ -129,20 +161,48 @@ class StageLimitsPopup:
                 format="%.3f",
                 increment=0.1,
             )
-            max_spinbox.grid(row=i, column=3, padx=5, pady=2)
+            self.spinboxes[stage_name + "_max"].set(min.get(stage_name, 0.0))
+            self.spinboxes[stage_name + "_max"].grid(row=i, column=3, padx=5, pady=2)
+            self.spinboxes[stage_name + "_max"].hover.setdescription(
+                "The desired maximum limit for the stage."
+            )
 
             # Column 5: Update maximum button
-            update_max_btn = tk.Button(self.frame, text="Update", width=8)
-            update_max_btn.grid(row=i, column=4, padx=5, pady=2)
+            self.buttons[stage_name + "_max"] = HoverButton(
+                self.frame, text="Update", width=button_width
+            )
+            self.buttons[stage_name + "_max"].grid(row=i, column=4, padx=5, pady=2)
+            self.buttons[stage_name + "_max"].hover.setdescription(
+                "Click to update the maximum limit for this stage to the current "
+                "position."
+            )
 
-    def close_popup(self):
-        """Close the popup window."""
-        self.popup.destroy()
+        # Provide a checkbox to disable the stage limits.
+        self.enable_stage_limits_var = tk.BooleanVar()
+        self.stage_limits_enabled = tk.Checkbutton(
+            self.frame,
+            text="Stage Limits Enabled",
+            variable=self.enable_stage_limits_var,
+        )
+        self.stage_limits_enabled.grid(
+            row=len(sorted_stages) + 1,
+            column=0,
+            columnspan=2,
+            padx=5,
+            pady=5,
+            sticky="w",
+        )
 
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.withdraw()  # Hide the root window
-    popup = StageLimitsPopup(root)
-    popup.populate_view(["Stage 1", "Stage 2", "Stage 3"])
-    popup.popup.mainloop()
+        # Save button.
+        self.save_button = HoverButton(self.frame, text="Save", width=button_width)
+        self.save_button.grid(
+            row=len(sorted_stages) + 1,
+            column=4,
+            columnspan=1,
+            padx=5,
+            pady=5,
+            sticky="e",
+        )
+        self.save_button.hover.setdescription(
+            "Click to save the limits for all stages."
+        )

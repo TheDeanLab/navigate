@@ -52,19 +52,22 @@ class StageLimitsController:
             Arbitrary keyword arguments
         """
 
+        # Initialize the parent controller
+        self.parent_controller = parent_controller
+
         #: list: List of stages available in the system.
-        self.num_stages = parent_controller.configuration_controller.all_stage_axes
+        self.num_stages = self.parent_controller.configuration_controller.all_stage_axes
 
         #: dict: List of minimum limits for each stage.
         self.min_limits = (
-            parent_controller.configuration_controller.get_stage_limits_min_limits(
+            self.parent_controller.configuration_controller.get_stage_position_limits(
                 suffix="_min"
             )
         )
 
         #: dict: List of maximum limits for each stage.
         self.max_limits = (
-            parent_controller.configuration_controller.get_stage_limits_max_limits(
+            self.parent_controller.configuration_controller.get_stage_position_limits(
                 suffix="_max"
             )
         )
@@ -72,4 +75,68 @@ class StageLimitsController:
         #: PopUp: Popup window for the stage limits.
         self.view = popup
 
-        self.view.populate_view(self.num_stages)
+        # Initialize the view with the number of stages and their limits
+        self.view.populate_view(self.num_stages, self.min_limits, self.max_limits)
+
+        # Get the buttons from the view and set their commands
+        self.view.save_button.configure(command=self.save_stage_limits)
+        self.view.stage_limits_enabled.configure(command=self.toggle_limits)
+        for key, value in self.view.buttons.items():
+            value.configure(command=lambda k=key: self.update_axis(k))
+
+        # Configure traces for closing the window or pressing escape.
+        self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
+        self.view.popup.bind("<Escape>", lambda event: self.close_popup())
+
+        # See if the stage limits are currently enabled or disabled.
+        self.stage_limits_enabled = self.parent_controller.stage_controller.stage_limits
+        self.view.enable_stage_limits_var.set(not self.stage_limits_enabled)
+
+    def save_stage_limits(self):
+        print("Saving limits...")
+
+    def toggle_limits(self):
+        """Toggle the stage limits on or off."""
+
+        # Get the current state of the checkbox.
+        limits_enabled = self.view.enable_stage_limits_var.get()
+
+        # Update the stage controller with the new state.
+        self.parent_controller.stage_controller.stage_limits = limits_enabled
+
+        # Update the menu controller to reflect the change.
+        self.parent_controller.menu_controller.disable_stage_limits.set(limits_enabled)
+
+        print("Toggling limits...")
+
+    def update_axis(self, axis):
+        """Get the current stage position, and update the stage limits in the configuration.
+
+        axis: str
+            The stage limit to update, e.g., 'x_min', 'y_max', etc.
+        """
+
+        # Identify the axis and whether it's a minimum or maximum limit.
+        axis, min_or_max = axis.split("_")
+
+        # Get our current position.
+        self.parent_controller.execute("query_stages")
+        current_position = self.parent_controller.stage_controller.get_position()
+
+        # Update the popup window.
+        self.view.spinboxes[f"{axis}_{min_or_max}"].set(current_position[axis])
+
+        # Update the configuration.
+        self.parent_controller.configuration_controller.microscope_config["stage"][
+            f"{axis}_{min_or_max}"
+        ] = current_position[axis]
+
+        print(f"Updating {axis} {min_or_max} limits to {current_position[axis]}...")
+
+    def close_popup(self):
+        """Close the popup window."""
+        self.save_stage_limits()
+        self.view.popup.destroy()
+
+        if hasattr(self.parent_controller, "stage_limits_popup_controller"):
+            del self.parent_controller.stage_limits_popup_controller

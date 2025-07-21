@@ -1,8 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-from sphinx.cmd.quickstart import suffix
-
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -30,6 +27,8 @@ from sphinx.cmd.quickstart import suffix
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
+from navigate.config.config import update_config_dict
 
 
 class StageLimitsController:
@@ -78,9 +77,10 @@ class StageLimitsController:
         # Initialize the view with the number of stages and their limits
         self.view.populate_view(self.num_stages, self.min_limits, self.max_limits)
 
-        # Get the buttons from the view and set their commands
+        # Save button trace.
         self.view.save_button.configure(command=self.save_stage_limits)
-        self.view.stage_limits_enabled.configure(command=self.toggle_limits)
+
+        # Configure the spinboxes for each stage limit.
         for key, value in self.view.buttons.items():
             value.configure(command=lambda k=key: self.update_axis(k))
 
@@ -90,24 +90,28 @@ class StageLimitsController:
 
         # See if the stage limits are currently enabled or disabled.
         self.stage_limits_enabled = self.parent_controller.stage_controller.stage_limits
-        self.view.enable_stage_limits_var.set(not self.stage_limits_enabled)
+        self.view.enable_stage_limits_var.set(self.stage_limits_enabled)
+
+        # Checkbox trace for enabling/disabling stage limits.
+        self.view.enable_stage_limits_var.trace_add("write", self.toggle_limits)
 
     def save_stage_limits(self):
         print("Saving limits...")
 
-    def toggle_limits(self):
+    def toggle_limits(self, *args):
         """Toggle the stage limits on or off."""
 
         # Get the current state of the checkbox.
         limits_enabled = self.view.enable_stage_limits_var.get()
 
         # Update the stage controller with the new state.
-        self.parent_controller.stage_controller.stage_limits = limits_enabled
+        self.parent_controller.execute("stage_limits", limits_enabled)
 
-        # Update the menu controller to reflect the change.
-        self.parent_controller.menu_controller.disable_stage_limits.set(limits_enabled)
-
-        print("Toggling limits...")
+        # Update the menu item state.
+        if limits_enabled is True:
+            self.parent_controller.menu_controller.disable_stage_limits.set(0)
+        else:
+            self.parent_controller.menu_controller.disable_stage_limits.set(1)
 
     def update_axis(self, axis):
         """Get the current stage position, and update the stage limits in the configuration.

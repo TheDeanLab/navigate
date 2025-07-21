@@ -1015,17 +1015,25 @@ class MenuController(GUIController):
     def toggle_stage_limits(self, *args) -> None:
         """Toggle stage limits."""
         if self.disable_stage_limits.get() == 1:
+            limits_enabled = False
             self.parent_controller.configuration["experiment"]["StageParameters"][
                 "limits"
-            ] = False
+            ] = limits_enabled
             logger.debug("Disabling stage limits")
-            self.parent_controller.execute("stage_limits", False)
+            self.parent_controller.execute("stage_limits", limits_enabled)
         else:
+            limits_enabled = True
             self.parent_controller.configuration["experiment"]["StageParameters"][
                 "limits"
-            ] = True
+            ] = limits_enabled
             logger.debug("Enabling stage limits")
-            self.parent_controller.execute("stage_limits", True)
+            self.parent_controller.execute("stage_limits", limits_enabled)
+
+        # If the stage limits popup is open, update it.
+        if hasattr(self.parent_controller, "stage_limits_popup_controller"):
+            self.parent_controller.stage_limits_popup_controller.view.enable_stage_limits_var.set(
+                limits_enabled
+            )
 
     @log_function_call
     def popup_autofocus_setting(self, *args) -> None:

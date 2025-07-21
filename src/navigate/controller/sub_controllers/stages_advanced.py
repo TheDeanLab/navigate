@@ -37,7 +37,6 @@ import os
 # Local Imports
 from navigate.config.config import update_config_dict, get_navigate_path
 from navigate.tools.file_functions import save_yaml_file
-from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 
 # Logger Setup
@@ -54,7 +53,7 @@ class AdvancedStageParametersController:
         parent_controller: "Controller",
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize the AdvancedStageParametersController class.
 
         Parameters
@@ -77,26 +76,31 @@ class AdvancedStageParametersController:
         #: list: List of stages available in the system.
         self.num_stages = self.parent_controller.configuration_controller.all_stage_axes
 
-        #: dict: List of minimum limits for each stage.
-        self.min_limits = (
+        min_limits = (
             self.parent_controller.configuration_controller.get_stage_position_limits(
                 suffix="_min"
             )
         )
 
-        #: dict: List of maximum limits for each stage.
-        self.max_limits = (
+        max_limits = (
             self.parent_controller.configuration_controller.get_stage_position_limits(
                 suffix="_max"
             )
         )
 
+        current_flip_flags = (
+            self.parent_controller.configuration_controller.stage_flip_flags
+        )
+
+        ni_stage = self.parent_controller.configuration_controller.has_analog_stage
+
         #: PopUp: Popup window for the stage limits.
         self.view = popup
 
         # Initialize the view with the number of stages and their limits
-        self.view.populate_view(self.num_stages, self.min_limits, self.max_limits)
-
+        self.view.populate_view(
+            self.num_stages, min_limits, max_limits, current_flip_flags, ni_stage
+        )
         # Save button trace.
         self.view.save_button.configure(command=self.save_stage_limits)
 
@@ -131,6 +135,8 @@ class AdvancedStageParametersController:
         # Add a trace to the microscope dropdown to detect microscope changes.
         self.view.microscope.variable.trace_add("write", self.update_microscope)
 
+        # Add a trace to the NI galvo stage variable.
+
         logger.debug("Stage limits popup initialized.")
 
     def save_stage_limits(self):
@@ -141,7 +147,7 @@ class AdvancedStageParametersController:
             filename="configuration.yaml",
         )
 
-    def toggle_limits(self, *args):
+    def toggle_limits(self, *args) -> None:
         """Toggle the stage limits on or off."""
 
         # Get the current state of the checkbox.
@@ -156,7 +162,7 @@ class AdvancedStageParametersController:
         else:
             self.parent_controller.menu_controller.disable_stage_limits.set(1)
 
-    def update_axis(self, axis):
+    def update_axis(self, axis: str) -> None:
         """Get the current stage position, and update the stage limits in the configuration.
 
         axis: str
@@ -178,7 +184,7 @@ class AdvancedStageParametersController:
             f"{axis}_{min_or_max}"
         ] = current_position[axis]
 
-        # Get the current stage dictionary. Not sure if this is necessary.
+        # Get the current stage dictionary.
         stage_dict = dict(
             self.parent_controller.configuration["configuration"]["microscopes"][
                 self.current_microscope
@@ -201,7 +207,7 @@ class AdvancedStageParametersController:
             f"Updating {axis} {min_or_max} limits to" f" {current_position[axis]}..."
         )
 
-    def close_popup(self):
+    def close_popup(self) -> None:
         """Close the popup window."""
         self.save_stage_limits()
         self.view.popup.destroy()
@@ -211,7 +217,9 @@ class AdvancedStageParametersController:
 
         logger.debug("Stage limits popup closed and sub-controller deleted.")
 
-    def update_microscope(self, *args):
+    def update_microscope(self, *args) -> None:
         """Update the microscope configuration when the microscope is changed."""
         self.current_microscope = self.view.microscope.get()
         print(f"Updated microscope to {self.current_microscope}.")
+
+        # TODO: Repopulate the widgets with the new microscope configuration.

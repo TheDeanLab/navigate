@@ -372,6 +372,7 @@ class MenuController(GUIController):
                     None,
                     None,
                 ],
+                "add_separator_2": [None, None, None, None, None],
             },
         }
         self.populate_menu(stage_control_menu)

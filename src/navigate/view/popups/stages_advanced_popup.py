@@ -37,7 +37,7 @@ from tkinter import ttk
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from navigate.view.custom_widgets.hover import HoverButton
+from navigate.view.custom_widgets.hover import HoverButton, HoverCheckButton
 
 
 class AdvancedStageParametersPopup:
@@ -76,19 +76,33 @@ class AdvancedStageParametersPopup:
         #: dict: Dictionary to hold the spinboxes for stage limits.
         self.spinboxes = {}
 
+        #: dict: Dictionary to hold the flip flags for each stage.
+        self.flip_flags = {}
+
+        #: dict: Dictionary to hold the flip buttons for each stage.
+        self.flip_button = {}
+
         #: BooleanVar: Variable to hold the state of the stage limits checkbox.
         self.enable_stage_limits_var = None
 
         #: Checkbutton: Checkbox for the stage limits.
         self.stage_limits_enabled = None
 
-        #: HoverButton: Button to save the limits.
+        #: HoverCheckButton: Button to save the limits.
         self.save_button = None
 
         #: LabelInput: Dropdown for selecting the microscope.
         self.microscope = None
 
-    def populate_view(self, stages, min, max):
+        #: HoverCheckButton: Checkbutton for NI Galvo stage.
+        self.ni_galvo_stage = None
+
+        #: BooleanVar: Variable to hold the state of the NI Galvo stage checkbox.
+        self.ni_galvo_flag = None
+
+    def populate_view(
+        self, stages: list, min: dict, max: dict, flip_axes: dict, ni_stage: bool
+    ) -> None:
         """Populate the view with the stages.
 
         Add the widgets to the view for each stage in alphabetical order.
@@ -103,6 +117,10 @@ class AdvancedStageParametersPopup:
             A dictionary containing the minimum limits for each stage.
         max : dict
             A dictionary containing the maximum limits for each stage.
+        flip_axes : dict
+            A dictionary containing the flip flags for each stage.
+        ni_stage : bool
+            A boolean indicating if the NI Galvo stage is being used.
         """
         button_width = 6
 
@@ -121,19 +139,28 @@ class AdvancedStageParametersPopup:
                 "state": "readonly",
             },
         )
-        self.microscope.grid(row=0, column=0, columnspan=5, padx=5, pady=5, sticky="ew")
+        self.microscope.grid(row=0, column=0, columnspan=7, padx=5, pady=5, sticky="ew")
 
         # Create column headers
         tk.Label(self.frame, text="Stage", font=("Arial", 10, "bold")).grid(
             row=1, column=0, padx=5, pady=5, sticky="NSEW"
         )
+
         tk.Label(
             self.frame, text="Minimum Stage Limit", font=("Arial", 10, "bold")
         ).grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky="NSEW")
+
         tk.Label(
             self.frame, text="Maximum Stage Limit", font=("Arial", 10, "bold")
         ).grid(row=1, column=3, columnspan=2, padx=5, pady=5, sticky="NSEW")
 
+        tk.Label(self.frame, text="Stage Offsets", font=("Arial", 10, "bold")).grid(
+            row=1, column=5, columnspan=1, padx=5, pady=5, sticky="NSEW"
+        )
+
+        tk.Label(self.frame, text="Reverse Direction", font=("Arial", 10, "bold")).grid(
+            row=1, column=6, columnspan=1, padx=5, pady=5, sticky="NSEW"
+        )
         # Create a row for each stage
         for i, stage_name in enumerate(sorted_stages, start=1):
 
@@ -178,7 +205,7 @@ class AdvancedStageParametersPopup:
                 format="%.3f",
                 increment=0.1,
             )
-            self.spinboxes[stage_name + "_max"].set(min.get(stage_name, 0.0))
+            self.spinboxes[stage_name + "_max"].set(max.get(stage_name, 0.0))
             self.spinboxes[stage_name + "_max"].grid(
                 row=i + 2, column=3, padx=5, pady=2
             )
@@ -196,9 +223,50 @@ class AdvancedStageParametersPopup:
                 "position."
             )
 
+            # Column 6: Offsets
+            self.spinboxes[stage_name + "_offset"] = ValidatedSpinbox(
+                self.frame,
+                from_=-100000,
+                to=100000,
+                width=10,
+                format="%.3f",
+                increment=0.1,
+            )
+            self.spinboxes[stage_name + "_offset"].set(min.get(stage_name, 0.0))
+            self.spinboxes[stage_name + "_offset"].grid(
+                row=i + 2, column=5, padx=5, pady=2
+            )
+            self.spinboxes[stage_name + "_offset"].hover.setdescription(
+                f"The relative offset between different microscope instances for the "
+                f"{stage_name} axis."
+            )
+
+            # Column 7: Flip flags.
+            self.flip_flags[stage_name] = tk.BooleanVar()
+
+            self.flip_button[stage_name] = HoverCheckButton(
+                self.frame,
+                variable=self.flip_flags[stage_name],
+            )
+
+            self.flip_button[stage_name].grid(
+                row=i + 2,
+                column=6,
+                columnspan=1,
+                padx=5,
+                pady=5,
+                sticky="",
+            )
+            self.flip_button[stage_name].hover.setdescription(
+                f"Reverse the direction of the stage movement for the {stage_name} "
+                "axis. "
+            )
+            # Set the initial state of the flip flag.
+            self.flip_flags[stage_name].set(flip_axes.get(stage_name, False))
+
         # Provide a checkbox to disable the stage limits.
         self.enable_stage_limits_var = tk.BooleanVar()
-        self.stage_limits_enabled = tk.Checkbutton(
+        self.stage_limits_enabled = HoverCheckButton(
             self.frame,
             text="Stage Limits Enabled",
             variable=self.enable_stage_limits_var,
@@ -211,12 +279,33 @@ class AdvancedStageParametersPopup:
             pady=5,
             sticky="w",
         )
+        self.stage_limits_enabled.hover.setdescription(
+            "Enable or disable the stage limits. If disabled, the limits will not be "
+            "enforced."
+        )
+
+        # NI Galvo Flag
+        self.ni_galvo_flag = tk.BooleanVar()
+        self.ni_galvo_stage = HoverCheckButton(
+            self.frame,
+            text="Analog Stage",
+            variable=self.ni_galvo_flag,
+        )
+        self.ni_galvo_stage.grid(
+            row=len(sorted_stages) + 3,
+            column=2,
+            columnspan=2,
+            padx=5,
+            pady=5,
+            sticky="w",
+        )
+        self.ni_galvo_flag.set(ni_stage)
 
         # Save button.
         self.save_button = HoverButton(self.frame, text="Save", width=button_width)
         self.save_button.grid(
             row=len(sorted_stages) + 3,
-            column=4,
+            column=6,
             columnspan=1,
             padx=5,
             pady=5,
@@ -225,3 +314,6 @@ class AdvancedStageParametersPopup:
         self.save_button.hover.setdescription(
             "Click to save the limits for all stages."
         )
+
+        # Center the flip flag checkboxes
+        self.frame.grid_columnconfigure(6, weight=1)

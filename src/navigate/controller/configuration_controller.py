@@ -255,7 +255,9 @@ class ConfigurationController:
         if self.microscope_config is not None:
             stage_dict = self.microscope_config["stage"]
             for a in axes:
-                position_limits[a] = stage_dict.get(a + suffix, 0 if suffix == "_min" else 100)
+                position_limits[a] = stage_dict.get(
+                    a + suffix, 0 if suffix == "_min" else 100
+                )
         else:
             for a in axes:
                 position_limits[a] = 0 if suffix == "_min" else 100
@@ -279,7 +281,7 @@ class ConfigurationController:
         for axis in self.stage_axes:
             flip_flags[axis] = stage_dict.get(f"flip_{axis}", False)
         return flip_flags
-    
+
     @property
     def stage_axes(self):
         """Return the axes of the stage
@@ -298,9 +300,9 @@ class ConfigurationController:
             else:
                 axes = list(stage_config["axes"])
             return axes
-        
+
         return ["x", "y"]
-    
+
     @property
     def all_stage_axes(self):
         """Return all the axes of the stage
@@ -411,6 +413,20 @@ class ConfigurationController:
             return self.microscope_config["stage"]
         return None
 
+    @property
+    def has_analog_stage(self):
+        """Check to see if the has_ni_galvo_stage flag is set in the configuration.
+
+        Returns
+        -------
+        has_ni_galvo_stage : bool
+            True if the microscope has an NI galvo stage, False otherwise.
+        """
+
+        if self.microscope_config is not None:
+            return self.microscope_config["stage"].get("has_ni_galvo_stage", False)
+        return False
+
     def get_stages_by_axis(self, axis_prefix="z"):
         """Return a list of all stage names.
 
@@ -430,7 +446,12 @@ class ConfigurationController:
                 stages = list(stages)
             else:
                 stages = [stages]
-            return [f"{stage['type']} - {axis}" for stage in stages for axis in stage["axes"] if axis.startswith(axis_prefix)]
+            return [
+                f"{stage['type']} - {axis}"
+                for stage in stages
+                for axis in stage["axes"]
+                if axis.startswith(axis_prefix)
+            ]
         return []
 
     @property

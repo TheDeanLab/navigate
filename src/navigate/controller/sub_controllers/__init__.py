@@ -19,7 +19,7 @@ from .camera_map import CameraMapSettingPopupController  # noqa
 from .microscope_popup import MicroscopePopupController  # noqa
 from .adaptive_optics import AdaptiveOpticsPopupController  # noqa
 from .histogram import HistogramController  # noqa
-from .stages_advanced import StageLimitsController  # noqa
+from .stages_advanced import AdvancedStageParametersController  # noqa
 
 # from .uninstall_plugin_controller import UninstallPluginController  # noqa
 from .plugins import PluginsController, UninstallPluginController  # noqa

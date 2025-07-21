@@ -53,7 +53,7 @@ from navigate.view.popups.waveform_parameter_popup_window import (
 )
 from navigate.view.popups.feature_list_popup import FeatureListPopup
 from navigate.view.popups.camera_setting_popup import CameraSettingPopup
-from navigate.view.popups.stages_advanced_popup import StageLimitsPopup
+from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 
 # Local Controller Imports
 from navigate.controller.sub_controllers.gui import GUIController
@@ -68,7 +68,7 @@ from navigate.controller.sub_controllers import (
     FeatureAdvancedSettingController,
     AdaptiveOpticsPopupController,
     UninstallPluginController,
-    StageLimitsController,
+    AdvancedStageParametersController,
 )
 
 # Local Tools Imports
@@ -365,7 +365,7 @@ class MenuController(GUIController):
                     None,
                 ],
                 "add_separator_1": [None, None, None, None, None],
-                "Set Stage Limits": [
+                "Advanced Stage Parameters": [
                     "standard",
                     self.stage_limits_popup,
                     None,
@@ -1449,8 +1449,10 @@ class MenuController(GUIController):
         if hasattr(self.parent_controller, "stage_limits_popup_controller"):
             self.parent_controller.stage_limits_popup_controller.showup()
             return
-        popup = StageLimitsPopup(self.view)
-        stage_limits_controller = StageLimitsController(popup, self.parent_controller)
+        popup = AdvancedStageParametersPopup(self.view)
+        stage_limits_controller = AdvancedStageParametersController(
+            popup, self.parent_controller
+        )
         setattr(
             self.parent_controller,
             "stage_limits_popup_controller",

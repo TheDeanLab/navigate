@@ -28,20 +28,40 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from navigate.config.config import update_config_dict
+# Standard Library Imports
+import logging
+import os
+
+# Third Party Imports
+
+# Local Imports
+from navigate.config.config import update_config_dict, get_navigate_path
+from navigate.tools.file_functions import save_yaml_file
+from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
-class StageLimitsController:
+class AdvancedStageParametersController:
     """Controller for the Stage Limits popup."""
 
-    def __init__(self, popup, parent_controller, *args, **kwargs):
-        """Initialize the StageLimitsController class.
+    def __init__(
+        self,
+        popup: AdvancedStageParametersPopup,
+        parent_controller: "Controller",
+        *args,
+        **kwargs,
+    ):
+        """Initialize the AdvancedStageParametersController class.
 
         Parameters
         ----------
         root : tk.Tk
             The root window
-        popup : PopUp
+        popup : AdvancedStageParametersPopup
             The popup window for stage limits
         parent_controller : Controller
             The parent controller that manages this popup
@@ -95,8 +115,31 @@ class StageLimitsController:
         # Checkbox trace for enabling/disabling stage limits.
         self.view.enable_stage_limits_var.trace_add("write", self.toggle_limits)
 
+        # Populate the list of microscopes in the dropdown.
+        self.view.microscope.set_values(
+            self.parent_controller.configuration_controller.microscope_list
+        )
+
+        #: str: The current microscope name.
+        self.current_microscope = (
+            self.parent_controller.configuration_controller.microscope_name
+        )
+
+        # Set the current microscope in the dropdown.
+        self.view.microscope.set(self.current_microscope)
+
+        # Add a trace to the microscope dropdown to detect microscope changes.
+        self.view.microscope.variable.trace_add("write", self.update_microscope)
+
+        logger.debug("Stage limits popup initialized.")
+
     def save_stage_limits(self):
-        print("Saving limits...")
+        file_directory = os.path.join(get_navigate_path(), "config")
+        save_yaml_file(
+            file_directory=file_directory,
+            content_dict=self.parent_controller.configuration["configuration"],
+            filename="configuration.yaml",
+        )
 
     def toggle_limits(self, *args):
         """Toggle the stage limits on or off."""
@@ -135,7 +178,28 @@ class StageLimitsController:
             f"{axis}_{min_or_max}"
         ] = current_position[axis]
 
-        print(f"Updating {axis} {min_or_max} limits to {current_position[axis]}...")
+        # Get the current stage dictionary. Not sure if this is necessary.
+        stage_dict = dict(
+            self.parent_controller.configuration["configuration"]["microscopes"][
+                self.current_microscope
+            ]["stage"]
+        )
+
+        # Update the stage dictionary with the new limit.
+        stage_dict[f"{axis}_{min_or_max}"] = current_position[axis]
+
+        update_config_dict(
+            manager=self.parent_controller.manager,
+            parent_dict=self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][self.current_microscope],
+            config_name="stage",
+            new_config=stage_dict,
+        )
+
+        logger.debug(
+            f"Updating {axis} {min_or_max} limits to" f" {current_position[axis]}..."
+        )
 
     def close_popup(self):
         """Close the popup window."""
@@ -144,3 +208,10 @@ class StageLimitsController:
 
         if hasattr(self.parent_controller, "stage_limits_popup_controller"):
             del self.parent_controller.stage_limits_popup_controller
+
+        logger.debug("Stage limits popup closed and sub-controller deleted.")
+
+    def update_microscope(self, *args):
+        """Update the microscope configuration when the microscope is changed."""
+        self.current_microscope = self.view.microscope.get()
+        print(f"Updated microscope to {self.current_microscope}.")

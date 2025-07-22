@@ -251,20 +251,20 @@ class ASIGalvo(GalvoBase, SerialDevice):
             # Negative amplitude reverses the polarity of the waveform
             amplitude = amplitude * -1
             # Sawtooth waveform that is triggered on TTL input
-            self.galvo.SA_waveform(self.axis, 128, amplitude, offset, period)
+            self.galvo.single_axis_waveform(self.axis, 128, amplitude, offset, period)
 
         if duty_cycle == 50:
             # Adjusts the period for a triangle waveform
             period = 2 * round(period / 2)
             # Triangle waveform that is triggered on TTL input
-            self.galvo.SA_waveform(self.axis, 129, amplitude, offset, period)
+            self.galvo.single_axis_waveform(self.axis, 129, amplitude, offset, period)
 
         if duty_cycle == 100:
             # Sawtooth waveform that is triggered on TTL input
-            self.galvo.SA_waveform(self.axis, 128, amplitude, offset, period)
+            self.galvo.single_axis_waveform(self.axis, 128, amplitude, offset, period)
 
         # Waveform is free running after TTL input
-        self.galvo.SAM(self.axis, 4)
+        self.galvo.single_axis_mode(self.axis, 4)
 
     def sine_wave(self, period=10.0, amplitude=1.0, offset=0.0):
         """Sends the tiger controller commands to initiate the sine wave.
@@ -286,13 +286,13 @@ class ASIGalvo(GalvoBase, SerialDevice):
         offset *= 1000
 
         # Sine wave that is triggered on TTL input
-        self.galvo.SA_waveform(self.axis, 131, amplitude, offset, period)
+        self.galvo.single_axis_waveform(self.axis, 131, amplitude, offset, period)
         # Waveform is free running after it is triggered
-        self.galvo.SAM(self.axis, 4)
+        self.galvo.single_axis_mode(self.axis, 4)
 
     def turn_off(self):
         """Stops the galvo waveform"""
-        self.galvo.SAM(self.axis, 0)
+        self.galvo.single_axis_mode(self.axis, 0)
 
     def close(self):
         """Close the ASI galvo serial port.

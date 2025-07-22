@@ -1038,7 +1038,7 @@ class TigerController:
         self.send_command(f'6 CCA Z=0\r')
         self.read_response()
 
-    def SA_waveform(
+    def single_axis_waveform(
         self, axis: str, waveform: int = 0, amplitude: int = 1000, offset: int = 500, period: int = 10 
     ) -> None:
         """Programs the analog waveforms using SAA, SAO, SAP, and SAF
@@ -1075,7 +1075,7 @@ class TigerController:
         self.send_command(f"3 SAF {axis}={round(period)}")
         self.read_response()
 
-    def SAM(self, axis: str, mode: int) -> None:
+    def single_axis_mode(self, axis: str, mode: int) -> None:
         """Sets the single-axis mode according to the integer code.
 
         0: stops waveforms if they are running
@@ -1245,7 +1245,6 @@ class TigerController:
                 # Sets the output of Cell 10 as the input to the TTL corresponding to
                 # the second Galvo pair
                 f"6 m e = {ttls[galvo2_axis]}",
-                #"6 m e = 43"
                 "6 cca y = 2 z = 10",
             ]
 

@@ -224,9 +224,9 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         offset *= 1000
 
         # Triangle waveform
-        self.remote_focus.SA_waveform(self.axis, 1, amplitude, offset, period)
+        self.remote_focus.single_axis_waveform(self.axis, 1, amplitude, offset, period)
         # Waveform is free running after it is triggered 
-        self.remote_focus.SAM(self.axis, 4)
+        self.remote_focus.single_axis_mode(self.axis, 4)
 
     def ramp(
         self,
@@ -267,9 +267,9 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         exposure_time = int(round(exposure_time * 1000))
 
         # Ramp waveform that is triggered on TTL inputs
-        self.remote_focus.SA_waveform(self.axis, 128, amplitude, offset, exposure_time)
+        self.remote_focus.single_axis_waveform(self.axis, 128, amplitude, offset, exposure_time)
         # The waveform cycles once and waits for another TTL inputs
-        self.remote_focus.SAM(self.axis, 2)
+        self.remote_focus.single_axis_mode(self.axis, 2)
     
     def move(self, exposure_times, sweep_times, offset=None):
         """Move the remote focus.
@@ -290,7 +290,7 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
     
     def turn_off(self): 
         """Stops the remote focus waveform"""
-        self.remote_focus.SAM(self.axis, 0)
+        self.remote_focus.single_axis_mode(self.axis, 0)
 
     def close(self):
         """Close the ASI remote_focus serial port.

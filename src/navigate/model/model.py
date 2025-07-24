@@ -735,11 +735,8 @@ class Model:
             self.configuration["experiment"]["MicroscopeState"][
                 "image_mode"
             ] = "customized"
-            self.addon_feature = [
-                    {"name": PrepareNextChannel},
-                    {"name": TonyWilson}
-                ]
-            self.run_command("acquire")            
+            self.addon_feature = [{"name": PrepareNextChannel}, {"name": TonyWilson}]
+            self.run_command("acquire")
 
         elif command == "load_feature":
             """
@@ -1657,3 +1654,49 @@ class Model:
             return
         for id in frame_ids:
             self.data_buffer_saving_flags[id] = True
+
+
+class ASIModel(Model):
+    """ASI Model class.
+
+    This class is used to control microscopes equipped with the Tiger Controller as
+    the DAQ object. Assumes that only one microscope object will be enabled. Tiger
+    Controller performs all hardware operations, such as galvos, voice coils,
+    analog and digital triggering, etc. Requires a different software architecture
+    for control than NI-based daq systems.
+
+    """
+
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        configuration: Optional[Dict[str, Any]] = None,
+        event_queue: multiprocessing.Queue = None,
+    ) -> None:
+        """Initialize the ASI Model.
+
+        Parameters
+        ----------
+        args : argparse.Namespace
+            Command line arguments.
+        configuration : Optional[Dict[str, Any]]
+            Configuration dictionary. Default is None.
+        event_queue : multiprocessing.Queue
+            Event queue for communication with the controller. Default is None.
+
+        """
+        self.parent_model = super().__init__(args, configuration, event_queue)
+
+        print("ASIModel initialized.")
+
+        # Hypothetically, if you want to use logic in a parent method, but add to it.
+        def mark_saving_flags(frame_ids: list):
+            # Add stuff before the call.
+            super().mark_saving_flags(frame_ids=frame_ids)
+            # Add stuff after the call.
+
+        def get_feature_list():
+            # print("Overrode the original method. WIll only print now.")
+            pass
+
+        # If you add nothing else, automatically uses the parent method.

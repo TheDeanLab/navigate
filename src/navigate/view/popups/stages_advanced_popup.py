@@ -55,8 +55,6 @@ class AdvancedStageParametersPopup:
         kwargs : dict
             Dictionary of keyword arguments.
         """
-        # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window
         #: PopUp: Popup window for the camera view.
         self.popup = PopUp(
             root,
@@ -92,16 +90,21 @@ class AdvancedStageParametersPopup:
         self.save_button = None
 
         #: LabelInput: Dropdown for selecting the microscope.
-        self.microscope = None
-
-        #: HoverCheckButton: Checkbutton for NI Galvo stage.
-        self.ni_galvo_stage = None
-
-        #: BooleanVar: Variable to hold the state of the NI Galvo stage checkbox.
-        self.ni_galvo_flag = None
+        self.microscope = LabelInput(
+            self.frame,
+            label_pos="left",
+            label="Microscope",
+            input_class=ValidatedCombobox,
+            input_var=tk.StringVar(),
+            label_args={"font": ("Arial", 12, "bold")},
+            input_args={
+                "state": "readonly",
+            },
+        )
+        self.microscope.grid(row=0, column=0, columnspan=7, padx=5, pady=5, sticky="ew")
 
     def populate_view(
-        self, stages: list, min: dict, max: dict, flip_axes: dict, ni_stage: bool
+        self, stages: list, min: dict, max: dict, flip_axes: dict
     ) -> None:
         """Populate the view with the stages.
 
@@ -119,27 +122,11 @@ class AdvancedStageParametersPopup:
             A dictionary containing the maximum limits for each stage.
         flip_axes : dict
             A dictionary containing the flip flags for each stage.
-        ni_stage : bool
-            A boolean indicating if the NI Galvo stage is being used.
         """
         button_width = 6
 
         # Sort stages alphabetically
         sorted_stages = sorted(stages)
-
-        # Create a dropdown menu for selecting which microscope.
-        self.microscope = LabelInput(
-            self.frame,
-            label_pos="left",
-            label="Microscope",
-            input_class=ValidatedCombobox,
-            input_var=tk.StringVar(),
-            label_args={"font": ("Arial", 12, "bold")},
-            input_args={
-                "state": "readonly",
-            },
-        )
-        self.microscope.grid(row=0, column=0, columnspan=7, padx=5, pady=5, sticky="ew")
 
         # Create column headers
         tk.Label(self.frame, text="Stage", font=("Arial", 10, "bold")).grid(
@@ -284,23 +271,6 @@ class AdvancedStageParametersPopup:
             "enforced."
         )
 
-        # NI Galvo Flag
-        self.ni_galvo_flag = tk.BooleanVar()
-        self.ni_galvo_stage = HoverCheckButton(
-            self.frame,
-            text="Analog Stage",
-            variable=self.ni_galvo_flag,
-        )
-        self.ni_galvo_stage.grid(
-            row=len(sorted_stages) + 3,
-            column=2,
-            columnspan=2,
-            padx=5,
-            pady=5,
-            sticky="w",
-        )
-        self.ni_galvo_flag.set(ni_stage)
-
         # Save button.
         self.save_button = HoverButton(self.frame, text="Save", width=button_width)
         self.save_button.grid(
@@ -317,3 +287,31 @@ class AdvancedStageParametersPopup:
 
         # Center the flip flag checkboxes
         self.frame.grid_columnconfigure(6, weight=1)
+
+    def clear_view(self) -> None:
+        """Clear the view by destroying all widgets and resetting variables."""
+        for widget_type in [self.spinboxes, self.buttons, self.flip_button]:
+            for widget in widget_type.values():
+                widget.destroy()
+            widget_type.clear()
+        self.flip_flags.clear()
+
+        for widget_type in [
+            self.stage_limits_enabled,
+            self.save_button,
+        ]:
+            if widget_type is not None:
+                widget_type.destroy()
+
+        # Clear all remaining widgets except the microscope dropdown
+        # This removes stage labels and headers that aren't stored in dictionaries
+        for widget in self.frame.winfo_children():
+            grid_info = widget.grid_info()
+            if grid_info and widget != self.microscope:
+                # Keep row 0 (microscope dropdown), clear everything else
+                if int(grid_info.get("row", 0)) > 0:
+                    widget.destroy()
+
+        # Reset the widget variables to None
+        self.stage_limits_enabled = None
+        self.save_button = None

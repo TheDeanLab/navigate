@@ -77,6 +77,13 @@ class ConfigurationController:
             )
         )
 
+    def update_configuration(self) -> None:
+        """Update the microscope configuration to reflect any changes made to it."""
+
+        self.microscope_config = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]
+
     def change_microscope(self, microscope_name=None) -> bool:
         """Get the new microscope configuration dict according to the name.
 
@@ -294,16 +301,13 @@ class ConfigurationController:
             List of axes, e.g. ['x', 'y', 'z', 'theta', 'f'].
         """
         if self.microscope_config is not None:
-            print("Using microscope configuration")
             stage_config = self.microscope_config["stage"]["hardware"]
             axes = []
             if isinstance(stage_config, ListProxy):
                 for stage in stage_config:
-                    print("Using stage configuration from ListProxy")
                     axes.extend(list(stage["axes"]))
             else:
                 axes = list(stage_config["axes"])
-                print("Using stage configuration from DictProxy")
             return axes
 
         return ["x", "y"]

@@ -96,7 +96,7 @@ class AdvancedStageParametersPopup:
             label="Microscope",
             input_class=ValidatedCombobox,
             input_var=tk.StringVar(),
-            label_args={"font": ("Arial", 12, "bold")},
+            label_args={"font": ("Arial", 14, "bold")},
             input_args={
                 "state": "readonly",
             },
@@ -151,9 +151,12 @@ class AdvancedStageParametersPopup:
         # Create a row for each stage
         for i, stage_name in enumerate(sorted_stages, start=1):
 
+            # Capitalize the first letter of the stage name
+            display_name = stage_name.capitalize()
+
             # Column 1: Stage name label
-            tk.Label(self.frame, text=stage_name).grid(
-                row=i + 2, column=0, padx=5, pady=2, sticky="w"
+            tk.Label(self.frame, text=display_name, font=("Arial", 10, "bold")).grid(
+                row=i + 2, column=0, padx=5, pady=2, sticky="ew"
             )
 
             # Column 2: Minimum limit spinbox
@@ -162,8 +165,8 @@ class AdvancedStageParametersPopup:
                 from_=-100000,
                 to=100000,
                 width=10,
-                format="%.3f",
-                increment=0.1,
+                format="%.0f",
+                increment=1,
             )
             self.spinboxes[stage_name + "_min"].set(min.get(stage_name, 0.0))
             self.spinboxes[stage_name + "_min"].grid(
@@ -189,8 +192,8 @@ class AdvancedStageParametersPopup:
                 from_=-100000,
                 to=100000,
                 width=10,
-                format="%.3f",
-                increment=0.1,
+                format="%.0f",
+                increment=1,
             )
             self.spinboxes[stage_name + "_max"].set(max.get(stage_name, 0.0))
             self.spinboxes[stage_name + "_max"].grid(
@@ -216,8 +219,8 @@ class AdvancedStageParametersPopup:
                 from_=-100000,
                 to=100000,
                 width=10,
-                format="%.3f",
-                increment=0.1,
+                format="%.0f",
+                increment=1,
             )
             self.spinboxes[stage_name + "_offset"].set(min.get(stage_name, 0.0))
             self.spinboxes[stage_name + "_offset"].grid(
@@ -252,11 +255,14 @@ class AdvancedStageParametersPopup:
             self.flip_flags[stage_name].set(flip_axes.get(stage_name, False))
 
         # Provide a checkbox to disable the stage limits.
+        style = ttk.Style()
+        style.configure("Custom.TCheckbutton", font=("Arial", 10, "bold"))
         self.enable_stage_limits_var = tk.BooleanVar()
         self.stage_limits_enabled = HoverCheckButton(
             self.frame,
             text="Stage Limits Enabled",
             variable=self.enable_stage_limits_var,
+            style="Custom.TCheckbutton",
         )
         self.stage_limits_enabled.grid(
             row=len(sorted_stages) + 3,

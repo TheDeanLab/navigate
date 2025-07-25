@@ -92,19 +92,12 @@ class AdvancedStageParametersController:
         self.view.microscope.set(self.current_microscope)
 
         #: dict: Stage configuration dictionary for the current microscope.
-        self.stage_dict = dict(
-            self.parent_controller.configuration["configuration"]["microscopes"][
-                self.current_microscope
-            ]["stage"]
-        )
+        self.stage_dict = self.local_config_controller.microscope_config["stage"]
 
-        self.update_microscope()
+        self.update_microscope(in_initialization=True)
 
         # Add a trace to the microscope dropdown to detect microscope changes.
         self.view.microscope.variable.trace_add("write", self.update_microscope)
-
-        # Save button trace.
-        self.view.save_button.configure(command=self.save_stage_parameters)
 
         # Configure traces for the widgets in the popup.
         self._configure_widget_traces()
@@ -113,16 +106,12 @@ class AdvancedStageParametersController:
         self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
         self.view.popup.bind("<Escape>", lambda event: self.close_popup())
 
-        # See if the stage limits are currently enabled or disabled.
-        self.stage_limits_enabled = self.parent_controller.stage_controller.stage_limits
-        self.view.enable_stage_limits_var.set(self.stage_limits_enabled)
-
-        # Checkbox trace for enabling/disabling stage limits.
-        self.view.enable_stage_limits_var.trace_add("write", self.toggle_limits)
-
         logger.debug("Stage limits popup initialized.")
 
-    def save_stage_parameters(self):
+    def save_stage_parameters(self) -> None:
+        """Save the current stage parameters to the configuration file."""
+
+        # Update the stage dictionary.
         update_config_dict(
             manager=self.parent_controller.manager,
             parent_dict=self.parent_controller.configuration["configuration"][
@@ -132,11 +121,18 @@ class AdvancedStageParametersController:
             new_config=self.stage_dict,
         )
 
+        # Save the updated configuration to a YAML file.
         save_yaml_file(
             file_directory=os.path.join(get_navigate_path(), "config"),
             content_dict=self.parent_controller.configuration["configuration"],
             filename="configuration.yaml",
         )
+
+        # Update the configuration controller with the new configuration.
+        self.parent_controller.configuration_controller.update_configuration()
+
+        # Reinitialize the stage controller with the new configuration.
+        self.parent_controller.stage_controller.initialize()
 
     def toggle_limits(self, *args) -> None:
         """Toggle the stage limits on or off."""
@@ -161,15 +157,20 @@ class AdvancedStageParametersController:
         axis : str
             The axis to flip, e.g., 'x', 'y', or 'z'.
         """
-        # Update the parent controller's configuration controller with the new flip flag.
-        self.parent_controller.configuration_controller.microscope_config["stage"][
-            f"flip_{axis}"
-        ] = self.view.flip_flags[axis].get()
+        # Update the loaded configuration.
+        self.parent_controller.configuration["configuration"]["microscopes"][
+            self.current_microscope
+        ]["stage"][f"flip_{axis}"] = self.view.flip_flags[axis].get()
 
+        # Update our local stage dictionary with the new flip flag.
         self.stage_dict[f"flip_{axis}"] = self.view.flip_flags[axis].get()
+        logger.debug(
+            f"Updating {axis} flip flag to {self.stage_dict[f'flip_{axis}']}..."
+        )
 
     def update_axis(self, axis: str) -> None:
-        """Get the current stage position, and update the stage limits in the configuration.
+        """Get the current stage position, and update the stage limits in the
+        configuration. Only applied when someone presses the "update" button.
 
         axis: str
             The stage limit to update, e.g., 'x_min', 'y_max', etc.
@@ -184,16 +185,10 @@ class AdvancedStageParametersController:
         # Update the popup window.
         self.view.spinboxes[f"{axis}_{min_or_max}"].set(current_position[axis])
 
-        # Update the parent controller's configuration controller.
-        self.parent_controller.configuration_controller.microscope_config["stage"][
-            f"{axis}_{min_or_max}"
-        ] = current_position[axis]
-
-        print(
-            self.parent_controller.configuration_controller.microscope_config["stage"][
-                f"{axis}_{min_or_max}"
-            ]
-        )
+        # Update the loaded configuration.
+        self.parent_controller.configuration["configuration"]["microscopes"][
+            self.current_microscope
+        ]["stage"][f"{axis}_{min_or_max}"] = current_position[axis]
 
         # Update the stage dictionary with the new limit and/or flip flag.
         self.stage_dict[f"{axis}_{min_or_max}"] = current_position[axis]
@@ -204,7 +199,6 @@ class AdvancedStageParametersController:
 
     def close_popup(self) -> None:
         """Close the popup window."""
-        print("Closing stage limits popup...")
         self.save_stage_parameters()
         self.view.popup.destroy()
 
@@ -213,21 +207,27 @@ class AdvancedStageParametersController:
 
         logger.debug("Stage limits popup closed and sub-controller deleted.")
 
-    def update_microscope(self, *args) -> None:
-        """Update the microscope configuration when the microscope is changed."""
+    def update_microscope(self, *args, in_initialization=False) -> None:
+        """Update the microscope configuration when the microscope is changed.
 
+        Parameters
+        ----------
+        in_initialization : bool, optional
+            If True, this method is called during initialization and does not
+            save the previous stage parameters.
+        """
         # Save the configuration for the previous microscope before switching.
-        self.save_stage_parameters()
+        if not in_initialization:
+            self.save_stage_parameters()
 
         # Get the current microscope from the dropdown.
         self.current_microscope = self.view.microscope.get()
         self.view.clear_view()
 
         # Update the local configuration controller with the new microscope.
-        self.local_config_controller.microscope_name = self.current_microscope
-
-        # Make sure the microscope_config.
-        self.local_config_controller.change_microscope(self.current_microscope)
+        self.local_config_controller.change_microscope(
+            microscope_name=self.current_microscope
+        )
 
         # Set the number of stage axes for the most recently selected microscope.
         num_stages = self.local_config_controller.stage_axes
@@ -250,6 +250,27 @@ class AdvancedStageParametersController:
         # Reconfigure traces for the new widgets
         self._configure_widget_traces()
 
+    def update_spinboxes(self, axis) -> None:
+        """Update the spinboxes for the stage limits.
+
+        Parameters
+        ----------
+        axis : str
+            The axis to update, e.g., 'x', 'y', or 'z'.
+        """
+        # Get the current value from the spinbox.
+        value = int(self.view.spinboxes[axis].get())
+
+        # Update the loaded configuration.
+        self.parent_controller.configuration["configuration"]["microscopes"][
+            self.current_microscope
+        ]["stage"][axis] = value
+
+        # Update our local stage dictionary with the new value.
+        self.stage_dict[axis] = value
+
+        logger.debug(f"Updating {axis} limit to {value}...")
+
     def _configure_widget_traces(self):
         """Configure traces and commands for widgets after they're created."""
         # Configure the spinboxes for each stage limit.
@@ -259,3 +280,17 @@ class AdvancedStageParametersController:
         # Configure the reverse flags for each stage axis.
         for key, value in self.view.flip_flags.items():
             value.trace_add("write", lambda *args, k=key: self.flip_axis(k))
+
+        # Configure trace for minimum limit, maximum limit, and offset spinboxes.
+        for key, value in self.view.spinboxes.items():
+            value.bind("<FocusOut>", lambda event, k=key: self.update_spinboxes(k))
+
+        # Save button trace.
+        self.view.save_button.configure(command=self.save_stage_parameters)
+
+        # See if the stage limits are currently enabled or disabled.
+        self.stage_limits_enabled = self.parent_controller.stage_controller.stage_limits
+        self.view.enable_stage_limits_var.set(self.stage_limits_enabled)
+
+        # Checkbox trace for enabling/disabling stage limits.
+        self.view.enable_stage_limits_var.trace_add("write", self.toggle_limits)

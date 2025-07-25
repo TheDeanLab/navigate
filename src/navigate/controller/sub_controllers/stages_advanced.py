@@ -31,6 +31,7 @@
 # Standard Library Imports
 import logging
 import os
+from typing import Optional
 
 # Third Party Imports
 
@@ -46,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 class AdvancedStageParametersController:
-    """Controller for the Stage Limits popup."""
+    """Controller for the Advanced Stage Parameters popup."""
 
     def __init__(
         self,
@@ -194,7 +195,7 @@ class AdvancedStageParametersController:
         self.stage_dict[f"{axis}_{min_or_max}"] = current_position[axis]
 
         logger.debug(
-            f"Updating {axis} {min_or_max} limits to" f" {current_position[axis]}..."
+            f"Updating {axis} {min_or_max} limits to {current_position[axis]}..."
         )
 
     def close_popup(self) -> None:
@@ -207,7 +208,9 @@ class AdvancedStageParametersController:
 
         logger.debug("Stage limits popup closed and sub-controller deleted.")
 
-    def update_microscope(self, *args, in_initialization=False) -> None:
+    def update_microscope(
+        self, *args, in_initialization: Optional[bool] = False
+    ) -> None:
         """Update the microscope configuration when the microscope is changed.
 
         Parameters
@@ -244,13 +247,18 @@ class AdvancedStageParametersController:
         # Get the current flip flags for each stage axis.
         current_flip_flags = self.local_config_controller.stage_flip_flags
 
-        # Initialize the view with the number of stages and their limits
-        self.view.populate_view(num_stages, min_limits, max_limits, current_flip_flags)
+        # Get the current offsets for each stage axis.
+        offsets = self.local_config_controller.stage_offsets
+
+        # Initialize the view with the number of stage_list and their limits
+        self.view.populate_view(
+            num_stages, min_limits, max_limits, current_flip_flags, offsets
+        )
 
         # Reconfigure traces for the new widgets
         self._configure_widget_traces()
 
-    def update_spinboxes(self, axis) -> None:
+    def update_spinboxes(self, axis: str) -> None:
         """Update the spinboxes for the stage limits.
 
         Parameters
@@ -268,10 +276,9 @@ class AdvancedStageParametersController:
 
         # Update our local stage dictionary with the new value.
         self.stage_dict[axis] = value
-
         logger.debug(f"Updating {axis} limit to {value}...")
 
-    def _configure_widget_traces(self):
+    def _configure_widget_traces(self) -> None:
         """Configure traces and commands for widgets after they're created."""
         # Configure the spinboxes for each stage limit.
         for key, value in self.view.buttons.items():

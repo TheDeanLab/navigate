@@ -104,24 +104,32 @@ class AdvancedStageParametersPopup:
         self.microscope.grid(row=0, column=0, columnspan=7, padx=5, pady=5, sticky="ew")
 
     def populate_view(
-        self, stages: list, min: dict, max: dict, flip_axes: dict
+        self,
+        stages: list,
+        min_dict: dict,
+        max_dict: dict,
+        flip_axes: dict,
+        offsets: dict,
     ) -> None:
         """Populate the view with the stages.
 
+
         Add the widgets to the view for each stage in alphabetical order.
-        Creates a row for each stage with: stage name, min limit spinbox,
-        update min button, max limit spinbox, and update max button.
+        Creates a row for each stage with: stage name, min_dict limit spinbox,
+        update min_dict button, max limit spinbox, and update max button.
 
         Parameters
         ----------
         stages : list
             The list of stage names as strings.
-        min : dict
+        min_dict : dict
             A dictionary containing the minimum limits for each stage.
-        max : dict
+        max_dict : dict
             A dictionary containing the maximum limits for each stage.
         flip_axes : dict
             A dictionary containing the flip flags for each stage.
+        offsets : dict
+            A dictionary containing the offsets for each stage.
         """
         button_width = 6
 
@@ -168,7 +176,7 @@ class AdvancedStageParametersPopup:
                 format="%.0f",
                 increment=1,
             )
-            self.spinboxes[stage_name + "_min"].set(min.get(stage_name, 0.0))
+            self.spinboxes[stage_name + "_min"].set(min_dict.get(stage_name, 0.0))
             self.spinboxes[stage_name + "_min"].grid(
                 row=i + 2, column=1, padx=5, pady=2
             )
@@ -195,7 +203,7 @@ class AdvancedStageParametersPopup:
                 format="%.0f",
                 increment=1,
             )
-            self.spinboxes[stage_name + "_max"].set(max.get(stage_name, 0.0))
+            self.spinboxes[stage_name + "_max"].set(max_dict.get(stage_name, 0.0))
             self.spinboxes[stage_name + "_max"].grid(
                 row=i + 2, column=3, padx=5, pady=2
             )
@@ -222,7 +230,7 @@ class AdvancedStageParametersPopup:
                 format="%.0f",
                 increment=1,
             )
-            self.spinboxes[stage_name + "_offset"].set(min.get(stage_name, 0.0))
+            self.spinboxes[stage_name + "_offset"].set(offsets.get(stage_name, 0.0))
             self.spinboxes[stage_name + "_offset"].grid(
                 row=i + 2, column=5, padx=5, pady=2
             )

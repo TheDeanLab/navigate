@@ -34,6 +34,7 @@
 # Standard Library Imports
 import logging
 from multiprocessing.managers import ListProxy, DictProxy
+from typing import Optional
 
 # Third Party Imports
 
@@ -47,15 +48,15 @@ logger = logging.getLogger(p)
 class ConfigurationController:
     """Configuration Controller - Used to get the configuration of the microscope."""
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: DictProxy) -> None:
         """Initialize the Configuration Controller
 
         Parameters
         ----------
-        configuration : dict
+        configuration : DictProxy
             The configuration dictionary.
         """
-        #: dict: The configuration dictionary.
+        #: DictProxy: The configuration dictionary.
         self.configuration = configuration
 
         #: str: The microscope name.
@@ -112,7 +113,7 @@ class ConfigurationController:
         self.microscope_name = microscope_name
         return True
 
-    def get_microscope_configuration_dict(self):
+    def get_microscope_configuration_dict(self) -> dict:
         """Return microscope configuration dictionary
 
         Returns
@@ -122,7 +123,7 @@ class ConfigurationController:
         return self.microscope_config
 
     @property
-    def channels_info(self):
+    def channels_info(self) -> dict:
         """Return the channels info
 
         Populate the channel combobox with the channels
@@ -148,7 +149,7 @@ class ConfigurationController:
         return setting
 
     @property
-    def lasers_info(self):
+    def lasers_info(self) -> list:
         """Return the lasers info
 
         Populate the laser combobox with the lasers
@@ -167,7 +168,7 @@ class ConfigurationController:
         ]
 
     @property
-    def camera_config_dict(self):
+    def camera_config_dict(self) -> dict:
         """Get camera configuration dict
 
         Returns
@@ -182,7 +183,7 @@ class ConfigurationController:
         return None
 
     @property
-    def camera_pixels(self):
+    def camera_pixels(self) -> list[int]:
         """Get default pixel values from camera
 
         Returns
@@ -201,7 +202,7 @@ class ConfigurationController:
         ]
 
     @property
-    def stage_default_position(self):
+    def stage_default_position(self) -> dict:
         """Get current position of the stage
 
         Returns
@@ -223,7 +224,7 @@ class ConfigurationController:
         return position
 
     @property
-    def stage_step(self):
+    def stage_step(self) -> dict:
         """Get the step size of the stage
 
         Returns
@@ -244,7 +245,25 @@ class ConfigurationController:
             steps = {"x": 10, "y": 10, "z": 10, "theta": 10, "f": 10}
         return steps
 
-    def get_stage_position_limits(self, suffix):
+    @property
+    def stage_offsets(self) -> dict:
+        """Get the offsets of the stage
+
+        Returns
+        -------
+        offsets : dict
+            Offsets in x, y, z, theta, and f.
+        """
+        if self.microscope_config is not None:
+            stage_dict = self.microscope_config["stage"]
+        else:
+            stage_dict = {}
+        offsets = {}
+        for axis in self.stage_axes:
+            offsets[axis] = stage_dict.get(f"{axis}_offset", 0)
+        return offsets
+
+    def get_stage_position_limits(self, suffix: str) -> dict:
         """Return the position limits of the stage
 
         Parameters
@@ -273,7 +292,7 @@ class ConfigurationController:
         return position_limits
 
     @property
-    def stage_flip_flags(self):
+    def stage_flip_flags(self) -> dict[str, bool]:
         """Return the flip flags of the stage
 
         Returns
@@ -292,7 +311,7 @@ class ConfigurationController:
         return flip_flags
 
     @property
-    def stage_axes(self):
+    def stage_axes(self) -> list[str]:
         """Return the axes of the stage
 
         Returns
@@ -313,7 +332,7 @@ class ConfigurationController:
         return ["x", "y"]
 
     @property
-    def all_stage_axes(self):
+    def all_stage_axes(self) -> list[str]:
         """Return all the axes of the stage
 
         Returns
@@ -334,7 +353,7 @@ class ConfigurationController:
         return list(set(axes))
 
     @property
-    def camera_flip_flags(self):
+    def camera_flip_flags(self) -> dict[str, bool]:
         """Return the flip flags of the camera
 
         Returns
@@ -353,7 +372,7 @@ class ConfigurationController:
         return flip_flags
 
     @property
-    def remote_focus_dict(self):
+    def remote_focus_dict(self) -> dict:
         """Return delay_percent, pulse_percent.
 
         Returns
@@ -367,7 +386,7 @@ class ConfigurationController:
         return None
 
     @property
-    def galvo_parameter_dict(self):
+    def galvo_parameter_dict(self) -> dict:
         """Return galvo parameter dict.
 
         Returns
@@ -384,12 +403,12 @@ class ConfigurationController:
         return None
 
     @property
-    def daq_sample_rate(self):
+    def daq_sample_rate(self) -> int:
         """Return daq sample rate.
 
         Returns
         -------
-        daq_sample_rate : float
+        daq_sample_rate : int
             Sample rate of the daq.
         """
         if self.microscope_config is not None:
@@ -397,7 +416,7 @@ class ConfigurationController:
         return 100000
 
     @property
-    def filter_wheel_setting_dict(self):
+    def filter_wheel_setting_dict(self) -> dict:
         """Return filter wheel setting dict.
 
         Returns
@@ -410,7 +429,7 @@ class ConfigurationController:
         return None
 
     @property
-    def stage_setting_dict(self):
+    def stage_setting_dict(self) -> dict:
         """Return stage setting dict.
 
         Returns
@@ -423,7 +442,7 @@ class ConfigurationController:
         return None
 
     @property
-    def has_analog_stage(self):
+    def has_analog_stage(self) -> bool:
         """Check to see if the has_ni_galvo_stage flag is set in the configuration.
 
         Returns
@@ -436,7 +455,7 @@ class ConfigurationController:
             return self.microscope_config["stage"].get("has_ni_galvo_stage", False)
         return False
 
-    def get_stages_by_axis(self, axis_prefix="z"):
+    def get_stages_by_axis(self, axis_prefix: Optional[str] = "z"):
         """Return a list of all stage names.
 
         Parameters
@@ -464,7 +483,7 @@ class ConfigurationController:
         return []
 
     @property
-    def number_of_channels(self):
+    def number_of_channels(self) -> int:
         """Return number of channels.
 
         Returns
@@ -477,7 +496,7 @@ class ConfigurationController:
         return 5
 
     @property
-    def number_of_filter_wheels(self):
+    def number_of_filter_wheels(self) -> int:
         """Return number of filter wheels
 
         Returns
@@ -491,7 +510,7 @@ class ConfigurationController:
         return 1
 
     @property
-    def filter_wheel_names(self):
+    def filter_wheel_names(self) -> list[str]:
         """Return a list of filter wheel names
 
         Returns
@@ -509,7 +528,7 @@ class ConfigurationController:
         return filter_wheel_names
 
     @property
-    def microscope_list(self):
+    def microscope_list(self) -> list[str]:
         """Return a list of microscope names
 
         Returns
@@ -519,7 +538,7 @@ class ConfigurationController:
         """
         return list(self.configuration["configuration"]["microscopes"].keys())
 
-    def get_zoom_value_list(self, microscope_name):
+    def get_zoom_value_list(self, microscope_name: str) -> list:
         """Return a list of zoom values
 
         Returns
@@ -532,5 +551,12 @@ class ConfigurationController:
         ].keys()
 
     @property
-    def gui_setting(self):
+    def gui_setting(self) -> dict:
+        """Return the GUI settings
+
+        Returns
+        -------
+        gui_setting : dict
+            Dictionary with the GUI settings.
+        """
         return self.configuration["configuration"]["gui"]

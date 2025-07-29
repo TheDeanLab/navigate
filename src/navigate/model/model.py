@@ -74,6 +74,7 @@ from navigate.log_files.log_functions import log_setup
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.common_functions import load_module_from_file, VariableWithLock
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
+from navigate.tools.threads import ThreadWithWarning
 from navigate.model.microscope import Microscope
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel
@@ -587,9 +588,13 @@ class Model:
                 self.data_buffer_saving_flags = None
 
             if self.imaging_mode == "live":
-                self.signal_thread = threading.Thread(target=self.run_live_acquisition)
+                self.signal_thread = ThreadWithWarning(target=self.run_live_acquisition,
+                                                       warning_queue=self.event_queue,
+                                                       logger=self.logger)
             else:
-                self.signal_thread = threading.Thread(target=self.run_acquisition)
+                self.signal_thread = ThreadWithWarning(target=self.run_acquisition,
+                                                       warning_queue=self.event_queue,
+                                                       logger=self.logger)
 
             self.signal_thread.name = f"{self.imaging_mode} signal"
 
@@ -685,7 +690,9 @@ class Model:
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
                 self.stop_send_signal = False
-                self.signal_thread = threading.Thread(target=self.run_live_acquisition)
+                self.signal_thread = ThreadWithWarning(target=self.run_live_acquisition, 
+                                                       warning_queue=self.event_queue,
+                                                       logger=self.logger)
                 self.signal_thread.name = "Waveform Popup Signal"
                 self.signal_thread.start()
 

@@ -432,3 +432,25 @@ class SyntheticCamera(CameraBase):
             Trigger source, either 'External' or 'Internal'.
         """
         logger.debug(f"Set camera trigger mode: {trigger_source}")
+
+    def snap(self) -> np.ndarray:
+        """Simulate single-frame image acquisition.
+
+        Returns
+        -------
+        image : np.ndarray
+            Synthetic image of shape (y_pixels, x_pixels), dtype=uint16
+        """
+        if self.random_image:
+            image = np.random.normal(
+                0,
+                self._noise_sigma / 0.47,
+                size=(self.y_pixels, self.x_pixels)
+            ).astype(np.uint16) + int(self._mean_background_count)
+        else:
+            image = self.tif_images[self.current_tif_id][self.img_id]
+            self.img_id += 1
+            if self.img_id >= len(self.tif_images[self.current_tif_id]):
+                self.img_id = 0
+                self.current_tif_id = (self.current_tif_id + 1) % len(self.tif_images)
+        return image

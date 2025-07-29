@@ -78,10 +78,10 @@ from navigate.model.microscope import Microscope
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel
 
-
 # Logger Setup
-p = __name__.split(".")[1]
+logger = logging.getLogger(__name__)
 
+print("NOTE: USING NEW model.py")
 
 class Model:
     """Navigate Model Class
@@ -109,7 +109,7 @@ class Model:
         log_setup("model_logging.yml")
 
         #: object: Logger object.
-        self.logger = logging.getLogger(p)
+        self.logger = logger
 
         #: dict: Configuration dictionary.
         self.configuration = configuration
@@ -786,6 +786,7 @@ class Model:
         elif command == "stage_limits":
             for microscope_name in self.microscopes:
                 self.microscopes[microscope_name].update_stage_limits(args[0])
+        
         elif command == "stop":
             """
             Called when user halts the acquisition
@@ -1211,6 +1212,7 @@ class Model:
         # Update the stage position.
         # Allows the user to externally move the stage in the continuous mode.
         self.get_stage_position()
+    
 
     def run_acquisition(self) -> None:
         """Run acquisition along with a feature list one time.
@@ -1224,6 +1226,7 @@ class Model:
             self.snap_image()
             return
 
+        
         while (
             not self.signal_container.end_flag
             and not self.stop_send_signal

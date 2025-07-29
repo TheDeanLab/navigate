@@ -35,10 +35,19 @@ import pytest
 import os
 from multiprocessing import Manager
 from unittest.mock import MagicMock
+import matplotlib.pyplot as plt
+import numpy as np
+import time
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # Or INFO
 
 # Third Party Imports
 
 # Local Imports
+from navigate.model.devices.camera.synthetic_threaded import SyntheticThreadedCamera
+from navigate.model.devices.galvo.synthetic_threaded import SyntheticThreadedGalvo
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
@@ -106,6 +115,7 @@ def model():
         # event_queue.join_thread()
 
 
+
 def test_single_acquisition(model):
     state = model.configuration["experiment"]["MicroscopeState"]
     state["image_mode"] = "single"
@@ -153,6 +163,72 @@ def test_live_acquisition(model):
             model.run_command("stop")
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
+
+
+def test_run_threaded_camera_acquisition(model):
+    number_of_frames = 5
+    image_list = run_threaded_camera_acquisition(model, number_of_frames)
+    logger.debug(f"Number of images: {len(image_list)}")
+
+    assert len(image_list) == number_of_frames, f"Expected {number_of_frames} images, got {len(image_list)}"
+    assert isinstance(image_list[-1], np.ndarray), "Last item is not a NumPy array"
+
+def test_run_threaded_galvo(model):
+    """
+    Test that a SyntheticThreadedGalvo can start and stop waveform playback
+    in a separate thread, and behaves as expected.
+    """
+
+    logger = logging.getLogger("navigate.model.devices.galvo.synthetic_threaded")
+    logger.setLevel(logging.DEBUG)
+
+    galvo = SyntheticThreadedGalvo(
+        model.active_microscope_name,
+        None,  # synthetic DAQ (not used)
+        model.configuration,
+        device_id=0,
+        use_threading=True
+    )
+
+    microscope = model.get_active_microscope()
+    exposure_times, sweep_times = microscope.calculate_exposure_sweep_times()
+    galvo.adjust_waveforms(exposure_times, sweep_times)
+
+    # --- Assertions before starting ---
+    assert not galvo.active, "Galvo should not be active before starting"
+    assert galvo.thread is None, "Galvo thread should be None before starting"
+
+    galvo.start_threaded_output()
+
+    # --- Assertions after starting ---
+    assert galvo.active, "Galvo should be marked active after start"
+    assert galvo.thread is not None and galvo.thread.is_alive(), "Galvo thread should be alive after start"
+
+    # Let it run briefly.
+    time.sleep(0.01)
+
+    galvo.stop_threaded_output()
+
+    # --- Assertions after stopping ---
+    assert not galvo.active, "Galvo should not be active after stop"
+    assert galvo.thread is None, "Galvo thread should be None after stop"
+
+    logger.debug("Galvo thread start/stop test passed.")
+
+def test_run_camera_galvo_threaded_acquisition(model):
+    """ Test that we can perform an acquisition with camera and galvo working in separate threads. """
+    image_list, synthetic_camera, synthetic_galvo = run_camera_galvo_threaded_acquisition(model)
+    
+    model.logger.info(f"Captured {len(image_list)} images.")
+    
+    assert image_list, "No images were captured."
+    assert isinstance(image_list[-1], np.ndarray), "Last item is not a NumPy array."
+
+    shapes = {img.shape for img in image_list}
+    assert len(shapes) == 1, "Inconsistent image shapes"
+
+    assert synthetic_galvo.thread is None, "Galvo thread should be None after stop"
+    assert synthetic_camera.thread is None, "Camera thread should be None after stop" 
 
 
 def test_autofocus_live_acquisition(model):
@@ -433,3 +509,89 @@ def test_load_feature_records(model):
     feature_records_2 = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
     assert feature_records == feature_records_2
     os.remove(f"{feature_lists_path}/__sequence.yml")
+
+def run_threaded_camera_acquisition(model, number_of_frames) -> None:
+    synthetic_camera = SyntheticThreadedCamera(model.active_microscope_name, None, model.configuration, use_threading = True) # Synthetic camera has "None" hardware. 
+    synthetic_camera.start_threaded_acquisition()
+    image_list = []
+
+    for _ in range(number_of_frames):
+        image = synthetic_camera.get_image_from_queue(timeout=2)
+        if image is not None:
+            image_list.append(image)
+        else: 
+            model.logger.warning("Warning: Timed out waiting for image.")
+            break
+    
+    synthetic_camera.stop_threaded_acquisition()
+    model.logger.info("Acquisition stopped.")
+
+    return image_list
+
+def _show_image(images, frame):
+    """ Can be helpful during debugging."""
+    if not images:
+        logger.debug("No images to display.")
+        return
+    img = images[frame]
+    plt.imshow(img, cmap="gray")
+    plt.title(f"Image {frame}")
+    plt.colorbar()
+    plt.show()
+
+def run_camera_galvo_threaded_acquisition(model):
+    """ Run an acquisition with camera and galvo working in separate threads. 
+    The camera snaps images while the galvo moves through all of its waveforms. """
+    # Initialize camera.
+    synthetic_camera = SyntheticThreadedCamera(
+    model.active_microscope_name,
+    None,
+    model.configuration, 
+    use_threading = True
+    )
+
+    # Initialize galvo.
+    synthetic_galvo = SyntheticThreadedGalvo(
+    model.active_microscope_name,
+    None,  # Can use synthetic DAQ here if available.
+    model.configuration,
+    device_id=0,
+    use_threading=True
+    )
+
+    # Prepare waveforms for galvo.
+    microscope = model.get_active_microscope()
+    exposure_times, sweep_times = microscope.calculate_exposure_sweep_times()
+    synthetic_galvo.adjust_waveforms(exposure_times, sweep_times)
+
+    # Start threads and their tasks.
+    synthetic_camera.start_threaded_acquisition() 
+    synthetic_galvo.start_threaded_output() 
+    
+    image_list = []
+
+    start_time = time.time()
+    timeout = 10  # Seconds.
+
+    # Run the threaded acquisition - camera is snapping and galvo is moving simultaneously.
+    try:
+        while not synthetic_galvo.stop_event.is_set():
+            image = synthetic_camera.get_image_from_queue(timeout=2)
+            
+            if image is not None:
+                image_list.append(image)
+            else: 
+                model.logger.warning("Warning: Timed out waiting for image.")
+                break
+
+            if time.time() - start_time > timeout:
+                model.logger.warning("Timeout reached waiting for galvo to finish.")
+                break
+
+    finally: # Make sure we always stop the threads.      
+        synthetic_camera.stop_threaded_acquisition() 
+        model.logger.info("Camera thread stopped.")
+        synthetic_galvo.stop_threaded_output()
+        model.logger.info("Galvo thread stopped.")   
+
+    return image_list, synthetic_camera, synthetic_galvo

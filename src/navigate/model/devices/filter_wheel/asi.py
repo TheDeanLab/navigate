@@ -155,7 +155,13 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
             self.filter_wheel.select_filter_wheel(
                 filter_wheel_number=self.filter_wheel_number
             )
-            self.filter_wheel.move_filter_wheel(self.filter_dictionary[filter_name])
+
+            try: 
+                self.filter_wheel.move_filter_wheel(self.filter_dictionary[filter_name])
+                self.filter_wheel_position = self.filter_dictionary[filter_name]
+            except Exception as e:
+                logger.error(f"Filter wheel movement failed: {e}") 
+                raise   
 
             #  Wheel Position Change Delay
             if wait_until_done:
@@ -277,12 +283,18 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
 
             # Calculate the Delay Needed to Change the Positions
             self.filter_change_delay(filter_name)
-            dichroic_position = self.filter_dictionary[filter_name]
+            target_position = self.filter_dictionary[filter_name] # Where we want to move the filter.
 
-            assert dichroic_position in range(4)
-            self.dichroic.move_dichroic(
-                dichroic_id=self.dichroic_id, dichroic_position=dichroic_position
-            )
+            assert target_position in range(4)
+            
+            try:
+                self.dichroic.move_dichroic(
+                dichroic_id=self.dichroic_id, dichroic_position=target_position
+                )
+                self.dichroic_position = target_position
+            except Exception as e:
+                logger.error(f"Dichroic movement failed: {e}") 
+                raise      
 
             #  Wheel Position Change Delay
             if wait_until_done:

@@ -54,8 +54,8 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class NIDAQ(DAQBase):
-    """NIDAQ class for Control of NI Data Acquisition Cards."""
+class SyntheticThreadedDAQ(DAQBase):
+    """Synthetic Threaded DAQ class for Control of NI Data Acquisition Cards."""
 
     def __init__(self, configuration: Dict[str, Any]) -> None:
         """Initialize NIDAQ class.

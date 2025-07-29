@@ -190,31 +190,29 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
             build_nested_dict(manager, d, i, v)
     parent_dict[key_name] = d
 
-
 def update_config_dict(
-    manager: multiprocessing.Manager,
+    manager,
     parent_dict: dict,
     config_name: str,
     new_config: Union[dict, str],
 ) -> bool:
-    """Read a new file and update info of the configuration dict.
+    """Read a new file or dict and update part of the configuration dict.
 
     Parameters
     ----------
     manager : multiprocessing.Manager
-        Shares objects (e.g., dict) between processes
+        Manager used to wrap shared objects like dict or list.
     parent_dict : dict
-        Dictionary we are adding to
+        Dictionary to update (e.g., config["experiment"])
     config_name : str
-        Name of dictionary to replace
+        Key to update in parent_dict
     new_config : dict or str
-        Dictionary values or
-        yaml file name
+        Dictionary values or path to a YAML file
 
     Returns
     -------
     bool
-        True or False
+        True if update was successful, False otherwise
     """
     if type(new_config) != dict and type(new_config) != list:
         file_path = str(new_config)
@@ -228,7 +226,6 @@ def update_config_dict(
 
     build_nested_dict(manager, parent_dict, config_name, new_config)
     return True
-
 
 def verify_experiment_config(manager, configuration):
     """Verify configuration (configuration, experiment, waveform_constants) yaml files

@@ -38,6 +38,11 @@ handlers:
     filters: [not_performance]
     mode: a
 loggers:
+  navigate:
+    level: DEBUG
+    handlers: [console, model_info, model_debug]
+    propagate: yes
+  
   model:
     level: DEBUG
     handlers: [console, model_info, model_debug]

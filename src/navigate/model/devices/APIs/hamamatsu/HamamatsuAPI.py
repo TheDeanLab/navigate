@@ -22,8 +22,10 @@ from ctypes import (
     c_char_p,
     c_double,
 )
+
 from enum import IntEnum
 import logging
+import numpy as np
 
 # Third Party Imports
 
@@ -1147,102 +1149,194 @@ class DCAM:
 
     def stop_acquisition(self):
         """
-        # this function will stop capture and detach buffer
-        """
-        # stop capture
-        dcamcap_stop(self.__hdcam)
+        Stop camera acquisition and detach the buffer.
 
-        # detach buffer
-        return self.__result(dcambuf_release(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))
+        This halts hardware streaming using dcamcap_stop() and detaches the
+        shared memory buffers from the DCAM device using dcamcap_release().
+
+        Returns
+        -------
+        success : bool
+            True if stopping and detaching were successful, False otherwise.
+        """
+        if not getattr(self, "is_acquiring", False):
+            self.logger.warning("stop_acquisition() called, but acquisition was not running.")
+            return False
+
+        success = True
+
+        try:
+            self.logger.info("Stopping Hamamatsu acquisition...")
+            dcamcap_stop(self.__hdcam)
+            self.logger.info("Capture stopped successfully.")
+        except Exception as e:
+            self.logger.exception(f"Failed to stop capture: {e}")
+            success = False
+
+        try:
+            result = self.__result(dcambuf_release(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))
+            if result:
+                self.logger.info("Buffer detached successfully.")
+            else:
+                self.logger.error("Buffer detachment failed.")
+                success = False
+        except Exception as e:
+            self.logger.exception(f"Failed to detach buffer: {e}")
+            success = False
+
+        self.is_acquiring = False
+        return success
+
 
     def get_frames(self):
         """
-        # this function will return a list of frame index
-        # following lines are from documents: 'dcamapi4-en.html'
-        # The host software can check the capturing status with the dcamcap_status()
-        # function. It will return a DCAMCAP_STATUS.
-        # The dcamcap_transferinfo() function returns the total number of images
-        # captured and the frame index of the last captured image.
-        # These functions do not wait for any events and will return with their
-        # values immediately.
-        # These functions are useful for polling however this is stressful to the CPU.
-        # We recommend using dcamwait functions to wait for events such as the arrival
-        # of new frames, then calling these functions to check status and/or
-        # transferred information.
+        Wait for a new frame and return the list of frame indices that were acquired
+        since the last poll.
+
+        Returns
+        -------
+        List[int]
+            List of frame indices (relative to circular buffer) that are new
+            since the last call to this function.
         """
-        # current solution: wait for a new frame, then call dcamcap_transferinfo()
-        frame_idx_list = []
         wait_param = DCAMWAIT_START()
         wait_param.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED
-        wait_param.timeout = 500  # 500ms
-        #  Timeout Duration - Will throw an error if the timeout is too small.
-        #  Currently set to a value > maximum typical integration time.
+        wait_param.timeout = 500  # milliseconds
 
-        if self.__result(dcamwait_start(self.__hdcamwait, byref(wait_param))):
-            cap_info = DCAMCAP_TRANSFERINFO()
-            dcamcap_transferinfo(self.__hdcam, byref(cap_info))
-            # after testing with the camera, we find out that:
-            # nNewestFrameIndex starts from 0;
-            # nFrameCount increments all the frames from beginning even we have already
-            # pulled the info out
-            frame_count = cap_info.nFrameCount - self.pre_frame_count
+        if not self.__result(dcamwait_start(self.__hdcamwait, byref(wait_param))):
+            self.logger.warning("dcamwait_start timed out or failed.")
+            return []
 
-            # print("Frame Count - cap_info", cap_info.nFrameCount, frame_count)
-            # print("Newest Frame Index - cap_info", cap_info.nNewestFrameIndex)
+        cap_info = DCAMCAP_TRANSFERINFO()
+        dcamcap_transferinfo(self.__hdcam, byref(cap_info))
 
-            if frame_count <= cap_info.nNewestFrameIndex + 1:
-                frame_idx_list = list(
-                    range(
-                        cap_info.nNewestFrameIndex - frame_count + 1,
-                        cap_info.nNewestFrameIndex + 1,
-                    )
-                )
-            else:
-                if frame_count > self.number_of_frames:
-                    # We waited so long that we've missed at least a buffer's
-                    # worth of frames
-                    msg = (
-                        "Hamamatsu API - Dropping frames! Number of frames "
-                        f"since last poll {frame_count} exceeds buffer size  "
-                        f"{self.number_of_frames}. This is likely due to slow "
-                        "file saving."
-                    )
-                    logger.debug(msg)
-                    print(msg)
+        newest_idx = cap_info.nNewestFrameIndex
+        total_frames = cap_info.nFrameCount
 
-                    # Update the frame count to grab the last N usable frames
-                    frame_count = self.number_of_frames
+        frame_count = total_frames - self.pre_frame_count
+        self.logger.debug(f"New frames since last poll: {frame_count}")
 
-                frame_idx_list = list(
-                    range(
-                        self.number_of_frames
-                        - frame_count
-                        + cap_info.nNewestFrameIndex
-                        + 1,
-                        self.number_of_frames,
-                    )
-                ) + list(range(0, cap_info.nNewestFrameIndex + 1))
+        if frame_count <= 0:
+            # Nothing new
+            return []
 
-            # check if backlog happens
-            # if (self.pre_index+1) % self.number_of_frames != frame_idx_list[0]:
-            #    print('backlog happens!')
-            self.pre_index = cap_info.nNewestFrameIndex
-            self.pre_frame_count = cap_info.nFrameCount
+        buffer_size = self.number_of_frames
+        dropped = frame_count > buffer_size
 
-        return frame_idx_list
+        if dropped:
+            self.logger.warning(
+                f"Dropping frames! {frame_count} frames arrived, but buffer holds only {buffer_size}."
+            )
+            # Clip to buffer size
+            frame_count = buffer_size
+
+        # Reconstruct index list
+        start_idx = (newest_idx - frame_count + 1) % buffer_size
+        end_idx = (newest_idx + 1) % buffer_size
+
+        if start_idx < end_idx:
+            frame_indices = list(range(start_idx, end_idx))
+        else:
+            frame_indices = list(range(start_idx, buffer_size)) + list(range(0, end_idx))
+
+        # Update internal state
+        self.pre_index = newest_idx
+        self.pre_frame_count = total_frames
+
+        return frame_indices
 
     def get_camera_handler(self):
+        """
+        Return the raw DCAM camera handle for low-level access.
+        
+        Warning: This is an internal pointer; using it outside the API wrapper is discouraged.
+        """
         return self.__hdcam
 
-    def fire_software_trigger(self):
-        trigger_source = self.get_property_value("trigger_source")
-        if trigger_source == 3.0:
-            # fire trigger to camera
+    def fire_software_trigger(self) -> bool:
+        """
+        Fire a software trigger to the Hamamatsu camera if trigger source is set to software mode.
+
+        Returns
+        -------
+        success : bool
+            True if trigger was fired successfully, False otherwise.
+        """
+        try:
+            trigger_source = self.get_property_value("trigger_source")
+        except Exception as e:
+            self.logger.exception(f"Could not read trigger_source: {e}")
+            return False
+
+        SOFTWARE_TRIGGER_MODE = 3.0  # ideally imported or defined globally
+
+        if trigger_source != SOFTWARE_TRIGGER_MODE:
+            self.logger.warning(
+                f"Cannot fire software trigger: camera is in mode {trigger_source}, not software mode ({SOFTWARE_TRIGGER_MODE})."
+            )
+            return False
+
+        try:
+            self.logger.debug("Firing software trigger to camera...")
             err = dcamcap_firetrigger(self.__hdcam, 0)
             if err < 0:
-                print("an error happened when sending trigger to the camera", err)
-        else:
-            print(f"Camera is in mode {trigger_source}, not software mode (3).")
+                self.logger.error(f"Failed to fire trigger. Error code: {err}")
+                return False
+            self.logger.info("Software trigger fired successfully.")
+            return True
+        except Exception as e:
+            self.logger.exception(f"Exception occurred while firing trigger: {e}")
+            return False
+
+    def snap(self):
+        """
+        Capture a single frame using software trigger mode.
+
+        Returns
+        -------
+        np.ndarray or None
+            Captured image as a NumPy array if successful, else None.
+        """
+
+        # 1. Verify software trigger mode is active
+        SOFTWARE_TRIGGER_MODE = 3.0
+        if self.get_property_value("trigger_source") != SOFTWARE_TRIGGER_MODE:
+            self.logger.error("snap() requires trigger_source to be set to SOFTWARE.")
+            return None
+
+        # 2. Prepare a single-frame buffer
+        height = self.get_property_value("image_height")
+        width = self.get_property_value("image_width")
+        frame_dtype = np.uint16
+
+        image = np.zeros((height, width), dtype=frame_dtype)
+        buffer = [image]  # Single-frame list
+
+        self.start_acquisition(buffer, number_of_frames=1)
+
+        # 3. Fire the software trigger
+        if not self.fire_software_trigger():
+            self.logger.error("Software trigger failed.")
+            self.stop_acquisition()
+            return None
+
+        # 4. Wait for frame readiness
+        wait_param = DCAMWAIT_START()
+        wait_param.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY
+        wait_param.timeout = 1000  # ms
+
+        if not self.__result(dcamwait_start(self.__hdcamwait, byref(wait_param))):
+            self.logger.error("Timeout waiting for frame in snap().")
+            self.stop_acquisition()
+            return None
+
+        # 5. Optional: copy to a fresh array to decouple from DCAM buffer
+        result = np.copy(image)
+
+        # 6. Cleanup
+        self.stop_acquisition()
+
+        return result
 
 
 if __name__ == "__main__":

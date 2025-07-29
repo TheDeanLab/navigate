@@ -38,6 +38,7 @@ import inspect
 # Third Party Imports
 
 # Local Imports
+from navigate.model.utils.exceptions import UserVisibleException
 
 p = __name__.split(".")[1]
 
@@ -561,7 +562,7 @@ class SignalContainer(Container):
                 result, is_end = self.curr_node.run(*args, wait_response=wait_response)
             except Exception as e:
                 logger.debug(f"SignalContainer - {traceback.format_exc()}")
-                if self.warning_queue:
+                if self.warning_queue and isinstance(e, UserVisibleException):
                     self.warning_queue.put(
                         ("warning", f"Warning: review details below.\n{str(e)}")
                     )
@@ -1038,7 +1039,7 @@ def load_features(model, feature_list):
     for node in break_list:
         if node[0] == "child":
             node[1].child, node[2].child = create_node({"name": DummyFeature})
-    return SignalContainer(signal_root, signal_cleanup_list, model.event_queue), DataContainer(
+    return SignalContainer(signal_root, signal_cleanup_list, getattr(model, "event_queue", None)), DataContainer(
         data_root, data_cleanup_list
     )
 

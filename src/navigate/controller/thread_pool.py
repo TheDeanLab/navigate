@@ -468,29 +468,3 @@ class ThreadWaitlist:
             The traceback of the exception.
         """
         self.waitlistLock.release()
-
-
-class ThreadWithWarning(threading.Thread):
-    """A custom thread class that raises a warning to the user if any error is raised."""
-
-    def __init__(self, *args, **kwargs):
-        """Initialize the ThreadWithWarning."""
-        if "warning_queue" in kwargs:
-            self._warning_queue = kwargs["warning_queue"]
-            del kwargs["warning_queue"]
-        self._logger = logger
-        if "logger" in kwargs:
-            self._logger = kwargs["logger"]
-            del kwargs["logger"]
-        super().__init__(*args, **kwargs)
-
-    def run(self):
-        """Run the thread and handle warnings."""
-        try:
-            super().run()
-        except Exception as e:
-            self._logger.error(f"Error in thread {self.name}: {e}")
-            if hasattr(self, "_warning_queue"):
-                self._warning_queue.put(("warning", str(e)))
-            raise e
-

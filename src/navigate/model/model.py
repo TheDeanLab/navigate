@@ -70,11 +70,11 @@ from navigate.model.features.feature_related_functions import (
     SharedList,
     load_dynamic_parameter_functions,
 )
+from navigate.model.utils.threads import ThreadWithWarning
 from navigate.log_files.log_functions import log_setup
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.common_functions import load_module_from_file, VariableWithLock
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
-from navigate.tools.threads import ThreadWithWarning
 from navigate.model.microscope import Microscope
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel

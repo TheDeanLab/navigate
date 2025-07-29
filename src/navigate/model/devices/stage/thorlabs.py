@@ -341,14 +341,14 @@ class KST101Stage(StageBase):
 
         # Open the same serial number device if there are several devices connected to the
         # computer
-        available_serialnum = kst_controller.TLI_GetDeviceListExt()
-        if not list(filter(lambda s: str(s) == str(serialnum), available_serialnum)):
+        available_serial_numbers = kst_controller.TLI_GetDeviceListExt()
+        if not list(filter(lambda s: str(s) == str(serial_number), available_serial_numbers)):
             print(
-                f"** Please make sure Thorlabs stage with serial number {serialnum} "
+                f"** Please make sure Thorlabs stage with serial number {serial_number} "
                 f"is connected to the computer!"
             )
             raise RuntimeError
-        kst_controller.KST_Open(str(serialnum))
+        kst_controller.KST_Open(str(serial_number))
         return kst_controller
 
     def report_position(self):

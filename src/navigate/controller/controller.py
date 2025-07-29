@@ -68,7 +68,7 @@ from navigate.controller.sub_controllers import (
     # AdaptiveOpticsPopupController,
 )
 
-from navigate.controller.thread_pool import SynchronizedThreadPool
+from navigate.tools.threads import SynchronizedThreadPool
 
 # Local Model Imports
 from navigate.model.model import Model

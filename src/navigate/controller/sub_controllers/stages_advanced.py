@@ -37,7 +37,7 @@ from typing import Optional
 
 # Local Imports
 from navigate.config.config import update_config_dict, get_navigate_path
-from navigate.tools.file_functions import save_yaml_file
+from navigate.tools.file_functions import write_to_yaml
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 from navigate.controller.configuration_controller import ConfigurationController
 
@@ -123,10 +123,9 @@ class AdvancedStageParametersController:
         )
 
         # Save the updated configuration to a YAML file.
-        save_yaml_file(
-            file_directory=os.path.join(get_navigate_path(), "config"),
+        write_to_yaml(
             content_dict=self.parent_controller.configuration["configuration"],
-            filename="configuration.yaml",
+            filename=os.path.join(get_navigate_path(), "config", "configuration.yaml"),
         )
 
         # Update the configuration controller with the new configuration.

@@ -499,6 +499,8 @@ class SignalContainer(Container):
         cleanup_list : list of TreeNode, optional
             A list of nodes containing 'cleanup' functions to be executed when the
             container is closed. Default is an empty list.
+        warning_queue : Queue, optional
+            A queue for warning messages. Default is None.
         number_of_execution : int, optional
             The number of times the control sequence should be executed. Default is 1.
         """

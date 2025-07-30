@@ -32,4 +32,10 @@
 class UserVisibleException(Exception):
     """Base class for exceptions that should be visible to the user."""
     def __init__(self, message: str):
+        """Initialize the exception with a user-friendly message.
+        Parameters
+        ----------
+        message : str
+            A message that describes the exception in a user-friendly way.
+        """
         super().__init__(message)

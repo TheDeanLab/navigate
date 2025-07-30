@@ -75,9 +75,7 @@ def main():
         print(
             "WARNING: navigate was built to operate on a Windows platform. "
             "While much of the software will work for evaluation purposes, some "
-            "unanticipated behaviors may occur. For example, it is known that the "
-            "Tkinter-based GUI does not grid symmetrically, nor resize properly "
-            "on MacOS. Testing on Linux operating systems has not been performed."
+            "unanticipated behaviors may occur."
         )
 
     # Start the GUI, withdraw main screen, and show splash screen.

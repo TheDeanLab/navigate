@@ -43,7 +43,7 @@ from typing import Callable
 
 # Third Party Imports
 
-# Local Imports
+# Local View Imports
 from navigate.view.popups.ilastik_setting_popup import ilastik_setting_popup
 from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
 from navigate.view.popups.adaptiveoptics_popup import AdaptiveOpticsPopup
@@ -53,6 +53,9 @@ from navigate.view.popups.waveform_parameter_popup_window import (
 )
 from navigate.view.popups.feature_list_popup import FeatureListPopup
 from navigate.view.popups.camera_setting_popup import CameraSettingPopup
+from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
+
+# Local Controller Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.controller.sub_controllers import (
     AutofocusPopupController,
@@ -65,7 +68,10 @@ from navigate.controller.sub_controllers import (
     FeatureAdvancedSettingController,
     AdaptiveOpticsPopupController,
     UninstallPluginController,
+    AdvancedStageParametersController,
 )
+
+# Local Tools Imports
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.tools.decorators import FeatureList
 from navigate.tools.common_functions import load_module_from_file, combine_funcs
@@ -359,6 +365,14 @@ class MenuController(GUIController):
                     None,
                 ],
                 "add_separator_1": [None, None, None, None, None],
+                "Advanced Stage Parameters": [
+                    "standard",
+                    self.stage_limits_popup,
+                    None,
+                    None,
+                    None,
+                ],
+                "add_separator_2": [None, None, None, None, None],
             },
         }
         self.populate_menu(stage_control_menu)
@@ -1002,17 +1016,25 @@ class MenuController(GUIController):
     def toggle_stage_limits(self, *args) -> None:
         """Toggle stage limits."""
         if self.disable_stage_limits.get() == 1:
+            limits_enabled = False
             self.parent_controller.configuration["experiment"]["StageParameters"][
                 "limits"
-            ] = False
+            ] = limits_enabled
             logger.debug("Disabling stage limits")
-            self.parent_controller.execute("stage_limits", False)
+            self.parent_controller.execute("stage_limits", limits_enabled)
         else:
+            limits_enabled = True
             self.parent_controller.configuration["experiment"]["StageParameters"][
                 "limits"
-            ] = True
+            ] = limits_enabled
             logger.debug("Enabling stage limits")
-            self.parent_controller.execute("stage_limits", True)
+            self.parent_controller.execute("stage_limits", limits_enabled)
+
+        # If the stage limits popup is open, update it.
+        if hasattr(self.parent_controller, "stage_limits_popup_controller"):
+            self.parent_controller.stage_limits_popup_controller.view.enable_stage_limits_var.set(
+                limits_enabled
+            )
 
     @log_function_call
     def popup_autofocus_setting(self, *args) -> None:
@@ -1422,3 +1444,18 @@ class MenuController(GUIController):
                 )
 
         return func
+
+    def stage_limits_popup(self, *args, **kwargs) -> None:
+        """Pop up the Stage Limits setting window."""
+        if hasattr(self.parent_controller, "stage_limits_popup_controller"):
+            self.parent_controller.stage_limits_popup_controller.showup()
+            return
+        popup = AdvancedStageParametersPopup(self.view)
+        stage_limits_controller = AdvancedStageParametersController(
+            popup, self.parent_controller
+        )
+        setattr(
+            self.parent_controller,
+            "stage_limits_popup_controller",
+            stage_limits_controller,
+        )

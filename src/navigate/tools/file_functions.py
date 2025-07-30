@@ -38,6 +38,7 @@ import yaml
 from pathlib import Path
 import psutil
 from typing import Union
+from multiprocessing.managers import ListProxy, DictProxy
 
 # Third party imports
 
@@ -196,6 +197,45 @@ def save_yaml_file(
             f.write(file_content)
         return False
     return True
+
+def write_to_yaml(content_dict: dict, filename: str) -> None:
+    """write to a standard yaml file
+
+    Parameters
+    ----------
+    content_dict: dict
+        configuration dictionary
+    filename: str
+        yaml file name
+    """
+
+    def write_func(prefix, config_dict, f):
+        for k in config_dict.keys():
+            if type(config_dict[k])in [dict, DictProxy]:
+                f.write(f"{prefix}{k}:\n")
+                write_func(prefix + " " * 2, config_dict[k], f)
+            elif type(config_dict[k]) in [list, ListProxy]:
+                # it the list is a simple list, we can write it out
+                is_simple_list = True
+                for item in config_dict[k]:
+                    if type(item) in [dict, DictProxy, list, ListProxy]:
+                        is_simple_list = False
+                        break
+                if is_simple_list:
+                    f.write(f"{prefix}{k}: {config_dict[k]}\n")
+                    continue
+                list_prefix = " "
+                if k != "None":
+                    f.write(f"{prefix}{k}:\n")
+                    list_prefix = " " * 2
+                for list_item in config_dict[k]:
+                    f.write(f"{prefix}{list_prefix}-\n")
+                    write_func(prefix + list_prefix * 2, list_item, f)
+            elif k != "":
+                f.write(f"{prefix}{k}: {config_dict[k]}\n")
+
+    with open(filename, "w") as f:
+        write_func("", content_dict, f)
 
 
 def delete_folder(top: str) -> None:

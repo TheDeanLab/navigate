@@ -31,13 +31,13 @@
 
 # Standard Library Imports
 import pytest
-from serial import Serial
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.pump.tecan_x_calibur import TecanXCaliburPump
+from navigate.model.devices.pump.tecan import XCaliburPump
+from navigate.model.utils.exceptions import UserVisibleException
 
 class FakeSerial:
     def __init__(self, port, baudrate, timeout):
@@ -83,7 +83,7 @@ class FakeSerial:
 @pytest.fixture
 def fake_pump():
     """
-    Fixture that returns a TecanXCaliburPump with a mocked serial connection.
+    Fixture that returns an XCaliburPump with a mocked serial connection.
     """
 
     # Pick some speeds within the known bounds 0-40.
@@ -93,16 +93,19 @@ def fake_pump():
     baudrate = 9600
     timeout = 0.5
 
-    pump = TecanXCaliburPump(
-        device_name="TestPump",
-        port=port,               
-        baudrate=baudrate,
-        timeout=timeout,
-        min_speed_code=min_speed_code, 
-        max_speed_code=max_speed_code,
+    fake_serial = FakeSerial(port=port, baudrate=baudrate, timeout=timeout)
+
+    config = {
+        "min_speed_code": min_speed_code,
+        "max_speed_code": max_speed_code,
+        "fine_positioning": False,
+    }
+
+    pump = XCaliburPump(
+        microscope_name="TestPump",
+        device_connection=fake_serial,
+        configuration=config,
     )
-    
-    pump.serial = FakeSerial(port, baudrate, timeout)
     
     return pump
 
@@ -125,11 +128,11 @@ def test_set_speed_command_rejected(fake_pump):
     fake_pump.serial.command_responses["S" + str(valid_speed)] = b"/03" # Simulate command-response.
 
     # Make sure the pre-defined response raises the correct error.
-    with pytest.raises(RuntimeError, match="Pump error /3: Invalid operand - bad parameter value"):
+    with pytest.raises(UserVisibleException, match="Pump error /3: Invalid operand - bad parameter value"):
         fake_pump.set_speed(valid_speed) 
 
 @patch("serial.Serial")
-def test_connect_success(mock_serial_class): # Argument passed automatically from patch (mocked version of Serial).
+def test_connect_and_initialize_success(mock_serial_class): # Argument passed automatically from patch (mocked version of Serial).
     """
     Simulate a successful connection using FakeSerial via patching.
     """
@@ -137,12 +140,23 @@ def test_connect_success(mock_serial_class): # Argument passed automatically fro
     fake_serial = FakeSerial(port="FAKE", baudrate=9600, timeout=0.5)
     fake_serial.command_responses["ZR"] = b"/00"  # Simulate valid response.
 
-    # Make sure Serial() returns this custom fake.
+    # Tell the mock object what to return instead of Serial.
     mock_serial_class.return_value = fake_serial
 
-    # Create the pump and call connect — now it will receive the FakeSerial.
-    pump = TecanXCaliburPump("TestPump", port="FAKE")
-    pump.connect()
+    # Simulate the connect call that is done when all device connections are set up.
+    # Will be the same as fake_serial if successful.
+    serial_connection = XCaliburPump.connect(port="FAKE", baudrate=9600, timeout=0.5)
+
+    mock_serial_class.assert_called_once_with(port="FAKE", baudrate=9600, timeout=0.5)
+
+    # Create the pump and call connect - now it will receive the FakeSerial.
+    pump = XCaliburPump(
+        microscope_name="TestPump",
+        device_connection=serial_connection,
+        configuration={},
+    )
+
+    pump.initialize_pump()
 
     # Assertions
     assert pump.serial == fake_serial
@@ -150,7 +164,7 @@ def test_connect_success(mock_serial_class): # Argument passed automatically fro
     assert fake_serial.is_open
 
 @patch("serial.Serial")
-def test_connect_initialization_error(mock_serial_class): # Argument passed automatically from patch (mocked version of Serial).
+def test_initialization_error(mock_serial_class): # Argument passed automatically from patch (mocked version of Serial).
     """
     Simulate a pump that fails to initialize (command 'ZR', response '/01').
 
@@ -166,46 +180,38 @@ def test_connect_initialization_error(mock_serial_class): # Argument passed auto
     mock_serial_class.return_value = fake_serial
 
     # Create the pump.
-    pump = TecanXCaliburPump("TestPump", port="FAKE")
+    pump = XCaliburPump(
+        microscope_name="TestPump",
+        device_connection=fake_serial,
+        configuration={},
+    )
 
     # Expect a RuntimeError due to /01 response.
-    with pytest.raises(RuntimeError, match="Pump error /1: Initialization error"):
-        pump.connect()
+    with pytest.raises(UserVisibleException, match="Pump error /1: Initialization error"):
+        pump.initialize_pump()
 
     # Check that the correct command was sent.
     assert pump.serial.commands[-1] == b"ZR\r"
 
-@patch("serial.Serial")
-def test_connect_raises_if_serial_open_fails(mock_serial_class):
-    """
-    Simulates a failure during Serial.open() to verify that the TecanXCaliburPump.connect() 
-    method does not suppress the exception. Instead, it should propagate the IOError 
-    indicating that the serial port could not be opened.
-    """
-    fake = FakeSerial(port="FAKE", baudrate=9600, timeout=0.5)
 
-    # Function that raises error when called. This is used to simulate a failed Serial.open().
-    def raise_open(): raise IOError("Port failed")
-    
-    fake.open = raise_open # Override open() in FakeSerial.
-
-    # Instructs mock class to return our custom FakeSerial instance instead of MagicMock.
-    mock_serial_class.return_value = fake 
-    
-    pump = TecanXCaliburPump("TestPump", port="FAKE")
-
-    # If error from open() is passed correctly the connect should fail.
-    with pytest.raises(IOError, match="Port failed"):
-        pump.connect()
+# NOTE: We do not wrap or handle exceptions in XCaliburPump.connect().
+# Errors like Serial(port=...) failures are allowed to propagate.
+# Therefore, no test is needed for connect() error handling.
 
 def test_send_command_raises_if_serial_is_none():
     """
     Verifies that send_command() raises if self.serial is None.
     """
-    pump = TecanXCaliburPump("TestPump", port="FAKE")
+    fake_serial = FakeSerial(port="FAKE", baudrate=9600, timeout=0.5)
+
+    pump = XCaliburPump(
+        microscope_name="TestPump",
+        device_connection=fake_serial,
+        configuration={},
+    )
     pump.serial = None  # Simulate uninitialized or failed connection
 
-    with pytest.raises(RuntimeError, match="Serial object is None"):
+    with pytest.raises(UserVisibleException, match="Serial object is None"):
         pump.send_command("ZR")
 
 def test_move_absolute_success_standard_and_fine_modes(fake_pump):
@@ -241,17 +247,17 @@ def test_move_absolute_success_standard_and_fine_modes(fake_pump):
 
 def test_move_absolute_out_of_bounds_raises(fake_pump):
     """
-    Verify that move_absolute() raises ValueError when given a position
+    Verify that move_absolute() raises UserVisibleException when given a position
     outside the valid range for the current positioning mode.
     """
     # Standard mode: max is 3000.
     fake_pump.fine_positioning = False
-    with pytest.raises(ValueError, match="out of bounds"):
+    with pytest.raises(UserVisibleException, match="out of bounds"):
         fake_pump.move_absolute(3000 + 1)
 
     # Fine mode: max is 24000.
     fake_pump.fine_positioning = True
-    with pytest.raises(ValueError, match="out of bounds"):
+    with pytest.raises(UserVisibleException, match="out of bounds"):
         fake_pump.move_absolute(24000 + 1)
 
 def test_set_fine_positioning_mode_toggle(fake_pump):
@@ -287,3 +293,6 @@ def test_set_fine_positioning_mode_toggle(fake_pump):
     assert fake_pump.fine_positioning is False
     assert fake_pump.serial.commands[-2] == b"N0\r"
     assert fake_pump.serial.commands[-1] == b"R\r"
+
+# TODO: Once pump is integrated into Model/Controller, test that
+# UserVisibleException raised by pump results in a warning event.

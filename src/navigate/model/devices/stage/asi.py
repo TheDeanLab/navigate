@@ -119,15 +119,17 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             for ax, aa in feedback_alignment.items():
                 # Get current feedback alignment values
                 current_aa = self.asi_controller.get_feedback_alignment(ax)
-                logger.debug(f"ASI Stage - Current Feedback Alignment for "
-                             f"{ax} is {current_aa}")
+                logger.debug(
+                    f"ASI Stage - Current Feedback Alignment for "
+                    f"{ax} is {current_aa}"
+                )
 
                 # Set feedback alignment values only if they differ
                 if aa != current_aa:
                     self.asi_controller.set_feedback_alignment(ax, aa)
-                    logger.debug(f"ASI Stage - UPdated Feedback Alignment for "
-                                 f"{ax} to {aa}")
-
+                    logger.debug(
+                        f"ASI Stage - Updated Feedback Alignment for " f"{ax} to {aa}"
+                    )
 
             # Set finishing accuracy to half of the minimum pixel size we will use
             # pixel size is in microns, finishing accuracy is in mm
@@ -159,8 +161,10 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                     # Set finishing accuracy if it differs. Rotational
                     # finishing accuracy differs from translation stages.
                     if abs(accuracy - 0.003013) > 0.0001:
-                        logger.debug(f"ASI Stage - Setting Finishing Accuracy for "
-                                     f"{ax} to {finishing_accuracy}")
+                        logger.debug(
+                            f"ASI Stage - Setting Finishing Accuracy for "
+                            f"{ax} to {finishing_accuracy}"
+                        )
                         self.asi_controller.set_finishing_accuracy(ax, 0.003013)
                         updated_values = True
 
@@ -180,9 +184,13 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
                     # Set finishing accuracy if it differs
                     if abs(accuracy - finishing_accuracy) > 0.0001:
-                        logger.debug(f"ASI Stage - Setting Finishing Accuracy for "
-                                     f"{ax} to {finishing_accuracy}")
-                        self.asi_controller.set_finishing_accuracy(ax, finishing_accuracy)
+                        logger.debug(
+                            f"ASI Stage - Setting Finishing Accuracy for "
+                            f"{ax} to {finishing_accuracy}"
+                        )
+                        self.asi_controller.set_finishing_accuracy(
+                            ax, finishing_accuracy
+                        )
                         updated_values = True
 
                     # Get current error value
@@ -191,15 +199,19 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
                     # Set error if it differs
                     if abs(error - 1.2 * finishing_accuracy) > 0.0001:
-                        logger.debug(f"ASI Stage - Setting Error for {ax} to "
-                                     f"{1.2 * finishing_accuracy}")
+                        logger.debug(
+                            f"ASI Stage - Setting Error for {ax} to "
+                            f"{1.2 * finishing_accuracy}"
+                        )
                         self.asi_controller.set_error(ax, 1.2 * finishing_accuracy)
                         updated_values = True
 
                 if updated_values:
-                    print("The finishing accuracy or error settings for the ASI stage "
-                          "have been updated. You will need to power cycle "
-                          "the Tiger Controller for these changes to take effect.")
+                    print(
+                        "The finishing accuracy or error settings for the ASI stage "
+                        "have been updated. You will need to power cycle "
+                        "the Tiger Controller for these changes to take effect."
+                    )
 
             # Set backlash to 0 (less accurate)
             for ax in self.asi_axes.keys():
@@ -334,9 +346,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         # Move stage
         try:
             if axis == "theta":
-                self.asi_controller.move_axis(
-                    self.axes_mapping[axis], axis_abs * 1000
-                )
+                self.asi_controller.move_axis(self.axes_mapping[axis], axis_abs * 1000)
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
                 self.asi_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
@@ -635,7 +645,9 @@ class MS2000Stage(ASIStage):
         device_id : int
             Device ID for the stage, default to 0
         """
-        StageBase.__init__(self, microscope_name, device_connection, configuration, device_id)
+        StageBase.__init__(
+            self, microscope_name, device_connection, configuration, device_id
+        )
 
         # Default axes mapping
         axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
@@ -714,7 +726,10 @@ class MS2000Stage(ASIStage):
         asi_stage : object
             Successfully initialized stage object.
         """
-        from navigate.model.devices.APIs.asi.asi_MS2000_controller import MS2000Controller
+        from navigate.model.devices.APIs.asi.asi_MS2000_controller import (
+            MS2000Controller,
+        )
+
         # wait until ASI device is ready
         asi_stage = MS2000Controller(port, baudrate)
         asi_stage.connect_to_serial()
@@ -723,7 +738,6 @@ class MS2000Stage(ASIStage):
             raise Exception("ASI stage connection failed.")
 
         return asi_stage
-
 
     def move_axis_relative(self, axis, distance, wait_until_done=False):
         """Move the stage relative to the current position along the specified axis.
@@ -813,7 +827,8 @@ class MS2000Stage(ASIStage):
             return False
 
         return True
-    
+
+
 class MFC2000Stage(ASIStage):
     """Applied Scientific Instrumentation (ASI) Stage Class
 
@@ -867,6 +882,7 @@ class MFC2000Stage(ASIStage):
             Successfully initialized stage object.
         """
         from navigate.model.devices.APIs.asi.asi_MFC_controller import MFCTwoThousand
+
         # wait until ASI device is ready
         asi_stage = MFCTwoThousand(port, baudrate)
         asi_stage.connect_to_serial()
@@ -875,4 +891,3 @@ class MFC2000Stage(ASIStage):
             raise Exception("ASI stage connection failed.")
 
         return asi_stage
-   

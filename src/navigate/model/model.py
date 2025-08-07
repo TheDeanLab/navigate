@@ -1685,18 +1685,96 @@ class ASIModel(Model):
             Event queue for communication with the controller. Default is None.
 
         """
-        self.parent_model = super().__init__(args, configuration, event_queue)
+        super().__init__(args, configuration, event_queue)
 
         print("ASIModel initialized.")
 
-        # Hypothetically, if you want to use logic in a parent method, but add to it.
-        def mark_saving_flags(frame_ids: list):
-            # Add stuff before the call.
-            super().mark_saving_flags(frame_ids=frame_ids)
-            # Add stuff after the call.
+    # Hypothetically, if you want to use logic in a parent method, but add to it.
+    def mark_saving_flags(frame_ids: list):
+        # Add stuff before the call.
+        super().mark_saving_flags(frame_ids=frame_ids)
+        # Add stuff after the call.
 
-        def get_feature_list():
-            # print("Overrode the original method. WIll only print now.")
-            pass
+    def get_feature_list():
+        # print("Overrode the original method. WIll only print now.")
+        pass
 
-        # If you add nothing else, automatically uses the parent method.
+    def run_acquisition(self) -> None:
+        """Run acquisition along with a feature list one time.
+
+        Returns
+        -------
+        None
+            Completes after acquisition pass ends.
+        """
+        if not hasattr(self, "signal_container"):
+            self.snap_zstack()
+            return
+
+        while (
+            not self.signal_container.end_flag
+            and not self.stop_send_signal
+            and not self.stop_acquisition
+        ):
+            self.snap_zstack()
+            if not hasattr(self, "signal_container"):
+                return
+            if self.signal_container.is_closed:
+                self.logger.info("Signal container is closed.")
+                self.stop_acquisition = True
+                return
+        if self.imaging_mode != "live":
+            self.stop_acquisition = True
+    # If you add nothing else, automatically uses the parent method.
+
+    def snap_zstack(self) -> None:
+        """Acquire a z-stack after updating the waveforms.
+        Can be used in acquisitions where changing waveforms are required,  
+        but there is additional overhead due to the need to write the
+        waveforms into the Tiger Controller.
+
+        Returns
+        -------
+        None
+            Completes after the image is captured and buffered.
+        """
+        if hasattr(self, "signal_container"):
+            self.signal_container.run()
+
+        # Stash current position, channel, timepoint. Do this here, because signal
+        # container functions can inject changes to the stage. NOTE: This line is
+        # wildly expensive when get_stage_position() does not cache results.
+        stage_pos = self.get_stage_position()
+        self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
+        self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
+        self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
+        self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
+        self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
+
+        # Run the acquisition
+        try:
+            self.active_microscope.daq.run_acquisition()
+            print("ASIModel: Acquisition started.")
+        except:  # noqa
+            self.active_microscope.daq.stop_acquisition()
+            if self.active_microscope.current_channel == 0:
+                self.stop_acquisition = True
+                self.event_queue.put(
+                    (
+                        "warning",
+                        "An error happened. Please read the log files for details!",
+                    )
+                )
+                return
+            self.active_microscope.daq.prepare_acquisition(
+                f"channel_{self.active_microscope.current_channel}"
+            )
+            self.active_microscope.daq.run_acquisition()
+        #finally:
+            
+
+        if hasattr(self, "signal_container"):
+            self.signal_container.run(wait_response=True)
+
+        self.frame_id = (self.frame_id + 1) % self.number_of_frames
+

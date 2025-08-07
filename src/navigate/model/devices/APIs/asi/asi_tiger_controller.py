@@ -1099,6 +1099,7 @@ class TigerController:
         delays: list[float],
         camera_delay: float,
         remote_focus_delay: float,
+        exposure_time: float,
         sweep_time: float,
         analog_outputs: dict,
     ) -> None:
@@ -1139,7 +1140,8 @@ class TigerController:
         else:
             galvo2_delay = 0
         remote_focus_axis = analog_outputs["remote_focus"]
-
+        print(f"Exposure time: {exposure_time}")
+        exposure_time = int(exposure_time*4)
         sweep_time = (
             int(sweep_time * 4) - 2
         )  # Hardcoded -2 to account for delays within controller
@@ -1191,7 +1193,7 @@ class TigerController:
             "6 ccb x = 4 y = 71",
             # Cell 6, a one-shot triggered by the rising edge of Cell 5
             "6 m e = 6",
-            "6 cca y = 8 z = 10",
+            f"6 cca y = 8 z = {exposure_time}",
             "6 ccb x = 5 y = 192",
             # Cell 7, delay cell that waits for the sweep time until retriggering.
             # Used for the main loop. Timing is dependent on the sweep_time variable
@@ -1232,7 +1234,7 @@ class TigerController:
                 # Sets the output of Cell 2 as the input to the TTL corresponding to
                 # the first Galvo pair
                 f"6 m e = {ttls[galvo1_axis]}",
-                "6 cca y = 1 z = 2",
+                "6 cca y = 2 z = 2",
             ]
         # Multiple Galvo case, has the first set of commands and the commands for the
         # second Galvo
@@ -1257,3 +1259,12 @@ class TigerController:
         for command in galvo_commands:
             self.send_command(f"{command}\r")
             self.read_response()
+
+    def setup_laser(self, axis : str) -> None:
+        
+        axis = int(axis) + 32
+
+        self.send_command(f"m e = {axis}\r")
+        self.read_response()
+        self.send_command("cca z = 6")
+        self.read_response()

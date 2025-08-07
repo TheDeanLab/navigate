@@ -71,7 +71,7 @@ from navigate.controller.sub_controllers import (
 from navigate.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
-from navigate.model.model import Model
+from navigate.model.model import Model, ASIModel
 from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
@@ -223,6 +223,9 @@ class Controller:
         #: ObjectInSubprocess: Model object in MVC architecture.
         if self.use_asi_model():
             print("Using ASI model.")
+            self.model = ObjectInSubprocess(
+                ASIModel, args, self.configuration, event_queue=self.event_queue
+            )
         else:
             self.model = ObjectInSubprocess(
                 Model, args, self.configuration, event_queue=self.event_queue
@@ -372,13 +375,13 @@ class Controller:
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
-        daq_type = self.configuration["configuration"][microscope_name]["daq"][
+        daq_type = self.configuration["configuration"]["microscopes"][microscope_name]["daq"][
             "hardware"
-        ].get("type", "ni")
+        ].get("type", "NI")
 
-        if daq_type == "ni":
+        if daq_type in ("ni", "NI"):
             return False
-        elif daq_type == "asi":
+        elif daq_type in ("asi", "ASI"):
             return True
         else:
             raise ValueError(f"Unknown daq type: {daq_type}")

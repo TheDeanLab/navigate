@@ -129,7 +129,7 @@ class ASIDaq(DAQBase, SerialDevice):
         self.analog_outputs["remote_focus"] = remote_focus_channel
 
         # sets up initial PLC configuration with default delay (ms), camera delay, rfvc delay, sweep time (ms), and analog outputs dict
-        self.daq.setup_control_loop([200], 0, 0, 120, self.analog_outputs)
+        self.daq.setup_control_loop([200], 0, 0, 100, 120, self.analog_outputs)
 
     @classmethod
     def connect(cls, port, baudrate=115200, timeout=0.25):
@@ -169,8 +169,8 @@ class ASIDaq(DAQBase, SerialDevice):
             Channel key for current channel.
         """
         # Get appropriate sweep_time for the current channel
+        exposure_time = self.exposure_times[channel_key] * 1000
         sweep_time = self.sweep_times[channel_key]
-
         # loop through galvo phases to calculate time delays
         # delays[i] corresponds to the time between the ith galvo trigger and the master trigger
         n = len(self.galvos)
@@ -217,7 +217,7 @@ class ASIDaq(DAQBase, SerialDevice):
         )
         # sets up control loop with all parameters (all times in ms)
         self.daq.setup_control_loop(
-            delays, self.camera_delay, rfvc_delay, sweep_time, self.analog_outputs
+            delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs
         )
 
         self.current_channel_key = channel_key

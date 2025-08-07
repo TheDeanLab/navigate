@@ -159,11 +159,15 @@ class ASILaser(LaserBase, SerialDevice):
         laser_intensity : float
             The laser intensity.
         """
-        self.output_voltage = (int(laser_intensity) / 100) * self.laser_max_ao * 1000
-        if self.output_voltage > (self.laser_max_ao * 1000):
-            self.output_voltage = self.laser_max_ao * 1000
-        self.laser.move_axis(self.analog_axis, self.output_voltage)
-        self._current_intensity = laser_intensity
+        if self.modulation_type in ("digital", "mixed"):
+            self.laser.setup_laser(self.digital_axis) 
+
+        if self.modulation_type in ("analog", "mixed"):
+            self.output_voltage = (int(laser_intensity) / 100) * self.laser_max_ao * 1000
+            if self.output_voltage > (self.laser_max_ao * 1000):
+                self.output_voltage = self.laser_max_ao * 1000
+            self.laser.move_axis(self.analog_axis, self.output_voltage)
+            self._current_intensity = laser_intensity
 
     def turn_on(self):
         """Turns on the laser."""

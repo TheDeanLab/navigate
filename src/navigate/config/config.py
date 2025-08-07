@@ -208,8 +208,7 @@ def update_config_dict(
     config_name : str
         Name of dictionary to replace
     new_config : dict or str
-        Dictionary values or
-        yaml file name
+        Dictionary values or yaml file name
 
     Returns
     -------
@@ -751,16 +750,16 @@ def verify_waveform_constants(manager, configuration):
                         # "delay",
                     ]:
                         if k not in waveform_dict[microscope_name][zoom][laser].keys():
-                            waveform_dict[microscope_name][zoom][laser][
-                                k
-                            ] = config_dict["remote_focus"].get(k, "0")
+                            waveform_dict[microscope_name][zoom][laser][k] = (
+                                config_dict["remote_focus"].get(k, "0")
+                            )
                         else:
                             try:
                                 float(waveform_dict[microscope_name][zoom][laser][k])
                             except ValueError:
-                                waveform_dict[microscope_name][zoom][laser][
-                                    k
-                                ] = config_dict["remote_focus"].get(k, "0")
+                                waveform_dict[microscope_name][zoom][laser][k] = (
+                                    config_dict["remote_focus"].get(k, "0")
+                                )
 
             # delete non-exist lasers
             for k in waveform_dict[microscope_name][zoom].keys():
@@ -1004,24 +1003,16 @@ def verify_configuration(manager, configuration):
                 laser_hardware_config = {"type": "Synthetic"}
             laser_hardware_config["wavelength"] = laser_config["wavelength"]
 
-            update_config_dict(
-                manager,
-                laser_config,
-                "hardware",
-                laser_hardware_config
-            )
+            update_config_dict(manager, laser_config, "hardware", laser_hardware_config)
 
         # zoom
         zoom_config = device_config[microscope_name]["zoom"]
         if "hardware" not in zoom_config:
             update_config_dict(
-                manager,
-                zoom_config,
-                "hardware",
-                {"type": "Synthetic", "servo_id": 0}
+                manager, zoom_config, "hardware", {"type": "Synthetic", "servo_id": 0}
             )
         elif "type" not in zoom_config["hardware"]:
-                zoom_config["hardware"]["type"] = "Synthetic"
+            zoom_config["hardware"]["type"] = "Synthetic"
 
         filter_wheel_config = device_config[microscope_name]["filter_wheel"]
         if type(filter_wheel_config) == DictProxy:
@@ -1033,7 +1024,6 @@ def verify_configuration(manager, configuration):
                 "filter_wheel",
                 [filter_wheel_config],
             )
-
 
         temp_config = device_config[microscope_name]["filter_wheel"]
         for _, filter_wheel_config in enumerate(temp_config):
@@ -1091,7 +1081,7 @@ def verify_positions_config(positions):
         return []
 
     position_num = len(positions)
-    for i in range(position_num - 1, start_index-1, -1):
+    for i in range(position_num - 1, start_index - 1, -1):
         position = positions[i]
         try:
             for j in range(len(position)):
@@ -1100,6 +1090,7 @@ def verify_positions_config(positions):
             del positions[i]
 
     return positions
+
 
 def support_deceased_configuration(configuration):
     """Support old version of configurations.
@@ -1120,7 +1111,9 @@ def support_deceased_configuration(configuration):
     for microscope_name in device_config.keys():
         microscope_config = device_config[microscope_name]
         if "remote_focus_device" in microscope_config.keys():
-            microscope_config["remote_focus"] = microscope_config.pop("remote_focus_device")
+            microscope_config["remote_focus"] = microscope_config.pop(
+                "remote_focus_device"
+            )
             is_updated = True
         if "lasers" in microscope_config.keys():
             microscope_config["laser"] = microscope_config.pop("lasers")
@@ -1136,4 +1129,3 @@ def support_deceased_configuration(configuration):
                 if stage["type"] in deceased_device_type_names:
                     stage["type"] = deceased_device_type_names[stage["type"]]
                     is_updated = True
-

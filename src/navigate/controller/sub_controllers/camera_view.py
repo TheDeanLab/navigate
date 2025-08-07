@@ -152,7 +152,10 @@ class BaseViewController(GUIController, ABaseViewController):
         self.canvas_width_scale = 4
 
         #: str: The colormap for the image.
-        self.colormap = plt.get_cmap("gist_gray")
+        # self.colormap = plt.get_cmap("gist_gray")
+
+        #: np.ndarray: Precomputed lookup table for the image colormap.
+        self.colormap = self._generate_lut("gist_gray")
 
         #: str: The mode of the camera view controller.
         self.mode = "stop"
@@ -372,7 +375,8 @@ class BaseViewController(GUIController, ABaseViewController):
         else:
             cmap_name = target.color.get()
             self._snr_selected = True if cmap_name == "RdBu_r" else False
-            self.colormap = plt.get_cmap(cmap_name)
+            # self.colormap = plt.get_cmap(cmap_name)
+            self.colormap = self._generate_lut(cmap_name)
             self.process_image()
             logger.debug(f"Updating the LUT, {cmap_name}")
 
@@ -441,28 +445,43 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         pass
 
-    def apply_lut(self, image: np.ndarray) -> np.ndarray:
-        """Applies a LUT to an image.
+    @staticmethod
+    def _generate_lut(cmap_name: str) -> np.ndarray:
+        """Create an OpenCV-compatible color lookup table.
 
-        self.color_values = ['gray', 'gradient', 'rainbow']
+        Parameters
+        ----------
+        cmap_name : str
+            Name of the Matplotlib colormap.
+
+        Returns
+        -------
+        numpy.ndarray
+            Lookup table shaped for ``cv2.applyColorMap`` in BGR order.
+        """
+        cmap = plt.get_cmap(cmap_name)
+        lut = (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
+
+        # Convert RGB to BGR for OpenCV
+        lut = lut[:, ::-1]
+        return lut.reshape(256, 1, 3)
+
+    def apply_lut(self, image: np.ndarray) -> np.ndarray:
+        """Apply a LUT to an image.
 
         Parameters
         ----------
         image : np.ndarray
-            Image data.
+            Image data normalized to [0, 1].
 
         Returns
         -------
         image : np.ndarray
-            Image data with LUT applied.
+            RGB image data with LUT applied.
         """
-        image = self.colormap(image)
-
-        # Convert RGBA to RGB Image.
-        image = image[:, :, :3]
-
-        # Scale back to an 8-bit image.
-        image = image * (2**self.bit_depth - 1)
+        image_uint8 = (image * 255).astype(np.uint8)
+        image = cv2.applyColorMap(image_uint8, self.colormap)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return image
 
     def identify_channel_index_and_slice(self) -> tuple:

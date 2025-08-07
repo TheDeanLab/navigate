@@ -265,7 +265,7 @@ class TigerController:
         move time.
 
         Desirable values for the autozero command are between 90 and 164. We attempt
-        to autozero it 3x. 
+        to autozero it 3x.
 
         Parameters
         ----------
@@ -277,7 +277,6 @@ class TigerController:
         self.send_command(f"AA {axis}={aa}\r")
         self.read_response()
 
-        # We only call AZ once. Recommended to check the return value.
         for i in range(3):
             self.send_command(f"AZ {axis}\r")
 

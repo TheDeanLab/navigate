@@ -202,9 +202,6 @@ class BaseViewController(GUIController, ABaseViewController):
         #: event: The resize event ID.
         self.resize_event_id = None
 
-        #: np.ndarray: The saturated pixels in the image.
-        self.saturated_pixels = None
-
         #: list: The selected channels being acquired.
         self.selected_channels = None
 
@@ -447,7 +444,6 @@ class BaseViewController(GUIController, ABaseViewController):
     def apply_lut(self, image: np.ndarray) -> np.ndarray:
         """Applies a LUT to an image.
 
-        Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
 
         Parameters
@@ -464,18 +460,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         # Convert RGBA to RGB Image.
         image = image[:, :, :3]
-
-        # Specify the saturated values in the red channel
-        if np.any(self.saturated_pixels):
-            # TODO: Evaluate if this is functional.
-            # Saturated pixels is an array of True or
-            # False statements same size as the image.
-
-            # Pull out the red image from the RGBA
-            # Set saturated pixels to 1, put back into array.
-            red_image = image[:, :, 2]
-            red_image[self.saturated_pixels] = 1
-            image[:, :, 2] = red_image
 
         # Scale back to an 8-bit image.
         image = image * (2**self.bit_depth - 1)
@@ -780,23 +764,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         return zoom_image
 
-    def detect_saturation(self, image: np.ndarray) -> None:
-        """Look for any pixels at the maximum intensity allowable for the camera.
-
-        Note
-        ----
-        The camera is set to 16-bit depth, so the maximum intensity is 2^16 - 1. If
-        another camera is used, this function should be updated to reflect the maximum
-        intensity value.
-
-        Parameters
-        ----------
-        image : np.ndarray
-            Image data.
-        """
-        saturation_value = 2**16 - 1
-        self.saturated_pixels = image[image > saturation_value]
-
     def down_sample_image(self, image: np.ndarray) -> np.ndarray:
         """Down-sample the data for image display according to widget size.
 
@@ -935,14 +902,13 @@ class BaseViewController(GUIController, ABaseViewController):
     def process_image(self) -> None:
         """Process the image to be displayed.
 
-        Applies digital zoom, detects saturation, down-samples the image, scales the
+        Applies digital zoom, down-samples the image, scales the
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
         if self.image is None:
             return
         image = self.digital_zoom()
-        self.detect_saturation(image)
         image = self.down_sample_image(image)
         image = self.transpose_image(image)
         image = self.scale_image_intensity(image)
@@ -975,9 +941,7 @@ class BaseViewController(GUIController, ABaseViewController):
             top_height = self.parent_controller.view.top_frame.winfo_height()
             w_width = self.parent_controller.view.winfo_width()
             w_height = self.parent_controller.view.winfo_height()
-            width = max(
-                w_width - left_width - 16, 560 + self.view.lut.winfo_width()
-            )
+            width = max(w_width - left_width - 16, 560 + self.view.lut.winfo_width())
             height = max(w_height - top_height - 50, 670)
         else:
             width = event.width
@@ -1012,7 +976,7 @@ class BaseViewController(GUIController, ABaseViewController):
                     widget_height += widget.winfo_height() + 5
                     if widget.winfo_height() < 30:
                         widget_height += 30
-                    
+
         self.canvas_height = (
             height - widget_height - (50 if self.view.is_docked else -5)
         )

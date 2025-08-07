@@ -780,7 +780,9 @@ class BaseViewController(GUIController, ABaseViewController):
             Down-sampled image data.
         """
         sx, sy = self.canvas_width, self.canvas_height
-        down_sampled_image = cv2.resize(image, (sx, sy))
+        down_sampled_image = cv2.resize(
+            src=image, dsize=(sx, sy), interpolation=cv2.INTER_NEAREST
+        )
         return down_sampled_image
 
     def scale_image_intensity(self, image: np.ndarray) -> np.ndarray:
@@ -796,7 +798,7 @@ class BaseViewController(GUIController, ABaseViewController):
         image : np.ndarray
             Scaled image data.
         """
-        if self.autoscale is True:
+        if self.autoscale:
             self.max_counts = np.max(image)
             self.min_counts = np.min(image)
         else:

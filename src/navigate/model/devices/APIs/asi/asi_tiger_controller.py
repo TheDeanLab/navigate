@@ -264,6 +264,9 @@ class TigerController:
         decreased by 1 or 2 as described at the page on tuning stages to minimize
         move time.
 
+        Desirable values for the autozero command are between 90 and 164. We attempt
+        to autozero it 3x. 
+
         Parameters
         ----------
         axis : str
@@ -275,15 +278,8 @@ class TigerController:
         self.read_response()
 
         # We only call AZ once. Recommended to check the return value.
-        for i in range(5):
+        for i in range(3):
             self.send_command(f"AZ {axis}\r")
-            response = self.read_response()
-            # Acceptable values may fall between 90 and 164.
-            # If the value is not in this range, we will try again.
-            if 90 <= float(response.split("=")[1]) <= 164:
-                return
-        # If we reach here, we have tried 5 times and still not in range.
-        print("Zeroing stage failed to get within acceptable range after 5 attempts.")
 
     def get_feedback_alignment(self, axis: str) -> float:
         """Get the stage feedback alignment.

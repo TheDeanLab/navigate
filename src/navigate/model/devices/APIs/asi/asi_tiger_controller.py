@@ -273,8 +273,17 @@ class TigerController:
         """
         self.send_command(f"AA {axis}={aa}\r")
         self.read_response()
-        self.send_command(f"AZ {axis}\r")
-        self.read_response()
+
+        # We only call AZ once. Recommended to check the return value.
+        for i in range(5):
+            self.send_command(f"AZ {axis}\r")
+            response = self.read_response()
+            # Acceptable values may fall between 90 and 164.
+            # If the value is not in this range, we will try again.
+            if 90 <= float(response.split("=")[1]) <= 164:
+                return
+        # If we reach here, we have tried 5 times and still not in range.
+        print("Zeroing stage failed to get within acceptable range after 5 attempts.")
 
     def get_feedback_alignment(self, axis: str) -> float:
         """Get the stage feedback alignment.
@@ -1123,7 +1132,7 @@ class TigerController:
         self.send_command(f"6 CCA Z=0\r")
         self.read_response()
 
-    def logic_cell_on(self, axis : str):
+    def logic_cell_on(self, axis: str):
         """Turn on internal logic cell
 
         Parameters
@@ -1131,12 +1140,12 @@ class TigerController:
         axis : str
             The axis of the internal logic cell
         """
-        self.send_command(f'6 M E = {axis}\r')
+        self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f'6 CCA Z=1\r')
+        self.send_command(f"6 CCA Z=1\r")
         self.read_response()
 
-    def logic_cell_off(self, axis :str):
+    def logic_cell_off(self, axis: str):
         """Turn off internal logic cell
 
         Parameters
@@ -1144,13 +1153,18 @@ class TigerController:
         axis : str
             The axis of the internal logic cell
         """
-        self.send_command(f'6 M E = {axis}\r')
+        self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f'6 CCA Z=0\r')
+        self.send_command(f"6 CCA Z=0\r")
         self.read_response()
 
     def single_axis_waveform(
-        self, axis: str, waveform: int = 0, amplitude: int = 1000, offset: int = 500, period: int = 10 
+        self,
+        axis: str,
+        waveform: int = 0,
+        amplitude: int = 1000,
+        offset: int = 500,
+        period: int = 10,
     ) -> None:
         """Programs the analog waveforms using SAA, SAO, SAP, and SAF
         Default waveform is a sawtooth waveform with an amplitude of 1V, an offset of 0.5V and period of 10 ms
@@ -1170,10 +1184,10 @@ class TigerController:
         """
         print(f"Period (ms): {period}")
         # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
-        if (waveform % 128 == 3):
-            offset = .5*(offset+amplitude)
+        if waveform % 128 == 3:
+            offset = 0.5 * (offset + amplitude)
 
-        amplitude = amplitude*2
+        amplitude = amplitude * 2
 
         print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.

@@ -179,8 +179,6 @@ class StageController(GUIController):
             command=self.parent_controller.channels_tab_controller.update_end_position
         )
 
-
-
     def stage_key_press(self, event: tk.Event) -> None:
         """The stage key press.
 
@@ -210,6 +208,7 @@ class StageController(GUIController):
         """Initialize the Stage limits of steps and positions."""
         config = self.parent_controller.configuration_controller
         self.stage_axes = config.stage_axes
+
         # disable stages not available for the current microscope
         for axis in set(config.all_stage_axes) - set(self.stage_axes):
             stage_frame = getattr(self.view, f"{axis}_frame")
@@ -310,7 +309,7 @@ class StageController(GUIController):
                 elif axis == "y":
                     self.view.xy_frame.toggle_button_states(flag, ["y"])
                     self.view.position_frame.inputs["y"].widget.config(state=state)
-                
+
                 else:
                     stage_frame = getattr(self.view, f"{axis}_frame")
                     stage_frame.toggle_button_states(flag, [axis])
@@ -621,6 +620,7 @@ class StageController(GUIController):
         handler : Callable[[], None]
             Function to update step size in experiment.yml.
         """
+
         def func(*args):
             """Callback functions bind to step size variables."""
             microscope_name = self.parent_controller.configuration["experiment"][
@@ -659,15 +659,19 @@ class StageController(GUIController):
                 description = f"\N{GREEK SMALL LETTER MU}m in {axis.upper()}."
 
             for i in range(len(btn_prefix)):
-                exec(f"self.view.{frame_prefix}_frame.{btn_prefix[i]}_{btn_suffix}.hover."
-                     f"setdescription('Move {step_multiple[i] * step_value} {description}')")
+                exec(
+                    f"self.view.{frame_prefix}_frame.{btn_prefix[i]}_{btn_suffix}.hover."
+                    f"setdescription('Move {step_multiple[i] * step_value} {description}')"
+                )
 
         # Position Frame
         for axis in self.stage_axes:
             if axis == "theta":
                 description = "Theta stage position in degrees."
             else:
-                description = f"{axis.upper()} stage position in \N{GREEK SMALL LETTER MU}m."
+                description = (
+                    f"{axis.upper()} stage position in \N{GREEK SMALL LETTER MU}m."
+                )
             self.view.position_frame.inputs[axis].widget.hover.setdescription(
                 description
             )

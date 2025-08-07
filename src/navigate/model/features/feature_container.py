@@ -38,6 +38,7 @@ import inspect
 # Third Party Imports
 
 # Local Imports
+from navigate.model.utils.exceptions import UserVisibleException
 
 p = __name__.split(".")[1]
 
@@ -488,7 +489,7 @@ class SignalContainer(Container):
       track of the remaining executions.
     """
 
-    def __init__(self, root=None, cleanup_list=[], number_of_execution=1):
+    def __init__(self, root=None, cleanup_list=[], warning_queue=None, number_of_execution=1):
         """Initialize the SignalContainer object.
 
         Parameters:
@@ -498,6 +499,8 @@ class SignalContainer(Container):
         cleanup_list : list of TreeNode, optional
             A list of nodes containing 'cleanup' functions to be executed when the
             container is closed. Default is an empty list.
+        warning_queue : Queue, optional
+            A queue for warning messages. Default is None.
         number_of_execution : int, optional
             The number of times the control sequence should be executed. Default is 1.
         """
@@ -508,6 +511,9 @@ class SignalContainer(Container):
 
         #: int: The remaining number of executions of the control sequence.
         self.remaining_number_of_execution = number_of_execution
+
+        #: Queue: A queue for warning messages related to the control sequence.
+        self.warning_queue = warning_queue
 
     def reset(self):
         """Reset the container's state, including the current node and end flag.
@@ -556,8 +562,12 @@ class SignalContainer(Container):
         while self.curr_node:
             try:
                 result, is_end = self.curr_node.run(*args, wait_response=wait_response)
-            except Exception:
+            except Exception as e:
                 logger.debug(f"SignalContainer - {traceback.format_exc()}")
+                if self.warning_queue and isinstance(e, UserVisibleException):
+                    self.warning_queue.put(
+                        ("warning", f"Warning: review details below.\n{str(e)}")
+                    )
                 self.end_flag = True
                 self.cleanup()
                 return
@@ -1031,7 +1041,7 @@ def load_features(model, feature_list):
     for node in break_list:
         if node[0] == "child":
             node[1].child, node[2].child = create_node({"name": DummyFeature})
-    return SignalContainer(signal_root, signal_cleanup_list), DataContainer(
+    return SignalContainer(signal_root, signal_cleanup_list, getattr(model, "event_queue", None)), DataContainer(
         data_root, data_cleanup_list
     )
 

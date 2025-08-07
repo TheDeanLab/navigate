@@ -498,7 +498,9 @@ class StackAcquisitionFrame(ttk.Labelframe):
             input_args={"width": 8},
         )
         self.inputs["z_device"].state(["disabled", "readonly"])
-        self.inputs["z_device"].grid(row=4, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5)
+        self.inputs["z_device"].grid(
+            row=4, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+        )
 
         self.inputs["f_device"] = LabelInput(
             parent=self.stack_frame,
@@ -508,7 +510,9 @@ class StackAcquisitionFrame(ttk.Labelframe):
             input_args={"width": 8},
         )
         self.inputs["f_device"].state(["disabled", "readonly"])
-        self.inputs["f_device"].grid(row=5, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5)
+        self.inputs["f_device"].grid(
+            row=5, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+        )
 
         # Laser Cycling Settings
         self.inputs["cycling"] = LabelInput(
@@ -519,11 +523,21 @@ class StackAcquisitionFrame(ttk.Labelframe):
             input_args={"width": 8},
         )
         self.inputs["cycling"].state(["readonly"])
-        self.inputs["cycling"].grid(row=6, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5)
+        self.inputs["cycling"].grid(
+            row=6, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+        )
 
         self.cubic_frame = ttk.Frame(self.stack_frame)
-        self.cubic_frame.grid(row=3, rowspan=3, column=2, columnspan=2, sticky=tk.NE, padx=(5, 15), pady=(5, 0))
-        
+        self.cubic_frame.grid(
+            row=3,
+            rowspan=3,
+            column=2,
+            columnspan=2,
+            sticky=tk.NE,
+            padx=(5, 15),
+            pady=(5, 0),
+        )
+
         image_directory = Path(__file__).resolve().parent
 
         self.image = tk.PhotoImage(
@@ -532,7 +546,15 @@ class StackAcquisitionFrame(ttk.Labelframe):
 
         # Use ttk.Label
         self.cubic_image_label = ttk.Label(self.cubic_frame, image=self.image)
-        self.cubic_image_label.grid(row=0, rowspan=2, column=0, columnspan=2, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0))
+        self.cubic_image_label.grid(
+            row=0,
+            rowspan=2,
+            column=0,
+            columnspan=2,
+            sticky=tk.NSEW,
+            padx=(5, 0),
+            pady=(5, 0),
+        )
 
         self.inputs["top"] = LabelInput(
             parent=self.cubic_frame,
@@ -562,7 +584,9 @@ class StackAcquisitionFrame(ttk.Labelframe):
             input_args={"width": 8},
         )
         self.inputs["z_offset"].widget.configure(state="disabled")
-        self.inputs["z_offset"].grid(row=0, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5)
+        self.inputs["z_offset"].grid(
+            row=0, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+        )
 
         uniform_grid(self)
 
@@ -579,10 +603,10 @@ class StackAcquisitionFrame(ttk.Labelframe):
             "The relative offset between the Z stages, if applicable."
         )
         self.buttons["set_end"].hover.setdescription(
-            "Sets the Z-stack end position " "for the F and Z Axes."
+            "Sets the Z-stack end position for the F and Z Axes."
         )
         self.buttons["set_start"].hover.setdescription(
-            "Sets the Z-stack start position " "for the F and Z Axes."
+            "Sets the Z-stack start position for the F and Z Axes."
         )
         self.inputs["z_device"].widget.hover.setdescription(
             "The device that controls the Z-stack."
@@ -630,7 +654,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
 
         if len(axes) <= 2:
             return
-        
+
         self.devices_dict = devices
 
         # Create the additional stack widgets here
@@ -649,23 +673,35 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 command=self.update_setting_widgets(axis),
                 variable=self.additional_stack_setting_variables[f"stack_{axis}"],
             )
-            self.inputs[f"stack_{axis}"].grid(row=1, column=axes.index(axis) + 1, sticky=tk.NW, padx=(5, 10), pady=(5, 0))
+            self.inputs[f"stack_{axis}"].grid(
+                row=1,
+                column=axes.index(axis) + 1,
+                sticky=tk.NW,
+                padx=(5, 10),
+                pady=(5, 0),
+            )
 
         self.additional_stack_setting_frame = ttk.Frame(self.additional_stack_frame)
-        self.additional_stack_setting_frame.grid(row=2, column=0, columnspan=10, sticky=tk.NSEW, padx=(5, 30), pady=(5, 0))
+        self.additional_stack_setting_frame.grid(
+            row=2, column=0, columnspan=10, sticky=tk.NSEW, padx=(5, 30), pady=(5, 0)
+        )
         self.additional_stack_setting_labels = {}
 
-        for i, label_text in enumerate(["Axis", "Device", "Offset (" + "\N{GREEK SMALL LETTER MU}" + "m)"]): #, "Step", "Slice Num"]):
+        for i, label_text in enumerate(
+            ["Axis", "Device", "Offset (" + "\N{GREEK SMALL LETTER MU}" + "m)"]
+        ):  # , "Step", "Slice Num"]):
             label = ttk.Label(self.additional_stack_setting_frame, text=label_text)
             label.grid(row=0, column=i, sticky=tk.NSEW, padx=10, pady=2)
         for i, axis in enumerate(axes):
             label = ttk.Label(self.additional_stack_setting_frame, text=axis.upper())
-            label.grid(row=i+1, column=0, sticky=tk.NSEW, padx=10, pady=2)
+            label.grid(row=i + 1, column=0, sticky=tk.NSEW, padx=10, pady=2)
             label.grid_remove()
             self.additional_stack_setting_labels[axis] = label
             # Create the device label
-            label = ttk.Label(self.additional_stack_setting_frame, text=self.devices_dict[axis])
-            label.grid(row=i+1, column=1, sticky=tk.NSEW, padx=10, pady=2)
+            label = ttk.Label(
+                self.additional_stack_setting_frame, text=self.devices_dict[axis]
+            )
+            label.grid(row=i + 1, column=1, sticky=tk.NSEW, padx=10, pady=2)
             label.grid_remove()
             self.additional_stack_setting_labels[f"{axis}_device"] = label
             # Create the offset spinbox
@@ -675,9 +711,11 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 master=self.additional_stack_setting_frame,
                 from_=-10000,
                 to=10000,
-                textvariable=self.additional_stack_setting_variables[index_name]
+                textvariable=self.additional_stack_setting_variables[index_name],
             )
-            self.inputs[index_name].grid(row=i+1, column=2, sticky=tk.NSEW, padx=10, pady=2)
+            self.inputs[index_name].grid(
+                row=i + 1, column=2, sticky=tk.NSEW, padx=10, pady=2
+            )
             self.inputs[index_name].grid_remove()
 
         self.additional_stack_setting_frame.grid_remove()
@@ -695,6 +733,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
         axis : str
             The axis to update the widgets for.
         """
+
         def func(*args: list) -> None:
             """Inner function to update the widgets.
 
@@ -718,7 +757,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
                     self.additional_stack_setting_frame.grid_remove()
 
         return func
-    
+
     # Getters
     def get_variables(self) -> dict:
         """Returns a dictionary of the variables in the widget

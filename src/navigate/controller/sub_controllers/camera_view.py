@@ -152,7 +152,10 @@ class BaseViewController(GUIController, ABaseViewController):
         self.canvas_width_scale = 4
 
         #: str: The colormap for the image.
-        self.colormap = plt.get_cmap("gist_gray")
+        # self.colormap = plt.get_cmap("gist_gray")
+
+        #: np.ndarray: Precomputed lookup table for the image colormap.
+        self.colormap = self._generate_lut("gist_gray")
 
         #: str: The mode of the camera view controller.
         self.mode = "stop"
@@ -201,9 +204,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         #: event: The resize event ID.
         self.resize_event_id = None
-
-        #: np.ndarray: The saturated pixels in the image.
-        self.saturated_pixels = None
 
         #: list: The selected channels being acquired.
         self.selected_channels = None
@@ -375,7 +375,8 @@ class BaseViewController(GUIController, ABaseViewController):
         else:
             cmap_name = target.color.get()
             self._snr_selected = True if cmap_name == "RdBu_r" else False
-            self.colormap = plt.get_cmap(cmap_name)
+            # self.colormap = plt.get_cmap(cmap_name)
+            self.colormap = self._generate_lut(cmap_name)
             self.process_image()
             logger.debug(f"Updating the LUT, {cmap_name}")
 
@@ -444,41 +445,43 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         pass
 
-    def apply_lut(self, image: np.ndarray) -> np.ndarray:
-        """Applies a LUT to an image.
+    @staticmethod
+    def _generate_lut(cmap_name: str) -> np.ndarray:
+        """Create an OpenCV-compatible color lookup table.
 
-        Red is reserved for saturated pixels.
-        self.color_values = ['gray', 'gradient', 'rainbow']
+        Parameters
+        ----------
+        cmap_name : str
+            Name of the Matplotlib colormap.
+
+        Returns
+        -------
+        numpy.ndarray
+            Lookup table shaped for ``cv2.applyColorMap`` in BGR order.
+        """
+        cmap = plt.get_cmap(cmap_name)
+        lut = (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
+
+        # Convert RGB to BGR for OpenCV
+        lut = lut[:, ::-1]
+        return lut.reshape(256, 1, 3)
+
+    def apply_lut(self, image: np.ndarray) -> np.ndarray:
+        """Apply a LUT to an image.
 
         Parameters
         ----------
         image : np.ndarray
-            Image data.
+            Image data normalized to [0, 1].
 
         Returns
         -------
         image : np.ndarray
-            Image data with LUT applied.
+            RGB image data with LUT applied.
         """
-        image = self.colormap(image)
-
-        # Convert RGBA to RGB Image.
-        image = image[:, :, :3]
-
-        # Specify the saturated values in the red channel
-        if np.any(self.saturated_pixels):
-            # TODO: Evaluate if this is functional.
-            # Saturated pixels is an array of True or
-            # False statements same size as the image.
-
-            # Pull out the red image from the RGBA
-            # Set saturated pixels to 1, put back into array.
-            red_image = image[:, :, 2]
-            red_image[self.saturated_pixels] = 1
-            image[:, :, 2] = red_image
-
-        # Scale back to an 8-bit image.
-        image = image * (2**self.bit_depth - 1)
+        image_uint8 = (image * 255).astype(np.uint8)
+        image = cv2.applyColorMap(image_uint8, self.colormap)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return image
 
     def identify_channel_index_and_slice(self) -> tuple:
@@ -780,23 +783,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         return zoom_image
 
-    def detect_saturation(self, image: np.ndarray) -> None:
-        """Look for any pixels at the maximum intensity allowable for the camera.
-
-        Note
-        ----
-        The camera is set to 16-bit depth, so the maximum intensity is 2^16 - 1. If
-        another camera is used, this function should be updated to reflect the maximum
-        intensity value.
-
-        Parameters
-        ----------
-        image : np.ndarray
-            Image data.
-        """
-        saturation_value = 2**16 - 1
-        self.saturated_pixels = image[image > saturation_value]
-
     def down_sample_image(self, image: np.ndarray) -> np.ndarray:
         """Down-sample the data for image display according to widget size.
 
@@ -813,7 +799,9 @@ class BaseViewController(GUIController, ABaseViewController):
             Down-sampled image data.
         """
         sx, sy = self.canvas_width, self.canvas_height
-        down_sampled_image = cv2.resize(image, (sx, sy))
+        down_sampled_image = cv2.resize(
+            src=image, dsize=(sx, sy), interpolation=cv2.INTER_NEAREST
+        )
         return down_sampled_image
 
     def scale_image_intensity(self, image: np.ndarray) -> np.ndarray:
@@ -829,7 +817,7 @@ class BaseViewController(GUIController, ABaseViewController):
         image : np.ndarray
             Scaled image data.
         """
-        if self.autoscale is True:
+        if self.autoscale:
             self.max_counts = np.max(image)
             self.min_counts = np.min(image)
         else:
@@ -935,14 +923,13 @@ class BaseViewController(GUIController, ABaseViewController):
     def process_image(self) -> None:
         """Process the image to be displayed.
 
-        Applies digital zoom, detects saturation, down-samples the image, scales the
+        Applies digital zoom, down-samples the image, scales the
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
         if self.image is None:
             return
         image = self.digital_zoom()
-        self.detect_saturation(image)
         image = self.down_sample_image(image)
         image = self.transpose_image(image)
         image = self.scale_image_intensity(image)
@@ -975,9 +962,7 @@ class BaseViewController(GUIController, ABaseViewController):
             top_height = self.parent_controller.view.top_frame.winfo_height()
             w_width = self.parent_controller.view.winfo_width()
             w_height = self.parent_controller.view.winfo_height()
-            width = max(
-                w_width - left_width - 16, 560 + self.view.lut.winfo_width()
-            )
+            width = max(w_width - left_width - 16, 560 + self.view.lut.winfo_width())
             height = max(w_height - top_height - 50, 670)
         else:
             width = event.width
@@ -1012,7 +997,7 @@ class BaseViewController(GUIController, ABaseViewController):
                     widget_height += widget.winfo_height() + 5
                     if widget.winfo_height() < 30:
                         widget_height += 30
-                    
+
         self.canvas_height = (
             height - widget_height - (50 if self.view.is_docked else -5)
         )

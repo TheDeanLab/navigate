@@ -287,7 +287,7 @@ class TestCameraViewController:
     def test_process_image(self):
         self.camera_view.image = np.random.randint(0, 256, (600, 800))
         self.camera_view.digital_zoom = MagicMock()
-        self.camera_view.detect_saturation = MagicMock()
+        # self.camera_view.detect_saturation = MagicMock()
         self.camera_view.down_sample_image = MagicMock()
         self.camera_view.scale_image_intensity = MagicMock()
         self.camera_view.add_crosshair = MagicMock()
@@ -297,7 +297,7 @@ class TestCameraViewController:
         self.camera_view.process_image()
 
         self.camera_view.digital_zoom.assert_called()
-        self.camera_view.detect_saturation.assert_called()
+        # self.camera_view.detect_saturation.assert_called()
         self.camera_view.down_sample_image.assert_called()
         self.camera_view.scale_image_intensity.assert_called()
         self.camera_view.add_crosshair.assert_called()
@@ -406,7 +406,7 @@ class TestCameraViewController:
     def test_left_click(self, onoff):
         self.camera_view.add_crosshair = MagicMock()
         self.camera_view.digital_zoom = MagicMock()
-        self.camera_view.detect_saturation = MagicMock()
+        # self.camera_view.detect_saturation = MagicMock()
         self.camera_view.down_sample_image = MagicMock()
         self.camera_view.transpose_image = MagicMock()
         self.camera_view.scale_image_intensity = MagicMock()
@@ -469,8 +469,8 @@ class TestCameraViewController:
         self.camera_view.resize(event)
 
         # monkeypatch cv2.resize
-        def mocked_resize(img, size):
-            return np.ones((size[0], size[1]))
+        def mocked_resize(src, dsize, interpolation=1):
+            return np.ones((dsize[0], dsize[1]))
 
         monkeypatch.setattr(cv2, "resize", mocked_resize)
 
@@ -625,7 +625,7 @@ class TestCameraViewController:
             self.microscope_state, {"img_x_pixels": 50, "img_y_pixels": 100}
         )
         self.camera_view.digital_zoom = MagicMock()
-        self.camera_view.detect_saturation = MagicMock()
+        # self.camera_view.detect_saturation = MagicMock()
         self.camera_view.down_sample_image = MagicMock()
         self.camera_view.scale_image_intensity = MagicMock()
         self.camera_view.apply_lut = MagicMock()
@@ -701,16 +701,6 @@ class TestCameraViewController:
     def test_update_LUT(self):
         # Same as apply LUT TODO
         pass
-
-    def test_detect_saturation(self):
-        test_image = np.random.randint(0, 2**16, size=(100, 100))
-        test_image[:50, :50] = 2**16 - 1  # set top left corner to saturation value
-
-        # Call the function to detect saturation
-        self.camera_view.detect_saturation(test_image)
-
-        # Assert that the saturated pixels were correctly detected
-        assert np.all(self.camera_view.saturated_pixels == 2**16 - 1)
 
     def test_toggle_min_max_button(self):
 

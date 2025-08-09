@@ -479,10 +479,13 @@ class BaseViewController(GUIController, ABaseViewController):
         image : np.ndarray
             RGB image data with LUT applied.
         """
-        image_uint8 = (image * 255).astype(np.uint8)
-        image = cv2.applyColorMap(image_uint8, self.colormap)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        return image
+        if image.dtype != np.uint8:
+            image = (image * 255).astype(np.uint8)
+            print("Image dtype was not uint8, converting to uint8.")
+
+        # image_uint8 = (image * 255).astype(np.uint8)
+        image = cv2.applyColorMap(image, self.colormap)
+        return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     def identify_channel_index_and_slice(self) -> tuple:
         """As images arrive, identify channel index and slice.
@@ -807,6 +810,12 @@ class BaseViewController(GUIController, ABaseViewController):
     def scale_image_intensity(self, image: np.ndarray) -> np.ndarray:
         """Scale the data to the min/max counts, and adjust bit-depth.
 
+        Notes
+        -----
+        For autoscaled image intensity, with numpy, it was taking around 6ms. With
+        cv2, this is reduced to 300 microseconds. With non autoscaled data,
+        still taking around 4 ms. Need to change the trace.
+
         Parameters
         ----------
         image : np.ndarray
@@ -818,15 +827,14 @@ class BaseViewController(GUIController, ABaseViewController):
             Scaled image data.
         """
         if self.autoscale:
-            self.max_counts = np.max(image)
-            self.min_counts = np.min(image)
-        else:
-            self.update_min_max_counts()
+            return cv2.normalize(image, None, 0, 1, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
         if self.max_counts != self.min_counts:
-            image = (image - self.min_counts) / (self.max_counts - self.min_counts)
-            image[image < 0] = 0
-            image[image > 1] = 1
+            scale = 1.0 / (self.max_counts - self.min_counts)
+            beta = -self.min_counts * scale
+            image = cv2.convertScaleAbs(image, alpha=scale * 255.0, beta=beta * 255.0)
+            # image = image.astype(np.float32) / 255.0
+
         return image
 
     def add_crosshair(self, image: np.ndarray) -> np.ndarray:
@@ -929,13 +937,32 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         if self.image is None:
             return
+        # Digital zoom took 0.0000 seconds
         image = self.digital_zoom()
+
+        # Down-sampling took 0.0002 seconds
         image = self.down_sample_image(image)
+
+        # Transposing took 0.0000 seconds
         image = self.transpose_image(image)
+
+        # Scaling intensity took 0.0058 seconds
+        start_time = time.time()
         image = self.scale_image_intensity(image)
+        print(f"Scaling intensity took {time.time() - start_time:.4f} seconds")
+
+        # Adding crosshair took 0.0000 seconds
         image = self.add_crosshair(image)
+
+        start_time = time.time()
+        # Applying LUT took 0.0078 seconds
         image = self.apply_lut(image)
+        print(f"Applying LUT took {time.time() - start_time:.4f} seconds")
+
+        start_time = time.time()
+        # Populating image took 0.0158 seconds
         self.populate_image(image)
+        print(f"Populating image took {time.time() - start_time:.4f} seconds")
 
     def left_click(self, *_) -> None:
         """Toggles cross-hair on image upon left click event."""
@@ -1021,6 +1048,7 @@ class BaseViewController(GUIController, ABaseViewController):
         display : bool
             Flag to display the image.
         """
+        print("Updating min and max counts")
         if self.image_palette["Min"].get() != "":
             self.min_counts = float(self.image_palette["Min"].get())
         if self.image_palette["Max"].get() != "":
@@ -1362,16 +1390,27 @@ class CameraViewController(BaseViewController):
             Image data.
         """
         start_time = time.time()
+
+        # time to flip image: 0.0000 seconds
         self.image = self.flip_image(image)
+
+        # time to append max intensity: 0.0031 seconds
         self.max_intensity_history.append(np.max(image))
         if self._snr_selected:
             self.image = compute_signal_to_noise(
                 self.image, self._offset, self._variance
             )
+
+        # time to process image: 0.0311 seconds
         self.process_image()
+
+        # time to update max counts: 0.0001 seconds
         self.update_max_counts()
+
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
+
+        # Displaying image took 0.0345 seconds
         logger.info(f"Displaying image took {time.time() - start_time:.4f} seconds")
 
     def set_mask_color_table(self, colors: list) -> None:

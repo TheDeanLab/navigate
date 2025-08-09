@@ -1430,32 +1430,34 @@ class CameraViewController(BaseViewController):
         image : np.ndarray
             Image data.
         """
-        start_time = time.time()
+        start_time = time.perf_counter()
 
-        # time to flip image: 0.0000 seconds
         self.image = self.flip_image(image)
 
-        # time to append max intensity: 0.0031 seconds
-        self.max_intensity_history.append(np.max(image))
         if self._snr_selected:
             self.image = compute_signal_to_noise(
                 self.image, self._offset, self._variance
             )
 
-        # time to process image: 0.00741 seconds
         img_out = self.render(self.image)  # no Tk calls
+
+        # record the max without rescanning the full frame
+        if hasattr(self, "_last_frame_display_max"):
+            self.max_intensity_history.append(self._last_frame_display_max)
+        else:
+            self.max_intensity_history.append(int(np.max(self.image)))
 
         # Schedule the image to be displayed in the Tkinter main loop
         self.view.after(0, lambda img=img_out: self.populate_image(img))
 
-        # time to update max counts: 0.0001 seconds
         self.update_max_counts()
 
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
 
-        # Displaying image took 0.0345 seconds
-        logger.info(f"Displaying image took {time.time() - start_time:.4f} seconds")
+        logger.info(
+            f"Displaying image took {time.perf_counter() - start_time:.4f} seconds"
+        )
 
     def set_mask_color_table(self, colors: list) -> None:
         """Set up segmentation mask color table

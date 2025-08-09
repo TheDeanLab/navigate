@@ -36,6 +36,7 @@ import tkinter as tk
 from tkinter import messagebox
 import logging
 import threading
+import queue
 from typing import Dict, Optional
 import tempfile
 import os
@@ -185,6 +186,13 @@ class BaseViewController(GUIController, ABaseViewController):
 
         #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
+
+        #: queue.Queue: single-slot queue for display frames
+        self._disp_q = queue.Queue(maxsize=1)
+
+        #: threading.Thread: single persistent display worker
+        self._disp_thread = threading.Thread(target=self._display_worker, daemon=True)
+        self._disp_thread.start()
 
         #: int: The maximum counts of the image.
         self.max_counts = None
@@ -433,27 +441,26 @@ class BaseViewController(GUIController, ABaseViewController):
             self.update_min_max_counts(display=display)
 
     def try_to_display_image(self, image: np.ndarray) -> None:
-        """Try to display an image.
+        """Try to display an image using a single worker and a 1-deep queue.
 
-        Note
-        ----
-        This function is called when an image is acquired. The image is passed to the
-        display function. If the display function is already displaying an image, the
-        function will return. Thus, if imaging is faster than the display, the display
-        will skip frames.
-
-        Parameters
-        ----------
-        image : np.ndarray
-            Image data.
+        This enqueues the most recent frame and drops older frames if the queue is full.
         """
-        with self.is_displaying_image as is_displaying_image:
-            if is_displaying_image.value:
-                return
-            is_displaying_image.value = True
+        try:
+            self._disp_q.put_nowait(image)
+        except queue.Full:
+            # Drop stale frame; keep UI responsive
+            pass
 
-        display_thread = threading.Thread(target=self.display_image, args=(image,))
-        display_thread.start()
+    def _display_worker(self) -> None:
+        """Background worker that serially processes display requests."""
+        while True:
+            image = self._disp_q.get()
+            try:
+                self.display_image(image)
+            except Exception as e:
+                logger.exception("Error in display worker: %s", e)
+            finally:
+                self._disp_q.task_done()
 
     def display_image(self, image: np.ndarray) -> None:
         """Display an image.
@@ -951,15 +958,25 @@ class BaseViewController(GUIController, ABaseViewController):
             return
         self.image_cache_flag = not self.image_cache_flag
 
-    def process_image(self) -> None:
+    def render(self, image: np.ndarray) -> np.ndarray:
         """Process the image to be displayed.
+
+        Parameters
+        ----------
+        image : np.ndarray
+            Image data to be processed.
+
+        Returns
+        -------
+        image : np.ndarray
 
         Applies digital zoom, down-samples the image, scales the
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
-        if self.image is None:
-            return
+        if image is None:
+            return None
+
         # Digital zoom takes ~0.0000 seconds
         image = self.digital_zoom()
 
@@ -978,7 +995,15 @@ class BaseViewController(GUIController, ABaseViewController):
         # Applying LUT zoom takes ~0.0048 seconds
         image = self.apply_lut(image)
 
+        return image
+
+    def process_image(self) -> None:
+        """Processes the image to be displayed."""
+        if self.image is None:
+            return
+
         # Populating image took 0.0158 seconds
+        image = self.render(self.image)
         self.populate_image(image)
 
     def left_click(self, *_) -> None:
@@ -1065,7 +1090,6 @@ class BaseViewController(GUIController, ABaseViewController):
         display : bool
             Flag to display the image.
         """
-        print("Updating min and max counts")
         if self.image_palette["Min"].get() != "":
             self.min_counts = float(self.image_palette["Min"].get())
         if self.image_palette["Max"].get() != "":
@@ -1418,10 +1442,11 @@ class CameraViewController(BaseViewController):
                 self.image, self._offset, self._variance
             )
 
-        # time to process image: 0.0241 seconds
-        start_time = time.time()
-        self.process_image()
-        print(f"Time to proces image: {time.time() - start_time:.4f} seconds")
+        # time to process image: 0.00741 seconds
+        img_out = self.render(self.image)  # no Tk calls
+
+        # Schedule the image to be displayed in the Tkinter main loop
+        self.view.after(0, lambda img=img_out: self.populate_image(img))
 
         # time to update max counts: 0.0001 seconds
         self.update_max_counts()

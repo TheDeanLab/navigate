@@ -110,6 +110,15 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         super().__init__(view, parent_controller)
 
+        #: int: Cached maximum value of the last displayed frame.
+        self._last_frame_display_max = None
+
+        #: tkinter.PhotoImage: The tkinter photo image for the canvas.
+        self._photo = None
+
+        #: tkinter.PhotoImage: The buffered tkinter photo image for the canvas.
+        self._img_buf = None
+
         #: bool: The flag for the selected signal-to-noise ratio.
         self._snr_selected = False
 
@@ -312,13 +321,15 @@ class BaseViewController(GUIController, ABaseViewController):
 
     def _on_minmax_changed(self, *args) -> None:
         """Debounce updates to min/max entry changes by 100 ms."""
+
         # Cancel any pending scheduled update
-        if getattr(self, "_minmax_after_id", None):
+        if self._minmax_after_id:
             try:
                 self.view.after_cancel(self._minmax_after_id)
             except Exception:
                 pass
             self._minmax_after_id = None
+
         # Schedule a new update
         self._minmax_after_id = self.view.after(
             100, lambda: self.update_min_max_counts(display=True)
@@ -484,13 +495,9 @@ class BaseViewController(GUIController, ABaseViewController):
         Returns
         -------
         numpy.ndarray
-            Lookup table shaped for ``cv2.applyColorMap`` in BGR order.
+            Lookup table.
         """
         cmap = plt.get_cmap(cmap_name)
-        # lut = (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
-        # Convert RGB to BGR for OpenCV
-        # lut = lut[:, ::-1]
-        # return lut.reshape(256, 1, 3)
         return (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
 
     def apply_lut(self, image: np.ndarray) -> np.ndarray:
@@ -509,7 +516,7 @@ class BaseViewController(GUIController, ABaseViewController):
         image = np.require(image, dtype=np.uint8, requirements=["C"])
         lut = self.colormap
         h, w = image.shape[:2]
-        if getattr(self, "_lut_buf", None) is None or self._lut_buf.shape[:2] != (h, w):
+        if self._lut_buf is None or self._lut_buf.shape[:2] != (h, w):
             self._lut_buf = np.empty((h, w, 3), dtype=np.uint8)
 
         flat_idx = image.ravel()
@@ -856,16 +863,26 @@ class BaseViewController(GUIController, ABaseViewController):
         image : np.ndarray
             Scaled image data (uint8).
         """
-        if self.autoscale:
-            # Output directly as 8-bit [0..255] to avoid later dtype conversions
-            return cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+        # Compute min/max once and reuse; also store display max
+        min_value, max_value, _, _ = cv2.minMaxLoc(image)
+        self._last_frame_display_max = int(max_value)
 
-        if self.max_counts != self.min_counts:
+        if self.autoscale:
+            # In the off chance that we get a flat image, we set the min and max.
+            if max_value > min_value:
+                scale = 255.0 / (max_value - min_value)
+                beta = -min_value * scale
+                return cv2.convertScaleAbs(image, alpha=scale, beta=beta)
+
+        # If autoscale is disabled, we use the min/max counts from the GUI.
+        if self.max_counts > self.min_counts:
             scale = 255.0 / (self.max_counts - self.min_counts)
             beta = -self.min_counts * scale
-            image = cv2.convertScaleAbs(image, alpha=scale, beta=beta)
+            return cv2.convertScaleAbs(image, alpha=scale, beta=beta)
 
-        return image
+        # If the user has provided incorrect min/max values, we return a flat image.
+        else:
+            return np.ones_like(image, dtype=np.uint8)
 
     def add_crosshair(self, image: np.ndarray) -> np.ndarray:
         """Adds a cross-hair to the image.
@@ -917,48 +934,87 @@ class BaseViewController(GUIController, ABaseViewController):
         y = self.parent_controller.view.winfo_pointery()
         return x, y
 
-    def array_to_image(self, image: np.ndarray) -> Image:
-        """Convert a numpy array to a PIL Image
+    def _ensure_canvas_image(self, w: int, h: int, mode: str) -> None:
+        """Create/recreate the backing PhotoImage when size or mode changes.
+
+        This is used to ensure that the canvas image is always the correct size and
+        mode, but we do not have to create a new PhotoImage object every time we
+        update the image. We incur a 1x ~14 ms cost for creating the initial object.
+        Thereafter, the operation is essentially free.
 
         Parameters
         ----------
-        image : numpy.ndarray
-            Image data.
-
-        Returns
-        -------
-        image : Image
-            A PIL Image
+        w : int
+            Width of the image.
+        h : int
+            Height of the image.
+        mode : str
+            Mode of the image (e.g., "RGB", "L", "RGBA").
         """
-        return Image.fromarray(image.astype(np.uint8))
+        need_new = (
+            getattr(self, "_photo", None) is None
+            or self._photo.width() != w
+            or self._photo.height() != h
+            or getattr(self, "_photo_mode", None) != mode
+        )
+        if need_new:
+            # create a base PIL image
+            base = Image.new(mode, (w, h))
+            self._photo = ImageTk.PhotoImage(base)
+            self._photo_mode = mode
+
+            if getattr(self, "_img_item", None) is None:
+                self._img_item = self.canvas.create_image(
+                    0, 0, image=self._photo, anchor="nw"
+                )
+            else:
+                # Reuse the same canvas item, just rebind the image
+                self.canvas.itemconfig(self._img_item, image=self._photo)
 
     def populate_image(self, image: np.ndarray) -> None:
-        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas
+        """Update the Tk canvas using a persistent PhotoImage + paste.
 
-        Note
-        ----
-        When calling ImageTk.PhotoImage() to generate a new image, it will destroy
-        what the canvas is showing, causing it to blink. This problem is solved by
-        creating two images and alternating between them.
+        This is a zero-copy operation that allows us to update the canvas image
+        without creating a new PhotoImage object every time. This is much faster than
+        creating a new PhotoImage object and reconfiguring the canvas item. Copying
+        the image from a buffer is between 100 and 800 microseconds. Pasting the
+        image is between 3 and 5 ms.
 
         Parameters
         ----------
         image : np.ndarray
-            Image data.
+            The image data to be displayed on the canvas.
+
         """
-        temp_img = self.array_to_image(image)
+
         try:
-            if self.image_cache_flag:
-                self.tk_image = ImageTk.PhotoImage(temp_img)
-                self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
+            h, w = image.shape[:2]
+
+            # infer mode from number of dimensions.
+            if image.ndim == 2:
+                mode = "L"
+            elif image.shape[2] == 3:
+                mode = "RGB"
+            elif image.shape[2] == 4:
+                mode = "RGBA"
             else:
-                self.tk_image2 = ImageTk.PhotoImage(temp_img)
-                self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
+                raise ValueError(f"Unsupported image shape {image.shape}")
+
+            self._ensure_canvas_image(w, h, mode)
+
+            # zero-copy wrap of the numpy buffer into a PIL image
+            # keep a reference so the buffer stays alive while Tk reads it
+            self._img_buf = image
+            pil = Image.frombuffer(mode, (w, h), image, "raw", mode, 0, 1)
+            t1 = time.perf_counter()
+
+            # fast in-place update; no new PhotoImage objects, no new canvas items
+            self._photo.paste(pil)
+
         except tk.TclError:
             return
-        self.image_cache_flag = not self.image_cache_flag
 
-    def render(self, image: np.ndarray) -> np.ndarray:
+    def render(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Process the image to be displayed.
 
         Parameters
@@ -1389,41 +1445,13 @@ class CameraViewController(BaseViewController):
             )
             self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
-    def array_to_image(self, image: np.ndarray) -> Image:
-        """Convert a numpy array to a PIL Image.
-
-        If a color mask is present, it will apply the mask to the image.
-
-        Parameters
-        ----------
-        image : np.ndarray
-            Image data.
-
-        Returns
-        -------
-        image : Image
-            A PIL Image
-        """
-        if self.display_mask_flag and self.display_state == "Live":
-            self.ilastik_mask_ready_lock.acquire()
-            temp_img1 = image.astype(np.uint8)
-            img1 = Image.fromarray(temp_img1)
-
-            temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
-            img2 = Image.fromarray(temp_img2)
-            temp_img = Image.blend(img1, img2, 0.2)
-        else:
-            temp_img = Image.fromarray(image.astype(np.uint8))
-        return temp_img
-
     def display_image(self, image: np.ndarray) -> None:
         """Display an image using the LUT specified in the View.
 
-        If Autoscale is selected, automatically calculates
-        the min and max values for the data.
+        If Autoscale is selected, automatically calculates the min and max values for the data.
 
-        If Autoscale is not selected, takes the user values
-        as specified in the min and max counts.
+        If Autoscale is not selected, takes the user values as specified in the min
+        and max counts.
 
         Parameters
         ----------

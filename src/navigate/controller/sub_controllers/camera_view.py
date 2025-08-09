@@ -1439,7 +1439,7 @@ class CameraViewController(BaseViewController):
                 self.image, self._offset, self._variance
             )
 
-        img_out = self.render(self.image)  # no Tk calls
+        img_out = self.render(self.image)
 
         # record the max without rescanning the full frame
         if hasattr(self, "_last_frame_display_max"):

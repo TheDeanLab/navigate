@@ -112,6 +112,9 @@ class BaseViewController(GUIController, ABaseViewController):
         #: bool: The flag for the selected signal-to-noise ratio.
         self._snr_selected = False
 
+        #: numpy.ndarray: The lookup table buffer for the image colormap.
+        self._lut_buf = None
+
         #: numpy.ndarray: The offset map.
         self._offset = None
 
@@ -151,11 +154,10 @@ class BaseViewController(GUIController, ABaseViewController):
         #: int: The scaling factor for the width of the canvas.
         self.canvas_width_scale = 4
 
-        #: str: The colormap for the image.
-        # self.colormap = plt.get_cmap("gist_gray")
-
         #: np.ndarray: Precomputed lookup table for the image colormap.
-        self.colormap = self._generate_lut("gist_gray")
+        self.colormap = np.ascontiguousarray(
+            self._generate_lut("gist_gray"), dtype=np.uint8
+        )
 
         #: str: The mode of the camera view controller.
         self.mode = "stop"
@@ -250,12 +252,15 @@ class BaseViewController(GUIController, ABaseViewController):
         #: dict: The dictionary of image palette widgets.
         self.image_palette = view.lut.get_widgets()
 
-        # Binding for adjusting the lookup table min and max counts.
+        #: Optional[str]: after() id for debouncing min/max updates
+        self._minmax_after_id = None
+
+        # Binding for adjusting the lookup table min and max counts (debounced 100 ms)
         self.image_palette["Min"].get_variable().trace_add(
-            "write", lambda *args: self.update_min_max_counts(display=True)
+            "write", self._on_minmax_changed
         )
         self.image_palette["Max"].get_variable().trace_add(
-            "write", lambda *args: self.update_min_max_counts(display=True)
+            "write", self._on_minmax_changed
         )
         self.image_palette["Autoscale"].widget.config(
             command=lambda: self.toggle_min_max_buttons(display=True)
@@ -296,6 +301,20 @@ class BaseViewController(GUIController, ABaseViewController):
         self.menu.add_separator()
         self.menu.add_command(label="Move Here", command=self.move_stage)
         self.menu.add_command(label="Mark Position", command=self.mark_position)
+
+    def _on_minmax_changed(self, *args) -> None:
+        """Debounce updates to min/max entry changes by 100 ms."""
+        # Cancel any pending scheduled update
+        if getattr(self, "_minmax_after_id", None):
+            try:
+                self.view.after_cancel(self._minmax_after_id)
+            except Exception:
+                pass
+            self._minmax_after_id = None
+        # Schedule a new update
+        self._minmax_after_id = self.view.after(
+            100, lambda: self.update_min_max_counts(display=True)
+        )
 
     def initialize(self, name, data) -> None:
         """Sets widgets based on data given from main controller/config.
@@ -375,8 +394,9 @@ class BaseViewController(GUIController, ABaseViewController):
         else:
             cmap_name = target.color.get()
             self._snr_selected = True if cmap_name == "RdBu_r" else False
-            # self.colormap = plt.get_cmap(cmap_name)
-            self.colormap = self._generate_lut(cmap_name)
+            self.colormap = np.ascontiguousarray(
+                self._generate_lut(cmap_name), dtype=np.uint8
+            )
             self.process_image()
             logger.debug(f"Updating the LUT, {cmap_name}")
 
@@ -460,11 +480,11 @@ class BaseViewController(GUIController, ABaseViewController):
             Lookup table shaped for ``cv2.applyColorMap`` in BGR order.
         """
         cmap = plt.get_cmap(cmap_name)
-        lut = (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
-
+        # lut = (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
         # Convert RGB to BGR for OpenCV
-        lut = lut[:, ::-1]
-        return lut.reshape(256, 1, 3)
+        # lut = lut[:, ::-1]
+        # return lut.reshape(256, 1, 3)
+        return (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
 
     def apply_lut(self, image: np.ndarray) -> np.ndarray:
         """Apply a LUT to an 8-bit single-channel image.
@@ -479,9 +499,16 @@ class BaseViewController(GUIController, ABaseViewController):
         image : np.ndarray
             RGB image data with LUT applied.
         """
-        # Input is expected to be uint8 already
-        image = cv2.applyColorMap(image, self.colormap)
-        return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = np.require(image, dtype=np.uint8, requirements=["C"])
+        lut = self.colormap
+        h, w = image.shape[:2]
+        if getattr(self, "_lut_buf", None) is None or self._lut_buf.shape[:2] != (h, w):
+            self._lut_buf = np.empty((h, w, 3), dtype=np.uint8)
+
+        flat_idx = image.ravel()
+        out = self._lut_buf.reshape(-1, 3)
+        np.take(lut, flat_idx, axis=0, out=out)
+        return self._lut_buf
 
     def identify_channel_index_and_slice(self) -> tuple:
         """As images arrive, identify channel index and slice.
@@ -827,7 +854,6 @@ class BaseViewController(GUIController, ABaseViewController):
             return cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
 
         if self.max_counts != self.min_counts:
-            # Fixed min/max → 8-bit [0..255]
             scale = 255.0 / (self.max_counts - self.min_counts)
             beta = -self.min_counts * scale
             image = cv2.convertScaleAbs(image, alpha=scale, beta=beta)
@@ -934,32 +960,26 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         if self.image is None:
             return
-        # Digital zoom took 0.0000 seconds
+        # Digital zoom takes ~0.0000 seconds
         image = self.digital_zoom()
 
-        # Down-sampling took 0.0002 seconds
+        # Down-sampling zoom takes ~0.0002 seconds
         image = self.down_sample_image(image)
 
-        # Transposing took 0.0000 seconds
+        # Transposing zoom takes ~0.0000 seconds
         image = self.transpose_image(image)
 
-        # Scaling intensity took 0.0058 seconds
-        start_time = time.time()
+        # Scaling intensity zoom takes ~0.0002 seconds
         image = self.scale_image_intensity(image)
-        print(f"Scaling intensity took {time.time() - start_time:.4f} seconds")
 
-        # Adding crosshair took 0.0000 seconds
+        # Adding crosshair zoom takes ~0.0000 seconds
         image = self.add_crosshair(image)
 
-        start_time = time.time()
-        # Applying LUT took 0.0078 seconds
+        # Applying LUT zoom takes ~0.0048 seconds
         image = self.apply_lut(image)
-        print(f"Applying LUT took {time.time() - start_time:.4f} seconds")
 
-        start_time = time.time()
         # Populating image took 0.0158 seconds
         self.populate_image(image)
-        print(f"Populating image took {time.time() - start_time:.4f} seconds")
 
     def left_click(self, *_) -> None:
         """Toggles cross-hair on image upon left click event."""
@@ -1398,8 +1418,10 @@ class CameraViewController(BaseViewController):
                 self.image, self._offset, self._variance
             )
 
-        # time to process image: 0.0311 seconds
+        # time to process image: 0.0241 seconds
+        start_time = time.time()
         self.process_image()
+        print(f"Time to proces image: {time.time() - start_time:.4f} seconds")
 
         # time to update max counts: 0.0001 seconds
         self.update_max_counts()

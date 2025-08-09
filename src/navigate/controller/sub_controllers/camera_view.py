@@ -467,23 +467,19 @@ class BaseViewController(GUIController, ABaseViewController):
         return lut.reshape(256, 1, 3)
 
     def apply_lut(self, image: np.ndarray) -> np.ndarray:
-        """Apply a LUT to an image.
+        """Apply a LUT to an 8-bit single-channel image.
 
         Parameters
         ----------
         image : np.ndarray
-            Image data normalized to [0, 1].
+            8-bit image data (uint8), scaled to [0..255].
 
         Returns
         -------
         image : np.ndarray
             RGB image data with LUT applied.
         """
-        if image.dtype != np.uint8:
-            image = (image * 255).astype(np.uint8)
-            print("Image dtype was not uint8, converting to uint8.")
-
-        # image_uint8 = (image * 255).astype(np.uint8)
+        # Input is expected to be uint8 already
         image = cv2.applyColorMap(image, self.colormap)
         return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -824,16 +820,17 @@ class BaseViewController(GUIController, ABaseViewController):
         Returns
         -------
         image : np.ndarray
-            Scaled image data.
+            Scaled image data (uint8).
         """
         if self.autoscale:
-            return cv2.normalize(image, None, 0, 1, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+            # Output directly as 8-bit [0..255] to avoid later dtype conversions
+            return cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
 
         if self.max_counts != self.min_counts:
-            scale = 1.0 / (self.max_counts - self.min_counts)
+            # Fixed min/max → 8-bit [0..255]
+            scale = 255.0 / (self.max_counts - self.min_counts)
             beta = -self.min_counts * scale
-            image = cv2.convertScaleAbs(image, alpha=scale * 255.0, beta=beta * 255.0)
-            # image = image.astype(np.float32) / 255.0
+            image = cv2.convertScaleAbs(image, alpha=scale, beta=beta)
 
         return image
 
@@ -868,8 +865,8 @@ class BaseViewController(GUIController, ABaseViewController):
                 crosshair_x = -1
             if crosshair_y < 0 or crosshair_y >= self.canvas_height:
                 crosshair_y = -1
-            image[:, int(crosshair_x)] = 1
-            image[int(crosshair_y), :] = 1
+            image[:, int(crosshair_x)] = 255
+            image[int(crosshair_y), :] = 255
 
         return image
 

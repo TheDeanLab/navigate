@@ -110,6 +110,15 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         super().__init__(view, parent_controller)
 
+        #: float: Max frames per second (0 or None disables throttling)
+        self.max_fps: float = 20.0
+
+        #: float: Minimum time between processed frames
+        self._min_frame_interval: float = 1.0 / self.max_fps
+
+        #: float: Timestamp of last enqueued frame (perf_counter seconds)
+        self._last_enqueue_time: float = 0.0
+
         #: int: Cached maximum value of the last displayed frame.
         self._last_frame_display_max = None
 
@@ -455,12 +464,42 @@ class BaseViewController(GUIController, ABaseViewController):
         """Try to display an image using a single worker and a 1-deep queue.
 
         This enqueues the most recent frame and drops older frames if the queue is full.
+        Also, rate-limits enqueues to `self.max_fps` (default 20 Hz).
         """
+
+        # Throttle to max_fps (0 disables throttle)
+        now = time.perf_counter()
+        if (
+            self._min_frame_interval > 0.0
+            and (now - self._last_enqueue_time) < self._min_frame_interval
+        ):
+            # If we are receiving frames faster than the max_fps, drop this frame.
+            return
+        self._last_enqueue_time = now
+
         try:
+            # Try to put the new frame into the queue.
             self._disp_q.put_nowait(image)
+
         except queue.Full:
-            # Drop stale frame; keep UI responsive
-            pass
+            # If the queue is already full, we replace the oldest frame with the new
+            # one.
+            try:
+                # Attempt to remove the oldest frame if it exists
+                _ = self._disp_q.get_nowait()
+
+                # Confirm that we successfully removed the oldest frame
+                self._disp_q.task_done()
+            except queue.Empty:
+                pass
+
+            try:
+                # Now put the new frame into the queue
+                self._disp_q.put_nowait(image)
+
+            except queue.Full:
+                # Just in case...
+                pass
 
     def _display_worker(self) -> None:
         """Background worker that serially processes display requests."""
@@ -882,7 +921,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         # If the user has provided incorrect min/max values, we return a flat image.
         else:
-            return np.ones_like(image, dtype=np.uint8)
+            return np.ones_like(image, dtype=np.uint8) * 255
 
     def add_crosshair(self, image: np.ndarray) -> np.ndarray:
         """Adds a cross-hair to the image.

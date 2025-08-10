@@ -173,29 +173,37 @@ class AdvancedStageParametersController:
         configuration. Only applied when someone presses the "update" button.
 
         axis: str
-            The stage limit to update, e.g., 'x_min', 'y_max', etc.
+            The stage limit to update, e.g., 'x_min', 'y_max', 'f_home', etc.
         """
-        # Identify the axis and whether it's a minimum or maximum limit.
-        axis, min_or_max = axis.split("_")
+        # Identify the axis and whether it's a min, max, or home update.
+        axis, min_max_or_home = axis.split("_")
 
         # Get our current position.
         self.parent_controller.execute("query_stages")
+
+        # Get the current position from the stage controller.
         current_position = self.parent_controller.stage_controller.get_position()
 
-        # Update the popup window.
-        self.view.spinboxes[f"{axis}_{min_or_max}"].set(current_position[axis])
+        # TODO: Add method to query non-standard axes. Currently gets the value
+        #  from the stage positions tab, which is only active when the microscope
+        #  is selected and assumes that the user has not adjusted the stage
+        #  position outside of the software.
 
-        # Update the loaded configuration.
-        self.parent_controller.configuration["configuration"]["microscopes"][
-            self.current_microscope
-        ]["stage"][f"{axis}_{min_or_max}"] = current_position[axis]
+        if axis in ["x", "y", "z", "f", "theta"]:
+            # Update the popup window.
+            self.view.spinboxes[f"{axis}_{min_max_or_home}"].set(current_position[axis])
 
-        # Update the stage dictionary with the new limit and/or flip flag.
-        self.stage_dict[f"{axis}_{min_or_max}"] = current_position[axis]
+            # Update the loaded configuration.
+            self.parent_controller.configuration["configuration"]["microscopes"][
+                self.current_microscope
+            ]["stage"][f"{axis}_{min_max_or_home}"] = current_position[axis]
 
-        logger.debug(
-            f"Updating {axis} {min_or_max} limits to {current_position[axis]}..."
-        )
+            # Update the stage dictionary with the new value.
+            self.stage_dict[f"{axis}_{min_max_or_home}"] = current_position[axis]
+
+            logger.debug(
+                f"Updating {axis} {min_max_or_home} limits to {current_position[axis]}..."
+            )
 
     def close_popup(self) -> None:
         """Close the popup window."""
@@ -249,9 +257,17 @@ class AdvancedStageParametersController:
         # Get the current offsets for each stage axis.
         offsets = self.local_config_controller.stage_offsets
 
+        # Get the current home position for each stage axis.
+        home_positions = self.local_config_controller.stage_home_position
+
         # Initialize the view with the number of stage_list and their limits
         self.view.populate_view(
-            num_stages, min_limits, max_limits, current_flip_flags, offsets
+            num_stages,
+            min_limits,
+            max_limits,
+            current_flip_flags,
+            offsets,
+            home_positions,
         )
 
         # Reconfigure traces for the new widgets
@@ -267,6 +283,9 @@ class AdvancedStageParametersController:
         """
         # Get the current value from the spinbox.
         value = int(self.view.spinboxes[axis].get())
+
+        if value == "" and "_home" in axis:
+            return
 
         # Update the loaded configuration.
         self.parent_controller.configuration["configuration"]["microscopes"][

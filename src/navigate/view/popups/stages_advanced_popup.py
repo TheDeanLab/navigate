@@ -101,7 +101,7 @@ class AdvancedStageParametersPopup:
                 "state": "readonly",
             },
         )
-        self.microscope.grid(row=0, column=0, columnspan=7, padx=5, pady=5, sticky="ew")
+        self.microscope.grid(row=0, column=0, columnspan=3, padx=5, pady=5, sticky="ew")
 
     def populate_view(
         self,
@@ -110,9 +110,9 @@ class AdvancedStageParametersPopup:
         max_dict: dict,
         flip_axes: dict,
         offsets: dict,
+        home_dict: dict,
     ) -> None:
         """Populate the view with the stages.
-
 
         Add the widgets to the view for each stage in alphabetical order.
         Creates a row for each stage with: stage name, min_dict limit spinbox,
@@ -149,12 +149,16 @@ class AdvancedStageParametersPopup:
             self.frame, text="Maximum Stage Limit", font=("Arial", 10, "bold")
         ).grid(row=1, column=3, columnspan=2, padx=5, pady=5, sticky="NSEW")
 
+        tk.Label(self.frame, text="Home Position", font=("Arial", 10, "bold")).grid(
+            row=1, column=5, columnspan=2, padx=5, pady=5, sticky="NSEW"
+        )
+
         tk.Label(self.frame, text="Stage Offsets", font=("Arial", 10, "bold")).grid(
-            row=1, column=5, columnspan=1, padx=5, pady=5, sticky="NSEW"
+            row=1, column=7, columnspan=1, padx=5, pady=5, sticky="NSEW"
         )
 
         tk.Label(self.frame, text="Reverse Direction", font=("Arial", 10, "bold")).grid(
-            row=1, column=6, columnspan=1, padx=5, pady=5, sticky="NSEW"
+            row=1, column=8, columnspan=1, padx=5, pady=5, sticky="NSEW"
         )
         # Create a row for each stage
         for i, stage_name in enumerate(sorted_stages, start=1):
@@ -221,7 +225,46 @@ class AdvancedStageParametersPopup:
                 "position."
             )
 
-            # Column 6: Offsets
+            # Column 6: Home position spinbox
+            self.spinboxes[stage_name + "_home"] = ValidatedSpinbox(
+                self.frame,
+                from_=-100000,
+                to=100000,
+                width=10,
+                format="%.0f",
+                increment=1,
+            )
+
+            # If the home_dict does not have the stage, set it to an empty string. We
+            # want to make sure we don't by default set it to a position where there
+            # is a crash hazard. Replace None or "None" with "".
+            # TODO: The configuration should never have "None" if we set things
+            #  correctly.
+            home_position = home_dict.get(stage_name, "")
+            if home_position is None or home_position == "None":
+                home_position = ""
+            self.spinboxes[stage_name + "_home"].set(home_position)
+            self.spinboxes[stage_name + "_home"].grid(
+                row=i + 2, column=5, padx=5, pady=2
+            )
+            self.spinboxes[stage_name + "_home"].hover.setdescription(
+                "The desired home position for the stage."
+            )
+
+            # Column 7: Update home button
+            self.buttons[stage_name + "_home"] = HoverButton(
+                self.frame, text="Update", width=button_width
+            )
+            self.buttons[stage_name + "_home"].grid(row=i + 2, column=6, padx=5, pady=2)
+            self.buttons[stage_name + "_home"].hover.setdescription(
+                "Click to update the home position for this stage to the current "
+                "position."
+            )
+
+            # TODO: Once this is fixed, remove this next line of code.
+            self.buttons[stage_name + "_home"].configure(state="disabled")
+
+            # Column 8: Offsets
             self.spinboxes[stage_name + "_offset"] = ValidatedSpinbox(
                 self.frame,
                 from_=-100000,
@@ -232,24 +275,22 @@ class AdvancedStageParametersPopup:
             )
             self.spinboxes[stage_name + "_offset"].set(offsets.get(stage_name, 0.0))
             self.spinboxes[stage_name + "_offset"].grid(
-                row=i + 2, column=5, padx=5, pady=2
+                row=i + 2, column=7, padx=5, pady=2
             )
             self.spinboxes[stage_name + "_offset"].hover.setdescription(
                 f"The relative offset between different microscope instances for the "
                 f"{stage_name} axis."
             )
 
-            # Column 7: Flip flags.
+            # Column 9: Flip flags.
             self.flip_flags[stage_name] = tk.BooleanVar()
-
             self.flip_button[stage_name] = HoverCheckButton(
                 self.frame,
                 variable=self.flip_flags[stage_name],
             )
-
             self.flip_button[stage_name].grid(
                 row=i + 2,
-                column=6,
+                column=8,
                 columnspan=1,
                 padx=5,
                 pady=5,
@@ -289,7 +330,7 @@ class AdvancedStageParametersPopup:
         self.save_button = HoverButton(self.frame, text="Save", width=button_width)
         self.save_button.grid(
             row=len(sorted_stages) + 3,
-            column=6,
+            column=8,
             columnspan=1,
             padx=5,
             pady=5,

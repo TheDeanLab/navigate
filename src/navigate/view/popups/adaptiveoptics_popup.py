@@ -361,13 +361,6 @@ class AdaptiveOpticsPopup:
             row=0, column=0, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
         )
 
-        camera_var = tk.StringVar()
-        #: ttk.Combobox: Camera List
-        self.camera_list = ttk.Combobox(master=self.tab_cnn, textvariable=camera_var)
-        # self.camera_list["values"] = ("cam_0", "cam_1")
-        self.camera_list.grid(row=0, column=0, padx=10, pady=10)
-        # self.camera_list.current(0)
-
     def onFrameConfigure(self, event):
         """Reset the scroll region to encompass the inner frame.
 

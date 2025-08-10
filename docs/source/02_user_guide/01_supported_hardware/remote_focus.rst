@@ -112,6 +112,39 @@ Optotune Focus Tunable Lens
 
 ------------------
 
+Applied Scientific Instrumentation
+----------------------------------
+
+In principle, this hardware type can support any analog-controlled voice coil or tunable lens. 
+The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ and the `Optotune Focus Tunable Lens <https://www.optotune.com/tunable-lenses>`_ 
+can be controlled with an analog signal from the ASI Tiger Controller (`TG-1000 <https://asiimaging.com/docs/products/tiger>`_).
+
+The ASI Tiger Controller has a few limitations for the analog signals. 
+The remote focus waveform is a periodic ramp waveform with a delay period between each ramp. 
+The ramp lasts for the exposure time, falls very quickly and rests until the next exposure time.
+Fall time is not configurable so there is no 'gentle' fall with this hardware.
+
+The ramp waveform must last a whole number of milliseconds. If exposure time is not a whole number, 
+the ramp time will be rounded to the nearest whole number.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes: 
+        microscope_name:
+          remote_focus_device:
+            hardware: 
+              type: ASI
+              axis: A
+              min: 0
+              max: 5
+              port: COM4
+
+|
+
+------------------
+
 Synthetic Remote Focus Device
 -----------------------------
 If no remote focus device is present, one must configure the software to use a synthetic

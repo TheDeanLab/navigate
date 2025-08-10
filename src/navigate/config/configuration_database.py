@@ -108,6 +108,7 @@ filter_wheel_hardware_widgets = {
 
 daq_device_types = {
     "National Instruments": "NI",
+    "Applied Scientific Instrumentation": ("ASI", "asi"),
     "Virtual Device": "Synthetic",
 }
 
@@ -435,12 +436,14 @@ stage_constants_widgets = {
 remote_focus_device_types = {
     "Equipment Solutions": ("EquipmentSolutions", "equipment_solutions"),
     "Analog Device": ("NI", "ni"),
+    "ASI Device": ("ASI", "asi"),
     "Virtual Device": ("Synthetic", "synthetic"),
 }
 
 remote_focus_hardware_widgets = {
     "type": ["Device Type", "Combobox", "string", remote_focus_device_types, None],
     "channel": ["DAQ Channel", "Input", "string", None, "Example: PXI6259/ao3"],
+    "axis": ["Device Type", "Input", "string", None, "Example: A"],
     "min": [
         "Minimum Voltage",
         "Spinbox",
@@ -466,7 +469,7 @@ remote_focus_hardware_widgets = {
     "frame_config": {"ref": "hardware"},
 }
 
-galvo_device_types = {"Analog Device": ("NI", "ni"), "Virtual Device": ("Synthetic", "synthetic")}
+galvo_device_types = {"Analog Device": ("NI", "ni"), "ASI Device": ("ASI", "asi"), "Virtual Device": ("Synthetic", "synthetic")}
 
 waveform_types = {
     "Sine": "sine",
@@ -483,6 +486,7 @@ galvo_hardware_widgets = {
         None,
         "*Analog Device only. Example: PXI6259/ao1",
     ],
+    "hardware/axis": ["Axis", "Input", "string", None, "Example: A"],
     "hardware/min": [
         "Minimum Voltage",
         "Spinbox",

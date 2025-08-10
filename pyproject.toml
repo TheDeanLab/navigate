@@ -7,7 +7,7 @@ name = "navigate-micro"
 description = "Open source, smart, light-sheet microscopy control software."
 authors = [{name = "The Dean Lab, UT Southwestern Medical Center"}]
 readme = "README.md"
-license = {file = "LICENSE.md"}
+license-files = ["LICENSE.md"]
 dynamic = ["version"]
 classifiers = [
     "Intended Audience :: Developers",

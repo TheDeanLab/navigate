@@ -19,12 +19,9 @@ is closed.
 Applied Scientific Instrumentation
 ----------------------------------
 
-Tiger Controller
-~~~~~~~~~~~~~~~~~~
-
------------------
-
-The `tgplc <https://asiimaging.com/docs/tiger_programmable_logic_card>`_ control card from ASI can be used to trigger shutter operation.
+The `TGPLC <https://asiimaging.com/docs/tiger_programmable_logic_card>`_ control card for the 
+Tiger Controller (`TG-1000 <https://asiimaging.com/docs/products/tiger>`_) from ASI can be used to trigger shutter operation.
+TGPLC output 1 is reserved for the camera trigger.
 
 -----------------
 
@@ -37,9 +34,10 @@ The `tgplc <https://asiimaging.com/docs/tiger_programmable_logic_card>`_ control
             shutter:
               hardware:
                 type: ASI
-                axis: [1-8]
+                axis: 2
                 min: 0.0
                 max: 5.0
+                port: COM4
 
 |
 

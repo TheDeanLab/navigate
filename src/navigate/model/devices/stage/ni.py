@@ -312,6 +312,8 @@ class NIStage(StageBase, NIDevice):
         self.sweep_times = sweep_times
         if mode == "normal":
             if self.ao_task is None:
+                if self.daq.analog_outputs is not None:
+                    self.daq.analog_outputs.pop(self.axes_channels[0], None)
                 self.ao_task = nidaqmx.Task()
                 self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
             self.move_axis_absolute(

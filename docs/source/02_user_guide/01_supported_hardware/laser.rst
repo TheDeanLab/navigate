@@ -8,11 +8,10 @@ We currently support laser control via voltage signals. In the near-future, we w
 Applied Scientific Instrumentation
 ----------------------------------
 
-
-Tiger Controller
-~~~~~~~~~~~~~~~~~~
-
-The Tiger Controller from ASI can also be used to perform analog, digital, and mixed modulation of lasers. Digital modulation is controlled with a `TGPLC <https://asiimaging.com/docs/tiger_programmable_logic_card>`_ or `TGGALVO <https://asiimaging.com/docs/tggalvo>`_ control cards, while analog modulation is controlled with a TGGALVO control card.
+The Tiger Controller (`TG-1000 <https://asiimaging.com/docs/products/tiger>`_) from ASI can also be used to perform analog, digital, and mixed modulation of lasers. 
+Digital modulation is controlled with a `TGPLC <https://asiimaging.com/docs/tiger_programmable_logic_card>`_ 
+or `TGGALVO <https://asiimaging.com/docs/tggalvo>`_ control cards, while analog modulation is controlled with a TGGALVO control card.
+TGPLC output 1 is reserved for the camera trigger.
 
 --------------------------------
 
@@ -28,7 +27,7 @@ The Tiger Controller from ASI can also be used to perform analog, digital, and m
                 onoff:
                   hardware:
                     type: ASI
-                    axis: [2-8]
+                    axis: 2
                     min: 0.0
                     max: 5.0
                 power:
@@ -42,7 +41,7 @@ The Tiger Controller from ASI can also be used to perform analog, digital, and m
                 onoff:
                   hardware:
                     type: ASI
-                    axis: [2-8]
+                    axis: 3
                     min: 0.0
                     max: 5.0
                 power:

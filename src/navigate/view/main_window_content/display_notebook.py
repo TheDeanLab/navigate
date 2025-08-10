@@ -90,6 +90,8 @@ class CameraNotebook(DockableNotebook):
         self.add(self.mip_tab, text="MIP", sticky=tk.NSEW)
         self.add(self.waveform_tab, text="Waveforms", sticky=tk.NSEW)
 
+        uniform_grid(self)
+
 
 class MIPTab(tk.Frame):
     """MipTab class."""
@@ -114,18 +116,12 @@ class MIPTab(tk.Frame):
         #: int: The index of the tab.
         self.index = 1
 
-        #: Bool: The popup flag.
-        self.is_popup = False
-
         #: Bool: The docked flag.
         self.is_docked = True
 
         #: ttk.Frame: The frame that will hold the camera image.
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
-
-        #: bool: The popup flag.
-        self.is_popup = False
 
         #: bool: The docked flag.
         self.is_docked = True
@@ -182,16 +178,14 @@ class CameraTab(tk.Frame):
         #: int: The index of the tab.
         self.index = 0
 
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
-
         #: ttk.Frame: The frame that will hold the camera image.
         self.cam_image = ttk.Frame(self)
-        self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
+        self.cam_image.grid(row=0, column=0, sticky=tk.NSEW)
+        self.display_setting = ttk.Frame(self)
+        self.display_setting.grid(row=0, column=1, sticky=tk.NSEW)
 
-        #: bool: The popup flag.
-        self.is_popup = False
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         #: bool: The docked flag.
         self.is_docked = True
@@ -214,13 +208,9 @@ class CameraTab(tk.Frame):
         #: FigureCanvasTkAgg: The canvas that will hold the camera image.
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
-        #: IntensityFrame: The frame that will hold the scale settings/palette color.
-        self.lut = IntensityFrame(self)
-        self.lut.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
-
         #: tk.Scale: The slider that will hold the slice index.
         self.slider = tk.Scale(
-            self,
+            self.cam_image,
             from_=0,
             to=200,
             tickinterval=20,
@@ -229,19 +219,23 @@ class CameraTab(tk.Frame):
             label="Slice",
         )
         self.slider.configure(state="disabled")
-        self.slider.grid(row=3, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.slider.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
         self.slider.grid_remove()
 
         #: HistogramFrame: The frame that will hold the histogram.
-        self.histogram = HistogramFrame(self)
-        self.histogram.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.histogram = HistogramFrame(self.cam_image)
+        self.histogram.grid(row=2, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        #: IntensityFrame: The frame that will hold the scale settings/palette color.
+        self.lut = IntensityFrame(self.display_setting)
+        self.lut.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
         #: MetricsFrame: The frame that will hold the camera selection and counts.
-        self.image_metrics = MetricsFrame(self)
+        self.image_metrics = MetricsFrame(self.display_setting)
         self.image_metrics.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
         #: RenderFrame: The frame that will hold the live display functionality.
-        self.live_frame = RenderFrame(self)
+        self.live_frame = RenderFrame(self.display_setting)
         self.live_frame.grid(row=2, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
 

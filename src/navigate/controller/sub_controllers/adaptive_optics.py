@@ -63,9 +63,11 @@ class AdaptiveOpticsPopupController(GUIController):
 
         self.view.popup.protocol("WM_DELETE_WINDOW", self.view.popup.dismiss)
 
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "HighlightedMode"
-        ] = None
+        self.mirror_params = self.parent_controller.configuration["experiment"]["MirrorParameters"]
+        self.ao_params = self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"]
+        self.tw_params = self.ao_params["TonyWilson"]
+
+        self.ao_params["HighlightedMode"] = None
 
         #: list of dicts: list of dicts containing trace data
         self.trace_list = []
@@ -78,16 +80,6 @@ class AdaptiveOpticsPopupController(GUIController):
 
         #: dict: dictionary of mode labels
         self.mode_labels = self.view.get_labels()
-
-        # TODO: just for testing, remove later...
-        #: list: list of cameras
-        self.camera_list = self.view.camera_list
-        self.camera_list[
-            "values"
-        ] = self.parent_controller.configuration_controller.microscope_list
-        self.camera_list.bind(
-            "<<ComboboxSelected>>", lambda evt: self.change_camera(evt)
-        )
 
         #: Figure: figure for mirror plot
         self.fig = self.view.fig
@@ -129,20 +121,27 @@ class AdaptiveOpticsPopupController(GUIController):
                 "<Leave>", lambda evt: evt.widget.config(background="SystemButtonFace")
             )
 
+        # update all experiment values each time one is changed
+        # from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+        # for k in self.widgets:
+        #     input = self.widgets[k]
+        #     if type(input) == LabelInput:
+        #         input.widget.bind(
+        #             "<KeyRelease>", self.on_input_change
+        #         )
+
+        self.widgets["iterations"].widget.bind( "<KeyRelease>", self.on_input_change)
+        self.widgets["steps"].widget.bind(      "<KeyRelease>", self.on_input_change)
+        self.widgets["amplitude"].widget.bind(  "<KeyRelease>", self.on_input_change)
+
+        self.widgets["from"]["button"].bind(    "<<ComboboxSelected>>", self.on_input_change)
+        self.widgets["metric"]["button"].bind(  "<<ComboboxSelected>>", self.on_input_change)
+        self.widgets["fitfunc"]["button"].bind( "<<ComboboxSelected>>", self.on_input_change)
+
         self.populate_experiment_values()
 
-    def change_camera(self, evt):
-        """Change the camera to the selected camera
-
-        Parameters
-        ----------
-        evt : Event
-            The event that triggered this function
-        """
-        # cam_id = evt.widget.get().split("_")[-1]
-        # self.parent_controller.execute("change_camera", int(cam_id))
-        cam_name = evt.widget.get()
-        self.parent_controller.execute("resolution", cam_name)
+    def on_input_change(self, evt):
+        self.update_experiment_values()
 
     def set_highlighted_mode(self, evt, mode):
         """Set the highlighted mode
@@ -155,7 +154,7 @@ class AdaptiveOpticsPopupController(GUIController):
             The mode to highlight
         """
         evt.widget.config(background="red")
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
+        self.ao_params[
             "HighlightedMode"
         ] = mode
         self.plot_tw_trace()
@@ -172,11 +171,7 @@ class AdaptiveOpticsPopupController(GUIController):
 
     def populate_experiment_values(self):
         """Populate the experiment values"""
-        self.camera_list.set(
-            self.parent_controller.configuration["experiment"]["MicroscopeState"][
-                "microscope_name"
-            ]
-        )
+
         self.widgets["save_report"]["variable"].set(
             self.parent_controller.configuration["experiment"][
                 "AdaptiveOpticsParameters"
@@ -217,41 +212,26 @@ class AdaptiveOpticsPopupController(GUIController):
         modes_dict = {}
         coef_list = self.get_coef_from_widgets()
         keys = self.view.mode_names
+        
         for i, coef in enumerate(coef_list):
             modes_dict[keys[i]] = coef
-        self.parent_controller.configuration["experiment"]["MirrorParameters"][
-            "modes"
-        ] = modes_dict
+        
+        self.mirror_params["modes"] = modes_dict
 
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "TonyWilson"
-        ]["iterations"] = int(self.widgets["iterations"].get())
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "TonyWilson"
-        ]["steps"] = int(self.widgets["steps"].get())
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "TonyWilson"
-        ]["amplitude"] = float(self.widgets["amplitude"].get())
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "TonyWilson"
-        ]["from"] = self.widgets["from"]["variable"].get()
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "TonyWilson"
-        ]["metric"] = self.widgets["metric"]["variable"].get()
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "TonyWilson"
-        ]["fitfunc"] = self.widgets["fitfunc"]["variable"].get()
+        try:
+            self.tw_params["iterations"] = int(self.widgets["iterations"].get())
+            self.tw_params["steps"] = int(self.widgets["steps"].get())
+            self.tw_params["amplitude"] = float(self.widgets["amplitude"].get())
+            self.tw_params["from"] = self.widgets["from"]["variable"].get()
+            self.tw_params["metric"] = self.widgets["metric"]["variable"].get()
+            self.tw_params["fitfunc"] = self.widgets["fitfunc"]["variable"].get()
+        except ValueError:
+            pass
 
-        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
-            "save_report"
-        ] = self.widgets["save_report"]["variable"].get()
+        self.ao_params["save_report"] = self.widgets["save_report"]["variable"].get()
 
         for k in self.modes_armed.keys():
-            self.parent_controller.configuration["experiment"][
-                "AdaptiveOpticsParameters"
-            ]["TonyWilson"]["modes_armed"][k] = self.modes_armed[k]["variable"].get()
-
-        # print(self.parent_controller.configuration['experiment']['MirrorParameters']['modes'])
+            self.tw_params["modes_armed"][k] = self.modes_armed[k]["variable"].get()
 
     def get_coef_from_widgets(self):
         """Get the coefficients from the widgets

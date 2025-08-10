@@ -44,6 +44,9 @@ from multiprocessing.managers import ListProxy
 from .image_writer import ImageWriter
 from navigate.tools.common_functions import VariableWithLock
 
+
+from navigate.model.waveforms import remote_focus_ramp
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -172,6 +175,117 @@ class WaitForExternalTrigger:
 
         return result
 
+class ProjectionMode:
+
+    def __init__(self, model, axis='z', galvo_num=0, enable=True, z_range=None, shear_amp=None):
+
+        self.model = model
+
+        self.enable = enable
+
+        self.z_range = z_range
+        self.shear_amp = shear_amp
+
+        self.microscope_state = None
+        self.waveform_constants = None
+
+        self.galvo_stage = model.active_microscope.stages[axis]
+        self.shear_galvo = model.active_microscope.galvo[f"galvo_{galvo_num}"]
+
+        self.galvo_num = galvo_num
+
+        self.exposure_times = None
+        self.sweep_times = None
+        self.channels = None
+
+        self.current_channel_in_list = 0
+
+        self.config_table = {
+            "signal": {"main": self.toggle_projection_mode}
+        }
+
+    def toggle_projection_mode(self):
+
+        self.microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+        self.waveform_constants = self.model.configuration["waveform_constants"]
+
+        (
+            self.exposure_times,
+            self.sweep_times
+        ) = self.model.active_microscope.get_exposure_sweep_times()
+
+        if self.enable:
+            self.setup_projection()
+        else:
+            self.disable_projection()
+
+        return True
+
+    def setup_projection(self):
+
+        self.microscope_state["waveform_template"] = "Confocal-Projection"
+
+        self.channels = self.microscope_state["selected_channels"]
+
+        remote_focus_delay = float(self.waveform_constants["other_constants"][
+            "remote_focus_delay"
+            ]) / 1000
+        remote_focus_ramp_falling = float(self.waveform_constants["other_constants"][
+            "remote_focus_ramp_falling"
+            ]) / 1000
+        
+        z_range = self.microscope_state["scanrange"] if self.z_range is None else self.z_range        
+        shear_amp = self.microscope_state["shear_amp"] if self.shear_amp is None else self.shear_amp
+
+        waveform_dict = {}
+        for channel_key in self.microscope_state["channels"].keys():
+            
+            channel = self.microscope_state["channels"][channel_key]
+
+            if channel["is_selected"]:
+
+                waveform_dict[channel_key] = remote_focus_ramp(
+                    sample_rate = self.galvo_stage.sample_rate,
+                    exposure_time = self.exposure_times[channel_key],
+                    sweep_time = self.sweep_times[channel_key],
+                    remote_focus_delay = remote_focus_delay,
+                    fall = remote_focus_ramp_falling,
+                    camera_delay = self.galvo_stage.camera_delay,
+                    amplitude = eval(self.galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)})
+                )
+        
+        self.galvo_stage.update_waveform(waveform_dict)
+
+        self.set_shear_amplitude(shear_amp)
+
+    def set_shear_amplitude(self, amp):
+            
+        self.waveform_constants["galvo_constants"][f"Galvo {self.galvo_num}"][
+        self.microscope_state["microscope_name"]
+        ][
+            self.microscope_state["zoom"]
+        ]["amplitude"] = amp
+
+        self.shear_galvo.adjust(
+            self.exposure_times,
+            self.sweep_times
+        )
+
+    def disable_projection(self):
+
+        self.microscope_state["waveform_template"] = "Default"        
+
+        self.galvo_stage.waveform_dict = {}
+
+        self.set_shear_amplitude(0)
+
+        # self.galvo_stage.ao_task = None
+
+        self.galvo_stage.switch_mode(
+            "normal",
+            # exposure_times = self.exposure_times,
+            # sweep_times = self.sweep_times
+            )
 
 class WaitToContinue:
     """WaitToContinue class for synchronizing signal and data acquisition.

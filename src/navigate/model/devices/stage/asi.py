@@ -152,7 +152,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 self.asi_controller.set_backlash(ax, 0.0)
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.2)
+            self.set_speed(percent=0.9)
 
     def __del__(self):
         """Delete the ASI Stage connection."""
@@ -268,9 +268,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         # Move stage
         try:
             if axis == "theta":
-                self.asi_controller.move_axis(
-                    self.axes_mapping[axis], axis_abs * 1000
-                )
+                self.asi_controller.move_axis(self.axes_mapping[axis], axis_abs * 1000)
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
                 self.asi_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
@@ -569,7 +567,9 @@ class MS2000Stage(ASIStage):
         device_id : int
             Device ID for the stage, default to 0
         """
-        StageBase.__init__(self, microscope_name, device_connection, configuration, device_id)
+        StageBase.__init__(
+            self, microscope_name, device_connection, configuration, device_id
+        )
 
         # Default axes mapping
         axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
@@ -628,8 +628,7 @@ class MS2000Stage(ASIStage):
                 self.asi_controller.set_backlash(ax, 0.02)
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.4)
-            # self.set_speed(percent=0.9)
+            self.set_speed(percent=0.9)
 
     @classmethod
     def connect(cls, port, baudrate=115200, timeout=0.25):
@@ -649,7 +648,10 @@ class MS2000Stage(ASIStage):
         asi_stage : object
             Successfully initialized stage object.
         """
-        from navigate.model.devices.APIs.asi.asi_MS2000_controller import MS2000Controller
+        from navigate.model.devices.APIs.asi.asi_MS2000_controller import (
+            MS2000Controller,
+        )
+
         # wait until ASI device is ready
         asi_stage = MS2000Controller(port, baudrate)
         asi_stage.connect_to_serial()
@@ -658,7 +660,6 @@ class MS2000Stage(ASIStage):
             raise Exception("ASI stage connection failed.")
 
         return asi_stage
-
 
     def move_axis_relative(self, axis, distance, wait_until_done=False):
         """Move the stage relative to the current position along the specified axis.
@@ -748,7 +749,8 @@ class MS2000Stage(ASIStage):
             return False
 
         return True
-    
+
+
 class MFC2000Stage(ASIStage):
     """Applied Scientific Instrumentation (ASI) Stage Class
 
@@ -802,6 +804,7 @@ class MFC2000Stage(ASIStage):
             Successfully initialized stage object.
         """
         from navigate.model.devices.APIs.asi.asi_MFC_controller import MFCTwoThousand
+
         # wait until ASI device is ready
         asi_stage = MFCTwoThousand(port, baudrate)
         asi_stage.connect_to_serial()
@@ -810,4 +813,3 @@ class MFC2000Stage(ASIStage):
             raise Exception("ASI stage connection failed.")
 
         return asi_stage
-   

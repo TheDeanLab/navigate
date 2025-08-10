@@ -230,11 +230,16 @@ class ConfigurationController:
         Returns
         -------
         position : dict
-            Dictionary with x, y, z, theta, and f home positions.
+            Dictionary with all stage home positions.
         """
-        position = {"x": None, "y": None, "z": None, "theta": None, "f": None}
+
+        # Get all stage axes, not just the core X, Y, Z, F, and Theta.
+        axes = self.all_stage_axes
+
+        # Create a dictionary for every axis in axes with a default value of None.
+        position = {axis: None for axis in axes}
         if self.microscope_config is not None:
-            for axis in ["x", "y", "z", "theta", "f"]:
+            for axis in axes:
                 key = f"{axis}_home"
                 position[axis] = self.microscope_config["stage"].get(key, None)
                 if position[axis] is None:

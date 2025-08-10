@@ -567,7 +567,7 @@ class Microscope:
         for i, k in enumerate(self.galvo):
             galvo_type = self.configuration["configuration"]["microscopes"][
                 self.microscope_name
-            ]["galvo"][i]["hardware"]["type"]            
+            ]["galvo"][i]["hardware"]["type"]
             if galvo_type in ("asi.ASI", "ASI"):
                 self.galvo[k].turn_off()
 
@@ -913,7 +913,6 @@ class Microscope:
             self.central_focus = None
 
         return success
-
 
     def stop_stage(self) -> None:
         """Stop stage."""

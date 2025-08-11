@@ -297,7 +297,9 @@ class AdvancedStageParametersController:
 
         # Update our local stage dictionary with the new value.
         self.stage_dict[axis] = value
-        logger.debug(f"Updating {axis} limit to {value}...")
+        logger.debug(
+            f"Updating {axis} limit to {value} for {self.current_microscope}..."
+        )
 
     def _configure_widget_traces(self) -> None:
         """Configure traces and commands for widgets after they're created."""

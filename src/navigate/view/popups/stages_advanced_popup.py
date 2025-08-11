@@ -261,9 +261,6 @@ class AdvancedStageParametersPopup:
                 "position."
             )
 
-            # TODO: Once this is fixed, remove this next line of code.
-            self.buttons[stage_name + "_home"].configure(state="disabled")
-
             # Column 8: Offsets
             self.spinboxes[stage_name + "_offset"] = ValidatedSpinbox(
                 self.frame,

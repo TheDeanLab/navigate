@@ -193,9 +193,6 @@ class BaseViewController(GUIController, ABaseViewController):
         #: numpy.ndarray: The image data.
         self.image = None
 
-        #: bool: The flag for the image cache.
-        self.image_cache_flag = True
-
         #: int: The count of images.
         self.image_count = 0
 
@@ -244,9 +241,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         #: ImageTk.PhotoImage: The tkinter image.
         self.tk_image = None
-
-        #: ImageTk.PhotoImage: The tkinter image 2.
-        self.tk_image2 = None
 
         #: int: The total number of images per volume.
         self.total_images_per_volume = 0
@@ -904,7 +898,7 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         # Compute min/max once and reuse; also store display max
         min_value, max_value, _, _ = cv2.minMaxLoc(image)
-        self._last_frame_display_max = int(max_value)
+        self._last_frame_display_max = max_value
 
         if self.autoscale:
             # In the off chance that we get a flat image, we set the min and max.
@@ -1045,7 +1039,6 @@ class BaseViewController(GUIController, ABaseViewController):
             # keep a reference so the buffer stays alive while Tk reads it
             self._img_buf = image
             pil = Image.frombuffer(mode, (w, h), image, "raw", mode, 0, 1)
-            t1 = time.perf_counter()
 
             # fast in-place update; no new PhotoImage objects, no new canvas items
             self._photo.paste(pil)

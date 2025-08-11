@@ -198,8 +198,12 @@ def save_yaml_file(
         return False
     return True
 
+
 def write_to_yaml(content_dict: dict, filename: str) -> None:
-    """write to a standard yaml file
+    """Write to a standard yaml file.
+
+    The yaml file is written according with the keys in alphabetical order to make it
+    easier to read.
 
     Parameters
     ----------
@@ -210,8 +214,8 @@ def write_to_yaml(content_dict: dict, filename: str) -> None:
     """
 
     def write_func(prefix, config_dict, f):
-        for k in config_dict.keys():
-            if type(config_dict[k])in [dict, DictProxy]:
+        for k in sorted(config_dict.keys(), key=lambda x: str(x)):
+            if type(config_dict[k]) in [dict, DictProxy]:
                 f.write(f"{prefix}{k}:\n")
                 write_func(prefix + " " * 2, config_dict[k], f)
             elif type(config_dict[k]) in [list, ListProxy]:

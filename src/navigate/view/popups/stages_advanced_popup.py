@@ -103,6 +103,15 @@ class AdvancedStageParametersPopup:
         )
         self.microscope.grid(row=0, column=0, columnspan=3, padx=5, pady=5, sticky="ew")
 
+        #: dict: Holder for column frames (LabelFrames)
+        self.column_frames = {}
+
+        #: dict: Hold per-row widgets to normalize row heights across LabelFrames
+        self._row_widgets = {}
+
+        #: int: Fixed row height (px) to ensure perfect alignment across columns
+        self.row_minsize = 34
+
     def populate_view(
         self,
         stages: list,
@@ -136,44 +145,59 @@ class AdvancedStageParametersPopup:
         # Sort stages alphabetically
         sorted_stages = sorted(stages)
 
-        # Create column headers
-        tk.Label(self.frame, text="Stage", font=("Arial", 10, "bold")).grid(
-            row=1, column=0, padx=5, pady=5, sticky="NSEW"
+        # Create column LabelFrames to group each functional area
+        self.column_frames = {
+            "stage": ttk.LabelFrame(self.frame, text="Stage"),
+            "min": ttk.LabelFrame(self.frame, text="Minimum Stage Limit"),
+            "max": ttk.LabelFrame(self.frame, text="Maximum Stage Limit"),
+            "home": ttk.LabelFrame(self.frame, text="Home Position"),
+            "offset": ttk.LabelFrame(self.frame, text="Stage Offsets"),
+            "flip": ttk.LabelFrame(self.frame, text="Reverse Direction"),
+        }
+
+        # Grid the LabelFrames in one row so they look like columns
+        self.column_frames["stage"].grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+        self.column_frames["min"].grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+        self.column_frames["max"].grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
+        self.column_frames["home"].grid(row=1, column=3, padx=5, pady=5, sticky="nsew")
+        self.column_frames["offset"].grid(
+            row=1, column=4, padx=5, pady=5, sticky="nsew"
         )
+        self.column_frames["flip"].grid(row=1, column=5, padx=5, pady=5, sticky="nsew")
 
-        tk.Label(
-            self.frame, text="Minimum Stage Limit", font=("Arial", 10, "bold")
-        ).grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky="NSEW")
+        # Make the columns expand nicely
+        for c in range(6):
+            self.frame.grid_columnconfigure(c, weight=1)
 
-        tk.Label(
-            self.frame, text="Maximum Stage Limit", font=("Arial", 10, "bold")
-        ).grid(row=1, column=3, columnspan=2, padx=5, pady=5, sticky="NSEW")
+        # Inside each framed column, set reasonable inner column weights
+        # (min/max/home groups have two inner columns: value + Update button)
+        for key in ("min", "max", "home"):
+            self.column_frames[key].grid_columnconfigure(0, weight=1)
+            self.column_frames[key].grid_columnconfigure(1, weight=0)
+        self.column_frames["stage"].grid_columnconfigure(0, weight=1)
+        self.column_frames["offset"].grid_columnconfigure(0, weight=1)
+        self.column_frames["flip"].grid_columnconfigure(0, weight=1)
 
-        tk.Label(self.frame, text="Home Position", font=("Arial", 10, "bold")).grid(
-            row=1, column=5, columnspan=2, padx=5, pady=5, sticky="NSEW"
-        )
-
-        tk.Label(self.frame, text="Stage Offsets", font=("Arial", 10, "bold")).grid(
-            row=1, column=7, columnspan=1, padx=5, pady=5, sticky="NSEW"
-        )
-
-        tk.Label(self.frame, text="Reverse Direction", font=("Arial", 10, "bold")).grid(
-            row=1, column=8, columnspan=1, padx=5, pady=5, sticky="NSEW"
-        )
         # Create a row for each stage
-        for i, stage_name in enumerate(sorted_stages, start=1):
+        for i, stage_name in enumerate(sorted_stages):
 
             # Capitalize the first letter of the stage name
             display_name = stage_name.capitalize()
 
             # Column 1: Stage name label
-            tk.Label(self.frame, text=display_name, font=("Arial", 10, "bold")).grid(
-                row=i + 2, column=0, padx=5, pady=2, sticky="ew"
+            stage_lbl = tk.Label(
+                self.column_frames["stage"],
+                text=display_name,
+                font=("Arial", 10, "bold"),
             )
+            stage_lbl.grid(row=i, column=0, padx=5, pady=0, sticky="ew")
+
+            # collect row widgets for height normalization
+            self._row_widgets.setdefault(i, []).append(stage_lbl)
 
             # Column 2: Minimum limit spinbox
             self.spinboxes[stage_name + "_min"] = ValidatedSpinbox(
-                self.frame,
+                self.column_frames["min"],
                 from_=-100000,
                 to=100000,
                 width=10,
@@ -181,26 +205,26 @@ class AdvancedStageParametersPopup:
                 increment=1,
             )
             self.spinboxes[stage_name + "_min"].set(min_dict.get(stage_name, 0.0))
-            self.spinboxes[stage_name + "_min"].grid(
-                row=i + 2, column=1, padx=5, pady=2
-            )
+            self.spinboxes[stage_name + "_min"].grid(row=i, column=0, padx=5, pady=0)
             self.spinboxes[stage_name + "_min"].hover.setdescription(
                 "The desired minimum limit for the stage."
             )
+            self._row_widgets[i].append(self.spinboxes[stage_name + "_min"])
 
             # Column 3: Update minimum button
             self.buttons[stage_name + "_min"] = HoverButton(
-                self.frame, text="Update", width=button_width
+                self.column_frames["min"], text="Update", width=button_width
             )
-            self.buttons[stage_name + "_min"].grid(row=i + 2, column=2, padx=5, pady=2)
+            self.buttons[stage_name + "_min"].grid(row=i, column=1, padx=5, pady=0)
             self.buttons[stage_name + "_min"].hover.setdescription(
                 "Click to update the minimum limit for this stage to the current "
                 "position."
             )
+            self._row_widgets[i].append(self.buttons[stage_name + "_min"])
 
             # Column 4: Maximum limit spinbox
             self.spinboxes[stage_name + "_max"] = ValidatedSpinbox(
-                self.frame,
+                self.column_frames["max"],
                 from_=-100000,
                 to=100000,
                 width=10,
@@ -208,26 +232,26 @@ class AdvancedStageParametersPopup:
                 increment=1,
             )
             self.spinboxes[stage_name + "_max"].set(max_dict.get(stage_name, 0.0))
-            self.spinboxes[stage_name + "_max"].grid(
-                row=i + 2, column=3, padx=5, pady=2
-            )
+            self.spinboxes[stage_name + "_max"].grid(row=i, column=0, padx=5, pady=0)
             self.spinboxes[stage_name + "_max"].hover.setdescription(
                 "The desired maximum limit for the stage."
             )
+            self._row_widgets[i].append(self.spinboxes[stage_name + "_max"])
 
             # Column 5: Update maximum button
             self.buttons[stage_name + "_max"] = HoverButton(
-                self.frame, text="Update", width=button_width
+                self.column_frames["max"], text="Update", width=button_width
             )
-            self.buttons[stage_name + "_max"].grid(row=i + 2, column=4, padx=5, pady=2)
+            self.buttons[stage_name + "_max"].grid(row=i, column=1, padx=5, pady=0)
             self.buttons[stage_name + "_max"].hover.setdescription(
                 "Click to update the maximum limit for this stage to the current "
                 "position."
             )
+            self._row_widgets[i].append(self.buttons[stage_name + "_max"])
 
             # Column 6: Home position spinbox
             self.spinboxes[stage_name + "_home"] = ValidatedSpinbox(
-                self.frame,
+                self.column_frames["home"],
                 from_=-100000,
                 to=100000,
                 width=10,
@@ -237,33 +261,31 @@ class AdvancedStageParametersPopup:
 
             # If the home_dict does not have the stage, set it to an empty string. We
             # want to make sure we don't by default set it to a position where there
-            # is a crash hazard. Replace None or "None" with "".
-            # TODO: The configuration should never have "None" if we set things
-            #  correctly.
+            # is a crash hazard. Replace None or "None" with "" just in case.
             home_position = home_dict.get(stage_name, "")
             if home_position is None or home_position == "None":
                 home_position = ""
             self.spinboxes[stage_name + "_home"].set(home_position)
-            self.spinboxes[stage_name + "_home"].grid(
-                row=i + 2, column=5, padx=5, pady=2
-            )
+            self.spinboxes[stage_name + "_home"].grid(row=i, column=0, padx=5, pady=0)
             self.spinboxes[stage_name + "_home"].hover.setdescription(
                 "The desired home position for the stage."
             )
+            self._row_widgets[i].append(self.spinboxes[stage_name + "_home"])
 
             # Column 7: Update home button
             self.buttons[stage_name + "_home"] = HoverButton(
-                self.frame, text="Update", width=button_width
+                self.column_frames["home"], text="Update", width=button_width
             )
-            self.buttons[stage_name + "_home"].grid(row=i + 2, column=6, padx=5, pady=2)
+            self.buttons[stage_name + "_home"].grid(row=i, column=1, padx=5, pady=0)
             self.buttons[stage_name + "_home"].hover.setdescription(
                 "Click to update the home position for this stage to the current "
                 "position."
             )
+            self._row_widgets[i].append(self.buttons[stage_name + "_home"])
 
             # Column 8: Offsets
             self.spinboxes[stage_name + "_offset"] = ValidatedSpinbox(
-                self.frame,
+                self.column_frames["offset"],
                 from_=-100000,
                 to=100000,
                 width=10,
@@ -271,26 +293,25 @@ class AdvancedStageParametersPopup:
                 increment=1,
             )
             self.spinboxes[stage_name + "_offset"].set(offsets.get(stage_name, 0.0))
-            self.spinboxes[stage_name + "_offset"].grid(
-                row=i + 2, column=7, padx=5, pady=2
-            )
+            self.spinboxes[stage_name + "_offset"].grid(row=i, column=0, padx=5, pady=0)
             self.spinboxes[stage_name + "_offset"].hover.setdescription(
                 f"The relative offset between different microscope instances for the "
                 f"{stage_name} axis."
             )
+            self._row_widgets[i].append(self.spinboxes[stage_name + "_offset"])
 
             # Column 9: Flip flags.
             self.flip_flags[stage_name] = tk.BooleanVar()
             self.flip_button[stage_name] = HoverCheckButton(
-                self.frame,
+                self.column_frames["flip"],
                 variable=self.flip_flags[stage_name],
             )
             self.flip_button[stage_name].grid(
-                row=i + 2,
-                column=8,
+                row=i,
+                column=0,
                 columnspan=1,
                 padx=5,
-                pady=5,
+                pady=0,
                 sticky="",
             )
             self.flip_button[stage_name].hover.setdescription(
@@ -299,6 +320,12 @@ class AdvancedStageParametersPopup:
             )
             # Set the initial state of the flip flag.
             self.flip_flags[stage_name].set(flip_axes.get(stage_name, False))
+            self._row_widgets[i].append(self.flip_button[stage_name])
+
+        # Enforce a fixed row height so rows line up exactly across columns
+        for r in self._row_widgets.keys():
+            for fr in self.column_frames.values():
+                fr.grid_rowconfigure(r, minsize=self.row_minsize)
 
         # Provide a checkbox to disable the stage limits.
         style = ttk.Style()
@@ -311,9 +338,9 @@ class AdvancedStageParametersPopup:
             style="Custom.TCheckbutton",
         )
         self.stage_limits_enabled.grid(
-            row=len(sorted_stages) + 3,
+            row=2,
             column=0,
-            columnspan=2,
+            columnspan=3,
             padx=5,
             pady=5,
             sticky="w",
@@ -326,8 +353,8 @@ class AdvancedStageParametersPopup:
         # Save button.
         self.save_button = HoverButton(self.frame, text="Save", width=button_width)
         self.save_button.grid(
-            row=len(sorted_stages) + 3,
-            column=8,
+            row=2,
+            column=5,
             columnspan=1,
             padx=5,
             pady=5,
@@ -337,8 +364,8 @@ class AdvancedStageParametersPopup:
             "Click to save the limits for all stages."
         )
 
-        # Center the flip flag checkboxes
-        self.frame.grid_columnconfigure(6, weight=1)
+        # Center the flip flag checkboxes inside their column
+        self.column_frames["flip"].grid_columnconfigure(0, weight=1)
 
     def clear_view(self) -> None:
         """Clear the view by destroying all widgets and resetting variables."""
@@ -347,6 +374,11 @@ class AdvancedStageParametersPopup:
                 widget.destroy()
             widget_type.clear()
         self.flip_flags.clear()
+
+        # Destroy column frames (LabelFrames) if they exist
+        for fr in self.column_frames.values():
+            fr.destroy()
+        self.column_frames = {}
 
         for widget_type in [
             self.stage_limits_enabled,
@@ -363,6 +395,9 @@ class AdvancedStageParametersPopup:
                 # Keep row 0 (microscope dropdown), clear everything else
                 if int(grid_info.get("row", 0)) > 0:
                     widget.destroy()
+
+        # Reset per-row widgets
+        self._row_widgets = {}
 
         # Reset the widget variables to None
         self.stage_limits_enabled = None

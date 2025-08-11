@@ -193,7 +193,24 @@ class MS2000Controller(TigerController):
         # sleep to avoid error, empirically found this made it work
         time.sleep(0.1)
 
+    def set_jog_speed(self, axes: list, jsspd: int):
+        """Set jog wheel speed.
+        
+        Parameters
+        ----------
+        axes: list
+            List of axes to set
+        jsspd: int
+            Jog wheel speed (0.1 - 100)
+        """
+        cmd = 'JSSPD ' + ' '.join(f"{ax.upper()}={jsspd}" for ax in axes)
+        
+        # send JSSPD command to MS2000 controller: set jog wheel speed
+        self.send_command(cmd)
 
+        # get response (:A if successful)
+        self.read_response()
+        
     def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s.
 

@@ -700,9 +700,23 @@ class Controller:
             )
 
         elif command == "query_stages":
-            """Query the stages for their current position in a thread-blocking format."""
+            """Query the stages for the active microscope's current position in a
+            thread-blocking format."""
             query_thread = self.threads_pool.createThread(
                 resourceName="model", target=self.stop_stage
+            )
+
+            while query_thread.is_alive():
+                time.sleep(0.01)
+
+        elif command == "query_select_microscope":
+            """Query a specific microscope for its current positions in a
+            thread-blocking format."""
+            microscope_name = args[0]
+            query_thread = self.threads_pool.createThread(
+                resourceName="model",
+                target=self.query_select_microscope,
+                args=(microscope_name,),
             )
 
             while query_thread.is_alive():
@@ -1371,6 +1385,15 @@ class Controller:
 
         # Pass to model
         self.model.move_stage(pos_dict)
+
+    def query_select_microscope(self, *args):
+        """Query a specific microscope for its stage positions."""
+        microscope_name = args[0]
+        stage_positions = self.model.query_select_microscope(microscope_name)
+
+        # Inject updated positions back into the advanced stage parameters popup.
+        if hasattr(self, "stage_limits_popup_controller"):
+            self.stage_limits_popup_controller.positions = stage_positions
 
     def stop_stage(self):
         """Stop the stage.

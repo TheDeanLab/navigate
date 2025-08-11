@@ -107,6 +107,9 @@ class AdvancedStageParametersController:
         self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
         self.view.popup.bind("<Escape>", lambda event: self.close_popup())
 
+        #: dict: Current stage positions for the selected microscope.
+        self.positions = None
+
         logger.debug("Stage limits popup initialized.")
 
     def save_stage_parameters(self) -> None:
@@ -178,32 +181,32 @@ class AdvancedStageParametersController:
         # Identify the axis and whether it's a min, max, or home update.
         axis, min_max_or_home = axis.split("_")
 
-        # Get our current position.
-        self.parent_controller.execute("query_stages")
+        # Contact the model in a thread-blocking format, request the current stage
+        # positions, and then have the controller inject the updated values into the
+        # Advanced Stage Parameters popup as self.positions.
+        self.parent_controller.execute(
+            "query_select_microscope", self.current_microscope
+        )
 
-        # Get the current position from the stage controller.
-        current_position = self.parent_controller.stage_controller.get_position()
+        if self.positions is not None:
+            position = self.positions[f"{axis}_pos"]
 
-        # TODO: Add method to query non-standard axes. Currently gets the value
-        #  from the stage positions tab, which is only active when the microscope
-        #  is selected and assumes that the user has not adjusted the stage
-        #  position outside of the software.
-
-        if axis in ["x", "y", "z", "f", "theta"]:
             # Update the popup window.
-            self.view.spinboxes[f"{axis}_{min_max_or_home}"].set(current_position[axis])
+            self.view.spinboxes[f"{axis}_{min_max_or_home}"].set(position)
 
             # Update the loaded configuration.
             self.parent_controller.configuration["configuration"]["microscopes"][
                 self.current_microscope
-            ]["stage"][f"{axis}_{min_max_or_home}"] = current_position[axis]
+            ]["stage"][f"{axis}_{min_max_or_home}"] = position
 
             # Update the stage dictionary with the new value.
-            self.stage_dict[f"{axis}_{min_max_or_home}"] = current_position[axis]
+            self.stage_dict[f"{axis}_{min_max_or_home}"] = position
 
             logger.debug(
-                f"Updating {axis} {min_max_or_home} limits to {current_position[axis]}..."
+                f"Updated {axis} {min_max_or_home} limits to {position} for {self.current_microscope}."
             )
+        else:
+            logger.error("Updated positions not received from the controller.")
 
     def close_popup(self) -> None:
         """Close the popup window."""

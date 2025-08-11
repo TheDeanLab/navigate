@@ -588,13 +588,17 @@ class Model:
                 self.data_buffer_saving_flags = None
 
             if self.imaging_mode == "live":
-                self.signal_thread = ThreadWithWarning(target=self.run_live_acquisition,
-                                                       warning_queue=self.event_queue,
-                                                       logger=self.logger)
+                self.signal_thread = ThreadWithWarning(
+                    target=self.run_live_acquisition,
+                    warning_queue=self.event_queue,
+                    logger=self.logger,
+                )
             else:
-                self.signal_thread = ThreadWithWarning(target=self.run_acquisition,
-                                                       warning_queue=self.event_queue,
-                                                       logger=self.logger)
+                self.signal_thread = ThreadWithWarning(
+                    target=self.run_acquisition,
+                    warning_queue=self.event_queue,
+                    logger=self.logger,
+                )
 
             self.signal_thread.name = f"{self.imaging_mode} signal"
 
@@ -690,9 +694,11 @@ class Model:
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
                 self.stop_send_signal = False
-                self.signal_thread = ThreadWithWarning(target=self.run_live_acquisition, 
-                                                       warning_queue=self.event_queue,
-                                                       logger=self.logger)
+                self.signal_thread = ThreadWithWarning(
+                    target=self.run_live_acquisition,
+                    warning_queue=self.event_queue,
+                    logger=self.logger,
+                )
                 self.signal_thread.name = "Waveform Popup Signal"
                 self.signal_thread.start()
 
@@ -742,11 +748,8 @@ class Model:
             self.configuration["experiment"]["MicroscopeState"][
                 "image_mode"
             ] = "customized"
-            self.addon_feature = [
-                    {"name": PrepareNextChannel},
-                    {"name": TonyWilson}
-                ]
-            self.run_command("acquire")            
+            self.addon_feature = [{"name": PrepareNextChannel}, {"name": TonyWilson}]
+            self.run_command("acquire")
 
         elif command == "load_feature":
             """
@@ -885,6 +888,13 @@ class Model:
             Dictionary of stage positions.
         """
         return self.active_microscope.get_stage_position()
+
+    def query_select_microscope(self, *args: List[Any]) -> Dict[str, Any]:
+        """Query the selected stage."""
+        microscope_name = args[0]
+        self.microscopes[microscope_name].stop_stage()
+        ret_pos_dict = self.microscopes[microscope_name].get_stage_position()
+        return ret_pos_dict
 
     def stop_stage(self) -> None:
         """Stop the stages."""

@@ -895,6 +895,17 @@ class Model:
         self.microscopes[microscope_name].stop_stage()
         ret_pos_dict = self.microscopes[microscope_name].get_stage_position()
         return ret_pos_dict
+    
+    def update_stage_limits(self, microscope_name: str) -> None:
+        """Update stage limits
+        
+        PaParameters
+        ----------
+        microscope_name : str
+            Microscope name
+        """
+        microscope = self.microscopes[microscope_name]
+        microscope.update_stage_limits()
 
     def stop_stage(self) -> None:
         """Stop the stages."""

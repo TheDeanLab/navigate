@@ -278,10 +278,7 @@ class Controller:
 
         #: StageController: Stage Sub-Controller.
         self.stage_controller = StageController(
-            self.view.settings.stage_control_tab,
-            self.view,
-            self.camera_view_controller.canvas,
-            self,
+            self.view.settings.stage_control_tab, self,
         )
 
         #: WaveformTabController: Waveform Display Sub-Controller.
@@ -721,6 +718,16 @@ class Controller:
 
             while query_thread.is_alive():
                 time.sleep(0.01)
+
+        elif command == "update_stage_limits":
+            microscope_name = args[0]
+            if microscope_name == self.configuration_controller.microscope_name:
+                self.stage_controller.initialize()
+            self.threads_pool.createThread(
+                resourceName="model",
+                target=self.update_stage_limits,
+                args=(microscope_name,)
+            )
 
         elif command == "move_stage_and_update_info":
             """update stage view to show the position
@@ -1402,6 +1409,16 @@ class Controller:
         and update the GUI control values accordingly.
         """
         self.model.stop_stage()
+
+    def update_stage_limits(self, microscope_name: str) -> None:
+        """Update stage limits on the device side
+        
+        Parameters
+        ----------
+        microscope_name : str
+            Microscope name.
+        """
+        self.model.update_stage_limits(microscope_name)
 
     def update_stage_controller_silent(self, ret_pos_dict):
         """Send updates to the stage GUI

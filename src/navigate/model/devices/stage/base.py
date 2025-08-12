@@ -123,6 +123,9 @@ class StageBase:
         #: bool: Whether the stage has limits enabled or not. Default is True.
         self.stage_limits = True
 
+        #: stage_configuration
+        self.stage_configuration = stage_configuration
+
     def __del__(self):
         """Destructor for the StageBase class."""
         pass
@@ -229,6 +232,11 @@ class StageBase:
         if is_strict and not result_flag:
             return {}
         return abs_pos_dict
+
+    def update_limits(self):
+        for ax in self.axes:
+            setattr(self, f"{ax}_min", self.stage_configuration.get(f"{ax}_min", -10000))
+            setattr(self, f"{ax}_max", self.stage_configuration.get(f"{ax}_max", 10000))
 
     def stop(self):
         """Stop all stage movement abruptly."""

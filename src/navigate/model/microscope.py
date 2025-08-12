@@ -962,6 +962,7 @@ class Microscope:
         self.ask_stage_for_position = True
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
+            stage.update_limits()
 
     def assemble_device_config_lists(
         self, device_name: str, device_name_dict: dict

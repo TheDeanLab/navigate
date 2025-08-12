@@ -914,8 +914,7 @@ class BaseViewController(GUIController, ABaseViewController):
             return cv2.convertScaleAbs(image, alpha=scale, beta=beta)
 
         # If the user has provided incorrect min/max values, we return a flat image.
-        else:
-            return np.ones_like(image, dtype=np.uint8) * 255
+        return np.ones_like(image, dtype=np.uint8) * 255
 
     def add_crosshair(self, image: np.ndarray) -> np.ndarray:
         """Adds a cross-hair to the image.

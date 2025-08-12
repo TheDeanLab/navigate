@@ -306,9 +306,9 @@ class ConfigurationController:
         if self.microscope_config is not None:
             stage_dict = self.microscope_config["stage"]
             for a in axes:
-                position_limits[a] = stage_dict.get(
+                position_limits[a] = float(stage_dict.get(
                     a + suffix, 0 if suffix == "_min" else 100
-                )
+                ))
         else:
             for a in axes:
                 position_limits[a] = 0 if suffix == "_min" else 100

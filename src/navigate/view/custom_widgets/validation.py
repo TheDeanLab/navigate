@@ -615,6 +615,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         # Checking if less than max
         if value > float(max_val):
             self.error.set("Value is too high (max {})".format(max_val))
+            valid = False
 
         # If input is valid on focusout add to history of widget
         return valid
@@ -905,7 +906,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         min_var=None,
         max_var=None,
         focus_update_var=None,
-        required=False,
+        required=True,
         **kwargs,
     ):
         """Initialize the spinbox
@@ -1099,6 +1100,9 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         if value.strip() == "" and self.required:
             self.error.set("A value is required")
             return False
+        elif value.strip() == "" and self.required is False:
+            self.error.set("")
+            return True
         else:
             self.error.set("")
 

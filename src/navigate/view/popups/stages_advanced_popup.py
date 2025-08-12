@@ -257,6 +257,7 @@ class AdvancedStageParametersPopup:
                 width=10,
                 format="%.0f",
                 increment=1,
+                required=False,
             )
 
             # If the home_dict does not have the stage, set it to an empty string. We

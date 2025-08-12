@@ -112,6 +112,10 @@ class AdvancedStageParametersController:
 
         logger.debug("Stage limits popup initialized.")
 
+    def showup(self):
+        """This function will let the popup window show in front."""
+        self.view.popup.deiconify()
+
     def save_stage_parameters(self) -> None:
         """Save the current stage parameters to the configuration file."""
 
@@ -134,8 +138,8 @@ class AdvancedStageParametersController:
         # Update the configuration controller with the new configuration.
         self.parent_controller.configuration_controller.update_configuration()
 
-        # Reinitialize the stage controller with the new configuration.
-        self.parent_controller.stage_controller.initialize()
+        # Reinitialize the stage controller with the new configuration and update the stage device.
+        self.parent_controller.execute("update_stage_limits", self.current_microscope)
 
     def toggle_limits(self, *args) -> None:
         """Toggle the stage limits on or off."""
@@ -242,6 +246,9 @@ class AdvancedStageParametersController:
             microscope_name=self.current_microscope
         )
 
+        # update stage config dictionary
+        self.stage_dict = self.local_config_controller.microscope_config["stage"]
+
         # Set the number of stage axes for the most recently selected microscope.
         num_stages = self.local_config_controller.stage_axes
 
@@ -285,15 +292,14 @@ class AdvancedStageParametersController:
             The axis to update, e.g., 'x', 'y', or 'z'.
         """
         # Get the current value from the spinbox.
-        value = int(self.view.spinboxes[axis].get())
+        value = self.view.spinboxes[axis].get()
 
         if value == "" and "_home" in axis:
+            if axis in self.stage_dict.keys():
+                del self.stage_dict[axis]
             return
-
-        # Update the loaded configuration.
-        self.parent_controller.configuration["configuration"]["microscopes"][
-            self.current_microscope
-        ]["stage"][axis] = value
+        
+        value = int(float(value))
 
         # Update our local stage dictionary with the new value.
         self.stage_dict[axis] = value

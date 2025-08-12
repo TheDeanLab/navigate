@@ -567,7 +567,7 @@ class Microscope:
         for i, k in enumerate(self.galvo):
             galvo_type = self.configuration["configuration"]["microscopes"][
                 self.microscope_name
-            ]["galvo"][i]["hardware"]["type"]            
+            ]["galvo"][i]["hardware"]["type"]
             if galvo_type in ("asi.ASI", "ASI"):
                 self.galvo[k].turn_off()
 
@@ -890,7 +890,6 @@ class Microscope:
             True if stage is successfully moved, False otherwise.
         """
         self.ask_stage_for_position = True
-
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
@@ -963,6 +962,7 @@ class Microscope:
         self.ask_stage_for_position = True
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
+            stage.update_limits()
 
     def assemble_device_config_lists(
         self, device_name: str, device_name_dict: dict

@@ -120,7 +120,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self._last_enqueue_time: float = 0.0
 
         #: int: Cached maximum value of the last displayed frame.
-        self._last_frame_display_max = None
+        self._last_frame_display_max = 0
 
         #: tkinter.PhotoImage: The tkinter photo image for the canvas.
         self._photo = None
@@ -1267,7 +1267,8 @@ class CameraViewController(BaseViewController):
         self.rolling_frames = 1
 
         #: list: The list of maximum intensity values.
-        self.max_intensity_history = []
+        self.max_intensity_history = [0] * 32
+        self.max_intensity_history_idx = 0
 
         #: bool: The flag for displaying the mask.
         self.display_mask_flag = False
@@ -1451,31 +1452,36 @@ class CameraViewController(BaseViewController):
         If frames to average == 0 or 1, provides the maximum value from the last
         acquired data.
         """
-
-        # If the array is larger than 32 entries, remove the 0th entry.
-        if len(self.max_intensity_history) > (2**5):
-            self.max_intensity_history = self.max_intensity_history[1:]
-
         # Get the number of frames to average from the VIEW
         self.rolling_frames = int(self.image_metrics["Frames"].get())
 
-        # Make sure the array is longer than the number of frames to average.
-        if self.rolling_frames > len(self.max_intensity_history):
-            self.rolling_frames = len(self.max_intensity_history)
-            self.image_metrics["Frames"].set(self.rolling_frames)
-
-        if self.rolling_frames == 0:
+        if self.rolling_frames <= 0:
             # Cannot average 0 frames. Set to 1, and report max intensity
+            self.rolling_frames = 1
             self.image_metrics["Frames"].set(1)
-            self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
+            rolling_average = self._last_frame_display_max
         elif self.rolling_frames == 1:
-            self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
-        elif self.rolling_frames > 1:
+            rolling_average = self._last_frame_display_max
+        elif self.max_intensity_history_idx >= self.rolling_frames:
+
             rolling_average = (
-                sum(self.max_intensity_history[-self.rolling_frames :])
+                sum(
+                    self.max_intensity_history[
+                        self.max_intensity_history_idx
+                        - self.rolling_frames : self.max_intensity_history_idx
+                    ]
+                )
                 / self.rolling_frames
             )
-            self.image_metrics["Image"].set(f"{rolling_average:.0f}")
+        else:
+            temp = sum(
+                self.max_intensity_history[
+                    self.max_intensity_history_idx - self.rolling_frames :
+                ]
+            ) + sum(self.max_intensity_history[0 : self.max_intensity_history_idx])
+            rolling_average = temp / self.rolling_frames
+
+        self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
     def display_image(self, image: np.ndarray) -> None:
         """Display an image using the LUT specified in the View.
@@ -1502,10 +1508,10 @@ class CameraViewController(BaseViewController):
         img_out = self.render(self.image)
 
         # record the max without rescanning the full frame
-        if hasattr(self, "_last_frame_display_max"):
-            self.max_intensity_history.append(self._last_frame_display_max)
-        else:
-            self.max_intensity_history.append(int(np.max(self.image)))
+        self.max_intensity_history[self.max_intensity_history_idx] = (
+            self._last_frame_display_max
+        )
+        self.max_intensity_history_idx = (self.max_intensity_history_idx + 1) % 32
 
         # Schedule the image to be displayed in the Tkinter main loop
         self.view.after(0, lambda img=img_out: self.populate_image(img))

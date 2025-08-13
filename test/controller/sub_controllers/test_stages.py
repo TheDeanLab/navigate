@@ -48,12 +48,14 @@ def stage_controller(dummy_controller):
 
     dummy_controller.camera_view_controller = MagicMock()
 
-    return StageController(
+    stage_controller = StageController(
         dummy_controller.view.settings.stage_control_tab,
-        dummy_controller.view,
-        dummy_controller.camera_view_controller.canvas,
         dummy_controller,
     )
+    
+    dummy_controller.view.settings.stage_control_tab.focus_get = MagicMock(return_value=True)
+
+    return stage_controller
 
 
 # test before set position variables to MagicMock()

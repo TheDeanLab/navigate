@@ -224,6 +224,29 @@ class ConfigurationController:
         return position
 
     @property
+    def stage_home_position(self) -> dict:
+        """Get the home position of the stage. If not set, return None.
+
+        Returns
+        -------
+        position : dict
+            Dictionary with all stage home positions.
+        """
+
+        # Get all stage axes, not just the core X, Y, Z, F, and Theta.
+        axes = self.all_stage_axes
+
+        # Create a dictionary for every axis in axes with a default value of None.
+        position = {axis: None for axis in axes}
+        if self.microscope_config is not None:
+            for axis in axes:
+                key = f"{axis}_home"
+                position[axis] = self.microscope_config["stage"].get(key, None)
+                if position[axis] is None:
+                    del position[axis]
+        return position
+
+    @property
     def stage_step(self) -> dict:
         """Get the step size of the stage
 
@@ -283,9 +306,9 @@ class ConfigurationController:
         if self.microscope_config is not None:
             stage_dict = self.microscope_config["stage"]
             for a in axes:
-                position_limits[a] = stage_dict.get(
+                position_limits[a] = float(stage_dict.get(
                     a + suffix, 0 if suffix == "_min" else 100
-                )
+                ))
         else:
             for a in axes:
                 position_limits[a] = 0 if suffix == "_min" else 100

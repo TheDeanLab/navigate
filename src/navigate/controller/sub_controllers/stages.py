@@ -64,8 +64,6 @@ class StageController(GUIController):
     def __init__(
         self,
         view: StageControlTab,
-        main_view: MainApp,
-        canvas: tk.Canvas,
         parent_controller: "navigate.controller.controller.Controller",
     ) -> None:
         """Initializes the StageController
@@ -74,10 +72,6 @@ class StageController(GUIController):
          ----------
          view : navigate.view.stage_view.StageView
              The stage view
-         main_view : tkinter.Tk
-             The main view of the microscope
-         canvas : tkinter.Canvas
-             The canvas of the microscope
          parent_controller : navigate.controller.Controller
              The parent controller of the stage controller
         """
@@ -110,6 +104,7 @@ class StageController(GUIController):
             if axis in ["x", "y", "z", "theta", "f"]:
                 continue
             view.add_additional_stage(axis)
+
         #: dict: The event id
         self.event_id = dict(zip(all_stage_axes, [None] * len(all_stage_axes)))
 
@@ -270,6 +265,16 @@ class StageController(GUIController):
 
         self.joystick_axes = self.new_joystick_axes
         self.flip_flags = config.stage_flip_flags
+
+        # home button
+        home_dict = self.parent_controller.configuration_controller.stage_home_position
+        empty_home_dict = all(value is None for value in home_dict.values())
+        if empty_home_dict:
+            self.view.stop_frame.home_btn.grid_forget()
+        else:
+            self.view.stop_frame.home_btn.grid()
+            self.view.stop_frame.home_btn.configure(command=self.home_button_handler)
+            
 
     def disable_synthetic_stages(self, config: ConfigurationController) -> None:
         """Disable synthetic stages.
@@ -510,6 +515,18 @@ class StageController(GUIController):
             Variable length argument list
         """
         self.view.after(250, lambda *args: self.parent_controller.execute("stop_stage"))
+
+    #    Tai's home button
+    def home_button_handler(self, *args: Iterable) -> None:
+        """This function calls the home method of the stage.
+
+        Parameters
+        ----------
+        *args : Iterable
+            Variable length argument list
+        """
+        home = self.parent_controller.configuration_controller.stage_home_position
+        self.set_position(home)
 
     def joystick_button_handler(
         self, event: Optional[tk.Event] = None, *args: Iterable

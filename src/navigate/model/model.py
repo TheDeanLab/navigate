@@ -1682,7 +1682,7 @@ class ASIModel(Model):
     ) -> None:
         """Initialize the ASI Model.
 
-        Parameters
+        Parameters 
         ----------
         args : argparse.Namespace
             Command line arguments.
@@ -1695,16 +1695,6 @@ class ASIModel(Model):
         super().__init__(args, configuration, event_queue)
 
         print("ASIModel initialized.")
-
-    # Hypothetically, if you want to use logic in a parent method, but add to it.
-    def mark_saving_flags(frame_ids: list):
-        # Add stuff before the call.
-        super().mark_saving_flags(frame_ids=frame_ids)
-        # Add stuff after the call.
-
-    def get_feature_list():
-        # print("Overrode the original method. WIll only print now.")
-        pass
 
     def run_acquisition(self) -> None:
         """Run acquisition along with a feature list one time.
@@ -1736,6 +1726,7 @@ class ASIModel(Model):
 
     def snap_zstack(self) -> None:
         """Acquire a z-stack after updating the waveforms.
+        
         Can be used in acquisitions where changing waveforms are required,  
         but there is additional overhead due to the need to write the
         waveforms into the Tiger Controller.
@@ -1745,8 +1736,9 @@ class ASIModel(Model):
         None
             Completes after the image is captured and buffered.
         """
-        if hasattr(self, "signal_container"):
-            self.signal_container.run()
+        # if hasattr(self, "signal_container"):
+        #     self.signal_container.run()
+        self.active_microscope.prepare_next_channel()
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is

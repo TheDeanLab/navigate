@@ -1225,6 +1225,9 @@ class TigerController:
             # Sets the camera signal output to the first physical PLC output
             "6 m e = 33",
             f"6 cca z = {camera_output}",
+            # Sends TTL to Piezo
+            "6 m e = 45",
+            f"6 cca z = {camera_output}",
         ]
         # Creates object to hold galvo commands
         galvo_commands = []

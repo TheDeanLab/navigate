@@ -192,17 +192,17 @@ class ASILaser(LaserBase, SerialDevice):
             self.set_power(0)
             self._current_intensity = tmp
             self.laser.logic_card_off(self.digital_axis)
-            logger.info(f"{str(self)} initialized with mixed modulation.")
+            logger.info(f"{str(self)} closed with mixed modulation.")
 
         elif self.modulation_type == "analog":
             tmp = self._current_intensity
             self.set_power(0)
             self._current_intensity = tmp
-            logger.info(f"{str(self)} initialized with analog modulation.")
+            logger.info(f"{str(self)} closed with analog modulation.")
 
         elif self.modulation_type == "digital":
             self.laser.logic_card_off(self.digital_axis)
-            logger.info(f"{str(self)} initialized with digital modulation.")
+            logger.info(f"{str(self)} closed with digital modulation.")
 
     
     def close(self):

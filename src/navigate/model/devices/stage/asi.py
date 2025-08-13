@@ -91,6 +91,134 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
+        #: object: ASI Tiger Controller
+        self.asi_controller = device_connection
+        self.set_axes_mapping()
+        self.set_feedback_alignment(configuration)
+        self.set_finishing_accuracy(configuration)
+        self.set_error()
+        self.set_backlash()
+        self.set_speed(percent=0.8)
+
+    def set_backlash(self) -> None:
+        """Set the backlash for the ASI Stage.
+
+        The backlash is set to 0.1 for rotational axes and 0.0 for translation axes.
+        """
+        if self.asi_controller is None:
+            return
+
+        for ax in self.asi_axes.keys():
+            backlash = 0.1 if ax == "theta" else 0.0
+            current_backlash = self.asi_controller.get_backlash(ax)
+            if abs(current_backlash - backlash) > 0.0001:
+                logger.debug(f"Axis {ax}: accuracy {accuracy} → {tolerance}")
+                self.asi_controller.set_backlash(ax, backlash)
+
+    def set_finishing_accuracy(self, configuration) -> None:
+        """Set the finishing accuracy for the ASI Stage.
+
+        The finishing accuracy is set to half of the minimum pixel size
+        used in the microscope configuration. The finishing accuracy is set
+        in millimeters, while the pixel size is in microns. The finishing
+        accuracy is set for each axis, and the error is set to 1.2 times
+        the finishing accuracy for translation axes, and a fixed value for
+        the rotational axis (theta).
+
+        Note:
+            If this changes, the stage must be power cycled for these
+            changes to take effect. The user will be notified of this.
+        """
+
+        if self.device_connection is None:
+            return
+
+        # Get the minimum pixel size for all microscopes in the configuration.
+        pixel_sizes = []
+        for microscope in list(configuration["configuration"]["microscopes"]):
+            pixel_size = min(
+                list(
+                    configuration["configuration"]["microscopes"][microscope_name][
+                        "zoom"
+                    ]["pixel_size"].values()
+                )
+            )
+            pixel_sizes.append(pixel_size)
+
+        pixel_size = min(pixel_sizes)
+        self.finishing_accuracy = 0.001 * pixel_sizes / 2
+
+        for ax in self.asi_axes.keys():
+            tolerance = 0.003013 if ax == "theta" else self.finishing_accuracy
+            accuracy = self.asi_controller.get_finishing_accuracy(ax)
+            if abs(accuracy - self.finishing_accuracy) > 0.0001:
+                logger.debug(f"Axis {ax}: accuracy {accuracy} → {tolerance}")
+                self.asi_controller.set_finishing_accuracy(ax, tolerance)
+                self._alert_user()
+
+    @staticmethod
+    def _alert_user():
+        print(
+            "The finishing accuracy or error settings for the ASI stage "
+            "have been updated. You will need to power cycle "
+            "the Tiger Controller for these changes to take effect."
+        )
+
+    def set_error(self) -> None:
+        if self.device_connection is None:
+            return
+
+        # Default finishing accuracy is 1.2 times the minimum pixel size
+        for ax in self.asi_axes.keys():
+            tolerance = 0.1 if ax == "theta" else 1.2 * self.finishing_accuracy
+            error = self.asi_controller.get_error(ax)
+            if abs(error - tolerance) > 0.0001:
+                logger.debug(f"Axis {ax}: error {error} → {tolerance}")
+                self.asi_controller.set_error(ax, tolerance)
+                self._alert_user()
+
+    def set_feedback_alignment(self) -> None:
+        """Set the feedback alignment for the ASI Stage.
+
+        The default feedback alignment is 85 for each axis if not specified.
+        If the configuration file specifies a different feedback alignment,
+        that alignment is used.
+
+        Queries the ASI controller for the current feedback alignment, and only
+        updates the feedback alignment if the new value differs from the current one.
+        """
+
+        # Default feedback alignment of 85 if not specified.
+        if self.stage_feedback is None:
+            feedback_alignment = {axis: 85 for axis in self.asi_axes}
+        else:
+            feedback_alignment = {
+                axis: self.stage_feedback
+                for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
+            }
+
+        if self.asi_controller is None:
+            return
+
+        for ax, aa in feedback_alignment.items():
+            # Get current feedback alignment values from the ASI controller
+            current_aa = self.asi_controller.get_feedback_alignment(ax)
+            if aa != current_aa:
+                self.asi_controller.set_feedback_alignment(ax, aa)
+                logger.debug(f"Axis {ax}: feedback alignment {current_aa} → {aa}")
+
+    def set_axes_mapping(self) -> None:
+        """Set the axes mapping for the ASI Stage.
+
+        The default axes mapping is (software axis -> hardware axis):
+        - "x" -> "Z"
+        - "y" -> "Y"
+        - "z" -> "X"
+        - "f" -> "M"
+
+        If the configuration file specifies a different mapping, that mapping is used.
+        """
+
         # Default axes mapping
         axes_mapping = {"x": "Z", "y": "Y", "z": "X", "f": "M"}
         if not self.axes_mapping:
@@ -104,135 +232,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
-        # Set feedback alignment values. Default 85 if not specified.
-        if self.stage_feedback is None:
-            feedback_alignment = {axis: 85 for axis in self.asi_axes}
-        else:
-            feedback_alignment = {
-                axis: self.stage_feedback
-                for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
-            }
-
-        self.asi_controller = device_connection
-        if device_connection is not None:
-
-            for ax, aa in feedback_alignment.items():
-                # Get current feedback alignment values
-                current_aa = self.asi_controller.get_feedback_alignment(ax)
-                logger.debug(
-                    f"ASI Stage - Current Feedback Alignment for "
-                    f"{ax} is {current_aa}"
-                )
-
-                # Set feedback alignment values only if they differ
-                if aa != current_aa:
-                    self.asi_controller.set_feedback_alignment(ax, aa)
-                    logger.debug(
-                        f"ASI Stage - Updated Feedback Alignment for " f"{ax} to {aa}"
-                    )
-
-            # Set finishing accuracy to half of the minimum pixel size we will use
-            # pixel size is in microns, finishing accuracy is in mm
-            # TODO: check this over all microscopes sharing this stage,
-            #       not just the current one
-            finishing_accuracy = (
-                0.001
-                * min(
-                    list(
-                        configuration["configuration"]["microscopes"][microscope_name][
-                            "zoom"
-                        ]["pixel_size"].values()
-                    )
-                )
-                / 2
-            )
-
-            # Set finishing accuracy and error for each axis
-            # If this changes, the stage must be power cycled for these
-            # changes to take effect. Track with updated_values variable.
-            updated_values = False
-            for ax in self.asi_axes.keys():
-                if self.asi_axes[ax] == "theta":
-
-                    # Get current finishing accuracy and error values
-                    accuracy = self.asi_controller.get_finishing_accuracy(ax)
-                    logger.debug(f"ASI Stage - Accuracy for {ax} is {accuracy}")
-
-                    # Set finishing accuracy if it differs. Rotational
-                    # finishing accuracy differs from translation stages.
-                    if abs(accuracy - 0.003013) > 0.0001:
-                        logger.debug(
-                            f"ASI Stage - Setting Finishing Accuracy for "
-                            f"{ax} to {finishing_accuracy}"
-                        )
-                        self.asi_controller.set_finishing_accuracy(ax, 0.003013)
-                        updated_values = True
-
-                    # Get current error value
-                    error = self.asi_controller.get_error(ax)
-                    logger.debug(f"ASI Stage - Error for {ax} is {error}")
-
-                    # Set error if it differs
-                    if abs(error - 0.1) > 0.0001:
-                        logger.debug(f"ASI Stage - Setting Error for {ax} to 0.1")
-                        self.asi_controller.set_error(ax, 0.1)
-                        updated_values = True
-                else:
-                    # Get current finishing accuracy and error values
-                    accuracy = self.asi_controller.get_finishing_accuracy(ax)
-                    logger.debug(f"ASI Stage - Accuracy for {ax} is {accuracy}")
-
-                    # Set finishing accuracy if it differs
-                    if abs(accuracy - finishing_accuracy) > 0.0001:
-                        logger.debug(
-                            f"ASI Stage - Setting Finishing Accuracy for "
-                            f"{ax} to {finishing_accuracy}"
-                        )
-                        self.asi_controller.set_finishing_accuracy(
-                            ax, finishing_accuracy
-                        )
-                        updated_values = True
-
-                    # Get current error value
-                    error = self.asi_controller.get_error(ax)
-                    logger.debug(f"ASI Stage - Error for {ax} is {error}")
-
-                    # Set error if it differs
-                    if abs(error - 1.2 * finishing_accuracy) > 0.0001:
-                        logger.debug(
-                            f"ASI Stage - Setting Error for {ax} to "
-                            f"{1.2 * finishing_accuracy}"
-                        )
-                        self.asi_controller.set_error(ax, 1.2 * finishing_accuracy)
-                        updated_values = True
-
-                if updated_values:
-                    print(
-                        "The finishing accuracy or error settings for the ASI stage "
-                        "have been updated. You will need to power cycle "
-                        "the Tiger Controller for these changes to take effect."
-                    )
-
-            # Set backlash to 0 (less accurate)
-            for ax in self.asi_axes.keys():
-                # Get the current backlash value for the axis
-                backlash = self.asi_controller.get_backlash(ax)
-                logger.debug(f"ASI Stage - Backlash for {ax} is {backlash}")
-
-                if self.asi_axes[ax] == "theta" and abs(backlash - 0.1) > 0.0001:
-                    logger.debug(f"ASI Stage - Setting Backlash for {ax} to 0.1")
-                    self.asi_controller.set_backlash(ax, 0.1)
-
-                elif self.asi_axes[ax] != "theta" and abs(backlash) > 0.0001:
-                    logger.debug(f"ASI Stage - Setting Backlash for {ax} to 0.0")
-                    self.asi_controller.set_backlash(ax, 0.0)
-
-            # Speed optimizations - Set speed to 30% of maximum on each axis.
-            # Previously set to 90%, but we suspect this may be causing the
-            # observed jitter.
-            self.set_speed(percent=0.3)
-
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the ASI Stage connection."""
         try:
             if self.asi_controller is not None:
@@ -243,7 +243,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             raise
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(cls, port: str, baudrate: int = 115200, timeout: float = 0.25) -> Any:
         """Connect to the ASI Stage
 
         Parameters
@@ -270,7 +270,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
         return asi_stage
 
-    def get_axis_position(self, axis):
+    def get_axis_position(self, axis: st) -> float:
         """Get position of specific axis
 
         Parameters
@@ -292,7 +292,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return float("inf")
         return pos
 
-    def report_position(self):
+    def report_position(self) -> Dict[str, float]:
         """Reports the position for all axes in microns, and create
         position dictionary.
 
@@ -315,7 +315,9 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
         """Move stage along a single axis.
 
         Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]
@@ -363,7 +365,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             self.asi_controller.wait_for_device()
         return True
 
-    def verify_move(self, move_dictionary):
+    def verify_move(self, move_dictionary: dict) -> dict:
         """Don't submit a move command for axes that aren't moving.
         The Tiger controller wait time for each axis is additive.
 
@@ -388,7 +390,9 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 res_dict[axis] = val
         return res_dict
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(
+        self, move_dictionary: dict, wait_until_done: bool = False
+    ) -> bool:
         """Move Absolute Method.
 
         XYZ Values should remain in microns for the ASI API
@@ -434,7 +438,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
         return True
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop all stage movement abruptly."""
         try:
             self.asi_controller.stop()
@@ -442,7 +446,9 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             print(f"ASI stage halt command failed: {e}")
             logger.exception("ASI Stage Exception", e)
 
-    def set_speed(self, velocity_dict=None, percent=None):
+    def set_speed(
+        self, velocity_dict: Optional[dict] = None, percent: float = None
+    ) -> bool:
         """Set scan velocity.
 
         Parameters
@@ -474,7 +480,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 return False
         return True
 
-    def get_speed(self, axis):
+    def get_speed(self, axis: str) -> float:
         """Get scan velocity of the axis.
 
         Parameters
@@ -496,7 +502,13 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return 0
         return velocity
 
-    def scanr(self, start_position_mm, end_position_mm, enc_divide, axis="z"):
+    def scanr(
+        self,
+        start_position_mm: float,
+        end_position_mm: float,
+        enc_divide: float,
+        axis: str = "z",
+    ) -> bool:
         """Set scan range
 
         Parameters
@@ -532,8 +544,13 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         return True
 
     def scanv(
-        self, start_position_mm, end_position_mm, number_of_lines, overshoot, axis="z"
-    ):
+        self,
+        start_position_mm: float,
+        end_position_mm: float,
+        number_of_lines: int,
+        overshoot: float,
+        axis: str = "z",
+    ) -> bool:
         """Set scan range
 
         Parameters
@@ -569,7 +586,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return False
         return True
 
-    def start_scan(self, axis):
+    def start_scan(self, axis: str) -> bool:
         """Start scan state machine
 
         Parameters
@@ -594,14 +611,14 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return False
         return True
 
-    def stop_scan(self):
+    def stop_scan(self) -> None:
         """Stop scan"""
         try:
             self.asi_controller.stop_scan()
         except ASIException as e:
             logger.exception("ASI Stage Exception", e)
 
-    def wait_until_complete(self, axis):
+    def wait_until_complete(self, axis: str) -> bool:
         try:
             while self.asi_controller.is_axis_busy(axis):
                 time.sleep(0.1)

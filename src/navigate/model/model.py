@@ -582,6 +582,8 @@ class Model:
                 )
                 self.data_buffer_saving_flags = [False] * self.number_of_frames
             else:
+
+                # Retrieve dictionary of features and then initialize the signal and data containers.
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
@@ -602,6 +604,7 @@ class Model:
 
             self.signal_thread.name = f"{self.imaging_mode} signal"
 
+            # Z-stack will be in here.
             if self.is_save and self.imaging_mode != "live":
                 saving_config = {}
                 plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
@@ -895,10 +898,10 @@ class Model:
         self.microscopes[microscope_name].stop_stage()
         ret_pos_dict = self.microscopes[microscope_name].get_stage_position()
         return ret_pos_dict
-    
+
     def update_stage_limits(self, microscope_name: str) -> None:
         """Update stage limits
-        
+
         PaParameters
         ----------
         microscope_name : str
@@ -1706,7 +1709,7 @@ class ASIModel(Model):
     ) -> None:
         """Initialize the ASI Model.
 
-        Parameters 
+        Parameters
         ----------
         args : argparse.Namespace
             Command line arguments.
@@ -1720,6 +1723,39 @@ class ASIModel(Model):
 
         print("ASIModel initialized.")
 
+    # def run_command(
+    #     self, command: str, *args: List[Union[str, int]], **kwargs: Dict[str, Any]
+    # ) -> None:
+    #     if command == "acquire":
+    #         """Begin an acquisition."""
+    #         self.is_acquiring = True
+    #         self.imaging_mode = self.configuration["experiment"]["MicroscopeState"][
+    #             "image_mode"
+    #         ]
+    #         self.is_save = self.configuration["experiment"]["MicroscopeState"][
+    #             "is_save"
+    #         ]
+    #         if len(self.configuration["multi_positions"]) == 0:
+    #             self.configuration["experiment"]["MicroscopeState"][
+    #                 "is_multiposition"
+    #             ] = False
+    #
+    #         # Calculate waveforms, turn on lasers, etc.
+    #         r = self.prepare_acquisition()
+    #         if not r:
+    #             self.show_img_pipe.send("stop")
+    #             self.event_queue.put(
+    #                 (
+    #                     "warning",
+    #                     "Acquisition aborted because of camera ROI setting failed.\n"
+    #                     "Please do not use center ROI for the Ximea Camera.",
+    #                 )
+    #             )
+    #             return
+    #         else:
+    #             return super().run_command(command, *args, **kwargs)
+    #
+    #
     def run_acquisition(self) -> None:
         """Run acquisition along with a feature list one time.
 
@@ -1728,16 +1764,29 @@ class ASIModel(Model):
         None
             Completes after acquisition pass ends.
         """
-        if not hasattr(self, "signal_container"):
-            self.snap_zstack()
-            return
+        # if not hasattr(self, "signal_container"):
+        #     self.snap_zstack()
+        #     return
 
+        # The data_thread is grabbing images from the camera.
+        # We can initialize the data_thread to grab a certain number of images.
+        # Data thread directly hands the images to the ImageWriter, which saves them
+        # to disk.
+
+        # Within the run_data_process, which is inside of the data_thread, we call
+        # the data_container.
+
+        # The signal thread is running this function iteratively.
+        self.snap_zstack()
+
+        # Launch the signal and data containers, and let them terminate the
+        # acquisition when we have received the right number of frames.
         while (
             not self.signal_container.end_flag
             and not self.stop_send_signal
             and not self.stop_acquisition
         ):
-            self.snap_zstack()
+            # self.snap_zstack()
             if not hasattr(self, "signal_container"):
                 return
             if self.signal_container.is_closed:
@@ -1746,12 +1795,13 @@ class ASIModel(Model):
                 return
         if self.imaging_mode != "live":
             self.stop_acquisition = True
+
     # If you add nothing else, automatically uses the parent method.
 
     def snap_zstack(self) -> None:
         """Acquire a z-stack after updating the waveforms.
-        
-        Can be used in acquisitions where changing waveforms are required,  
+
+        Can be used in acquisitions where changing waveforms are required,
         but there is additional overhead due to the need to write the
         waveforms into the Tiger Controller.
 
@@ -1793,11 +1843,9 @@ class ASIModel(Model):
                 f"channel_{self.active_microscope.current_channel}"
             )
             self.active_microscope.daq.run_acquisition()
-        #finally:
-            
+        # finally:
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
-

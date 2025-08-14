@@ -154,6 +154,47 @@ def fourier_annulus(im, radius_1=0, radius_2=64):
     return np.mean(IM_mask), IM_mask
 
 
+class SPSA:
+
+    def __init__(self, model):
+        pass
+
+class AdaptiveOpticsOptimizer:
+    """Abstracted Optimizer for AO"""
+
+    def __init__(
+            self,
+            model,
+            class_name,
+            verbose=False
+    ):
+
+        #: navigate.model.Model: Model object
+        self.model = model
+
+        #: bool: True if you want to print the full output string each step
+        self.verbose = verbose
+
+        #: dict: easy access to experiment params and settings
+        self.ao_params = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]
+        self.settings = self.ao_params[class_name]
+
+        #: list: detailed report to save as JSON after
+        self.report = []        
+
+        #: navigate.model.devices.mirrors.mirror_imop.ImagineOpticsMirror: Mirror object
+        self.mirror_controller = self.model.active_microscope.mirror.mirror_controller
+
+        #: int: Number of modes
+        self.n_modes = self.mirror_controller.n_modes
+
+        #: bool: whether to save report at the end of run
+        self.save_report = self.ao_params.get("save_report", False)
+
+
+
 class TonyWilson:
     """Tony Wilson iterative AO routine"""
 

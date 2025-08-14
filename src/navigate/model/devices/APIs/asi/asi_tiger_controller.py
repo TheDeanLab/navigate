@@ -1066,13 +1066,13 @@ class TigerController:
 
         print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
-        self.send_command(f"3 SAP {axis}={round(waveform)}")
+        self.send_command(f"9 SAP {axis}={round(waveform)}")
         self.read_response()
-        self.send_command(f"3 SAA {axis}={round(amplitude)}")
+        self.send_command(f"9 SAA {axis}={round(amplitude)}")
         self.read_response()
-        self.send_command(f"3 SAO {axis}={round(offset)}")
+        self.send_command(f"9 SAO {axis}={round(offset)}")
         self.read_response()
-        self.send_command(f"3 SAF {axis}={round(period)}")
+        self.send_command(f"9 SAF {axis}={round(period)}")
         self.read_response()
 
     def single_axis_mode(self, axis: str, mode: int) -> None:
@@ -1091,7 +1091,7 @@ class TigerController:
         mode: int
             Integer code.
         """
-        self.send_command(f"3 SAM {axis}={mode}")
+        self.send_command(f"9 SAM {axis}={mode}")
         self.read_response()
 
     def setup_control_loop(
@@ -1125,7 +1125,8 @@ class TigerController:
         """
         # TODO: Investigate if these axis outputs are shared amongst units.
         # Reference values for ttls that correspond to outputs A-C
-        ttls = {"A": 42, "B": 44, "C": 46}
+        ttls = {"A": 42, "B": 44, "C": 46,
+                "H": 42, "I": 44, "J": 46}
 
         start_delay = int(delays[0] * 4)  # Unit conversion from ms to 1/4 ms
 
@@ -1216,7 +1217,7 @@ class TigerController:
             "6 ccb x = 6 y = 192",
             # Cell 12, a one-shot triggered by the rising edge of Cell 11
             "6 m e = 12",
-            "6 cca y = 8 z = 10",
+            "6 cca y = 8 z = 4",
             "6 ccb x = 11 y = 192",
             # Routes the output of the remote focus trigger to the TTL output from the
             # PLC
@@ -1226,7 +1227,7 @@ class TigerController:
             "6 m e = 33",
             f"6 cca z = {camera_output}",
             # Sends TTL to Piezo
-            "6 m e = 45",
+            "6 m e = 47",
             f"6 cca z = {camera_output}",
         ]
         # Creates object to hold galvo commands

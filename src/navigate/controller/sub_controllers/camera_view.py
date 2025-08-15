@@ -53,7 +53,6 @@ import numpy as np
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.analysis.camera import compute_signal_to_noise
-from navigate.tools.common_functions import VariableWithLock
 from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path, update_config_dict
 
@@ -195,9 +194,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         #: int: The count of images.
         self.image_count = 0
-
-        #: VariableWithLock: The lock for displaying the image.
-        self.is_displaying_image = VariableWithLock(bool)
 
         #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
@@ -604,7 +600,6 @@ class BaseViewController(GUIController, ABaseViewController):
         camera_parameters : dict
             Camera parameters.
         """
-        self.is_displaying_image.value = False
         self.image_count = 0  # was image_counter
         self.slice_index = 0
         self.image_mode = microscope_state["image_mode"]
@@ -1281,6 +1276,60 @@ class CameraViewController(BaseViewController):
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
+    def render(self, image: np.ndarray) -> Optional[np.ndarray]:
+        """Process the image to be displayed.
+
+        Parameters
+        ----------
+        image : np.ndarray
+            Image data to be processed.
+
+        Returns
+        -------
+        image : np.ndarray
+
+        Applies digital zoom, down-samples the image, scales the
+        image intensity, adds a crosshair, applies the lookup table, and populates the
+        image.
+        """
+        if image is None:
+            return None
+        
+        image = super().render(image)
+        
+        # Overlaying mask
+        image = self.overlay_mask(image)
+
+        return image
+    
+    def overlay_mask(self, image: np.ndarray, alpha=0.2) -> Optional[np.ndarray]:
+        """Overlay a mask on top of the image
+
+        Parameters
+        ----------
+        image : np.ndarray
+            Image data to be processed.
+        alpha : float
+            The mask blending ratio.
+
+        Returns
+        -------
+        image : np.ndarray
+
+        Overlays a mask if avaiable.
+        """
+        if image is None:
+            return None
+        if self.display_mask_flag and self.display_state == "Live":
+            self.ilastik_mask_ready_lock.acquire()
+            seg_mask = cv2.resize(self.ilastik_seg_mask, image.shape[:2])
+            if alpha > 1:
+                alpha = 1
+            if alpha < 0:
+                alpha = 0
+            image = cv2.addWeighted(image, 1-alpha, seg_mask, alpha, 0)
+        return image
+
     def try_to_display_image(self, image: np.ndarray) -> None:
         """Try to display an image.
 
@@ -1363,9 +1412,6 @@ class CameraViewController(BaseViewController):
         self.image = self.flip_image(image)
         self.process_image()
         self.update_max_counts()
-
-        with self.is_displaying_image as is_displaying_image:
-            is_displaying_image.value = False
 
     def update_display_state(self, *_) -> None:
         """Image Display Combobox Called.
@@ -1451,6 +1497,12 @@ class CameraViewController(BaseViewController):
         If frames to average == 0 or 1, provides the maximum value from the last
         acquired data.
         """
+        # record the max without rescanning the full frame
+        self.max_intensity_history[self.max_intensity_history_idx] = (
+            self._last_frame_display_max
+        )
+        self.max_intensity_history_idx = (self.max_intensity_history_idx + 1) % 32
+
         # Get the number of frames to average from the VIEW
         self.rolling_frames = int(self.image_metrics["Frames"].get())
 
@@ -1506,19 +1558,10 @@ class CameraViewController(BaseViewController):
 
         img_out = self.render(self.image)
 
-        # record the max without rescanning the full frame
-        self.max_intensity_history[self.max_intensity_history_idx] = (
-            self._last_frame_display_max
-        )
-        self.max_intensity_history_idx = (self.max_intensity_history_idx + 1) % 32
-
         # Schedule the image to be displayed in the Tkinter main loop
         self.view.after(0, lambda img=img_out: self.populate_image(img))
 
         self.update_max_counts()
-
-        with self.is_displaying_image as is_displaying_image:
-            is_displaying_image.value = False
 
         logger.info(
             f"Displaying image took {time.perf_counter() - start_time:.4f} seconds"
@@ -1850,8 +1893,6 @@ class MIPViewController(BaseViewController):
         """
         self.image = self.get_mip_image()
         self.process_image()
-        with self.is_displaying_image as is_displaying_image:
-            is_displaying_image.value = False
 
     def display_mip_image(self, *_) -> None:
         """Display MIP image in non-live view."""

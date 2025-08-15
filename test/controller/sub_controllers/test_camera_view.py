@@ -423,30 +423,37 @@ class TestCameraViewController:
         self.camera_view.populate_image.assert_called()
         assert self.camera_view.apply_cross_hair == (not onoff)
 
-    @pytest.mark.parametrize("frames", [0, 1, 2])
-    @pytest.mark.parametrize("count", [0, 1])
-    def test_update_max_count(self, frames, count):
-
-        # Arrange
-        max = random.randint(10, 50)
+    @pytest.mark.parametrize("frames", [0, 1, 2, 10])
+    def test_update_max_count(self, frames):
         self.camera_view.image_metrics["Frames"].set(frames)
-        self.camera_view.max_counts = max
-        self.camera_view.image_count = count
-        self.camera_view.max_intensity_history = [max]
-        if count == 1:
-            self.camera_view.down_sampled_image = [max]
-            self.camera_view.temp_array = [max]
+        
+        idx = 0
+        temp = [0] * 40
 
-        # Act
-        self.camera_view.update_max_counts()
+        while idx < 40:
+            self.camera_view._last_frame_display_max = np.random.randint(0, 500)
+            temp[idx] = self.camera_view._last_frame_display_max
+            idx += 1
+            # Act
+            self.camera_view.update_max_counts()
 
-        # Assert
-        if frames == 0:
-            assert self.camera_view.image_metrics["Frames"].get() == 1
-            assert self.camera_view.image_metrics["Image"].get() == max
+            assert self.camera_view.max_intensity_history_idx == idx % 32
+            assert self.camera_view.max_intensity_history[self.camera_view.max_intensity_history_idx-1] == self.camera_view._last_frame_display_max
 
-        if frames == 1:
-            assert self.camera_view.image_metrics["Image"].get() == max
+            # Assert
+            if frames == 0:
+                assert self.camera_view.image_metrics["Frames"].get() == 1
+                frame_num = 1
+            else:
+                frame_num = frames
+
+            if frame_num <= idx:
+                rolling_average = sum(temp[idx-frame_num:idx]) / frame_num
+            else:
+                rolling_average = sum(temp[:idx]) / frame_num
+
+            assert self.camera_view.image_metrics["Image"].get() == round(rolling_average, 0)
+
 
     def test_down_sample_image(self, monkeypatch):
         import cv2

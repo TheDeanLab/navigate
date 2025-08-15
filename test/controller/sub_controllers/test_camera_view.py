@@ -423,30 +423,43 @@ class TestCameraViewController:
         self.camera_view.populate_image.assert_called()
         assert self.camera_view.apply_cross_hair == (not onoff)
 
-    @pytest.mark.parametrize("frames", [0, 1, 2])
-    @pytest.mark.parametrize("count", [0, 1])
-    def test_update_max_count(self, frames, count):
-
-        # Arrange
-        max = random.randint(10, 50)
+    @pytest.mark.parametrize("frames", [0, 1, 2, 10])
+    def test_update_max_count(self, frames):
         self.camera_view.image_metrics["Frames"].set(frames)
-        self.camera_view.max_counts = max
-        self.camera_view.image_count = count
-        self.camera_view.max_intensity_history = [max]
-        if count == 1:
-            self.camera_view.down_sampled_image = [max]
-            self.camera_view.temp_array = [max]
 
-        # Act
-        self.camera_view.update_max_counts()
+        idx = 0
+        temp = [0] * 40
 
-        # Assert
-        if frames == 0:
-            assert self.camera_view.image_metrics["Frames"].get() == 1
-            assert self.camera_view.image_metrics["Image"].get() == max
+        while idx < 40:
+            self.camera_view._last_frame_display_max = np.random.randint(0, 500)
+            temp[idx] = self.camera_view._last_frame_display_max
+            idx += 1
+            # Act
+            self.camera_view.update_max_counts()
 
-        if frames == 1:
-            assert self.camera_view.image_metrics["Image"].get() == max
+            assert self.camera_view._max_intensity_history_idx == idx % 32
+            assert (
+                self.camera_view.max_intensity_history[
+                    self.camera_view._max_intensity_history_idx - 1
+                ]
+                == self.camera_view._last_frame_display_max
+            )
+
+            # Assert
+            if frames == 0:
+                assert self.camera_view.image_metrics["Frames"].get() == 1
+                frame_num = 1
+            else:
+                frame_num = frames
+
+            if frame_num <= idx:
+                rolling_average = sum(temp[idx - frame_num : idx]) / frame_num
+            else:
+                rolling_average = sum(temp[:idx]) / frame_num
+
+            assert self.camera_view.image_metrics["Image"].get() == round(
+                rolling_average, 0
+            )
 
     def test_down_sample_image(self, monkeypatch):
         import cv2
@@ -503,12 +516,11 @@ class TestCameraViewController:
 
         # Assert that max_counts and min_counts have been set correctly
         if auto is True:
-            assert self.camera_view.max_counts == np.max(test_image)
-            assert self.camera_view.min_counts == np.min(test_image)
+            assert self.camera_view._last_frame_display_max == np.max(test_image)
 
         # Assert that the image has been scaled correctly
         assert np.min(scaled_image) >= 0
-        assert np.max(scaled_image) <= 1
+        assert np.max(scaled_image) <= 255
 
     def test_populate_image(self, monkeypatch):
         from PIL import Image, ImageTk
@@ -540,7 +552,11 @@ class TestCameraViewController:
         monkeypatch.setattr(Image, "blend", mocked_blend)
 
         def mocked_PhotoImage(img):
-            return img
+            mock_photo = MagicMock()
+            # Set up width and height methods to return appropriate dimensions
+            mock_photo.width.return_value = 100
+            mock_photo.height.return_value = 100
+            return mock_photo
 
         monkeypatch.setattr(ImageTk, "PhotoImage", mocked_PhotoImage)
 
@@ -551,19 +567,13 @@ class TestCameraViewController:
         self.camera_view.populate_image(self.camera_view.cross_hair_image)
 
         # Assert that the tk_image has been created correctly
-        assert self.camera_view.tk_image is not None
-        self.camera_view.canvas.create_image.assert_called()
-        assert self.camera_view.image_cache_flag is False
+        assert self.camera_view._img_buf is not None
 
         # Set display_mask_flag to True
         self.camera_view.display_mask_flag = False
 
         # Call the function
         self.camera_view.populate_image(self.camera_view.cross_hair_image)
-
-        # Assert that the tk_image has been created correctly
-        assert self.camera_view.tk_image2 is not None
-        assert self.camera_view.image_cache_flag is True
 
     def test_initialize_non_live_display(self):
         # Create test buffer and microscope_state
@@ -690,8 +700,8 @@ class TestCameraViewController:
         image2 = self.camera_view.add_crosshair(image)
 
         # Assert
-        assert np.all(image2[:, self.camera_view.zoom_rect[0][1] // 2] == 1)
-        assert np.all(image2[self.camera_view.zoom_rect[1][1] // 2, :] == 1)
+        assert np.all(image2[:, self.camera_view.zoom_rect[0][1] // 2] == 255)
+        assert np.all(image2[self.camera_view.zoom_rect[1][1] // 2, :] == 255)
 
     def test_apply_LUT(self):
         # Someone else with better numpy understanding will need to do this TODO

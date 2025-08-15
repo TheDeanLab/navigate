@@ -426,7 +426,7 @@ class TestCameraViewController:
     @pytest.mark.parametrize("frames", [0, 1, 2, 10])
     def test_update_max_count(self, frames):
         self.camera_view.image_metrics["Frames"].set(frames)
-        
+
         idx = 0
         temp = [0] * 40
 
@@ -437,8 +437,13 @@ class TestCameraViewController:
             # Act
             self.camera_view.update_max_counts()
 
-            assert self.camera_view.max_intensity_history_idx == idx % 32
-            assert self.camera_view.max_intensity_history[self.camera_view.max_intensity_history_idx-1] == self.camera_view._last_frame_display_max
+            assert self.camera_view._max_intensity_history_idx == idx % 32
+            assert (
+                self.camera_view.max_intensity_history[
+                    self.camera_view._max_intensity_history_idx - 1
+                ]
+                == self.camera_view._last_frame_display_max
+            )
 
             # Assert
             if frames == 0:
@@ -448,12 +453,13 @@ class TestCameraViewController:
                 frame_num = frames
 
             if frame_num <= idx:
-                rolling_average = sum(temp[idx-frame_num:idx]) / frame_num
+                rolling_average = sum(temp[idx - frame_num : idx]) / frame_num
             else:
                 rolling_average = sum(temp[:idx]) / frame_num
 
-            assert self.camera_view.image_metrics["Image"].get() == round(rolling_average, 0)
-
+            assert self.camera_view.image_metrics["Image"].get() == round(
+                rolling_average, 0
+            )
 
     def test_down_sample_image(self, monkeypatch):
         import cv2

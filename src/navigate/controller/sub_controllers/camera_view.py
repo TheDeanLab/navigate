@@ -1262,7 +1262,9 @@ class CameraViewController(BaseViewController):
 
         #: list: The list of maximum intensity values.
         self.max_intensity_history = [0] * 32
-        self.max_intensity_history_idx = 0
+
+        #: int: The index of the latest maximun intesity value in the list.
+        self._max_intensity_history_idx = 0
 
         #: bool: The flag for displaying the mask.
         self.display_mask_flag = False
@@ -1498,10 +1500,10 @@ class CameraViewController(BaseViewController):
         acquired data.
         """
         # record the max without rescanning the full frame
-        self.max_intensity_history[self.max_intensity_history_idx] = (
+        self.max_intensity_history[self._max_intensity_history_idx] = (
             self._last_frame_display_max
         )
-        self.max_intensity_history_idx = (self.max_intensity_history_idx + 1) % 32
+        self._max_intensity_history_idx = (self._max_intensity_history_idx + 1) % 32
 
         # Get the number of frames to average from the VIEW
         self.rolling_frames = int(self.image_metrics["Frames"].get())
@@ -1513,13 +1515,13 @@ class CameraViewController(BaseViewController):
             rolling_average = self._last_frame_display_max
         elif self.rolling_frames == 1:
             rolling_average = self._last_frame_display_max
-        elif self.max_intensity_history_idx >= self.rolling_frames:
+        elif self._max_intensity_history_idx >= self.rolling_frames:
 
             rolling_average = (
                 sum(
                     self.max_intensity_history[
-                        self.max_intensity_history_idx
-                        - self.rolling_frames : self.max_intensity_history_idx
+                        self._max_intensity_history_idx
+                        - self.rolling_frames : self._max_intensity_history_idx
                     ]
                 )
                 / self.rolling_frames
@@ -1527,9 +1529,9 @@ class CameraViewController(BaseViewController):
         else:
             temp = sum(
                 self.max_intensity_history[
-                    self.max_intensity_history_idx - self.rolling_frames :
+                    self._max_intensity_history_idx - self.rolling_frames :
                 ]
-            ) + sum(self.max_intensity_history[0 : self.max_intensity_history_idx])
+            ) + sum(self.max_intensity_history[0 : self._max_intensity_history_idx])
             rolling_average = temp / self.rolling_frames
 
         self.image_metrics["Image"].set(f"{rolling_average:.0f}")

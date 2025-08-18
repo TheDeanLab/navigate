@@ -1590,6 +1590,222 @@ class ZStackAcquisition:
         if self.image_writer:
             self.image_writer.cleanup()
 
+class ASIZStackAcquisition(ZStackAcquisition):
+    """ASIZStackAcquisition class for controlling z-stack acquisition with ASI Tiger Controller.
+
+    This class extends the ZStackAcquisition class to provide functionality for
+    controlling z-stack acquisition specifically with ASI Tiger Controller, including
+    managing z and focus positions, acquiring image data, and handling multi-channel
+    acquisitions.
+
+    """
+    def __init__(
+        self,
+        model,
+        get_origin=False,
+        saving_flag=False,
+        saving_dir="z-stack",
+        force_multiposition=False,
+    ):
+        
+        """Initialize the ASIZStackAcquisition class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for z-stack acquisition control.
+        get_origin : bool, optional
+            Flag to determine whether to get the z and focus origin positions.
+            Default is False.
+        saving_flag : bool, optional
+            Flag to enable image saving during z-stack acquisition. Default is False.
+        saving_dir : str, optional
+            The subdirectory for saving z-stack images. The default is "z-stack".
+        force_multiposition : bool, optional
+            Flag to force multiposition even if not configured. Default is False.
+        """
+        super().__init__(self, model, get_origin, saving_flag, saving_dir, force_multiposition)
+
+    def signal_func(self):
+        """Control z-stack acquisition, move positions, and manage data threads.
+
+        This method controls the z-stack acquisition process, including moving positions
+        and focus, managing data threads, and handling data acquisition during the
+        signal stage.
+
+        Returns:
+        -------
+        bool
+            A boolean value indicating whether to continue the z-stack acquisition
+            process.
+        """
+        if self.model.stop_acquisition:
+            return False
+        data_thread_is_paused = False
+
+        # move stage X, Y, Theta
+        if self.need_to_move_new_position:
+            self.need_to_move_new_position = False
+            self.pre_position = self.current_position
+            self.current_position = dict(
+                zip(
+                    self.stage_axes,
+                    [self.positions[self.current_position_idx][i] for i in self.axes_index],
+                )
+            )
+
+            # calculate first z, f position
+            self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
+            self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
+            if self.defocus is not None:
+                self.current_focus_position += self.defocus[
+                    self.current_channel_in_list
+                ]
+
+            pos_dict = dict(
+                map(
+                    lambda ax: (
+                        f"{ax}_abs",
+                        self.current_position[ax],
+                    ),
+                    self.tiling_axes,
+                )
+            )
+
+            if self.current_position_idx > 0:
+                delta_distances = [self.current_position[axis] - self.pre_position[axis] for axis in self.tiling_axes if axis != "theta"]
+                delta_distances.append(
+                    self.current_position[self.primary_z_axis]
+                    - self.pre_position[self.primary_z_axis]
+                    + self.z_stack_distance
+                )
+                delta_distances.append(
+                    self.current_position[self.primary_f_axis]
+                    - self.pre_position[self.primary_f_axis]
+                    + self.f_stack_distance
+                )
+            else:
+                axes_num = len(self.tiling_axes) + 2 - (1 if "theta" in self.tiling_axes else 0)
+                delta_distances = [0] * axes_num
+
+            # displacement = [delta_z, delta_f, delta_x, delta_y]
+            # Check the distance between the current position and previous position,
+            # if it is too far, then we can call self.model.pause_data_thread() and
+            # self.model.resume_data_thread() after the stage has completed the move
+            # to the next position.
+
+            self.should_pause_data_thread = any(
+                distance > self.stage_distance_threshold
+                for distance in delta_distances
+            )
+            if self.should_pause_data_thread:
+                self.model.pause_data_thread()
+                data_thread_is_paused = True
+
+            self.model.move_stage(pos_dict, wait_until_done=True)
+
+        # Potentially pause the data thread and move z, f position
+        if self.need_to_move_z_position:
+            if self.should_pause_data_thread and not data_thread_is_paused:
+                self.model.pause_data_thread()
+                logger.info("Data thread paused.")
+
+            stack_pos = [
+                (f"{self.primary_z_axis}_abs", self.current_z_position),
+                (f"{self.primary_f_axis}_abs", self.current_focus_position)
+            ]
+            for axis, offset in self.secondary_stack_settings.items():
+                stack_pos.append((f"{axis}_abs", self.current_z_position + offset))
+            # This move is handled by the ASI Tiger Controller
+            # self.model.move_stage(
+            #     dict(stack_pos),
+            #     wait_until_done=True,
+            # )
+
+        if self.should_pause_data_thread:
+            self.model.resume_data_thread()
+            self.should_pause_data_thread = False
+
+        self.model.mark_saving_flags([self.model.frame_id])
+
+        return True
+
+    def signal_end(self) -> bool:
+        """Handle the end of the signal stage and position cycling.
+
+        This method handles the end of the signal stage, including position cycling and
+        channel updates for multichannel acquisitions.
+
+        Returns:
+        -------
+        bool
+            A boolean value indicating whether to end the current node.
+        """
+
+        # end this node
+        if self.model.stop_acquisition:
+            return True
+
+        if self.stack_cycling_mode != "per_stack":
+            # update the channel for each z position in 'per_slice'
+            if self.defocus is not None:
+                self.current_focus_position -= self.defocus[
+                    self.current_channel_in_list
+                ]
+            self.update_channel()
+            self.need_to_move_z_position = self.current_channel_in_list == 0
+
+        # in 'per_slice', move to the next z position if all the channels have been
+        # acquired
+        if self.need_to_move_z_position:
+            # next z, f position
+            self.current_z_position += self.z_step_size
+            self.current_focus_position += self.focus_step_size
+
+            # update z position moved time
+            self.z_position_moved_time += 1
+
+        # decide whether to move X, Y, Theta
+        if self.z_position_moved_time >= self.number_z_steps:
+            self.z_position_moved_time = 0
+            # calculate first z, f position
+            self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
+            self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
+            if (
+                self.z_stack_distance > self.stage_distance_threshold
+                or self.f_stack_distance > self.stage_distance_threshold
+            ):
+                self.should_pause_data_thread = True
+
+            # after running through a z-stack, update channel
+            if self.stack_cycling_mode == "per_stack":
+                self.update_channel()
+                # if run through all the channels, move to the next position
+                if self.current_channel_in_list == 0:
+                    self.need_to_move_new_position = True
+            else:
+                self.need_to_move_new_position = True
+
+            if self.need_to_move_new_position:
+                # move to the next position
+                self.current_position_idx += 1
+
+        if self.current_position_idx >= len(self.positions):
+            self.current_position_idx = 0
+            # restore z, f, and secondary z if any
+            stack_pos = [
+                (f"{self.primary_z_axis}_abs", self.restore_z),
+                (f"{self.primary_f_axis}_abs", self.restore_f)
+            ]
+            for axis, offset in self.secondary_stack_settings.items():
+                stack_pos.append((f"{axis}_abs", self.restore_z + offset))
+            self.model.move_stage(
+                dict(stack_pos),
+                wait_until_done=False,
+            )  # Update position
+            return True
+
+        return False
 
 class FindTissueSimple2D:
     """FindTissueSimple2D class for detecting tissue and gridding out the imaging

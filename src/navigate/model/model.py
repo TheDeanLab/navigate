@@ -1513,10 +1513,10 @@ class Model:
                 if microscope_config[k] == "":
                     idx = int(k[k.rfind("_") + 1 :])
                     microscope.filter_wheel[k] = SyntheticFilterWheel(
-                        type("DummyConnection", (object,), {}),
-                        self.configuration["configuration"]["microscopes"][
-                            microscope_name
-                        ]["filter_wheel"][idx],
+                        microscope_name,
+                        None,
+                        self.configuration,
+                        idx
                     )
             else:
                 if microscope_config[k] == "":

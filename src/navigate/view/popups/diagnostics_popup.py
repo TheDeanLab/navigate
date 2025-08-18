@@ -47,7 +47,7 @@ from navigate.view.custom_widgets.hover import HoverButton
 # logger = logging.getLogger(p)
 
 
-class DiagnosticsPopupWindow(ttk.Frame):
+class DiagnosticsPopup(ttk.Frame):
     """Popup window with plots that provide information on the software performance."""
 
     def __init__(self, root):
@@ -91,7 +91,6 @@ class DiagnosticsPopupWindow(ttk.Frame):
             self.frame,
             text="Update",
             width=6,
-            command=self.populate_plots,
         )
         self.buttons["update"].grid(
             row=0,
@@ -119,12 +118,12 @@ class DiagnosticsPopupWindow(ttk.Frame):
 
         # Create 6 label frames in a 3 row by 2 column grid
         labels = [
-            "Interprocess Communication",
-            "Display Update",
-            "Saving Rate",
-            "Histogram Update",
-            "Data Processing",
-            "Memory Usage",
+            "Time Necessary to Update Image Display",
+            "Test-1",
+            "Test",
+            "Test2",
+            "Test3",
+            "Test4",
         ]
         counter = 0
         for i in range(2):
@@ -160,111 +159,6 @@ class DiagnosticsPopupWindow(ttk.Frame):
         self.diagnostics_frame.grid_rowconfigure(0, weight=1)
         self.diagnostics_frame.grid_rowconfigure(1, weight=1)
         self.diagnostics_frame.grid_rowconfigure(2, weight=1)
-
-        # Initialize plots (empty)
-        self.initialize_plots()
-
-    def initialize_plots(self):
-        """Initialize empty plots with axes but no data."""
-        # Y-axis labels for each plot
-        y_labels = {
-            1: "Latency (ms)",
-            2: "FPS",
-            3: "MB/s",
-            4: "Time (ms)",
-            5: "Time (ms)",
-            6: "Memory (MB)",
-        }
-
-        # Initialize each plot without data
-        for i in range(1, 7):
-            # Get figure and clear it
-            fig = self.inputs[f"diagnostics_{i}"]
-            ax = fig.axes[0]
-            ax.clear()
-
-            # Add labels and grid
-            ax.set_xlabel("Time (s)")
-            ax.set_ylabel(y_labels[i])
-            ax.grid(True, linestyle="--", alpha=0.7)
-
-            # Set reasonable y limits
-            ax.set_ylim(0, 100)
-
-            # Draw the empty canvas
-            self.inputs[f"canvas_{i}"].draw()
-            self.inputs[f"canvas_{i}"].get_tk_widget().pack(fill="both", expand=True)
-
-    def populate_plots(self):
-        """Generate and display dummy data for all diagnostic plots."""
-        import numpy as np
-        from datetime import datetime
-        import matplotlib.dates as mdates
-
-        # Generate dummy data
-        time_points = np.linspace(0, 60, 100)  # 60 seconds of data
-
-        # Different data patterns for each plot
-        data_sets = {
-            1: 10
-            + 5 * np.sin(np.linspace(0, 4 * np.pi, 100))
-            + np.random.normal(0, 1, 100),  # IPC latency
-            2: 30
-            + 5 * np.sin(np.linspace(0, 3 * np.pi, 100))
-            + np.random.normal(0, 2, 100),  # Display FPS
-            3: 25
-            + 10 * np.sin(np.linspace(0, 2 * np.pi, 100))
-            + np.random.normal(0, 3, 100),  # Saving rate
-            4: 15
-            + 7 * np.sin(np.linspace(0, 5 * np.pi, 100))
-            + np.random.normal(0, 1.5, 100),  # Histogram update
-            5: 50
-            + 20 * np.sin(np.linspace(0, 2.5 * np.pi, 100))
-            + np.random.normal(0, 5, 100),  # Processing time
-            6: np.cumsum(np.random.normal(0, 5, 100))
-            + 500,  # Memory usage (growing trend)
-        }
-
-        # Y-axis labels for each plot
-        y_labels = {
-            1: "Latency (ms)",
-            2: "FPS",
-            3: "MB/s",
-            4: "Time (ms)",
-            5: "Time (ms)",
-            6: "Memory (MB)",
-        }
-
-        # Update each plot
-        for i in range(1, 7):
-            # Get figure and clear it
-            fig = self.inputs[f"diagnostics_{i}"]
-            ax = fig.axes[0]
-            ax.clear()
-
-            # Plot the data
-            ax.plot(time_points, data_sets[i], linewidth=2)
-
-            # Add labels and grid
-            ax.set_xlabel("Time (s)")
-            ax.set_ylabel(y_labels[i])
-            ax.grid(True, linestyle="--", alpha=0.7)
-
-            # Add some stats
-            mean_val = np.mean(data_sets[i])
-            ax.text(
-                0.05,
-                0.95,
-                f"Mean: {mean_val:.2f}",
-                transform=ax.transAxes,
-                fontsize=9,
-                va="top",
-                bbox=dict(boxstyle="round", alpha=0.1),
-            )
-
-            # Draw the canvas
-            self.inputs[f"canvas_{i}"].draw()
-            self.inputs[f"canvas_{i}"].get_tk_widget().pack(fill="both", expand=True)
 
     # Getters
     def get_variables(self):
@@ -314,5 +208,5 @@ class DiagnosticsPopupWindow(ttk.Frame):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    diagnostics_popup = DiagnosticsPopupWindow(root)
+    diagnostics_popup = DiagnosticsPopup(root)
     root.mainloop()

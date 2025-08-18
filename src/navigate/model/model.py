@@ -895,10 +895,10 @@ class Model:
         self.microscopes[microscope_name].stop_stage()
         ret_pos_dict = self.microscopes[microscope_name].get_stage_position()
         return ret_pos_dict
-    
+
     def update_stage_limits(self, microscope_name: str) -> None:
         """Update stage limits
-        
+
         PaParameters
         ----------
         microscope_name : str
@@ -1018,7 +1018,7 @@ class Model:
                 self.data_container.run(frame_ids)
 
             # show image
-            self.logger.info(f"Image delivered to controller: {frame_ids[0]}")
+            self.logger.info(f"Image delivered to controller: {frame_ids[-1]}")
             self.show_img_pipe.send(frame_ids[-1])
 
             if count_frame and acquired_frame_num >= num_of_frames:

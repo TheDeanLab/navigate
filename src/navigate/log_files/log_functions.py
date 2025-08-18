@@ -159,31 +159,6 @@ def eliminate_old_log_files(logging_path):
         Path to logs files.
     """
 
-    def get_folder_date(folder_name):
-        """Get the date from the folder name.
-
-        Parameters
-        ----------
-        folder_name : str
-            Folder name
-        """
-        try:
-            # Extract the year, month, day, hour, and minute from the folder name
-            year, month, day, hourminute = folder_name.split("-")
-            hour = hourminute[:2]
-            minute = hourminute[2:]
-            date = datetime(
-                year=int(year),
-                month=int(month),
-                day=int(day),
-                hour=int(hour),
-                minute=int(minute),
-            )
-            return date
-        except ValueError:
-            # Folder name is not in anticipated format
-            return False
-
     today = datetime.now()
     date_threshold = today - timedelta(days=30)
 
@@ -219,5 +194,81 @@ def main_process_listener(queue):
             logger = logging.getLogger(record.name)
             logger.handle(record)
         except Exception:
-            print("Whoops! Problem: ", file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
+
+
+def load_latest_log_file() -> tuple:
+    """Load the latest log file from the logging directory.
+
+    Returns
+    -------
+    tuple
+        Tuple containing the model log data and controller log data.
+    """
+
+    date_dirs = []
+    logging_path = Path.joinpath(Path(get_navigate_path()), "logs")
+
+    # Iterate through all folders in logging path
+    for folder in os.listdir(logging_path):
+        date = get_folder_date(folder)
+        if date is not False:
+            date_dirs.append(folder)
+
+    # Sort the directories by date
+    latest_dir = max(date_dirs)
+
+    controller_log_path = os.path.join(
+        logging_path, latest_dir, "view_controller_debug.log"
+    )
+    model_log_path = os.path.join(logging_path, latest_dir, "model_debug.log")
+
+    try:
+        if controller_log_path and os.path.exists(controller_log_path):
+            with open(controller_log_path, "r") as file:
+                controller_log_data = file.readlines()
+    except Exception:
+        controller_log_data = None
+
+    try:
+        if model_log_path and os.path.exists(model_log_path):
+            with open(model_log_path, "r") as file:
+                model_log_data = file.readlines()
+    except Exception:
+        model_log_data = None
+
+    return model_log_data, controller_log_data
+
+
+def get_folder_date(folder_name: str) -> datetime:
+    """Get the date from the log folder's name.
+
+    Parameters
+    ----------
+    folder_name : str
+        Folder name in the format 'YYYY-MM-DD-HHMM'.
+
+    Returns : datetime or bool
+        Returns a datetime object if the folder name is in the correct format.
+        The format is 'YYYY-MM-DD-HHMM', where:
+            - YYYY: 4-digit year
+            - MM: 2-digit month (01-12)
+            - DD: 2-digit day (01-31)
+            - HHMM: 4-digit hour and minute (HHMM, e.g., 1530 for 3:30 PM)
+        If the folder name is not in this format, it will return False.
+    """
+    try:
+        # Extract the year, month, day, hour, and minute from the folder name
+        year, month, day, hourminute = folder_name.split("-")
+        hour = hourminute[:2]
+        minute = hourminute[2:]
+        date = datetime(
+            year=int(year),
+            month=int(month),
+            day=int(day),
+            hour=int(hour),
+            minute=int(minute),
+        )
+        return date
+    except ValueError:
+        return False

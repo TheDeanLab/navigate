@@ -1066,13 +1066,13 @@ class TigerController:
 
         print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
-        self.send_command(f"9 SAP {axis}={round(waveform)}")
+        self.send_command(f"3 SAP {axis}={round(waveform)}")
         self.read_response()
-        self.send_command(f"9 SAA {axis}={round(amplitude)}")
+        self.send_command(f"3 SAA {axis}={round(amplitude)}")
         self.read_response()
-        self.send_command(f"9 SAO {axis}={round(offset)}")
+        self.send_command(f"3 SAO {axis}={round(offset)}")
         self.read_response()
-        self.send_command(f"9 SAF {axis}={round(period)}")
+        self.send_command(f"3 SAF {axis}={round(period)}")
         self.read_response()
 
     def single_axis_mode(self, axis: str, mode: int) -> None:
@@ -1091,7 +1091,7 @@ class TigerController:
         mode: int
             Integer code.
         """
-        self.send_command(f"9 SAM {axis}={mode}")
+        self.send_command(f"3 SAM {axis}={mode}")
         self.read_response()
 
     def setup_control_loop(
@@ -1102,6 +1102,7 @@ class TigerController:
         exposure_time: float,
         sweep_time: float,
         analog_outputs: dict,
+        num_cycles=0,
     ) -> None:
         """
         Sets up the control loop for triggering the remote focus, Galvo/s, and Camera
@@ -1142,10 +1143,15 @@ class TigerController:
             galvo2_delay = 0
         remote_focus_axis = analog_outputs["remote_focus"]
         print(f"Exposure time: {exposure_time}")
+        print(f"Sweep time: {sweep_time}")
+        cycle_time = sweep_time * num_cycles
+
+        # Convert all time values to 1/4 ms
         exposure_time = int(exposure_time*4)
         sweep_time = (
             int(sweep_time * 4) - 2
         )  # Hardcoded -2 to account for delays within controller
+        cycle_time = int(cycle_time * 4)
 
         # Dynamic delay processing. Instead of having each delay handled separately,
         # to save some cell space delays are programmed based on some simple
@@ -1230,6 +1236,12 @@ class TigerController:
             "6 m e = 47",
             f"6 cca z = {camera_output}",
         ]
+        if (num_cycles > 0):
+            commands[8:10] = [
+                # Cell 4, One-shot that lasts for the cycle time
+                f"6 cca y = 8 z = {cycle_time}",
+                "6 ccb x = 3 y = 192"
+            ]
         # Creates object to hold galvo commands
         galvo_commands = []
         # Single Galvo case, just sets up the first Galvo
@@ -1259,6 +1271,7 @@ class TigerController:
         # Runs the main setup commands, followed by the Galvo specific commands
         for command in commands:
             self.send_command(f"{command}\r")
+            print(f"Sent Command: {command}")
             self.read_response()
         for command in galvo_commands:
             self.send_command(f"{command}\r")

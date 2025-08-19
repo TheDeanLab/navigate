@@ -50,6 +50,7 @@ from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from navigate.model.features.common_features import (
     Snap,  # noqa
     ZStackAcquisition,
+    ASIZStackAcquisition,
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
@@ -1721,41 +1722,17 @@ class ASIModel(Model):
         """
         super().__init__(args, configuration, event_queue)
 
+        self.acquisition_modes_feature_setting["z-stack"] = (
+                    {"name": ASIZStackAcquisition},
+                    {"name": StackPause},
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.timepoints",),
+                    },
+                )
+
         print("ASIModel initialized.")
 
-    # def run_command(
-    #     self, command: str, *args: List[Union[str, int]], **kwargs: Dict[str, Any]
-    # ) -> None:
-    #     if command == "acquire":
-    #         """Begin an acquisition."""
-    #         self.is_acquiring = True
-    #         self.imaging_mode = self.configuration["experiment"]["MicroscopeState"][
-    #             "image_mode"
-    #         ]
-    #         self.is_save = self.configuration["experiment"]["MicroscopeState"][
-    #             "is_save"
-    #         ]
-    #         if len(self.configuration["multi_positions"]) == 0:
-    #             self.configuration["experiment"]["MicroscopeState"][
-    #                 "is_multiposition"
-    #             ] = False
-    #
-    #         # Calculate waveforms, turn on lasers, etc.
-    #         r = self.prepare_acquisition()
-    #         if not r:
-    #             self.show_img_pipe.send("stop")
-    #             self.event_queue.put(
-    #                 (
-    #                     "warning",
-    #                     "Acquisition aborted because of camera ROI setting failed.\n"
-    #                     "Please do not use center ROI for the Ximea Camera.",
-    #                 )
-    #             )
-    #             return
-    #         else:
-    #             return super().run_command(command, *args, **kwargs)
-    #
-    #
     def run_acquisition(self) -> None:
         """Run acquisition along with a feature list one time.
 
@@ -1764,9 +1741,9 @@ class ASIModel(Model):
         None
             Completes after acquisition pass ends.
         """
-        # if not hasattr(self, "signal_container"):
-        #     self.snap_zstack()
-        #     return
+        if not hasattr(self, "signal_container"):
+            self.snap_zstack()
+            return
 
         # The data_thread is grabbing images from the camera.
         # We can initialize the data_thread to grab a certain number of images.
@@ -1777,7 +1754,7 @@ class ASIModel(Model):
         # the data_container.
 
         # The signal thread is running this function iteratively.
-        self.snap_zstack()
+        # self.snap_zstack()
 
         # Launch the signal and data containers, and let them terminate the
         # acquisition when we have received the right number of frames.
@@ -1786,7 +1763,7 @@ class ASIModel(Model):
             and not self.stop_send_signal
             and not self.stop_acquisition
         ):
-            # self.snap_zstack()
+            self.snap_zstack()
             if not hasattr(self, "signal_container"):
                 return
             if self.signal_container.is_closed:
@@ -1810,8 +1787,8 @@ class ASIModel(Model):
         None
             Completes after the image is captured and buffered.
         """
-        # if hasattr(self, "signal_container"):
-        #     self.signal_container.run()
+        if hasattr(self, "signal_container"):
+            self.signal_container.run()
         self.active_microscope.prepare_next_channel()
 
         # Stash current position, channel, timepoint. Do this here, because signal

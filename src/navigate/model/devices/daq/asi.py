@@ -157,7 +157,7 @@ class ASIDaq(DAQBase, SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
 
-    def prepare_acquisition(self, channel_key: str) -> None:
+    def prepare_acquisition(self, channel_key: str, zstack: bool = False) -> None:
         """Prepare the acquisition.
 
         Creates and configures the DAQ tasks.
@@ -215,19 +215,23 @@ class ASIDaq(DAQBase, SerialDevice):
         rfvc_delay = float(
             self.waveform_constants["other_constants"].get("remote_focus_delay", 5)
         )
+        if zstack:
+            start_pos = self.configuration["experiment"]["MicroscopeState"]["start_position"]
+            end_pos = self.configuration["experiment"]["MicroscopeState"]["end_position"]
+            step_size = self.configuration["experiment"]["MicroscopeState"]["step_size"]
 
-        start_pos = self.configuration["experiment"]["MicroscopeState"]["start_position"]
-        end_pos = self.configuration["experiment"]["MicroscopeState"]["end_position"]
-        step_size = self.configuration["experiment"]["MicroscopeState"]["step_size"]
+            print(f"ASIModel: Starting z-stack from {start_pos} to {end_pos} by {step_size}")
 
-        print(f"ASIModel: Starting z-stack from {start_pos} to {end_pos} by {step_size}")
+            num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
 
-        num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
-
-        # sets up control loop with all parameters (all times in ms)
-        self.daq.setup_control_loop(
-            delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs
-        )
+            # sets up control loop with all parameters (all times in ms)
+            self.daq.setup_control_loop(
+                delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs, num_steps
+            )
+        else:
+            self.daq.setup_control_loop(
+                delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs
+            )
 
         self.current_channel_key = channel_key
         self.is_updating_analog_task = False

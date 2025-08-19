@@ -672,7 +672,7 @@ class PrepareNextChannel:
         #: dict: A dictionary defining the configuration for the channel preparation
         self.config_table = {"signal": {"main": self.signal_func}}
 
-    def signal_func(self):
+    def signal_func(self, zstack=False):
         """Prepare virtual and active microscopes for the next imaging channel.
 
         This method prepares virtual microscopes, if any, followed by the active
@@ -687,7 +687,7 @@ class PrepareNextChannel:
         for microscope_name in self.model.virtual_microscopes:
             self.model.virtual_microscopes[microscope_name].prepare_next_channel()
 
-        self.model.active_microscope.prepare_next_channel()
+        self.model.active_microscope.prepare_next_channel(zstack=zstack)
 
         return True
 
@@ -1304,7 +1304,7 @@ class ZStackAcquisition:
             self.model.virtual_microscopes[microscope_name].current_channel = 0
 
         # PREPARE NEXT CHANNEL as a feature...
-        self.prepare_next_channel.signal_func()
+        self.prepare_next_channel.signal_func(zstack=True)
 
         logger.info(
             f"ZStackAcquisition: Positions {self.positions}, "
@@ -1624,7 +1624,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         force_multiposition : bool, optional
             Flag to force multiposition even if not configured. Default is False.
         """
-        super().__init__(self, model, get_origin, saving_flag, saving_dir, force_multiposition)
+        super().__init__(model, get_origin, saving_flag, saving_dir, force_multiposition)
 
     def signal_func(self):
         """Control z-stack acquisition, move positions, and manage data threads.

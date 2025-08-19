@@ -207,6 +207,17 @@ class DiagnosticsPopupController:
         times = self.extract_times(model_log, pattern)
         self.plot_histogram(panel=4, times=times)
 
+        # Plot the time necessary to get stage positions.
+        pattern = r"model: Stage positions got in (\d+\.\d+) seconds"
+        times = self.extract_times(model_log, pattern)
+        self.plot_histogram(panel=7, times=times, title="Time to get stage positions")
+
+        # Plot the time necessary to turn on/off lasers and send out triggers.
+        # The time should closely match the waveform length (exposure time + delay).
+        pattern = r"model: DAQ sending out triggers in (\d+\.\d+) seconds"
+        times = self.extract_times(model_log, pattern)
+        self.plot_histogram(panel=8, times=times, title="Time for DAQ to out triggers")
+
     @staticmethod
     def extract_times(log_content, pattern):
         """
@@ -238,7 +249,7 @@ class DiagnosticsPopupController:
         times = times if len(times) > 0 else None
         return times
 
-    def plot_histogram(self, panel, times):
+    def plot_histogram(self, panel, times, title=""):
         """
         Create a histogram of image display times with statistics.
 
@@ -249,6 +260,10 @@ class DiagnosticsPopupController:
         times : list
             A list of times in seconds to plot
         """
+        # add a new fiture if necessary
+        if f"canvas_{panel}" not in self.view.inputs:
+            self.view.add_plot_figure(title)
+        
         fig = self.view.inputs[f"diagnostics_{panel}"]
         ax = fig.axes[0]
         ax.clear()

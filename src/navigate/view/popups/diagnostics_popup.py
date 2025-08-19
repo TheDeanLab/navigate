@@ -138,31 +138,8 @@ class DiagnosticsPopup(ttk.Frame):
             "Test2",
             "Test3",
         ]
-        counter = 0
-        for i in range(2):
-            for j in range(3):
-                label_frame = ttk.LabelFrame(
-                    self.diagnostics_frame,
-                    text=labels[counter],
-                    padding=(5, 5, 5, 5),
-                )
-                label_frame.grid(
-                    row=i,
-                    column=j,
-                    padx=5,
-                    pady=5,
-                    sticky="NSEW",
-                )
-                # Add a matplotlib.figure.figure to the label frame
-                self.inputs[f"diagnostics_{i * 3 + j + 1}"] = Figure(
-                    figsize=(4.0, 3.0), tight_layout=True
-                )
-                self.inputs[f"canvas_{i * 3 + j + 1}"] = FigureCanvasTkAgg(
-                    self.inputs[f"diagnostics_{i * 3 + j + 1}"], label_frame
-                )
-                self.inputs[f"diagnostics_{i * 3 + j + 1}"].add_subplot(111)
-
-                counter += 1
+        for i in range(6):
+            self.add_plot_figure(labels[i])
 
         # Configure the frames to expand
         self.frame.grid_columnconfigure(0, weight=1)
@@ -172,6 +149,32 @@ class DiagnosticsPopup(ttk.Frame):
         self.diagnostics_frame.grid_rowconfigure(0, weight=1)
         self.diagnostics_frame.grid_rowconfigure(1, weight=1)
         self.diagnostics_frame.grid_rowconfigure(2, weight=1)
+
+    # Add plot figure
+    def add_plot_figure(self, title):
+        counter = sum(k.startswith("canvas_") for k in self.inputs)
+        i = counter // 3
+        j = counter % 3
+        label_frame = ttk.LabelFrame(
+            self.diagnostics_frame,
+            text=title,
+            padding=(5, 5, 5, 5),
+        )
+        label_frame.grid(
+            row=i,
+            column=j,
+            padx=5,
+            pady=5,
+            sticky="NSEW",
+        )
+        # Add a matplotlib.figure.figure to the label frame
+        self.inputs[f"diagnostics_{counter + 1}"] = Figure(
+            figsize=(4.0, 3.0), tight_layout=True
+        )
+        self.inputs[f"canvas_{counter + 1}"] = FigureCanvasTkAgg(
+            self.inputs[f"diagnostics_{counter + 1}"], label_frame
+        )
+        self.inputs[f"diagnostics_{counter + 1}"].add_subplot(111)
 
     # Getters
     def get_variables(self):

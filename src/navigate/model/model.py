@@ -1185,14 +1185,19 @@ class Model:
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
+        start_time = time.perf_counter()
         stage_pos = self.get_stage_position()
         self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
         self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
         self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
         self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
         self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
+        self.logger.info(
+            f"Stage positions got in {time.perf_counter() - start_time:.4f} seconds"
+        )
 
         # Run the acquisition
+        start_time = time.perf_counter()
         try:
             self.active_microscope.turn_on_laser()
             self.active_microscope.daq.run_acquisition()
@@ -1214,6 +1219,9 @@ class Model:
         finally:
             # Ensure the laser is turned off
             self.active_microscope.turn_off_lasers()
+        self.logger.info(
+            f"DAQ sending out triggers in {time.perf_counter() - start_time:.4f} seconds"
+        )
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)

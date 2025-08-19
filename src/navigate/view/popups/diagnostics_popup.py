@@ -43,14 +43,10 @@ from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.hover import HoverButton
 
 
-# p = __name__.split(".")[1]
-# logger = logging.getLogger(p)
-
-
 class DiagnosticsPopup(ttk.Frame):
     """Popup window with plots that provide information on the software performance."""
 
-    def __init__(self, root):
+    def __init__(self, root: tk.Tk) -> None:
         """Initialize the DiagnosticsPopupWindow class.
 
         Parameters
@@ -90,7 +86,7 @@ class DiagnosticsPopup(ttk.Frame):
         self.buttons["update"] = HoverButton(
             self.frame,
             text="Update",
-            width=6,
+            width=10,
         )
         self.buttons["update"].grid(
             row=0,
@@ -103,13 +99,30 @@ class DiagnosticsPopup(ttk.Frame):
             "Update the diagnostic plots using the most recent data."
         )
 
+        # Create a button to save an image of the diagnostics.
+        self.buttons["save_image"] = HoverButton(
+            self.frame,
+            text="Save Image",
+            width=10,
+        )
+        self.buttons["save_image"].grid(
+            row=1,
+            column=0,
+            padx=5,
+            pady=5,
+            sticky="W",
+        )
+        self.buttons["save_image"].hover.setdescription(
+            "Save a screenshot of the performance diagnostics."
+        )
+
         # Create a label frame
         self.diagnostics_frame = ttk.LabelFrame(
             self.frame,
             padding=(5, 5, 5, 5),
         )
         self.diagnostics_frame.grid(
-            row=1,
+            row=2,
             column=0,
             padx=5,
             pady=5,
@@ -119,11 +132,11 @@ class DiagnosticsPopup(ttk.Frame):
         # Create 6 label frames in a 3 row by 2 column grid
         labels = [
             "Time Necessary to Update Image Display",
-            "Test-1",
-            "Test",
+            "Time Necessary to Update Histogram Display",
+            "Time Necessary to Move Z or F Stage during Z-Stack",
+            "Time Necessary to Acquire a New Image",
             "Test2",
             "Test3",
-            "Test4",
         ]
         counter = 0
         for i in range(2):
@@ -204,9 +217,3 @@ class DiagnosticsPopup(ttk.Frame):
             Dictionary that holds the buttons.
         """
         return self.buttons
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    diagnostics_popup = DiagnosticsPopup(root)
-    root.mainloop()

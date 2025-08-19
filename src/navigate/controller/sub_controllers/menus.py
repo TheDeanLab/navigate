@@ -274,7 +274,7 @@ class MenuController(GUIController):
                     None,
                 ],
                 "add_separator_2": [None, None, None, None, None],
-                "Diagnostics": [
+                "Performance Diagnostics": [
                     "standard",
                     self.open_diagnostics,
                     None,

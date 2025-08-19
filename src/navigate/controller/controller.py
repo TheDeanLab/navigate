@@ -278,7 +278,8 @@ class Controller:
 
         #: StageController: Stage Sub-Controller.
         self.stage_controller = StageController(
-            self.view.settings.stage_control_tab, self,
+            self.view.settings.stage_control_tab,
+            self,
         )
 
         #: WaveformTabController: Waveform Display Sub-Controller.
@@ -726,7 +727,7 @@ class Controller:
             self.threads_pool.createThread(
                 resourceName="model",
                 target=self.update_stage_limits,
-                args=(microscope_name,)
+                args=(microscope_name,),
             )
 
         elif command == "move_stage_and_update_info":
@@ -1166,7 +1167,7 @@ class Controller:
                 break
             # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
-            logger.info(f"Navigate Controller - Received Image: {image_id}")
+            logger.info(f"Received image from the controller: {image_id}")
 
             if image_id == "stop":
                 self.current_image_id = -1
@@ -1412,7 +1413,7 @@ class Controller:
 
     def update_stage_limits(self, microscope_name: str) -> None:
         """Update stage limits on the device side
-        
+
         Parameters
         ----------
         microscope_name : str

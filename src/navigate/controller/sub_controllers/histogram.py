@@ -35,21 +35,21 @@ import threading
 import tkinter as tk
 from typing import Any
 import time
+import logging
 
 # Third Party Imports
 import numpy as np
 from matplotlib.ticker import FuncFormatter
 
-from navigate.config import update_config_dict
-
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.view.main_window_content.display_notebook import HistogramFrame
+from navigate.config import update_config_dict
 
 
 # Logger Setup
-# p = __name__.split(".")[1]
-# logger = logging.getLogger(p)
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class HistogramController:
@@ -225,6 +225,7 @@ class HistogramController:
         image : SharedNDArray
             Image Data
         """
+        start_time = time.perf_counter()
 
         # Estimate total variation distance.
         number_bins = 20
@@ -262,6 +263,9 @@ class HistogramController:
             )
         )
         self.histogram.figure_canvas.draw()
+        logger.info(
+            f"Histogram populated in {time.perf_counter() - start_time:.4f} seconds"
+        )
 
     def _clear_histogram(self) -> None:
         """Clear the histogram but keep canvas interactive."""

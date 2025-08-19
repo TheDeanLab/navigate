@@ -34,6 +34,8 @@ import os
 from typing import Optional
 from datetime import datetime
 import re
+from tkinter import filedialog
+from PIL import ImageGrab
 
 # Third Party Imports
 import numpy as np
@@ -89,6 +91,9 @@ class DiagnosticsPopupController:
             command=self.populate_plots,
         )
 
+        # Add trace to save a screenshot of the popup
+        self.view.buttons["save_image"].configure(command=self.capture_image)
+
         # Initialize plots (empty)
         self.initialize_plots()
 
@@ -104,6 +109,43 @@ class DiagnosticsPopupController:
             del self.parent_controller.diagnostics_controller
 
         logger.debug("Diagnostics popup closed and sub-controller deleted.")
+
+    def capture_image(self) -> None:
+
+        # Create default filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_filename = f"diagnostics_{timestamp}.png"
+
+        # Set default directory to user's home directory
+        default_dir = os.path.expanduser("~")
+
+        # Open file dialog
+        file_path = filedialog.asksaveasfilename(
+            initialdir=default_dir,
+            initialfile=default_filename,
+            defaultextension=".png",
+            filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
+        )
+
+        # If user cancels, return without saving
+        if not file_path:
+            return
+
+        # Make sure that the save dialog has time to close before capturing the screenshot
+        self.view.popup.after_idle(lambda: self._take_screenshot(file_path))
+
+    def _take_screenshot(self, file_path):
+        # Get the window geometry
+        x = self.view.popup.winfo_rootx()
+        y = self.view.popup.winfo_rooty()
+        width = self.view.popup.winfo_width()
+        height = self.view.popup.winfo_height()
+
+        # Capture the screenshot
+        screenshot = ImageGrab.grab(bbox=(x, y, x + width, y + height))
+        screenshot.save(file_path)
+
+        logger.info(f"Diagnostics screenshot saved to: {file_path}")
 
     def initialize_plots(self):
         """Initialize empty plots with axes but no data."""
@@ -144,80 +186,29 @@ class DiagnosticsPopupController:
         model_log, controller_log = load_latest_log_file()
 
         # Plot the histogram of the display times from the controller log
-        self.plot_display_time_histogram(controller_log)
+        pattern = r"camera_view: Displaying image took (\d+\.\d+) seconds"
+        times = self.extract_times(controller_log, pattern)
+        self.plot_histogram(panel=1, times=times)
 
-        # Plot the duration of time necessary to transfer the data between processes.
+        # Plot the histogram of the times necessary to populate the histogram.
+        pattern = r"histogram: Histogram populated in (\d+\.\d+) seconds"
+        times = self.extract_times(controller_log, pattern)
+        self.plot_histogram(panel=2, times=times)
 
-        #
-        # # Generate dummy data
-        # time_points = np.linspace(0, 60, 100)  # 60 seconds of data
-        #
-        # # Different data patterns for each plot
-        # data_sets = {
-        #     1: 10
-        #     + 5 * np.sin(np.linspace(0, 4 * np.pi, 100))
-        #     + np.random.normal(0, 1, 100),  # IPC latency
-        #     2: 30
-        #     + 5 * np.sin(np.linspace(0, 3 * np.pi, 100))
-        #     + np.random.normal(0, 2, 100),  # Display FPS
-        #     3: 25
-        #     + 10 * np.sin(np.linspace(0, 2 * np.pi, 100))
-        #     + np.random.normal(0, 3, 100),  # Saving rate
-        #     4: 15
-        #     + 7 * np.sin(np.linspace(0, 5 * np.pi, 100))
-        #     + np.random.normal(0, 1.5, 100),  # Histogram update
-        #     5: 50
-        #     + 20 * np.sin(np.linspace(0, 2.5 * np.pi, 100))
-        #     + np.random.normal(0, 5, 100),  # Processing time
-        #     6: np.cumsum(np.random.normal(0, 5, 100))
-        #     + 500,  # Memory usage (growing trend)
-        # }
-        #
-        # # Y-axis labels for each plot
-        # y_labels = {
-        #     1: "Latency (ms)",
-        #     2: "FPS",
-        #     3: "MB/s",
-        #     4: "Time (ms)",
-        #     5: "Time (ms)",
-        #     6: "Memory (MB)",
-        # }
-        #
-        # # Update each plot
-        # for i in range(2, 7):
-        #     # Get figure and clear it
-        #     fig = self.view.inputs[f"diagnostics_{i}"]
-        #     ax = fig.axes[0]
-        #     ax.clear()
-        #
-        #     # Plot the data
-        #     ax.plot(time_points, data_sets[i], linewidth=2)
-        #
-        #     # Add labels and grid
-        #     ax.set_xlabel("Time (s)")
-        #     ax.set_ylabel(y_labels[i])
-        #     ax.grid(True, linestyle="--", alpha=0.7)
-        #
-        #     # Add some stats
-        #     mean_val = np.mean(data_sets[i])
-        #     ax.text(
-        #         0.05,
-        #         0.95,
-        #         f"Mean: {mean_val:.2f}",
-        #         transform=ax.transAxes,
-        #         fontsize=9,
-        #         va="top",
-        #         bbox=dict(boxstyle="round", alpha=0.1),
-        #     )
-        #
-        #     # Draw the canvas
-        #     self.view.inputs[f"canvas_{i}"].draw()
-        #     self.view.inputs[f"canvas_{i}"].get_tk_widget().pack(
-        #         fill="both", expand=True
-        #     )
+        # Plot the time to move the z and f stages during a z-stack.
+        pattern = (
+            r"common_features: Z- and F-position move duration: (\d+\.\d+) seconds"
+        )
+        times = self.extract_times(model_log, pattern)
+        self.plot_histogram(panel=3, times=times)
+
+        # Plot the time necessary to acquire a new image.
+        pattern = r"model: New image acquired in (\d+\.\d+) seconds"
+        times = self.extract_times(model_log, pattern)
+        self.plot_histogram(panel=4, times=times)
 
     @staticmethod
-    def extract_display_times(log_content):
+    def extract_times(log_content, pattern):
         """
         Extract image display times from controller log content.
 
@@ -225,61 +216,64 @@ class DiagnosticsPopupController:
         ----------
         log_content : list or None
             List of log lines from the controller log
+        pattern : str
+            Regular expression pattern to match display time entries
 
         Returns
         -------
-        list
-            A list of float values representing display times in seconds
+        times : list
+            A list of float values representing times in seconds
         """
 
         if not log_content:
-            return []
-
-        # Pattern to match display time entries
-        pattern = r"camera_view: Displaying image took (\d+\.\d+) seconds"
+            return None
 
         # Extract all matching times
-        display_times = []
+        times = []
         for line in log_content:
             match = re.search(pattern, line)
             if match:
-                display_times.append(float(match.group(1)))
+                times.append(float(match.group(1)))
 
-        return display_times
+        times = times if len(times) > 0 else None
+        return times
 
-    def plot_display_time_histogram(self, controller_log):
+    def plot_histogram(self, panel, times):
         """
         Create a histogram of image display times with statistics.
 
         Parameters
         ----------
-        controller_log : str
-            The content of the controller log file as a string or list of lines
+        panel : int
+            The panel number to plot the histogram on (1-6)
+        times : list
+            A list of times in seconds to plot
         """
-
-        fig = self.view.inputs[f"diagnostics_1"]
+        fig = self.view.inputs[f"diagnostics_{panel}"]
         ax = fig.axes[0]
         ax.clear()
 
-        display_times = self.extract_display_times(controller_log)
-
-        if not display_times:
+        if times is None:
             ax.text(
                 0.5,
                 0.5,
-                "No display time data available",
+                "No data available",
                 ha="center",
                 va="center",
                 transform=ax.transAxes,
             )
+            self.view.inputs[f"canvas_{panel}"].draw()
+            self.view.inputs[f"canvas_{panel}"].get_tk_widget().pack(
+                fill="both", expand=True
+            )
             return
 
         # Convert to milliseconds for better readability
-        display_times_ms = [t * 1000 for t in display_times]
+        times_ms = [t * 1000 for t in times]
 
         # Plot histogram
         _, _, _ = ax.hist(
-            display_times_ms,
+            times_ms,
             bins=20,
             alpha=0.7,
             color="skyblue",
@@ -288,8 +282,8 @@ class DiagnosticsPopupController:
         )
 
         # Calculate statistics
-        mean_val = np.mean(display_times_ms)
-        std_val = np.std(display_times_ms)
+        mean_val = np.mean(times_ms)
+        std_val = np.std(times_ms)
 
         # Add vertical lines for mean and std dev
         ax.axvline(
@@ -308,17 +302,13 @@ class DiagnosticsPopupController:
         )
         ax.axvline(mean_val - std_val, color="g", linestyle="dotted", linewidth=2)
 
-        # Add text with statistics
-        stats_text = f"Mean: {mean_val:.2f} ms\nStd Dev: {std_val:.2f} ms\nSamples: {len(display_times_ms)}"
-        ax.text(
-            0.05,
-            0.95,
-            stats_text,
-            transform=ax.transAxes,
-            fontsize=9,
-            va="top",
-            bbox=dict(boxstyle="round", alpha=0.5),
+        # Add text with statistics as a title
+        stats_text = (
+            f"Mean: {mean_val:.2f} ms."
+            f"Std Dev: {std_val:.2f} ms."
+            f"N: {len(times_ms)}"
         )
+        ax.set_title(stats_text, fontsize=9)
 
         # Update labels
         ax.set_xlabel("Time (ms)")
@@ -328,5 +318,7 @@ class DiagnosticsPopupController:
         ax.grid(True, linestyle="--", alpha=0.7)
 
         # Draw the canvas
-        self.view.inputs[f"canvas_1"].draw()
-        self.view.inputs[f"canvas_1"].get_tk_widget().pack(fill="both", expand=True)
+        self.view.inputs[f"canvas_{panel}"].draw()
+        self.view.inputs[f"canvas_{panel}"].get_tk_widget().pack(
+            fill="both", expand=True
+        )

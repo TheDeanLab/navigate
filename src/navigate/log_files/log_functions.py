@@ -223,19 +223,23 @@ def load_latest_log_file() -> tuple:
     )
     model_log_path = os.path.join(logging_path, latest_dir, "model_debug.log")
 
+    # Default to None if the log files do not exist
+    controller_log_data = None
+    model_log_data = None
+
     try:
         if controller_log_path and os.path.exists(controller_log_path):
             with open(controller_log_path, "r") as file:
                 controller_log_data = file.readlines()
     except Exception:
-        controller_log_data = None
+        pass
 
     try:
         if model_log_path and os.path.exists(model_log_path):
             with open(model_log_path, "r") as file:
                 model_log_data = file.readlines()
     except Exception:
-        model_log_data = None
+        pass
 
     return model_log_data, controller_log_data
 

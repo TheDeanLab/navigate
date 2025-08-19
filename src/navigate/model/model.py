@@ -980,8 +980,8 @@ class Model:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
+            start_time = time.perf_counter()
             frame_ids = self.active_microscope.camera.get_new_frame()
-            self.logger.info(f"Running data process, getting frames {frame_ids}")
             # if there is at least one frame available
             if not frame_ids:
                 self.logger.debug(
@@ -1001,6 +1001,9 @@ class Model:
                     break
                 continue
 
+            self.logger.info(
+                f"New image acquired in {time.perf_counter() - start_time:.4f} seconds"
+            )
             acquired_frame_num += len(frame_ids)
 
             wait_num = self.camera_wait_iterations
@@ -1018,7 +1021,7 @@ class Model:
                 self.data_container.run(frame_ids)
 
             # show image
-            self.logger.info(f"Image delivered to controller: {frame_ids[-1]}")
+            self.logger.info(f"Sending image to the controller: {frame_ids[-1]}")
             self.show_img_pipe.send(frame_ids[-1])
 
             if count_frame and acquired_frame_num >= num_of_frames:

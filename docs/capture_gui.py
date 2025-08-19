@@ -1,7 +1,7 @@
-from mss import mss
-from PIL import Image
 import tkinter as tk
 import os
+
+from navigate.tools.gui import capture_region, tk_window_bbox
 from navigate.view.splash_screen import SplashScreen
 from navigate.controller.controller import Controller
 from navigate.tools.main_functions import create_parser, evaluate_parser_input_arguments
@@ -57,23 +57,6 @@ def get_controller():
     )
 
     return root, controller
-
-
-def capture_region(x, y, w, h, out_path):
-    with mss() as sct:
-        img = sct.grab(
-            {"left": int(x), "top": int(y), "width": int(w), "height": int(h)}
-        )
-        Image.frombytes("RGB", img.size, img.rgb).save(out_path)
-
-
-def tk_window_bbox(win, pad=0):
-    win.update_idletasks()
-    x = win.winfo_rootx() - pad
-    y = win.winfo_rooty() - pad
-    w = win.winfo_width() + 2 * pad
-    h = win.winfo_height() + 2 * pad
-    return x, y, w, h
 
 
 if __name__ == "__main__":

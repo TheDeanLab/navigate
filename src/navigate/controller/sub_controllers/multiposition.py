@@ -38,9 +38,15 @@ import logging
 # Third Party Imports
 import pandas as pd
 import numpy as np
+import os
+import yaml
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.tools.file_functions import (
+    load_yaml_file,
+    save_yaml_file,
+)
 
 
 # Logger Setup
@@ -222,22 +228,29 @@ class MultiPositionController(GUIController):
         The valid csv file should contain the line of headers: stage axes
         """
         filename = filedialog.askopenfilenames(
-            defaultextension=".csv",
-            filetypes=(("CSV files", "*.csv"), ("Text files", "*.txt")),
+            defaultextension=".yml",
+            filetypes=(("yml file", "*.yml"),("CSV files", "*.csv"), ("Text files", "*.txt")),
         )
         if not filename:
             return
-        df = pd.read_csv(filename[0])
-        # validate the csv file
+        if filename[0].endswith(".yml"):
+            # Load YAML/JSON file
+            with open(filename[0], "r") as f:
+                data = yaml.safe_load(f)  # works because YAML supports JSON too
+            # First row is header, rest are data
+            df = pd.DataFrame(data[1:], columns=data[0])
+        else:
+            df = pd.read_csv(filename[0])
+        # validate the csv/yml file
         df.columns = map(lambda v: v.upper(), df.columns)
         stage_axes = self.parent_controller.configuration_controller.stage_axes
         cmp_header = [axis in df.columns for axis in [axis.upper() for axis in stage_axes]]
         if not all(cmp_header):
             messagebox.showwarning(
                 title="Warning",
-                message=f"The csv file isn't right, it should contain {[axis.upper() for axis in stage_axes]}",
+                message=f"The csv/yml file isn't right, it should contain {[axis.upper() for axis in stage_axes]}",
             )
-            logger.info(f"The csv file isn't right, it should contain {[axis.upper() for axis in stage_axes]}")
+            logger.info(f"The csv/yml file isn't right, it should contain {[axis.upper() for axis in stage_axes]}")
             return
         self.table.model.df = df
         self.table.currentrow = 0
@@ -245,7 +258,7 @@ class MultiPositionController(GUIController):
         self.table.resetColors()
         self.table.redraw()
         self.table.tableChanged()
-        self.show_verbose_info("loaded csv file", filename)
+        self.show_verbose_info("loaded csv/yml file", filename)
 
     def export_positions(self):
         """Export the positions in the Multi-Position Acquisition Interface to a
@@ -255,10 +268,20 @@ class MultiPositionController(GUIController):
         Then, it will export positions to that csv file
         """
         filename = filedialog.asksaveasfilename(
-            defaultextension=".csv",
-            filetypes=(("CSV file", "*.csv"), ("Text file", "*.txt")),
+            defaultextension=".yml",
+            filetypes=(("yml file", "*.yml"),("CSV file", "*.csv"), ("Text file", "*.txt")),
         )
         if not filename:
+            return
+        if filename.endswith(".yml"):
+            file_directory, file_name_only = os.path.split(filename)
+            data = [self.table.model.df.columns.tolist()] + self.table.model.df.values.tolist()
+            save_yaml_file(
+                file_directory=file_directory,
+                content_dict=data,
+                filename=file_name_only,
+            )
+            self.show_verbose_info("exporting yml file", filename)
             return
         self.table.model.df.to_csv(filename, index=False)
         self.show_verbose_info("exporting csv file", filename)

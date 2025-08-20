@@ -31,18 +31,10 @@
 
 # Standard Library Imports
 from abc import ABC, abstractmethod
-import time
-import json
-import logging
-from builtins import bytes
-from typing import Union
 
 # Third Party Imports
-from serial import Serial
 
 # Local Imports
-
-logger = logging.getLogger(__name__)
 
 
 class DeviceBase(ABC):
@@ -75,7 +67,7 @@ class DeviceBase(ABC):
         pass
 
 
-class SerialDevice(Serial):
+class SerialDevice:
     """SerialDevice - Parent serial device class."""
 
     def __init__(
@@ -106,9 +98,6 @@ class SerialDevice(Serial):
         #: str: Unique identifier for the device, serial_ followed by the port.
         self.unique_id = "serial_" + port
 
-        #: serial.Serial: Serial connection object, initialized to None.
-        self.serial = None
-
     def connect(
         self, port: str, baudrate: int = 115200, timeout: float = 0.25
     ) -> object:
@@ -129,11 +118,16 @@ class SerialDevice(Serial):
             The serial connection object if successful, otherwise None.
         """
         if port:
-            self.serial = super().__init__(
-                port=port,
-                baudrate=baudrate,
-                timeout=timeout,
-            )
+            from serial import Serial
+
+            self.serial = Serial()
+            self.serial.port = port
+            self.serial.baudrate = baudrate
+            self.serial.timeout = timeout
+            self.serial.open()
+        else:
+            self.serial = None
+
         return self.serial
 
     def disconnect(self) -> None:
@@ -143,60 +137,6 @@ class SerialDevice(Serial):
                 self.serial.close()
         except Exception as e:
             print(f"Error disconnecting from serial device: {e}")
-
-    def write(self, data: bytes) -> int:
-        """Write data to the serial device.
-
-        Parameters
-        ----------
-        data : bytes
-            The data to write to the serial device.
-
-        Returns
-        -------
-        int
-            The number of bytes written to the serial device, with logging of the event.
-        """
-        start = time.perf_counter_ns()
-        result = super().write(data)
-        self.log_event("write", data, time.perf_counter_ns() - start)
-        return result
-
-    def readline(self, size: Union[int, None] = -1, /) -> bytes:
-        """Read a line from the serial device.
-
-        Returns
-        -------
-        bytes
-            The line read from the serial device, with logging of the event.
-        """
-        start = time.perf_counter_ns()
-        line = super().readline()
-        self.log_event("read", line, time.perf_counter_ns() - start)
-        return line
-
-    def log_event(self, kind: str, payload: bytes, duration_ns: int) -> None:
-        """Log the event with performance data.
-
-        Parameters
-        ----------
-        kind : str
-            The type of event, e.g., "read" or "write".
-        payload : bytes
-            The data being read or written.
-        duration_ns : int
-            The duration of the operation in nanoseconds.
-        """
-        logger.performance(
-            json.dumps(
-                {
-                    "kind": kind,
-                    "payload": payload.decode(errors="ignore"),
-                    "duration_ns": duration_ns,
-                    "timestamp": time.time(),
-                }
-            )
-        )
 
 
 class IntegratedDevice:

@@ -594,6 +594,8 @@ class Model:
                     logger=self.logger,
                 )
             else:
+                if self.imaging_mode == "z-stack":
+                    self.is_data_thread_on = False
                 self.signal_thread = ThreadWithWarning(
                     target=self.run_acquisition,
                     warning_queue=self.event_queue,
@@ -623,7 +625,8 @@ class Model:
                 self.data_thread = threading.Thread(target=self.run_data_process)
             self.data_thread.name = f"{self.imaging_mode} Data"
             self.signal_thread.start()
-            self.data_thread.start()
+            if self.is_data_thread_on:
+                self.data_thread.start()
             for m in self.virtual_microscopes:
                 image_writer = (
                     ImageWriter(
@@ -806,7 +809,7 @@ class Model:
                 self.signal_container.end_flag = True
             if self.signal_thread:
                 self.signal_thread.join()
-            if self.data_thread:
+            if self.is_data_thread_on and self.data_thread:
                 self.data_thread.join()
 
             self.end_acquisition()
@@ -1143,6 +1146,8 @@ class Model:
             self.stop_send_signal = False
             self.injected_flag.value = False
             self.is_live = False
+            self.start_grab_image_flag = False
+            self.is_data_thread_on = True
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
         if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_model"):
@@ -1192,7 +1197,11 @@ class Model:
         # Run the acquisition
         try:
             self.active_microscope.turn_on_laser()
-            self.active_microscope.daq.run_acquisition()
+            self.active_microscope.daq.run_acquisition(wait_until_done=self.is_data_thread_on)
+            if not self.is_data_thread_on:
+                if self.start_grab_image_flag:
+                    self.grab_image(getattr(self.image_writer, "save_image", None))
+                self.active_microscope.daq.wait_acquisition_done()
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
             if self.active_microscope.current_channel == 0:
@@ -1216,6 +1225,54 @@ class Model:
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
+        self.start_grab_image_flag = True
+
+    def grab_image(
+        self, data_func: Optional[callable] = None
+    ) -> None:
+        wait_num = self.camera_wait_iterations
+
+        while not self.stop_acquisition:
+            frame_ids = self.active_microscope.camera.get_new_frame()
+            self.logger.info(f"Running data process, getting frames {frame_ids}")
+            # if there is at least one frame available
+            if not frame_ids:
+                self.logger.debug(
+                    f"Frame not received. Waiting {wait_num}"
+                    f"/{self.camera_wait_iterations} iterations"
+                )
+                wait_num -= 1
+                if wait_num <= 0:
+                    error_statement = (
+                        "Acquisition aborted due to camera time out "
+                        "error. Please verify that the external "
+                        "trigger is connected and configured properly."
+                    )
+
+                    self.logger.debug(error_statement)
+                    print(error_statement)
+                    break
+                continue
+
+            wait_num = self.camera_wait_iterations
+
+            # ImageWriter to save images
+            if data_func:
+                data_func(frame_ids)
+
+            if hasattr(self, "data_container") and not self.data_container.end_flag:
+                if self.data_container.is_closed:
+                    self.logger.info("Data container is closed.")
+                    self.stop_acquisition = True
+                    break
+
+                self.data_container.run(frame_ids)
+
+            # show image
+            self.logger.info(f"Image delivered to controller: {frame_ids[0]}")
+            self.show_img_pipe.send(frame_ids[-1])
+
+            break
 
     def run_live_acquisition(self) -> None:
         """Stream live image to the GUI.
@@ -1264,6 +1321,10 @@ class Model:
                 self.logger.info("Signal container is closed.")
                 self.stop_acquisition = True
                 return
+        if not self.is_data_thread_on:
+            if self.start_grab_image_flag:
+                self.grab_image(getattr(self.image_writer, "save_image", None))
+            self.show_img_pipe.send("stop")
         if self.imaging_mode != "live":
             self.stop_acquisition = True
 

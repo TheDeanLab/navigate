@@ -123,7 +123,7 @@ class SyntheticDAQ(DAQBase):
         if self.wait_to_run_lock.locked():
             self.wait_to_run_lock.release()
 
-    def run_acquisition(self):
+    def run_acquisition(self, wait_until_done=True):
         """Run DAQ Acquisition.
 
         Run the tasks for triggering, analog and counter outputs.
@@ -134,6 +134,10 @@ class SyntheticDAQ(DAQBase):
         if self.is_updating_analog_task:
             self.wait_to_run_lock.acquire()
             self.wait_to_run_lock.release()
+        if wait_until_done:
+            self.wait_acquisition_done()
+
+    def wait_acquisition_done(self):
         time.sleep(0.01)
         if self.trigger_mode == "self-trigger":
             for microscope_name in self.camera:

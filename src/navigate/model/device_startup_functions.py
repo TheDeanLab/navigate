@@ -176,9 +176,8 @@ class SerialConnectionFactory:
                 build_connection_function, args, exception=exception
             )
             cls._connections[str(port)] = MonitoredSerial(
-                connection, port, exception=exception
+                serial_connection=connection
             )
-
         return cls._connections[str(port)]
 
 

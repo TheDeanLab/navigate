@@ -77,8 +77,18 @@ class DeviceBase(ABC):
         pass
 
 
-class MonitoredSerial(serial.Serial):
+class MonitoredSerial:
     """MonitoredSerial - Serial class that logs read/write events."""
+
+    def __init__(self, serial_connection: serial.Serial):
+        """Initialize MonitoredSerial with an existing connection, without initializing a new serial.Serial instance.
+
+        Parameters
+        ----------
+        serial_connection : serial.Serial
+            An existing serial connection to wrap
+        """
+        self.serial = serial_connection
 
     def write(self, data: bytes):
         """Write data to the serial port and log the event.
@@ -90,7 +100,7 @@ class MonitoredSerial(serial.Serial):
         """
 
         start = time.perf_counter_ns()
-        super().write(data)
+        self.serial.write(data)
         self.log_event("write", data, time.perf_counter_ns() - start)
 
     def readline(self, size: Union[int, None] = -1, /) -> bytes:
@@ -107,9 +117,35 @@ class MonitoredSerial(serial.Serial):
             The line read from the serial port.
         """
         start = time.perf_counter_ns()
-        line = super().readline()
-        self.log_event("read", line, time.perf_counter_ns() - start)
+        line = self.serial.readline()
+        self.log_event("readline", line, time.perf_counter_ns() - start)
         return line
+
+    def read(self, size: int = 1) -> bytes:
+        """Read a specified number of bytes from the serial port and log the event.
+
+        Parameters
+        ----------
+        size : int, optional
+            The number of bytes to read, by default 1.
+
+        Returns
+        -------
+        bytes
+            The bytes read from the serial port.
+        """
+        start = time.perf_counter_ns()
+        data = self.serial.read(size)
+        self.log_event("read", data, time.perf_counter_ns() - start)
+        return data
+
+    @property
+    def in_waiting(self) -> int:
+        return self.serial.in_waiting
+    
+    @property
+    def is_open(self) -> bool:
+        return self.serial.is_open
 
     @staticmethod
     def log_event(kind: str, payload: bytes, duration_ns: int) -> None:
@@ -134,6 +170,7 @@ class MonitoredSerial(serial.Serial):
                 }
             )
         )
+
 
 
 class SerialDevice:

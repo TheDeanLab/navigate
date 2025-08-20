@@ -259,7 +259,7 @@ class SutterFilterWheel(FilterWheelBase, SerialDevice):
             expected.
         """
         for i in range(100):
-            num_waiting = self.serial.inWaiting()
+            num_waiting = self.serial.in_waiting
             # if there are unread returns from previous commands
             if num_waiting >= num_bytes:
                 break

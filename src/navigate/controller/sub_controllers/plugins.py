@@ -200,7 +200,7 @@ class PluginsController:
             if controller_name in self.plugins_dict:
                 self.plugins_dict[controller_name].popup.deiconify()
                 return
-            popup = PopUp(self.view, plugin_name, "+320+180", transient=False)
+            popup = PopUp(self.view, plugin_name, "+320+180", top=False, transient=False)
             popup.configure(bg="white")
             popup.resizable(True, True)
             content_frame = popup.get_frame()

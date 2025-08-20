@@ -223,9 +223,9 @@ class MultiPositionController(GUIController):
         return self.table.model.df.shape[0]
 
     def load_positions(self):
-        """Load a csv file.
+        """Load a yml or csv file.
 
-        The valid csv file should contain the line of headers: stage axes
+        The valid yml/csv file should contain the line of headers: stage axes
         """
         filename = filedialog.askopenfilenames(
             defaultextension=".yml",
@@ -262,10 +262,10 @@ class MultiPositionController(GUIController):
 
     def export_positions(self):
         """Export the positions in the Multi-Position Acquisition Interface to a
-        csv file.
+        yml or csv file.
 
         This function opens a dialog that let the user input a filename
-        Then, it will export positions to that csv file
+        Then, it will export positions to that yml/csv file
         """
         filename = filedialog.asksaveasfilename(
             defaultextension=".yml",

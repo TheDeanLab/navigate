@@ -46,6 +46,7 @@ from navigate.tools.common_functions import combine_funcs
 from navigate.tools.decorators import AcquisitionMode
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.plugins_popup import PluginsPopup
+from navigate.view.custom_widgets.common import uniform_grid
 from navigate.plugins.plugin_manager import PluginFileManager, PluginPackageManager
 
 
@@ -201,10 +202,12 @@ class PluginsController:
                 return
             popup = PopUp(self.view, plugin_name, "+320+180", transient=False)
             popup.configure(bg="white")
+            popup.resizable(True, True)
             content_frame = popup.get_frame()
             plugin_frame = frame(content_frame)
             plugin_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
-
+            uniform_grid(content_frame)
+            uniform_grid(plugin_frame)
             plugin_controller = controller(plugin_frame, self.parent_controller)
             self.parent_controller.register_event_listeners(
                 getattr(plugin_controller, "custom_events", {})

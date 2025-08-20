@@ -46,6 +46,7 @@ from navigate.model.devices.device_types import (
     IntegratedDevice,
     NIDevice,
     SequenceDevice,
+    MonitoredSerial,
 )
 from navigate.model.devices.daq.base import DAQBase
 
@@ -171,8 +172,11 @@ class SerialConnectionFactory:
         """
         port = args[0]
         if str(port) not in cls._connections:
-            cls._connections[str(port)] = auto_redial(
+            connection = auto_redial(
                 build_connection_function, args, exception=exception
+            )
+            cls._connections[str(port)] = MonitoredSerial(
+                connection, port, exception=exception
             )
 
         return cls._connections[str(port)]
@@ -622,6 +626,8 @@ def load_devices(
         ]["hardware"]["type"]
 
     if device_type not in devices_dict["daq"]:
-        devices_dict["daq"][device_type] = start_daq(configuration, device_type, microscope_name)
+        devices_dict["daq"][device_type] = start_daq(
+            configuration, device_type, microscope_name
+        )
 
     return devices_dict

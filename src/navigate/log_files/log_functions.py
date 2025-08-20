@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+import logging
 import logging.config
 import logging.handlers
 from pathlib import Path
@@ -39,6 +40,7 @@ import sys
 import traceback
 from datetime import datetime, timedelta
 import shutil
+from typing import Optional
 
 # Third Party Imports
 import yaml
@@ -48,7 +50,23 @@ from navigate.config.config import get_navigate_path
 from navigate.tools.common_dict_tools import update_nested_dict
 
 
-def find_filename(k, v):
+# Custom performance logging level
+PERFORMANCE = 25
+logging.addLevelName(PERFORMANCE, "PERFORMANCE")
+
+
+# Add a performance method to the Logger class
+def performance(self, message, *args, **kwargs) -> None:
+    """Log 'performance' messages at the PERFORMANCE level."""
+    if self.isEnabledFor(PERFORMANCE):
+        self._log(PERFORMANCE, message, args, **kwargs)
+
+
+# Attach the performance method to the Logger class
+logging.Logger.performance = performance
+
+
+def find_filename(k: str, v: str) -> bool:
     """Check that we've met the condition dictionary key == 'filename'
 
     Parameters
@@ -68,7 +86,7 @@ def find_filename(k, v):
     return False
 
 
-def log_setup(logging_configuration, logging_path=None):
+def log_setup(logging_configuration: str, logging_path: Optional[str] = None) -> None:
     """Setup logging configuration
 
     Initialize a logger from a YAML file containing information in the Python logging
@@ -119,7 +137,7 @@ def log_setup(logging_configuration, logging_path=None):
     # Discard log files older than 30 days
     eliminate_old_log_files(logging_path)
 
-    def update_filename(v):
+    def update_filename(v: str) -> str:
         """Function to map filename to base_directory/filename in the dictionary
 
         Parameters
@@ -150,7 +168,7 @@ def log_setup(logging_configuration, logging_path=None):
             print(yaml_error)
 
 
-def eliminate_old_log_files(logging_path):
+def eliminate_old_log_files(logging_path: str) -> None:
     """Eliminate log files in the logging folder older than 30 days.
 
     Parameters
@@ -174,7 +192,7 @@ def eliminate_old_log_files(logging_path):
                     continue
 
 
-def main_process_listener(queue):
+def main_process_listener(queue: "multiprocessing.Queue") -> None:
     """Listener function for the main process
 
     This function will listen for new logs put in queue from sub processes,

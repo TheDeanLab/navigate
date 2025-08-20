@@ -31,7 +31,6 @@
 # Standard Library Imports
 import logging
 import os
-from typing import Optional
 from datetime import datetime
 import re
 from tkinter import filedialog
@@ -39,7 +38,6 @@ from PIL import ImageGrab
 
 # Third Party Imports
 import numpy as np
-import matplotlib.dates as mdates
 
 # Local Imports
 from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
@@ -132,22 +130,26 @@ class DiagnosticsPopupController:
             return
 
         # Make sure that the save dialog has time to close before capturing the screenshot
-        self.view.popup.after_idle(lambda: self._take_screenshot(file_path))
+        self.view.popup.after(100, lambda: self._take_screenshot(file_path))
 
-    def _take_screenshot(self, file_path):
+    def _take_screenshot(self, file_path: str) -> None:
+        """Capture a screenshot of the diagnostics popup and save it to the specified file path.
+
+        Parameters
+        ----------
+        file_path : str
+            The path where the screenshot will be saved.
+        """
         # Get the window geometry
-        x = self.view.popup.winfo_rootx()
-        y = self.view.popup.winfo_rooty()
-        width = self.view.popup.winfo_width()
-        height = self.view.popup.winfo_height()
-
-        # Capture the screenshot
+        x = self.view.diagnostics_frame.winfo_rootx()
+        y = self.view.diagnostics_frame.winfo_rooty()
+        width = self.view.diagnostics_frame.winfo_width()
+        height = self.view.diagnostics_frame.winfo_height()
         screenshot = ImageGrab.grab(bbox=(x, y, x + width, y + height))
         screenshot.save(file_path)
-
         logger.info(f"Diagnostics screenshot saved to: {file_path}")
 
-    def initialize_plots(self):
+    def initialize_plots(self) -> None:
         """Initialize empty plots with axes but no data."""
         # Y-axis labels for each plot
         y_labels = {
@@ -180,7 +182,7 @@ class DiagnosticsPopupController:
                 fill="both", expand=True
             )
 
-    def populate_plots(self):
+    def populate_plots(self) -> None:
         """Generate and display dummy data for all diagnostic plots."""
 
         model_log, controller_log = load_latest_log_file()
@@ -219,7 +221,7 @@ class DiagnosticsPopupController:
         self.plot_histogram(panel=8, times=times, title="Time for DAQ to out triggers")
 
     @staticmethod
-    def extract_times(log_content, pattern):
+    def extract_times(log_content: list, pattern: str) -> list:
         """
         Extract image display times from controller log content.
 
@@ -249,7 +251,7 @@ class DiagnosticsPopupController:
         times = times if len(times) > 0 else None
         return times
 
-    def plot_histogram(self, panel, times, title=""):
+    def plot_histogram(self, panel: int, times: list, title="") -> None:
         """
         Create a histogram of image display times with statistics.
 
@@ -259,11 +261,13 @@ class DiagnosticsPopupController:
             The panel number to plot the histogram on (1-6)
         times : list
             A list of times in seconds to plot
+        title : str
+            The title for the plot. If empty, a default title will be used.
         """
-        # add a new fiture if necessary
+        # add a new figure if necessary
         if f"canvas_{panel}" not in self.view.inputs:
             self.view.add_plot_figure(title)
-        
+
         fig = self.view.inputs[f"diagnostics_{panel}"]
         ax = fig.axes[0]
         ax.clear()

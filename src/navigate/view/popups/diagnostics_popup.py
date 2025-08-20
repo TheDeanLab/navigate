@@ -169,7 +169,7 @@ class DiagnosticsPopup(ttk.Frame):
         )
         # Add a matplotlib.figure.figure to the label frame
         self.inputs[f"diagnostics_{counter + 1}"] = Figure(
-            figsize=(4.0, 3.0), tight_layout=True
+            figsize=(3.0, 2.0), tight_layout=True
         )
         self.inputs[f"canvas_{counter + 1}"] = FigureCanvasTkAgg(
             self.inputs[f"diagnostics_{counter + 1}"], label_frame

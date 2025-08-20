@@ -1,14 +1,20 @@
 %YAML 1.2
 ---
 version: 1
+disable_existing_loggers: False
+
 formatters:
   base:
     format: '%(asctime)s - %(name)s - %(levelname)s - %(module)s: %(message)s'
+  json:
+    format: '%(message)s'
+
 filters:
   performance_specs:
     (): ext://navigate.log_files.filters.PerformanceFilter
   not_performance:
     (): ext://navigate.log_files.filters.NonPerfFilter
+
 handlers:
   console:
     class: logging.StreamHandler
@@ -37,9 +43,16 @@ handlers:
     filename: model_error.log
     filters: [not_performance]
     mode: a
+  performance:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: json
+    filename: performance.log
+    filters: [ performance_specs ]
+    mode: a
+
 loggers:
   model:
     level: DEBUG
-    handlers: [console, model_info, model_debug]
-#    handlers: [console, model_info, model_debug, model_performance]
+    handlers: [console, model_info, model_debug, performance]
     propagate: no

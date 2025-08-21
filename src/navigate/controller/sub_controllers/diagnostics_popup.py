@@ -34,6 +34,8 @@ import os
 from datetime import datetime
 import re
 from tkinter import filedialog
+from typing import Optional, Iterable
+
 from PIL import ImageGrab
 
 # Third Party Imports
@@ -151,18 +153,8 @@ class DiagnosticsPopupController:
 
     def initialize_plots(self) -> None:
         """Initialize empty plots with axes but no data."""
-        # Y-axis labels for each plot
-        y_labels = {
-            1: "Frequency",
-            2: "FPS",
-            3: "MB/s",
-            4: "Time (ms)",
-            5: "Time (ms)",
-            6: "Memory (MB)",
-        }
-
         # Initialize each plot without data
-        for i in range(1, 7):
+        for i in range(1, 8):
             # Get figure and clear it
             fig = self.view.inputs[f"diagnostics_{i}"]
             ax = fig.axes[0]
@@ -170,7 +162,6 @@ class DiagnosticsPopupController:
 
             # Add labels and grid
             ax.set_xlabel("Time (ms)")
-            ax.set_ylabel(y_labels[i])
             ax.grid(True, linestyle="--", alpha=0.7)
 
             # Set reasonable y limits
@@ -185,43 +176,47 @@ class DiagnosticsPopupController:
     def populate_plots(self) -> None:
         """Generate and display dummy data for all diagnostic plots."""
 
-        model_log, controller_log = load_latest_log_file()
+        model_log, controller_log, performance_log = load_latest_log_file()
+
+        # Plot the time necessary to acquire a new image.
+        pattern = r"model: New image acquired in (\d+\.\d+) seconds"
+        times = self.extract_times(model_log, pattern)
+        self.plot_histogram(panel=1, times=times, title="Image Acquisition Time")
 
         # Plot the histogram of the display times from the controller log
         pattern = r"camera_view: Displaying image took (\d+\.\d+) seconds"
         times = self.extract_times(controller_log, pattern)
-        self.plot_histogram(panel=1, times=times)
+        self.plot_histogram(panel=2, times=times, title="Image Display Times")
 
         # Plot the histogram of the times necessary to populate the histogram.
         pattern = r"histogram: Histogram populated in (\d+\.\d+) seconds"
         times = self.extract_times(controller_log, pattern)
-        self.plot_histogram(panel=2, times=times)
+        self.plot_histogram(panel=3, times=times, title="Histogram Population Times")
 
         # Plot the time to move the z and f stages during a z-stack.
         pattern = (
             r"common_features: Z- and F-position move duration: (\d+\.\d+) seconds"
         )
         times = self.extract_times(model_log, pattern)
-        self.plot_histogram(panel=3, times=times)
-
-        # Plot the time necessary to acquire a new image.
-        pattern = r"model: New image acquired in (\d+\.\d+) seconds"
-        times = self.extract_times(model_log, pattern)
-        self.plot_histogram(panel=4, times=times)
+        self.plot_histogram(panel=4, times=times, title="Z/F Stage Move Duration")
 
         # Plot the time necessary to get stage positions.
         pattern = r"model: Stage positions got in (\d+\.\d+) seconds"
         times = self.extract_times(model_log, pattern)
-        self.plot_histogram(panel=7, times=times, title="Time to get stage positions")
+        self.plot_histogram(panel=5, times=times, title="Get Stage Positions Time")
 
         # Plot the time necessary to turn on/off lasers and send out triggers.
         # The time should closely match the waveform length (exposure time + delay).
         pattern = r"model: DAQ sending out triggers in (\d+\.\d+) seconds"
         times = self.extract_times(model_log, pattern)
-        self.plot_histogram(panel=8, times=times, title="Time for DAQ to out triggers")
+        self.plot_histogram(panel=6, times=times, title="DAQ Trigger Time")
+
+        # Plot the time necessary to perform all serial communications.
+        times = self.extract_times(performance_log)
+        self.plot_histogram(panel=7, times=times, title="Serial Communication Time")
 
     @staticmethod
-    def extract_times(log_content: list, pattern: str) -> list:
+    def extract_times(log_content: list, pattern: str = "") -> list:
         """
         Extract image display times from controller log content.
 
@@ -230,28 +225,34 @@ class DiagnosticsPopupController:
         log_content : list or None
             List of log lines from the controller log
         pattern : str
-            Regular expression pattern to match display time entries
+            Regular expression pattern to match display time entries.
+            If empty, it assumes JSON format.
 
         Returns
         -------
-        times : list
-            A list of float values representing times in seconds
+        times : list or None
+            A list of float values representing times in seconds.
+            Returns None if no times are found.
         """
 
         if not log_content:
             return None
 
-        # Extract all matching times
+        if isinstance(log_content[0], dict):
+            # JSON formatted log exists as a dictionary.
+            durations = [entry['duration_ns'] * 1e-9 for entry in log_content]
+            return durations if len(durations) > 0 else None
+
+        # Standard logs exist as a list of strings.
         times = []
         for line in log_content:
             match = re.search(pattern, line)
             if match:
                 times.append(float(match.group(1)))
 
-        times = times if len(times) > 0 else None
-        return times
+        return times if len(times) > 0 else None
 
-    def plot_histogram(self, panel: int, times: list, title="") -> None:
+    def plot_histogram(self, panel: int, times: Optional[Iterable], title="") -> None:
         """
         Create a histogram of image display times with statistics.
 
@@ -259,7 +260,7 @@ class DiagnosticsPopupController:
         ----------
         panel : int
             The panel number to plot the histogram on (1-6)
-        times : list
+        times : Optional[Iterable]
             A list of times in seconds to plot
         title : str
             The title for the plot. If empty, a default title will be used.

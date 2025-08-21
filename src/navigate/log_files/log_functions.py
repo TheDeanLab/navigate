@@ -41,6 +41,7 @@ import traceback
 from datetime import datetime, timedelta
 import shutil
 from typing import Optional
+import json
 
 # Third Party Imports
 import yaml
@@ -240,10 +241,12 @@ def load_latest_log_file() -> tuple:
         logging_path, latest_dir, "view_controller_debug.log"
     )
     model_log_path = os.path.join(logging_path, latest_dir, "model_debug.log")
+    performance_log_path = os.path.join(logging_path, latest_dir, "performance.log")
 
     # Default to None if the log files do not exist
     controller_log_data = None
     model_log_data = None
+    performance_log_data = None
 
     try:
         if controller_log_path and os.path.exists(controller_log_path):
@@ -259,7 +262,19 @@ def load_latest_log_file() -> tuple:
     except Exception:
         pass
 
-    return model_log_data, controller_log_data
+    try:
+        if performance_log_path and os.path.exists(performance_log_path):
+            performance_log_data = []
+            with open(performance_log_path, "r") as file:
+                for line in file:
+                    try:
+                        performance_log_data.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
+    except Exception:
+        pass
+
+    return model_log_data, controller_log_data, performance_log_data
 
 
 def get_folder_date(folder_name: str) -> datetime:

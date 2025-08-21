@@ -45,29 +45,21 @@ from navigate.controller.sub_controllers.multiposition import MultiPositionContr
 
 @pytest.fixture
 def multiposition_controller(dummy_controller):
-    # Create a copy/clone of the dummy_controller to avoid side effects
-    isolated_controller = MagicMock()
-    isolated_controller.configuration = dummy_controller.configuration
-
     # Create a mock pt attribute for the multiposition_tab
-    isolated_controller.view.settings.multiposition_tab.pt = MagicMock()
-    isolated_controller.view.settings.multiposition_tab.pt.model = MagicMock()
-    isolated_controller.view.settings.multiposition_tab.pt.model.df = pd.DataFrame()
+    dummy_controller.view.settings.multiposition_tab.pt = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.model = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.model.df = pd.DataFrame()
 
     # Add other required mock attributes and methods
-    isolated_controller.view.settings.multiposition_tab.pt.redraw = MagicMock()
-    isolated_controller.view.settings.multiposition_tab.pt.tableChanged = MagicMock()
-    isolated_controller.view.settings.multiposition_tab.pt.resetColors = MagicMock()
-    isolated_controller.view.settings.multiposition_tab.pt.update_rowcolors = (
-        MagicMock()
-    )
+    dummy_controller.view.settings.multiposition_tab.pt.redraw = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.tableChanged = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.resetColors = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.update_rowcolors = MagicMock()
 
     # Mock the master and tiling buttons
-    isolated_controller.view.settings.multiposition_tab.master = MagicMock()
-    isolated_controller.view.settings.multiposition_tab.master.tiling_buttons = (
-        MagicMock()
-    )
-    isolated_controller.view.settings.multiposition_tab.master.tiling_buttons.buttons = {
+    dummy_controller.view.settings.multiposition_tab.master = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.master.tiling_buttons = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.master.tiling_buttons.buttons = {
         "tiling": MagicMock(),
         "save_data": MagicMock(),
         "load_data": MagicMock(),
@@ -75,17 +67,11 @@ def multiposition_controller(dummy_controller):
     }
 
     # This is the important part - configure the stage axes
-    isolated_controller.configuration_controller = MagicMock()
-    isolated_controller.configuration_controller.stage_axes = [
-        "x",
-        "y",
-        "z",
-        "theta",
-        "f",
-    ]
+    dummy_controller.configuration_controller = MagicMock()
+    dummy_controller.configuration_controller.stage_axes = ["x", "y", "z", "theta", "f"]
 
     return MultiPositionController(
-        isolated_controller.view.settings.multiposition_tab, isolated_controller
+        dummy_controller.view.settings.multiposition_tab, dummy_controller
     )
 
 

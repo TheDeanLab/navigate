@@ -36,6 +36,7 @@ import tkinter as tk
 from tkinter import messagebox
 import logging
 import threading
+import queue
 from typing import Dict, Optional
 import tempfile
 import os
@@ -52,7 +53,6 @@ import numpy as np
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.analysis.camera import compute_signal_to_noise
-from navigate.tools.common_functions import VariableWithLock
 from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path, update_config_dict
 
@@ -109,8 +109,29 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         super().__init__(view, parent_controller)
 
+        #: float: Max frames per second (0 or None disables throttling)
+        self.max_fps: float = 20.0
+
+        #: float: Minimum time between processed frames
+        self._min_frame_interval: float = 1.0 / self.max_fps
+
+        #: float: Timestamp of last enqueued frame (perf_counter seconds)
+        self._last_enqueue_time: float = 0.0
+
+        #: int: Cached maximum value of the last displayed frame.
+        self._last_frame_display_max = 0
+
+        #: tkinter.PhotoImage: The tkinter photo image for the canvas.
+        self._photo = None
+
+        #: tkinter.PhotoImage: The buffered tkinter photo image for the canvas.
+        self._img_buf = None
+
         #: bool: The flag for the selected signal-to-noise ratio.
         self._snr_selected = False
+
+        #: numpy.ndarray: The lookup table buffer for the image colormap.
+        self._lut_buf = None
 
         #: numpy.ndarray: The offset map.
         self._offset = None
@@ -151,11 +172,10 @@ class BaseViewController(GUIController, ABaseViewController):
         #: int: The scaling factor for the width of the canvas.
         self.canvas_width_scale = 4
 
-        #: str: The colormap for the image.
-        # self.colormap = plt.get_cmap("gist_gray")
-
         #: np.ndarray: Precomputed lookup table for the image colormap.
-        self.colormap = self._generate_lut("gist_gray")
+        self.colormap = np.ascontiguousarray(
+            self._generate_lut("gist_gray"), dtype=np.uint8
+        )
 
         #: str: The mode of the camera view controller.
         self.mode = "stop"
@@ -172,17 +192,18 @@ class BaseViewController(GUIController, ABaseViewController):
         #: numpy.ndarray: The image data.
         self.image = None
 
-        #: bool: The flag for the image cache.
-        self.image_cache_flag = True
-
         #: int: The count of images.
         self.image_count = 0
 
-        #: VariableWithLock: The lock for displaying the image.
-        self.is_displaying_image = VariableWithLock(bool)
-
         #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
+
+        #: queue.Queue: single-slot queue for display frames
+        self._disp_q = queue.Queue(maxsize=1)
+
+        #: threading.Thread: single persistent display worker
+        self._disp_thread = threading.Thread(target=self._display_worker, daemon=True)
+        self._disp_thread.start()
 
         #: int: The maximum counts of the image.
         self.max_counts = None
@@ -217,9 +238,6 @@ class BaseViewController(GUIController, ABaseViewController):
         #: ImageTk.PhotoImage: The tkinter image.
         self.tk_image = None
 
-        #: ImageTk.PhotoImage: The tkinter image 2.
-        self.tk_image2 = None
-
         #: int: The total number of images per volume.
         self.total_images_per_volume = 0
 
@@ -250,12 +268,15 @@ class BaseViewController(GUIController, ABaseViewController):
         #: dict: The dictionary of image palette widgets.
         self.image_palette = view.lut.get_widgets()
 
-        # Binding for adjusting the lookup table min and max counts.
+        #: Optional[str]: after() id for debouncing min/max updates
+        self._minmax_after_id = None
+
+        # Binding for adjusting the lookup table min and max counts (debounced 100 ms)
         self.image_palette["Min"].get_variable().trace_add(
-            "write", lambda *args: self.update_min_max_counts(display=True)
+            "write", self._on_minmax_changed
         )
         self.image_palette["Max"].get_variable().trace_add(
-            "write", lambda *args: self.update_min_max_counts(display=True)
+            "write", self._on_minmax_changed
         )
         self.image_palette["Autoscale"].widget.config(
             command=lambda: self.toggle_min_max_buttons(display=True)
@@ -296,6 +317,22 @@ class BaseViewController(GUIController, ABaseViewController):
         self.menu.add_separator()
         self.menu.add_command(label="Move Here", command=self.move_stage)
         self.menu.add_command(label="Mark Position", command=self.mark_position)
+
+    def _on_minmax_changed(self, *args) -> None:
+        """Debounce updates to min/max entry changes by 100 ms."""
+
+        # Cancel any pending scheduled update
+        if self._minmax_after_id:
+            try:
+                self.view.after_cancel(self._minmax_after_id)
+            except Exception:
+                pass
+            self._minmax_after_id = None
+
+        # Schedule a new update
+        self._minmax_after_id = self.view.after(
+            100, lambda: self.update_min_max_counts(display=True)
+        )
 
     def initialize(self, name, data) -> None:
         """Sets widgets based on data given from main controller/config.
@@ -375,8 +412,9 @@ class BaseViewController(GUIController, ABaseViewController):
         else:
             cmap_name = target.color.get()
             self._snr_selected = True if cmap_name == "RdBu_r" else False
-            # self.colormap = plt.get_cmap(cmap_name)
-            self.colormap = self._generate_lut(cmap_name)
+            self.colormap = np.ascontiguousarray(
+                self._generate_lut(cmap_name), dtype=np.uint8
+            )
             self.process_image()
             logger.debug(f"Updating the LUT, {cmap_name}")
 
@@ -413,27 +451,56 @@ class BaseViewController(GUIController, ABaseViewController):
             self.update_min_max_counts(display=display)
 
     def try_to_display_image(self, image: np.ndarray) -> None:
-        """Try to display an image.
+        """Try to display an image using a single worker and a 1-deep queue.
 
-        Note
-        ----
-        This function is called when an image is acquired. The image is passed to the
-        display function. If the display function is already displaying an image, the
-        function will return. Thus, if imaging is faster than the display, the display
-        will skip frames.
-
-        Parameters
-        ----------
-        image : np.ndarray
-            Image data.
+        This enqueues the most recent frame and drops older frames if the queue is full.
+        Also, rate-limits enqueues to `self.max_fps` (default 20 Hz).
         """
-        with self.is_displaying_image as is_displaying_image:
-            if is_displaying_image.value:
-                return
-            is_displaying_image.value = True
 
-        display_thread = threading.Thread(target=self.display_image, args=(image,))
-        display_thread.start()
+        # Throttle to max_fps (0 disables throttle)
+        now = time.perf_counter()
+        if (
+            self._min_frame_interval > 0.0
+            and (now - self._last_enqueue_time) < self._min_frame_interval
+        ):
+            # If we are receiving frames faster than the max_fps, drop this frame.
+            return
+        self._last_enqueue_time = now
+
+        try:
+            # Try to put the new frame into the queue.
+            self._disp_q.put_nowait(image)
+
+        except queue.Full:
+            # If the queue is already full, we replace the oldest frame with the new
+            # one.
+            try:
+                # Attempt to remove the oldest frame if it exists
+                _ = self._disp_q.get_nowait()
+
+                # Confirm that we successfully removed the oldest frame
+                self._disp_q.task_done()
+            except queue.Empty:
+                pass
+
+            try:
+                # Now put the new frame into the queue
+                self._disp_q.put_nowait(image)
+
+            except queue.Full:
+                # Just in case...
+                pass
+
+    def _display_worker(self) -> None:
+        """Background worker that serially processes display requests."""
+        while True:
+            image = self._disp_q.get()
+            try:
+                self.display_image(image)
+            except Exception as e:
+                logger.exception("Error in display worker: %s", e)
+            finally:
+                self._disp_q.task_done()
 
     def display_image(self, image: np.ndarray) -> None:
         """Display an image.
@@ -457,32 +524,34 @@ class BaseViewController(GUIController, ABaseViewController):
         Returns
         -------
         numpy.ndarray
-            Lookup table shaped for ``cv2.applyColorMap`` in BGR order.
+            Lookup table.
         """
         cmap = plt.get_cmap(cmap_name)
-        lut = (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
-
-        # Convert RGB to BGR for OpenCV
-        lut = lut[:, ::-1]
-        return lut.reshape(256, 1, 3)
+        return (cmap(np.linspace(0, 1, 256))[:, :3] * 255).astype(np.uint8)
 
     def apply_lut(self, image: np.ndarray) -> np.ndarray:
-        """Apply a LUT to an image.
+        """Apply a LUT to an 8-bit single-channel image.
 
         Parameters
         ----------
         image : np.ndarray
-            Image data normalized to [0, 1].
+            8-bit image data (uint8), scaled to [0..255].
 
         Returns
         -------
         image : np.ndarray
             RGB image data with LUT applied.
         """
-        image_uint8 = (image * 255).astype(np.uint8)
-        image = cv2.applyColorMap(image_uint8, self.colormap)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        return image
+        image = np.require(image, dtype=np.uint8, requirements=["C"])
+        lut = self.colormap
+        h, w = image.shape[:2]
+        if self._lut_buf is None or self._lut_buf.shape[:2] != (h, w):
+            self._lut_buf = np.empty((h, w, 3), dtype=np.uint8)
+
+        flat_idx = image.ravel()
+        out = self._lut_buf.reshape(-1, 3)
+        np.take(lut, flat_idx, axis=0, out=out)
+        return self._lut_buf
 
     def identify_channel_index_and_slice(self) -> tuple:
         """As images arrive, identify channel index and slice.
@@ -531,7 +600,6 @@ class BaseViewController(GUIController, ABaseViewController):
         camera_parameters : dict
             Camera parameters.
         """
-        self.is_displaying_image.value = False
         self.image_count = 0  # was image_counter
         self.slice_index = 0
         self.image_mode = microscope_state["image_mode"]
@@ -807,6 +875,12 @@ class BaseViewController(GUIController, ABaseViewController):
     def scale_image_intensity(self, image: np.ndarray) -> np.ndarray:
         """Scale the data to the min/max counts, and adjust bit-depth.
 
+        Notes
+        -----
+        For autoscaled image intensity, with numpy, it was taking around 6ms. With
+        cv2, this is reduced to 300 microseconds. With non autoscaled data,
+        still taking around 4 ms. Need to change the trace.
+
         Parameters
         ----------
         image : np.ndarray
@@ -815,19 +889,27 @@ class BaseViewController(GUIController, ABaseViewController):
         Returns
         -------
         image : np.ndarray
-            Scaled image data.
+            Scaled image data (uint8).
         """
-        if self.autoscale:
-            self.max_counts = np.max(image)
-            self.min_counts = np.min(image)
-        else:
-            self.update_min_max_counts()
+        # Compute min/max once and reuse; also store display max
+        min_value, max_value, _, _ = cv2.minMaxLoc(image)
+        self._last_frame_display_max = max_value
 
-        if self.max_counts != self.min_counts:
-            image = (image - self.min_counts) / (self.max_counts - self.min_counts)
-            image[image < 0] = 0
-            image[image > 1] = 1
-        return image
+        if self.autoscale:
+            # In the off chance that we get a flat image, we set the min and max.
+            if max_value > min_value:
+                scale = 255.0 / (max_value - min_value)
+                beta = -min_value * scale
+                return cv2.convertScaleAbs(image, alpha=scale, beta=beta)
+
+        # If autoscale is disabled, we use the min/max counts from the GUI.
+        if self.max_counts > self.min_counts:
+            scale = 255.0 / (self.max_counts - self.min_counts)
+            beta = -self.min_counts * scale
+            return cv2.convertScaleAbs(image, alpha=scale, beta=beta)
+
+        # If the user has provided incorrect min/max values, we return a flat image.
+        return np.ones_like(image, dtype=np.uint8) * 255
 
     def add_crosshair(self, image: np.ndarray) -> np.ndarray:
         """Adds a cross-hair to the image.
@@ -860,8 +942,8 @@ class BaseViewController(GUIController, ABaseViewController):
                 crosshair_x = -1
             if crosshair_y < 0 or crosshair_y >= self.canvas_height:
                 crosshair_y = -1
-            image[:, int(crosshair_x)] = 1
-            image[int(crosshair_y), :] = 1
+            image[:, int(crosshair_x)] = 255
+            image[int(crosshair_y), :] = 255
 
         return image
 
@@ -879,62 +961,131 @@ class BaseViewController(GUIController, ABaseViewController):
         y = self.parent_controller.view.winfo_pointery()
         return x, y
 
-    def array_to_image(self, image: np.ndarray) -> Image:
-        """Convert a numpy array to a PIL Image
+    def _ensure_canvas_image(self, w: int, h: int, mode: str) -> None:
+        """Create/recreate the backing PhotoImage when size or mode changes.
+
+        This is used to ensure that the canvas image is always the correct size and
+        mode, but we do not have to create a new PhotoImage object every time we
+        update the image. We incur a 1x ~14 ms cost for creating the initial object.
+        Thereafter, the operation is essentially free.
 
         Parameters
         ----------
-        image : numpy.ndarray
-            Image data.
-
-        Returns
-        -------
-        image : Image
-            A PIL Image
+        w : int
+            Width of the image.
+        h : int
+            Height of the image.
+        mode : str
+            Mode of the image (e.g., "RGB", "L", "RGBA").
         """
-        return Image.fromarray(image.astype(np.uint8))
+        need_new = (
+            getattr(self, "_photo", None) is None
+            or self._photo.width() != w
+            or self._photo.height() != h
+            or getattr(self, "_photo_mode", None) != mode
+        )
+        if need_new:
+            # create a base PIL image
+            base = Image.new(mode, (w, h))
+            self._photo = ImageTk.PhotoImage(base)
+            self._photo_mode = mode
+
+            if getattr(self, "_img_item", None) is None:
+                self._img_item = self.canvas.create_image(
+                    0, 0, image=self._photo, anchor="nw"
+                )
+            else:
+                # Reuse the same canvas item, just rebind the image
+                self.canvas.itemconfig(self._img_item, image=self._photo)
 
     def populate_image(self, image: np.ndarray) -> None:
-        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas
+        """Update the Tk canvas using a persistent PhotoImage + paste.
 
-        Note
-        ----
-        When calling ImageTk.PhotoImage() to generate a new image, it will destroy
-        what the canvas is showing, causing it to blink. This problem is solved by
-        creating two images and alternating between them.
+        This is a zero-copy operation that allows us to update the canvas image
+        without creating a new PhotoImage object every time. This is much faster than
+        creating a new PhotoImage object and reconfiguring the canvas item. Copying
+        the image from a buffer is between 100 and 800 microseconds. Pasting the
+        image is between 3 and 5 ms.
 
         Parameters
         ----------
         image : np.ndarray
-            Image data.
+            The image data to be displayed on the canvas.
+
         """
-        temp_img = self.array_to_image(image)
+
         try:
-            if self.image_cache_flag:
-                self.tk_image = ImageTk.PhotoImage(temp_img)
-                self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
+            h, w = image.shape[:2]
+
+            # infer mode from number of dimensions.
+            if image.ndim == 2:
+                mode = "L"
+            elif image.shape[2] == 3:
+                mode = "RGB"
+            elif image.shape[2] == 4:
+                mode = "RGBA"
             else:
-                self.tk_image2 = ImageTk.PhotoImage(temp_img)
-                self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
+                raise ValueError(f"Unsupported image shape {image.shape}")
+
+            self._ensure_canvas_image(w, h, mode)
+
+            # zero-copy wrap of the numpy buffer into a PIL image
+            # keep a reference so the buffer stays alive while Tk reads it
+            self._img_buf = image
+            pil = Image.frombuffer(mode, (w, h), image, "raw", mode, 0, 1)
+
+            # fast in-place update; no new PhotoImage objects, no new canvas items
+            self._photo.paste(pil)
+
         except tk.TclError:
             return
-        self.image_cache_flag = not self.image_cache_flag
 
-    def process_image(self) -> None:
+    def render(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Process the image to be displayed.
+
+        Parameters
+        ----------
+        image : np.ndarray
+            Image data to be processed.
+
+        Returns
+        -------
+        image : np.ndarray
 
         Applies digital zoom, down-samples the image, scales the
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
+        if image is None:
+            return None
+
+        # Digital zoom takes ~0.0000 seconds
+        image = self.digital_zoom()
+
+        # Down-sampling zoom takes ~0.0002 seconds
+        image = self.down_sample_image(image)
+
+        # Transposing zoom takes ~0.0000 seconds
+        image = self.transpose_image(image)
+
+        # Scaling intensity zoom takes ~0.0002 seconds
+        image = self.scale_image_intensity(image)
+
+        # Adding crosshair zoom takes ~0.0000 seconds
+        image = self.add_crosshair(image)
+
+        # Applying LUT zoom takes ~0.0048 seconds
+        image = self.apply_lut(image)
+
+        return image
+
+    def process_image(self) -> None:
+        """Processes the image to be displayed."""
         if self.image is None:
             return
-        image = self.digital_zoom()
-        image = self.down_sample_image(image)
-        image = self.transpose_image(image)
-        image = self.scale_image_intensity(image)
-        image = self.add_crosshair(image)
-        image = self.apply_lut(image)
+
+        # Populating image took 0.0158 seconds
+        image = self.render(self.image)
         self.populate_image(image)
 
     def left_click(self, *_) -> None:
@@ -1110,7 +1261,10 @@ class CameraViewController(BaseViewController):
         self.rolling_frames = 1
 
         #: list: The list of maximum intensity values.
-        self.max_intensity_history = []
+        self.max_intensity_history = [0] * 32
+
+        #: int: The index of the latest maximun intesity value in the list.
+        self._max_intensity_history_idx = 0
 
         #: bool: The flag for displaying the mask.
         self.display_mask_flag = False
@@ -1123,6 +1277,60 @@ class CameraViewController(BaseViewController):
 
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
+
+    def render(self, image: np.ndarray) -> Optional[np.ndarray]:
+        """Process the image to be displayed.
+
+        Parameters
+        ----------
+        image : np.ndarray
+            Image data to be processed.
+
+        Returns
+        -------
+        image : np.ndarray
+
+        Applies digital zoom, down-samples the image, scales the
+        image intensity, adds a crosshair, applies the lookup table, and populates the
+        image.
+        """
+        if image is None:
+            return None
+        
+        image = super().render(image)
+        
+        # Overlaying mask
+        image = self.overlay_mask(image)
+
+        return image
+    
+    def overlay_mask(self, image: np.ndarray, alpha=0.2) -> Optional[np.ndarray]:
+        """Overlay a mask on top of the image
+
+        Parameters
+        ----------
+        image : np.ndarray
+            Image data to be processed.
+        alpha : float
+            The mask blending ratio.
+
+        Returns
+        -------
+        image : np.ndarray
+
+        Overlays a mask if avaiable.
+        """
+        if image is None:
+            return None
+        if self.display_mask_flag and self.display_state == "Live":
+            self.ilastik_mask_ready_lock.acquire()
+            seg_mask = cv2.resize(self.ilastik_seg_mask, image.shape[:2])
+            if alpha > 1:
+                alpha = 1
+            if alpha < 0:
+                alpha = 0
+            image = cv2.addWeighted(image, 1-alpha, seg_mask, alpha, 0)
+        return image
 
     def try_to_display_image(self, image: np.ndarray) -> None:
         """Try to display an image.
@@ -1206,9 +1414,6 @@ class CameraViewController(BaseViewController):
         self.image = self.flip_image(image)
         self.process_image()
         self.update_max_counts()
-
-        with self.is_displaying_image as is_displaying_image:
-            is_displaying_image.value = False
 
     def update_display_state(self, *_) -> None:
         """Image Display Combobox Called.
@@ -1294,85 +1499,75 @@ class CameraViewController(BaseViewController):
         If frames to average == 0 or 1, provides the maximum value from the last
         acquired data.
         """
-
-        # If the array is larger than 32 entries, remove the 0th entry.
-        if len(self.max_intensity_history) > (2**5):
-            self.max_intensity_history = self.max_intensity_history[1:]
+        # record the max without rescanning the full frame
+        self.max_intensity_history[self._max_intensity_history_idx] = (
+            self._last_frame_display_max
+        )
+        self._max_intensity_history_idx = (self._max_intensity_history_idx + 1) % 32
 
         # Get the number of frames to average from the VIEW
         self.rolling_frames = int(self.image_metrics["Frames"].get())
 
-        # Make sure the array is longer than the number of frames to average.
-        if self.rolling_frames > len(self.max_intensity_history):
-            self.rolling_frames = len(self.max_intensity_history)
-            self.image_metrics["Frames"].set(self.rolling_frames)
-
-        if self.rolling_frames == 0:
+        if self.rolling_frames <= 0:
             # Cannot average 0 frames. Set to 1, and report max intensity
+            self.rolling_frames = 1
             self.image_metrics["Frames"].set(1)
-            self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
+            rolling_average = self._last_frame_display_max
         elif self.rolling_frames == 1:
-            self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
-        elif self.rolling_frames > 1:
+            rolling_average = self._last_frame_display_max
+        elif self._max_intensity_history_idx >= self.rolling_frames:
+
             rolling_average = (
-                sum(self.max_intensity_history[-self.rolling_frames :])
+                sum(
+                    self.max_intensity_history[
+                        self._max_intensity_history_idx
+                        - self.rolling_frames : self._max_intensity_history_idx
+                    ]
+                )
                 / self.rolling_frames
             )
-            self.image_metrics["Image"].set(f"{rolling_average:.0f}")
-
-    def array_to_image(self, image: np.ndarray) -> Image:
-        """Convert a numpy array to a PIL Image.
-
-        If a color mask is present, it will apply the mask to the image.
-
-        Parameters
-        ----------
-        image : np.ndarray
-            Image data.
-
-        Returns
-        -------
-        image : Image
-            A PIL Image
-        """
-        if self.display_mask_flag and self.display_state == "Live":
-            self.ilastik_mask_ready_lock.acquire()
-            temp_img1 = image.astype(np.uint8)
-            img1 = Image.fromarray(temp_img1)
-
-            temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
-            img2 = Image.fromarray(temp_img2)
-            temp_img = Image.blend(img1, img2, 0.2)
         else:
-            temp_img = Image.fromarray(image.astype(np.uint8))
-        return temp_img
+            temp = sum(
+                self.max_intensity_history[
+                    self._max_intensity_history_idx - self.rolling_frames :
+                ]
+            ) + sum(self.max_intensity_history[0 : self._max_intensity_history_idx])
+            rolling_average = temp / self.rolling_frames
+
+        self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
     def display_image(self, image: np.ndarray) -> None:
         """Display an image using the LUT specified in the View.
 
-        If Autoscale is selected, automatically calculates
-        the min and max values for the data.
+        If Autoscale is selected, automatically calculates the min and max values for the data.
 
-        If Autoscale is not selected, takes the user values
-        as specified in the min and max counts.
+        If Autoscale is not selected, takes the user values as specified in the min
+        and max counts.
 
         Parameters
         ----------
         image : np.ndarray
             Image data.
         """
-        start_time = time.time()
+        start_time = time.perf_counter()
+
         self.image = self.flip_image(image)
-        self.max_intensity_history.append(np.max(image))
+
         if self._snr_selected:
             self.image = compute_signal_to_noise(
                 self.image, self._offset, self._variance
             )
-        self.process_image()
+
+        img_out = self.render(self.image)
+
+        # Schedule the image to be displayed in the Tkinter main loop
+        self.view.after(0, lambda img=img_out: self.populate_image(img))
+
         self.update_max_counts()
-        with self.is_displaying_image as is_displaying_image:
-            is_displaying_image.value = False
-        logger.info(f"Displaying image took {time.time() - start_time:.4f} seconds")
+
+        logger.info(
+            f"Displaying image took {time.perf_counter() - start_time:.4f} seconds"
+        )
 
     def set_mask_color_table(self, colors: list) -> None:
         """Set up segmentation mask color table
@@ -1700,8 +1895,6 @@ class MIPViewController(BaseViewController):
         """
         self.image = self.get_mip_image()
         self.process_image()
-        with self.is_displaying_image as is_displaying_image:
-            is_displaying_image.value = False
 
     def display_mip_image(self, *_) -> None:
         """Display MIP image in non-live view."""

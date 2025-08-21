@@ -138,6 +138,7 @@ class SyntheticDAQ(DAQBase):
             self.wait_acquisition_done()
 
     def wait_acquisition_done(self):
+        """Wait for a short time to generate an image"""
         time.sleep(0.01)
         if self.trigger_mode == "self-trigger":
             for microscope_name in self.camera:

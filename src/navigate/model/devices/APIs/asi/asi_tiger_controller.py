@@ -35,7 +35,6 @@ import time
 import logging
 
 # Third Party Imports
-from serial import Serial
 from serial import SerialException
 from serial import SerialTimeoutException
 from serial import EIGHTBITS
@@ -44,6 +43,7 @@ from serial import STOPBITS_ONE
 from serial.tools import list_ports
 
 # Local Imports
+from navigate.model.devices import MonitoredSerial
 
 # Logging setup
 p = __name__.split(".")[1]
@@ -118,7 +118,7 @@ class TigerController:
 
         """
         #: Serial: Serial port object
-        self.serial_port = Serial()
+        self.serial_port = MonitoredSerial()
 
         #: str: COM port of the Tiger Controller
         self.com_port = com_port

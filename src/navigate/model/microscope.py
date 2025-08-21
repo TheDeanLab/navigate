@@ -937,6 +937,13 @@ class Microscope:
                 temp_pos = stage.report_position()
                 self.ret_pos_dict.update(temp_pos)
             self.ask_stage_for_position = False
+
+        # Round to 2 decimal places for display purposes
+        for key, value in self.ret_pos_dict.items():
+            try:
+                self.ret_pos_dict[key] = round(value, 2)
+            except (TypeError, ValueError, OverflowError) as e:
+                logger.error(f"Error rounding {key} position value: {e}")
         return self.ret_pos_dict
 
     def move_remote_focus(self, offset: Optional[float] = None) -> None:

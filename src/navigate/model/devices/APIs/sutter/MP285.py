@@ -41,6 +41,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 
 # Local application imports
+from navigate.model.devices import MonitoredSerial
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -83,8 +84,8 @@ class MP285:
             Timeout for the serial connection.
         """
 
-        #: serial.Serial: Serial connection to the MP-285 stage
-        self.serial = serial.Serial()
+        #: MonitoredSerial: Serial connection to the MP-285 stage
+        self.serial = MonitoredSerial()
         self.serial.port = com_port
         self.serial.baudrate = baud_rate
         self.serial.timeout = timeout

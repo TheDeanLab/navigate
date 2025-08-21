@@ -31,15 +31,13 @@
 
 # Standard Library Imports
 from abc import ABC, abstractmethod
-import time
-import json
 import logging
-from typing import Union
 
 # Third Party Imports
 import serial
 
 # Local Imports
+from navigate.model.devices import MonitoredSerial
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -75,65 +73,6 @@ class DeviceBase(ABC):
     def connect(self) -> None:
         """Connect to the device."""
         pass
-
-
-class MonitoredSerial(serial.Serial):
-    """MonitoredSerial - Serial class that logs read/write events."""
-
-    def write(self, data: bytes):
-        """Write data to the serial port and log the event.
-
-        Parameters
-        ----------
-        data : bytes
-            Data to be written to the serial port.
-        """
-
-        start = time.perf_counter_ns()
-        super().write(data)
-        self.log_event("write", data, time.perf_counter_ns() - start)
-
-    def readline(self, size: Union[int, None] = -1, /) -> bytes:
-        """Read a line from the serial port and log the event.
-
-        Parameters
-        ----------
-        size : int, optional
-            The maximum number of bytes to read, by default -1 (read until timeout).
-
-        Returns
-        -------
-        bytes
-            The line read from the serial port.
-        """
-        start = time.perf_counter_ns()
-        line = super().readline()
-        self.log_event("read", line, time.perf_counter_ns() - start)
-        return line
-
-    @staticmethod
-    def log_event(kind: str, payload: bytes, duration_ns: int) -> None:
-        """Log the read/write event with performance data.
-
-        Parameters
-        ----------
-        kind : str
-            The type of event, either "read" or "write".
-        payload : bytes
-            The data that was read or written.
-        duration_ns : int
-            The duration of the read/write operation in nanoseconds.
-        """
-        logger.performance(
-            json.dumps(
-                {
-                    "kind": kind,
-                    "payload": payload.decode(errors="ignore"),
-                    "duration_ns": duration_ns,
-                    "timestamp": time.time(),
-                }
-            )
-        )
 
 
 class SerialDevice:
@@ -189,7 +128,7 @@ class SerialDevice:
         if port:
             from serial import Serial
 
-            self.serial = Serial()
+            self.serial = MonitoredSerial()
             self.serial.port = port
             self.serial.baudrate = baudrate
             self.serial.timeout = timeout

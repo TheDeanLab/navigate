@@ -37,11 +37,12 @@ import logging
 from typing import Any, Dict
 
 # Third Party Imports
-from navigate.tools.decorators import log_initialization
 
 # Local Imports
 from navigate.model.devices.remote_focus.ni import NIRemoteFocus
-from navigate.model.devices.device_types import NIDevice, SerialDevice
+from navigate.model.devices.device_types import SerialDevice
+from navigate.model.devices import MonitoredSerial
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -152,7 +153,7 @@ class EquipmentSolutionsRemoteFocus(NIRemoteFocus, SerialDevice):
         # Open Serial Port
         try:
             logger.debug(f"Opening Voice Coil on COM: {port}")
-            serial_connection = serial.Serial(
+            serial_connection = MonitoredSerial(
                 port=port,
                 baudrate=baudrate,
                 bytesize=serial.EIGHTBITS,

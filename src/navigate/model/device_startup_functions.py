@@ -46,7 +46,6 @@ from navigate.model.devices.device_types import (
     IntegratedDevice,
     NIDevice,
     SequenceDevice,
-    MonitoredSerial,
 )
 from navigate.model.devices.daq.base import DAQBase
 
@@ -172,13 +171,9 @@ class SerialConnectionFactory:
         """
         port = args[0]
         if str(port) not in cls._connections:
-            connection = auto_redial(
+            cls._connections[str(port)] = auto_redial(
                 build_connection_function, args, exception=exception
             )
-            cls._connections[str(port)] = MonitoredSerial(
-                connection, port, exception=exception
-            )
-
         return cls._connections[str(port)]
 
 

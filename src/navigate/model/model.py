@@ -601,7 +601,10 @@ class Model:
                 )
             else:
                 if self.imaging_mode == "z-stack":
-                    self.is_data_thread_on = False
+                    speed_mode = self.configuration["experiment"][
+                        "MicroscopeState"
+                    ].get("speed", "Auto")
+                    self.is_data_thread_on = speed_mode == "Auto"
                 self.signal_thread = ThreadWithWarning(
                     target=self.run_acquisition,
                     warning_queue=self.event_queue,
@@ -633,6 +636,8 @@ class Model:
             self.signal_thread.start()
             if self.is_data_thread_on:
                 self.data_thread.start()
+
+            # TODO: virtual microscopes only work with data thread on currently.
             for m in self.virtual_microscopes:
                 image_writer = (
                     ImageWriter(
@@ -904,10 +909,10 @@ class Model:
         self.microscopes[microscope_name].stop_stage()
         ret_pos_dict = self.microscopes[microscope_name].get_stage_position()
         return ret_pos_dict
-    
+
     def update_stage_limits(self, microscope_name: str) -> None:
         """Update stage limits
-        
+
         PaParameters
         ----------
         microscope_name : str
@@ -1205,7 +1210,9 @@ class Model:
         # Run the acquisition
         try:
             self.active_microscope.turn_on_laser()
-            self.active_microscope.daq.run_acquisition(wait_until_done=self.is_data_thread_on)
+            self.active_microscope.daq.run_acquisition(
+                wait_until_done=self.is_data_thread_on
+            )
             if not self.is_data_thread_on:
                 if self.available_image_count > 0:
                     self.grab_image(getattr(self.image_writer, "save_image", None))
@@ -1236,9 +1243,14 @@ class Model:
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
 
-    def grab_image(
-        self, data_func: Optional[callable] = None
-    ) -> None:
+    def grab_image(self, data_func: Optional[callable] = None) -> None:
+        """Grab one image from the camera.
+        
+        Parameters
+        ----------
+        data_func : Optional[callable]
+            Function to run on the acquired data. Default is None.
+        """
         wait_num = self.camera_wait_iterations
 
         while not self.stop_acquisition:

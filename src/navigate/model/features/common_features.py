@@ -1476,6 +1476,9 @@ class ZStackAcquisition:
                 dict(stack_pos),
                 wait_until_done=False,
             )  # Update position
+
+            if not self.model.is_data_thread_on:
+                self.model.grab_image(getattr(self.model.image_writer, "save_image", None))
             return True
 
         return False

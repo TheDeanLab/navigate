@@ -251,6 +251,12 @@ class Model:
         #: bool: Submit a request to pause the data thread?
         self.ask_to_pause_data_thread = False
 
+        #: bool: Is there a data thread?
+        self.is_data_thread_on = False
+
+        #: int: Available image frames
+        self.available_image_count = 0
+
         #: int: Number of frames in the data buffer.
         self.number_of_frames = self.configuration["experiment"]["CameraParameters"][
             "databuffer_size"
@@ -1048,7 +1054,8 @@ class Model:
         None
             Execution pauses until resume_data_thread() is called.
         """
-
+        if not self.is_data_thread_on:
+            return
         self.pause_data_ready_lock.acquire()
         self.ask_to_pause_data_thread = True
         self.pause_data_ready_lock.acquire()
@@ -1063,7 +1070,8 @@ class Model:
         None
             Execution continues after pause.
         """
-
+        if not self.is_data_thread_on:
+            return
         self.ask_to_pause_data_thread = False
         self.pause_data_event.set()
         if self.pause_data_ready_lock.locked():
@@ -1146,7 +1154,7 @@ class Model:
             self.stop_send_signal = False
             self.injected_flag.value = False
             self.is_live = False
-            self.start_grab_image_flag = False
+            self.available_image_count = 0
             self.is_data_thread_on = True
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
@@ -1199,7 +1207,7 @@ class Model:
             self.active_microscope.turn_on_laser()
             self.active_microscope.daq.run_acquisition(wait_until_done=self.is_data_thread_on)
             if not self.is_data_thread_on:
-                if self.start_grab_image_flag:
+                if self.available_image_count > 0:
                     self.grab_image(getattr(self.image_writer, "save_image", None))
                 self.active_microscope.daq.wait_acquisition_done()
         except:  # noqa
@@ -1221,11 +1229,12 @@ class Model:
             # Ensure the laser is turned off
             self.active_microscope.turn_off_lasers()
 
+        self.available_image_count += 1
+
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
-        self.start_grab_image_flag = True
 
     def grab_image(
         self, data_func: Optional[callable] = None
@@ -1271,6 +1280,8 @@ class Model:
             # show image
             self.logger.info(f"Image delivered to controller: {frame_ids[0]}")
             self.show_img_pipe.send(frame_ids[-1])
+
+            self.available_image_count -= len(frame_ids)
 
             break
 
@@ -1322,11 +1333,14 @@ class Model:
                 self.stop_acquisition = True
                 return
         if not self.is_data_thread_on:
-            if self.start_grab_image_flag:
+            if self.available_image_count > 0:
                 self.grab_image(getattr(self.image_writer, "save_image", None))
             self.show_img_pipe.send("stop")
         if self.imaging_mode != "live":
             self.stop_acquisition = True
+
+        if not self.is_data_thread_on:
+            self.end_acquisition()
 
     def reset_feature_list(self) -> None:
         """Reset live mode feature list."""

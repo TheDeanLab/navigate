@@ -35,35 +35,67 @@
 
 # Third party imports
 import pytest
+import unittest
 from unittest.mock import MagicMock, patch
 import pandas as pd
 
 # Local application imports
 from navigate.controller.sub_controllers.multiposition import MultiPositionController
 
+
 @pytest.fixture
 def multiposition_controller(dummy_controller):
+    # Create a mock pt attribute for the multiposition_tab
+    dummy_controller.view.settings.multiposition_tab.pt = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.model = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.model.df = pd.DataFrame()
+
+    # Add other required mock attributes and methods
+    dummy_controller.view.settings.multiposition_tab.pt.redraw = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.tableChanged = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.resetColors = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.pt.update_rowcolors = MagicMock()
+
+    # Mock the master and tiling buttons
+    dummy_controller.view.settings.multiposition_tab.master = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.master.tiling_buttons = MagicMock()
+    dummy_controller.view.settings.multiposition_tab.master.tiling_buttons.buttons = {
+        "tiling": MagicMock(),
+        "save_data": MagicMock(),
+        "load_data": MagicMock(),
+        "eliminate_tiles": MagicMock(),
+    }
+
     return MultiPositionController(
         dummy_controller.view.settings.multiposition_tab, dummy_controller
     )
 
+
 @patch("navigate.controller.sub_controllers.multiposition.filedialog.askopenfilenames")
 @patch("navigate.controller.sub_controllers.multiposition.yaml.safe_load")
-def test_load_positions_yaml(mock_safe_load, mock_askopen, multiposition_controller):
+@patch("builtins.open", new_callable=unittest.mock.mock_open, read_data="dummy content")
+def test_load_positions_yaml(
+    mock_file, mock_safe_load, mock_askopen, multiposition_controller
+):
     """Test loading positions from YAML"""
     controller = multiposition_controller
     table = controller.table
 
     mock_askopen.return_value = ("dummy_file.yml",)
     mock_safe_load.return_value = [
-        ["X", "Y", "Z"],
-        [0, 0, 0],
-        [100, 200, 300]
+        ["X", "Y", "Z", "THETA", "F"],
+        [0, 0, 0, 0, 0],
+        [100, 200, 300, 400, 500],
     ]
 
     controller.load_positions()
 
-    expected = pd.DataFrame([[0, 0, 0], [100, 200, 300]], columns=["X", "Y", "Z"])
+    mock_file.assert_called_once_with("dummy_file.yml", "r")
+
+    expected = pd.DataFrame(
+        [[0, 0, 0, 0, 0], [100, 200, 300, 400, 500]],
+        columns=["X", "Y", "Z", "THETA", "F"],
+    )
     pd.testing.assert_frame_equal(table.model.df, expected)
 
 

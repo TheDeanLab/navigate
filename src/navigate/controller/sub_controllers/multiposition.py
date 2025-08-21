@@ -31,9 +31,11 @@
 
 
 # Standard Library Imports
+import tkinter as tk
 from tkinter import filedialog, messagebox
 import math
 import logging
+from typing import Callable
 
 # Third Party Imports
 import pandas as pd
@@ -43,10 +45,7 @@ import yaml
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
-from navigate.tools.file_functions import (
-    load_yaml_file,
-    save_yaml_file,
-)
+from navigate.tools.file_functions import save_yaml_file
 
 
 # Logger Setup
@@ -57,7 +56,7 @@ logger = logging.getLogger(p)
 class MultiPositionController(GUIController):
     """Controller for the Multi-Position Acquisition Interface."""
 
-    def __init__(self, view, parent_controller=None):
+    def __init__(self, view, parent_controller=None) -> None:
         """Initialize the Multi-Position Acquisition Interface.
 
         Parameters
@@ -68,15 +67,15 @@ class MultiPositionController(GUIController):
             parent controller, by default None
         """
         super().__init__(view, parent_controller)
+
         #: MultiPositionTable: Multi-Position Acquisition Interface
         self.table = self.view.pt
-
-        # self.table.rowheader.bind("<Double-Button-1>", self.handle_double_click)
         self.table.loadCSV = self.load_positions
         self.table.exportCSV = self.export_positions
         self.table.insertRow = self.insert_row_func
         self.table.addStagePosition = self.add_stage_position
 
+        # Traces
         self.view.master.tiling_buttons.buttons["tiling"].config(
             command=self.parent_controller.channels_tab_controller.launch_tiling_wizard
         )
@@ -93,16 +92,16 @@ class MultiPositionController(GUIController):
             command=self.eliminate_tiles
         )
 
-    def eliminate_tiles(self):
+    def eliminate_tiles(self) -> None:
         """Eliminate tiles that do not contain tissue."""
         self.parent_controller.execute("eliminate_tiles")
 
-    def set_positions(self, positions):
+    def set_positions(self, positions: list[list[float]]) -> None:
         """Set positions to multi-position's table
 
         Parameters
         ----------
-        positions : [[]]
+        positions : list[list[float]]
             positions to be set
         """
         stage_axes = self.parent_controller.configuration_controller.stage_axes
@@ -134,21 +133,25 @@ class MultiPositionController(GUIController):
             start_index = 1
         # if there are some missing headers, add them
         if len(headers) < len(positions[start_index]):
-            headers = headers + ["col-" + str(i) for i in range(len(positions[start_index]) - len(headers))]
+            headers = headers + [
+                "col-" + str(i)
+                for i in range(len(positions[start_index]) - len(headers))
+            ]
         for i, name in enumerate(headers):
-            data[name] = list(pos[i] if i < len(pos) else np.nan for pos in positions[start_index:])
+            data[name] = list(
+                pos[i] if i < len(pos) else np.nan for pos in positions[start_index:]
+            )
         self.table.model.df = pd.DataFrame(data)
         self.table.currentrow = 0
         self.table.redraw()
         self.table.tableChanged()
-        self.show_verbose_info("loaded new positions")
 
-    def get_positions(self):
+    def get_positions(self) -> list[list[float]]:
         """Return all positions from the Multi-Position Acquisition Interface.
 
         Returns
         -------
-        list
+        positions : list[list[float]]
             positions in the format of [[x, y, z, theta, f], ]
         """
         positions = [list(self.table.model.df.columns)]
@@ -161,21 +164,18 @@ class MultiPositionController(GUIController):
         rows = self.table.model.df.shape[0]
         for i in range(rows):
             temp = list(self.table.model.df.iloc[i])
-            if (
-                len(
-                    list(
-                        filter(
-                            lambda v: isinstance(v, (float, int)) and not math.isnan(v),
-                            [temp[i] for i in axes_index],
-                        )
+            if len(
+                list(
+                    filter(
+                        lambda v: isinstance(v, (float, int)) and not math.isnan(v),
+                        [temp[i] for i in axes_index],
                     )
                 )
-                == len(axes_index)
-            ):
+            ) == len(axes_index):
                 positions.append(temp)
         return positions
 
-    def handle_double_click(self, event):
+    def handle_double_click(self, event: tk.Event) -> None:
         """Move to a position within the Multi-Position Acquisition Interface.
 
         When double-clicked the row head, it will call the parent/central controller
@@ -183,8 +183,8 @@ class MultiPositionController(GUIController):
 
         Parameters
         ----------
-        event : tkinter event
-            event that triggers the function
+        event : tk.Event
+            The event that triggers the function
         """
         # it is calculated based on the GUI position
         rowclicked = self.table.get_row_clicked(event)
@@ -196,10 +196,19 @@ class MultiPositionController(GUIController):
         # df.iloc uses position index
         temp = list(df.iloc[rowclicked])
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        axes_index = [df.columns.get_loc(axis) for axis in [axis.upper() for axis in stage_axes]]
+        axes_index = [
+            df.columns.get_loc(axis) for axis in [axis.upper() for axis in stage_axes]
+        ]
         # validate position
         # we currently only move to a position doesn't contain nan
-        if len(list(filter(lambda v: isinstance(v, (float, int)) and not math.isnan(v), [temp[i] for i in axes_index]))) != len(stage_axes):
+        if len(
+            list(
+                filter(
+                    lambda v: isinstance(v, (float, int)) and not math.isnan(v),
+                    [temp[i] for i in axes_index],
+                )
+            )
+        ) != len(stage_axes):
             messagebox.showwarning(
                 title="Warning",
                 message="The selected position is invalid, can't go to this position!",
@@ -210,9 +219,8 @@ class MultiPositionController(GUIController):
         for i, axis in enumerate(stage_axes):
             position[axis] = temp[axes_index[i]]
         self.parent_controller.execute("move_stage_and_update_info", position)
-        self.show_verbose_info("move stage to", position)
 
-    def get_position_num(self):
+    def get_position_num(self) -> int:
         """Return the number of positions in the Multi-Position Acquisition Interface.
 
         Returns
@@ -222,17 +230,22 @@ class MultiPositionController(GUIController):
         """
         return self.table.model.df.shape[0]
 
-    def load_positions(self):
+    def load_positions(self) -> None:
         """Load a yml or csv file.
 
         The valid yml/csv file should contain the line of headers: stage axes
         """
         filename = filedialog.askopenfilenames(
             defaultextension=".yml",
-            filetypes=(("yml file", "*.yml"),("CSV files", "*.csv"), ("Text files", "*.txt")),
+            filetypes=(
+                ("yml file", "*.yml"),
+                ("CSV files", "*.csv"),
+                ("Text files", "*.txt"),
+            ),
         )
         if not filename:
             return
+
         if filename[0].endswith(".yml"):
             # Load YAML/JSON file
             with open(filename[0], "r") as f:
@@ -241,26 +254,30 @@ class MultiPositionController(GUIController):
             df = pd.DataFrame(data[1:], columns=data[0])
         else:
             df = pd.read_csv(filename[0])
+
         # validate the csv/yml file
         df.columns = map(lambda v: v.upper(), df.columns)
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        cmp_header = [axis in df.columns for axis in [axis.upper() for axis in stage_axes]]
+        cmp_header = [
+            axis in df.columns for axis in [axis.upper() for axis in stage_axes]
+        ]
         if not all(cmp_header):
-            messagebox.showwarning(
-                title="Warning",
-                message=f"The csv/yml file isn't right, it should contain {[axis.upper() for axis in stage_axes]}",
+            message = (
+                f"The CSV/YAML file isn't correct. \n"
+                f"It should contain {[axis.upper() for axis in stage_axes]}"
             )
-            logger.info(f"The csv/yml file isn't right, it should contain {[axis.upper() for axis in stage_axes]}")
+            messagebox.showwarning(title="Warning", message=message)
+            logger.info(message)
             return
         self.table.model.df = df
         self.table.currentrow = 0
+
         # reset index
         self.table.resetColors()
         self.table.redraw()
         self.table.tableChanged()
-        self.show_verbose_info("loaded csv/yml file", filename)
 
-    def export_positions(self):
+    def export_positions(self) -> None:
         """Export the positions in the Multi-Position Acquisition Interface to a
         yml or csv file.
 
@@ -269,47 +286,52 @@ class MultiPositionController(GUIController):
         """
         filename = filedialog.asksaveasfilename(
             defaultextension=".yml",
-            filetypes=(("yml file", "*.yml"),("CSV file", "*.csv"), ("Text file", "*.txt")),
+            filetypes=(
+                ("yml file", "*.yml"),
+                ("CSV file", "*.csv"),
+                ("Text file", "*.txt"),
+            ),
         )
+
         if not filename:
             return
+
         if filename.endswith(".yml"):
             file_directory, file_name_only = os.path.split(filename)
-            data = [self.table.model.df.columns.tolist()] + self.table.model.df.values.tolist()
+            data = [
+                self.table.model.df.columns.tolist()
+            ] + self.table.model.df.values.tolist()
             save_yaml_file(
                 file_directory=file_directory,
                 content_dict=data,
                 filename=file_name_only,
             )
-            self.show_verbose_info("exporting yml file", filename)
             return
-        self.table.model.df.to_csv(filename, index=False)
-        self.show_verbose_info("exporting csv file", filename)
 
-    def move_to_position(self):
+        self.table.model.df.to_csv(filename, index=False)
+
+    def move_to_position(self) -> None:
         """Move to a position within the Multi-Position Acquisition Interface."""
         event = type("MyEvent", (object,), {})
         event.x, event.y = 0, 0
         self.handle_double_click(event)
 
-    def insert_row_func(self):
+    def insert_row_func(self) -> None:
         """Insert a row in the Multi-Position Acquisition Interface."""
         self.table.model.addRow(self.table.currentrow)
         self.table.update_rowcolors()
         self.table.redraw()
         self.table.tableChanged()
-        self.show_verbose_info("insert a row before current row")
 
-    def add_stage_position(self):
+    def add_stage_position(self) -> None:
         """Add the current stage position to the Multi-Position Acquisition Interface.
 
-        This function will get the stage's current position,
-        Then add it to position list
+        This function will get the stage's current position and add it to position list
         """
         position = self.parent_controller.execute("get_stage_position")
         self.append_position(position)
 
-    def append_position(self, position):
+    def append_position(self, position: dict) -> None:
         """Append a position to the Multi-Position Acquisition Interface.
 
         Parameters
@@ -341,9 +363,8 @@ class MultiPositionController(GUIController):
         self.table.update_rowcolors()
         self.table.redraw()
         self.table.tableChanged()
-        self.show_verbose_info("add current stage position to position list")
 
-    def remove_positions(self, position_flag_list):
+    def remove_positions(self, position_flag_list: list[bool]) -> None:
         """Remove positions according to position_flag_list
 
         Parameters
@@ -360,6 +381,12 @@ class MultiPositionController(GUIController):
         self.set_positions(new_positions)
 
     @property
-    def custom_events(self):
-        """Return custom events for the Multi-Position Controller."""
+    def custom_events(self) -> dict[str, Callable]:
+        """Return custom events for the Multi-Position Controller.
+
+        Returns
+        -------
+        dict[str, Callable]
+            Dictionary of custom events with their corresponding functions.
+        """
         return {"remove_positions": self.remove_positions}

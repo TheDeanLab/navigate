@@ -66,6 +66,10 @@ def multiposition_controller(dummy_controller):
         "eliminate_tiles": MagicMock(),
     }
 
+    # This is the important part - configure the stage axes
+    dummy_controller.configuration_controller = MagicMock()
+    dummy_controller.configuration_controller.stage_axes = ["x", "y", "z", "theta", "f"]
+
     return MultiPositionController(
         dummy_controller.view.settings.multiposition_tab, dummy_controller
     )
@@ -107,11 +111,15 @@ def test_load_positions_csv(mock_read_csv, mock_askopen, multiposition_controlle
     table = controller.table
 
     mock_askopen.return_value = ("dummy_file.csv",)
-    mock_read_csv.return_value = pd.DataFrame({"X": [1, 2], "Y": [3, 4], "Z": [5, 6]})
+    mock_read_csv.return_value = pd.DataFrame(
+        {"X": [1, 2], "Y": [3, 4], "Z": [5, 6], "THETA": [0, 0], "F": [0, 0]}
+    )
 
     controller.load_positions()
 
-    expected = pd.DataFrame({"X": [1, 2], "Y": [3, 4], "Z": [5, 6]})
+    expected = pd.DataFrame(
+        {"X": [1, 2], "Y": [3, 4], "Z": [5, 6], "THETA": [0, 0], "F": [0, 0]}
+    )
     pd.testing.assert_frame_equal(table.model.df, expected)
 
 
@@ -122,7 +130,9 @@ def test_export_positions_yaml(mock_save_yaml, mock_asksave, multiposition_contr
     controller = multiposition_controller
     table = controller.table
 
-    table.model.df = pd.DataFrame({"X": [1, 2], "Y": [3, 4], "Z": [5, 6]})
+    table.model.df = pd.DataFrame(
+        {"X": [1, 2], "Y": [3, 4], "Z": [5, 6], "THETA": [0, 0], "F": [0, 0]}
+    )
     mock_asksave.return_value = "/tmp/output.yml"
 
     controller.export_positions()
@@ -135,7 +145,9 @@ def test_export_positions_csv(mock_asksave, multiposition_controller):
     controller = multiposition_controller
     table = controller.table
 
-    df = pd.DataFrame({"X": [1, 2], "Y": [3, 4], "Z": [5, 6]})
+    df = pd.DataFrame(
+        {"X": [1, 2], "Y": [3, 4], "Z": [5, 6], "THETA": [0, 0], "F": [0, 0]}
+    )
     table.model.df = df
     table.model.df.to_csv = MagicMock()
 

@@ -43,7 +43,7 @@ import pandas as pd
 from navigate.controller.sub_controllers.multiposition import MultiPositionController
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def multiposition_controller(dummy_controller):
     # Create a mock pt attribute for the multiposition_tab
     dummy_controller.view.settings.multiposition_tab.pt = MagicMock()

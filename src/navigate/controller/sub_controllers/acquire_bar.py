@@ -541,7 +541,7 @@ class AcquireBarController(GUIController):
         state = self.acquire_pop.tab_frame.inputs[main_widget].get_variable().get()
         for widget in dependent_widgets:
             self.acquire_pop.tab_frame.inputs[widget].widget.config(
-                state="readonly" if state else "disabled"
+                state="normal" if state else "disabled"
             )
 
     def update_microscope_mode(self, *args: Iterable) -> None:

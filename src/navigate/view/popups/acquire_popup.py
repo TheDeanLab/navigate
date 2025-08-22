@@ -426,7 +426,7 @@ class TabFrame:
             input_class=ValidatedSpinbox,
             input_var=tk.StringVar(),
             input_args={
-                "from_": 0,
+                "from_": -360,
                 "to": 360,
                 "increment": 1,
             },
@@ -443,7 +443,7 @@ class TabFrame:
             input_class=ValidatedSpinbox,
             input_var=tk.StringVar(),
             input_args={
-                "from_": 0,
+                "from_": -360,
                 "to": 360,
                 "increment": 1,
             },
@@ -455,11 +455,11 @@ class TabFrame:
         self.inputs["rotate_angle_z"] = LabelInput(
             parent=rotate_notebook,
             label_pos="top",
-            label="Y Angle",
+            label="Z Angle",
             input_class=ValidatedSpinbox,
             input_var=tk.StringVar(),
             input_args={
-                "from_": 0,
+                "from_": -360,
                 "to": 360,
                 "increment": 1,
             },

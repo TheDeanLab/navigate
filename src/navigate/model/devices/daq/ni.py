@@ -438,7 +438,7 @@ class NIDAQ(DAQBase):
         # Specify ports, timing, and triggering
         self.set_external_trigger(self.external_trigger)
 
-    def run_acquisition(self) -> None:
+    def run_acquisition(self, wait_until_done : bool = True) -> None:
         """Run DAQ Acquisition.
 
         Run the tasks for triggering, analog and counter outputs.
@@ -460,6 +460,12 @@ class NIDAQ(DAQBase):
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
             )
+
+        if wait_until_done:
+            self.wait_acquisition_done()
+
+    def wait_acquisition_done(self) -> None:
+        """Wait acquisition tasks done"""
 
         try:
             self.camera_trigger_task.wait_until_done(timeout=10000)

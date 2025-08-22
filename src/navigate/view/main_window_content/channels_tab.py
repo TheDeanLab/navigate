@@ -527,6 +527,18 @@ class StackAcquisitionFrame(ttk.Labelframe):
             row=6, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
         )
 
+        self.inputs["speed"] = LabelInput(
+            parent=self.stack_frame,
+            label="Speed Mode".ljust(30),
+            input_class=ttk.Combobox,
+            input_var=tk.StringVar(),
+            input_args={"width": 8, "values": ["Auto", "Fixed"]}
+        )
+        self.inputs["speed"].state(["disabled", "readonly"])
+        self.inputs["speed"].grid(
+            row=7, column=0, columnspan=2, sticky="NSEW", padx=5, pady=5
+        )
+
         self.cubic_frame = ttk.Frame(self.stack_frame)
         self.cubic_frame.grid(
             row=3,

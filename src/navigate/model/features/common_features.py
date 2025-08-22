@@ -1474,8 +1474,11 @@ class ZStackAcquisition:
                 stack_pos.append((f"{axis}_abs", self.restore_z + offset))
             self.model.move_stage(
                 dict(stack_pos),
-                wait_until_done=False,
+                wait_until_done=not self.model.is_data_thread_on,
             )  # Update position
+
+            if not self.model.is_data_thread_on:
+                self.model.grab_image(getattr(self.model.image_writer, "save_image", None))
             return True
 
         return False

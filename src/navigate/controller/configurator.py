@@ -47,7 +47,7 @@ from navigate.config.configuration_database import (
     hardwares_dict,
     hardwares_config_name_dict,
 )
-from navigate.tools.file_functions import load_yaml_file
+from navigate.tools.file_functions import load_yaml_file, write_to_yaml
 
 # Logger Setup
 import logging
@@ -214,7 +214,7 @@ class Configurator:
                             warning_info[hardware_name] = True
                         set_value(temp_dict, k.split("/"), v)
 
-        self.write_to_yaml(config_dict, filename)
+        write_to_yaml({"microscopes": config_dict}, filename)
         # display warning
         if warning_info:
             messagebox.showwarning(
@@ -223,37 +223,6 @@ class Configurator:
                 f"{', '.join(warning_info.keys())}"
                 f". Please double check!",
             )
-
-    def write_to_yaml(self, config: dict, filename: str) -> None:
-        """write yaml file
-
-        Parameters
-        ----------
-        config: dict
-            configuration dictionary
-        filename: str
-            yaml file name
-        """
-
-        def write_func(prefix, config_dict, f):
-            for k in config_dict:
-                if type(config_dict[k]) == dict:
-                    f.write(f"{prefix}{k}:\n")
-                    write_func(prefix + " " * 2, config_dict[k], f)
-                elif type(config_dict[k]) == list:
-                    list_prefix = " "
-                    if k != "None":
-                        f.write(f"{prefix}{k}:\n")
-                        list_prefix = " " * 2
-                    for list_item in config_dict[k]:
-                        f.write(f"{prefix}{list_prefix}-\n")
-                        write_func(prefix + list_prefix * 2, list_item, f)
-                elif k != "":
-                    f.write(f"{prefix}{k}: {config_dict[k]}\n")
-
-        with open(filename, "w") as f:
-            f.write("microscopes:\n")
-            write_func("  ", config, f)
 
     def create_config_window(self, id: int) -> None:
         """Creates the configuration window tabs.

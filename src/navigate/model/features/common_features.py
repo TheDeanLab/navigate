@@ -37,6 +37,7 @@ from functools import reduce
 from threading import Lock
 import logging
 from multiprocessing.managers import ListProxy
+from queue import Queue, Empty
 
 # Third party imports
 
@@ -1119,7 +1120,7 @@ class ZStackAcquisition:
         # TODO: distance > 1000 should not be hardcoded and somehow related to
         #  different kinds of stage devices.
         #: int: The stage distance threshold for pausing the data thread.
-        self.stage_distance_threshold = 1000
+        self.stage_distance_threshold = 200
 
         #: dict: A dictionary of the previous position in the multi-position table.
         self.pre_position = None
@@ -1156,6 +1157,7 @@ class ZStackAcquisition:
 
         self.prepare_next_channel = PrepareNextChannel(model)
 
+
         #: dict: A dictionary defining the configuration for the z-stack acquisition
         self.config_table = {
             "signal": {
@@ -1171,6 +1173,12 @@ class ZStackAcquisition:
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
+
+        if self.model.active_microscope_name == "Macroscale":
+            self.data_queue = Queue()
+            self.config_table["signal"]["response"] = self.signal_response_func
+
+        self.resend_trigger = False
 
     def get_microscope_state(self, microscope_state: dict) -> None:
         """Get the microscope state from the configuration.
@@ -1313,6 +1321,9 @@ class ZStackAcquisition:
             A boolean value indicating whether to continue the z-stack acquisition
             process.
         """
+        if self.resend_trigger:
+            return True
+
         if self.model.stop_acquisition:
             return False
         data_thread_is_paused = False
@@ -1414,6 +1425,8 @@ class ZStackAcquisition:
         bool
             A boolean value indicating whether to end the current node.
         """
+        if self.resend_trigger:
+            return False
 
         # end this node
         if self.model.stop_acquisition:
@@ -1480,6 +1493,21 @@ class ZStackAcquisition:
 
         return False
 
+    def signal_response_func(self, *args) -> bool:
+        try:
+            r = self.data_queue.get(timeout=100)
+            if r == -1:
+                self.resend_trigger = True
+            else:
+                self.resend_trigger = False
+        except Empty:
+            logger.warning(
+                "ZStackAcquisition: No data received within the timeout period."
+            )
+            return False
+
+        return True
+
     def update_channel(self) -> None:
         """Update the active channel during multichannel acquisition.
 
@@ -1516,9 +1544,17 @@ class ZStackAcquisition:
             A list of frame IDs received during data acquisition.
 
         """
+
+        if -1 in frame_ids and hasattr(self, "data_queue"):
+            self.data_queue.put(-1)
+            self.received_frames += frame_ids.index(-1)
+            return
         self.received_frames += len(frame_ids)
         if self.image_writer is not None:
             self.image_writer.save_image(frame_ids)
+
+        if hasattr(self, "data_queue"):
+            self.data_queue.put(True)
 
     def end_data_func(self) -> bool:
         """Check if all expected data frames have been received.

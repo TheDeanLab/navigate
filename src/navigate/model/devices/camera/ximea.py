@@ -36,6 +36,7 @@ from typing import Any, Dict, Optional
 
 # Third Party Imports
 from ximea import xiapi
+import numpy as np
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
@@ -73,6 +74,7 @@ class XimeaBase(CameraBase):
         super().__init__(microscope_name, device_connection, configuration)
 
         #: str: Name of the microscope
+        self._frames_received = None
         self.microscope_name = microscope_name
 
         #: object: Camera Object
@@ -80,6 +82,15 @@ class XimeaBase(CameraBase):
 
         #: dict: Configuration settings
         self.configuration = configuration
+
+        #: bool: Auto restart flag
+        self.auto_restart = True
+
+        #: int: Auto restart counter
+        self.auto_restart_counter = 0
+
+        #: int: Timeout counter
+        self.timeout_counter = 0
 
         #: dict: Camera parameters
         self.camera_parameters["x_pixels"] = self.cam.get_param("width:max")
@@ -379,7 +390,7 @@ class XimeaBase(CameraBase):
         result = self.set_ROI(roi_width, roi_height, center_x, center_y)
         return result
 
-    def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+    def initialize_image_series(self, data_buffer=None, number_of_frames=1000):
         """Initialize Ximea Camera image series.
 
         Parameters
@@ -395,8 +406,12 @@ class XimeaBase(CameraBase):
         self._number_of_frames = number_of_frames
         self._frames_received = 0
 
-        # set buffer policy: XI_BP_SAFE
-        self.cam.set_param("buffer_policy", "XI_BP_SAFE")
+        # # set buffer policy: XI_BP_SAFE
+        # self.cam.set_param("buffer_policy", "XI_BP_SAFE")
+
+        # *** use UNSAFE
+        self.cam.set_param("buffer_policy", "XI_BP_UNSAFE")
+
         # set image data format to XI_MONO16, this value can be set only if acquisition is stopped.
         self.cam.set_param('imgdataformat', "XI_MONO16")
         #imgpayloadsize changes automatically after setting imgdataformat
@@ -422,15 +437,29 @@ class XimeaBase(CameraBase):
         frame : numpy.ndarray
             Frame ids from Ximea camera.
         """
-        # attach buffer to image object
-        self._image.bp = self._data_buffer[self._frames_received].ctypes.data
-        self._image.bp_size = self._data_buffer[self._frames_received].nbytes
+        # # attach buffer to image object
+        # self._image.bp = self._data_buffer[self._frames_received].ctypes.data
+        # self._image.bp_size = self._data_buffer[self._frames_received].nbytes
         # get data from camera
         try:
             self.cam.get_image(self._image, 500)
         except xiapi.Xi_error as e:
+            if e.status == 10:  # XI_ERR_TIMEOUT
+                self.timeout_counter += 1
+                if self.auto_restart and self.timeout_counter >= 5 and self.auto_restart_counter < 3:
+                    self.auto_restart_counter += 1
+                    logger.warning(f"Timeout error while getting image. Restarting acquisition. Auto restart it {self.auto_restart_counter}")
+                    self.cam.stop_acquisition()
+                    self.cam.start_acquisition()
+                    return [-1]
             logger.error(f"Error getting image from camera: {e}")
             return []
+        self.auto_restart_counter = 0
+        self.timeout_counter = 0
+        # *** copy image to data buffer
+        self._data_buffer[self._frames_received][:, :] = np.copy(
+            self._image.get_image_data_numpy()
+        )
 
         frames_received = [self._frames_received]
 

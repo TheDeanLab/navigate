@@ -126,7 +126,7 @@ class CameraBase:
         # readout time in model and controller
         self.camera_parameters["trigger_source"] = 2.0 # external trigger
         self.camera_parameters["readout_speed"] = 1.0
-        self.camera_parameters["pixel_size_in_microns"] = 6.5
+        # self.camera_parameters["pixel_size_in_microns"] = 6.5
         self.camera_parameters["trigger_active"] = 1.0
         self.camera_parameters["trigger_mode"] = 1.0 # standard trigger mode
         self.camera_parameters["trigger_polarity"] = 2.0

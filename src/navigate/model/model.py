@@ -94,6 +94,7 @@ class Model:
         args: argparse.Namespace,
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
+        log_queue: Optional[multiprocessing.Queue] = None,
     ) -> None:
         """Initialize the Model.
 
@@ -105,9 +106,14 @@ class Model:
             Configuration dictionary. Defaults to None.
         event_queue : multiprocessing.Queue
             Event queue. Receives events from the controller.
+        log_queue : Optional[multiprocessing.Queue]
+            Log queue. Receives log messages from the controller.
         """
         # Set up logging
-        log_setup("model_logging.yml")
+        if log_queue:
+            log_setup("logging.yml", queue=log_queue)
+        else:
+            log_setup("model_logging.yml")
 
         #: object: Logger object.
         self.logger = logging.getLogger(p)

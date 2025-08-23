@@ -41,7 +41,6 @@ dependencies = [
     'h5py==3.7.0',
     'requests==2.28.1',
     'psutil==6.0.0',
-    "mss"
     ]
 
 [project.scripts]

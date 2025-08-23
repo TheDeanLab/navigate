@@ -34,13 +34,12 @@
 import logging
 import logging.config
 import logging.handlers
+import multiprocessing as mp
 from pathlib import Path
 import os
-import sys
-import traceback
 from datetime import datetime, timedelta
 import shutil
-from typing import Optional
+from typing import Optional, Union
 import json
 
 # Third Party Imports
@@ -87,7 +86,12 @@ def find_filename(k: str, v: str) -> bool:
     return False
 
 
-def log_setup(logging_configuration: str, logging_path: Optional[str] = None) -> None:
+def log_setup(
+    logging_configuration: str,
+    logging_path: Optional[str] = None,
+    queue=None,
+    start_listener=False,
+) -> Optional[Union[mp.Queue, tuple[mp.Queue, logging.handlers.QueueListener]]]:
     """Setup logging configuration
 
     Initialize a logger from a YAML file containing information in the Python logging
@@ -105,6 +109,18 @@ def log_setup(logging_configuration: str, logging_path: Optional[str] = None) ->
         Relative to the location of the folder containing this file.
     logging_path : str, optional
         Path to store logs. Defaults to navigate_path/logs
+    queue : multiprocessing.Queue, optional
+        Queue to use for logging from sub-processes. If None, a new queue will be
+        created if start_listener is True. Defaults to None.
+    start_listener : bool, optional
+        Whether to start a listener for the queue. Defaults to False.
+
+    Returns
+    -------
+    Optional[Union[mp.Queue, tuple[mp.Queue, logging.handlers.QueueListener]]]
+        If start_listener is True, returns a tuple containing the queue and the listener.
+        If start_listener is False and a queue is provided, returns the queue.
+        Otherwise, returns None.
     """
 
     # path to logging_configuration is set relative
@@ -113,7 +129,7 @@ def log_setup(logging_configuration: str, logging_path: Optional[str] = None) ->
     logging_configuration_path = Path.joinpath(base_directory, logging_configuration)
 
     # Save directory for logging information.
-    time = datetime.now()
+    time: datetime = datetime.now()
     time_stamp = Path(
         "%s-%s-%s-%s%s"
         % (
@@ -131,9 +147,9 @@ def log_setup(logging_configuration: str, logging_path: Optional[str] = None) ->
     if not os.path.exists(logging_path):
         os.mkdir(logging_path)
 
-    todays_path = Path.joinpath(logging_path, time_stamp)
-    if not os.path.exists(todays_path):
-        os.mkdir(todays_path)
+    current_path = Path.joinpath(logging_path, time_stamp)
+    if not os.path.exists(current_path):
+        os.mkdir(current_path)
 
     # Discard log files older than 30 days
     eliminate_old_log_files(logging_path)
@@ -151,7 +167,7 @@ def log_setup(logging_configuration: str, logging_path: Optional[str] = None) ->
         Path : str
             Path to the log file
         """
-        return Path.joinpath(todays_path, v)
+        return Path.joinpath(current_path, v)
 
     # Read the logging configuration file.
     with open(logging_configuration_path, "r") as f:
@@ -162,11 +178,31 @@ def log_setup(logging_configuration: str, logging_path: Optional[str] = None) ->
             config_data2 = update_nested_dict(
                 config_data, find_filename, update_filename
             )
+            # Configures our loggers from updated logging.yml
             logging.config.dictConfig(config_data2)
 
-            # Configures our loggers from updated logging.yml
         except yaml.YAMLError as yaml_error:
             print(yaml_error)
+
+    # If a queue is provided, or we are to start a listener,
+    if queue is None and start_listener:
+        queue = mp.Queue(-1)
+
+    if queue:
+        qh = logging.handlers.QueueHandler(queue)
+        handlers = []
+        for name in [""] + list(config_data2.get("loggers", {})):
+            logger = logging.getLogger(name or None)
+            handlers.extend(logger.handlers)
+            logger.handlers = [qh]
+        if start_listener:
+            listener = logging.handlers.QueueListener(
+                queue, *handlers, respect_handler_level=True
+            )
+            listener.start()
+            return queue, listener
+        return queue
+    return None
 
 
 def eliminate_old_log_files(logging_path: str) -> None:
@@ -191,29 +227,6 @@ def eliminate_old_log_files(logging_path: str) -> None:
                     shutil.rmtree(old_path)
                 except OSError:
                     continue
-
-
-def main_process_listener(queue: "multiprocessing.Queue") -> None:
-    """Listener function for the main process
-
-    This function will listen for new logs put in queue from sub processes,
-    it will then log via the main process.
-
-    Parameters
-    ----------
-    queue : multiprocessing.Queue
-        Queue to listen for new logs
-    """
-    while True:
-        try:
-            record = queue.get()
-            if record is None:
-                # Sentinel to tell listener to stop
-                break
-            logger = logging.getLogger(record.name)
-            logger.handle(record)
-        except Exception:
-            traceback.print_exc(file=sys.stderr)
 
 
 def load_latest_log_file() -> tuple:

@@ -115,6 +115,7 @@ class Controller:
         waveform_templates_path,
         gui_configuration_path,
         multi_positions_path,
+        log_queue,
         args,
     ):
         """Initialize the Navigate Controller.
@@ -143,6 +144,8 @@ class Controller:
         gui_configuration_path : string
             Path to the GUI configuration yaml file.
             Provides GUI configuration parameters.
+        log_queue : Optional[mp.Queue]
+            The queue for logging events from multiple processes.
         *args :
             Command line input arguments for non-default
             file paths or using synthetic hardware modes.
@@ -223,7 +226,11 @@ class Controller:
 
         #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
-            Model, args, self.configuration, event_queue=self.event_queue
+            Model,
+            args,
+            self.configuration,
+            event_queue=self.event_queue,
+            log_queue=log_queue,
         )
 
         #: mp.Pipe: Pipe for sending images from model to view.

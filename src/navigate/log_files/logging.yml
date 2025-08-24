@@ -22,44 +22,23 @@ handlers:
     formatter: base
     stream: ext://sys.stdout
     filters: [not_performance]
-  vc_info:
+  info:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: base
     filename: info.log
     filters: [not_performance]
     mode: a
-  vc_debug:
+  debug:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
     filename: debug.log
     filters: [not_performance]
-    mode: a
-  model_info:
-    class: logging.handlers.RotatingFileHandler
-    level: INFO
-    formatter: base
-    filename: info.log
-    filters: [ not_performance ]
-    mode: a
-  model_debug:
-    class: logging.handlers.RotatingFileHandler
-    level: DEBUG
-    formatter: base
-    filename: debug.log
-    filters: [ not_performance ]
-    mode: a
-  model_error:
-    class: logging.handlers.RotatingFileHandler
-    level: ERROR
-    formatter: base
-    filename: error.log
-    filters: [ not_performance ]
     mode: a
   performance:
     class: logging.handlers.RotatingFileHandler
-    level: DEBUG
+    level: PERFORMANCE
     formatter: json
     filename: performance.log
     filters: [ performance_specs ]
@@ -68,17 +47,17 @@ handlers:
 loggers:
   view:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug, performance]
+    handlers: [console, info, debug, performance]
     propagate: no
   controller:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug, performance]
+    handlers: [console, info, debug, performance]
     propagate: no
   config:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug, performance]
+    handlers: [console, info, debug, performance]
     propagate: no
   model:
     level: DEBUG
-    handlers: [console, model_info, model_debug, model_error, performance]
+    handlers: [console, info, debug, performance]
     propagate: no

@@ -26,15 +26,36 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: base
-    filename: view_controller_info.log
+    filename: info.log
     filters: [not_performance]
     mode: a
   vc_debug:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: view_controller_debug.log
+    filename: debug.log
     filters: [not_performance]
+    mode: a
+  model_info:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: base
+    filename: info.log
+    filters: [ not_performance ]
+    mode: a
+  model_debug:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: base
+    filename: debug.log
+    filters: [ not_performance ]
+    mode: a
+  model_error:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: base
+    filename: error.log
+    filters: [ not_performance ]
     mode: a
   performance:
     class: logging.handlers.RotatingFileHandler
@@ -56,4 +77,8 @@ loggers:
   config:
     level: DEBUG
     handlers: [console, vc_info, vc_debug, performance]
+    propagate: no
+  model:
+    level: DEBUG
+    handlers: [console, model_info, model_debug, model_error, performance]
     propagate: no

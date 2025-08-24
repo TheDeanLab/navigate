@@ -110,10 +110,7 @@ class Model:
             Log queue. Receives log messages from the controller.
         """
         # Set up logging
-        if log_queue:
-            log_setup("logging.yml", queue=log_queue)
-        else:
-            log_setup("model_logging.yml")
+        log_setup("logging.yml", queue=log_queue)
 
         #: object: Logger object.
         self.logger = logging.getLogger(p)

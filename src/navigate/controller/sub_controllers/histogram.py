@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -36,6 +35,7 @@ import tkinter as tk
 from typing import Any
 import time
 import logging
+import json
 
 # Third Party Imports
 import numpy as np
@@ -225,7 +225,7 @@ class HistogramController:
         image : SharedNDArray
             Image Data
         """
-        start_time = time.perf_counter()
+        start_time = time.perf_counter_ns()
 
         # Estimate total variation distance.
         number_bins = 20
@@ -263,8 +263,14 @@ class HistogramController:
             )
         )
         self.histogram.figure_canvas.draw()
-        logger.info(
-            f"Histogram populated in {time.perf_counter() - start_time:.4f} seconds"
+        logger.performance(
+            json.dumps(
+                {
+                    "kind": "Histogram",
+                    "duration_ns": time.perf_counter_ns() - start_time,
+                    "timestamp": time.time(),
+                }
+            )
         )
 
     def _clear_histogram(self) -> None:

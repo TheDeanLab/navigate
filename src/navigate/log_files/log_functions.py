@@ -39,7 +39,7 @@ from pathlib import Path
 import os
 from datetime import datetime, timedelta
 import shutil
-from typing import Optional, Union
+from typing import Optional, Union, Any
 import json
 
 # Third Party Imports
@@ -231,13 +231,14 @@ def eliminate_old_log_files(logging_path: str) -> None:
                     continue
 
 
-def load_latest_log_file() -> tuple:
-    """Load the latest log file from the logging directory.
+def load_performance_log() -> Optional[list[Any]]:
+    """Load the latest performance log file from the logging directory.
 
     Returns
     -------
-    tuple
-        Tuple containing the model log data and controller log data.
+    Optional[list[Any]]
+        List of dictionaries containing performance log data, or None if no log file
+        exists.
     """
 
     date_dirs = []
@@ -245,37 +246,19 @@ def load_latest_log_file() -> tuple:
 
     # Iterate through all folders in logging path
     for folder in os.listdir(logging_path):
+        if folder.startswith("."):
+            continue
+
         date = get_folder_date(folder)
         if date is not False:
             date_dirs.append(folder)
 
     # Sort the directories by date
     latest_dir = max(date_dirs)
-
-    controller_log_path = os.path.join(
-        logging_path, latest_dir, "view_controller_debug.log"
-    )
-    model_log_path = os.path.join(logging_path, latest_dir, "model_debug.log")
     performance_log_path = os.path.join(logging_path, latest_dir, "performance.log")
 
     # Default to None if the log files do not exist
-    controller_log_data = None
-    model_log_data = None
     performance_log_data = None
-
-    try:
-        if controller_log_path and os.path.exists(controller_log_path):
-            with open(controller_log_path, "r") as file:
-                controller_log_data = file.readlines()
-    except Exception:
-        pass
-
-    try:
-        if model_log_path and os.path.exists(model_log_path):
-            with open(model_log_path, "r") as file:
-                model_log_data = file.readlines()
-    except Exception:
-        pass
 
     try:
         if performance_log_path and os.path.exists(performance_log_path):
@@ -289,7 +272,7 @@ def load_latest_log_file() -> tuple:
     except Exception:
         pass
 
-    return model_log_data, controller_log_data, performance_log_data
+    return performance_log_data
 
 
 def get_folder_date(folder_name: str) -> datetime:

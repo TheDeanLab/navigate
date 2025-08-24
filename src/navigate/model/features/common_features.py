@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -37,14 +36,13 @@ from functools import reduce
 from threading import Lock
 import logging
 from multiprocessing.managers import ListProxy
+import json
 
 # Third party imports
 
 # Local application imports
 from .image_writer import ImageWriter
 from navigate.tools.common_functions import VariableWithLock
-
-
 from navigate.model.waveforms import remote_focus_ramp
 
 # Logger Setup
@@ -1422,13 +1420,19 @@ class ZStackAcquisition:
             for axis, offset in self.secondary_stack_settings.items():
                 stack_pos.append((f"{axis}_abs", self.current_z_position + offset))
 
-            start_time = time.perf_counter()
+            start_time = time.perf_counter_ns()
             self.model.move_stage(
                 dict(stack_pos),
                 wait_until_done=True,
             )
-            logger.info(
-                f"Z- and F-position move duration: {time.perf_counter() - start_time:.3f} seconds"
+            logger.performance(
+                json.dumps(
+                    {
+                        "kind": "Z/F Move",
+                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "timestamp": time.time(),
+                    }
+                )
             )
 
         if self.should_pause_data_thread:

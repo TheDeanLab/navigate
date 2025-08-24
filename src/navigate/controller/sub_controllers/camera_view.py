@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
@@ -43,6 +42,7 @@ import os
 import time
 import abc
 import copy
+import json
 
 # Third Party Imports
 import cv2
@@ -1296,14 +1296,14 @@ class CameraViewController(BaseViewController):
         """
         if image is None:
             return None
-        
+
         image = super().render(image)
-        
+
         # Overlaying mask
         image = self.overlay_mask(image)
 
         return image
-    
+
     def overlay_mask(self, image: np.ndarray, alpha=0.2) -> Optional[np.ndarray]:
         """Overlay a mask on top of the image
 
@@ -1329,7 +1329,7 @@ class CameraViewController(BaseViewController):
                 alpha = 1
             if alpha < 0:
                 alpha = 0
-            image = cv2.addWeighted(image, 1-alpha, seg_mask, alpha, 0)
+            image = cv2.addWeighted(image, 1 - alpha, seg_mask, alpha, 0)
         return image
 
     def try_to_display_image(self, image: np.ndarray) -> None:
@@ -1549,7 +1549,7 @@ class CameraViewController(BaseViewController):
         image : np.ndarray
             Image data.
         """
-        start_time = time.perf_counter()
+        start_time = time.perf_counter_ns()
 
         self.image = self.flip_image(image)
 
@@ -1565,8 +1565,14 @@ class CameraViewController(BaseViewController):
 
         self.update_max_counts()
 
-        logger.info(
-            f"Displaying image took {time.perf_counter() - start_time:.4f} seconds"
+        logger.performance(
+            json.dumps(
+                {
+                    "kind": "Image Display",
+                    "duration_ns": time.perf_counter_ns() - start_time,
+                    "timestamp": time.time(),
+                }
+            )
         )
 
     def set_mask_color_table(self, colors: list) -> None:

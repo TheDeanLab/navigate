@@ -1,4 +1,4 @@
-""" Hardware devices. """
+"""Hardware devices."""
 
 # Standard library imports
 import time
@@ -41,7 +41,7 @@ class MonitoredSerial(serial.Serial):
 
         start = time.perf_counter_ns()
         super().write(data)
-        self.log_event("write", data, time.perf_counter_ns() - start)
+        self.log_event(data, time.perf_counter_ns() - start)
 
     def readline(self, size: Union[int, None] = -1, /) -> bytes:
         """Read a line from the serial port and log the event.
@@ -58,7 +58,7 @@ class MonitoredSerial(serial.Serial):
         """
         start = time.perf_counter_ns()
         line = super().readline()
-        self.log_event("readline", line, time.perf_counter_ns() - start)
+        self.log_event(line, time.perf_counter_ns() - start)
         return line
 
     def read(self, size=1) -> bytes:
@@ -76,16 +76,14 @@ class MonitoredSerial(serial.Serial):
         """
         start = time.perf_counter_ns()
         data = super().read(size)
-        self.log_event("read", data, time.perf_counter_ns() - start)
+        self.log_event(data, time.perf_counter_ns() - start)
         return data
 
-    def log_event(self, kind: str, payload: bytes, duration_ns: int) -> None:
+    def log_event(self, payload: bytes, duration_ns: int) -> None:
         """Log the read/write event with performance data.
 
         Parameters
         ----------
-        kind : str
-            The type of event, either "read" or "write".
         payload : bytes
             The data that was read or written.
         duration_ns : int
@@ -94,7 +92,7 @@ class MonitoredSerial(serial.Serial):
         logger.performance(
             json.dumps(
                 {
-                    "kind": kind,
+                    "kind": "Serial",
                     "payload": payload.decode(errors="ignore"),
                     "duration_ns": duration_ns,
                     "timestamp": time.time(),

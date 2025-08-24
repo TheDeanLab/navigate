@@ -32,10 +32,8 @@
 import logging
 import os
 from datetime import datetime
-import re
 from tkinter import filedialog
-from typing import Optional, Iterable
-
+from typing import Optional, Iterable, Any
 from PIL import ImageGrab
 
 # Third Party Imports
@@ -43,7 +41,7 @@ import numpy as np
 
 # Local Imports
 from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
-from navigate.log_files.log_functions import load_latest_log_file
+from navigate.log_files.log_functions import load_performance_log
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -85,6 +83,7 @@ class DiagnosticsPopupController:
         # Configure traces for closing the window or pressing escape.
         self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
         self.view.popup.bind("<Escape>", lambda event: self.close_popup())
+        self.view.buttons["close"].configure(command=self.close_popup)
 
         # Add trace to self.populate_plots to generate initial data
         self.view.buttons["update"].configure(
@@ -96,6 +95,9 @@ class DiagnosticsPopupController:
 
         # Initialize plots (empty)
         self.initialize_plots()
+
+        # Populate plots with data
+        self.populate_plots()
 
     def showup(self) -> None:
         """This function will let the popup window show in front."""
@@ -176,81 +178,78 @@ class DiagnosticsPopupController:
     def populate_plots(self) -> None:
         """Generate and display dummy data for all diagnostic plots."""
 
-        model_log, controller_log, performance_log = load_latest_log_file()
+        performance_log = load_performance_log()
 
         # Plot the time necessary to acquire a new image.
-        pattern = r"model: New image acquired in (\d+\.\d+) seconds"
-        times = self.extract_times(model_log, pattern)
+        times = self.extract_times(performance_log, kind="Acquire Image")
         self.plot_histogram(panel=1, times=times, title="Image Acquisition Time")
 
         # Plot the histogram of the display times from the controller log
-        pattern = r"camera_view: Displaying image took (\d+\.\d+) seconds"
-        times = self.extract_times(controller_log, pattern)
+        times = self.extract_times(performance_log, kind="Image Display")
         self.plot_histogram(panel=2, times=times, title="Image Display Times")
 
         # Plot the histogram of the times necessary to populate the histogram.
-        pattern = r"histogram: Histogram populated in (\d+\.\d+) seconds"
-        times = self.extract_times(controller_log, pattern)
+        times = self.extract_times(performance_log, kind="Histogram")
         self.plot_histogram(panel=3, times=times, title="Histogram Population Times")
-
-        # Plot the time to move the z and f stages during a z-stack.
-        pattern = (
-            r"common_features: Z- and F-position move duration: (\d+\.\d+) seconds"
-        )
-        times = self.extract_times(model_log, pattern)
-        self.plot_histogram(panel=4, times=times, title="Z/F Stage Move Duration")
-
-        # Plot the time necessary to get stage positions.
-        pattern = r"model: Stage positions got in (\d+\.\d+) seconds"
-        times = self.extract_times(model_log, pattern)
-        self.plot_histogram(panel=5, times=times, title="Get Stage Positions Time")
 
         # Plot the time necessary to turn on/off lasers and send out triggers.
         # The time should closely match the waveform length (exposure time + delay).
-        pattern = r"model: DAQ sending out triggers in (\d+\.\d+) seconds"
-        times = self.extract_times(model_log, pattern)
-        self.plot_histogram(panel=6, times=times, title="DAQ Trigger Time")
+        times = self.extract_times(performance_log, kind="DAQ Triggers")
+        self.plot_histogram(panel=4, times=times, title="DAQ Trigger Time")
+
+        times = self.extract_times(performance_log, kind="Stage Position")
+        self.plot_histogram(panel=5, times=times, title="Get Stage Positions Time")
+
+        # Plot the time necessary to move the Z and F stages.
+        times = self.extract_times(performance_log, kind="Z/F Move")
+        self.plot_histogram(panel=6, times=times, title="Z/F Stage Move Duration")
 
         # Plot the time necessary to perform all serial communications.
-        times = self.extract_times(performance_log)
+        times = self.extract_times(performance_log, kind="Serial")
         self.plot_histogram(panel=7, times=times, title="Serial Communication Time")
 
     @staticmethod
-    def extract_times(log_content: list, pattern: str = "") -> list:
+    def extract_times(log_content: Optional[Any], kind: str = "") -> Optional[list]:
         """
-        Extract image display times from controller log content.
+        Extract times from JSON formatted performance log content for a specific kind.
 
         Parameters
         ----------
         log_content : list or None
-            List of log lines from the controller log
-        pattern : str
-            Regular expression pattern to match display time entries.
-            If empty, it assumes JSON format.
+            List of log entries (dictionaries) from the performance log
+        kind : str
+            The kind of operation to filter by (e.g., "Stage Position", "DAQ Triggers", etc.)
+            If empty, returns all durations.
 
         Returns
         -------
-        times : list or None
+        times : Optional[list]
             A list of float values representing times in seconds.
             Returns None if no times are found.
         """
 
-        if not log_content:
+        if not log_content or not isinstance(log_content, list):
             return None
 
+        if not isinstance(log_content, list):
+            return None
+
+        durations = []
+
+        # JSON formatted log exists as a dictionary.
         if isinstance(log_content[0], dict):
-            # JSON formatted log exists as a dictionary.
-            durations = [entry['duration_ns'] * 1e-9 for entry in log_content]
-            return durations if len(durations) > 0 else None
+            if kind:
+                # Filter by specific kind
+                durations = [
+                    entry["duration_ns"] * 1e-9
+                    for entry in log_content
+                    if entry.get("kind") == kind
+                ]
+            else:
+                # Return all durations
+                durations = [entry["duration_ns"] * 1e-9 for entry in log_content]
 
-        # Standard logs exist as a list of strings.
-        times = []
-        for line in log_content:
-            match = re.search(pattern, line)
-            if match:
-                times.append(float(match.group(1)))
-
-        return times if len(times) > 0 else None
+        return durations if len(durations) > 0 else None
 
     def plot_histogram(self, panel: int, times: Optional[Iterable], title="") -> None:
         """
@@ -261,13 +260,15 @@ class DiagnosticsPopupController:
         panel : int
             The panel number to plot the histogram on (1-6)
         times : Optional[Iterable]
-            A list of times in seconds to plot
+            A list of times in nanoseconds to plot
         title : str
             The title for the plot. If empty, a default title will be used.
         """
         # add a new figure if necessary
         if f"canvas_{panel}" not in self.view.inputs:
             self.view.add_plot_figure(title)
+
+        self.view.label_frame[panel].config(text=title)
 
         fig = self.view.inputs[f"diagnostics_{panel}"]
         ax = fig.axes[0]
@@ -294,7 +295,7 @@ class DiagnosticsPopupController:
         # Plot histogram
         _, _, _ = ax.hist(
             times_ms,
-            bins=20,
+            # bins=20,
             alpha=0.7,
             color="skyblue",
             edgecolor="black",

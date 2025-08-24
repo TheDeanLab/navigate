@@ -3,7 +3,6 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
-
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
 
@@ -37,6 +36,7 @@ import time
 import os
 from typing import Tuple, Any, Dict, List, Optional, Union
 import argparse
+import json
 
 # Third Party Imports
 import numpy as np
@@ -983,7 +983,7 @@ class Model:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
-            start_time = time.perf_counter()
+            start_time = time.perf_counter_ns()
             frame_ids = self.active_microscope.camera.get_new_frame()
             # if there is at least one frame available
             if not frame_ids:
@@ -1004,9 +1004,16 @@ class Model:
                     break
                 continue
 
-            self.logger.info(
-                f"New image acquired in {time.perf_counter() - start_time:.4f} seconds"
+            self.logger.performance(
+                json.dumps(
+                    {
+                        "kind": "Acquire Image",
+                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "timestamp": time.time(),
+                    }
+                )
             )
+
             acquired_frame_num += len(frame_ids)
 
             wait_num = self.camera_wait_iterations
@@ -1188,19 +1195,25 @@ class Model:
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
-        start_time = time.perf_counter()
+        start_time = time.perf_counter_ns()
         stage_pos = self.get_stage_position()
         self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
         self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
         self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
         self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
         self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
-        self.logger.info(
-            f"Stage positions got in {time.perf_counter() - start_time:.4f} seconds"
+        self.logger.performance(
+            json.dumps(
+                {
+                    "kind": "Stage Position",
+                    "duration_ns": time.perf_counter_ns() - start_time,
+                    "timestamp": time.time(),
+                }
+            )
         )
 
         # Run the acquisition
-        start_time = time.perf_counter()
+        start_time = time.perf_counter_ns()
         try:
             self.active_microscope.turn_on_laser()
             self.active_microscope.daq.run_acquisition()
@@ -1222,8 +1235,15 @@ class Model:
         finally:
             # Ensure the laser is turned off
             self.active_microscope.turn_off_lasers()
-        self.logger.info(
-            f"DAQ sending out triggers in {time.perf_counter() - start_time:.4f} seconds"
+
+        self.logger.performance(
+            json.dumps(
+                {
+                    "kind": "DAQ Triggers",
+                    "duration_ns": time.perf_counter_ns() - start_time,
+                    "timestamp": time.time(),
+                }
+            )
         )
 
         if hasattr(self, "signal_container"):

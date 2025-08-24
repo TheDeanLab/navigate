@@ -72,6 +72,9 @@ class DiagnosticsPopup(ttk.Frame):
         #: dict: Dictionary to hold input widgets in the popup.
         self.inputs = {}
 
+        #: dict: Dictionary to hold label frames in the popup.
+        self.label_frame = {}
+
         #: ttk.Labelframe: Frame for the diagnostics popup.
         self.frame = self.popup.get_frame()
         self.frame.grid(
@@ -106,8 +109,8 @@ class DiagnosticsPopup(ttk.Frame):
             width=10,
         )
         self.buttons["save_image"].grid(
-            row=1,
-            column=0,
+            row=0,
+            column=1,
             padx=5,
             pady=5,
             sticky="W",
@@ -116,51 +119,58 @@ class DiagnosticsPopup(ttk.Frame):
             "Save a screenshot of the performance diagnostics."
         )
 
+        self.buttons["close"] = HoverButton(
+            self.frame,
+            text="Close",
+            width=10,
+        )
+        self.buttons["close"].grid(
+            row=0,
+            column=2,
+            padx=5,
+            pady=5,
+            sticky="W",
+        )
+        self.buttons["close"].hover.setdescription("Close the diagnostics window.")
+
         # Create a label frame
         self.diagnostics_frame = ttk.LabelFrame(
             self.frame,
             padding=(5, 5, 5, 5),
         )
         self.diagnostics_frame.grid(
-            row=2,
+            row=1,
             column=0,
+            columnspan=3,
             padx=5,
             pady=5,
             sticky="NSEW",
         )
 
-        # Create 6 label frames in a 3 row by 2 column grid
-        labels = [
-            "Time Necessary to Update Image Display",
-            "Time Necessary to Update Histogram Display",
-            "Time Necessary to Move Z or F Stage during Z-Stack",
-            "Time Necessary to Acquire a New Image",
-            "Test2",
-            "Test3",
-        ]
-        for i in range(6):
-            self.add_plot_figure(labels[i])
+        for i in range(8):
+            self.add_plot_figure("")
 
         # Configure the frames to expand
-        self.frame.grid_columnconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(2, weight=1)
         self.frame.grid_rowconfigure(1, weight=1)
         self.diagnostics_frame.grid_columnconfigure(0, weight=1)
         self.diagnostics_frame.grid_columnconfigure(1, weight=1)
+        self.diagnostics_frame.grid_columnconfigure(2, weight=1)  # Added
+        self.diagnostics_frame.grid_columnconfigure(3, weight=1)  # Added
         self.diagnostics_frame.grid_rowconfigure(0, weight=1)
         self.diagnostics_frame.grid_rowconfigure(1, weight=1)
-        self.diagnostics_frame.grid_rowconfigure(2, weight=1)
 
     # Add plot figure
     def add_plot_figure(self, title):
         counter = sum(k.startswith("canvas_") for k in self.inputs)
-        i = counter // 3
-        j = counter % 3
-        label_frame = ttk.LabelFrame(
+        i = counter // 4
+        j = counter % 4
+        self.label_frame[counter + 1] = ttk.LabelFrame(
             self.diagnostics_frame,
             text=title,
             padding=(5, 5, 5, 5),
         )
-        label_frame.grid(
+        self.label_frame[counter + 1].grid(
             row=i,
             column=j,
             padx=5,
@@ -169,10 +179,10 @@ class DiagnosticsPopup(ttk.Frame):
         )
         # Add a matplotlib.figure.figure to the label frame
         self.inputs[f"diagnostics_{counter + 1}"] = Figure(
-            figsize=(3.0, 2.0), tight_layout=True
+            figsize=(4.0, 3.0), tight_layout=True
         )
         self.inputs[f"canvas_{counter + 1}"] = FigureCanvasTkAgg(
-            self.inputs[f"diagnostics_{counter + 1}"], label_frame
+            self.inputs[f"diagnostics_{counter + 1}"], self.label_frame[counter + 1]
         )
         self.inputs[f"diagnostics_{counter + 1}"].add_subplot(111)
 

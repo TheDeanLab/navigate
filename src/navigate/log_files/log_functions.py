@@ -193,7 +193,9 @@ def log_setup(
         handlers = []
         for name in [""] + list(config_data2.get("loggers", {})):
             logger = logging.getLogger(name or None)
-            handlers.extend(logger.handlers)
+            for handler in logger.handlers:
+                if handler not in handlers:
+                    handlers.append(handler)
             logger.handlers = [qh]
         if start_listener:
             listener = logging.handlers.QueueListener(

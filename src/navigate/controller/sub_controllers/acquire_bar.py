@@ -139,6 +139,9 @@ class AcquireBarController(GUIController):
                 # Set to Indeterminate mode.
                 self.view.CurAcq["mode"] = "indeterminate"
                 self.view.OvrAcq["mode"] = "indeterminate"
+                self.view.CurAcq.start()
+                self.view.OvrAcq.start()
+                self.view.total_acquisition_label.config(text="--:--:--")
             else:
                 # Set to Determinate mode and initialize at zero.
                 # stack_index = 0
@@ -193,10 +196,10 @@ class AcquireBarController(GUIController):
                         self.update_progress_label(seconds_left)
                     except ZeroDivisionError:
                         pass
-                else:
-                    self.view.CurAcq.start()
-                    self.view.OvrAcq.start()
-                    self.view.total_acquisition_label.config(text="--:--:--")
+                # else:
+                    # self.view.CurAcq.start()
+                    # self.view.OvrAcq.start()
+                    # self.view.total_acquisition_label.config(text="--:--:--")
 
                 if mode == "z-stack":
                     top_percent_complete = 100 * (
@@ -221,9 +224,9 @@ class AcquireBarController(GUIController):
                     self.view.CurAcq["value"] = top_percent_complete
                     self.view.OvrAcq["value"] = top_percent_complete
 
-                else:
-                    self.view.CurAcq.start()
-                    self.view.OvrAcq.start()
+                # else:
+                #     self.view.CurAcq.start()
+                #     self.view.OvrAcq.start()
 
             elif stop is True:
                 self.update_progress_label(seconds_left=0)

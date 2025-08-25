@@ -1191,12 +1191,13 @@ class Controller:
         )
 
         self.stop_acquisition_flag = False
-        start_time = time.time()
+        # start_time = time.time()
         self.camera_setting_controller.update_readout_time()
 
         while True:
             if self.stop_acquisition_flag:
                 break
+            start_time = time.perf_counter()
             # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
             logger.info(f"Navigate Controller - Received Image: {image_id}")
@@ -1215,28 +1216,45 @@ class Controller:
                 self.execute("stop_acquire")
 
             # Display the image and update the histogram
+            camera_view_time = time.perf_counter()
             self.camera_view_controller.try_to_display_image(
                 image=self.data_buffer[image_id]
             )
+            camera_view_time = time.perf_counter() - camera_view_time
+
+            mip_setting_time = time.perf_counter()
             self.mip_setting_controller.try_to_display_image(
                 image=self.data_buffer[image_id]
             )
+            mip_setting_time = time.perf_counter() - mip_setting_time
+
+            histogram_time = time.perf_counter()
             self.histogram_controller.populate_histogram(
                 image=self.data_buffer[image_id]
             )
+            histogram_time = time.perf_counter() - histogram_time
+            
             images_received += 1
 
             # Update progress bar.
+            acquire_bar_time = time.perf_counter()
             self.acquire_bar_controller.progress_bar(
                 images_received=images_received,
                 microscope_state=self.configuration["experiment"]["MicroscopeState"],
                 mode=mode,
                 stop=False,
             )
+            acquire_bar_time = time.perf_counter() - acquire_bar_time
+            print(
+                f"camera_view_time: {camera_view_time:.3f}, "
+                f"mip_setting_time: {mip_setting_time:.3f}, "
+                f"histogram_time: {histogram_time:.3f} "
+                f"acquire_bar_time: {acquire_bar_time:.3f}"
+            )
             # update framerate
-            stop_time = time.time()
+            stop_time = time.perf_counter()
             try:
-                frames_per_second = images_received / (stop_time - start_time)
+                frames_per_second = 1 / (stop_time - start_time)
             except ZeroDivisionError:
                 frames_per_second = 1 / (
                     self.configuration["experiment"]["MicroscopeState"]["channels"][

@@ -1271,7 +1271,7 @@ class TigerController:
         # Runs the main setup commands, followed by the Galvo specific commands
         for command in commands:
             self.send_command(f"{command}\r")
-            print(f"Sent Command: {command}")
+            # print(f"Sent Command: {command}")
             self.read_response()
         for command in galvo_commands:
             self.send_command(f"{command}\r")

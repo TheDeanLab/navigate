@@ -1777,7 +1777,6 @@ class Model:
         for id in frame_ids:
             self.data_buffer_saving_flags[id] = True
 
-
 class ASIModel(Model):
     """ASI Model class.
 
@@ -1891,7 +1890,7 @@ class ASIModel(Model):
         # Run the acquisition
         try:
             self.active_microscope.daq.run_acquisition()
-            print("ASIModel: Acquisition started.")
+            # print("ASIModel: Acquisition started.")
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
             if self.active_microscope.current_channel == 0:

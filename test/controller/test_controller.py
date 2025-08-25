@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, ANY
 import pytest
 import numpy
 import multiprocessing as mp
+import logging
 
 
 class DummySplashScreen:
@@ -35,7 +36,7 @@ def controller(tk_root):
     multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
     args = SimpleNamespace(synthetic_hardware=True)
 
-    log_queue = None
+    log_queue = mp.Queue()
 
     controller = Controller(
         tk_root,
@@ -64,6 +65,38 @@ def controller(tk_root):
         controller.execute("exit")
     except SystemExit:
         pass
+
+        # Close/Join all mp.Queues
+        q = getattr(controller, "event_queue", None)
+        if q is not None:
+            try:
+                q.close()
+            except Exception:
+                pass
+            try:
+                q.join_thread()
+            except Exception:
+                pass
+
+        try:
+            log_queue.close()
+            log_queue.join_thread()
+        except Exception:
+            pass
+
+        # Close any Pipes
+        if getattr(controller, "show_img_pipe", None):
+            try:
+                controller.show_img_pipe.close()
+            except Exception:
+                pass
+
+        try:
+            controller.manager.shutdown()
+        except Exception:
+            pass
+
+        logging.shutdown()
 
 
 def test_update_buffer(controller):

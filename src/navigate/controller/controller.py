@@ -71,7 +71,7 @@ from navigate.controller.sub_controllers import (
 from navigate.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
-from navigate.model.model import Model
+from navigate.model.model import Model, ASIModel
 from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
@@ -222,9 +222,15 @@ class Controller:
         )
 
         #: ObjectInSubprocess: Model object in MVC architecture.
-        self.model = ObjectInSubprocess(
-            Model, args, self.configuration, event_queue=self.event_queue
-        )
+        if self.use_asi_model():
+            print("Using ASI model.")
+            self.model = ObjectInSubprocess(
+                ASIModel, args, self.configuration, event_queue=self.event_queue
+            )
+        else:
+            self.model = ObjectInSubprocess(
+                Model, args, self.configuration, event_queue=self.event_queue
+            )
 
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
@@ -350,6 +356,33 @@ class Controller:
         self.window_height = 0
         self.view.root.after(5000, self.enable_resize)
         self.view.root.bind("<Configure>", self.resize)
+
+    def use_asi_model(self) -> bool:
+        """Check if the model uses ASI hardware.
+
+        Returns
+        -------
+        bool
+            True if the model uses ASI hardware, False if it uses NI hardware.
+
+        Raises
+        -------
+        ValueError
+            If the DAQ type is unknown.
+        """
+        microscope_name = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        daq_type = self.configuration["configuration"]["microscopes"][microscope_name]["daq"][
+            "hardware"
+        ].get("type", "NI")
+
+        if daq_type in ("ni", "NI"):
+            return False
+        elif daq_type in ("asi", "ASI"):
+            return True
+        else:
+            raise ValueError(f"Unknown daq type: {daq_type}")
 
     def update_buffer(self):
         """Update the buffer size according to the camera

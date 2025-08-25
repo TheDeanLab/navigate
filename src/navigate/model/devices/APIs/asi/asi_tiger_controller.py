@@ -1099,8 +1099,10 @@ class TigerController:
         delays: list[float],
         camera_delay: float,
         remote_focus_delay: float,
+        exposure_time: float,
         sweep_time: float,
         analog_outputs: dict,
+        num_cycles=0,
     ) -> None:
         """
         Sets up the control loop for triggering the remote focus, Galvo/s, and Camera
@@ -1124,7 +1126,8 @@ class TigerController:
         """
         # TODO: Investigate if these axis outputs are shared amongst units.
         # Reference values for ttls that correspond to outputs A-C
-        ttls = {"A": 42, "B": 44, "C": 46}
+        ttls = {"A": 42, "B": 44, "C": 46,
+                "H": 42, "I": 44, "J": 46}
 
         start_delay = int(delays[0] * 4)  # Unit conversion from ms to 1/4 ms
 
@@ -1139,10 +1142,16 @@ class TigerController:
         else:
             galvo2_delay = 0
         remote_focus_axis = analog_outputs["remote_focus"]
+        print(f"Exposure time: {exposure_time}")
+        print(f"Sweep time: {sweep_time}")
+        cycle_time = sweep_time * num_cycles
 
+        # Convert all time values to 1/4 ms
+        exposure_time = int(exposure_time*4)
         sweep_time = (
             int(sweep_time * 4) - 2
         )  # Hardcoded -2 to account for delays within controller
+        cycle_time = int(cycle_time * 4)
 
         # Dynamic delay processing. Instead of having each delay handled separately,
         # to save some cell space delays are programmed based on some simple
@@ -1191,7 +1200,7 @@ class TigerController:
             "6 ccb x = 4 y = 71",
             # Cell 6, a one-shot triggered by the rising edge of Cell 5
             "6 m e = 6",
-            "6 cca y = 8 z = 10",
+            f"6 cca y = 8 z = {exposure_time}",
             "6 ccb x = 5 y = 192",
             # Cell 7, delay cell that waits for the sweep time until retriggering.
             # Used for the main loop. Timing is dependent on the sweep_time variable
@@ -1214,7 +1223,7 @@ class TigerController:
             "6 ccb x = 6 y = 192",
             # Cell 12, a one-shot triggered by the rising edge of Cell 11
             "6 m e = 12",
-            "6 cca y = 8 z = 10",
+            "6 cca y = 8 z = 4",
             "6 ccb x = 11 y = 192",
             # Routes the output of the remote focus trigger to the TTL output from the
             # PLC
@@ -1223,7 +1232,16 @@ class TigerController:
             # Sets the camera signal output to the first physical PLC output
             "6 m e = 33",
             f"6 cca z = {camera_output}",
+            # Sends TTL to Piezo
+            "6 m e = 47",
+            f"6 cca z = {camera_output}",
         ]
+        if (num_cycles > 0):
+            commands[8:10] = [
+                # Cell 4, One-shot that lasts for the cycle time
+                f"6 cca y = 8 z = {cycle_time}",
+                "6 ccb x = 3 y = 192"
+            ]
         # Creates object to hold galvo commands
         galvo_commands = []
         # Single Galvo case, just sets up the first Galvo
@@ -1232,7 +1250,7 @@ class TigerController:
                 # Sets the output of Cell 2 as the input to the TTL corresponding to
                 # the first Galvo pair
                 f"6 m e = {ttls[galvo1_axis]}",
-                "6 cca y = 1 z = 2",
+                "6 cca y = 2 z = 2",
             ]
         # Multiple Galvo case, has the first set of commands and the commands for the
         # second Galvo
@@ -1253,7 +1271,17 @@ class TigerController:
         # Runs the main setup commands, followed by the Galvo specific commands
         for command in commands:
             self.send_command(f"{command}\r")
+            print(f"Sent Command: {command}")
             self.read_response()
         for command in galvo_commands:
             self.send_command(f"{command}\r")
             self.read_response()
+
+    def setup_laser(self, axis : str) -> None:
+        
+        axis = int(axis) + 32
+
+        self.send_command(f"m e = {axis}\r")
+        self.read_response()
+        self.send_command("cca z = 6")
+        self.read_response()

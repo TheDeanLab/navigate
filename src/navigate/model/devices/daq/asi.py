@@ -129,7 +129,7 @@ class ASIDaq(DAQBase, SerialDevice):
         self.analog_outputs["remote_focus"] = remote_focus_channel
 
         # sets up initial PLC configuration with default delay (ms), camera delay, rfvc delay, sweep time (ms), and analog outputs dict
-        self.daq.setup_control_loop([200], 0, 0, 120, self.analog_outputs)
+        self.daq.setup_control_loop([200], 0, 0, 100, 120, self.analog_outputs)
 
     @classmethod
     def connect(cls, port, baudrate=115200, timeout=0.25):
@@ -157,7 +157,7 @@ class ASIDaq(DAQBase, SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
 
-    def prepare_acquisition(self, channel_key: str) -> None:
+    def prepare_acquisition(self, channel_key: str, zstack: bool = False) -> None:
         """Prepare the acquisition.
 
         Creates and configures the DAQ tasks.
@@ -169,8 +169,8 @@ class ASIDaq(DAQBase, SerialDevice):
             Channel key for current channel.
         """
         # Get appropriate sweep_time for the current channel
+        exposure_time = self.exposure_times[channel_key] * 1000
         sweep_time = self.sweep_times[channel_key]
-
         # loop through galvo phases to calculate time delays
         # delays[i] corresponds to the time between the ith galvo trigger and the master trigger
         n = len(self.galvos)
@@ -215,10 +215,23 @@ class ASIDaq(DAQBase, SerialDevice):
         rfvc_delay = float(
             self.waveform_constants["other_constants"].get("remote_focus_delay", 5)
         )
-        # sets up control loop with all parameters (all times in ms)
-        self.daq.setup_control_loop(
-            delays, self.camera_delay, rfvc_delay, sweep_time, self.analog_outputs
-        )
+        if zstack:
+            start_pos = self.configuration["experiment"]["MicroscopeState"]["start_position"]
+            end_pos = self.configuration["experiment"]["MicroscopeState"]["end_position"]
+            step_size = self.configuration["experiment"]["MicroscopeState"]["step_size"]
+
+            print(f"ASIModel: Starting z-stack from {start_pos} to {end_pos} by {step_size}")
+
+            num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
+
+            # sets up control loop with all parameters (all times in ms)
+            self.daq.setup_control_loop(
+                delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs, num_steps
+            )
+        else:
+            self.daq.setup_control_loop(
+                delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs
+            )
 
         self.current_channel_key = channel_key
         self.is_updating_analog_task = False

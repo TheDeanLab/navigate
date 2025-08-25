@@ -74,11 +74,11 @@ class ASILaser(LaserBase, SerialDevice):
         super().__init__(microscope_name, device_connection, configuration, device_id)
         analog = configuration["configuration"]["microscopes"][microscope_name][
             "laser"
-        ][device_id]["power"]["hardware"].get("type", None)
+        ][device_id]["power"]["hardware"].get("type", "None")
 
         digital = configuration["configuration"]["microscopes"][microscope_name][
             "laser"
-        ][device_id]["onoff"]["hardware"].get("type", None)
+        ][device_id]["onoff"]["hardware"].get("type", "None")
 
         if "ASI" in analog and "ASI" in digital:
             modulation_type = "mixed"
@@ -159,11 +159,15 @@ class ASILaser(LaserBase, SerialDevice):
         laser_intensity : float
             The laser intensity.
         """
-        self.output_voltage = (int(laser_intensity) / 100) * self.laser_max_ao * 1000
-        if self.output_voltage > (self.laser_max_ao * 1000):
-            self.output_voltage = self.laser_max_ao * 1000
-        self.laser.move_axis(self.analog_axis, self.output_voltage)
-        self._current_intensity = laser_intensity
+        if self.modulation_type in ("digital", "mixed"):
+            self.laser.setup_laser(self.digital_axis) 
+
+        if self.modulation_type in ("analog", "mixed"):
+            self.output_voltage = (int(laser_intensity) / 100) * self.laser_max_ao * 1000
+            if self.output_voltage > (self.laser_max_ao * 1000):
+                self.output_voltage = self.laser_max_ao * 1000
+            self.laser.move_axis(self.analog_axis, self.output_voltage)
+            self._current_intensity = laser_intensity
 
     def turn_on(self):
         """Turns on the laser."""
@@ -188,17 +192,17 @@ class ASILaser(LaserBase, SerialDevice):
             self.set_power(0)
             self._current_intensity = tmp
             self.laser.logic_card_off(self.digital_axis)
-            logger.info(f"{str(self)} initialized with mixed modulation.")
+            logger.info(f"{str(self)} closed with mixed modulation.")
 
         elif self.modulation_type == "analog":
             tmp = self._current_intensity
             self.set_power(0)
             self._current_intensity = tmp
-            logger.info(f"{str(self)} initialized with analog modulation.")
+            logger.info(f"{str(self)} closed with analog modulation.")
 
         elif self.modulation_type == "digital":
             self.laser.logic_card_off(self.digital_axis)
-            logger.info(f"{str(self)} initialized with digital modulation.")
+            logger.info(f"{str(self)} closed with digital modulation.")
 
     
     def close(self):

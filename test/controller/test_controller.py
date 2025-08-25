@@ -35,7 +35,7 @@ def controller(tk_root):
     multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
     args = SimpleNamespace(synthetic_hardware=True)
 
-    log_queue = mp.Queue()
+    log_queue = None
 
     controller = Controller(
         tk_root,

@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, ANY
 import pytest
 import numpy
+import multiprocessing as mp
 
 
 class DummySplashScreen:
@@ -34,6 +35,8 @@ def controller(tk_root):
     multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
     args = SimpleNamespace(synthetic_hardware=True)
 
+    log_queue = mp.Queue()
+
     controller = Controller(
         tk_root,
         DummySplashScreen(),
@@ -44,6 +47,7 @@ def controller(tk_root):
         waveform_templates_path,
         gui_configuration_path,
         multi_positions_path,
+        log_queue,
         args,
     )
     # To make sure the testcases won't hang on because of the model.event_queue
@@ -344,7 +348,9 @@ def test_execute_autofocus(controller):
     controller.acquire_bar_controller.is_acquiring = False
     controller.execute("autofocus")
     controller.threads_pool.createThread.assert_called_with(
-        resourceName="camera", target=controller.capture_image, args=("autofocus", "live")
+        resourceName="camera",
+        target=controller.capture_image,
+        args=("autofocus", "live"),
     )
 
     # Test the acquiring case
@@ -353,7 +359,9 @@ def test_execute_autofocus(controller):
     controller.threads_pool.createThread.reset_mock()
     controller.execute("autofocus")
     controller.threads_pool.createThread.assert_called_once()
-    controller.threads_pool.createThread.assert_any_call(resourceName="model", target=ANY)
+    controller.threads_pool.createThread.assert_any_call(
+        resourceName="model", target=ANY
+    )
     args, kwargs = controller.threads_pool.createThread.call_args
     assert kwargs["resourceName"] == "model"
 

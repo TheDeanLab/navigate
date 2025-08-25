@@ -280,6 +280,9 @@ class ChannelsTabController(GUIController):
             if self.microscope_state_dict["stack_cycling_mode"] == "per_z"
             else "Per Stack"
         )
+        if self.microscope_state_dict.get("speed", "") not in ["Auto", "Fixed"]:
+            self.stack_acq_vals["speed"].set("Auto")
+
         self.channel_setting_controller.populate_experiment_values(
             self.microscope_state_dict["channels"]
         )
@@ -396,7 +399,7 @@ class ChannelsTabController(GUIController):
             "step_size",
         ]:
             self.stack_acq_widgets[widget_name].widget["state"] = state
-        for widget_name in ["cycling", "z_device", "f_device"]:
+        for widget_name in ["cycling", "z_device", "f_device", "speed"]:
             self.stack_acq_widgets[widget_name].widget["state"] = (
                 "readonly" if state == "normal" else "disabled"
             )
@@ -879,6 +882,8 @@ class ChannelsTabController(GUIController):
 
         self.microscope_state_dict["primary_z_axis"] = primary_z_axis
         self.microscope_state_dict["primary_f_axis"] = primary_f_axis
+
+        self.microscope_state_dict["speed"] = self.stack_acq_vals["speed"].get()
 
         secondary_stack_settings= {}
         variable_dict = self.view.stack_acq_frame.additional_stack_setting_variables

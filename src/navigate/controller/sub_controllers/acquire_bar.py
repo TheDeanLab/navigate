@@ -36,6 +36,7 @@ import tkinter as tk
 from tkinter import messagebox
 from typing import Dict, Any, Iterable
 import re
+import threading
 
 # Third Party Imports
 
@@ -112,6 +113,13 @@ class AcquireBarController(GUIController):
             "rotate_data": ["rotate_angle_x", "rotate_angle_y", "rotate_angle_z"],
             "down_sample_data": ["lateral_down_sample", "axial_down_sample"],
         }
+        #: list: Progress bar values. First is current acquisition, second is overall.
+        self.cur_acq_value = 0
+        self.ovr_acq_value = 0
+
+        #: threading.Thread: single persistent progress bar worker
+        self._disp_thread = threading.Thread(target=self._progress_worker, daemon=True)
+        self._disp_thread.start()
 
     def progress_bar(
         self,
@@ -147,8 +155,8 @@ class AcquireBarController(GUIController):
                 # stack_index = 0
                 self.view.CurAcq["mode"] = "determinate"
                 self.view.OvrAcq["mode"] = "determinate"
-                self.view.CurAcq["value"] = 0
-                self.view.OvrAcq["value"] = 0
+                self.cur_acq_value = 0
+                self.ovr_acq_value = 0
 
         # Calculate the number of images anticipated.
         number_of_channels = 0
@@ -206,7 +214,7 @@ class AcquireBarController(GUIController):
                         images_received / top_anticipated_images
                     )
 
-                    self.view.CurAcq["value"] = (
+                    self.cur_acq_value = (
                         top_percent_complete % 100
                         if (top_percent_complete > 100.0)
                         else top_percent_complete
@@ -215,14 +223,14 @@ class AcquireBarController(GUIController):
                     bottom_anticipated_images = 100 * (
                         images_received / bottom_anticipated_images
                     )
-                    self.view.OvrAcq["value"] = bottom_anticipated_images
+                    self.ovr_acq_value = bottom_anticipated_images
 
                 elif mode == "single":
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
-                    self.view.CurAcq["value"] = top_percent_complete
-                    self.view.OvrAcq["value"] = top_percent_complete
+                    self.cur_acq_value = top_percent_complete
+                    self.ovr_acq_value = top_percent_complete
 
                 # else:
                 #     self.view.CurAcq.start()
@@ -231,6 +239,15 @@ class AcquireBarController(GUIController):
             elif stop is True:
                 self.update_progress_label(seconds_left=0)
                 self.stop_progress_bar()
+
+    def _progress_worker(self):
+        """Worker function to update the progress bar.
+
+        This function is called by the controller to update the progress bar.
+        It is used to update the progress bar in a separate thread.
+        """
+        self.view.CurAcq["value"] = self.cur_acq_value
+        self.view.OvrAcq["value"] = self.ovr_acq_value
 
     def stop_progress_bar(self) -> None:
         """Stop moving the continuous progress bar."""

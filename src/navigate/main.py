@@ -127,7 +127,7 @@ def main():
         )
 
     root.mainloop()
-    log_listener.stop()  # clean shutdown
+    log_listener.stop()
 
 
 if __name__ == "__main__":

@@ -6,6 +6,8 @@ import numpy
 import multiprocessing as mp
 import logging
 
+from navigate.log_files.log_functions import log_setup
+
 
 class DummySplashScreen:
     def destroy(self):
@@ -36,8 +38,9 @@ def controller(tk_root):
     multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
     args = SimpleNamespace(synthetic_hardware=True)
 
-    log_queue = mp.SimpleQueue()
-
+    log_queue, log_listener = log_setup(
+        "logging.yml", logging_path=None, start_listener=True
+    )
     controller = Controller(
         tk_root,
         DummySplashScreen(),
@@ -91,7 +94,11 @@ def controller(tk_root):
             controller.manager.shutdown()
         except Exception:
             pass
-
+        try:
+            log_listener.enqueue_sentinel()
+            log_listener.stop()
+        except Exception:
+            pass
         logging.shutdown()
 
 

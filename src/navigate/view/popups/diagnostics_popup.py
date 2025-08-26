@@ -41,6 +41,7 @@ from matplotlib.figure import Figure
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.hover import HoverButton
+from navigate.view.custom_widgets.common import uniform_grid
 
 
 class DiagnosticsPopup(ttk.Frame):
@@ -153,15 +154,16 @@ class DiagnosticsPopup(ttk.Frame):
         # Configure the frames to expand
         self.frame.grid_columnconfigure(2, weight=1)
         self.frame.grid_rowconfigure(1, weight=1)
-        self.diagnostics_frame.grid_columnconfigure(0, weight=1)
-        self.diagnostics_frame.grid_columnconfigure(1, weight=1)
-        self.diagnostics_frame.grid_columnconfigure(2, weight=1)  # Added
-        self.diagnostics_frame.grid_columnconfigure(3, weight=1)  # Added
-        self.diagnostics_frame.grid_rowconfigure(0, weight=1)
-        self.diagnostics_frame.grid_rowconfigure(1, weight=1)
+        uniform_grid(self.diagnostics_frame)
 
     # Add plot figure
-    def add_plot_figure(self, title):
+    def add_plot_figure(self, title : str) -> None:
+        """Add a plot figure to the diagnostics popup.
+        Parameters
+        ----------
+        title : str
+            Title of the plot figure.
+        """
         counter = sum(k.startswith("canvas_") for k in self.inputs)
         i = counter // 4
         j = counter % 4
@@ -177,6 +179,8 @@ class DiagnosticsPopup(ttk.Frame):
             pady=5,
             sticky="NSEW",
         )
+        # Configure the grid to expand if new rows are added
+        self.diagnostics_frame.grid_rowconfigure(i, weight=1)
         # Add a matplotlib.figure.figure to the label frame
         self.inputs[f"diagnostics_{counter + 1}"] = Figure(
             figsize=(4.0, 3.0), tight_layout=True

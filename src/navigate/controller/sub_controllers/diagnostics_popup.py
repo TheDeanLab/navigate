@@ -264,6 +264,10 @@ class DiagnosticsPopupController:
         title : str
             The title for the plot. If empty, a default title will be used.
         """
+        # Set default title if none provided
+        if title == "":
+            title = f"Panel {panel} Histogram"
+
         # add a new figure if necessary
         if f"canvas_{panel}" not in self.view.inputs:
             self.view.add_plot_figure(title)

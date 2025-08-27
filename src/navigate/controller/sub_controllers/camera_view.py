@@ -55,6 +55,7 @@ from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.analysis.camera import compute_signal_to_noise
 from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path, update_config_dict
+from navigate.tools.decorators import performance_monitor
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -1536,6 +1537,7 @@ class CameraViewController(BaseViewController):
 
         self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
+    @performance_monitor(prefix="Image Display")
     def display_image(self, image: np.ndarray) -> None:
         """Display an image using the LUT specified in the View.
 
@@ -1549,7 +1551,6 @@ class CameraViewController(BaseViewController):
         image : np.ndarray
             Image data.
         """
-        start_time = time.perf_counter_ns()
 
         self.image = self.flip_image(image)
 
@@ -1565,15 +1566,6 @@ class CameraViewController(BaseViewController):
 
         self.update_max_counts()
 
-        logger.performance(
-            json.dumps(
-                {
-                    "kind": "Image Display",
-                    "duration_ns": time.perf_counter_ns() - start_time,
-                    "timestamp": time.time(),
-                }
-            )
-        )
 
     def set_mask_color_table(self, colors: list) -> None:
         """Set up segmentation mask color table

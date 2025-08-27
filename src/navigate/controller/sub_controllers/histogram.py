@@ -45,6 +45,7 @@ from matplotlib.ticker import FuncFormatter
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.view.main_window_content.display_notebook import HistogramFrame
 from navigate.config import update_config_dict
+from navigate.tools.decorators import performance_monitor
 
 
 # Logger Setup
@@ -212,6 +213,7 @@ class HistogramController:
         )
         self.histogram_thread.start()
 
+    @performance_monitor(prefix="Histogram")
     def _populate_histogram(self, image: SharedNDArray) -> None:
         """Populate the histogram
 
@@ -225,7 +227,6 @@ class HistogramController:
         image : SharedNDArray
             Image Data
         """
-        start_time = time.perf_counter_ns()
 
         # Estimate total variation distance.
         number_bins = 20
@@ -263,15 +264,6 @@ class HistogramController:
             )
         )
         self.histogram.figure_canvas.draw()
-        logger.performance(
-            json.dumps(
-                {
-                    "kind": "Histogram",
-                    "duration_ns": time.perf_counter_ns() - start_time,
-                    "timestamp": time.time(),
-                }
-            )
-        )
 
     def _clear_histogram(self) -> None:
         """Clear the histogram but keep canvas interactive."""

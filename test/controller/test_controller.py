@@ -67,39 +67,41 @@ def controller(tk_root):
     try:
         controller.execute("exit")
     except SystemExit:
-        q = getattr(controller, "event_queue", None)
-        if q is not None:
-            try:
-                q.close()
-            except Exception:
-                pass
-            try:
-                q.join_thread()
-            except Exception:
-                pass
-
+        pass
+    q = getattr(controller, "event_queue", None)
+    if q is not None:
         try:
-            log_queue.close()
-        except Exception:
-            pass
-
-        # Close any Pipes
-        if getattr(controller, "show_img_pipe", None):
-            try:
-                controller.show_img_pipe.close()
-            except Exception:
-                pass
-
-        try:
-            controller.manager.shutdown()
+            q.close()
         except Exception:
             pass
         try:
-            log_listener.enqueue_sentinel()
-            log_listener.stop()
+            q.join_thread()
         except Exception:
             pass
-        logging.shutdown()
+
+    # Close any Pipes
+    if getattr(controller, "show_img_pipe", None):
+        try:
+            controller.show_img_pipe.close()
+        except Exception:
+            pass
+
+    try:
+        controller.manager.shutdown()
+    except Exception:
+        pass
+    # stop the queue listener before closing the queue
+    try:
+        log_listener.enqueue_sentinel()
+        log_listener.stop()
+    except Exception as e:
+        pass
+    try:
+        log_queue.close()
+    except Exception:
+        pass
+
+    logging.shutdown()
 
 
 def test_update_buffer(controller):

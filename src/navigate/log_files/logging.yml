@@ -61,3 +61,7 @@ loggers:
     level: DEBUG
     handlers: [console, info, debug, performance]
     propagate: no
+  tools:
+    level: DEBUG
+    handlers: [console, info, debug, performance]
+    propagate: no

@@ -37,7 +37,6 @@ import logging
 import serial
 
 # Local Imports
-from navigate.model.devices import MonitoredSerial
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -128,7 +127,7 @@ class SerialDevice:
         if port:
             from serial import Serial
 
-            self.serial = MonitoredSerial()
+            self.serial = serial.Serial()
             self.serial.port = port
             self.serial.baudrate = baudrate
             self.serial.timeout = timeout

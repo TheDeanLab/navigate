@@ -41,7 +41,6 @@ import serial
 # Local Imports
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
 from navigate.model.devices.device_types import SerialDevice
-from navigate.model.devices import MonitoredSerial
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -117,7 +116,7 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
         """
         logging.debug(f"LUDLFilterWheel - Opening Serial Port {comport}")
         try:
-            return MonitoredSerial(
+            return serial.Serial(
                 comport,
                 baudrate,
                 parity=serial.PARITY_NONE,

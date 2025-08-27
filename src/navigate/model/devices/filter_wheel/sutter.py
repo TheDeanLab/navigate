@@ -42,7 +42,6 @@ import serial
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
 from navigate.model.devices.device_types import SerialDevice
 from navigate.tools.decorators import log_initialization
-from navigate.model.devices import MonitoredSerial
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -143,7 +142,7 @@ class SutterFilterWheel(FilterWheelBase, SerialDevice):
         """
         logging.debug(f"SutterFilterWheel - Opening Serial Port {comport}")
         try:
-            return MonitoredSerial(comport, baudrate, timeout=timeout)
+            return serial.Serial(comport, baudrate, timeout=timeout)
         except serial.SerialException:
             logger.error("SutterFilterWheel - Could not establish Serial Port Connection")
             raise UserWarning(

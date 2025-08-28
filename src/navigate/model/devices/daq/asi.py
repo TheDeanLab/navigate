@@ -98,6 +98,9 @@ class ASIDaq(DAQBase, SerialDevice):
         #: str: zoom
         self.zoom = self.configuration["experiment"]["MicroscopeState"]["zoom"]
 
+        #: bool: Flag for z-stack acquisition.
+        self.zstack = False
+
         # retrieves galvo ListProxy/DictProxy from config file
         galvos_raw = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -157,7 +160,7 @@ class ASIDaq(DAQBase, SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
 
-    def prepare_acquisition(self, channel_key: str, zstack: bool = False) -> None:
+    def prepare_acquisition(self, channel_key: str) -> None:
         """Prepare the acquisition.
 
         Creates and configures the DAQ tasks.
@@ -180,7 +183,7 @@ class ASIDaq(DAQBase, SerialDevice):
             frequency = self.waveform_constants["galvo_constants"][f"Galvo {i}"][
                 self.microscope_name
             ][self.zoom]["frequency"]
-            period = self.exposure_times[channel_key] * 1000 / float(frequency)
+            period = exposure_time / float(frequency)
 
             # round period for triangle waveform to even number, as the TG-1000 can only generate triangle waveforms with even-number-of-ms periods
             if self.galvos[i]["waveform"] == "sawtooth":
@@ -215,7 +218,7 @@ class ASIDaq(DAQBase, SerialDevice):
         rfvc_delay = float(
             self.waveform_constants["other_constants"].get("remote_focus_delay", 5)
         )
-        if zstack:
+        if self.zstack:
             start_pos = self.configuration["experiment"]["MicroscopeState"]["start_position"]
             end_pos = self.configuration["experiment"]["MicroscopeState"]["end_position"]
             step_size = self.configuration["experiment"]["MicroscopeState"]["step_size"]
@@ -245,6 +248,8 @@ class ASIDaq(DAQBase, SerialDevice):
         The master trigger initiates all other waveforms via a shared trigger
         For this to work, all analog output and counter tasks have to be primed so that
         they are waiting for the trigger signal.
+
+        If it is a z-stack acquisition, wait for the loop to complete before returning.
         """
         # if self.is_updating_analog_task:
         #     self.wait_to_run_lock.acquire()
@@ -253,6 +258,8 @@ class ASIDaq(DAQBase, SerialDevice):
         # turn on PLC cell 1 (Master Trigger)
         try:
             self.daq.logic_cell_on("1")
+            if self.zstack:
+                self.daq.wait_for_loop()
         except Exception:
             logger.debug("DAQ cannot turn on")
             pass

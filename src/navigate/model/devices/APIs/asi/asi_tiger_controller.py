@@ -144,6 +144,9 @@ class TigerController:
         #: float: Last time a command was sent to the Tiger Controller
         self._last_cmd_send_time = time.perf_counter()
 
+        #: float: Time before control loop starts in order to sync galvos
+        self.start_delay = 0.0
+
     @staticmethod
     def scan_ports() -> list[str]:
         """Scans for available COM ports
@@ -1123,6 +1126,8 @@ class TigerController:
         analog_outputs: dict
             Dictionary that includes the device and the output axis on the DAC4 card,
             as specified in config
+        num_cycles: int
+            Number of cycles to run the loop. 0 for infinite
         """
         # TODO: Investigate if these axis outputs are shared amongst units.
         # Reference values for ttls that correspond to outputs A-C
@@ -1174,7 +1179,7 @@ class TigerController:
             remote_focus_output = 6
             start_delay += int((camera_delay + 2) * 4)
             difference_delay = 0
-
+        self.start_delay = start_delay / 4000  # Store for reference
         commands = [
             # Resets programmable logic cell configurations to constant cells
             # This handles configuring cell 1 and cell 8
@@ -1278,10 +1283,25 @@ class TigerController:
             self.read_response()
 
     def setup_laser(self, axis : str) -> None:
-        
+        """Sets up a laser to be triggered by the control loop"""
         axis = int(axis) + 32
 
-        self.send_command(f"m e = {axis}\r")
+        self.send_command(f"6 m e = {axis}\r")
         self.read_response()
-        self.send_command("cca z = 6")
+        self.send_command("6 cca z = 6")
         self.read_response()
+
+    def wait_for_loop(self) -> None:
+        """Waits for one z-stack to be imaged before returning"""
+        time.sleep(self.start_delay)
+        print("Waiting for loop to finish...")
+        bit4 = 1
+        while bit4 == 1:
+            self.send_command(f"6 rdadc z?") 
+            # returns 16-bit integer indicating state of all 16 cells, 
+            # where the 4th least significant bit gives the value of cell 4
+            response = self.read_response()
+            result = int(response.split(" ")[1])
+            bit4 = result >> 3 & 1
+            print(f"bit4: {bit4}")
+        return 

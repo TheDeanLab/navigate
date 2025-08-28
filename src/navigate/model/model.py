@@ -1733,6 +1733,34 @@ class ASIModel(Model):
 
         print("ASIModel initialized.")
 
+    def prepare_acquisition(self, turn_off_flags = True):
+        result = super().prepare_acquisition(turn_off_flags)
+        self.active_microscope.daq.zstack = self.imaging_mode == "z-stack"
+        return result
+
+    def run_live_acquisition(self) -> None:
+        """Stream live image to the GUI.
+
+        Recalculates the waveforms for each image, thereby allowing people to adjust
+        acquisition parameters in real-time.
+
+        Returns
+        -------
+        None
+            Terminates when live acquisition is stopped.
+        """
+        self.stop_acquisition = False
+        self.run_acquisition()
+        while not self.stop_acquisition and not self.stop_send_signal:
+            if self.injected_flag.value:
+                self.reset_feature_list()
+            elif hasattr(self, "signal_container"):
+                self.signal_container.reset()
+
+        # Update the stage position.
+        # Allows the user to externally move the stage in the continuous mode.
+        self.get_stage_position()
+
     def run_acquisition(self) -> None:
         """Run acquisition along with a feature list one time.
 
@@ -1758,11 +1786,13 @@ class ASIModel(Model):
 
         # Launch the signal and data containers, and let them terminate the
         # acquisition when we have received the right number of frames.
+        
         while (
             not self.signal_container.end_flag
             and not self.stop_send_signal
             and not self.stop_acquisition
         ):
+            print("in loop")
             self.snap_zstack()
             if not hasattr(self, "signal_container"):
                 return
@@ -1789,7 +1819,6 @@ class ASIModel(Model):
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
-        self.active_microscope.prepare_next_channel()
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
@@ -1803,7 +1832,15 @@ class ASIModel(Model):
 
         # Run the acquisition
         try:
-            self.active_microscope.daq.run_acquisition()
+             # if live and first frame, run once
+            # else run every time
+            if self.imaging_mode == "live": 
+                if self.frame_id == 0:
+                    self.active_microscope.daq.run_acquisition()
+            else:           
+                self.active_microscope.daq.run_acquisition()
+                # query cell 4
+            # if self.imaging_mode != "live", query cell 4
             print("ASIModel: Acquisition started.")
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()

@@ -672,7 +672,7 @@ class PrepareNextChannel:
         #: dict: A dictionary defining the configuration for the channel preparation
         self.config_table = {"signal": {"main": self.signal_func}}
 
-    def signal_func(self, zstack=False):
+    def signal_func(self):
         """Prepare virtual and active microscopes for the next imaging channel.
 
         This method prepares virtual microscopes, if any, followed by the active
@@ -687,7 +687,7 @@ class PrepareNextChannel:
         for microscope_name in self.model.virtual_microscopes:
             self.model.virtual_microscopes[microscope_name].prepare_next_channel()
 
-        self.model.active_microscope.prepare_next_channel(zstack=zstack)
+        self.model.active_microscope.prepare_next_channel()
 
         return True
 
@@ -1304,7 +1304,7 @@ class ZStackAcquisition:
             self.model.virtual_microscopes[microscope_name].current_channel = 0
 
         # PREPARE NEXT CHANNEL as a feature...
-        self.prepare_next_channel.signal_func(zstack=True)
+        self.prepare_next_channel.signal_func()
 
         logger.info(
             f"ZStackAcquisition: Positions {self.positions}, "
@@ -1705,17 +1705,17 @@ class ASIZStackAcquisition(ZStackAcquisition):
             self.model.move_stage(pos_dict, wait_until_done=True)
 
         # Potentially pause the data thread and move z, f position
-        if self.need_to_move_z_position:
-            if self.should_pause_data_thread and not data_thread_is_paused:
-                self.model.pause_data_thread()
-                logger.info("Data thread paused.")
+        # if self.need_to_move_z_position:
+        #     if self.should_pause_data_thread and not data_thread_is_paused:
+        #         self.model.pause_data_thread()
+        #         logger.info("Data thread paused.")
 
-            stack_pos = [
-                (f"{self.primary_z_axis}_abs", self.current_z_position),
-                (f"{self.primary_f_axis}_abs", self.current_focus_position)
-            ]
-            for axis, offset in self.secondary_stack_settings.items():
-                stack_pos.append((f"{axis}_abs", self.current_z_position + offset))
+        #     stack_pos = [
+        #         (f"{self.primary_z_axis}_abs", self.current_z_position),
+        #         (f"{self.primary_f_axis}_abs", self.current_focus_position)
+        #     ]
+        #     for axis, offset in self.secondary_stack_settings.items():
+        #         stack_pos.append((f"{axis}_abs", self.current_z_position + offset))
             # This move is handled by the ASI Tiger Controller
             # self.model.move_stage(
             #     dict(stack_pos),
@@ -1746,49 +1746,29 @@ class ASIZStackAcquisition(ZStackAcquisition):
         if self.model.stop_acquisition:
             return True
 
-        if self.stack_cycling_mode != "per_stack":
-            # update the channel for each z position in 'per_slice'
-            if self.defocus is not None:
-                self.current_focus_position -= self.defocus[
-                    self.current_channel_in_list
-                ]
+        # decide to move X, Y, Theta
+        self.z_position_moved_time = 0
+        # calculate first z, f position
+        self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
+        self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
+        if (
+            self.z_stack_distance > self.stage_distance_threshold
+            or self.f_stack_distance > self.stage_distance_threshold
+        ):
+            self.should_pause_data_thread = True
+
+        # after running through a z-stack, update channel
+        if self.stack_cycling_mode == "per_stack":
             self.update_channel()
-            self.need_to_move_z_position = self.current_channel_in_list == 0
-
-        # in 'per_slice', move to the next z position if all the channels have been
-        # acquired
-        if self.need_to_move_z_position:
-            # next z, f position
-            self.current_z_position += self.z_step_size
-            self.current_focus_position += self.focus_step_size
-
-            # update z position moved time
-            self.z_position_moved_time += 1
-
-        # decide whether to move X, Y, Theta
-        if self.z_position_moved_time >= self.number_z_steps:
-            self.z_position_moved_time = 0
-            # calculate first z, f position
-            self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
-            self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
-            if (
-                self.z_stack_distance > self.stage_distance_threshold
-                or self.f_stack_distance > self.stage_distance_threshold
-            ):
-                self.should_pause_data_thread = True
-
-            # after running through a z-stack, update channel
-            if self.stack_cycling_mode == "per_stack":
-                self.update_channel()
-                # if run through all the channels, move to the next position
-                if self.current_channel_in_list == 0:
-                    self.need_to_move_new_position = True
-            else:
+            # if run through all the channels, move to the next position
+            if self.current_channel_in_list == 0:
                 self.need_to_move_new_position = True
+        else:
+            self.need_to_move_new_position = True
 
-            if self.need_to_move_new_position:
-                # move to the next position
-                self.current_position_idx += 1
+        if self.need_to_move_new_position:
+            # move to the next position
+            self.current_position_idx += 1
 
         if self.current_position_idx >= len(self.positions):
             self.current_position_idx = 0

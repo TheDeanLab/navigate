@@ -762,7 +762,7 @@ class Microscope:
         """
         return self.exposure_times, self.sweep_times
 
-    def prepare_next_channel(self, update_daq_task_flag: bool = True, zstack: bool = False) -> None:
+    def prepare_next_channel(self, update_daq_task_flag: bool = True) -> None:
         """Prepare the next channel.
 
         This function, `prepare_next_channel`, is responsible for configuring various
@@ -803,6 +803,7 @@ class Microscope:
 
         # Laser Settings
         self.current_laser_index = channel["laser_index"]
+        # is this needed? lasers should be off already in NI mode. This messes up ASI mode
         for k in self.laser:
             self.laser[k].turn_off()
         self.laser[str(self.laser_wavelength[self.current_laser_index])].set_power(
@@ -820,7 +821,7 @@ class Microscope:
         # if there is a NI Galvo stage in the system.
         if update_daq_task_flag:
             self.daq.stop_acquisition()
-            self.daq.prepare_acquisition(channel_key, zstack=zstack)
+            self.daq.prepare_acquisition(channel_key)
 
         # Add Defocus term
         # Assume wherever we start is the central focus

@@ -14,7 +14,7 @@ class DummySplashScreen:
         pass
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def controller(tk_root):
     from navigate.controller.controller import Controller
 

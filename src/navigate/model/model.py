@@ -1722,14 +1722,14 @@ class ASIModel(Model):
         """
         super().__init__(args, configuration, event_queue)
 
-        self.acquisition_modes_feature_setting["z-stack"] = (
+        self.acquisition_modes_feature_setting["z-stack"] = [(
                     {"name": ASIZStackAcquisition},
                     {"name": StackPause},
                     {
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.timepoints",),
                     },
-                )
+                )]
 
         print("ASIModel initialized.")
 

@@ -1303,5 +1303,4 @@ class TigerController:
             response = self.read_response()
             result = int(response.split(" ")[1])
             bit4 = result >> 3 & 1
-            print(f"bit4: {bit4}")
         return 

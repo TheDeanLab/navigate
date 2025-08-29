@@ -104,8 +104,9 @@ def controller(tk_root):
     multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
     args = SimpleNamespace(synthetic_hardware=True)
 
-    start_listener = platform.system() != "Windows"
-    log_queue, log_listener = _normalize_log_setup(start_listener)
+    # start_listener = platform.system() != "Windows"
+    # log_queue, log_listener = _normalize_log_setup(start_listener)
+    log_queue = mp.Queue(-1)
 
     controller = Controller(
         root=tk_root,
@@ -161,34 +162,43 @@ def controller(tk_root):
         pass
 
     # Detach QueueHandlers first so no more puts go to log_queue
-    _remove_queue_handlers(log_queue)
+    # _remove_queue_handlers(log_queue)
 
-    # Stop the queue listener (only if started)
-    try:
-        if start_listener and log_listener:
-            try:
-                log_listener.enqueue_sentinel()
-            except Exception:
-                pass
+    # # Stop the queue listener (only if started)
+    # try:
+    #     if start_listener and log_listener:
+    #         try:
+    #             log_listener.enqueue_sentinel()
+    #         except Exception:
+    #             pass
 
-            try:
-                log_listener.stop()
-            except Exception:
-                pass
-    except Exception:
-        pass
+    #         try:
+    #             log_listener.stop()
+    #         except Exception:
+    #             pass
+    # except Exception:
+    #     pass
 
-    # Close the logging queue and skip join on Windows
-    if platform.system() == "Windows":
+    # # Close the logging queue and skip join on Windows
+    # if platform.system() == "Windows":
 
+    #     try:
+    #         log_queue.close()
+    #     except Exception:
+    #         pass
+    #     try:
+    #         log_queue.cancel_join_thread()
+    #     except Exception:
+    #         pass
+
+    log_queue.close()
+    
+    while not log_queue.empty():
         try:
-            log_queue.close()
+            log_queue.get_nowait()
         except Exception:
-            pass
-        try:
-            log_queue.cancel_join_thread()
-        except Exception:
-            pass
+            break
+    log_queue.join_thread()
 
     logging.shutdown()
 

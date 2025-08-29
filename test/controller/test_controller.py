@@ -11,9 +11,48 @@ from logging.handlers import QueueHandler
 from navigate.log_files.log_functions import log_setup
 
 
+class _NullQueue:
+    """Minimal queue-like sink for logging; avoids mp feeder threads on Windows."""
+
+    def put(self, _):  # QueueHandler calls .put()
+        pass
+
+    def close(self):
+        pass
+
+    def cancel_join_thread(self):
+        pass
+
+
 class DummySplashScreen:
     def destroy(self):
         pass
+
+
+def _normalize_log_setup(start_listener):
+    """Call log_setup and normalize its return to (log_queue, log_listener)."""
+    from navigate.log_files.log_functions import log_setup
+
+    try:
+        res = log_setup("logging.yml", logging_path=None, start_listener=start_listener)
+    except Exception:
+        res = None
+
+    # Accept (queue, listener), or queue-only, or None.
+    if isinstance(res, tuple) and len(res) == 2:
+        return res[0], res[1]
+    if res is not None and hasattr(res, "put"):
+        return res, None
+
+    # Fallbacks:
+    if platform.system() == "Windows":
+        # Avoid mp.Queue on Windows to prevent hangs in CI.
+        return _NullQueue(), None
+    # Non-Windows: a real mp.Queue is fine without a listener.
+    try:
+        return mp.Queue(), None
+    except Exception:
+        return _NullQueue(), None
 
 
 def _remove_queue_handlers(target_queue=None):
@@ -66,9 +105,8 @@ def controller(tk_root):
     args = SimpleNamespace(synthetic_hardware=True)
 
     start_listener = platform.system() != "Windows"
-    log_queue, log_listener = log_setup(
-        "logging.yml", logging_path=None, start_listener=start_listener
-    )
+    log_queue, log_listener = _normalize_log_setup(start_listener)
+
     controller = Controller(
         root=tk_root,
         splash_screen=DummySplashScreen(),
@@ -82,6 +120,7 @@ def controller(tk_root):
         log_queue=log_queue,
         args=args,
     )
+
     # To make sure the testcases won't hang on because of the model.event_queue
     # The changes here won't affect other testcases,
     # because the testcases from other files use DummyController

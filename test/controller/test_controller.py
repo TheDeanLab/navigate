@@ -5,6 +5,7 @@ import pytest
 import numpy
 import multiprocessing as mp
 import logging
+import platform
 
 from navigate.log_files.log_functions import log_setup
 
@@ -38,8 +39,9 @@ def controller(tk_root):
     multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
     args = SimpleNamespace(synthetic_hardware=True)
 
+    start_listener = platform.system() != "Windows"
     log_queue, log_listener = log_setup(
-        "logging.yml", logging_path=None, start_listener=True
+        "logging.yml", logging_path=None, start_listener=start_listener
     )
     controller = Controller(
         tk_root,
@@ -68,6 +70,8 @@ def controller(tk_root):
         controller.execute("exit")
     except SystemExit:
         pass
+
+    # Tear down the controller properly
     q = getattr(controller, "event_queue", None)
     if q is not None:
         try:
@@ -75,7 +79,7 @@ def controller(tk_root):
         except Exception:
             pass
         try:
-            q.join_thread()
+            q.cancel_join_thread()
         except Exception:
             pass
 
@@ -90,14 +94,29 @@ def controller(tk_root):
         controller.manager.shutdown()
     except Exception:
         pass
+
     # stop the queue listener before closing the queue
     try:
-        log_listener.enqueue_sentinel()
-        log_listener.stop()
-    except Exception as e:
+        if start_listener and log_listener:
+            try:
+                log_listener.enqueue_sentinel()
+            except Exception:
+                pass
+
+            try:
+                log_listener.stop()
+            except Exception:
+                pass
+    except Exception:
         pass
+
+    # Close the logging queue and skip join on Windows
     try:
         log_queue.close()
+    except Exception:
+        pass
+    try:
+        log_queue.cancel_join_thread()
     except Exception:
         pass
 

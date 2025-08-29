@@ -29,17 +29,15 @@ jobs:
           pip install -e '.[dev]'
       - name: Test with pytest
         run: |
-          python3 -m pytest test/controller/test_controller.py
-
-#          python3 -m pytest
-#      - name: Codecov
-#        uses: codecov/codecov-action@v3.1.0
-#        with:
-#          token: ${{ secrets.CODECOV_TOKEN }}
-#          directory: ./coverage/reports/
-#          env_vars: OS,PYTHON
-#          fail_ci_if_error: false
-#          files: ./coverage.xml
-#          flags: unittests
-#          name: codecov-umbrella
-#          verbose: true
+          python3 -m pytest
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/reports/
+          env_vars: OS,PYTHON
+          fail_ci_if_error: false
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true

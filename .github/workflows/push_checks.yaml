@@ -29,8 +29,9 @@ jobs:
           pip install -e '.[dev]'
       - name: Test with pytest
         run: |
-#          python3 -m pytest
           python3 -m pytest test/controller/test_controller.py
+
+#          python3 -m pytest
 #      - name: Codecov
 #        uses: codecov/codecov-action@v3.1.0
 #        with:

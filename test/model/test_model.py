@@ -106,10 +106,10 @@ def model():
         model.__test_manager = manager
 
         yield model
-        # while not event_queue.empty():
-        #     event_queue.get()
-        # event_queue.close()
-        # event_queue.join_thread()
+        while not queue.empty():
+            queue.get()
+        queue.close()
+        queue.join_thread()
 
 
 def test_single_acquisition(model):

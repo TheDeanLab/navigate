@@ -1,6 +1,6 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
+import gc
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -41,6 +41,7 @@ from typing import Union, Dict, Any
 import nidaqmx
 import nidaqmx.constants
 import nidaqmx.task
+from nidaqmx.system import System
 import numpy as np
 
 # Local Imports
@@ -510,6 +511,7 @@ class NIDAQ(DAQBase):
 
         self.analog_output_tasks = {}
 
+
     def enable_microscope(self, microscope_name: str) -> None:
         """Enable microscope.
 
@@ -607,3 +609,26 @@ class NIDAQ(DAQBase):
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()
+
+    def reset(self, device_name: str = None) -> None:
+        """Reset the DAQ device.
+
+        Parameters
+        ----------
+        device_name : str
+            Name of the device to reset. If None, reset all devices.
+        """
+        for k in list(self.analog_output_tasks.keys()):
+            del self.analog_output_tasks[k]
+        del self.camera_trigger_task
+        del self.master_trigger_task
+        gc.collect()
+
+        system = System.local()
+        for device in system.devices:
+            if device_name is None or device.name == device_name:
+                try:
+                    device.reset_device()
+                    logger.info(f"Reset device: {device.name}")
+                except Exception:
+                    logger.debug(f"Could not reset device: {traceback.format_exc()}")

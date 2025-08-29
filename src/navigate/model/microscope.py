@@ -194,6 +194,8 @@ class Microscope:
         #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict["daq"].get(daq_type, None)
 
+        self.daq_waveform_write_count = 0
+
         # Load and start all devices
         for device_name in self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -797,6 +799,10 @@ class Microscope:
         # stop daq task first, give daq some rest time for new tasks
         if update_daq_task_flag:
             self.daq.stop_acquisition()
+            self.daq_waveform_write_count += 1
+            if self.daq_waveform_write_count >= 100:
+                self.daq.reset()
+                self.daq_waveform_write_count = 0
 
         # Filter Wheel Settings.
         for k in self.filter_wheel:

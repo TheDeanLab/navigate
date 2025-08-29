@@ -126,22 +126,22 @@ class Controller:
             Tk.tk GUI instance.
         splash_screen : Tk top-level widget.
             Tk.tk GUI instance.
-        configuration_path : string
+        configuration_path : Path
             Path to the configuration yaml file.
             Provides global microscope configuration parameters.
-        experiment_path : string
+        experiment_path : Path
             Path to the experiment yaml file.
             Provides experiment-specific microscope configuration.
-        waveform_constants_path : string
+        waveform_constants_path : Path
             Path to the waveform constants yaml file.
             Provides magnification and wavelength-specific parameters.
-        rest_api_path : string
+        rest_api_path : Path
             Path to the REST API yaml file.
             Provides REST API configuration parameters.
-        waveform_templates_path : string
+        waveform_templates_path : Path
             Path to the waveform templates yaml file.
             Provides waveform templates for each channel.
-        gui_configuration_path : string
+        gui_configuration_path : Path
             Path to the GUI configuration yaml file.
             Provides GUI configuration parameters.
         log_queue : Optional[mp.Queue]

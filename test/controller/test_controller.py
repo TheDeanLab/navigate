@@ -6,12 +6,38 @@ import numpy
 import multiprocessing as mp
 import logging
 import platform
+from logging.handlers import QueueHandler
 
 from navigate.log_files.log_functions import log_setup
 
 
 class DummySplashScreen:
     def destroy(self):
+        pass
+
+
+def _remove_queue_handlers(target_queue=None):
+    # Detach and close any QueueHandler that targets target_queue.
+    def strip_handlers(logger):
+        for h in list(getattr(logger, "handlers", [])):
+            if isinstance(h, QueueHandler) and (
+                target_queue is None or getattr(h, "queue", None) is target_queue
+            ):
+                try:
+                    logger.removeHandler(h)
+                except Exception:
+                    pass
+                try:
+                    h.close()
+                except Exception:
+                    pass
+
+    try:
+        strip_handlers(logging.getLogger())
+        for name, obj in logging.root.manager.loggerDict.items():
+            if isinstance(obj, logging.Logger):
+                strip_handlers(logging.getLogger(name))
+    except Exception:
         pass
 
 
@@ -44,17 +70,17 @@ def controller(tk_root):
         "logging.yml", logging_path=None, start_listener=start_listener
     )
     controller = Controller(
-        tk_root,
-        DummySplashScreen(),
-        configuration_path,
-        experiment_path,
-        waveform_constants_path,
-        rest_api_path,
-        waveform_templates_path,
-        gui_configuration_path,
-        multi_positions_path,
-        log_queue,
-        args,
+        root=tk_root,
+        splash_screen=DummySplashScreen(),
+        configuration_path=configuration_path,
+        experiment_path=experiment_path,
+        waveform_constants_path=waveform_constants_path,
+        rest_api_path=rest_api_path,
+        waveform_templates_path=waveform_templates_path,
+        gui_configuration_path=gui_configuration_path,
+        multi_positions_path=multi_positions_path,
+        log_queue=log_queue,
+        args=args,
     )
     # To make sure the testcases won't hang on because of the model.event_queue
     # The changes here won't affect other testcases,
@@ -95,7 +121,10 @@ def controller(tk_root):
     except Exception:
         pass
 
-    # stop the queue listener before closing the queue
+    # Detach QueueHandlers first so no more puts go to log_queue
+    _remove_queue_handlers(log_queue)
+
+    # Stop the queue listener (only if started)
     try:
         if start_listener and log_listener:
             try:
@@ -111,16 +140,35 @@ def controller(tk_root):
         pass
 
     # Close the logging queue and skip join on Windows
-    try:
-        log_queue.close()
-    except Exception:
-        pass
-    try:
-        log_queue.cancel_join_thread()
-    except Exception:
-        pass
+    if platform.system() == "Windows":
+
+        try:
+            log_queue.close()
+        except Exception:
+            pass
+        try:
+            log_queue.cancel_join_thread()
+        except Exception:
+            pass
 
     logging.shutdown()
+
+    # As a last resort on Windows, hard-terminate any alive mp children
+    if platform.system() == "Windows":
+        try:
+            children = list(mp.active_children())
+            for p in children:
+                try:
+                    p.terminate()
+                except Exception:
+                    pass
+            for p in children:
+                try:
+                    p.join(timeout=5)
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
 
 def test_update_buffer(controller):

@@ -44,7 +44,7 @@ import multiprocessing
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="module")
 def model():
     from types import SimpleNamespace
     from pathlib import Path
@@ -106,7 +106,6 @@ def model():
         model.__test_manager = manager
 
         yield model
-        
         while not queue.empty():
             queue.get()
         queue.close()

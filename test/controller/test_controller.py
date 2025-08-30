@@ -80,7 +80,7 @@ def _remove_queue_handlers(target_queue=None):
         pass
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="module")
 def controller(tk_root):
     from navigate.controller.controller import Controller
 

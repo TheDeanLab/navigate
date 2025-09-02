@@ -1736,6 +1736,7 @@ class ASIModel(Model):
     def prepare_acquisition(self, turn_off_flags = True):
         result = super().prepare_acquisition(turn_off_flags)
         self.active_microscope.daq.zstack = self.imaging_mode == "z-stack"
+        self.active_microscope.daq.single = self.imaging_mode == "single"
         return result
 
     def run_live_acquisition(self) -> None:

@@ -101,6 +101,9 @@ class ASIDaq(DAQBase, SerialDevice):
         #: bool: Flag for z-stack acquisition.
         self.zstack = False
 
+        #: bool: Flag for single acquisition.
+        self.single = False
+
         # retrieves galvo ListProxy/DictProxy from config file
         galvos_raw = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -230,6 +233,10 @@ class ASIDaq(DAQBase, SerialDevice):
             # sets up control loop with all parameters (all times in ms)
             self.daq.setup_control_loop(
                 delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs, num_steps
+            )
+        elif self.single:
+            self.daq.setup_control_loop(
+                delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs, 1
             )
         else:
             self.daq.setup_control_loop(

@@ -37,6 +37,7 @@ import time
 import os
 from typing import Tuple, Any, Dict, List, Optional, Union
 import argparse
+import json
 
 # Third Party Imports
 import numpy as np
@@ -94,6 +95,7 @@ class Model:
         args: argparse.Namespace,
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
+        log_queue: Optional[multiprocessing.Queue] = None,
     ) -> None:
         """Initialize the Model.
 
@@ -105,9 +107,11 @@ class Model:
             Configuration dictionary. Defaults to None.
         event_queue : multiprocessing.Queue
             Event queue. Receives events from the controller.
+        log_queue : Optional[multiprocessing.Queue]
+            Log queue. Receives log messages from the controller.
         """
         # Set up logging
-        log_setup("model_logging.yml")
+        log_setup("logging.yml", queue=log_queue)
 
         #: object: Logger object.
         self.logger = logging.getLogger(p)
@@ -913,7 +917,7 @@ class Model:
     def update_stage_limits(self, microscope_name: str) -> None:
         """Update stage limits
 
-        PaParameters
+        Parameters
         ----------
         microscope_name : str
             Microscope name
@@ -994,8 +998,8 @@ class Model:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
+            start_time = time.perf_counter_ns()
             frame_ids = self.active_microscope.camera.get_new_frame()
-            self.logger.info(f"Running data process, getting frames {frame_ids}")
             # if there is at least one frame available
             if not frame_ids:
                 self.logger.debug(
@@ -1015,6 +1019,16 @@ class Model:
                     break
                 continue
 
+            self.logger.performance(
+                json.dumps(
+                    {
+                        "kind": "Acquire Image",
+                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "timestamp": time.time(),
+                    }
+                )
+            )
+
             acquired_frame_num += len(frame_ids)
 
             wait_num = self.camera_wait_iterations
@@ -1032,7 +1046,7 @@ class Model:
                 self.data_container.run(frame_ids)
 
             # show image
-            self.logger.info(f"Image delivered to controller: {frame_ids[0]}")
+            self.logger.info(f"Sending image to the controller: {frame_ids[-1]}")
             self.show_img_pipe.send(frame_ids[-1])
 
             if count_frame and acquired_frame_num >= num_of_frames:
@@ -1200,14 +1214,25 @@ class Model:
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
+        start_time = time.perf_counter_ns()
         stage_pos = self.get_stage_position()
         self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
         self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
         self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
         self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
         self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
+        self.logger.performance(
+            json.dumps(
+                {
+                    "kind": "Stage Position",
+                    "duration_ns": time.perf_counter_ns() - start_time,
+                    "timestamp": time.time(),
+                }
+            )
+        )
 
         # Run the acquisition
+        start_time = time.perf_counter_ns()
         try:
             self.active_microscope.turn_on_laser()
             self.active_microscope.daq.run_acquisition(
@@ -1236,6 +1261,16 @@ class Model:
             # Ensure the laser is turned off
             self.active_microscope.turn_off_lasers()
 
+        self.logger.performance(
+            json.dumps(
+                {
+                    "kind": "DAQ Triggers",
+                    "duration_ns": time.perf_counter_ns() - start_time,
+                    "timestamp": time.time(),
+                }
+            )
+        )
+
         self.available_image_count += 1
 
         if hasattr(self, "signal_container"):
@@ -1245,7 +1280,7 @@ class Model:
 
     def grab_image(self, data_func: Optional[callable] = None) -> None:
         """Grab one image from the camera.
-        
+
         Parameters
         ----------
         data_func : Optional[callable]

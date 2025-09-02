@@ -37,11 +37,11 @@ import logging
 from typing import Any, Dict
 
 # Third Party Imports
-from navigate.tools.decorators import log_initialization
 
 # Local Imports
 from navigate.model.devices.remote_focus.ni import NIRemoteFocus
-from navigate.model.devices.device_types import NIDevice, SerialDevice
+from navigate.model.devices.device_types import SerialDevice
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]

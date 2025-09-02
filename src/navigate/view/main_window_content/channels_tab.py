@@ -328,7 +328,12 @@ class ChannelCreator(ttk.Labelframe):
             self.defocus_variables.append(tk.DoubleVar())
             self.defocus_spins.append(
                 ValidatedSpinbox(
-                    self, textvariable=self.defocus_variables[num], width=4
+                    self,
+                    textvariable=self.defocus_variables[num],
+                    width=4,
+                    from_=-100,
+                    to=100,
+                    increment=0.1,
                 )
             )
             self.defocus_spins[num].grid(

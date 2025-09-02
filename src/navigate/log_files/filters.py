@@ -59,14 +59,9 @@ class PerformanceFilter(logging.Filter):
         bool
             True if the record should be logged, False otherwise
         """
-        # Checking if log message should be sent to performance.log
-        # based on if it starts with Performance or Spec
-        if record.getMessage().startswith("Performance"):
-            return True
-        if record.getMessage().startswith("Spec"):
-            return True
-
-        return False
+        return record.levelname == "PERFORMANCE" or record.getMessage().startswith(
+            "Performance "
+        )
 
 
 class NonPerfFilter(logging.Filter):

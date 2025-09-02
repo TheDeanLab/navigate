@@ -158,13 +158,14 @@ def evaluate_parser_input_arguments(args):
     )
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     """Add Parser Input Arguments to ArgumentParser Object.
 
     Returns
     -------
-    parser : object
-        ArgumentParserObject with Added Input Arguments"""
+    parser : argparse.ArgumentParser
+        ArgumentParserObject with Added Input Arguments
+    """
 
     parser = argparse.ArgumentParser(description="navigate Command Line Arguments")
 

@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -37,14 +36,13 @@ from functools import reduce
 from threading import Lock
 import logging
 from multiprocessing.managers import ListProxy
+import json
 
 # Third party imports
 
 # Local application imports
 from .image_writer import ImageWriter
 from navigate.tools.common_functions import VariableWithLock
-
-
 from navigate.model.waveforms import remote_focus_ramp
 
 # Logger Setup
@@ -175,9 +173,12 @@ class WaitForExternalTrigger:
 
         return result
 
+
 class ProjectionMode:
 
-    def __init__(self, model, axis='z', galvo_num=0, enable=True, z_range=None, shear_amp=None):
+    def __init__(
+        self, model, axis="z", galvo_num=0, enable=True, z_range=None, shear_amp=None
+    ):
 
         self.model = model
 
@@ -200,19 +201,18 @@ class ProjectionMode:
 
         self.current_channel_in_list = 0
 
-        self.config_table = {
-            "signal": {"main": self.toggle_projection_mode}
-        }
+        self.config_table = {"signal": {"main": self.toggle_projection_mode}}
 
     def toggle_projection_mode(self):
 
-        self.microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+        self.microscope_state = self.model.configuration["experiment"][
+            "MicroscopeState"
+        ]
         self.waveform_constants = self.model.configuration["waveform_constants"]
 
-        (
-            self.exposure_times,
-            self.sweep_times
-        ) = self.model.active_microscope.get_exposure_sweep_times()
+        (self.exposure_times, self.sweep_times) = (
+            self.model.active_microscope.get_exposure_sweep_times()
+        )
 
         if self.enable:
             self.setup_projection()
@@ -227,53 +227,60 @@ class ProjectionMode:
 
         self.channels = self.microscope_state["selected_channels"]
 
-        remote_focus_delay = float(self.waveform_constants["other_constants"][
-            "remote_focus_delay"
-            ]) / 1000
-        remote_focus_ramp_falling = float(self.waveform_constants["other_constants"][
-            "remote_focus_ramp_falling"
-            ]) / 1000
-        
-        z_range = self.microscope_state["scanrange"] if self.z_range is None else self.z_range        
-        shear_amp = self.microscope_state["shear_amp"] if self.shear_amp is None else self.shear_amp
+        remote_focus_delay = (
+            float(self.waveform_constants["other_constants"]["remote_focus_delay"])
+            / 1000
+        )
+        remote_focus_ramp_falling = (
+            float(
+                self.waveform_constants["other_constants"]["remote_focus_ramp_falling"]
+            )
+            / 1000
+        )
+
+        z_range = (
+            self.microscope_state["scanrange"] if self.z_range is None else self.z_range
+        )
+        shear_amp = (
+            self.microscope_state["shear_amp"]
+            if self.shear_amp is None
+            else self.shear_amp
+        )
 
         waveform_dict = {}
         for channel_key in self.microscope_state["channels"].keys():
-            
+
             channel = self.microscope_state["channels"][channel_key]
 
             if channel["is_selected"]:
 
                 waveform_dict[channel_key] = remote_focus_ramp(
-                    sample_rate = self.galvo_stage.sample_rate,
-                    exposure_time = self.exposure_times[channel_key],
-                    sweep_time = self.sweep_times[channel_key],
-                    remote_focus_delay = remote_focus_delay,
-                    fall = remote_focus_ramp_falling,
-                    camera_delay = self.galvo_stage.camera_delay,
-                    amplitude = eval(self.galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)})
+                    sample_rate=self.galvo_stage.sample_rate,
+                    exposure_time=self.exposure_times[channel_key],
+                    sweep_time=self.sweep_times[channel_key],
+                    remote_focus_delay=remote_focus_delay,
+                    fall=remote_focus_ramp_falling,
+                    camera_delay=self.galvo_stage.camera_delay,
+                    amplitude=eval(
+                        self.galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)}
+                    ),
                 )
-        
+
         self.galvo_stage.update_waveform(waveform_dict)
 
         self.set_shear_amplitude(shear_amp)
 
     def set_shear_amplitude(self, amp):
-            
-        self.waveform_constants["galvo_constants"][f"Galvo {self.galvo_num}"][
-        self.microscope_state["microscope_name"]
-        ][
-            self.microscope_state["zoom"]
-        ]["amplitude"] = amp
 
-        self.shear_galvo.adjust(
-            self.exposure_times,
-            self.sweep_times
-        )
+        self.waveform_constants["galvo_constants"][f"Galvo {self.galvo_num}"][
+            self.microscope_state["microscope_name"]
+        ][self.microscope_state["zoom"]]["amplitude"] = amp
+
+        self.shear_galvo.adjust(self.exposure_times, self.sweep_times)
 
     def disable_projection(self):
 
-        self.microscope_state["waveform_template"] = "Default"        
+        self.microscope_state["waveform_template"] = "Default"
 
         self.galvo_stage.waveform_dict = {}
 
@@ -285,7 +292,8 @@ class ProjectionMode:
             "normal",
             # exposure_times = self.exposure_times,
             # sweep_times = self.sweep_times
-            )
+        )
+
 
 class WaitToContinue:
     """WaitToContinue class for synchronizing signal and data acquisition.
@@ -1187,13 +1195,14 @@ class ZStackAcquisition:
         # primary z and f axes, secondary stack settings
         self.primary_z_axis = microscope_state.get("primary_z_axis", "z")
         self.primary_f_axis = microscope_state.get("primary_f_axis", "f")
-        self.secondary_stack_settings = microscope_state.get("secondary_stack_settings", {})
-        self.tiling_axes = list(
-            set(self.stage_axes) - 
-            set([self.primary_z_axis, self.primary_f_axis]) - 
-            set(self.secondary_stack_settings.keys())
+        self.secondary_stack_settings = microscope_state.get(
+            "secondary_stack_settings", {}
         )
-        
+        self.tiling_axes = list(
+            set(self.stage_axes)
+            - set([self.primary_z_axis, self.primary_f_axis])
+            - set(self.secondary_stack_settings.keys())
+        )
 
         # get available channels
         self.channels = len(
@@ -1256,20 +1265,26 @@ class ZStackAcquisition:
             self.positions = self.model.configuration["multi_positions"][1:]
         else:
             self.position_headers = [axis.upper() for axis in self.stage_axes]
-            self.positions = [[float(pos_dict[f"{axis}_pos"]) for axis in self.stage_axes]]
+            self.positions = [
+                [float(pos_dict[f"{axis}_pos"]) for axis in self.stage_axes]
+            ]
 
             # get origin for primary z and f
             if not self.get_origin:
-                self.positions[0][self.stage_axes.index(self.primary_z_axis)] = microscope_state.get(
-                    "stack_z_origin",
-                    pos_dict[f"{self.primary_z_axis}_pos"]
+                self.positions[0][self.stage_axes.index(self.primary_z_axis)] = (
+                    microscope_state.get(
+                        "stack_z_origin", pos_dict[f"{self.primary_z_axis}_pos"]
+                    )
                 )
-                self.positions[0][self.stage_axes.index(self.primary_f_axis)] = microscope_state.get(
-                    "stack_focus_origin",
-                    pos_dict[f"{self.primary_f_axis}_pos"]
+                self.positions[0][self.stage_axes.index(self.primary_f_axis)] = (
+                    microscope_state.get(
+                        "stack_focus_origin", pos_dict[f"{self.primary_f_axis}_pos"]
+                    )
                 )
 
-        self.axes_index = [self.position_headers.index(axis.upper()) for axis in self.stage_axes]
+        self.axes_index = [
+            self.position_headers.index(axis.upper()) for axis in self.stage_axes
+        ]
 
         # Set up the next channel down here to ensure defocus isn't merged into
         # restore f_pos, positions
@@ -1324,13 +1339,20 @@ class ZStackAcquisition:
             self.current_position = dict(
                 zip(
                     self.stage_axes,
-                    [self.positions[self.current_position_idx][i] for i in self.axes_index],
+                    [
+                        self.positions[self.current_position_idx][i]
+                        for i in self.axes_index
+                    ],
                 )
             )
 
             # calculate first z, f position
-            self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
-            self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
+            self.current_z_position = (
+                self.start_z_position + self.current_position[self.primary_z_axis]
+            )
+            self.current_focus_position = (
+                self.start_focus + self.current_position[self.primary_f_axis]
+            )
             if self.defocus is not None:
                 self.current_focus_position += self.defocus[
                     self.current_channel_in_list
@@ -1347,7 +1369,11 @@ class ZStackAcquisition:
             )
 
             if self.current_position_idx > 0:
-                delta_distances = [self.current_position[axis] - self.pre_position[axis] for axis in self.tiling_axes if axis != "theta"]
+                delta_distances = [
+                    self.current_position[axis] - self.pre_position[axis]
+                    for axis in self.tiling_axes
+                    if axis != "theta"
+                ]
                 delta_distances.append(
                     self.current_position[self.primary_z_axis]
                     - self.pre_position[self.primary_z_axis]
@@ -1359,7 +1385,11 @@ class ZStackAcquisition:
                     + self.f_stack_distance
                 )
             else:
-                axes_num = len(self.tiling_axes) + 2 - (1 if "theta" in self.tiling_axes else 0)
+                axes_num = (
+                    len(self.tiling_axes)
+                    + 2
+                    - (1 if "theta" in self.tiling_axes else 0)
+                )
                 delta_distances = [0] * axes_num
 
             # displacement = [delta_z, delta_f, delta_x, delta_y]
@@ -1369,8 +1399,7 @@ class ZStackAcquisition:
             # to the next position.
 
             self.should_pause_data_thread = any(
-                distance > self.stage_distance_threshold
-                for distance in delta_distances
+                distance > self.stage_distance_threshold for distance in delta_distances
             )
             if self.should_pause_data_thread:
                 self.model.pause_data_thread()
@@ -1386,13 +1415,24 @@ class ZStackAcquisition:
 
             stack_pos = [
                 (f"{self.primary_z_axis}_abs", self.current_z_position),
-                (f"{self.primary_f_axis}_abs", self.current_focus_position)
+                (f"{self.primary_f_axis}_abs", self.current_focus_position),
             ]
             for axis, offset in self.secondary_stack_settings.items():
                 stack_pos.append((f"{axis}_abs", self.current_z_position + offset))
+
+            start_time = time.perf_counter_ns()
             self.model.move_stage(
                 dict(stack_pos),
                 wait_until_done=True,
+            )
+            logger.performance(
+                json.dumps(
+                    {
+                        "kind": "Z/F Move",
+                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "timestamp": time.time(),
+                    }
+                )
             )
 
         if self.should_pause_data_thread:
@@ -1442,8 +1482,12 @@ class ZStackAcquisition:
         if self.z_position_moved_time >= self.number_z_steps:
             self.z_position_moved_time = 0
             # calculate first z, f position
-            self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
-            self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
+            self.current_z_position = (
+                self.start_z_position + self.current_position[self.primary_z_axis]
+            )
+            self.current_focus_position = (
+                self.start_focus + self.current_position[self.primary_f_axis]
+            )
             if (
                 self.z_stack_distance > self.stage_distance_threshold
                 or self.f_stack_distance > self.stage_distance_threshold
@@ -1468,7 +1512,7 @@ class ZStackAcquisition:
             # restore z, f, and secondary z if any
             stack_pos = [
                 (f"{self.primary_z_axis}_abs", self.restore_z),
-                (f"{self.primary_f_axis}_abs", self.restore_f)
+                (f"{self.primary_f_axis}_abs", self.restore_f),
             ]
             for axis, offset in self.secondary_stack_settings.items():
                 stack_pos.append((f"{axis}_abs", self.restore_z + offset))

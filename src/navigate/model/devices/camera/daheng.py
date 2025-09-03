@@ -29,9 +29,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# NOTE: This module depends on Daheng's proprietary 'gxipy' SDK.
-# To use this camera class, 'gxipy' must be installed manually.
-# See the ImportError message below for installation instructions.
+# ################################################################################
+# WARNING:
+#    This camera class has not been internally tested by our team. 
+#    Users are advised to exercise caution when using it.
+# NOTE:
+#    This module depends on Daheng's proprietary 'gxipy' SDK.
+#    To use this camera class, 'gxipy' must be installed manually.
+#    See the ImportError message below for installation instructions.
+# ################################################################################
 
 # Standard Library Imports
 import logging 
@@ -39,7 +45,7 @@ from typing import Union, Any, List
 
 # Third Party Imports
 try:
-    from gxipy import DeviceManager, Device
+    import gxipy as gx
 except ImportError:
     raise ImportError(
         "Missing required module 'gxipy'.\n"
@@ -56,15 +62,16 @@ import numpy as np
 # Local Imports
 from navigate.model.utils.exceptions import UserVisibleException 
 from navigate.model.devices.camera.base import CameraBase
-from navigate.model.devices.device_types import SequenceDevice
 from navigate.tools.decorators import log_initialization
 
 
-logger = logging.getLogger(__name__)
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 @log_initialization
-class DahengCamera(SequenceDevice):
+class DahengCamera(CameraBase):
     """
     Daheng camera implementation for the MER2-1220-32U3C model.
 
@@ -86,6 +93,8 @@ class DahengCamera(SequenceDevice):
         configuration : dict
             Device configuration settings (e.g. resolution, exposure).
         """
+        super().__init__(microscope_name, device_connection, configuration)
+        
         self.microscope_name = microscope_name
         self.device_connection = device_connection  # Store raw connection for compatibility
         self.configuration = configuration
@@ -122,6 +131,8 @@ class DahengCamera(SequenceDevice):
         # Finish hardware setup (initialize feature_control etc.)
         self.initialize_sdk_state()
 
+        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
+
     def __str__(self) -> str:
         """
         Return a human-readable string representation of the camera status.
@@ -157,10 +168,10 @@ class DahengCamera(SequenceDevice):
         list
             An empty list since no parameters are required for Daheng connection.
         """
-        return []
+        return ["serial_number"]
         
     @classmethod
-    def connect(cls, serial_number: str = None) -> Device:
+    def connect(cls, serial_number: str = None) -> gx.Device:
         """
         Connect to a Daheng camera using the gxipy SDK.
 
@@ -181,7 +192,7 @@ class DahengCamera(SequenceDevice):
             If no camera is found, or if the specified serial number does not match any camera.
         """
         # Discover and list available devices using the Daheng SDK
-        device_manager = DeviceManager()
+        device_manager = gx.DeviceManager()
         device_manager.update_device_list()
         dev_info_list = device_manager.get_device_list()
 
@@ -228,8 +239,14 @@ class DahengCamera(SequenceDevice):
             self.device_serial_number = self.feature_control.get_string_feature("DeviceSerialNumber").get()
             self.payload_size = self.feature_control.get_int_feature("PayloadSize").get()
 
-            # Set default acquisition mode
-            self.feature_control.get_enum_feature("AcquisitionMode").set("Continuous")
+            # Set trigger source (GPIO line 2) for external triggering
+            self.device.TriggerSource.set(gx.GxTriggerSourceEntry.LINE2)
+            # Set trigger active
+            self.device.TriggerActivation.set(gx.GxTriggerActivationEntry.RISINGEDGE)
+            # Set trigger mode to on
+            self.device.TriggerMode.set(gx.GxSwitchEntry.ON)
+            # Set acquisition mode to single frame
+            self.device.AcquisitionMode.set(gx.GxAcquisitionModeEntry.SINGLEFRAME)
 
             # Get current image dimensions from hardware
             width = self.feature_control.get_int_feature("Width").get()
@@ -290,6 +307,7 @@ class DahengCamera(SequenceDevice):
 
         try:
             # Retrieve current settings from camera hardware
+            sensor_mode = self.device.SensorShutterMode.get()
             sensor_width = self.feature_control.get_int_feature("Width").get()
             sensor_height = self.feature_control.get_int_feature("Height").get()
             bin_x = self.feature_control.get_int_feature("BinningHorizontal").get()
@@ -300,7 +318,7 @@ class DahengCamera(SequenceDevice):
 
             # Log all settings
             logger.info("Camera Settings:")
-            logger.info("  sensor_mode: N/A (fixed to Continuous)")
+            logger.info(f"  sensor_mode: {sensor_mode} (0: Normal, 1: Light-Sheet)")
             logger.info(f"  binning: {bin_x}x{bin_y}")
             logger.info("  readout_speed: N/A")
             logger.info("  trigger_active: N/A")
@@ -322,6 +340,13 @@ class DahengCamera(SequenceDevice):
         This method safely closes the device connection and clears
         all associated resources, even if errors occur during shutdown.
         """
+        # Reset associated handles and status flags
+        self.feature_control = None # release device handler
+        self.data_stream = None
+        self.device_serial_number = None
+        self.payload_size = None
+        self.is_connected = False
+
         if self.device is not None:
             try:
                 # Attempt to close the hardware connection
@@ -330,13 +355,6 @@ class DahengCamera(SequenceDevice):
                 logger.warning(f"Error while closing Daheng device: {e}")
             finally:
                 self.device = None
-
-        # Reset associated handles and status flags
-        self.feature_control = None
-        self.data_stream = None
-        self.device_serial_number = None
-        self.payload_size = None
-        self.is_connected = False
 
         logger.info("Daheng camera disconnected and internal state cleared.")
 
@@ -350,8 +368,9 @@ class DahengCamera(SequenceDevice):
             Requested sensor mode (e.g., 'Normal', 'Light-Sheet').
             This value is ignored as Daheng does not support sensor mode switching.
         """
-        logger.warning(f"Sensor mode '{mode}' is not supported on Daheng cameras.")
-
+        modes_dict = {"Normal": 0, "Light-Sheet": 1}
+        self.device.SensorShutterMode.set(modes_dict.get(mode, 0))
+        
         # Default to scan mode 0 for compatibility
         self._scan_mode = 0
 

@@ -280,6 +280,7 @@ class ASIDaq(DAQBase, SerialDevice):
         # reset PLC cell 1 (Master Trigger)
         try:
             self.daq.logic_cell_on("8")
+            self.daq.logic_cell_off("4")
             self.daq.logic_cell_off("1")
         except Exception:
             logger.debug("DAQ cannot turn off")

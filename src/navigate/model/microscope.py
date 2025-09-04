@@ -801,7 +801,7 @@ class Microscope:
             self.daq.stop_acquisition()
             self.daq_waveform_write_count += 1
             if self.daq_waveform_write_count >= 100:
-                self.daq.reset()
+                # self.daq.reset()
                 self.daq_waveform_write_count = 0
 
         # Filter Wheel Settings.

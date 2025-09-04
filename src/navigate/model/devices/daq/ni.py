@@ -105,6 +105,13 @@ class NIDAQ(DAQBase):
         #: bool: Flag for waiting to run.
         self.wait_to_run_lock = Lock()
 
+        #: int: trigger count
+        self.trigger_count = 0
+
+        #: int: trigger reset count
+        self.trigger_reset_count = None
+
+
     def __str__(self) -> str:
         """String representation of the class."""
         return "NIDAQ"
@@ -465,6 +472,8 @@ class NIDAQ(DAQBase):
         if wait_until_done:
             self.wait_acquisition_done()
 
+        self.trigger_count += 1
+
     def wait_acquisition_done(self) -> None:
         """Wait acquisition tasks done"""
 
@@ -485,6 +494,10 @@ class NIDAQ(DAQBase):
                 self.master_trigger_task.stop()
         except nidaqmx.DaqError:
             pass
+
+        if self.trigger_reset_count is not None and self.trigger_count >= self.trigger_reset_count:
+            self.stop_acquisition()
+            self.prepare_acquisition(self.current_channel_key)
 
     def stop_acquisition(self) -> None:
         """Stop Acquisition.
@@ -510,6 +523,9 @@ class NIDAQ(DAQBase):
             self.wait_to_run_lock.release()
 
         self.analog_output_tasks = {}
+        if self.trigger_reset_count is not None and self.trigger_count >= self.trigger_reset_count:
+            self.reset()
+            self.trigger_count = 0
 
 
     def enable_microscope(self, microscope_name: str) -> None:
@@ -524,6 +540,9 @@ class NIDAQ(DAQBase):
             self.microscope_name = microscope_name
             self.analog_outputs = {}
             self.analog_output_tasks = {}
+            self.trigger_reset_count = self.configuration["configuration"]["microscopes"][
+                microscope_name
+            ]["daq"].get("trigger_reset_count", None)
 
         self.camera_delay = (
             float(self.waveform_constants["other_constants"].get("camera_delay", 5))

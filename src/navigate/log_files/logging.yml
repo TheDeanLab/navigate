@@ -1,14 +1,20 @@
 %YAML 1.2
 ---
 version: 1
+disable_existing_loggers: False
+
 formatters:
   base:
     format: '%(asctime)s - %(name)s - %(levelname)s - %(module)s: %(message)s'
+  json:
+    format: '%(message)s'
+
 filters:
   performance_specs:
     (): ext://navigate.log_files.filters.PerformanceFilter
   not_performance:
     (): ext://navigate.log_files.filters.NonPerfFilter
+
 handlers:
   console:
     class: logging.StreamHandler
@@ -16,33 +22,46 @@ handlers:
     formatter: base
     stream: ext://sys.stdout
     filters: [not_performance]
-  vc_info:
+  info:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: base
-    filename: view_controller_info.log
+    filename: info.log
     filters: [not_performance]
     mode: a
-  vc_debug:
+  debug:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: view_controller_debug.log
+    filename: debug.log
     filters: [not_performance]
     mode: a
+  performance:
+    class: logging.handlers.RotatingFileHandler
+    level: PERFORMANCE
+    formatter: json
+    filename: performance.log
+    filters: [ performance_specs ]
+    mode: a
+
 loggers:
   view:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug]
+    handlers: [console, info, debug, performance]
     propagate: no
   controller:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug]
+    handlers: [console, info, debug, performance]
     propagate: no
   config:
     level: DEBUG
-    handlers: [console, vc_info, vc_debug]
+    handlers: [console, info, debug, performance]
     propagate: no
-
-
-# https://docs.python.org/3/library/logging.html#logrecord-objects
+  model:
+    level: DEBUG
+    handlers: [console, info, debug, performance]
+    propagate: no
+  tools:
+    level: DEBUG
+    handlers: [console, info, debug, performance]
+    propagate: no

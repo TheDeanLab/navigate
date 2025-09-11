@@ -39,7 +39,9 @@ def dummy_microscope(dummy_model):
     from navigate.model.microscope import Microscope
     from navigate.model.device_startup_functions import load_devices
 
-    devices_dict = load_devices(dummy_model.active_microscope_name, dummy_model.configuration, is_synthetic=True)
+    devices_dict = load_devices(
+        dummy_model.active_microscope_name, dummy_model.configuration, is_synthetic=True
+    )
 
     return Microscope(
         dummy_model.active_microscope_name,
@@ -91,7 +93,7 @@ def test_get_stage_position(dummy_microscope):
     for axis in dummy_microscope.stages:
         pos_axis = axis + "_pos"
         temp_pos = dummy_microscope.stages[axis].report_position()
-        ret_pos_dict[pos_axis] = temp_pos[pos_axis]
+        ret_pos_dict[pos_axis] = round(temp_pos[pos_axis], 2)
 
     assert isinstance(stage_dict, dict)
     assert ret_pos_dict == stage_dict

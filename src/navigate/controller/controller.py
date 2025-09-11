@@ -115,6 +115,7 @@ class Controller:
         waveform_templates_path,
         gui_configuration_path,
         multi_positions_path,
+        log_queue,
         args,
     ):
         """Initialize the Navigate Controller.
@@ -125,24 +126,26 @@ class Controller:
             Tk.tk GUI instance.
         splash_screen : Tk top-level widget.
             Tk.tk GUI instance.
-        configuration_path : string
+        configuration_path : Path
             Path to the configuration yaml file.
             Provides global microscope configuration parameters.
-        experiment_path : string
+        experiment_path : Path
             Path to the experiment yaml file.
             Provides experiment-specific microscope configuration.
-        waveform_constants_path : string
+        waveform_constants_path : Path
             Path to the waveform constants yaml file.
             Provides magnification and wavelength-specific parameters.
-        rest_api_path : string
+        rest_api_path : Path
             Path to the REST API yaml file.
             Provides REST API configuration parameters.
-        waveform_templates_path : string
+        waveform_templates_path : Path
             Path to the waveform templates yaml file.
             Provides waveform templates for each channel.
-        gui_configuration_path : string
+        gui_configuration_path : Path
             Path to the GUI configuration yaml file.
             Provides GUI configuration parameters.
+        log_queue : Optional[mp.Queue]
+            The queue for logging events from multiple processes.
         *args :
             Command line input arguments for non-default
             file paths or using synthetic hardware modes.
@@ -152,6 +155,7 @@ class Controller:
 
         #: Tk top-level widget: Tk.tk GUI instance.
         self.root = root
+
         #: bool: Flag to indicate if the GUI is ready for resizing.
         self.resize_ready_flag = False
 
@@ -222,7 +226,11 @@ class Controller:
 
         #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
-            Model, args, self.configuration, event_queue=self.event_queue
+            Model,
+            args,
+            self.configuration,
+            event_queue=self.event_queue,
+            log_queue=log_queue,
         )
 
         #: mp.Pipe: Pipe for sending images from model to view.
@@ -278,8 +286,6 @@ class Controller:
         #: StageController: Stage Sub-Controller.
         self.stage_controller = StageController(
             self.view.settings.stage_control_tab,
-            self.view,
-            self.camera_view_controller.canvas,
             self,
         )
 
@@ -571,9 +577,7 @@ class Controller:
         return ""
 
     def enable_resize(self):
-        """Enable window resizing.
-        
-        """
+        """Enable window resizing."""
         self.resize_ready_flag = True
 
     def resize(self, event):
@@ -594,13 +598,12 @@ class Controller:
                 Width of the GUI.
             height : int
                 Height of the GUI.
-            """         
+            """
             self.view.scroll_frame.resize(width, height)
             self.view.right_frame.config(
-                width=width-self.view.left_frame.winfo_width()-3,
-                height=height-self.view.left_frame.winfo_height()
+                width=width - self.view.left_frame.winfo_width() - 3,
+                height=height - self.view.left_frame.winfo_height(),
             )
-            
 
         if not self.resize_ready_flag:
             return
@@ -692,24 +695,47 @@ class Controller:
             self.threads_pool.createThread(
                 resourceName="model",
                 target=self.move_stage,
-                args=({args[1] + "_abs": args[0]},)
+                args=({args[1] + "_abs": args[0]},),
             )
 
         elif command == "stop_stage":
             """Creates a thread and uses it to call the model to stop stage"""
             self.threads_pool.createThread(
-                resourceName="stop_stage",
-                target=self.stop_stage)
+                resourceName="stop_stage", target=self.stop_stage
+            )
 
         elif command == "query_stages":
-            """Query the stages for their current position in a thread-blocking format.
-            """
+            """Query the stages for the active microscope's current position in a
+            thread-blocking format."""
             query_thread = self.threads_pool.createThread(
-                resourceName="model",
-                target=self.stop_stage)
+                resourceName="model", target=self.stop_stage
+            )
 
             while query_thread.is_alive():
                 time.sleep(0.01)
+
+        elif command == "query_select_microscope":
+            """Query a specific microscope for its current positions in a
+            thread-blocking format."""
+            microscope_name = args[0]
+            query_thread = self.threads_pool.createThread(
+                resourceName="model",
+                target=self.query_select_microscope,
+                args=(microscope_name,),
+            )
+
+            while query_thread.is_alive():
+                time.sleep(0.01)
+
+        elif command == "update_stage_limits":
+            microscope_name = args[0]
+            if microscope_name == self.configuration_controller.microscope_name:
+                self.stage_controller.initialize()
+            self.threads_pool.createThread(
+                resourceName="model",
+                target=self.update_stage_limits,
+                args=(microscope_name,),
+            )
 
         elif command == "move_stage_and_update_info":
             """update stage view to show the position
@@ -736,9 +762,9 @@ class Controller:
             self.execute("acquire")
 
         elif command == "get_stage_position":
-            """Returns the current stage position from the widgets. 
-            
-            Does not communicate with the stages, but rather takes the last known 
+            """Returns the current stage position from the widgets.
+
+            Does not communicate with the stages, but rather takes the last known
             position.
 
             Returns
@@ -790,7 +816,8 @@ class Controller:
             self.change_microscope(temp[0], temp[1])
             work_thread = self.threads_pool.createThread(
                 resourceName="model",
-                target=lambda: self.model.run_command("update_setting", "resolution"))
+                target=lambda: self.model.run_command("update_setting", "resolution"),
+            )
             work_thread.join()
 
         elif command == "set_save":
@@ -821,14 +848,14 @@ class Controller:
             """
             self.threads_pool.createThread(
                 resourceName="model",
-                target=lambda: self.model.run_command("update_setting", *args)
+                target=lambda: self.model.run_command("update_setting", *args),
             )
 
         elif command == "stage_limits":
             self.stage_controller.stage_limits = args[0]
             self.threads_pool.createThread(
                 resourceName="model",
-                target=lambda: self.model.run_command("stage_limits", *args)
+                target=lambda: self.model.run_command("stage_limits", *args),
             )
 
         elif command == "autofocus":
@@ -842,7 +869,7 @@ class Controller:
             elif self.acquire_bar_controller.mode == "live":
                 self.threads_pool.createThread(
                     resourceName="model",
-                    target=lambda: self.model.run_command("autofocus", *args)
+                    target=lambda: self.model.run_command("autofocus", *args),
                 )
 
         elif command == "eliminate_tiles":
@@ -868,7 +895,7 @@ class Controller:
 
             work_thread = self.threads_pool.createThread(
                 resourceName="model",
-                target=lambda: self.model.run_command("load_feature", *args)
+                target=lambda: self.model.run_command("load_feature", *args),
             )
             work_thread.join()
 
@@ -1012,12 +1039,14 @@ class Controller:
             self.sloppy_stop()
             self.update_experiment_setting()
             file_directory = os.path.join(get_navigate_path(), "config")
-            for config_name, filename in [("experiment", "experiment.yml"),
-                                          ("multi_positions", "multi_positions.yml"),
-                                          ("gui", "gui_configuration.yml"),
-                                          ("waveform_constants", "waveform_constants.yml"),
-                                          ("rest_api_config", "rest_api_config.yml"),
-                                          ("waveform_templates", "waveform_templates.yml")]:
+            for config_name, filename in [
+                ("experiment", "experiment.yml"),
+                ("multi_positions", "multi_positions.yml"),
+                ("gui", "gui_configuration.yml"),
+                ("waveform_constants", "waveform_constants.yml"),
+                ("rest_api_config", "rest_api_config.yml"),
+                ("waveform_templates", "waveform_templates.yml"),
+            ]:
                 save_yaml_file(
                     file_directory=file_directory,
                     content_dict=self.configuration[config_name],
@@ -1145,7 +1174,7 @@ class Controller:
                 break
             # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
-            logger.info(f"Navigate Controller - Received Image: {image_id}")
+            logger.info(f"Received image from the controller: {image_id}")
 
             if image_id == "stop":
                 self.current_image_id = -1
@@ -1372,6 +1401,15 @@ class Controller:
         # Pass to model
         self.model.move_stage(pos_dict)
 
+    def query_select_microscope(self, *args):
+        """Query a specific microscope for its stage positions."""
+        microscope_name = args[0]
+        stage_positions = self.model.query_select_microscope(microscope_name)
+
+        # Inject updated positions back into the advanced stage parameters popup.
+        if hasattr(self, "stage_limits_popup_controller"):
+            self.stage_limits_popup_controller.positions = stage_positions
+
     def stop_stage(self):
         """Stop the stage.
 
@@ -1379,6 +1417,16 @@ class Controller:
         and update the GUI control values accordingly.
         """
         self.model.stop_stage()
+
+    def update_stage_limits(self, microscope_name: str) -> None:
+        """Update stage limits on the device side
+
+        Parameters
+        ----------
+        microscope_name : str
+            Microscope name.
+        """
+        self.model.update_stage_limits(microscope_name)
 
     def update_stage_controller_silent(self, ret_pos_dict):
         """Send updates to the stage GUI

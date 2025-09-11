@@ -43,6 +43,7 @@ from matplotlib.figure import Figure
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.common import CommonMethods, uniform_grid
 
 # Logger Setup
@@ -496,7 +497,7 @@ class MetricsFrame(ttk.Labelframe, CommonMethods):
                 self.inputs[self.names[i]] = LabelInput(
                     parent=self,
                     label=self.labels[i],
-                    input_class=ttk.Spinbox,
+                    input_class=ValidatedSpinbox,
                     input_var=tk.IntVar(),
                     input_args={"from_": 1, "to": 32, "increment": 1, "width": 5},
                     label_pos="top",

@@ -57,8 +57,9 @@ class StageControlNotebook(ttk.Notebook):
 
     def __init__(
         self,
-        frame: "navigate.view.main_window_content."
-        "settings_notebook.SettingsNotebook",
+        frame: (
+            "navigate.view.main_window_content." "settings_notebook.SettingsNotebook"
+        ),
         *args: Iterable,
         **kwargs: dict,
     ) -> None:
@@ -157,7 +158,9 @@ class StageControlTab(tk.Frame):
 
         #: PositionFrame: Position frame.
         self.position_frame = PositionFrame(self)
-        self.position_frame.grid(row=0, column=0, rowspan=1, sticky=tk.NSEW, padx=3, pady=3)
+        self.position_frame.grid(
+            row=0, column=0, rowspan=1, sticky=tk.NSEW, padx=3, pady=3
+        )
 
         #: StackShortcuts: Stack shortcuts.
         self.stack_shortcuts = StackShortcuts(self)
@@ -173,7 +176,9 @@ class StageControlTab(tk.Frame):
 
         #: OtherAxisFrame: Theta frame.
         self.theta_frame = OtherAxisFrame(stage_control_tab=self, name="Theta")
-        self.theta_frame.grid(row=2, column=2, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        self.theta_frame.grid(
+            row=2, column=2, rowspan=2, sticky=tk.NSEW, padx=3, pady=3
+        )
 
         # OtherAxisFrame: Focus frame.
         self.f_frame = OtherAxisFrame(stage_control_tab=self, name="Focus")
@@ -434,7 +439,6 @@ class OtherAxisFrame(ttk.Labelframe):
 
         uniform_grid(self)
 
-
     def get_widget(self) -> LabelInput:
         """Returns the frame widget
 
@@ -546,7 +550,7 @@ class PositionFrame(ttk.Labelframe):
         entry_names = ["x", "y", "z", "theta", "f"]
 
         #: list: List of labels for the position entries.
-        entry_labels = ["X", "Y", "Z", "\N{Greek Capital Theta Symbol}", "F"]
+        entry_labels = ["X", "Y", "Z", "\N{GREEK CAPITAL THETA SYMBOL}", "F"]
 
         #: ttk.Style: Style for the position entries.
         self.position_style = ttk.Style()
@@ -557,7 +561,6 @@ class PositionFrame(ttk.Labelframe):
             self.add_position_entry(entry_names[i], entry_labels[i])
 
         uniform_grid(self)
-
 
     def get_widgets(self) -> dict:
         """Get all widgets in the position frame
@@ -608,7 +611,9 @@ class PositionFrame(ttk.Labelframe):
         else:
             entry_state = "normal"
             frame_back_color = "#f0f0f0"
-        self.position_style.configure("Position.TEntry", fieldbackground=frame_back_color)
+        self.position_style.configure(
+            "Position.TEntry", fieldbackground=frame_back_color
+        )
 
         for variable in self.get_variables():
             if variable in joystick_axes:
@@ -648,7 +653,9 @@ class PositionFrame(ttk.Labelframe):
 
 
 class StackShortcuts(ttk.LabelFrame):
-    def __init__(self, position_frame: PositionFrame, *args: Iterable, **kwargs: dict) -> None:
+    def __init__(
+        self, position_frame: PositionFrame, *args: Iterable, **kwargs: dict
+    ) -> None:
         """Initialize the stack shortcuts frame.
 
         Parameters
@@ -944,11 +951,17 @@ class StopFrame(ttk.Labelframe):
 
         #: HoverTkButton: Joystick button.
         self.joystick_btn = HoverTkButton(
-            self, bg="white", fg="black", text="Enable Joystick", width=15, height=2
+            self, bg="white", fg="black", text="Enable Joystick", width=20, height=2
+        )
+
+        # Home button
+        self.home_btn = tk.Button(
+            self, bg="palegreen2", fg="black", text="Go Home", width=20, height=2
         )
 
         # Griding out buttons
         self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
+        self.home_btn.grid(row=1, column=0, rowspan=2, pady=2)
         self.joystick_btn.grid(row=2, column=0, rowspan=2, pady=2)
 
         uniform_grid(self)
@@ -961,7 +974,11 @@ class StopFrame(ttk.Labelframe):
         buttons: dict
             A dictionary of the buttons
         """
-        return {"stop": self.stop_btn, "joystick": self.joystick_btn}
+        return {
+            "stop": self.stop_btn,
+            "joystick": self.joystick_btn,
+            "home": self.home_btn,
+        }
 
     def toggle_button_states(
         self, joystick_is_on: bool = False, joystick_axes: Optional[list] = None

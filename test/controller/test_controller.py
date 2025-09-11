@@ -3,6 +3,25 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, ANY
 import pytest
 import numpy
+import multiprocessing as mp
+import logging
+import platform
+from logging.handlers import QueueHandler
+
+from navigate.log_files.log_functions import log_setup
+
+
+class _NullQueue:
+    """Minimal queue-like sink for logging; avoids mp feeder threads on Windows."""
+
+    def put(self, _):  # QueueHandler calls .put()
+        pass
+
+    def close(self):
+        pass
+
+    def cancel_join_thread(self):
+        pass
 
 
 class DummySplashScreen:
@@ -10,7 +29,58 @@ class DummySplashScreen:
         pass
 
 
-@pytest.fixture(scope="session")
+def _normalize_log_setup(start_listener):
+    """Call log_setup and normalize its return to (log_queue, log_listener)."""
+    from navigate.log_files.log_functions import log_setup
+
+    try:
+        res = log_setup("logging.yml", logging_path=None, start_listener=start_listener)
+    except Exception:
+        res = None
+
+    # Accept (queue, listener), or queue-only, or None.
+    if isinstance(res, tuple) and len(res) == 2:
+        return res[0], res[1]
+    if res is not None and hasattr(res, "put"):
+        return res, None
+
+    # Fallbacks:
+    if platform.system() == "Windows":
+        # Avoid mp.Queue on Windows to prevent hangs in CI.
+        return _NullQueue(), None
+    # Non-Windows: a real mp.Queue is fine without a listener.
+    try:
+        return mp.Queue(), None
+    except Exception:
+        return _NullQueue(), None
+
+
+def _remove_queue_handlers(target_queue=None):
+    # Detach and close any QueueHandler that targets target_queue.
+    def strip_handlers(logger):
+        for h in list(getattr(logger, "handlers", [])):
+            if isinstance(h, QueueHandler) and (
+                target_queue is None or getattr(h, "queue", None) is target_queue
+            ):
+                try:
+                    logger.removeHandler(h)
+                except Exception:
+                    pass
+                try:
+                    h.close()
+                except Exception:
+                    pass
+
+    try:
+        strip_handlers(logging.getLogger())
+        for name, obj in logging.root.manager.loggerDict.items():
+            if isinstance(obj, logging.Logger):
+                strip_handlers(logging.getLogger(name))
+    except Exception:
+        pass
+
+
+@pytest.fixture(scope="module")
 def controller(tk_root):
     from navigate.controller.controller import Controller
 
@@ -34,18 +104,23 @@ def controller(tk_root):
     multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
     args = SimpleNamespace(synthetic_hardware=True)
 
+    start_listener = platform.system() != "Windows"
+    log_queue, log_listener = _normalize_log_setup(start_listener)
+
     controller = Controller(
-        tk_root,
-        DummySplashScreen(),
-        configuration_path,
-        experiment_path,
-        waveform_constants_path,
-        rest_api_path,
-        waveform_templates_path,
-        gui_configuration_path,
-        multi_positions_path,
-        args,
+        root=tk_root,
+        splash_screen=DummySplashScreen(),
+        configuration_path=configuration_path,
+        experiment_path=experiment_path,
+        waveform_constants_path=waveform_constants_path,
+        rest_api_path=rest_api_path,
+        waveform_templates_path=waveform_templates_path,
+        gui_configuration_path=gui_configuration_path,
+        multi_positions_path=multi_positions_path,
+        log_queue=log_queue,
+        args=args,
     )
+
     # To make sure the testcases won't hang on because of the model.event_queue
     # The changes here won't affect other testcases,
     # because the testcases from other files use DummyController
@@ -60,6 +135,79 @@ def controller(tk_root):
         controller.execute("exit")
     except SystemExit:
         pass
+
+    # Tear down the controller properly
+    q = getattr(controller, "event_queue", None)
+    if q is not None:
+        try:
+            q.close()
+        except Exception:
+            pass
+        try:
+            q.cancel_join_thread()
+        except Exception:
+            pass
+
+    # Close any Pipes
+    if getattr(controller, "show_img_pipe", None):
+        try:
+            controller.show_img_pipe.close()
+        except Exception:
+            pass
+
+    try:
+        controller.manager.shutdown()
+    except Exception:
+        pass
+
+    # Detach QueueHandlers first so no more puts go to log_queue
+    _remove_queue_handlers(log_queue)
+
+    # Stop the queue listener (only if started)
+    try:
+        if start_listener and log_listener:
+            try:
+                log_listener.enqueue_sentinel()
+            except Exception:
+                pass
+
+            try:
+                log_listener.stop()
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    # Close the logging queue and skip join on Windows
+    if platform.system() == "Windows":
+
+        try:
+            log_queue.close()
+        except Exception:
+            pass
+        try:
+            log_queue.cancel_join_thread()
+        except Exception:
+            pass
+
+    logging.shutdown()
+
+    # As a last resort on Windows, hard-terminate any alive mp children
+    if platform.system() == "Windows":
+        try:
+            children = list(mp.active_children())
+            for p in children:
+                try:
+                    p.terminate()
+                except Exception:
+                    pass
+            for p in children:
+                try:
+                    p.join(timeout=5)
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
 
 def test_update_buffer(controller):
@@ -344,7 +492,9 @@ def test_execute_autofocus(controller):
     controller.acquire_bar_controller.is_acquiring = False
     controller.execute("autofocus")
     controller.threads_pool.createThread.assert_called_with(
-        resourceName="camera", target=controller.capture_image, args=("autofocus", "live")
+        resourceName="camera",
+        target=controller.capture_image,
+        args=("autofocus", "live"),
     )
 
     # Test the acquiring case
@@ -353,7 +503,9 @@ def test_execute_autofocus(controller):
     controller.threads_pool.createThread.reset_mock()
     controller.execute("autofocus")
     controller.threads_pool.createThread.assert_called_once()
-    controller.threads_pool.createThread.assert_any_call(resourceName="model", target=ANY)
+    controller.threads_pool.createThread.assert_any_call(
+        resourceName="model", target=ANY
+    )
     args, kwargs = controller.threads_pool.createThread.call_args
     assert kwargs["resourceName"] == "model"
 

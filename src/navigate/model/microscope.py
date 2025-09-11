@@ -567,7 +567,7 @@ class Microscope:
         for i, k in enumerate(self.galvo):
             galvo_type = self.configuration["configuration"]["microscopes"][
                 self.microscope_name
-            ]["galvo"][i]["hardware"]["type"]            
+            ]["galvo"][i]["hardware"]["type"]
             if galvo_type in ("asi.ASI", "ASI"):
                 self.galvo[k].turn_off()
 
@@ -794,6 +794,10 @@ class Microscope:
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
             channel_key
         ]
+        # stop daq task first, give daq some rest time for new tasks
+        if update_daq_task_flag:
+            self.daq.stop_acquisition()
+
         # Filter Wheel Settings.
         for k in self.filter_wheel:
             self.filter_wheel[k].set_filter(channel[k])
@@ -819,7 +823,6 @@ class Microscope:
         # choose to not update the waveform is very useful when running ZStack
         # if there is a NI Galvo stage in the system.
         if update_daq_task_flag:
-            self.daq.stop_acquisition()
             self.daq.prepare_acquisition(channel_key)
 
         # Add Defocus term
@@ -890,7 +893,6 @@ class Microscope:
             True if stage is successfully moved, False otherwise.
         """
         self.ask_stage_for_position = True
-
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
@@ -938,6 +940,13 @@ class Microscope:
                 temp_pos = stage.report_position()
                 self.ret_pos_dict.update(temp_pos)
             self.ask_stage_for_position = False
+
+        # Round to 2 decimal places for display purposes
+        for key, value in self.ret_pos_dict.items():
+            try:
+                self.ret_pos_dict[key] = round(value, 2)
+            except (TypeError, ValueError, OverflowError) as e:
+                logger.error(f"Error rounding {key} position value: {e}")
         return self.ret_pos_dict
 
     def move_remote_focus(self, offset: Optional[float] = None) -> None:
@@ -963,6 +972,7 @@ class Microscope:
         self.ask_stage_for_position = True
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
+            stage.update_limits()
 
     def assemble_device_config_lists(
         self, device_name: str, device_name_dict: dict

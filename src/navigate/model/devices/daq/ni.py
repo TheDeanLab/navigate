@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -36,11 +35,13 @@ from threading import Lock
 import traceback
 import time
 from typing import Union, Dict, Any
+import gc
 
 # Third Party Imports
 import nidaqmx
 import nidaqmx.constants
 import nidaqmx.task
+from nidaqmx.system import System
 import numpy as np
 
 # Local Imports
@@ -104,13 +105,23 @@ class NIDAQ(DAQBase):
         #: bool: Flag for waiting to run.
         self.wait_to_run_lock = Lock()
 
+        #: int: trigger count
+        self.trigger_count = 0
+
+        #: int: trigger reset count
+        self.trigger_reset_count = None
+
     def __str__(self) -> str:
         """String representation of the class."""
         return "NIDAQ"
 
     def __del__(self) -> None:
         """Destructor."""
-        for task in [self.camera_trigger_task, self.master_trigger_task, self.laser_switching_task]:
+        for task in [
+            self.camera_trigger_task,
+            self.master_trigger_task,
+            self.laser_switching_task,
+        ]:
             if task:
                 try:
                     task.stop()
@@ -125,8 +136,9 @@ class NIDAQ(DAQBase):
                         task.stop()
                         task.close()
                     except Exception:
-                        logger.exception(f"Error stopping task: {traceback.format_exc()}")
-
+                        logger.exception(
+                            f"Error stopping task: {traceback.format_exc()}"
+                        )
 
     def set_external_trigger(self, external_trigger=None) -> None:
         """Set trigger mode.
@@ -438,7 +450,7 @@ class NIDAQ(DAQBase):
         # Specify ports, timing, and triggering
         self.set_external_trigger(self.external_trigger)
 
-    def run_acquisition(self) -> None:
+    def run_acquisition(self, wait_until_done: bool = True) -> None:
         """Run DAQ Acquisition.
 
         Run the tasks for triggering, analog and counter outputs.
@@ -461,6 +473,14 @@ class NIDAQ(DAQBase):
                 [False, True, True, True, False], auto_start=True
             )
 
+        if wait_until_done:
+            self.wait_acquisition_done()
+
+        self.trigger_count += 1
+
+    def wait_acquisition_done(self) -> None:
+        """Wait acquisition tasks done"""
+
         try:
             self.camera_trigger_task.wait_until_done(timeout=10000)
             for task in self.analog_output_tasks.values():
@@ -478,6 +498,13 @@ class NIDAQ(DAQBase):
                 self.master_trigger_task.stop()
         except nidaqmx.DaqError:
             pass
+
+        if (
+            self.trigger_reset_count is not None
+            and self.trigger_count >= self.trigger_reset_count
+        ):
+            self.stop_acquisition()
+            self.prepare_acquisition(self.current_channel_key)
 
     def stop_acquisition(self) -> None:
         """Stop Acquisition.
@@ -503,6 +530,12 @@ class NIDAQ(DAQBase):
             self.wait_to_run_lock.release()
 
         self.analog_output_tasks = {}
+        if (
+            self.trigger_reset_count is not None
+            and self.trigger_count >= self.trigger_reset_count
+        ):
+            self.reset()
+            self.trigger_count = 0
 
     def enable_microscope(self, microscope_name: str) -> None:
         """Enable microscope.
@@ -516,6 +549,9 @@ class NIDAQ(DAQBase):
             self.microscope_name = microscope_name
             self.analog_outputs = {}
             self.analog_output_tasks = {}
+            self.trigger_reset_count = self.configuration["configuration"][
+                "microscopes"
+            ][microscope_name]["daq"].get("trigger_reset_count", None)
 
         self.camera_delay = (
             float(self.waveform_constants["other_constants"].get("camera_delay", 5))
@@ -601,3 +637,29 @@ class NIDAQ(DAQBase):
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()
+
+    def reset(self, device_name: str = None) -> None:
+        """Reset the DAQ device.
+
+        Parameters
+        ----------
+        device_name : str
+            Name of the device to reset. If None, reset all devices.
+        """
+        for k in list(self.analog_output_tasks.keys()):
+            del self.analog_output_tasks[k]
+
+        if hasattr(self, "camera_trigger_task"):
+            del self.camera_trigger_task
+        if hasattr(self, "master_trigger_task"):
+            del self.master_trigger_task
+        gc.collect()
+
+        system = System.local()
+        for device in system.devices:
+            if device_name is None or device.name == device_name:
+                try:
+                    device.reset_device()
+                    logger.info(f"Reset device: {device.name}")
+                except Exception:
+                    logger.debug(f"Could not reset device: {traceback.format_exc()}")

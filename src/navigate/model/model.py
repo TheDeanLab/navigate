@@ -37,6 +37,7 @@ import time
 import os
 from typing import Tuple, Any, Dict, List, Optional, Union
 import argparse
+import json
 
 # Third Party Imports
 import numpy as np
@@ -94,6 +95,7 @@ class Model:
         args: argparse.Namespace,
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
+        log_queue: Optional[multiprocessing.Queue] = None,
     ) -> None:
         """Initialize the Model.
 
@@ -105,9 +107,11 @@ class Model:
             Configuration dictionary. Defaults to None.
         event_queue : multiprocessing.Queue
             Event queue. Receives events from the controller.
+        log_queue : Optional[multiprocessing.Queue]
+            Log queue. Receives log messages from the controller.
         """
         # Set up logging
-        log_setup("model_logging.yml")
+        log_setup("logging.yml", queue=log_queue)
 
         #: object: Logger object.
         self.logger = logging.getLogger(p)
@@ -250,6 +254,12 @@ class Model:
 
         #: bool: Submit a request to pause the data thread?
         self.ask_to_pause_data_thread = False
+
+        #: bool: Is there a data thread?
+        self.is_data_thread_on = False
+
+        #: int: Available image frames
+        self.available_image_count = 0
 
         #: int: Number of frames in the data buffer.
         self.number_of_frames = self.configuration["experiment"]["CameraParameters"][
@@ -588,13 +598,22 @@ class Model:
                 self.data_buffer_saving_flags = None
 
             if self.imaging_mode == "live":
-                self.signal_thread = ThreadWithWarning(target=self.run_live_acquisition,
-                                                       warning_queue=self.event_queue,
-                                                       logger=self.logger)
+                self.signal_thread = ThreadWithWarning(
+                    target=self.run_live_acquisition,
+                    warning_queue=self.event_queue,
+                    logger=self.logger,
+                )
             else:
-                self.signal_thread = ThreadWithWarning(target=self.run_acquisition,
-                                                       warning_queue=self.event_queue,
-                                                       logger=self.logger)
+                if self.imaging_mode == "z-stack":
+                    speed_mode = self.configuration["experiment"][
+                        "MicroscopeState"
+                    ].get("speed", "Auto")
+                    self.is_data_thread_on = speed_mode == "Auto"
+                self.signal_thread = ThreadWithWarning(
+                    target=self.run_acquisition,
+                    warning_queue=self.event_queue,
+                    logger=self.logger,
+                )
 
             self.signal_thread.name = f"{self.imaging_mode} signal"
 
@@ -619,7 +638,10 @@ class Model:
                 self.data_thread = threading.Thread(target=self.run_data_process)
             self.data_thread.name = f"{self.imaging_mode} Data"
             self.signal_thread.start()
-            self.data_thread.start()
+            if self.is_data_thread_on:
+                self.data_thread.start()
+
+            # TODO: virtual microscopes only work with data thread on currently.
             for m in self.virtual_microscopes:
                 image_writer = (
                     ImageWriter(
@@ -690,9 +712,11 @@ class Model:
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
                 self.stop_send_signal = False
-                self.signal_thread = ThreadWithWarning(target=self.run_live_acquisition, 
-                                                       warning_queue=self.event_queue,
-                                                       logger=self.logger)
+                self.signal_thread = ThreadWithWarning(
+                    target=self.run_live_acquisition,
+                    warning_queue=self.event_queue,
+                    logger=self.logger,
+                )
                 self.signal_thread.name = "Waveform Popup Signal"
                 self.signal_thread.start()
 
@@ -742,11 +766,8 @@ class Model:
             self.configuration["experiment"]["MicroscopeState"][
                 "image_mode"
             ] = "customized"
-            self.addon_feature = [
-                    {"name": PrepareNextChannel},
-                    {"name": TonyWilson}
-                ]
-            self.run_command("acquire")            
+            self.addon_feature = [{"name": PrepareNextChannel}, {"name": TonyWilson}]
+            self.run_command("acquire")
 
         elif command == "load_feature":
             """
@@ -803,7 +824,7 @@ class Model:
                 self.signal_container.end_flag = True
             if self.signal_thread:
                 self.signal_thread.join()
-            if self.data_thread:
+            if self.is_data_thread_on and self.data_thread:
                 self.data_thread.join()
 
             self.end_acquisition()
@@ -886,6 +907,24 @@ class Model:
         """
         return self.active_microscope.get_stage_position()
 
+    def query_select_microscope(self, *args: List[Any]) -> Dict[str, Any]:
+        """Query the selected stage."""
+        microscope_name = args[0]
+        self.microscopes[microscope_name].stop_stage()
+        ret_pos_dict = self.microscopes[microscope_name].get_stage_position()
+        return ret_pos_dict
+
+    def update_stage_limits(self, microscope_name: str) -> None:
+        """Update stage limits
+
+        Parameters
+        ----------
+        microscope_name : str
+            Microscope name
+        """
+        microscope = self.microscopes[microscope_name]
+        microscope.update_stage_limits()
+
     def stop_stage(self) -> None:
         """Stop the stages."""
         self.active_microscope.stop_stage()
@@ -959,8 +998,8 @@ class Model:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
+            start_time = time.perf_counter_ns()
             frame_ids = self.active_microscope.camera.get_new_frame()
-            self.logger.info(f"Running data process, getting frames {frame_ids}")
             # if there is at least one frame available
             if not frame_ids:
                 self.logger.debug(
@@ -980,6 +1019,16 @@ class Model:
                     break
                 continue
 
+            self.logger.performance(
+                json.dumps(
+                    {
+                        "kind": "Acquire Image",
+                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "timestamp": time.time(),
+                    }
+                )
+            )
+
             acquired_frame_num += len(frame_ids)
 
             wait_num = self.camera_wait_iterations
@@ -997,7 +1046,7 @@ class Model:
                 self.data_container.run(frame_ids)
 
             # show image
-            self.logger.info(f"Image delivered to controller: {frame_ids[0]}")
+            self.logger.info(f"Sending image to the controller: {frame_ids[-1]}")
             self.show_img_pipe.send(frame_ids[-1])
 
             if count_frame and acquired_frame_num >= num_of_frames:
@@ -1024,7 +1073,8 @@ class Model:
         None
             Execution pauses until resume_data_thread() is called.
         """
-
+        if not self.is_data_thread_on:
+            return
         self.pause_data_ready_lock.acquire()
         self.ask_to_pause_data_thread = True
         self.pause_data_ready_lock.acquire()
@@ -1039,7 +1089,8 @@ class Model:
         None
             Execution continues after pause.
         """
-
+        if not self.is_data_thread_on:
+            return
         self.ask_to_pause_data_thread = False
         self.pause_data_event.set()
         if self.pause_data_ready_lock.locked():
@@ -1122,6 +1173,8 @@ class Model:
             self.stop_send_signal = False
             self.injected_flag.value = False
             self.is_live = False
+            self.available_image_count = 0
+            self.is_data_thread_on = True
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
         if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_model"):
@@ -1161,17 +1214,34 @@ class Model:
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
+        start_time = time.perf_counter_ns()
         stage_pos = self.get_stage_position()
         self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
         self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
         self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
         self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
         self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
+        self.logger.performance(
+            json.dumps(
+                {
+                    "kind": "Stage Position",
+                    "duration_ns": time.perf_counter_ns() - start_time,
+                    "timestamp": time.time(),
+                }
+            )
+        )
 
         # Run the acquisition
+        start_time = time.perf_counter_ns()
         try:
             self.active_microscope.turn_on_laser()
-            self.active_microscope.daq.run_acquisition()
+            self.active_microscope.daq.run_acquisition(
+                wait_until_done=self.is_data_thread_on
+            )
+            if not self.is_data_thread_on:
+                if self.available_image_count > 0:
+                    self.grab_image(getattr(self.image_writer, "save_image", None))
+                self.active_microscope.daq.wait_acquisition_done()
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
             if self.active_microscope.current_channel == 0:
@@ -1191,10 +1261,76 @@ class Model:
             # Ensure the laser is turned off
             self.active_microscope.turn_off_lasers()
 
+        self.logger.performance(
+            json.dumps(
+                {
+                    "kind": "DAQ Triggers",
+                    "duration_ns": time.perf_counter_ns() - start_time,
+                    "timestamp": time.time(),
+                }
+            )
+        )
+
+        self.available_image_count += 1
+
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
+
+    def grab_image(self, data_func: Optional[callable] = None) -> None:
+        """Grab one image from the camera.
+
+        Parameters
+        ----------
+        data_func : Optional[callable]
+            Function to run on the acquired data. Default is None.
+        """
+        wait_num = self.camera_wait_iterations
+
+        while not self.stop_acquisition:
+            frame_ids = self.active_microscope.camera.get_new_frame()
+            self.logger.info(f"Running data process, getting frames {frame_ids}")
+            # if there is at least one frame available
+            if not frame_ids:
+                self.logger.debug(
+                    f"Frame not received. Waiting {wait_num}"
+                    f"/{self.camera_wait_iterations} iterations"
+                )
+                wait_num -= 1
+                if wait_num <= 0:
+                    error_statement = (
+                        "Acquisition aborted due to camera time out "
+                        "error. Please verify that the external "
+                        "trigger is connected and configured properly."
+                    )
+
+                    self.logger.debug(error_statement)
+                    print(error_statement)
+                    break
+                continue
+
+            wait_num = self.camera_wait_iterations
+
+            # ImageWriter to save images
+            if data_func:
+                data_func(frame_ids)
+
+            if hasattr(self, "data_container") and not self.data_container.end_flag:
+                if self.data_container.is_closed:
+                    self.logger.info("Data container is closed.")
+                    self.stop_acquisition = True
+                    break
+
+                self.data_container.run(frame_ids)
+
+            # show image
+            self.logger.info(f"Image delivered to controller: {frame_ids[0]}")
+            self.show_img_pipe.send(frame_ids[-1])
+
+            self.available_image_count -= len(frame_ids)
+
+            break
 
     def run_live_acquisition(self) -> None:
         """Stream live image to the GUI.
@@ -1243,8 +1379,15 @@ class Model:
                 self.logger.info("Signal container is closed.")
                 self.stop_acquisition = True
                 return
+        if not self.is_data_thread_on:
+            if self.available_image_count > 0:
+                self.grab_image(getattr(self.image_writer, "save_image", None))
+            self.show_img_pipe.send("stop")
         if self.imaging_mode != "live":
             self.stop_acquisition = True
+
+        if not self.is_data_thread_on:
+            self.end_acquisition()
 
     def reset_feature_list(self) -> None:
         """Reset live mode feature list."""
@@ -1492,10 +1635,10 @@ class Model:
                 if microscope_config[k] == "":
                     idx = int(k[k.rfind("_") + 1 :])
                     microscope.filter_wheel[k] = SyntheticFilterWheel(
-                        type("DummyConnection", (object,), {}),
-                        self.configuration["configuration"]["microscopes"][
-                            microscope_name
-                        ]["filter_wheel"][idx],
+                        microscope_name,
+                        None,
+                        self.configuration,
+                        idx
                     )
             else:
                 if microscope_config[k] == "":

@@ -328,7 +328,12 @@ class ChannelCreator(ttk.Labelframe):
             self.defocus_variables.append(tk.DoubleVar())
             self.defocus_spins.append(
                 ValidatedSpinbox(
-                    self, textvariable=self.defocus_variables[num], width=4
+                    self,
+                    textvariable=self.defocus_variables[num],
+                    width=4,
+                    from_=-100,
+                    to=100,
+                    increment=0.1,
                 )
             )
             self.defocus_spins[num].grid(
@@ -525,6 +530,18 @@ class StackAcquisitionFrame(ttk.Labelframe):
         self.inputs["cycling"].state(["readonly"])
         self.inputs["cycling"].grid(
             row=6, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+        )
+
+        self.inputs["speed"] = LabelInput(
+            parent=self.stack_frame,
+            label="Speed Mode".ljust(30),
+            input_class=ttk.Combobox,
+            input_var=tk.StringVar(),
+            input_args={"width": 8, "values": ["Auto", "Fixed"]}
+        )
+        self.inputs["speed"].state(["disabled", "readonly"])
+        self.inputs["speed"].grid(
+            row=7, column=0, columnspan=2, sticky="NSEW", padx=5, pady=5
         )
 
         self.cubic_frame = ttk.Frame(self.stack_frame)

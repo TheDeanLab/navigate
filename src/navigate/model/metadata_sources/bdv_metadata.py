@@ -210,6 +210,25 @@ class BigDataViewerMetadata(XMLMetadata):
             {"name": "tile", "Tile": []},
             {"name": "angle", "Angle": {"id": {"text": 0}, "name": {"text": 0}}},
         ]
+
+        pixel_size = [self.dx, self.dy, self.dz]
+        if self.shear_data:
+
+            shear_angle = np.deg2rad(self.shear_angle)
+            # Must scale the voxel size to account for shear
+            if self.shear_dimension == "YZ":
+                print("Shearing in YZ direction...")
+                print("Shear angle in degrees is:", self.shear_angle)
+                print("Shear angle in radians is:", shear_angle)
+                scaled_z = abs(self.dz * np.sin(shear_angle))
+                pixel_size = [self.dx, self.dy, scaled_z]
+            elif self.shear_dimension == "XZ":
+                print("You should probably figure this out...")
+            else:
+                print("Trig is hard.")
+
+        print("The pixel sizes are:", pixel_size)
+
         # The actual loop that populates ViewSetup
         view_id = 0
         for c in range(self.shape_c):
@@ -226,7 +245,7 @@ class BigDataViewerMetadata(XMLMetadata):
                     "size": {"text": f"{self.shape_x} {self.shape_y} {self.shape_z}"},
                     "voxelSize": {
                         "unit": {"text": "um"},
-                        "size": {"text": f"{self.dx} {self.dy} {self.dz}"},
+                        "size": {"text": f"{pixel_size[0]} {pixel_size[1]} {pixel_size[2]}"},
                     },
                     "attributes": {
                         "illumination": {"text": "0"},

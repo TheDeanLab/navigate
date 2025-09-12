@@ -58,16 +58,9 @@ class BigDataViewerMetadata(XMLMetadata):
     """
 
     def __init__(self) -> None:
-        """Initialize the BigDataViewer metadata object.
-
-        Parameters
-        ----------
-        configuration : Optional[Dict[str, Any]]
-            Configuration dictionary.
-        """
+        """Initialize the BigDataViewer metadata object."""
         super().__init__()
 
-        # Affine Transform Parameters
         #: bool: Shear the data.
         self.shear_data = False
 
@@ -80,7 +73,6 @@ class BigDataViewerMetadata(XMLMetadata):
         #: npt.NDArray: Shear transform matrix.
         self.shear_transform = np.eye(3, 4)
 
-        # Rotation Transform Parameters
         #: bool: Rotate the data.
         self.rotate_data = False
 
@@ -194,8 +186,22 @@ class BigDataViewerMetadata(XMLMetadata):
             }
 
         # Calculate shear and rotation transforms
+        pixel_size = [self.dx, self.dy, self.dz]
         self.bdv_shear_transform()
         self.bdv_rotate_transform()
+
+        if self.shear_data:
+            shear_angle = np.deg2rad(self.shear_angle)
+            # Must scale the voxel size to account for shear
+            if self.shear_dimension == "YZ":
+                scaled_z = abs(self.dz * np.sin(shear_angle))
+                pixel_size = [self.dx, self.dy, scaled_z]
+            elif self.shear_dimension == "XZ":
+                # TODO: Implement
+                pass
+            else:
+                # TODO: Implement
+                pass
 
         # Populate ViewSetups
         bdv_dict["SequenceDescription"]["ViewSetups"] = {}
@@ -210,24 +216,6 @@ class BigDataViewerMetadata(XMLMetadata):
             {"name": "tile", "Tile": []},
             {"name": "angle", "Angle": {"id": {"text": 0}, "name": {"text": 0}}},
         ]
-
-        pixel_size = [self.dx, self.dy, self.dz]
-        if self.shear_data:
-
-            shear_angle = np.deg2rad(self.shear_angle)
-            # Must scale the voxel size to account for shear
-            if self.shear_dimension == "YZ":
-                print("Shearing in YZ direction...")
-                print("Shear angle in degrees is:", self.shear_angle)
-                print("Shear angle in radians is:", shear_angle)
-                scaled_z = abs(self.dz * np.sin(shear_angle))
-                pixel_size = [self.dx, self.dy, scaled_z]
-            elif self.shear_dimension == "XZ":
-                print("You should probably figure this out...")
-            else:
-                print("Trig is hard.")
-
-        print("The pixel sizes are:", pixel_size)
 
         # The actual loop that populates ViewSetup
         view_id = 0
@@ -245,7 +233,9 @@ class BigDataViewerMetadata(XMLMetadata):
                     "size": {"text": f"{self.shape_x} {self.shape_y} {self.shape_z}"},
                     "voxelSize": {
                         "unit": {"text": "um"},
-                        "size": {"text": f"{pixel_size[0]} {pixel_size[1]} {pixel_size[2]}"},
+                        "size": {
+                            "text": f"{pixel_size[0]} {pixel_size[1]} {pixel_size[2]}"
+                        },
                     },
                     "attributes": {
                         "illumination": {"text": "0"},
@@ -257,7 +247,8 @@ class BigDataViewerMetadata(XMLMetadata):
 
                 bdv_dict["SequenceDescription"]["ViewSetups"]["ViewSetup"].append(d)
                 view_id += 1
-        # Finish up the Tile Attributes outside of the channels loop so we have
+
+        # Finish up the Tile Attributes outside the channels loop so we have
         # one per tile
         for pos in range(self.positions):
             tile = {"id": {"text": str(pos)}, "name": {"text": str(pos)}}
@@ -273,6 +264,7 @@ class BigDataViewerMetadata(XMLMetadata):
         }
 
         # View registrations
+        reference_position = np.eye(3, 4, dtype=float)
         bdv_dict["ViewRegistrations"] = {"ViewRegistration": []}
         for t in range(self.shape_t):
             for p in range(self.positions):
@@ -301,6 +293,13 @@ class BigDataViewerMetadata(XMLMetadata):
                             # an acquisition.
                             pass
 
+                    if t == 0 and p == 0 and c == 0:
+                        # Save reference position to allow translation offsets for
+                        # shear to be applied relative to this position.
+                        reference_position = mat.ravel()
+
+                    current_position = mat.ravel()
+
                     view_transforms = [
                         {
                             "type": "affine",
@@ -327,6 +326,80 @@ class BigDataViewerMetadata(XMLMetadata):
                             }
                         )
 
+                        delta_z_position = current_position[-1] - reference_position[-1]
+                        shear_offset = np.eye(3, 4, dtype=float).ravel()
+
+                        if self.shear_dimension == "YZ":
+                            shear_offset[7] = (
+                                delta_z_position
+                                * np.tan(np.deg2rad(self.shear_angle))
+                                / self.dy
+                            )
+
+                        elif self.shear_dimension == "XZ":
+                            # TODO: Implement
+                            pass
+                        else:
+                            # TODO: Implement
+                            pass
+
+                        view_transforms.append(
+                            {
+                                "type": "affine",
+                                "Name": "Shear Offset Transform",
+                                "affine": {
+                                    "text": " ".join(
+                                        [
+                                            f"{x:.6f}"
+                                            for x in shear_offset
+                                        ]
+                                    )
+                                },
+                            }
+                        )
+                        #
+                        # original_position = views[0]["z"]
+                        #
+                        # shear_angle = self.shear_angle
+                        # delta_position = 1000
+                        # offset = (
+                        #     delta_position * np.tan(np.deg2rad(shear_angle)) / self.dy
+                        # )
+                        # 
+                        # #     [1 hxy hxz, 0,
+                        # #     hyx 1 hyz, 0,
+                        # #     hzx hzy 1, 0,
+                        # #     0, 0, 0, 1]
+                        #
+                        # # -31.298227 = 25*tan(theta)
+                        # 90 - 31.298227 =
+                        scaled_angle = self.shear_transform.ravel()[6]
+
+                        # Apply translation offset to account for shear in tiling
+                        # format. Everything is relative to the first position.
+
+                    #       <ViewTransform type="affine" Name="Tiling Offset">
+                    #            <affine>
+                    #            1.000   0.000000 0.000000 -0.00
+                    #            0.000 1.000000 0.000000 -1251.93
+                    #            0.000000 0.000000 1.000000 (Z)</affine>
+                    #       </ViewTransform>
+                    #      <ViewTransform type="affine" Name="Shearing Transform">
+                    # <affine>1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 -31.298227
+                    # 0.000000 0.000000 0.000000 1.000000 0.000000</affine>
+                    # </ViewTransform>
+
+                    # Tile ID 0 is fixed. 1000 microns.
+                    # Tiled ID 1 is where we need to apply the offset. 2000 microns.
+                    # Delta Position = Position1 - Position0 = 1000 microns.
+                    # Delta Position in pixels = Delta Position / dz
+                    # Offset= delta position in pixels * scaled angle
+                    # scaled angle = angle * dz/dy
+
+                    # delta position * tan(raw angle) / dy
+
+                    # translation =
+
                     if self.rotate_data:
                         view_transforms.append(
                             {
@@ -347,9 +420,7 @@ class BigDataViewerMetadata(XMLMetadata):
 
                     bdv_dict["ViewRegistrations"]["ViewRegistration"].append(d)
 
-        bdv_dict["Misc"] = {
-            "Entry": {"Key": "Note", "text": self.misc}
-        }
+        bdv_dict["Misc"] = {"Entry": {"Key": "Note", "text": self.misc}}
 
         return bdv_dict
 

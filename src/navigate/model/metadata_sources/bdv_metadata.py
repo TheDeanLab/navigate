@@ -297,7 +297,6 @@ class BigDataViewerMetadata(XMLMetadata):
                         # Save reference position to allow translation offsets for
                         # shear to be applied relative to this position.
                         reference_position = mat.ravel()
-                        print("Reference Position:", reference_position)
 
                     current_position = mat.ravel()
 
@@ -331,7 +330,8 @@ class BigDataViewerMetadata(XMLMetadata):
                         shear_offset = np.eye(3, 4, dtype=float).ravel()
                         if self.shear_dimension == "YZ":
                             shear_offset[7] = (
-                                delta_z_position * self.dz
+                                delta_z_position
+                                * self.dz
                                 * np.tan(np.deg2rad(self.shear_angle))
                                 / self.dy
                             )
@@ -343,18 +343,12 @@ class BigDataViewerMetadata(XMLMetadata):
                             # TODO: Implement
                             pass
 
-
                         view_transforms.append(
                             {
                                 "type": "affine",
                                 "Name": "Shear Offset Transform",
                                 "affine": {
-                                    "text": " ".join(
-                                        [
-                                            f"{x:.6f}"
-                                            for x in shear_offset
-                                        ]
-                                    )
+                                    "text": " ".join([f"{x:.6f}" for x in shear_offset])
                                 },
                             }
                         )

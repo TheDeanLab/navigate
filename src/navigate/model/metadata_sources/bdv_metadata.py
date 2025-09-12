@@ -297,6 +297,7 @@ class BigDataViewerMetadata(XMLMetadata):
                         # Save reference position to allow translation offsets for
                         # shear to be applied relative to this position.
                         reference_position = mat.ravel()
+                        print("Reference Position:", reference_position)
 
                     current_position = mat.ravel()
 
@@ -328,10 +329,9 @@ class BigDataViewerMetadata(XMLMetadata):
 
                         delta_z_position = current_position[-1] - reference_position[-1]
                         shear_offset = np.eye(3, 4, dtype=float).ravel()
-
                         if self.shear_dimension == "YZ":
                             shear_offset[7] = (
-                                delta_z_position
+                                delta_z_position * self.dz
                                 * np.tan(np.deg2rad(self.shear_angle))
                                 / self.dy
                             )
@@ -342,6 +342,7 @@ class BigDataViewerMetadata(XMLMetadata):
                         else:
                             # TODO: Implement
                             pass
+
 
                         view_transforms.append(
                             {
@@ -357,48 +358,6 @@ class BigDataViewerMetadata(XMLMetadata):
                                 },
                             }
                         )
-                        #
-                        # original_position = views[0]["z"]
-                        #
-                        # shear_angle = self.shear_angle
-                        # delta_position = 1000
-                        # offset = (
-                        #     delta_position * np.tan(np.deg2rad(shear_angle)) / self.dy
-                        # )
-                        # 
-                        # #     [1 hxy hxz, 0,
-                        # #     hyx 1 hyz, 0,
-                        # #     hzx hzy 1, 0,
-                        # #     0, 0, 0, 1]
-                        #
-                        # # -31.298227 = 25*tan(theta)
-                        # 90 - 31.298227 =
-                        scaled_angle = self.shear_transform.ravel()[6]
-
-                        # Apply translation offset to account for shear in tiling
-                        # format. Everything is relative to the first position.
-
-                    #       <ViewTransform type="affine" Name="Tiling Offset">
-                    #            <affine>
-                    #            1.000   0.000000 0.000000 -0.00
-                    #            0.000 1.000000 0.000000 -1251.93
-                    #            0.000000 0.000000 1.000000 (Z)</affine>
-                    #       </ViewTransform>
-                    #      <ViewTransform type="affine" Name="Shearing Transform">
-                    # <affine>1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 -31.298227
-                    # 0.000000 0.000000 0.000000 1.000000 0.000000</affine>
-                    # </ViewTransform>
-
-                    # Tile ID 0 is fixed. 1000 microns.
-                    # Tiled ID 1 is where we need to apply the offset. 2000 microns.
-                    # Delta Position = Position1 - Position0 = 1000 microns.
-                    # Delta Position in pixels = Delta Position / dz
-                    # Offset= delta position in pixels * scaled angle
-                    # scaled angle = angle * dz/dy
-
-                    # delta position * tan(raw angle) / dy
-
-                    # translation =
 
                     if self.rotate_data:
                         view_transforms.append(

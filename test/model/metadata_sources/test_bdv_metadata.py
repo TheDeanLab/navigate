@@ -55,7 +55,7 @@ def test_bdv_metadata(ext):
     md.shear_angle = 15
     md.dx, md.dy, md.dz = 1, 1, 1
     md.bdv_shear_transform()
-    assert md.shear_transform[0, 2] == np.cos(np.deg2rad(15))
+    assert md.shear_transform[0, 2] == np.tan(np.deg2rad(15))
 
     md.rotate_data = True
     md.rotate_angle_x = 15

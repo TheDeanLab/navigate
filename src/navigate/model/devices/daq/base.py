@@ -33,6 +33,7 @@
 # Standard Imports
 import logging
 from typing import Any, Dict
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -46,8 +47,14 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class DAQBase:
-    """DAQBase - Parent class for Data Acquisition (DAQ) classes."""
+class DAQBase(ABC):
+    """Abstract base class for Data Acquisition (DAQ) devices.
+
+    This class provides the interface and common functionality for controlling
+    data acquisition hardware with navigate. It handles waveform generation based on
+    configuration parameters, exposure times, and sweep times for different imaging
+    channels.
+    """
 
     def __init__(self, configuration: Dict[str, Any]) -> None:
         """Initializes the DAQBase class.
@@ -103,6 +110,49 @@ class DAQBase:
     def __str__(self) -> str:
         """Returns the string representation of the DAQBase class"""
         return "DAQBase"
+
+    @abstractmethod
+    def stop_acquisition(self) -> None:
+        """Stops the acquisition.
+
+        This abstract method must be implemented by all subclasses.
+        """
+        pass
+
+    @abstractmethod
+    def prepare_acquisition(self, channel_key: str) -> None:
+        """Prepare the acquisition.
+
+        This abstract method must be implemented by all subclasses.
+
+
+        Parameters
+        ----------
+        channel_key : str
+            Channel key for current channel.
+        """
+        pass
+
+    @abstractmethod
+    def run_acquisition(self, wait_until_done: bool = True) -> None:
+        """Run acquisition.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        wait_until_done : bool, optional
+            Whether to wait until the acquisition is done, by default True
+        """
+        pass
+
+    @abstractmethod
+    def wait_acquisition_done(self) -> None:
+        """Wait acquisition tasks done
+
+        This abstract method must be implemented by all subclasses.
+        """
+        pass
 
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in

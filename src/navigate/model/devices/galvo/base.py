@@ -33,6 +33,7 @@
 #  Standard Library Imports
 import logging
 from typing import Any, Dict
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -46,8 +47,17 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class GalvoBase:
-    """GalvoBase Class - Parent class for galvanometers."""
+class GalvoBase(ABC):
+    """Abstract base class for galvanometer devices.
+
+    This class provides the interface and common functionality for controlling
+    galvanometers with navigate. It handles waveform generation based on
+    configuration parameters and experimental settings.
+
+    The class generates appropriate control waveforms (sawtooth, sine, halfsaw)
+    according to camera exposure times and configuration parameters. Child classes
+    must implement the turn_off method to control hardware-specific behaviors.
+    """
 
     def __init__(
         self,
@@ -243,6 +253,7 @@ class GalvoBase:
 
         return self.waveform_dict
 
+    @abstractmethod
     def turn_off(self):
         """Turn off the galvo."""
         pass

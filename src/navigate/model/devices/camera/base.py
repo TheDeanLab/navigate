@@ -34,6 +34,7 @@
 import logging
 import os
 from typing import Any, Dict, Optional
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 import tifffile
@@ -48,8 +49,12 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class CameraBase:
-    """CameraBase - Parent camera class."""
+class CameraBase(ABC):
+    """Abstract base class for cameras.
+
+    This class provides the interface and common functionality for controlling
+    cameras with navigate.
+    """
 
     def __init__(
         self,
@@ -58,7 +63,7 @@ class CameraBase:
         configuration: Dict[str, Any],
         *args: Optional[Any],
         **kwargs: Optional[Any],
-    ):
+    ) -> None:
         """Initialize CameraBase class.
 
         Parameters
@@ -124,11 +129,11 @@ class CameraBase:
         #  trigger_active, trigger_mode and trigger_polarity
         # can be removed after updating how we get the
         # readout time in model and controller
-        self.camera_parameters["trigger_source"] = 2.0 # external trigger
+        self.camera_parameters["trigger_source"] = 2.0  # external trigger
         self.camera_parameters["readout_speed"] = 1.0
         self.camera_parameters["pixel_size_in_microns"] = 6.5
         self.camera_parameters["trigger_active"] = 1.0
-        self.camera_parameters["trigger_mode"] = 1.0 # standard trigger mode
+        self.camera_parameters["trigger_mode"] = 1.0  # standard trigger mode
         self.camera_parameters["trigger_polarity"] = 2.0
         self.camera_parameters["supported_sensor_modes"] = ["Normal", "Light-Sheet"]
         self.camera_parameters["supported_readout_directions"] = [
@@ -145,11 +150,126 @@ class CameraBase:
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
-    def __str__(self):
+        #: bool: whether to use random images
+        self.random_image = False
+
+        #: int: current image id
+        self.img_id = 0
+
+        #: int: current tif id
+        self.current_tif_id = 0
+
+        #: list: list of tif images
+        self.tif_images = []
+
+        #: int: number of frames to load. Overwritten by synthetic_camera.
+        self.num_of_frame = 100
+
+    def __str__(self) -> str:
         """Return string representation of CameraBase."""
         return "CameraBase"
 
-    def get_offset_variance_maps(self):
+    @abstractmethod
+    def get_new_frame(self) -> Any:
+        """Get a new frame from the camera.
+
+        This abstract method must be implemented by all subclasses.
+
+
+        Returns
+        -------
+        frame : Any
+            New frame from the camera.
+        """
+        pass
+
+    @abstractmethod
+    def initialize_image_series(self, data_buffer=None, number_of_frames=100) -> None:
+        """Initialize image series.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        data_buffer :
+            List of SharedNDArrays of shape=(self.img_height,
+            self.img_width) and dtype="uint16"
+            Default is None.
+        number_of_frames : int
+            Number of frames.  Default is 100.
+        """
+        pass
+
+    @abstractmethod
+    def close_image_series(self) -> None:
+        """Close image series.
+
+        This abstract method must be implemented by all subclasses.
+        """
+        pass
+
+    @abstractmethod
+    def set_line_interval(self, line_interval_time: float) -> None:
+        """Set the camera line interval time.
+
+        This abstract method must be implemented by all subclasses.
+        """
+        pass
+
+    @abstractmethod
+    def set_exposure_time(self, exposure_time: float) -> None:
+        """Set the camera exposure time."""
+        pass
+
+    def load_images(self, filenames: Optional[str] = None, ds=None) -> None:
+        """Pre-populate the buffer with images. Can either come from TIFF files or
+        Numpy stacks.
+
+        Parameters
+        ----------
+        filenames : str, optional
+            List of TIFF filenames, by default None
+        ds : list, optional
+            List of Numpy stacks, by default None
+
+        Raises
+        ------
+        tifffile.TiffFileError
+            If the TIFF file cannot be opened.
+        """
+        self.random_image = False
+        self.img_id = 0
+        self.current_tif_id = 0
+        self.tif_images = []
+        idx = 0
+        if filenames is not None:
+            # Load TIFF file into buffer as slices
+            for image_file in filenames:
+                try:
+                    tif = tifffile.TiffFile(image_file)
+                    if len(tif.pages) == 1:
+                        self.tif_images.append([tif.asarray()])
+                    else:
+                        self.tif_images.append(tif.asarray())
+                    idx += len(tif.pages)
+
+                    # TODO: self.num_of_frame is not defined in the base class
+                    if idx >= self.num_of_frame:
+                        return
+                except tifffile.TiffFileError:
+                    pass
+        elif ds is not None:
+            # Load a Numpy stack into buffer as slices
+            # Assume the stack is in the order ZYX
+            for idx, data in enumerate(ds):
+                self.tif_images.append(data)
+                idx += len(data)
+                if idx >= self.num_of_frame:
+                    return
+        else:
+            self.random_image = True
+
+    def get_offset_variance_maps(self) -> Any:
         """Get offset and variance maps from file.
 
         Returns
@@ -179,7 +299,7 @@ class CameraBase:
         return self._offset, self._variance
 
     @property
-    def offset(self):
+    def offset(self) -> Any:
         """Return offset map. If not present, load from file.
 
         Returns
@@ -192,7 +312,7 @@ class CameraBase:
         return self._offset
 
     @property
-    def variance(self):
+    def variance(self) -> Any:
         """Return variance map. If not present, load from file.
 
         Returns
@@ -205,7 +325,7 @@ class CameraBase:
             self.get_offset_variance_maps()
         return self._variance
 
-    def set_readout_direction(self, mode) -> None:
+    def set_readout_direction(self, mode: str) -> None:
         """Set HamamatsuOrca readout direction.
 
         Parameters
@@ -215,9 +335,10 @@ class CameraBase:
         """
         logger.info(f"Camera readout direction set to: {mode}.")
 
+    @abstractmethod
     def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time, shutter_width
-    ):
+        self, full_chip_exposure_time: float, shutter_width: float
+    ) -> tuple[float, float, float]:
         """Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an acquisition
 
@@ -260,9 +381,15 @@ class CameraBase:
             line interval duration (s).
         """
         return self.camera_parameters.get("line_interval", None)
-    
 
-    def set_ROI_and_binning(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024, binning='1x1') -> bool:
+    def set_ROI_and_binning(
+        self,
+        roi_width: int = 2048,
+        roi_height: int = 2048,
+        center_x: int = 1024,
+        center_y: int = 1024,
+        binning: str = "1x1",
+    ) -> bool:
         """Change the size of the active region on the camera and set the binning mode.
 
         Parameters
@@ -278,7 +405,7 @@ class CameraBase:
         binning : str
             Desired binning properties (e.g., '1x1', '2x2', '4x4', '8x8', '16x16',
             '1x2', '2x4')
-        
+
         Returns
         -------
         result: bool
@@ -292,13 +419,16 @@ class CameraBase:
         # Set Binning
         result = self.set_binning(binning)
         return result
-    
-    def set_trigger_mode(self, trigger_source:str="External") -> None:
+
+    @abstractmethod
+    def set_trigger_mode(self, trigger_source: str = "External") -> None:
         """Set the camera trigger source to external or internal free run mode.
+
+        This abstract method must be implemented by all subclasses.
+
         Parameters
         ----------
         trigger_source : str
             Trigger source. Options are 'External' or 'Internal'.
         """
-        # Only supports external triggering by default
         pass

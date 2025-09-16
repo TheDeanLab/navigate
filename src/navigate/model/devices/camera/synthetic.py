@@ -38,7 +38,6 @@ from typing import Optional, Any, Dict, List
 
 # Third Party Imports
 import numpy as np
-from tifffile import TiffFile, TiffFileError
 
 # Local Imports
 from navigate.model.analysis import camera
@@ -262,7 +261,7 @@ class SyntheticCamera(CameraBase):
             logger.debug(f"can't set binning to {binning_string}")
             print(f"can't set binning to {binning_string}")
             return False
-        
+
         self.x_binning = int(binning_string[0])
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
@@ -297,42 +296,6 @@ class SyntheticCamera(CameraBase):
         self.pre_frame_idx = 0
         self.current_frame_idx = 0
         self.is_acquiring = False
-
-    def load_images(self, filenames: Optional[str] = None, ds=None) -> None:
-        """Pre-populate the buffer with images. Can either come from TIFF files or
-        Numpy stacks."""
-        self.random_image = False
-        #: int: current image id
-        self.img_id = 0
-        #: int: current tif id
-        self.current_tif_id = 0
-        #: list: list of tif images
-        self.tif_images = []
-        idx = 0
-        if filenames is not None:
-            # Load TIFF file into buffer as slices
-            for image_file in filenames:
-                try:
-                    tif = TiffFile(image_file)
-                    if len(tif.pages) == 1:
-                        self.tif_images.append([tif.asarray()])
-                    else:
-                        self.tif_images.append(tif.asarray())
-                    idx += len(tif.pages)
-                    if idx >= self.num_of_frame:
-                        return
-                except TiffFileError:
-                    pass
-        elif ds is not None:
-            # Load a Numpy stack into buffer as slices
-            # Assume the stack is in the order ZYX
-            for idx, data in enumerate(ds):
-                self.tif_images.append(data)
-                idx += len(data)
-                if idx >= self.num_of_frame:
-                    return
-        else:
-            self.random_image = True
 
     def generate_new_frame(self) -> None:
         """Generate a synthetic image."""
@@ -397,7 +360,7 @@ class SyntheticCamera(CameraBase):
             X position of the center of view
         center_y : int
             Y position of the center of view
-        
+
         Returns
         -------
         bool
@@ -424,7 +387,7 @@ class SyntheticCamera(CameraBase):
         readout_time = 0.01  # 10 milliseconds.
         return readout_time
 
-    def set_trigger_mode(self, trigger_source: str="External") -> None:
+    def set_trigger_mode(self, trigger_source: str = "External") -> None:
         """Set camera trigger mode.
         Parameters
         ----------

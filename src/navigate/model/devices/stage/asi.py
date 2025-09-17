@@ -627,6 +627,15 @@ class MS2000Stage(ASIStage):
             for ax in self.asi_axes.keys():
                 self.asi_controller.set_backlash(ax, 0.02)
 
+            # Set wheel jog speed
+            jsspd = configuration["configuration"]["microscopes"][microscope_name][
+                "stage"]["hardware"][device_id].get("jsspd", None)
+            if jsspd is not None:
+                self.asi_controller.set_jog_speed(
+                    axes=self.asi_axes, 
+                    jsspd=int(jsspd)
+                    )
+
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)
 

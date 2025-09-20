@@ -34,7 +34,7 @@
 import importlib
 from threading import Lock
 from types import TracebackType
-from typing import Optional, Any, Type
+from typing import Optional, Any, Type, Union
 
 # Third-party imports
 
@@ -158,6 +158,29 @@ def load_param_from_module(module_name: str, param_name: str) -> Optional[any]:
         return None
     return param
 
+
+def decode_bytes(value: Union[bytes, memoryview]):
+    """Decode bytes or memoryview into readable string.
+    
+    Parameters
+    ----------
+    value : bytes or memoryview
+        the value
+
+    Returns
+    -------
+    result : str
+        a readable string
+    """
+    if isinstance(value, memoryview):
+        value = value.tobytes()
+
+    if not isinstance(value, (bytes, bytearray)):
+        return ""
+    try:
+        return value.decode(errors="ignore")
+    except Exception:
+        return ""
 
 class VariableWithLock:
     def __init__(self, variable_type: Any) -> None:

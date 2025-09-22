@@ -50,6 +50,11 @@ from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import numpy as np
 
+# OpenGL
+from OpenGL import GL
+from pyopengltk import OpenGLFrame
+from ctypes import c_void_p
+
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.analysis.camera import compute_signal_to_noise
@@ -61,6 +66,159 @@ from navigate.tools.decorators import performance_monitor
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+# ========================= Shaders =========================
+
+VERT_SRC = """
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 m_MVP = mat4(1.0);
+
+void main()
+{
+    gl_Position = m_MVP * vec4(aPos, 1.0);
+}
+"""
+
+FRAG_SRC = """
+#version 330 core
+out vec4 FragColor;
+
+void main() 
+{
+    FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+}
+"""
+
+# OpenGL rendering classes
+class Shader:
+    
+    def __init__(self, vert_src, frag_src):
+
+        # vertex shader
+        v = GL.glCreateShader(GL.GL_VERTEX_SHADER)
+        GL.glShaderSource(v, vert_src)
+        GL.glCompileShader(v)
+        if not GL.glGetShaderiv(v, GL.GL_COMPILE_STATUS):
+            raise RuntimeError("Vert Shader: " + GL.glGetShaderInfoLog(v).decode())
+
+        # fragment shader
+        f = GL.glCreateShader(GL.GL_FRAGMENT_SHADER)
+        GL.glShaderSource(f, frag_src)
+        GL.glCompileShader(f)
+        if not GL.glGetShaderiv(f, GL.GL_COMPILE_STATUS):
+            raise RuntimeError("Frag Shader: " + GL.glGetShaderInfoLog(f).decode())
+
+        # create shader program
+        program = GL.glCreateProgram()
+        GL.glAttachShader(program, v)
+        GL.glAttachShader(program, f)
+        GL.glLinkProgram(program)
+        if not GL.glGetProgramiv(program, GL.GL_LINK_STATUS):
+            raise RuntimeError("Linking error: " + GL.glGetProgramInfoLog(program).decode())
+
+        # discard shaders
+        GL.glDeleteShader(v)
+        GL.glDeleteShader(f)
+
+        # attributes
+        self.id = program
+        self._loc = {}
+
+    def __del__(self):
+        # cleanup
+        try:
+            if getattr(self, "id", None) and GL.glIsProgram(self.id):
+                GL.glDeleteProgram(self.id)
+        except Exception:
+            print(f"Failed to delete shader program: {self.id}")
+
+    def use(self):
+        GL.glUseProgram(self.id)
+
+    def loc(self, name: str):
+        """ 
+            Look up a uniform location if it exisits.
+            Else get it and store it for later.
+        """
+        if name not in self._loc:
+            self._loc[name] = GL.glGetUniformLocation(self.id, name)
+        return self._loc[name]
+
+    # uniform setting methods
+    def set_int(self, name, v): 
+        GL.glUniform1i(self.loc(name), int(v))
+    
+    def set_vec2(self, name, value): 
+        GL.glUniform2fv(self.loc(name), 1, value)
+    
+    def set_vec4(self, name, value): 
+        GL.glUniform4fv(self.loc(name), 1, value)
+
+class Triangle2D:
+
+    def __init__(self):
+
+        # vertices
+        data = np.array([
+            -0.5,   -0.5,   0.0, # v1
+             0.5,   -0.5,   0.0, # v2
+             0.0,    0.5,   0.0  # v3
+        ], dtype=np.float32)
+
+        # VAO
+        self.vao = GL.glGenVertexArrays(1)
+        GL.glBindVertexArray(self.vao)
+
+        # VBO
+        self.vbo = GL.glGenBuffers(1)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbo)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, data.nbytes, data, GL.GL_STATIC_DRAW)
+
+        # Attrib Linking
+        dsize = data.dtype.itemsize
+        stride = 3 * dsize # in bytes
+
+        # location = 0 : aPos
+        GL.glEnableVertexAttribArray(0) 
+        GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, stride, c_void_p(0))
+
+        # done with VAO
+        GL.glBindVertexArray(0)
+
+    def draw(self, shader : Shader):
+
+        # use this shader
+        shader.use()
+
+        # set shader uniforms
+
+        # draw VAO
+        GL.glBindVertexArray(self.vao)
+        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+
+        # unbind
+        GL.glBindVertexArray(0)
+
+class GLCameraFrame(OpenGLFrame):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def initgl(self):
+
+        # GL.glEnable(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT)
+        GL.glClearColor(0.08, 0.08, 0.10, 1.00)
+
+        self.shader = Shader(VERT_SRC, FRAG_SRC)
+        self.triangle = Triangle2D()
+
+    def redraw(self):
+        
+        GL.glViewport(0, 0, self.width, self.height)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+
+        self.triangle.draw(self.shader)
 
 class ABaseViewController(metaclass=abc.ABCMeta):
     """Abstract Base View Controller Class."""
@@ -999,6 +1157,27 @@ class BaseViewController(GUIController, ABaseViewController):
                 # Reuse the same canvas item, just rebind the image
                 self.canvas.itemconfig(self._img_item, image=self._photo)
 
+    def _ensure_canvas_gl_window(self, w: int, h: int):
+
+        need_new = (
+            getattr(self, "_gl_frame", None) is None
+            or self._gl_frame.width  != w
+            or self._gl_frame.height != h
+        )
+
+        if need_new:
+            # create a new GLCameraFrame
+            self._gl_frame = GLCameraFrame()
+
+            if getattr(self, "_gl_item", None) is None:
+                self._gl_item = self.canvas.create_window(
+                    0, 0, anchor="nw", window=self._gl_frame,
+                    width=w, height=h
+                )
+            else:
+                # Same logic as with _ensure_canvas_image, but rebind a gl_frame
+                self.canvas.itemconfig(self._gl_item, window=self._gl_frame)
+
     def populate_image(self, image: np.ndarray) -> None:
         """Update the Tk canvas using a persistent PhotoImage + paste.
 
@@ -1028,15 +1207,16 @@ class BaseViewController(GUIController, ABaseViewController):
             else:
                 raise ValueError(f"Unsupported image shape {image.shape}")
 
-            self._ensure_canvas_image(w, h, mode)
+            # self._ensure_canvas_image(w, h, mode)
+            self._ensure_canvas_gl_window(w, h)
 
             # zero-copy wrap of the numpy buffer into a PIL image
             # keep a reference so the buffer stays alive while Tk reads it
-            self._img_buf = image
-            pil = Image.frombuffer(mode, (w, h), image, "raw", mode, 0, 1)
+            # self._img_buf = image
+            # pil = Image.frombuffer(mode, (w, h), image, "raw", mode, 0, 1)
 
             # fast in-place update; no new PhotoImage objects, no new canvas items
-            self._photo.paste(pil)
+            # self._photo.paste(pil)
 
         except tk.TclError:
             return

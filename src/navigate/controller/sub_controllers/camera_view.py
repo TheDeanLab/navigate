@@ -54,6 +54,7 @@ import numpy as np
 from OpenGL import GL
 from pyopengltk import OpenGLFrame
 from ctypes import c_void_p
+import glm
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
@@ -65,28 +66,32 @@ from navigate.tools.decorators import performance_monitor
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
 # ========================= Shaders =========================
 
 VERT_SRC = """
 #version 330 core
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
 
 uniform mat4 m_MVP = mat4(1.0);
 
+out vec3 vColor;
+
 void main()
 {
+    vColor = aColor;
     gl_Position = m_MVP * vec4(aPos, 1.0);
 }
 """
 
 FRAG_SRC = """
 #version 330 core
+in vec3 vColor;
 out vec4 FragColor;
 
 void main() 
 {
-    FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+    FragColor = vec4(vColor, 1.0);
 }
 """
 
@@ -155,6 +160,10 @@ class Shader:
     def set_vec4(self, name, value): 
         GL.glUniform4fv(self.loc(name), 1, value)
 
+    def set_mat4(self, name: str, m: glm.mat4):
+        data = np.array(m.to_list(), dtype=np.float32)
+        GL.glUniformMatrix4fv(self.loc(name), 1, GL.GL_FALSE, data)
+
 class Triangle2D:
 
     def __init__(self):
@@ -200,10 +209,73 @@ class Triangle2D:
         # unbind
         GL.glBindVertexArray(0)
 
-class GLCameraFrame(OpenGLFrame):
+class Cube3D:
 
+    def __init__(self):
+
+        # positions + colors (8 verts)
+        data = np.array([
+            #    x   y   z     r    g    b
+                -1, -1, -1,    1,   0,   0,      # 0
+                 1, -1, -1,    0,   1,   0,      # 1
+                 1,  1, -1,    0,   0,   1,      # 2
+                -1,  1, -1,    1,   1,   0,      # 3
+                -1, -1,  1,    1,   0,   1,      # 4
+                 1, -1,  1,    0,   1,   1,      # 5
+                 1,  1,  1,    1,   1,   1,      # 6
+                -1,  1,  1,    0.2, 0.2, 0.2 # 7
+        ], dtype=np.float32)        
+
+        # 12 triangles (indices)
+        idx = np.array([
+            0,1,2, 2,3,0,    # back
+            4,5,6, 6,7,4,    # front
+            0,4,7, 7,3,0,    # left
+            1,5,6, 6,2,1,    # right
+            3,2,6, 6,7,3,    # top
+            0,1,5, 5,4,0     # bottom
+        ], dtype=np.uint32)
+
+        self.n_elements = idx.size
+
+        # VAO
+        self.vao = GL.glGenVertexArrays(1)
+        GL.glBindVertexArray(self.vao)
+
+        # VBO
+        self.vbo = GL.glGenBuffers(1)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbo)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, data.nbytes, data, GL.GL_STATIC_DRAW)
+
+        # Element Buffer
+        self.ebo = GL.glGenBuffers(1)
+        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.ebo)
+        GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, idx.nbytes, idx, GL.GL_STATIC_DRAW)
+
+        dsize = data.dtype.itemsize
+        stride = 6 * dsize  # 6 floats/vertex
+        GL.glEnableVertexAttribArray(0)  # aPos
+        GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, stride, c_void_p(0))
+        GL.glEnableVertexAttribArray(1)  # aColor
+        GL.glVertexAttribPointer(1, 3, GL.GL_FLOAT, GL.GL_FALSE, stride, c_void_p(3 * dsize))
+
+        GL.glBindVertexArray(0)                
+
+    def draw(self):
+
+        GL.glBindVertexArray(self.vao)
+        GL.glDrawElements(GL.GL_TRIANGLES, self.n_elements, GL.GL_UNSIGNED_INT, None)
+        
+        GL.glBindVertexArray(0)
+
+class GLCameraFrame(OpenGLFrame):
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Make these available BEFORE initgl() runs
+        self._draw_pending = False
+        self.animate = 0
+        self.tick = 0
 
     def initgl(self):
 
@@ -211,14 +283,48 @@ class GLCameraFrame(OpenGLFrame):
         GL.glClearColor(0.08, 0.08, 0.10, 1.00)
 
         self.shader = Shader(VERT_SRC, FRAG_SRC)
-        self.triangle = Triangle2D()
+        # self.triangle = Triangle2D()
+        self.cube = Cube3D()
+
+    def request_draw(self):
+        if self._draw_pending:
+            return
+        
+        self._draw_pending = True
+        self.after_idle(self._display_once)
+
+    def _display_once(self):
+        try:
+            self._display()
+        finally:
+            self._draw_pending = False
 
     def redraw(self):
+        w = max(1, int(self.winfo_width()))
+        h = max(1, int(self.winfo_height()))        
         
-        GL.glViewport(0, 0, self.width, self.height)
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glViewport(0, 0, w, h)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
-        self.triangle.draw(self.shader)
+        self.shader.use()
+
+        aspect = w / float(h)
+        proj  = glm.perspective(glm.radians(60.0), aspect, 0.1, 100.0)
+        view  = glm.translate(glm.mat4(1.0), glm.vec3(0.0, 0.0, -10.0))
+        model = glm.rotate(glm.mat4(1.0), glm.radians(45), glm.normalize(glm.vec3(1.0)))
+        model = glm.rotate(model, glm.radians(self.tick), glm.vec3(0., 0., 1.))
+        self.tick += 1
+
+        print(self.tick)
+
+        mvp = proj * view * model
+        self.shader.set_mat4("m_MVP", mvp)
+
+        # self.triangle.draw(self.shader)
+        self.cube.draw()
+
+        GL.glDisable(GL.GL_DEPTH_TEST)
 
 class ABaseViewController(metaclass=abc.ABCMeta):
     """Abstract Base View Controller Class."""
@@ -1166,17 +1272,15 @@ class BaseViewController(GUIController, ABaseViewController):
         )
 
         if need_new:
-            # create a new GLCameraFrame
-            self._gl_frame = GLCameraFrame()
-
             if getattr(self, "_gl_item", None) is None:
+                self._gl_frame = GLCameraFrame(self.canvas, width=w, height=h)
                 self._gl_item = self.canvas.create_window(
-                    0, 0, anchor="nw", window=self._gl_frame,
-                    width=w, height=h
+                    0, 0, anchor="nw", window=self._gl_frame, width=w, height=h
                 )
             else:
                 # Same logic as with _ensure_canvas_image, but rebind a gl_frame
-                self.canvas.itemconfig(self._gl_item, window=self._gl_frame)
+                self.canvas.itemconfig(self._gl_item, width=w, height=h)
+                self._gl_frame.config(width=w, height=h)
 
     def populate_image(self, image: np.ndarray) -> None:
         """Update the Tk canvas using a persistent PhotoImage + paste.
@@ -1214,6 +1318,8 @@ class BaseViewController(GUIController, ABaseViewController):
             # keep a reference so the buffer stays alive while Tk reads it
             # self._img_buf = image
             # pil = Image.frombuffer(mode, (w, h), image, "raw", mode, 0, 1)
+
+            self._gl_frame.request_draw()
 
             # fast in-place update; no new PhotoImage objects, no new canvas items
             # self._photo.paste(pil)

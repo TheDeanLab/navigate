@@ -74,9 +74,3 @@ class SyntheticLaser(LaserBase):
     def close(self) -> None:
         """Close the port before exit."""
         pass
-
-    def initialize_laser(self) -> None:
-        """
-        Initialize lasers.
-        """
-        pass

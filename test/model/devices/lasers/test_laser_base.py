@@ -10,7 +10,7 @@ def test_laser_base_functions():
     ]
     laser = LaserBase(microscope_name, None, model.configuration, 0)
 
-    funcs = ["set_power", "turn_on", "turn_off", "close", "initialize_laser"]
+    funcs = ["set_power", "turn_on", "turn_off", "close"]
     args = [[random.random()], None, None, None]
 
     for f, a in zip(funcs, args):

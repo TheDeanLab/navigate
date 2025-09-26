@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 from typing import Any, Dict, Optional
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -45,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class ShutterBase:
+class ShutterBase(ABC):
     """ShutterBase Class - Parent class for the laser shutters."""
 
     def __init__(
@@ -87,13 +88,21 @@ class ShutterBase:
         """Close the Shutter at exit."""
         pass
 
+    @abstractmethod
     def open_shutter(self) -> None:
-        """Open the Shutter."""
-        self.shutter_state = True
+        """Open the Shutter.
 
+        This abstract method must be implemented by all subclasses.
+        """
+        pass
+
+    @abstractmethod
     def close_shutter(self) -> None:
-        """Close the Shutter."""
-        self.shutter_state = False
+        """Close the Shutter.
+
+        This abstract method must be implemented by all subclasses.
+        """
+        pass
 
     @property
     def state(self) -> bool:

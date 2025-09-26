@@ -33,6 +33,7 @@
 #  Standard Library Imports
 import logging
 from typing import Any, Dict
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -50,7 +51,7 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class RemoteFocusBase:
+class RemoteFocusBase(ABC):
     """RemoteFocusBase Class - Parent class for Remote Focusing Device."""
 
     def __init__(
@@ -119,6 +120,14 @@ class RemoteFocusBase:
 
     def __del__(self):
         """Destructor"""
+        pass
+
+    @abstractmethod
+    def move(self):
+        """Moves the remote focus device to the specified position.
+
+        This abstract method must be implemented by all subclasses.
+        """
         pass
 
     def adjust(self, exposure_times, sweep_times, offset=None):

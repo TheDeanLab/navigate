@@ -70,3 +70,11 @@ class SyntheticShutter(ShutterBase):
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)
+
+    def open_shutter(self) -> None:
+        """Open the Shutter."""
+        self.shutter_state = True
+
+    def close_shutter(self) -> None:
+        """Close the Shutter."""
+        self.shutter_state = False

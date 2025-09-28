@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -44,10 +45,17 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class ZoomBase:
+class ZoomBase(ABC):
     """ZoomBase parent class."""
 
-    def __init__(self, microscope_name, device_controller, configuration, *args, **kwargs):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_controller,
+        configuration: dict,
+        *args,
+        **kwargs,
+    ) -> None:
         """Initialize the parent zoom class.
 
         Parameters
@@ -80,7 +88,7 @@ class ZoomBase:
         """Return the string representation of the ZoomBase object."""
         return "ZoomBase"
 
-    def build_stage_dict(self):
+    def build_stage_dict(self) -> None:
         """
         Construct a dictionary of stage offsets in between different zoom values.
 
@@ -122,7 +130,8 @@ class ZoomBase:
                             focus_target - focus_curr
                         )
 
-    def set_zoom(self, zoom, wait_until_done=False):
+    @abstractmethod
+    def set_zoom(self, zoom: dict, wait_until_done=False) -> None:
         """Change the microscope zoom.
 
         Confirms tha the zoom position is available in the zoomdict
@@ -142,7 +151,7 @@ class ZoomBase:
             logger.error(f"Zoom designation, {zoom}, not in the configuration")
             raise ValueError("Zoom designation not in the configuration")
 
-    def move(self, position=0, wait_until_done=False):
+    def move(self, position: int, wait_until_done: bool = False) -> None:
         """Move the Zoom Servo
 
         Parameters
@@ -154,7 +163,7 @@ class ZoomBase:
         """
         pass
 
-    def read_position(self):
+    def read_position(self) -> int:
         """Read the position of the Zoom Servo
 
         Returns

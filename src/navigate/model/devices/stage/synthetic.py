@@ -253,3 +253,7 @@ class SyntheticStage(StageBase):
     def update_waveform(self, waveform_dict):
         print("*** update waveform:", waveform_dict.keys())
         pass
+
+    def stop(self) -> None:
+        """Stop all stage movement abruptly."""
+        pass

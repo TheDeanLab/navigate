@@ -395,3 +395,31 @@ class SyntheticCamera(CameraBase):
             Trigger source, either 'External' or 'Internal'.
         """
         logger.debug(f"Set camera trigger mode: {trigger_source}")
+
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time: float, shutter_width: float
+    ) -> tuple[float, float, float]:
+        """Calculate the light sheet exposure time.
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Full chip exposure time in seconds.
+        shutter_width : float
+            Shutter width in pixels.
+
+        Returns
+        -------
+        tuple[float, float, float]
+            Tuple containing the light sheet exposure time, the line interval time,
+            and the readout time.
+        """
+        (
+            exposure_time,
+            camera_line_interval,
+            full_chip_exposure_time,
+        ) = super().calculate_light_sheet_exposure_time(
+            full_chip_exposure_time, shutter_width
+        )
+
+        return exposure_time, camera_line_interval, full_chip_exposure_time

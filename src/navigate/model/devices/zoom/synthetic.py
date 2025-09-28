@@ -73,3 +73,7 @@ class SyntheticZoom(ZoomBase):
     def __del__(self) -> None:
         """Delete the SyntheticZoom Servo."""
         pass
+
+    def set_zoom(self, zoom: dict, wait_until_done=False) -> None:
+        """Set the zoom position."""
+        super().set_zoom(zoom, wait_until_done)

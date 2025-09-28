@@ -86,3 +86,7 @@ class SyntheticGalvo(GalvoBase):
     def __str__(self) -> str:
         """Return string representation of the GalvoNI."""
         return "SyntheticGalvo"
+
+    def turn_off(self):
+        """Turn off the galvo."""
+        pass

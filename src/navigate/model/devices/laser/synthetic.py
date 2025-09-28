@@ -74,3 +74,25 @@ class SyntheticLaser(LaserBase):
     def close(self) -> None:
         """Close the port before exit."""
         pass
+
+    def set_power(self, laser_intensity: int) -> None:
+        """Set the laser power.
+
+        Parameters
+        ----------
+        laser_intensity : int
+            The laser intensity to set.
+        """
+        logger.debug(
+            f"{self.microscope_name} - SyntheticLaser.set_power({laser_intensity})"
+        )
+        self.laser_intensity = laser_intensity
+
+    def turn_on(self) -> None:
+        """Turn on the laser"""
+        pass
+
+    def turn_off(self) -> None:
+        """Turn off the laser"""
+
+        pass

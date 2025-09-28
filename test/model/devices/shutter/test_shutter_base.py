@@ -30,7 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import unittest
-from navigate.model.devices.shutter.base import ShutterBase
+from navigate.model.devices.shutter.synthetic import SyntheticShutter
 from test.model.dummy import DummyModel
 
 
@@ -41,7 +41,7 @@ class TestLaserBase(unittest.TestCase):
     microscope_name = "Mesoscale"
 
     def test_shutter_base_attributes(self):
-        shutter = ShutterBase(
+        shutter = SyntheticShutter(
             self.microscope_name, None, self.dummy_model.configuration
         )
 

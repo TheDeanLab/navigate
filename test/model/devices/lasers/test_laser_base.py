@@ -1,14 +1,15 @@
-def test_laser_base_functions():
-    import random
+from navigate.model.devices.laser.synthetic import SyntheticLaser
+from test.model.dummy import DummyModel
+import random
 
-    from navigate.model.devices.laser.base import LaserBase
-    from test.model.dummy import DummyModel
+
+def test_laser_base_functions():
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][
         "microscope_name"
     ]
-    laser = LaserBase(microscope_name, None, model.configuration, 0)
+    laser = SyntheticLaser(microscope_name, None, model.configuration, 0)
 
     funcs = ["set_power", "turn_on", "turn_off", "close"]
     args = [[random.random()], None, None, None]

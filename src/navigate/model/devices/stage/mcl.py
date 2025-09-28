@@ -46,7 +46,6 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-
 @log_initialization
 class MCLStage(StageBase, IntegratedDevice):
     """Mad City Lab stage class."""
@@ -118,7 +117,9 @@ class MCLStage(StageBase, IntegratedDevice):
         stage_connection : dict
             Dictionary containing the connection information for the stage.
         """
-        mcl_controller = importlib.import_module("navigate.model.devices.APIs.mcl.madlib")
+        mcl_controller = importlib.import_module(
+            "navigate.model.devices.APIs.mcl.madlib"
+        )
 
         # Initialize
         mcl_controller.MCL_GrabAllHandles()
@@ -212,3 +213,7 @@ class MCLStage(StageBase, IntegratedDevice):
             result = result and success
 
         return result
+
+    def stop(self):
+        """Stop all motion of the stage."""
+        pass

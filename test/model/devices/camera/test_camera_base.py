@@ -29,17 +29,17 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#"""
 
 # Third Party Imports
 
-from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices.camera.synthetic import SyntheticCamera
 
 
 def test_start_camera(dummy_model):
     model = dummy_model
     for microscope_name in model.configuration["configuration"]["microscopes"].keys():
-        camera = CameraBase(microscope_name, None, model.configuration)
+        camera = SyntheticCamera(microscope_name, None, model.configuration)
         assert (
             camera.camera_parameters["hardware"]["serial_number"]
             == model.configuration["configuration"]["microscopes"][microscope_name][
@@ -53,7 +53,7 @@ def test_start_camera(dummy_model):
     )
     raised_error = False
     try:
-        camera = CameraBase(microscope_name, None, model.configuration)
+        _ = SyntheticCamera(microscope_name, None, model.configuration)
     except NameError:
         raised_error = True
     assert (
@@ -69,7 +69,7 @@ def test_camera_base_functions(dummy_model):
         "microscope_name"
     ]
 
-    camera = CameraBase(microscope_name, None, model.configuration)
+    camera = SyntheticCamera(microscope_name, None, model.configuration)
     funcs = ["set_readout_direction", "calculate_light_sheet_exposure_time"]
     args = [[random.random()], [random.random(), random.random()]]
 

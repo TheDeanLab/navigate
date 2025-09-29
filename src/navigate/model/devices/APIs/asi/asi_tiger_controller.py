@@ -1069,13 +1069,13 @@ class TigerController:
 
         print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
-        self.send_command(f"3 SAP {axis}={round(waveform)}")
+        self.send_command(f"SAP {axis}={round(waveform)}")
         self.read_response()
-        self.send_command(f"3 SAA {axis}={round(amplitude)}")
+        self.send_command(f"SAA {axis}={round(amplitude)}")
         self.read_response()
-        self.send_command(f"3 SAO {axis}={round(offset)}")
+        self.send_command(f"SAO {axis}={round(offset)}")
         self.read_response()
-        self.send_command(f"3 SAF {axis}={round(period)}")
+        self.send_command(f"SAF {axis}={round(period)}")
         self.read_response()
 
     def single_axis_mode(self, axis: str, mode: int) -> None:
@@ -1094,7 +1094,7 @@ class TigerController:
         mode: int
             Integer code.
         """
-        self.send_command(f"3 SAM {axis}={mode}")
+        self.send_command(f"SAM {axis}={mode}")
         self.read_response()
 
     def setup_control_loop(
@@ -1129,7 +1129,7 @@ class TigerController:
         num_cycles: int
             Number of cycles to run the loop. 0 for infinite
         """
-        # TODO: Investigate if these axis outputs are shared amongst units.
+        # TODO: Investigate if these axis  outputs are shared amongst units.
         # Reference values for ttls that correspond to outputs A-C
         ttls = {"A": 42, "B": 44, "C": 46,
                 "H": 42, "I": 44, "J": 46}
@@ -1157,7 +1157,7 @@ class TigerController:
             int(sweep_time * 4) - 2
         )  # Hardcoded -2 to account for delays within controller
         cycle_time = int(cycle_time * 4)
-
+        num_cycles = int(num_cycles)
         # Dynamic delay processing. Instead of having each delay handled separately,
         # to save some cell space delays are programmed based on some simple
         # calculation logic. Cell 6 is the direct output for the logical loop,
@@ -1210,7 +1210,7 @@ class TigerController:
             # Cell 7, delay cell that waits for the sweep time until retriggering.
             # Used for the main loop. Timing is dependent on the sweep_time variable
             "6 m e = 7",
-            f"6 cca y = 9 z= {sweep_time}",
+            f"6 cca y = 9 z = {sweep_time}",
             "6 ccb x = 6 y = 192",
             # Cell 9, delay used to sync the phase of the Galvos
             # This is because the Tiger Controller can not arbitrarily start waveforms
@@ -1228,7 +1228,7 @@ class TigerController:
             "6 ccb x = 6 y = 192",
             # Cell 12, a one-shot triggered by the rising edge of Cell 11
             "6 m e = 12",
-            "6 cca y = 8 z = 4",
+            "6 cca y = 8 z = 40",
             "6 ccb x = 11 y = 192",
             # Routes the output of the remote focus trigger to the TTL output from the
             # PLC
@@ -1238,14 +1238,31 @@ class TigerController:
             "6 m e = 33",
             f"6 cca z = {camera_output}",
             # Sends TTL to Piezo
-            "6 m e = 47",
-            f"6 cca z = {camera_output}",
+            "6 m e = 35",
+            "6 cca z = 7",
         ]
+        print("Number of cycles: ", num_cycles)
         if (num_cycles > 0):
-            commands[8:10] = [
-                # Cell 4, One-shot that lasts for the cycle time
-                f"6 cca y = 8 z = {cycle_time}",
-                "6 ccb x = 3 y = 192"
+            commands[7:13] = [
+                "2 ttl x=2 y=2",
+                "2 rt y=10",
+                "2r f = -500",
+                "2r f = 500",
+                # Set PLC axis 4 to be an input to receive stage sync signal
+                "6 m e = 36",
+                "6 cca y = 0",
+                # Cell 4, One-shot that stays high for num_cycles
+                # Inputs are cell 3 and the inverse of PLC axis 4 (36+64)
+                "6 m e = 4",
+                f"6 cca y = 14 z = {num_cycles}",
+                "6 ccb x = 3 y = 100",
+                # Cell 5, AND cell used to check if the loop is still operating
+                # Cell inputs are the output of cell 4 and the inverse of PLC axis 4 (36+64)
+                "6 m e = 5",
+                "6 cca y = 5",
+                "6 ccb x = 4 y = 100",
+                "6 m e = 40",
+                "6 cca z = 4",
             ]
         # Creates object to hold galvo commands
         galvo_commands = []

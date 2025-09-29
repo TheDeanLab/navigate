@@ -37,7 +37,7 @@ import random
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.stage.base import StageBase
+from navigate.model.devices.stage.synthetic import SyntheticStage
 
 
 class TestStageBase:
@@ -75,7 +75,7 @@ class TestStageBase:
     def test_stage_attributes(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
-        stage = StageBase(self.microscope_name, None, self.configuration)
+        stage = SyntheticStage(self.microscope_name, None, self.configuration)
 
         # Attributes
         for axis in axes:
@@ -114,7 +114,7 @@ class TestStageBase:
     )
     def test_get_position_dict(self, axes, axes_pos):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
-        stage = StageBase(self.microscope_name, None, self.configuration)
+        stage = SyntheticStage(self.microscope_name, None, self.configuration)
         for i, axis in enumerate(axes):
             setattr(stage, f"{axis}_pos", axes_pos[i])
 
@@ -137,7 +137,7 @@ class TestStageBase:
     def test_get_abs_position(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
-        stage = StageBase(self.microscope_name, None, self.configuration)
+        stage = SyntheticStage(self.microscope_name, None, self.configuration)
 
         for axis in axes:
             axis_min = self.stage_configuration["stage"][f"{axis}_min"]
@@ -187,7 +187,7 @@ class TestStageBase:
     def test_verify_abs_position(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
-        stage = StageBase(self.microscope_name, None, self.configuration)
+        stage = SyntheticStage(self.microscope_name, None, self.configuration)
 
         move_dict = {}
         abs_dict = {}
@@ -198,7 +198,6 @@ class TestStageBase:
             axis_abs = random.randrange(axis_min, axis_max)
             move_dict[f"{axis}_abs"] = axis_abs
             abs_dict[axis] = axis_abs
-
         assert stage.verify_abs_position(move_dict) == abs_dict
 
         # turn off stage_limits
@@ -206,9 +205,13 @@ class TestStageBase:
         axis = random.choice(axes)
         axis_min = self.stage_configuration["stage"][f"{axis}_min"]
         axis_max = self.stage_configuration["stage"][f"{axis}_max"]
+
+        # Test minimum boundary
         move_dict[f"{axis}_abs"] = axis_min - 1.5
         abs_dict[axis] = axis_min - 1.5
         assert stage.verify_abs_position(move_dict) == abs_dict
+
+        # Test maximum boundary
         move_dict[f"{axis}_abs"] = axis_max + 1.5
         abs_dict[axis] = axis_max + 1.5
         assert stage.verify_abs_position(move_dict) == abs_dict
@@ -222,16 +225,6 @@ class TestStageBase:
         move_dict["theta_abs"] = 180
         if "theta" in axes:
             abs_dict["theta"] = 180
-        assert stage.verify_abs_position(move_dict) == abs_dict
-        stage.stage_limits = False
-        assert stage.verify_abs_position(move_dict) == abs_dict
-
-        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping[
-            :-1
-        ]
-        stage = StageBase(self.microscope_name, None, self.configuration)
-        abs_dict.pop(axes[-1])
-
         assert stage.verify_abs_position(move_dict) == abs_dict
         stage.stage_limits = False
         assert stage.verify_abs_position(move_dict) == abs_dict

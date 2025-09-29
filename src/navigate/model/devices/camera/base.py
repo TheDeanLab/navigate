@@ -125,16 +125,11 @@ class CameraBase(ABC):
         self.minimum_exposure_time = 0.001
         self.camera_parameters["x_pixels"] = 2048
         self.camera_parameters["y_pixels"] = 2048
-        # TODO: trigger_source, readout_speed,
-        #  trigger_active, trigger_mode and trigger_polarity
-        # can be removed after updating how we get the
-        # readout time in model and controller
-        self.camera_parameters["trigger_source"] = 2.0  # external trigger
-        self.camera_parameters["readout_speed"] = 1.0
-        self.camera_parameters["pixel_size_in_microns"] = 6.5
-        self.camera_parameters["trigger_active"] = 1.0
-        self.camera_parameters["trigger_mode"] = 1.0  # standard trigger mode
-        self.camera_parameters["trigger_polarity"] = 2.0
+
+        if "pixel_size_in_microns" not in self.camera_parameters:
+            self.camera_parameters["pixel_size_in_microns"] = 6.5
+
+        # Supported modes, not all cameras support all modes
         self.camera_parameters["supported_sensor_modes"] = ["Normal", "Light-Sheet"]
         self.camera_parameters["supported_readout_directions"] = [
             "Top-to-Bottom",
@@ -150,27 +145,12 @@ class CameraBase(ABC):
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
-        #: bool: whether to use random images
-        self.random_image = False
-
-        #: int: current image id
-        self.img_id = 0
-
-        #: int: current tif id
-        self.current_tif_id = 0
-
-        #: list: list of tif images
-        self.tif_images = []
-
-        #: int: number of frames to load. Overwritten by synthetic_camera.
-        self.num_of_frame = 100
-
     def __str__(self) -> str:
         """Return string representation of CameraBase."""
         return "CameraBase"
 
     @abstractmethod
-    def get_new_frame(self) -> Any:
+    def get_new_frame(self) -> list[int]:
         """Get a new frame from the camera.
 
         This abstract method must be implemented by all subclasses.
@@ -178,13 +158,13 @@ class CameraBase(ABC):
 
         Returns
         -------
-        frame : Any
-            New frame from the camera.
+        frame_ids : list[int]
+            New frame ids from the camera.
         """
-        pass
+        return []
 
     @abstractmethod
-    def initialize_image_series(self, data_buffer=None, number_of_frames=100) -> None:
+    def initialize_image_series(self, data_buffer: Optional[list]=None, number_of_frames: int=100) -> None:
         """Initialize image series.
 
         This abstract method must be implemented by all subclasses.
@@ -209,65 +189,22 @@ class CameraBase(ABC):
         pass
 
     @abstractmethod
-    def set_line_interval(self, line_interval_time: float) -> None:
+    def set_line_interval(self, line_interval_time: float) -> bool:
         """Set the camera line interval time.
 
         This abstract method must be implemented by all subclasses.
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
         """
-        pass
+        return True
 
     @abstractmethod
-    def set_exposure_time(self, exposure_time: float) -> None:
+    def set_exposure_time(self, exposure_time: float) -> bool:
         """Set the camera exposure time."""
-        pass
-
-    def load_images(self, filenames: Optional[str] = None, ds=None) -> None:
-        """Pre-populate the buffer with images. Can either come from TIFF files or
-        Numpy stacks.
-
-        Parameters
-        ----------
-        filenames : str, optional
-            List of TIFF filenames, by default None
-        ds : list, optional
-            List of Numpy stacks, by default None
-
-        Raises
-        ------
-        tifffile.TiffFileError
-            If the TIFF file cannot be opened.
-        """
-        self.random_image = False
-        self.img_id = 0
-        self.current_tif_id = 0
-        self.tif_images = []
-        idx = 0
-        if filenames is not None:
-            # Load TIFF file into buffer as slices
-            for image_file in filenames:
-                try:
-                    tif = tifffile.TiffFile(image_file)
-                    if len(tif.pages) == 1:
-                        self.tif_images.append([tif.asarray()])
-                    else:
-                        self.tif_images.append(tif.asarray())
-                    idx += len(tif.pages)
-
-                    # TODO: self.num_of_frame is not defined in the base class
-                    if idx >= self.num_of_frame:
-                        return
-                except tifffile.TiffFileError:
-                    pass
-        elif ds is not None:
-            # Load a Numpy stack into buffer as slices
-            # Assume the stack is in the order ZYX
-            for idx, data in enumerate(ds):
-                self.tif_images.append(data)
-                idx += len(data)
-                if idx >= self.num_of_frame:
-                    return
-        else:
-            self.random_image = True
+        return True
 
     def get_offset_variance_maps(self) -> Any:
         """Get offset and variance maps from file.
@@ -325,6 +262,7 @@ class CameraBase(ABC):
             self.get_offset_variance_maps()
         return self._variance
 
+    @abstractmethod
     def set_readout_direction(self, mode: str) -> None:
         """Set HamamatsuOrca readout direction.
 
@@ -337,7 +275,7 @@ class CameraBase(ABC):
 
     @abstractmethod
     def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time: float, shutter_width: float
+        self, full_chip_exposure_time: float, shutter_width: int
     ) -> tuple[float, float, float]:
         """Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an acquisition
@@ -372,7 +310,7 @@ class CameraBase(ABC):
         """Close camera."""
         pass
 
-    def get_line_interval(self) -> float:
+    def get_line_interval(self) -> Optional[float]:
         """Return stored camera line interval.
 
         Returns
@@ -381,6 +319,50 @@ class CameraBase(ABC):
             line interval duration (s).
         """
         return self.camera_parameters.get("line_interval", None)
+    
+    @abstractmethod
+    def set_ROI(
+        self,
+        roi_width: int = 2048,
+        roi_height: int = 2048,
+        center_x: int = 1024,
+        center_y: int = 1024,
+    ) -> bool:
+        """Change the size of the active region on the camera.
+
+        Parameters
+        ----------
+        roi_width : int
+            Width of active camera region.
+        roi_height : int
+            Height of active camera region.
+        center_x : int
+            X position of the center of view
+        center_y : int
+            Y position of the center of view
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
+        """
+        return True
+
+    @abstractmethod
+    def set_binning(self, binning: str = "1x1") -> bool:
+        """Set the camera binning mode.
+
+        Parameters
+        ----------
+        binning : str
+            Desired binning properties (e.g., '1x1', '2x2', '4x4', '1x2', '2x4')
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
+        """
+        return True
 
     def set_ROI_and_binning(
         self,
@@ -430,5 +412,16 @@ class CameraBase(ABC):
         ----------
         trigger_source : str
             Trigger source. Options are 'External' or 'Internal'.
+        """
+        pass
+
+    @abstractmethod
+    def set_sensor_mode(self, mode: str) -> None:
+        """Set camera sensor mode.
+
+        Parameters
+        ----------
+        mode : str
+            Sensor mode. Options are 'Normal' or 'Light-Sheet'.
         """
         pass

@@ -107,10 +107,8 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 self.camera_controller.set_property_value(
                     "readout_speed", int(speed_max)
                 )
-                self.camera_parameters["readout_speed"] = int(speed_max)
             else:
                 self.camera_controller.set_property_value("readout_speed", 1)
-                self.camera_parameters["readout_speed"] = 1
 
         self.camera_parameters[
             "pixel_size_in_microns"
@@ -139,7 +137,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         # self.close_camera()
 
     @classmethod
-    def connect(cls, camera_id):
+    def connect(cls, camera_id: str) -> DCAM:
         """Connect to HamamatsuOrca camera.
 
         Parameters
@@ -156,7 +154,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         return camera_controller
 
     @property
-    def serial_number(self):
+    def serial_number(self) -> str:
         """Get Camera Serial Number
 
         Returns
@@ -166,7 +164,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         """
         return self.camera_controller._serial_number
 
-    def report_settings(self):
+    def report_settings(self) -> None:
         """Print Camera Settings.
 
         Prints the current camera settings to the console and the log file."""
@@ -198,11 +196,11 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             self.camera_controller.get_property_range("exposure_time"),
         )
 
-    def close_camera(self):
+    def close_camera(self) -> None:
         """Close HamamatsuOrca Camera"""
         self.camera_controller.dev_close()
 
-    def set_trigger_mode(self, trigger_source="External"):
+    def set_trigger_mode(self, trigger_source:str="External") -> None:
         """Set Hamamatsu trigger source and trigger mode.
         
         Parameters
@@ -222,20 +220,20 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
             )
             self.camera_controller.set_property_value(
-                "trigger_active", self.camera_parameters["trigger_active"]
+                "trigger_active", 1.0
             )
             self.camera_controller.set_property_value(
-                "trigger_mode", self.camera_parameters["trigger_mode"]
+                "trigger_mode", 1
             )
             self.camera_controller.set_property_value(
-                "trigger_polarity", self.camera_parameters["trigger_polarity"]
+                "trigger_polarity", 2.0
             )
             self.camera_controller.set_property_value(
-                "trigger_source", self.camera_parameters["trigger_source"]
+                "trigger_source", 2 # External trigger.
             )
             logger.debug("Set camera trigger mode: External Edge Trigger.")
 
-    def set_sensor_mode(self, mode):
+    def set_sensor_mode(self, mode: str) -> None:
         """Set HamamatsuOrca sensor mode.
 
         Parameters
@@ -275,7 +273,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             print("Camera mode not supported")
             logger.debug("Camera mode not supported")
 
-    def set_readout_direction(self, mode):
+    def set_readout_direction(self, mode: str) -> None:
         """Set HamamatsuOrca readout direction.
 
         Parameters
@@ -300,7 +298,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             print("Camera readout direction not supported")
             logger.debug("Camera readout direction not supported")
 
-    def calculate_readout_time(self):
+    def calculate_readout_time(self) -> float:
         """Get the duration of time needed to read out an image.
 
         Returns
@@ -313,7 +311,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         # with camera internal delay
         return readout_time  # + 4 * self.minimum_exposure_time
 
-    def set_exposure_time(self, exposure_time):
+    def set_exposure_time(self, exposure_time: float) -> bool:
         """Set HamamatsuOrca exposure time.
 
         Note
@@ -324,22 +322,32 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         ----------
         exposure_time : float
             Exposure time in seconds.
+        
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
         """
         return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
-    def set_line_interval(self, line_interval_time):
+    def set_line_interval(self, line_interval_time: float) -> bool:
         """Set HamamatsuOrca line interval.
 
         Parameters
         ----------
         line_interval_time : float
             Line interval duration.
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
         """
         return self.camera_controller.set_property_value(
             "internal_line_interval", line_interval_time
         )
 
-    def get_line_interval(self):
+    def get_line_interval(self) -> float:
         """Get HamamatsuOrca line interval.
 
         Returns
@@ -347,11 +355,12 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         line_interval_time : float
             Line interval duration.
         """
-        self.line_interval = self.camera_controller.get_property_value(
+        line_interval = self.camera_controller.get_property_value(
             "internal_line_interval"
         )
+        return line_interval
 
-    def set_binning(self, binning_string):
+    def set_binning(self, binning_string: str) -> bool:
         """Set HamamatsuOrca binning mode.
 
         Parameters
@@ -383,7 +392,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         )
         return True
 
-    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024):
+    def set_ROI(self, roi_width: int=2048, roi_height: int=2048, center_x: int=1024, center_y: int=1024) -> bool:
         """Change the size of the active region on the camera.
 
         Parameters
@@ -451,7 +460,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
 
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
-    def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+    def initialize_image_series(self, data_buffer: Optional[list]=None, number_of_frames: int=100) -> None:
         """Initialize HamamatsuOrca image series.
 
         Parameters
@@ -466,7 +475,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         self.camera_controller.start_acquisition(data_buffer, number_of_frames)
         self.is_acquiring = True
 
-    def close_image_series(self):
+    def close_image_series(self) -> None:
         """Close image series.
 
         Stops the acquisition and sets is_acquiring flag to False.
@@ -474,12 +483,12 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         self.camera_controller.stop_acquisition()
         self.is_acquiring = False
 
-    def get_new_frame(self):
+    def get_new_frame(self) -> list[int]:
         """Get frame from HamamatsuOrca camera.
 
         Returns
         -------
-        frame : numpy.ndarray
+        frame_ids : list[int]
             Frame ids from HamamatsuOrca camera.
         """
         return self.camera_controller.get_frames()
@@ -525,8 +534,8 @@ class HamamatsuOrcaLightningCamera(HamamatsuBase):
         return "HamamatsuOrcaLightning"
 
     def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time, shutter_width
-    ):
+        self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
         """Calculate light sheet exposure time.
 
         Parameters
@@ -612,8 +621,8 @@ class HamamatsuOrcaFireCamera(HamamatsuBase):
         return "HamamatsuOrcaFire"
 
     def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time, shutter_width
-    ):
+        self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
         """Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an acquisition
 
@@ -695,8 +704,8 @@ class HamamatsuOrcaCamera(HamamatsuBase):
         return "HamamatsuOrca"
 
     def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time, shutter_width
-    ):
+        self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
         """Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an acquisition
 
@@ -775,8 +784,8 @@ class HamamatsuOrcaFusionCamera(HamamatsuBase):
         return "HamamatsuOrcaFusion"
 
     def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time, shutter_width
-    ):
+        self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
         """Calculate light sheet exposure time.
 
         Parameters

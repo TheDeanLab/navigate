@@ -108,7 +108,7 @@ class XimeaBase(CameraBase):
         self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
 
 
-    def __str__(str):
+    def __str__(self) -> str:
         """Return string representation of Ximea Base class
         
         Returns
@@ -123,7 +123,7 @@ class XimeaBase(CameraBase):
         self.cam.close_device()
 
     @classmethod
-    def get_connect_params(cls):
+    def get_connect_params(cls) -> list[str]:
         """Register the parameters required to connect to the camera.
 
         Returns
@@ -134,7 +134,7 @@ class XimeaBase(CameraBase):
         return ["serial_number"]
 
     @classmethod
-    def connect(cls, serial_number):
+    def connect(cls, serial_number: str) -> xiapi.Camera:
         """Build Photometrics Stage Serial Port connection
 
         Import Photometrics API and Initialize Camera Controller.
@@ -161,7 +161,7 @@ class XimeaBase(CameraBase):
             )
         
     @property
-    def serial_number(self):
+    def serial_number(self) -> str:
         """Get Camera Serial Number
 
         Returns
@@ -171,7 +171,7 @@ class XimeaBase(CameraBase):
         """
         self.cam.get_param("device_sn").decode("utf-8")
 
-    def report_settings(self):
+    def report_settings(self) -> None:
         """Print Camera Settings.
 
         Prints the current camera settings to the console and the log file.
@@ -182,7 +182,7 @@ class XimeaBase(CameraBase):
             print(param, value)
             logger.info(f"{param}, {value}")
 
-    def set_sensor_mode(self, mode):
+    def set_sensor_mode(self, mode: str) -> None:
         """Set Ximea sensor mode.
 
         On the manual page 72:
@@ -200,10 +200,26 @@ class XimeaBase(CameraBase):
         """
         self.cam.set_param("acq_timing_mode", "XI_ACQ_TIMING_MODE_FREE_RUN")
         self.cam.set_param("shutter_type", "XI_SHUTTER_ROLLING")
-    
-    def set_readout_direction(self, mode):
-        """Set readout direction"""
+
+    def set_trigger_mode(self, trigger_source = "External") -> None:
+        """Set Ximea trigger mode.
+        
+        Parameters
+        ----------
+        trigger_source : str
+            'External' or 'Internal'
+        """
         pass
+    
+    def set_readout_direction(self, mode: str) -> None:
+        """Set readout direction
+        
+        Parameters
+        ----------
+        mode : str
+            'Top-to-Bottom'
+        """
+        logger.info("Ximea camera only supports Top-to-Bottom readout direction.")
 
     def calculate_readout_time(self):
         """Get the duration of time needed to read out an image.
@@ -215,7 +231,30 @@ class XimeaBase(CameraBase):
         """
         return 0
     
-    def set_exposure_time(self, exposure_time):
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
+        """Calculate the exposure time for light-sheet imaging.
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Exposure time for full chip acquisition.
+        shutter_width : int
+            Width of the light-sheet shutter in pixels.
+        
+        Returns
+        -------
+        exposure_time : float
+            Exposure time for light-sheet imaging.
+        line_interval : float
+            Line interval for light-sheet imaging.
+        readout_time : float
+            Readout time for light-sheet imaging.
+        """
+        return super().calculate_light_sheet_exposure_time(full_chip_exposure_time, shutter_width)
+    
+    def set_exposure_time(self, exposure_time: float) -> bool:
         """Set Ximea exposure time.
 
         Note
@@ -226,12 +265,17 @@ class XimeaBase(CameraBase):
         ----------
         exposure_time : float
             Exposure time in seconds.
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
         """
         #seconds to us.
         self.cam.set_param("exposure", exposure_time * 1000000)
         return True
     
-    def set_line_interval(self, line_interval_time):
+    def set_line_interval(self, line_interval_time: float) -> bool:
         """Set line interval.
 
         Parameters
@@ -241,17 +285,7 @@ class XimeaBase(CameraBase):
         """
         return False
 
-    def get_line_interval(self):
-        """Get line interval.
-
-        Returns
-        -------
-        line_interval_time : float
-            Line interval duration.
-        """
-        self.line_interval = 0
-
-    def set_binning(self, binning_string):
+    def set_binning(self, binning_string) -> bool:
         """Set Ximea Camera binning mode.
 
         Parameters
@@ -288,7 +322,7 @@ class XimeaBase(CameraBase):
 
         return True
 
-    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024):
+    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024) -> bool:
         """Change the size of the active region on the camera.
 
         Parameters
@@ -347,39 +381,8 @@ class XimeaBase(CameraBase):
         self.y_pixels = self.cam.get_param("height") * binning_value
 
         return self.x_pixels == roi_width * binning_value and self.y_pixels == roi_height * binning_value
-    
-    def set_ROI_and_binning(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024, binning='1x1'):
-        """Change the size of the active region on the camera and set the binning mode.
 
-        Parameters
-        ----------
-        roi_width : int
-            Width of active camera region.
-        roi_height : int
-            Height of active camera region.
-        center_x : int
-            X position of the center of view
-        center_y : int
-            Y position of the center of view
-        binning : str
-            Desired binning properties (e.g., '1x1', '2x2', '4x4', '8x8', '16x16',
-            '1x2', '2x4')
-        
-        Returns
-        -------
-        result: bool
-            True if successful, False otherwise.
-        """
-        # Set Binning
-        result = self.set_binning(binning)
-        if not result:
-            return False
-        
-        # Set ROI
-        result = self.set_ROI(roi_width, roi_height, center_x, center_y)
-        return result
-
-    def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+    def initialize_image_series(self, data_buffer: Optional[list]=None, number_of_frames=100) -> None:
         """Initialize Ximea Camera image series.
 
         Parameters
@@ -406,7 +409,7 @@ class XimeaBase(CameraBase):
         self.cam.start_acquisition()
         self.is_acquiring = True
 
-    def close_image_series(self):
+    def close_image_series(self) -> None:
         """Close image series.
 
         Stops the acquisition and sets is_acquiring flag to False.
@@ -414,7 +417,7 @@ class XimeaBase(CameraBase):
         self.cam.stop_acquisition()
         self.is_acquiring = False
 
-    def get_new_frame(self):
+    def get_new_frame(self) -> list[int]:
         """Get frame from Ximea camera.
 
         Returns
@@ -472,7 +475,7 @@ class MU196XRCamera(XimeaBase):
         # need to reset the trigger mode to XI_GPI_TRIGGER, otherwise the trigger mode is XI_GPI_OFF
         self.cam.set_param("gpi_mode", "XI_GPI_TRIGGER")
 
-    def __str__(str):
+    def __str__(str) -> str:
         """Return string representation of Ximea MU196XR class
         
         Returns

@@ -92,8 +92,9 @@ class TestStageBase:
                 == self.stage_configuration["stage"][f"{axis}_max"]
             )
 
+        # Check default axes mapping
         if axes_mapping is None:
-            assert stage.axes_mapping == {}
+            assert stage.axes_mapping == {axis: axis.capitalize() for axis in axes}
         else:
             for i, axis in enumerate(axes):
                 assert stage.axes_mapping[axis] == axes_mapping[i]

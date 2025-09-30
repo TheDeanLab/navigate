@@ -32,7 +32,7 @@
 # Standard Imports
 import logging
 from multiprocessing.managers import ListProxy
-from typing import Any, Dict
+from typing import Any
 from abc import ABC, abstractmethod
 
 # Third Party Imports
@@ -53,7 +53,7 @@ class StageBase(ABC):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the stage.
@@ -137,7 +137,7 @@ class StageBase(ABC):
         return "StageBase"
 
     @abstractmethod
-    def report_position(self) -> Dict[str, float]:
+    def report_position(self) -> dict[str, float]:
         """Reports the position for all axes, and create position dictionary.
 
         This abstract method must be implemented by all subclasses.
@@ -147,10 +147,11 @@ class StageBase(ABC):
         position_dict : dict
             Dictionary containing the position of all axes
         """
+        pass
 
     @abstractmethod
     def move_absolute(
-        self, move_dictionary: Dict[str, float], wait_until_done=False
+        self, move_dictionary: dict[str, float], wait_until_done=False
     ) -> bool:
         """Move the stage to an absolute position.
 
@@ -205,7 +206,7 @@ class StageBase(ABC):
         """
         pass
 
-    def get_position_dict(self) -> Dict[str, float]:
+    def get_position_dict(self) -> dict[str, float]:
         """Return a dictionary with the saved stage positions.
 
         Returns

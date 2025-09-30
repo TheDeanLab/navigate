@@ -32,6 +32,7 @@
 # Standard Library Imports
 import logging
 import time
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -55,8 +56,8 @@ class DynamixelZoom(ZoomBase, SerialDevice):
         microscope_name: str,
         device_connection,
         configuration: dict,
-        *args,
-        **kwargs,
+        *args: Optional[Any],
+        **kwargs: Optional[Any],
     ) -> None:
         """Initialize the DynamixelZoom Servo.
 

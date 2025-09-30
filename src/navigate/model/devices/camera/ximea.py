@@ -32,7 +32,7 @@
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Third Party Imports
 from ximea import xiapi
@@ -55,7 +55,7 @@ class XimeaBase(CameraBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args: Optional[Any],
         **kwargs: Optional[Any],
     ) -> None:
@@ -453,7 +453,7 @@ class MU196XRCamera(XimeaBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args: Optional[Any],
         **kwargs: Optional[Any],
     ) -> None:

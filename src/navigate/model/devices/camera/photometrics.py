@@ -32,7 +32,7 @@
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Third Party Imports
 from ctypes import *  # noqa
@@ -67,7 +67,7 @@ class PhotometricsCamera(CameraBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *_: Optional[Any],
         **__: Optional[Any],
     ) -> None:

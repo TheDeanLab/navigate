@@ -32,7 +32,7 @@
 
 # Standard Imports
 import logging
-from typing import Any, Dict
+from typing import Any
 from abc import ABC, abstractmethod
 
 # Third Party Imports
@@ -56,7 +56,7 @@ class DAQBase(ABC):
     channels.
     """
 
-    def __init__(self, configuration: Dict[str, Any]) -> None:
+    def __init__(self, configuration: dict[str, Any]) -> None:
         """Initializes the DAQBase class.
 
         Parameters

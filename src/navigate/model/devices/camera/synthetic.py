@@ -34,7 +34,7 @@
 import logging
 import time
 import ctypes
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, List
 
 # Third Party Imports
 import numpy as np
@@ -97,7 +97,7 @@ class SyntheticCamera(CameraBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args: Optional[Any],
         **kwargs: Optional[Any],
     ) -> None:

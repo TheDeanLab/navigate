@@ -34,7 +34,7 @@
 import logging
 import time
 import io
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 import serial
@@ -66,7 +66,7 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the LUDLFilterWheel class.

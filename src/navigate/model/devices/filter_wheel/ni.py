@@ -34,7 +34,7 @@
 import logging
 import time
 import traceback
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 import nidaqmx
@@ -59,7 +59,7 @@ class NIFilterWheel(FilterWheelBase, NIDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the DAQFilterWheel class.

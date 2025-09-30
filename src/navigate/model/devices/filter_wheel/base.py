@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any
 from abc import ABC, abstractmethod
 
 # Third Party Imports
@@ -57,7 +57,7 @@ class FilterWheelBase(ABC):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the FilterWheelBase class.

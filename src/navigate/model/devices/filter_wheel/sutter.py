@@ -33,7 +33,7 @@
 #  Standard Library Imports
 import logging
 import time
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 import numpy as np
@@ -63,7 +63,7 @@ class SutterFilterWheel(FilterWheelBase, SerialDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the SutterFilterWheel class.

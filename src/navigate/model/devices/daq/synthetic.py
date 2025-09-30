@@ -34,7 +34,7 @@
 import logging
 import time
 from threading import Lock
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -51,7 +51,7 @@ logger = logging.getLogger(p)
 class SyntheticDAQ(DAQBase):
     """SyntheticDAQ class for Data Acquisition (DAQ)."""
 
-    def __init__(self, configuration: Dict[str, Any]) -> None:
+    def __init__(self, configuration: dict[str, Any]) -> None:
         """Initialize the Synthetic DAQ.
 
         Parameters
@@ -139,13 +139,18 @@ class SyntheticDAQ(DAQBase):
         """
         self.camera[microscope_name] = camera
 
-    def update_analog_task(self, board_name: str) -> Optional[bool]:
+    def update_analog_task(self, board_name: str) -> bool:
         """Update the analog task.
 
         Parameters
         ----------
         board_name : str
             Name of board.
+
+        Returns
+        -------
+        bool
+            True if task is updated, False otherwise.
         """
         # can't update an analog task while updating one.
         if self.is_updating_analog_task:
@@ -156,3 +161,4 @@ class SyntheticDAQ(DAQBase):
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()
+        return True

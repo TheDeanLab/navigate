@@ -33,7 +33,7 @@
 # Standard Library Imports
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from abc import ABC, abstractmethod
 
 # Third Party Imports
@@ -60,7 +60,7 @@ class CameraBase(ABC):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args: Optional[Any],
         **kwargs: Optional[Any],
     ) -> None:
@@ -164,8 +164,13 @@ class CameraBase(ABC):
         return []
 
     @abstractmethod
-    def initialize_image_series(self, data_buffer: Optional[list]=None, number_of_frames: int=100) -> None:
-        """Initialize image series.
+    def initialize_image_series(
+        self, 
+        data_buffer: Optional[list]=None, 
+        number_of_frames: int=100
+    ) -> None:
+        """Initialize image series and attach the given data_buffer, 
+        which serves as the destination for incoming images.
 
         This abstract method must be implemented by all subclasses.
 
@@ -178,7 +183,7 @@ class CameraBase(ABC):
         number_of_frames : int
             Number of frames.  Default is 100.
         """
-        pass
+        self.is_acquiring = True
 
     @abstractmethod
     def close_image_series(self) -> None:
@@ -186,7 +191,7 @@ class CameraBase(ABC):
 
         This abstract method must be implemented by all subclasses.
         """
-        pass
+        self.is_acquiring = False
 
     @abstractmethod
     def set_line_interval(self, line_interval_time: float) -> bool:

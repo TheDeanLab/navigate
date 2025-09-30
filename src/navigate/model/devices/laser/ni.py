@@ -33,7 +33,7 @@
 # Standard Library Imports
 import logging
 import traceback
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 import nidaqmx
@@ -61,7 +61,7 @@ class NILaser(LaserBase, NIDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int,
     ) -> None:
         """Initialize the LaserNI class.
@@ -256,7 +256,7 @@ class NILaser(LaserBase, NIDevice):
         except DaqError as e:
             logger.exception(e)
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the NI Task before exit."""
         if self.laser_ao_task:
             try:

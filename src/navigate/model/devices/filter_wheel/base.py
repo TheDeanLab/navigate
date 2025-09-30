@@ -92,13 +92,15 @@ class FilterWheelBase(ABC):
         self.filter_wheel_number = device_config["hardware"]["wheel_number"]
 
     @abstractmethod
-    def set_filter(self, position: Any) -> None:
+    def set_filter(self, position: Any, wait_until_done: bool=True) -> None:
         """Set the filter wheel to the specified position.
 
         Parameters
         ----------
         position : Any
             The desired filter position.
+        wait_until_done : bool
+            Whether to wait until the filter wheel has completed the move. Default is True.
         """
         pass
 

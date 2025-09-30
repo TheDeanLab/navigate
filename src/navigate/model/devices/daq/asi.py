@@ -260,3 +260,7 @@ class ASIDaq(DAQBase, SerialDevice):
 
         # if self.wait_to_run_lock.locked():
         #     self.wait_to_run_lock.release()
+
+    def wait_acquisition_done(self) -> None:
+        """Wait for acquisition to be done."""
+        super().wait_acquisition_done()

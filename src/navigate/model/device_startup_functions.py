@@ -41,7 +41,7 @@ import serial
 # Third Party Imports
 
 # Local Imports
-from navigate.tools.common_functions import build_ref_name, load_param_from_module
+from navigate.tools.common_functions import build_ref_name, load_param_from_module, decode_bytes
 from navigate.tools.decorators import performance_monitor
 from navigate.model.devices.device_types import (
     SerialDevice,
@@ -184,7 +184,7 @@ class SerialConnectionFactory:
             if serial_conn is not None:
                 serial_conn.write = performance_monitor(
                     prefix="Serial",
-                    display_args=lambda d: f"{str(port)}-{d.decode(errors='ignore')}"
+                    display_args=lambda d: f"{str(port)}-{decode_bytes(d)}"
                 )(serial_conn.write)
                 serial_conn.readline = performance_monitor(
                     prefix="Serial",

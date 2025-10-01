@@ -108,7 +108,6 @@ filter_wheel_hardware_widgets = {
 
 daq_device_types = {
     "National Instruments": "NI",
-    "Applied Scientific Instrumentation": ("ASI", "asi"),
     "Virtual Device": "Synthetic",
 }
 
@@ -173,7 +172,9 @@ stage_device_types = {
     "ASI MFC2000": ("MFC2000", "asi"),
     "ASI MS2000": ("MS2000", "asi"),
     "Analog/Digital Device": ("NI", "ni"),
+    "Conex slit": ("Conex", "conex"),
     "Mad City Labs": ("MCL", "mcl"),
+    "Newport": ("Newport", "newport"),
     "Physik Instrumente": ("PI", "pi"),
     "Sutter Instruments": ("MP285", "sutter"),
     "ThorLabs KCube Inertial Device KIM001": ("KIM001", "thorlabs"),
@@ -436,14 +437,12 @@ stage_constants_widgets = {
 remote_focus_device_types = {
     "Equipment Solutions": ("EquipmentSolutions", "equipment_solutions"),
     "Analog Device": ("NI", "ni"),
-    "ASI Device": ("ASI", "asi"),
     "Virtual Device": ("Synthetic", "synthetic"),
 }
 
 remote_focus_hardware_widgets = {
     "type": ["Device Type", "Combobox", "string", remote_focus_device_types, None],
     "channel": ["DAQ Channel", "Input", "string", None, "Example: PXI6259/ao3"],
-    "axis": ["Device Type", "Input", "string", None, "Example: A"],
     "min": [
         "Minimum Voltage",
         "Spinbox",
@@ -469,7 +468,7 @@ remote_focus_hardware_widgets = {
     "frame_config": {"ref": "hardware"},
 }
 
-galvo_device_types = {"Analog Device": ("NI", "ni"), "ASI Device": ("ASI", "asi"), "Virtual Device": ("Synthetic", "synthetic")}
+galvo_device_types = {"Analog Device": ("NI", "ni"), "Virtual Device": ("Synthetic", "synthetic")}
 
 waveform_types = {
     "Sine": "sine",
@@ -486,7 +485,6 @@ galvo_hardware_widgets = {
         None,
         "*Analog Device only. Example: PXI6259/ao1",
     ],
-    "hardware/axis": ["Axis", "Input", "string", None, "Example: A"],
     "hardware/min": [
         "Minimum Voltage",
         "Spinbox",
@@ -576,13 +574,12 @@ mirror_hardware_widgets = {
     "n_modes": ["Number of Modes", "Input", "int", None, "Example: 32", 32],
 }
 
-laser_device_types = {"Analog Device": ("NI", "ni"), "ASI Laser": ("ASI", "asi"), "Virtual Device": ("Synthetic", "synthetic")}
+laser_device_types = {"Analog Device": ("NI", "ni"), "Virtual Device": ("Synthetic", "synthetic")}
 
 laser_hardware_widgets = {
     "wavelength": ["Wavelength", "Input", "int", None, "Example: 488", 488],
     "onoff": ["On/Off Setting", "Label", None, None, None],
     "onoff/hardware/type": ["Type", "Combobox", "string", laser_device_types, None],
-    "onoff/hardware/axis": ["Digital Axis", "Input", "string", None, "Example: 2"],
     "onoff/hardware/channel": [
         "DAQ Channel",
         "Input",
@@ -606,7 +603,6 @@ laser_hardware_widgets = {
     ],
     "power": ["Power Setting", "Label", None, None, None],
     "power/hardware/type": ["Type", "Combobox", "string", laser_device_types, None],
-    "power/hardware/axis": ["Analog Axis", "Input", "string", None, "Example: B"],
     "power/hardware/channel": [
         "DAQ Channel",
         "Input",

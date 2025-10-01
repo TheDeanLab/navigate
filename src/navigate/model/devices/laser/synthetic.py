@@ -32,7 +32,7 @@
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 
@@ -53,7 +53,7 @@ class SyntheticLaser(LaserBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int,
     ) -> None:
         """Initialize the SyntheticLaser class.

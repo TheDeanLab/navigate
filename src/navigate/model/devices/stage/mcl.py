@@ -33,6 +33,7 @@
 import importlib
 import logging
 import time
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -50,7 +51,13 @@ logger = logging.getLogger(p)
 class MCLStage(StageBase, IntegratedDevice):
     """Mad City Lab stage class."""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ):
         """Initialize the MCL stage.
 
         Parameters
@@ -85,7 +92,7 @@ class MCLStage(StageBase, IntegratedDevice):
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Close the connection to the stage."""
         try:
             self.mcl_controller.MCL_ReleaseHandle(self.handle)
@@ -93,7 +100,7 @@ class MCLStage(StageBase, IntegratedDevice):
             logger.exception(f"{e}")
 
     @classmethod
-    def get_connect_params(cls):
+    def get_connect_params(cls) -> list[str]:
         """Register the parameters required to connect to the stage.
 
         Returns
@@ -104,7 +111,7 @@ class MCLStage(StageBase, IntegratedDevice):
         return ["serial_number"]
 
     @classmethod
-    def connect(cls, serial_number: int):
+    def connect(cls, serial_number: int) -> dict[str, Any]:
         """Build a connection to the Mad City Lab stage.
 
         Parameters
@@ -130,7 +137,7 @@ class MCLStage(StageBase, IntegratedDevice):
 
         return stage_connection
 
-    def report_position(self):
+    def report_position(self) -> dict[str, float]:
         """Report the position of the stage.
 
         Reports the position of the stage for all axes, and creates the hardware
@@ -148,7 +155,9 @@ class MCLStage(StageBase, IntegratedDevice):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
         """Implement movement logic along a single axis.
 
         Example calls:
@@ -186,7 +195,9 @@ class MCLStage(StageBase, IntegratedDevice):
                 return False
         return True
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = False
+    ) -> bool:
         """Move the stage to an absolute position.
 
         Parameters
@@ -214,6 +225,6 @@ class MCLStage(StageBase, IntegratedDevice):
 
         return result
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop all motion of the stage."""
         pass

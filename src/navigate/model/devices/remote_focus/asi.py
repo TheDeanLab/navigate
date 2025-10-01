@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -55,7 +55,7 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args,
         **kwargs,
     ) -> None:
@@ -81,7 +81,7 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         self.axis = self.device_config["hardware"]["axis"]
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
         """Build ASILaser Serial Port connection
 
         Parameters
@@ -106,7 +106,12 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
 
-    def adjust(self, exposure_times, sweep_times, offset=None):
+    def adjust(
+        self,
+        exposure_times: dict[str, float],
+        sweep_times: dict[str, float],
+        offset: Optional[float] = None,
+    ) -> dict[str, Any]:
         """Adjust the waveform.
 
         This method adjusts the waveform parameters.
@@ -197,9 +202,9 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
     
     def triangle(
         self,
-        sweep_time=0.24,
-        amplitude=1,
-        offset=0,
+        sweep_time: float=0.24,
+        amplitude: float=1,
+        offset: float=0,
     ):
         """Sends the tiger controller commands to initiate the triangle wave.
         
@@ -230,9 +235,9 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
 
     def ramp(
         self,
-        exposure_time=0.2,
-        amplitude=1,
-        offset=0.5,
+        exposure_time: float=0.2,
+        amplitude: float=1,
+        offset: float=0.5,
     ):
         """Sends the tiger controller commands to initiate the ramp wave.
 
@@ -271,7 +276,12 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         # The waveform cycles once and waits for another TTL inputs
         self.remote_focus.single_axis_mode(self.axis, 2)
     
-    def move(self, exposure_times, sweep_times, offset=None):
+    def move(
+        self,
+        exposure_times: dict[str, float],
+        sweep_times: dict[str, float],
+        offset: Optional[float] = None,
+    ) -> None:
         """Move the remote focus.
 
         This method moves the remote focus.

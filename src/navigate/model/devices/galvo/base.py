@@ -63,7 +63,7 @@ class GalvoBase(ABC):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the GalvoBase class.
@@ -74,7 +74,7 @@ class GalvoBase(ABC):
             Name of the microscope.
         device_connection : Any
             Device connection.
-        configuration : Dict[str, Any]
+        configuration : dict[str, Any]
             Dictionary of configuration parameters.
         device_id : int
             Galvo ID. Default is 0.
@@ -125,7 +125,7 @@ class GalvoBase(ABC):
         #: dict: Dictionary of galvo waveforms.
         self.waveform_dict = {}
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Returns the string representation of the GalvoBase class."""
         return "GalvoBase"
 
@@ -133,7 +133,8 @@ class GalvoBase(ABC):
         """Destructor"""
         pass
 
-    def adjust(self, exposure_times, sweep_times):
+    @abstractmethod
+    def adjust(self, exposure_times: dict[str, float], sweep_times: dict[str, float]) -> dict:
         """Adjust the galvo waveform to account for the camera readout time.
 
         Parameters
@@ -254,6 +255,6 @@ class GalvoBase(ABC):
         return self.waveform_dict
 
     @abstractmethod
-    def turn_off(self):
+    def turn_off(self) -> None:
         """Turn off the galvo."""
         pass

@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 from abc import ABC, abstractmethod
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -51,10 +52,10 @@ class ZoomBase(ABC):
     def __init__(
         self,
         microscope_name: str,
-        device_controller,
+        device_controller: Any,
         configuration: dict,
-        *args,
-        **kwargs,
+        *args: Optional[Any],
+        **kwargs: Optional[Any],
     ) -> None:
         """Initialize the parent zoom class.
 

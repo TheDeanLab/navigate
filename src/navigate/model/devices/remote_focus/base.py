@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any, Optional
 from abc import ABC, abstractmethod
 
 # Third Party Imports
@@ -58,7 +58,7 @@ class RemoteFocusBase(ABC):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args,
         **kwargs,
     ) -> None:
@@ -114,23 +114,42 @@ class RemoteFocusBase(ABC):
         #: dict: Waveform dictionary.
         self.waveform_dict = {}
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the RemoteFocusBase class."""
         return "RemoteFocusBase"
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor"""
         pass
 
     @abstractmethod
-    def move(self):
+    def move(
+        self,
+        exposure_times: dict[str, float],
+        sweep_times: dict[str, float],
+        offset: Optional[float] = None,
+    ) -> None:
         """Moves the remote focus device to the specified position.
 
         This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        exposure_times : dict
+            Dictionary of exposure times for each selected channel
+        sweep_times : dict
+            Dictionary of sweep times for each selected channel
+        offset : float, optional
+            Offset value for the remote focus waveform, by default None
         """
         pass
 
-    def adjust(self, exposure_times, sweep_times, offset=None):
+    def adjust(
+        self,
+        exposure_times: dict[str, float],
+        sweep_times: dict[str, float],
+        offset: Optional[float] = None,
+    ) -> dict[str, Any]:
         """Adjusts the remote focus waveform based on the readout time.
 
         Parameters

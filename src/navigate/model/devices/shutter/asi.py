@@ -33,7 +33,7 @@
 # Standard Library Imports
 import logging
 import traceback
-from typing import Any, Dict
+from typing import Any
 
 # Local Imports
 from navigate.model.devices.shutter.base import ShutterBase
@@ -59,7 +59,7 @@ class ASIShutter(ShutterBase, SerialDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         address=None,
     ) -> None:
         """Initialize the ASIShutter.
@@ -92,7 +92,7 @@ class ASIShutter(ShutterBase, SerialDevice):
         ]["hardware"]["port"]
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
         """Build ASILaser Serial Port connection
 
         Parameters

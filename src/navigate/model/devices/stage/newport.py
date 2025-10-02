@@ -170,7 +170,6 @@ class NewportESP302API:
             )
 
     def move_absolute(self, axis: int, position: float, wait: bool = True):
-        position = position
         self._send_and_read(f"{axis}PA{position}")
         self.check_controller_error()
         if wait:

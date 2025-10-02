@@ -2,17 +2,10 @@
 Stages
 ======
 
-Our software empowers users with a flexible solution for configuring
-multiple stages, catering to diverse microscope modalities. Each stage can be
-customized to suit the specific requirements of a particular modality or shared
-across  various modalities. Our unique approach allows seamless integration of stages
-from different manufacturers, enabling users to mix and match components for a truly
-versatile and optimized setup tailored to their research needs.
+Our software empowers users with a flexible solution for configuring multiple stages, catering to diverse microscope modalities. Each stage can be customized to suit the specific requirements of a particular modality or shared across  various modalities. Our unique approach allows seamless integration of stages from different manufacturers, enabling users to mix and match components for a truly versatile and optimized setup tailored to their research needs.
 
 .. Note::
-    The software provides configure specific hardware axes to software axes. This is
-    specified in the configuration file. For example, if specified as follows, the software
-    x, y, z, and f axes can be mapped to the hardware axes M, Y, X, and Z, respectively.
+    The software provides configure specific hardware axes to software axes. This is specified in the configuration file. For example, if specified as follows, the software x, y, z, and f axes can be mapped to the hardware axes M, Y, X, and Z, respectively.
 
     .. code-block:: yaml
 
@@ -585,6 +578,65 @@ identical. The voltage signal is delivered via the data acquisition card specifi
 |
 
 ----------------
+
+
+Newport
+-------
+Newport offers motion control solutions for various applications in microscopy. Our software supports two Newport stage controllers that provide accurate positioning capabilities.
+
+Conex Controller
+~~~~~~~~~~~~~~~~
+
+The Newport Conex Controller series offers compact, integrated motion control solutions that come pre-wired with dedicated controllers for quick, out-of-the-box operation. While the Conex series offers four `different controller types with various drive technologies <https://www.newport.com/c/controller-&-stage-kits>`_, we have used it to drive a `TRA6CC <https://www.newport.com/p/TRA6CC>`_ (Linear Actuator, DC Servo, 6 mm Travel, TRA6CC and CONEX-CC Controller) connected to a `M-SV-0.5 <https://www.newport.com/p/M-SV-0.5>`_ adjustable width slit that is positioned conjugate to the back pupil of the illumination objective. This setup allows precise and automated control of the illumination numerical aperture.
+
+. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+            stage:
+              hardware:
+                -
+                  name: slit
+                  type: conex.ConexStage
+                  serial_number: 126
+                  port: COM4
+                  axes: [S]
+                  axes_mapping: [S]
+                      s_min: -10000.0
+                      s_max: 10000.0
+                      s_offset: 0.0
+
+|
+
+--------------
+
+ESP302 Motion Controller Controller
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Newport `ESP302 Motion Controller <https://www.newport.com/f/esp30x-3-axis-dc-and-stepper-motion-controller>`_ is a versatile, 1-, 2-, or 3-axis motion controller that provides precise positioning capabilities for a wide range of Newport stages.
+
+. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+            stage:
+              hardware:
+                -
+                  name: delay_stage
+                  type: newport.NewportStage
+                  serial_number: 127
+                  axes: [theta]
+                  axes_mapping: [1]
+                  port: "192.168.1.90"
+                  baudrate: 5001
+                  timeout: 5.0
+|
+
+---------------
 
 Synthetic Stage
 ---------------

@@ -31,7 +31,7 @@
 
 import unittest
 from unittest.mock import MagicMock
-from navigate.model.devices.galvo.base import GalvoBase
+from navigate.model.devices.galvo.synthetic import SyntheticGalvo
 from navigate.config import (
     load_configs,
     get_configuration_paths,
@@ -74,7 +74,7 @@ class TestGalvoBase(unittest.TestCase):
         self.device_connection = MagicMock()
         galvo_id = 0
 
-        self.galvo = GalvoBase(
+        self.galvo = SyntheticGalvo(
             microscope_name=self.microscope_name,
             device_connection=self.device_connection,
             configuration=self.configuration,

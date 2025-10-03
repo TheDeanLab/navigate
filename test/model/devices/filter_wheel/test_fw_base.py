@@ -1,15 +1,18 @@
+from navigate.model.devices.filter_wheel.synthetic import SyntheticFilterWheel
+from test.model.dummy import DummyModel
+
+
 def test_filter_wheel_base_functions():
-    from navigate.model.devices.filter_wheel.base import FilterWheelBase
-    from test.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][
         "microscope_name"
     ]
-    fw = FilterWheelBase(
-        microscope_name,
-        None,
-        model.configuration,
+    fw = SyntheticFilterWheel(
+        microscope_name=microscope_name,
+        device_connection=None,
+        configuration=model.configuration,
+        device_id=0,
     )
 
     filter_dict = model.configuration["configuration"]["microscopes"][microscope_name][

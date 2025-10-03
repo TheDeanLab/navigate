@@ -33,7 +33,7 @@
 # Standard Imports
 import logging
 import time
-from typing import Any, Dict
+from typing import Any, Optional
 
 # Third Party Imports
 from pipython import GCSDevice, pitools, GCSError
@@ -56,7 +56,7 @@ class PIStage(StageBase, IntegratedDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ):
         """
@@ -114,9 +114,9 @@ class PIStage(StageBase, IntegratedDevice):
             print("Error while disconnecting the PI stage")
             logger.exception(f"Error while disconnecting the PI stage - {e}")
             raise e
-    
+
     @classmethod
-    def get_connect_params(cls):
+    def get_connect_params(cls) -> list[str]:
         """Register the parameters required to connect to the stage.
 
         Returns
@@ -127,7 +127,13 @@ class PIStage(StageBase, IntegratedDevice):
         return ["controllername", "serial_number", "stages", "refmode"]
 
     @classmethod
-    def connect(cls, controller_name, serial_number, stages, reference_modes):
+    def connect(
+        cls,
+        controller_name: str,
+        serial_number: str,
+        stages: list[str],
+        reference_modes: list[str],
+    ) -> dict[str, Any]:
         """Connect to the Physik Instrumente (PI) Stage
 
         Parameters
@@ -166,7 +172,7 @@ class PIStage(StageBase, IntegratedDevice):
         stage_connection = {"pi_tools": pi_tools, "pi_device": pi_device}
         return stage_connection
 
-    def report_position(self):
+    def report_position(self) -> dict[str, float]:
         """Reports the position for all axes, and create position dictionary.
 
         Positions from Physik Instrumente device are in millimeters
@@ -194,7 +200,9 @@ class PIStage(StageBase, IntegratedDevice):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
         """Move stage along a single axis.
 
         Parameters
@@ -234,7 +242,9 @@ class PIStage(StageBase, IntegratedDevice):
 
         return True
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = False
+    ) -> bool:
         """Move Absolute Method.
 
         XYZF Values are converted to millimeters for PI API.
@@ -259,9 +269,9 @@ class PIStage(StageBase, IntegratedDevice):
             return False
 
         pos_dict = {
-            self.axes_mapping[axis]: abs_pos_dict[axis] / 1000
-            if axis != "theta"
-            else abs_pos_dict[axis]
+            self.axes_mapping[axis]: (
+                abs_pos_dict[axis] / 1000 if axis != "theta" else abs_pos_dict[axis]
+            )
             for axis in abs_pos_dict
         }
 
@@ -275,14 +285,14 @@ class PIStage(StageBase, IntegratedDevice):
             return self.wait_on_target(axes=list(pos_dict.keys()))
         return True
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop all stage movement abruptly."""
         try:
             self.pi_device.STP(noraise=True)
         except GCSError as e:
             logger.exception(f"Stage stop failed - {e}")
 
-    def wait_on_target(self, axes=None):
+    def wait_on_target(self, axes: Optional[Any] = None):
         """Wait on target
 
         Parameters

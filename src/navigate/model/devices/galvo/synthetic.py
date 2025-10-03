@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -53,7 +53,7 @@ class SyntheticGalvo(GalvoBase):
         self,
         microscope_name: str,
         device_connection: Optional[Any],
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the SyntheticGalvo class.
@@ -86,3 +86,23 @@ class SyntheticGalvo(GalvoBase):
     def __str__(self) -> str:
         """Return string representation of the GalvoNI."""
         return "SyntheticGalvo"
+    
+    def adjust(self, exposure_times: dict[str, float], sweep_times: dict[str, float]) -> dict[str, Any]:
+        """Adjust the galvo waveform to account for the camera readout time.
+        Parameters
+        ----------
+        exposure_times : dict[str, float]
+            Dictionary of exposure times.
+        sweep_times : dict[str, float]
+            Dictionary of sweep times.
+        
+        Returns
+        -------
+        dict[str, Any]
+            Adjusted exposure and sweep times.
+        """
+        return super().adjust(exposure_times, sweep_times)
+
+    def turn_off(self):
+        """Turn off the galvo."""
+        pass

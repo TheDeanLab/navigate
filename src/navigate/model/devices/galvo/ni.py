@@ -33,7 +33,7 @@
 #  Standard Library Imports
 import logging
 import traceback
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 import nidaqmx
@@ -56,7 +56,7 @@ class NIGalvo(GalvoBase, NIDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the GalvoNI class.
@@ -67,7 +67,7 @@ class NIGalvo(GalvoBase, NIDevice):
             Name of the microscope.
         device_connection : Any
             Connection to the NI DAQ device.
-        configuration : Dict[str, Any]
+        configuration : dict[str, Any]
             Dictionary of configuration parameters.
         device_id : int
             Galvo ID. Default is 0.
@@ -95,7 +95,7 @@ class NIGalvo(GalvoBase, NIDevice):
         """Return string representation of the GalvoNI."""
         return "GalvoNI"
 
-    def adjust(self, exposure_times, sweep_times) -> Dict[str, Any]:
+    def adjust(self, exposure_times: dict[str, float], sweep_times: dict[str, float]) -> dict[str, Any]:
         """Adjust the galvo to the readout time
 
         Parameters

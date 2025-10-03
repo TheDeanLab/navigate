@@ -1,19 +1,16 @@
-def test_initialize_daq():
-    from navigate.model.devices.daq.base import DAQBase
-    from test.model.dummy import DummyModel
+from navigate.model.devices.daq.synthetic import SyntheticDAQ
+from test.model.dummy import DummyModel
+import numpy as np
 
+
+def test_initialize_daq():
     model = DummyModel()
-    DAQBase(model.configuration)
+    SyntheticDAQ(model.configuration)
 
 
 def test_calculate_all_waveforms():
-    import numpy as np
-
-    from navigate.model.devices.daq.base import DAQBase
-    from test.model.dummy import DummyModel
-
     model = DummyModel()
-    daq = DAQBase(model.configuration)
+    daq = SyntheticDAQ(model.configuration)
     microscope_state = model.configuration["experiment"]["MicroscopeState"]
     microscope_name = microscope_state["microscope_name"]
     exposure_times = {

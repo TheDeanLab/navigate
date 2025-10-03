@@ -34,6 +34,7 @@
 import logging
 import time
 import io
+from typing import Any
 
 # Third Party Imports
 import serial
@@ -61,7 +62,13 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
 
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the LUDLFilterWheel class.
 
         Parameters
@@ -87,12 +94,12 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
         #: float: Delay for filter wheel to change positions.
         self.wait_until_done_delay = self.device_config["filter_wheel_delay"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the class."""
         return "LUDLFilterWheel"
 
     @classmethod
-    def connect(cls, comport, baudrate, timeout=0.25):
+    def connect(cls, comport: str, baudrate: int=9600, timeout: float=0.25) -> serial.Serial:
         """Build LUDLFilterWheel Serial Port connection
 
         Attributes
@@ -130,7 +137,7 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
                 "Could not communicate with LUDL MAC6000 via COMPORT", comport
             )
 
-    def set_filter(self, filter_name, wait_until_done=True):
+    def set_filter(self, filter_name: str, wait_until_done: bool=True) -> None:
         """Set the filter wheel to a specific filter position.
 
         Parameters
@@ -155,7 +162,7 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
             if wait_until_done:
                 time.sleep(self.wait_until_done_delay)
 
-    def close(self):
+    def close(self) -> None:
         """Close the LUDLFilterWheel serial port.
 
         Sets the filter wheel to the Empty-Alignment position and then closes the port.
@@ -164,7 +171,7 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
         self.set_filter(list(self.filter_dictionary.keys())[0])
         self.serial.close()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor for the LUDLFilterWheel class."""
         if self.serial.is_open:
             self.close()

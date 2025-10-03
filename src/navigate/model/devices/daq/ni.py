@@ -34,7 +34,7 @@ import logging
 from threading import Lock
 import traceback
 import time
-from typing import Union, Dict, Any
+from typing import Any
 import gc
 
 # Third Party Imports
@@ -58,7 +58,7 @@ logger = logging.getLogger(p)
 class NIDAQ(DAQBase):
     """NIDAQ class for Control of NI Data Acquisition Cards."""
 
-    def __init__(self, configuration: Dict[str, Any]) -> None:
+    def __init__(self, configuration: dict[str, Any]) -> None:
         """Initialize NIDAQ class.
 
         Parameters
@@ -580,7 +580,7 @@ class NIDAQ(DAQBase):
         except KeyError:
             pass
 
-    def update_analog_task(self, board_name: str) -> Union[bool, None]:
+    def update_analog_task(self, board_name: str) -> bool:
         """Update analog task.
 
         Parameters
@@ -590,7 +590,7 @@ class NIDAQ(DAQBase):
 
         Returns
         -------
-        bool, None
+        bool
             True if task is updated, False otherwise.
         """
         # if there is no such analog task,
@@ -637,6 +637,7 @@ class NIDAQ(DAQBase):
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()
+        return True
 
     def reset(self, device_name: str = None) -> None:
         """Reset the DAQ device.

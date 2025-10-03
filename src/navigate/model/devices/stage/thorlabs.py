@@ -34,6 +34,7 @@ import importlib
 import logging
 import time
 from multiprocessing.managers import ListProxy
+from typing import Any, Optional
 
 # Local Imports
 from navigate.model.devices.stage.base import StageBase
@@ -49,7 +50,13 @@ logger = logging.getLogger(p)
 class KIM001Stage(StageBase, IntegratedDevice):
     """Thorlabs KIM Stage"""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the stage.
 
         Parameters
@@ -91,7 +98,7 @@ class KIM001Stage(StageBase, IntegratedDevice):
         else:
             self.serial_number = device_config["serial_number"]
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the KIM Connection"""
         try:
             self.stop()
@@ -100,7 +107,7 @@ class KIM001Stage(StageBase, IntegratedDevice):
             logger.exception(e)
 
     @classmethod
-    def get_connect_params(cls):
+    def get_connect_params(cls) -> list[str]:
         """Register the parameters required to connect to the stage.
 
         Returns
@@ -111,7 +118,7 @@ class KIM001Stage(StageBase, IntegratedDevice):
         return ["serial_number"]
 
     @classmethod
-    def connect(cls, serial_number: str):
+    def connect(cls, serial_number: str) -> Any:
         """Connect to the Thorlabs KIM Stage
 
         Parameters
@@ -134,7 +141,9 @@ class KIM001Stage(StageBase, IntegratedDevice):
         # Open the same serial number device if there are several devices connected to the
         # computer
         available_serialnum = kim_controller.TLI_GetDeviceListExt()
-        if not list(filter(lambda s: str(s) == str(serial_number), available_serialnum)):
+        if not list(
+            filter(lambda s: str(s) == str(serial_number), available_serialnum)
+        ):
             print(
                 f"** Please make sure Thorlabs stage with serial number {serial_number} "
                 f"is connected to the computer!"
@@ -143,7 +152,7 @@ class KIM001Stage(StageBase, IntegratedDevice):
         kim_controller.KIM_Open(str(serial_number))
         return kim_controller
 
-    def report_position(self):
+    def report_position(self) -> dict[str, float]:
         """Report the position of the stage.
 
         Reports the position of the stage for all axes, and creates the hardware
@@ -169,7 +178,9 @@ class KIM001Stage(StageBase, IntegratedDevice):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
         """Implement movement logic along a single axis.
 
         Parameters
@@ -213,7 +224,9 @@ class KIM001Stage(StageBase, IntegratedDevice):
                 return False
         return True
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = False
+    ) -> bool:
         """Move stage along a single axis.
 
         Parameters
@@ -244,16 +257,23 @@ class KIM001Stage(StageBase, IntegratedDevice):
 
         return result
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop all stage channels move"""
         for i in self.kim_axes:
             self.kim_controller.KIM_MoveStop(self.serial_number, i)
+
 
 @log_initialization
 class KST101Stage(StageBase):
     """Thorlabs KST Stage"""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the stage.
 
         Parameters
@@ -308,7 +328,7 @@ class KST101Stage(StageBase):
             logger.exception(e)
 
     @classmethod
-    def get_connect_params(cls):
+    def get_connect_params(cls) -> list[str]:
         """Register the parameters required to connect to the stage.
 
         Returns
@@ -319,7 +339,7 @@ class KST101Stage(StageBase):
         return ["serial_number"]
 
     @classmethod
-    def connect(cls, serial_number):
+    def connect(cls, serial_number: str) -> Any:
         """Connect to the Thorlabs KST Stage
 
         Parameters
@@ -342,7 +362,9 @@ class KST101Stage(StageBase):
         # Open the same serial number device if there are several devices connected to the
         # computer
         available_serial_numbers = kst_controller.TLI_GetDeviceListExt()
-        if not list(filter(lambda s: str(s) == str(serial_number), available_serial_numbers)):
+        if not list(
+            filter(lambda s: str(s) == str(serial_number), available_serial_numbers)
+        ):
             print(
                 f"** Please make sure Thorlabs stage with serial number {serial_number} "
                 f"is connected to the computer!"
@@ -351,7 +373,7 @@ class KST101Stage(StageBase):
         kst_controller.KST_Open(str(serial_number))
         return kst_controller
 
-    def report_position(self):
+    def report_position(self) -> dict[str, float]:
         """
         Report the position of the stage.
 
@@ -378,7 +400,9 @@ class KST101Stage(StageBase):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axes, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axes: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
         """
         Implement movement.
 
@@ -419,7 +443,9 @@ class KST101Stage(StageBase):
                 return False
         return True
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = False
+    ) -> bool:
         """Move stage along a single axis.
 
         Parameters
@@ -445,7 +471,7 @@ class KST101Stage(StageBase):
 
         return result
 
-    def move_to_position(self, position, wait_until_done=False):
+    def move_to_position(self, position: float, wait_until_done: bool = False) -> bool:
         """Perform a move to position
 
         Parameters
@@ -479,12 +505,12 @@ class KST101Stage(StageBase):
             else:
                 return True
 
-    def run_homing(self):
+    def run_homing(self) -> None:
         """Run homing sequence."""
         self.kst_controller.KST_HomeDevice(self.serial_number)
         self.move_to_position(12.5, wait_until_done=True)
 
-    def stop(self):
+    def stop(self) -> None:
         """
         Stop all stage channels move
         """

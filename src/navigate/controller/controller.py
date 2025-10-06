@@ -64,6 +64,7 @@ from navigate.controller.sub_controllers import (
     MenuController,
     PluginsController,
     HistogramController,
+    GLVolumeViewer
     # MicroscopePopupController,
     # AdaptiveOpticsPopupController,
 )
@@ -231,6 +232,13 @@ class Controller:
             self.configuration,
             event_queue=self.event_queue,
             log_queue=log_queue,
+        )
+
+        self.volume_viewer = ObjectInSubprocess(
+            GLVolumeViewer,
+            # self.configuration,
+            # event_queue=self.event_queue,
+            # log_queue=log_queue
         )
 
         #: mp.Pipe: Pipe for sending images from model to view.

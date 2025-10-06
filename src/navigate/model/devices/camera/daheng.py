@@ -147,8 +147,8 @@ class DahengCamera(CameraBase):
         str
             Status string including serial number and connection state.
         """
-        status = "Connected" if self.is_connected else "Disconnected"
-        serial = self.device_serial_number if self.device_serial_number else "N/A"
+        status = "Connected" if getattr(self, "is_connected", False) else "Disconnected"
+        serial = getattr(self, "device_serial_number", "N/A")
         return f"MER2_1220_32U3C Camera [Serial: {serial}, Status: {status}]"
 
     def __del__(self) -> None:
@@ -234,6 +234,8 @@ class DahengCamera(CameraBase):
         """
         if self.device is None:
             raise UserVisibleException("Daheng device handle not set. Was connect() called?")
+        
+        self.is_connected = True
 
         try:
             # Get feature control interface and data stream object
@@ -277,8 +279,6 @@ class DahengCamera(CameraBase):
             self.camera_parameters["y_pixels"] = height
             self.x_pixels = width
             self.y_pixels = height
-
-            self.is_connected = True
 
             logger.info(
                 f"Daheng camera connected: Serial={self.device_serial_number}, "

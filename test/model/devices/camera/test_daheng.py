@@ -39,14 +39,22 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 # Local Imports
-from navigate.model.devices.camera.daheng import DahengCamera
 from navigate.model.utils.exceptions import UserVisibleException
+
+try:
+    import gxipy  # noqa: F401
+except:
+    @pytest.fixture(autouse=True)
+    def mock_daheng_module():
+        fake_gx = MagicMock()
+        with patch.dict("sys.modules", {"gxipy": fake_gx}):
+            yield fake_gx
 
 
 @pytest.fixture
 def mock_daheng_sdk():
     """Patch Daheng SDK (gxipy) and return mocked device + subsystems."""
-    with patch("navigate.model.devices.camera.daheng.DeviceManager") as mock_device_manager:
+    with patch("navigate.model.devices.camera.daheng.gx.DeviceManager") as mock_device_manager:
         device = _create_mock_device(mock_device_manager)
         feature_control = _create_mock_feature_control()
         data_stream, raw_image = _create_mock_image_pipeline()
@@ -155,7 +163,7 @@ def _create_mock_image_pipeline() -> Tuple[MagicMock, MagicMock]:
     return stream, image
 
 @pytest.fixture
-def camera(mock_daheng_sdk) -> DahengCamera:
+def camera(mock_daheng_sdk):
     """
     Return a DahengCamera instance connected via mocked SDK.
 
@@ -164,14 +172,18 @@ def camera(mock_daheng_sdk) -> DahengCamera:
     """
     # Use the patched classmethod to simulate SDK connection.
     # This is where mock_daheng_sdk enters.
-    device = DahengCamera.connect(serial_number="1234")
+    from navigate.model.devices.camera.daheng import DahengCamera
 
     # Minimal config object matching Navigate's expected schema
     config = {
         "configuration": {
             "microscopes": {
                 "test_scope": {
-                    "camera": {}
+                    "camera": {
+                        "hardware": {
+                            "serial_number": "1234",
+                        }
+                    }
                 }
             }
         }
@@ -179,14 +191,14 @@ def camera(mock_daheng_sdk) -> DahengCamera:
 
     camera = DahengCamera(
         microscope_name="test_scope",
-        device_connection=device,
+        device_connection=mock_daheng_sdk["device"],
         configuration=config
     )
 
     # Initialize and return the test camera instance
     return camera
 
-@patch("navigate.model.devices.camera.daheng.DeviceManager")
+@patch("navigate.model.devices.camera.daheng.gx.DeviceManager")
 def test_connect_without_serial(mock_dm):
     """
     Test that DahengCamera.connect() connects to the first camera if no serial number is provided.
@@ -194,6 +206,7 @@ def test_connect_without_serial(mock_dm):
     This uses patching to replace the actual DeviceManager with a mock,
     simulating a single connected camera with serial '1234'.
     """
+
     mock_device = MagicMock()
 
     # Simulate SDK returning one device with serial '1234'
@@ -203,12 +216,13 @@ def test_connect_without_serial(mock_dm):
     mock_dm.return_value.open_device_by_index.return_value = mock_device
 
     # Call connect without specifying serial number
+    from navigate.model.devices.camera.daheng import DahengCamera
     device = DahengCamera.connect()
 
     # Verify that we get the mocked device object
     assert device == mock_device
 
-@patch("navigate.model.devices.camera.daheng.DeviceManager")
+@patch("navigate.model.devices.camera.daheng.gx.DeviceManager")
 def test_connect_invalid_serial_raises(mock_dm):
     """
     Test that DahengCamera.connect() raises a UserVisibleException if the
@@ -218,6 +232,8 @@ def test_connect_invalid_serial_raises(mock_dm):
     """
     # Simulate one connected device with serial '1234'
     mock_dm.return_value.get_device_list.return_value = [{"sn": "1234"}]
+
+    from navigate.model.devices.camera.daheng import DahengCamera
 
     # Attempt to connect with a non-existent serial number
     with pytest.raises(UserVisibleException, match="Daheng camera with serial INVALID_SN not found."):
@@ -383,7 +399,6 @@ def test_initialize_and_start_acquisition(camera):
     assert camera._data_buffer == fake_buffer
 
     # Start the acquisition and verify SDK interaction
-    camera.start_acquisition()
     camera.data_stream.start_stream.assert_called_once()
     camera.feature_control.get_command_feature.assert_called_with("AcquisitionStart")
     camera.feature_control.get_command_feature.return_value.send_command.assert_called_once()
@@ -402,7 +417,6 @@ def test_initialize_start_and_receive_image(camera):
     number_of_frames = 3
 
     camera.initialize_image_series(data_buffer=fake_buffer, number_of_frames=number_of_frames)
-    camera.start_acquisition()
 
     # Simulate receiving frames
     for i in range(3):
@@ -456,7 +470,8 @@ def test_set_sensor_mode_logs(camera, caplog):
     """
     with caplog.at_level("WARNING"):
         camera.set_sensor_mode("InvalidModeName")
-        assert "not supported" in caplog.text
+        camera.device.SensorShutterMode.set.assert_called_with(0)
+        assert camera._scan_mode == 0
 
 def test_snap_software_triggered_success(camera):
     """

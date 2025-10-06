@@ -37,6 +37,7 @@
 #    This module depends on Daheng's proprietary 'gxipy' SDK.
 #    To use this camera class, 'gxipy' must be installed manually.
 #    See the ImportError message below for installation instructions.
+#.   The Line0 trigger input is used by default for external triggering.
 # ################################################################################
 
 # Standard Library Imports
@@ -132,6 +133,10 @@ class DahengCamera(CameraBase):
         self.initialize_sdk_state()
 
         self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
+        self.camera_parameters["supported_trigger_sources"] = ["External"]
+        # support Normal and Light-Sheet modes
+        self.camera_parameters["supported_sensor_modes"] = ["Normal", "Light-Sheet"]
+
 
     def __str__(self) -> str:
         """
@@ -239,14 +244,21 @@ class DahengCamera(CameraBase):
             self.device_serial_number = self.feature_control.get_string_feature("DeviceSerialNumber").get()
             self.payload_size = self.feature_control.get_int_feature("PayloadSize").get()
 
-            # Set trigger source (GPIO line 2) for external triggering
-            self.device.TriggerSource.set(gx.GxTriggerSourceEntry.LINE2)
-            # Set trigger active
+            # Configure Acquisition and Trigger defaults
+            # Line0 as default trigger source
+            self.set_trigger_source("LINE0")
+            # Trigger mode ON by default
+            self.set_camera_trigger_mode("ON")
+            # trigger polarity is rising edge by default
             self.device.TriggerActivation.set(gx.GxTriggerActivationEntry.RISINGEDGE)
-            # Set trigger mode to on
-            self.device.TriggerMode.set(gx.GxSwitchEntry.ON)
             # Set acquisition mode to single frame
-            self.device.AcquisitionMode.set(gx.GxAcquisitionModeEntry.SINGLEFRAME)
+            self.device.AcquisitionMode.set(gx.GxAcquisitionModeEntry.CONTINUOUS)
+            # Set trigger mode to FrameStart
+            self.device.TriggerSelector.set(gx.GxTriggerSelectorEntry.FRAMESTART)
+            # set trigger delay to 0
+            self.device.TriggerDelay.set(0.0)
+            # Set Exposure Mode to Timed
+            self.device.ExposureMode.set(gx.GxExposureModeEntry.TIMED)
 
             # Get current image dimensions from hardware
             width = self.feature_control.get_int_feature("Width").get()
@@ -369,10 +381,12 @@ class DahengCamera(CameraBase):
             This value is ignored as Daheng does not support sensor mode switching.
         """
         modes_dict = {"Normal": 0, "Light-Sheet": 1}
-        self.device.SensorShutterMode.set(modes_dict.get(mode, 0))
-        
-        # Default to scan mode 0 for compatibility
-        self._scan_mode = 0
+
+        self._scan_mode = modes_dict.get(mode, 0)
+        self.device.SensorShutterMode.set(self._scan_mode)
+
+        logger.debug(f"Sensor mode set to {mode} ({self._scan_mode})")
+
 
     def set_readout_direction(self, mode: str) -> None:
         """
@@ -386,19 +400,19 @@ class DahengCamera(CameraBase):
         """
         logger.warning(f"Readout direction '{mode}' is not supported on Daheng cameras.")
 
-    def calculate_readout_time(self) -> None:
+    def calculate_readout_time(self) -> float:
         """
         Stub method for readout time calculation — not supported by Daheng cameras.
 
         Returns
         -------
-        None
-            Always returns None, as Daheng does not expose readout timing data.
+        float
+            Always returns 0, as Daheng does not expose readout timing data.
         """
-        logger.warning("DahengCamera does not support readout time calculation. Returning None.")
-        return None
+        logger.warning("DahengCamera does not support readout time calculation. Returning 0.")
+        return 0
 
-    def set_line_interval(self, line_interval_time: float) -> None:
+    def set_line_interval(self, line_interval_time: float) -> bool:
         """
         Stub for line interval (scan delay) — not supported by Daheng cameras.
 
@@ -416,7 +430,10 @@ class DahengCamera(CameraBase):
         # Set internal scan delay to zero for compatibility tracking
         self._scan_delay = 0
 
-    def calculate_light_sheet_exposure_time(self, full_chip_exposure_time: float, shutter_width: int) -> None:
+        return False
+    def calculate_light_sheet_exposure_time(
+            self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
         """
         Stub for light-sheet exposure time calculation — not supported on Daheng cameras.
 
@@ -429,11 +446,14 @@ class DahengCamera(CameraBase):
 
         Returns
         -------
-        None
-            Always returns None, as this feature is unsupported.
+        exposure_time : float
+            Light-sheet mode exposure time (s).
+        camera_line_interval : float
+            HamamatsuOrca line interval duration (s).
+        full_chip_exposure time : float
+            Full chip exposure time (s).
         """
-        logger.warning("calculate_light_sheet_exposure_time is not supported by Daheng cameras.")
-        return None
+        return full_chip_exposure_time, 0, full_chip_exposure_time
 
     def set_exposure_time(self, exposure_time: float) -> None:
         """
@@ -455,6 +475,11 @@ class DahengCamera(CameraBase):
         try:
             # Convert seconds to microseconds as required by gxipy
             exposure_time_us = int(exposure_time * 1_000_000)
+
+            if self._scan_mode == 1:
+                exposure_time_us = exposure_time_us // self.y_pixels
+                self.camera_parameters["line_interval"] = exposure_time_us / 1_000_000
+                logger.debug(f"Light-Sheet mode: Adjusted exposure time to {exposure_time_us} µs based on {self.y_pixels} lines")
 
             # Send exposure time setting to the camera
             self.feature_control.get_float_feature("ExposureTime").set(exposure_time_us)
@@ -620,6 +645,8 @@ class DahengCamera(CameraBase):
         self._frame_ids = []
         self.is_acquiring = True 
 
+        self.start_acquisition()
+
         logger.debug(f"Initialized image series: {number_of_frames} frames")
         
     def get_new_frame(self) -> List[int]:
@@ -731,7 +758,7 @@ class DahengCamera(CameraBase):
         except Exception as e:
             raise UserVisibleException(f"Failed to stop acquisition: {e}")
         
-    def set_trigger_mode(self, mode: str) -> None:
+    def set_camera_trigger_mode(self, mode: str) -> None:
         """
         Set the trigger mode on the camera.
 
@@ -755,6 +782,18 @@ class DahengCamera(CameraBase):
 
         except Exception as e:
             raise UserVisibleException(f"Failed to set trigger mode to '{mode}': {e}")
+        
+    def set_trigger_mode(self, trigger_source = "External"):
+        """Set the camera trigger source to external or internal free run mode.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        trigger_source : str
+            Trigger source. Options are 'External' or 'Internal'.
+        """
+        super().set_trigger_mode(trigger_source)
 
 
     def set_trigger_source(self, source: str) -> None:

@@ -240,6 +240,10 @@ class Controller:
             # event_queue=self.event_queue,
             # log_queue=log_queue
         )
+        self.volume_viewer.start_render_loop(1024, 800, "3D Viewer")
+        self.volume_viewer.set_shear_angle(45.0)
+        self.volume_viewer.set_opacity(0.15)
+        
 
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
@@ -1208,6 +1212,13 @@ class Controller:
                 image=self.data_buffer[image_id]
             )
             images_received += 1
+
+            if self.configuration["experiment"]["MicroscopeState"]["image_mode"] == 'z-stack':
+                self.volume_viewer.add_slice(
+                    self.data_buffer[image_id],
+                    n_slices=self.configuration["experiment"]["MicroscopeState"]["number_z_steps"],
+                    i=images_received
+                    )
 
             # Update progress bar.
             self.acquire_bar_controller.progress_bar(

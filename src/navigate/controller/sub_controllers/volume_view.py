@@ -1,10 +1,14 @@
 import numpy as np
-from OpenGL import GL
+# from OpenGL import GL
 import glfw
 import glm
 from typing import Union
 import math
-from multiprocessing import Process, shared_memory
+# from multiprocessing import Process, shared_memory
+import threading
+import queue
+
+GL = None
 
 # SHADERS
 
@@ -126,7 +130,6 @@ void main()
     FragColor = acc;
 }
 """
-
 
 class Shader:
     def __init__(self, vs, fs):
@@ -430,193 +433,325 @@ class FrameTimer:
             self.frame_timer = 0.
 
 class GLVolumeViewer:
-
     def __init__(self):
-        # texture storage
-        self.tex_3d, self.tex_1d = None, None
+        # thread/loop state
+        self._cmd_q = queue.Queue()
+        self._running = threading.Event()
+        self._ready   = threading.Event()
+        self._thread  = None
 
-    def create_window(self):
+        # window / GL objects (created in render thread)
+        self.window = None
+        self.shader = None
+        self.vao    = None
+        self.camera = None
+        self.timer  = FrameTimer()
 
-        if not glfw.init():
-            print("Failed to initialize GLFW!")
+        # stack data
+        self.stack = None
+
+        # textures
+        self.tex_3d = None
+        self.tex_1d = None
+
+        # cached config
+        self._opacity   = 0.15
+        self._stepWorld = 0.25
+        self._boxMin    = None
+        self._boxMax    = None
+
+    # ---------------- public API (non-blocking) ----------------
+
+    def start_render_loop(self, width=1024, height=800, title="3D Viewer"):
+        """Spawn the render thread and return immediately."""
+        if self._thread and self._thread.is_alive():
             return
-        
-        self.window = glfw.create_window(1024, 800, "3D Viewer", None, None)
+        self._running.set()
+        self._thread = threading.Thread(
+            target=self._render_thread, args=(width, height, title), daemon=True
+        )
+        self._thread.start()
+        # Optionally wait until GL is ready before returning:
+        self._ready.wait(timeout=5.0)
 
-        self.camera = Camera(self.window, position=[-400, 400, 400])
-        self.frame_timer = FrameTimer()
-
-        if not self.window:
-            glfw.terminate()
+    def stop_render_loop(self):
+        """Ask the render thread to exit, and wait for it."""
+        if not self._thread:
             return
+        self._running.clear()
+        # Post a no-op to wake queue in case it’s waiting
+        self._cmd_q.put(lambda: None)
+        self._thread.join(timeout=3.0)
+        self._thread = None
 
-        # create the GL context
-        glfw.make_context_current(self.window)
-        
-        # create ray-marching shader
-        self.shader = Shader(VERT_SRC, FRAG_SRC)
-        
-        # VAO
-        self.vao = GL.glGenVertexArrays(1)
+    # High-level commands (enqueue small callables):
 
-    def main_loop(self):
+    def add_slice(self, image : np.ndarray, n_slices : int, i: int):
 
-        while not glfw.window_should_close(self.window):
+        new_slice = image[np.newaxis].astype(np.float32)
 
-            # updates
-            self.frame_timer.tick(True)
-            self.camera.update(self.frame_timer.delta_time)
+        # print(f"new_slice {i}:", new_slice.shape)
 
-            GL.glViewport(0, 0, self.camera.win_w, self.camera.win_h)
+        try:
+            self.stack = np.vstack([
+                self.stack,
+                new_slice
+            ])
+        except ValueError:
+            self.stack = new_slice
 
-            # render (if texture exists)
-            if self.tex_3d and self.tex_1d:
+        # if self.stack is None:
+        #     print("Stack: None")
+        #     self.stack = new_slice
+        # else:
+        #     print("Stack:", self.stack.shape)
+        #     self.stack = np.vstack([
+        #         self.stack,
+        #         new_slice
+        #     ])
 
-                GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+        if len(self.stack) == n_slices-1:
+            self.tex_3d, self.tex_1d = None, None
+            self.bind_image_data(self.stack)
+            self.stack = None
 
-                self.shader.use()
-                # viewport
-                self.shader.set_vec2('viewportSize', (self.camera.win_w, self.camera.win_h))
+    def bind_image_data(self, vol_f32: np.ndarray):
+        """Upload / replace the 3D volume texture (runs on GL thread)."""
+        vol_f32 = np.asarray(vol_f32, dtype=np.float32)
+        vol_f32 = np.power(vol_f32, 0.9)
+        m = vol_f32.max()
+        if m > 0:
+            vol_f32 /= m
 
-                # inverse(proj*view)
-                inv_vp = glm.inverse(self.camera.projection * self.camera.view)
-                GL.glUniformMatrix4fv(self.shader.loc("invProjView"), 1, GL.GL_TRUE, np.array(inv_vp, np.float32))
-
-                # draw texture
-                GL.glActiveTexture(GL.GL_TEXTURE0)
-                GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
-                GL.glActiveTexture(GL.GL_TEXTURE1)
-                GL.glBindTexture(GL.GL_TEXTURE_1D, self.tex_1d)
-
-                GL.glDisable(GL.GL_DEPTH_TEST)
-                GL.glDisable(GL.GL_CULL_FACE)
-                GL.glDisable(GL.GL_BLEND)  # blending handled inside the shader
-
-                GL.glBindVertexArray(self.vao)
-                GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
-                GL.glBindVertexArray(0)
-
-
-            # swap buffers
-            glfw.swap_buffers(self.window)
-
-            # poll events
-            glfw.poll_events()
-
-        # end
-        glfw.terminate()
-
-    def bind_image_data(self, vol : np.ndarray):
-        
-        # scaling and normalizing
-        vol = np.power(vol, 0.9).astype(np.float32)
-        vol /= vol.max()        
-
-        # volume bounds
-        nz, ny, nx = 0.5 * np.array(vol.shape) - 0.5
-
-        # create textures
-        self.tex_3d = self.make_volume_texture(vol)
-        self.tex_1d = self.make_transfer_texture()
-
-        # shader configs
-        self.shader.use()
-        self.shader.set_int('volume',   0)
-        self.shader.set_int('transfer', 1)
-        self.shader.set_float('stepWorld', 0.25)
-        self.shader.set_vec3('boxMin', [-nx, -ny, -nz])
-        self.shader.set_vec3('boxMax', [ nx,  ny,  nz])
-
-    @staticmethod
-    def make_volume_texture(vol_f32 : np.ndarray):  
-        # vol_f32 shape = (Z,Y,X), values in [0,1]
         z, y, x = vol_f32.shape
+        # object-space bounds: centered on origin
+        nz, ny, nx = 0.5*np.array([z, y, x], dtype=np.float32) - 0.5
+        boxMin = (-nx, -ny, -nz)
+        boxMax = ( nx,  ny,  nz)
 
-        # create a texture to store the 3d volume
+        def _do():
+            self._ensure_gl_ready()
+            # (re)create textures
+            if self.tex_3d is None:
+                self.tex_3d = self._make_volume_texture(vol_f32)
+            else:
+                self._update_volume_texture(self.tex_3d, vol_f32)
+            if self.tex_1d is None:
+                self.tex_1d = self._make_transfer_texture()
+
+            # set uniforms
+            self.shader.use()
+            self.shader.set_int('volume',   0)
+            self.shader.set_int('transfer', 1)
+            self.shader.set_float('stepWorld', self._stepWorld)
+            self.shader.set_vec3('boxMin', boxMin)
+            self.shader.set_vec3('boxMax', boxMax)
+
+            self._boxMin, self._boxMax = glm.vec3(*boxMin), glm.vec3(*boxMax)
+
+        self._cmd_q.put(_do)
+
+    def set_opacity(self, value: float):
+        self._opacity = float(value)
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float('opacity', self._opacity)
+        self._cmd_q.put(_do)
+
+    def set_step_world(self, value: float):
+        self._stepWorld = float(value)
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float('stepWorld', self._stepWorld)
+        self._cmd_q.put(_do)
+
+    def set_shear_angle(self, degrees: float):
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float('shear_angle', float(degrees))
+        self._cmd_q.put(_do)
+
+    # ---------------- render thread ----------------
+
+    def _render_thread(self, width, height, title):
+        """Lives entirely in the child; owns the window + GL context."""
+        global GL
+        try:
+            # All GLFW/GL calls in this thread:
+            if not glfw.init():
+                raise RuntimeError("GLFW init failed")
+            glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+            glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+            glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+            self.window = glfw.create_window(width, height, title, None, None)
+            if not self.window:
+                raise RuntimeError("Failed to create GLFW window")
+
+            glfw.make_context_current(self.window)
+
+            # Import GL *now* (context thread)
+            from OpenGL import GL as _GL
+            GL = _GL
+
+            # Build pipeline objects now that GL is bound to this thread
+            self.shader = Shader(VERT_SRC, FRAG_SRC)
+            self.vao    = GL.glGenVertexArrays(1)
+
+            # camera + timer
+            self.camera = Camera(self.window, position=[-400, 400, 400])
+
+            # defaults on shader
+            self.shader.use()
+            self.shader.set_int('volume',   0)
+            self.shader.set_int('transfer', 1)
+            self.shader.set_float('opacity', self._opacity)
+            self.shader.set_float('stepWorld', self._stepWorld)
+
+            self._ready.set()
+
+            # main loop
+            while self._running.is_set() and not glfw.window_should_close(self.window):
+                # drain pending commands (without blocking the frame)
+                for _ in range(64):  # avoid starving rendering
+                    try:
+                        cmd = self._cmd_q.get_nowait()
+                    except queue.Empty:
+                        break
+                    try:
+                        cmd()
+                    except Exception as e:
+                        print("[GL thread] command error:", e)
+
+                # draw one frame
+                self._frame()
+
+            # cleanup
+            try:
+                if self.tex_3d: GL.glDeleteTextures([self.tex_3d]); self.tex_3d = None
+                if self.tex_1d: GL.glDeleteTextures([self.tex_1d]); self.tex_1d = None
+                if self.vao:    GL.glDeleteVertexArrays(1, [self.vao]); self.vao = None
+            finally:
+                glfw.destroy_window(self.window)
+                glfw.terminate()
+                self.window = None
+        except Exception as e:
+            print("[GL thread] fatal:", e)
+            try:
+                glfw.terminate()
+            except Exception:
+                pass
+            self.window = None
+            self._ready.set()  # unblock waiters even on failure
+
+    # ---------------- per-frame ----------------
+
+    def _frame(self):
+        self.timer.tick(False)
+        self.camera.update(self.timer.delta_time)
+
+        GL.glViewport(0, 0, self.camera.win_w, self.camera.win_h)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+
+        if self.tex_3d and self.tex_1d:
+            self.shader.use()
+            self.shader.set_vec2('viewportSize', (self.camera.win_w, self.camera.win_h))
+
+            inv_vp = glm.inverse(self.camera.projection * self.camera.view)
+            # transpose=True to feed row-major numpy as column-major
+            GL.glUniformMatrix4fv(self.shader.loc("invProjView"), 1, GL.GL_TRUE,
+                                  np.array(inv_vp, np.float32))
+
+            GL.glActiveTexture(GL.GL_TEXTURE0); GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
+            GL.glActiveTexture(GL.GL_TEXTURE1); GL.glBindTexture(GL.GL_TEXTURE_1D, self.tex_1d)
+
+            GL.glDisable(GL.GL_DEPTH_TEST)
+            GL.glDisable(GL.GL_CULL_FACE)
+            GL.glDisable(GL.GL_BLEND)
+
+            GL.glBindVertexArray(self.vao)
+            GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+            GL.glBindVertexArray(0)
+
+        glfw.swap_buffers(self.window)
+        glfw.poll_events()
+
+    # ---------------- GL helpers (GL thread only) ----------------
+
+    def _ensure_gl_ready(self):
+        if not (self.window and self.shader and self.vao):
+            raise RuntimeError("GL not ready yet")
+
+    def _make_volume_texture(self, vol_f32: np.ndarray):
+        z, y, x = vol_f32.shape
         tex = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
-        
-        # texture params
         GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
         GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
         GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_R, GL.GL_CLAMP_TO_EDGE)
-
-        # write image data to texture
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
         GL.glTexImage3D(GL.GL_TEXTURE_3D, 0,
-                        GL.GL_R16F,   # 16-bit float per voxel (enough for 0..1)
+                        GL.GL_R16F,
                         x, y, z, 0,
                         GL.GL_RED, GL.GL_FLOAT,
                         vol_f32.astype(np.float32))
-        
         return tex
 
-    @staticmethod
-    def make_transfer_texture(N : int = 256):
-        # grayscale ramp with alpha = value
-        tf = np.linspace(0,1,N, dtype=np.float32)
-        rgba = np.stack([tf, tf, tf, tf], axis=1)  # premultiplied in the shader
-        
-        # create a 1d transfer texture
+    def _update_volume_texture(self, tex, vol_f32: np.ndarray):
+        z, y, x = vol_f32.shape
+        GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+        GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 0,
+                           0, 0, 0, x, y, z,
+                           GL.GL_RED, GL.GL_FLOAT,
+                           vol_f32.astype(np.float32))
+
+    def _make_transfer_texture(self, N: int = 256):
+        tf = np.linspace(0, 1, N, dtype=np.float32)
+        rgba = (np.stack([tf, tf, tf, tf], axis=1) * 255).astype(np.uint8)
+
         tex = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_1D, tex)
-        
-        # texture params
         GL.glTexParameteri(GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
-        
-        # write
         GL.glTexImage1D(GL.GL_TEXTURE_1D, 0,
                         GL.GL_RGBA8, N, 0,
                         GL.GL_RGBA, GL.GL_UNSIGNED_BYTE,
-                        (rgba*255).astype(np.uint8))
+                        rgba)
         return tex
 
 #%%
 if __name__ == '__main__':
 
-    import tkinter as tk
-
-    root = tk.Tk('test')
-    root.geometry('400x300')
-
-    main_frame = tk.Frame(root, width=100, height=100)
-    main_frame.pack()
-    launch_button = tk.Button(main_frame, text='LAUNCH')    
-    test_button = tk.Button(main_frame, text='TEST') 
-    launch_button.pack()
-    test_button.pack()
-
-    def gauss_3d(pix, m=(0,0,0), s=(1,1,3)):
-
-        x, y, z = np.array(np.meshgrid(range(pix), range(pix), range(pix)), dtype=np.float32)
-
-        x -= x.mean()
-        y -= y.mean()
-        z -= z.mean()
-
-        g = ((x - m[2])/s[2])**2 + ((y - m[1])/s[1])**2 + ((z - m[0])/s[0])**2
-        g = np.exp(-g)
-
-        return g
-
-    # image data
-    path = r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif"
-    import tifffile as tiff
-    im = tiff.imread(path)
-
     from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
+    import tkinter as tk
+    import tifffile as tiff
+
+    root = tk.Tk()
+    root.geometry("400x300")
 
     viewer = ObjectInSubprocess(GLVolumeViewer)
 
-    def launch_viewer():
-        viewer.create_window()
-        viewer.bind_image_data(im)
-        viewer.main_loop()
+    # your data
+    im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif").astype(np.float32)
 
-    launch_button.configure(command=launch_viewer)
-    test_button.configure(command=lambda: print("Test!"))
+    def launch():
+        viewer.start_render_loop(1024, 800, "3D Viewer")  # returns immediately
+        viewer.bind_image_data(im)                        # enqueued to GL thread
+
+    def more_transparent():
+        viewer.set_opacity(0.08)
+
+    def stop():
+        viewer.stop_render_loop()
+
+    tk.Button(root, text="LAUNCH", command=launch).pack()
+    tk.Button(root, text="MORE TRANSPARENT", command=more_transparent).pack()
+    tk.Button(root, text="STOP", command=stop).pack()
+    tk.Button(root, text="TEST", command=lambda: print("Tk is responsive!")).pack()
 
     root.mainloop()

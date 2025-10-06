@@ -45,8 +45,8 @@ uniform float opacity = 0.15;  // global density/opacity
 
 // OPM parameters
 uniform float shear_angle = 45.0;   // degrees
-uniform float dz = 0.1345;          // um    
-uniform float px = 0.1345;          // um
+uniform float dz = 0.4;             // um    
+uniform float px = 0.1348;          // um
 
 // ---------- utilities ----------
 
@@ -70,8 +70,13 @@ mat4 inverseShearYZ(float angleDeg)
 {
     float k = sin(radians(angleDeg));
     mat4 m = mat4(1.0);
-    m[1][2] = px * k / dz;
+    m[1][2] = k;
     
+    // need to properly scale somehow: interpolation?
+    // m[1][2] = px * k / dz;
+    // m[0][0] = dz * k;
+    // m[2][2] = dz * cos(radians(angleDeg));
+
     return m;
 }
 
@@ -490,7 +495,7 @@ class GLVolumeViewer:
 
         new_slice = image[np.newaxis].astype(np.float32)
 
-        # print(f"new_slice {i}:", new_slice.shape)
+        print(f"new_slice {i}:", new_slice.shape)
 
         try:
             self.stack = np.vstack([
@@ -518,14 +523,14 @@ class GLVolumeViewer:
     def bind_image_data(self, vol_f32: np.ndarray):
         """Upload / replace the 3D volume texture (runs on GL thread)."""
         vol_f32 = np.asarray(vol_f32, dtype=np.float32)
-        vol_f32 = np.power(vol_f32, 0.9)
+        vol_f32 = np.clip(vol_f32, a_min=0, a_max=2000)
         m = vol_f32.max()
         if m > 0:
             vol_f32 /= m
-
-        z, y, x = vol_f32.shape
+        vol_f32 = np.power(vol_f32, 0.9)
+        
         # object-space bounds: centered on origin
-        nz, ny, nx = 0.5*np.array([z, y, x], dtype=np.float32) - 0.5
+        nz, ny, nx = 0.5*np.array(vol_f32.shape, dtype=np.float32) - 0.5
         boxMin = (-nx, -ny, -nz)
         boxMax = ( nx,  ny,  nz)
 
@@ -557,6 +562,14 @@ class GLVolumeViewer:
             self._ensure_gl_ready()
             self.shader.use()
             self.shader.set_float('opacity', self._opacity)
+        self._cmd_q.put(_do)
+
+    def set_zstep(self, value: float):
+        self._dz = float(value)
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float('dz', self._dz)
         self._cmd_q.put(_do)
 
     def set_step_world(self, value: float):

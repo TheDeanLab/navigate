@@ -1214,6 +1214,10 @@ class Controller:
             images_received += 1
 
             if self.configuration["experiment"]["MicroscopeState"]["image_mode"] == 'z-stack':
+                if images_received == 1:
+                    self.volume_viewer.set_zstep(
+                        self.configuration["experiment"]["MicroscopeState"]["step_size"]
+                    )
                 self.volume_viewer.add_slice(
                     self.data_buffer[image_id],
                     n_slices=self.configuration["experiment"]["MicroscopeState"]["number_z_steps"],

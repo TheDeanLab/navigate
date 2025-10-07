@@ -589,7 +589,7 @@ Conex Controller
 
 The Newport Conex Controller series offers compact, integrated motion control solutions that come pre-wired with dedicated controllers for quick, out-of-the-box operation. While the Conex series offers four `different controller types with various drive technologies <https://www.newport.com/c/controller-&-stage-kits>`_, we have used it to drive a `TRA6CC <https://www.newport.com/p/TRA6CC>`_ (Linear Actuator, DC Servo, 6 mm Travel, TRA6CC and CONEX-CC Controller) connected to a `M-SV-0.5 <https://www.newport.com/p/M-SV-0.5>`_ adjustable width slit that is positioned conjugate to the back pupil of the illumination objective. This setup allows precise and automated control of the illumination numerical aperture.
 
-. collapse:: Configuration File
+.. collapse:: Configuration File
 
     .. code-block:: yaml
 
@@ -617,7 +617,7 @@ ESP302 Motion Controller Controller
 
 The Newport `ESP302 Motion Controller <https://www.newport.com/f/esp30x-3-axis-dc-and-stepper-motion-controller>`_ is a versatile, 1-, 2-, or 3-axis motion controller that provides precise positioning capabilities for a wide range of Newport stages.
 
-. collapse:: Configuration File
+.. collapse:: Configuration File
 
     .. code-block:: yaml
 

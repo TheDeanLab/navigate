@@ -307,7 +307,7 @@ def test_set_binning(camera):
     camera.feature_control.get_int_feature.assert_any_call("BinningHorizontal")
     camera.feature_control.get_int_feature.assert_any_call("BinningVertical")
 
-def test_set_invalid_ROI(camera, caplog, capsys):
+def test_set_invalid_ROI(camera):
     """
     Test that set_ROI() returns False and logs a warning when given invalid dimensions.
     """
@@ -317,26 +317,19 @@ def test_set_invalid_ROI(camera, caplog, capsys):
     center_x = 1000
     center_y = 1000
 
+    logger = logging.getLogger("model")
+    logger.propagate = False  # prevent sending logs to root CLI handler
+
+    stream = io.StringIO()
+    handler = logging.StreamHandler(stream)
+    logger.addHandler(handler)
+
+    camera.stop_acquisition()
+    handler.flush()
     result = camera.set_ROI(roi_width=roi_width, roi_height=roi_height, center_x=center_x, center_y=center_y)
-    captured = capsys.readouterr()
     assert result is False
-    assert_text = caplog.text or captured.out
-    if assert_text:
-        assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in assert_text
-    else:
-        logger = logging.getLogger("model")
-        logger.propagate = False  # prevent sending logs to root CLI handler
-
-        stream = io.StringIO()
-        handler = logging.StreamHandler(stream)
-        logger.addHandler(handler)
-
-        camera.stop_acquisition()
-        handler.flush()
-        result = camera.set_ROI(roi_width=roi_width, roi_height=roi_height, center_x=center_x, center_y=center_y)
-        assert result is False
-        assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in stream.getvalue()
-        logger.removeHandler(handler)
+    assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in stream.getvalue()
+    logger.removeHandler(handler)
 
 def test_snap_image_returns_numpy_array(camera):
     """
@@ -467,46 +460,37 @@ def test_stop_acquisition(camera):
     # Verify internal state was updated
     assert camera.is_acquiring is False
 
-def test_stop_acquisition_when_disconnected(camera, caplog, capsys):
+def test_stop_acquisition_when_disconnected(camera):
     """
     Test that stop_acquisition() logs a warning and does not raise
     when called on a disconnected camera.
     """
     camera.is_connected = False
 
-    with caplog.at_level("WARNING"):
-        camera.stop_acquisition()
+    logger = logging.getLogger("model")
+    logger.propagate = False  # prevent sending logs to root CLI handler
 
-    captured = capsys.readouterr()
-    assert_text = caplog.text or captured.out
-    if assert_text:
-        assert "not connected" in assert_text
-    else:
-        logger = logging.getLogger("model")
-        logger.propagate = False  # prevent sending logs to root CLI handler
+    stream = io.StringIO()
+    handler = logging.StreamHandler(stream)
+    logger.addHandler(handler)
 
-        stream = io.StringIO()
-        handler = logging.StreamHandler(stream)
-        logger.addHandler(handler)
+    camera.stop_acquisition()
+    handler.flush()
 
-        camera.stop_acquisition()
-        handler.flush()
+    assert "not connected" in stream.getvalue()
 
-        assert "not connected" in stream.getvalue()
+    logger.removeHandler(handler)
 
-        logger.removeHandler(handler)
-
-def test_set_sensor_mode_logs(camera, caplog):
+def test_set_sensor_mode_logs(camera):
     """
     Test that set_sensor_mode() logs a warning for unsupported modes.
 
-    Daheng cameras don't support sensor mode switching, so this method should
-    simply log a warning when called, without raising an error or doing anything.
+    If an invalid mode is specified, the camera will be set to Normal
+    mode (using global shutter).
     """
-    with caplog.at_level("WARNING"):
-        camera.set_sensor_mode("InvalidModeName")
-        camera.device.SensorShutterMode.set.assert_called_with(0)
-        assert camera._scan_mode == 0
+    camera.set_sensor_mode("InvalidModeName")
+    camera.device.SensorShutterMode.set.assert_called_with(0)
+    assert camera._scan_mode == 0
 
 def test_snap_software_triggered_success(camera):
     """

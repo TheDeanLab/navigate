@@ -1,5 +1,5 @@
 camera_device_types = {
-    "Daheng MER2-1220-32U3C": {"Daheng", "daheng"},
+    "Daheng MER2-1220-32U3C": ("Daheng", "daheng"),
     "Hamamatsu ORCA Lightning": ("HamamatsuOrcaLightning", "hamamatsu"),
     "Hamamatsu ORCA Fire": ("HamamatsuOrcaFire", "hamamatsu"),
     "Hamamatsu ORCA Fusion": ("HamamatsuOrcaFusion", "hamamatsu"),

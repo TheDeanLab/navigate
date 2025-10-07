@@ -34,7 +34,7 @@ import logging
 import time
 
 # from idlelib.debugger_r import DictProxy
-from typing import Any, Dict
+from typing import Any
 
 # Third-Party Imports
 from serial import SerialException
@@ -58,7 +58,7 @@ class MP285Stage(StageBase, SerialDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the MP285Stage.
@@ -152,7 +152,9 @@ class MP285Stage(StageBase, SerialDevice):
         self.close()
 
     @classmethod
-    def connect(cls, port: str, baud_rate: int=115200, timeout: float=0.25) -> MP285:
+    def connect(
+        cls, port: str, baud_rate: int = 115200, timeout: float = 0.25
+    ) -> MP285:
         """Connect to the MP285Stage."""
         try:
             mp285_stage = MP285(port, baud_rate, timeout)
@@ -163,9 +165,8 @@ class MP285Stage(StageBase, SerialDevice):
             raise UserWarning(
                 "Could not communicate with Sutter MP-285 via COMPORT", port
             )
-        
 
-    def report_position(self) -> dict:
+    def report_position(self) -> dict[str, float]:
         """Reports the position for all axes, and creates a position dictionary.
 
         Positions from the MP-285 are converted to microns.
@@ -204,7 +205,7 @@ class MP285Stage(StageBase, SerialDevice):
         return position
 
     def move_axis_absolute(
-        self, axis: str, abs_pos: float, wait_until_done=False
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
     ) -> bool:
         """Implement movement logic along a single axis.
 
@@ -225,7 +226,9 @@ class MP285Stage(StageBase, SerialDevice):
         move_dictionary = {f"{axis}_abs": abs_pos}
         return self.move_absolute(move_dictionary, wait_until_done)
 
-    def move_absolute(self, move_dictionary: dict, wait_until_done=True) -> bool:
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = True
+    ) -> bool:
         """Move stage along a single axis.
 
         Parameters

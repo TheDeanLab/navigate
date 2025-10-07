@@ -30,14 +30,19 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-from time import time
+import time
 import logging
 from functools import wraps
+import json
+from typing import Optional
 
 # Third Party Imports
 
 # Local Imports
 
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 def function_timer(func):
     """Decorator for evaluating the duration of time necessary to execute a statement.
@@ -54,13 +59,54 @@ def function_timer(func):
     """
 
     def wrap_func(*args, **kwargs):
-        t1 = time()
+        t1 = time.time()
         result = func(*args, **kwargs)
-        t2 = time()
+        t2 = time.time()
         print(f"Function {func.__name__!r} executed in {(t2 - t1):.4f}s")
         return result
 
     return wrap_func
+
+def performance_monitor(
+        prefix : str ="General",
+        display_args : Optional[callable] =None,
+        display_result : Optional[callable] = None
+) -> callable:
+    """Decorator for evaluating the duration of time necessary to execute a statement.
+
+    Parameters
+    ----------
+    prefix : str
+        The function to be timed.
+    display_args : callable, optional
+        Whether to display the arguments passed to the function.
+    display_result : callable, optional
+        Whether to display the result of the function.
+
+    Returns
+    -------
+    decorator : callable
+        The decorator function.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrap_func(*args, **kwargs):
+            start_time = time.perf_counter_ns()
+            result = func(*args, **kwargs)
+            logger.performance(
+                json.dumps(
+                    {
+                        "kind": prefix,
+                        "args": display_args(*args) if display_args else "Hidden",
+                        "result": display_result(result) if display_result else "Hidden",
+                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "timestamp": time.time(),
+                    }
+                )
+            )
+            return result
+        return wrap_func
+    return decorator
 
 
 class FeatureList(object):

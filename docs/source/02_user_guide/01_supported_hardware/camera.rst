@@ -180,6 +180,7 @@ Iris 15
 Ximea
 --------------------------------
 
+
 MU196MR-ON
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -191,16 +192,32 @@ MU196MR-ON
         microscope_name:
             camera:
               hardware:
-                type: ximea
+                type: ximea.MU196XR
                 serial_number: 111
-                camera_connection: PMPCIECam00
               defect_correct_mode: 2.0
               delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
-
-
+              gain: 1
+              pixel_size_in_microns: 1.4
+              readout_port: 0
+              readout_speed: 1.0
+              settle_down: 0.0
+              speed_table_index: 0
+              supported_readout_directions: ['Top-to-Bottom']
+              supported_sensor_modes: ['Normal']
+              supported_trigger_sources: ['External']
+              trigger_active: 1.0
+              trigger_mode: 1.0
+              trigger_polarity: 2.0
+              trigger_source: 2.0
+              x_pixels: 5112
+              x_pixels_min: 192
+              x_pixels_step: 24
+              y_pixels: 3840
+              y_pixels_min: 2
+              y_pixels_step: 2
 |
 
 ------------------

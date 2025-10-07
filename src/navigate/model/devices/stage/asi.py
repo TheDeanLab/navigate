@@ -32,7 +32,7 @@
 # Standard Imports
 import logging
 import time
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 
@@ -73,7 +73,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ):
         """Initialize the ASI Stage connection.
@@ -154,7 +154,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the ASI Stage connection."""
         try:
             if self.asi_controller is not None:
@@ -165,7 +165,9 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             raise
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Connect to the ASI Stage
 
         Parameters
@@ -192,7 +194,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
         return asi_stage
 
-    def get_axis_position(self, axis):
+    def get_axis_position(self, axis: str) -> float:
         """Get position of specific axis
 
         Parameters
@@ -214,7 +216,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return float("inf")
         return pos
 
-    def report_position(self):
+    def report_position(self) -> dict[str, float]:
         """Reports the position for all axes in microns, and create
         position dictionary.
 
@@ -237,7 +239,9 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
         """Move stage along a single axis.
 
         Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]
@@ -285,7 +289,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             self.asi_controller.wait_for_device()
         return True
 
-    def verify_move(self, move_dictionary):
+    def verify_move(self, move_dictionary: dict[str, float]) -> dict[str, float]:
         """Don't submit a move command for axes that aren't moving.
         The Tiger controller wait time for each axis is additive.
 
@@ -310,7 +314,9 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 res_dict[axis] = val
         return res_dict
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = False
+    ) -> bool:
         """Move Absolute Method.
 
         XYZ Values should remain in microns for the ASI API
@@ -335,7 +341,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return False
         abs_pos_dict = self.verify_move(abs_pos_dict)
         if len(abs_pos_dict) == 0:
-            return
+            return False
 
         # This is to account for the asi 1/10 of a micron units
         pos_dict = {
@@ -356,7 +362,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
         return True
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop all stage movement abruptly."""
         try:
             self.asi_controller.stop()
@@ -364,7 +370,9 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             print(f"ASI stage halt command failed: {e}")
             logger.exception("ASI Stage Exception", e)
 
-    def set_speed(self, velocity_dict=None, percent=None):
+    def set_speed(
+        self, velocity_dict: dict[str, float] = None, percent: float = None
+    ) -> bool:
         """Set scan velocity.
 
         Parameters
@@ -396,7 +404,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 return False
         return True
 
-    def get_speed(self, axis):
+    def get_speed(self, axis: str) -> float:
         """Get scan velocity of the axis.
 
         Parameters
@@ -418,7 +426,13 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return 0
         return velocity
 
-    def scanr(self, start_position_mm, end_position_mm, enc_divide, axis="z"):
+    def scanr(
+        self,
+        start_position_mm: float,
+        end_position_mm: float,
+        enc_divide: float,
+        axis: str = "z",
+    ) -> bool:
         """Set scan range
 
         Parameters
@@ -454,8 +468,13 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         return True
 
     def scanv(
-        self, start_position_mm, end_position_mm, number_of_lines, overshoot, axis="z"
-    ):
+        self,
+        start_position_mm: float,
+        end_position_mm: float,
+        number_of_lines: int,
+        overshoot: float,
+        axis: str = "z",
+    ) -> bool:
         """Set scan range
 
         Parameters
@@ -491,7 +510,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return False
         return True
 
-    def start_scan(self, axis):
+    def start_scan(self, axis: str) -> bool:
         """Start scan state machine
 
         Parameters
@@ -516,14 +535,14 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return False
         return True
 
-    def stop_scan(self):
+    def stop_scan(self) -> None:
         """Stop scan"""
         try:
             self.asi_controller.stop_scan()
         except ASIException as e:
             logger.exception("ASI Stage Exception", e)
 
-    def wait_until_complete(self, axis):
+    def wait_until_complete(self, axis: str) -> bool:
         try:
             while self.asi_controller.is_axis_busy(axis):
                 time.sleep(0.1)
@@ -551,7 +570,7 @@ class MS2000Stage(ASIStage):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ):
         """Initialize the ASI Stage connection.
@@ -627,11 +646,22 @@ class MS2000Stage(ASIStage):
             for ax in self.asi_axes.keys():
                 self.asi_controller.set_backlash(ax, 0.02)
 
+            # Set wheel jog speed
+            jsspd = configuration["configuration"]["microscopes"][microscope_name][
+                "stage"]["hardware"][device_id].get("jsspd", None)
+            if jsspd is not None:
+                self.asi_controller.set_jog_speed(
+                    axes=self.asi_axes, 
+                    jsspd=int(jsspd)
+                    )
+
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Connect to the ASI Stage
 
         Parameters
@@ -661,7 +691,9 @@ class MS2000Stage(ASIStage):
 
         return asi_stage
 
-    def move_axis_relative(self, axis, distance, wait_until_done=False):
+    def move_axis_relative(
+        self, axis: str, distance: float, wait_until_done: bool = False
+    ) -> bool:
         """Move the stage relative to the current position along the specified axis.
         XYZ Values should remain in microns for the ASI API
         Theta Values are not accepted.
@@ -710,8 +742,12 @@ class MS2000Stage(ASIStage):
         return True
 
     def scan_axis_triggered_move(
-        self, start_position, end_position, axis, ttl_triggered=False
-    ):
+        self,
+        start_position: float,
+        end_position: float,
+        axis: str,
+        ttl_triggered: bool = False,
+    ) -> bool:
         """Move the stage along the specified axis from start position to end position,
         with optional TTL triggering.
 
@@ -767,7 +803,7 @@ class MFC2000Stage(ASIStage):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ):
         """Initialize the ASI Stage connection.
@@ -786,7 +822,9 @@ class MFC2000Stage(ASIStage):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Connect to the ASI Stage
 
         Parameters

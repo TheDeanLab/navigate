@@ -1,12 +1,32 @@
 .. _contributing_guidelines:
 
-=======================
+************************
 Contributing Guidelines
+************************
+
+.. contents:: Table of Contents
+   :depth: 3
+
+General Overview
 =======================
 
-We welcome contributions in the form of bug reports, bug fixes, new features and documentation. If you are contributing code, please create it in a fork and branch separate from the main ``develop`` branch and then make a pull request to the ``develop`` branch for code review. Some best practices for new code are outlined below.
+We welcome contributions in the form of bug reports, bug fixes, new features and documentation. Some best practices for contributing code are outlined below. If you are considering refactoring the code, please reach out to us prior to starting this process.
 
-If you are considering refactoring part of the code, please reach out to us prior to starting this process. We are happy to invite you to our regular software development meeting.
+-------------------
+
+Project Philosophy
+==================
+
+**navigate** is designed with the following principles in mind:
+
+* Prioritize standard library imports for maximum stability, and minimize external dependencies.
+* Abstraction layer to drive different camera types, etc.
+* Plugin architecture for extensibility.
+* Maximize productivity for biological users through robust graphical user interface-based workflows.
+* Performant and responsive.
+* Brutally obvious, well-documented, clean code organized in an industry standard Model-View-Controller architecture.
+
+We ask that all contributions adhere to these principles.
 
 -------------------
 
@@ -17,45 +37,64 @@ General Principles
 - Please do not create new configuration variables unless absolutely necessary, especially in the ``configuration.yaml`` and ``experiment.yaml`` files. A new variable is necessary only if no variable stores similar information or there is no way to use the most similar variable without disrupting another part of the code base.
 - We are happy to discuss code refactors for improved clarity and speed. However, please do not modify something that is already working without discussing this with the software team in advance.
 - All code that modifies microscope control behavior must be reviewed and tested on a live system prior to merging into the ``develop`` branch.
+- Scientific Units - Please express quantities in the following units when they are in the standard model/view/controller code. Deviations from this can occur where it is necessary to pass a different unit to a piece of hardware.
+
+    * Time - Milliseconds
+    * Distance - Micrometers
+    * Voltage - Volts
+    * Rotation - Degrees
+
+
+-------------------
+
+Getting Started
+==============
+
+1. **Fork and Clone**: Fork the repository and clone it locally
+2. **Set Up Environment**: `pip install -e .[dev]` to install in development mode
+3. **Install Pre-commit Hooks**: `pre-commit install` to set up linting hooks
+4. **Run Tests**: Ensure `pytest` passes before making changes
+
+-------------------
+
+Pull Request Process
+===================
+
+1. Create a branch from `develop` with a descriptive name
+2. Make your changes following the guidelines in this document
+3. Add tests for new functionality
+4. Ensure all tests pass and linting is clean
+5. Update documentation as needed
+6. Submit PR to the `develop` branch with clear description of changes
+
 
 -------------------
 
 Coding Style
 ============
 
+Naming Conventions
+------------------
 We follow the `PEP8 code style guide <https://peps.python.org/pep-0008/>`_. All class names are written in ``CamelCase`` and all variable names are ``lowercase_and_separated_by_underscores``.
 
--------------------
+Type Hints
+----------------
+Type hints are used throughout the code base. Please add type hints to any new methods or functions you create. If you are unsure how to do this, please see `PEP 484 <https://peps.python.org/pep-0484/>`_ for more information.
 
-Communicating with Hardware
-===========================
+Numpydoc
+----------------
+We use `Numpydoc <https://numpydoc.readthedocs.io/en/latest/format.html>`_ style docstrings throughout the code base. Please use this style for any new methods or functions you create.
 
-In handling hardware devices, such as Sutter's MP-285A stage, using threads can introduce complexities, especially when simultaneous read and write operations occur over a shared resource like a serial line. An encountered issue demonstrated the challenges when two different threads attempted to write to and read from the same serial port simultaneously. This action led to data corruption due to interleaving of read/write calls that require precise handshaking, characteristic of the MP-285A's communication protocol. The solution involved implementing a blocking mechanism using `threading.Event()` to ensure that operations on the serial port do not overlap, showcasing the difficulties of multithreading sequential processes. To mitigate such issues, a design where each hardware device operates within its own dedicated thread is advisable. This approach simplifies the management of device communications by enforcing sequential execution, eliminating the need to handle complex concurrency issues inherent in multithreading environments. This strategy ensures robust and error-free interaction with hardware devices.
-
--------------------
-
-Documentation
-=============
-
+Sphinx
+----------------
 We use `Sphinx <https://www.sphinx-doc.org/en/master/>`_ to generate documentation from documented methods, attributes, and classes. Please document all new methods, attributes, and classes using a Sphinx compatible version of `Numpydoc <https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html>`_.
 
--------------------
+Linters
+----------------
+We use `Ruff <https://docs.astral.sh/ruff/>`_ to enforce consistent code formatting. Please run Ruff on your code before making a pull request. Ideally, these actions should be integrated as part of a pre-commit hook (see below).
 
-Scientific Units
-================
-
-Please express quantities in the following units when they are in the standard model/view/controller code. Deviations from this can occur where it is necessary to pass a different unit to a piece of hardware.
-
-* Time - Milliseconds
-* Distance - Micrometers
-* Voltage - Volts
-* Rotation - Degrees
-
--------------------
-
-Pre-Commit Hooks
-================
-
+Pre-commit Hooks
+----------------
 We use `pre-commit hooks <https://pre-commit.com/>`_ to enforce consistent code formatting and automate some of the code review process. In some rare cases, the linter may complain about a line of code that is actually fine. For example, in the example code below, Ruff linter complains that the start_stage class is imported but not used. However, it is actually used in as part of an ``exec`` statement.
 
 .. code-block:: python
@@ -70,11 +109,12 @@ To avoid this error, add a ``# noqa`` comment to the end of the line to tell Ruf
 
         from navigate.model.device_startup_functions import start_stage  # noqa
 
--------------------
+Unit Tests
+----------------
+Each line of code is unit tested to ensure it behaves appropriately and alert future coders to modifications that break expected functionality. Guidelines for writing good unit tests can be found `here <https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test>`_ and `over here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>`_, or in examples of unit tests in this repository's ``test`` folder. We use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit tests. Please check that unit tests pass on your machine before making a pull request.
 
 Dictionary Parsing
-==================
-
+------------------
 The :ref:`configuration file <configuration_file>` is loaded as a large dictionary object, and it is easy to create small errors in the dictionary that can crash the program. To avoid this, when getting properties from the configuration dictionary, it is best to use the ``.get()`` command, which provides you with the opportunity to also have a default value should the key provided not be found. For example,
 
 .. code-block:: python
@@ -86,35 +126,47 @@ Here, we try to retrieve the ``waveform`` key from a the ``self.device_config`` 
 
 -------------------
 
-Unit Tests
-==========
+Communicating with Hardware
+===========================
 
-Each line of code is unit tested to ensure it behaves appropriately and alert future coders to modifications that break expected functionality. Guidelines for writing good unit tests can be found `here <https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test>`_ and `over here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>`_, or in examples of unit tests in this repository's ``test`` folder. We use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit tests. Please check that unit tests pass on your machine before making a pull request.
+Threads and Blocking
+---------------------------
+In handling hardware devices, such as Sutter's MP-285A stage, using threads can introduce complexities, especially when simultaneous read and write operations occur over a shared resource like a serial line. An encountered issue demonstrated the challenges when two different threads attempted to write to and read from the same serial port simultaneously. This action led to data corruption due to interleaving of read/write calls that require precise handshaking, characteristic of the MP-285A's communication protocol. The solution involved implementing a blocking mechanism using `threading.Event()` to ensure that operations on the serial port do not overlap, showcasing the difficulties of multithreading sequential processes. To mitigate such issues, a design where each hardware device operates within its own dedicated thread is advisable. This approach simplifies the management of device communications by enforcing sequential execution, eliminating the need to handle complex concurrency issues inherent in multithreading environments. This strategy ensures robust and error-free interaction with hardware devices.
 
--------------------
 
-Developing with a Mac
-=====================
+Dedicated Device Interfaces
+---------------------------
 
-Many of us have Apple products and use them for development. However, there are some issues that you may encounter when developing on a Mac. Below are some of the issues we have encountered and how to resolve them.
+**navigate** implements a robust hardware abstraction layer through dedicated device interfaces. When integrating new hardware devices:
 
--------------------
+* Each hardware device type (cameras, stages, etc.) has its own dedicated interface that must be implemented
+* All hardware classes inherit from a base class specific to the device type
+* Base classes include AbstractMethods that define the required interface for any derived hardware class
+* These abstract methods clearly communicate which functions must be implemented for any new hardware
+* Failure to override these abstract methods in derived classes will result in runtime errors
 
-Shared memory limits
-^^^^^^^^^^^^^^^^^^^^
+This architecture ensures consistency across different hardware implementations while providing clear guidance for developers adding support for new devices. When adding support for a new hardware device, first identify the appropriate base class and ensure you implement all required abstract methods.
 
-.. code-block:: console
 
-  OSError: You tried to simultaneously open more SharedNDArrays than are allowed by your system!
 
-This results from a limitation in the number of shared memory objects that can be created on a Mac. To figure out how many objects can open, open a terminal and run the following command
 
-.. code-block:: console
+.. Developing with a Mac
+.. =====================
 
-  ulimit -n
+.. Many of us have Apple products and use them for development. However, there are some issues that you may encounter when developing on a Mac. Below are some of the issues we have encountered and how to resolve them.
 
-To increase this number, simply add an integer value after it. In our hands, 1000 typically works:
+.. .. code-block:: console
 
-.. code-block:: console
+..   OSError: You tried to simultaneously open more SharedNDArrays than are allowed by your system!
 
-  ulimit -n 1000
+.. This results from a limitation in the number of shared memory objects that can be created on a Mac. To figure out how many objects can open, open a terminal and run the following command
+
+.. .. code-block:: console
+
+..   ulimit -n
+
+.. To increase this number, simply add an integer value after it. In our hands, 1000 typically works:
+
+.. .. code-block:: console
+
+..   ulimit -n 1000

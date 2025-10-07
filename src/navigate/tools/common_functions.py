@@ -30,10 +30,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Standard library imports
 import importlib
 from threading import Lock
+from types import TracebackType
+from typing import Optional, Any, Type, Union
 
-from typing import Optional
+# Third-party imports
+
+# Local Application Imports
 
 
 def combine_funcs(*funclist):
@@ -58,7 +63,7 @@ def combine_funcs(*funclist):
     return new_func
 
 
-def build_ref_name(separator, *args):
+def build_ref_name(separator, *args) -> str:
     """this function will build a reference name
 
     Parameters
@@ -130,6 +135,7 @@ def load_module_from_file(module_name: str, file_path: str) -> Optional[any]:
         return None
     return module
 
+
 def load_param_from_module(module_name: str, param_name: str) -> Optional[any]:
     """This function will load a parameter from a module
 
@@ -153,14 +159,52 @@ def load_param_from_module(module_name: str, param_name: str) -> Optional[any]:
     return param
 
 
-class VariableWithLock:
-    def __init__(self, VariableType):
-        self.lock = Lock()
-        self.value = VariableType()
+def decode_bytes(value: Union[bytes, memoryview]):
+    """Decode bytes or memoryview into readable string.
+    
+    Parameters
+    ----------
+    value : bytes or memoryview
+        the value
 
-    def __enter__(self):
+    Returns
+    -------
+    result : str
+        a readable string
+    """
+    if isinstance(value, memoryview):
+        value = value.tobytes()
+
+    if not isinstance(value, (bytes, bytearray)):
+        return ""
+    try:
+        return value.decode(errors="ignore")
+    except Exception:
+        return ""
+
+class VariableWithLock:
+    def __init__(self, variable_type: Any) -> None:
+        """This class is a wrapper for a variable with a lock to ensure thread safety.
+
+        Parameters
+        ----------
+        variable_type: Any
+            The type of the variable to be wrapped. This can be any type, such as int
+            or str, or even a custom class.
+        """
+        self.lock = Lock()
+        self.value = variable_type()
+
+    def __enter__(self) -> "VariableWithLock":
+        """Acquire the lock when entering the context."""
         self.lock.acquire()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        """Release the lock when exiting the context."""
         self.lock.release()

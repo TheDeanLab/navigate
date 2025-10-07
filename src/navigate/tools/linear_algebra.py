@@ -157,7 +157,7 @@ def affine_shear(dz, dy, dx, dimension="YZ", angle=0):
         return shear_transform
 
     scaled_angle = np.multiply(
-        np.cos(np.deg2rad(angle)),
+        np.tan(np.deg2rad(angle)),
         [dy / dx, dz / dx, dz / dy],
     )
 

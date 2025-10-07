@@ -58,6 +58,6 @@ def test_log_setup(logging_configuration, logging_path):
         logging_path = Path.joinpath(Path(get_navigate_path()), "logs")
     todays_path = Path.joinpath(logging_path, time_stamp)
 
-    log_setup(logging_configuration, logging_path)
+    log_setup(logging_configuration, logging_path, queue=False)
 
-    assert Path.joinpath(todays_path, "view_controller_debug.log").is_file()
+    assert Path.joinpath(todays_path, "debug.log").is_file()

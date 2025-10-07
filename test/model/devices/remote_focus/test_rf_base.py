@@ -37,22 +37,20 @@ import pytest
 import numpy as np
 
 # Local Imports
+from navigate.model.devices.remote_focus.synthetic import SyntheticRemoteFocus
+from test.model.dummy import DummyModel
 
 
 def test_remote_focus_base_init():
-    from navigate.model.devices.remote_focus.base import RemoteFocusBase
-    from test.model.dummy import DummyModel
-
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][
         "microscope_name"
     ]
-    RemoteFocusBase(microscope_name, None, model.configuration)
+    SyntheticRemoteFocus(microscope_name, None, model.configuration)
 
 
 @pytest.mark.parametrize("smoothing", [0] + list(np.random.rand(5) * 100))
 def test_remote_focus_base_adjust(smoothing):
-    from navigate.model.devices.remote_focus.base import RemoteFocusBase
     from test.model.dummy import DummyModel
 
     model = DummyModel()
@@ -76,7 +74,7 @@ def test_remote_focus_base_adjust(smoothing):
             ] = smoothing
             channel["camera_exposure_time"] = np.random.rand() * 150 + 50
 
-    rf = RemoteFocusBase(microscope_name, None, model.configuration)
+    rf = SyntheticRemoteFocus(microscope_name, None, model.configuration)
 
     # exposure_times = {
     #     k: v["camera_exposure_time"] / 1000

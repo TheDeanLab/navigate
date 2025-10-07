@@ -32,7 +32,8 @@
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -45,14 +46,14 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class LaserBase:
+class LaserBase(ABC):
     """Laser Base Class"""
 
     def __init__(
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int,
     ) -> None:
         """Initialize Laser Base Class
@@ -86,8 +87,11 @@ class LaserBase:
         """Return string representation of the class"""
         return "LaserBase"
 
+    @abstractmethod
     def set_power(self, laser_intensity: int) -> None:
         """Set laser power
+
+        This abstract method must be implemented by all subclasses.
 
         Parameters
         ----------
@@ -96,20 +100,25 @@ class LaserBase:
         """
         pass
 
+    @abstractmethod
     def turn_on(self) -> None:
-        """Turn on the laser"""
+        """Turn on the laser
+
+        This abstract method must be implemented by all subclasses.
+        """
         pass
 
+    @abstractmethod
     def turn_off(self) -> None:
-        """Turn off the laser"""
+        """Turn off the laser
+
+        This abstract method must be implemented by all subclasses.
+        """
+
         pass
 
     def close(self) -> None:
         """
         Close the laser before exit.
         """
-        pass
-
-    def initialize_laser(self) -> None:
-        """Initialize lasers."""
         pass

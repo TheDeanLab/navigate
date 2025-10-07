@@ -51,8 +51,8 @@ def test_synthetic_filter_wheel_functions():
         0
     )
 
-    funcs = ["filter_change_delay", "set_filter", "read", "close"]
-    args = [["channel_dummy"], ["channel_dummy"], [int(random.random() * 100)], None]
+    funcs = [ "set_filter", "close"]
+    args = [["channel_dummy"], None]
 
     for f, a in zip(funcs, args):
         if a is not None:

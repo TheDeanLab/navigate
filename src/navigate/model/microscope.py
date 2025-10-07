@@ -794,6 +794,10 @@ class Microscope:
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
             channel_key
         ]
+        # stop daq task first, give daq some rest time for new tasks
+        if update_daq_task_flag:
+            self.daq.stop_acquisition()
+
         # Filter Wheel Settings.
         for k in self.filter_wheel:
             self.filter_wheel[k].set_filter(channel[k])
@@ -819,7 +823,6 @@ class Microscope:
         # choose to not update the waveform is very useful when running ZStack
         # if there is a NI Galvo stage in the system.
         if update_daq_task_flag:
-            self.daq.stop_acquisition()
             self.daq.prepare_acquisition(channel_key)
 
         # Add Defocus term
@@ -937,6 +940,13 @@ class Microscope:
                 temp_pos = stage.report_position()
                 self.ret_pos_dict.update(temp_pos)
             self.ask_stage_for_position = False
+
+        # Round to 2 decimal places for display purposes
+        for key, value in self.ret_pos_dict.items():
+            try:
+                self.ret_pos_dict[key] = round(value, 2)
+            except (TypeError, ValueError, OverflowError) as e:
+                logger.error(f"Error rounding {key} position value: {e}")
         return self.ret_pos_dict
 
     def move_remote_focus(self, offset: Optional[float] = None) -> None:

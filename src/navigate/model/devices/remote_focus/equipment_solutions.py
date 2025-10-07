@@ -37,11 +37,11 @@ import logging
 from typing import Any, Dict
 
 # Third Party Imports
-from navigate.tools.decorators import log_initialization
 
 # Local Imports
 from navigate.model.devices.remote_focus.ni import NIRemoteFocus
-from navigate.model.devices.device_types import NIDevice, SerialDevice
+from navigate.model.devices.device_types import SerialDevice
+from navigate.tools.decorators import log_initialization
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -66,7 +66,7 @@ class EquipmentSolutionsRemoteFocus(NIRemoteFocus, SerialDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args,
         **kwargs,
     ) -> None:
@@ -204,7 +204,7 @@ class EquipmentSolutionsRemoteFocus(NIRemoteFocus, SerialDevice):
         received_bytes = self.serial.read(num_bytes)
         return received_bytes
 
-    def send_command(self, message: str):
+    def send_command(self, message: str) -> None:
         """Send write command to the RemoteFocusEquipmentSolutions device.
 
         Parameters

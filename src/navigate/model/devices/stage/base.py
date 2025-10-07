@@ -31,10 +31,9 @@
 
 # Standard Imports
 import logging
-
-# from idlelib.debugger_r import DictProxy
 from multiprocessing.managers import ListProxy
-from typing import Any, Dict
+from typing import Any
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -47,14 +46,14 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class StageBase:
+class StageBase(ABC):
     """Stage Parent Class"""
 
     def __init__(
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the stage.
@@ -115,7 +114,10 @@ class StageBase:
         """
         for ax in self.axes:
             setattr(self, f"{ax}_pos", 0)
-            if f"{ax}_min" not in stage_configuration or f"{ax}_max" not in stage_configuration:
+            if (
+                f"{ax}_min" not in stage_configuration
+                or f"{ax}_max" not in stage_configuration
+            ):
                 logger.warning(f"Stage {ax} limits not set in configuration file.")
             setattr(self, f"{ax}_min", stage_configuration.get(f"{ax}_min", -10000))
             setattr(self, f"{ax}_max", stage_configuration.get(f"{ax}_max", 10000))
@@ -126,15 +128,85 @@ class StageBase:
         #: stage_configuration
         self.stage_configuration = stage_configuration
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor for the StageBase class."""
         pass
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of the stage."""
         return "StageBase"
 
-    def get_position_dict(self):
+    @abstractmethod
+    def report_position(self) -> dict[str, float]:
+        """Reports the position for all axes, and create position dictionary.
+
+        This abstract method must be implemented by all subclasses.
+
+        Returns
+        -------
+        position_dict : dict
+            Dictionary containing the position of all axes
+        """
+        pass
+
+    @abstractmethod
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done=False
+    ) -> bool:
+        """Move the stage to an absolute position.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        move_dictionary : dict
+            A dictionary of values required for movement.
+            Includes 'x_abs', 'y_abs', etc. for one or more axes.
+            Expect values in micrometers, except for theta, which is in degrees.
+        wait_until_done : bool, optional
+            If True, wait until the move is complete before returning. Default is False.
+
+        Returns
+        -------
+        bool
+            True if the move was successful, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def move_axis_absolute(
+        self, axis: str, position: float, wait_until_done=False
+    ) -> bool:
+        """Move a single axis to an absolute position.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        axis : str
+            The axis to move (e.g., 'x', 'y', 'z', 'f', 'theta').
+        position : float
+            The absolute position to move to in micrometers (or degrees for theta).
+        wait_until_done : bool, optional
+            If True, wait until the move is complete before returning. Default is False.
+
+        Returns
+        -------
+        bool
+            True if the move was successful, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def stop(self) -> None:
+        """Stop all stage movement abruptly.
+
+        This abstract method must be implemented by all subclasses.
+
+        """
+        pass
+
+    def get_position_dict(self) -> dict[str, float]:
         """Return a dictionary with the saved stage positions.
 
         Returns
@@ -148,7 +220,7 @@ class StageBase:
             position_dict[ax_str] = getattr(self, ax_str)
         return position_dict
 
-    def get_abs_position(self, axis, axis_abs):
+    def get_abs_position(self, axis: str, axis_abs: float) -> float:
         """Ensure the requested position is within axis bounds and return it.
 
         Parameters
@@ -192,7 +264,7 @@ class StageBase:
             return -1e50
         return axis_abs
 
-    def verify_abs_position(self, move_dictionary, is_strict=False):
+    def verify_abs_position(self, move_dictionary: dict, is_strict=False) -> dict:
         """Ensure the requested moving positions are within axes bounds
 
         Parameters
@@ -233,15 +305,13 @@ class StageBase:
             return {}
         return abs_pos_dict
 
-    def update_limits(self):
+    def update_limits(self) -> None:
         for ax in self.axes:
-            setattr(self, f"{ax}_min", self.stage_configuration.get(f"{ax}_min", -10000))
+            setattr(
+                self, f"{ax}_min", self.stage_configuration.get(f"{ax}_min", -10000)
+            )
             setattr(self, f"{ax}_max", self.stage_configuration.get(f"{ax}_max", 10000))
 
-    def stop(self):
-        """Stop all stage movement abruptly."""
-        pass
-
-    def close(self):
+    def close(self) -> None:
         """Close the stage."""
         pass

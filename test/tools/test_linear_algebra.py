@@ -82,18 +82,18 @@ class TestAffineShear(unittest.TestCase):
     def test_shear_xy(self):
         result = affine_shear(1, 1, 1, dimension="XY", angle=45)
         expected = np.eye(4, 4)
-        expected[0, 1] = 0.70710678
+        expected[0, 1] = 1.0
         np.testing.assert_array_almost_equal(result, expected)
 
     def test_different_pixe_sizes(self):
         result = affine_shear(167, 167, 333, dimension="XY", angle=45)
         expected = np.eye(4, 4)
-        expected[0, 1] = 0.35461511
+        expected[0, 1] = 0.501502
         np.testing.assert_array_almost_equal(result, expected)
 
     def test_shear_xz(self):
         # Test shear in XZ dimension
         result = affine_shear(167, 167, 333, dimension="XZ", angle=45)
         expected = np.eye(4, 4)
-        expected[0, 2] = 0.35461511
+        expected[0, 2] = 0.501502
         np.testing.assert_array_almost_equal(result, expected)

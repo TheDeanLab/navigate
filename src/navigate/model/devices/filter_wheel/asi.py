@@ -33,6 +33,7 @@
 #  Standard Library Imports
 import logging
 import time
+from typing import Any
 
 # Third Party Imports
 
@@ -57,7 +58,13 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
         https://asiimaging.com/docs/fw_1000#fw-1000_ascii_command_set
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the ASIFilterWheel class.
 
         Parameters
@@ -89,12 +96,12 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
         #: int: Filter wheel position.
         self.filter_wheel_position = 0
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the class."""
         return "ASIFilterWheel"
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
         """Build ASIFilterWheel Serial Port connection
 
         Parameters
@@ -119,7 +126,7 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
 
-    def filter_change_delay(self, filter_name):
+    def filter_change_delay(self, filter_name: str) -> None:
         """Estimate duration of time necessary to move the filter wheel
 
         Assumes that it is ~40ms per adjacent position.
@@ -136,7 +143,7 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
         delta_position = int(abs(old_position - new_position))
         self.wait_until_done_delay = delta_position * 0.04
 
-    def set_filter(self, filter_name, wait_until_done=True):
+    def set_filter(self, filter_name: str, wait_until_done=True) -> None:
         """Change the filter wheel to the filter designated by the filter
         position argument.
 
@@ -167,7 +174,7 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
             if wait_until_done:
                 time.sleep(self.wait_until_done_delay)
 
-    def close(self):
+    def close(self) -> None:
         """Close the ASI Filter Wheel serial port.
 
         Sets the filter wheel to the home position and then closes the port.
@@ -177,7 +184,7 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
             logger.debug("ASI Filter Wheel - Closing Device.")
             self.filter_wheel.disconnect_from_serial()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor for the ASIFilterWheel class."""
         self.close()
 
@@ -196,7 +203,13 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
         Typical switch time between adjacent positions is < 250 ms.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the ASICubeSlider class.
 
         Parameters
@@ -211,7 +224,7 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
             The ID of the device. Default is 0.
         """
 
-        super().__init__(microscope_name, device_connection, configuration)
+        super().__init__(microscope_name, device_connection, configuration, device_id)
 
         #: obj: ASI Tiger Controller object.
         self.dichroic = device_connection
@@ -228,7 +241,7 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
         self.dichroic_position = 0
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
         """Build ASIFilterWheel Serial Port connection
 
         Parameters
@@ -253,7 +266,7 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
 
-    def filter_change_delay(self, filter_name):
+    def filter_change_delay(self, filter_name: str) -> None:
         """Estimate duration of time necessary to move the dichroic
 
         Assumes that it is <250 ms per adjacent position.
@@ -269,7 +282,7 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
         delta_position = int(abs(old_position - new_position))
         self.wait_until_done_delay = delta_position * 0.25
 
-    def set_filter(self, filter_name, wait_until_done=True):
+    def set_filter(self, filter_name: str, wait_until_done: bool=True) -> None:
         """Change the dichroic position.
 
         Parameters
@@ -300,7 +313,7 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
             if wait_until_done:
                 time.sleep(self.wait_until_done_delay)
 
-    def close(self):
+    def close(self) -> None:
         """Close the ASI Filter Wheel serial port.
 
         Sets the filter wheel to the home position and then closes the port.

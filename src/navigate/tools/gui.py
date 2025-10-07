@@ -1,10 +1,8 @@
 # Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
-# limitations in the disclaimer below)
-# provided that the following conditions are met:
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -16,6 +14,7 @@
 #      * Neither the name of the copyright holders nor the names of its
 #      contributors may be used to endorse or promote products derived from this
 #      software without specific prior written permission.
+
 
 # NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
 # THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
@@ -29,52 +28,28 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
 # Standard Library Imports
-import pytest
+from PIL import Image
 
 # Third Party Imports
+from mss import mss
 
 # Local Imports
-from test.model.dummy import DummyModel
-class TestSyntheticHardware:
 
-    @pytest.fixture(autouse=True)
-    def setup_class(self, dummy_model):
-        self.dummy_model = dummy_model
-        self.microscope_name = "Mesoscale"
 
-    def test_synthetic_daq(self):
-        from navigate.model.devices.daq.synthetic import SyntheticDAQ
-
-        SyntheticDAQ(self.dummy_model.configuration)
-
-    def test_synthetic_camera(self):
-        from navigate.model.devices.camera.synthetic import (
-            SyntheticCamera,
-            SyntheticCameraController,
+def capture_region(x, y, w, h, out_path):
+    with mss() as sct:
+        img = sct.grab(
+            {"left": int(x), "top": int(y), "width": int(w), "height": int(h)}
         )
+        Image.frombytes("RGB", img.size, img.rgb).save(out_path)
 
-        scc = SyntheticCameraController()
-        SyntheticCamera(self.microscope_name, scc, self.dummy_model.configuration)
 
-    def test_synthetic_stage(self):
-        from navigate.model.devices.stage.synthetic import SyntheticStage
-
-        SyntheticStage(self.microscope_name, None, self.dummy_model.configuration)
-
-    def test_synthetic_zoom(self):
-        from navigate.model.devices.zoom.synthetic import SyntheticZoom
-
-        SyntheticZoom(self.microscope_name, None, self.dummy_model.configuration)
-
-    def test_synthetic_shutter(self):
-        from navigate.model.devices.shutter.synthetic import SyntheticShutter
-
-        SyntheticShutter(self.microscope_name, None, self.dummy_model.configuration)
-
-    def test_synthetic_laser(self):
-        from navigate.model.devices.laser.synthetic import SyntheticLaser
-
-        SyntheticLaser(self.microscope_name, None, self.dummy_model.configuration, 0)
+def tk_window_bbox(win, pad=0):
+    win.update_idletasks()
+    x = win.winfo_rootx() - pad
+    y = win.winfo_rooty() - pad
+    w = win.winfo_width() + 2 * pad
+    h = win.winfo_height() + 2 * pad
+    return x, y, w, h

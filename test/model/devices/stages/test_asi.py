@@ -157,7 +157,7 @@ class TestStageASI:
             "N",
         ]
         asi_stage = TigerController(port, baudrate)
-        asi_stage.serial_port = self.asi_serial_device
+        asi_stage.serial = self.asi_serial_device
         asi_stage.connect_to_serial()
         return asi_stage
 
@@ -269,13 +269,13 @@ class TestStageASI:
                 pos_dict[f"{axis}_pos"] = float(pos)
                 if axis == "theta":
                     setattr(
-                        asi_stage.serial_port,
+                        asi_stage.serial,
                         f"{stage.axes_mapping[axis]}_abs",
                         pos * 1000.0,
                     )
                 else:
                     setattr(
-                        asi_stage.serial_port,
+                        asi_stage.serial,
                         f"{stage.axes_mapping[axis]}_abs",
                         pos * 10.0,
                     )

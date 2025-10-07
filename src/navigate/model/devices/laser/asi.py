@@ -32,9 +32,7 @@
 
 #  Standard Library Imports
 import logging
-import time
-import traceback
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 
@@ -56,7 +54,13 @@ class ASILaser(LaserBase, SerialDevice):
     This class is used to control a laser connected to a ASI Device.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id: int = 0):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int,
+    ) -> None:
         """Initialize the ASILaser class.
 
         Parameters
@@ -121,12 +125,12 @@ class ASILaser(LaserBase, SerialDevice):
         #: float: Current laser intensity.
         self._current_intensity = 0
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the class."""
         return "ASILaser"
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
         """Build ASILaser Serial Port connection
 
         Parameters
@@ -151,7 +155,7 @@ class ASILaser(LaserBase, SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
     
-    def set_power(self, laser_intensity: float):
+    def set_power(self, laser_intensity: float) -> None:
         """Sets the analog laser power.
 
         Parameters
@@ -165,7 +169,7 @@ class ASILaser(LaserBase, SerialDevice):
         self.laser.move_axis(self.analog_axis, self.output_voltage)
         self._current_intensity = laser_intensity
 
-    def turn_on(self):
+    def turn_on(self) -> None:
         """Turns on the laser."""
         if self.modulation_type == "mixed":
             self.set_power(self._current_intensity)
@@ -181,7 +185,7 @@ class ASILaser(LaserBase, SerialDevice):
             logger.info(f"{str(self)} initialized with digital modulation.")
         
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         """Turns off the laser."""
         if self.modulation_type == "mixed":
             tmp = self._current_intensity
@@ -201,7 +205,7 @@ class ASILaser(LaserBase, SerialDevice):
             logger.info(f"{str(self)} initialized with digital modulation.")
 
     
-    def close(self):
+    def close(self) -> None:
         """Close the ASI Laser serial port.
 
         Turns the laser off and then closes the port.

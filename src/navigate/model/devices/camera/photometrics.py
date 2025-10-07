@@ -32,13 +32,13 @@
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Third Party Imports
 from ctypes import *  # noqa
 import numpy as np
 from pyvcam import pvc
-from pyvcam.camera import Camera
+from pyvcam.camera import Camera as PyvcamCamera
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
@@ -67,7 +67,7 @@ class PhotometricsCamera(CameraBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *_: Optional[Any],
         **__: Optional[Any],
     ) -> None:
@@ -139,13 +139,11 @@ class PhotometricsCamera(CameraBase):
         self.camera_controller.prog_scan_dir = 0
 
         # Photometrics camera settings from config file
-        self.camera_controller.readout_port = self.camera_parameters["readout_port"]
-        self.camera_controller.speed_table_index = self.camera_parameters[
-            "speed_table_index"
-        ]
-        self.camera_controller.gain = self.camera_parameters["gain"]
+        self.camera_controller.readout_port = self.camera_parameters.get("readout_port", 0)
+        self.camera_controller.speed_table_index = self.camera_parameters.get("speed_table_index", 1)
+        self.camera_controller.gain = self.camera_parameters.get("gain", 1)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of PhotometricsBase object.
 
         Returns
@@ -161,7 +159,7 @@ class PhotometricsCamera(CameraBase):
             self.camera_controller.close()
 
     @classmethod
-    def get_connect_params(cls):
+    def get_connect_params(cls) -> list[str]:
         """Register the parameters required to connect to the camera.
 
         Returns
@@ -172,7 +170,7 @@ class PhotometricsCamera(CameraBase):
         return ["camera_connection"]
 
     @classmethod
-    def connect(cls, camera_connection):
+    def connect(cls, camera_connection: str) -> PyvcamCamera:
         """Build Photometrics Stage Serial Port connection
 
         Import Photometrics API and Initialize Camera Controller.
@@ -189,8 +187,7 @@ class PhotometricsCamera(CameraBase):
         """
         try:
             pvc.init_pvcam()
-            # camera_names = Camera.get_available_camera_names()
-            camera_to_open = Camera.select_camera(camera_connection)
+            camera_to_open = PyvcamCamera.select_camera(camera_connection)
             camera_to_open.open()
             return camera_to_open
         except Exception as e:
@@ -200,7 +197,7 @@ class PhotometricsCamera(CameraBase):
             )
 
     @property
-    def serial_number(self):
+    def serial_number(self) -> str:
         """Get Camera Serial Number
 
         Returns
@@ -210,16 +207,12 @@ class PhotometricsCamera(CameraBase):
         """
         return self.camera_controller.serial_no
 
-    def report_settings(self):
+    def report_settings(self) -> None:
         """Print Camera Settings."""
         # TODO: complete param recording
         print("sensor_mode: " + str(self.camera_controller.prog_scan_mode))
         print("binning: " + str(self.camera_controller.binning))
         print("readout_speed" + str(self.camera_controller.readout_time))
-        print("trigger_active")
-        print("trigger_mode")
-        print("trigger_polarity")
-        print("trigger_source")
         print("internal_line_interval")
         print("sensor size" + str(self.camera_controller.sensor_size))
         print("image_height and width" + str(self.x_pixels) + ", " + str(self.y_pixels))
@@ -229,7 +222,7 @@ class PhotometricsCamera(CameraBase):
         """Close Photometrics Camera"""
         self.camera_controller.close()
 
-    def set_sensor_mode(self, mode):
+    def set_sensor_mode(self, mode: str) -> None:
         """Set Photometrics sensor mode
 
         Can be normal or programmable scan mode (e.g., ASLM).
@@ -247,7 +240,24 @@ class PhotometricsCamera(CameraBase):
             print("Camera mode not supported" + str(modes_dict[mode]))
             logger.debug("Camera mode not supported" + str(modes_dict[mode]))
 
-    def set_readout_direction(self, mode):
+    def set_trigger_mode(self, trigger_source: str = "External") -> None:
+        """Set the camera trigger source to external or internal free run mode.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        trigger_source : str
+            Trigger source. Options are 'External' or 'Internal'.
+        """
+        if trigger_source == "External":
+            self.camera_controller.trig_mode = "External"
+        elif trigger_source == "Internal":
+            self.camera_controller.trig_mode = "Internal"
+        else:
+            logger.debug("Camera trigger mode not supported")
+
+    def set_readout_direction(self, mode: str) -> None:
         """Set Photometrics readout direction.
 
         Parameters
@@ -289,7 +299,7 @@ class PhotometricsCamera(CameraBase):
 
         return readout_time_ms / 1000
 
-    def set_exposure_time(self, exposure_time):
+    def set_exposure_time(self, exposure_time: float) -> bool:
         """Set Photometrics exposure time.
 
         Note: Units of the Photometrics API are in milliseconds
@@ -301,15 +311,15 @@ class PhotometricsCamera(CameraBase):
 
         Returns
         -------
-        exposure_time : float
-            Exposure time in milliseconds.
+        result : bool
+            True if exposure time was set successfully, False otherwise.
         """
         self._exposure_time = int(exposure_time * 1000)
         self.camera_controller.exp_time = self._exposure_time
         self.camera_controller.start_live(self._exposure_time)
-        return exposure_time
+        return True
 
-    def set_line_interval(self, line_interval_time):
+    def set_line_interval(self, line_interval_time: float) -> bool:
         """Set Photometrics line interval.
 
         Parameters
@@ -320,10 +330,11 @@ class PhotometricsCamera(CameraBase):
         # todo calculate line delay from scan delay
         self._scan_delay = line_interval_time
         self.camera_controller.prog_scan_line_delay = line_interval_time
+        return True
 
     def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time, shutter_width
-    ):
+        self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
         """Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an ASLM acquisition
 
@@ -376,7 +387,7 @@ class PhotometricsCamera(CameraBase):
         self._scan_delay = aslm_line_delay
         return aslm_line_exposure / 1000, aslm_line_delay, aslm_acquisition_time / 1000
 
-    def set_binning(self, binning_string):
+    def set_binning(self, binning_string: str) -> bool:
         """Set Photometrics binning mode.
 
         Parameters
@@ -416,7 +427,13 @@ class PhotometricsCamera(CameraBase):
         self.y_pixels = int(self.y_pixels / self.y_binning)
         return True
 
-    def set_ROI(self, roi_width=3200, roi_height=3200, center_x=1600, center_y=1600):
+    def set_ROI(
+        self,
+        roi_width: int=3200,
+        roi_height: int=3200,
+        center_x: int=1600,
+        center_y: int=1600
+    ) -> bool:
         """Change the size of the active region on the camera.
 
         Parameters
@@ -465,7 +482,7 @@ class PhotometricsCamera(CameraBase):
         self.x_pixels, self.y_pixels = self.camera_controller.shape()
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
-    def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+    def initialize_image_series(self, data_buffer: Optional[list]=None, number_of_frames: int=100) -> None:
         """Initialize Photometrics image series. This is for starting stacks etc.
 
         Parameters
@@ -513,14 +530,14 @@ class PhotometricsCamera(CameraBase):
         # with the current exposure time.
         self.camera_controller.start_live()
 
-    def _receive_images(self):
+    def _receive_images(self) -> list[int]:
         """
         Update image in the data buffer if the Photometrics camera acquired a new
         image and return frame ids.
 
         Returns
         -------
-        frame : numpy.ndarray
+        frame : list
             Frame ids from Photometrics camera that point to newly acquired data in
             data buffer
         """
@@ -547,19 +564,19 @@ class PhotometricsCamera(CameraBase):
 
         return []
 
-    def get_new_frame(self):
+    def get_new_frame(self) -> list[int]:
         """
         Call update function for data buffer and get frame ids from Photometrics camera.
 
         Returns
         -------
-        frame : numpy.ndarray
+        frame : list[int]
             Frame ids from Photometrics camera that point to newly acquired
             data in data buffer
         """
         return self._receive_images()
 
-    def close_image_series(self):
+    def close_image_series(self) -> None:
         """Close Photometrics image series.
 
         Stops the acquisition and sets is_acquiring flag to False.

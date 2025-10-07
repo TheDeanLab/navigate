@@ -137,6 +137,15 @@ class ASIDaq(DAQBase, SerialDevice):
         # sets up initial PLC configuration with default delay (ms), camera delay, rfvc delay, sweep time (ms), and analog outputs dict
         self.daq.setup_control_loop([200], 0, 0, 100, 120, self.analog_outputs)
 
+        self.axis_addr = self.daq.get_axis_addr()
+
+        hw = self.configuration["configuration"]["microscopes"][
+                self.microscope_name
+            ]["stage"]["hardware"][0]
+        self.axis_map = dict(zip(hw['axes'], hw['axes_mapping']))
+
+        self.count = 0
+
     @classmethod
     def connect(cls, port, baudrate=115200, timeout=0.25):
         """Build ASIDaq Serial Port connection
@@ -226,11 +235,16 @@ class ASIDaq(DAQBase, SerialDevice):
             end_pos = self.configuration["experiment"]["MicroscopeState"]["end_position"]
             step_size = self.configuration["experiment"]["MicroscopeState"]["step_size"]
 
-            print(f"ASIModel: Starting z-stack from {start_pos} to {end_pos} by {step_size}")
+            navigate_axis = self.configuration["experiment"]["MicroscopeState"]["primary_z_axis"]
+            tiger_axis = self.axis_map[navigate_axis].upper()
+            addr = self.axis_addr[tiger_axis]
+
+            print(f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}")
 
             num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
 
             # sets up control loop with all parameters (all times in ms)
+            self.daq.setup_z_stage(tiger_axis, addr, int(step_size*10))
             self.daq.setup_control_loop(
                 delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs, num_steps
             )
@@ -267,8 +281,8 @@ class ASIDaq(DAQBase, SerialDevice):
             self.daq.logic_cell_on("1")
             if self.zstack:
                 self.daq.wait_for_loop()
-        except Exception:
-            logger.debug("DAQ cannot turn on")
+        except Exception as e:
+            logger.error(f"DAQ Error: {e}")
             pass
 
     def stop_acquisition(self) -> None:
@@ -278,9 +292,13 @@ class ASIDaq(DAQBase, SerialDevice):
         """
         # turn on PLC cell 8 (kills control loop)
         # reset PLC cell 1 (Master Trigger)
+        self.count += 1
+        print(f"ASIModel: Stopping acquisition {self.count}")
+        # if self.count == 2:
+        #     raise Exception("Stopping acquisition too many times")
         try:
             self.daq.logic_cell_on("8")
-            self.daq.logic_cell_off("4")
+            #self.daq.logic_cell_off("4")
             self.daq.logic_cell_off("1")
         except Exception:
             logger.debug("DAQ cannot turn off")

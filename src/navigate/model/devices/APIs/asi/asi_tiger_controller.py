@@ -1242,12 +1242,9 @@ class TigerController:
             "6 cca z = 7",
         ]
         print("Number of cycles: ", num_cycles)
+        print("Cycle time (ms): ", cycle_time / 4)
         if (num_cycles > 0):
             commands[7:13] = [
-                "2 ttl x=2 y=2",
-                "2 rt y=10",
-                "2r f = -500",
-                "2r f = 500",
                 # Set PLC axis 4 to be an input to receive stage sync signal
                 "6 m e = 36",
                 "6 cca y = 0",
@@ -1261,8 +1258,6 @@ class TigerController:
                 "6 m e = 5",
                 "6 cca y = 5",
                 "6 ccb x = 4 y = 100",
-                "6 m e = 40",
-                "6 cca z = 4",
             ]
         # Creates object to hold galvo commands
         galvo_commands = []
@@ -1314,10 +1309,57 @@ class TigerController:
         print("Waiting for loop to finish...")
         bit4 = 1
         while bit4 == 1:
+            #time.sleep(0.1)  # sleep for 100 ms before checking again
             self.send_command(f"6 rdadc z?") 
             # returns 16-bit integer indicating state of all 16 cells, 
             # where the 4th least significant bit gives the value of cell 4
             response = self.read_response()
-            result = int(response.split(" ")[1])
+            print(f"Response: {response}")
+            try:
+                result = int(response.split(" ")[1])
+            except (ValueError, IndexError):
+                print("Couldn't read logic cell state, trying again...")
+                continue
             bit4 = result >> 3 & 1
+            print(f"Cell 4 state: {bit4}")
         return 
+
+    def get_axis_addr(self) -> dict:
+        """Return the dict of matching axes to their addresses.
+
+        Returns
+        -------
+        dict[str:str]
+            List of axes for this stage
+        """
+        self.send_command("BU X")
+        response = self.read_response()
+        # Extract relevant lines
+        lines = response.strip().splitlines()
+        axes = lines[1].split(":")[1].split()
+        addrs = lines[3].split(":")[1].split()
+
+        # Build dictionary
+        axis_addr = {axis: int(addr) for axis, addr in zip(axes, addrs)}
+
+        print(axis_addr)
+        return axis_addr
+
+    def setup_z_stage(self, axis: str, addr, step_size) -> None:
+        """Sets up the z-stage to be triggered by the control loop
+
+        Parameters
+        ----------
+        axis : str
+            The axis of the z-stage
+        """
+        commands = [
+            f"{addr} ttl x=2 y=2",
+            f"{addr} rt y=10",
+            f"{addr} r {axis} = -{step_size}",
+            f"{addr} r {axis} = {step_size}",
+        ]
+        for command in commands:
+            self.send_command(f"{command}\r")
+            print(f"Sent Command: {command}")
+            self.read_response()

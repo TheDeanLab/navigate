@@ -33,6 +33,8 @@
 import pytest
 from typing import Tuple
 from unittest.mock import patch, MagicMock
+import logging
+import io
 
 # Third Party Imports
 import numpy as np
@@ -319,7 +321,22 @@ def test_set_invalid_ROI(camera, caplog, capsys):
     captured = capsys.readouterr()
     assert result is False
     assert_text = caplog.text or captured.out
-    assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in assert_text
+    if assert_text:
+        assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in assert_text
+    else:
+        logger = logging.getLogger("model")
+        logger.propagate = False  # prevent sending logs to root CLI handler
+
+        stream = io.StringIO()
+        handler = logging.StreamHandler(stream)
+        logger.addHandler(handler)
+
+        camera.stop_acquisition()
+        handler.flush()
+        result = camera.set_ROI(roi_width=roi_width, roi_height=roi_height, center_x=center_x, center_y=center_y)
+        assert result is False
+        assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in stream.getvalue()
+        logger.removeHandler(handler)
 
 def test_snap_image_returns_numpy_array(camera):
     """
@@ -462,7 +479,22 @@ def test_stop_acquisition_when_disconnected(camera, caplog, capsys):
 
     captured = capsys.readouterr()
     assert_text = caplog.text or captured.out
-    assert "not connected" in assert_text
+    if assert_text:
+        assert "not connected" in assert_text
+    else:
+        logger = logging.getLogger("model")
+        logger.propagate = False  # prevent sending logs to root CLI handler
+
+        stream = io.StringIO()
+        handler = logging.StreamHandler(stream)
+        logger.addHandler(handler)
+
+        camera.stop_acquisition()
+        handler.flush()
+
+        assert "not connected" in stream.getvalue()
+
+        logger.removeHandler(handler)
 
 def test_set_sensor_mode_logs(camera, caplog):
     """

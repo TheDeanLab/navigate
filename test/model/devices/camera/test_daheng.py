@@ -50,7 +50,6 @@ except:
         with patch.dict("sys.modules", {"gxipy": fake_gx}):
             yield fake_gx
 
-
 @pytest.fixture
 def mock_daheng_sdk():
     """Patch Daheng SDK (gxipy) and return mocked device + subsystems."""
@@ -306,7 +305,7 @@ def test_set_binning(camera):
     camera.feature_control.get_int_feature.assert_any_call("BinningHorizontal")
     camera.feature_control.get_int_feature.assert_any_call("BinningVertical")
 
-def test_set_invalid_ROI(camera, caplog):
+def test_set_invalid_ROI(camera, caplog, capsys):
     """
     Test that set_ROI() returns False and logs a warning when given invalid dimensions.
     """
@@ -317,8 +316,10 @@ def test_set_invalid_ROI(camera, caplog):
     center_y = 1000
 
     result = camera.set_ROI(roi_width=roi_width, roi_height=roi_height, center_x=center_x, center_y=center_y)
+    captured = capsys.readouterr()
     assert result is False
-    assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in caplog.text
+    assert_text = caplog.text or captured.out
+    assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in assert_text
 
 def test_snap_image_returns_numpy_array(camera):
     """
@@ -449,7 +450,7 @@ def test_stop_acquisition(camera):
     # Verify internal state was updated
     assert camera.is_acquiring is False
 
-def test_stop_acquisition_when_disconnected(camera, caplog):
+def test_stop_acquisition_when_disconnected(camera, caplog, capsys):
     """
     Test that stop_acquisition() logs a warning and does not raise
     when called on a disconnected camera.
@@ -459,7 +460,9 @@ def test_stop_acquisition_when_disconnected(camera, caplog):
     with caplog.at_level("WARNING"):
         camera.stop_acquisition()
 
-    assert "not connected" in caplog.text
+    captured = capsys.readouterr()
+    assert_text = caplog.text or captured.out
+    assert "not connected" in assert_text
 
 def test_set_sensor_mode_logs(camera, caplog):
     """

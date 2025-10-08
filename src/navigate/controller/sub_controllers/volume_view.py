@@ -7,6 +7,7 @@ import math
 # from multiprocessing import Process, shared_memory
 import threading
 import queue
+import time
 
 GL = None
 
@@ -475,6 +476,7 @@ class GLVolumeViewer:
         self._stepWorld = 0.25
         self._cRange    = []
         self._gamma     = 1.0
+        self._shear_ang = None
         self._boxMin    = None
         self._boxMax    = None
 
@@ -506,32 +508,51 @@ class GLVolumeViewer:
 
     def add_slice(self, image : np.ndarray, n_slices : int, i: int):
 
-        new_slice = image[np.newaxis].astype(np.float32)
+        # new_slice = image[np.newaxis].astype(np.float32)
 
-        print(f"new_slice {i}:", new_slice.shape)
+        # print(f"new_slice {i}:", new_slice.shape)
 
-        try:
-            self.stack = np.vstack([
-                self.stack,
-                new_slice
-            ])
-        except ValueError:
-            self.stack = new_slice
-
-        # if self.stack is None:
-        #     print("Stack: None")
-        #     self.stack = new_slice
-        # else:
-        #     print("Stack:", self.stack.shape)
+        # try:
         #     self.stack = np.vstack([
         #         self.stack,
         #         new_slice
         #     ])
+        # except ValueError:
+        #     self.stack = new_slice
 
-        if len(self.stack) == n_slices-1:
-            self.tex_3d, self.tex_1d = None, None
+        # if len(self.stack) == n_slices-1:
+        #     self.tex_3d, self.tex_1d = None, None
+        #     self.bind_image_data(self.stack)
+        #     self.stack = None
+
+        if self.stack is not None:
+            if (n_slices,) + image.shape != self.stack.shape:
+                print("Dimension mismatch... stack = None")
+                self.stack = None
+                self.add_slice(image, n_slices, i)
+            t0 = time.time()
+            self.stack[i] = image
+            self.bind_slice(image, i)
+            print(f"Added slice {i}/{n_slices} in {1000.*(time.time() - t0):.3f} ms")
+        else:
+            ny, nx = image.shape
+            print("Allocating volume...", (n_slices, ny, nx))
+            self.stack = np.zeros((n_slices, ny, nx), dtype=np.float32)
             self.bind_image_data(self.stack)
-            self.stack = None
+            self.add_slice(image, n_slices, i)
+
+    def bind_slice(self, im_f32: np.ndarray, z: int = 0):
+
+        im_f32 /= self.stack.max()
+        im_f32 = im_f32.astype(np.float32)
+
+        def _do():
+            self._ensure_gl_ready()
+
+            # assumes textures created...
+            self._update_texture_slice_z(self.tex_3d, im_f32, z)
+        
+        self._cmd_q.put(_do)
 
     def bind_image_data(self, vol_f32: np.ndarray):
         """Upload / replace the 3D volume texture (runs on GL thread)."""
@@ -583,6 +604,14 @@ class GLVolumeViewer:
             self._ensure_gl_ready()
             self.shader.use()
             self.shader.set_float('gamma', self._gamma)
+        self._cmd_q.put(_do)
+
+    def set_shear_angle(self, value: float):
+        self._shear_ang = float(value)
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float('shear_angle', self._shear_ang)
         self._cmd_q.put(_do)
 
     def set_c_range(self, value: list):
@@ -673,9 +702,12 @@ class GLVolumeViewer:
 
             # cleanup
             try:
-                if self.tex_3d: GL.glDeleteTextures([self.tex_3d]); self.tex_3d = None
-                if self.tex_1d: GL.glDeleteTextures([self.tex_1d]); self.tex_1d = None
-                if self.vao:    GL.glDeleteVertexArrays(1, [self.vao]); self.vao = None
+                if self.tex_3d: 
+                    GL.glDeleteTextures([self.tex_3d]); self.tex_3d = None
+                if self.tex_1d: 
+                    GL.glDeleteTextures([self.tex_1d]); self.tex_1d = None
+                if self.vao:    
+                    GL.glDeleteVertexArrays(1, [self.vao]); self.vao = None
             finally:
                 glfw.destroy_window(self.window)
                 glfw.terminate()
@@ -744,10 +776,35 @@ class GLVolumeViewer:
                         vol_f32.astype(np.float32))
         return tex
 
-    def _update_volume_texture(self, tex, vol_f32: np.ndarray):
-        z, y, x = vol_f32.shape
+    def _update_texture_slice_z(self, tex, im_f32 : np.ndarray, z : int):
+        ny, nx = im_f32.shape
+
+        data = np.ascontiguousarray(im_f32, dtype=np.float32)
+
         GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+        
+        # update only the data for slice (z)
+        GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 
+                           0,           # level
+                           0,           # xoffset (none)
+                           0,           # yoffset (none)
+                           int(z),      # zoffset (z-slice position)
+                           nx,          # width
+                           ny,          # height
+                           1,           # depth (one slice)
+                           GL.GL_RED,   # format
+                           GL.GL_FLOAT, # type
+                           data         # image data
+        )
+
+    def _update_volume_texture(self, tex, vol_f32: np.ndarray):
+        z, y, x = vol_f32.shape
+        
+        GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+        
+        # updates the whole volume texture in one shot
         GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 0,
                            0, 0, 0, x, y, z,
                            GL.GL_RED, GL.GL_FLOAT,
@@ -758,6 +815,7 @@ class GLVolumeViewer:
         rgba = (np.stack([tf, tf, tf, tf], axis=1) * 255).astype(np.uint8)
 
         tex = GL.glGenTextures(1)
+        
         GL.glBindTexture(GL.GL_TEXTURE_1D, tex)
         GL.glTexParameteri(GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
@@ -770,6 +828,7 @@ class GLVolumeViewer:
 #%%
 if __name__ == '__main__':
 
+    import os
     from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
     from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
     import tkinter as tk
@@ -783,41 +842,72 @@ if __name__ == '__main__':
 
     # your data
     # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff").astype(np.float32)
-    im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif").astype(np.float32)
+    # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif").astype(np.float32)
     # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\A12_P0_mCherry.tiff").astype(np.float32)
 
-    while True:
-        im_size_GB = im.nbytes / 1e9
-        print(f"Image size: {im_size_GB} GB...")
-        if im_size_GB > 1.0:
-            print(f"...exceeds 1.0 GB. Downsampling 2x...")
-            im = im[::2, ::2, ::2]
-        else:
-            break
+    def downsample_if_needed(im : np.ndarray, max_gb=0.5):
+        while True:
+            im_size_GB = im.nbytes / 1e9
+            print(f"Image size: {im_size_GB} GB...")
+            if im_size_GB > max_gb:
+                print(f"...exceeds 1.0 GB. Downsampling 2x...")
+                im = im[::2, ::2, ::2]
+            else:
+                break
+        
+        return im
+
+    frames = [
+        downsample_if_needed(tiff.imread(
+            os.path.join(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\movie", f"1_CH00_00000{t}.tif")
+        ).astype(np.float32))
+        for t in range(10)
+    ]
 
     def launch():
-        viewer.start_render_loop(1024, 800, "3D Viewer")  # returns immediately
-        viewer.bind_image_data(im)                        # enqueued to GL thread
+        viewer.start_render_loop(1024, 800, "3D Viewer")
+
+    import time
+    def play():
+        for t, vol in enumerate(frames):
+            n_slices = len(vol)
+            for z in range(n_slices):
+                print(f"Frame {t} slice {z}...")
+                viewer.add_slice(vol[z], n_slices, z)
+                # time.sleep(0.01)
 
     def stop():
         viewer.stop_render_loop()
-    
-    opacity = tk.DoubleVar(root, value=0.25)
+
+    experiment = {
+        'opacity': 0.10,
+        'cMin': 0.0002,
+        'cMax': 0.3000,
+        'gamma': 1.2,
+        'shear_angle': -30,
+    }
+
+    opacity = tk.DoubleVar(root, value=experiment['opacity'])
     def opacity_change():
         viewer.set_opacity(opacity.get())
     
-    cMin = tk.DoubleVar(root, value=0.0)
-    cMax = tk.DoubleVar(root, value=0.5)
+    cMin = tk.DoubleVar(root, value=experiment['cMin'])
+    cMax = tk.DoubleVar(root, value=experiment['cMax'])
     def c_change():
         viewer.set_c_range([cMin.get(), cMax.get()])
 
-    gamma = tk.DoubleVar(root, value=1.0)
+    gamma = tk.DoubleVar(root, value=experiment['gamma'])
     def gamma_change():
         viewer.set_gamma(gamma.get())
 
+    shear_angle = tk.DoubleVar(root, value=experiment['shear_angle'])
+    def shear_angle_change():
+        viewer.set_shear_angle(shear_angle.get())
+
     tk.Button(root, text="LAUNCH", command=launch).pack()
     tk.Button(root, text="STOP", command=stop).pack()
-    
+    tk.Button(root, text="PLAY", command=play).pack()
+
     settings = tk.LabelFrame(root, text="Settings").pack()
     
     LabelInput(
@@ -864,9 +954,21 @@ if __name__ == '__main__':
             }
         ).pack()
 
+    LabelInput(
+        settings, label_pos="left", label="Shear Angle",
+        input_class=ttk.Spinbox, input_var=shear_angle,
+        input_args={
+            "from_": -90.0, 
+            "to": 90.0, 
+            "increment": 2.5,
+            "command": shear_angle_change
+            }
+        ).pack()
+
     opacity_change()
     c_change()
     gamma_change()
+    shear_angle_change()
 
     launch()
 

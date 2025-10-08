@@ -54,6 +54,11 @@ uniform float shear_angle = 45.0;   // degrees
 uniform float dz = 0.4;             // um    
 uniform float px = 0.1348;          // um
 
+uniform float zSlice;
+
+// 2D-3D toggle
+uniform bool is3DMode = false;
+
 // ---------- utilities ----------
 
 // test intersection
@@ -88,65 +93,87 @@ mat4 inverseShearYZ(float angleDeg)
 
 void main()
 {
-    // -------- reconstruct world-space ray from pixel --------
-    vec2 ndc = (gl_FragCoord.xy / viewportSize) * 2.0 - 1.0;
-    vec4 p0w = invProjView * vec4(ndc, -1.0, 1.0);
-    vec4 p1w = invProjView * vec4(ndc,  1.0, 1.0);
-    vec3 roW = p0w.xyz / p0w.w;
-    vec3 rdW = normalize(p1w.xyz / p1w.w - roW);
+    // out color
+    vec4 outColor;
 
-    // -------- transform ray to OBJECT space via inverse shear --------
-    mat4 invShear  = inverseShearYZ(shear_angle);
-    vec3 ro = (invShear * vec4(roW, 1.0)).xyz;
-    vec3 rd = normalize(mat3(invShear) * rdW);   // direction uses linear part only
+    if (is3DMode) 
+    {
+        // -------- reconstruct world-space ray from pixel --------
+        vec2 ndc = (gl_FragCoord.xy / viewportSize) * 2.0 - 1.0;
+        vec4 p0w = invProjView * vec4(ndc, -1.0, 1.0);
+        vec4 p1w = invProjView * vec4(ndc,  1.0, 1.0);
+        vec3 roW = p0w.xyz / p0w.w;
+        vec3 rdW = normalize(p1w.xyz / p1w.w - roW);
 
-    // -------- AABB in object space --------
-    float tEnter, tExit;
-    if (!intersectAABB(ro, rd, boxMin, boxMax, tEnter, tExit)) 
-        discard;
-    tEnter = max(tEnter, 0.0);
+        // -------- transform ray to OBJECT space via inverse shear --------
+        mat4 invShear  = inverseShearYZ(shear_angle);
+        vec3 ro = (invShear * vec4(roW, 1.0)).xyz;
+        vec3 rd = normalize(mat3(invShear) * rdW);   // direction uses linear part only
 
-    // -------- step-size invariant opacity terms --------
-    vec3 boxSizeO = boxMax - boxMin;                    // object-space size
-    vec3 dim      = vec3(textureSize(volume, 0));       // voxel counts (X,Y,Z)
-    vec3 voxelO   = boxSizeO / dim;                     // voxel size (object units)
+        // -------- AABB in object space --------
+        float tEnter, tExit;
+        if (!intersectAABB(ro, rd, boxMin, boxMax, tEnter, tExit)) 
+            discard;
+        tEnter = max(tEnter, 0.0);
 
-    // world-object length of one marching step along this ray
-    float stepObj = length(mat3(invShear) * (rdW * stepWorld));
+        // -------- step-size invariant opacity terms --------
+        vec3 boxSizeO = boxMax - boxMin;                    // object-space size
+        vec3 dim      = vec3(textureSize(volume, 0));       // voxel counts (X,Y,Z)
+        vec3 voxelO   = boxSizeO / dim;                     // voxel size (object units)
 
-    // “steps per voxel” along this ray (orientation aware)
-    float dVoxel  = max(dot(abs(rd), voxelO), 1e-6);
-    float kStep   = stepObj / dVoxel;
+        // world-object length of one marching step along this ray
+        float stepObj = length(mat3(invShear) * (rdW * stepWorld));
 
-    // -------- march --------
-    vec3 invBoxSize = 1.0 / boxSizeO;
-    vec4 acc = vec4(0.0);
+        // “steps per voxel” along this ray (orientation aware)
+        float dVoxel  = max(dot(abs(rd), voxelO), 1e-6);
+        float kStep   = stepObj / dVoxel;
 
-    for (float t = tEnter; t < tExit && acc.a < 0.98; t += stepObj) {
-        vec3 pos = ro + rd * t;                           // object-space position
-        vec3 uvw = (pos - boxMin) * invBoxSize;           // [0,1]^3
+        // -------- march --------
+        vec3 invBoxSize = 1.0 / boxSizeO;
+        vec4 acc = vec4(0.0);
 
-        float s  = texture(volume, uvw).r;                // scalar sample
-        vec4 tf  = texture(transfer, s);                  // color + base alpha
+        for (float t = tEnter; t < tExit && acc.a < 0.98; t += stepObj) {
+            vec3 pos = ro + rd * t;                           // object-space position
+            vec3 uvw = (pos - boxMin) * invBoxSize;           // [0,1]^3
 
-        // convert TF alpha to per-step alpha (Beer-Lambert) and premultiply
-        float a  = 1.0 - exp(-opacity * tf.a * kStep);
+            float s  = texture(volume, uvw).r;                // scalar sample
+            vec4 tf  = texture(transfer, s);                  // color + base alpha
 
-        // color
-        vec3  c  = tf.rgb;
-              // c  /= 1000; // bit-depth scaling
-              c  = pow(c, vec3(gamma)); // gamma
-              c  *= a; // alpha
-              c  = clamp(c, cMin, cMax); // clipping
-              c = (c - cMin) / (cMax - cMin);
-              
-        // front-to-back compositing (premultiplied)
-        acc.rgb += (1.0 - acc.a) * c;
-        acc.a   += (1.0 - acc.a) * a;
+            // convert TF alpha to per-step alpha (Beer-Lambert) and premultiply
+            float a  = 1.0 - exp(-opacity * tf.a * kStep);
+
+            // color
+            vec3  c  = tf.rgb;
+                // c  /= 1000; // bit-depth scaling
+                c  = pow(c, vec3(gamma)); // gamma
+                c  *= a; // alpha
+                c  = clamp(c, cMin, cMax); // clipping
+                c = (c - cMin) / (cMax - cMin);
+                
+            // front-to-back compositing (premultiplied)
+            acc.rgb += (1.0 - acc.a) * c;
+            acc.a   += (1.0 - acc.a) * a;
+        }
+        
+        outColor = acc;
+    } else {
+        // pixel → [0,1] UV across the screen
+        vec2 uv = gl_FragCoord.xy / viewportSize;
+
+        // convert voxel index → normalized texture coord at the *center* of the slice
+        ivec3 dim = textureSize(volume, 0);
+        float z   = clamp(zSlice, 0.0, float(dim.z - 1));
+        float tz  = (z + 0.5) / float(dim.z);   // sample at slice center to avoid mixing
+
+        // sample and show as grayscale
+        float s = texture(volume, vec3(uv, tz)).r;
+        
+        outColor = vec4(s, s, s, 1.0);    
     }
-
-    FragColor = acc;
+    
+    FragColor = outColor;
 }
+
 """
 
 class Shader:
@@ -794,7 +821,8 @@ class GLVolumeViewer:
                            0,           # level
                            0,           # xoffset (none)
                            0,           # yoffset (none)
-                           int(z),      # zoffset (z-slice position)
+                           # int(z),      # zoffset (z-slice position)
+                           int(0),      # zoffset (z-slice position)
                            nx,          # width
                            ny,          # height
                            1,           # depth (one slice)

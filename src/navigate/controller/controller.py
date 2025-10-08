@@ -234,16 +234,14 @@ class Controller:
             log_queue=log_queue,
         )
 
-        self.volume_viewer = ObjectInSubprocess(
-            GLVolumeViewer,
-            # self.configuration,
-            # event_queue=self.event_queue,
-            # log_queue=log_queue
-        )
+        # volume viewer
+        self.volume_viewer = ObjectInSubprocess(GLVolumeViewer)
         self.volume_viewer.start_render_loop(1024, 800, "3D Viewer")
-        self.volume_viewer.set_shear_angle(45.0)
+        # params
+        self.volume_viewer.set_shear_angle(-30.0)
         self.volume_viewer.set_opacity(0.15)
-        
+        self.volume_viewer.set_c_range([0.0002, 0.3000])
+        self.volume_viewer.set_gamma(1.0)        
 
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
@@ -1202,27 +1200,29 @@ class Controller:
                 self.execute("stop_acquire")
 
             # Display the image and update the histogram
-            self.camera_view_controller.try_to_display_image(
-                image=self.data_buffer[image_id]
-            )
-            self.mip_setting_controller.try_to_display_image(
-                image=self.data_buffer[image_id]
-            )
-            self.histogram_controller.populate_histogram(
-                image=self.data_buffer[image_id]
-            )
+            # self.camera_view_controller.try_to_display_image(
+            #     image=self.data_buffer[image_id]
+            # )
+            # self.mip_setting_controller.try_to_display_image(
+            #     image=self.data_buffer[image_id]
+            # )
+            # self.histogram_controller.populate_histogram(
+            #     image=self.data_buffer[image_id]
+            # )
+            microscope_state = self.configuration["experiment"]["MicroscopeState"]
+            i, n_slices = 0, 2
+            if microscope_state["image_mode"] == 'z-stack':
+                i, n_slices = images_received, microscope_state["number_z_steps"]
+            # if images_received == 1:
+            #     self.volume_viewer.set_zstep(
+            #         self.configuration["experiment"]["MicroscopeState"]["step_size"]
+            #     )
+            self.volume_viewer.add_slice(
+                self.data_buffer[image_id],
+                n_slices=n_slices,
+                i=i
+                )            
             images_received += 1
-
-            if self.configuration["experiment"]["MicroscopeState"]["image_mode"] == 'z-stack':
-                if images_received == 1:
-                    self.volume_viewer.set_zstep(
-                        self.configuration["experiment"]["MicroscopeState"]["step_size"]
-                    )
-                self.volume_viewer.add_slice(
-                    self.data_buffer[image_id],
-                    n_slices=self.configuration["experiment"]["MicroscopeState"]["number_z_steps"],
-                    i=images_received
-                    )
 
             # Update progress bar.
             self.acquire_bar_controller.progress_bar(

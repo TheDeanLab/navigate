@@ -134,6 +134,7 @@ void main()
 
         // color
         vec3  c  = tf.rgb;
+              // c  /= 1000; // bit-depth scaling
               c  = pow(c, vec3(gamma)); // gamma
               c  *= a; // alpha
               c  = clamp(c, cMin, cMax); // clipping
@@ -522,29 +523,30 @@ class GLVolumeViewer:
 
         # if len(self.stack) == n_slices-1:
         #     self.tex_3d, self.tex_1d = None, None
-        #     self.bind_image_data(self.stack)
+        #     self.bind_volume(self.stack)
         #     self.stack = None
 
         if self.stack is not None:
             if (n_slices,) + image.shape != self.stack.shape:
-                print("Dimension mismatch... stack = None")
+                # print("Dimension mismatch... stack = None")
                 self.stack = None
                 self.add_slice(image, n_slices, i)
+                
             t0 = time.time()
             self.stack[i] = image
             self.bind_slice(image, i)
-            print(f"Added slice {i}/{n_slices} in {1000.*(time.time() - t0):.3f} ms")
+            # print(f"Added {image.shape} {image.astype(np.float32).nbytes/1e6:.2f} MB slice {i}/{n_slices} in {1000.*(time.time() - t0):.3f} ms")
         else:
             ny, nx = image.shape
-            print("Allocating volume...", (n_slices, ny, nx))
+            # print("Allocating volume...", (n_slices, ny, nx))
             self.stack = np.zeros((n_slices, ny, nx), dtype=np.float32)
-            self.bind_image_data(self.stack)
+            self.bind_volume(self.stack)
             self.add_slice(image, n_slices, i)
 
     def bind_slice(self, im_f32: np.ndarray, z: int = 0):
 
-        im_f32 /= self.stack.max()
-        im_f32 = im_f32.astype(np.float32)
+        # im_f32 /= self.stack.max() # Extremely slow! Scale in shader...
+        im_f32 = im_f32 / 1000.
 
         def _do():
             self._ensure_gl_ready()
@@ -554,7 +556,7 @@ class GLVolumeViewer:
         
         self._cmd_q.put(_do)
 
-    def bind_image_data(self, vol_f32: np.ndarray):
+    def bind_volume(self, vol_f32: np.ndarray):
         """Upload / replace the 3D volume texture (runs on GL thread)."""
         vol_f32 = np.asarray(vol_f32, dtype=np.float32)
         # vol_f32 = np.clip(vol_f32, a_min=0, a_max=4000)
@@ -703,11 +705,14 @@ class GLVolumeViewer:
             # cleanup
             try:
                 if self.tex_3d: 
-                    GL.glDeleteTextures([self.tex_3d]); self.tex_3d = None
+                    GL.glDeleteTextures([self.tex_3d])
+                    self.tex_3d = None
                 if self.tex_1d: 
-                    GL.glDeleteTextures([self.tex_1d]); self.tex_1d = None
+                    GL.glDeleteTextures([self.tex_1d])
+                    self.tex_1d = None
                 if self.vao:    
-                    GL.glDeleteVertexArrays(1, [self.vao]); self.vao = None
+                    GL.glDeleteVertexArrays(1, [self.vao])
+                    self.vao = None
             finally:
                 glfw.destroy_window(self.window)
                 glfw.terminate()
@@ -870,11 +875,11 @@ if __name__ == '__main__':
     import time
     def play():
         for t, vol in enumerate(frames):
+            print("Frame:", t)
             n_slices = len(vol)
             for z in range(n_slices):
-                print(f"Frame {t} slice {z}...")
+                # print(f"Frame {t} slice {z}...")
                 viewer.add_slice(vol[z], n_slices, z)
-                # time.sleep(0.01)
 
     def stop():
         viewer.stop_render_loop()

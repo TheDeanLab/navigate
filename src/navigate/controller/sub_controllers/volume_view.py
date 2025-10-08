@@ -41,7 +41,12 @@ uniform vec3 boxMin;
 uniform vec3 boxMax;
 
 uniform float stepWorld;       // step length in WORLD units
+
+// contrast params
 uniform float opacity = 0.15;  // global density/opacity
+uniform float cMin = 0.0;
+uniform float cMax = 1.0;
+uniform float gamma = 1.0;
 
 // OPM parameters
 uniform float shear_angle = 45.0;   // degrees
@@ -125,8 +130,14 @@ void main()
 
         // convert TF alpha to per-step alpha (Beer-Lambert) and premultiply
         float a  = 1.0 - exp(-opacity * tf.a * kStep);
-        vec3  c  = tf.rgb * a;
 
+        // color
+        vec3  c  = tf.rgb;
+              c  = pow(c, vec3(gamma)); // gamma
+              c  *= a; // alpha
+              c  = clamp(c, cMin, cMax); // clipping
+              c = (c - cMin) / (cMax - cMin);
+              
         // front-to-back compositing (premultiplied)
         acc.rgb += (1.0 - acc.a) * c;
         acc.a   += (1.0 - acc.a) * a;
@@ -462,6 +473,8 @@ class GLVolumeViewer:
         # cached config
         self._opacity   = 0.15
         self._stepWorld = 0.25
+        self._cRange    = []
+        self._gamma     = 1.0
         self._boxMin    = None
         self._boxMax    = None
 
@@ -523,12 +536,12 @@ class GLVolumeViewer:
     def bind_image_data(self, vol_f32: np.ndarray):
         """Upload / replace the 3D volume texture (runs on GL thread)."""
         vol_f32 = np.asarray(vol_f32, dtype=np.float32)
-        vol_f32 = np.clip(vol_f32, a_min=0, a_max=2000)
+        # vol_f32 = np.clip(vol_f32, a_min=0, a_max=4000)
         m = vol_f32.max()
         if m > 0:
             vol_f32 /= m
-        vol_f32 = np.power(vol_f32, 0.9)
-        
+        # vol_f32 = np.power(vol_f32, 0.9)
+
         # object-space bounds: centered on origin
         nz, ny, nx = 0.5*np.array(vol_f32.shape, dtype=np.float32) - 0.5
         boxMin = (-nx, -ny, -nz)
@@ -563,6 +576,23 @@ class GLVolumeViewer:
             self.shader.use()
             self.shader.set_float('opacity', self._opacity)
         self._cmd_q.put(_do)
+
+    def set_gamma(self, value: float):
+        self._gamma = float(value)
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float('gamma', self._gamma)
+        self._cmd_q.put(_do)
+
+    def set_c_range(self, value: list):
+        self._cRange = list(value)
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float('cMin', self._cRange[0])
+            self.shader.set_float('cMax', self._cRange[1])
+        self._cmd_q.put(_do)            
 
     def set_zstep(self, value: float):
         self._dz = float(value)
@@ -741,7 +771,9 @@ class GLVolumeViewer:
 if __name__ == '__main__':
 
     from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
+    from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
     import tkinter as tk
+    from tkinter import ttk
     import tifffile as tiff
 
     root = tk.Tk()
@@ -750,21 +782,94 @@ if __name__ == '__main__':
     viewer = ObjectInSubprocess(GLVolumeViewer)
 
     # your data
+    # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff").astype(np.float32)
     im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif").astype(np.float32)
+    # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\A12_P0_mCherry.tiff").astype(np.float32)
+
+    while True:
+        im_size_GB = im.nbytes / 1e9
+        print(f"Image size: {im_size_GB} GB...")
+        if im_size_GB > 1.0:
+            print(f"...exceeds 1.0 GB. Downsampling 2x...")
+            im = im[::2, ::2, ::2]
+        else:
+            break
 
     def launch():
         viewer.start_render_loop(1024, 800, "3D Viewer")  # returns immediately
         viewer.bind_image_data(im)                        # enqueued to GL thread
 
-    def more_transparent():
-        viewer.set_opacity(0.08)
-
     def stop():
         viewer.stop_render_loop()
+    
+    opacity = tk.DoubleVar(root, value=0.25)
+    def opacity_change():
+        viewer.set_opacity(opacity.get())
+    
+    cMin = tk.DoubleVar(root, value=0.0)
+    cMax = tk.DoubleVar(root, value=0.5)
+    def c_change():
+        viewer.set_c_range([cMin.get(), cMax.get()])
+
+    gamma = tk.DoubleVar(root, value=1.0)
+    def gamma_change():
+        viewer.set_gamma(gamma.get())
 
     tk.Button(root, text="LAUNCH", command=launch).pack()
-    tk.Button(root, text="MORE TRANSPARENT", command=more_transparent).pack()
     tk.Button(root, text="STOP", command=stop).pack()
-    tk.Button(root, text="TEST", command=lambda: print("Tk is responsive!")).pack()
+    
+    settings = tk.LabelFrame(root, text="Settings").pack()
+    
+    LabelInput(
+        settings, label_pos="left", label="Opacity",
+        input_class=ttk.Spinbox, input_var=opacity,
+        input_args={
+            "from_": 0.05, 
+            "to": 1.0, 
+            "increment": 0.05,
+            "command": opacity_change
+            }
+        ).pack()
+
+    LabelInput(
+        settings, label_pos="left", label="cMin",
+        input_class=ttk.Spinbox, input_var=cMin,
+        input_args={
+            "from_": 0.0, 
+            "to": 0.5, 
+            "increment": 0.0001,
+            "command": c_change
+            }
+        ).pack()
+
+    LabelInput(
+        settings, label_pos="left", label="cMax",
+        input_class=ttk.Spinbox, input_var=cMax,
+        input_args={
+            "from_": 0.02, 
+            "to": 1.0, 
+            "increment": 0.01,
+            "command": c_change
+            }
+        ).pack()
+
+    LabelInput(
+        settings, label_pos="left", label="Gamma",
+        input_class=ttk.Spinbox, input_var=gamma,
+        input_args={
+            "from_": 0.05, 
+            "to": 2.0, 
+            "increment": 0.05,
+            "command": gamma_change
+            }
+        ).pack()
+
+    opacity_change()
+    c_change()
+    gamma_change()
+
+    launch()
 
     root.mainloop()
+
+# %%

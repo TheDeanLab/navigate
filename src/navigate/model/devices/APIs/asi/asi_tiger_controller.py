@@ -998,7 +998,7 @@ class TigerController:
         axis = int(axis) + 32
         self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f"6 CCA Z=64\r")
+        self.send_command(f"6 CCA Y=2 Z=64\r")
         self.read_response()
 
     def logic_card_off(self, axis: str):
@@ -1243,22 +1243,25 @@ class TigerController:
         ]
         print("Number of cycles: ", num_cycles)
         print("Cycle time (ms): ", cycle_time / 4)
+        # If Single or Z-stack mode, set up the number of cycles to run
         if (num_cycles > 0):
             commands[7:13] = [
                 # Set PLC axis 4 to be an input to receive stage sync signal
                 "6 m e = 36",
                 "6 cca y = 0",
-                # Cell 4, One-shot that stays high for num_cycles
-                # Inputs are cell 3 and the inverse of PLC axis 4 (36+64)
+                # Cell 4, One-shot that stays high for num_cycles clock cycles
+                # Trigger inputs is cell 3 and Clock input is the inverse of PLC axis 4 (36+64)
                 "6 m e = 4",
                 f"6 cca y = 14 z = {num_cycles}",
                 "6 ccb x = 3 y = 100",
                 # Cell 5, AND cell used to check if the loop is still operating
                 # Cell inputs are the output of cell 4 and the inverse of PLC axis 4 (36+64)
+                # Triggers with every stage sync signal
                 "6 m e = 5",
                 "6 cca y = 5",
                 "6 ccb x = 4 y = 100",
             ]
+            
         # Creates object to hold galvo commands
         galvo_commands = []
         # Single Galvo case, just sets up the first Galvo
@@ -1300,7 +1303,7 @@ class TigerController:
 
         self.send_command(f"6 m e = {axis}\r")
         self.read_response()
-        self.send_command("6 cca z = 6")
+        self.send_command("6 cca y=2 z = 6")
         self.read_response()
 
     def wait_for_loop(self) -> None:

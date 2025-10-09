@@ -86,7 +86,7 @@ class ASIDaq(DAQBase, SerialDevice):
         #: bool: Flag for updating analog task.
         self.is_updating_analog_task = False
 
-        #: dict: Analog output tasks.
+        #: dict: Mapping of device to tiger axis.
         self.analog_outputs = {}
 
         #: Any: Device connection.
@@ -118,17 +118,15 @@ class ASIDaq(DAQBase, SerialDevice):
             ]  # convert each DictProxy in the list to a dict
         else:
             raise TypeError("Unexpected type for galvos: {}".format(type(galvos_raw)))
-
-        # update analog outputs with galvo IDs and associated axes
-        i = 0
-        for g in self.galvos:
-            self.analog_outputs[f"galvo {i}"] = g["hardware"]["axis"]
-            i += 1
-
-        # retreive galvo phases from config
+        
+        #: List: list of galvo phases.
         self.phases = [galvo["phase"] for galvo in self.galvos]
 
-        # update analog outputs with rfvc and associated axis
+        # update analog outputs with galvo IDs and associated axes
+        for i, g in enumerate(self.galvos):
+            self.analog_outputs[f"galvo {i}"] = g["hardware"]["axis"]
+
+        # update analog outputs with remote focus and associated axis
         remote_focus_channel = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["remote_focus"]["hardware"]["axis"]
@@ -137,12 +135,15 @@ class ASIDaq(DAQBase, SerialDevice):
         # sets up initial PLC configuration with default delay (ms), camera delay, rfvc delay, sweep time (ms), and analog outputs dict
         self.daq.setup_control_loop([200], 0, 0, 100, 120, self.analog_outputs)
 
-        self.axis_addr = self.daq.get_axis_addr()
-
         hw = self.configuration["configuration"]["microscopes"][
                 self.microscope_name
             ]["stage"]["hardware"][0]
+
+        #: Dict: Mapping of navigate axes to tiger axes.        
         self.axis_map = dict(zip(hw['axes'], hw['axes_mapping']))
+
+        #: Dict: Mapping of tiger axes to addresses.
+        self.axis_addr = self.daq.get_axis_addr()
 
         self.count = 0
 

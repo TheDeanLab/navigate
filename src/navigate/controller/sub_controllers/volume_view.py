@@ -8,6 +8,7 @@ import math
 import threading
 import queue
 import time
+import traceback
 
 GL = None
 
@@ -24,6 +25,23 @@ void main()
 
     gl_Position = vec4(p*2.0 - 1.0, 0.0, 1.0);
 }
+"""
+
+FRAG_2D_SRC = """
+#version 330 core
+
+out vec4 FragColor;
+
+uniform sampler2D pixels;
+uniform vec2 viewportSize;
+
+void main()
+{
+    vec2 uv = gl_FragCoord.xy / viewportSize;
+
+    FragColor = texture(pixels, uv);
+}
+
 """
 
 FRAG_SRC = """
@@ -57,7 +75,7 @@ uniform float px = 0.1348;          // um
 uniform float zSlice;
 
 // 2D-3D toggle
-uniform bool is3DMode = false;
+uniform bool is3DMode = true;
 
 // ---------- utilities ----------
 
@@ -477,6 +495,213 @@ class FrameTimer:
             self.frame_ctr = 0
             self.frame_timer = 0.
 
+class GLFrameViewer:
+
+    def __init__(self):
+
+        # concurrency
+        self.cmd_queue = queue.Queue()
+        self.is_running  = threading.Event()
+        self.is_ready    = threading.Event()
+        self.thread      = None
+
+        # GL objects (created in render thread)
+        self.window = None
+        self.shader = None
+        self.vao    = None
+        self.timer  = FrameTimer()
+
+        # texture
+        self.tex = None
+
+        # config
+        self.width  = None
+        self.height = None
+        # ...
+
+    def start_render_loop(self, window_dim=(1000,800), title="Camera View"):
+        if self.thread and self.thread.is_alive():
+            return
+        
+        # create and start render thread
+        self.is_running.set()
+        self.thread = threading.Thread(
+            target=self.render_thread,
+            args=(window_dim, title)
+        )
+        self.thread.start()
+
+        # Wait until GL is ready
+        self.is_ready.wait(timeout=1.0)
+
+    def stop_render_loop(self):
+        if not self.thread:
+            return
+        
+        self.is_running.clear()
+
+        # Wake the queue if waiting
+        self.cmd_queue.put(lambda: None)
+
+        # Kill the thread
+        self.thread.join(timeout=3.0)
+        self.thread = None
+
+    def render_thread(self, window_dim, title):
+        """
+            Lives entirely in the child process. Needs to own both the GLFW window
+            and the GL Context. GL imports need to be handled within.
+        """
+        global GL
+
+        try:
+            # init GLFW
+            if not glfw.init():
+                raise RuntimeError("ERROR: GLFW init failed!")
+
+            #version 330 core
+            glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+            glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+            glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+
+            # create window
+            self.width, self.height = window_dim
+            self.window = glfw.create_window(self.width, self.height, title, None, None)
+
+            # GL context
+            glfw.make_context_current(self.window)
+
+            # Can import GL now that in-thread context exists
+            from OpenGL import GL as _GL
+            GL = _GL
+
+            # can now create GL objects
+            self.shader = Shader(VERT_SRC, FRAG_2D_SRC)
+            self.vao    = GL.glGenVertexArrays(1) # quad
+
+            # ready to render
+            self.is_ready.set()
+
+            # if the texture doesn't exist, create it
+            if not self.tex:
+                self.make_texture()
+
+            # --------- MAIN LOOP ---------
+            while self.is_running.is_set() and not glfw.window_should_close(self.window):
+
+                for _ in range(64):
+                    try:
+                        cmd = self.cmd_queue.get_nowait()
+                    except queue.Empty:
+                        break
+                    try:
+                        cmd()
+                    except Exception as e:
+                        print(f"[GL Thread] Error Executing cmd={cmd}:", e)
+                        traceback.print_exc()
+                
+                # render frame
+                self.draw_frame()
+
+        except Exception as e:
+            print("[GL Thread] Fatal Error:", e)
+            traceback.print_exc()
+            
+            # try to terminate GLFW
+            try:
+                glfw.terminate()
+            except Exception:
+                pass
+            self.window = None
+            self.is_ready.set()
+
+    def _ensure_gl_ready(self):
+        if not (self.window and self.shader and self.vao):
+            raise RuntimeError("GL not ready yet")
+
+    def update_image(self, im : np.ndarray):
+
+        def _do():
+            self._ensure_gl_ready()
+            self.update_texture(im)
+        
+        self.cmd_queue.put(_do)
+
+    def make_texture(self):
+
+        self.tex = GL.glGenTextures(1)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex)
+
+        # params
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+
+        nx, ny = (self.width, self.height)
+        # pre-allocate the full image, only update pixels later
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+        GL.glTexImage2D(
+            GL.GL_TEXTURE_2D,   # target
+            0,                  # mipmap level
+            GL.GL_R16F,         # internal format
+            nx,
+            ny,
+            0,                  # border
+            GL.GL_RED,          # format
+            GL.GL_FLOAT,        # type
+            np.zeros((ny, nx), dtype=np.float32)        
+        )
+
+    def update_texture(self, data : np.ndarray):
+        """
+            Update 2D texture pixels with new data.
+        """
+        ny, nx = data.shape
+
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex)
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+
+        GL.glTexSubImage2D(
+            GL.GL_TEXTURE_2D,   # target
+            0,                  # mipmap level
+            0,                  # xoffset
+            0,                  # yoffset
+            nx,                 # width
+            ny,                 # height
+            GL.GL_RED,          # format
+            GL.GL_FLOAT,        # type
+            data.astype(np.float32)
+        )
+
+    def draw_frame(self):
+        """
+            Simply renders the texture once per frame.
+        """
+        if not self.tex:
+            return # don't render if no texture
+        
+        self.timer.tick()
+        
+        GL.glViewport(0, 0, self.width, self.height)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+
+        self.shader.use()
+        self.shader.set_vec2('viewportSize', (self.width, self.height))
+
+        GL.glActiveTexture(GL.GL_TEXTURE0)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex)
+
+        GL.glBindVertexArray(self.vao)
+        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+        GL.glBindVertexArray(0)
+        
+        # render
+        glfw.swap_buffers(self.window)
+
+        # user input
+        glfw.poll_events()
+
 class GLVolumeViewer:
     def __init__(self):
         # thread/loop state
@@ -871,7 +1096,7 @@ if __name__ == '__main__':
     root = tk.Tk()
     root.geometry("400x300")
 
-    viewer = ObjectInSubprocess(GLVolumeViewer)
+
 
     # your data
     # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff").astype(np.float32)
@@ -897,114 +1122,135 @@ if __name__ == '__main__':
         for t in range(10)
     ]
 
+    TEST_MODE = '2d'
     def launch():
-        viewer.start_render_loop(1024, 800, "3D Viewer")
+        pass
 
-    import time
-    def play():
-        for t, vol in enumerate(frames):
-            print("Frame:", t)
-            n_slices = len(vol)
-            for z in range(n_slices):
-                # print(f"Frame {t} slice {z}...")
-                viewer.add_slice(vol[z], n_slices, z)
+    if TEST_MODE == '2d':
+        viewer_2d = ObjectInSubprocess(GLFrameViewer)
 
-    def stop():
-        viewer.stop_render_loop()
+        def launch():
+            viewer_2d.start_render_loop((1000, 800), "Camera Viewer")
 
-    experiment = {
-        'opacity': 0.10,
-        'cMin': 0.0002,
-        'cMax': 0.3000,
-        'gamma': 1.2,
-        'shear_angle': -30,
-    }
+        import time
+        def play():
+            for t, vol in enumerate(frames):
+                print("Frame:", t)
+                n_slices = len(vol)
+                for z in range(n_slices):
+                    viewer_2d.update_image(vol[z])
 
-    opacity = tk.DoubleVar(root, value=experiment['opacity'])
-    def opacity_change():
-        viewer.set_opacity(opacity.get())
-    
-    cMin = tk.DoubleVar(root, value=experiment['cMin'])
-    cMax = tk.DoubleVar(root, value=experiment['cMax'])
-    def c_change():
-        viewer.set_c_range([cMin.get(), cMax.get()])
+        def stop():
+            viewer_3d.stop_render_loop()
 
-    gamma = tk.DoubleVar(root, value=experiment['gamma'])
-    def gamma_change():
-        viewer.set_gamma(gamma.get())
+    elif TEST_MODE == '3d':
+        viewer_3d = ObjectInSubprocess(GLVolumeViewer)
 
-    shear_angle = tk.DoubleVar(root, value=experiment['shear_angle'])
-    def shear_angle_change():
-        viewer.set_shear_angle(shear_angle.get())
+        def launch():
+            viewer_3d.start_render_loop(1024, 800, "3D Viewer")
+
+        import time
+        def play():
+            for t, vol in enumerate(frames):
+                print("Frame:", t)
+                n_slices = len(vol)
+                for z in range(n_slices):
+                    # print(f"Frame {t} slice {z}...")
+                    viewer_3d.add_slice(vol[z], n_slices, z)
+
+        def stop():
+            viewer_3d.stop_render_loop()
+
+        experiment = {
+            'opacity': 0.10,
+            'cMin': 0.0002,
+            'cMax': 0.3000,
+            'gamma': 1.2,
+            'shear_angle': -30,
+        }
+
+        opacity = tk.DoubleVar(root, value=experiment['opacity'])
+        def opacity_change():
+            viewer_3d.set_opacity(opacity.get())
+        
+        cMin = tk.DoubleVar(root, value=experiment['cMin'])
+        cMax = tk.DoubleVar(root, value=experiment['cMax'])
+        def c_change():
+            viewer_3d.set_c_range([cMin.get(), cMax.get()])
+
+        gamma = tk.DoubleVar(root, value=experiment['gamma'])
+        def gamma_change():
+            viewer_3d.set_gamma(gamma.get())
+
+        shear_angle = tk.DoubleVar(root, value=experiment['shear_angle'])
+        def shear_angle_change():
+            viewer_3d.set_shear_angle(shear_angle.get())
+
+        settings = tk.LabelFrame(root, text="Settings").pack()
+        
+        LabelInput(
+            settings, label_pos="left", label="Opacity",
+            input_class=ttk.Spinbox, input_var=opacity,
+            input_args={
+                "from_": 0.05, 
+                "to": 1.0, 
+                "increment": 0.05,
+                "command": opacity_change
+                }
+            ).pack()
+
+        LabelInput(
+            settings, label_pos="left", label="cMin",
+            input_class=ttk.Spinbox, input_var=cMin,
+            input_args={
+                "from_": 0.0, 
+                "to": 0.5, 
+                "increment": 0.0001,
+                "command": c_change
+                }
+            ).pack()
+
+        LabelInput(
+            settings, label_pos="left", label="cMax",
+            input_class=ttk.Spinbox, input_var=cMax,
+            input_args={
+                "from_": 0.02, 
+                "to": 1.0, 
+                "increment": 0.01,
+                "command": c_change
+                }
+            ).pack()
+
+        LabelInput(
+            settings, label_pos="left", label="Gamma",
+            input_class=ttk.Spinbox, input_var=gamma,
+            input_args={
+                "from_": 0.05, 
+                "to": 2.0, 
+                "increment": 0.05,
+                "command": gamma_change
+                }
+            ).pack()
+
+        LabelInput(
+            settings, label_pos="left", label="Shear Angle",
+            input_class=ttk.Spinbox, input_var=shear_angle,
+            input_args={
+                "from_": -90.0, 
+                "to": 90.0, 
+                "increment": 2.5,
+                "command": shear_angle_change
+                }
+            ).pack()
+
+        opacity_change()
+        c_change()
+        gamma_change()
+        shear_angle_change()
 
     tk.Button(root, text="LAUNCH", command=launch).pack()
     tk.Button(root, text="STOP", command=stop).pack()
     tk.Button(root, text="PLAY", command=play).pack()
 
-    settings = tk.LabelFrame(root, text="Settings").pack()
-    
-    LabelInput(
-        settings, label_pos="left", label="Opacity",
-        input_class=ttk.Spinbox, input_var=opacity,
-        input_args={
-            "from_": 0.05, 
-            "to": 1.0, 
-            "increment": 0.05,
-            "command": opacity_change
-            }
-        ).pack()
-
-    LabelInput(
-        settings, label_pos="left", label="cMin",
-        input_class=ttk.Spinbox, input_var=cMin,
-        input_args={
-            "from_": 0.0, 
-            "to": 0.5, 
-            "increment": 0.0001,
-            "command": c_change
-            }
-        ).pack()
-
-    LabelInput(
-        settings, label_pos="left", label="cMax",
-        input_class=ttk.Spinbox, input_var=cMax,
-        input_args={
-            "from_": 0.02, 
-            "to": 1.0, 
-            "increment": 0.01,
-            "command": c_change
-            }
-        ).pack()
-
-    LabelInput(
-        settings, label_pos="left", label="Gamma",
-        input_class=ttk.Spinbox, input_var=gamma,
-        input_args={
-            "from_": 0.05, 
-            "to": 2.0, 
-            "increment": 0.05,
-            "command": gamma_change
-            }
-        ).pack()
-
-    LabelInput(
-        settings, label_pos="left", label="Shear Angle",
-        input_class=ttk.Spinbox, input_var=shear_angle,
-        input_args={
-            "from_": -90.0, 
-            "to": 90.0, 
-            "increment": 2.5,
-            "command": shear_angle_change
-            }
-        ).pack()
-
-    opacity_change()
-    c_change()
-    gamma_change()
-    shear_angle_change()
-
     launch()
-
     root.mainloop()
-
-# %%

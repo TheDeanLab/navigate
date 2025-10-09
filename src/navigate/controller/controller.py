@@ -64,7 +64,8 @@ from navigate.controller.sub_controllers import (
     MenuController,
     PluginsController,
     HistogramController,
-    GLVolumeViewer
+    GLVolumeViewer,
+    GLFrameViewer
     # MicroscopePopupController,
     # AdaptiveOpticsPopupController,
 )
@@ -235,13 +236,17 @@ class Controller:
         )
 
         # volume viewer
-        self.volume_viewer = ObjectInSubprocess(GLVolumeViewer)
-        self.volume_viewer.start_render_loop(1024, 800, "3D Viewer")
-        # params
-        self.volume_viewer.set_shear_angle(-30.0)
-        self.volume_viewer.set_opacity(0.15)
-        self.volume_viewer.set_c_range([0.0002, 0.3000])
-        self.volume_viewer.set_gamma(1.0)        
+        # self.volume_viewer = ObjectInSubprocess(GLVolumeViewer)
+        # self.volume_viewer.start_render_loop(1024, 800, "3D Viewer")
+        # # params
+        # self.volume_viewer.set_shear_angle(-30.0)
+        # self.volume_viewer.set_opacity(0.15)
+        # self.volume_viewer.set_c_range([0.0002, 0.3000])
+        # self.volume_viewer.set_gamma(1.0)        
+
+        # frame viewer
+        self.frame_viewer = ObjectInSubprocess(GLFrameViewer)
+        self.frame_viewer.start_render_loop((1024, 1024), "Camera View")
 
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
@@ -1210,18 +1215,23 @@ class Controller:
             #     image=self.data_buffer[image_id]
             # )
             microscope_state = self.configuration["experiment"]["MicroscopeState"]
-            i, n_slices = 0, 2
-            if microscope_state["image_mode"] == 'z-stack':
-                i, n_slices = images_received, microscope_state["number_z_steps"]
-            # if images_received == 1:
-            #     self.volume_viewer.set_zstep(
-            #         self.configuration["experiment"]["MicroscopeState"]["step_size"]
-            #     )
-            self.volume_viewer.add_slice(
-                self.data_buffer[image_id],
-                n_slices=n_slices,
-                i=i
-                )            
+            # i, n_slices = 0, 2
+            # if microscope_state["image_mode"] == 'z-stack':
+            #     i, n_slices = images_received, microscope_state["number_z_steps"]
+            # # if images_received == 1:
+            # #     self.volume_viewer.set_zstep(
+            # #         self.configuration["experiment"]["MicroscopeState"]["step_size"]
+            # #     )
+            # self.volume_viewer.add_slice(
+            #     self.data_buffer[image_id],
+            #     n_slices=n_slices,
+            #     i=i
+            #     )            
+            
+            self.frame_viewer.update_image(
+                self.data_buffer[image_id]
+            )
+
             images_received += 1
 
             # Update progress bar.

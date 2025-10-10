@@ -250,6 +250,7 @@ class GLFrameViewer:
 
             # GL context
             glfw.make_context_current(self.window)
+            glfw.swap_interval(0) # VSync off?
 
             # Can import GL now that in-thread context exists
             from OpenGL import GL as _GL
@@ -273,7 +274,7 @@ class GLFrameViewer:
             # --------- MAIN LOOP ---------
             while self.is_running.is_set() and not glfw.window_should_close(self.window):
 
-                for _ in range(10):
+                for _ in range(64):
                     try:
                         cmd = self.cmd_queue.get_nowait()
                     except queue.Empty:
@@ -402,7 +403,11 @@ class GLFrameViewer:
         GL.glBindVertexArray(0)
         
         # render
+        t0 = time.perf_counter()
         glfw.swap_buffers(self.window)
+        stall_ms = (time.perf_counter() - t0) * 1000
+        if stall_ms > 5:
+            print(f"Swap stall: {stall_ms:.2f} ms")
 
         # user input
         glfw.poll_events()

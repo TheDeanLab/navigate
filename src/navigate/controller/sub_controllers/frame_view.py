@@ -40,7 +40,7 @@ void main()
     vec2 uv = gl_FragCoord.xy / viewportSize;
 
     float s = texture(pixels, uv).r;
-    s = s / 1000.;
+    // s = s / 1000.;
     FragColor = vec4(s, s, s, 1.0);
 }
 
@@ -231,6 +231,10 @@ class GLFrameViewer:
             if not self.tex:
                 self.make_texture()
 
+            # bind sampler unit
+            self.shader.use()
+            self.shader.set_int('pixels', 0) # GL_TEXTURE0
+
             # --------- MAIN LOOP ---------
             while self.is_running.is_set() and not glfw.window_should_close(self.window):
 
@@ -300,36 +304,43 @@ class GLFrameViewer:
         # pre-allocate the full image, only update pixels later
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
         GL.glTexImage2D(
-            GL.GL_TEXTURE_2D,   # target
-            0,                  # mipmap level
-            GL.GL_R16F,         # internal format
+            GL.GL_TEXTURE_2D,       # target
+            0,                      # mipmap level
+            GL.GL_R16,              # internal format (1-channel 16-bit normalized)
             nx,
             ny,
-            0,                  # border
-            GL.GL_RED,          # format
-            GL.GL_FLOAT,        # type
-            np.zeros((ny, nx), dtype=np.float32)        
+            0,                      # border
+            GL.GL_RED,              # format
+            GL.GL_UNSIGNED_SHORT,   # type (uint16)
+            # np.zeros((ny, nx), dtype=np.float32)
+            None
         )
 
     def update_texture(self, data : np.ndarray):
         """
             Update 2D texture pixels with new data.
         """
+        # uint16 and C-contiguous
+        if not data.flags['C_CONTIGUOUS']:
+            data = np.ascontiguousarray(data)
+        if data.dtype != np.uint16:
+            data = data.astype(np.uint16)
+        
         ny, nx = data.shape
 
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex)
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
 
         GL.glTexSubImage2D(
-            GL.GL_TEXTURE_2D,   # target
-            0,                  # mipmap level
-            0,                  # xoffset
-            0,                  # yoffset
-            nx,                 # width
-            ny,                 # height
-            GL.GL_RED,          # format
-            GL.GL_FLOAT,        # type
-            data.astype(np.float32)
+            GL.GL_TEXTURE_2D,       # target
+            0,                      # mipmap level
+            0,                      # xoffset
+            0,                      # yoffset
+            nx,                     # width
+            ny,                     # height
+            GL.GL_RED,              # format
+            GL.GL_UNSIGNED_SHORT,   # type
+            data
         )
 
     def draw_frame(self):

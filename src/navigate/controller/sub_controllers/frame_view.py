@@ -36,13 +36,13 @@ const int BIT_DEPTH = 65535;
 
 uniform sampler2D pixels;
 uniform vec2 viewportSize;
-uniform vec2 colorMinMax = vec2(0, 65535);
+uniform vec2 colorMinMax = vec2(0, 1000);
 
 void main()
 {
     vec2 uv = gl_FragCoord.xy / viewportSize;
     uv.y = 1.0 - uv.y;
-    
+
     float s = texture(pixels, uv).r;
     
     float sMin = float(colorMinMax.x) / BIT_DEPTH;

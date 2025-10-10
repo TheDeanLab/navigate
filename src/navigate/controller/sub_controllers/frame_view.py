@@ -32,16 +32,24 @@ FRAG_2D_SRC = """
 
 out vec4 FragColor;
 
+const int BIT_DEPTH = 65535;
+
 uniform sampler2D pixels;
 uniform vec2 viewportSize;
+uniform vec2 colorMinMax = vec2(0, 65535);
 
 void main()
 {
     vec2 uv = gl_FragCoord.xy / viewportSize;
-
+    uv.y = 1.0 - uv.y;
+    
     float s = texture(pixels, uv).r;
     
-    s = clamp(s, 0, 0.1) / 0.1;
+    float sMin = float(colorMinMax.x) / BIT_DEPTH;
+    float sMax = float(colorMinMax.y) / BIT_DEPTH;
+
+    s = clamp(s, sMin, sMax);
+    s = (s - sMin) / (sMax - sMin);
 
     FragColor = vec4(s, s, s, 1.0);
 }
@@ -162,8 +170,9 @@ class GLFrameViewer:
         self.tex = None
 
         # config
-        self.width  = None
-        self.height = None
+        self.width   = None
+        self.height  = None
+        self.min_max = None
         # ...
 
     def start_render_loop(self, window_dim=(1000,800), title="Camera View"):
@@ -314,7 +323,6 @@ class GLFrameViewer:
             0,                      # border
             GL.GL_RED,              # format
             GL.GL_UNSIGNED_SHORT,   # type (uint16)
-            # np.zeros((ny, nx), dtype=np.float32)
             None
         )
 
@@ -373,6 +381,18 @@ class GLFrameViewer:
         # user input
         glfw.poll_events()
 
+    # ----- update functions -----
+
+    def set_min_max(self, min_max: list):
+        self.min_max = min_max
+
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_vec2('colorMinMax', min_max)
+
+        self.cmd_queue.put(_do)
+
 #%%
 if __name__ == '__main__':
 
@@ -413,18 +433,55 @@ if __name__ == '__main__':
     viewer = ObjectInSubprocess(GLFrameViewer)
 
     def launch():
-        viewer.start_render_loop((1000, 800), "Camera Viewer")
+        viewer.start_render_loop((800, 800), "Camera Viewer")
 
-    import time
+    # import time
+    # def play():
+    #     for t, vol in enumerate(frames):
+    #         print("Frame:", t)
+    #         n_slices = len(vol)
+    #         for z in range(n_slices):
+    #             viewer.update_image(vol[z])
+
     def play():
-        for t, vol in enumerate(frames):
-            print("Frame:", t)
-            n_slices = len(vol)
-            for z in range(n_slices):
-                viewer.update_image(vol[z])
+        viewer.update_image(frames[0].max(0))
 
     def stop():
         viewer.stop_render_loop()
+
+    experiment = {
+        'cMin': 0,
+        'cMax': 65535,
+    }
+
+    cMin = tk.IntVar(root, value=experiment['cMin'])
+    cMax = tk.IntVar(root, value=experiment['cMax'])
+    def c_change():
+        viewer.set_min_max([cMin.get(), cMax.get()])
+
+    settings = tk.LabelFrame(root, text="Settings").pack()
+
+    LabelInput(
+        settings, label_pos="left", label="cMin",
+        input_class=ttk.Spinbox, input_var=cMin,
+        input_args={
+            "from_": 0, 
+            "to": 65535, 
+            "increment": 85,
+            "command": c_change
+            }
+        ).pack()
+
+    LabelInput(
+        settings, label_pos="left", label="cMax",
+        input_class=ttk.Spinbox, input_var=cMax,
+        input_args={
+            "from_": 0, 
+            "to": 65535, 
+            "increment": 85,
+            "command": c_change
+            }
+        ).pack()
 
     tk.Button(root, text="LAUNCH", command=launch).pack()
     tk.Button(root, text="STOP", command=stop).pack()

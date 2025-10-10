@@ -40,7 +40,9 @@ void main()
     vec2 uv = gl_FragCoord.xy / viewportSize;
 
     float s = texture(pixels, uv).r;
-    // s = s / 1000.;
+    
+    s = clamp(s, 0, 0.1) / 0.1;
+
     FragColor = vec4(s, s, s, 1.0);
 }
 

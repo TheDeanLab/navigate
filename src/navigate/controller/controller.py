@@ -244,6 +244,11 @@ class Controller:
         # self.volume_viewer.set_c_range([0.0002, 0.3000])
         # self.volume_viewer.set_gamma(1.0)        
 
+        # frame viewer
+        self.frame_viewer = ObjectInSubprocess(GLFrameViewer)
+        # autostart
+        self.frame_viewer.start_render_loop((1024, 1024), "Camera View")
+
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
 
@@ -258,11 +263,6 @@ class Controller:
 
         #: View: View object in MVC architecture.
         self.view = view(self.root)
-
-        # frame viewer
-        self.frame_viewer = ObjectInSubprocess(GLFrameViewer)
-        # autostart
-        self.frame_viewer.start_render_loop((800, 800), "Camera View")
 
         #: dict: Event listeners for the controller.
         self.event_listeners = {}
@@ -1231,8 +1231,6 @@ class Controller:
             #     i=i
             #     )            
             
-            print(f"Image_{image_id}:", self.data_buffer[image_id].dtype)
-
             self.frame_viewer.update_image(
                 self.data_buffer[image_id]
             )

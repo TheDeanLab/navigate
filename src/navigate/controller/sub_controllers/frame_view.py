@@ -27,38 +27,6 @@ void main()
 }
 """
 
-# FRAG_2D_SRC = """
-# #version 330 core
-
-# out vec4 FragColor;
-
-# const int BIT_DEPTH = 65535;
-
-# uniform sampler2D pixels;
-# uniform vec2 viewportSize;
-# uniform vec2 colorMinMax = vec2(0, 1000);
-
-# void main()
-# {
-#     vec2 uv = gl_FragCoord.xy / viewportSize;
-#     uv.y = 1.0 - uv.y;
-
-#     float s = texture(pixels, uv).r;
-#     s = s / 1000.;
-    
-#     // float sMin = float(colorMinMax.x) / BIT_DEPTH;
-#     // float sMax = float(colorMinMax.y) / BIT_DEPTH;
-
-#     // s = clamp(s, sMin, sMax);
-#     // s = (s - sMin) / (sMax - sMin);
-
-#     // s = clamp(s, 0.0, 0.1) / 0.1;
-    
-#     FragColor = vec4(s, s, s, 1.0);
-# }
-
-# """
-
 FRAG_2D_SRC = """
 #version 330 core
 

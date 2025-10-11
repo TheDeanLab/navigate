@@ -413,7 +413,7 @@ class GLFrameViewer:
         t0 = time.perf_counter()
         glfw.swap_buffers(self.window)
         stall_ms = (time.perf_counter() - t0) * 1000
-        if stall_ms > 5:
+        if stall_ms > 15:
             print(f"Swap stall: {stall_ms:.2f} ms")
 
         # user input

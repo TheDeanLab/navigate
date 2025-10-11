@@ -247,7 +247,7 @@ class Controller:
         # frame viewer
         self.frame_viewer = ObjectInSubprocess(GLFrameViewer)
         # autostart
-        self.frame_viewer.start_render_loop((1024, 1024), "Camera View")
+        self.frame_viewer.start_render_loop((512, 512), "Camera View")
 
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")

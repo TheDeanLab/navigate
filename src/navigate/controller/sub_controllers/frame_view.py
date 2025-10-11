@@ -156,6 +156,7 @@ class GLFrameViewer:
         self.window = None
         self.shader = None
         self.vao    = None
+        self.pbo    = None
         self.timer  = FrameTimer()
 
         # texture
@@ -234,6 +235,9 @@ class GLFrameViewer:
             # if the texture doesn't exist, create it
             if not self.tex:
                 self.make_texture()
+            if not self.pbo:
+                nbytes = self.width * self.height * 2
+                self.make_pbo_ring(nbytes)
 
             # bind sampler unit
             self.shader.use()
@@ -319,6 +323,22 @@ class GLFrameViewer:
             None
         )
 
+    def make_pbo_ring(self, nbytes: int, N: int = 3):
+
+        """
+            Create N pixel unpack buffers for async texture upload.
+        """
+        self.pbo = GL.glGenBuffers(N)
+
+        # bind
+        for b in self.pbo:
+            GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, b)
+            GL.glBufferData(GL.GL_PIXEL_UNPACK_BUFFER, nbytes, None, GL.GL_STREAM_DRAW)
+        
+        # unbind
+        GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
+        self._pbo_index = 0
+
     def update_texture(self, data : np.ndarray):
         """
             Update 2D texture pixels with new data.
@@ -332,10 +352,26 @@ class GLFrameViewer:
             print("Converted to uint16!")
         
         ny, nx = data.shape
+        nbytes = nx * ny * 2 # uint16
 
+        # pick next PBO
+        b = self.pbo[self._pbo_index]
+        self._pbo_index = (self._pbo_index) % len(self.pbo)
+
+        # bind and orphan the buffer
+        GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, b)
+        GL.glBufferData(GL.GL_PIXEL_UNPACK_BUFFER, nbytes, None, GL.GL_STREAM_DRAW)
+
+        # map and copy CPU -> PBO
+        ptr = GL.glMapBuffer(GL.GL_PIXEL_UNPACK_BUFFER, GL.GL_WRITE_ONLY)
+        import ctypes
+        ctypes.memmove(int(ptr), data.ctypes.data, nbytes)
+        GL.glUnmapBuffer(GL.GL_PIXEL_UNPACK_BUFFER)
+
+
+        # bind texture and issue copy GPU <- PBO
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex)
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
-
         GL.glTexSubImage2D(
             GL.GL_TEXTURE_2D,       # target
             0,                      # mipmap level
@@ -345,8 +381,11 @@ class GLFrameViewer:
             ny,                     # height
             GL.GL_RED,              # format
             GL.GL_UNSIGNED_SHORT,   # type
-            data
+            None
         )
+
+        # cleanup
+        GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
 
     def draw_frame(self):
         """

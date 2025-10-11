@@ -356,7 +356,7 @@ class GLFrameViewer:
 
         # pick next PBO
         b = self.pbo[self._pbo_index]
-        self._pbo_index = (self._pbo_index) % len(self.pbo)
+        self._pbo_index = (self._pbo_index + 1) % len(self.pbo)
 
         # bind and orphan the buffer
         GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, b)

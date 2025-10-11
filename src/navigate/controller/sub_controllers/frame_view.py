@@ -435,96 +435,149 @@ class GLFrameViewer:
 if __name__ == '__main__':
 
     import os
-    from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
+    from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
     from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
     import tkinter as tk
-    from tkinter import ttk
-    import tifffile as tiff
 
     root = tk.Tk()
     root.geometry("400x300")
 
-    # your data
-    # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff").astype(np.float32)
-    # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif").astype(np.float32)
-    # im = tiff.imread(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\A12_P0_mCherry.tiff").astype(np.float32)
-
-    def downsample_if_needed(im : np.ndarray, max_gb=0.5):
-        while True:
-            im_size_GB = im.nbytes / 1e9
-            print(f"Image size: {im_size_GB} GB...")
-            if im_size_GB > max_gb:
-                print(f"...exceeds 1.0 GB. Downsampling 2x...")
-                im = im[::2, ::2, ::2]
-            else:
-                break
-        
-        return im
-
-    frames = [
-        downsample_if_needed(tiff.imread(
-            os.path.join(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\movie", f"1_CH00_00000{t}.tif")
-        ).astype(np.float32))
-        for t in range(10)
-    ]
-
     viewer = ObjectInSubprocess(GLFrameViewer)
 
-    def launch():
-        viewer.start_render_loop((800, 800), "Camera Viewer")
+    # --- profiling tests ---
+    import statistics as stats
 
-    # import time
-    # def play():
-    #     for t, vol in enumerate(frames):
-    #         print("Frame:", t)
-    #         n_slices = len(vol)
-    #         for z in range(n_slices):
-    #             viewer.update_image(vol[z])
+    def print_stats(label, samples_ms):
+        if not samples_ms:
+            print(f"{label}: no samples")
+            return
+        ms = samples_ms
+        print(f"\n{label}")
+        print("-"*max(24, len(label)))
+        print(f"count={len(ms)}  min={min(ms):.3f} ms  med={stats.median(ms):.3f} ms  "
+            f"p90={np.percentile(ms,90):.3f} ms  p99={np.percentile(ms,99):.3f} ms  max={max(ms):.3f} ms")
 
-    def play():
-        viewer.update_image(frames[0].max(0))
+    def warm_start(viewer):
+        print("\n[Warmup] starting render loop…")
+        viewer.start_render_loop((1024, 1024), "GLFrameViewer Profile")
+        time.sleep(1.0)  # let GLFW/driver settle
 
-    def stop():
-        viewer.stop_render_loop()
+    def bench_enqueue_numpy(viewer, shape=(1024,1024), seconds=2.0):
+        print("\n[Test 1] Enqueue cost: numpy.ndarray → update_image")
+        h, w = shape
+        frame = (np.random.randint(0, 65535, (h, w)).astype(np.uint16))
+        times = []
+        t_end = time.perf_counter() + seconds
+        i = 0
+        while time.perf_counter() < t_end:
+            t0 = time.perf_counter()
+            viewer.update_image(frame)
+            times.append((time.perf_counter() - t0)*1000)
+            i += 1
+        print_stats("Enqueue (numpy) ms", times)
+        print(f"approx calls/s: {i/seconds:.1f}")
 
-    experiment = {
-        'cMin': 0,
-        'cMax': 65535,
-    }
+    def bench_enqueue_shared(viewer, shape=(1024,1024), seconds=2.0):
+        print("\n[Test 2] Enqueue cost: SharedNDArray → update_image")
+        h, w = shape
+        snd = SharedNDArray(shape=(h,w), dtype=np.uint16)
+        # fill once (in this process)
+        snd[:] = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
+        times = []
+        t_end = time.perf_counter() + seconds
+        i = 0
+        while time.perf_counter() < t_end:
+            t0 = time.perf_counter()
+            viewer.update_image(snd)
+            times.append((time.perf_counter() - t0)*1000)
+            i += 1
+        print_stats("Enqueue (SharedNDArray) ms", times)
+        print(f"approx calls/s: {i/seconds:.1f}")
 
-    cMin = tk.IntVar(root, value=experiment['cMin'])
-    cMax = tk.IntVar(root, value=experiment['cMax'])
-    def c_change():
-        viewer.set_min_max([cMin.get(), cMax.get()])
+    def bench_upload_static(viewer, shape=(1024,1024), seconds=2.0):
+        print("\n[Test 3] Upload pressure: static frame (no per-frame CPU work)")
+        h, w = shape
+        frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
+        sends = 0
+        t_end = time.perf_counter() + seconds
+        while time.perf_counter() < t_end:
+            viewer.update_image(frame)
+            sends += 1
+        print(f"static uploads issued: {sends} in {seconds}s  → {sends/seconds:.1f} calls/s")
+        print("(Correlate with swap stall prints from GL thread above.)")
 
-    settings = tk.LabelFrame(root, text="Settings").pack()
+    def bench_upload_random(viewer, shape=(1024,1024), seconds=2.0):
+        print("\n[Test 4] Upload pressure: per-frame randomize (adds CPU work)")
+        h, w = shape
+        sends = 0
+        t_end = time.perf_counter() + seconds
+        while time.perf_counter() < t_end:
+            frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
+            viewer.update_image(frame)
+            sends += 1
+        print(f"randomized uploads issued: {sends} in {seconds}s  → {sends/seconds:.1f} calls/s")
+        print("(If this drops a lot vs static, CPU frame gen is part of the bottleneck.)")
 
-    LabelInput(
-        settings, label_pos="left", label="cMin",
-        input_class=ttk.Spinbox, input_var=cMin,
-        input_args={
-            "from_": 0, 
-            "to": 65535, 
-            "increment": 85,
-            "command": c_change
-            }
-        ).pack()
+    def bench_size_sweep(viewer, sizes=((512,512),(1024,1024),(1536,1536),(2048,2048)), per_size_seconds=1.0):
+        print("\n[Test 5] Throughput vs image size (static frame per size)")
+        for h, w in sizes:
+            frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
+            sends = 0
+            t_end = time.perf_counter() + per_size_seconds
+            while time.perf_counter() < t_end:
+                viewer.update_image(frame)
+                sends += 1
+            mb = (h*w*2)/1e6
+            print(f"  {h}x{w} ({mb:.1f} MB): {sends/per_size_seconds:.1f} calls/s")
 
-    LabelInput(
-        settings, label_pos="left", label="cMax",
-        input_class=ttk.Spinbox, input_var=cMax,
-        input_args={
-            "from_": 0, 
-            "to": 65535, 
-            "increment": 85,
-            "command": c_change
-            }
-        ).pack()
+    def bench_producer_rate(viewer, shape=(1024,1024), target_fps=120, seconds=3.0):
+        print(f"\n[Test 6] Producer thread @ {target_fps} Hz: queue contention test")
+        h, w = shape
+        frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
+        period = 1.0/target_fps
+        sends = 0
+        stop = threading.Event()
 
-    tk.Button(root, text="LAUNCH", command=launch).pack()
-    tk.Button(root, text="STOP", command=stop).pack()
-    tk.Button(root, text="PLAY", command=play).pack()
+        def producer():
+            nonlocal sends
+            next_t = time.perf_counter()
+            while not stop.is_set():
+                viewer.update_image(frame)
+                sends += 1
+                next_t += period
+                # sleep with catch-up
+                dt = next_t - time.perf_counter()
+                if dt > 0:
+                    time.sleep(dt)
 
-    launch()
+        th = threading.Thread(target=producer, daemon=True)
+        th.start()
+        time.sleep(seconds)
+        stop.set()
+        th.join(timeout=1.0)
+        print(f"sent {sends} frames in {seconds}s → {sends/seconds:.1f} Hz")
+        print("Watch for any '[GL] Command queue backlog' (if you added that) or swap stalls; if we can't keep up, the consumer (GL thread) is the limiter.")
+
+    # ---- run the suite ----
+    warm_start(viewer)
+
+    # idle settle
+    print("\n[Idle] Letting viewer run idle for 0.5s… (baseline swap stalls)")
+    time.sleep(0.5)
+
+    def run_tests():
+
+        bench_enqueue_numpy(viewer, shape=(1024,1024), seconds=2.0)
+        bench_enqueue_shared(viewer, shape=(1024,1024), seconds=2.0)
+        bench_upload_static(viewer, shape=(1024,1024), seconds=2.0)
+        bench_upload_random(viewer, shape=(1024,1024), seconds=2.0)
+        bench_size_sweep(viewer, sizes=((512,512),(1024,1024),(1536,1536)), per_size_seconds=1.0)
+        bench_producer_rate(viewer, shape=(1024,1024), target_fps=120, seconds=3.0)
+
+        print("\n[Done] You can close the window or leave it running.")
+
+    # -----------------------
+
+    tk.Button(root, text="RUN TESTS", command=run_tests).pack()
 
     root.mainloop()

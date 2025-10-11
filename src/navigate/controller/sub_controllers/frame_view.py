@@ -323,7 +323,7 @@ class GLFrameViewer:
             None
         )
 
-    def make_pbo_ring(self, nbytes: int, N: int = 3):
+    def make_pbo_ring(self, nbytes: int, N: int = 6):
 
         """
             Create N pixel unpack buffers for async texture upload.

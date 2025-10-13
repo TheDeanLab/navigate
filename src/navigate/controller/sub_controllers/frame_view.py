@@ -155,17 +155,18 @@ class GLFrameViewController(GUIController):
 
     def __init__(self, view, parent_controller=None):
         """
-            GUIController a-la CameraViewController to hold the GL Viewer
-            in an ObjectInSubprocess so GLFW loop can run on it's own thread,
-            while this controller can handle events and pass it image data.
+            GUIController a-la CameraViewController:
+            Has a GLFrameViewer that runs the render loop on it's
+            own thread to maintain the GL Context separate from
+            Tk.mainloop().
         """
 
         super().__init__(view, parent_controller)
 
-        # viewer running GL on it's own thread
-        self.viewer = ObjectInSubprocess(GLFrameViewer)
+        # OpenGL viewer
+        self.viewer = GLFrameViewer()
 
-        # start rendering on __init__
+        # start rendering thread
         self.viewer.start_render_loop(window_dim=(512,512))
 
         # image widgets
@@ -179,9 +180,14 @@ class GLFrameViewController(GUIController):
             "write", self._on_minmax_changed
         )
 
+        # autoscale
+        self.autoscale = self.image_palette["Autoscale"]
+
     def display_image(self, image: SharedNDArray) -> None:
 
-        self.viewer.update_image(image)
+        # self.viewer.update_image(image)
+        # self.viewer.data_q.put_nowait(image)
+        self.viewer.try_to_display_image(image)
 
     # private util functions
     
@@ -204,10 +210,11 @@ class GLFrameViewer:
     def __init__(self):
 
         # concurrency
-        self.cmd_queue = queue.Queue()
-        self.is_running  = threading.Event()
-        self.is_ready    = threading.Event()
-        self.thread      = None
+        self.cmd_q      = queue.Queue()
+        self.data_q     = queue.Queue(maxsize=1) # single-slot data queue
+        self.is_running = threading.Event()
+        self.is_ready   = threading.Event()
+        self.thread     = None
 
         # GL objects (created in render thread)
         self.window = None
@@ -246,8 +253,9 @@ class GLFrameViewer:
         
         self.is_running.clear()
 
-        # Wake the queue if waiting
-        self.cmd_queue.put(lambda: None)
+        # Wake the queues if waiting
+        self.cmd_q.put(lambda: None)
+        self.data_q.put(lambda: None)
 
         # Kill the thread
         self.thread.join(timeout=3.0)
@@ -303,9 +311,10 @@ class GLFrameViewer:
             # --------- MAIN LOOP ---------
             while self.is_running.is_set() and not glfw.window_should_close(self.window):
 
-                for _ in range(64):
+                # command queue drains
+                for _ in range(8):
                     try:
-                        cmd = self.cmd_queue.get_nowait()
+                        cmd = self.cmd_q.get_nowait()
                     except queue.Empty:
                         break
                     try:
@@ -314,6 +323,18 @@ class GLFrameViewer:
                         print(f"[GL Thread] Error Executing cmd={cmd}:", e)
                         traceback.print_exc()
                 
+                # data queue drains
+                for _ in range(64):
+                    try:
+                        data = self.data_q.get_nowait()
+                    except queue.Empty:
+                        break
+                    try:
+                        self.update_texture(data)
+                    except Exception as e:
+                        print(f"[GL Thread] Data queue error:", e)
+                        traceback.print_exc()                        
+
                 # render frame
                 self.draw_frame()
             
@@ -346,13 +367,37 @@ class GLFrameViewer:
         if not (self.window and self.shader and self.vao):
             raise RuntimeError("GL not ready yet")
 
+    def try_to_display_image(self, image: np.ndarray):
+
+        try:
+            # try to put the new frame into the queue
+            self.data_q.put_nowait(image)
+        
+        except queue.Full:
+            # queue is full: replace oldest image with newest
+            try:
+                # drain oldest
+                _ = self.data_q.get_nowait()
+
+                # Confirm that we successfully removed the oldest frame
+                self.data_q.task_done()
+            except queue.Empty:
+                pass
+            
+            try:
+                # now put the new frame into the queue
+                self.data_q.put_nowait(image)
+            except queue.Full:
+                pass        
+
     def update_image(self, im : np.ndarray):
 
         def _do():
             self._ensure_gl_ready()
             self.update_texture(im)
         
-        self.cmd_queue.put(_do)
+        # self.cmd_q.put(_do)
+        self.cmd_q.put_nowait(_do)
 
     def make_texture(self):
 
@@ -486,7 +531,7 @@ class GLFrameViewer:
             self.shader.use()
             self.shader.set_vec2('cMinMax', min_max)
 
-        self.cmd_queue.put(_do)
+        self.cmd_q.put(_do)
 
 #%%
 if __name__ == '__main__':

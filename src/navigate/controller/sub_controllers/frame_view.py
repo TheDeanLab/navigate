@@ -525,8 +525,8 @@ class GLFrameViewer:
         t0 = time.perf_counter()
         glfw.swap_buffers(self.window)
         stall_ms = (time.perf_counter() - t0) * 1000
-        if stall_ms > 15:
-            print(f"Swap stall: {stall_ms:.2f} ms")
+        # if stall_ms > 15:
+        #     print(f"Swap stall: {stall_ms:.2f} ms")
 
         # user input
         glfw.poll_events()
@@ -556,15 +556,13 @@ class GLFrameViewer:
 #%%
 if __name__ == '__main__':
 
-    import os
-    from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
-    from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+    from navigate.model.concurrency.concurrency_tools import SharedNDArray
     import tkinter as tk
 
     root = tk.Tk()
     root.geometry("400x300")
 
-    viewer = ObjectInSubprocess(GLFrameViewer)
+    viewer = GLFrameViewer()
 
     # --- profiling tests ---
     import statistics as stats

@@ -1,14 +1,15 @@
 import numpy as np
-# from OpenGL import GL
 import glfw
 import glm
 from typing import Union
-import math
-# from multiprocessing import Process, shared_memory
 import threading
 import queue
 import time
 import traceback
+
+# Local Imports
+from navigate.controller.sub_controllers.gui import GUIController
+from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
 
 GL = None
 
@@ -34,6 +35,7 @@ out vec4 FragColor;
 
 uniform sampler2D pixels;
 uniform vec2 viewportSize;
+uniform vec2 cMinMax = vec2(0, 65535);
 
 void main()
 {
@@ -41,8 +43,15 @@ void main()
     // uv.y = 1.0 - uv.y;
 
     float s = texture(pixels, uv).r;
-    s = clamp(s, 0.0, 0.1) / 0.1;
 
+    // lut
+    float cMin = float(cMinMax.x/65535);
+    float cMax = float(cMinMax.y/65535);
+    //clamp
+    s = clamp(s, cMin, cMax);
+    // normalize
+    s = (s - cMin) / (cMax - cMin);
+    
     FragColor = vec4(s, s, s, 1.0);
 }
 
@@ -141,6 +150,54 @@ class FrameTimer:
             
             self.frame_ctr = 0
             self.frame_timer = 0.
+
+class GLFrameViewController(GUIController):
+
+    def __init__(self, view, parent_controller=None):
+        """
+            GUIController a-la CameraViewController to hold the GL Viewer
+            in an ObjectInSubprocess so GLFW loop can run on it's own thread,
+            while this controller can handle events and pass it image data.
+        """
+
+        super().__init__(view, parent_controller)
+
+        # viewer running GL on it's own thread
+        self.viewer = ObjectInSubprocess(GLFrameViewer)
+
+        # start rendering on __init__
+        self.viewer.start_render_loop(window_dim=(512,512))
+
+        # image widgets
+        self.image_palette = view.lut.get_widgets()
+
+        # Binding for adjusting lookup table min/max counts
+        self.image_palette["Min"].get_variable().trace_add(
+            "write", self._on_minmax_changed
+        )
+        self.image_palette["Max"].get_variable().trace_add(
+            "write", self._on_minmax_changed
+        )
+
+    def display_image(self, image: SharedNDArray) -> None:
+
+        self.viewer.update_image(image)
+
+    # private util functions
+    
+    def _on_minmax_changed(self, *args):
+
+        min_counts = self.image_palette["Min"].get()
+        max_counts = self.image_palette["Max"].get()
+
+        try:
+            assert isinstance(min_counts, int)
+            assert isinstance(max_counts, int)
+        except AssertionError:
+            return
+
+        # send update commands to viewer queue
+        self.viewer.set_min_max([min_counts, max_counts])
 
 class GLFrameViewer:
 
@@ -422,12 +479,12 @@ class GLFrameViewer:
     # ----- update functions -----
 
     def set_min_max(self, min_max: list):
-        self.min_max = min_max
+        # self.min_max = min_max
 
         def _do():
             self._ensure_gl_ready()
             self.shader.use()
-            self.shader.set_vec2('colorMinMax', min_max)
+            self.shader.set_vec2('cMinMax', min_max)
 
         self.cmd_queue.put(_do)
 

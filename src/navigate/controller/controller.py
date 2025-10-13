@@ -65,7 +65,7 @@ from navigate.controller.sub_controllers import (
     PluginsController,
     HistogramController,
     GLVolumeViewer,
-    GLFrameViewer
+    GLFrameViewController
     # MicroscopePopupController,
     # AdaptiveOpticsPopupController,
 )
@@ -244,11 +244,6 @@ class Controller:
         # self.volume_viewer.set_c_range([0.0002, 0.3000])
         # self.volume_viewer.set_gamma(1.0)        
 
-        # frame viewer
-        self.frame_viewer = ObjectInSubprocess(GLFrameViewer)
-        # autostart
-        self.frame_viewer.start_render_loop((512, 512), "Camera View")
-
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
 
@@ -278,6 +273,11 @@ class Controller:
         #: MultiPositionController: Multi-Position Tab Sub-Controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
+        )
+
+        # GLFrameViewController: Camera view using GLFW and OpenGL
+        self.frame_view_controller = GLFrameViewController(
+            self.view.camera_waveform.camera_tab, self
         )
 
         #: CameraViewController: Camera View Tab Sub-Controller.
@@ -1231,9 +1231,8 @@ class Controller:
             #     i=i
             #     )            
             
-            self.frame_viewer.update_image(
-                self.data_buffer[image_id]
-            )
+            # OpenGL display
+            self.frame_view_controller.display_image(self.data_buffer[image_id])
 
             images_received += 1
 

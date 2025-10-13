@@ -231,7 +231,7 @@ class GLFrameViewer:
         self.width        = None
         self.height       = None
         self.min_max      = None
-        self.do_autoscale = True
+        self.do_autoscale = False
         # ...
 
     def start_render_loop(self, window_dim=(1000,800), title="Camera View"):
@@ -591,7 +591,7 @@ if __name__ == '__main__':
         i = 0
         while time.perf_counter() < t_end:
             t0 = time.perf_counter()
-            viewer.update_image(frame)
+            viewer.try_to_display_image(frame)
             times.append((time.perf_counter() - t0)*1000)
             i += 1
         print_stats("Enqueue (numpy) ms", times)
@@ -608,7 +608,7 @@ if __name__ == '__main__':
         i = 0
         while time.perf_counter() < t_end:
             t0 = time.perf_counter()
-            viewer.update_image(snd)
+            viewer.try_to_display_image(snd)
             times.append((time.perf_counter() - t0)*1000)
             i += 1
         print_stats("Enqueue (SharedNDArray) ms", times)
@@ -621,7 +621,7 @@ if __name__ == '__main__':
         sends = 0
         t_end = time.perf_counter() + seconds
         while time.perf_counter() < t_end:
-            viewer.update_image(frame)
+            viewer.try_to_display_image(frame)
             sends += 1
         print(f"static uploads issued: {sends} in {seconds}s  → {sends/seconds:.1f} calls/s")
         print("(Correlate with swap stall prints from GL thread above.)")
@@ -633,7 +633,7 @@ if __name__ == '__main__':
         t_end = time.perf_counter() + seconds
         while time.perf_counter() < t_end:
             frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
-            viewer.update_image(frame)
+            viewer.try_to_display_image(frame)
             sends += 1
         print(f"randomized uploads issued: {sends} in {seconds}s  → {sends/seconds:.1f} calls/s")
         print("(If this drops a lot vs static, CPU frame gen is part of the bottleneck.)")
@@ -645,7 +645,7 @@ if __name__ == '__main__':
             sends = 0
             t_end = time.perf_counter() + per_size_seconds
             while time.perf_counter() < t_end:
-                viewer.update_image(frame)
+                viewer.try_to_display_image(frame)
                 sends += 1
             mb = (h*w*2)/1e6
             print(f"  {h}x{w} ({mb:.1f} MB): {sends/per_size_seconds:.1f} calls/s")
@@ -662,7 +662,7 @@ if __name__ == '__main__':
             nonlocal sends
             next_t = time.perf_counter()
             while not stop.is_set():
-                viewer.update_image(frame)
+                viewer.try_to_display_image(frame)
                 sends += 1
                 next_t += period
                 # sleep with catch-up
@@ -691,7 +691,7 @@ if __name__ == '__main__':
         bench_enqueue_shared(viewer, shape=(1024,1024), seconds=2.0)
         bench_upload_static(viewer, shape=(1024,1024), seconds=2.0)
         bench_upload_random(viewer, shape=(1024,1024), seconds=2.0)
-        bench_size_sweep(viewer, sizes=((512,512),(1024,1024),(1536,1536)), per_size_seconds=1.0)
+        bench_size_sweep(viewer, sizes=((256,256),(512,512),(1024,1024)), per_size_seconds=1.0)
         bench_producer_rate(viewer, shape=(1024,1024), target_fps=120, seconds=3.0)
 
         print("\n[Done] You can close the window or leave it running.")

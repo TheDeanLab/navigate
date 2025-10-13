@@ -13,6 +13,8 @@ from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess, Sha
 
 GL = None
 
+RING_BUF_SIZE = 6
+
 # SHADERS
 
 VERT_SRC = """
@@ -211,7 +213,7 @@ class GLFrameViewer:
 
         # concurrency
         self.cmd_q      = queue.Queue()
-        self.data_q     = queue.Queue(maxsize=1) # single-slot data queue
+        self.data_q     = queue.Queue(maxsize=RING_BUF_SIZE)
         self.is_running = threading.Event()
         self.is_ready   = threading.Event()
         self.thread     = None
@@ -310,9 +312,18 @@ class GLFrameViewer:
 
             # --------- MAIN LOOP ---------
             while self.is_running.is_set() and not glfw.window_should_close(self.window):
+                """
+                    Still don't know best way to queue images to work with the ring buffer.
+                    - Pull once from data_q and immediately update_texture
+                    - Pull once from data_q and send update_image to cmd_q
+                    - Pull RING_BUF_SIZE times from data_q and send update_image
+
+                    Weird part is we max out at 40 FPS @ 5 msec no matter what we do.
+                    Need to think about this more...
+                """
 
                 # command queue drains
-                for _ in range(8):
+                for _ in range(RING_BUF_SIZE):
                     try:
                         cmd = self.cmd_q.get_nowait()
                     except queue.Empty:
@@ -323,17 +334,12 @@ class GLFrameViewer:
                         print(f"[GL Thread] Error Executing cmd={cmd}:", e)
                         traceback.print_exc()
                 
-                # data queue drains
-                for _ in range(64):
-                    try:
-                        data = self.data_q.get_nowait()
-                    except queue.Empty:
-                        break
-                    try:
-                        self.update_texture(data)
-                    except Exception as e:
-                        print(f"[GL Thread] Data queue error:", e)
-                        traceback.print_exc()                        
+                # data queue drain                   
+                try:
+                    image = self.data_q.get_nowait()
+                    self.update_image(image)
+                except queue.Empty:
+                    pass
 
                 # render frame
                 self.draw_frame()
@@ -425,7 +431,7 @@ class GLFrameViewer:
             None
         )
 
-    def make_pbo_ring(self, nbytes: int, N: int = 6):
+    def make_pbo_ring(self, nbytes: int, N: int = RING_BUF_SIZE):
 
         """
             Create N pixel unpack buffers for async texture upload.

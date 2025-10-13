@@ -130,8 +130,9 @@ class Shader:
 
 class FrameTimer:
 
-    def __init__(self):
+    def __init__(self, every=1.0):
 
+        self.every = every
         self.delta_time = 0.
         self.last_frame = 0.
         self.frame_timer = 0.
@@ -145,13 +146,15 @@ class FrameTimer:
         self.frame_timer += self.delta_time
         self.frame_ctr += 1
 
-        if self.frame_timer > 2.0:
+        if self.frame_timer > self.every:
             avg_delta_time = self.frame_timer / self.frame_ctr
             if verbose:
                 print(f"FPS: {1/avg_delta_time}")
             
             self.frame_ctr = 0
             self.frame_timer = 0.
+        
+        return self.frame_ctr
 
 class GLFrameViewController(GUIController):
 
@@ -182,13 +185,8 @@ class GLFrameViewController(GUIController):
             "write", self._on_minmax_changed
         )
 
-        # autoscale
-        self.autoscale = self.image_palette["Autoscale"]
-
     def display_image(self, image: SharedNDArray) -> None:
 
-        # self.viewer.update_image(image)
-        # self.viewer.data_q.put_nowait(image)
         self.viewer.try_to_display_image(image)
 
     # private util functions
@@ -205,7 +203,8 @@ class GLFrameViewController(GUIController):
             return
 
         # send update commands to viewer queue
-        self.viewer.set_min_max([min_counts, max_counts])
+        if not self.autoscale.get():
+            self.viewer.set_min_max([min_counts, max_counts])
 
 class GLFrameViewer:
 
@@ -223,15 +222,16 @@ class GLFrameViewer:
         self.shader = None
         self.vao    = None
         self.pbo    = None
-        self.timer  = FrameTimer()
+        self.timer  = FrameTimer(every=0.2)
 
         # texture
         self.tex = None
 
         # config
-        self.width   = None
-        self.height  = None
-        self.min_max = None
+        self.width        = None
+        self.height       = None
+        self.min_max      = None
+        self.do_autoscale = True
         # ...
 
     def start_render_loop(self, window_dim=(1000,800), title="Camera View"):
@@ -341,6 +341,12 @@ class GLFrameViewer:
                 except queue.Empty:
                     pass
 
+                if self.timer.tick() == 0 and self.do_autoscale:
+                    try:
+                        self.autoscale(image)
+                    except NameError:
+                        pass
+
                 # render frame
                 self.draw_frame()
             
@@ -372,7 +378,7 @@ class GLFrameViewer:
     def _ensure_gl_ready(self):
         if not (self.window and self.shader and self.vao):
             raise RuntimeError("GL not ready yet")
-
+        
     def try_to_display_image(self, image: np.ndarray):
 
         try:
@@ -500,10 +506,8 @@ class GLFrameViewer:
             Simply renders the texture once per frame.
         """
         if not self.tex:
-            return # don't render if no texture
-        
-        self.timer.tick()
-        
+            return # don't render if no texture    
+
         GL.glViewport(0, 0, self.width, self.height)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
 
@@ -538,6 +542,16 @@ class GLFrameViewer:
             self.shader.set_vec2('cMinMax', min_max)
 
         self.cmd_q.put(_do)
+
+    def autoscale(self, image: np.ndarray):
+
+        # only tax the CPU every timer tick
+        if self.timer.frame_ctr > 0:
+            return
+
+        min_pix = image.min()
+        max_pix = image.max()
+        self.set_min_max([min_pix, max_pix])
 
 #%%
 if __name__ == '__main__':

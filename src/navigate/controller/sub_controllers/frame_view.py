@@ -202,9 +202,7 @@ class GLFrameViewController(GUIController):
         except AssertionError:
             return
 
-        # send update commands to viewer queue
-        if not self.autoscale.get():
-            self.viewer.set_min_max([min_counts, max_counts])
+        self.viewer.set_min_max([min_counts, max_counts])
 
 class GLFrameViewer:
 

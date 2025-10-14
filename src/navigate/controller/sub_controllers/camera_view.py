@@ -1537,7 +1537,7 @@ class CameraViewController(BaseViewController):
 
         self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
-    @performance_monitor(prefix="Image Display")
+    @performance_monitor(prefix="Image Display", display_result=lambda x: {"image_id": int(x)})
     def display_image(self, image: np.ndarray) -> None:
         """Display an image using the LUT specified in the View.
 
@@ -1566,6 +1566,7 @@ class CameraViewController(BaseViewController):
 
         self.update_max_counts()
 
+        return self.image_count
 
     def set_mask_color_table(self, colors: list) -> None:
         """Set up segmentation mask color table

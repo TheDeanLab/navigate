@@ -1025,6 +1025,7 @@ class Model:
                         "kind": "Acquire Image",
                         "duration_ns": time.perf_counter_ns() - start_time,
                         "timestamp": time.time(),
+                        "image_id": frame_ids[-1]
                     }
                 )
             )

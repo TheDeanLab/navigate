@@ -19,7 +19,7 @@ In general, it is a good idea to acquire the data used to derive the offset and 
 
 3. **Calculate the Variance Map**: Compute the variance of the dark frames to create the variance map. This map represents the noise characteristics of the camera.
 
-4. **Save the Maps**: Save the offset and variance maps as tiff image in a folder titled `camera_maps` in navigate's home directory.
+4. **Save the Maps**: Save the offset and variance maps as tiff images in a folder titled `camera_maps` in navigate's home directory.
 
     - For Windows-based users: ``C:\AppData\Local\.navigate\camera_maps\``.
     - For Linux and MacOS users: ``/home/<username>/.navigate/camera_maps/``.

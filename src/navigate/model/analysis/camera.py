@@ -126,12 +126,13 @@ def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=0.0, Nr=1.4, M=1.0):
 def compute_signal_to_noise(
     image: npt.NDArray[np.float32], offset_map: npt.NDArray, variance_map: npt.NDArray
 ) -> npt.NDArray[np.float32]:
-    """Compute the signal-to-noise ratio of an image from offset and variance maps.
+    """Compute the signal-to-noise ratio of a 2D image or 3D image stack (ZYX) from
+    offset and variance maps.
 
     Parameters
     ----------
     image : npt.NDArray[np.float32]
-        ZYX image of camera frames.
+        2D or 3D image of camera frames.
     offset_map : npt.NDArray
         XY image of camera offset in the absence of signal.
     variance_map : npt.NDArray
@@ -140,7 +141,7 @@ def compute_signal_to_noise(
     Returns
     -------
     snr : npt.NDArray[np.float32]
-        XY image of signal-to-noise ratio.
+        2D or 3D signal-to-noise ratio corrected image.
     """
     snr = np.zeros_like(image, dtype=np.float32)
 
@@ -157,12 +158,13 @@ def compute_signal_to_noise(
 def _snr(
     image: npt.NDArray[np.float32], offset_map: npt.NDArray, variance_map: npt.NDArray
 ) -> npt.NDArray[np.float32]:
-    """Compute the signal-to-noise ratio of a single image from offset and variance maps.
+    """Compute the signal-to-noise ratio of a single 2D image from offset and variance
+    maps.
 
     Parameters
     ----------
     image : npt.NDArray[np.float32]
-        ZYX image of camera frames.
+        XY image of camera frame.
     offset_map : npt.NDArray
         XY image of camera offset in the absence of signal.
     variance_map : npt.NDArray

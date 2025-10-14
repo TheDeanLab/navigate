@@ -35,6 +35,7 @@
 # Third-party imports
 import numpy as np
 import numpy.typing as npt
+import cv2
 
 # Local application imports
 
@@ -122,27 +123,69 @@ def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=0.0, Nr=1.4, M=1.0):
     return noise
 
 
-def compute_signal_to_noise(image, offset_map, variance_map):
+def compute_signal_to_noise(
+    image: npt.NDArray[np.float32], offset_map: npt.NDArray, variance_map: npt.NDArray
+) -> npt.NDArray[np.float32]:
     """Compute the signal-to-noise ratio of an image from offset and variance maps.
 
     Parameters
     ----------
-    image : np.array
+    image : npt.NDArray[np.float32]
         ZYX image of camera frames.
-    offset_map : np.array
+    offset_map : npt.NDArray
         XY image of camera offset in the absence of signal.
-    variance_map : np.array
+    variance_map : npt.NDArray
         XY image of camera variance in the absence of signal.
 
     Returns
     -------
-    snr : np.array
+    snr : npt.NDArray[np.float32]
         XY image of signal-to-noise ratio.
     """
-    S = image.astype(float) - offset_map.astype(float)
-    S[S < 0] = 0  # clip
-    N = np.sqrt(S + variance_map.astype(float) + 1.0)  # +1 to avoid div by zero error
-    # print(f"Image min: {image.min()} offset_map min: {offset_map.min()}
-    # S min: {S.min()} variance_map min: {variance_map.min()} N min: {N.min()}")
+    snr = np.zeros_like(image, dtype=np.float32)
 
-    return 1.0 * S / N
+    if image.ndim == 3:
+        for i in range(image.shape[0]):
+            snr[i, :, :] = _snr(image[i, :, :], offset_map, variance_map)
+    elif image.ndim == 2:
+        snr = _snr(image, offset_map, variance_map)
+    else:
+        raise ValueError("Image must be 2D or 3D array.")
+    return snr
+
+
+def _snr(
+    image: npt.NDArray[np.float32], offset_map: npt.NDArray, variance_map: npt.NDArray
+) -> npt.NDArray[np.float32]:
+    """Compute the signal-to-noise ratio of a single image from offset and variance maps.
+
+    Parameters
+    ----------
+    image : npt.NDArray[np.float32]
+        ZYX image of camera frames.
+    offset_map : npt.NDArray
+        XY image of camera offset in the absence of signal.
+    variance_map : npt.NDArray
+        XY image of camera variance in the absence of signal.
+
+    Returns
+    -------
+    snr : npt.NDArray[np.float32]
+        XY image of signal-to-noise ratio.
+    """
+    # Must convert to float32 for OpenCV
+    im_diff = cv2.subtract(image.astype(np.float32), offset_map.astype(np.float32))
+
+    # Clip negative values to zero
+    im_diff = cv2.max(im_diff, 0.0)
+
+    # Compute variance + im_diff + 1.0
+    im_variance = cv2.add(im_diff, variance_map.astype(np.float32))
+    im_variance = cv2.add(im_variance, 1.0)
+
+    # Compute square root
+    im_sqrt = cv2.sqrt(im_variance)
+
+    # Divide im_diff by im_sqrt to get SNR
+    snr = cv2.divide(im_diff, im_sqrt)
+    return snr

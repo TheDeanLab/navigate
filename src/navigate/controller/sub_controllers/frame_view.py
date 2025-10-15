@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import glfw
 import glm
@@ -56,6 +57,156 @@ void main()
     s = (s - cMin) / (cMax - cMin);
     
     FragColor = vec4(s, s, s, 1.0);
+}
+
+"""
+
+FRAG_3D_SRC = """
+// RAYMARCH_FRAG_SRC  —  raymarch with shear (Y by Z) + step-size invariant opacity
+#version 330 core
+
+out vec4 FragColor;
+
+uniform sampler3D volume;
+uniform sampler1D transfer;
+
+uniform mat4 invProjView;
+uniform vec2 viewportSize;
+
+uniform vec3 boxMin;
+uniform vec3 boxMax;
+
+uniform float stepWorld;       // step length in WORLD units
+
+// contrast params
+uniform float opacity = 0.15;  // global density/opacity
+uniform float cMin = 0.0;
+uniform float cMax = 1.0;
+uniform float gamma = 1.0;
+
+// OPM parameters
+uniform float shear_angle = 45.0;   // degrees
+uniform float dz = 0.4;             // um    
+uniform float px = 0.1348;          // um
+
+uniform float zSlice;
+
+// 2D-3D toggle
+uniform bool is3DMode = true;
+
+// ---------- utilities ----------
+
+// test intersection
+bool intersectAABB(vec3 ro, vec3 rd, vec3 bmin, vec3 bmax, out float t0, out float t1)
+{
+    vec3 invD = 1.0/rd;
+    vec3 tA = (bmin - ro) * invD;
+    vec3 tB = (bmax - ro) * invD;
+    vec3 tmin = min(tA,tB), tmax = max(tA,tB);
+    
+    t0 = max(max(tmin.x, tmin.y), tmin.z);
+    t1 = min(min(tmax.x, tmax.y), tmax.z);
+    
+    return t1 > max(t0, 0.0);
+}
+
+// OPM shear transform
+// Build the inverse of the shear Y -= k*Z
+mat4 inverseShearYZ(float angleDeg)
+{
+    float k = sin(radians(angleDeg));
+    mat4 m = mat4(1.0);
+    m[1][2] = k;
+    
+    // need to properly scale somehow: interpolation?
+    // m[1][2] = px * k / dz;
+    // m[0][0] = dz * k;
+    // m[2][2] = dz * cos(radians(angleDeg));
+
+    return m;
+}
+
+void main()
+{
+    // out color
+    vec4 outColor;
+
+    if (is3DMode) 
+    {
+        // -------- reconstruct world-space ray from pixel --------
+        vec2 ndc = (gl_FragCoord.xy / viewportSize) * 2.0 - 1.0;
+        vec4 p0w = invProjView * vec4(ndc, -1.0, 1.0);
+        vec4 p1w = invProjView * vec4(ndc,  1.0, 1.0);
+        vec3 roW = p0w.xyz / p0w.w;
+        vec3 rdW = normalize(p1w.xyz / p1w.w - roW);
+
+        // -------- transform ray to OBJECT space via inverse shear --------
+        mat4 invShear  = inverseShearYZ(shear_angle);
+        vec3 ro = (invShear * vec4(roW, 1.0)).xyz;
+        vec3 rd = normalize(mat3(invShear) * rdW);   // direction uses linear part only
+
+        // -------- AABB in object space --------
+        float tEnter, tExit;
+        if (!intersectAABB(ro, rd, boxMin, boxMax, tEnter, tExit)) 
+            discard;
+        tEnter = max(tEnter, 0.0);
+
+        // -------- step-size invariant opacity terms --------
+        vec3 boxSizeO = boxMax - boxMin;                    // object-space size
+        vec3 dim      = vec3(textureSize(volume, 0));       // voxel counts (X,Y,Z)
+        vec3 voxelO   = boxSizeO / dim;                     // voxel size (object units)
+
+        // world-object length of one marching step along this ray
+        float stepObj = length(mat3(invShear) * (rdW * stepWorld));
+
+        // “steps per voxel” along this ray (orientation aware)
+        float dVoxel  = max(dot(abs(rd), voxelO), 1e-6);
+        float kStep   = stepObj / dVoxel;
+
+        // -------- march --------
+        vec3 invBoxSize = 1.0 / boxSizeO;
+        vec4 acc = vec4(0.0);
+
+        for (float t = tEnter; t < tExit && acc.a < 0.98; t += stepObj) {
+            vec3 pos = ro + rd * t;                           // object-space position
+            vec3 uvw = (pos - boxMin) * invBoxSize;           // [0,1]^3
+
+            float s  = texture(volume, uvw).r;                // scalar sample
+            vec4 tf  = texture(transfer, s);                  // color + base alpha
+
+            // convert TF alpha to per-step alpha (Beer-Lambert) and premultiply
+            float a  = 1.0 - exp(-opacity * tf.a * kStep);
+
+            // color
+            vec3  c  = tf.rgb;
+                // c  /= 1000; // bit-depth scaling
+                c  = pow(c, vec3(gamma)); // gamma
+                c  *= a; // alpha
+                c  = clamp(c, cMin, cMax); // clipping
+                c = (c - cMin) / (cMax - cMin);
+                
+            // front-to-back compositing (premultiplied)
+            acc.rgb += (1.0 - acc.a) * c;
+            acc.a   += (1.0 - acc.a) * a;
+        }
+        
+        outColor = acc;
+    } else {
+        // pixel → [0,1] UV across the screen
+        vec2 uv = gl_FragCoord.xy / viewportSize;
+
+        // convert voxel index → normalized texture coord at the *center* of the slice
+        ivec3 dim = textureSize(volume, 0);
+        float z   = clamp(zSlice, 0.0, float(dim.z - 1));
+        float tz  = (z + 0.5) / float(dim.z);   // sample at slice center to avoid mixing
+
+        // sample and show as grayscale
+        float s = texture(volume, vec3(uv, tz)).r;
+        
+        outColor = vec4(s, s, s, 1.0);    
+    }
+    
+    FragColor = outColor;
 }
 
 """
@@ -128,6 +279,213 @@ class Shader:
             m = m.to_list()
 
         GL.glUniformMatrix4fv(self.loc(name), 1, GL.GL_FALSE, np.float32(m))
+
+class Camera:
+    """
+    Orbit (yaw/pitch + radius), pixel-accurate pan, dolly,
+    and auto-recenter pivot to AABB under the cursor on RMB release.
+    """
+    def __init__(self, window, position=glm.vec3(0,0,5), look_at=glm.vec3(0,0,0)):
+        self.window = window
+
+        # window state
+        self.win_w = self.win_h = 0
+        self.win_x = self.win_y = 0
+
+        # camera params
+        self.FOV = 45.0
+        self.NEAR_FIELD = 0.1
+        self.FAR_FIELD  = 10000.0
+        self.world_up   = glm.vec3(0,1,0)
+
+        # control gains
+        self.ROT_SENS   = 0.25   # deg/pixel
+        self.PAN_SENS   = 1.0    # world-per-pixel multiplier
+        self.ZOOM_SENS  = 1.0
+        self.MIN_RADIUS = 0.01
+        self.MAX_PITCH  = math.radians(89.0)
+
+        # orbit state
+        self.look_at = glm.vec3(look_at)
+        off = glm.vec3(position) - self.look_at
+        self.radius = float(glm.length(off)) if glm.length(off) > 0 else 1.0
+        self.yaw    = math.atan2(off.x, off.z)  # yaw=0 → +Z
+        self.pitch  = math.asin(max(-1.0, min(1.0, off.y / max(self.radius, 1e-8))))
+
+        # input state
+        self.first_mouse = True
+        self.last_mouse_x = 0.0
+        self.last_mouse_y = 0.0
+        self.scroll_offset = 0.0
+        self.is_rotating = False
+        self.is_translating = False
+        self._was_panning = False
+
+        # picking
+        self.auto_recenter_on_pan = True
+        self._pick_has_box = False  # set via set_pick_box()
+
+        # callbacks
+        glfw.set_scroll_callback(self.window, self._scroll_callback)
+        glfw.set_mouse_button_callback(self.window, self._button_callback)
+
+        # build initial matrices
+        self._recompute_position()
+        self.update()
+
+    # ---------- public ----------
+    def set_pick_box(self, bmin, bmax):
+        """Provide AABB for pivot recenter: glm.vec3(bmin), glm.vec3(bmax)"""
+        self._aabb_min = glm.vec3(bmin)
+        self._aabb_max = glm.vec3(bmax)
+        self._pick_has_box = True
+
+    def get_view_matrix(self):
+        return glm.lookAt(self.position, self.look_at, self.up)
+
+    def get_projection_matrix(self):
+        return glm.perspective(glm.radians(self.FOV), self.aspect_ratio, self.NEAR_FIELD, self.FAR_FIELD)
+
+    def update(self, dt=0.0):
+        # window size/pos
+        win_w, win_h = glfw.get_framebuffer_size(self.window)
+        win_x, win_y = glfw.get_window_pos(self.window)
+        if (win_w, win_h) != (self.win_w, self.win_h) or (win_x, win_y) != (self.win_x, self.win_y):
+            self.win_w, self.win_h = win_w, win_h
+            self.aspect_ratio = float(self.win_w) / max(1.0, float(self.win_h))
+            self.win_x, self.win_y = win_x, win_y
+            self.last_mouse_x = float(win_w) * 0.5
+            self.last_mouse_y = float(win_h) * 0.5
+            self.first_mouse = True
+
+        # inputs
+        self._mouse_move()     # pixels are frame-local; don't scale by dt
+        self._scroll_move(dt)  # optional dt use is fine
+
+        # bases + matrices
+        self._update_basis()
+        self.view = self.get_view_matrix()
+        self.projection = self.get_projection_matrix()
+
+    # ---------- callbacks ----------
+    def _scroll_callback(self, window, dx, dy):
+        self.scroll_offset = dy
+
+    def _button_callback(self, window, button, action, mods):
+        if action == glfw.PRESS:
+            if button == glfw.MOUSE_BUTTON_LEFT:
+                self.is_rotating = True
+                self.first_mouse = True
+            elif button == glfw.MOUSE_BUTTON_RIGHT:
+                self.is_translating = True
+                self._was_panning = True
+                self.first_mouse = True
+        else:
+            if button == glfw.MOUSE_BUTTON_LEFT:
+                self.is_rotating = False
+            elif button == glfw.MOUSE_BUTTON_RIGHT:
+                self.is_translating = False
+                # on pan end: recenter pivot under cursor
+                if self._was_panning and self.auto_recenter_on_pan:
+                    self._recenter_pivot_under_cursor()
+                self._was_panning = False
+
+    # ---------- internals ----------
+    def _recompute_position(self):
+        cp = math.cos(self.pitch); sp = math.sin(self.pitch)
+        cy = math.cos(self.yaw);   sy = math.sin(self.yaw)
+        dir_vec = glm.vec3(cp * sy, sp, cp * cy)  # Y-up, yaw=0 → +Z
+        self.position = self.look_at + self.radius * dir_vec
+
+    def _update_basis(self):
+        self.front = glm.normalize(self.look_at - self.position)
+        self.right = glm.normalize(glm.cross(self.front, self.world_up))
+        self.up    = glm.normalize(glm.cross(self.right, self.front))
+
+    def _mouse_move(self):
+        x_pos, y_pos = glfw.get_cursor_pos(self.window)
+        if self.first_mouse:
+            self.last_mouse_x = x_pos
+            self.last_mouse_y = y_pos
+            self.first_mouse = False
+            return
+
+        dx = x_pos - self.last_mouse_x
+        dy = y_pos - self.last_mouse_y
+        self.last_mouse_x = x_pos
+        self.last_mouse_y = y_pos
+
+        if self.is_rotating:
+            # pixels → degrees → radians
+            yaw_delta   = math.radians(-dx * self.ROT_SENS)
+            pitch_delta = math.radians(-dy * self.ROT_SENS)
+            self.yaw   += yaw_delta
+            self.pitch += pitch_delta
+            self.pitch = max(-self.MAX_PITCH, min(self.MAX_PITCH, self.pitch))
+            self._recompute_position()
+
+        elif self.is_translating:
+            # screen pixels → world units at current radius
+            vpp = (2.0 * self.radius * math.tan(math.radians(self.FOV)*0.5)) / max(1.0, float(self.win_h))
+            sx = vpp * self.aspect_ratio * self.PAN_SENS
+            sy = vpp * self.PAN_SENS
+            pan = (-dx) * sx * self.right + (dy) * sy * self.up
+            self.look_at  += pan
+            self.position += pan
+
+    def _scroll_move(self, dt):
+        if not self.scroll_offset:
+            return
+        # exponential dolly on radius
+        scale = math.exp(-self.scroll_offset * self.ZOOM_SENS * (dt if dt > 0 else 1.0))
+        self.radius = max(self.MIN_RADIUS, self.radius * scale)
+        self._recompute_position()
+        self.scroll_offset = 0.0
+
+    # ---------- picking helpers ----------
+    def _ray_from_screen(self, x, y):
+        """Screen (pixels, origin top-left) → world ray (ro, rd)."""
+        # screen → NDC
+        ndc_x =  2.0 * (x / max(1.0, float(self.win_w))) - 1.0
+        ndc_y = -2.0 * (y / max(1.0, float(self.win_h))) + 1.0  # flip Y
+
+        invPV = glm.inverse(self.projection * self.view)
+        p0 = invPV * glm.vec4(ndc_x, ndc_y, -1.0, 1.0)
+        p1 = invPV * glm.vec4(ndc_x, ndc_y,  1.0, 1.0)
+        p0 = glm.vec3(p0.x/p0.w, p0.y/p0.w, p0.z/p0.w)
+        p1 = glm.vec3(p1.x/p1.w, p1.y/p1.w, p1.z/p1.w)
+        ro = p0
+        rd = glm.normalize(p1 - p0)
+        return ro, rd
+
+    @staticmethod
+    def _intersect_aabb(ro, rd, bmin, bmax):
+        """Return nearest hit point with AABB, or None."""
+        invD = glm.vec3(1.0/rd.x if rd.x != 0 else 1e32,
+                        1.0/rd.y if rd.y != 0 else 1e32,
+                        1.0/rd.z if rd.z != 0 else 1e32)
+        t0s = (bmin - ro) * invD
+        t1s = (bmax - ro) * invD
+        tmin = glm.vec3(min(t0s.x, t1s.x), min(t0s.y, t1s.y), min(t0s.z, t1s.z))
+        tmax = glm.vec3(max(t0s.x, t1s.x), max(t0s.y, t1s.y), max(t0s.z, t1s.z))
+        t_enter = max(max(tmin.x, tmin.y), tmin.z)
+        t_exit  = min(min(tmax.x, tmax.y), tmax.z)
+        if t_exit > max(t_enter, 0.0):
+            return ro + rd * max(t_enter, 0.0)
+        return None
+
+    def _recenter_pivot_under_cursor(self):
+        if not self._pick_has_box:
+            return
+        x, y = glfw.get_cursor_pos(self.window)
+        ro, rd = self._ray_from_screen(x, y)
+        hit = self._intersect_aabb(ro, rd, self._aabb_min, self._aabb_max)
+        if hit is not None:
+            # keep camera where it is; change pivot to hit and shrink radius accordingly
+            self.look_at = hit
+            self.radius = max(self.MIN_RADIUS, float(glm.length(self.position - self.look_at)))
+            # recompute bases so next rotate is about new pivot
+            self._update_basis()
 
 class FrameTimer:
 
@@ -230,6 +588,7 @@ class GLFrameViewer:
         self.tex = None
 
         # config
+        self.mode         = "frame"
         self.width        = None
         self.height       = None
         self.min_max      = None
@@ -566,6 +925,8 @@ class GLFrameViewer:
 #%%
 if __name__ == '__main__':
 
+    TEST_MODE = "volume"
+
     from navigate.model.concurrency.concurrency_tools import SharedNDArray
     import tkinter as tk
 
@@ -574,140 +935,141 @@ if __name__ == '__main__':
 
     viewer = GLFrameViewer()
 
-    # --- profiling tests ---
-    import statistics as stats
+    if TEST_MODE == "performance":
 
-    def print_stats(label, samples_ms):
-        if not samples_ms:
-            print(f"{label}: no samples")
-            return
-        ms = samples_ms
-        print(f"\n{label}")
-        print("-"*max(24, len(label)))
-        print(f"count={len(ms)}  min={min(ms):.3f} ms  med={stats.median(ms):.3f} ms  "
-            f"p90={np.percentile(ms,90):.3f} ms  p99={np.percentile(ms,99):.3f} ms  max={max(ms):.3f} ms")
+        # --- profiling tests ---
+        import statistics as stats
 
-    def warm_start(viewer):
-        print("\n[Warmup] starting render loop…")
-        viewer.start_render_loop((1024, 1024), "GLFrameViewer Profile")
-        time.sleep(1.0)  # let GLFW/driver settle
+        def print_stats(label, samples_ms):
+            if not samples_ms:
+                print(f"{label}: no samples")
+                return
+            ms = samples_ms
+            print(f"\n{label}")
+            print("-"*max(24, len(label)))
+            print(f"count={len(ms)}  min={min(ms):.3f} ms  med={stats.median(ms):.3f} ms  "
+                f"p90={np.percentile(ms,90):.3f} ms  p99={np.percentile(ms,99):.3f} ms  max={max(ms):.3f} ms")
 
-    def bench_enqueue_numpy(viewer, shape=(1024,1024), seconds=2.0):
-        print("\n[Test 1] Enqueue cost: numpy.ndarray → update_image")
-        h, w = shape
-        frame = (np.random.randint(0, 65535, (h, w)).astype(np.uint16))
-        times = []
-        t_end = time.perf_counter() + seconds
-        i = 0
-        while time.perf_counter() < t_end:
-            t0 = time.perf_counter()
-            viewer.try_to_display_image(frame)
-            times.append((time.perf_counter() - t0)*1000)
-            i += 1
-        print_stats("Enqueue (numpy) ms", times)
-        print(f"approx calls/s: {i/seconds:.1f}")
+        def warm_start(viewer):
+            print("\n[Warmup] starting render loop…")
+            viewer.start_render_loop((1024, 1024), "GLFrameViewer Profile")
+            time.sleep(1.0)  # let GLFW/driver settle
 
-    def bench_enqueue_shared(viewer, shape=(1024,1024), seconds=2.0):
-        print("\n[Test 2] Enqueue cost: SharedNDArray → update_image")
-        h, w = shape
-        snd = SharedNDArray(shape=(h,w), dtype=np.uint16)
-        # fill once (in this process)
-        snd[:] = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
-        times = []
-        t_end = time.perf_counter() + seconds
-        i = 0
-        while time.perf_counter() < t_end:
-            t0 = time.perf_counter()
-            viewer.try_to_display_image(snd)
-            times.append((time.perf_counter() - t0)*1000)
-            i += 1
-        print_stats("Enqueue (SharedNDArray) ms", times)
-        print(f"approx calls/s: {i/seconds:.1f}")
+        def bench_enqueue_numpy(viewer, shape=(1024,1024), seconds=2.0):
+            print("\n[Test 1] Enqueue cost: numpy.ndarray → update_image")
+            h, w = shape
+            frame = (np.random.randint(0, 65535, (h, w)).astype(np.uint16))
+            times = []
+            t_end = time.perf_counter() + seconds
+            i = 0
+            while time.perf_counter() < t_end:
+                t0 = time.perf_counter()
+                viewer.try_to_display_image(frame)
+                times.append((time.perf_counter() - t0)*1000)
+                i += 1
+            print_stats("Enqueue (numpy) ms", times)
+            print(f"approx calls/s: {i/seconds:.1f}")
 
-    def bench_upload_static(viewer, shape=(1024,1024), seconds=2.0):
-        print("\n[Test 3] Upload pressure: static frame (no per-frame CPU work)")
-        h, w = shape
-        frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
-        sends = 0
-        t_end = time.perf_counter() + seconds
-        while time.perf_counter() < t_end:
-            viewer.try_to_display_image(frame)
-            sends += 1
-        print(f"static uploads issued: {sends} in {seconds}s  → {sends/seconds:.1f} calls/s")
-        print("(Correlate with swap stall prints from GL thread above.)")
+        def bench_enqueue_shared(viewer, shape=(1024,1024), seconds=2.0):
+            print("\n[Test 2] Enqueue cost: SharedNDArray → update_image")
+            h, w = shape
+            snd = SharedNDArray(shape=(h,w), dtype=np.uint16)
+            # fill once (in this process)
+            snd[:] = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
+            times = []
+            t_end = time.perf_counter() + seconds
+            i = 0
+            while time.perf_counter() < t_end:
+                t0 = time.perf_counter()
+                viewer.try_to_display_image(snd)
+                times.append((time.perf_counter() - t0)*1000)
+                i += 1
+            print_stats("Enqueue (SharedNDArray) ms", times)
+            print(f"approx calls/s: {i/seconds:.1f}")
 
-    def bench_upload_random(viewer, shape=(1024,1024), seconds=2.0):
-        print("\n[Test 4] Upload pressure: per-frame randomize (adds CPU work)")
-        h, w = shape
-        sends = 0
-        t_end = time.perf_counter() + seconds
-        while time.perf_counter() < t_end:
-            frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
-            viewer.try_to_display_image(frame)
-            sends += 1
-        print(f"randomized uploads issued: {sends} in {seconds}s  → {sends/seconds:.1f} calls/s")
-        print("(If this drops a lot vs static, CPU frame gen is part of the bottleneck.)")
-
-    def bench_size_sweep(viewer, sizes=((512,512),(1024,1024),(1536,1536),(2048,2048)), per_size_seconds=1.0):
-        print("\n[Test 5] Throughput vs image size (static frame per size)")
-        for h, w in sizes:
+        def bench_upload_static(viewer, shape=(1024,1024), seconds=2.0):
+            print("\n[Test 3] Upload pressure: static frame (no per-frame CPU work)")
+            h, w = shape
             frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
             sends = 0
-            t_end = time.perf_counter() + per_size_seconds
+            t_end = time.perf_counter() + seconds
             while time.perf_counter() < t_end:
                 viewer.try_to_display_image(frame)
                 sends += 1
-            mb = (h*w*2)/1e6
-            print(f"  {h}x{w} ({mb:.1f} MB): {sends/per_size_seconds:.1f} calls/s")
+            print(f"static uploads issued: {sends} in {seconds}s  → {sends/seconds:.1f} calls/s")
+            print("(Correlate with swap stall prints from GL thread above.)")
 
-    def bench_producer_rate(viewer, shape=(1024,1024), target_fps=120, seconds=3.0):
-        print(f"\n[Test 6] Producer thread @ {target_fps} Hz: queue contention test")
-        h, w = shape
-        frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
-        period = 1.0/target_fps
-        sends = 0
-        stop = threading.Event()
-
-        def producer():
-            nonlocal sends
-            next_t = time.perf_counter()
-            while not stop.is_set():
+        def bench_upload_random(viewer, shape=(1024,1024), seconds=2.0):
+            print("\n[Test 4] Upload pressure: per-frame randomize (adds CPU work)")
+            h, w = shape
+            sends = 0
+            t_end = time.perf_counter() + seconds
+            while time.perf_counter() < t_end:
+                frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
                 viewer.try_to_display_image(frame)
                 sends += 1
-                next_t += period
-                # sleep with catch-up
-                dt = next_t - time.perf_counter()
-                if dt > 0:
-                    time.sleep(dt)
+            print(f"randomized uploads issued: {sends} in {seconds}s  → {sends/seconds:.1f} calls/s")
+            print("(If this drops a lot vs static, CPU frame gen is part of the bottleneck.)")
 
-        th = threading.Thread(target=producer, daemon=True)
-        th.start()
-        time.sleep(seconds)
-        stop.set()
-        th.join(timeout=1.0)
-        print(f"sent {sends} frames in {seconds}s → {sends/seconds:.1f} Hz")
-        print("Watch for any '[GL] Command queue backlog' (if you added that) or swap stalls; if we can't keep up, the consumer (GL thread) is the limiter.")
+        def bench_size_sweep(viewer, sizes=((512,512),(1024,1024),(1536,1536),(2048,2048)), per_size_seconds=1.0):
+            print("\n[Test 5] Throughput vs image size (static frame per size)")
+            for h, w in sizes:
+                frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
+                sends = 0
+                t_end = time.perf_counter() + per_size_seconds
+                while time.perf_counter() < t_end:
+                    viewer.try_to_display_image(frame)
+                    sends += 1
+                mb = (h*w*2)/1e6
+                print(f"  {h}x{w} ({mb:.1f} MB): {sends/per_size_seconds:.1f} calls/s")
 
-    # ---- run the suite ----
-    warm_start(viewer)
+        def bench_producer_rate(viewer, shape=(1024,1024), target_fps=120, seconds=3.0):
+            print(f"\n[Test 6] Producer thread @ {target_fps} Hz: queue contention test")
+            h, w = shape
+            frame = np.random.randint(0, 65535, (h, w), dtype=np.uint16)
+            period = 1.0/target_fps
+            sends = 0
+            stop = threading.Event()
 
-    # idle settle
-    print("\n[Idle] Letting viewer run idle for 0.5s… (baseline swap stalls)")
-    time.sleep(0.5)
+            def producer():
+                nonlocal sends
+                next_t = time.perf_counter()
+                while not stop.is_set():
+                    viewer.try_to_display_image(frame)
+                    sends += 1
+                    next_t += period
+                    # sleep with catch-up
+                    dt = next_t - time.perf_counter()
+                    if dt > 0:
+                        time.sleep(dt)
 
-    def run_tests():
+            th = threading.Thread(target=producer, daemon=True)
+            th.start()
+            time.sleep(seconds)
+            stop.set()
+            th.join(timeout=1.0)
+            print(f"sent {sends} frames in {seconds}s → {sends/seconds:.1f} Hz")
+            print("Watch for any '[GL] Command queue backlog' (if you added that) or swap stalls; if we can't keep up, the consumer (GL thread) is the limiter.")
 
-        bench_enqueue_numpy(viewer, shape=(1024,1024), seconds=2.0)
-        bench_enqueue_shared(viewer, shape=(1024,1024), seconds=2.0)
-        bench_upload_static(viewer, shape=(1024,1024), seconds=2.0)
-        bench_upload_random(viewer, shape=(1024,1024), seconds=2.0)
-        bench_size_sweep(viewer, sizes=((256,256),(512,512),(1024,1024)), per_size_seconds=1.0)
-        bench_producer_rate(viewer, shape=(1024,1024), target_fps=120, seconds=3.0)
+        # ---- run the suite ----
+        warm_start(viewer)
 
-        print("\n[Done] You can close the window or leave it running.")
+        # idle settle
+        print("\n[Idle] Letting viewer run idle for 0.5s… (baseline swap stalls)")
+        time.sleep(0.5)
 
-    # -----------------------
+        def run_tests():
 
-    tk.Button(root, text="RUN TESTS", command=run_tests).pack()
+            bench_enqueue_numpy(viewer, shape=(1024,1024), seconds=2.0)
+            bench_enqueue_shared(viewer, shape=(1024,1024), seconds=2.0)
+            bench_upload_static(viewer, shape=(1024,1024), seconds=2.0)
+            bench_upload_random(viewer, shape=(1024,1024), seconds=2.0)
+            bench_size_sweep(viewer, sizes=((256,256),(512,512),(1024,1024)), per_size_seconds=1.0)
+            bench_producer_rate(viewer, shape=(1024,1024), target_fps=120, seconds=3.0)
+
+            print("\n[Done] You can close the window or leave it running.")
+        # -----------------------
+
+        tk.Button(root, text="RUN TESTS", command=run_tests).pack()
 
     root.mainloop()

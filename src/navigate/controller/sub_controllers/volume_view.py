@@ -1122,12 +1122,12 @@ if __name__ == '__main__':
         for t in range(10)
     ]
 
-    TEST_MODE = '2d'
+    TEST_MODE = '3d'
     def launch():
         pass
 
     if TEST_MODE == '2d':
-        viewer_2d = ObjectInSubprocess(GLFrameViewer)
+        viewer_2d = GLFrameViewer()
 
         def launch():
             viewer_2d.start_render_loop((1000, 800), "Camera Viewer")
@@ -1144,7 +1144,7 @@ if __name__ == '__main__':
             viewer_3d.stop_render_loop()
 
     elif TEST_MODE == '3d':
-        viewer_3d = ObjectInSubprocess(GLVolumeViewer)
+        viewer_3d = GLVolumeViewer()
 
         def launch():
             viewer_3d.start_render_loop(1024, 800, "3D Viewer")

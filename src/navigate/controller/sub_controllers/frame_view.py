@@ -9,7 +9,8 @@ import traceback
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
-from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
+from navigate.model.concurrency.concurrency_tools import SharedNDArray
+from navigate.tools.decorators import performance_monitor
 
 GL = None
 
@@ -191,6 +192,9 @@ class GLFrameViewController(GUIController):
 
     # private util functions
     
+    def reset(self):
+        self.viewer.rendered_images = 0
+
     def _on_minmax_changed(self, *args):
 
         min_counts = self.image_palette["Min"].get()
@@ -231,6 +235,9 @@ class GLFrameViewer:
         self.min_max      = None
         self.do_autoscale = False
         # ...
+
+        # monitoring
+        self.rendered_images = 0
 
     def start_render_loop(self, window_dim=(1000,800), title="Camera View"):
         if self.thread and self.thread.is_alive():
@@ -451,6 +458,7 @@ class GLFrameViewer:
         GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
         self._pbo_index = 0
 
+    @performance_monitor(prefix="GL: Update Texture", display_result=lambda i: {"image_id": int(i)})
     def update_texture(self, data : np.ndarray):
         """
             Update 2D texture pixels with new data.
@@ -498,6 +506,10 @@ class GLFrameViewer:
 
         # cleanup
         GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
+
+        self.rendered_images = (self.rendered_images + 1) % 100
+
+        return self.rendered_images
 
     def draw_frame(self):
         """

@@ -1205,16 +1205,19 @@ class Controller:
                 )
                 self.execute("stop_acquire")
 
+            OPENGL_DISPLAY = False
+
             # Display the image and update the histogram
-            # self.camera_view_controller.try_to_display_image(
-            #     image=self.data_buffer[image_id]
-            # )
-            # self.mip_setting_controller.try_to_display_image(
-            #     image=self.data_buffer[image_id]
-            # )
-            # self.histogram_controller.populate_histogram(
-            #     image=self.data_buffer[image_id]
-            # )
+            if not OPENGL_DISPLAY:
+                self.camera_view_controller.try_to_display_image(
+                    image=self.data_buffer[image_id]
+                )
+                # self.mip_setting_controller.try_to_display_image(
+                #     image=self.data_buffer[image_id]
+                # )
+                # self.histogram_controller.populate_histogram(
+                #     image=self.data_buffer[image_id]
+                # )
             
             # microscope_state = self.configuration["experiment"]["MicroscopeState"]
             
@@ -1232,7 +1235,10 @@ class Controller:
             #     )            
             
             # OpenGL display
-            self.frame_view_controller.display_image(self.data_buffer[image_id])
+            if OPENGL_DISPLAY:
+                if images_received == 0:
+                    self.frame_view_controller.reset()
+                self.frame_view_controller.display_image(self.data_buffer[image_id])
 
             images_received += 1
 

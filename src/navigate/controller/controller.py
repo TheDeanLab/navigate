@@ -279,6 +279,8 @@ class Controller:
         self.frame_view_controller = GLFrameViewController(
             self.view.camera_waveform.camera_tab, self
         )
+        # self.frame_view_controller.set_mode("frame")
+        self.frame_view_controller.set_mode("volume")
 
         #: CameraViewController: Camera View Tab Sub-Controller.
         self.camera_view_controller = CameraViewController(
@@ -1205,7 +1207,7 @@ class Controller:
                 )
                 self.execute("stop_acquire")
 
-            OPENGL_DISPLAY = False
+            OPENGL_DISPLAY = True
 
             # Display the image and update the histogram
             if not OPENGL_DISPLAY:
@@ -1219,7 +1221,7 @@ class Controller:
                 #     image=self.data_buffer[image_id]
                 # )
             
-            # microscope_state = self.configuration["experiment"]["MicroscopeState"]
+            microscope_state = self.configuration["experiment"]["MicroscopeState"]
             
             # i, n_slices = 0, 2
             # if microscope_state["image_mode"] == 'z-stack':
@@ -1236,8 +1238,16 @@ class Controller:
             
             # OpenGL display
             if OPENGL_DISPLAY:
-                if images_received == 0:
+                if image_id == 0:
                     self.frame_view_controller.reset()
+
+                if microscope_state["image_mode"] == "z-stack":
+                    self.frame_view_controller.viewer.set_slices(
+                        microscope_state["number_z_steps"]
+                    )
+                else:
+                    self.frame_view_controller.viewer.set_slices(2)
+
                 self.frame_view_controller.display_image(self.data_buffer[image_id])
 
             images_received += 1

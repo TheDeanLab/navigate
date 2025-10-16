@@ -1046,8 +1046,7 @@ class GLVolumeViewer:
                            0,           # level
                            0,           # xoffset (none)
                            0,           # yoffset (none)
-                           # int(z),      # zoffset (z-slice position)
-                           int(0),      # zoffset (z-slice position)
+                           int(z),      # zoffset (z-slice position)
                            nx,          # width
                            ny,          # height
                            1,           # depth (one slice)
@@ -1115,12 +1114,16 @@ if __name__ == '__main__':
         
         return im
 
-    frames = [
-        downsample_if_needed(tiff.imread(
-            os.path.join(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\movie", f"1_CH00_00000{t}.tif")
-        ).astype(np.float32))
-        for t in range(10)
-    ]
+    try:
+        # im_path = os.path.join(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\movie", f"1_CH00_00000{t}.tif")
+        im_path = r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\CancerCells\A11\2025-09-28\P0001\Position0\CH00_000000.tiff"
+
+        frames = [
+            downsample_if_needed(tiff.imread(im_path).astype(np.float32))
+            for t in range(1)
+        ]
+    except FileNotFoundError:
+        frames = np.random.random((10,64,256,256)).astype(np.float32)
 
     TEST_MODE = '3d'
     def launch():
@@ -1147,7 +1150,7 @@ if __name__ == '__main__':
         viewer_3d = GLVolumeViewer()
 
         def launch():
-            viewer_3d.start_render_loop(1024, 800, "3D Viewer")
+            viewer_3d.start_render_loop(512, 512, "3D Viewer")
 
         import time
         def play():
@@ -1162,11 +1165,11 @@ if __name__ == '__main__':
             viewer_3d.stop_render_loop()
 
         experiment = {
-            'opacity': 0.10,
+            'opacity': 0.15,
             'cMin': 0.0002,
-            'cMax': 0.3000,
-            'gamma': 1.2,
-            'shear_angle': -30,
+            'cMax': 0.8000,
+            'gamma': 1.0,
+            'shear_angle': 45,
         }
 
         opacity = tk.DoubleVar(root, value=experiment['opacity'])

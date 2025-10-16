@@ -284,7 +284,7 @@ class Camera:
         # control gains
         self.ROT_SENS   = 0.25   # deg/pixel
         self.PAN_SENS   = 1.0    # world-per-pixel multiplier
-        self.ZOOM_SENS  = 1.0
+        self.ZOOM_SENS  = 2.0
         self.MIN_RADIUS = 0.01
         self.MAX_PITCH  = math.radians(89.0)
 
@@ -798,7 +798,7 @@ class GLVolumeViewer:
     def bind_slice(self, im_f32: np.ndarray, z: int = 0):
 
         # im_f32 /= self.stack.max() # Extremely slow! Scale in shader...
-        im_f32 = im_f32 / 1000.
+        im_f32 = im_f32 / 65535.
 
         def _do():
             self._ensure_gl_ready()
@@ -1117,9 +1117,20 @@ if __name__ == '__main__':
     try:
         # im_path = os.path.join(r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\movie", f"1_CH00_00000{t}.tif")
         im_path = r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\CancerCells\A11\2025-09-28\P0001\Position0\CH00_000000.tiff"
+        # im_path = r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Coverslip\Beads\P0\2025-09-27\P001\CH00_000000.tiff"
+
+        data = {
+            "beads": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Coverslip\Beads\P0\2025-09-27\P001\CH00_000000.tiff",
+            "A10-Vasc-P2": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\Vasc\A10\2025-09-28\P2001\Position0\CH00_000000.tiff",
+            "A11-Vasc-P3": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\Vasc\A11\2025-09-28\P2003\Position0\CH00_000000.tiff",
+            "A12-Vasc-P2": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\Vasc\A12\2025-09-28\P2002\Position0\CH00_000000.tiff",
+            "A12-Cells-P1": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\CancerCells\A12\2025-09-28\P1001\Position0\CH00_000000.tiff"
+        }
 
         frames = [
-            downsample_if_needed(tiff.imread(im_path).astype(np.float32))
+            downsample_if_needed(tiff.imread(
+                data['A12-Vasc-P2']
+            ).astype(np.float32))
             for t in range(1)
         ]
     except FileNotFoundError:
@@ -1167,9 +1178,9 @@ if __name__ == '__main__':
         experiment = {
             'opacity': 0.15,
             'cMin': 0.0002,
-            'cMax': 0.8000,
+            'cMax': 0.4000,
             'gamma': 1.0,
-            'shear_angle': 45,
+            'shear_angle': 29,
         }
 
         opacity = tk.DoubleVar(root, value=experiment['opacity'])

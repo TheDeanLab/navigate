@@ -1126,12 +1126,14 @@ if __name__ == '__main__':
             "A10-Vasc-P2": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\Vasc\A10\2025-09-28\P2001\Position0\CH00_000000.tiff",
             "A11-Vasc-P3": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\Vasc\A11\2025-09-28\P2003\Position0\CH00_000000.tiff",
             "A12-Vasc-P2": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\Vasc\A12\2025-09-28\P2002\Position0\CH00_000000.tiff",
-            "A12-Cells-P1": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\CancerCells\A12\2025-09-28\P1001\Position0\CH00_000000.tiff"
+            "A12-Cells-P1": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Fish\CancerCells\A12\2025-09-28\P1001\Position0\CH00_000000.tiff",
+            "data_reto": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
+            "beads_cs": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff"
         }
 
         frames = [
             downsample_if_needed(tiff.imread(
-                data['A12-Vasc-P2']
+                data['beads_cs']
             ).astype(np.float32))
             for t in range(1)
         ]

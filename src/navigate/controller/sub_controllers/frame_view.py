@@ -80,9 +80,9 @@ uniform float stepWorld;       // step length in WORLD units
 
 // contrast params
 uniform float opacity = 0.15;  // global density/opacity
-uniform float cMin = 0.0;
-uniform float cMax = 1.0;
-uniform float gamma = 1.0;
+uniform float cMin    = 0.0;
+uniform float cMax    = 1.0;
+uniform float gamma   = 1.0;
 
 // OPM parameters
 uniform float shear_angle = 45.0;   // degrees
@@ -171,19 +171,22 @@ void main()
             vec3 pos = ro + rd * t;                           // object-space position
             vec3 uvw = (pos - boxMin) * invBoxSize;           // [0,1]^3
 
-            float s  = texture(volume, uvw).r;                // scalar sample
-            vec4 tf  = texture(transfer, s);                  // color + base alpha
+            // sample scalar (0..1 from R16)
+            float s  = texture(volume, uvw).r;            
 
+            // windowing
+            float sW = clamp(s, cMin, cMax);
+            sW = (sW - cMin) / max(cMax - cMin, 1e-6); // bounded-normalize            
+
+            // transfer lookup function
+            vec4 tf  = texture(transfer, sW);
+
+            // optional gamma (on color)
+            vec3 rgb = pow(tf.rgb, vec3(gamma));
+            
             // convert TF alpha to per-step alpha (Beer-Lambert) and premultiply
-            float a  = 1.0 - exp(-opacity * tf.a * kStep);
-
-            // color
-            vec3  c  = tf.rgb;
-            // c  /= 1000; // bit-depth scaling
-            c  = pow(c, vec3(gamma)); // gamma
-            c  *= a; // alpha
-            c  = clamp(c, cMin, cMax); // clipping
-            c = (c - cMin) / (cMax - cMin);
+            float a = 1.0 - exp(-opacity * tf.a * kStep);
+            vec3  c = rgb * a;
                 
             // front-to-back compositing (premultiplied)
             acc.rgb += (1.0 - acc.a) * c;
@@ -688,10 +691,10 @@ class GLFrameViewer:
             }
             
             # VAO
-            self.vao    = GL.glGenVertexArrays(1) # quad
+            self.vao = GL.glGenVertexArrays(1) # quad
 
             # camera
-            self.camera = Camera(self.window, position=[800]*3)
+            self.camera = Camera(self.window, position=[500]*3)
 
             # if the texture doesn't exist, create it
             if not self.tex_2d:
@@ -873,10 +876,8 @@ class GLFrameViewer:
 
     def bind_slice(self, image: np.ndarray, z: int=0):
 
-        print(image.dtype)
-
-        image = image / 65535
-        image = image.astype(np.float32)
+        # image = image / 65535
+        # image = image.astype(np.float32)
 
         def _do():
             self._ensure_gl_ready()
@@ -886,11 +887,11 @@ class GLFrameViewer:
 
     def bind_volume(self, vol_f32: np.ndarray):
         """Upload / replace the 3D volume texture (runs on GL thread)."""
-        vol_f32 = np.asarray(vol_f32, dtype=np.float32)
+        vol_f32 = np.asarray(vol_f32, dtype=np.uint16)
         # vol_f32 = np.clip(vol_f32, a_min=0, a_max=4000)
-        m = vol_f32.max()
-        if m > 0:
-            vol_f32 /= m
+        # m = vol_f32.max()
+        # if m > 0:
+        #     vol_f32 /= m
         # vol_f32 = np.power(vol_f32, 0.9)
 
         # object-space bounds: centered on origin
@@ -938,14 +939,14 @@ class GLFrameViewer:
         GL.glTexImage3D(
             GL.GL_TEXTURE_3D, 
             0,
-            GL.GL_R16F,
+            GL.GL_R16,
             x, 
             y, 
             z, 
             0,
             GL.GL_RED, 
-            GL.GL_FLOAT,
-            vol_f32.astype(np.float32)
+            GL.GL_UNSIGNED_SHORT,
+            None
             )        
 
     def make_frame_texture(self):
@@ -1082,11 +1083,11 @@ class GLFrameViewer:
                            y,           # height
                            1,           # depth (one slice)
                            GL.GL_RED,   # format
-                           GL.GL_FLOAT, # type
+                           GL.GL_UNSIGNED_SHORT, # uint16
                            slice        # image data
         )
 
-        print("Updated texture slice:", z, slice.max())
+        # print("Updated texture slice:", z, slice.max())
 
     def update_volume_texture(self, volume: np.ndarray):
         z, y, x = volume.shape
@@ -1097,8 +1098,8 @@ class GLFrameViewer:
         # updates the whole volume texture in one shot
         GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 0,
                            0, 0, 0, x, y, z,
-                           GL.GL_RED, GL.GL_FLOAT,
-                           volume.astype(np.float32))
+                           GL.GL_RED, GL.GL_UNSIGNED_SHORT,
+                           volume)
 
     def draw_frame(self):
         """
@@ -1115,6 +1116,9 @@ class GLFrameViewer:
                 return
         else:
             raise Exception(f"Invalid draw mode: {self.mode}")
+
+        # adjust viewport based on window size
+        self.width, self.height = glfw.get_framebuffer_size(self.window)
 
         GL.glViewport(0, 0, self.width, self.height)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
@@ -1153,7 +1157,7 @@ class GLFrameViewer:
 
     def set_min_max(self, min_max: list):
         # self.min_max = min_max
-
+        print("set_min_max called!", min_max)
         def _do():
             self._ensure_gl_ready()
             
@@ -1163,8 +1167,8 @@ class GLFrameViewer:
                 shader.set_vec2('cMinMax', min_max)
             elif self.mode == "volume" and min_max:
                 c_min, c_max = min_max
-                shader.set_float('cMin', float(c_min/65535))
-                shader.set_float('cMax', float(c_max/65535))
+                shader.set_float('cMin', float(c_min)/65535.)
+                shader.set_float('cMax', float(c_max)/65535.)
 
         self.cmd_q.put(_do)
 
@@ -1185,18 +1189,40 @@ if __name__ == '__main__':
 
     from navigate.model.concurrency.concurrency_tools import SharedNDArray
     import tkinter as tk
+    import tifffile as tiff
+
 
     root = tk.Tk()
     root.geometry("400x300")
 
     viewer = GLFrameViewer(mode=TEST_MODE)
 
+    # test data
+    data = {
+        "data_reto": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
+        "beads_cs": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff"
+    }
+
     if TEST_MODE == "volume":
-        viewer.start_render_loop(window_dim=(512,512))
+        viewer.start_render_loop(window_dim=(800,800))
 
-        vol = np.random.random((64,256,256)).astype(np.uint16) * 1000
+        # try to load data
+        try:
+            vol = tiff.imread(data['data_reto'])
+            print(f"Loaded {vol.shape} stack of dtype={vol.dtype}")
+            print(f"Volume stats: mean={vol.mean():.2f}\tmin={vol.min()}\tmax={vol.max()}")
+        except FileNotFoundError:
+            # just random noise...
+            vol = np.random.random((64,256,256)).astype(np.uint16) * 1000
 
-        viewer.bind_volume(vol)
+        # viewer.bind_volume(vol)
+
+        viewer.set_min_max([vol.min(), vol.max()])
+
+        viewer.set_slices(len(vol))
+        for z in range(len(vol)):
+            # print(f"Adding slice {z}, dtype={vol.dtype}")
+            viewer.add_slice(vol[z])
 
     elif TEST_MODE == "frame":
 

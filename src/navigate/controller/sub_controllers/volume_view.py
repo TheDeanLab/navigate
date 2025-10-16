@@ -797,6 +797,8 @@ class GLVolumeViewer:
 
     def bind_slice(self, im_f32: np.ndarray, z: int = 0):
 
+        print(im_f32.dtype)
+
         # im_f32 /= self.stack.max() # Extremely slow! Scale in shader...
         im_f32 = im_f32 / 65535.
 

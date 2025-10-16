@@ -80,7 +80,8 @@ uniform float stepWorld;       // step length in WORLD units
 
 // contrast params
 uniform float opacity = 0.15;  // global density/opacity
-uniform vec2 cMinMax = vec2(0, 65535);
+uniform float cMin = 0.0;
+uniform float cMax = 1.0;
 uniform float gamma = 1.0;
 
 // OPM parameters
@@ -177,9 +178,6 @@ void main()
             float a  = 1.0 - exp(-opacity * tf.a * kStep);
 
             // color
-            float cMin = float(cMinMax.x/65535);
-            float cMax = float(cMinMax.y/65535);
-
             vec3  c  = tf.rgb;
             // c  /= 1000; // bit-depth scaling
             c  = pow(c, vec3(gamma)); // gamma
@@ -875,7 +873,10 @@ class GLFrameViewer:
 
     def bind_slice(self, image: np.ndarray, z: int=0):
 
-        # image = image.astype(np.float32)
+        print(image.dtype)
+
+        image = image / 65535
+        image = image.astype(np.float32)
 
         def _do():
             self._ensure_gl_ready()
@@ -1081,8 +1082,7 @@ class GLFrameViewer:
                            y,           # height
                            1,           # depth (one slice)
                            GL.GL_RED,   # format
-                           # GL.GL_FLOAT, # type
-                           GL.GL_UNSIGNED_SHORT,
+                           GL.GL_FLOAT, # type
                            slice        # image data
         )
 
@@ -1159,7 +1159,12 @@ class GLFrameViewer:
             
             shader = self.shaders[self.mode]
             shader.use()
-            shader.set_vec2('cMinMax', min_max)
+            if self.mode == "frame":
+                shader.set_vec2('cMinMax', min_max)
+            elif self.mode == "volume" and min_max:
+                c_min, c_max = min_max
+                shader.set_float('cMin', float(c_min/65535))
+                shader.set_float('cMax', float(c_max/65535))
 
         self.cmd_q.put(_do)
 

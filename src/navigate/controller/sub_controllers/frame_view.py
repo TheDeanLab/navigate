@@ -595,10 +595,10 @@ class GLFrameViewer:
         self.camera = None
         self.timer  = FrameTimer(every=0.5)
 
-        # stack data
-        self.stack = None
-        self._z    = 0
-        self._N    = 1
+        # stack attribs
+        self.vol_shape = None
+        self._z        = 0
+        self._N        = 1
 
         # textures
         self.tex_3d = None
@@ -611,7 +611,7 @@ class GLFrameViewer:
         self.height       = None
         self.min_max      = None
         self.do_autoscale = False
-        # ...
+        self.min_max      = [0, 65535]
 
         # monitoring
         self.rendered_images = 0
@@ -643,7 +643,7 @@ class GLFrameViewer:
 
         # Wake the queues if waiting
         self.cmd_q.put(lambda: None)
-        # self.data_q.put(lambda: None)
+        self.data_q.put(lambda: None)
 
         # Kill the thread
         self.thread.join(timeout=3.0)
@@ -674,12 +674,6 @@ class GLFrameViewer:
             # GL context
             glfw.make_context_current(self.window)
             
-            # VSync: throttle to 60 FPS?
-            # if self.mode == "frame":
-            #     glfw.swap_interval(0)
-            # else:
-            #     glfw.swap_interval(1)
-
             # key callback
             glfw.set_key_callback(self.window, self.glfw_key_callback)
 
@@ -757,23 +751,15 @@ class GLFrameViewer:
                     else:
                         raise Exception(f"Invalid draw mode: {self.mode}")
                 except queue.Empty:
-                    pass
-
-                # if self.timer.tick() == 0 and self.do_autoscale:
-                #     try:
-                #         self.autoscale(image)
-                #     except NameError:
-                #         pass
+                    if self.mode == "frame":
+                        # quiet mode if no new frames: go easy on GPU
+                        continue
 
                 # draw frame
                 self.draw_frame()
             
                 # render
-                t0 = time.perf_counter()
                 glfw.swap_buffers(self.window)
-                stall_ms = (time.perf_counter() - t0) * 1000
-                # if stall_ms > 15:
-                #     print(f"Swap stall: {stall_ms:.2f} ms")
 
                 # user input
                 glfw.poll_events()
@@ -811,6 +797,9 @@ class GLFrameViewer:
                 self.mode = "volume"
             elif self.mode == "volume":
                 self.mode = "frame"
+            
+            # apply lut
+            self.set_min_max(self.min_max)
 
     def _ensure_gl_ready(self):
         window = self.window
@@ -854,34 +843,29 @@ class GLFrameViewer:
 
     def add_slice(self, image: np.ndarray):
 
-        if self.stack is not None:
-            if (self._N,) + image.shape != self.stack.shape:
-                print(f"Dimension mismatch... {(self._N,) + image.shape} != {self.stack.shape}")
+        if self.vol_shape is not None:
+            if (self._N,) + image.shape != self.vol_shape:
+                # clear the volume and reallocate
+                self.vol_shape = None
+                print(f"Dimension mismatch... {(self._N,) + image.shape} != {self.vol_shape}")
+                # clear texture
                 GL.glDeleteTextures(1, [self.tex_3d])
                 self.tex_3d = None
-                self.stack = None
-                
+                # try again
                 self.add_slice(image)
                 
-            t0 = time.time()
-            self.stack[self._z] = image
+            # else bind the slice
             self.bind_slice(image, self._z)
 
             # N-bounded increment
             self._z = (self._z + int(self._N > 2)) % self._N
-            # print(f"Added {image.shape} {image.astype(np.float32).nbytes/1e6:.2f} MB slice {i}/{self._N} in {1000.*(time.time() - t0):.3f} ms")
         else:
-            ny, nx = image.shape
-            print("Allocating volume...", (self._N, ny, nx))
-            self.stack = np.zeros((self._N, ny, nx), dtype=np.float32)
-            self._z = 0
-            self.bind_volume(self.stack)
+            new_shape = (self._N,) + image.shape
+            print("Allocating volume...", new_shape)
+            self.bind_volume(new_shape)
             self.add_slice(image)
 
     def bind_slice(self, image: np.ndarray, z: int=0):
-
-        # image = image / 65535
-        # image = image.astype(np.float32)
 
         def _do():
             self._ensure_gl_ready()
@@ -889,27 +873,25 @@ class GLFrameViewer:
 
         self.cmd_q.put(_do)
 
-    def bind_volume(self, vol_f32: np.ndarray):
+    # def bind_volume(self, vol_f32: np.ndarray):
+    def bind_volume(self, shape: tuple):
         """Upload / replace the 3D volume texture (runs on GL thread)."""
-        vol_f32 = np.asarray(vol_f32, dtype=np.uint16)
-        # vol_f32 = np.clip(vol_f32, a_min=0, a_max=4000)
-        # m = vol_f32.max()
-        # if m > 0:
-        #     vol_f32 /= m
-        # vol_f32 = np.power(vol_f32, 0.9)
+        
+        # first thing: make this the vol_shape and set z = 0
+        self._z = 0
+        self.vol_shape = shape
 
         # object-space bounds: centered on origin
-        nz, ny, nx = 0.5*np.array(vol_f32.shape, dtype=np.float32) - 0.5
+        nz, ny, nx = 0.5*np.float32(shape) - 0.5
         boxMin = (-nx, -ny, -nz)
         boxMax = ( nx,  ny,  nz)
 
         def _do():
             self._ensure_gl_ready()
+            
             # (re)create textures
             if self.tex_3d is None:
-                self.make_volume_texture(vol_f32)
-            else:
-                self.update_volume_texture(vol_f32)
+                self.make_volume_texture(shape)
             if self.tex_1d is None:
                 self.make_transfer_texture()
 
@@ -923,14 +905,12 @@ class GLFrameViewer:
 
         self.cmd_q.put(_do)
 
-    def make_volume_texture(self, vol_f32: np.ndarray):
+    def make_volume_texture(self, shape: tuple):
 
-        z, y, x = vol_f32.shape
+        z, y, x = shape
 
         self.tex_3d = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
-
-        print("Made volume tex_3d:", self.tex_3d)
 
         # params
         GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
@@ -1060,7 +1040,7 @@ class GLFrameViewer:
             nx,                     # width
             ny,                     # height
             GL.GL_RED,              # format
-            GL.GL_UNSIGNED_SHORT,   # type
+            GL.GL_UNSIGNED_SHORT,   # type: uint16
             None
         )
 
@@ -1080,21 +1060,27 @@ class GLFrameViewer:
 
         # update only the data for slice (z)
         GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 
-                           0,           # level
-                           0,           # xoffset (none)
-                           0,           # yoffset (none)
-                           int(z),      # zoffset (z-slice position)
-                           x,           # width
-                           y,           # height
-                           1,           # depth (one slice)
-                           GL.GL_RED,   # format
+                           0,                    # level
+                           0,                    # xoffset (none)
+                           0,                    # yoffset (none)
+                           int(z),               # zoffset (z-slice position)
+                           x,                    # width
+                           y,                    # height
+                           1,                    # depth (one slice)
+                           GL.GL_RED,            # format
                            GL.GL_UNSIGNED_SHORT, # uint16
-                           slice        # image data
+                           slice                 # image data
         )
 
-        # print("Updated texture slice:", z, slice.max())
-
     def update_volume_texture(self, volume: np.ndarray):
+        try:
+            assert volume.shape == self.vol_shape
+        except AssertionError:
+            print("[GL] Volume shape mismatch with allocated texture... Reallocating.")
+            self.bind_volume(volume.shape)
+            # try again
+            self.update_volume_texture(volume)
+
         z, y, x = volume.shape
         
         GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
@@ -1161,8 +1147,8 @@ class GLFrameViewer:
     # ----- update functions -----
 
     def set_min_max(self, min_max: list):
-        # self.min_max = min_max
-        print("set_min_max called!", min_max)
+        self.min_max = min_max
+        
         def _do():
             self._ensure_gl_ready()
             
@@ -1206,6 +1192,7 @@ if __name__ == '__main__':
 
     # test data
     data = {
+        "beads_opm": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Coverslip\Beads\P0\2025-09-27\P001\CH00_000000.tiff",
         "data_reto": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
         "beads_cs": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff"
     }
@@ -1246,7 +1233,7 @@ if __name__ == '__main__':
 
         # try to load data
         try:
-            vol = tiff.imread(data['data_reto'])
+            vol = tiff.imread(data['beads_opm'])
             print(f"Loaded {vol.shape} stack of dtype={vol.dtype}")
             print(f"Volume stats: mean={vol.mean():.2f}\tmin={vol.min()}\tmax={vol.max()}")
         except FileNotFoundError:

@@ -1133,7 +1133,7 @@ if __name__ == '__main__':
 
         frames = [
             downsample_if_needed(tiff.imread(
-                data['beads_cs']
+                data['data_reto']
             ).astype(np.float32))
             for t in range(1)
         ]

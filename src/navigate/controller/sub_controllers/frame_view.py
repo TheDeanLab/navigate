@@ -79,7 +79,7 @@ uniform vec3 boxMax;
 uniform float stepWorld;       // step length in WORLD units
 
 // contrast params
-uniform float opacity = 0.15;  // global density/opacity
+uniform float opacity = 0.25;  // global density/opacity
 uniform float cMin    = 0.0;
 uniform float cMax    = 1.0;
 uniform float gamma   = 1.0;
@@ -1188,7 +1188,9 @@ if __name__ == '__main__':
     TEST_MODE = "volume"
 
     from navigate.model.concurrency.concurrency_tools import SharedNDArray
+    from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
     import tkinter as tk
+    from tkinter import ttk
     import tifffile as tiff
 
 
@@ -1205,6 +1207,37 @@ if __name__ == '__main__':
 
     if TEST_MODE == "volume":
         viewer.start_render_loop(window_dim=(800,800))
+
+        # ------------------- WIDGETS -------------------- |
+
+        cMin = tk.IntVar(root, value=0)
+        cMax = tk.IntVar(root, value=65535)
+        def c_change():
+            viewer.set_min_max([cMin.get(), cMax.get()])
+
+        settings = tk.LabelFrame(root, text="Settings").pack()
+
+        LabelInput(
+            settings, label_pos="left", label="cMin",
+            input_class=ttk.Spinbox, input_var=cMin,
+            input_args={
+                "from_": 0, 
+                "to": 65535, 
+                "increment": 5,
+                "command": c_change
+                }
+            ).pack()
+
+        LabelInput(
+            settings, label_pos="left", label="cMax",
+            input_class=ttk.Spinbox, input_var=cMax,
+            input_args={
+                "from_": 0, 
+                "to": 65535, 
+                "increment": 255,
+                "command": c_change
+                }
+            ).pack()
 
         # try to load data
         try:

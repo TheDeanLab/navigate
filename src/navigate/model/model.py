@@ -1268,6 +1268,7 @@ class Model:
                     "kind": "DAQ Triggers",
                     "duration_ns": time.perf_counter_ns() - start_time,
                     "timestamp": time.time(),
+                    "image_id": self.available_image_count # should be self.frame_id ?
                 }
             )
         )

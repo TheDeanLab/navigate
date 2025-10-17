@@ -79,7 +79,7 @@ uniform vec3 boxMax;
 uniform float stepWorld;       // step length in WORLD units
 
 // contrast params
-uniform float opacity = 0.25;  // global density/opacity
+uniform float opacity = 0.15;  // global density/opacity
 uniform float cMin    = 0.0;
 uniform float cMax    = 1.0;
 uniform float gamma   = 1.0;
@@ -543,6 +543,9 @@ class GLFrameViewController(GUIController):
         # image widgets
         self.image_palette = view.lut.get_widgets()
 
+        # str: display state
+        self.display_state = None
+
         # Binding for adjusting lookup table min/max counts
         self.image_palette["Min"].get_variable().trace_add(
             "write", self._on_minmax_changed
@@ -551,9 +554,11 @@ class GLFrameViewController(GUIController):
             "write", self._on_minmax_changed
         )
 
-    def display_image(self, image: SharedNDArray) -> None:
+    def try_to_display_image(self, image: SharedNDArray) -> None:
 
-        self.viewer.try_to_display_image(image)
+        self.display_state = self.view.live_frame.live.get()
+        if self.display_state == "OpenGL":
+            self.viewer.try_to_display_image(image)
 
     # private util functions
     
@@ -751,9 +756,7 @@ class GLFrameViewer:
                     else:
                         raise Exception(f"Invalid draw mode: {self.mode}")
                 except queue.Empty:
-                    if self.mode == "frame":
-                        # quiet mode if no new frames: go easy on GPU
-                        continue
+                    pass
 
                 # draw frame
                 self.draw_frame()

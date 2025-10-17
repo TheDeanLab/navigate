@@ -7,11 +7,17 @@ import threading
 import queue
 import time
 import traceback
+import logging
+import json
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.tools.decorators import performance_monitor
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 GL = None
 
@@ -620,6 +626,7 @@ class GLFrameViewer:
 
         # monitoring
         self.rendered_images = 0
+        self._t0             = 0
 
     def set_slices(self, N: int):
         self._N = N
@@ -749,6 +756,10 @@ class GLFrameViewer:
                 # data queue drain                   
                 try:
                     image = self.data_q.get_nowait()
+                    
+                    # image received: start the timer
+                    self._t0 = time.perf_counter_ns()
+
                     if self.mode == "frame":
                         self.update_image(image)
                     elif self.mode == "volume":
@@ -1001,7 +1012,7 @@ class GLFrameViewer:
         GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
         self._pbo_index = 0
 
-    @performance_monitor(prefix="GL: Update Texture", display_result=lambda i: {"image_id": int(i)})
+    # @performance_monitor(prefix="GL: Update Texture", display_result=lambda i: {"image_id": int(i)})
     def update_texture(self, data : np.ndarray):
         """
             Update 2D texture pixels with new data.
@@ -1052,7 +1063,19 @@ class GLFrameViewer:
 
         self.rendered_images = (self.rendered_images + 1) % 100
 
-        return self.rendered_images
+        # return self.rendered_images
+
+        # render complete: update performance logger
+        logger.performance(
+            json.dumps(
+                {
+                    "kind": "GL: Update Texture",
+                    "duration_ns": time.perf_counter_ns() - self._t0,
+                    "timestamp": time.time(),
+                    "image_id": self.rendered_images
+                }
+            )
+        )
 
     def update_texture_slice_z(self, slice: np.ndarray, z: int):
 

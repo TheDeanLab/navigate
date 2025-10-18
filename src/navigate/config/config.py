@@ -275,6 +275,8 @@ def verify_experiment_config(manager, configuration):
         "fine_step_size": 5,
         "fine_selected": True,
         "robust_fit": False,
+        "spline_fit": False,
+        "test_significance": False,
     }
     if (
         "AutoFocusParameters" not in configuration["experiment"]

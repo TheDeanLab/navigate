@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -58,15 +58,17 @@ class TestSutterFilterWheel(unittest.TestCase):
                     "mock_filter_wheel": {
                         "filter_wheel": [
                             {
-                            "hardware": {"wheel_number": self.number_of_filter_wheels},
-                            "available_filters": {
-                                "filter1": 0,
-                                "filter2": 1,
-                                "filter3": 2,
-                                "filter4": 3,
-                                "filter5": 4,
-                                "filter6": 5,
-                            }
+                                "hardware": {
+                                    "wheel_number": self.number_of_filter_wheels
+                                },
+                                "available_filters": {
+                                    "filter1": 0,
+                                    "filter2": 1,
+                                    "filter3": 2,
+                                    "filter4": 3,
+                                    "filter5": 4,
+                                    "filter6": 5,
+                                },
                             }
                         ]
                     }

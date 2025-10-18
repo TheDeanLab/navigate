@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-import platform
 import logging
 import time
 import importlib
@@ -41,7 +40,11 @@ import serial
 # Third Party Imports
 
 # Local Imports
-from navigate.tools.common_functions import build_ref_name, load_param_from_module, decode_bytes
+from navigate.tools.common_functions import (
+    build_ref_name,
+    load_param_from_module,
+    decode_bytes,
+)
 from navigate.tools.decorators import performance_monitor
 from navigate.model.devices.device_types import (
     SerialDevice,
@@ -173,9 +176,7 @@ class SerialConnectionFactory:
         """
         port = args[0]
         if str(port) not in cls._connections:
-            conn = auto_redial(
-                build_connection_function, args, exception=exception
-            )
+            conn = auto_redial(build_connection_function, args, exception=exception)
             serial_conn = None
             if type(conn) is serial.Serial:
                 serial_conn = conn
@@ -184,18 +185,17 @@ class SerialConnectionFactory:
             if serial_conn is not None:
                 serial_conn.write = performance_monitor(
                     prefix="Serial",
-                    display_args=lambda d: f"{str(port)}-{decode_bytes(d)}"
+                    display_args=lambda d: f"{str(port)}-{decode_bytes(d)}",
                 )(serial_conn.write)
                 serial_conn.readline = performance_monitor(
-                    prefix="Serial",
-                    display_result=lambda s: f"{str(port)}-{s}"
+                    prefix="Serial", display_result=lambda s: f"{str(port)}-{s}"
                 )(serial_conn.readline)
                 serial_conn.read = performance_monitor(
-                    prefix="Serial",
-                    display_result=lambda s: f"{str(port)}-{s}"
+                    prefix="Serial", display_result=lambda s: f"{str(port)}-{s}"
                 )(serial_conn.read)
             cls._connections[str(port)] = conn
         return cls._connections[str(port)]
+
 
 class IntegratedDeviceFactory:
     """Integrated Device Factory.

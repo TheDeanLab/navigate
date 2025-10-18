@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -165,11 +165,9 @@ class CameraBase(ABC):
 
     @abstractmethod
     def initialize_image_series(
-        self, 
-        data_buffer: Optional[list]=None, 
-        number_of_frames: int=100
+        self, data_buffer: Optional[list] = None, number_of_frames: int = 100
     ) -> None:
-        """Initialize image series and attach the given data_buffer, 
+        """Initialize image series and attach the given data_buffer,
         which serves as the destination for incoming images.
 
         This abstract method must be implemented by all subclasses.
@@ -324,7 +322,7 @@ class CameraBase(ABC):
             line interval duration (s).
         """
         return self.camera_parameters.get("line_interval", None)
-    
+
     @abstractmethod
     def set_ROI(
         self,

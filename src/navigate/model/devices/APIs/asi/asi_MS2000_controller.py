@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,10 @@
 
 
 # Standard Imports
-import threading
 import time
 import logging
 
 # Third Party Imports
-from serial import Serial
 from serial import SerialException
 from serial import SerialTimeoutException
 from serial import EIGHTBITS
@@ -44,7 +42,8 @@ from serial import PARITY_NONE
 from serial import STOPBITS_ONE
 
 # Local Imports
-from navigate.model.devices.APIs.asi.asi_tiger_controller import ASIException, TigerController
+from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -72,7 +71,6 @@ class MS2000Controller(TigerController):
     def __str__(self) -> str:
         """Returns the string representation of the MS2000 Controller class"""
         return "MS2000Controller"
-
 
     def connect_to_serial(
         self,
@@ -154,7 +152,6 @@ class MS2000Controller(TigerController):
 
         return default_axes_sequence
 
-
     def wait_for_device(self, report: bool = False):
         """Waits for the all motors to stop moving."""
         if not report:
@@ -195,7 +192,7 @@ class MS2000Controller(TigerController):
 
     def set_jog_speed(self, axes: list, jsspd: int):
         """Set jog wheel speed.
-        
+
         Parameters
         ----------
         axes: list
@@ -203,8 +200,8 @@ class MS2000Controller(TigerController):
         jsspd: int
             Jog wheel speed (0.1 - 100)
         """
-        cmd = 'JSSPD ' + ' '.join(f"{ax.upper()}={jsspd}" for ax in axes)
-        
+        cmd = "JSSPD " + " ".join(f"{ax.upper()}={jsspd}" for ax in axes)
+
         # send JSSPD command to MS2000 controller: set jog wheel speed
         self.send_command(cmd)
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -132,10 +132,9 @@ class MicroscopePopupController(GUIController):
             for microscope in self.microscope_info.keys():
                 if microscope != microscope_name:
                     for k in self.microscope_info[microscope_name].keys():
-                        if (
-                            self.microscope_info[microscope_name][k]
-                            == self.microscope_info[microscope].get(k, "")
-                        ):
+                        if self.microscope_info[microscope_name][
+                            k
+                        ] == self.microscope_info[microscope].get(k, ""):
                             self.variables[f"{microscope_name} {k}"].set("")
 
         variable = self.variables[microscope_name]

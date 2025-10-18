@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,6 @@ class NIShutter(ShutterBase):
                 self.shutter_task.close()
             except Exception:
                 logger.exception(f"Error stopping task: {traceback.format_exc()}")
-
 
     def open_shutter(self) -> None:
         """Open the shutter"""

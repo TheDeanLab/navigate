@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 import time
 import serial
 import logging
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 
@@ -130,7 +130,9 @@ class EquipmentSolutionsRemoteFocus(NIRemoteFocus, SerialDevice):
             pass
 
     @classmethod
-    def connect(cls, port: str="COM1", baudrate: int=115200, timeout: float=1.25) -> serial.Serial:
+    def connect(
+        cls, port: str = "COM1", baudrate: int = 115200, timeout: float = 1.25
+    ) -> serial.Serial:
         """Connect to Serial Communication Port
         port : str
             Serial Port (default is "COM1")
@@ -239,7 +241,6 @@ class EquipmentSolutionsRemoteFocus(NIRemoteFocus, SerialDevice):
             raise UserWarning(
                 "Error in communicating with Voice Coil via COMPORT", self.comport
             )
-
 
 
 if __name__ == "__main__":

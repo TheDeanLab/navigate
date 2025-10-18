@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
+class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
     """ASIRemoteFocus Class - Analog control of the remote focus device."""
 
     def __init__(
@@ -81,7 +81,9 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         self.axis = self.device_config["hardware"]["axis"]
 
     @classmethod
-    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Build ASILaser Serial Port connection
 
         Parameters
@@ -115,7 +117,7 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         """Adjust the waveform.
 
         This method adjusts the waveform parameters.
-        Based on the sensor mode and readout direction, either the triangle or ramp function will be called. 
+        Based on the sensor mode and readout direction, either the triangle or ramp function will be called.
 
         Parameters
         ----------
@@ -162,7 +164,7 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
                     waveform_constants["remote_focus_constants"][imaging_mode][zoom][
                         laser
                     ]["amplitude"] = "1000"
-                
+
                 amplitude = float(
                     waveform_constants["remote_focus_constants"][imaging_mode][zoom][
                         laser
@@ -184,31 +186,31 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
                     ]["offset"]
                 )
                 if offset is not None:
-                    remote_focus_offset += offset    
+                    remote_focus_offset += offset
 
                 # Calculate the Waveforms
                 if sensor_mode == "Light-Sheet" and (
                     readout_direction == "Bidirectional"
                     or readout_direction == "Rev. Bidirectional"
                 ):
-                    sweep_time=self.sweep_time
+                    sweep_time = self.sweep_time
                     amplitude = amplitude
                     offset = remote_focus_offset
-                
+
                     self.triangle(sweep_time, amplitude, offset)
 
                 else:
                     self.ramp(exposure_time, amplitude, remote_focus_offset)
-    
+
     def triangle(
         self,
-        sweep_time: float=0.24,
-        amplitude: float=1,
-        offset: float=0,
+        sweep_time: float = 0.24,
+        amplitude: float = 1,
+        offset: float = 0,
     ):
         """Sends the tiger controller commands to initiate the triangle wave.
-        
-        The waveform starts at the offset and immediately rises linearly to 2x amplitude 
+
+        The waveform starts at the offset and immediately rises linearly to 2x amplitude
         (amplitude here refers to 1/2 peak-to-peak) and immediately falls linearly back
         to the offset. The waveform is a periodic waveform with no delay periods between
         cycles.
@@ -224,29 +226,29 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         """
 
         # Converts sweep_time to ms and amplitude and offset to mV
-        period = int(round(sweep_time * 1000)) 
+        period = int(round(sweep_time * 1000))
         amplitude *= 1000
         offset *= 1000
 
         # Triangle waveform
         self.remote_focus.single_axis_waveform(self.axis, 1, amplitude, offset, period)
-        # Waveform is free running after it is triggered 
+        # Waveform is free running after it is triggered
         self.remote_focus.single_axis_mode(self.axis, 4)
 
     def ramp(
         self,
-        exposure_time: float=0.2,
-        amplitude: float=1,
-        offset: float=0.5,
+        exposure_time: float = 0.2,
+        amplitude: float = 1,
+        offset: float = 0.5,
     ):
         """Sends the tiger controller commands to initiate the ramp wave.
 
-        The waveform starts at offset and immediately rises linearly to 2x amplitude 
-        (amplitude here refers to 1/2 peak-to-peak) and then immediately drops back 
-        down to the offset voltage during the fall period. 
+        The waveform starts at offset and immediately rises linearly to 2x amplitude
+        (amplitude here refers to 1/2 peak-to-peak) and then immediately drops back
+        down to the offset voltage during the fall period.
 
-        There is a delay period after each cycle that comes from the PLC, which is 
-        not included in this function. 
+        There is a delay period after each cycle that comes from the PLC, which is
+        not included in this function.
 
         Parameters
         ----------
@@ -272,10 +274,12 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         exposure_time = int(round(exposure_time * 1000))
 
         # Ramp waveform that is triggered on TTL inputs
-        self.remote_focus.single_axis_waveform(self.axis, 128, amplitude, offset, exposure_time)
+        self.remote_focus.single_axis_waveform(
+            self.axis, 128, amplitude, offset, exposure_time
+        )
         # The waveform cycles once and waits for another TTL inputs
         self.remote_focus.single_axis_mode(self.axis, 2)
-    
+
     def move(
         self,
         exposure_times: dict[str, float],
@@ -295,10 +299,10 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         offset : float
             The offset of the signal in volts.
         """
-        
+
         self.adjust(exposure_times, sweep_times, offset)
-    
-    def turn_off(self): 
+
+    def turn_off(self):
         """Stops the remote focus waveform"""
         self.remote_focus.single_axis_mode(self.axis, 0)
 
@@ -315,5 +319,3 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
     def __del__(self):
         """Destructor for the ASIRemoteFocus class."""
         self.close()
-
-        

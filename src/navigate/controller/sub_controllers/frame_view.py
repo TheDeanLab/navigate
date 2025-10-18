@@ -15,9 +15,11 @@ from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.tools.decorators import performance_monitor
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+logger = None
+if __name__ != "__main__":
+    # Logger Setup
+    p = __name__.split(".")[1]
+    logger = logging.getLogger(p)
 
 GL = None
 
@@ -27,7 +29,7 @@ RING_BUF_SIZE = 6
 
 VERT_SRC = """
 // RAYMARCH_VERT_SRC
-#version 330 core
+#version 430 core
 
 void main()
 {
@@ -39,7 +41,7 @@ void main()
 """
 
 FRAG_2D_SRC = """
-#version 330 core
+#version 430 core
 
 out vec4 FragColor;
 
@@ -69,7 +71,7 @@ void main()
 
 FRAG_3D_SRC = """
 // RAYMARCH_FRAG_SRC  —  raymarch with shear (Y by Z) + step-size invariant opacity
-#version 330 core
+#version 430 core
 
 out vec4 FragColor;
 
@@ -674,8 +676,8 @@ class GLFrameViewer:
             if not glfw.init():
                 raise RuntimeError("ERROR: GLFW init failed!")         
 
-            #version 330 core
-            glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+            #version 430 core
+            glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
             glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
             glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
 
@@ -1066,16 +1068,17 @@ class GLFrameViewer:
         # return self.rendered_images
 
         # render complete: update performance logger
-        logger.performance(
-            json.dumps(
-                {
-                    "kind": "GL: Update Texture",
-                    "duration_ns": time.perf_counter_ns() - self._t0,
-                    "timestamp": time.time(),
-                    "image_id": self.rendered_images
-                }
+        if logger:
+            logger.performance(
+                json.dumps(
+                    {
+                        "kind": "GL: Update Texture",
+                        "duration_ns": time.perf_counter_ns() - self._t0,
+                        "timestamp": time.time(),
+                        "image_id": self.rendered_images
+                    }
+                )
             )
-        )
 
     def update_texture_slice_z(self, slice: np.ndarray, z: int):
 
@@ -1259,7 +1262,7 @@ if __name__ == '__main__':
 
         # try to load data
         try:
-            vol = tiff.imread(data['beads_opm'])
+            vol = tiff.imread(data['data_reto'])
             print(f"Loaded {vol.shape} stack of dtype={vol.dtype}")
             print(f"Volume stats: mean={vol.mean():.2f}\tmin={vol.min()}\tmax={vol.max()}")
         except FileNotFoundError:

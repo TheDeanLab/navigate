@@ -59,9 +59,7 @@ class PerformanceFilter(logging.Filter):
         bool
             True if the record should be logged, False otherwise
         """
-        return record.levelname == "PERFORMANCE" or record.getMessage().startswith(
-            "Performance "
-        )
+        return record.levelname == "PERFORMANCE"
 
 
 class NonPerfFilter(logging.Filter):
@@ -87,8 +85,4 @@ class NonPerfFilter(logging.Filter):
         """
         # Making sure performance data only goes to performance.log
 
-        if record.getMessage().startswith("Performance"):
-            return False
-        if record.getMessage().startswith("Spec"):
-            return False
-        return True
+        return record.levelname != "PERFORMANCE"

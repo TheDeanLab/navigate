@@ -682,8 +682,8 @@ class GLFrameViewer:
             glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
 
             # create window
-            self.width, self.height = window_dim
-            self.window = glfw.create_window(self.width, self.height, title, None, None)
+            init_width, init_height = window_dim
+            self.window = glfw.create_window(init_width, init_height, title, None, None)
 
             # GL context
             glfw.make_context_current(self.window)
@@ -707,13 +707,6 @@ class GLFrameViewer:
 
             # camera
             self.camera = Camera(self.window, position=[500]*3)
-
-            # if the texture doesn't exist, create it
-            if not self.tex_2d:
-                self.make_frame_texture()
-            if not self.pbo:
-                nbytes = self.width * self.height * 2
-                self.make_pbo_ring(nbytes)
 
             # 2D shader uniform inits
             self.shaders['frame'].use()
@@ -850,6 +843,19 @@ class GLFrameViewer:
 
     def update_image(self, image: np.ndarray):
 
+        # create new texture if image size has changed
+        if image.shape != (self.height, self.width):
+            # clear the old texture (if it exists)
+            if self.tex_2d:
+                GL.glDeleteTextures([self.tex_2d])
+                self.tex_2d = None
+            # make new            
+            self.make_frame_texture(image.shape)
+            nbytes = np.prod(image.shape) * 2
+            self.make_pbo_ring(nbytes)
+            # update image dims
+            self.height, self.width = image.shape
+
         def _do():
             self._ensure_gl_ready()
             self.update_texture(image)
@@ -949,7 +955,7 @@ class GLFrameViewer:
             None
             )        
 
-    def make_frame_texture(self):
+    def make_frame_texture(self, shape: tuple):
 
         self.tex_2d = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex_2d)
@@ -960,7 +966,9 @@ class GLFrameViewer:
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
 
-        nx, ny = (self.width, self.height)
+        # shape
+        ny, nx = shape
+
         # pre-allocate the full image, only update pixels later
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
         GL.glTexImage2D(
@@ -1138,15 +1146,15 @@ class GLFrameViewer:
             raise Exception(f"Invalid draw mode: {self.mode}")
 
         # adjust viewport based on window size
-        self.width, self.height = glfw.get_framebuffer_size(self.window)
+        w, h = glfw.get_framebuffer_size(self.window)
 
-        GL.glViewport(0, 0, self.width, self.height)
+        GL.glViewport(0, 0, w, h)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         shader = self.shaders[self.mode]
 
         shader.use()
-        shader.set_vec2('viewportSize', (self.width, self.height))
+        shader.set_vec2('viewportSize', (w, h))
         
         if self.mode == "volume":
             self.camera.update(self.timer.delta_time)

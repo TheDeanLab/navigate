@@ -532,7 +532,7 @@ class FrameTimer:
 
 class GLFrameViewController(GUIController):
 
-    def __init__(self, view, parent_controller=None):
+    def __init__(self, view, parent_controller=None, mode="frame"):
         """
             GUIController a-la CameraViewController:
             Has a GLFrameViewer that runs the render loop on it's
@@ -543,7 +543,7 @@ class GLFrameViewController(GUIController):
         super().__init__(view, parent_controller)
 
         # OpenGL viewer
-        self.viewer = GLFrameViewer()
+        self.viewer = GLFrameViewer(mode)
 
         # start rendering thread
         self.viewer.start_render_loop(window_dim=(512,512))
@@ -618,10 +618,12 @@ class GLFrameViewer:
         self.tex_2d = None
         self.tex_1d = None
 
+        # window attribs
+        self.title = None
+
         # config
         self.mode         = mode
-        self.width        = None
-        self.height       = None
+        self.tex_2d_shape = None
         self.min_max      = None
         self.do_autoscale = False
         self.min_max      = [0, 65535]
@@ -683,7 +685,8 @@ class GLFrameViewer:
 
             # create window
             init_width, init_height = window_dim
-            self.window = glfw.create_window(init_width, init_height, title, None, None)
+            self.title = title
+            self.window = glfw.create_window(init_width, init_height, self.title + f" [{self.mode.upper()}]", None, None)
 
             # GL context
             glfw.make_context_current(self.window)
@@ -733,7 +736,7 @@ class GLFrameViewer:
                     Weird part is we max out at 40 FPS @ 5 msec no matter what we do.
                     Need to think about this more...
                 """
-
+                # VSync off for 2D mode
                 glfw.swap_interval(0 if self.mode == "frame" else 1)
 
                 # command queue drains
@@ -775,9 +778,15 @@ class GLFrameViewer:
 
             # cleanup
             try:
+                if self.tex_1d: 
+                    GL.glDeleteTextures([self.tex_1d])
+                    self.tex_1d = None
                 if self.tex_2d: 
                     GL.glDeleteTextures([self.tex_2d])
                     self.tex_2d = None
+                if self.tex_3d: 
+                    GL.glDeleteTextures([self.tex_3d])
+                    self.tex_3d = None
                 if self.vao:    
                     GL.glDeleteVertexArrays(1, [self.vao])
                     self.vao = None
@@ -807,6 +816,9 @@ class GLFrameViewer:
             elif self.mode == "volume":
                 self.mode = "frame"
             
+            # update window title
+            glfw.set_window_title(self.window, self.title + f" [{self.mode.upper()}]")
+
             # apply lut
             self.set_min_max(self.min_max)
 
@@ -844,7 +856,7 @@ class GLFrameViewer:
     def update_image(self, image: np.ndarray):
 
         # create new texture if image size has changed
-        if image.shape != (self.height, self.width):
+        if image.shape != self.tex_2d_shape:
             # clear the old texture (if it exists)
             if self.tex_2d:
                 GL.glDeleteTextures([self.tex_2d])
@@ -854,7 +866,7 @@ class GLFrameViewer:
             nbytes = np.prod(image.shape) * 2
             self.make_pbo_ring(nbytes)
             # update image dims
-            self.height, self.width = image.shape
+            self.tex_2d_shape = image.shape
 
         def _do():
             self._ensure_gl_ready()
@@ -869,7 +881,6 @@ class GLFrameViewer:
             if (self._N,) + image.shape != self.vol_shape:
                 # clear the volume and reallocate
                 self.vol_shape = None
-                print(f"Dimension mismatch... {(self._N,) + image.shape} != {self.vol_shape}")
                 # clear texture
                 GL.glDeleteTextures(1, [self.tex_3d])
                 self.tex_3d = None
@@ -883,7 +894,7 @@ class GLFrameViewer:
             self._z = (self._z + int(self._N > 2)) % self._N
         else:
             new_shape = (self._N,) + image.shape
-            print("Allocating volume...", new_shape)
+            # allocate new volume
             self.bind_volume(new_shape)
             self.add_slice(image)
 
@@ -1007,7 +1018,6 @@ class GLFrameViewer:
             )                
 
     def make_pbo_ring(self, nbytes: int, N: int = RING_BUF_SIZE):
-
         """
             Create N pixel unpack buffers for async texture upload.
         """
@@ -1022,19 +1032,10 @@ class GLFrameViewer:
         GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
         self._pbo_index = 0
 
-    # @performance_monitor(prefix="GL: Update Texture", display_result=lambda i: {"image_id": int(i)})
     def update_texture(self, data : np.ndarray):
         """
             Update 2D texture pixels with new data.
-        """
-        # uint16 and C-contiguous
-        if not data.flags['C_CONTIGUOUS']:
-            data = np.ascontiguousarray(data)
-            print("Made contiguous!")
-        if data.dtype != np.uint16:
-            data = data.astype(np.uint16)
-            print("Converted to uint16!")
-        
+        """        
         ny, nx = data.shape
         nbytes = nx * ny * 2 # uint16
 
@@ -1072,8 +1073,6 @@ class GLFrameViewer:
         GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
 
         self.rendered_images = (self.rendered_images + 1) % 100
-
-        # return self.rendered_images
 
         # render complete: update performance logger
         if logger:

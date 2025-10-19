@@ -279,7 +279,6 @@ class Controller:
         self.frame_view_controller = GLFrameViewController(
             self.view.camera_waveform.camera_tab, self
         )
-        self.frame_view_controller.set_mode("frame")
 
         #: CameraViewController: Camera View Tab Sub-Controller.
         self.camera_view_controller = CameraViewController(
@@ -1206,10 +1205,7 @@ class Controller:
                 )
                 self.execute("stop_acquire")
 
-            # OPENGL_DISPLAY = True
-
             # Display the image and update the histogram
-            # if not OPENGL_DISPLAY:
             self.camera_view_controller.try_to_display_image(
                 image=self.data_buffer[image_id]
             )
@@ -1220,23 +1216,9 @@ class Controller:
             #     image=self.data_buffer[image_id]
             # )
             
-            microscope_state = self.configuration["experiment"]["MicroscopeState"]
-            
-            # i, n_slices = 0, 2
-            # if microscope_state["image_mode"] == 'z-stack':
-            #     i, n_slices = images_received, microscope_state["number_z_steps"]
-            # # if images_received == 1:
-            # #     self.volume_viewer.set_zstep(
-            # #         self.configuration["experiment"]["MicroscopeState"]["step_size"]
-            # #     )
-            # self.volume_viewer.add_slice(
-            #     self.data_buffer[image_id],
-            #     n_slices=n_slices,
-            #     i=i
-            #     )            
+            microscope_state = self.configuration["experiment"]["MicroscopeState"]       
             
             # OpenGL display
-            # if OPENGL_DISPLAY:
             if image_id == 0:
                 self.frame_view_controller.reset()
 
@@ -1245,6 +1227,7 @@ class Controller:
                     microscope_state["number_z_steps"]
                 )
             else:
+                # for single slice in 3D: ping-pong between 2 slices looks nice
                 self.frame_view_controller.viewer.set_slices(2)
 
             # display with OpenGL rendering

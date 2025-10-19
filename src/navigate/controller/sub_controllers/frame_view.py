@@ -47,12 +47,13 @@ out vec4 FragColor;
 
 uniform sampler2D pixels;
 uniform vec2 viewportSize;
+uniform vec2 shift = vec2(0.0);
 uniform vec2 cMinMax = vec2(0, 65535);
 
 void main()
 {
-    vec2 uv = gl_FragCoord.xy / viewportSize;
-    // uv.y = 1.0 - uv.y;
+    vec2 uv = (gl_FragCoord.xy - shift) / viewportSize;
+    // uv.y = 1.0 - uv.y; // flip?
 
     float s = texture(pixels, uv).r;
 
@@ -891,7 +892,7 @@ class GLFrameViewer:
             self.bind_slice(image, self._z)
 
             # N-bounded increment
-            self._z = (self._z + int(self._N > 2)) % self._N
+            self._z = (self._z + 1) % self._N
         else:
             new_shape = (self._N,) + image.shape
             # allocate new volume
@@ -1128,6 +1129,29 @@ class GLFrameViewer:
                            GL.GL_RED, GL.GL_UNSIGNED_SHORT,
                            volume)
 
+    def config_gl_viewport(self):
+
+        vp_w, vp_h = glfw.get_framebuffer_size(self.window)
+        tx_h, tx_w = self.tex_2d_shape
+        x0, y0 = (0, 0)
+
+        if self.mode == "frame":
+            aspect = tx_w / tx_h
+
+            new_w = vp_w * min(aspect,   1)
+            new_h = vp_h * min(1/aspect, 1)
+
+            # TODO: center shift isn't quite working yet...
+            # x0 = (vp_w - tx_w) / 2
+            # y0 = (vp_h - tx_h) / 2
+            
+            vp_w = new_w
+            vp_h = new_h
+
+        viewport = (int(x0), int(y0), int(vp_w), int(vp_h))
+
+        return viewport
+
     def draw_frame(self):
         """
             Simply renders the texture once per frame.
@@ -1145,16 +1169,18 @@ class GLFrameViewer:
             raise Exception(f"Invalid draw mode: {self.mode}")
 
         # adjust viewport based on window size
-        w, h = glfw.get_framebuffer_size(self.window)
-
-        GL.glViewport(0, 0, w, h)
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-
+        vx, vy, vw, vh = self.config_gl_viewport()
+        # w, h = glfw.get_framebuffer_size(self.window)
+        GL.glViewport(vx, vy, vw, vh)
+        # GL.glViewport(0, 0, vw, vh)
         shader = self.shaders[self.mode]
 
         shader.use()
-        shader.set_vec2('viewportSize', (w, h))
-        
+        shader.set_vec2('viewportSize', (vw, vh))    
+        shader.set_vec2('shift', (vx, vy))
+
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+
         if self.mode == "volume":
             self.camera.update(self.timer.delta_time)
             # camera view-projection

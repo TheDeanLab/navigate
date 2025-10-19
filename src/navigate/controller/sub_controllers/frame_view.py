@@ -9,6 +9,7 @@ import time
 import traceback
 import logging
 import json
+import cv2
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
@@ -52,20 +53,30 @@ uniform vec2 cMinMax = vec2(0, 65535);
 
 void main()
 {
+    vec4 outColor;
+
     vec2 uv = (gl_FragCoord.xy - shift) / viewportSize;
     // uv.y = 1.0 - uv.y; // flip?
 
-    float s = texture(pixels, uv).r;
+    float ch_w = 1e-2;
+    if (abs(uv.x - 0.5) < ch_w || abs(uv.y - 0.5) < ch_w)
+    {
+        outColor = vec4(1.0);
+    } else {
+        float s = texture(pixels, uv).r;
 
-    // lut
-    float cMin = float(cMinMax.x/65535);
-    float cMax = float(cMinMax.y/65535);
-    //clamp
-    s = clamp(s, cMin, cMax);
-    // normalize
-    s = (s - cMin) / (cMax - cMin);
-    
-    FragColor = vec4(s, s, s, 1.0);
+        // lut
+        float cMin = float(cMinMax.x/65535);
+        float cMax = float(cMinMax.y/65535);
+        //clamp
+        s = clamp(s, cMin, cMax);
+        // normalize
+        s = (s - cMin) / (cMax - cMin);
+        
+        outColor = vec4(s, s, s, 1.0);
+    }
+
+    FragColor = outColor;
 }
 
 """
@@ -563,7 +574,16 @@ class GLFrameViewController(GUIController):
             "write", self._on_minmax_changed
         )
 
+        # autoscale variable
+        self.autoscale = self.image_palette["Autoscale"]
+
     def try_to_display_image(self, image: SharedNDArray) -> None:
+
+        # TODO: CPU min/max is inefficient
+        # Try to do this with Compute Shaders on GPU
+        if self.autoscale:
+            cMin, cMax, _, _ = cv2.minMaxLoc(image)
+            self.viewer.set_min_max([cMin, cMax])
 
         self.display_state = self.view.live_frame.live.get()
         if self.display_state == "OpenGL":
@@ -578,6 +598,9 @@ class GLFrameViewController(GUIController):
         self.viewer.mode = mode
 
     def _on_minmax_changed(self, *args):
+
+        if self.autoscale:
+            return
 
         min_counts = self.image_palette["Min"].get()
         max_counts = self.image_palette["Max"].get()
@@ -1142,8 +1165,8 @@ class GLFrameViewer:
             new_h = vp_h * min(1/aspect, 1)
 
             # TODO: center shift isn't quite working yet...
-            # x0 = (vp_w - tx_w) / 2
-            # y0 = (vp_h - tx_h) / 2
+            x0 = (vp_w - tx_w) / 2
+            y0 = (vp_h - tx_h) / 2
             
             vp_w = new_w
             vp_h = new_h

@@ -58,7 +58,7 @@ void main()
     vec2 uv = (gl_FragCoord.xy - shift) / viewportSize;
     // uv.y = 1.0 - uv.y; // flip?
 
-    float ch_w = 1e-2;
+    float ch_w = 0; // off
     if (abs(uv.x - 0.5) < ch_w || abs(uv.y - 0.5) < ch_w)
     {
         outColor = vec4(1.0);
@@ -780,7 +780,8 @@ class GLFrameViewer:
                     image = self.data_q.get_nowait()
                     
                     # image received: start the timer
-                    self._t0 = time.perf_counter_ns()
+                    # self._t0 = time.perf_counter_ns()
+                    # measure here...?
 
                     if self.mode == "frame":
                         self.update_image(image)
@@ -876,6 +877,10 @@ class GLFrameViewer:
                 self.data_q.put_nowait(image)
             except queue.Full:
                 pass        
+
+        # image sent: start the timer
+        self._t0 = time.perf_counter_ns()
+        # ...or here?
 
     def update_image(self, image: np.ndarray):
 
@@ -1099,12 +1104,14 @@ class GLFrameViewer:
         self.rendered_images = (self.rendered_images + 1) % 100
 
         # render complete: update performance logger
+        duration_ns = time.perf_counter_ns() - self._t0
+        # print(f"Rendered: {(duration_ns/1000):.2f} us")
         if logger:
             logger.performance(
                 json.dumps(
                     {
                         "kind": "GL: Update Texture",
-                        "duration_ns": time.perf_counter_ns() - self._t0,
+                        "duration_ns": duration_ns,
                         "timestamp": time.time(),
                         "image_id": self.rendered_images
                     }
@@ -1155,21 +1162,19 @@ class GLFrameViewer:
     def config_gl_viewport(self):
 
         vp_w, vp_h = glfw.get_framebuffer_size(self.window)
-        tx_h, tx_w = self.tex_2d_shape
         x0, y0 = (0, 0)
 
         if self.mode == "frame":
+            tx_h, tx_w = self.tex_2d_shape
+            
             aspect = tx_w / tx_h
 
-            new_w = vp_w * min(aspect,   1)
-            new_h = vp_h * min(1/aspect, 1)
+            vp_w *= min(aspect,   1)
+            vp_h *= min(1/aspect, 1)
 
             # TODO: center shift isn't quite working yet...
-            x0 = (vp_w - tx_w) / 2
-            y0 = (vp_h - tx_h) / 2
-            
-            vp_w = new_w
-            vp_h = new_h
+            # x0 = (vp_w - tx_w) / 2
+            # y0 = (vp_h - tx_h) / 2
 
         viewport = (int(x0), int(y0), int(vp_w), int(vp_h))
 
@@ -1261,6 +1266,13 @@ class GLFrameViewer:
 #%%
 if __name__ == '__main__':
 
+    """
+        We will use __main__ for testing, profiling and debugging.
+        Run inside a Tk.mainloop() and have some widgets to test.
+        Might be nice to let a user just run this file in a navigate env
+        and view saved data as standalone?
+    """
+
     TEST_MODE = "volume"
 
     from navigate.model.concurrency.concurrency_tools import SharedNDArray
@@ -1271,15 +1283,16 @@ if __name__ == '__main__':
 
 
     root = tk.Tk()
-    root.geometry("400x300")
+    root.geometry("500x500")
 
     viewer = GLFrameViewer(mode=TEST_MODE)
 
     # test data
     data = {
-        "beads_opm": r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Coverslip\Beads\P0\2025-09-27\P001\CH00_000000.tiff",
-        "data_reto": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
-        "beads_cs": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff"
+        "beads_opm":    r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Coverslip\Beads\P0\2025-09-27\P001\CH00_000000.tiff",
+        "vasc":         r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\A12_P0_mCherry.tiff",
+        "data_reto":    r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
+        "beads_cs":     r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff"
     }
 
     if TEST_MODE == "volume":
@@ -1316,23 +1329,46 @@ if __name__ == '__main__':
                 }
             ).pack()
 
+        exp_time = tk.IntVar(root, value=5)
+        LabelInput(
+            settings, label_pos="left", label="Exp. Time [ms]",
+            input_class=ttk.Spinbox, input_var=exp_time,
+            input_args={
+                "from_": 1, 
+                "to": 500, 
+                "increment": 5
+                }
+            ).pack()
+
         # try to load data
         try:
-            vol = tiff.imread(data['data_reto'])
+            vol = tiff.imread(data['vasc'])
             print(f"Loaded {vol.shape} stack of dtype={vol.dtype}")
             print(f"Volume stats: mean={vol.mean():.2f}\tmin={vol.min()}\tmax={vol.max()}")
         except FileNotFoundError:
             # just random noise...
             vol = np.random.random((64,256,256)).astype(np.uint16) * 1000
 
+        viewer.set_min_max([vol.min(), vol.max()])
+        viewer.set_slices(len(vol))
+
+        # to mimic navigate, want stack as SharedNDArray to prevent
+        # pickling overhead when passing to render thread
+        def to_snd(im: np.ndarray):
+            snd = SharedNDArray(shape=im.shape, dtype=im.dtype)
+            snd[:] = im
+            return im
+        data_buffer = [to_snd(im) for im in vol]
+
         # viewer.bind_volume(vol)
 
-        viewer.set_min_max([vol.min(), vol.max()])
-
-        viewer.set_slices(len(vol))
-        for z in range(len(vol)):
-            # print(f"Adding slice {z}, dtype={vol.dtype}")
-            viewer.add_slice(vol[z])
+        def display_stack():
+            for im in data_buffer:
+                # print(f"Adding slice {z}, dtype={vol.dtype}")
+                viewer.try_to_display_image(im)
+                time.sleep(float(exp_time.get())/1000)
+        
+        tk.Button(root, text="DISPLAY", comman=display_stack).pack()
 
     elif TEST_MODE == "frame":
 

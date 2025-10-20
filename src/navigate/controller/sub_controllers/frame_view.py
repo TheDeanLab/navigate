@@ -53,12 +53,24 @@ out vec4 FragColor;
 
 uniform sampler2D pixels;
 uniform vec2 viewportSize;
-uniform vec2 cMinMax = vec2(0, 65535);
+uniform vec2 cMinMax   = vec2(0, 65535);
 uniform bool crosshair = true;
+
+// zoom uniforms
+uniform float zoom     = 1.0;
+uniform vec2  focusUV  = vec2(0.5); // default center
+uniform vec2  panPIX   = vec2(0.0); // default none
 
 void main()
 {
-    vec2 uv = vUV;
+    // pixel pan to UV pan
+    vec2 texSize = vec2(textureSize(pixels, 0));
+    vec2 panUV   = panPIX / max(texSize, 1.0);
+    
+    // zoom centered on focusUV (zoom >= 1.0)
+    vec2 uv = focusUV + (vUV - focusUV) / max(zoom, 1.0);
+    // pan
+    uv += panUV;
     
     // flip?
     // uv.y = 1.0 - uv.y;
@@ -76,8 +88,12 @@ void main()
     
     vec4 outColor = vec4(s, s, s, 1.0);
     
-    if ((abs(uv.x - 0.5) < 1/viewportSize.x || abs(uv.y - 0.5) < 1/viewportSize.y) && crosshair)
+    if (crosshair &&
+        (abs(vUV.x - 0.5) < 1.0 / viewportSize.x ||
+         abs(vUV.y - 0.5) < 1.0 / viewportSize.y)) 
+    {
         outColor = vec4(1.0);
+    }
 
     FragColor = outColor;
 }
@@ -343,6 +359,10 @@ class Camera:
         self.yaw    = math.atan2(off.x, off.z)  # yaw=0 → +Z
         self.pitch  = math.asin(max(-1.0, min(1.0, off.y / max(self.radius, 1e-8))))
 
+        # zoom/pan state (2D)
+        self.pan_xy  = [0., 0.]
+        self.zoom_xy = 1.0
+
         # input state
         self.first_mouse = True
         self.last_mouse_x = 0.0
@@ -398,6 +418,23 @@ class Camera:
         self.view = self.get_view_matrix()
         self.projection = self.get_projection_matrix()
 
+    def clamp_panning_to_viewport(self, viewport: tuple):
+        """
+            TODO: Doesn't quite work well on window resize.
+            Ok, for now...
+        """
+        vw, vh = viewport
+        px, py = self.pan_xy
+        z      = self.zoom_xy
+
+        lim_x, lim_y = ((z-1)*vw/z/2, (z-1)*vh/z/2)
+        
+        px = np.clip(px, a_min=-lim_x, a_max=lim_x)
+        py = np.clip(py, a_min=-lim_y, a_max=lim_y)
+
+        self.pan_xy  = [px, py]
+        self.zoom_xy = z
+
     # ---------- callbacks ----------
     def _scroll_callback(self, window, dx, dy):
         self.scroll_offset = dy
@@ -408,36 +445,41 @@ class Camera:
             Even in Frame view mode.
             Communicate to GLFrameViewer through parent_viewer.
         """
-        if self.parent_viewer.mode == "volume":
+        viewer = self.parent_viewer
+
+        # if viewer.mode == "volume":
             # 3D Events
-            if action == glfw.PRESS:
-                if button == glfw.MOUSE_BUTTON_LEFT:
+        if action == glfw.PRESS:
+            if button == glfw.MOUSE_BUTTON_LEFT:
+                if viewer.mode == "frame":
+                    # right button = crosshair in 2d mode
+                    def _do():
+                        viewer.crosshair = not viewer.crosshair
+                    viewer.cmd_q.put_nowait(_do)
+                else:
+                    # do 3d rotation
                     self.is_rotating = True
-                    self.first_mouse = True
-                elif button == glfw.MOUSE_BUTTON_RIGHT:
-                    self.is_translating = True
-                    self._was_panning = True
-                    self.first_mouse = True
-            else:
-                if button == glfw.MOUSE_BUTTON_LEFT:
-                    self.is_rotating = False
-                elif button == glfw.MOUSE_BUTTON_RIGHT:
-                    self.is_translating = False
-                    # on pan end: recenter pivot under cursor
-                    if self._was_panning and self.auto_recenter_on_pan:
-                        self._recenter_pivot_under_cursor()
-                    self._was_panning = False
-        elif self.parent_viewer.mode == "frame":
-            if action == glfw.PRESS and button == glfw.MOUSE_BUTTON_LEFT:
-                def _do():
-                    self.parent_viewer.crosshair = not self.parent_viewer.crosshair
-                    
-                self.parent_viewer.cmd_q.put_nowait(_do)
+                    self.first_mouse = True                                        
+            elif button == glfw.MOUSE_BUTTON_RIGHT:
+                self.is_translating = True
+                self._was_panning = True
+                self.first_mouse = True
+        else:
+            if button == glfw.MOUSE_BUTTON_LEFT:
+                self.is_rotating = False
+            elif button == glfw.MOUSE_BUTTON_RIGHT:
+                self.is_translating = False
+                # on pan end: recenter pivot under cursor
+                if self._was_panning and self.auto_recenter_on_pan:
+                    self._recenter_pivot_under_cursor()
+                self._was_panning = False
 
     # ---------- internals ----------
     def _recompute_position(self):
-        cp = math.cos(self.pitch); sp = math.sin(self.pitch)
-        cy = math.cos(self.yaw);   sy = math.sin(self.yaw)
+        cp = math.cos(self.pitch)
+        sp = math.sin(self.pitch)
+        cy = math.cos(self.yaw)
+        sy = math.sin(self.yaw)
         dir_vec = glm.vec3(cp * sy, sp, cp * cy)  # Y-up, yaw=0 → +Z
         self.position = self.look_at + self.radius * dir_vec
 
@@ -447,6 +489,9 @@ class Camera:
         self.up    = glm.normalize(glm.cross(self.right, self.front))
 
     def _mouse_move(self):
+        # viewer mode governs behaviour
+        viewer = self.parent_viewer
+
         x_pos, y_pos = glfw.get_cursor_pos(self.window)
         if self.first_mouse:
             self.last_mouse_x = x_pos
@@ -469,23 +514,37 @@ class Camera:
             self._recompute_position()
 
         elif self.is_translating:
-            # screen pixels → world units at current radius
-            vpp = (2.0 * self.radius * math.tan(math.radians(self.FOV)*0.5)) / max(1.0, float(self.win_h))
-            sx = vpp * self.aspect_ratio * self.PAN_SENS
-            sy = vpp * self.PAN_SENS
-            pan = (-dx) * sx * self.right + (dy) * sy * self.up
-            self.look_at  += pan
-            self.position += pan
+            if viewer.mode == "volume":
+                # screen pixels → world units at current radius
+                vpp = (2.0 * self.radius * math.tan(math.radians(self.FOV)*0.5)) / max(1.0, float(self.win_h))
+                sx = vpp * self.aspect_ratio * self.PAN_SENS
+                sy = vpp * self.PAN_SENS
+                pan = (-dx) * sx * self.right + (dy) * sy * self.up
+                self.look_at  += pan
+                self.position += pan
+            elif viewer.mode == "frame":
+                self.pan_xy = [
+                    -(self.last_mouse_x - self.win_w/2),
+                      self.last_mouse_y - self.win_h/2
+                ]
 
     def _scroll_move(self, dt):
         if not self.scroll_offset:
             return
-        # exponential dolly on radius
-        scale = math.exp(-self.scroll_offset * self.ZOOM_SENS * (dt if dt > 0 else 1.0))
-        self.radius = max(self.MIN_RADIUS, self.radius * scale)
-        self._recompute_position()
-        self.scroll_offset = 0.0
+        elif self.parent_viewer.mode == "volume":
+            # exponential dolly on radius
+            scale = math.exp(-self.scroll_offset * self.ZOOM_SENS * (dt if dt > 0 else 1.0))
+            self.radius = max(self.MIN_RADIUS, self.radius * scale)
+            self._recompute_position()
+        elif self.parent_viewer.mode == "frame":
+            self.zoom_xy = np.clip(
+                self.zoom_xy + self.scroll_offset * self.ZOOM_SENS/2.0,
+                a_min=1.0,
+                a_max=10.0
+            )
 
+        self.scroll_offset = 0.0
+        
     # ---------- picking helpers ----------
     def _ray_from_screen(self, x, y):
         """Screen (pixels, origin top-left) → world ray (ro, rd)."""
@@ -1240,8 +1299,10 @@ class GLFrameViewer:
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
+        # update camera
+        self.camera.update(self.timer.delta_time)
+
         if self.mode == "volume":
-            self.camera.update(self.timer.delta_time)
             # camera view-projection
             inv_vp = glm.inverse(self.camera.projection * self.camera.view)
             GL.glUniformMatrix4fv(shader.loc("invProjView"), 1, GL.GL_TRUE,
@@ -1257,6 +1318,12 @@ class GLFrameViewer:
             GL.glDisable(GL.GL_BLEND)
 
         elif self.mode == "frame":
+            self.camera.clamp_panning_to_viewport((vw, vh))
+
+            # camera pan/zoom
+            shader.set_vec2( 'panPIX', self.camera.pan_xy)
+            shader.set_float('zoom',   self.camera.zoom_xy)
+
             GL.glActiveTexture(GL.GL_TEXTURE0)
             GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex_2d)
         
@@ -1325,7 +1392,7 @@ if __name__ == '__main__':
         "data_reto":    r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
         "beads_cs":     r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff"
     }
-    use_data = "data_reto"
+    use_data = "beads_cs"
 
 
     if TEST_MODE == "volume":

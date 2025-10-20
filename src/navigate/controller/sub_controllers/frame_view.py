@@ -32,32 +32,36 @@ VERT_SRC = """
 // RAYMARCH_VERT_SRC
 #version 430 core
 
+out vec2 vUV;
+
 void main()
 {
     // 3 vertices: (0,0), (2,0), (0,2) in [0,2] → NDC [-1,1]
     vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
 
     gl_Position = vec4(p*2.0 - 1.0, 0.0, 1.0);
+
+    // uv [0..1] across viewport
+    vUV = p;    
 }
 """
 
 FRAG_2D_SRC = """
 #version 430 core
-
+in vec2 vUV;
 out vec4 FragColor;
 
 uniform sampler2D pixels;
 uniform vec2 viewportSize;
-uniform vec2 shift = vec2(0.0);
 uniform vec2 cMinMax = vec2(0, 65535);
 uniform bool crosshair = true;
 
 void main()
 {
-    vec4 outColor;
-
-    vec2 uv = (gl_FragCoord.xy - shift) / viewportSize;
-    // uv.y = 1.0 - uv.y; // flip?
+    vec2 uv = vUV;
+    
+    // flip?
+    // uv.y = 1.0 - uv.y;
 
     // pixel value
     float s = texture(pixels, uv).r;
@@ -65,17 +69,15 @@ void main()
     // lut
     float cMin = float(cMinMax.x/65535);
     float cMax = float(cMinMax.y/65535);
-    //clamp
-    s = clamp(s, cMin, cMax);
     // normalize
     s = (s - cMin) / (cMax - cMin);
+    //clamp
+    s = clamp(s, 0.0, 1.0);
     
-    outColor = vec4(s, s, s, 1.0);
+    vec4 outColor = vec4(s, s, s, 1.0);
     
     if ((abs(uv.x - 0.5) < 1/viewportSize.x || abs(uv.y - 0.5) < 1/viewportSize.y) && crosshair)
-    {
         outColor = vec4(1.0);
-    }
 
     FragColor = outColor;
 }
@@ -1224,14 +1226,11 @@ class GLFrameViewer:
 
         # adjust viewport based on window size
         vx, vy, vw, vh = self.config_gl_viewport()
-        # w, h = glfw.get_framebuffer_size(self.window)
         GL.glViewport(vx, vy, vw, vh)
-        # GL.glViewport(0, 0, vw, vh)
+        
         shader = self.shaders[self.mode]
-
         shader.use()
         shader.set_vec2('viewportSize', (vw, vh))    
-        shader.set_vec2('shift', (vx, vy))
         shader.set_int('crosshair', int(self.crosshair))
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
@@ -1325,7 +1324,7 @@ if __name__ == '__main__':
 
 
     if TEST_MODE == "volume":
-        viewer.start_render_loop(window_dim=(512,512))
+        viewer.start_render_loop(window_dim=(800,800))
 
         # ------------------- WIDGETS -------------------- |
 

@@ -593,12 +593,17 @@ class GLFrameViewController(GUIController):
 
         # autoscale variable
         self.autoscale = self.image_palette["Autoscale"]
+        # TODO: Gets tripped up bc widget is already config'd in camera_view.py
+        # Shouldn't be a problem if we scrap camera_view
+        self.autoscale.widget.config(
+            command=self._on_minmax_changed
+        )
 
     def try_to_display_image(self, image: SharedNDArray) -> None:
 
         # TODO: CPU min/max is inefficient
         # Try to do this with Compute Shaders on GPU
-        if self.autoscale:
+        if self.autoscale.get():
             cMin, cMax, _, _ = cv2.minMaxLoc(image)
             self.viewer.set_min_max([cMin, cMax])
 
@@ -616,7 +621,7 @@ class GLFrameViewController(GUIController):
 
     def _on_minmax_changed(self, *args):
 
-        if self.autoscale:
+        if self.autoscale.get():
             return
 
         min_counts = self.image_palette["Min"].get()

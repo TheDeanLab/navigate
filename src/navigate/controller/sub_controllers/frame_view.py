@@ -50,6 +50,7 @@ uniform sampler2D pixels;
 uniform vec2 viewportSize;
 uniform vec2 shift = vec2(0.0);
 uniform vec2 cMinMax = vec2(0, 65535);
+uniform bool crosshair = true;
 
 void main()
 {
@@ -58,22 +59,22 @@ void main()
     vec2 uv = (gl_FragCoord.xy - shift) / viewportSize;
     // uv.y = 1.0 - uv.y; // flip?
 
-    float ch_w = 0; // off
-    if (abs(uv.x - 0.5) < ch_w || abs(uv.y - 0.5) < ch_w)
+    // pixel value
+    float s = texture(pixels, uv).r;
+
+    // lut
+    float cMin = float(cMinMax.x/65535);
+    float cMax = float(cMinMax.y/65535);
+    //clamp
+    s = clamp(s, cMin, cMax);
+    // normalize
+    s = (s - cMin) / (cMax - cMin);
+    
+    outColor = vec4(s, s, s, 1.0);
+    
+    if ((abs(uv.x - 0.5) < 1/viewportSize.x || abs(uv.y - 0.5) < 1/viewportSize.y) && crosshair)
     {
         outColor = vec4(1.0);
-    } else {
-        float s = texture(pixels, uv).r;
-
-        // lut
-        float cMin = float(cMinMax.x/65535);
-        float cMax = float(cMinMax.y/65535);
-        //clamp
-        s = clamp(s, cMin, cMax);
-        // normalize
-        s = (s - cMin) / (cMax - cMin);
-        
-        outColor = vec4(s, s, s, 1.0);
     }
 
     FragColor = outColor;
@@ -312,8 +313,9 @@ class Camera:
     Orbit (yaw/pitch + radius), pixel-accurate pan, dolly,
     and auto-recenter pivot to AABB under the cursor on RMB release.
     """
-    def __init__(self, window, position=glm.vec3(0,0,5), look_at=glm.vec3(0,0,0)):
+    def __init__(self, window, parent_viewer, position=glm.vec3(0,0,5), look_at=glm.vec3(0,0,0)):
         self.window = window
+        self.parent_viewer = parent_viewer
 
         # window state
         self.win_w = self.win_h = 0
@@ -399,23 +401,36 @@ class Camera:
         self.scroll_offset = dy
 
     def _button_callback(self, window, button, action, mods):
-        if action == glfw.PRESS:
-            if button == glfw.MOUSE_BUTTON_LEFT:
-                self.is_rotating = True
-                self.first_mouse = True
-            elif button == glfw.MOUSE_BUTTON_RIGHT:
-                self.is_translating = True
-                self._was_panning = True
-                self.first_mouse = True
-        else:
-            if button == glfw.MOUSE_BUTTON_LEFT:
-                self.is_rotating = False
-            elif button == glfw.MOUSE_BUTTON_RIGHT:
-                self.is_translating = False
-                # on pan end: recenter pivot under cursor
-                if self._was_panning and self.auto_recenter_on_pan:
-                    self._recenter_pivot_under_cursor()
-                self._was_panning = False
+        """
+            The Camera class is handling mouse events.
+            Even in Frame view mode.
+            Communicate to GLFrameViewer through parent_viewer.
+        """
+        if self.parent_viewer.mode == "volume":
+            # 3D Events
+            if action == glfw.PRESS:
+                if button == glfw.MOUSE_BUTTON_LEFT:
+                    self.is_rotating = True
+                    self.first_mouse = True
+                elif button == glfw.MOUSE_BUTTON_RIGHT:
+                    self.is_translating = True
+                    self._was_panning = True
+                    self.first_mouse = True
+            else:
+                if button == glfw.MOUSE_BUTTON_LEFT:
+                    self.is_rotating = False
+                elif button == glfw.MOUSE_BUTTON_RIGHT:
+                    self.is_translating = False
+                    # on pan end: recenter pivot under cursor
+                    if self._was_panning and self.auto_recenter_on_pan:
+                        self._recenter_pivot_under_cursor()
+                    self._was_panning = False
+        elif self.parent_viewer.mode == "frame":
+            if action == glfw.PRESS and button == glfw.MOUSE_BUTTON_LEFT:
+                def _do():
+                    self.parent_viewer.crosshair = not self.parent_viewer.crosshair
+                    
+                self.parent_viewer.cmd_q.put_nowait(_do)
 
     # ---------- internals ----------
     def _recompute_position(self):
@@ -651,6 +666,7 @@ class GLFrameViewer:
         self.min_max      = None
         self.do_autoscale = False
         self.min_max      = [0, 65535]
+        self.crosshair    = True
 
         # monitoring
         self.rendered_images = 0
@@ -733,7 +749,7 @@ class GLFrameViewer:
             self.vao = GL.glGenVertexArrays(1) # quad
 
             # camera
-            self.camera = Camera(self.window, position=[500]*3)
+            self.camera = Camera(self.window, self, position=[500]*3)
 
             # 2D shader uniform inits
             self.shaders['frame'].use()
@@ -1216,6 +1232,7 @@ class GLFrameViewer:
         shader.use()
         shader.set_vec2('viewportSize', (vw, vh))    
         shader.set_vec2('shift', (vx, vy))
+        shader.set_int('crosshair', int(self.crosshair))
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
@@ -1304,7 +1321,7 @@ if __name__ == '__main__':
         "data_reto":    r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
         "beads_cs":     r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff"
     }
-    use_data = ""
+    use_data = "data_reto"
 
 
     if TEST_MODE == "volume":

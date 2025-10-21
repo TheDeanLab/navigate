@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -46,16 +46,20 @@ from navigate.model.utils.exceptions import UserVisibleException
 try:
     import gxipy  # noqa: F401
 except:
+
     @pytest.fixture(autouse=True)
     def mock_daheng_module():
         fake_gx = MagicMock()
         with patch.dict("sys.modules", {"gxipy": fake_gx}):
             yield fake_gx
 
+
 @pytest.fixture
 def mock_daheng_sdk():
     """Patch Daheng SDK (gxipy) and return mocked device + subsystems."""
-    with patch("navigate.model.devices.camera.daheng.gx.DeviceManager") as mock_device_manager:
+    with patch(
+        "navigate.model.devices.camera.daheng.gx.DeviceManager"
+    ) as mock_device_manager:
         device = _create_mock_device(mock_device_manager)
         feature_control = _create_mock_feature_control()
         data_stream, raw_image = _create_mock_image_pipeline()
@@ -102,6 +106,7 @@ def _attach_mock_interfaces_to_device(device, feature_control, data_stream):
     device.get_remote_device_feature_control.return_value = feature_control
     device.data_stream = data_stream
 
+
 def _create_mock_device(mock_device_manager) -> MagicMock:
     """
     Create a fake Daheng device and configure DeviceManager return values.
@@ -124,6 +129,7 @@ def _create_mock_device(mock_device_manager) -> MagicMock:
 
     return mock_device
 
+
 def _create_mock_feature_control() -> MagicMock:
     """
     Create a fake FeatureControl interface that simulates Daheng camera settings.
@@ -140,11 +146,14 @@ def _create_mock_feature_control() -> MagicMock:
     """
     mock_feature_control = MagicMock(name="FakeFeatureControl")
     mock_feature_control.get_string_feature.return_value.get.return_value = "1234"
-    mock_feature_control.get_int_feature.side_effect = lambda name: MagicMock(get=MagicMock(return_value=2048))
+    mock_feature_control.get_int_feature.side_effect = lambda name: MagicMock(
+        get=MagicMock(return_value=2048)
+    )
     mock_feature_control.get_enum_feature.return_value.set.return_value = None
     return mock_feature_control
 
-def _create_mock_image_pipeline() -> Tuple[MagicMock, MagicMock]: 
+
+def _create_mock_image_pipeline() -> Tuple[MagicMock, MagicMock]:
     """
     Create a mocked data stream and raw image pipeline.
 
@@ -162,6 +171,7 @@ def _create_mock_image_pipeline() -> Tuple[MagicMock, MagicMock]:
     stream.snap_image.return_value = image
     image.get_numpy_array.return_value = np.zeros((2048, 2048), dtype=np.uint16)
     return stream, image
+
 
 @pytest.fixture
 def camera(mock_daheng_sdk):
@@ -193,11 +203,12 @@ def camera(mock_daheng_sdk):
     camera = DahengCamera(
         microscope_name="test_scope",
         device_connection=mock_daheng_sdk["device"],
-        configuration=config
+        configuration=config,
     )
 
     # Initialize and return the test camera instance
     return camera
+
 
 @patch("navigate.model.devices.camera.daheng.gx.DeviceManager")
 def test_connect_without_serial(mock_dm):
@@ -218,10 +229,12 @@ def test_connect_without_serial(mock_dm):
 
     # Call connect without specifying serial number
     from navigate.model.devices.camera.daheng import DahengCamera
+
     device = DahengCamera.connect()
 
     # Verify that we get the mocked device object
     assert device == mock_device
+
 
 @patch("navigate.model.devices.camera.daheng.gx.DeviceManager")
 def test_connect_invalid_serial_raises(mock_dm):
@@ -237,8 +250,11 @@ def test_connect_invalid_serial_raises(mock_dm):
     from navigate.model.devices.camera.daheng import DahengCamera
 
     # Attempt to connect with a non-existent serial number
-    with pytest.raises(UserVisibleException, match="Daheng camera with serial INVALID_SN not found."):
+    with pytest.raises(
+        UserVisibleException, match="Daheng camera with serial INVALID_SN not found."
+    ):
         DahengCamera.connect(serial_number="INVALID_SN")
+
 
 def test_str(camera):
     """
@@ -252,6 +268,7 @@ def test_str(camera):
     assert "Serial: 1234" in result
     assert "Connected" in result
 
+
 def test_camera_connected(camera):
     """
     Test that the camera object reports a connected state after setup.
@@ -263,6 +280,7 @@ def test_camera_connected(camera):
     assert camera.is_connected
     assert camera.device_serial_number == "1234"
 
+
 def test_disconnect_clears_state(camera):
     """
     Test that disconnect() resets internal state and marks camera as disconnected.
@@ -272,6 +290,7 @@ def test_disconnect_clears_state(camera):
     assert camera.feature_control is None
     assert camera.is_connected is False
     assert camera.serial_number == "UNKNOWN"
+
 
 def test_set_exposure_time(camera):
     """
@@ -285,6 +304,7 @@ def test_set_exposure_time(camera):
     # Verifies that the SDK was told to get the 'ExposureTime' feature
     camera.feature_control.get_float_feature.assert_called_with("ExposureTime")
 
+
 def test_set_gain(camera):
     """
     Ensure set_gain() calls the Gain feature with the expected float value.
@@ -292,6 +312,7 @@ def test_set_gain(camera):
     camera.set_gain(5.0)
     camera.feature_control.get_float_feature.assert_called_with("Gain")
     camera.feature_control.get_float_feature.return_value.set.assert_called_with(5.0)
+
 
 def test_set_binning(camera):
     """
@@ -306,6 +327,7 @@ def test_set_binning(camera):
     # Check that the SDK was asked for the correct feature names at least once
     camera.feature_control.get_int_feature.assert_any_call("BinningHorizontal")
     camera.feature_control.get_int_feature.assert_any_call("BinningVertical")
+
 
 def test_set_invalid_ROI(camera):
     """
@@ -326,10 +348,13 @@ def test_set_invalid_ROI(camera):
 
     camera.stop_acquisition()
     handler.flush()
-    result = camera.set_ROI(roi_width=roi_width, roi_height=roi_height, center_x=center_x, center_y=center_y)
+    result = camera.set_ROI(
+        roi_width=roi_width, roi_height=roi_height, center_x=center_x, center_y=center_y
+    )
     assert result is False
     assert f"Invalid ROI dimensions: {roi_width}x{roi_height}" in stream.getvalue()
     logger.removeHandler(handler)
+
 
 def test_snap_image_returns_numpy_array(camera):
     """
@@ -345,6 +370,7 @@ def test_snap_image_returns_numpy_array(camera):
     assert_array_equal(result, expected)
     camera.data_stream.snap_image.assert_called_once()
 
+
 def test_snap_software_triggered_invalid_config(camera):
     """
     Test that snap_software_triggered() raises if trigger config is invalid.
@@ -355,11 +381,17 @@ def test_snap_software_triggered_invalid_config(camera):
     """
     # Override trigger mode/source with bad values
     mock_enum_feature = MagicMock()
-    mock_enum_feature.get_current_entry.return_value.get_symbolic.side_effect = ["OFF", "HARDWARE"]
+    mock_enum_feature.get_current_entry.return_value.get_symbolic.side_effect = [
+        "OFF",
+        "HARDWARE",
+    ]
     camera.feature_control.get_enum_feature.return_value = mock_enum_feature
 
-    with pytest.raises(UserVisibleException, match="TriggerMode='ON' and TriggerSource='SOFTWARE'"):
+    with pytest.raises(
+        UserVisibleException, match="TriggerMode='ON' and TriggerSource='SOFTWARE'"
+    ):
         camera.snap_software_triggered()
+
 
 def test_send_software_trigger(camera):
     """
@@ -372,6 +404,7 @@ def test_send_software_trigger(camera):
     camera.feature_control.get_command_feature.assert_called_with("TriggerSoftware")
     camera.feature_control.get_command_feature.return_value.send_command.assert_called_once()
 
+
 def test_set_trigger_mode(camera):
     """
     Test that set_trigger_mode() calls the correct enum feature and sets it to 'ON'.
@@ -379,6 +412,7 @@ def test_set_trigger_mode(camera):
     camera.set_trigger_mode("ON")
     camera.feature_control.get_enum_feature.assert_called_with("TriggerMode")
     camera.feature_control.get_enum_feature.return_value.set.assert_called_with("ON")
+
 
 def test_set_trigger_source(camera):
     """
@@ -391,6 +425,7 @@ def test_set_trigger_source(camera):
     camera.feature_control.get_enum_feature.assert_called_with("TriggerSource")
     camera.feature_control.get_enum_feature.return_value.set.assert_called_with("LINE1")
 
+
 def test_initialize_and_start_acquisition(camera):
     """
     Test that initialize_image_series and start_acquisition correctly
@@ -401,7 +436,9 @@ def test_initialize_and_start_acquisition(camera):
     number_of_frames = 5
 
     # Initialize acquisition
-    camera.initialize_image_series(data_buffer=fake_buffer, number_of_frames=number_of_frames)
+    camera.initialize_image_series(
+        data_buffer=fake_buffer, number_of_frames=number_of_frames
+    )
 
     # Assert acquisition is marked as started
     assert camera.is_acquiring is True
@@ -413,6 +450,7 @@ def test_initialize_and_start_acquisition(camera):
     camera.data_stream.start_stream.assert_called_once()
     camera.feature_control.get_command_feature.assert_called_with("AcquisitionStart")
     camera.feature_control.get_command_feature.return_value.send_command.assert_called_once()
+
 
 def test_initialize_start_and_receive_image(camera):
     """
@@ -427,7 +465,9 @@ def test_initialize_start_and_receive_image(camera):
     fake_buffer = [MagicMock(name=f"Frame{i}") for i in range(3)]
     number_of_frames = 3
 
-    camera.initialize_image_series(data_buffer=fake_buffer, number_of_frames=number_of_frames)
+    camera.initialize_image_series(
+        data_buffer=fake_buffer, number_of_frames=number_of_frames
+    )
 
     # Simulate receiving frames
     for i in range(3):
@@ -438,6 +478,7 @@ def test_initialize_start_and_receive_image(camera):
     # Circular buffer check
     wraparound = camera.get_new_frame()
     assert wraparound == [0]
+
 
 def test_stop_acquisition(camera):
     """
@@ -460,6 +501,7 @@ def test_stop_acquisition(camera):
     # Verify internal state was updated
     assert camera.is_acquiring is False
 
+
 def test_stop_acquisition_when_disconnected(camera):
     """
     Test that stop_acquisition() logs a warning and does not raise
@@ -481,6 +523,7 @@ def test_stop_acquisition_when_disconnected(camera):
 
     logger.removeHandler(handler)
 
+
 def test_set_sensor_mode_logs(camera):
     """
     Test that set_sensor_mode() logs a warning for unsupported modes.
@@ -491,6 +534,7 @@ def test_set_sensor_mode_logs(camera):
     camera.set_sensor_mode("InvalidModeName")
     camera.device.SensorShutterMode.set.assert_called_with(0)
     assert camera._scan_mode == 0
+
 
 def test_snap_software_triggered_success(camera):
     """
@@ -503,21 +547,25 @@ def test_snap_software_triggered_success(camera):
     """
     # Patch enum feature to simulate correct trigger mode and source
     mock_enum_feature = MagicMock()
-    
+
     # First call to get_symbolic() returns 'ON', second returns 'SOFTWARE'
-    mock_enum_feature.get_current_entry.return_value.get_symbolic.side_effect = ["ON", "SOFTWARE"]
+    mock_enum_feature.get_current_entry.return_value.get_symbolic.side_effect = [
+        "ON",
+        "SOFTWARE",
+    ]
     camera.feature_control.get_enum_feature.return_value = mock_enum_feature
 
     # Snap image - behind the scenes, this calls data_stream.snap_image() which
     # is mocked during setup to return a fake image whose get_numpy_array() method
     # returns np.ndarray representing a fake image.
     result = camera.snap_software_triggered()
-    
+
     expected = np.zeros((2048, 2048), dtype=np.uint16)
     assert_array_equal(result, expected)
 
     # Ensure the correct trigger command was issued via SDK
     camera.feature_control.get_command_feature.return_value.send_command.assert_called_with()
+
 
 def test_get_new_frame(camera):
     """
@@ -530,7 +578,9 @@ def test_get_new_frame(camera):
     buffer = [MagicMock() for _ in range(number_of_images)]
 
     # Initialize image acquisition
-    camera.initialize_image_series(data_buffer=buffer, number_of_frames=number_of_images)
+    camera.initialize_image_series(
+        data_buffer=buffer, number_of_frames=number_of_images
+    )
     camera._frames_received = 0
 
     # First full loop through buffer
@@ -544,6 +594,7 @@ def test_get_new_frame(camera):
 
     result = camera.get_new_frame()
     assert result == [1]
+
 
 def test_close_image_series(camera):
     """

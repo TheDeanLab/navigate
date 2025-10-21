@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -201,7 +201,9 @@ class UpdateTableTestCase(unittest.TestCase):
     def test_update_table_1(self):
         pos = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
 
-        update_table(table=self.table, pos=pos, axes=["X", "Y", "Z", "THETA", "F"], append=False)
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y", "Z", "THETA", "F"], append=False
+        )
 
         np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
         np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
@@ -213,36 +215,31 @@ class UpdateTableTestCase(unittest.TestCase):
         new_positions = np.array([[16, 17, 18, 19, 20], [21, 22, 23, 24, 25]])
 
         print(self.table.model.df.shape)
-        update_table(self.table, pos=new_positions, axes=["X", "Y", "Z", "THETA", "F"], append=True)
+        update_table(
+            self.table,
+            pos=new_positions,
+            axes=["X", "Y", "Z", "THETA", "F"],
+            append=True,
+        )
         assert self.table.currentrow == 4
         np.testing.assert_array_equal(
-            self.table.model.df["X"][
-                3:,
-            ],
+            self.table.model.df["X"][3:,],
             new_positions[:, 0],
         )
         np.testing.assert_array_equal(
-            self.table.model.df["Y"][
-                3:,
-            ],
+            self.table.model.df["Y"][3:,],
             new_positions[:, 1],
         )
         np.testing.assert_array_equal(
-            self.table.model.df["Z"][
-                3:,
-            ],
+            self.table.model.df["Z"][3:,],
             new_positions[:, 2],
         )
         np.testing.assert_array_equal(
-            self.table.model.df["THETA"][
-                3:,
-            ],
+            self.table.model.df["THETA"][3:,],
             new_positions[:, 3],
         )
         np.testing.assert_array_equal(
-            self.table.model.df["F"][
-                3:,
-            ],
+            self.table.model.df["F"][3:,],
             new_positions[:, 4],
         )
 

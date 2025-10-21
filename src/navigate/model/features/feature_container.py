@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -489,7 +489,9 @@ class SignalContainer(Container):
       track of the remaining executions.
     """
 
-    def __init__(self, root=None, cleanup_list=[], warning_queue=None, number_of_execution=1):
+    def __init__(
+        self, root=None, cleanup_list=[], warning_queue=None, number_of_execution=1
+    ):
         """Initialize the SignalContainer object.
 
         Parameters:
@@ -838,8 +840,10 @@ def load_features(model, feature_list):
                     if variable_name not in shared_variables:
                         shared_variables[variable_name] = list(arg["value"])
                     args[i] = shared_variables[variable_name]
-        
-        parameter_num = len(inspect.signature(feature_dict["name"].__init__).parameters) - 2
+
+        parameter_num = (
+            len(inspect.signature(feature_dict["name"].__init__).parameters) - 2
+        )
         if len(args) > parameter_num:
             feature = feature_dict["name"](model, *args[:parameter_num])
         else:
@@ -1041,9 +1045,9 @@ def load_features(model, feature_list):
     for node in break_list:
         if node[0] == "child":
             node[1].child, node[2].child = create_node({"name": DummyFeature})
-    return SignalContainer(signal_root, signal_cleanup_list, getattr(model, "event_queue", None)), DataContainer(
-        data_root, data_cleanup_list
-    )
+    return SignalContainer(
+        signal_root, signal_cleanup_list, getattr(model, "event_queue", None)
+    ), DataContainer(data_root, data_cleanup_list)
 
 
 def dummy_True(*args):

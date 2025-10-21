@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@ class FilterWheelBase(ABC):
         self.filter_wheel_number = device_config["hardware"]["wheel_number"]
 
     @abstractmethod
-    def set_filter(self, position: Any, wait_until_done: bool=True) -> None:
+    def set_filter(self, position: Any, wait_until_done: bool = True) -> None:
         """Set the filter wheel to the specified position.
 
         Parameters

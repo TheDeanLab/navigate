@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -31,17 +31,17 @@
 
 # ################################################################################
 # WARNING:
-#    This camera class has not been internally tested by our team. 
+#    This camera class has not been internally tested by our team.
 #    Users are advised to exercise caution when using it.
 # NOTE:
 #    This module depends on Daheng's proprietary 'gxipy' SDK.
 #    To use this camera class, 'gxipy' must be installed manually.
 #    See the ImportError message below for installation instructions.
-#.   The Line0 trigger input is used by default for external triggering.
+# .   The Line0 trigger input is used by default for external triggering.
 # ################################################################################
 
 # Standard Library Imports
-import logging 
+import logging
 from typing import Union, Any, List
 
 # Third Party Imports
@@ -61,7 +61,7 @@ except ImportError:
 import numpy as np
 
 # Local Imports
-from navigate.model.utils.exceptions import UserVisibleException 
+from navigate.model.utils.exceptions import UserVisibleException
 from navigate.model.devices.camera.base import CameraBase
 from navigate.tools.decorators import log_initialization
 
@@ -95,15 +95,17 @@ class DahengCamera(CameraBase):
             Device configuration settings (e.g. resolution, exposure).
         """
         super().__init__(microscope_name, device_connection, configuration)
-        
+
         self.microscope_name = microscope_name
-        self.device_connection = device_connection  # Store raw connection for compatibility
+        self.device_connection = (
+            device_connection  # Store raw connection for compatibility
+        )
         self.configuration = configuration
 
         # Daheng device handles
         self.device = device_connection  # The camera device object, returned from connect(). Required for all SDK interaction.
-        self.feature_control = None # Feature control interface. Used to get/set camera features (exposure, ROI, trigger, etc.).
-        self.data_stream = None # Data stream object. Handles image streaming and retrieval from the camera buffer.
+        self.feature_control = None  # Feature control interface. Used to get/set camera features (exposure, ROI, trigger, etc.).
+        self.data_stream = None  # Data stream object. Handles image streaming and retrieval from the camera buffer.
         self.device_serial_number = None
         self.payload_size = None
         self.is_connected = False
@@ -112,7 +114,9 @@ class DahengCamera(CameraBase):
         self.camera_parameters = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]
-        self.camera_parameters["x_pixels"] = 2048  # Placeholder until real values are known
+        self.camera_parameters["x_pixels"] = (
+            2048  # Placeholder until real values are known
+        )
         self.camera_parameters["y_pixels"] = 2048
 
         # Acquisition state
@@ -120,7 +124,7 @@ class DahengCamera(CameraBase):
         self._data_buffer = None
         self._number_of_frames = 100
         self._frames_received = 0
-        self._frame_ids = [] 
+        self._frame_ids = []
         self._exposure_time = 0.05  # Seconds
         self._scan_mode = 0
         self._scan_delay = 0
@@ -136,7 +140,6 @@ class DahengCamera(CameraBase):
         self.camera_parameters["supported_trigger_sources"] = ["External"]
         # support Normal and Light-Sheet modes
         self.camera_parameters["supported_sensor_modes"] = ["Normal", "Light-Sheet"]
-
 
     def __str__(self) -> str:
         """
@@ -174,7 +177,7 @@ class DahengCamera(CameraBase):
             An empty list since no parameters are required for Daheng connection.
         """
         return ["serial_number"]
-        
+
     @classmethod
     def connect(cls, serial_number: str = None) -> gx.Device:
         """
@@ -212,7 +215,9 @@ class DahengCamera(CameraBase):
                     device = device_manager.open_device_by_index(i)
                     break
             else:
-                raise UserVisibleException(f"Daheng camera with serial {serial_number} not found.")
+                raise UserVisibleException(
+                    f"Daheng camera with serial {serial_number} not found."
+                )
         else:
             # Default: connect to the first available camera (index 1 due to C-style in gxipy)
             device = device_manager.open_device_by_index(1)
@@ -233,8 +238,10 @@ class DahengCamera(CameraBase):
             If the camera device handle is missing or SDK initialization fails.
         """
         if self.device is None:
-            raise UserVisibleException("Daheng device handle not set. Was connect() called?")
-        
+            raise UserVisibleException(
+                "Daheng device handle not set. Was connect() called?"
+            )
+
         self.is_connected = True
 
         try:
@@ -243,8 +250,12 @@ class DahengCamera(CameraBase):
             self.data_stream = self.device.data_stream
 
             # Get static device properties
-            self.device_serial_number = self.feature_control.get_string_feature("DeviceSerialNumber").get()
-            self.payload_size = self.feature_control.get_int_feature("PayloadSize").get()
+            self.device_serial_number = self.feature_control.get_string_feature(
+                "DeviceSerialNumber"
+            ).get()
+            self.payload_size = self.feature_control.get_int_feature(
+                "PayloadSize"
+            ).get()
 
             # Configure Acquisition and Trigger defaults
             # Line0 as default trigger source
@@ -272,7 +283,8 @@ class DahengCamera(CameraBase):
             if configured_x != width or configured_y != height:
                 logger.info(
                     f"Configured resolution ({configured_x}x{configured_y}) differs from hardware ({width}x{height}). "
-                    "Overriding with hardware values.")
+                    "Overriding with hardware values."
+                )
 
             # Save into internal state and config dictionary
             self.camera_parameters["x_pixels"] = width
@@ -287,7 +299,7 @@ class DahengCamera(CameraBase):
 
         except Exception as e:
             raise UserVisibleException(f"Failed to initialize camera SDK state: {e}")
-    
+
     @property
     def serial_number(self) -> str:
         """
@@ -299,11 +311,13 @@ class DahengCamera(CameraBase):
             Serial number of the camera, or "UNKNOWN" if the camera is not connected.
         """
         if not self.is_connected or self.device_serial_number is None:
-            logger.warning("Attempted to retrieve serial number, but camera is not connected.")
+            logger.warning(
+                "Attempted to retrieve serial number, but camera is not connected."
+            )
             return "UNKNOWN"
 
         return self.device_serial_number
-    
+
     def report_settings(self) -> None:
         """
         Log the current camera settings using the Daheng SDK.
@@ -326,7 +340,9 @@ class DahengCamera(CameraBase):
             bin_y = self.feature_control.get_int_feature("BinningVertical").get()
             exposure_us = self.feature_control.get_float_feature("ExposureTime").get()
             trigger_mode = self.feature_control.get_enum_feature("TriggerMode").get()
-            trigger_source = self.feature_control.get_enum_feature("TriggerSource").get()
+            trigger_source = self.feature_control.get_enum_feature(
+                "TriggerSource"
+            ).get()
 
             # Log all settings
             logger.info("Camera Settings:")
@@ -353,7 +369,7 @@ class DahengCamera(CameraBase):
         all associated resources, even if errors occur during shutdown.
         """
         # Reset associated handles and status flags
-        self.feature_control = None # release device handler
+        self.feature_control = None  # release device handler
         self.data_stream = None
         self.device_serial_number = None
         self.payload_size = None
@@ -387,7 +403,6 @@ class DahengCamera(CameraBase):
 
         logger.debug(f"Sensor mode set to {mode} ({self._scan_mode})")
 
-
     def set_readout_direction(self, mode: str) -> None:
         """
         Stub method for setting readout direction — not supported on Daheng cameras.
@@ -398,7 +413,9 @@ class DahengCamera(CameraBase):
             Desired readout direction (e.g., 'Top-to-Bottom', 'Bottom-to-Top', 'Alternate').
             This value is ignored as Daheng does not support changing readout direction.
         """
-        logger.warning(f"Readout direction '{mode}' is not supported on Daheng cameras.")
+        logger.warning(
+            f"Readout direction '{mode}' is not supported on Daheng cameras."
+        )
 
     def calculate_readout_time(self) -> float:
         """
@@ -409,7 +426,9 @@ class DahengCamera(CameraBase):
         float
             Always returns 0, as Daheng does not expose readout timing data.
         """
-        logger.warning("DahengCamera does not support readout time calculation. Returning 0.")
+        logger.warning(
+            "DahengCamera does not support readout time calculation. Returning 0."
+        )
         return 0
 
     def set_line_interval(self, line_interval_time: float) -> bool:
@@ -431,8 +450,9 @@ class DahengCamera(CameraBase):
         self._scan_delay = 0
 
         return False
+
     def calculate_light_sheet_exposure_time(
-            self, full_chip_exposure_time: float, shutter_width: int
+        self, full_chip_exposure_time: float, shutter_width: int
     ) -> tuple[float, float, float]:
         """
         Stub for light-sheet exposure time calculation — not supported on Daheng cameras.
@@ -479,7 +499,9 @@ class DahengCamera(CameraBase):
             if self._scan_mode == 1:
                 exposure_time_us = exposure_time_us // self.y_pixels
                 self.camera_parameters["line_interval"] = exposure_time_us / 1_000_000
-                logger.debug(f"Light-Sheet mode: Adjusted exposure time to {exposure_time_us} µs based on {self.y_pixels} lines")
+                logger.debug(
+                    f"Light-Sheet mode: Adjusted exposure time to {exposure_time_us} µs based on {self.y_pixels} lines"
+                )
 
             # Send exposure time setting to the camera
             self.feature_control.get_float_feature("ExposureTime").set(exposure_time_us)
@@ -491,7 +513,6 @@ class DahengCamera(CameraBase):
 
         except Exception as e:
             raise UserVisibleException(f"Failed to set exposure time: {e}")
-
 
     def set_gain(self, gain: float) -> None:
         """
@@ -513,12 +534,11 @@ class DahengCamera(CameraBase):
         try:
             # Set gain using the Daheng SDK float feature
             self.feature_control.get_float_feature("Gain").set(gain)
-            
+
             logger.info(f"Gain set to {gain} dB")
 
         except Exception as e:
             raise UserVisibleException(f"Failed to set gain: {e}")
-
 
     def set_binning(self, binning_string: str = "1x1") -> bool:
         """
@@ -542,7 +562,7 @@ class DahengCamera(CameraBase):
             # Parse input
             idx = binning_string.index("x")
             bin_x = int(binning_string[:idx])
-            bin_y = int(binning_string[idx + 1:])
+            bin_y = int(binning_string[idx + 1 :])
 
             # Apply the changes to the hardware
             self.feature_control.get_int_feature("BinningHorizontal").set(bin_x)
@@ -558,15 +578,18 @@ class DahengCamera(CameraBase):
             self.x_pixels = int(width / bin_x)
             self.y_pixels = int(height / bin_y)
 
-            logger.info(f"Binning set to {binning_string} (effective resolution {self.x_pixels}x{self.y_pixels})")
+            logger.info(
+                f"Binning set to {binning_string} (effective resolution {self.x_pixels}x{self.y_pixels})"
+            )
             return True
 
         except Exception as e:
             logger.warning(f"Failed to set binning to {binning_string}: {e}")
             return False
 
-
-    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024) -> bool:
+    def set_ROI(
+        self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024
+    ) -> bool:
         """
         Set the region of interest (ROI) on the sensor, centered at (center_x, center_y).
 
@@ -595,9 +618,12 @@ class DahengCamera(CameraBase):
 
         # Validate ROI size
         if (
-            roi_width > full_width or roi_height > full_height
-            or roi_width < 1 or roi_height < 1
-            or roi_width % 2 != 0 or roi_height % 2 != 0
+            roi_width > full_width
+            or roi_height > full_height
+            or roi_width < 1
+            or roi_height < 1
+            or roi_width % 2 != 0
+            or roi_height % 2 != 0
         ):
             logger.warning(f"Invalid ROI dimensions: {roi_width}x{roi_height}")
             return False
@@ -607,7 +633,9 @@ class DahengCamera(CameraBase):
         offset_y = center_y - roi_height // 2
 
         if offset_x < 0 or offset_y < 0:
-            logger.warning(f"Computed ROI offset out of bounds: x={offset_x}, y={offset_y}")
+            logger.warning(
+                f"Computed ROI offset out of bounds: x={offset_x}, y={offset_y}"
+            )
             return False
 
         try:
@@ -621,7 +649,9 @@ class DahengCamera(CameraBase):
             self.x_pixels = roi_width
             self.y_pixels = roi_height
 
-            logger.info(f"ROI set to (offset_x={offset_x}, offset_y={offset_y}, width={roi_width}, height={roi_height})")
+            logger.info(
+                f"ROI set to (offset_x={offset_x}, offset_y={offset_y}, width={roi_width}, height={roi_height})"
+            )
             return True
 
         except Exception as e:
@@ -643,12 +673,12 @@ class DahengCamera(CameraBase):
         self._number_of_frames = number_of_frames
         self._frames_received = 0
         self._frame_ids = []
-        self.is_acquiring = True 
+        self.is_acquiring = True
 
         self.start_acquisition()
 
         logger.debug(f"Initialized image series: {number_of_frames} frames")
-        
+
     def get_new_frame(self) -> List[int]:
         """
         Retrieve a new image frame and return its index in the internal buffer.
@@ -685,7 +715,7 @@ class DahengCamera(CameraBase):
         except Exception as e:
             logger.error(f"Image receive failed: {e}")
             return []
-    
+
     def close_image_series(self) -> None:
         """
         Stop multi-frame acquisition and mark acquisition as complete.
@@ -707,7 +737,9 @@ class DahengCamera(CameraBase):
             If the camera is not connected or if acquisition start fails.
         """
         if not self.is_connected:
-            raise UserVisibleException("Camera must be connected before starting acquisition.")
+            raise UserVisibleException(
+                "Camera must be connected before starting acquisition."
+            )
 
         try:
             # Start the image data stream (necessary for frame delivery)
@@ -717,9 +749,21 @@ class DahengCamera(CameraBase):
             self.feature_control.get_command_feature("AcquisitionStart").send_command()
 
             # Retrieve and log current acquisition settings
-            acq_mode = self.feature_control.get_enum_feature("AcquisitionMode").get_current_entry().get_symbolic()
-            trigger_mode = self.feature_control.get_enum_feature("TriggerMode").get_current_entry().get_symbolic()
-            trigger_source = self.feature_control.get_enum_feature("TriggerSource").get_current_entry().get_symbolic()
+            acq_mode = (
+                self.feature_control.get_enum_feature("AcquisitionMode")
+                .get_current_entry()
+                .get_symbolic()
+            )
+            trigger_mode = (
+                self.feature_control.get_enum_feature("TriggerMode")
+                .get_current_entry()
+                .get_symbolic()
+            )
+            trigger_source = (
+                self.feature_control.get_enum_feature("TriggerSource")
+                .get_current_entry()
+                .get_symbolic()
+            )
 
             logger.info(
                 f"Acquisition started: "
@@ -751,13 +795,13 @@ class DahengCamera(CameraBase):
             # Stop the hardware and the data stream
             self.feature_control.get_command_feature("AcquisitionStop").send_command()
             self.data_stream.stop_stream()
-            
+
             self.is_acquiring = False
             logger.info("Acquisition stopped")
 
         except Exception as e:
             raise UserVisibleException(f"Failed to stop acquisition: {e}")
-        
+
     def set_camera_trigger_mode(self, mode: str) -> None:
         """
         Set the trigger mode on the camera.
@@ -782,8 +826,8 @@ class DahengCamera(CameraBase):
 
         except Exception as e:
             raise UserVisibleException(f"Failed to set trigger mode to '{mode}': {e}")
-        
-    def set_trigger_mode(self, trigger_source = "External"):
+
+    def set_trigger_mode(self, trigger_source="External"):
         """Set the camera trigger source to external or internal free run mode.
 
         This abstract method must be implemented by all subclasses.
@@ -794,7 +838,6 @@ class DahengCamera(CameraBase):
             Trigger source. Options are 'External' or 'Internal'.
         """
         super().set_trigger_mode(trigger_source)
-
 
     def set_trigger_source(self, source: str) -> None:
         """
@@ -816,11 +859,13 @@ class DahengCamera(CameraBase):
         try:
             # Set the trigger source using the Daheng SDK enum feature
             self.feature_control.get_enum_feature("TriggerSource").set(source)
-           
+
             logger.info(f"Trigger source set to {source}")
 
         except Exception as e:
-            raise UserVisibleException(f"Failed to set trigger source to '{source}': {e}")
+            raise UserVisibleException(
+                f"Failed to set trigger source to '{source}': {e}"
+            )
 
     def send_software_trigger(self) -> None:
         """
@@ -832,7 +877,9 @@ class DahengCamera(CameraBase):
             If the camera is not connected or the trigger command fails.
         """
         if not self.is_connected:
-            raise UserVisibleException("Camera must be connected to send a software trigger")
+            raise UserVisibleException(
+                "Camera must be connected to send a software trigger"
+            )
 
         try:
             self.feature_control.get_command_feature("TriggerSoftware").send_command()
@@ -843,7 +890,7 @@ class DahengCamera(CameraBase):
                 "and trigger source is set to 'SOFTWARE'.\n"
                 f"Original error: {e}"
             )
-        
+
     def snap_software_triggered(self, timeout_ms: int = 1000) -> Union[np.ndarray, Any]:
         """
         Send a software trigger and return the resulting image.
@@ -866,11 +913,21 @@ class DahengCamera(CameraBase):
             If the camera is not connected or trigger settings are incorrect.
         """
         if not self.is_connected:
-            raise UserVisibleException("Camera must be connected to perform a software-triggered snap")
+            raise UserVisibleException(
+                "Camera must be connected to perform a software-triggered snap"
+            )
 
         # Get the current trigger mode and source to see that they are correct
-        trigger_mode = self.feature_control.get_enum_feature("TriggerMode").get_current_entry().get_symbolic()
-        trigger_source = self.feature_control.get_enum_feature("TriggerSource").get_current_entry().get_symbolic()
+        trigger_mode = (
+            self.feature_control.get_enum_feature("TriggerMode")
+            .get_current_entry()
+            .get_symbolic()
+        )
+        trigger_source = (
+            self.feature_control.get_enum_feature("TriggerSource")
+            .get_current_entry()
+            .get_symbolic()
+        )
 
         if not (trigger_mode == "ON" and trigger_source == "SOFTWARE"):
             raise UserVisibleException(
@@ -880,8 +937,9 @@ class DahengCamera(CameraBase):
         self.send_software_trigger()
         return self.snap_image(timeout_ms=timeout_ms)
 
-
-    def snap_image(self, timeout_ms: int = 1000, return_raw: bool = False) -> Union[np.ndarray, Any]:
+    def snap_image(
+        self, timeout_ms: int = 1000, return_raw: bool = False
+    ) -> Union[np.ndarray, Any]:
         """
         Retrieve the next image from the camera buffer.
 
@@ -912,10 +970,11 @@ class DahengCamera(CameraBase):
         try:
             raw_image = self.data_stream.snap_image(timeout_ms)
             if raw_image is None:
-                raise UserVisibleException("No image received from the camera (timeout or stream failure)")
+                raise UserVisibleException(
+                    "No image received from the camera (timeout or stream failure)"
+                )
 
             return raw_image if return_raw else raw_image.get_numpy_array()
 
         except Exception as e:
             raise UserVisibleException(f"Error retrieving image from camera: {e}")
-    

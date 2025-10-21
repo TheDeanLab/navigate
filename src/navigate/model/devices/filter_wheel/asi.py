@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -101,7 +101,9 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
         return "ASIFilterWheel"
 
     @classmethod
-    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Build ASIFilterWheel Serial Port connection
 
         Parameters
@@ -163,12 +165,12 @@ class ASIFilterWheel(FilterWheelBase, SerialDevice):
                 filter_wheel_number=self.filter_wheel_number
             )
 
-            try: 
+            try:
                 self.filter_wheel.move_filter_wheel(self.filter_dictionary[filter_name])
                 self.filter_wheel_position = self.filter_dictionary[filter_name]
             except Exception as e:
-                logger.error(f"Filter wheel movement failed: {e}") 
-                raise   
+                logger.error(f"Filter wheel movement failed: {e}")
+                raise
 
             #  Wheel Position Change Delay
             if wait_until_done:
@@ -241,7 +243,9 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
         self.dichroic_position = 0
 
     @classmethod
-    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Build ASIFilterWheel Serial Port connection
 
         Parameters
@@ -282,7 +286,7 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
         delta_position = int(abs(old_position - new_position))
         self.wait_until_done_delay = delta_position * 0.25
 
-    def set_filter(self, filter_name: str, wait_until_done: bool=True) -> None:
+    def set_filter(self, filter_name: str, wait_until_done: bool = True) -> None:
         """Change the dichroic position.
 
         Parameters
@@ -296,18 +300,20 @@ class ASICubeSliderFilterWheel(FilterWheelBase, SerialDevice):
 
             # Calculate the Delay Needed to Change the Positions
             self.filter_change_delay(filter_name)
-            target_position = self.filter_dictionary[filter_name] # Where we want to move the filter.
+            target_position = self.filter_dictionary[
+                filter_name
+            ]  # Where we want to move the filter.
 
             assert target_position in range(4)
-            
+
             try:
                 self.dichroic.move_dichroic(
-                dichroic_id=self.dichroic_id, dichroic_position=target_position
+                    dichroic_id=self.dichroic_id, dichroic_position=target_position
                 )
                 self.dichroic_position = target_position
             except Exception as e:
-                logger.error(f"Dichroic movement failed: {e}") 
-                raise      
+                logger.error(f"Dichroic movement failed: {e}")
+                raise
 
             #  Wheel Position Change Delay
             if wait_until_done:

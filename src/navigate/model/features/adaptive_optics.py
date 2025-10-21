@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
 
 # Standard Library Imports
 from queue import Queue
-import threading
 from copy import deepcopy
 import time
 
@@ -43,7 +42,6 @@ from scipy.optimize import curve_fit
 
 # Local imports
 from navigate.model.features.common_features import PrepareNextChannel
-from navigate.model.features.feature_container import load_features
 import navigate.model.analysis.image_contrast as img_contrast
 from navigate.model.features.image_writer import ImageWriter
 
@@ -157,10 +155,7 @@ def fourier_annulus(im, radius_1=0, radius_2=64):
 class TonyWilson:
     """Tony Wilson iterative AO routine"""
 
-    def __init__(self, 
-                 model, 
-                 verbose=False
-                 ):
+    def __init__(self, model, verbose=False):
         """Initialize the Tony Wilson iterative AO routine
 
         Parameters
@@ -260,10 +255,7 @@ class TonyWilson:
             return
 
         self.model.addon_feature = [
-            [
-                {"name": PrepareNextChannel},
-                {"name": TonyWilson}
-            ]
+            [{"name": PrepareNextChannel}, {"name": TonyWilson}]
         ]
 
         self.model.configuration["experiment"]["MicroscopeState"][
@@ -341,7 +333,7 @@ class TonyWilson:
         bool
             True if the signal is done, False otherwise
         """
-        
+
         out_str = "in_func_signal\n"
         out_str += f"\tSignal:\t{self.signal_id}\n"
 
@@ -373,7 +365,7 @@ class TonyWilson:
 
         try:
             curr_mirror_coefs = self.mirror_controller.get_modal_coefs()[0]
-            
+
             out_str += (
                 f"\tCoefs:\t[{' '.join([f'{c:.2f}' for c in curr_mirror_coefs])}]\n"
             )

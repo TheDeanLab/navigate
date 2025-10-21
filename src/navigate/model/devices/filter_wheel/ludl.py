@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,6 @@ logger = logging.getLogger(p)
 
 
 class LUDLFilterWheel(FilterWheelBase, SerialDevice):
-
     """LUDLFilterWheel - Class for controlling LUDL Electronic Products Filter Wheels
 
     Testing using MAC6000 controller over RS-232. USB or Ethernet not tested.
@@ -99,7 +98,9 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
         return "LUDLFilterWheel"
 
     @classmethod
-    def connect(cls, comport: str, baudrate: int=9600, timeout: float=0.25) -> serial.Serial:
+    def connect(
+        cls, comport: str, baudrate: int = 9600, timeout: float = 0.25
+    ) -> serial.Serial:
         """Build LUDLFilterWheel Serial Port connection
 
         Attributes
@@ -137,7 +138,7 @@ class LUDLFilterWheel(FilterWheelBase, SerialDevice):
                 "Could not communicate with LUDL MAC6000 via COMPORT", comport
             )
 
-    def set_filter(self, filter_name: str, wait_until_done: bool=True) -> None:
+    def set_filter(self, filter_name: str, wait_until_done: bool = True) -> None:
         """Set the filter wheel to a specific filter position.
 
         Parameters

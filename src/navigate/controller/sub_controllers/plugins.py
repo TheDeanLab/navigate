@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -200,7 +200,9 @@ class PluginsController:
             if controller_name in self.plugins_dict:
                 self.plugins_dict[controller_name].popup.deiconify()
                 return
-            popup = PopUp(self.view, plugin_name, "+320+180", top=False, transient=False)
+            popup = PopUp(
+                self.view, plugin_name, "+320+180", top=False, transient=False
+            )
             popup.configure(bg="white")
             popup.resizable(True, True)
             content_frame = popup.get_frame()

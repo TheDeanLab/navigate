@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -90,12 +90,12 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         self.camera_parameters["y_pixels"] = self.camera_controller.max_image_height
         self.camera_parameters["x_pixels_min"] = self.camera_controller.min_image_width
         self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
-        self.camera_parameters[
-            "x_pixels_step"
-        ] = self.camera_controller.step_image_width
-        self.camera_parameters[
-            "y_pixels_step"
-        ] = self.camera_controller.step_image_height
+        self.camera_parameters["x_pixels_step"] = (
+            self.camera_controller.step_image_width
+        )
+        self.camera_parameters["y_pixels_step"] = (
+            self.camera_controller.step_image_height
+        )
         self.minimum_exposure_time, _, _ = self.camera_controller.get_property_range(
             "exposure_time"
         )
@@ -110,9 +110,9 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             else:
                 self.camera_controller.set_property_value("readout_speed", 1)
 
-        self.camera_parameters[
-            "pixel_size_in_microns"
-        ] = self.camera_controller.get_property_value("pixel_width")
+        self.camera_parameters["pixel_size_in_microns"] = (
+            self.camera_controller.get_property_value("pixel_width")
+        )
 
         # Values are pulled from the CameraParameters section of the configuration.yml
         # file. Exposure time converted here from milliseconds to seconds.
@@ -200,9 +200,9 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         """Close HamamatsuOrca Camera"""
         self.camera_controller.dev_close()
 
-    def set_trigger_mode(self, trigger_source:str="External") -> None:
+    def set_trigger_mode(self, trigger_source: str = "External") -> None:
         """Set Hamamatsu trigger source and trigger mode.
-        
+
         Parameters
         ----------
         trigger_source : str
@@ -219,17 +219,11 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             self.camera_controller.set_property_value(
                 "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
             )
+            self.camera_controller.set_property_value("trigger_active", 1.0)
+            self.camera_controller.set_property_value("trigger_mode", 1)
+            self.camera_controller.set_property_value("trigger_polarity", 2.0)
             self.camera_controller.set_property_value(
-                "trigger_active", 1.0
-            )
-            self.camera_controller.set_property_value(
-                "trigger_mode", 1
-            )
-            self.camera_controller.set_property_value(
-                "trigger_polarity", 2.0
-            )
-            self.camera_controller.set_property_value(
-                "trigger_source", 2 # External trigger.
+                "trigger_source", 2  # External trigger.
             )
             logger.debug("Set camera trigger mode: External Edge Trigger.")
 
@@ -257,18 +251,18 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 self.camera_controller.step_image_height,
             ) = self.camera_controller.get_property_range("subarray_vsize")
             # update configuration dict
-            self.camera_parameters[
-                "x_pixels_min"
-            ] = self.camera_controller.min_image_width
-            self.camera_parameters[
-                "y_pixels_min"
-            ] = self.camera_controller.min_image_height
-            self.camera_parameters[
-                "x_pixels_step"
-            ] = self.camera_controller.step_image_width
-            self.camera_parameters[
-                "y_pixels_step"
-            ] = self.camera_controller.step_image_height
+            self.camera_parameters["x_pixels_min"] = (
+                self.camera_controller.min_image_width
+            )
+            self.camera_parameters["y_pixels_min"] = (
+                self.camera_controller.min_image_height
+            )
+            self.camera_parameters["x_pixels_step"] = (
+                self.camera_controller.step_image_width
+            )
+            self.camera_parameters["y_pixels_step"] = (
+                self.camera_controller.step_image_height
+            )
         else:
             print("Camera mode not supported")
             logger.debug("Camera mode not supported")
@@ -322,7 +316,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         ----------
         exposure_time : float
             Exposure time in seconds.
-        
+
         Returns
         -------
         result: bool
@@ -392,7 +386,13 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         )
         return True
 
-    def set_ROI(self, roi_width: int=2048, roi_height: int=2048, center_x: int=1024, center_y: int=1024) -> bool:
+    def set_ROI(
+        self,
+        roi_width: int = 2048,
+        roi_height: int = 2048,
+        center_x: int = 1024,
+        center_y: int = 1024,
+    ) -> bool:
         """Change the size of the active region on the camera.
 
         Parameters
@@ -460,7 +460,9 @@ class HamamatsuBase(CameraBase, SequenceDevice):
 
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
-    def initialize_image_series(self, data_buffer: Optional[list]=None, number_of_frames: int=100) -> None:
+    def initialize_image_series(
+        self, data_buffer: Optional[list] = None, number_of_frames: int = 100
+    ) -> None:
         """Initialize HamamatsuOrca image series.
 
         Parameters

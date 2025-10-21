@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -42,7 +42,6 @@ import os
 import time
 import abc
 import copy
-import json
 
 # Third Party Imports
 import cv2
@@ -1565,7 +1564,6 @@ class CameraViewController(BaseViewController):
         self.view.after(0, lambda img=img_out: self.populate_image(img))
 
         self.update_max_counts()
-
 
     def set_mask_color_table(self, colors: list) -> None:
         """Set up segmentation mask color table

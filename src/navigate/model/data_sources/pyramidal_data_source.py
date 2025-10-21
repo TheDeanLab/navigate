@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -167,16 +167,18 @@ class PyramidalDataSource(DataSource):
         self._subdivisions = None
         self._shapes = None
 
-        if ("BDVParameters" in configuration["experiment"].keys()
-            and "down_sample" in configuration["experiment"]["BDVParameters"].keys()):
-            down_sample = configuration["experiment"]["BDVParameters"]["down_sample"].get(
-                "down_sample", False
-            )
+        if (
+            "BDVParameters" in configuration["experiment"].keys()
+            and "down_sample" in configuration["experiment"]["BDVParameters"].keys()
+        ):
+            down_sample = configuration["experiment"]["BDVParameters"][
+                "down_sample"
+            ].get("down_sample", False)
 
             if down_sample:
-                max_xy = configuration["experiment"]["BDVParameters"]["down_sample"].get(
-                    "lateral_down_sample", 1
-                )
+                max_xy = configuration["experiment"]["BDVParameters"][
+                    "down_sample"
+                ].get("lateral_down_sample", 1)
                 max_z = configuration["experiment"]["BDVParameters"]["down_sample"].get(
                     "axial_down_sample", 1
                 )

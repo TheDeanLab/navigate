@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -86,8 +86,10 @@ class SyntheticGalvo(GalvoBase):
     def __str__(self) -> str:
         """Return string representation of the GalvoNI."""
         return "SyntheticGalvo"
-    
-    def adjust(self, exposure_times: dict[str, float], sweep_times: dict[str, float]) -> dict[str, Any]:
+
+    def adjust(
+        self, exposure_times: dict[str, float], sweep_times: dict[str, float]
+    ) -> dict[str, Any]:
         """Adjust the galvo waveform to account for the camera readout time.
         Parameters
         ----------
@@ -95,7 +97,7 @@ class SyntheticGalvo(GalvoBase):
             Dictionary of exposure times.
         sweep_times : dict[str, float]
             Dictionary of sweep times.
-        
+
         Returns
         -------
         dict[str, Any]

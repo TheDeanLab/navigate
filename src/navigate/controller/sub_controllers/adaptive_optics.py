@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,12 @@ class AdaptiveOpticsPopupController(GUIController):
 
         self.view.popup.protocol("WM_DELETE_WINDOW", self.view.popup.dismiss)
 
-        self.mirror_params = self.parent_controller.configuration["experiment"]["MirrorParameters"]
-        self.ao_params = self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"]
+        self.mirror_params = self.parent_controller.configuration["experiment"][
+            "MirrorParameters"
+        ]
+        self.ao_params = self.parent_controller.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]
         self.tw_params = self.ao_params["TonyWilson"]
 
         self.ao_params["HighlightedMode"] = None
@@ -130,13 +134,19 @@ class AdaptiveOpticsPopupController(GUIController):
         #             "<KeyRelease>", self.on_input_change
         #         )
 
-        self.widgets["iterations"].widget.bind( "<KeyRelease>", self.on_input_change)
-        self.widgets["steps"].widget.bind(      "<KeyRelease>", self.on_input_change)
-        self.widgets["amplitude"].widget.bind(  "<KeyRelease>", self.on_input_change)
+        self.widgets["iterations"].widget.bind("<KeyRelease>", self.on_input_change)
+        self.widgets["steps"].widget.bind("<KeyRelease>", self.on_input_change)
+        self.widgets["amplitude"].widget.bind("<KeyRelease>", self.on_input_change)
 
-        self.widgets["from"]["button"].bind(    "<<ComboboxSelected>>", self.on_input_change)
-        self.widgets["metric"]["button"].bind(  "<<ComboboxSelected>>", self.on_input_change)
-        self.widgets["fitfunc"]["button"].bind( "<<ComboboxSelected>>", self.on_input_change)
+        self.widgets["from"]["button"].bind(
+            "<<ComboboxSelected>>", self.on_input_change
+        )
+        self.widgets["metric"]["button"].bind(
+            "<<ComboboxSelected>>", self.on_input_change
+        )
+        self.widgets["fitfunc"]["button"].bind(
+            "<<ComboboxSelected>>", self.on_input_change
+        )
 
         self.populate_experiment_values()
 
@@ -154,9 +164,7 @@ class AdaptiveOpticsPopupController(GUIController):
             The mode to highlight
         """
         evt.widget.config(background="red")
-        self.ao_params[
-            "HighlightedMode"
-        ] = mode
+        self.ao_params["HighlightedMode"] = mode
         self.plot_tw_trace()
 
     def select_all_modes(self):
@@ -212,10 +220,10 @@ class AdaptiveOpticsPopupController(GUIController):
         modes_dict = {}
         coef_list = self.get_coef_from_widgets()
         keys = self.view.mode_names
-        
+
         for i, coef in enumerate(coef_list):
             modes_dict[keys[i]] = coef
-        
+
         self.mirror_params["modes"] = modes_dict
 
         try:

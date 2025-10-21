@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,7 @@ class NIFilterWheel(FilterWheelBase, NIDevice):
                 pass
         return True
 
-    def set_filter(self, filter_name: str, wait_until_done: bool=True) -> None:
+    def set_filter(self, filter_name: str, wait_until_done: bool = True) -> None:
         """Change the filter wheel to the filter designated by the filter
         position argument. Requires a digital port on the DAQ.
 

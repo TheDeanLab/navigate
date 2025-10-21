@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ import pytest
 
 # Third Party Imports
 
+
 # Local Imports
-from test.model.dummy import DummyModel
 class TestSyntheticHardware:
 
     @pytest.fixture(autouse=True)

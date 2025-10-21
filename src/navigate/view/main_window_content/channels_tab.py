@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -537,7 +537,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
             label="Speed Mode".ljust(30),
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
-            input_args={"width": 8, "values": ["Auto", "Fixed"]}
+            input_args={"width": 8, "values": ["Auto", "Fixed"]},
         )
         self.inputs["speed"].state(["disabled", "readonly"])
         self.inputs["speed"].grid(

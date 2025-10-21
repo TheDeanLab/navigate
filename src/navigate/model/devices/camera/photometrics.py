@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
@@ -47,6 +47,7 @@ from navigate.tools.decorators import log_initialization
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 @log_initialization
 class PhotometricsCamera(CameraBase):
@@ -139,8 +140,12 @@ class PhotometricsCamera(CameraBase):
         self.camera_controller.prog_scan_dir = 0
 
         # Photometrics camera settings from config file
-        self.camera_controller.readout_port = self.camera_parameters.get("readout_port", 0)
-        self.camera_controller.speed_table_index = self.camera_parameters.get("speed_table_index", 1)
+        self.camera_controller.readout_port = self.camera_parameters.get(
+            "readout_port", 0
+        )
+        self.camera_controller.speed_table_index = self.camera_parameters.get(
+            "speed_table_index", 1
+        )
         self.camera_controller.gain = self.camera_parameters.get("gain", 1)
 
     def __str__(self) -> str:
@@ -429,10 +434,10 @@ class PhotometricsCamera(CameraBase):
 
     def set_ROI(
         self,
-        roi_width: int=3200,
-        roi_height: int=3200,
-        center_x: int=1600,
-        center_y: int=1600
+        roi_width: int = 3200,
+        roi_height: int = 3200,
+        center_x: int = 1600,
+        center_y: int = 1600,
     ) -> bool:
         """Change the size of the active region on the camera.
 
@@ -482,7 +487,9 @@ class PhotometricsCamera(CameraBase):
         self.x_pixels, self.y_pixels = self.camera_controller.shape()
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
-    def initialize_image_series(self, data_buffer: Optional[list]=None, number_of_frames: int=100) -> None:
+    def initialize_image_series(
+        self, data_buffer: Optional[list] = None, number_of_frames: int = 100
+    ) -> None:
         """Initialize Photometrics image series. This is for starting stacks etc.
 
         Parameters

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -130,7 +130,9 @@ class ASILaser(LaserBase, SerialDevice):
         return "ASILaser"
 
     @classmethod
-    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Build ASILaser Serial Port connection
 
         Parameters
@@ -154,7 +156,7 @@ class ASILaser(LaserBase, SerialDevice):
             logger.error("ASI stage connection failed.")
             raise Exception("ASI stage connection failed.")
         return tiger_controller
-    
+
     def set_power(self, laser_intensity: float) -> None:
         """Sets the analog laser power.
 
@@ -183,7 +185,6 @@ class ASILaser(LaserBase, SerialDevice):
         elif self.modulation_type == "digital":
             self.laser.logic_card_on(self.digital_axis)
             logger.info(f"{str(self)} initialized with digital modulation.")
-        
 
     def turn_off(self) -> None:
         """Turns off the laser."""
@@ -204,7 +205,6 @@ class ASILaser(LaserBase, SerialDevice):
             self.laser.logic_card_off(self.digital_axis)
             logger.info(f"{str(self)} initialized with digital modulation.")
 
-    
     def close(self) -> None:
         """Close the ASI Laser serial port.
 

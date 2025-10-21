@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ class WaveformParameterPopupWindow:
             name="Waveform Parameter Settings",
             size="+320+180",
             top=False,
-            transient=False
+            transient=False,
         )
 
         #: configuration_controller: The configuration controller
@@ -239,7 +239,7 @@ class WaveformParameterPopupWindow:
                 parent=self.galvo_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
-                input_args={"from_": 0, "to": 100, "increment": 1}
+                input_args={"from_": 0, "to": 100, "increment": 1},
             )
 
             self.inputs[galvo_labels[i] + " Rising"].grid(

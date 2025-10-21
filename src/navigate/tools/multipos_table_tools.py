@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -136,8 +136,10 @@ def compute_tiles_from_bounding_box(
             if f"{axis}_tiles" in kwargs.keys() and f"{axis}_length" in kwargs.keys():
                 additional_settings[axis] = {
                     "start": kwargs[f"{axis}_start"],
-                    "tiles": 1 if kwargs[f"{axis}_tiles"] <= 0 else kwargs[f"{axis}_tiles"],
-                    "step": kwargs[f"{axis}_length"] * (1 - overlap)
+                    "tiles": (
+                        1 if kwargs[f"{axis}_tiles"] <= 0 else kwargs[f"{axis}_tiles"]
+                    ),
+                    "step": kwargs[f"{axis}_length"] * (1 - overlap),
                 }
 
     # Error checking to prevent empty list when tiles are zero
@@ -175,7 +177,9 @@ def compute_tiles_from_bounding_box(
     additional_coordinates = []
     for axis in additional_settings:
         values = additional_settings[axis]
-        additional_coordinates.append(dim_vector(values["start"], values["tiles"], values["step"]))
+        additional_coordinates.append(
+            dim_vector(values["start"], values["tiles"], values["step"])
+        )
 
     if f_track_with_z:
         # TODO: update it later. We are not using this option in navigate now.
@@ -266,9 +270,10 @@ def update_table(table, pos, axes, append=False):
     table.redraw()
     table.tableChanged()
 
+
 def write_to_csv_file(positions, file_path):
     """Write positions to a csv file.
-    
+
     Parameters
     ----------
     pos: list or np.array

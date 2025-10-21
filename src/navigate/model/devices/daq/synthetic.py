@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 import logging
 import time
 from threading import Lock
-from typing import Any, Optional
+from typing import Any
 
 # Third Party Imports
 
@@ -103,7 +103,7 @@ class SyntheticDAQ(DAQBase):
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal.
-        
+
         Parameters
         ----------
         wait_until_done : bool, optional

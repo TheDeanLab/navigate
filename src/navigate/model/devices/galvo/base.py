@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any
 from abc import ABC, abstractmethod
 
 # Third Party Imports
@@ -134,7 +134,9 @@ class GalvoBase(ABC):
         pass
 
     @abstractmethod
-    def adjust(self, exposure_times: dict[str, float], sweep_times: dict[str, float]) -> dict:
+    def adjust(
+        self, exposure_times: dict[str, float], sweep_times: dict[str, float]
+    ) -> dict:
         """Adjust the galvo waveform to account for the camera readout time.
 
         Parameters

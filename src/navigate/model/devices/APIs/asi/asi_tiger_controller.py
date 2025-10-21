@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@ import time
 import logging
 
 import serial
+
 # Third Party Imports
 from serial import SerialException
 from serial import SerialTimeoutException
@@ -995,7 +996,7 @@ class TigerController:
         axis = int(axis) + 32
         self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f"6 CCA Z=64\r")
+        self.send_command("6 CCA Z=64\r")
         self.read_response()
 
     def logic_card_off(self, axis: str):
@@ -1009,10 +1010,10 @@ class TigerController:
         axis = int(axis) + 32
         self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f"6 CCA Z=0\r")
+        self.send_command("6 CCA Z=0\r")
         self.read_response()
 
-    def logic_cell_on(self, axis : str):
+    def logic_cell_on(self, axis: str):
         """Turn on internal logic cell
 
         Parameters
@@ -1020,12 +1021,12 @@ class TigerController:
         axis : str
             The axis of the internal logic cell
         """
-        self.send_command(f'6 M E = {axis}\r')
+        self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f'6 CCA Z=1\r')
+        self.send_command("6 CCA Z=1\r")
         self.read_response()
 
-    def logic_cell_off(self, axis :str):
+    def logic_cell_off(self, axis: str):
         """Turn off internal logic cell
 
         Parameters
@@ -1033,13 +1034,18 @@ class TigerController:
         axis : str
             The axis of the internal logic cell
         """
-        self.send_command(f'6 M E = {axis}\r')
+        self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f'6 CCA Z=0\r')
+        self.send_command("6 CCA Z=0\r")
         self.read_response()
 
     def single_axis_waveform(
-        self, axis: str, waveform: int = 0, amplitude: int = 1000, offset: int = 500, period: int = 10 
+        self,
+        axis: str,
+        waveform: int = 0,
+        amplitude: int = 1000,
+        offset: int = 500,
+        period: int = 10,
     ) -> None:
         """Programs the analog waveforms using SAA, SAO, SAP, and SAF
         Default waveform is a sawtooth waveform with an amplitude of 1V, an offset of 0.5V and period of 10 ms
@@ -1059,10 +1065,10 @@ class TigerController:
         """
         print(f"Period (ms): {period}")
         # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
-        if (waveform % 128 == 3):
-            offset = .5*(offset+amplitude)
+        if waveform % 128 == 3:
+            offset = 0.5 * (offset + amplitude)
 
-        amplitude = amplitude*2
+        amplitude = amplitude * 2
 
         print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.

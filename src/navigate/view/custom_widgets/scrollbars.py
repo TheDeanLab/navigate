@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,9 @@ class ScrolledFrame(ttk.Frame):
         # Create a frame inside the canvas which will be scrolled with it.
         #: ttk.Frame: The interior frame of the ScrolledFrame.
         self.interior = interior = ttk.Frame(self.canvas)
-        self.interior_window = self.canvas.create_window(0, 0, window=interior, anchor=tk.constants.NW)
+        self.interior_window = self.canvas.create_window(
+            0, 0, window=interior, anchor=tk.constants.NW
+        )
 
         # Track changes to the canvas and frame width and sync them,
         # also updating the scrollbar.
@@ -119,8 +121,8 @@ class ScrolledFrame(ttk.Frame):
 
     def resize(self, width, height):
         self.unbind_autosize()
-        width = width-self.vscrollbar.winfo_width()
-        height = height-self.hscrollbar.winfo_height()
+        width = width - self.vscrollbar.winfo_width()
+        height = height - self.hscrollbar.winfo_height()
         self.canvas.config(width=width)
         self.canvas.config(height=height)
         self.canvas.itemconfig(self.interior_window, width=width, height=height)

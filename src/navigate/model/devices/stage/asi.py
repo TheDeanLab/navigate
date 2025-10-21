@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -648,12 +648,10 @@ class MS2000Stage(ASIStage):
 
             # Set wheel jog speed
             jsspd = configuration["configuration"]["microscopes"][microscope_name][
-                "stage"]["hardware"][device_id].get("jsspd", None)
+                "stage"
+            ]["hardware"][device_id].get("jsspd", None)
             if jsspd is not None:
-                self.asi_controller.set_jog_speed(
-                    axes=self.asi_axes, 
-                    jsspd=int(jsspd)
-                    )
+                self.asi_controller.set_jog_speed(axes=self.asi_axes, jsspd=int(jsspd))
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)

@@ -1396,7 +1396,8 @@ class CameraViewController(BaseViewController):
             self.image_palette["SNR"].grid_remove()
         else:
             self._offset, self._variance = copy.deepcopy(off), copy.deepcopy(var)
-            self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.NSEW, pady=3)
+            self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.W,
+                                           pady=3)
 
     def slider_update(self, *_) -> None:
         """Updates the image when the slider is moved."""

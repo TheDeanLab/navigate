@@ -873,6 +873,7 @@ class Model:
         success : bool
             Was the move successful?
         """
+        print("****** moving stage to: ", pos_dict)
         try:
             r = self.active_microscope.move_stage(pos_dict, wait_until_done)
             self.logger.info(

@@ -1193,6 +1193,9 @@ class TigerController:
             "6 m e = 3",
             f"6 cca y = 9 z = {start_delay}",
             "6 ccb x = 1 y = 192",
+            # Stop sending Stage trigger signal
+            "6 m e = 35",
+            "6 cca z = 0", 
             # Cell 4, JK flop used for toggling on and off state of the loop
             # Cells 3 and 8 serve as the inputs of this cell
             "6 m e = 4",
@@ -1236,16 +1239,13 @@ class TigerController:
             f"6 cca y = 2 z = {remote_focus_output}",
             # Sets the camera signal output to the first physical PLC output
             "6 m e = 33",
-            f"6 cca z = {camera_output}",
-            # Sends TTL to Piezo
-            "6 m e = 35",
-            "6 cca z = 7",
+            f"6 cca z = {camera_output}",           
         ]
         print("Number of cycles: ", num_cycles)
         print("Cycle time (ms): ", cycle_time / 4)
         # If Single or Z-stack mode, set up the number of cycles to run
         if (num_cycles > 0):
-            commands[7:13] = [
+            commands[7:15] = [
                 # Set PLC axis 4 to be an input to receive stage sync signal
                 "6 m e = 36",
                 "6 cca y = 0",
@@ -1260,6 +1260,9 @@ class TigerController:
                 "6 m e = 5",
                 "6 cca y = 5",
                 "6 ccb x = 4 y = 100",
+                #Send Trigger to stage
+                "6 m e = 35",
+                "6 cca z = 7",
             ]
             
         # Creates object to hold galvo commands
@@ -1312,19 +1315,17 @@ class TigerController:
         print("Waiting for loop to finish...")
         bit4 = 1
         while bit4 == 1:
-            #time.sleep(0.1)  # sleep for 100 ms before checking again
             self.send_command(f"6 rdadc z?") 
             # returns 16-bit integer indicating state of all 16 cells, 
             # where the 4th least significant bit gives the value of cell 4
             response = self.read_response()
-            print(f"Response: {response}")
             try:
                 result = int(response.split(" ")[1])
             except (ValueError, IndexError):
-                print("Couldn't read logic cell state, trying again...")
+                # print("Couldn't read logic cell state, trying again...")
                 continue
             bit4 = result >> 3 & 1
-            print(f"Cell 4 state: {bit4}")
+            time.sleep(0.01)  # sleep for 10 ms before checking again
         return 
 
     def get_axis_addr(self) -> dict:

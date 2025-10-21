@@ -232,17 +232,33 @@ class AutofocusPopupController(GUIController):
         return func
 
     def display_plot(self, data_and_flags: tuple[np.ndarray, bool, bool]) -> None:
-        """Displays the autofocus plot
+        """
+        Display autofocus data on the coarse axes, handling segmentation, plotting mode, and redraw.
 
-        data : tuple[np.ndarray, bool, bool]
-            (data, line_plot, clear_data)
-            data: The data to be plotted.
-            line_plot:
-                If True, the plot will be a line plot.
-                If False, the plot will be a scatter plot.
-            clear_data:
-                If True, the plot will be cleared before plotting.
-                If False, the plot will be added to the existing plot.
+        This method unpacks and normalizes incoming data, splits it into coarse and fine
+        segments according to the current autofocus settings, renders scatter and/or line
+        plots on the coarse axes, optionally clears previous data, marks the detected
+        maximum(s), and schedules a non-blocking canvas redraw.
+
+        Parameters
+        ----------
+        data_and_flags : tuple[np.ndarray, bool, bool]
+            Tuple of (data, line_plot, clear_data).
+            - data : array_like, shape (N, >=2)
+                Rows are samples; column 0 is x positions (stage), column 1 is signal values.
+                The method converts this to ``np.asarray(..., dtype=float)`` internally.
+            - line_plot : bool
+                If True and data is non-empty, overlay a continuous red line through the points.
+                If False, only scatter markers are drawn.
+            - clear_data : bool
+                If True, the axes are cleared before plotting; when clearing and data exists,
+                the method will call ``_plot_maxima`` to draw peak indicators.
+
+        Raises
+        ------
+        ValueError
+            May be raised if ``data`` is empty or has fewer than two columns (propagated from
+            internal processing or from ``_plot_maxima``).
         """
         # Unpack the data and flags
         data, line_plot, clear_data = data_and_flags
@@ -280,7 +296,14 @@ class AutofocusPopupController(GUIController):
         self._redraw_plot()
 
     def _redraw_plot(self):
-        # To redraw the plot
+        """
+        Redraw the autofocus coarse plot and refresh the figure canvas.
+
+        This method updates the plot title and axis labels, applies scientific formatting
+        to the y-axis, enables minor tick locators on both axes, tightens the figure
+        layout, and schedules a non-blocking canvas redraw.
+
+        """
         self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
         self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)
         self.autofocus_coarse.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -290,7 +313,26 @@ class AutofocusPopupController(GUIController):
         self.autofocus_fig.canvas.draw_idle()
 
     def _plot_maxima(self, data: np.ndarray) -> None:
-        # Plot the maxima
+        """
+        Plot vertical and horizontal indicators for the maximum (peak) in the autofocus data.
+
+        This method finds the maximum signal value and its corresponding x location,
+        reads the current axes limits, draws a vertical dashed line at the peak location
+        and a horizontal dashed line at the peak value, and stores the plotted line
+        references on `self.coarse_plot`.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            2D array with shape (N, >=2). Column 0 contains x positions and column 1
+            contains the corresponding signal values.
+
+        Raises
+        ------
+        ValueError
+            If `data` is empty or does not contain at least two columns.
+
+        """
         y_max = np.max(data[:, 1])
         peak_loc = data[np.argmax(data[:, 1]), 0]
 
@@ -309,7 +351,7 @@ class AutofocusPopupController(GUIController):
 
     @property
     def custom_events(self) -> dict[str, callable]:
-        """dict: Custom events for this controller
+        """Custom events for this controller
 
         Returns
         -------

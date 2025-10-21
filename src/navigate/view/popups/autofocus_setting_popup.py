@@ -33,6 +33,7 @@
 # Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
+import logging
 
 # Third Party Imports
 from matplotlib.figure import Figure

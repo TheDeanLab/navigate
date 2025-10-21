@@ -38,6 +38,7 @@ from abc import ABC, abstractmethod
 
 # Third Party Imports
 import tifffile
+import numpy as np
 
 # Local Imports
 from navigate.config import get_navigate_path
@@ -226,16 +227,22 @@ class CameraBase(ABC):
         """
         serial_number = self.camera_parameters["hardware"]["serial_number"]
         map_path = os.path.join(get_navigate_path(), "camera_maps")
-        try:
-            self._offset = tifffile.imread(
-                os.path.join(map_path, f"{serial_number}_off.tiff")
-            )
-            self._variance = tifffile.imread(
-                os.path.join(map_path, f"{serial_number}_var.tiff")
-            )
-        except FileNotFoundError:
-            logger.info(f"{str(self)}, Offset or variance map not found in {map_path}")
+
+        def load_map(filename_base: str) -> Optional[np.ndarray]:
+            for ext in [".tiff", ".tif"]:
+                file_path = os.path.join(map_path, f"{filename_base}{ext}")
+                if os.path.exists(file_path):
+                    return tifffile.imread(file_path)
+            return None
+
+        self._offset = load_map(f"{serial_number}_off")
+        self._variance = load_map(f"{serial_number}_var")
+
+        if self._offset is None or self._variance is None:
+            logger.info(
+                f"{str(self)}, Offset or variance map not found in {map_path}")
             self._offset, self._variance = None, None
+
         return self._offset, self._variance
 
     @property

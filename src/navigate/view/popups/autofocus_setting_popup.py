@@ -280,9 +280,8 @@ class AutofocusPopup:
         self.autofocus_btn = ttk.Button(
             button_bar, text="▶ Start Autofocus", style="Accent.TButton", width=18
         )
-        self.autofocus_btn.pack(pady=(4, 6))
+        self.autofocus_btn.pack(pady=(4, 6), anchor="center")
         button_bar.grid_columnconfigure(0, weight=1)
-        self.autofocus_btn.pack(anchor="center")
 
         # Plot
         self.fig = Figure(figsize=(5, 5), dpi=100)

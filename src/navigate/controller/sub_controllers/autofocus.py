@@ -271,8 +271,8 @@ class AutofocusPopupController(GUIController):
                     data[coarse_steps:, 0], data[coarse_steps:, 1], "k."
                 )
 
-            # if data.size:
-            self._plot_maxima(data)
+            if data.size:
+                self._plot_maxima(data)
 
         if line_plot and data.size:
             self.autofocus_coarse.plot(data[:, 0], data[:, 1], "r-")

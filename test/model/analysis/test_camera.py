@@ -2,19 +2,28 @@ import numpy as np
 import pytest
 
 
-@pytest.mark.skip("volatile")
 def test_compute_scmos_offset_and_variance_map():
     from navigate.model.analysis.camera import compute_scmos_offset_and_variance_map
 
-    mu, sig = 100 * np.random.rand() + 1, 100 * np.random.rand() + 1
-    im = sig * np.random.randn(256, 256, 256) + mu
+    # deterministic RNG and fixed signal parameters
+    rng = np.random.default_rng(0)
+    mu, sig = 100.0, 20.0
+    frames = 256
+    im = sig * rng.standard_normal((256, 256, frames)) + mu
 
     offset, variance = compute_scmos_offset_and_variance_map(im)
 
-    print(mu, sig)
-    # TODO: 1 is a bit high?
-    np.testing.assert_allclose(offset, mu, rtol=1)
-    np.testing.assert_allclose(variance, sig * sig, rtol=1)
+    # theoretical standard errors for per-pixel estimators (normal samples)
+    n = frames
+    stderr_mean = sig / np.sqrt(n)
+    stderr_var = sig * sig * np.sqrt(2.0 / (n - 1))
+
+    # allow a few sigma of the estimator's sampling distribution (e.g. 5\*std)
+    atol_mean = 5.0 * stderr_mean
+    atol_var = 5.0 * stderr_var
+
+    np.testing.assert_allclose(offset, mu, atol=atol_mean, rtol=0.0)
+    np.testing.assert_allclose(variance, sig * sig, atol=atol_var, rtol=0.0)
 
 
 @pytest.mark.parametrize("local", [True, False])

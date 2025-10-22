@@ -1,0 +1,9 @@
+[run]
+source = navigate
+omit =
+    */config.py
+    */config-*.py
+
+[report]
+exclude_lines =
+    pragma: no cover

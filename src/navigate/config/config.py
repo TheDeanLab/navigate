@@ -309,6 +309,18 @@ def verify_experiment_config(manager, configuration):
                         device_ref,
                         autofocus_sample_setting,
                     )
+                else:
+                    # add missing parameters
+                    for k in autofocus_sample_setting.keys():
+                        if (
+                            k
+                            not in autofocus_setting_dict[microscope_name][device][
+                                device_ref
+                            ].keys()
+                        ):
+                            autofocus_setting_dict[microscope_name][device][
+                                device_ref
+                            ][k] = autofocus_sample_setting[k]
 
     # remove non-consistent autofocus parameter
     for microscope_name in autofocus_setting_dict.keys():

@@ -30,9 +30,6 @@ jobs:
 
           # sync dependencies from uv.lock
           uv sync --group docs --group dev
-
-          # install the package itself without re-resolving dependencies
-          python -m pip install -e . --no-deps
       - name: Test with pytest
         run: |
           python3 -m pytest

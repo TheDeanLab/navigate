@@ -152,7 +152,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
                 self.asi_controller.set_backlash(ax, 0.0)
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.9)
+            self.set_speed(percent=0.4)
 
     def __del__(self) -> None:
         """Delete the ASI Stage connection."""
@@ -286,7 +286,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return False
 
         if wait_until_done:
-            self.asi_controller.wait_for_device()
+            self.asi_controller.wait_for_device(600)
         return True
 
     def verify_move(self, move_dictionary: dict[str, float]) -> dict[str, float]:
@@ -358,7 +358,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             logger.exception("ASI Stage Exception", e)
             return False
         if wait_until_done:
-            self.asi_controller.wait_for_device()
+            self.asi_controller.wait_for_device(600)
 
         return True
 

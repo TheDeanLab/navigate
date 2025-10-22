@@ -1368,7 +1368,7 @@ class ZStackAcquisition:
                 )
             )
 
-            if self.current_position_idx > 0:
+            if self.current_position_idx >= 0:
                 delta_distances = [
                     self.current_position[axis] - self.pre_position[axis]
                     for axis in self.tiling_axes
@@ -1406,6 +1406,8 @@ class ZStackAcquisition:
                 data_thread_is_paused = True
 
             self.model.move_stage(pos_dict, wait_until_done=True)
+
+            print("****** stage has moved to where it should be. ******")
 
         # Potentially pause the data thread and move z, f position
         if self.need_to_move_z_position:
@@ -1521,10 +1523,10 @@ class ZStackAcquisition:
                 wait_until_done=not self.model.is_data_thread_on,
             )  # Update position
 
-            if not self.model.is_data_thread_on:
-                self.model.grab_image(
-                    getattr(self.model.image_writer, "save_image", None)
-                )
+            # if not self.model.is_data_thread_on:
+            #     self.model.grab_image(
+            #         getattr(self.model.image_writer, "save_image", None)
+            #     )
             return True
 
         return False

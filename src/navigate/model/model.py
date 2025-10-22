@@ -1235,13 +1235,24 @@ class Model:
         start_time = time.perf_counter_ns()
         try:
             self.active_microscope.turn_on_laser()
-            self.active_microscope.daq.run_acquisition(
-                wait_until_done=self.is_data_thread_on
-            )
-            if not self.is_data_thread_on:
-                if self.available_image_count > 0:
+            trigger_source = self.configuration["experiment"]["CameraParameters"][
+                self.active_microscope_name
+            ].get("trigger_source", "External")
+            print(f"**** trigger source: {trigger_source} ****")
+            if trigger_source == "External":
+                self.active_microscope.daq.run_acquisition(
+                    wait_until_done=self.is_data_thread_on
+                )
+                if not self.is_data_thread_on:
+                    self.available_image_count += 1
+                    self.active_microscope.daq.wait_acquisition_done()
                     self.grab_image(getattr(self.image_writer, "save_image", None))
-                self.active_microscope.daq.wait_acquisition_done()
+            else:
+                print("**** send out software trigger!")
+                self.active_microscope.camera.send_software_trigger()
+                if not self.is_data_thread_on:
+                    self.available_image_count += 1
+                    self.grab_image(getattr(self.image_writer, "save_image", None))
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
             if self.active_microscope.current_channel == 0:
@@ -1271,8 +1282,6 @@ class Model:
             )
         )
 
-        self.available_image_count += 1
-
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
@@ -1298,6 +1307,17 @@ class Model:
                     f"/{self.camera_wait_iterations} iterations"
                 )
                 wait_num -= 1
+                trigger_source = self.configuration["experiment"]["CameraParameters"][
+                    self.active_microscope_name
+                ].get("trigger_source", "External")
+                if trigger_source == "External":
+                    self.active_microscope.daq.run_acquisition()
+                else:
+                    self.active_microscope.camera.send_software_trigger()
+                self.logger.debug(
+                    f"Resend software triggers {self.camera_wait_iterations - wait_num}"
+                    f"times"
+                )
                 if wait_num <= 0:
                     error_statement = (
                         "Acquisition aborted due to camera time out "

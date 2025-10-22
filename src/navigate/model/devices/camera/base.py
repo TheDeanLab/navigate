@@ -435,3 +435,7 @@ class CameraBase(ABC):
             Sensor mode. Options are 'Normal' or 'Light-Sheet'.
         """
         pass
+
+    def send_software_trigger(self) -> None:
+        """Send a software trigger to the camera."""
+        pass

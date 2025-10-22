@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+import time
 from typing import Any, Optional
 
 # Third Party Imports
@@ -81,6 +82,9 @@ class XimeaBase(CameraBase):
         #: dict: Configuration settings
         self.configuration = configuration
 
+        self._exposure_time = 0.1
+        self._frames_received = 0
+
         #: dict: Camera parameters
         self.camera_parameters["x_pixels"] = self.cam.get_param("width:max")
         self.camera_parameters["y_pixels"] = self.cam.get_param("height:max")
@@ -102,22 +106,23 @@ class XimeaBase(CameraBase):
             input_trigger_port = "XI_GPI_PORT1"
         self.cam.set_param("gpi_selector", input_trigger_port)
         self.cam.set_param("gpi_mode", "XI_GPI_TRIGGER")
+        self.cam.set_param("trigger_selector", "XI_TRG_SEL_FRAME_START")
         self.cam.set_param('trigger_source', "XI_TRG_EDGE_RISING")
-
+        # self.cam.set_param("trigger_source", "XI_TRG_OFF")
         self.camera_parameters["supported_sensor_modes"] = ["Normal"]
         self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
-
+        self.camera_parameters["supported_trigger_sources"] = ["External", "Internal"]
 
     def __str__(self) -> str:
         """Return string representation of Ximea Base class
-        
+
         Returns
         -------
         str
             String representation of Ximea Base class.
         """
         return "XimeaBase"
-    
+
     def __del__(self):
         """Delete Ximea Camera class."""
         self.cam.close_device()
@@ -159,7 +164,7 @@ class XimeaBase(CameraBase):
             raise UserWarning(
                 "Could not establish connection with XIMEA camera", serial_number
             )
-        
+
     @property
     def serial_number(self) -> str:
         """Get Camera Serial Number
@@ -176,7 +181,8 @@ class XimeaBase(CameraBase):
 
         Prints the current camera settings to the console and the log file.
         """
-        params = ["exposure", "downsampling", "width", "height", "offsetX", "offsetY", "shutter_type"]
+        params = ["exposure", "downsampling", "width", "height", "offsetX", "offsetY",
+                  "shutter_type"]
         for param in params:
             value = self.cam.get_param(param)
             print(param, value)
@@ -186,9 +192,9 @@ class XimeaBase(CameraBase):
         """Set Ximea sensor mode.
 
         On the manual page 72:
-        Cameras can be operated in two shutter modes, Rolling Shutter or Global Reset Release. 
-        The Rolling Shutter mode is used if the camera is operated in free-run mode. 
-        If the camera is triggered, either by hardware trigger or through software, 
+        Cameras can be operated in two shutter modes, Rolling Shutter or Global Reset Release.
+        The Rolling Shutter mode is used if the camera is operated in free-run mode.
+        If the camera is triggered, either by hardware trigger or through software,
         the sensor uses the Global Reset Release mode.
 
         Confirmed that the camera can run in free-run mode even if it is triggered by software.
@@ -214,6 +220,16 @@ class XimeaBase(CameraBase):
     def set_readout_direction(self, mode: str) -> None:
         """Set readout direction
         
+        Parameters
+        ----------
+        mode : str
+            'Top-to-Bottom'
+        """
+        logger.info("Ximea camera only supports Top-to-Bottom readout direction.")
+
+    def set_readout_direction(self, mode: str) -> None:
+        """Set readout direction
+
         Parameters
         ----------
         mode : str
@@ -252,7 +268,8 @@ class XimeaBase(CameraBase):
         readout_time : float
             Readout time for light-sheet imaging.
         """
-        return super().calculate_light_sheet_exposure_time(full_chip_exposure_time, shutter_width)
+        return super().calculate_light_sheet_exposure_time(full_chip_exposure_time,
+                                                           shutter_width)
     
     def set_exposure_time(self, exposure_time: float) -> bool:
         """Set Ximea exposure time.
@@ -271,8 +288,12 @@ class XimeaBase(CameraBase):
         result: bool
             True if successful, False otherwise.
         """
-        #seconds to us.
+        # seconds to us.
         self.cam.set_param("exposure", exposure_time * 1000000)
+        self.cam.set_param("trigger_overlap", "XI_TRG_OVERLAP_OFF")
+        self.cam.set_framerate(1 / (exposure_time*1000000))
+        self._exposure_time = exposure_time
+        self.cam.enable_recent_frame()
         return True
     
     def set_line_interval(self, line_interval_time: float) -> bool:
@@ -316,13 +337,14 @@ class XimeaBase(CameraBase):
             logger.debug(f"can't set binning to {binning_string}")
             print(f"can't set binning to {binning_string}")
             return False
-        self.cam.set_param("downsampling_type", "XI_BINNING") # XI_BINNING
+        self.cam.set_param("downsampling_type", "XI_BINNING")  # XI_BINNING
         self.cam.set_param("downsampling", "XI_DWN_" + binning_string)
         # after setting downsampling, the image size changes (width, height, imgpayloadsize)
 
         return True
 
-    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024) -> bool:
+    def set_ROI(self, roi_width=2048, roi_height=2048, center_x=1024,
+                center_y=1024) -> bool:
         """Change the size of the active region on the camera.
 
         Parameters
@@ -341,7 +363,8 @@ class XimeaBase(CameraBase):
         result: bool
             True if successful, False otherwise.
         """
-        binning_value = int(self.cam.get_param("downsampling")[len("XI_DWN_"):].split("x")[0])
+        binning_value = int(
+            self.cam.get_param("downsampling")[len("XI_DWN_"):].split("x")[0])
 
         roi_width = roi_width // binning_value
         roi_width = roi_width - roi_width % self.camera_parameters["x_pixels_step"]
@@ -356,17 +379,18 @@ class XimeaBase(CameraBase):
         y_max = self.camera_parameters["y_pixels"] // binning_value
 
         if (roi_width % self.camera_parameters["x_pixels_step"] != 0
-            or roi_height % self.camera_parameters["y_pixels_step"] != 0
-            or offset_x < self.offset_x_min
-            or offset_x % self.offset_x_step != 0
-            or offset_y < self.offset_y_min
-            or offset_y % self.offset_y_step != 0
-            or offset_x + roi_width > x_max
-            or offset_y + roi_height > y_max
+                or roi_height % self.camera_parameters["y_pixels_step"] != 0
+                or offset_x < self.offset_x_min
+                or offset_x % self.offset_x_step != 0
+                or offset_y < self.offset_y_min
+                or offset_y % self.offset_y_step != 0
+                or offset_x + roi_width > x_max
+                or offset_y + roi_height > y_max
         ):
-            logger.debug(f"can't set roi to {roi_width} and {roi_height} with the center ({center_x}, {center_y})")
+            logger.debug(
+                f"can't set roi to {roi_width} and {roi_height} with the center ({center_x}, {center_y})")
             return False
-        
+
         # width and height are actual image size, not the ROI size in Ximea Camera
         try:
             self.cam.set_param("width", roi_width)
@@ -374,7 +398,8 @@ class XimeaBase(CameraBase):
             self.cam.set_param("offsetX", offset_x)
             self.cam.set_param("offsetY", offset_y)
         except xiapi.Xi_error as e:
-            logger.error(f"Error setting ROI: {e} with {roi_width} and {roi_height} with the offset ({offset_x}, {offset_y})")
+            logger.error(
+                f"Error setting ROI: {e} with {roi_width} and {roi_height} with the offset ({offset_x}, {offset_y})")
             return False
 
         self.x_pixels = self.cam.get_param("width") * binning_value
@@ -382,7 +407,8 @@ class XimeaBase(CameraBase):
 
         return self.x_pixels == roi_width * binning_value and self.y_pixels == roi_height * binning_value
 
-    def initialize_image_series(self, data_buffer: Optional[list]=None, number_of_frames=100) -> None:
+    def initialize_image_series(self, data_buffer: Optional[list] = None,
+                                number_of_frames=100) -> None:
         """Initialize Ximea Camera image series.
 
         Parameters
@@ -392,23 +418,24 @@ class XimeaBase(CameraBase):
             self.img_width) and dtype="uint16"
             Default is None.
         number_of_frames : int
-            Number of frames.  Default is 100.
+            Number of frames.  Default is 100.It
         """
         self._data_buffer = data_buffer
         self._number_of_frames = number_of_frames
         self._frames_received = 0
+        self._reset_threshold = 200
 
         # set buffer policy: XI_BP_SAFE
         self.cam.set_param("buffer_policy", "XI_BP_SAFE")
         # set image data format to XI_MONO16, this value can be set only if acquisition is stopped.
         self.cam.set_param('imgdataformat', "XI_MONO16")
-        #imgpayloadsize changes automatically after setting imgdataformat
+        # imgpayloadsize changes automatically after setting imgdataformat
         # self.cam.get_param("imgpayloadsize")
         # start_acquisition
         self._image = xiapi.Image()
         self.cam.start_acquisition()
-        self.is_acquiring = True
 
+        self.is_acquiring = True
     def close_image_series(self) -> None:
         """Close image series.
 
@@ -426,22 +453,41 @@ class XimeaBase(CameraBase):
             Frame ids from Ximea camera.
         """
         # attach buffer to image object
-        self._image.bp = self._data_buffer[self._frames_received].ctypes.data
-        self._image.bp_size = self._data_buffer[self._frames_received].nbytes
+        # self._image.bp = self._data_buffer[self._frames_received].ctypes.data
+        # self._image.bp_size = self._data_buffer[self._frames_received].nbytes
+        # self.cam.get_image(self._image, 10000)
         # get data from camera
         try:
-            self.cam.get_image(self._image, 500)
+            self.cam.get_image(self._image, 110000)
+            temp = self._image.get_image_data_numpy()
+            self._data_buffer[self._frames_received][:, :] = temp[:, :]
         except xiapi.Xi_error as e:
             logger.error(f"Error getting image from camera: {e}")
+            self.reset_camera()
             return []
-
         frames_received = [self._frames_received]
 
         self._frames_received += 1
+
+        self._reset_threshold -= 1
+        print(self._reset_threshold)
+        if self._reset_threshold <= 0:
+            self.reset_camera()
+
         if self._frames_received >= self._number_of_frames:
             self._frames_received = 0
 
         return frames_received
+
+    def reset_camera(self) -> None:
+        """Reset camera to default settings."""
+        self.close_image_series()
+        time.sleep(1)
+        frames_received = self._frames_received
+        self.initialize_image_series(self._data_buffer, self._number_of_frames)
+        self._frames_received = frames_received
+        time.sleep(5)
+
 
 class MU196XRCamera(XimeaBase):
     """Ximea MU196XR class.
@@ -470,14 +516,14 @@ class MU196XRCamera(XimeaBase):
         """
         super().__init__(microscope_name, device_connection, configuration)
 
-        # on MU196 series, the trigger input is on GPI port 3, gpi index is 2
-        self.cam.set_param("gpi_selector", "XI_GPI_PORT2")
-        # need to reset the trigger mode to XI_GPI_TRIGGER, otherwise the trigger mode is XI_GPI_OFF
-        self.cam.set_param("gpi_mode", "XI_GPI_TRIGGER")
+        # # on MU196 series, the trigger input is on GPI port 3, gpi index is 2
+        # self.cam.set_param("gpi_selector", "XI_GPI_PORT2")
+        # # need to reset the trigger mode to XI_GPI_TRIGGER, otherwise the trigger mode is XI_GPI_OFF
+        # self.cam.set_param("gpi_mode", "XI_GPI_TRIGGER")
 
     def __str__(str) -> str:
         """Return string representation of Ximea MU196XR class
-        
+
         Returns
         -------
         str
@@ -485,3 +531,19 @@ class MU196XRCamera(XimeaBase):
         """
         return "Ximea MU196XR Camera"
 
+    def set_trigger_mode(self, mode: str="External"):
+        if mode == "External":
+            self.cam.set_param("gpi_selector", "XI_GPI_PORT2")
+            self.cam.set_param("gpi_mode", "XI_GPI_TRIGGER")
+            # need to reset the trigger mode to XI_GPI_TRIGGER, otherwise the trigger mode is XI_GPI_OFF
+            self.cam.set_param("trigger_selector", "XI_TRG_SEL_FRAME_START")
+            self.cam.set_param("trigger_source", "XI_TRG_EDGE_FALLING")
+        else:
+            self.cam.set_param("gpi_selector", "XI_GPI_PORT2")
+            self.cam.set_param("gpi_mode", "XI_GPI_OFF")
+            self.cam.set_param("trigger_source", "XI_TRG_SOFTWARE")
+
+    def send_software_trigger(self) -> None:
+        """Send software trigger to Ximea camera."""
+        self.cam.set_param("trigger_software", 1)
+        time.sleep(self._exposure_time )

@@ -29,7 +29,7 @@ jobs:
           python -m pip install uv
 
           # install pinned deps from the lock file (command may be `install`, `sync` or `apply` depending on uv version)
-          uv install --lockfile uv.lock
+          uv pip install --lockfile uv.lock
 
           # install the package itself without re-resolving dependencies
           python -m pip install -e '.[dev,docs]'

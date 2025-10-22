@@ -35,7 +35,7 @@ jobs:
           python -m pip install -e . --no-deps
       - name: Test with pytest
         run: |
-          python3 -m pytest
+          uv run pytest
       - name: Codecov
         uses: codecov/codecov-action@v3.1.0
         with:

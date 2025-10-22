@@ -41,7 +41,7 @@ from datetime import datetime
 
 # Third Party Imports
 import numpy as np
-from tifffile import imsave
+from tifffile import imwrite
 
 # Local imports
 import navigate
@@ -257,7 +257,7 @@ class ImageWriter:
                             + str(t_idx).zfill(6)
                             + ".tif"
                         )
-                        imsave(
+                        imwrite(
                             os.path.join(self.mip_directory, mip_name),
                             self.mip[c_save_idx, :, :],
                         )

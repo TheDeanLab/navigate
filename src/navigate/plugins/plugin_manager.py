@@ -70,13 +70,27 @@ class PluginPackageManager:
     def get_plugins() -> dict:
         """Get plugins
 
+        importlib.metadata.entry_points changed API across versions:
+        - Older versions returned a dict-like object supporting .get("group", [])
+        - Newer versions (Py3.10+) accept entry_points(group="...") and/or .select(group="...")
+
         Returns
         -------
         plugins : dict
             plugins dict
         """
         plugins = {}
-        for entry_point in entry_points().get("navigate.plugins", []):
+
+        try:
+            # Preferred modern API (Py3.10+). Returns an iterable of EntryPoint.
+            candidate_eps = entry_points(group="navigate.plugins")
+        except TypeError:
+            # Backward compatibility for older importlib_metadata where entry_points()
+            # returns a dict-like mapping of groups.
+            eps_all = entry_points()
+            candidate_eps = eps_all.get("navigate.plugins", [])
+
+        for entry_point in candidate_eps:
             plugin_package_name = entry_point.module.split(".")[0]
             if plugin_package_name in plugins:
                 error_statement = (
@@ -87,6 +101,7 @@ class PluginPackageManager:
                 print(error_statement)
                 continue
             plugins[plugin_package_name] = plugin_package_name
+
         return plugins
 
     @staticmethod

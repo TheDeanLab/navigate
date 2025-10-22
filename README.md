@@ -14,7 +14,21 @@ navigate
 **navigate** is an open source Python package for control of light-sheet microscopes.
 It allows for easily reconfigurable hardware setups and automated acquisition routines.
 
-### Quick install
+### Quick install with UV
+
+Download and install [UV](https://uv.readthedocs.io/en/latest/installation.html).
+
+```
+cd path/to/navigate
+uv sync
+
+# Install optional dependencies for development
+uv sync --group dev --group docs
+```
+
+To test, run 'uv run navigate -sh' to launch in synthetic hardware mode.
+
+### Quick install with Miniconda
 
 Download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).
 

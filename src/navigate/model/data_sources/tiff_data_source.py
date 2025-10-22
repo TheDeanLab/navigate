@@ -226,7 +226,7 @@ class TiffDataSource(DataSource):
         data : npt.ArrayLike
             Data to write to file.
         kw : dict
-            Keyword arguments to pass to tifffile.imsave.
+            Keyword arguments to pass to tifffile.imwrite.
         """
         self.mode = "w"
 

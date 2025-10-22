@@ -127,7 +127,7 @@ class KeystrokeController(GUIController):
         self.multi_table = main_view.settings.multiposition_tab.multipoint_list.pt
 
         #: MultiPositionTable: Multiposition Table
-        self.multi_table.rowheader.bind(
+        self.multi_table.row_header.bind(
             "<Double-Button-1>", self.multi_controller.handle_double_click
         )
 

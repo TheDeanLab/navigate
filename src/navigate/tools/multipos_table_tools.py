@@ -262,7 +262,7 @@ def update_table(table, pos, axes, append=False):
     """
     frame = pd.DataFrame(pos, columns=[axis.upper() for axis in axes])
     if append:
-        table.model.df = table.model.df.append(frame, ignore_index=True)
+        table.model.df = pd.concat([table.model.df, frame], ignore_index=True)
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1

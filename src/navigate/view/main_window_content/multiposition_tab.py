@@ -107,6 +107,7 @@ class MultiPointFrame(ttk.Labelframe):
             Arbitrary keyword arguments.
 
         """
+        self.inputs = {}
         text_label = "Multi-Position Acquisition"
         super().__init__(settings_tab, text=text_label, *args, **kwargs)
 
@@ -167,7 +168,7 @@ class MultiPointList(ttk.Frame):
     """MultiPointList
 
     MultiPointList is a frame that contains the widgets for the multipoint
-    experiment settings. uses Pandastable for embedding an interactive list within a
+    experiment settings. It uses Pandastable for embedding an interactive list within a
     tk Frame. https://pandastable.readthedocs.io/en/latest/
     """
 
@@ -245,11 +246,11 @@ class MultiPositionRowHeader(RowHeader):
 
         Returns
         -------
-        popupmenu : tk.Menu
+        popup_menu : tk.Menu
             The popup menu.
         """
 
-        defaultactions = {
+        default_actions = {
             "Sort by index": lambda: self.table.sortTable(index=True),
             "Reset index": lambda: self.table.resetIndex(),
             "Toggle index": lambda: self.toggleIndex(),
@@ -271,19 +272,18 @@ class MultiPositionRowHeader(RowHeader):
             "Delete Position(s)",
         ]
 
-        popupmenu = Menu(self, tearoff=0)
+        popup_menu = Menu(self, tearoff=0)
 
-        def popupFocusOut(event):
-            popupmenu.unpost()
+        def popup_focus_out(*_):
+            popup_menu.unpost()
 
         for action in main:
-            popupmenu.add_command(label=action, command=defaultactions[action])
+            popup_menu.add_command(label=action, command=default_actions[action])
 
-        popupmenu.bind("<FocusOut>", popupFocusOut)
-        popupmenu.focus_set()
-        popupmenu.post(event.x_root, event.y_root)
-        # applyStyle(popupmenu)
-        return popupmenu
+        popup_menu.bind("<FocusOut>", popup_focus_out)
+        popup_menu.focus_set()
+        popup_menu.post(event.x_root, event.y_root)
+        return popup_menu
 
 
 class MultiPositionColumnHeader(ColumnHeader):
@@ -293,7 +293,7 @@ class MultiPositionColumnHeader(ColumnHeader):
     customize the column header for the multipoint table.
     """
 
-    def __init__(self, parent=None, table=None, bg="gray25"):
+    def __init__(self, parent=None, table=None, bg="#F5F5F5"):
         """Initialize the MultiPositionColumnHeader
 
         Parameters
@@ -306,7 +306,12 @@ class MultiPositionColumnHeader(ColumnHeader):
             The background color of the column header.
         """
 
-        super().__init__(parent, table, bg)
+        super().__init__(parent, table, bgcolor=bg, fgcolor="black")
+        self.atdivider = None
+        self.bgcolor = bg
+        self.fgcolor = "white"
+        self.thefont = ("Helvetica", 12, "bold")
+        self.configure(bg=bg)
 
     def popupMenu(self, event):
         """Add left and right click behaviour for column header
@@ -382,6 +387,8 @@ class MultiPositionTable(Table):
 
         super().__init__(parent, width=400, height=500, columns=4, **kwargs)
 
+        self.table_col_header = None
+        self.row_header = None
         self.loadCSV = None
         self.exportCSV = None
         self.insertRow = None
@@ -398,14 +405,15 @@ class MultiPositionTable(Table):
         super().show(callback)
 
         #: MultiPositionRowHeader: The row header for the table.
-        self.rowheader = MultiPositionRowHeader(self.parentframe, self)
-        self.rowheader.grid(row=1, column=0, rowspan=1, sticky="news")
+        self.row_header = MultiPositionRowHeader(self.parentframe, self)
+        self.row_header.grid(row=1, column=0, rowspan=1, sticky="news")
 
         #: MultiPositionColumnHeader: The column header for the table.
-        self.tablecolheader = MultiPositionColumnHeader(
-            self.parentframe, self, bg=self.colheadercolor
+        bg_color = getattr(self, "colheadercolor", "gray25")
+        self.table_col_header = MultiPositionColumnHeader(
+            self.parentframe, self, bg=bg_color
         )
-        self.tablecolheader.grid(row=0, column=1, rowspan=1, sticky="news")
+        self.table_col_header.grid(row=0, column=1, rowspan=1, sticky="news")
 
     def popupMenu(self, event, rows=None, cols=None, outside=None):
         """Add right click behaviour for table

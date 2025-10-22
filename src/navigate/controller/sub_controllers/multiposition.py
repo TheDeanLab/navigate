@@ -318,7 +318,9 @@ class MultiPositionController(GUIController):
 
     def insert_row_func(self) -> None:
         """Insert a row in the Multi-Position Acquisition Interface."""
-        self.table.model.addRow(self.table.currentrow)
+        insert_at = max(self.table.currentrow, 0)
+        self.table.model.insertRow(insert_at)
+        self.table.currentrow = insert_at
         self.table.update_rowcolors()
         self.table.redraw()
         self.table.tableChanged()
@@ -356,8 +358,9 @@ class MultiPositionController(GUIController):
         self.table.model.df = self.table.model.df.reindex(columns=headers)
 
         # temp = list(map(lambda k: position[k], position))
-        self.table.model.df = self.table.model.df.append(
-            pd.DataFrame([temp], columns=headers), ignore_index=True
+        new_row = pd.DataFrame([temp], columns=headers)
+        self.table.model.df = pd.concat(
+            [self.table.model.df, new_row], ignore_index=True
         )
         self.table.currentrow = self.table.model.df.shape[0] - 1
         self.table.update_rowcolors()

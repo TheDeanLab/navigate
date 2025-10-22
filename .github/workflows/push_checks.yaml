@@ -29,7 +29,10 @@ jobs:
           python -m pip install uv
 
           # sync dependencies from uv.lock
-          uv sync --group docs --group dev
+          uv sync
+          uv sync --group dev
+          
+          python -m pip install -e . --no-deps
       - name: Test with pytest
         run: |
           python3 -m pytest

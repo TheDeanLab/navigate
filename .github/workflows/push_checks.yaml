@@ -28,11 +28,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install uv
 
-          # install pinned deps from the lock file (command may be `install`, `sync` or `apply` depending on uv version)
-          uv pip install --lockfile uv.lock
+          # sync dependencies from uv.lock
+          uv sync --group docs --group dev
 
           # install the package itself without re-resolving dependencies
-          python -m pip install -e '.[dev,docs]'
+          python -m pip install -e . --no-deps
       - name: Test with pytest
         run: |
           python3 -m pytest

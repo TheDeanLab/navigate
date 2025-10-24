@@ -63,7 +63,6 @@ from navigate.controller.sub_controllers import (
     MenuController,
     PluginsController,
     HistogramController,
-    GLVolumeViewer,
     GLFrameViewController
     # MicroscopePopupController,
     # AdaptiveOpticsPopupController,

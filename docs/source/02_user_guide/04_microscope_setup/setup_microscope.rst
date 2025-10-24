@@ -9,3 +9,4 @@ Setting Up A Microscope
 
    01_software_configuration/software_configuration
    02_multiple_cameras/multiple_cameras
+   03_snr/snr

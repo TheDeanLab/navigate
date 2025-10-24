@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,9 @@ class TestStageTlKCubeInertial:
         self.random_multiple_axes_test = random_multiple_axes_test
 
     def test_stage_attributes(self):
-        stage = KIM001Stage(self.microscope_name, self.kim_controller, self.configuration)
+        stage = KIM001Stage(
+            self.microscope_name, self.kim_controller, self.configuration
+        )
 
         # Methods
         assert hasattr(stage, "get_position_dict") and callable(
@@ -132,7 +134,9 @@ class TestStageTlKCubeInertial:
     def test_initialize_stage(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
-        stage = KIM001Stage(self.microscope_name, self.kim_controller, self.configuration)
+        stage = KIM001Stage(
+            self.microscope_name, self.kim_controller, self.configuration
+        )
 
         # Attributes
         for axis in axes:

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,10 @@ class AutofocusPopupController(GUIController):
     """Class creates the popup to configure autofocus parameters."""
 
     def __init__(
-            self,
-            view: AutofocusPopup,
-            parent_controller: 'navigate.controller.controller.Controller') -> None:
+        self,
+        view: AutofocusPopup,
+        parent_controller: "navigate.controller.controller.Controller",
+    ) -> None:
         """
         Parameters
         ----------
@@ -99,7 +100,7 @@ class AutofocusPopupController(GUIController):
             self.view.setting_vars[k].trace_add("write", self.update_setting_dict(k))
 
     def close_popup(self, *_: tuple[str]) -> None:
-        """Closes the popup window
+        """Close the popup window
 
         Parameters
         ----------
@@ -224,58 +225,114 @@ class AutofocusPopupController(GUIController):
         def func(*_: tuple[str]) -> None:
             device = self.widgets["device"].widget.get()
             device_ref = self.widgets["device_ref"].widget.get()
-            self.setting_dict[self.microscope_name][device][device_ref][
-                parameter
-            ] = self.view.setting_vars[parameter].get()
+            self.setting_dict[self.microscope_name][device][device_ref][parameter] = (
+                self.view.setting_vars[parameter].get()
+            )
 
         return func
 
-    def display_plot(
-            self,
-            data_and_flags: tuple[np.ndarray, bool, bool]
-    ) -> None:
-        """Displays the autofocus plot
-
-        data : tuple[np.ndarray, bool, bool]
-            (data, line_plot, clear_data)
-            data: The data to be plotted.
-            line_plot:
-                If True, the plot will be a line plot.
-                If False, the plot will be a scatter plot.
-            clear_data:
-                If True, the plot will be cleared before plotting.
-                If False, the plot will be added to the existing plot.
+    def display_plot(self, data_and_flags: tuple[np.ndarray, bool, bool]) -> None:
         """
+        Display autofocus data on the coarse axes, handling segmentation, plotting mode, and redraw.
+
+        This method unpacks and normalizes incoming data, splits it into coarse and fine
+        segments according to the current autofocus settings, renders scatter and/or line
+        plots on the coarse axes, optionally clears previous data, marks the detected
+        maximum(s), and schedules a non-blocking canvas redraw.
+
+        Parameters
+        ----------
+        data_and_flags : tuple[np.ndarray, bool, bool]
+            Tuple of (data, line_plot, clear_data).
+            - data : array_like, shape (N, >=2)
+                Rows are samples; column 0 is x positions (stage), column 1 is signal values.
+                The method converts this to ``np.asarray(..., dtype=float)`` internally.
+            - line_plot : bool
+                If True and data is non-empty, overlay a continuous red line through the points.
+                If False, only scatter markers are drawn.
+            - clear_data : bool
+                If True, the axes are cleared before plotting; when clearing and data exists,
+                the method will call ``_plot_maxima`` to draw peak indicators.
+
+        Raises
+        ------
+        ValueError
+            May be raised if ``data`` is empty or has fewer than two columns (propagated from
+            internal processing or from ``_plot_maxima``).
+        """
+        # Unpack the data and flags
         data, line_plot, clear_data = data_and_flags
-        data = np.asarray(data)
-        coarse_range = self.setting_dict.get("coarse_range", 500)
-        coarse_step = self.setting_dict.get("coarse_step_size", 50)
-        fine_range = self.setting_dict.get("fine_range", 50)
-        fine_step = self.setting_dict.get("fine_step_size", 5)
+        data = np.asarray(data, dtype=float)
+
+        # Pull current settings for the selected device/ref
+        device = self.widgets["device"].widget.get()
+        device_ref = self.widgets["device_ref"].widget.get()
+        settings = self.setting_dict[self.microscope_name][device][device_ref]
 
         # Calculate the coarse portion of the data
+        coarse_range = float(settings.get("coarse_range", 500))
+        coarse_step = float(settings.get("coarse_step_size", 50))
         coarse_steps = int(coarse_range) // int(coarse_step) + 1
-        fine_steps = int(fine_range) // int(fine_step) + 1
 
-        if line_plot is True:
-            marker = "r-"
-        else:
-            marker = "k."
-
-        if clear_data is True:
+        if clear_data:
             self.autofocus_coarse.clear()
+            if data.shape[0] > 0:
+                self.autofocus_coarse.plot(
+                    data[:coarse_steps, 0], data[:coarse_steps, 1], "k."
+                )
 
-        # Plotting coarse data
-        self.coarse_plot = self.autofocus_coarse.plot(
-            data[:coarse_steps, 0], data[:coarse_steps, 1], marker
-        )
+            # fine segment begins after coarse, not at fine_steps
+            if data.shape[0] > coarse_steps:
+                self.autofocus_coarse.plot(
+                    data[coarse_steps:, 0], data[coarse_steps:, 1], "k."
+                )
 
-        # Plotting fine data
-        self.coarse_plot = self.autofocus_coarse.plot(
-            data[fine_steps:, 0], data[fine_steps:, 1], marker
-        )
+            if data.size:
+                self._plot_maxima(data)
 
-        # Plot the maxima
+        if line_plot and data.size:
+            self.autofocus_coarse.plot(data[:, 0], data[:, 1], "r-")
+
+        self._redraw_plot()
+
+    def _redraw_plot(self):
+        """
+        Redraw the autofocus coarse plot and refresh the figure canvas.
+
+        This method updates the plot title and axis labels, applies scientific formatting
+        to the y-axis, enables minor tick locators on both axes, tightens the figure
+        layout, and schedules a non-blocking canvas redraw.
+
+        """
+        self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
+        self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)
+        self.autofocus_coarse.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+        self.autofocus_coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.autofocus_coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.autofocus_fig.tight_layout()
+        self.autofocus_fig.canvas.draw_idle()
+
+    def _plot_maxima(self, data: np.ndarray) -> None:
+        """
+        Plot vertical and horizontal indicators for the maximum (peak) in the autofocus data.
+
+        This method finds the maximum signal value and its corresponding x location,
+        reads the current axes limits, draws a vertical dashed line at the peak location
+        and a horizontal dashed line at the peak value, and stores the plotted line
+        references on `self.coarse_plot`.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            2D array with shape (N, >=2). Column 0 contains x positions and column 1
+            contains the corresponding signal values.
+
+        Raises
+        ------
+        ValueError
+            If `data` is empty or does not contain at least two columns.
+
+        """
         y_max = np.max(data[:, 1])
         peak_loc = data[np.argmax(data[:, 1]), 0]
 
@@ -292,18 +349,9 @@ class AutofocusPopupController(GUIController):
             [x_axes_limit[0], x_axes_limit[1]], [y_max, y_max], "--", color="gray"
         )
 
-        # To redraw the plot
-        self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
-        self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)
-        self.autofocus_coarse.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
-        self.autofocus_coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
-        self.autofocus_coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
-        self.autofocus_fig.tight_layout()
-        self.autofocus_fig.canvas.draw_idle()
-
     @property
     def custom_events(self) -> dict[str, callable]:
-        """dict: Custom events for this controller
+        """Custom events for this controller
 
         Returns
         -------

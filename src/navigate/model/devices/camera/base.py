@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ from abc import ABC, abstractmethod
 
 # Third Party Imports
 import tifffile
+import numpy as np
 
 # Local Imports
 from navigate.config import get_navigate_path
@@ -165,11 +166,9 @@ class CameraBase(ABC):
 
     @abstractmethod
     def initialize_image_series(
-        self, 
-        data_buffer: Optional[list]=None, 
-        number_of_frames: int=100
+        self, data_buffer: Optional[list] = None, number_of_frames: int = 100
     ) -> None:
-        """Initialize image series and attach the given data_buffer, 
+        """Initialize image series and attach the given data_buffer,
         which serves as the destination for incoming images.
 
         This abstract method must be implemented by all subclasses.
@@ -228,16 +227,22 @@ class CameraBase(ABC):
         """
         serial_number = self.camera_parameters["hardware"]["serial_number"]
         map_path = os.path.join(get_navigate_path(), "camera_maps")
-        try:
-            self._offset = tifffile.imread(
-                os.path.join(map_path, f"{serial_number}_off.tiff")
-            )
-            self._variance = tifffile.imread(
-                os.path.join(map_path, f"{serial_number}_var.tiff")
-            )
-        except FileNotFoundError:
-            logger.info(f"{str(self)}, Offset or variance map not found in {map_path}")
+
+        def load_map(filename_base: str) -> Optional[np.ndarray]:
+            for ext in [".tiff", ".tif"]:
+                file_path = os.path.join(map_path, f"{filename_base}{ext}")
+                if os.path.exists(file_path):
+                    return tifffile.imread(file_path)
+            return None
+
+        self._offset = load_map(f"{serial_number}_off")
+        self._variance = load_map(f"{serial_number}_var")
+
+        if self._offset is None or self._variance is None:
+            logger.info(
+                f"{str(self)}, Offset or variance map not found in {map_path}")
             self._offset, self._variance = None, None
+
         return self._offset, self._variance
 
     @property
@@ -324,7 +329,7 @@ class CameraBase(ABC):
             line interval duration (s).
         """
         return self.camera_parameters.get("line_interval", None)
-    
+
     @abstractmethod
     def set_ROI(
         self,

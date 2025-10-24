@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,9 @@ class BigDataViewerDataSource(PyramidalDataSource):
                 zs = min(z // dz, self.shapes[i, 0] - 1)  # TODO: Is this necessary?
                 try:
                     # Down-sample in X and Y.
-                    self.image[dataset_name][zs, ...] = data[::dy, ::dx].astype(self.dtype)
+                    self.image[dataset_name][zs, ...] = data[::dy, ::dx].astype(
+                        self.dtype
+                    )
                     if is_kw and (i == 0):
                         self._views.append(kw)
                 except OSError as e:

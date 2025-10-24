@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -42,7 +42,6 @@ import os
 import time
 import abc
 import copy
-import json
 
 # Third Party Imports
 import cv2
@@ -1397,7 +1396,8 @@ class CameraViewController(BaseViewController):
             self.image_palette["SNR"].grid_remove()
         else:
             self._offset, self._variance = copy.deepcopy(off), copy.deepcopy(var)
-            self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.NSEW, pady=3)
+            self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.W,
+                                           pady=3)
 
     def slider_update(self, *_) -> None:
         """Updates the image when the slider is moved."""

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -44,6 +44,7 @@ from typing import Optional
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 def function_timer(func):
     """Decorator for evaluating the duration of time necessary to execute a statement.
 
@@ -67,10 +68,11 @@ def function_timer(func):
 
     return wrap_func
 
+
 def performance_monitor(
-        prefix : str ="General",
-        display_args : Optional[callable] =None,
-        display_result : Optional[callable] = None
+    prefix: str = "General",
+    display_args: Optional[callable] = None,
+    display_result: Optional[callable] = None,
 ) -> callable:
     """Decorator for evaluating the duration of time necessary to execute a statement.
 
@@ -88,6 +90,7 @@ def performance_monitor(
     decorator : callable
         The decorator function.
     """
+
     def decorator(func):
         @wraps(func)
         def wrap_func(*args, **kwargs):
@@ -98,14 +101,18 @@ def performance_monitor(
                     {
                         "kind": prefix,
                         "args": display_args(*args) if display_args else "Hidden",
-                        "result": display_result(result) if display_result else "Hidden",
+                        "result": (
+                            display_result(result) if display_result else "Hidden"
+                        ),
                         "duration_ns": time.perf_counter_ns() - start_time,
                         "timestamp": time.time(),
                     }
                 )
             )
             return result
+
         return wrap_func
+
     return decorator
 
 

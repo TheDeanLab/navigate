@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -306,9 +306,9 @@ class ConfigurationController:
         if self.microscope_config is not None:
             stage_dict = self.microscope_config["stage"]
             for a in axes:
-                position_limits[a] = float(stage_dict.get(
-                    a + suffix, 0 if suffix == "_min" else 100
-                ))
+                position_limits[a] = float(
+                    stage_dict.get(a + suffix, 0 if suffix == "_min" else 100)
+                )
         else:
             for a in axes:
                 position_limits[a] = 0 if suffix == "_min" else 100

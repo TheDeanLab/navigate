@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@ from navigate.tools.multipos_table_tools import (
     update_table,
 )
 from navigate.controller.sub_controllers.gui import GUIController
-from navigate.tools.common_functions import combine_funcs
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.config.config import get_navigate_path
 
@@ -100,7 +99,9 @@ class TilingWizardController(GUIController):
 
         # Initialize widgets to previous values
         #: list: List of axes to iterate over
-        stage_axes = self.parent_controller.parent_controller.configuration_controller.stage_axes
+        stage_axes = (
+            self.parent_controller.parent_controller.configuration_controller.stage_axes
+        )
         self._axes = [axis for axis in stage_axes if axis != "theta"]
         self.load_settings()
 
@@ -270,7 +271,7 @@ class TilingWizardController(GUIController):
             if a > b:
                 return b, a
             return a, b
-    
+
         if False in self.is_validated.values():
             messagebox.showwarning(
                 title="Navigate",
@@ -278,7 +279,7 @@ class TilingWizardController(GUIController):
                 "please make sure all FOV Dists are correct!",
             )
             return
-        
+
         tiling_setting = {}
         for axis in self._axes:
             start_pos = float(self.variables[f"{axis}_start"].get())
@@ -287,19 +288,11 @@ class TilingWizardController(GUIController):
             fov = float(self.variables[f"{axis}_fov"].get())
 
             if axis == self.primary_z_axis:
-                start_pos -= float(
-                    self.stack_acq_widgets["start_position"].get()
-                )
-                stop_pos -= float(
-                    self.stack_acq_widgets["end_position"].get()
-                )
+                start_pos -= float(self.stack_acq_widgets["start_position"].get())
+                stop_pos -= float(self.stack_acq_widgets["end_position"].get())
             elif axis == self.primary_f_axis:
-                start_pos -= float(
-                    self.stack_acq_widgets["start_focus"].get()
-                )
-                stop_pos -= float(
-                    self.stack_acq_widgets["end_focus"].get()
-                )
+                start_pos -= float(self.stack_acq_widgets["start_focus"].get())
+                stop_pos -= float(self.stack_acq_widgets["end_focus"].get())
 
             start_pos, stop_pos = sort_vars(start_pos, stop_pos)
             tiling_setting[f"{axis}_start"] = start_pos
@@ -313,8 +306,7 @@ class TilingWizardController(GUIController):
 
         overlap = float(self._percent_overlap) / 100
         columns, table_values = compute_tiles_from_bounding_box(
-            overlap=overlap,
-            **tiling_setting
+            overlap=overlap, **tiling_setting
         )
 
         update_table(self.multipoint_table, table_values, columns)
@@ -485,7 +477,9 @@ class TilingWizardController(GUIController):
                 # get the new primary z axis
                 primary_z = self.stack_acq_widgets["z_device"].get().split(" - ")[1]
                 if self.primary_z_axis != primary_z:
-                    self.variables[f"{primary_z}_fov"].set(self.variables[f"{self.primary_z_axis}_fov"].get())
+                    self.variables[f"{primary_z}_fov"].set(
+                        self.variables[f"{self.primary_z_axis}_fov"].get()
+                    )
                     self.variables[f"{self.primary_z_axis}_fov"].set(0)
                     self.primary_z_axis = primary_z
                 return
@@ -493,7 +487,9 @@ class TilingWizardController(GUIController):
                 # get the new primary f axis
                 primary_f = self.stack_acq_widgets["f_device"].get().split(" - ")[1]
                 if self.primary_f_axis != primary_f:
-                    self.variables[f"{primary_f}_fov"].set(self.variables[f"{self.primary_f_axis}_fov"].get())
+                    self.variables[f"{primary_f}_fov"].set(
+                        self.variables[f"{self.primary_f_axis}_fov"].get()
+                    )
                     self.variables[f"{self.primary_f_axis}_fov"].set(0)
                     self.primary_f_axis = primary_f
                 return

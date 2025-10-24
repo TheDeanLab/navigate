@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -157,7 +157,7 @@ class DiagnosticsPopup(ttk.Frame):
         uniform_grid(self.diagnostics_frame)
 
     # Add plot figure
-    def add_plot_figure(self, title : str) -> None:
+    def add_plot_figure(self, title: str) -> None:
         """Add a plot figure to the diagnostics popup.
         Parameters
         ----------

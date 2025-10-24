@@ -7,6 +7,44 @@ Cameras
 The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.
 
+-------------------
+
+Daheng
+------
+
+MER2-1220-32U3C
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+More information on the Daheng MER2-1220-32U3C camera can be found
+`here <https://en.daheng-imaging.com/show-106-1997-1.html>`_.
+
+.. warning::
+
+    This camera class has not been internally tested by our team. Users are advised to exercise caution when using it.
+
+.. note::
+
+    This camera requires Daheng Imaging's proprietary Python SDK and must be installed manually. Download the SDK `here <https://www.daheng-imaging.com/>`_. Locate 'gxipy' under: Development/Samples/Python/gxipy and then install it using pip. Also, this camera class uses the Line0 trigger input by default for external triggering.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+            camera:
+              hardware:
+                type: daheng.Daheng
+                serial_number: "123456"
+              defect_correct_mode: 2.0
+              delay: 1.0  #ms
+              settle_down: 0.1 #ms
+              flip_x: False
+              flip_y: False
+
+|
+
+
 Hamamatsu
 ---------
 

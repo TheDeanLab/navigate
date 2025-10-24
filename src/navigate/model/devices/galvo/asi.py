@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,9 @@ class ASIGalvo(GalvoBase, SerialDevice):
         return "GalvoASI"
 
     @classmethod
-    def connect(cls, port: str, baudrate: int=115200, timeout: float=0.25) -> TigerController:
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Build ASILaser Serial Port connection
 
         Parameters
@@ -109,7 +111,9 @@ class ASIGalvo(GalvoBase, SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
 
-    def adjust(self, exposure_times: dict[str, float], sweep_times: dict[str, float]) -> dict[str, Any]:
+    def adjust(
+        self, exposure_times: dict[str, float], sweep_times: dict[str, float]
+    ) -> dict[str, Any]:
         """Adjust the galvo waveform to account for the camera readout time.
 
         Parameters
@@ -224,7 +228,13 @@ class ASIGalvo(GalvoBase, SerialDevice):
                     print("Unknown Galvo waveform specified in configuration file.")
                     continue
 
-    def sawtooth(self, period: float=10, amplitude: float=1, offset: float=0, duty_cycle: float=100) -> None:
+    def sawtooth(
+        self,
+        period: float = 10,
+        amplitude: float = 1,
+        offset: float = 0,
+        duty_cycle: float = 100,
+    ) -> None:
         """
         Sends the tiger controller commands to initiate the sawtooth wave.
 
@@ -266,7 +276,9 @@ class ASIGalvo(GalvoBase, SerialDevice):
         # Waveform is free running after TTL input
         self.galvo.single_axis_mode(self.axis, 4)
 
-    def sine_wave(self, period: float=10.0, amplitude: float=1.0, offset: float=0.0) -> None:
+    def sine_wave(
+        self, period: float = 10.0, amplitude: float = 1.0, offset: float = 0.0
+    ) -> None:
         """Sends the tiger controller commands to initiate the sine wave.
 
         Parameters

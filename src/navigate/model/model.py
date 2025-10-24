@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
@@ -1637,10 +1637,7 @@ class Model:
                 if microscope_config[k] == "":
                     idx = int(k[k.rfind("_") + 1 :])
                     microscope.filter_wheel[k] = SyntheticFilterWheel(
-                        microscope_name,
-                        None,
-                        self.configuration,
-                        idx
+                        microscope_name, None, self.configuration, idx
                     )
             else:
                 if microscope_config[k] == "":

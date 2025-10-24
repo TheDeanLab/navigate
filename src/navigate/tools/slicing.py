@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
 def slice_len(sl, n):
     """Calculate the length of the slice over an array of size n.
 
@@ -46,6 +47,7 @@ def slice_len(sl, n):
     """
     return len(range(n)[sl])
 
+
 def key_len(keys):
     # Check lengths
     if isinstance(keys, slice) or isinstance(keys, int):
@@ -54,11 +56,10 @@ def key_len(keys):
         length = len(keys)
 
     if length < 1:
-        raise IndexError(
-            "Too few indices."
-        )
+        raise IndexError("Too few indices.")
 
     return length
+
 
 def ensure_iter(keys, pos, shape):
     """Ensure the output is iterable.
@@ -102,12 +103,13 @@ def ensure_iter(keys, pos, shape):
             return range(start, stop, step)
         elif isinstance(val, int):
             if val > shape or (val + 1) > shape:
-                # TODO: It's not clear to me this is the correct behavior 
-                return range(shape-1, shape)
+                # TODO: It's not clear to me this is the correct behavior
+                return range(shape - 1, shape)
             return range(val, val + 1)
-            
+
     else:
         return range(shape)
+
 
 def ensure_slice(keys, pos):
     """Ensure the output is a slice.
@@ -138,7 +140,7 @@ def ensure_slice(keys, pos):
             # Only one key
             val = keys
         if isinstance(val, int):
-            return slice(val, val+1, None)
+            return slice(val, val + 1, None)
         assert isinstance(val, slice)
         return val
     else:

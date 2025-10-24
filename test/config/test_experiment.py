@@ -115,7 +115,6 @@ class TextExperimentFile(unittest.TestCase):
 
         self.parse_entries(section="CameraParameters", expected_values=expected_values)
 
-    # TODO: This test case could be removed after PR#452 is merged into Develop.
     def test_autofocus_parameters(self):
         expected_values = {
             "coarse_range": int,
@@ -125,6 +124,8 @@ class TextExperimentFile(unittest.TestCase):
             "fine_step_size": int,
             "fine_selected": bool,
             "robust_fit": bool,
+            "spline_fit": bool,
+            "test_significance": bool,
         }
 
         self.parse_entries(

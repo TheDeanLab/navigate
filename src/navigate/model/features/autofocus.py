@@ -38,6 +38,7 @@ import threading
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.stats import linregress
+from scipy.interpolate import UnivariateSpline
 
 # Local imports
 from navigate.model.features.feature_container import load_features
@@ -97,44 +98,61 @@ class Autofocus:
         """
         #: Model: Model object
         self.model = model
+
         #: float: Maximum entropy
         self.max_entropy = None
+
         #: int: Frame id
         self.f_frame_id = None
+
         #: int: Number of frames
         self.frame_num = None
+
         #: float: Initial position
         self.init_pos = None
+
         #: float: Focus position
         self.f_pos = None
+
         #: float: Focus position
         self.focus_pos = None
+
         #: int: Target frame id
         self.target_frame_id = None
+
         #: int: Number of frames
         self.get_frames_num = None
+
         #: list: Plot data
         self.plot_data = None
+
         #: int: Total frame number
         self.total_frame_num = None
+
         #: float: Fine step size
         self.fine_step_size = None
+
         #: float: Fine position offset
         self.fine_pos_offset = None
+
         #: float: Coarse step size
         self.coarse_step_size = None
+
         #: int: Coarse steps
         self.coarse_steps = None
+
         #: int: Signal id
         self.signal_id = None
 
         #: Queue: Autofocus frame queue
         self.autofocus_frame_queue = Queue()
+
         #: Queue: Autofocus position queue
         self.autofocus_pos_queue = Queue()
 
         #: int: Target channel
         self.target_channel = 1
+
         #: dict: Configuration table
         self.config_table = {
             "signal": {
@@ -149,8 +167,10 @@ class Autofocus:
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
+
         #: str: Device name
         self.device = device
+
         #: str: Device reference
         self.device_ref = device_ref
 
@@ -443,15 +463,23 @@ class Autofocus:
         # Send the data for plotting via the event queue
         self.model.event_queue.put(("autofocus", [self.plot_data, False, True]))
 
+        # Get current autofocus settings.
+        microscope_name = self.model.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        settings = self.model.configuration["experiment"]["AutoFocusParameters"][
+            microscope_name
+        ][self.device][self.device_ref]
+
         # Evaluate data by fitting it to an inverse power tent.
-        if self.model.configuration["experiment"]["AutoFocusParameters"][
-            self.model.active_microscope_name
-        ][self.device][self.device_ref]["robust_fit"]:
+        if settings.get("robust_fit", False):
             fit_data, fit_focus_position, r_squared = self.robust_autofocus()
+
 
             # If the fit is good, use the fit focus position, else use the max entropy
             if r_squared > 0.9:
                 self.focus_pos = fit_focus_position
+                # Overlay as a line without clearing
                 self.model.event_queue.put(("autofocus", [fit_data, True, False]))
                 self.model.logger.info(
                     f"Robust Focus Estimate: {self.focus_pos}, " f"R^2: {r_squared}"
@@ -461,6 +489,26 @@ class Autofocus:
                 self.model.logger.info(
                     f"Robust Focus Estimate Failed. R^2: {r_squared}"
                 )
+
+        # Perform spline fit for peak estimation if enabled
+        if settings.get("spline_fit", False):
+            fit_data, fit_focus_position, r_squared = self.spline_autofocus()
+            self.focus_pos = fit_focus_position
+            self.model.event_queue.put(("autofocus", [fit_data, True, False]))
+            self.model.logger.info(
+                f"Spline Focus Estimate: {self.focus_pos}, R^2: {r_squared}"
+            )
+
+        # Test significance of the autofocus peak relative to noise floor
+        if settings.get("test_significance", False):
+            vals = np.asarray(self.plot_data)[:, 1]
+            mu, sigma = float(vals.mean()), float(vals.std())
+            peak = float(vals.max())
+            if peak <= mu + 2 * sigma:
+                self.model.logger.warning(
+                    f"Autofocus significance test failed: peak {peak:.3f} <= mean+2σ {mu+2*sigma:.3f}"
+                )
+                return True
 
         # Update the configuration with the new focus position
         if self.device == "stage":
@@ -479,6 +527,7 @@ class Autofocus:
                 )
             )
             self.model.event_queue.put(("update_stage", stage_position))
+
         elif self.device == "remote_focus":
             # update offset of the waveform_constants configuration dict
             zoom = self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
@@ -490,11 +539,6 @@ class Autofocus:
                     float(remote_focus_constants[laser]["offset"]) + self.focus_pos
                 )
 
-        # Log the new focus position
-        # self.model.logger.info("***********final focus: %s" % self.focus_pos)
-        # self.model.logger.info(
-        #     f"***** final stage position: {self.model.get_stage_position()}"
-        # )
         return self.get_frames_num > self.total_frame_num
 
     def robust_autofocus(self):
@@ -539,4 +583,74 @@ class Autofocus:
         for i in range(len(x_data)):
             fit_data.append([x_data[i], y_fit[i]])
 
+        return fit_data, focus_position, r_squared
+
+    def spline_autofocus(self, num: int = 1000, s: float = 1):
+        """Estimate the autofocus peak using a smoothing spline.
+
+        Fits a `scipy.interpolate.UnivariateSpline` to the current autofocus
+        scatter data stored in `self.plot_data` \([x, y] pairs\), evaluates the
+        fitted curve on a fine grid for plotting, and returns the estimated peak
+        position along with an R^2 value computed on the original samples.
+
+        Parameters
+        ----------
+        num : int, default=1000
+            Number of evenly spaced evaluation points over the observed x-range
+            used to generate the spline overlay for plotting.
+        s : float, default=1
+            Smoothing factor passed to `UnivariateSpline`. Use `s=0` for an
+            interpolating spline; higher values increase smoothing.
+
+        Returns
+        -------
+        fit_data : list[list[float]]
+            Dense spline curve as a list of \[x, y] pairs with length `num`,
+            suitable for overlay plotting.
+        focus_position : float or None
+            x-position of the maximum of the dense spline curve. `None` if no data.
+        r_squared : float
+            Coefficient of determination (R^2) of the spline evaluated at the
+            original sample x-values. Returns `0.0` if total variance is zero.
+
+        Notes
+        -----
+        - Input data are sorted by x before fitting for stability.
+        - The spline degree `k` is chosen adaptively as `min(3, max(1, n-1))`
+          where `n` is the number of samples.
+        - If no data are available, the function returns \([], None, 0.0\).
+
+        See Also
+        --------
+        robust_autofocus
+            Inverse power tent fit used as an alternative robust peak estimator.
+        """
+        arr = np.asarray(self.plot_data, dtype=float)
+        if arr.size == 0:
+            return [], None, 0.0
+
+        # Sort by x to keep spline stable
+        idx = np.argsort(arr[:, 0], kind="mergesort")
+        x_data = arr[idx, 0]
+        y_data = arr[idx, 1]
+
+        # Guard: need enough points for cubic spline (k=3)
+        k = 3
+        k = min(k, max(1, len(x_data) - 1))
+        spline = UnivariateSpline(x_data, y_data, s=s, k=k)
+
+        # Fine grid evaluation
+        x_min, x_max = float(x_data.min()), float(x_data.max())
+        x_fine = np.linspace(x_min, x_max, num)
+        y_fine = spline(x_fine)
+
+        # Peak and R^2 on original samples
+        peak_idx = int(np.argmax(y_fine))
+        focus_position = float(x_fine[peak_idx])
+        y_pred = spline(x_data)
+        ss_res = float(np.sum((y_data - y_pred) ** 2))
+        ss_tot = float(np.sum((y_data - np.mean(y_data)) ** 2))
+        r_squared = 0.0 if ss_tot == 0.0 else 1.0 - ss_res / ss_tot
+
+        fit_data = np.stack([x_fine, y_fine], axis=1).tolist()
         return fit_data, focus_position, r_squared

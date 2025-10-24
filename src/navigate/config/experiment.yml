@@ -27,6 +27,8 @@ AutoFocusParameters:
   fine_step_size: 5
   fine_selected: True
   robust_fit: True
+  spline_fit: False
+  test_significance: False
 StageParameters:
   xy_step: 500.0
   z_step: 500.0

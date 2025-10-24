@@ -234,15 +234,6 @@ class Controller:
             log_queue=log_queue,
         )
 
-        # volume viewer
-        # self.volume_viewer = ObjectInSubprocess(GLVolumeViewer)
-        # self.volume_viewer.start_render_loop(1024, 800, "3D Viewer")
-        # # params
-        # self.volume_viewer.set_shear_angle(-30.0)
-        # self.volume_viewer.set_opacity(0.15)
-        # self.volume_viewer.set_c_range([0.0002, 0.3000])
-        # self.volume_viewer.set_gamma(1.0)        
-
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
 

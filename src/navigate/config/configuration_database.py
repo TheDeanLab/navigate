@@ -435,6 +435,7 @@ stage_constants_widgets = {
 
 remote_focus_device_types = {
     "Equipment Solutions": ("EquipmentSolutions", "equipment_solutions"),
+    "Equipment Solutions ASI": ("EquipmentSolutionsASI", "equipment_solutions"),
     "Analog Device": ("NI", "ni"),
     "ASI Device": ("ASI", "asi"),
     "Virtual Device": ("Synthetic", "synthetic"),

@@ -307,3 +307,7 @@ class ASIRemoteFocus(RemoteFocusBase , SerialDevice):
         self.close()
 
         
+if __name__ == "__main__":
+    vc = RemoteFocusEquipmentSolutions()
+    vc.send_command("k0\r")  # Turn off servo
+    vc.send_command("k1\r")  # Engage servo

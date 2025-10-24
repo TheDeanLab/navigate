@@ -1833,16 +1833,8 @@ class ASIModel(Model):
         self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
 
         # Run the acquisition
-        try:
-             # if live and first frame, run once
-            # else run every time
-            if self.imaging_mode == "live": 
-                if self.frame_id == 0:
-                    self.active_microscope.daq.run_acquisition()
-            else:           
-                self.active_microscope.daq.run_acquisition()
-                # query cell 4
-            # if self.imaging_mode != "live", query cell 4
+        try:         
+            self.active_microscope.daq.run_acquisition()
             print("ASIModel: Acquisition started.")
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()

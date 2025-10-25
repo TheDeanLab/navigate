@@ -191,23 +191,27 @@ void main()
         tEnter = max(tEnter, 0.0);
 
         // -------- step-size invariant opacity terms --------
-        vec3 boxSizeO = boxMax - boxMin;                    // object-space size
+        // vec3 boxSizeO = boxMax - boxMin;                    // object-space size
         vec3 dim      = vec3(textureSize(volume, 0));       // voxel counts (X,Y,Z)
-        vec3 voxelO   = boxSizeO / dim;                     // voxel size (object units)
+        // vec3 voxelO   = boxSizeO / dim;                     // voxel size (object units)
 
         // world-object length of one marching step along this ray
-        float stepObj = length(mat3(invShear) * (rdW * stepWorld));
+        // float stepObj = length(mat3(invShear) * (rdW * stepWorld));
+        float stepObj = stepWorld;
+
+        // volxel size (um): px = py always
+        vec3 spacing = vec3(px, px, dz);
 
         // “steps per voxel” along this ray (orientation aware)
-        float dVoxel  = max(dot(abs(rd), voxelO), 1e-6);
+        float dVoxel  = max(dot(abs(rd), spacing), 1e-6);
         float kStep   = stepObj / dVoxel;
 
         // -------- march --------
-        vec3 invBoxSize = 1.0 / boxSizeO;
+        vec3 invBoxSize = 1.0 / (boxMax - boxMin); // um^-1
         vec4 acc = vec4(0.0);
 
         for (float t = tEnter; t < tExit && acc.a < 0.98; t += stepObj) {
-            vec3 pos = ro + rd * t;                           // object-space position
+            vec3 pos = ro + rd * t;                           // position (um)
             vec3 uvw = (pos - boxMin) * invBoxSize;           // [0,1]^3
 
             // sample scalar (0..1 from R16)
@@ -633,6 +637,9 @@ class GLFrameViewController(GUIController):
         # OpenGL viewer
         self.viewer = GLFrameViewer(mode)
 
+        # microscope state
+        self.microscope_state = self.parent_controller.configuration["experiment"]["MicroscopeState"]
+
         # start rendering thread
         self.viewer.start_render_loop(window_dim=(512,512))
 
@@ -660,6 +667,16 @@ class GLFrameViewController(GUIController):
 
     def try_to_display_image(self, image: SharedNDArray) -> None:
 
+        # stacking setup
+        n_steps   = self.microscope_state["number_z_steps"]
+        step_size = self.microscope_state["step_size"]
+        self.viewer.set_dz(step_size)
+        
+        if self.microscope_state["image_mode"] == "z-stack":
+            self.viewer.set_slices(n_steps)
+        else:
+            self.viewer.set_slices(2)
+
         # TODO: CPU min/max is inefficient
         # Try to do this with Compute Shaders on GPU
         if self.autoscale.get():
@@ -674,6 +691,8 @@ class GLFrameViewController(GUIController):
     
     def reset(self):
         self.viewer.rendered_images = 0
+        # self.viewer.vol_shape = None
+        # self.viewer.vol_min_max = None
 
     def set_mode(self, mode: str):
         self.viewer.mode = mode
@@ -706,17 +725,18 @@ class GLFrameViewer:
         self.thread     = None
 
         # GL objects (created in render thread)
-        self.window = None
-        self.shader = None
-        self.vao    = None
-        self.pbo    = None
-        self.camera = None
-        self.timer  = FrameTimer(every=0.5)
+        self.window  = None
+        self.shaders = None
+        self.vao     = None
+        self.pbo     = None
+        self.camera  = None
+        self.timer   = FrameTimer(every=1.0)
 
         # stack attribs
         self.vol_shape = None
         self._z        = 0
         self._N        = 1
+        self._dz       = 1.0
 
         # textures
         self.tex_3d = None
@@ -730,6 +750,7 @@ class GLFrameViewer:
         self.mode         = mode
         self.tex_2d_shape = None
         self.min_max      = None
+        self.vol_min_max  = None
         self.do_autoscale = False
         self.min_max      = [0, 65535]
         self.crosshair    = True
@@ -740,6 +761,16 @@ class GLFrameViewer:
 
     def set_slices(self, N: int):
         self._N = N
+
+    def set_dz(self, dz: float):
+        self._dz = dz
+
+        def _do():
+            shader = self.shaders["volume"]
+            shader.use()
+            shader.set_float("dz", self._dz)
+        
+        self.cmd_q.put_nowait(_do)
 
     def start_render_loop(self, window_dim=(1000,800), title="Camera View"):
         if self.thread and self.thread.is_alive():
@@ -788,6 +819,9 @@ class GLFrameViewer:
             glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
             glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
             glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+
+            # always on top
+            glfw.window_hint(glfw.FLOATING, glfw.TRUE)
 
             # create window
             init_width, init_height = window_dim
@@ -1346,6 +1380,16 @@ class GLFrameViewer:
                 shader.set_vec2('cMinMax', min_max)
             elif self.mode == "volume" and min_max:
                 c_min, c_max = min_max
+
+                # if self.vol_min_max is None:
+                #     self.vol_min_max = min_max
+                # else:
+                #     v_min, v_max = self.vol_min_max
+                #     self.vol_min_max = [
+                #         min([v_min, c_min]),
+                #         max([v_max, c_max])
+                #     ]
+
                 shader.set_float('cMin', float(c_min)/65535.)
                 shader.set_float('cMax', float(c_max)/65535.)
 

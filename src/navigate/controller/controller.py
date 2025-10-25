@@ -1205,21 +1205,9 @@ class Controller:
             #     image=self.data_buffer[image_id]
             # )
             
-            microscope_state = self.configuration["experiment"]["MicroscopeState"]       
-            
             # OpenGL display
             if image_id == 0:
                 self.frame_view_controller.reset()
-
-            if microscope_state["image_mode"] == "z-stack":
-                self.frame_view_controller.viewer.set_slices(
-                    microscope_state["number_z_steps"]
-                )
-            else:
-                # for single slice in 3D: ping-pong between 2 slices looks nice
-                self.frame_view_controller.viewer.set_slices(2)
-
-            # display with OpenGL rendering
             self.frame_view_controller.try_to_display_image(self.data_buffer[image_id])
 
             images_received += 1

@@ -1505,7 +1505,8 @@ if __name__ == '__main__':
     viewer.set_resolution(px=px, dz=spacing)
     viewer.set_shear_angle(0.0)
     viewer.set_opacity(0.10)
+    viewer.set_gamma(0.80)
     viewer.set_step_world(0.15)
-    viewer.set_min_max([0, 1000])
+    viewer.set_min_max([0, 800])
 
     root.mainloop()

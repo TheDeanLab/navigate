@@ -124,7 +124,7 @@ uniform float cMax    = 1.0;
 uniform float gamma   = 1.0;
 
 // OPM parameters
-uniform float shear_angle = 60.0;   // degrees
+uniform float shear_angle = 0.0;   // degrees
 uniform float dz = 0.4;             // um    
 uniform float px = 0.1348;          // um
 
@@ -221,8 +221,12 @@ void main()
         // transfer lookup function
         vec4 tf  = texture(transfer, sW);
 
+        // lut
+        vec3 lut   = vec3(1.0, 1.0, 1.0);
+        vec3 tf_rgb = vec3(lut.x*tf.r, lut.y*tf.g, lut.z*tf.b);
+
         // optional gamma (on color)
-        vec3 rgb = pow(tf.rgb, vec3(gamma));
+        vec3 rgb = pow(tf_rgb, vec3(gamma));
         
         // convert TF alpha to per-step alpha (Beer-Lambert) and premultiply
         float a = 1.0 - exp(-opacity * tf.a * kStep);
@@ -726,11 +730,18 @@ class GLFrameViewer:
         # config
         self.mode         = mode
         self.tex_2d_shape = None
-        self.min_max      = None
         self.vol_min_max  = None
         self.do_autoscale = False
         self.min_max      = [0, 65535]
         self.crosshair    = True
+
+        # image properties
+        self.gamma       = None
+        self.step_world  = None
+        self.shear_angle = None
+        self.opacity     = None
+        self.resolution  = None
+        self.min_max     = None
 
         # monitoring
         self.rendered_images = 0
@@ -1242,16 +1253,19 @@ class GLFrameViewer:
             # try again
             self.update_volume_texture(volume)
 
-        z, y, x = volume.shape
-        
-        GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
-        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
-        
-        # updates the whole volume texture in one shot
-        GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 0,
-                           0, 0, 0, x, y, z,
-                           GL.GL_RED, GL.GL_UNSIGNED_SHORT,
-                           volume)
+        def _do():
+            z, y, x = volume.shape
+            
+            GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
+            GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+            
+            # updates the whole volume texture in one shot
+            GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 0,
+                            0, 0, 0, x, y, z,
+                            GL.GL_RED, GL.GL_UNSIGNED_SHORT,
+                            volume)
+
+        self.cmd_q.put_nowait(_do)
 
     def config_gl_viewport(self):
 
@@ -1345,6 +1359,61 @@ class GLFrameViewer:
 
     # ----- update functions -----
 
+    def set_gamma(self, gamma: float=1.0):
+        self.gamma = gamma
+
+        def _do():
+            shader = self.shaders[self.mode]
+            shader.use()
+            shader.set_float('gamma', gamma)
+        
+        self.cmd_q.put_nowait(_do)
+
+    def set_step_world(self, step_world: float=0.25):
+        self.step_world = step_world
+
+        def _do():
+            shader = self.shaders[self.mode]
+            shader.use()
+            shader.set_float('stepWorld', step_world)
+        
+        self.cmd_q.put_nowait(_do)
+
+    def set_opacity(self, opacity: float=0.25):
+        self.opacity = opacity
+
+        def _do():
+            shader = self.shaders[self.mode]
+            shader.use()
+            shader.set_float('opacity', opacity)
+        
+        self.cmd_q.put_nowait(_do)
+
+    def set_shear_angle(self, theta: float=0.0):
+        self.shear_angle = theta
+
+        def _do():
+            shader = self.shaders[self.mode]
+            shader.use()
+            shader.set_float('shear_angle', theta)
+        
+        self.cmd_q.put_nowait(_do)
+
+    def set_resolution(self, px: float=1.0, dz: float=1.0):
+        self.resolution = {
+            'px': px,
+            'dz': dz
+        }
+
+        def _do():
+            shader = self.shaders[self.mode]
+            shader.use()
+            shader.set_float('px', px)
+            shader.set_float('dz', dz)
+        
+        self.cmd_q.put_nowait(_do)
+
+
     def set_min_max(self, min_max: list):
         self.min_max = min_max
         
@@ -1398,7 +1467,7 @@ if __name__ == '__main__':
     from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
     import tkinter as tk
     from tkinter import ttk
-    import tifffile as tiff
+    import tifffile
 
 
     root = tk.Tk()
@@ -1411,11 +1480,37 @@ if __name__ == '__main__':
         "beads_opm":    r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Coverslip\Beads\P0\2025-09-27\P001\CH00_000000.tiff",
         "vasc":         r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\A12_P0_mCherry.tiff",
         "data_reto":    r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
-        "beads_cs":     r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff"
+        "beads_cs":     r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff",
+        "LM-red":       r"C:\Users\conor\Documents\Lm_Images\C1-NT 002-Airyscan Processing.tif",
+        "LM-blue":      r"C:\Users\conor\Documents\Lm_Images\C2-NT 002-Airyscan Processing.tif"
     }
-    use_data = "beads_cs"
+    use_data = "LM-red"
 
+    with tifffile.TiffFile(data[use_data]) as tif:
+        meta = tif.imagej_metadata
 
+        n_slices = meta['slices']
+        spacing  = meta['spacing']
+        units    = meta['unit']
+
+        pixels, microns = tif.pages[0].tags.get('XResolution').value
+        px = microns / pixels
+
+        vol = tif.asarray()
+
+    viewer.start_render_loop(window_dim=(600,600))
+
+    viewer.update_volume_texture(vol)
+
+    viewer.set_resolution(px=px, dz=spacing)
+    viewer.set_shear_angle(0.0)
+    viewer.set_opacity(0.10)
+    viewer.set_step_world(0.15)
+    viewer.set_min_max([0, 1000])
+
+    root.mainloop()
+
+"""
     if TEST_MODE == "volume":
         viewer.start_render_loop(window_dim=(800,800))
 
@@ -1488,8 +1583,10 @@ if __name__ == '__main__':
             for im in data_buffer:
                 # print(f"Adding slice {z}, dtype={vol.dtype}")
                 viewer.try_to_display_image(im)
-                time.sleep(float(exp_time.get())/1000)
+                # time.sleep(float(exp_time.get())/1000)
         
+        display_stack()
+
         tk.Button(root, text="DISPLAY", comman=display_stack).pack()
 
     elif TEST_MODE == "frame":
@@ -1630,3 +1727,4 @@ if __name__ == '__main__':
         tk.Button(root, text="RUN TESTS", command=run_tests).pack()
 
     root.mainloop()
+"""

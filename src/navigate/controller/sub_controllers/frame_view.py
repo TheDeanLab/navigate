@@ -1505,6 +1505,8 @@ if __name__ == '__main__':
     root = tk.Tk()
     root.geometry("500x500")
 
+    settings = tk.Frame(root).pack()
+
     viewer = GLFrameViewer(mode=TEST_MODE)
 
     # test data
@@ -1514,9 +1516,10 @@ if __name__ == '__main__':
         "data_reto":    r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif",
         "beads_cs":     r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff",
         "LM-red":       r"C:\Users\conor\Documents\Lm_Images\C1-NT 002-Airyscan Processing.tif",
-        "LM-blue":      r"C:\Users\conor\Documents\Lm_Images\C2-NT 002-Airyscan Processing.tif"
+        "LM-blue":      r"C:\Users\conor\Documents\Lm_Images\C2-NT 002-Airyscan Processing.tif",
+        "vast-cell":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH00_000000.tiff"
     }
-    use_data = "LM-blue"
+    use_data = "vast-cell"
 
     with tifffile.TiffFile(data[use_data]) as tif:
         meta = tif.imagej_metadata
@@ -1527,20 +1530,56 @@ if __name__ == '__main__':
             spacing  = meta['spacing']
             pixels, microns = tif.pages[0].tags.get('XResolution').value
             px = microns / pixels
-        except KeyError:
-            spacing = 0.1
-            px = 0.1
+        except:
+            spacing = 0.4
+            px = 0.1348
 
     viewer.start_render_loop(window_dim=(600,600))
 
     viewer.update_volume_texture(vol)
 
+    variables = {}
+    def add_widget(root, kw: str, defaults: tuple):
+        # for each arg: create the StringVar and LabelInput
+        value, low, delta, high = defaults
+        variables[kw] = tk.StringVar(root, value=str(value))
+        LabelInput(
+            root,
+            input_class=ttk.Spinbox,
+            input_var=variables[kw],
+            label_pos="left",
+            label=kw,
+            input_args={
+                "from_": low,
+                "to": high,
+                "increment": delta,
+            }
+        ).pack()
+
+    add_widget(settings, "theta",   (45.0, 0.0, 1.0, 90.0))
+    variables["theta"].trace_add("write", lambda *args: viewer.set_shear_angle(float(variables["theta"].get())))
+    
+    add_widget(settings, "opacity", (0.15, 0.0, 0.01, 1.0))
+    variables["opacity"].trace_add("write", lambda *args: viewer.set_opacity(float(variables["opacity"].get())))
+
+    add_widget(settings, "gamma",   (1.0, 0.05, 0.05, 2.0))
+    variables["gamma"].trace_add("write", lambda *args: viewer.set_gamma(float(variables["gamma"].get())))
+    
+    add_widget(settings, "step_world",   (0.15, 0.01, 0.01, 1.0))
+    variables["step_world"].trace_add("write", lambda *args: viewer.set_step_world(float(variables["step_world"].get())))
+
+    add_widget(settings, "min",   (0,    0, 50,  65535))
+    add_widget(settings, "max",   (5000, 0, 250, 65535))
+    def get_min_max():
+        return [float(variables["min"].get()), float(variables["max"].get())]
+    [variables[k].trace_add("write", lambda *args: viewer.set_min_max(get_min_max())) for k in ["min", "max"]]
+
     viewer.set_resolution(px=px, dz=spacing)
-    viewer.set_shear_angle(0.0)
-    viewer.set_opacity(0.15)
-    viewer.set_gamma(0.90)
-    viewer.set_step_world(0.15)
-    viewer.set_min_max([50, 1000])
+    viewer.set_shear_angle(theta=float(variables["theta"].get()))
+    viewer.set_opacity(opacity=float(variables["opacity"].get()))
+    viewer.set_gamma(gamma=float(variables["gamma"].get()))
+    viewer.set_step_world(step_world=float(variables["step_world"].get()))
+    viewer.set_min_max(min_max=get_min_max())
 
     # viewer.set_ortho_view([0, 0, 100])
 

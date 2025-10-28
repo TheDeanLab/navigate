@@ -210,10 +210,6 @@ void main()
         // sample scalar (0..1 from R16)
         float s  = texture(volume, uvw).r;            
 
-        // windowing
-        // float sW = clamp(s, cMin, cMax);
-        // sW = (sW - cMin) / max(cMax - cMin, 1e-6); // bounded-normalize            
-
         // normalize
         float sW = (s - cMin) / max(cMax - cMin, 1e-6);
         sW = clamp(sW, 0.0, 1.0);

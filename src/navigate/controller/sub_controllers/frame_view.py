@@ -329,7 +329,8 @@ class Camera:
         self.NEAR_FIELD = 0.1
         self.FAR_FIELD  = 10000.0
         self.world_up   = glm.vec3(0,1,0)
-
+        self.is_ortho_proj = False
+        
         # control gains
         self.ROT_SENS   = 0.25   # deg/pixel
         self.PAN_SENS   = 1.0    # world-per-pixel multiplier
@@ -380,7 +381,28 @@ class Camera:
         return glm.lookAt(self.position, self.look_at, self.up)
 
     def get_projection_matrix(self):
-        return glm.perspective(glm.radians(self.FOV), self.aspect_ratio, self.NEAR_FIELD, self.FAR_FIELD)
+        if self.is_ortho_proj:
+            # projection = glm.ortho(-self.win_h/8, self.win_w/8, -self.win_h/8, self.win_h/8, -1.0, 1.0)
+            nz, ny, nx = self.parent_viewer.vol_shape
+            opj_size = 25
+            projection = glm.ortho(-opj_size, opj_size, -opj_size, opj_size, 0.1, 100.0)
+        else:
+            projection = glm.perspective(glm.radians(self.FOV), self.aspect_ratio, self.NEAR_FIELD, self.FAR_FIELD)
+        
+        return projection
+
+    def set_ortho_view(self, position: Union[list, np.ndarray]):
+        # self.position = glm.vec3(position)
+        self.look_at = glm.vec3(0.0)
+
+        self.pitch  = glm.radians(90.)
+        self.yaw    = glm.radians(0.)
+        self.radius = 1.0
+
+        self._recompute_position()
+        self._update_basis()
+        self.view = self.get_view_matrix()
+        self.is_ortho_proj = True
 
     def update(self, dt=0.0):
         # window size/pos
@@ -514,7 +536,7 @@ class Camera:
                 ]
 
     def _scroll_move(self, dt):
-        if not self.scroll_offset:
+        if not self.scroll_offset or dt == 0.0:
             return
         elif self.parent_viewer.mode == "volume":
             # exponential dolly on radius
@@ -1441,6 +1463,16 @@ class GLFrameViewer:
 
         self.cmd_q.put(_do)
 
+    def set_ortho_view(self, position):
+        self.ortho_position = position
+
+        def _do():
+            self._ensure_gl_ready()
+
+            self.camera.set_ortho_view(self.ortho_position)
+
+        self.cmd_q.put_nowait(_do)
+
     def autoscale(self, image: np.ndarray):
 
         # only tax the CPU every timer tick
@@ -1484,19 +1516,20 @@ if __name__ == '__main__':
         "LM-red":       r"C:\Users\conor\Documents\Lm_Images\C1-NT 002-Airyscan Processing.tif",
         "LM-blue":      r"C:\Users\conor\Documents\Lm_Images\C2-NT 002-Airyscan Processing.tif"
     }
-    use_data = "LM-red"
+    use_data = "LM-blue"
 
     with tifffile.TiffFile(data[use_data]) as tif:
         meta = tif.imagej_metadata
-
-        n_slices = meta['slices']
-        spacing  = meta['spacing']
-        units    = meta['unit']
-
-        pixels, microns = tif.pages[0].tags.get('XResolution').value
-        px = microns / pixels
-
+        
         vol = tif.asarray()
+
+        try:
+            spacing  = meta['spacing']
+            pixels, microns = tif.pages[0].tags.get('XResolution').value
+            px = microns / pixels
+        except KeyError:
+            spacing = 0.1
+            px = 0.1
 
     viewer.start_render_loop(window_dim=(600,600))
 
@@ -1504,9 +1537,11 @@ if __name__ == '__main__':
 
     viewer.set_resolution(px=px, dz=spacing)
     viewer.set_shear_angle(0.0)
-    viewer.set_opacity(0.10)
-    viewer.set_gamma(0.80)
+    viewer.set_opacity(0.15)
+    viewer.set_gamma(0.90)
     viewer.set_step_world(0.15)
-    viewer.set_min_max([0, 800])
+    viewer.set_min_max([50, 1000])
+
+    # viewer.set_ortho_view([0, 0, 100])
 
     root.mainloop()

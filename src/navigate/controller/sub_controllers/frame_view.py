@@ -1519,25 +1519,30 @@ if __name__ == '__main__':
         "LM-blue":      r"C:\Users\conor\Documents\Lm_Images\C2-NT 002-Airyscan Processing.tif",
         "vast-cell":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH00_000000.tiff"
     }
-    use_data = "vast-cell"
+    use_data = ["LM-red", "LM-blue"]
 
-    with tifffile.TiffFile(data[use_data]) as tif:
-        meta = tif.imagej_metadata
-        
-        vol = tif.asarray()
+    vol_channels = {}
 
-        try:
-            spacing  = meta['spacing']
-            pixels, microns = tif.pages[0].tags.get('XResolution').value
-            px = microns / pixels
-        except:
-            spacing = 0.4
-            px = 0.1348
+    for chan in use_data:
+        with tifffile.TiffFile(data[chan]) as tif:
+            meta = tif.imagej_metadata
+            
+            vol_channels[chan] = tif.asarray()
+
+            try:
+                spacing  = meta['spacing']
+                pixels, microns = tif.pages[0].tags.get('XResolution').value
+                px = microns / pixels
+            except:
+                spacing = 0.4
+                px = 0.1348
 
     viewer.start_render_loop(window_dim=(600,600))
 
-    viewer.update_volume_texture(vol)
+    # ideally here we would just pass the full dict with all channels
+    viewer.update_volume_texture(vol_channels["LM-red"])
 
+    # Tk widgets
     variables = {}
     def add_widget(root, kw: str, defaults: tuple):
         # for each arg: create the StringVar and LabelInput

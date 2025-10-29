@@ -211,9 +211,10 @@ void main()
         // sample scalar (all 4 channels in RGBA)
         vec4 s = texture(volume, uvw);            
 
-        int nChannels = 4;
-        for (int i = 0; i < nChannels; ++i)
+        for (int i = 0; i < 4; ++i)
         {
+            if (i >= nChannels) break;
+
             // select current channel (rgba)
             float s_i = (i == 0) ? s.r :
                         (i == 1) ? s.g :
@@ -232,7 +233,8 @@ void main()
             if (tf.rgb == vec3(0.0)) continue;
 
             // optional gamma
-            vec3 rgb = pow(tf.rgb, vec3(gamma));
+            vec3 rgb = tf.rgb;
+            if (gamma != 1.0) rgb = pow(rgb, vec3(gamma));
 
             // Beer-Lambert step-invariant opacity based on tf.alpha
             float a = 1.0 - exp(-opacity * tf.a * kStep);
@@ -1444,7 +1446,7 @@ class GLFrameViewer:
 
             shader = self.shaders["volume"]
             shader.use()
-            shader.set_float('nChannels', n_channels)
+            shader.set_int('nChannels', n_channels)
         
         self.cmd_q.put_nowait(_do)        
 
@@ -1598,8 +1600,8 @@ if __name__ == '__main__':
         "vast-vasc":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH01_000000.tiff"
     }
 
-    # use_data = ["LM-red", "LM-blue"]
-    use_data = ["vast-vasc", "vast-cell"]
+    use_data = ["LM-red", "LM-blue"]
+    # use_data = ["vast-vasc", "vast-cell"]
 
     vol_channels = []
 
@@ -1661,7 +1663,7 @@ if __name__ == '__main__':
     variables["step_world"].trace_add("write", lambda *args: viewer.set_step_world(float(variables["step_world"].get())))
 
     add_widget(settings, "min",   (0,    0, 50,  65535))
-    add_widget(settings, "max",   (5000, 0, 250, 65535))
+    add_widget(settings, "max",   (2000, 0, 250, 65535))
     def get_min_max():
         return [float(variables["min"].get()), float(variables["max"].get())]
     [variables[k].trace_add("write", lambda *args: viewer.set_min_max(get_min_max())) for k in ["min", "max"]]

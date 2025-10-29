@@ -1505,7 +1505,7 @@ if __name__ == '__main__':
 
     viewer = GLFrameViewer(mode=TEST_MODE)
 
-    # test data
+    # test data library
     data = {
         "beads_opm":    r"d:\VAST\Stephan_kdrl_rasmCherry_GFP_cancer_hindbrain_4dfp_24hpi\OPM\Coverslip\Beads\P0\2025-09-27\P001\CH00_000000.tiff",
         "vasc":         r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\A12_P0_mCherry.tiff",
@@ -1513,17 +1513,19 @@ if __name__ == '__main__':
         "beads_cs":     r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\beads_coverslip.tiff",
         "LM-red":       r"C:\Users\conor\Documents\Lm_Images\C1-NT 002-Airyscan Processing.tif",
         "LM-blue":      r"C:\Users\conor\Documents\Lm_Images\C2-NT 002-Airyscan Processing.tif",
-        "vast-cell":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH00_000000.tiff"
+        "vast-cell":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH00_000000.tiff",
+        "vast-vasc":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH01_000000.tiff"
     }
-    use_data = ["LM-red", "LM-blue"]
 
-    vol_channels = {}
+    use_data = ["vast-vasc", "vast-cell"]
+
+    vol_channels = []
 
     for chan in use_data:
         with tifffile.TiffFile(data[chan]) as tif:
             meta = tif.imagej_metadata
             
-            vol_channels[chan] = tif.asarray()
+            vol_channels.append(tif.asarray())
 
             try:
                 spacing  = meta['spacing']
@@ -1536,7 +1538,7 @@ if __name__ == '__main__':
     viewer.start_render_loop(window_dim=(600,600))
 
     # ideally here we would just pass the full dict with all channels
-    viewer.update_volume_texture(vol_channels["LM-red"])
+    viewer.update_volume_texture(vol_channels[0])
 
     # Tk widgets
     variables = {}

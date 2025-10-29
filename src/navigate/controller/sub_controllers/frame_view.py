@@ -1619,14 +1619,14 @@ if __name__ == '__main__':
 
     viewer.start_render_loop(window_dim=(600,600))
 
-    # ideally here we would just pass the full dict with all channels
+    # pass the channels in as a list[np.ndarray]
     viewer.update_volume_texture(
         vol_channels,
         luts=[
-            [0, 1, 1, 1],
-            [1, 0, 1, 1],
-            [0, 0, 0, 1],
-            [0, 0, 0, 1],
+            [0, 1, 1, 1], # ch0
+            [1, 0, 1, 1], # ch1
+            [0, 0, 0, 1], # ch2
+            [0, 0, 0, 1], # ch3
         ])
 
     # Tk widgets

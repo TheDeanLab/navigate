@@ -107,7 +107,7 @@ FRAG_3D_SRC = """
 out vec4 FragColor;
 
 uniform sampler3D volume;
-uniform sampler1D transfer;
+uniform sampler2D transfer;
 
 uniform mat4 invProjView;
 uniform vec2 viewportSize;
@@ -123,15 +123,13 @@ uniform float cMin    = 0.0;
 uniform float cMax    = 1.0;
 uniform float gamma   = 1.0;
 
+// channels
+uniform int nChannels = 4;
+
 // OPM parameters
 uniform float shear_angle = 0.0;   // degrees
 uniform float dz = 0.4;             // um    
 uniform float px = 0.1348;          // um
-
-uniform float zSlice;
-
-// 2D-3D toggle
-uniform bool is3DMode = true;
 
 // ---------- utilities ----------
 
@@ -200,37 +198,50 @@ void main()
     float kStep   = stepWorld / dVoxel;
 
     // -------- march --------
+    
     vec3 invBoxSize = 1.0 / (boxMax_um - boxMin_um); // um^-1
+    
+    // accumulator
     vec4 acc = vec4(0.0);
 
     for (float t = tEnter; t < tExit && acc.a < 0.98; t += stepWorld) {
         vec3 pos = ro + rd * t;                           // position (um)
         vec3 uvw = (pos - boxMin_um) * invBoxSize;           // [0,1]^3
 
-        // sample scalar (0..1 from R16)
-        float s  = texture(volume, uvw).r;            
+        // sample scalar (all 4 channels in RGBA)
+        vec4 s = texture(volume, uvw);            
 
-        // normalize
-        float sW = (s - cMin) / max(cMax - cMin, 1e-6);
-        sW = clamp(sW, 0.0, 1.0);
-
-        // transfer lookup function
-        vec4 tf  = texture(transfer, sW);
-
-        // lut
-        vec3 lut   = vec3(1.0, 1.0, 1.0);
-        vec3 tf_rgb = vec3(lut.x*tf.r, lut.y*tf.g, lut.z*tf.b);
-
-        // optional gamma (on color)
-        vec3 rgb = pow(tf_rgb, vec3(gamma));
-        
-        // convert TF alpha to per-step alpha (Beer-Lambert) and premultiply
-        float a = 1.0 - exp(-opacity * tf.a * kStep);
-        vec3  c = rgb * a;
+        int nChannels = 4;
+        for (int i = 0; i < nChannels; ++i)
+        {
+            // select current channel (rgba)
+            float s_i = (i == 0) ? s.r :
+                        (i == 1) ? s.g :
+                        (i == 2) ? s.b : s.a;
             
-        // front-to-back compositing (premultiplied)
-        acc.rgb += (1.0 - acc.a) * c;
-        acc.a   += (1.0 - acc.a) * a;
+            // scale and normalize
+            // TODO: same min/max applied to all, can tailor using cMin[], cMax[] later
+            float sW = (s_i - cMin) / max(cMax - cMin, 1e-6);
+            sW = clamp(sW, 0.0, 1.0);
+
+            // 2D transfer lookup: channels arranged by row
+            float row = (float(i) + 0.5) / 4.0; // normalized row position
+            vec4 tf = texture(transfer, vec2(sW, row));
+
+            // don't composite zeros
+            if (tf.rgb == vec3(0.0)) continue;
+
+            // optional gamma
+            vec3 rgb = pow(tf.rgb, vec3(gamma));
+
+            // Beer-Lambert step-invariant opacity based on tf.alpha
+            float a = 1.0 - exp(-opacity * tf.a * kStep);
+            vec3  c = rgb * a;
+
+            // front-to-back premultiplied composite
+            acc.rgb += (1.0 - acc.a) * c;
+            acc.a   += (1.0 - acc.a) * a;
+        }
     }
     
     FragColor = acc;
@@ -740,7 +751,7 @@ class GLFrameViewer:
         # textures
         self.tex_3d = None
         self.tex_2d = None
-        self.tex_1d = None
+        self.tex_tf = None
 
         # window attribs
         self.title = None
@@ -760,6 +771,8 @@ class GLFrameViewer:
         self.opacity     = None
         self.resolution  = None
         self.min_max     = None
+        self.luts        = None
+        self.n_channels  = None
 
         # monitoring
         self.rendered_images = 0
@@ -926,9 +939,9 @@ class GLFrameViewer:
 
             # cleanup
             try:
-                if self.tex_1d: 
-                    GL.glDeleteTextures([self.tex_1d])
-                    self.tex_1d = None
+                if self.tex_tf: 
+                    GL.glDeleteTextures([self.tex_tf])
+                    self.tex_tf = None
                 if self.tex_2d: 
                     GL.glDeleteTextures([self.tex_2d])
                     self.tex_2d = None
@@ -1077,14 +1090,14 @@ class GLFrameViewer:
             # (re)create textures
             if self.tex_3d is None:
                 self.make_volume_texture(shape)
-            if self.tex_1d is None:
+            if self.tex_tf is None:
                 self.make_transfer_texture()
 
             # set uniforms
             self.shaders['volume'].use()
             self.shaders['volume'].set_int('volume',   1)
             self.shaders['volume'].set_int('transfer', 2)
-            self.shaders['volume'].set_float('stepWorld', 0.25)
+            # self.shaders['volume'].set_float('stepWorld', 0.25)
             self.shaders['volume'].set_vec3('boxMin', boxMin)
             self.shaders['volume'].set_vec3('boxMax', boxMax)
 
@@ -1108,14 +1121,14 @@ class GLFrameViewer:
         GL.glTexImage3D(
             GL.GL_TEXTURE_3D, 
             0,
-            GL.GL_R16,
+            GL.GL_RGBA16,
             x, 
             y, 
             z, 
             0,
-            GL.GL_RED, 
+            GL.GL_RGBA, 
             GL.GL_UNSIGNED_SHORT,
-            None
+            None # input: [[[R0, G0, B0, A0], [R1, G1, B1, A1], ... ] ... ]
             )        
 
     def make_frame_texture(self, shape: tuple):
@@ -1146,28 +1159,34 @@ class GLFrameViewer:
             None
         )
 
-    def make_transfer_texture(self, N: int=256):
-        rgba = (
-            np.stack(4 * [np.linspace(0, 1, N, dtype=np.float32) * 255], axis=1)
-        ).astype(np.uint8)
+    def make_transfer_texture(self, n_lanes: int=4):
+        print("Transfer LUTs:", self.luts)
 
-        self.tex_1d = GL.glGenTextures(1)
-        GL.glBindTexture(GL.GL_TEXTURE_1D, self.tex_1d)
+        # RGBA 2D transfer textures with 4 lanes
+        rgba = np.array(n_lanes*[np.linspace(0, 255, 256)])[..., np.newaxis] \
+             * np.array(self.luts)[:, np.newaxis, :]
+        rgba = rgba.astype(np.uint8)
 
-        GL.glTexParameteri(GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
-        GL.glTexParameteri(GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
-        GL.glTexParameteri(GL.GL_TEXTURE_1D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+        self.tex_tf = GL.glGenTextures(1)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex_tf)
+
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
         
-        GL.glTexImage1D(
-            GL.GL_TEXTURE_1D, 
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+        GL.glTexImage2D(
+            GL.GL_TEXTURE_2D, 
             0,
-            GL.GL_RGBA8, 
-            N, 
+            GL.GL_RGBA8,
+            256, 
+            4, 
             0,
             GL.GL_RGBA, 
             GL.GL_UNSIGNED_BYTE,
-            rgba
-            )                
+            rgba # shape: (4 lanes x 256 levels x 4 rgba)
+        )               
 
     def make_pbo_ring(self, nbytes: int, N: int = RING_BUF_SIZE):
         """
@@ -1262,26 +1281,66 @@ class GLFrameViewer:
                            slice                 # image data
         )
 
-    def update_volume_texture(self, volume: np.ndarray):
+    def update_volume_texture(self, 
+                              channels: list[np.ndarray], 
+                              luts: list[list]=[
+                                  [1.0, 1.0, 1.0, 1.0], # ch0
+                                  [1.0, 0.0, 0.0, 1.0], # ch1
+                                  [0.0, 1.0, 0.0, 1.0], # ch2
+                                  [0.0, 0.0, 1.0, 1.0], # ch3
+                              ]
+                              ):
+        # update luts
+        self.luts = luts
+
         try:
-            assert volume.shape == self.vol_shape
+            # RGBA lanes only support 4 channels
+            assert len(channels) <= 4
+        except AssertionError:
+            print("[GL] Can only accept 4 channels! Keeping last 4 in list...")
+            channels = channels[-4:]
+
+        # set nChannels in shader
+        self.set_n_channels(len(channels))
+
+        for c in range(1, len(channels)):
+            try:
+                # channels must all have the same shape
+                assert channels[c].shape == channels[0].shape
+            except AssertionError:
+                print(f"[GL] Channel_{c} shape: {channels[c].shape} != {channels[0].shape}." \
+                    "Replacing with zeros...")
+                # throw away channels of unequal shape
+                channels[c] = np.zeros(channels[0].shape)
+
+        vol_shape = channels[0].shape
+        try:
+            assert vol_shape == self.vol_shape
         except AssertionError:
             print("[GL] Volume shape mismatch with allocated texture... Reallocating.")
-            self.bind_volume(volume.shape)
+            self.bind_volume(vol_shape)
             # try again
-            self.update_volume_texture(volume)
+            self.update_volume_texture(channels, luts)
+
+        # package channels as RGBA volume
+        volume = np.zeros(vol_shape + (4,))
+        for i in range(len(channels)):
+            volume[..., i] = channels[i]
 
         def _do():
-            z, y, x = volume.shape
-            
+            z, y, x = vol_shape
+
             GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
             GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
             
             # updates the whole volume texture in one shot
-            GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 0,
-                            0, 0, 0, x, y, z,
-                            GL.GL_RED, GL.GL_UNSIGNED_SHORT,
-                            volume)
+            GL.glTexSubImage3D(
+                GL.GL_TEXTURE_3D, 
+                0, 0, 0, 0, 
+                x, y, z,
+                GL.GL_RGBA, GL.GL_UNSIGNED_SHORT,
+                volume.astype(np.uint16)
+                )
 
         self.cmd_q.put_nowait(_do)
 
@@ -1326,7 +1385,7 @@ class GLFrameViewer:
             if not self.tex_2d:
                 return
         elif self.mode == "volume":
-            if not (self.tex_3d and self.tex_1d):
+            if not (self.tex_3d and self.tex_tf):
                 return
         else:
             raise Exception(f"Invalid draw mode: {self.mode}")
@@ -1354,7 +1413,7 @@ class GLFrameViewer:
             GL.glActiveTexture(GL.GL_TEXTURE1)
             GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
             GL.glActiveTexture(GL.GL_TEXTURE2)
-            GL.glBindTexture(GL.GL_TEXTURE_1D, self.tex_1d)            
+            GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex_tf)            
 
             GL.glDisable(GL.GL_DEPTH_TEST)
             GL.glDisable(GL.GL_CULL_FACE)
@@ -1377,10 +1436,24 @@ class GLFrameViewer:
 
     # ----- update functions -----
 
+    def set_n_channels(self, n_channels: int=4):
+        self.n_channels = n_channels
+
+        def _do():
+            self._ensure_gl_ready()
+
+            shader = self.shaders["volume"]
+            shader.use()
+            shader.set_float('nChannels', n_channels)
+        
+        self.cmd_q.put_nowait(_do)        
+
     def set_gamma(self, gamma: float=1.0):
         self.gamma = gamma
 
         def _do():
+            self._ensure_gl_ready()
+
             shader = self.shaders[self.mode]
             shader.use()
             shader.set_float('gamma', gamma)
@@ -1391,6 +1464,8 @@ class GLFrameViewer:
         self.step_world = step_world
 
         def _do():
+            self._ensure_gl_ready()
+
             shader = self.shaders[self.mode]
             shader.use()
             shader.set_float('stepWorld', step_world)
@@ -1401,6 +1476,8 @@ class GLFrameViewer:
         self.opacity = opacity
 
         def _do():
+            self._ensure_gl_ready()
+
             shader = self.shaders[self.mode]
             shader.use()
             shader.set_float('opacity', opacity)
@@ -1411,6 +1488,8 @@ class GLFrameViewer:
         self.shear_angle = theta
 
         def _do():
+            self._ensure_gl_ready()
+
             shader = self.shaders[self.mode]
             shader.use()
             shader.set_float('shear_angle', theta)
@@ -1424,6 +1503,8 @@ class GLFrameViewer:
         }
 
         def _do():
+            self._ensure_gl_ready()
+
             shader = self.shaders[self.mode]
             shader.use()
             shader.set_float('px', px)
@@ -1517,6 +1598,7 @@ if __name__ == '__main__':
         "vast-vasc":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH01_000000.tiff"
     }
 
+    # use_data = ["LM-red", "LM-blue"]
     use_data = ["vast-vasc", "vast-cell"]
 
     vol_channels = []
@@ -1538,7 +1620,14 @@ if __name__ == '__main__':
     viewer.start_render_loop(window_dim=(600,600))
 
     # ideally here we would just pass the full dict with all channels
-    viewer.update_volume_texture(vol_channels[0])
+    viewer.update_volume_texture(
+        vol_channels,
+        luts=[
+            [0, 1, 1, 1],
+            [1, 0, 1, 1],
+            [0, 0, 0, 1],
+            [0, 0, 0, 1],
+        ])
 
     # Tk widgets
     variables = {}
@@ -1559,16 +1648,16 @@ if __name__ == '__main__':
             }
         ).pack()
 
-    add_widget(settings, "theta",   (45.0, 0.0, 1.0, 90.0))
+    add_widget(settings, "theta",   (0.0, 0.0, 1.0, 90.0))
     variables["theta"].trace_add("write", lambda *args: viewer.set_shear_angle(float(variables["theta"].get())))
     
-    add_widget(settings, "opacity", (0.15, 0.0, 0.01, 1.0))
+    add_widget(settings, "opacity", (0.05, 0.0, 0.01, 1.0))
     variables["opacity"].trace_add("write", lambda *args: viewer.set_opacity(float(variables["opacity"].get())))
 
     add_widget(settings, "gamma",   (1.0, 0.05, 0.05, 2.0))
     variables["gamma"].trace_add("write", lambda *args: viewer.set_gamma(float(variables["gamma"].get())))
     
-    add_widget(settings, "step_world",   (0.15, 0.01, 0.01, 1.0))
+    add_widget(settings, "step_world",   (0.50, 0.02, 0.02, 1.0))
     variables["step_world"].trace_add("write", lambda *args: viewer.set_step_world(float(variables["step_world"].get())))
 
     add_widget(settings, "min",   (0,    0, 50,  65535))

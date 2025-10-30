@@ -119,8 +119,7 @@ uniform float stepWorld;       // step length in WORLD units
 
 // contrast params
 uniform float opacity = 0.15;  // global density/opacity
-uniform float cMin    = 0.0;
-uniform float cMax    = 1.0;
+uniform vec2 cMinMax[4];
 uniform float gamma   = 1.0;
 
 // channels
@@ -222,6 +221,8 @@ void main()
             
             // scale and normalize
             // TODO: same min/max applied to all, can tailor using cMin[], cMax[] later
+            float cMin = cMinMax[i].x;
+            float cMax = cMinMax[i].y;
             float sW = (s_i - cMin) / max(cMax - cMin, 1e-6);
             sW = clamp(sW, 0.0, 1.0);
 
@@ -763,8 +764,8 @@ class GLFrameViewer:
         self.tex_2d_shape = None
         self.vol_min_max  = None
         self.do_autoscale = False
-        self.min_max      = [0, 65535]
         self.crosshair    = True
+        self.cam_pos      = None
 
         # image properties
         self.gamma       = None
@@ -772,7 +773,7 @@ class GLFrameViewer:
         self.shear_angle = None
         self.opacity     = None
         self.resolution  = None
-        self.min_max     = None
+        self.min_max     = [0, 65535]
         self.luts        = None
         self.n_channels  = None
 
@@ -793,7 +794,10 @@ class GLFrameViewer:
         
         self.cmd_q.put_nowait(_do)
 
-    def start_render_loop(self, window_dim=(1000,800), title="Camera View"):
+    def start_render_loop(self, window_dim=(1000,800), title="Camera View", cam_pos=[100, 100, 100]):
+        # initial camera pos
+        self.cam_pos = cam_pos
+
         if self.thread and self.thread.is_alive():
             return
         
@@ -870,7 +874,7 @@ class GLFrameViewer:
             self.vao = GL.glGenVertexArrays(1) # quad
 
             # camera
-            self.camera = Camera(self.window, self, position=[100]*3)
+            self.camera = Camera(self.window, self, position=self.cam_pos)
 
             # 2D shader uniform inits
             self.shaders['frame'].use()
@@ -1515,7 +1519,7 @@ class GLFrameViewer:
         self.cmd_q.put_nowait(_do)
 
 
-    def set_min_max(self, min_max: list):
+    def set_min_max(self, min_max: list, ch: int=0):
         self.min_max = min_max
         
         def _do():
@@ -1526,8 +1530,14 @@ class GLFrameViewer:
             if self.mode == "frame":
                 shader.set_vec2('cMinMax', min_max)
             elif self.mode == "volume" and min_max:
-                c_min, c_max = min_max
+                print("set_min_max:", ch, min_max)
+                shader.set_vec2(
+                    f"cMinMax[{ch}]", 
+                    np.array(min_max, dtype=np.float32)/65535.
+                    )
 
+                # c_min, c_max = min_max
+                
                 # if self.vol_min_max is None:
                 #     self.vol_min_max = min_max
                 # else:
@@ -1537,8 +1547,8 @@ class GLFrameViewer:
                 #         max([v_max, c_max])
                 #     ]
 
-                shader.set_float('cMin', float(c_min)/65535.)
-                shader.set_float('cMax', float(c_max)/65535.)
+                # shader.set_float('cMin', float(c_min)/65535.)
+                # shader.set_float('cMax', float(c_max)/65535.)
 
         self.cmd_q.put(_do)
 
@@ -1574,15 +1584,16 @@ if __name__ == '__main__':
 
     TEST_MODE = "volume"
 
-    from navigate.model.concurrency.concurrency_tools import SharedNDArray
-    from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+    import os
     import tkinter as tk
     from tkinter import ttk
     import tifffile
 
+    from navigate.model.concurrency.concurrency_tools import SharedNDArray
+    from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
     root = tk.Tk()
-    root.geometry("500x500")
+    root.geometry("500x800")
 
     settings = tk.Frame(root).pack()
 
@@ -1597,29 +1608,83 @@ if __name__ == '__main__':
         "LM-red":       r"C:\Users\conor\Documents\Lm_Images\C1-NT 002-Airyscan Processing.tif",
         "LM-blue":      r"C:\Users\conor\Documents\Lm_Images\C2-NT 002-Airyscan Processing.tif",
         "vast-cell":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH00_000000.tiff",
-        "vast-vasc":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH01_000000.tiff"
+        "vast-vasc":    r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001\CH01_000000.tiff",
     }
 
-    use_data = ["LM-red", "LM-blue"]
-    # use_data = ["vast-vasc", "vast-cell"]
+    # use_data = ["LM-red", "LM-blue"]
+    use_data = ["vasc"]
 
     vol_channels = []
 
-    for chan in use_data:
-        with tifffile.TiffFile(data[chan]) as tif:
+    resolution = {
+        'px': 0.1248,
+        'dz': 0.4
+    }
+
+    def add_channel(vol_path: str, ds: int=1):
+        with tifffile.TiffFile(vol_path) as tif:
             meta = tif.imagej_metadata
             
-            vol_channels.append(tif.asarray())
+            vol_channels.append(
+                tif.asarray()[::ds, ::ds, ::ds]
+                )
 
             try:
-                spacing  = meta['spacing']
+                resolution['dz'] = meta['spacing']
                 pixels, microns = tif.pages[0].tags.get('XResolution').value
-                px = microns / pixels
+                resolution['px'] = microns / pixels
             except:
-                spacing = 0.4
-                px = 0.1348
+                pass
+            finally:
+                resolution['px'] *= ds
+                resolution['dz'] *= ds
 
-    viewer.start_render_loop(window_dim=(600,600))
+    # for chan in use_data:
+    #     add_channel(data[chan])
+
+    vast_expt_data = {
+        # day 1
+        "d1-h7-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P1001",
+        "d1-h7-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P2001",
+        "d1-h7-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P3001",
+        "d1-h7-p4":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P4001",
+        "d1-h10-p1": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P1001",
+        "d1-h10-p2": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P2002",
+        "d1-h10-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P3001",
+        "d1-h11-p1": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H11\2025-10-25\P1001",
+        "d1-h11-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H11\2025-10-25\P3003",
+        # day 2
+        "d2-h3-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P1001",
+        "d2-h3-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P2001",
+        "d2-h3-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P3001",
+        "d2-h5-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P1001",  # extravasation?
+        "d2-h5-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P2002",  # extravasation?
+        "d2-h5-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P3001",
+        "d2-h6-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P1001",
+        "d2-h6-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P2001",
+        "d2-h6-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001",
+        "d2-h7-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P1001",  # badly aberrated...
+        "d2-h7-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P2001",
+        "d2-h7-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P3001",  # extravasation?
+        "d2-h10-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H10\2025-10-25\P3001",
+        "d2-h10-p4": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H10\2025-10-25\P4001",
+        # day 3
+        "d3-h6-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P1001",
+        "d3-h6-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P2001",  # same site as d2-h6-p1?
+        "d3-h6-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P3001",
+        "d3-h6-p4":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P4001",  # extravasation?
+        "d3-h7-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P1001",  # badly aberrated...
+        "d3-h7-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P2002",
+        "d3-h7-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P3001",  # extravasation?
+        "d3-h10-p2": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H10\2025-10-26\P2001", # extravasation?
+        "d3-h10-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H10\2025-10-26\P3002", # volume looks empty...
+    }
+    vast_condition = "d3-h7-p3"
+
+    add_channel(os.path.join(vast_expt_data[vast_condition], "CH00_000000.tiff"), ds=2)
+    add_channel(os.path.join(vast_expt_data[vast_condition], "CH01_000000.tiff"), ds=2)
+
+    viewer.start_render_loop(window_dim=(600,600), cam_pos=[-200, 200, 200])
 
     # pass the channels in as a list[np.ndarray]
     viewer.update_volume_texture(
@@ -1630,6 +1695,12 @@ if __name__ == '__main__':
             [0, 0, 0, 1], # ch2
             [0, 0, 0, 1], # ch3
         ])
+
+    for ch, vol in enumerate(vol_channels):
+        viewer.set_min_max([vol.max()/15, vol.max()/1.15], ch=ch)
+
+    # viewer.set_min_max([5000, 50000], ch=0)
+    # viewer.set_min_max([500 , 10000], ch=1)
 
     # Tk widgets
     variables = {}
@@ -1650,30 +1721,32 @@ if __name__ == '__main__':
             }
         ).pack()
 
-    add_widget(settings, "theta",   (0.0, 0.0, 1.0, 90.0))
+    add_widget(settings, "theta", (60.0, 0.0, 1.0, 90.0))
     variables["theta"].trace_add("write", lambda *args: viewer.set_shear_angle(float(variables["theta"].get())))
     
-    add_widget(settings, "opacity", (0.05, 0.0, 0.01, 1.0))
+    add_widget(settings, "opacity", (0.15, 0.0, 0.01, 1.0))
     variables["opacity"].trace_add("write", lambda *args: viewer.set_opacity(float(variables["opacity"].get())))
 
-    add_widget(settings, "gamma",   (1.0, 0.05, 0.05, 2.0))
+    add_widget(settings, "gamma", (0.5, 0.00, 0.05, 2.0))
     variables["gamma"].trace_add("write", lambda *args: viewer.set_gamma(float(variables["gamma"].get())))
     
-    add_widget(settings, "step_world",   (0.50, 0.02, 0.02, 1.0))
+    add_widget(settings, "step_world", (0.25, 0.02, 0.02, 1.0))
     variables["step_world"].trace_add("write", lambda *args: viewer.set_step_world(float(variables["step_world"].get())))
+    
+    # for ch in range(len(vol_channels)):
+    #     min_k, max_k = (f"min_{ch}", f"max_{ch}")
+    #     add_widget(settings, min_k,   (5000,  0, 50,  65535))
+    #     add_widget(settings, max_k,   (50000, 0, 250, 65535))
+    #     def get_min_max():
+    #         return [float(variables[min_k].get()), float(variables[max_k].get())]
+    #     [variables[k].trace_add("write", lambda *args: viewer.set_min_max(get_min_max(), ch=ch)) for k in [min_k, max_k]]
+    #     viewer.set_min_max(min_max=get_min_max(), ch=ch)
 
-    add_widget(settings, "min",   (0,    0, 50,  65535))
-    add_widget(settings, "max",   (2000, 0, 250, 65535))
-    def get_min_max():
-        return [float(variables["min"].get()), float(variables["max"].get())]
-    [variables[k].trace_add("write", lambda *args: viewer.set_min_max(get_min_max())) for k in ["min", "max"]]
-
-    viewer.set_resolution(px=px, dz=spacing)
+    viewer.set_resolution(px=resolution['px'], dz=resolution['dz'])
     viewer.set_shear_angle(theta=float(variables["theta"].get()))
     viewer.set_opacity(opacity=float(variables["opacity"].get()))
     viewer.set_gamma(gamma=float(variables["gamma"].get()))
     viewer.set_step_world(step_world=float(variables["step_world"].get()))
-    viewer.set_min_max(min_max=get_min_max())
 
     # viewer.set_ortho_view([0, 0, 100])
 

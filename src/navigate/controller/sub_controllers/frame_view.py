@@ -401,18 +401,18 @@ class Camera:
         
         return projection
 
-    def set_ortho_view(self, position: Union[list, np.ndarray]):
+    def set_ortho_view(self, pitch: float=0.0, yaw: float=0.0, radius: float=1.0):
         # self.position = glm.vec3(position)
         self.look_at = glm.vec3(0.0)
 
-        self.pitch  = glm.radians(90.)
-        self.yaw    = glm.radians(0.)
-        self.radius = 1.0
+        self.pitch  = glm.radians(pitch)
+        self.yaw    = glm.radians(yaw)
+        self.radius = radius
 
         self._recompute_position()
         self._update_basis()
         self.view = self.get_view_matrix()
-        self.is_ortho_proj = True
+        # self.is_ortho_proj = True
 
     def update(self, dt=0.0):
         # window size/pos
@@ -975,19 +975,29 @@ class GLFrameViewer:
             self.is_ready.set()
 
     def glfw_key_callback(self, window, key, scancode, action, mods):
-        if key == glfw.KEY_TAB and action == glfw.PRESS:
+        if action == glfw.PRESS:
+            if key == glfw.KEY_TAB:
 
-            # pretty bad, but works for now...
-            if self.mode == "frame":
-                self.mode = "volume"
-            elif self.mode == "volume":
-                self.mode = "frame"
+                # pretty bad, but works for now...
+                if self.mode == "frame":
+                    self.mode = "volume"
+                elif self.mode == "volume":
+                    self.mode = "frame"
+                
+                # update window title
+                glfw.set_window_title(self.window, self.title + f" [{self.mode.upper()}]")
+
+                # apply lut
+                self.set_min_max(self.min_max)
             
-            # update window title
-            glfw.set_window_title(self.window, self.title + f" [{self.mode.upper()}]")
-
-            # apply lut
-            self.set_min_max(self.min_max)
+            elif key == glfw.KEY_X:
+                self.camera.set_ortho_view( 0.0, 90.0, 350.0)
+            elif key == glfw.KEY_Y:
+                self.camera.set_ortho_view( 0.0,  0.0, 350.0)
+            elif key == glfw.KEY_Z:
+                self.camera.set_ortho_view(90.0, 90.0, 350.0)
+            elif key == glfw.KEY_C:
+                self.camera.set_ortho_view(45.0, 45.0, 350.0)
 
     def _ensure_gl_ready(self):
         window = self.window
@@ -1679,7 +1689,8 @@ if __name__ == '__main__':
         "d3-h10-p2": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H10\2025-10-26\P2001", # extravasation?
         "d3-h10-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H10\2025-10-26\P3002", # volume looks empty...
     }
-    vast_condition = "d3-h7-p3"
+    # vast_condition = "d3-h7-p3"
+    vast_condition = "d2-h5-p2"
 
     add_channel(os.path.join(vast_expt_data[vast_condition], "CH00_000000.tiff"), ds=2)
     add_channel(os.path.join(vast_expt_data[vast_condition], "CH01_000000.tiff"), ds=2)
@@ -1696,11 +1707,79 @@ if __name__ == '__main__':
             [0, 0, 0, 1], # ch3
         ])
 
-    for ch, vol in enumerate(vol_channels):
-        viewer.set_min_max([vol.max()/15, vol.max()/1.15], ch=ch)
+    # for ch, vol in enumerate(vol_channels):
+    #     viewer.set_min_max([vol.max()/15, vol.max()/1.15], ch=ch)
 
     # viewer.set_min_max([5000, 50000], ch=0)
     # viewer.set_min_max([500 , 10000], ch=1)
+
+    lut_default = {
+        'min_0': 5000, 'max_0': 45000,
+        'min_1': 250,  'max_1':  5000,
+    }
+
+    min_0 = tk.StringVar(root, value=str(lut_default['min_0']))
+    max_0 = tk.StringVar(root, value=str(lut_default['max_0']))
+    lut_frame_0 = tk.Frame(settings).pack()
+    LabelInput(
+        lut_frame_0,
+        input_class=ttk.Spinbox,
+        input_var=min_0,
+        label_pos="left",
+        label="min_0",
+        input_args={
+            "from_": 0,
+            "to": 65535,
+            "increment": 50,
+        }
+    ).pack()
+    LabelInput(
+        lut_frame_0,
+        input_class=ttk.Spinbox,
+        input_var=max_0,
+        label_pos="left",
+        label="max_0",
+        input_args={
+            "from_": 0,
+            "to": 65535,
+            "increment": 50,
+        }
+    ).pack()
+    min_0.trace_add("write", lambda *args: viewer.set_min_max([int(min_0.get()), int(max_0.get())], ch=0))
+    max_0.trace_add("write", lambda *args: viewer.set_min_max([int(min_0.get()), int(max_0.get())], ch=0))
+
+    min_1 = tk.StringVar(root, value=str(lut_default['min_1']))
+    max_1 = tk.StringVar(root, value=str(lut_default['max_1']))
+    lut_frame_1 = tk.Frame(settings).pack()
+    LabelInput(
+        lut_frame_1,
+        input_class=ttk.Spinbox,
+        input_var=min_1,
+        label_pos="left",
+        label="min_1",
+        input_args={
+            "from_": 0,
+            "to": 65535,
+            "increment": 50,
+        }
+    ).pack()
+    LabelInput(
+        lut_frame_1,
+        input_class=ttk.Spinbox,
+        input_var=max_1,
+        label_pos="left",
+        label="max_1",
+        input_args={
+            "from_": 0,
+            "to": 65535,
+            "increment": 50,
+        }
+    ).pack()
+    min_1.trace_add("write", lambda *args: viewer.set_min_max([int(min_1.get()), int(max_1.get())], ch=1))
+    max_1.trace_add("write", lambda *args: viewer.set_min_max([int(min_1.get()), int(max_1.get())], ch=1))
+
+    viewer.set_min_max([lut_default['min_0'], lut_default['max_0']], ch=0)
+    viewer.set_min_max([lut_default['min_1'], lut_default['max_1']], ch=1)
 
     # Tk widgets
     variables = {}
@@ -1724,10 +1803,10 @@ if __name__ == '__main__':
     add_widget(settings, "theta", (60.0, 0.0, 1.0, 90.0))
     variables["theta"].trace_add("write", lambda *args: viewer.set_shear_angle(float(variables["theta"].get())))
     
-    add_widget(settings, "opacity", (0.15, 0.0, 0.01, 1.0))
+    add_widget(settings, "opacity", (0.25, 0.0, 0.01, 1.0))
     variables["opacity"].trace_add("write", lambda *args: viewer.set_opacity(float(variables["opacity"].get())))
 
-    add_widget(settings, "gamma", (0.5, 0.00, 0.05, 2.0))
+    add_widget(settings, "gamma", (0.50, 0.00, 0.05, 2.0))
     variables["gamma"].trace_add("write", lambda *args: viewer.set_gamma(float(variables["gamma"].get())))
     
     add_widget(settings, "step_world", (0.25, 0.02, 0.02, 1.0))

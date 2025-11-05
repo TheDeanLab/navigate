@@ -892,7 +892,16 @@ class Microscope:
         success : bool
             True if stage is successfully moved, False otherwise.
         """
-        self.ask_stage_for_position = True
+        if self.configuration["experiment"]["MicroscopeState"][
+            "image_mode"
+        ] in ("z-stack", "customized"):
+            # cache stage positions in z-stack and customized modes.
+            self.ask_stage_for_position = False
+            for axis_key in pos_dict.keys():
+                axis = axis_key[: axis_key.index("_")]
+                self.ret_pos_dict[f"{axis}_pos"] = pos_dict[axis_key]
+        else:
+            self.ask_stage_for_position = True
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]

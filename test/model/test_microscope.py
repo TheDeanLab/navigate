@@ -75,33 +75,130 @@ def test_prepare_acquisition(dummy_microscope):
         for k in ["camera_waveform", "remote_focus_waveform", "galvo_waveform"]
     ]
 
+def test_move_stage(dummy_microscope):
+    import numpy as np
+
+    acquisition_mode = dummy_microscope.configuration["experiment"]["MicroscopeState"][
+        "image_mode"
+    ]
+
+    expected_device_flag = {
+        "continous": True,
+        "single": True,
+        "z-stack": False,
+        "customized": False,
+    }
+    for mode in expected_device_flag:
+        dummy_microscope.configuration["experiment"]["MicroscopeState"][
+            "image_mode"
+        ] = mode
+
+        # move stage to random position
+        axes = ["x", "y", "z", "theta", "f"]
+        for i in range(5):
+            test_axes = random.sample(axes, i+1)
+            pos_dict = {
+                f"{k}_abs": v
+                for k, v in zip(test_axes, np.random.rand(len(test_axes)) * 100)
+            }
+            dummy_microscope.move_stage(pos_dict, wait_until_done=True)
+
+            assert dummy_microscope.ask_stage_for_position == expected_device_flag[mode]
+
+            if expected_device_flag[mode] == False:
+                # assert position is cached
+                for axis in test_axes:
+                    assert round(dummy_microscope.ret_pos_dict[axis + "_pos"], 2) == round(
+                        pos_dict[f"{axis}_abs"], 2
+                    )
+
+    # set back acquisition mode
+    dummy_microscope.configuration["experiment"]["MicroscopeState"][
+        "image_mode"
+    ] = acquisition_mode
 
 def test_get_stage_position(dummy_microscope):
     import numpy as np
 
-    pos_dict = {
-        f"{k}_abs": v
-        for k, v in zip(["x", "y", "z", "theta", "f"], np.random.rand(5) * 100)
-    }
-    dummy_microscope.move_stage(pos_dict, wait_until_done=True)
+    acquisition_mode = dummy_microscope.configuration["experiment"]["MicroscopeState"][
+        "image_mode"
+    ]
 
-    assert dummy_microscope.ask_stage_for_position is True
+    report_position_funcs = {}
+    axes_dict = {}
+    for stage, axes in dummy_microscope.stages_list:
+        for axis in axes:
+            axes_dict[axis] = axes
+            report_position_funcs[axis] = stage.report_position
 
-    stage_dict = dummy_microscope.get_stage_position()
+    is_called = dict([(axis, False) for axis in dummy_microscope.stages])
+    def report_position_mock(axis):
+        def func():
+            for a in axes_dict[axis]:
+                is_called[a] = True
+            return report_position_funcs[axis]()
+        return func
 
-    ret_pos_dict = {}
     for axis in dummy_microscope.stages:
-        pos_axis = axis + "_pos"
-        temp_pos = dummy_microscope.stages[axis].report_position()
-        ret_pos_dict[pos_axis] = round(temp_pos[pos_axis], 2)
+        dummy_microscope.stages[axis].report_position = report_position_mock(axis)
 
-    assert isinstance(stage_dict, dict)
-    assert ret_pos_dict == stage_dict
+    expected_device_flag = {
+        "continous": True,
+        "single": True,
+        "z-stack": False,
+        "customized": False,
+    }
+    for mode in expected_device_flag:
+        dummy_microscope.configuration["experiment"]["MicroscopeState"][
+            "image_mode"
+        ] = mode
+        
+        # move stage to random position
+        pos_dict = {
+            f"{k}_abs": v
+            for k, v in zip(["x", "y", "z", "theta", "f"], np.random.rand(5) * 100)
+        }
+        dummy_microscope.move_stage(pos_dict, wait_until_done=True)
 
-    # Check caching
-    stage_dict = dummy_microscope.get_stage_position()
-    assert ret_pos_dict == stage_dict
-    assert dummy_microscope.ask_stage_for_position is False
+        assert dummy_microscope.ask_stage_for_position == expected_device_flag[mode]
+
+        for axis in is_called:
+            is_called[axis] = False
+
+        stage_dict = dummy_microscope.get_stage_position()
+
+        # verify if report_position is called according to mode
+        for axis in is_called:
+            assert is_called[axis] == expected_device_flag[mode]
+
+        ret_pos_dict = {}
+        for axis in dummy_microscope.stages:
+            pos_axis = axis + "_pos"
+            temp_pos = dummy_microscope.stages[axis].report_position()
+            ret_pos_dict[pos_axis] = round(temp_pos[pos_axis], 2)
+
+        assert isinstance(stage_dict, dict)
+        assert ret_pos_dict == stage_dict
+
+        # Check caching
+        assert dummy_microscope.ask_stage_for_position is False
+        for axis in is_called:
+            is_called[axis] = False
+        stage_dict = dummy_microscope.get_stage_position()
+        assert ret_pos_dict == stage_dict
+        assert dummy_microscope.ask_stage_for_position is False
+        for axis in is_called:
+            assert is_called[axis] is False
+        
+
+    # set back acquisition mode
+    dummy_microscope.configuration["experiment"]["MicroscopeState"][
+        "image_mode"
+    ] = acquisition_mode
+
+    # restore report position functions
+    for axis in dummy_microscope.stages:
+        dummy_microscope.stages[axis].report_position = report_position_funcs[axis]
 
 
 def test_prepare_next_channel(dummy_microscope):

@@ -199,7 +199,7 @@ class Metadata:
         self._multiposition = state["is_multiposition"]
 
         if bool(self._multiposition):
-            self.positions = len(self.configuration["multi_positions"])
+            self.positions = len(self.configuration["multi_positions"]) - 1
         else:
             self.positions = 1
 

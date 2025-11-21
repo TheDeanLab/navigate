@@ -563,7 +563,7 @@ class Model:
             self.is_save = self.configuration["experiment"]["MicroscopeState"][
                 "is_save"
             ]
-            if len(self.configuration["multi_positions"]) == 0:
+            if len(self.configuration["multi_positions"]) < 2:
                 self.configuration["experiment"]["MicroscopeState"][
                     "is_multiposition"
                 ] = False

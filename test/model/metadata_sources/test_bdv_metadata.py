@@ -70,3 +70,116 @@ def test_bdv_metadata(ext):
     # Make sure we can still write the data.
     md.write_xml(f"test_bdv.{ext}", views)
     os.remove("test_bdv.xml")
+
+@pytest.mark.parametrize("stack_cycling_mode", ["per_stack", "per_z"])
+def test_bdv_xml_dict(dummy_model, stack_cycling_mode):
+    from navigate.model.metadata_sources.bdv_metadata import BigDataViewerMetadata
+
+    md = BigDataViewerMetadata()
+
+    md.configuration = dummy_model.configuration.copy()
+
+    # set shape from configuration and experiment
+    md.configuration["experiment"]["MicroscopeState"]["image_mode"] = "z-stack"
+
+    # timepoints, channels, z-slices, positions
+    for tp in [1]: #, 2, 3, 5]:
+        for pos in [1, 3, 5]:
+            for ch in [1, 2, 3]:
+                for z in [1, 5, 10, 20]:
+                    md.configuration["experiment"]["MicroscopeState"]["timepoints"] = tp
+                    # channel settings
+                    channel_dict = md.configuration["experiment"]["MicroscopeState"]["channels"]
+                    for i in range(1, ch+1):
+                        channel_name = f"channel_{i}"
+                        if channel_name not in channel_dict:
+                            channel_dict[channel_name] = {
+                                "is_selected": True,
+                                "laser": "488nm",
+                                "laser_index": 0,
+                                "camera_exposure_time": 200.0,
+                                "laser_power": 20.0,
+                                "interval_time": 1.0,
+                                "defocus": 104.0,
+                                "filter_wheel_0": "Empty-Alignment",
+                                "filter_position_0": 6,
+                                "filter_wheel_1": "Empty-Alignment",
+                                "filter_position_1": 6
+                            }
+                        else:
+                            channel_dict[channel_name]["is_selected"] = True
+                    for i in range(ch+1, 5):
+                        channel_name = f"channel_{i}"
+                        if channel_name in channel_dict:
+                            channel_dict[channel_name]["is_selected"] = False
+                    # z-stack settings
+                    start_z_position = md.configuration["experiment"]["MicroscopeState"]["start_position"]
+                    md.configuration["experiment"]["MicroscopeState"]["number_z_steps"] = z
+                    md.configuration["experiment"]["MicroscopeState"]["step_size"] = 0.2
+                    md.configuration["experiment"]["MicroscopeState"]["end_position"] = z * 0.2 + start_z_position
+                    # multiposition settings
+                    md.configuration["experiment"]["MicroscopeState"]["is_multiposition"] = (
+                        True if pos > 1 else False
+                    )
+                    multipositions = [
+                        ["X", "Y", "Z", "THETA", "F"]
+                    ]
+                    for p in range(pos):
+                        position = [
+                            np.random.uniform(0, 100),  # X
+                            np.random.uniform(0, 100),  # Y
+                            np.random.uniform(0, 100),  # Z
+                            np.random.uniform(0, 360),  # THETA
+                            np.random.uniform(0, 10),  # F
+                        ]
+                        multipositions.append(position)
+
+                    md.configuration["multi_positions"] = multipositions
+
+                    md.set_from_configuration_experiment()
+
+                    assert md.shape_t == tp
+                    assert md.shape_c == ch
+                    assert md.shape_z == z
+                    assert md.positions == pos
+
+                    if pos > 1:
+                        assert md._multiposition is True
+                    else:
+                        assert md._multiposition is False
+
+                    # view
+                    views = []
+                    for p in range(1, pos):
+                        for c in range(ch):
+                            position = md.configuration["multi_positions"][p + 1]
+                            for _z in range(z):
+                                views.append(
+                                    {
+                                        "x": position[0],
+                                        "y": position[1],
+                                        "z": position[2] + start_z_position + _z * 0.2,
+                                        "theta": position[3],
+                                        "f": position[4],
+                                    }
+                                )
+
+                    xml_dict = md.bdv_xml_dict("test_file.h5", views)
+
+                    assert "ImageLoader" in xml_dict["SequenceDescription"]
+                    assert "ViewSetups" in xml_dict["SequenceDescription"]
+                    assert "Timepoints" in xml_dict["SequenceDescription"]
+                    assert "ViewRegistrations" in xml_dict
+                    # verify affine values are the same for a position
+                    view_registrations = xml_dict["ViewRegistrations"]["ViewRegistration"]
+                    for i in range(len(view_registrations)):
+                        # assert view id
+                        view_id = view_registrations[i]["setup"]
+                        if ch > 1:
+                            assert view_id == ((i % ch) * pos + (i // ch))
+                        # assert affine position consistency between channels
+                        if i % ch == 0:
+                            affine = view_registrations[i]["ViewTransform"][0]["affine"]["text"]
+                        else:
+                            affine_c = view_registrations[i]["ViewTransform"][0]["affine"]["text"]
+                            assert affine == affine_c

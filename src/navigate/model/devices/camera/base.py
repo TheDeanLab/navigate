@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,12 @@
 # Standard Library Imports
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Optional
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 import tifffile
+import numpy as np
 
 # Local Imports
 from navigate.config import get_navigate_path
@@ -48,17 +50,21 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class CameraBase:
-    """CameraBase - Parent camera class."""
+class CameraBase(ABC):
+    """Abstract base class for cameras.
+
+    This class provides the interface and common functionality for controlling
+    cameras with navigate.
+    """
 
     def __init__(
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args: Optional[Any],
         **kwargs: Optional[Any],
-    ):
+    ) -> None:
         """Initialize CameraBase class.
 
         Parameters
@@ -120,16 +126,11 @@ class CameraBase:
         self.minimum_exposure_time = 0.001
         self.camera_parameters["x_pixels"] = 2048
         self.camera_parameters["y_pixels"] = 2048
-        # TODO: trigger_source, readout_speed,
-        #  trigger_active, trigger_mode and trigger_polarity
-        # can be removed after updating how we get the
-        # readout time in model and controller
-        self.camera_parameters["trigger_source"] = 2.0 # external trigger
-        self.camera_parameters["readout_speed"] = 1.0
-        self.camera_parameters["pixel_size_in_microns"] = 6.5
-        self.camera_parameters["trigger_active"] = 1.0
-        self.camera_parameters["trigger_mode"] = 1.0 # standard trigger mode
-        self.camera_parameters["trigger_polarity"] = 2.0
+
+        if "pixel_size_in_microns" not in self.camera_parameters:
+            self.camera_parameters["pixel_size_in_microns"] = 6.5
+
+        # Supported modes, not all cameras support all modes
         self.camera_parameters["supported_sensor_modes"] = ["Normal", "Light-Sheet"]
         self.camera_parameters["supported_readout_directions"] = [
             "Top-to-Bottom",
@@ -145,11 +146,71 @@ class CameraBase:
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of CameraBase."""
         return "CameraBase"
 
-    def get_offset_variance_maps(self):
+    @abstractmethod
+    def get_new_frame(self) -> list[int]:
+        """Get a new frame from the camera.
+
+        This abstract method must be implemented by all subclasses.
+
+
+        Returns
+        -------
+        frame_ids : list[int]
+            New frame ids from the camera.
+        """
+        return []
+
+    @abstractmethod
+    def initialize_image_series(
+        self, data_buffer: Optional[list] = None, number_of_frames: int = 100
+    ) -> None:
+        """Initialize image series and attach the given data_buffer,
+        which serves as the destination for incoming images.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        data_buffer :
+            List of SharedNDArrays of shape=(self.img_height,
+            self.img_width) and dtype="uint16"
+            Default is None.
+        number_of_frames : int
+            Number of frames.  Default is 100.
+        """
+        self.is_acquiring = True
+
+    @abstractmethod
+    def close_image_series(self) -> None:
+        """Close image series.
+
+        This abstract method must be implemented by all subclasses.
+        """
+        self.is_acquiring = False
+
+    @abstractmethod
+    def set_line_interval(self, line_interval_time: float) -> bool:
+        """Set the camera line interval time.
+
+        This abstract method must be implemented by all subclasses.
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
+        """
+        return True
+
+    @abstractmethod
+    def set_exposure_time(self, exposure_time: float) -> bool:
+        """Set the camera exposure time."""
+        return True
+
+    def get_offset_variance_maps(self) -> Any:
         """Get offset and variance maps from file.
 
         Returns
@@ -166,20 +227,26 @@ class CameraBase:
         """
         serial_number = self.camera_parameters["hardware"]["serial_number"]
         map_path = os.path.join(get_navigate_path(), "camera_maps")
-        try:
-            self._offset = tifffile.imread(
-                os.path.join(map_path, f"{serial_number}_off.tiff")
-            )
-            self._variance = tifffile.imread(
-                os.path.join(map_path, f"{serial_number}_var.tiff")
-            )
-        except FileNotFoundError:
-            logger.info(f"{str(self)}, Offset or variance map not found in {map_path}")
+
+        def load_map(filename_base: str) -> Optional[np.ndarray]:
+            for ext in [".tiff", ".tif"]:
+                file_path = os.path.join(map_path, f"{filename_base}{ext}")
+                if os.path.exists(file_path):
+                    return tifffile.imread(file_path)
+            return None
+
+        self._offset = load_map(f"{serial_number}_off")
+        self._variance = load_map(f"{serial_number}_var")
+
+        if self._offset is None or self._variance is None:
+            logger.info(
+                f"{str(self)}, Offset or variance map not found in {map_path}")
             self._offset, self._variance = None, None
+
         return self._offset, self._variance
 
     @property
-    def offset(self):
+    def offset(self) -> Any:
         """Return offset map. If not present, load from file.
 
         Returns
@@ -192,7 +259,7 @@ class CameraBase:
         return self._offset
 
     @property
-    def variance(self):
+    def variance(self) -> Any:
         """Return variance map. If not present, load from file.
 
         Returns
@@ -205,7 +272,8 @@ class CameraBase:
             self.get_offset_variance_maps()
         return self._variance
 
-    def set_readout_direction(self, mode) -> None:
+    @abstractmethod
+    def set_readout_direction(self, mode: str) -> None:
         """Set HamamatsuOrca readout direction.
 
         Parameters
@@ -215,9 +283,10 @@ class CameraBase:
         """
         logger.info(f"Camera readout direction set to: {mode}.")
 
+    @abstractmethod
     def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time, shutter_width
-    ):
+        self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
         """Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an acquisition
 
@@ -251,7 +320,7 @@ class CameraBase:
         """Close camera."""
         pass
 
-    def get_line_interval(self) -> float:
+    def get_line_interval(self) -> Optional[float]:
         """Return stored camera line interval.
 
         Returns
@@ -260,9 +329,59 @@ class CameraBase:
             line interval duration (s).
         """
         return self.camera_parameters.get("line_interval", None)
-    
 
-    def set_ROI_and_binning(self, roi_width=2048, roi_height=2048, center_x=1024, center_y=1024, binning='1x1') -> bool:
+    @abstractmethod
+    def set_ROI(
+        self,
+        roi_width: int = 2048,
+        roi_height: int = 2048,
+        center_x: int = 1024,
+        center_y: int = 1024,
+    ) -> bool:
+        """Change the size of the active region on the camera.
+
+        Parameters
+        ----------
+        roi_width : int
+            Width of active camera region.
+        roi_height : int
+            Height of active camera region.
+        center_x : int
+            X position of the center of view
+        center_y : int
+            Y position of the center of view
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
+        """
+        return True
+
+    @abstractmethod
+    def set_binning(self, binning: str = "1x1") -> bool:
+        """Set the camera binning mode.
+
+        Parameters
+        ----------
+        binning : str
+            Desired binning properties (e.g., '1x1', '2x2', '4x4', '1x2', '2x4')
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
+        """
+        return True
+
+    def set_ROI_and_binning(
+        self,
+        roi_width: int = 2048,
+        roi_height: int = 2048,
+        center_x: int = 1024,
+        center_y: int = 1024,
+        binning: str = "1x1",
+    ) -> bool:
         """Change the size of the active region on the camera and set the binning mode.
 
         Parameters
@@ -278,7 +397,7 @@ class CameraBase:
         binning : str
             Desired binning properties (e.g., '1x1', '2x2', '4x4', '8x8', '16x16',
             '1x2', '2x4')
-        
+
         Returns
         -------
         result: bool
@@ -292,13 +411,27 @@ class CameraBase:
         # Set Binning
         result = self.set_binning(binning)
         return result
-    
-    def set_trigger_mode(self, trigger_source:str="External") -> None:
+
+    @abstractmethod
+    def set_trigger_mode(self, trigger_source: str = "External") -> None:
         """Set the camera trigger source to external or internal free run mode.
+
+        This abstract method must be implemented by all subclasses.
+
         Parameters
         ----------
         trigger_source : str
             Trigger source. Options are 'External' or 'Internal'.
         """
-        # Only supports external triggering by default
+        pass
+
+    @abstractmethod
+    def set_sensor_mode(self, mode: str) -> None:
+        """Set camera sensor mode.
+
+        Parameters
+        ----------
+        mode : str
+            Sensor mode. Options are 'Normal' or 'Light-Sheet'.
+        """
         pass

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -275,6 +275,8 @@ def verify_experiment_config(manager, configuration):
         "fine_step_size": 5,
         "fine_selected": True,
         "robust_fit": False,
+        "spline_fit": False,
+        "test_significance": False,
     }
     if (
         "AutoFocusParameters" not in configuration["experiment"]
@@ -307,6 +309,18 @@ def verify_experiment_config(manager, configuration):
                         device_ref,
                         autofocus_sample_setting,
                     )
+                else:
+                    # add missing parameters
+                    for k in autofocus_sample_setting.keys():
+                        if (
+                            k
+                            not in autofocus_setting_dict[microscope_name][device][
+                                device_ref
+                            ].keys()
+                        ):
+                            autofocus_setting_dict[microscope_name][device][
+                                device_ref
+                            ][k] = autofocus_sample_setting[k]
 
     # remove non-consistent autofocus parameter
     for microscope_name in autofocus_setting_dict.keys():

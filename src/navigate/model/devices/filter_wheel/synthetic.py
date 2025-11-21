@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 
 #  Standard Library Imports
 import logging
+from typing import Any
 
 # Third Party Imports
 
@@ -47,7 +48,13 @@ logger = logging.getLogger(p)
 class SyntheticFilterWheel(FilterWheelBase):
     """SyntheticFilterWheel Class"""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the SyntheticFilterWheel.
 
         Parameters
@@ -63,22 +70,11 @@ class SyntheticFilterWheel(FilterWheelBase):
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
-
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of the SyntheticFilterWheel."""
         return "SyntheticFilterWheel"
 
-    def filter_change_delay(self, filter_name):
-        """Calculate duration of time necessary to change filter wheel positions
-
-        Parameters
-        ----------
-        filter_name : str
-            Name of the filter that we want to move to
-        """
-        pass
-
-    def set_filter(self, filter_name, wait_until_done=True):
+    def set_filter(self, filter_name: str, wait_until_done: bool = True) -> None:
         """Change the filter wheel to the filter designated by the filter
         position argument.
 
@@ -91,23 +87,13 @@ class SyntheticFilterWheel(FilterWheelBase):
         """
         pass
 
-    def read(self, num_bytes):
-        """Reads the specified number of bytes from the serial port.
-
-        Parameters
-        ----------
-        num_bytes : int
-            Number of bytes to read from the serial port.
-        """
-        pass
-
-    def close(self):
+    def close(self) -> None:
         """Close the SyntheticFilterWheel.
 
         Sets the filter wheel to the Empty-Alignment position and then closes the port.
         """
         pass
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the SyntheticFilterWheel."""
         pass

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -151,7 +151,7 @@ class ImageWriter:
         self.disk_space_check_interval = 60
 
         #: int: Minimum disk space required in bytes.
-        self.min_disk_space = 10 * 1024 * 1024 * 1024 # 10 GB
+        self.min_disk_space = 10 * 1024 * 1024 * 1024  # 10 GB
 
         #: float: Time of last disk space check
         self.last_disk_space_check = 0
@@ -177,7 +177,10 @@ class ImageWriter:
                 continue
 
             # Check disk space at regular intervals to prevent running out of space
-            if time.time() - self.last_disk_space_check > self.disk_space_check_interval:
+            if (
+                time.time() - self.last_disk_space_check
+                > self.disk_space_check_interval
+            ):
                 _, _, free = shutil.disk_usage(self.save_directory)
                 logger.info(f"Free Disk Space: {free / 1024 / 1024 / 1024} GB")
                 if free < self.min_disk_space:
@@ -349,9 +352,7 @@ class ImageWriter:
                 os.makedirs(self.save_directory)
                 logger.debug(f"Save Directory Created - {self.save_directory}")
             except (PermissionError, OSError, FileNotFoundError):
-                logger.debug(
-                    f"Unable to Create Save Directory - {self.save_directory}"
-                )
+                logger.debug(f"Unable to Create Save Directory - {self.save_directory}")
                 self.model.stop_acquisition = True
                 self.model.event_queue.put(
                     "warning",
@@ -393,9 +394,7 @@ class ImageWriter:
                 os.makedirs(self.mip_directory)
                 logger.debug(f"MIP Directory Created - {self.mip_directory}")
             except (PermissionError, OSError, FileNotFoundError):
-                logger.debug(
-                    f"Unable to Create MIP Directory - {self.mip_directory}"
-                )
+                logger.debug(f"Unable to Create MIP Directory - {self.mip_directory}")
                 self.model.stop_acquisition = True
                 self.model.event_queue.put(
                     "warning",

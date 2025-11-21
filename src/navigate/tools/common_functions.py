@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 import importlib
 from threading import Lock
 from types import TracebackType
-from typing import Optional, Any, Type
+from typing import Optional, Any, Type, Union
 
 # Third-party imports
 
@@ -157,6 +157,30 @@ def load_param_from_module(module_name: str, param_name: str) -> Optional[any]:
     except ModuleNotFoundError:
         return None
     return param
+
+
+def decode_bytes(value: Union[bytes, memoryview]):
+    """Decode bytes or memoryview into readable string.
+
+    Parameters
+    ----------
+    value : bytes or memoryview
+        the value
+
+    Returns
+    -------
+    result : str
+        a readable string
+    """
+    if isinstance(value, memoryview):
+        value = value.tobytes()
+
+    if not isinstance(value, (bytes, bytearray)):
+        return ""
+    try:
+        return value.decode(errors="ignore")
+    except Exception:
+        return ""
 
 
 class VariableWithLock:

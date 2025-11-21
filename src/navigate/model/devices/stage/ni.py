@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ import logging
 import traceback
 from multiprocessing.managers import ListProxy
 import time
-from typing import Any, Dict
+from typing import Any, Optional
 
 # Third Party Imports
 import numpy as np
@@ -66,7 +66,7 @@ class NIStage(StageBase, NIDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the Galvo Stage.
@@ -166,7 +166,7 @@ class NIStage(StageBase, NIDevice):
         self.switch_mode("normal")
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
-    def report_position(self):
+    def report_position(self) -> dict[str, float]:
         """Reports the position for all axes, and create position dictionary.
 
         Returns
@@ -176,7 +176,7 @@ class NIStage(StageBase, NIDevice):
         """
         return self.get_position_dict()
 
-    def update_waveform(self, waveform_dict):
+    def update_waveform(self, waveform_dict: dict[str, np.ndarray]) -> bool:
         """Update the waveform for the stage.
 
         Parameters
@@ -218,7 +218,9 @@ class NIStage(StageBase, NIDevice):
         }
         return True
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
         """Implement movement logic along a single axis.
 
         Parameters
@@ -268,7 +270,9 @@ class NIStage(StageBase, NIDevice):
 
         return True
 
-    def move_absolute(self, move_dictionary, wait_until_done=True):
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = True
+    ) -> bool:
         """Move Absolute Method.
 
         Parameters
@@ -291,11 +295,16 @@ class NIStage(StageBase, NIDevice):
         axis = list(abs_pos_dict.keys())[0]
         return self.move_axis_absolute(axis, abs_pos_dict[axis], wait_until_done)
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop all stage movement abruptly."""
         pass
 
-    def switch_mode(self, mode="normal", exposure_times=None, sweep_times=None):
+    def switch_mode(
+        self,
+        mode: str = "normal",
+        exposure_times: Optional[dict] = None,
+        sweep_times: Optional[dict] = None,
+    ):
         """Switch Galvo stage working mode.
 
         Parameters

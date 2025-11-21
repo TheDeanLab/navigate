@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any
 
 # Third Party Imports
 
@@ -53,7 +53,7 @@ class SyntheticLaser(LaserBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int,
     ) -> None:
         """Initialize the SyntheticLaser class.
@@ -75,8 +75,24 @@ class SyntheticLaser(LaserBase):
         """Close the port before exit."""
         pass
 
-    def initialize_laser(self) -> None:
+    def set_power(self, laser_intensity: int) -> None:
+        """Set the laser power.
+
+        Parameters
+        ----------
+        laser_intensity : int
+            The laser intensity to set.
         """
-        Initialize lasers.
-        """
+        logger.debug(
+            f"{self.microscope_name} - SyntheticLaser.set_power({laser_intensity})"
+        )
+        self.laser_intensity = laser_intensity
+
+    def turn_on(self) -> None:
+        """Turn on the laser"""
+        pass
+
+    def turn_off(self) -> None:
+        """Turn off the laser"""
+
         pass

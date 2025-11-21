@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -54,7 +54,7 @@ class SyntheticShutter(ShutterBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args: Optional[Any],
         **kwargs: Optional[Any],
     ) -> None:
@@ -70,3 +70,11 @@ class SyntheticShutter(ShutterBase):
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)
+
+    def open_shutter(self) -> None:
+        """Open the Shutter."""
+        self.shutter_state = True
+
+    def close_shutter(self) -> None:
+        """Close the Shutter."""
+        self.shutter_state = False

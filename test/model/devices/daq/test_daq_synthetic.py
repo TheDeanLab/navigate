@@ -20,25 +20,13 @@ def test_synthetic_daq_functions():
 
     funcs = [
         "add_camera",
-        "create_camera_task",
-        "create_master_trigger_task",
-        "create_galvo_remote_focus_tasks",
-        "start_tasks",
-        "stop_tasks",
-        "close_tasks",
         "prepare_acquisition",
         "run_acquisition",
         "stop_acquisition",
-        "write_waveforms_to_tasks",
+        "wait_acquisition_done",
     ]
     args = [
         [microscope_name, model.camera[microscope_name]],
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
         [f"channel_{random.randint(1, 5)}"],
         None,
         None,

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ import tkinter as tk
 from multiprocessing.managers import ListProxy, DictProxy
 import logging
 from typing import Dict, Optional, Callable, Iterable
-import re
 
 # Third Party Imports
 
@@ -44,8 +43,7 @@ import navigate
 from navigate.controller.configuration_controller import ConfigurationController
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.decorators import log_initialization
-from navigate.view.main_application_window import MainApp
-from navigate.view.main_window_content.stage_tab import StageControlTab, OtherAxisFrame
+from navigate.view.main_window_content.stage_tab import StageControlTab
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -274,7 +272,6 @@ class StageController(GUIController):
         else:
             self.view.stop_frame.home_btn.grid()
             self.view.stop_frame.home_btn.configure(command=self.home_button_handler)
-            
 
     def disable_synthetic_stages(self, config: ConfigurationController) -> None:
         """Disable synthetic stages.
@@ -671,7 +668,7 @@ class StageController(GUIController):
                 btn_suffix = "btn"
 
             if axis == "theta":
-                description = f"\N{DEGREE SIGN} in \N{GREEK CAPITAL LETTER THETA}."
+                description = "\N{DEGREE SIGN} in \N{GREEK CAPITAL LETTER THETA}."
             else:
                 description = f"\N{GREEK SMALL LETTER MU}m in {axis.upper()}."
 

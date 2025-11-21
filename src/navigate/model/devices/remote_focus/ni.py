@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -54,7 +54,7 @@ class NIRemoteFocus(RemoteFocusBase, NIDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args,
         **kwargs,
     ) -> None:
@@ -89,7 +89,12 @@ class NIRemoteFocus(RemoteFocusBase, NIDevice):
         Deletion of the NIDAQ task is handled by the NIDAQ object."""
         pass
 
-    def adjust(self, exposure_times, sweep_times, offset=None):
+    def adjust(
+        self,
+        exposure_times: dict[str, float],
+        sweep_times: dict[str, float],
+        offset: Optional[float] = None,
+    ) -> dict[str, Any]:
         """Adjust the waveform.
 
         This method adjusts the waveform.
@@ -117,7 +122,12 @@ class NIRemoteFocus(RemoteFocusBase, NIDevice):
 
         return waveform_dict
 
-    def move(self, exposure_times, sweep_times, offset=None):
+    def move(
+        self,
+        exposure_times: dict[str, float],
+        sweep_times: dict[str, float],
+        offset: Optional[float] = None,
+    ) -> None:
         """Move the remote focus.
 
         This method moves the remote focus.

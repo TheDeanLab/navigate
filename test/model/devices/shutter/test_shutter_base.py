@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import unittest
-from navigate.model.devices.shutter.base import ShutterBase
+from navigate.model.devices.shutter.synthetic import SyntheticShutter
 from test.model.dummy import DummyModel
 
 
@@ -41,7 +41,7 @@ class TestLaserBase(unittest.TestCase):
     microscope_name = "Mesoscale"
 
     def test_shutter_base_attributes(self):
-        shutter = ShutterBase(
+        shutter = SyntheticShutter(
             self.microscope_name, None, self.dummy_model.configuration
         )
 

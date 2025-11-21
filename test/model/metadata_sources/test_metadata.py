@@ -1,4 +1,5 @@
 import pytest
+import random
 
 
 def test_metadata_voxel_size(dummy_model):
@@ -101,3 +102,53 @@ def test_metadata_set_stack_order_from_configuration_experiment(
         assert md._per_stack is True
     else:
         assert md._per_stack is False
+
+def set_shape_from_configuration_experiment(dummy_model):
+    from navigate.model.metadata_sources.metadata import Metadata
+
+    md = Metadata()
+
+    md.configuration = dummy_model.configuration.copy()
+
+
+    # set up experiment with multiposition
+    # no position
+    md.configuration["experiment"]["MicroscopeState"]["image_mode"] = "z-stack"
+    md.configuration["multi_positions"] = [
+        ["X", "Y", "Z", "THETA", "F"]
+    ]
+    md.configuration["expriment"]["MicroscopeState"]["is_multiposition"] = False
+
+    md._set_shape_from_configuration_experiment()
+
+    assert md._multiposition is False
+    assert md.positions == 1
+
+    # customized mode
+    md.configuration["experiment"]["MicroscopeState"]["image_mode"] = "customized"
+    assert md._multiposition is True
+    assert md.positions == 1
+
+    # random multiposition
+    md.configuration["experiment"]["MicroscopeState"]["image_mode"] = "z-stack"
+    for i in range(5):
+        num_positions = random.randint(2, 10)
+        md.configuration["multi_positions"] = [["X", "Y", "Z", "THETA", "F"]]
+        for p in range(num_positions):
+            pos = [
+                random.uniform(0, 100),  # X
+                random.uniform(0, 100),  # Y
+                random.uniform(0, 100),  # Z
+                random.uniform(0, 360),  # THETA
+                random.uniform(0, 10),  # F
+            ]
+            md.configuration["multi_positions"].append(pos)
+
+        md.configuration["experiment"]["MicroscopeState"]["is_multiposition"] = True
+
+        md._set_shape_from_configuration_experiment()
+
+        assert md._multiposition is True
+        assert md.positions == num_positions
+
+

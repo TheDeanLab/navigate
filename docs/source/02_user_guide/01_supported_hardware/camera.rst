@@ -7,6 +7,44 @@ Cameras
 The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.
 
+-------------------
+
+Daheng
+------
+
+MER2-1220-32U3C
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+More information on the Daheng MER2-1220-32U3C camera can be found
+`here <https://en.daheng-imaging.com/show-106-1997-1.html>`_.
+
+.. warning::
+
+    This camera class has not been internally tested by our team. Users are advised to exercise caution when using it.
+
+.. note::
+
+    This camera requires Daheng Imaging's proprietary Python SDK and must be installed manually. Download the SDK `here <https://www.daheng-imaging.com/>`_. Locate 'gxipy' under: Development/Samples/Python/gxipy and then install it using pip. Also, this camera class uses the Line0 trigger input by default for external triggering.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+            camera:
+              hardware:
+                type: daheng.Daheng
+                serial_number: "123456"
+              defect_correct_mode: 2.0
+              delay: 1.0  #ms
+              settle_down: 0.1 #ms
+              flip_x: False
+              flip_y: False
+
+|
+
+
 Hamamatsu
 ---------
 
@@ -180,6 +218,7 @@ Iris 15
 Ximea
 --------------------------------
 
+
 MU196MR-ON
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -191,16 +230,32 @@ MU196MR-ON
         microscope_name:
             camera:
               hardware:
-                type: ximea
+                type: ximea.MU196XR
                 serial_number: 111
-                camera_connection: PMPCIECam00
               defect_correct_mode: 2.0
               delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
-
-
+              gain: 1
+              pixel_size_in_microns: 1.4
+              readout_port: 0
+              readout_speed: 1.0
+              settle_down: 0.0
+              speed_table_index: 0
+              supported_readout_directions: ['Top-to-Bottom']
+              supported_sensor_modes: ['Normal']
+              supported_trigger_sources: ['External']
+              trigger_active: 1.0
+              trigger_mode: 1.0
+              trigger_polarity: 2.0
+              trigger_source: 2.0
+              x_pixels: 5112
+              x_pixels_min: 192
+              x_pixels_step: 24
+              y_pixels: 3840
+              y_pixels_min: 2
+              y_pixels_step: 2
 |
 
 ------------------

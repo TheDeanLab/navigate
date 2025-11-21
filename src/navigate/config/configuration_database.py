@@ -1,9 +1,11 @@
 camera_device_types = {
+    "Daheng MER2-1220-32U3C": ("Daheng", "daheng"),
     "Hamamatsu ORCA Lightning": ("HamamatsuOrcaLightning", "hamamatsu"),
     "Hamamatsu ORCA Fire": ("HamamatsuOrcaFire", "hamamatsu"),
     "Hamamatsu ORCA Fusion": ("HamamatsuOrcaFusion", "hamamatsu"),
     "Hamamatsu Flash 4.0": ("HamamatsuOrca", "hamamatsu"),
     "Photometrics Iris 15B": ("Photometrics", "photometrics"),
+    "Ximea MU196MR-ON": ("MU196XR", "ximea"),
     "Virtual Device": ("Synthetic", "synthetic"),
 }
 
@@ -172,8 +174,10 @@ stage_device_types = {
     "Applied Scientific Instrumentation": ("ASI", "asi"),
     "ASI MFC2000": ("MFC2000", "asi"),
     "ASI MS2000": ("MS2000", "asi"),
-    "Analog/Digital Device": ("NI", "ni"),
+    "NI Analog/Digital Device": ("NI", "ni"),
+    "Newport Conex Controller": ("Conex", "conex"),
     "Mad City Labs": ("MCL", "mcl"),
+    "Newport ESP302 Motion Controller": ("Newport", "newport"),
     "Physik Instrumente": ("PI", "pi"),
     "Sutter Instruments": ("MP285", "sutter"),
     "ThorLabs KCube Inertial Device KIM001": ("KIM001", "thorlabs"),
@@ -470,7 +474,11 @@ remote_focus_hardware_widgets = {
     "frame_config": {"ref": "hardware"},
 }
 
-galvo_device_types = {"Analog Device": ("NI", "ni"), "ASI Device": ("ASI", "asi"), "Virtual Device": ("Synthetic", "synthetic")}
+galvo_device_types = {
+    "Analog Device": ("NI", "ni"),
+    "ASI Device": ("ASI", "asi"),
+    "Virtual Device": ("Synthetic", "synthetic"),
+}
 
 waveform_types = {
     "Sine": "sine",
@@ -528,7 +536,10 @@ galvo_top_widgets = {
     ],
 }
 
-zoom_device_types = {"Dynamixel": ("Dynamixel", "dynamixel"), "Virtual Device": ("Synthetic", "synthetic")}
+zoom_device_types = {
+    "Dynamixel": ("Dynamixel", "dynamixel"),
+    "Virtual Device": ("Synthetic", "synthetic"),
+}
 
 zoom_position_widgets = {
     "zoom_value": ["Zoom Value", "Input", "string", None, "Example: 16x"],
@@ -577,7 +588,11 @@ mirror_hardware_widgets = {
     "n_modes": ["Number of Modes", "Input", "int", None, "Example: 32", 32],
 }
 
-laser_device_types = {"Analog Device": ("NI", "ni"), "ASI Laser": ("ASI", "asi"), "Virtual Device": ("Synthetic", "synthetic")}
+laser_device_types = {
+    "Analog Device": ("NI", "ni"),
+    "ASI Laser": ("ASI", "asi"),
+    "Virtual Device": ("Synthetic", "synthetic"),
+}
 
 laser_hardware_widgets = {
     "wavelength": ["Wavelength", "Input", "int", None, "Example: 488", 488],

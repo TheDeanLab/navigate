@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,7 @@ def main():
 
     # Parse command line arguments
     parser = create_parser()
-    args = parser.parse_args()
+    command_line_args = parser.parse_args()
 
     (
         configuration_path,
@@ -102,27 +102,32 @@ def main():
         configurator,
         gui_configuration_path,
         multi_positions_path,
-    ) = evaluate_parser_input_arguments(args)
+    ) = evaluate_parser_input_arguments(command_line_args)
 
-    log_setup("logging.yml", logging_path)
+    # Configure logging with the multiprocess listener
+    log_queue, log_listener = log_setup(
+        "logging.yml", logging_path, start_listener=True
+    )
 
-    if args.configurator:
+    if command_line_args.configurator:
         Configurator(root, splash_screen)
     else:
         Controller(
-            root,
-            splash_screen,
-            configuration_path,
-            experiment_path,
-            waveform_constants_path,
-            rest_api_path,
-            waveform_templates_path,
-            gui_configuration_path,
-            multi_positions_path,
-            args,
+            root=root,
+            splash_screen=splash_screen,
+            configuration_path=configuration_path,
+            experiment_path=experiment_path,
+            waveform_constants_path=waveform_constants_path,
+            rest_api_path=rest_api_path,
+            waveform_templates_path=waveform_templates_path,
+            gui_configuration_path=gui_configuration_path,
+            multi_positions_path=multi_positions_path,
+            log_queue=log_queue,
+            args=command_line_args,
         )
 
     root.mainloop()
+    log_listener.stop()
 
 
 if __name__ == "__main__":

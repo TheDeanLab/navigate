@@ -1,6 +1,5 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -37,14 +36,13 @@ from functools import reduce
 from threading import Lock
 import logging
 from multiprocessing.managers import ListProxy
+import json
 
 # Third party imports
 
 # Local application imports
 from .image_writer import ImageWriter
 from navigate.tools.common_functions import VariableWithLock
-
-
 from navigate.model.waveforms import remote_focus_ramp
 
 # Logger Setup
@@ -1432,9 +1430,20 @@ class ZStackAcquisition:
             ]
             for axis, offset in self.secondary_stack_settings.items():
                 stack_pos.append((f"{axis}_abs", self.current_z_position + offset))
+
+            start_time = time.perf_counter_ns()
             self.model.move_stage(
                 dict(stack_pos),
                 wait_until_done=True,
+            )
+            logger.performance(
+                json.dumps(
+                    {
+                        "kind": "Z/F Move",
+                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "timestamp": time.time(),
+                    }
+                )
             )
 
         if self.should_pause_data_thread:
@@ -1520,8 +1529,13 @@ class ZStackAcquisition:
                 stack_pos.append((f"{axis}_abs", self.restore_z + offset))
             self.model.move_stage(
                 dict(stack_pos),
-                wait_until_done=False,
+                wait_until_done=not self.model.is_data_thread_on,
             )  # Update position
+
+            if not self.model.is_data_thread_on:
+                self.model.grab_image(
+                    getattr(self.model.image_writer, "save_image", None)
+                )
             return True
 
         return False

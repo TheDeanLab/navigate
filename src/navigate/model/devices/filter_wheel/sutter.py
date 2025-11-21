@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
 #  Standard Library Imports
 import logging
 import time
+from typing import Any
 
 # Third Party Imports
 import numpy as np
@@ -58,7 +59,13 @@ class SutterFilterWheel(FilterWheelBase, SerialDevice):
         https://www.sutter.com/manuals/LB10-3_OpMan.pdf
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the SutterFilterWheel class.
 
         Parameters
@@ -118,7 +125,9 @@ class SutterFilterWheel(FilterWheelBase, SerialDevice):
         return "SutterFilterWheel"
 
     @classmethod
-    def connect(cls, comport, baudrate, timeout=0.25):
+    def connect(
+        cls, comport: str, baudrate: int = 9600, timeout: float = 0.25
+    ) -> serial.Serial:
         """Build SutterFilterWheel Serial Port connection
 
         Attributes
@@ -144,7 +153,9 @@ class SutterFilterWheel(FilterWheelBase, SerialDevice):
         try:
             return serial.Serial(comport, baudrate, timeout=timeout)
         except serial.SerialException:
-            logger.error("SutterFilterWheel - Could not establish Serial Port Connection")
+            logger.error(
+                "SutterFilterWheel - Could not establish Serial Port Connection"
+            )
             raise UserWarning(
                 "Could not communicate with Sutter Lambda 10-B via COMPORT", comport
             )
@@ -185,7 +196,7 @@ class SutterFilterWheel(FilterWheelBase, SerialDevice):
         except IndexError:
             self.wait_until_done_delay = 0.01
 
-    def set_filter(self, filter_name: str, wait_until_done: bool = True):
+    def set_filter(self, filter_name: str, wait_until_done: bool = True) -> None:
         """Change the filter wheel to the filter designated by the filter
         position argument.
 

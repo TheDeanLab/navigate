@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -157,7 +157,7 @@ def affine_shear(dz, dy, dx, dimension="YZ", angle=0):
         return shear_transform
 
     scaled_angle = np.multiply(
-        np.cos(np.deg2rad(angle)),
+        np.tan(np.deg2rad(angle)),
         [dy / dx, dz / dx, dz / dy],
     )
 

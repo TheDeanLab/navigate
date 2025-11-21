@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,8 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any, Optional
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -50,14 +51,14 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class RemoteFocusBase:
+class RemoteFocusBase(ABC):
     """RemoteFocusBase Class - Parent class for Remote Focusing Device."""
 
     def __init__(
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args,
         **kwargs,
     ) -> None:
@@ -113,15 +114,42 @@ class RemoteFocusBase:
         #: dict: Waveform dictionary.
         self.waveform_dict = {}
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the RemoteFocusBase class."""
         return "RemoteFocusBase"
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor"""
         pass
 
-    def adjust(self, exposure_times, sweep_times, offset=None):
+    @abstractmethod
+    def move(
+        self,
+        exposure_times: dict[str, float],
+        sweep_times: dict[str, float],
+        offset: Optional[float] = None,
+    ) -> None:
+        """Moves the remote focus device to the specified position.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        exposure_times : dict
+            Dictionary of exposure times for each selected channel
+        sweep_times : dict
+            Dictionary of sweep times for each selected channel
+        offset : float, optional
+            Offset value for the remote focus waveform, by default None
+        """
+        pass
+
+    def adjust(
+        self,
+        exposure_times: dict[str, float],
+        sweep_times: dict[str, float],
+        offset: Optional[float] = None,
+    ) -> dict[str, Any]:
         """Adjusts the remote focus waveform based on the readout time.
 
         Parameters

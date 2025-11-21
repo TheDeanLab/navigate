@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,9 @@ import threading
 import time
 import logging
 
+import serial
+
 # Third Party Imports
-from serial import Serial
 from serial import SerialException
 from serial import SerialTimeoutException
 from serial import EIGHTBITS
@@ -118,7 +119,7 @@ class TigerController:
 
         """
         #: Serial: Serial port object
-        self.serial_port = Serial()
+        self.serial = serial.Serial()
 
         #: str: COM port of the Tiger Controller
         self.com_port = com_port
@@ -183,23 +184,23 @@ class TigerController:
         write_timeout : int
             Write timeout in seconds
         """
-        self.serial_port.port = self.com_port
-        self.serial_port.baudrate = self.baud_rate
-        self.serial_port.parity = PARITY_NONE
-        self.serial_port.bytesize = EIGHTBITS
-        self.serial_port.stopbits = STOPBITS_ONE
-        self.serial_port.xonoff = False
-        self.serial_port.rtscts = False
-        self.serial_port.dsrdtr = False
-        self.serial_port.write_timeout = write_timeout
-        self.serial_port.timeout = read_timeout
+        self.serial.port = self.com_port
+        self.serial.baudrate = self.baud_rate
+        self.serial.parity = PARITY_NONE
+        self.serial.bytesize = EIGHTBITS
+        self.serial.stopbits = STOPBITS_ONE
+        self.serial.xonoff = False
+        self.serial.rtscts = False
+        self.serial.dsrdtr = False
+        self.serial.write_timeout = write_timeout
+        self.serial.timeout = read_timeout
 
         # set the size of the rx and tx buffers before calling open
-        self.serial_port.set_buffer_size(rx_size, tx_size)
+        self.serial.set_buffer_size(rx_size, tx_size)
 
         # try to open the serial port
         try:
-            self.serial_port.open()
+            self.serial.open()
         except SerialException:
             self.report_to_console(
                 f"SerialException: can't connect to {self.com_port} at "
@@ -208,8 +209,8 @@ class TigerController:
 
         if self.is_open():
             # clear the rx and tx buffers
-            self.serial_port.reset_input_buffer()
-            self.serial_port.reset_output_buffer()
+            self.serial.reset_input_buffer()
+            self.serial.reset_output_buffer()
             # report connection status to user
             self.report_to_console("Connected to the serial port.")
             self.report_to_console(
@@ -353,7 +354,7 @@ class TigerController:
     def disconnect_from_serial(self) -> None:
         """Disconnect from the serial port if it's open."""
         if self.is_open():
-            self.serial_port.close()
+            self.serial.close()
             self.report_to_console("Disconnected from the serial port.")
 
     def is_open(self) -> bool:
@@ -365,7 +366,7 @@ class TigerController:
             True if the serial port exists and is open
         """
         # short circuits if serial port is None
-        return self.serial_port and self.serial_port.is_open
+        return self.serial and self.serial.is_open
 
     def report_to_console(self, message: str) -> None:
         """Print message to the output device, usually the console.
@@ -391,15 +392,15 @@ class TigerController:
         # always reset the buffers before a new command is sent
         self.safe_to_write.wait()
         self.safe_to_write.clear()
-        self.serial_port.read_all()
-        self.serial_port.reset_input_buffer()
-        self.serial_port.reset_output_buffer()
+        self.serial.read_all()
+        self.serial.reset_input_buffer()
+        self.serial.reset_output_buffer()
 
         # send the serial command to the controller
         self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         try:
-            self.serial_port.write(command)
+            self.serial.write(command)
         except SerialTimeoutException as e:
             print(f"Tiger Controller -- SerialTimeoutException: {e}")
             pass
@@ -412,7 +413,7 @@ class TigerController:
         str
             Response from the serial port
         """
-        response = self.serial_port.readline()
+        response = self.serial.readline()
         self.safe_to_write.set()
 
         try:
@@ -1012,10 +1013,10 @@ class TigerController:
         axis = int(axis) + 32
         self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f"6 CCA Z=0\r")
+        self.send_command("6 CCA Z=0\r")
         self.read_response()
 
-    def logic_cell_on(self, axis : str):
+    def logic_cell_on(self, axis: str):
         """Turn on internal logic cell
 
         Parameters
@@ -1023,12 +1024,12 @@ class TigerController:
         axis : str
             The axis of the internal logic cell
         """
-        self.send_command(f'6 M E = {axis}\r')
+        self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f'6 CCA Z=1\r')
+        self.send_command("6 CCA Z=1\r")
         self.read_response()
 
-    def logic_cell_off(self, axis :str):
+    def logic_cell_off(self, axis: str):
         """Turn off internal logic cell
 
         Parameters
@@ -1036,13 +1037,18 @@ class TigerController:
         axis : str
             The axis of the internal logic cell
         """
-        self.send_command(f'6 M E = {axis}\r')
+        self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command(f'6 CCA Z=0\r')
+        self.send_command("6 CCA Z=0\r")
         self.read_response()
 
     def single_axis_waveform(
-        self, axis: str, waveform: int = 0, amplitude: int = 1000, offset: int = 500, period: int = 10 
+        self,
+        axis: str,
+        waveform: int = 0,
+        amplitude: int = 1000,
+        offset: int = 500,
+        period: int = 10,
     ) -> None:
         """Programs the analog waveforms using SAA, SAO, SAP, and SAF
         Default waveform is a sawtooth waveform with an amplitude of 1V, an offset of 0.5V and period of 10 ms
@@ -1062,10 +1068,10 @@ class TigerController:
         """
         print(f"Period (ms): {period}")
         # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
-        if (waveform % 128 == 3):
-            offset = .5*(offset+amplitude)
+        if waveform % 128 == 3:
+            offset = 0.5 * (offset + amplitude)
 
-        amplitude = amplitude*2
+        amplitude = amplitude * 2
 
         print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.

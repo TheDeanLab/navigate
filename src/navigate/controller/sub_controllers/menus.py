@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@ from navigate.view.popups.waveform_parameter_popup_window import (
 from navigate.view.popups.feature_list_popup import FeatureListPopup
 from navigate.view.popups.camera_setting_popup import CameraSettingPopup
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
+from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
 
 # Local Controller Imports
 from navigate.controller.sub_controllers.gui import GUIController
@@ -69,6 +70,7 @@ from navigate.controller.sub_controllers import (
     AdaptiveOpticsPopupController,
     UninstallPluginController,
     AdvancedStageParametersController,
+    DiagnosticsPopupController,
 )
 
 # Local Tools Imports
@@ -272,6 +274,14 @@ class MenuController(GUIController):
                     None,
                 ],
                 "add_separator_2": [None, None, None, None, None],
+                "Performance Diagnostics": [
+                    "standard",
+                    self.open_diagnostics,
+                    None,
+                    None,
+                    None,
+                ],
+                "add_separator_3": [None, None, None, None, None],
                 "Quit": [
                     "standard",
                     lambda *args: self.parent_controller.acquire_bar_controller.exit_program(),
@@ -1458,4 +1468,17 @@ class MenuController(GUIController):
             self.parent_controller,
             "stage_limits_popup_controller",
             stage_limits_controller,
+        )
+
+    def open_diagnostics(self, *args, **kwargs) -> None:
+        """Open the diagnostics window."""
+        if hasattr(self.parent_controller, "diagnostics_controller"):
+            self.parent_controller.diagnostics_controller.showup()
+            return
+        popup = DiagnosticsPopup(self.view)
+        diagnostics_controller = DiagnosticsPopupController(
+            popup, self.parent_controller
+        )
+        setattr(
+            self.parent_controller, "diagnostics_controller", diagnostics_controller
         )

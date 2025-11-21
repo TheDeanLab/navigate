@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -332,7 +332,7 @@ class Microscope:
                     daq_connection=self.daq,
                     plugin_devices=devices_dict["__plugins__"],
                 )
-            except Exception as e:
+            except Exception:
                 raise Exception(
                     "Stage not found. "
                     "This often arises when the configuration.yaml file is "
@@ -794,6 +794,10 @@ class Microscope:
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
             channel_key
         ]
+        # stop daq task first, give daq some rest time for new tasks
+        if update_daq_task_flag:
+            self.daq.stop_acquisition()
+
         # Filter Wheel Settings.
         for k in self.filter_wheel:
             self.filter_wheel[k].set_filter(channel[k])
@@ -820,7 +824,6 @@ class Microscope:
         # choose to not update the waveform is very useful when running ZStack
         # if there is a NI Galvo stage in the system.
         if update_daq_task_flag:
-            self.daq.stop_acquisition()
             self.daq.prepare_acquisition(channel_key)
 
         # Add Defocus term
@@ -890,7 +893,16 @@ class Microscope:
         success : bool
             True if stage is successfully moved, False otherwise.
         """
-        self.ask_stage_for_position = True
+        if self.configuration["experiment"]["MicroscopeState"][
+            "image_mode"
+        ] in ("z-stack", "customized"):
+            # cache stage positions in z-stack and customized modes.
+            self.ask_stage_for_position = False
+            for axis_key in pos_dict.keys():
+                axis = axis_key[: axis_key.index("_")]
+                self.ret_pos_dict[f"{axis}_pos"] = pos_dict[axis_key]
+        else:
+            self.ask_stage_for_position = True
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
@@ -938,6 +950,13 @@ class Microscope:
                 temp_pos = stage.report_position()
                 self.ret_pos_dict.update(temp_pos)
             self.ask_stage_for_position = False
+
+        # Round to 2 decimal places for display purposes
+        for key, value in self.ret_pos_dict.items():
+            try:
+                self.ret_pos_dict[key] = round(value, 2)
+            except (TypeError, ValueError, OverflowError) as e:
+                logger.error(f"Error rounding {key} position value: {e}")
         return self.ret_pos_dict
 
     def move_remote_focus(self, offset: Optional[float] = None) -> None:

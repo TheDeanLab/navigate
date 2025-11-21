@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 # Standard Imports
 import logging
 import time
-from typing import Any, Dict
+from typing import Any
 
 from typing import Optional
 
@@ -55,7 +55,7 @@ class SyntheticStage(StageBase):
         self,
         microscope_name: str,
         device_connection: Optional[Any],
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ):
         """Initialize the stage.
@@ -92,7 +92,7 @@ class SyntheticStage(StageBase):
         """Destructor."""
         pass
 
-    def report_position(self):
+    def report_position(self) -> dict[str, float]:
         """Report the current position of the stage.
 
         Returns
@@ -102,7 +102,9 @@ class SyntheticStage(StageBase):
         """
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
         """Implement movement logic along a single axis.
 
         Parameters
@@ -130,7 +132,9 @@ class SyntheticStage(StageBase):
         setattr(self, f"{axis}_pos", axis_abs)
         return True
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = False
+    ) -> bool:
         """Move stage along a single axis.
 
         Parameters
@@ -176,7 +180,7 @@ class SyntheticStage(StageBase):
         """
         self.y_pos = self.y_unload_position
 
-    def get_axis_position(self, axis):
+    def get_axis_position(self, axis: str) -> float:
         """Get the current position of the stage along a single axis.
 
         Parameters
@@ -191,7 +195,7 @@ class SyntheticStage(StageBase):
         """
         return getattr(self, f"{axis}_pos")
 
-    def set_speed(self, velocity_dict):
+    def set_speed(self, velocity_dict: dict[str, float]) -> None:
         """Set the speed of the stage.
 
         Parameters
@@ -201,7 +205,7 @@ class SyntheticStage(StageBase):
         """
         pass
 
-    def get_speed(self, axis):
+    def get_speed(self, axis: str) -> float:
         """Get the speed of the stage.
 
         Parameters
@@ -217,7 +221,13 @@ class SyntheticStage(StageBase):
 
         return 1
 
-    def scanr(self, start_position_mm, end_position_mm, enc_divide, axis="z"):
+    def scanr(
+        self,
+        start_position_mm: float,
+        end_position_mm: float,
+        enc_divide: float,
+        axis: str = "z",
+    ) -> None:
         """Scan the stage using the constant velocity mode along a single axis.
 
         Parameters
@@ -235,7 +245,7 @@ class SyntheticStage(StageBase):
 
         pass
 
-    def start_scan(self, axis):
+    def start_scan(self, axis: str) -> None:
         """Start a scan along a single axis.
 
         Parameters
@@ -246,10 +256,14 @@ class SyntheticStage(StageBase):
         """
         pass
 
-    def stop_scan(self):
+    def stop_scan(self) -> None:
         """Stop a scan."""
         pass
 
-    def update_waveform(self, waveform_dict):
+    def update_waveform(self, waveform_dict: dict[str, Any]) -> None:
         print("*** update waveform:", waveform_dict.keys())
+        pass
+
+    def stop(self) -> None:
+        """Stop all stage movement abruptly."""
         pass

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,8 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -46,14 +47,23 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class GalvoBase:
-    """GalvoBase Class - Parent class for galvanometers."""
+class GalvoBase(ABC):
+    """Abstract base class for galvanometer devices.
+
+    This class provides the interface and common functionality for controlling
+    galvanometers with navigate. It handles waveform generation based on
+    configuration parameters and experimental settings.
+
+    The class generates appropriate control waveforms (sawtooth, sine, halfsaw)
+    according to camera exposure times and configuration parameters. Child classes
+    must implement the turn_off method to control hardware-specific behaviors.
+    """
 
     def __init__(
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the GalvoBase class.
@@ -64,7 +74,7 @@ class GalvoBase:
             Name of the microscope.
         device_connection : Any
             Device connection.
-        configuration : Dict[str, Any]
+        configuration : dict[str, Any]
             Dictionary of configuration parameters.
         device_id : int
             Galvo ID. Default is 0.
@@ -115,7 +125,7 @@ class GalvoBase:
         #: dict: Dictionary of galvo waveforms.
         self.waveform_dict = {}
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Returns the string representation of the GalvoBase class."""
         return "GalvoBase"
 
@@ -123,7 +133,10 @@ class GalvoBase:
         """Destructor"""
         pass
 
-    def adjust(self, exposure_times, sweep_times):
+    @abstractmethod
+    def adjust(
+        self, exposure_times: dict[str, float], sweep_times: dict[str, float]
+    ) -> dict:
         """Adjust the galvo waveform to account for the camera readout time.
 
         Parameters
@@ -243,6 +256,7 @@ class GalvoBase:
 
         return self.waveform_dict
 
-    def turn_off(self):
+    @abstractmethod
+    def turn_off(self) -> None:
         """Turn off the galvo."""
         pass

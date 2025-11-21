@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 # Standard Library Imports
 import logging
 import traceback
-from typing import Any, Dict
+from typing import Any
 
 # Local Imports
 from navigate.model.devices.shutter.base import ShutterBase
@@ -59,7 +59,7 @@ class ASIShutter(ShutterBase, SerialDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         address=None,
     ) -> None:
         """Initialize the ASIShutter.
@@ -92,7 +92,9 @@ class ASIShutter(ShutterBase, SerialDevice):
         ]["hardware"]["port"]
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Build ASILaser Serial Port connection
 
         Parameters
@@ -129,7 +131,7 @@ class ASIShutter(ShutterBase, SerialDevice):
             if self.shutter:
                 self.shutter.disconnect_from_serial()
                 logger.debug("TigerController disconnected successfully.")
-        except Exception as e:
+        except Exception:
             logger.exception(f"Error during cleanup: {traceback.format_exc()}")
 
     def open_shutter(self) -> None:
@@ -143,7 +145,7 @@ class ASIShutter(ShutterBase, SerialDevice):
         try:
             self.shutter.logic_card_on(self.axis)
             logger.debug("ASIShutter opened")
-        except Exception as e:
+        except Exception:
             logger.exception(f"Shutter not open: {traceback.format_exc()}")
 
     def close_shutter(self) -> None:
@@ -157,7 +159,7 @@ class ASIShutter(ShutterBase, SerialDevice):
         try:
             self.shutter.logic_card_off(self.axis)
             logger.debug("ASIShutter closed")
-        except Exception as e:
+        except Exception:
             logger.exception(f"Shutter did not close: {traceback.format_exc()}")
 
     @property

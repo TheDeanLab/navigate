@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 import logging
 import time
 import ctypes
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, List
 
 # Third Party Imports
 import numpy as np
@@ -97,7 +97,7 @@ class SyntheticCamera(CameraBase):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         *args: Optional[Any],
         **kwargs: Optional[Any],
     ) -> None:
@@ -226,7 +226,7 @@ class SyntheticCamera(CameraBase):
         """
         self.camera_exposure_time = exposure_time
 
-    def set_line_interval(self, line_interval_time: float) -> None:
+    def set_line_interval(self, line_interval_time: float) -> bool:
         """Set SyntheticCamera line interval.
 
         Parameters
@@ -234,7 +234,7 @@ class SyntheticCamera(CameraBase):
         line_interval_time : float
             Line interval duration.
         """
-        pass
+        super().set_line_interval(line_interval_time)
 
     def set_binning(self, binning_string: str) -> bool:
         """Set SyntheticCamera binning mode.
@@ -262,7 +262,7 @@ class SyntheticCamera(CameraBase):
             logger.debug(f"can't set binning to {binning_string}")
             print(f"can't set binning to {binning_string}")
             return False
-        
+
         self.x_binning = int(binning_string[0])
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
@@ -273,7 +273,7 @@ class SyntheticCamera(CameraBase):
         self,
         data_buffer: Optional[List[SharedNDArray]] = None,
         number_of_frames: int = 100,
-    ):
+    ) -> None:
         """Initialize SyntheticCamera image series.
 
         Parameters
@@ -298,9 +298,22 @@ class SyntheticCamera(CameraBase):
         self.current_frame_idx = 0
         self.is_acquiring = False
 
-    def load_images(self, filenames: Optional[str] = None, ds=None) -> None:
+    def load_images(self, filenames: Optional[list[str]] = None, ds=None) -> None:
         """Pre-populate the buffer with images. Can either come from TIFF files or
-        Numpy stacks."""
+        Numpy stacks.
+
+        Parameters
+        ----------
+        filenames : list[str], optional
+            List of TIFF filenames, by default None
+        ds : list, optional
+            List of Numpy stacks, by default None
+
+        Raises
+        ------
+        tifffile.TiffFileError
+            If the TIFF file cannot be opened.
+        """
         self.random_image = False
         #: int: current image id
         self.img_id = 0
@@ -333,6 +346,8 @@ class SyntheticCamera(CameraBase):
                     return
         else:
             self.random_image = True
+            del self.tif_images[:]
+            self.tif_images = []
 
     def generate_new_frame(self) -> None:
         """Generate a synthetic image."""
@@ -397,7 +412,7 @@ class SyntheticCamera(CameraBase):
             X position of the center of view
         center_y : int
             Y position of the center of view
-        
+
         Returns
         -------
         bool
@@ -424,7 +439,7 @@ class SyntheticCamera(CameraBase):
         readout_time = 0.01  # 10 milliseconds.
         return readout_time
 
-    def set_trigger_mode(self, trigger_source: str="External") -> None:
+    def set_trigger_mode(self, trigger_source: str = "External") -> None:
         """Set camera trigger mode.
         Parameters
         ----------
@@ -432,3 +447,34 @@ class SyntheticCamera(CameraBase):
             Trigger source, either 'External' or 'Internal'.
         """
         logger.debug(f"Set camera trigger mode: {trigger_source}")
+
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time: float, shutter_width: float
+    ) -> tuple[float, float, float]:
+        """Calculate the light sheet exposure time.
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Full chip exposure time in seconds.
+        shutter_width : float
+            Shutter width in pixels.
+
+        Returns
+        -------
+        tuple[float, float, float]
+            Tuple containing the light sheet exposure time, the line interval time,
+            and the readout time.
+        """
+        (
+            exposure_time,
+            camera_line_interval,
+            full_chip_exposure_time,
+        ) = super().calculate_light_sheet_exposure_time(
+            full_chip_exposure_time, shutter_width
+        )
+
+        return exposure_time, camera_line_interval, full_chip_exposure_time
+
+    def set_readout_direction(self, mode) -> None:
+        super().set_readout_direction(mode)

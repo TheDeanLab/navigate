@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 # Standard Library Imports
 import logging
 import time
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -50,7 +51,14 @@ logger = logging.getLogger(p)
 class DynamixelZoom(ZoomBase, SerialDevice):
     """DynamixelZoom Class - Controls the Dynamixel Servo."""
 
-    def __init__(self, microscope_name, device_connection, configuration, *args, **kwargs):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection,
+        configuration: dict,
+        *args: Optional[Any],
+        **kwargs: Optional[Any],
+    ) -> None:
         """Initialize the DynamixelZoom Servo.
 
         Parameters
@@ -112,7 +120,7 @@ class DynamixelZoom(ZoomBase, SerialDevice):
         #: obj: DynamixelZoom port number.
         self.port_num = device_connection
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the DynamixelZoom Instance"""
         try:
             self.dynamixel.closePort(self.port_num)
@@ -120,7 +128,9 @@ class DynamixelZoom(ZoomBase, SerialDevice):
             logger.exception(e)
 
     @classmethod
-    def connect(cls, comport: str, baudrate: int = 115200, timeout: float = 0.25):
+    def connect(
+        cls, comport: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> int:
         """Connect to the DynamixelZoom Servo.
 
         Parameters
@@ -151,7 +161,7 @@ class DynamixelZoom(ZoomBase, SerialDevice):
         dynamixel.setBaudRate(port_num, baudrate)
         return port_num
 
-    def set_zoom(self, zoom, wait_until_done=False):
+    def set_zoom(self, zoom: dict, wait_until_done: bool = False) -> None:
         """Change the DynamixelZoom Servo.
 
         Confirms that the zoom position is available in the zoomdict, and then
@@ -178,7 +188,7 @@ class DynamixelZoom(ZoomBase, SerialDevice):
             logger.error(f"Zoom designation, {zoom}, not in the configuration")
             raise ValueError("Zoom designation not in the configuration")
 
-    def move(self, position, wait_until_done=False):
+    def move(self, position: int, wait_until_done: bool = False) -> None:
         """Move the DynamixelZoom Servo
 
         Parameters
@@ -233,7 +243,7 @@ class DynamixelZoom(ZoomBase, SerialDevice):
                     self.port_num, 1, self.id, self.addr_mx_present_position
                 )
 
-    def read_position(self):
+    def read_position(self) -> int:
         """Read the position of the Zoom Servo.
 
         Returned position is an int between 0 and 4096.

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+import logging
 import logging.config
 import logging.handlers
+import multiprocessing as mp
 from pathlib import Path
 import os
-import sys
-import traceback
 from datetime import datetime, timedelta
 import shutil
+from typing import Optional, Union, Any
+import json
 
 # Third Party Imports
 import yaml
@@ -48,7 +50,23 @@ from navigate.config.config import get_navigate_path
 from navigate.tools.common_dict_tools import update_nested_dict
 
 
-def find_filename(k, v):
+# Custom performance logging level
+PERFORMANCE = 25
+logging.addLevelName(PERFORMANCE, "PERFORMANCE")
+
+
+# Add a performance method to the Logger class
+def performance(self, message, *args, **kwargs) -> None:
+    """Log 'performance' messages at the PERFORMANCE level."""
+    if self.isEnabledFor(PERFORMANCE):
+        self._log(PERFORMANCE, message, args, **kwargs)
+
+
+# Attach the performance method to the Logger class
+logging.Logger.performance = performance
+
+
+def find_filename(k: str, v: str) -> bool:
     """Check that we've met the condition dictionary key == 'filename'
 
     Parameters
@@ -68,7 +86,12 @@ def find_filename(k, v):
     return False
 
 
-def log_setup(logging_configuration, logging_path=None):
+def log_setup(
+    logging_configuration: str,
+    logging_path: Optional[str] = None,
+    queue=None,
+    start_listener=False,
+) -> Optional[Union[mp.Queue, tuple[mp.Queue, logging.handlers.QueueListener]]]:
     """Setup logging configuration
 
     Initialize a logger from a YAML file containing information in the Python logging
@@ -86,6 +109,18 @@ def log_setup(logging_configuration, logging_path=None):
         Relative to the location of the folder containing this file.
     logging_path : str, optional
         Path to store logs. Defaults to navigate_path/logs
+    queue : multiprocessing.Queue, optional
+        Queue to use for logging from sub-processes. If None, a new queue will be
+        created if start_listener is True. Defaults to None.
+    start_listener : bool, optional
+        Whether to start a listener for the queue. Defaults to False.
+
+    Returns
+    -------
+    Optional[Union[mp.Queue, tuple[mp.Queue, logging.handlers.QueueListener]]]
+        If start_listener is True, returns a tuple containing the queue and the listener.
+        If start_listener is False and a queue is provided, returns the queue.
+        Otherwise, returns None.
     """
 
     # path to logging_configuration is set relative
@@ -94,7 +129,7 @@ def log_setup(logging_configuration, logging_path=None):
     logging_configuration_path = Path.joinpath(base_directory, logging_configuration)
 
     # Save directory for logging information.
-    time = datetime.now()
+    time: datetime = datetime.now()
     time_stamp = Path(
         "%s-%s-%s-%s%s"
         % (
@@ -112,14 +147,14 @@ def log_setup(logging_configuration, logging_path=None):
     if not os.path.exists(logging_path):
         os.mkdir(logging_path)
 
-    todays_path = Path.joinpath(logging_path, time_stamp)
-    if not os.path.exists(todays_path):
-        os.mkdir(todays_path)
+    current_path = Path.joinpath(logging_path, time_stamp)
+    if not os.path.exists(current_path):
+        os.mkdir(current_path)
 
     # Discard log files older than 30 days
     eliminate_old_log_files(logging_path)
 
-    def update_filename(v):
+    def update_filename(v: str) -> str:
         """Function to map filename to base_directory/filename in the dictionary
 
         Parameters
@@ -132,7 +167,7 @@ def log_setup(logging_configuration, logging_path=None):
         Path : str
             Path to the log file
         """
-        return Path.joinpath(todays_path, v)
+        return Path.joinpath(current_path, v)
 
     # Read the logging configuration file.
     with open(logging_configuration_path, "r") as f:
@@ -143,14 +178,36 @@ def log_setup(logging_configuration, logging_path=None):
             config_data2 = update_nested_dict(
                 config_data, find_filename, update_filename
             )
+            # Configures our loggers from updated logging.yml
             logging.config.dictConfig(config_data2)
 
-            # Configures our loggers from updated logging.yml
         except yaml.YAMLError as yaml_error:
             print(yaml_error)
 
+    # If a queue is provided, or we are to start a listener,
+    if queue is None and start_listener:
+        queue = mp.Queue(-1)
 
-def eliminate_old_log_files(logging_path):
+    if queue:
+        qh = logging.handlers.QueueHandler(queue)
+        handlers = []
+        for name in [""] + list(config_data2.get("loggers", {})):
+            logger = logging.getLogger(name or None)
+            for handler in logger.handlers:
+                if handler not in handlers:
+                    handlers.append(handler)
+            logger.handlers = [qh]
+        if start_listener:
+            listener = logging.handlers.QueueListener(
+                queue, *handlers, respect_handler_level=True
+            )
+            listener.start()
+            return queue, listener
+        return queue
+    return None
+
+
+def eliminate_old_log_files(logging_path: str) -> None:
     """Eliminate log files in the logging folder older than 30 days.
 
     Parameters
@@ -158,31 +215,6 @@ def eliminate_old_log_files(logging_path):
     logging_path : str
         Path to logs files.
     """
-
-    def get_folder_date(folder_name):
-        """Get the date from the folder name.
-
-        Parameters
-        ----------
-        folder_name : str
-            Folder name
-        """
-        try:
-            # Extract the year, month, day, hour, and minute from the folder name
-            year, month, day, hourminute = folder_name.split("-")
-            hour = hourminute[:2]
-            minute = hourminute[2:]
-            date = datetime(
-                year=int(year),
-                month=int(month),
-                day=int(day),
-                hour=int(hour),
-                minute=int(minute),
-            )
-            return date
-        except ValueError:
-            # Folder name is not in anticipated format
-            return False
 
     today = datetime.now()
     date_threshold = today - timedelta(days=30)
@@ -199,25 +231,79 @@ def eliminate_old_log_files(logging_path):
                     continue
 
 
-def main_process_listener(queue):
-    """Listener function for the main process
+def load_performance_log() -> Optional[list[Any]]:
+    """Load the latest performance log file from the logging directory.
 
-    This function will listen for new logs put in queue from sub processes,
-    it will then log via the main process.
+    Returns
+    -------
+    Optional[list[Any]]
+        List of dictionaries containing performance log data, or None if no log file
+        exists.
+    """
+
+    date_dirs = []
+    logging_path = Path.joinpath(Path(get_navigate_path()), "logs")
+
+    # Iterate through all folders in logging path
+    for folder in os.listdir(logging_path):
+        if folder.startswith("."):
+            continue
+
+        date = get_folder_date(folder)
+        if date is not False:
+            date_dirs.append(folder)
+
+    # Sort the directories by date
+    latest_dir = max(date_dirs)
+    performance_log_path = os.path.join(logging_path, latest_dir, "performance.log")
+
+    # Default to None if the log files do not exist
+    performance_log_data = None
+
+    try:
+        if performance_log_path and os.path.exists(performance_log_path):
+            performance_log_data = []
+            with open(performance_log_path, "r") as file:
+                for line in file:
+                    try:
+                        performance_log_data.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
+    except Exception:
+        pass
+
+    return performance_log_data
+
+
+def get_folder_date(folder_name: str) -> datetime:
+    """Get the date from the log folder's name.
 
     Parameters
     ----------
-    queue : multiprocessing.Queue
-        Queue to listen for new logs
+    folder_name : str
+        Folder name in the format 'YYYY-MM-DD-HHMM'.
+
+    Returns : datetime or bool
+        Returns a datetime object if the folder name is in the correct format.
+        The format is 'YYYY-MM-DD-HHMM', where:
+            - YYYY: 4-digit year
+            - MM: 2-digit month (01-12)
+            - DD: 2-digit day (01-31)
+            - HHMM: 4-digit hour and minute (HHMM, e.g., 1530 for 3:30 PM)
+        If the folder name is not in this format, it will return False.
     """
-    while True:
-        try:
-            record = queue.get()
-            if record is None:
-                # Sentinel to tell listener to stop
-                break
-            logger = logging.getLogger(record.name)
-            logger.handle(record)
-        except Exception:
-            print("Whoops! Problem: ", file=sys.stderr)
-            traceback.print_exc(file=sys.stderr)
+    try:
+        # Extract the year, month, day, hour, and minute from the folder name
+        year, month, day, hourminute = folder_name.split("-")
+        hour = hourminute[:2]
+        minute = hourminute[2:]
+        date = datetime(
+            year=int(year),
+            month=int(month),
+            day=int(day),
+            hour=int(hour),
+            minute=int(minute),
+        )
+        return date
+    except ValueError:
+        return False

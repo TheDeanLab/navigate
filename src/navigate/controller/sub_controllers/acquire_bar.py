@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -161,9 +161,9 @@ class AcquireBarController(GUIController):
             number_of_positions = 1
         else:
             # The first row is a header that describes stage axis designation.
-            number_of_positions = len(
-                self.parent_controller.configuration["multi_positions"]
-            ) - 1
+            number_of_positions = (
+                len(self.parent_controller.configuration["multi_positions"]) - 1
+            )
 
         if mode == "single":
             number_of_slices = 1
@@ -540,9 +540,14 @@ class AcquireBarController(GUIController):
         """
         state = self.acquire_pop.tab_frame.inputs[main_widget].get_variable().get()
         for widget in dependent_widgets:
-            self.acquire_pop.tab_frame.inputs[widget].widget.config(
-                state="readonly" if state else "disabled"
-            )
+            if "dimension" in widget:
+                self.acquire_pop.tab_frame.inputs[widget].widget.config(
+                    state="readonly" if state else "disabled"
+                )
+            else:
+                self.acquire_pop.tab_frame.inputs[widget].widget.config(
+                    state="normal" if state else "disabled"
+                )
 
     def update_microscope_mode(self, *args: Iterable) -> None:
         """Gets the state of the pull-down menu and tells the central controller

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,8 @@
 
 # Standard Imports
 import logging
-from typing import Any, Dict
+from typing import Any
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -46,10 +47,16 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class DAQBase:
-    """DAQBase - Parent class for Data Acquisition (DAQ) classes."""
+class DAQBase(ABC):
+    """Abstract base class for Data Acquisition (DAQ) devices.
 
-    def __init__(self, configuration: Dict[str, Any]) -> None:
+    This class provides the interface and common functionality for controlling
+    data acquisition hardware with navigate. It handles waveform generation based on
+    configuration parameters, exposure times, and sweep times for different imaging
+    channels.
+    """
+
+    def __init__(self, configuration: dict[str, Any]) -> None:
         """Initializes the DAQBase class.
 
         Parameters
@@ -100,9 +107,55 @@ class DAQBase:
         #: int: Number of times to expand the waveform
         self.waveform_expand_num = 1
 
+        #: str: Trigger mode. Self-trigger or external-trigger.
+        self.trigger_mode = "self-trigger"
+
     def __str__(self) -> str:
         """Returns the string representation of the DAQBase class"""
         return "DAQBase"
+
+    @abstractmethod
+    def stop_acquisition(self) -> None:
+        """Stops the acquisition.
+
+        This abstract method must be implemented by all subclasses.
+        """
+        pass
+
+    @abstractmethod
+    def prepare_acquisition(self, channel_key: str) -> None:
+        """Prepare the acquisition.
+
+        This abstract method must be implemented by all subclasses.
+
+
+        Parameters
+        ----------
+        channel_key : str
+            Channel key for current channel.
+        """
+        pass
+
+    @abstractmethod
+    def run_acquisition(self, wait_until_done: bool = True) -> None:
+        """Run acquisition.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        wait_until_done : bool, optional
+            Whether to wait until the acquisition is done, by default True
+        """
+        pass
+
+    @abstractmethod
+    def wait_acquisition_done(self) -> None:
+        """Wait acquisition tasks done
+
+        This abstract method must be implemented by all subclasses.
+        """
+        pass
 
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in
@@ -168,3 +221,28 @@ class DAQBase:
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]
+
+    def update_analog_task(self, board_name: str) -> None:
+        """Update the analog task.
+
+        This abstract method must be implemented by all subclasses.
+
+        Parameters
+        ----------
+        board_name : str
+            Name of board.
+        """
+        pass
+
+    def set_external_trigger(self, external_trigger: str = None) -> None:
+        """Set the external trigger.
+
+        Parameters
+        ----------
+        external_trigger : str, optional
+            Name of external trigger.
+        """
+
+        self.trigger_mode = (
+            "self-trigger" if external_trigger is None else "external-trigger"
+        )

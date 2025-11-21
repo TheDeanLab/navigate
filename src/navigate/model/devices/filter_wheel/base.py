@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,8 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
+from abc import ABC, abstractmethod
 
 # Third Party Imports
 
@@ -45,10 +46,20 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class FilterWheelBase:
-    """FilterWheelBase - Parent class for controlling filter wheels."""
+class FilterWheelBase(ABC):
+    """Abstract base class for filter wheels.
 
-    def __init__(self, microscope_name: str, device_connection: Any, configuration: Dict[str, Any], device_id: int = 0) -> None:
+    This class defines the interface for filter wheel devices used in the Navigate software.
+    Implementations should handle the specifics of communication with particular hardware.
+    """
+
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the FilterWheelBase class.
 
         Parameters
@@ -66,7 +77,9 @@ class FilterWheelBase:
         self.device_connection = device_connection
 
         #: Dict[str, Any]: Dictionary of device configuration parameters.
-        device_config = configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"][device_id]
+        device_config = configuration["configuration"]["microscopes"][microscope_name][
+            "filter_wheel"
+        ][device_id]
         self.device_config = device_config
 
         #: dict: Dictionary of filters available on the filter wheel.
@@ -77,6 +90,19 @@ class FilterWheelBase:
 
         #: int: index of filter wheel
         self.filter_wheel_number = device_config["hardware"]["wheel_number"]
+
+    @abstractmethod
+    def set_filter(self, position: Any, wait_until_done: bool = True) -> None:
+        """Set the filter wheel to the specified position.
+
+        Parameters
+        ----------
+        position : Any
+            The desired filter position.
+        wait_until_done : bool
+            Whether to wait until the filter wheel has completed the move. Default is True.
+        """
+        pass
 
     def __str__(self) -> str:
         """Return the string representation of the FilterWheelBase class."""

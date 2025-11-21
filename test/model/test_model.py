@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@ import pytest
 import os
 from multiprocessing import Manager
 from unittest.mock import MagicMock
+import multiprocessing
 
 # Third Party Imports
 
@@ -72,7 +73,9 @@ def model():
             configuration_directory, "waveform_constants.yml"
         )
         rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
-        multi_positions_path = Path.joinpath(configuration_directory, "multi_positions.yml")
+        multi_positions_path = Path.joinpath(
+            configuration_directory, "multi_positions.yml"
+        )
 
         event_queue = MagicMock()
 
@@ -91,19 +94,22 @@ def model():
         positions = verify_positions_config(positions)
         configuration["multi_positions"] = positions
 
+        queue = multiprocessing.Queue()
+
         model = Model(
             args=SimpleNamespace(synthetic_hardware=True),
             configuration=configuration,
             event_queue=event_queue,
+            log_queue=queue,
         )
 
         model.__test_manager = manager
 
         yield model
-        # while not event_queue.empty():
-        #     event_queue.get()
-        # event_queue.close()
-        # event_queue.join_thread()
+        while not queue.empty():
+            queue.get()
+        queue.close()
+        queue.join_thread()
 
 
 def test_single_acquisition(model):
@@ -111,7 +117,9 @@ def test_single_acquisition(model):
     state["image_mode"] = "single"
     state["is_save"] = False
 
-    n_frames = len(list(filter(lambda channel: channel["is_selected"], state["channels"].values())))
+    n_frames = len(
+        list(filter(lambda channel: channel["is_selected"], state["channels"].values()))
+    )
 
     show_img_pipe = model.create_pipe("show_img_pipe")
 
@@ -228,7 +236,7 @@ def test_multiposition_acquisition(model):
         model.__test_manager,  # noqa
         model.configuration,
         "multi_positions",
-        [[10.0, 10.0, 10.0, 10.0, 10.0]],
+        [["X", "Y", "Z", "THETA", "F"],[10.0, 10.0, 10.0, 10.0, 10.0]],
     )
     model.configuration["experiment"]["MicroscopeState"]["image_mode"] = "z-stack"
     model.configuration["experiment"]["MicroscopeState"]["number_z_steps"] = 10

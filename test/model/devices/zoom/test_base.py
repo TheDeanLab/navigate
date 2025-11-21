@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,11 @@ import pytest
 
 @pytest.fixture
 def dummy_zoom(dummy_model):
-    from navigate.model.devices.zoom.base import ZoomBase
+    from navigate.model.devices.zoom.synthetic import SyntheticZoom
 
-    return ZoomBase(dummy_model.active_microscope_name, None, dummy_model.configuration)
+    return SyntheticZoom(
+        dummy_model.active_microscope_name, None, dummy_model.configuration
+    )
 
 
 def test_zoom_base_attributes(dummy_zoom):

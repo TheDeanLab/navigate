@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,9 @@ logger = logging.getLogger(p)
 class ImagineOpticsMirror(MirrorBase):
     """ImageineOpticsMirror mirror class."""
 
-    def __init__(self, microscope_name, device_connection, configuration, *args, **kwargs):
+    def __init__(
+        self, microscope_name, device_connection, configuration, *args, **kwargs
+    ):
         """Initialize the ImagineOpticsMirror class.
 
         Parameters

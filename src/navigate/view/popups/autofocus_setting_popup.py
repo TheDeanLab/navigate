@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.ticker as tck
 
+from navigate.view.custom_widgets.hover import HoverCheckButton
+
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -65,73 +67,117 @@ class AutofocusPopup:
         **kwargs
             Arbitrary keyword arguments.
         """
-        # Creating popup window with this name and size/placement,
-        # PopUp is a Toplevel window
-        #: PopUp: PopUp window
+        #: PopUp: The autofocusing popup window
         self.popup = PopUp(
             root, "Autofocus Settings", "+320+180", top=False, transient=False
         )
-        # Change background of popup window to white
-        self.popup.configure(bg="white")
 
-        # Creating content frame
-        content_frame = self.popup.get_frame()
-        device_frame = tk.Frame(content_frame)
-        device_frame.grid(row=0, columnspan=3, sticky=tk.NSEW)
-
-        # Dictionary for all the variables
         #: dict: Dictionary of all the input widgets.
         self.inputs = {}
+
         #: dict: Dictionary of all the setting variables.
         self.setting_vars = {}
 
+        # Creating content frame
+        content_frame = self.popup.get_frame()
+
+        for c in range(3):
+            content_frame.grid_columnconfigure(c, weight=1)
+        content_frame.grid_rowconfigure(3, weight=1)
+
+        # Section 1.
+        device_frame = ttk.Labelframe(
+            content_frame, text="Device Type and Focusing Axis", labelanchor="n"
+        )
+        ttk.Style().configure(
+            "Bold.TLabelframe.Label", font=("TkDefaultFont", 14, "bold")
+        )
+        ttk.Style().configure("Bold.TLabelframe.Label", foreground="#222222")
+        device_frame.configure(style="Bold.TLabelframe")
+        device_frame.grid(
+            row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=(5, 10)
+        )
+
         self.inputs["device"] = LabelInput(
             parent=device_frame,
-            label="Device:",
+            label="Device Type:",
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
             input_args={"width": 20, "state": "readonly"},
             label_args={"padding": (0, 0, 10, 0)},
         )
-        self.inputs["device"].grid(row=0, column=0, pady=3, padx=5)
+        self.inputs["device"].grid(row=0, column=0, pady=6, padx=10, sticky=tk.W)
 
         self.inputs["device_ref"] = LabelInput(
             parent=device_frame,
-            label="Axis:",
+            label="Focusing Axis:",
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
             input_args={"width": 20, "state": "readonly"},
             label_args={"padding": (0, 0, 10, 0)},
         )
-        self.inputs["device_ref"].grid(row=0, column=1, pady=3, padx=30)
+        self.inputs["device_ref"].grid(row=0, column=1, pady=6, padx=10, sticky=tk.W)
 
-        starting_row_id = 1
+        # Section 2.
+        scan_frame = ttk.Labelframe(
+            content_frame,
+            text="Scan Parameters",
+            labelanchor="n",
+            style="Bold.TLabelframe",
+        )
+        scan_frame.grid(
+            row=1, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=(0, 10)
+        )
 
-        # Row 0, Column Titles
+        for c in range(3):
+            scan_frame.grid_columnconfigure(c, weight=1)
+        starting_row_id = 0
+
         title_labels = [
-            "Select",
+            "",
             "Range  (" + "\N{GREEK SMALL LETTER MU}" + "m)",
-            "Step Size  (" + "\N{GREEK SMALL LETTER MU}" + "m)"
+            "Step Size  (" + "\N{GREEK SMALL LETTER MU}" + "m)",
         ]
         for i in range(3):
-            title = ttk.Label(content_frame, text=title_labels[i], padding=(2, 5, 0, 0))
-            title.grid(row=starting_row_id, column=i, sticky=tk.NSEW)
+            title = ttk.Label(scan_frame, text=title_labels[i], padding=(2, 5, 0, 0))
+            title.grid(row=starting_row_id, column=i, sticky=tk.EW)
 
-        # Row 1, 2 - Autofocus Settings
         setting_names = ["coarse", "fine", "robust_fit"]
         setting_labels = ["Coarse", "Fine", "Inverse Power Tent Fit"]
+        hover_text = [
+            "Performs a broad autofocus scan centered on the current position. \n"
+            "The system evaluates focus values from current position – (range / 2) to "
+            "current position + (range / 2), using the specified step size. \n"
+            "If 'Fine' is also selected, the result of the coarse search is used as "
+            "the center point for a more precise fine scan.",
+            "Performs a refined secondary autofocus scan around the best focus found "
+            "during the coarse search. \nThe fine scan covers a smaller region, "
+            "e.g., from the coarse peak position – (fine range / 2) to the coarse peak "
+            "position + (fine range / 2) "
+            "using the finer step size defined in this section. \nThis step provides "
+            "sub-micron precision in determining the optimal focal plane.",
+            "Fits an inverse power tent curve to estimate the peak focus value. "
+            "Results can improve accuracy but may be unstable in noisy data.",
+        ]
+
         for i in range(2):
-            # Column 0 - Checkboxes
             variable = tk.BooleanVar(False)
-            widget = ttk.Checkbutton(
-                content_frame, text=setting_labels[i], variable=variable
+            widget = HoverCheckButton(
+                scan_frame, text=setting_labels[i], variable=variable
             )
-            widget.grid(row=i + 1 + starting_row_id, column=0, sticky=tk.NSEW, padx=5)
+            widget.hover.setdescription(hover_text[i])
+            widget.grid(
+                row=i + 1 + starting_row_id,
+                column=0,
+                sticky=tk.W,
+                padx=5,
+                pady=(8 if i == 0 else 6, 4),
+            )
             self.setting_vars[setting_names[i] + "_selected"] = variable
 
             # Column 1 - Ranges
             widget = LabelInput(
-                parent=content_frame,
+                parent=scan_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
                 input_args={"from_": 0.0, "to": 50000},
@@ -139,16 +185,16 @@ class AutofocusPopup:
             widget.grid(
                 row=i + 1 + starting_row_id,
                 column=1,
-                sticky=tk.NSEW,
-                padx=(0, 5),
-                pady=(15, 0),
+                sticky=tk.EW,
+                padx=(0, 8),
+                pady=(6, 4),
             )
             self.inputs[setting_names[i] + "_range"] = widget
             self.setting_vars[setting_names[i] + "_range"] = widget.get_variable()
 
             # Column 2 - Step Sizes
             widget = LabelInput(
-                parent=content_frame,
+                parent=scan_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
                 input_args={"from_": 0.0, "to": 50000},
@@ -156,34 +202,93 @@ class AutofocusPopup:
             widget.grid(
                 row=i + 1 + starting_row_id,
                 column=2,
-                sticky=tk.NSEW,
-                padx=(0, 5),
-                pady=(15, 0),
+                sticky=tk.EW,
+                padx=(0, 8),
+                pady=(6, 4),
             )
             self.inputs[setting_names[i] + "_step_size"] = widget
             self.setting_vars[setting_names[i] + "_step_size"] = widget.get_variable()
 
-        # Row 4, Autofocus Button
-        #: ttk.Button: Autofocus button.
-        self.autofocus_btn = ttk.Button(content_frame, text="Autofocus")
-        self.autofocus_btn.grid(
-            row=starting_row_id + 4, column=2, padx=(0, 25), pady=(10, 10), sticky=tk.E
+        # Section 3.
+        options_frame = ttk.Labelframe(
+            content_frame,
+            text="Curve Fitting and Statistical Tests",
+            labelanchor="n",
+            style="Bold.TLabelframe",
+        )
+        options_frame.grid(
+            row=2, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=(0, 10)
+        )
+        for c in range(3):
+            options_frame.grid_columnconfigure(c, weight=1)
+
+        variable = tk.BooleanVar(False)
+        robust_fit = HoverCheckButton(
+            options_frame, text=setting_labels[2], variable=variable
+        )
+        robust_fit.grid(row=0, column=0, sticky=tk.W, padx=6, pady=6)
+        self.setting_vars["robust_fit"] = variable
+        robust_fit.hover.setdescription(
+            "Fit the data with an inverse power tent to identify the ideal focus."
         )
 
         variable = tk.BooleanVar(False)
-        robust_fit = ttk.Checkbutton(
-            content_frame, text=setting_labels[2], variable=variable
+        spline_fit = HoverCheckButton(
+            options_frame, text="Spline Fit", variable=variable
         )
-        robust_fit.grid(row=starting_row_id + 4, column=0, sticky=tk.NSEW, padx=5)
-        self.setting_vars["robust_fit"] = variable
+        spline_fit.grid(row=0, column=1, sticky=tk.W, padx=6, pady=6)
+        self.setting_vars["spline_fit"] = variable
+        spline_fit.hover.setdescription(
+            "Fit the data with a spline to identify the ideal focus."
+        )
 
-        # Row 5, Plot
-        #: matplotlib.figure.Figure: Figure for the plot.
+        variable = tk.BooleanVar(False)
+        test_significance = HoverCheckButton(
+            options_frame, text="Test Significance", variable=variable
+        )
+        test_significance.grid(row=0, column=2, sticky=tk.W, padx=6, pady=6)
+        self.setting_vars["test_significance"] = variable
+        test_significance.hover.setdescription(
+            "Only accept focus positions that provide a statistically significant "
+            "response. \nSignificance defined as the mean + 2 standard deviations."
+        )
+
+        # Section 4. Autofocus Button
+        style = ttk.Style()
+        try:
+            # Make it bolder/bigger with extra padding
+            style.configure(
+                "Accent.TButton", font=("TkDefaultFont", 12, "bold"), padding=(14, 8)
+            )
+            theme = style.theme_use()
+            if theme not in ("aqua", "vista", "xpnative"):
+                style.map(
+                    "Accent.TButton",
+                    foreground=[("pressed", "white"), ("active", "white")],
+                    background=[
+                        ("pressed", "#2c6be0"),
+                        ("active", "#3478f6"),
+                        ("!disabled", "#3478f6"),
+                    ],
+                )
+        except tk.TclError:
+            pass
+        button_bar = ttk.Frame(content_frame)
+        button_bar.grid(
+            row=3, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=(0, 6)
+        )
+
+        self.autofocus_btn = ttk.Button(
+            button_bar, text="▶ Start Autofocus", style="Accent.TButton", width=18
+        )
+        self.autofocus_btn.pack(pady=(4, 6), anchor="center")
+        button_bar.grid_columnconfigure(0, weight=1)
+
+        # Plot
         self.fig = Figure(figsize=(5, 5), dpi=100)
-        #: matplotlib.axes.Axes: Axes for the plot.
         self.coarse = self.fig.add_subplot(111)
-        self.coarse.set_title("Discrete Cosine Transform", fontsize=18)
-        self.coarse.set_xlabel("Focus Stage Position", fontsize=16)
+        self.coarse.set_ylabel("Discrete Cosine Transform", fontsize=10)
+        self.coarse.set_xlabel("Focus Stage Position", fontsize=10)
         self.coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
         self.coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
 
@@ -191,13 +296,16 @@ class AutofocusPopup:
         canvas = FigureCanvasTkAgg(self.fig, master=content_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=starting_row_id + 5,
+            row=4,
             column=0,
             columnspan=3,
             sticky=tk.NSEW,
-            padx=(5, 5),
-            pady=(5, 5),
+            padx=10,
+            pady=(0, 10),
         )
+
+        # Allow the plot row to stretch
+        content_frame.grid_rowconfigure(4, weight=1)
 
     def get_widgets(self):
         """Returns the dictionary of input widgets.
@@ -208,3 +316,10 @@ class AutofocusPopup:
             Dictionary of all the input widgets.
         """
         return self.inputs
+
+
+if __name__ == "__main__":
+    # Launch the popup
+    root = tk.Tk()
+    AutofocusPopup(root=root)
+    root.mainloop()

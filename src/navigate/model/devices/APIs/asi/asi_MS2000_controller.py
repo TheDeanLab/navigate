@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,10 @@
 
 
 # Standard Imports
-import threading
 import time
 import logging
 
 # Third Party Imports
-from serial import Serial
 from serial import SerialException
 from serial import SerialTimeoutException
 from serial import EIGHTBITS
@@ -44,7 +42,8 @@ from serial import PARITY_NONE
 from serial import STOPBITS_ONE
 
 # Local Imports
-from navigate.model.devices.APIs.asi.asi_tiger_controller import ASIException, TigerController
+from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -73,7 +72,6 @@ class MS2000Controller(TigerController):
         """Returns the string representation of the MS2000 Controller class"""
         return "MS2000Controller"
 
-
     def connect_to_serial(
         self,
         rx_size: int = 12800,
@@ -95,21 +93,21 @@ class MS2000Controller(TigerController):
         write_timeout : int
             Write timeout in seconds
         """
-        self.serial_port.port = self.com_port
-        self.serial_port.baudrate = self.baud_rate
-        self.serial_port.parity = PARITY_NONE
-        self.serial_port.bytesize = EIGHTBITS
-        self.serial_port.stopbits = STOPBITS_ONE
-        self.serial_port.xonoff = False
-        self.serial_port.rtscts = False
-        self.serial_port.dsrdtr = False
-        self.serial_port.write_timeout = write_timeout
-        self.serial_port.timeout = read_timeout
+        self.serial.port = self.com_port
+        self.serial.baudrate = self.baud_rate
+        self.serial.parity = PARITY_NONE
+        self.serial.bytesize = EIGHTBITS
+        self.serial.stopbits = STOPBITS_ONE
+        self.serial.xonoff = False
+        self.serial.rtscts = False
+        self.serial.dsrdtr = False
+        self.serial.write_timeout = write_timeout
+        self.serial.timeout = read_timeout
 
         # set the size of the rx and tx buffers before calling open
-        self.serial_port.set_buffer_size(rx_size, tx_size)
+        self.serial.set_buffer_size(rx_size, tx_size)
         try:
-            self.serial_port.open()
+            self.serial.open()
         except SerialException:
             self.report_to_console(
                 f"SerialException: can't connect to {self.com_port} at "
@@ -118,8 +116,8 @@ class MS2000Controller(TigerController):
 
         if self.is_open():
             # clear the rx and tx buffers
-            self.serial_port.reset_input_buffer()
-            self.serial_port.reset_output_buffer()
+            self.serial.reset_input_buffer()
+            self.serial.reset_output_buffer()
             # report connection status to user
             self.report_to_console("Connected to the serial port.")
             self.report_to_console(
@@ -154,7 +152,6 @@ class MS2000Controller(TigerController):
 
         return default_axes_sequence
 
-
     def wait_for_device(self, report: bool = False):
         """Waits for the all motors to stop moving."""
         if not report:
@@ -177,15 +174,15 @@ class MS2000Controller(TigerController):
         # always reset the buffers before a new command is sent
         self.safe_to_write.wait()
         self.safe_to_write.clear()
-        self.serial_port.read_all()
-        self.serial_port.reset_input_buffer()
-        self.serial_port.reset_output_buffer()
+        self.serial.read_all()
+        self.serial.reset_input_buffer()
+        self.serial.reset_output_buffer()
 
         # send the serial command to the controller
         self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         try:
-            self.serial_port.write(command)
+            self.serial.write(command)
         except SerialTimeoutException as e:
             print(f"MS2000 Controller -- SerialTimeoutException: {e}")
             pass
@@ -193,6 +190,23 @@ class MS2000Controller(TigerController):
         # sleep to avoid error, empirically found this made it work
         time.sleep(0.1)
 
+    def set_jog_speed(self, axes: list, jsspd: int):
+        """Set jog wheel speed.
+
+        Parameters
+        ----------
+        axes: list
+            List of axes to set
+        jsspd: int
+            Jog wheel speed (0.1 - 100)
+        """
+        cmd = "JSSPD " + " ".join(f"{ax.upper()}={jsspd}" for ax in axes)
+
+        # send JSSPD command to MS2000 controller: set jog wheel speed
+        self.send_command(cmd)
+
+        # get response (:A if successful)
+        self.read_response()
 
     def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s.

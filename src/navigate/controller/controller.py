@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -39,7 +39,6 @@ import threading
 import sys
 import os
 import time
-import platform
 
 # Third Party Imports
 
@@ -115,6 +114,7 @@ class Controller:
         waveform_templates_path,
         gui_configuration_path,
         multi_positions_path,
+        log_queue,
         args,
     ):
         """Initialize the Navigate Controller.
@@ -125,24 +125,26 @@ class Controller:
             Tk.tk GUI instance.
         splash_screen : Tk top-level widget.
             Tk.tk GUI instance.
-        configuration_path : string
+        configuration_path : Path
             Path to the configuration yaml file.
             Provides global microscope configuration parameters.
-        experiment_path : string
+        experiment_path : Path
             Path to the experiment yaml file.
             Provides experiment-specific microscope configuration.
-        waveform_constants_path : string
+        waveform_constants_path : Path
             Path to the waveform constants yaml file.
             Provides magnification and wavelength-specific parameters.
-        rest_api_path : string
+        rest_api_path : Path
             Path to the REST API yaml file.
             Provides REST API configuration parameters.
-        waveform_templates_path : string
+        waveform_templates_path : Path
             Path to the waveform templates yaml file.
             Provides waveform templates for each channel.
-        gui_configuration_path : string
+        gui_configuration_path : Path
             Path to the GUI configuration yaml file.
             Provides GUI configuration parameters.
+        log_queue : Optional[mp.Queue]
+            The queue for logging events from multiple processes.
         *args :
             Command line input arguments for non-default
             file paths or using synthetic hardware modes.
@@ -284,7 +286,8 @@ class Controller:
 
         #: StageController: Stage Sub-Controller.
         self.stage_controller = StageController(
-            self.view.settings.stage_control_tab, self,
+            self.view.settings.stage_control_tab,
+            self,
         )
 
         #: WaveformTabController: Waveform Display Sub-Controller.
@@ -579,7 +582,7 @@ class Controller:
 
         if (
             self.configuration["experiment"]["MicroscopeState"]["is_multiposition"]
-            and len(positions) == 0
+            and len(positions) < 2
         ):
             # Update the view and override the settings.
             self.configuration["experiment"]["MicroscopeState"][
@@ -587,7 +590,6 @@ class Controller:
             ] = False
             self.channels_tab_controller.is_multiposition_val.set(False)
 
-        # TODO: validate experiment dict
         self.channels_tab_controller.update_experiment_values()
         warning_message += self.channels_tab_controller.verify_experiment_values()
 
@@ -759,7 +761,7 @@ class Controller:
             self.threads_pool.createThread(
                 resourceName="model",
                 target=self.update_stage_limits,
-                args=(microscope_name,)
+                args=(microscope_name,),
             )
 
         elif command == "move_stage_and_update_info":
@@ -1199,7 +1201,7 @@ class Controller:
                 break
             # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
-            logger.info(f"Navigate Controller - Received Image: {image_id}")
+            logger.info(f"Received image from the controller: {image_id}")
 
             if image_id == "stop":
                 self.current_image_id = -1
@@ -1445,7 +1447,7 @@ class Controller:
 
     def update_stage_limits(self, microscope_name: str) -> None:
         """Update stage limits on the device side
-        
+
         Parameters
         ----------
         microscope_name : str

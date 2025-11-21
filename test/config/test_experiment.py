@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -115,7 +115,6 @@ class TextExperimentFile(unittest.TestCase):
 
         self.parse_entries(section="CameraParameters", expected_values=expected_values)
 
-    # TODO: This test case could be removed after PR#452 is merged into Develop.
     def test_autofocus_parameters(self):
         expected_values = {
             "coarse_range": int,
@@ -125,6 +124,8 @@ class TextExperimentFile(unittest.TestCase):
             "fine_step_size": int,
             "fine_selected": bool,
             "robust_fit": bool,
+            "spline_fit": bool,
+            "test_significance": bool,
         }
 
         self.parse_entries(
@@ -200,4 +201,3 @@ class TextExperimentFile(unittest.TestCase):
                     self.data["MicroscopeState"]["channels"][key][key_key],
                     expected_values[key_key],
                 ), f"{key_key} is not of type {expected_values[key_key]}"
-

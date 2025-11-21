@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 import logging
 import time
 import traceback
+from typing import Any
 
 # Third Party Imports
 import nidaqmx
@@ -54,7 +55,13 @@ logger = logging.getLogger(p)
 class NIFilterWheel(FilterWheelBase, NIDevice):
     """DAQFilterWheel - Class for controlling filter wheels with a DAQ."""
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id):
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
         """Initialize the DAQFilterWheel class.
 
         Parameters
@@ -76,24 +83,31 @@ class NIFilterWheel(FilterWheelBase, NIDevice):
 
         self.filter_wheel_task = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the class."""
         return "DAQFilterWheel"
 
-    def __enter__(self):
-        """Enter the ASI Filter Wheel context manager."""
+    def __enter__(self) -> "NIFilterWheel":
+        """Enter the NI Filter Wheel context manager."""
         return self
 
-    def __exit__(self):
-        """Exit the ASI Filter Wheel context manager."""
+    def __exit__(self) -> bool:
+        """Exit the NI Filter Wheel context manager.
+
+        Returns
+        -------
+        bool
+            True if the context was exited successfully, False otherwise.
+        """
         if self.filter_wheel_task:
             try:
                 self.filter_wheel_task.stop()
                 self.filter_wheel_task.close()
             except Exception:
                 pass
+        return True
 
-    def set_filter(self, filter_name, wait_until_done=True):
+    def set_filter(self, filter_name: str, wait_until_done: bool = True) -> None:
         """Change the filter wheel to the filter designated by the filter
         position argument. Requires a digital port on the DAQ.
 

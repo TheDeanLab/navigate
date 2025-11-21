@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any, Dict
+from typing import Any
 
 
 # Local Imports
@@ -54,7 +54,7 @@ class ASIGalvo(GalvoBase, SerialDevice):
         self,
         microscope_name: str,
         device_connection: Any,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id: int = 0,
     ) -> None:
         """Initialize the GalvoASI class.
@@ -65,7 +65,7 @@ class ASIGalvo(GalvoBase, SerialDevice):
             Name of the microscope.
         device_connection : Any
             Connection to the NI DAQ device.
-        configuration : Dict[str, Any]
+        configuration : dict[str, Any]
             Dictionary of configuration parameters.
         device_id : int
             Galvo ID. Default is 0.
@@ -84,7 +84,9 @@ class ASIGalvo(GalvoBase, SerialDevice):
         return "GalvoASI"
 
     @classmethod
-    def connect(cls, port, baudrate=115200, timeout=0.25):
+    def connect(
+        cls, port: str, baudrate: int = 115200, timeout: float = 0.25
+    ) -> TigerController:
         """Build ASILaser Serial Port connection
 
         Parameters
@@ -109,7 +111,9 @@ class ASIGalvo(GalvoBase, SerialDevice):
             raise Exception("ASI stage connection failed.")
         return tiger_controller
 
-    def adjust(self, exposure_times, sweep_times):
+    def adjust(
+        self, exposure_times: dict[str, float], sweep_times: dict[str, float]
+    ) -> dict[str, Any]:
         """Adjust the galvo waveform to account for the camera readout time.
 
         Parameters
@@ -224,7 +228,13 @@ class ASIGalvo(GalvoBase, SerialDevice):
                     print("Unknown Galvo waveform specified in configuration file.")
                     continue
 
-    def sawtooth(self, period=10, amplitude=1, offset=0, duty_cycle=100):
+    def sawtooth(
+        self,
+        period: float = 10,
+        amplitude: float = 1,
+        offset: float = 0,
+        duty_cycle: float = 100,
+    ) -> None:
         """
         Sends the tiger controller commands to initiate the sawtooth wave.
 
@@ -266,7 +276,9 @@ class ASIGalvo(GalvoBase, SerialDevice):
         # Waveform is free running after TTL input
         self.galvo.single_axis_mode(self.axis, 4)
 
-    def sine_wave(self, period=10.0, amplitude=1.0, offset=0.0):
+    def sine_wave(
+        self, period: float = 10.0, amplitude: float = 1.0, offset: float = 0.0
+    ) -> None:
         """Sends the tiger controller commands to initiate the sine wave.
 
         Parameters
@@ -290,11 +302,11 @@ class ASIGalvo(GalvoBase, SerialDevice):
         # Waveform is free running after it is triggered
         self.galvo.single_axis_mode(self.axis, 4)
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         """Stops the galvo waveform"""
         self.galvo.single_axis_mode(self.axis, 0)
 
-    def close(self):
+    def close(self) -> None:
         """Close the ASI galvo serial port.
 
         Stops the remote focus waveform and then closes the port.
@@ -304,6 +316,6 @@ class ASIGalvo(GalvoBase, SerialDevice):
             logger.debug("ASI Remote Focus - Closing Device.")
             self.galvo.disconnect_from_serial()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor for the ASIGalvo class."""
         self.close()

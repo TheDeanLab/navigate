@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 
 import unittest
 from unittest.mock import MagicMock
-from navigate.model.devices.galvo.base import GalvoBase
+from navigate.model.devices.galvo.synthetic import SyntheticGalvo
 from navigate.config import (
     load_configs,
     get_configuration_paths,
@@ -74,7 +74,7 @@ class TestGalvoBase(unittest.TestCase):
         self.device_connection = MagicMock()
         galvo_id = 0
 
-        self.galvo = GalvoBase(
+        self.galvo = SyntheticGalvo(
             microscope_name=self.microscope_name,
             device_connection=self.device_connection,
             configuration=self.configuration,

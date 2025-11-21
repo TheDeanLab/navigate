@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 # Standard Imports
 import logging
 from threading import Lock
-from typing import Dict, Any
+from typing import Any
 
 # Third Party Imports
 from multiprocessing.managers import DictProxy, ListProxy
@@ -62,7 +62,7 @@ class ASIDaq(DAQBase, SerialDevice):
         self,
         microscope_name,
         device_connection,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         device_id,
     ) -> None:
         """Initialize the ASI DAQ.
@@ -307,3 +307,7 @@ class ASIDaq(DAQBase, SerialDevice):
 
         # if self.wait_to_run_lock.locked():
         #     self.wait_to_run_lock.release()
+
+    def wait_acquisition_done(self) -> None:
+        """Wait for acquisition to be done."""
+        super().wait_acquisition_done()

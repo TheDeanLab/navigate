@@ -1718,10 +1718,11 @@ class ASIZStackAcquisition(ZStackAcquisition):
 
             print("Current position - Z: ", self.current_position[self.primary_z_axis])
             self.current_pos_dict = pos_dict
-
+            self.model.pause_data_thread()
             self.model.move_stage(pos_dict, wait_until_done=True)
             time.sleep(1)
-            print("****** stage moved to: ", self.model.get_stage_position())
+            print("Func stage moved to: ", self.model.get_stage_position())
+            self.model.resume_data_thread()
 
         # Potentially pause the data thread and move z, f position
         # if self.need_to_move_z_position:
@@ -1791,7 +1792,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
                 self.model.move_stage({f"{self.primary_z_axis}_abs": self.current_pos_dict[f"{self.primary_z_axis}_abs"]}, wait_until_done=True)
                 # self.model.move_stage(self.current_pos_dict, wait_until_done=True)
                 # time sleep gone but still freezing here idk why
-                print("****** stage is moved to: ", self.model.get_stage_position())
+                print("End: stage is moved to: ", self.model.get_stage_position())
                 self.model.resume_data_thread()
         else:
             self.need_to_move_new_position = True

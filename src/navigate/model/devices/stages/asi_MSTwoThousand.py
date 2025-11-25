@@ -48,6 +48,7 @@ from navigate.tools.decorators import log_initialization
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+SLEEP_AFTER_WAIT = 0.100
 
 def build_ASI_Stage_connection(com_port, baud_rate=115200):
     """Connect to the ASI Stage
@@ -220,7 +221,7 @@ class ASIStage(StageBase):
             logger.exception("ASI Stage Exception", e)
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=True):
         """Move stage along a single axis.
 
         Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]
@@ -258,6 +259,9 @@ class ASIStage(StageBase):
 
         if wait_until_done:
             self.ms2000_controller.wait_for_device()
+            if SLEEP_AFTER_WAIT:
+                time.sleep(SLEEP_AFTER_WAIT)
+            
         return True
 
     def verify_move(self, move_dictionary):
@@ -285,7 +289,7 @@ class ASIStage(StageBase):
                 res_dict[axis] = val
         return res_dict
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(self, move_dictionary, wait_until_done=True):
         """Move Absolute Method.
 
         XYZ Values should remain in microns for the ASI API
@@ -325,6 +329,8 @@ class ASIStage(StageBase):
             return False
         if wait_until_done:
             self.ms2000_controller.wait_for_device()
+            if SLEEP_AFTER_WAIT:
+                time.sleep(SLEEP_AFTER_WAIT)
 
         return True
 

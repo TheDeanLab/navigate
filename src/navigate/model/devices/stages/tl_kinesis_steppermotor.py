@@ -62,6 +62,7 @@ from navigate.model.devices.APIs.thorlabs.pykinesis_controller import KinesisSta
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+SLEEP_AFTER_WAIT = 0.100
 
 def build_KINESIS_Stage_connection(serial_number):
     """Connect to the Thorlabs KST Stage
@@ -161,7 +162,7 @@ class TLKINStage(StageBase):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axes, abs_pos, wait_until_done=False):
+    def move_axis_absolute(self, axes, abs_pos, wait_until_done=True):
         """
         Implement movement.
 
@@ -210,7 +211,8 @@ class TLKINStage(StageBase):
             self.move_axis_absolute("f", move_dictionary["f_abs"], wait_until_done),
             result,
         )
-
+        if SLEEP_AFTER_WAIT:
+            time.sleep(SLEEP_AFTER_WAIT)
         return result
 
     def move_to_position(self, position, wait_until_done=False):
@@ -231,6 +233,8 @@ class TLKINStage(StageBase):
         self.kin_controller.move_to_position(position,
                                              self.device_unit_scale, 
                                              wait_until_done)
+        if SLEEP_AFTER_WAIT:
+            time.sleep(SLEEP_AFTER_WAIT)
         
     def run_homing(self):
         """Run homing sequence."""

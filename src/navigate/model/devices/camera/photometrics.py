@@ -207,6 +207,7 @@ class PhotometricsBase(CameraBase):
     def close_camera(self):
         """Close Photometrics Camera"""
         self.camera_controller.close()
+        pvc.uninit_pvcam()
 
     def set_sensor_mode(self, mode):
         """Set Photometrics sensor mode

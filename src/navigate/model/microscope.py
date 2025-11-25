@@ -679,7 +679,7 @@ class Microscope:
                             ]["number_of_pixels"]
                         ),
                     )
-                    if updated_exposure_time != exposure_time:
+                    if np.round(updated_exposure_time,1) != np.round(exposure_time,1):
                         print(
                             f"*** Notice: The actual exposure time of the camera for "
                             f"{channel_key} is {round(updated_exposure_time*1000, 1)}"

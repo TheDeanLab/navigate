@@ -128,7 +128,12 @@ class MS2000Controller:
         self.verbose = verbose
 
         #: list[str]: Default axes sequence of the MS2000 Controller
-        self.default_axes_sequence = None
+        self.default_axes_sequence = [
+            "X",
+            "Y",
+            "Z",
+        ]
+            
 
         #: list[float]: Maximum speeds of the MS2000 Controller
         self._max_speeds = None
@@ -209,17 +214,10 @@ class MS2000Controller:
             self.serial_port.reset_input_buffer()
             self.serial_port.reset_output_buffer()
             # report connection status to user
-            self.report_to_console("Connected to the serial port.")
+            self.report_to_console("MS2000 Connected to the serial port.")
             self.report_to_console(
                 f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}"
             )
-
-            #: list[str]: Default axes sequence of the MS2000 Controller
-            self.default_axes_sequence = [
-                "X",
-                "Y",
-                "Z",
-            ]
             
     def get_default_motor_axis_sequence(self) -> None:
         """Get the default motor axis sequence from the ASI device
@@ -324,16 +322,16 @@ class MS2000Controller:
         if self.verbose:
             print(message)
 
-    def wait_for_device(self, report: bool = False):
-        """Waits for the all motors to stop moving."""
-        if not report:
-            print("Waiting for device...")
-        temp = self.report
-        self.report = report
-        busy = True
-        while busy:
-            busy = self.is_device_busy()
-        self.report = temp
+    # def wait_for_device(self, report: bool = False):
+    #     """Waits for the all motors to stop moving."""
+    #     if not report:
+    #         print("Waiting for device...")
+    #     temp = self.report
+    #     self.report = report
+    #     busy = True
+    #     while busy:
+    #         busy = self.is_device_busy()
+    #     self.report = temp
 
     def send_command(self, cmd: str) -> None:
         """Send a serial command to the device.
@@ -579,7 +577,6 @@ class MS2000Controller:
         busy = self.is_device_busy()
         waiting_time = 0.0
 
-        # t_start = time.time()
         while busy:
             waiting_time += 0.001
             if waiting_time >= timeout:

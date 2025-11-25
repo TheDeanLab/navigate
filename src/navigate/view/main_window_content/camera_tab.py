@@ -454,7 +454,7 @@ class ROI(ttk.Labelframe):
                 # input_class=ttk.Spinbox,
                 input_class=ValidatedSpinbox,
                 input_var=tk.IntVar(),
-                input_args={"from_": 0, "to": 2048, "increment": 1.0, "width": 6},
+                input_args={"from_": 0, "to": 5000, "increment": 1.0, "width": 6},
             )
             self.inputs[roi_boundary_names[i]].grid(
                 row=i // 2 + 1, column=i % 2 + 1, pady=1, padx=5, sticky=tk.NW

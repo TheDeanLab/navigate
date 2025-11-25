@@ -114,9 +114,22 @@ def create_save_path(saving_settings: dict) -> str:
 
     # Determine Number of Acquisitions in Directory
     prefix_num = len(prefix_string)
+    
+    def is_valid_dir(name):
+        return name.startswith(prefix_string) and name[prefix_num:].isdigit()
+
     cell_directories = list(
-        filter(lambda v: v[:prefix_num] == prefix_string, os.listdir(save_directory))
+        filter(is_valid_dir, os.listdir(save_directory))
     )
+
+    if len(cell_directories) != 0:
+        cell_directories.sort()
+        # Extract numeric suffixes and get the highest one
+        latest_index = max(int(name[prefix_num:]) for name in cell_directories)
+        cell_index = latest_index + 1
+    else:
+        cell_index = 1
+        
     if len(cell_directories) != 0:
         cell_directories.sort()
         cell_index = int(cell_directories[-1][prefix_num:]) + 1

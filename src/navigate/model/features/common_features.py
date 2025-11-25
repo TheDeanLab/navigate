@@ -988,6 +988,9 @@ class ZStackAcquisition:
         self.z_stack_distance = abs(
             self.start_z_position - float(microscope_state["end_position"])
         )
+        if DEBUGGING:
+            print(f"\nOrigin: {self.get_origin}")
+            print(f"\n Start Z: {self.start_z_position}")
         # NOTE: To allow for the focus stage to move in a negative direction while the z-stage is
         #       moving in a positive direction, check the focus start/stop and modify the step size
         self.start_focus = float(microscope_state["start_focus"])

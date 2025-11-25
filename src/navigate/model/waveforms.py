@@ -488,3 +488,104 @@ def smooth_waveform(waveform, percent_smoothing=10):
     )
 
     return smoothed_waveform
+
+
+def quadratic(
+    sample_rate: float = 100000, 
+    sweep_time: float = 0.4,
+    exposure: float = 0.100,
+    amplitude: float = 0.1,
+    offset: float = 0,
+    delay: float = 0
+):
+    """Qudratic galvo waveform used for curvedASLM
+
+    Amplitude voltage at the FOV edges.
+    Offset is the voltage at the center of the FOV.
+        
+    Parameters
+    ----------
+    sample_rate : int, optional
+        Unit - Hz, by default 100000
+    sweep_time : float, optional
+        Unit - Seconds, by default 0.4
+    exposure_time : Float
+        Unit - Seconds
+    amplitude : Float
+        Unit - Volts
+    offset : Float
+        Unit - Volts
+    delay : float, optional
+        Unit - seconds, by default 0
+
+    Returns
+    -------
+    waveform : np.array
+    """
+    samples = int(sample_rate * sweep_time)
+    exposure_samples = int(sample_rate * exposure)
+    waveform = np.full(samples, offset)
+    if delay==0:
+        start_sample = 0
+    else:
+        start_sample = int(delay*sample_rate)
+    tn = np.linspace(-1, 1, exposure_samples)
+    quad_waveform = amplitude * tn**2 + offset
+    
+    waveform[start_sample:int(start_sample + exposure_samples)] = quad_waveform
+    return waveform
+
+
+def centered_cubic(
+    sample_rate: int = 100000, 
+    sweep_time: float = 0.4,
+    exposure: float = 0.100,
+    amplitude: float = 0.0,
+    offset: float = 0,
+    delay: float = 0
+):
+    """Cubic galvo waveform used for curvedASLM
+
+    Amplitude is the start (top) voltage,
+    Offset is the end (bottom) voltage
+        
+    Parameters
+    ----------
+    sample_rate : int, optional
+        Unit - Hz, by default 100000
+    sweep_time : float, optional
+        Unit - Seconds, by default 0.4
+    exposure_time : Float
+        Unit - Seconds
+    amplitude : Float
+        Unit - Volts
+    offset : Float
+        Unit - Volts
+    delay : float, optional
+        Unit - Seconds, by default 0
+
+    Returns
+    -------
+    waveform : np.array
+    """
+    samples = int(sample_rate * sweep_time)
+    exposure_samples = int(sample_rate * exposure)
+    waveform = np.full(samples, offset)
+    if delay==0:
+        start_sample = 0
+    else:
+        start_sample = int(delay*sample_rate)
+    tn = np.linspace(-1, 1, exposure_samples)
+    
+    # determine the optimal value for a and b
+    # start with an initial guess based on vstart, vend
+    vstart = amplitude
+    vend = offset
+
+    b = (vend - vstart) / 2
+    a = vend - b
+    cubic = a*tn**2 + b*tn**3
+
+    # compile total waveform
+    waveform[start_sample:int(start_sample + exposure_samples)] = cubic
+    return waveform

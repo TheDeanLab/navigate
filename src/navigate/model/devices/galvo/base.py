@@ -37,7 +37,7 @@ from typing import Any, Dict
 # Third Party Imports
 
 # Local Imports
-from navigate.model.waveforms import sawtooth, sine_wave
+from navigate.model.waveforms import sawtooth, sine_wave, quadratic, centered_cubic
 from navigate.tools.decorators import log_initialization
 
 # # Logger Setup
@@ -205,6 +205,24 @@ class GalvoBase:
                         offset=galvo_offset,
                         phase=self.camera_delay,
                     )
+                elif self.galvo_waveform == "centered_cubic":
+                    self.waveform_dict[channel_key] = centered_cubic(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        exposure=exposure_time,
+                        delay = self.camera_delay,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                    )               
+                elif self.galvo_waveform == "quadratic":
+                    self.waveform_dict[channel_key] = quadratic(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        exposure=exposure_time,
+                        delay = self.camera_delay,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                    )               
                 elif self.galvo_waveform == "sine":
                     self.waveform_dict[channel_key] = sine_wave(
                         sample_rate=self.sample_rate,

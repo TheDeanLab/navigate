@@ -7,12 +7,15 @@ See Thorlabs.MotionControl.KCube.StepperMotor.h for more functions to implement.
 2024/10/23 Sheppard: Initialized to control Kinesis Stepper motor in Linux
 """
 from pylablib.devices import Thorlabs
+from time import sleep
 import logging
 # Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+SLEEP_AFTER_WAIT = 0.100
 
 class KinesisStage():
     def __init__(self, dev_path: str, verbose: bool):
@@ -88,6 +91,8 @@ class KinesisStage():
         self.stage.move_by(steps, channel=1, scale=False)
         if wait_till_done:
             self.stage.wait_move(channel=1)
+        if SLEEP_AFTER_WAIT:
+            sleep(SLEEP_AFTER_WAIT)
         return 0
 
     def get_current_position(self, steps_per_um):

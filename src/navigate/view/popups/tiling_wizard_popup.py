@@ -148,6 +148,7 @@ class TilingWizardPopup:
                     parent=pos_grid,
                     input_class=ValidatedSpinbox,
                     input_var=tk.StringVar(),
+                    input_args={"width": 7}
                 )
                 self.inputs[names[i]].grid(
                     row=i - 1, column=1, sticky=tk.NSEW, pady=(20, 0), padx=5
@@ -161,6 +162,7 @@ class TilingWizardPopup:
                 label=dist_labels[i],
                 input_class=ValidatedEntry,
                 input_var=tk.StringVar(),
+                input_args={"width": 7}
             )
             self.inputs[entry_names[i]].grid(
                 row=i, column=2, sticky=tk.NSEW, padx=(5, 0), pady=(17, 0)

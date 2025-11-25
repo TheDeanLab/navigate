@@ -629,10 +629,10 @@ class TigerController:
         waiting_time = 0.0
 
         while busy:
-            waiting_time += 0.001
+            waiting_time += 0.05
             if waiting_time >= timeout:
                 break
-            time.sleep(0.001)
+            time.sleep(0.05)
             busy = self.is_device_busy()
 
         if self.verbose:

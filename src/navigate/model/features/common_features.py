@@ -1678,65 +1678,67 @@ class ASIZStackAcquisition(ZStackAcquisition):
                 )
             )
 
-            # calculate first z, f position
-            self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
-            self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
-            if self.defocus is not None:
-                self.current_focus_position += self.defocus[
-                    self.current_channel_in_list
-                ]
-            print("self.start_z_position: ", self.start_z_position)
-            print("self.current_z_position: ", self.current_z_position)
-            pos_dict = dict(
-                map(
-                    lambda ax: (
-                        f"{ax}_abs",
-                        self.current_position[ax],
-                    ),
-                    self.tiling_axes,
-                )
+        # calculate first z, f position
+        self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
+        self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
+        if self.defocus is not None:
+            self.current_focus_position += self.defocus[
+                self.current_channel_in_list
+            ]
+        print("self.start_z_position: ", self.start_z_position)
+        print("self.current_z_position: ", self.current_z_position)
+        pos_dict = dict(
+            map(
+                lambda ax: (
+                    f"{ax}_abs",
+                    self.current_position[ax],
+                ),
+                self.tiling_axes,
             )
+        )
 
-            # if self.current_position_idx > 0:
-            delta_distances = [self.current_position[axis] - self.pre_position[axis] for axis in self.tiling_axes if axis != "theta"]
-            delta_distances.append(
-                self.current_position[self.primary_z_axis]
-                - self.pre_position[self.primary_z_axis]
-                + self.z_stack_distance
-            )
-            delta_distances.append(
-                self.current_position[self.primary_f_axis]
-                - self.pre_position[self.primary_f_axis]
-                + self.f_stack_distance
-            )
-            # else:
-            #     axes_num = len(self.tiling_axes) + 2 - (1 if "theta" in self.tiling_axes else 0)
-            #     delta_distances = [0] * axes_num
+        # if self.current_position_idx > 0:
+        delta_distances = [self.current_position[axis] - self.pre_position[axis] for axis in self.tiling_axes if axis != "theta"]
+        delta_distances.append(
+            self.current_position[self.primary_z_axis]
+            - self.pre_position[self.primary_z_axis]
+            + self.z_stack_distance
+        )
+        delta_distances.append(
+            self.current_position[self.primary_f_axis]
+            - self.pre_position[self.primary_f_axis]
+            + self.f_stack_distance
+        )
+        # else:
+        #     axes_num = len(self.tiling_axes) + 2 - (1 if "theta" in self.tiling_axes else 0)
+        #     delta_distances = [0] * axes_num
 
-            # displacement = [delta_z, delta_f, delta_x, delta_y]
-            # Check the distance between the current position and previous position,
-            # if it is too far, then we can call self.model.pause_data_thread() and
-            # self.model.resume_data_thread() after the stage has completed the move
-            # to the next position.
-            print(delta_distances)
-            self.should_pause_data_thread = any(
-                distance > self.stage_distance_threshold
-                for distance in delta_distances
-            )
-            if self.should_pause_data_thread:
-                self.model.pause_data_thread()
-                data_thread_is_paused = True
-            
-            pos_dict[f"{self.primary_z_axis}_abs"] = self.current_position[self.primary_z_axis] + self.start_z_position
-            pos_dict[f"{self.primary_f_axis}_abs"] = self.current_position[self.primary_f_axis] + self.start_focus
+        # displacement = [delta_z, delta_f, delta_x, delta_y]
+        # Check the distance between the current position and previous position,
+        # if it is too far, then we can call self.model.pause_data_thread() and
+        # self.model.resume_data_thread() after the stage has completed the move
+        # to the next position.
+        print(delta_distances)
+        self.should_pause_data_thread = any(
+            distance > self.stage_distance_threshold
+            for distance in delta_distances
+        )
+        # if self.should_pause_data_thread:
+        #     self.model.pause_data_thread()
+        #     data_thread_is_paused = True
+        
+        pos_dict[f"{self.primary_z_axis}_abs"] = self.current_position[self.primary_z_axis] + self.start_z_position
+        pos_dict[f"{self.primary_f_axis}_abs"] = self.current_position[self.primary_f_axis] + self.start_focus
 
-            print("Current position - Z: ", self.current_position[self.primary_z_axis])
-            self.current_pos_dict = pos_dict
-            self.model.pause_data_thread()
-            self.model.move_stage(pos_dict, wait_until_done=True)
-            time.sleep(1)
-            print("Func stage moved to: ", self.model.get_stage_position())
-            self.model.resume_data_thread()
+        print("Current position - Z: ", self.current_position[self.primary_z_axis])
+        self.current_pos_dict = pos_dict
+        self.model.pause_data_thread()
+        start_time = time.time()
+        self.model.move_stage(pos_dict, wait_until_done=True)
+        # time.sleep(2)
+        stop_time = time.time()
+        print("Time to move ", stop_time - start_time)
+        self.model.resume_data_thread()
 
         # Potentially pause the data thread and move z, f position
         # if self.need_to_move_z_position:
@@ -1756,9 +1758,9 @@ class ASIZStackAcquisition(ZStackAcquisition):
         #         wait_until_done=True,
         #     )
 
-        if self.should_pause_data_thread:
-            self.model.resume_data_thread()
-            self.should_pause_data_thread = False
+        # if self.should_pause_data_thread:
+        #     self.model.resume_data_thread()
+        #     self.should_pause_data_thread = False
 
         self.model.mark_saving_flags([self.model.frame_id])
 
@@ -1785,11 +1787,11 @@ class ASIZStackAcquisition(ZStackAcquisition):
         # # calculate first z, f position
         # self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
         # self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
-        if (
-            self.z_stack_distance > self.stage_distance_threshold
-            or self.f_stack_distance > self.stage_distance_threshold
-        ):
-            self.should_pause_data_thread = True
+        # if (
+        #     self.z_stack_distance > self.stage_distance_threshold
+        #     or self.f_stack_distance > self.stage_distance_threshold
+        # ):
+        #     self.should_pause_data_thread = True
 
         # after running through a z-stack, update channel
         if self.stack_cycling_mode == "per_stack":
@@ -1797,23 +1799,23 @@ class ASIZStackAcquisition(ZStackAcquisition):
             # if run through all the channels, move to the next position
             if self.current_channel_in_list == 0:
                 self.need_to_move_new_position = True
-            else:
-                if self.should_pause_data_thread:
-                    self.model.pause_data_thread()
-                    data_thread_is_paused = True
-                self.model.pause_data_thread()
-                time.sleep(1)
-                self.model.move_stage({f"{self.primary_z_axis}_abs": self.current_pos_dict[f"{self.primary_z_axis}_abs"]}, wait_until_done=True)
-                # self.model.move_stage(self.current_pos_dict, wait_until_done=True)
-                # time sleep gone but still freezing here idk why
-                print("End: stage is moved to: ", self.model.get_stage_position())
-                self.model.resume_data_thread()
+            # else:
+            #     if self.should_pause_data_thread:
+            #         self.model.pause_data_thread()
+            #         data_thread_is_paused = True
+            #     self.model.pause_data_thread()
+            #     time.sleep(1)
+            #     self.model.move_stage({f"{self.primary_z_axis}_abs": self.current_pos_dict[f"{self.primary_z_axis}_abs"]}, wait_until_done=True)
+            #     # self.model.move_stage(self.current_pos_dict, wait_until_done=True)
+            #     # time sleep gone but still freezing here idk why
+            #     print("End: stage is moved to: ", self.model.get_stage_position())
+            #     self.model.resume_data_thread()
         else:
             self.need_to_move_new_position = True
 
-        if self.should_pause_data_thread:
-            self.model.resume_data_thread()
-            self.should_pause_data_thread = False
+        # if self.should_pause_data_thread:
+        #     self.model.resume_data_thread()
+        #     self.should_pause_data_thread = False
 
         if self.need_to_move_new_position:
             # move to the next position

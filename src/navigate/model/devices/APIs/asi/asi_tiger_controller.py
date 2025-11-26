@@ -632,10 +632,10 @@ class TigerController:
         waiting_time = 0.0
 
         while busy:
-            waiting_time += 0.001
+            waiting_time += 0.05
             if waiting_time >= timeout:
                 break
-            time.sleep(0.001)
+            time.sleep(0.05)
             busy = self.is_device_busy()
 
         if self.verbose:
@@ -1269,6 +1269,8 @@ class TigerController:
                 #Send Trigger to stage
                 "6 m e = 35",
                 "6 cca z = 7",
+                "6 m e = 40"
+                "6 cca z = 7"
             ]
             
         # Creates object to hold galvo commands
@@ -1300,7 +1302,7 @@ class TigerController:
         # Runs the main setup commands, followed by the Galvo specific commands
         for command in commands:
             self.send_command(f"{command}\r")
-            print(f"Sent Command: {command}")
+            # print(f"Sent Command: {command}")
             self.read_response()
         for command in galvo_commands:
             self.send_command(f"{command}\r")

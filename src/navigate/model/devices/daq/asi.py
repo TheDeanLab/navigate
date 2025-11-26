@@ -243,9 +243,19 @@ class ASIDaq(DAQBase, SerialDevice):
             print(f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}")
 
             num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
-
-            # sets up control loop with all parameters (all times in ms)
             self.daq.setup_z_stage(tiger_axis, addr, int(step_size*10))
+
+            start_focus = self.configuration["experiment"]["MicroscopeState"]["start_focus"]
+            end_focus = self.configuration["experiment"]["MicroscopeState"]["end_focus"]
+            if (end_focus - start_focus > 0):
+                focus_step = (end_focus - start_focus) / num_steps
+                navigate_focus_axis = self.configuration["experiment"]["MicroscopeState"]["primary_f_axis"]
+                tiger_focus_axis = self.axis_map[navigate_focus_axis].upper()
+                focus_addr = self.axis_addr[tiger_focus_axis]
+
+                self.daq.setup_z_stage(tiger_focus_axis, focus_addr, int(focus_step*10))
+
+            # sets up control loop with all parameters (all times in ms)            
             self.daq.setup_control_loop(
                 delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs, num_steps
             )

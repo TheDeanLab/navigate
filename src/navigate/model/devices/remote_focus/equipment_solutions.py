@@ -34,9 +34,10 @@
 import time
 import serial
 import logging
-from typing import Any
+from typing import Any, Dict
 
 # Third Party Imports
+from navigate.tools.decorators import log_initialization
 
 # Local Imports
 from navigate.model.devices.remote_focus.ni import NIRemoteFocus

@@ -110,3 +110,59 @@ def test_map_boundary():
     assert map_boundary([[1, 2]]) == [(0, 1), (0, 2)]
     assert map_boundary([None, [1, 2]]) == [(1, 1), (1, 2)]
     assert map_boundary([None, [1, 2], None]) == [(1, 1), (1, 2)]
+
+
+def test_map_labels():
+
+    def generate_labeled_stack_with_3d_blobs(
+        depth=50,
+        height=1024,
+        width=1024,
+        num_labels=30,
+        blob_size=5,
+    ):
+        stack = np.zeros((depth, height, width), dtype=np.uint16)
+        rng = np.random.default_rng()
+
+        r = blob_size // 2  # radius for spherical blob
+
+        for label in range(1, num_labels + 1):
+            # Choose center location, ensuring the blob stays inside boundaries
+            cz = rng.integers(r, depth - r)
+            cy = rng.integers(r, height - r)
+            cx = rng.integers(r, width - r)
+
+            # Fill a cube: 5x5x5
+            stack[
+                cz - r : cz + r + 1,
+                cy - r : cy + r + 1,
+                cx - r : cx + r + 1
+            ] = label
+
+        return stack
+    
+    from navigate.model.analysis.boundary_detect import map_labels
+
+    labeled_image = generate_labeled_stack_with_3d_blobs()
+
+    z_range, position_table, target_labels = map_labels(
+        labeled_image,
+        position = [0, 0, 0, 0, 0],
+        z_start = -100,
+        z_step = 1,
+        x_direction = "x",
+        y_direction = "y",
+        current_pixel_size = 1,
+        current_image_width = 1024,
+        current_image_height = 1024,
+        target_pixel_size = 0.05,
+        target_image_width = 1024,
+        target_image_height = 1024,
+        overlap=0.05,
+        filter_pixel_number=1,
+    )
+
+    assert z_range == 5 # blob size in z direction
+
+    assert position_table[0] == ["X", "Y", "Z", "THETA", "F"]
+

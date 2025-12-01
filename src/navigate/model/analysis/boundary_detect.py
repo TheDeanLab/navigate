@@ -545,7 +545,7 @@ def map_labels(
     y_direction_index = 1 - x_direction_index
 
     target_num = np.max(labeled_image)
-    position_table = ["X", "Y", "Z", "Theta", "F"]
+    position_table = [["X", "Y", "Z", "THETA", "F"]]
     x, y, z, theta, f = position
 
     center_x = current_image_width // 2

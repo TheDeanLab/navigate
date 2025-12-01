@@ -424,7 +424,7 @@ class VolumeSearch:
         """
         if self.end_flag:
             direction = True
-            positions = ["X", "Y", "Z", "THETA", "F"]
+            positions = [["X", "Y", "Z", "THETA", "F"]]
             for z_index in sorted(self.boundary.keys()):
                 path = map_boundary(self.boundary[z_index], direction)
                 direction = not direction

@@ -424,7 +424,7 @@ class VolumeSearch:
         """
         if self.end_flag:
             direction = True
-            positions = []
+            positions = ["X", "Y", "Z", "THETA", "F"]
             for z_index in sorted(self.boundary.keys()):
                 path = map_boundary(self.boundary[z_index], direction)
                 direction = not direction
@@ -559,7 +559,7 @@ class VolumeSearch3D:
             "MicroscopeState"
         ]
 
-        if self.position_id > len(self.model.configuration["multi_positions"]):
+        if self.position_id > len(self.model.configuration["multi_positions"]) - 1:
             self.position_id = 0
 
         z_stack_data = self.model.image_writer.data_source.get_data(
@@ -581,13 +581,13 @@ class VolumeSearch3D:
         z_end = microscope_state_config["end_position"]
         z_step = microscope_state_config["step_size"]
 
-        if len(self.model.configuration["multi_positions"]) == 0:
+        if len(self.model.configuration["multi_positions"]) < 2:
             pos_dict = self.model.get_stage_position()
             position = [
                 pos_dict[f"{axis}_pos"] for axis in ["x", "y", "z", "theta", "f"]
             ]
         else:
-            position = self.model.configuration["multi_positions"][self.position_id]
+            position = self.model.configuration["multi_positions"][self.position_id+1]
         # current stage position is the end of z
         position[2] -= z_end
 
@@ -684,7 +684,7 @@ class VolumeSearch3D:
 
         self.model.event_queue.put(("multiposition", positions))
         self.model.configuration["multi_positions"] = positions
-        if len(positions) > 0:
+        if len(positions) > 1:
             microscope_state_config["is_multiposition"] = True
 
         microscope_state_config["start_position"] = 0

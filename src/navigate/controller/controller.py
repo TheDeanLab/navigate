@@ -1453,7 +1453,8 @@ class Controller:
                 # Update the multi-position tab without appending to the list
                 update_table(
                     table=self.multiposition_tab_controller.table,
-                    pos=value,
+                    pos=value[1:],
+                    axes = value[0]
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)
 

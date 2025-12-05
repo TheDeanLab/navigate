@@ -892,6 +892,11 @@ class Microscope:
         success : bool
             True if stage is successfully moved, False otherwise.
         """
+
+        # TODO: Calling the proxy dictionary costs ~3 ms, and is performed for every step
+        # in the z-stack. To optimize performance, we should retrieve the image mode
+        # once and avoid repeated dictionary lookups.
+
         if self.configuration["experiment"]["MicroscopeState"]["image_mode"] in (
             "z-stack",
             "customized",

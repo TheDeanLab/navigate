@@ -157,8 +157,6 @@ class SyntheticStage(StageBase):
 
         for axis in abs_pos_dict:
             setattr(self, f"{axis}_pos", abs_pos_dict[axis])
-        if wait_until_done is True:
-            time.sleep(0.025)
 
         return True
 

@@ -290,6 +290,7 @@ class ASIDaq(DAQBase, SerialDevice):
         # turn on PLC cell 1 (Master Trigger)
         try:
             self.daq.logic_cell_on("1")
+            print("***ASIModel: Acquisition started: set logic cell 1 on***")
             if self.zstack:
                 self.daq.wait_for_loop()
         except Exception as e:

@@ -1546,6 +1546,9 @@ class ZStackAcquisition:
         This method updates the active channel for multichannel acquisitions, allowing
         cycling through channels.
         """
+        # # for single channel, force the channel to be reset
+        # if self.channels == 1:
+        #     self.model.active_microscope.current_channel = 0
         self.current_channel_in_list = (
             self.current_channel_in_list + 1
         ) % self.channels
@@ -1677,6 +1680,17 @@ class ASIZStackAcquisition(ZStackAcquisition):
                     [self.positions[self.current_position_idx][i] for i in self.axes_index],
                 )
             )
+            pos_dict = dict(
+                map(
+                    lambda ax: (
+                        f"{ax}_abs",
+                        self.current_position[ax],
+                    ),
+                    self.tiling_axes,
+                )
+            )
+        else:
+            pos_dict = {}
 
         # calculate first z, f position
         self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
@@ -1687,31 +1701,23 @@ class ASIZStackAcquisition(ZStackAcquisition):
             ]
         print("self.start_z_position: ", self.start_z_position)
         print("self.current_z_position: ", self.current_z_position)
-        pos_dict = dict(
-            map(
-                lambda ax: (
-                    f"{ax}_abs",
-                    self.current_position[ax],
-                ),
-                self.tiling_axes,
-            )
-        )
+       
 
-        # if self.current_position_idx > 0:
-        delta_distances = [self.current_position[axis] - self.pre_position[axis] for axis in self.tiling_axes if axis != "theta"]
-        delta_distances.append(
-            self.current_position[self.primary_z_axis]
-            - self.pre_position[self.primary_z_axis]
-            + self.z_stack_distance
-        )
-        delta_distances.append(
-            self.current_position[self.primary_f_axis]
-            - self.pre_position[self.primary_f_axis]
-            + self.f_stack_distance
-        )
-        # else:
-        #     axes_num = len(self.tiling_axes) + 2 - (1 if "theta" in self.tiling_axes else 0)
-        #     delta_distances = [0] * axes_num
+        if self.current_position_idx > 0:
+            delta_distances = [self.current_position[axis] - self.pre_position[axis] for axis in self.tiling_axes if axis != "theta"]
+            delta_distances.append(
+                self.current_position[self.primary_z_axis]
+                - self.pre_position[self.primary_z_axis]
+                + self.z_stack_distance
+            )
+            delta_distances.append(
+                self.current_position[self.primary_f_axis]
+                - self.pre_position[self.primary_f_axis]
+                + self.f_stack_distance
+            )
+        else:
+            axes_num = len(self.tiling_axes) + 2 - (1 if "theta" in self.tiling_axes else 0)
+            delta_distances = [0] * axes_num
 
         # displacement = [delta_z, delta_f, delta_x, delta_y]
         # Check the distance between the current position and previous position,
@@ -1734,33 +1740,14 @@ class ASIZStackAcquisition(ZStackAcquisition):
         self.current_pos_dict = pos_dict
         self.model.pause_data_thread()
         start_time = time.time()
+        # time.sleep(4)
         self.model.move_stage(pos_dict, wait_until_done=True)
-        # time.sleep(2)
+        
         stop_time = time.time()
         print("Time to move ", stop_time - start_time)
+        if self.current_position_idx > 0:
+            time.sleep(1)  # wait for stage to settle
         self.model.resume_data_thread()
-
-        # Potentially pause the data thread and move z, f position
-        # if self.need_to_move_z_position:
-        #     if self.should_pause_data_thread and not data_thread_is_paused:
-        #         self.model.pause_data_thread()
-        #         logger.info("Data thread paused.")
-
-        #     stack_pos = [
-        #         (f"{self.primary_z_axis}_abs", self.current_z_position),
-        #         (f"{self.primary_f_axis}_abs", self.current_focus_position)
-        #     ]
-        #     for axis, offset in self.secondary_stack_settings.items():
-        #         stack_pos.append((f"{axis}_abs", self.current_z_position + offset))
-        #     # This move is handled by the ASI Tiger Controller
-        #     self.model.move_stage(
-        #         dict(stack_pos),
-        #         wait_until_done=True,
-        #     )
-
-        # if self.should_pause_data_thread:
-        #     self.model.resume_data_thread()
-        #     self.should_pause_data_thread = False
 
         self.model.mark_saving_flags([self.model.frame_id])
 
@@ -1782,40 +1769,16 @@ class ASIZStackAcquisition(ZStackAcquisition):
         if self.model.stop_acquisition:
             return True
 
-        # decide to move X, Y, Theta
-        # self.z_position_moved_time = 0
-        # # calculate first z, f position
-        # self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
-        # self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
-        # if (
-        #     self.z_stack_distance > self.stage_distance_threshold
-        #     or self.f_stack_distance > self.stage_distance_threshold
-        # ):
-        #     self.should_pause_data_thread = True
-
         # after running through a z-stack, update channel
         if self.stack_cycling_mode == "per_stack":
             self.update_channel()
+            if self.channels == 1:
+                self.model.active_microscope.daq.stop_acquisition()
             # if run through all the channels, move to the next position
             if self.current_channel_in_list == 0:
                 self.need_to_move_new_position = True
-            # else:
-            #     if self.should_pause_data_thread:
-            #         self.model.pause_data_thread()
-            #         data_thread_is_paused = True
-            #     self.model.pause_data_thread()
-            #     time.sleep(1)
-            #     self.model.move_stage({f"{self.primary_z_axis}_abs": self.current_pos_dict[f"{self.primary_z_axis}_abs"]}, wait_until_done=True)
-            #     # self.model.move_stage(self.current_pos_dict, wait_until_done=True)
-            #     # time sleep gone but still freezing here idk why
-            #     print("End: stage is moved to: ", self.model.get_stage_position())
-            #     self.model.resume_data_thread()
         else:
             self.need_to_move_new_position = True
-
-        # if self.should_pause_data_thread:
-        #     self.model.resume_data_thread()
-        #     self.should_pause_data_thread = False
 
         if self.need_to_move_new_position:
             # move to the next position
@@ -1823,17 +1786,6 @@ class ASIZStackAcquisition(ZStackAcquisition):
         print(self.current_position_idx)
         if self.current_position_idx >= len(self.positions):
             self.current_position_idx = 0
-            # # restore z, f, and secondary z if any
-            # stack_pos = [
-            #     (f"{self.primary_z_axis}_abs", self.restore_z),
-            #     (f"{self.primary_f_axis}_abs", self.restore_f)
-            # ]
-            # for axis, offset in self.secondary_stack_settings.items():
-            #     stack_pos.append((f"{axis}_abs", self.restore_z + offset))
-            # self.model.move_stage(
-            #     dict(stack_pos),
-            #     wait_until_done=False,
-            # )  # Update position
             return True
 
         return False

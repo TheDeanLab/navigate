@@ -1269,8 +1269,6 @@ class TigerController:
                 #Send Trigger to stage
                 "6 m e = 35",
                 "6 cca z = 7",
-                "6 m e = 40"
-                "6 cca z = 7"
             ]
             
         # Creates object to hold galvo commands
@@ -1366,6 +1364,7 @@ class TigerController:
             The axis of the z-stage
         """
         commands = [
+            "rm y=3",
             f"{addr} ttl x=2 y=2",
             f"{addr} rt y=10",
             f"{addr} r {axis} = -{step_size}",

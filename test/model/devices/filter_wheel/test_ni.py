@@ -49,7 +49,18 @@ class TestNIFilterWheel(unittest.TestCase):
                         "filter_wheel": [{
                             "available_filters": {
                                     "filter_1": "Channel/line0",
-                                    "filter_2": "Channel/line1",
+                                    "filter_2": "Channel/line0",
+                                },
+                            "hardware": {
+                                "type": "NI",
+                                "wheel_number": 1,
+                            },
+                            "filter_wheel_delay": 0.5,
+                        },
+                        {
+                            "available_filters": {
+                                    "filter_3": "Channel/line1",
+                                    "filter_4": "Channel/line1",
                                 },
                             "hardware": {
                                 "type": "NI",
@@ -68,11 +79,19 @@ class TestNIFilterWheel(unittest.TestCase):
             configuration=configuration,
             device_id=0,
         )
+
+        self.filter_wheel_2 = NIFilterWheel(
+            microscope_name="TestScope",
+            device_connection=self.mock_device_connection,
+            configuration=configuration,
+            device_id=1,
+        )
+
     @patch('navigate.model.devices.filter_wheel.ni.nidaqmx.Task')
     def test_set_filter_valid(self, mock_task):
         self.filter_wheel.set_filter("filter_1")
         assert mock_task.called_once()
-        self.assertEqual(self.filter_wheel.filter_wheel_value, "filter_1")
+        self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_1")
 
         # set to the same value again, should not call write
         mock_task.reset_mock()
@@ -81,7 +100,7 @@ class TestNIFilterWheel(unittest.TestCase):
 
         # set to a different value
         self.filter_wheel.set_filter("filter_2")
-        self.assertEqual(self.filter_wheel.filter_wheel_value, "filter_2")
+        self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_2")
         assert mock_task.called_once()
 
         # set to the same value again, should not call write
@@ -92,3 +111,16 @@ class TestNIFilterWheel(unittest.TestCase):
     def test_set_filter_invalid(self):
         with self.assertRaises(ValueError):
             self.filter_wheel.set_filter(-1)
+
+    @patch('navigate.model.devices.filter_wheel.ni.nidaqmx.Task')
+    def test_multiple_filter_wheels_independent(self, mock_task):
+        self.filter_wheel.set_filter("filter_1")
+        self.filter_wheel_2.set_filter("filter_3")
+
+        self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_1")
+        self.assertEqual(self.filter_wheel_2.filter_wheel_value[2], "filter_3")
+
+        self.filter_wheel_2.set_filter("filter_4")
+        self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_1")
+        self.assertEqual(self.filter_wheel_2.filter_wheel_value[2], "filter_4")
+

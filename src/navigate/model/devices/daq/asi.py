@@ -186,7 +186,7 @@ class ASIDaq(DAQBase, SerialDevice):
         """
         # Get appropriate sweep_time for the current channel
         exposure_time = self.exposure_times[channel_key] * 1000
-        sweep_time = self.sweep_times[channel_key]
+        sweep_time = self.sweep_times[channel_key] * 1000
         # loop through galvo phases to calculate time delays
         # delays[i] corresponds to the time between the ith galvo trigger and the master trigger
         n = len(self.galvos)
@@ -221,9 +221,10 @@ class ASIDaq(DAQBase, SerialDevice):
             i += 1
 
         # modify sweep time to sync with the first galvo if there are asi galvos in config
-        if len(delays) > 0:
-            n7 = 1000 * sweep_time // period0 + 1
-            sweep_time = period0 * n7
+        # to do: only run the following if the galvo is not a resonant galvo
+        # if len(delays) > 0:
+        #     n7 = sweep_time // period0 + 1
+        #     sweep_time = period0 * n7
 
         self.camera_delay = float(
             self.waveform_constants["other_constants"].get("camera_delay", 5)
@@ -235,6 +236,7 @@ class ASIDaq(DAQBase, SerialDevice):
             start_pos = self.configuration["experiment"]["MicroscopeState"]["start_position"]
             end_pos = self.configuration["experiment"]["MicroscopeState"]["end_position"]
             step_size = self.configuration["experiment"]["MicroscopeState"]["step_size"]
+            num_steps = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
 
             navigate_axis = self.configuration["experiment"]["MicroscopeState"]["primary_z_axis"]
             tiger_axis = self.axis_map[navigate_axis].upper()
@@ -242,7 +244,7 @@ class ASIDaq(DAQBase, SerialDevice):
 
             print(f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}")
 
-            num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
+            # num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
             self.daq.setup_z_stage(tiger_axis, addr, int(step_size*10))
 
             start_focus = self.configuration["experiment"]["MicroscopeState"]["start_focus"]

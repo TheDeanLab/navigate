@@ -1170,20 +1170,20 @@ class TigerController:
         # and cell 12 is the post-delay output. So whichever delay is longer
         # (accounting for hardware delays), will get input from 12. Additionally,
         # delay is calculated as a shifted difference between the higher and lower delay
-        if remote_focus_delay > camera_delay + 2:
+        if remote_focus_delay > camera_delay + 3.75:
             camera_output = 6
             remote_focus_output = 12
-            start_delay += int((camera_delay + 2) * 4)
-            difference_delay = int((remote_focus_delay - (camera_delay + 2)) * 4)
-        elif remote_focus_delay < camera_delay + 2:
+            start_delay += int((camera_delay + 3.75) * 4)
+            difference_delay = int((remote_focus_delay - (camera_delay + 3.75)) * 4)
+        elif remote_focus_delay < camera_delay + 3.75:
             camera_output = 12
             remote_focus_output = 6
             start_delay += int(remote_focus_delay * 4)
-            difference_delay = int(((camera_delay + 2) - remote_focus_delay) * 4)
+            difference_delay = int(((camera_delay + 3.75) - remote_focus_delay) * 4)
         else:
             camera_output = 6
             remote_focus_output = 6
-            start_delay += int((camera_delay + 2) * 4)
+            start_delay += int((camera_delay + 3.75) * 4)
             difference_delay = 0
         self.start_delay = start_delay / 4000  # Store for reference
         commands = [
@@ -1331,7 +1331,7 @@ class TigerController:
                 # print("Couldn't read logic cell state, trying again...")
                 continue
             bit4 = result >> 3 & 1
-            time.sleep(0.01)  # sleep for 10 ms before checking again
+            time.sleep(0.05)  # sleep for 10 ms before checking again
         return 
 
     def get_axis_addr(self) -> dict:

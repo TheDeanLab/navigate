@@ -673,18 +673,24 @@ class Microscope:
             / 1000
         )
         ps = float(waveform_constants["other_constants"].get("percent_smoothing", 0.0))
-
+        # 0.00997 (startup), 0.01567 (first acquire, loop 1), 0.101 (second acquire
+        # onwards)
         readout_time = 0
         readout_mode = self.configuration["experiment"]["CameraParameters"][
             self.microscope_name
         ]["sensor_mode"]
+        print("Initial readout time:", readout_time)
 
         if readout_mode == "Normal":
             readout_time = self.camera.calculate_readout_time()
+        # elif readout_mode == "Light-Sheet":
+        #     readout_time = self.camera.calculate_readout_time()
         elif self.configuration["experiment"]["CameraParameters"][self.microscope_name][
             "readout_direction"
         ] in ["Bidirectional", "Rev. Bidirectional"]:
             remote_focus_ramp_falling = 0
+        print("New readout time:", readout_time)
+
         # set readout out time
         self.configuration["experiment"]["CameraParameters"][self.microscope_name][
             "readout_time"

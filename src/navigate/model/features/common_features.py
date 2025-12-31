@@ -1738,7 +1738,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
 
         print("Current position - Z: ", self.current_position[self.primary_z_axis])
         self.current_pos_dict = pos_dict
-        self.model.pause_data_thread()
+        # self.model.pause_data_thread()
         start_time = time.time()
         # time.sleep(4)
         self.model.move_stage(pos_dict, wait_until_done=True)
@@ -1747,7 +1747,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         print("Time to move ", stop_time - start_time)
         if self.current_position_idx > 0:
             time.sleep(1)  # wait for stage to settle
-        self.model.resume_data_thread()
+        # self.model.resume_data_thread()
 
         self.model.mark_saving_flags([self.model.frame_id])
 

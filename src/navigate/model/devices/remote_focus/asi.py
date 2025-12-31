@@ -231,7 +231,8 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
         offset *= 1000
 
         # Triangle waveform
-        self.remote_focus.single_axis_waveform(self.axis, 1, amplitude, offset, period)
+        self.remote_focus.single_axis_waveform(self.axis, 129, amplitude, offset,
+                                               period)
         # Waveform is free running after it is triggered
         self.remote_focus.single_axis_mode(self.axis, 4)
 

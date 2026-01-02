@@ -45,6 +45,7 @@ jobs:
             python -m pip install --upgrade pip
             pip install -U setuptools build twine
         - name: Sync version file with release tag
+          if: github.event_name == 'release'
           shell: pwsh
           run: |
             $tag = $env:GITHUB_REF_NAME

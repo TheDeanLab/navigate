@@ -25,6 +25,9 @@ Computer Considerations
 .. important::
    Scientific cameras are capable of rapidly generating large amounts of high-resolution data. As such, the read/write speed of the data storage device is critical for smooth operation of the software. For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor, operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~167 MB/s. While such capabilities are well within the capabilities of modern SSDs, they are beyond the capabilities of most HDDs. Therefore, it is recommended to use a fast SSD for data saving operations.
 
+.. important::
+   Power management settings on the host computer can significantly affect runtime performance. Refer to the **Power Management Configuration** section for detailed recommendations.
+
 .. collapse:: Example Computer Configuration
 
     - *Base Platform*

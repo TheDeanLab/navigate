@@ -12,5 +12,6 @@ In this section, we outline some common challenges encountered in setting up a m
 
    01_proxy
    02_usb_connectivity
+   03_power_management
 
 

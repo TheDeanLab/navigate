@@ -125,9 +125,6 @@ class SyntheticStage(StageBase):
         if axis_abs == -1e50:
             return False
 
-        if wait_until_done:
-            time.sleep(0.025)
-
         # Move the stage
         setattr(self, f"{axis}_pos", axis_abs)
         return True
@@ -157,8 +154,6 @@ class SyntheticStage(StageBase):
 
         for axis in abs_pos_dict:
             setattr(self, f"{axis}_pos", abs_pos_dict[axis])
-        if wait_until_done is True:
-            time.sleep(0.025)
 
         return True
 

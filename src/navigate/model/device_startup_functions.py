@@ -499,7 +499,11 @@ def start_device(
 
     elif device_category in plugin_devices:
         # device_category in ["stage", "shutter", "filter_wheel", "remote_focus", "camera", "galvo", "zoom", "laser"]
-        if device_category == "stage":
+        if device_id == -1:
+            hardware_configuration = configuration["configuration"]["microscopes"][
+                microscope_name
+            ][device_category]["hardware"]
+        elif device_category == "stage":
             hardware_configuration = configuration["configuration"]["microscopes"][
                 microscope_name
             ][device_category]["hardware"][device_id]
@@ -519,7 +523,7 @@ def start_device(
                 "load_device"
             ](
                 hardware_configuration,
-                is_synthetic,
+                is_synthetic=is_synthetic,
                 device_type=device_category,
             )
             start_function = plugin_devices[device_category][device_type][

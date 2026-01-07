@@ -260,6 +260,16 @@ def update_table(table, pos, axes, append=False):
     None :
         Table is updated
     """
+    if len(pos) == 0:
+        return
+    # handle axes and pos columns mismatch
+    # get the number of axes from the pos array
+    axes_count = max(len(p) for p in pos)
+    # trim axes to match pos array
+    axes = axes[:axes_count]
+    # if there are not enough axes, pad with empty strings
+    if len(axes) < axes_count:
+        axes.extend([" "] * (axes_count - len(axes)))
     frame = pd.DataFrame(pos, columns=[axis.upper() for axis in axes])
     if append:
         table.model.df = table.model.df.append(frame, ignore_index=True)

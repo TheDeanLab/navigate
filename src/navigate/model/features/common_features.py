@@ -1995,7 +1995,7 @@ class FindTissueSimple2D:
             x_tiles = calc_num_tiles(xd, self.overlap, fov_x)
             y_tiles = calc_num_tiles(yd, self.overlap, fov_y)
 
-            table_values = compute_tiles_from_bounding_box(
+            axes, table_values = compute_tiles_from_bounding_box(
                 x_start,
                 x_tiles,
                 fov_x,
@@ -2018,4 +2018,4 @@ class FindTissueSimple2D:
                 self.overlap,
             )
 
-            self.model.event_queue.put(("multiposition", table_values))
+            self.model.event_queue.put(("multiposition", [axes] + table_values))

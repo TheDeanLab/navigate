@@ -840,15 +840,25 @@ class BaseViewController(GUIController, ABaseViewController):
 
         y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
-        zoom_image = self.image[
-            int(y_start_index * self.canvas_height_scale) : int(
-                y_end_index * self.canvas_height_scale
-            ),
-            int(x_start_index * self.canvas_width_scale) : int(
-                x_end_index * self.canvas_width_scale
-            ),
-        ]
 
+        if self.transpose:
+            zoom_image = self.image[
+                int(x_start_index * self.canvas_width_scale) : int(
+                    x_end_index * self.canvas_width_scale
+                ),
+                int(y_start_index * self.canvas_height_scale) : int(
+                    y_end_index * self.canvas_height_scale
+                ),
+            ]
+        else:
+            zoom_image = self.image[
+                int(y_start_index * self.canvas_height_scale) : int(
+                    y_end_index * self.canvas_height_scale
+                ),
+                int(x_start_index * self.canvas_width_scale) : int(
+                    x_end_index * self.canvas_width_scale
+                ),
+            ]
         return zoom_image
 
     def down_sample_image(self, image: np.ndarray) -> np.ndarray:
@@ -1396,8 +1406,7 @@ class CameraViewController(BaseViewController):
             self.image_palette["SNR"].grid_remove()
         else:
             self._offset, self._variance = copy.deepcopy(off), copy.deepcopy(var)
-            self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.W,
-                                           pady=3)
+            self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.W, pady=3)
 
     def slider_update(self, *_) -> None:
         """Updates the image when the slider is moved."""

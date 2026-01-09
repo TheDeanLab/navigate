@@ -145,8 +145,6 @@ class ASIDaq(DAQBase, SerialDevice):
         #: Dict: Mapping of tiger axes to addresses.
         self.axis_addr = self.daq.get_axis_addr()
 
-        self.count = 0
-
     @classmethod
     def connect(cls, port, baudrate=115200, timeout=0.25):
         """Build ASIDaq Serial Port connection
@@ -221,7 +219,7 @@ class ASIDaq(DAQBase, SerialDevice):
             i += 1
 
         # modify sweep time to sync with the first galvo if there are asi galvos in config
-        # to do: only run the following if the galvo is not a resonant galvo
+        # TODO: only run the following if the galvo is not a resonant galvo
         # if len(delays) > 0:
         #     n7 = sweep_time // period0 + 1
         #     sweep_time = period0 * n7
@@ -242,7 +240,7 @@ class ASIDaq(DAQBase, SerialDevice):
             tiger_axis = self.axis_map[navigate_axis].upper()
             addr = self.axis_addr[tiger_axis]
 
-            print(f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}")
+            logger.debug(f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}")
 
             # num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
             self.daq.setup_z_stage(tiger_axis, addr, int(step_size*10))
@@ -292,7 +290,7 @@ class ASIDaq(DAQBase, SerialDevice):
         # turn on PLC cell 1 (Master Trigger)
         try:
             self.daq.logic_cell_on("1")
-            print("***ASIModel: Acquisition started: set logic cell 1 on***")
+            logger.info("***ASIModel: Acquisition started: set logic cell 1 on***")
             if self.zstack:
                 self.daq.wait_for_loop()
         except Exception as e:
@@ -306,10 +304,8 @@ class ASIDaq(DAQBase, SerialDevice):
         """
         # turn on PLC cell 8 (kills control loop)
         # reset PLC cell 1 (Master Trigger)
-        self.count += 1
-        print(f"ASIModel: Stopping acquisition {self.count}")
-        # if self.count == 2:
-        #     raise Exception("Stopping acquisition too many times")
+        logger.info(f"ASIModel: Stopping acquisition")
+        
         try:
             self.daq.logic_cell_on("8")
             #self.daq.logic_cell_off("4")

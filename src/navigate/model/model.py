@@ -891,7 +891,7 @@ class Model:
         success : bool
             Was the move successful?
         """
-        print("****** moving stage to: ", pos_dict)
+        self.logger.debug("****** moving stage to: %s", pos_dict)
         try:
             r = self.active_microscope.move_stage(pos_dict, wait_until_done)
             self.logger.info(
@@ -1851,7 +1851,7 @@ class ASIModel(Model):
                     },
                 )]
 
-        print("ASIModel initialized.")
+        self.logger.info("ASIModel initialized.")
 
     def prepare_acquisition(self, turn_off_flags = True):
         result = super().prepare_acquisition(turn_off_flags)
@@ -1913,7 +1913,7 @@ class ASIModel(Model):
             and not self.stop_send_signal
             and not self.stop_acquisition
         ):
-            print("in loop")
+            self.logger.debug("in loop")
             self.snap_zstack()
             if not hasattr(self, "signal_container"):
                 return
@@ -1954,7 +1954,7 @@ class ASIModel(Model):
         # Run the acquisition
         try:         
             self.active_microscope.daq.run_acquisition()
-            print("ASIModel: Acquisition started.")
+            self.logger.info("ASIModel: Acquisition started.")
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
             if self.active_microscope.current_channel == 0:

@@ -1181,7 +1181,7 @@ class ZStackAcquisition:
             "node": {"node_type": "multi-step", "device_related": True},
         }
 
-        print(
+        logger.info(
             "ZStackAcquisition: Initialized.",
         )
 
@@ -1338,7 +1338,7 @@ class ZStackAcquisition:
             A boolean value indicating whether to continue the z-stack acquisition
             process.
         """
-        print("ZStackAcquisition: signal_func called.")
+        logger.info("ZStackAcquisition: signal_func called.")
         if self.model.stop_acquisition:
             return False
         data_thread_is_paused = False
@@ -1699,8 +1699,8 @@ class ASIZStackAcquisition(ZStackAcquisition):
             self.current_focus_position += self.defocus[
                 self.current_channel_in_list
             ]
-        print("self.start_z_position: ", self.start_z_position)
-        print("self.current_z_position: ", self.current_z_position)
+        logger.info("self.start_z_position: %d", self.start_z_position)
+        logger.info("self.current_z_position: %d", self.current_z_position)
        
 
         if self.current_position_idx > 0:
@@ -1724,7 +1724,6 @@ class ASIZStackAcquisition(ZStackAcquisition):
         # if it is too far, then we can call self.model.pause_data_thread() and
         # self.model.resume_data_thread() after the stage has completed the move
         # to the next position.
-        print(delta_distances)
         self.should_pause_data_thread = any(
             distance > self.stage_distance_threshold
             for distance in delta_distances
@@ -1736,15 +1735,11 @@ class ASIZStackAcquisition(ZStackAcquisition):
         pos_dict[f"{self.primary_z_axis}_abs"] = self.current_position[self.primary_z_axis] + self.start_z_position
         pos_dict[f"{self.primary_f_axis}_abs"] = self.current_position[self.primary_f_axis] + self.start_focus
 
-        print("Current position - Z: ", self.current_position[self.primary_z_axis])
+        logger.info("Current position - Z: %d", self.current_position[self.primary_z_axis])
         self.current_pos_dict = pos_dict
         # self.model.pause_data_thread()
-        start_time = time.time()
-        # time.sleep(4)
         self.model.move_stage(pos_dict, wait_until_done=True)
         
-        stop_time = time.time()
-        print("Time to move ", stop_time - start_time)
         if self.current_position_idx > 0:
             time.sleep(1)  # wait for stage to settle
         # self.model.resume_data_thread()
@@ -1783,7 +1778,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         if self.need_to_move_new_position:
             # move to the next position
             self.current_position_idx += 1
-        print(self.current_position_idx)
+        logger.debug("current_position_idx: %d", self.current_position_idx)
         if self.current_position_idx >= len(self.positions):
             self.current_position_idx = 0
             return True

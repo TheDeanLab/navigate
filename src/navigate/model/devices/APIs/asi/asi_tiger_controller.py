@@ -1066,14 +1066,14 @@ class TigerController:
         period: int
             sets the period of the waveform in ms
         """
-        print(f"Period (ms): {period}")
         # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
         if waveform % 128 == 3:
             offset = 0.5 * (offset + amplitude)
 
         amplitude = amplitude * 2
-
-        print("***", waveform, amplitude, axis, offset, period)
+        if self.verbose:
+            print(f"Period (ms): {period}")
+            print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
         self.send_command(f"SAP {axis}={round(waveform)}")
         self.read_response()
@@ -1153,8 +1153,8 @@ class TigerController:
         else:
             galvo2_delay = 0
         remote_focus_axis = analog_outputs["remote_focus"]
-        print(f"Exposure time: {exposure_time}")
-        print(f"Sweep time: {sweep_time}")
+        logger.info(f"Exposure time: {exposure_time}")
+        logger.info(f"Sweep time: {sweep_time}")
         cycle_time = sweep_time * num_cycles
 
         # Convert all time values to 1/4 ms
@@ -1247,8 +1247,8 @@ class TigerController:
             "6 m e = 33",
             f"6 cca z = {camera_output}",           
         ]
-        print("Number of cycles: ", num_cycles)
-        print("Cycle time (ms): ", cycle_time / 4)
+        logger.info("Number of cycles: %d", num_cycles)
+        logger.info("Cycle time (ms): %d", cycle_time / 4)
         # If Single or Z-stack mode, set up the number of cycles to run
         if (num_cycles > 0):
             commands[7:15] = [
@@ -1300,7 +1300,8 @@ class TigerController:
         # Runs the main setup commands, followed by the Galvo specific commands
         for command in commands:
             self.send_command(f"{command}\r")
-            # print(f"Sent Command: {command}")
+            if self.verbose:
+                print(f"Sent Command: {command}")
             self.read_response()
         for command in galvo_commands:
             self.send_command(f"{command}\r")
@@ -1318,7 +1319,7 @@ class TigerController:
     def wait_for_loop(self) -> None:
         """Waits for one z-stack to be imaged before returning"""
         time.sleep(self.start_delay)
-        print("Waiting for loop to finish...")
+        logger.debug("Waiting for loop to finish...")
         bit4 = 1
         while bit4 == 1:
             self.send_command(f"6 rdadc z?") 
@@ -1352,7 +1353,7 @@ class TigerController:
         # Build dictionary
         axis_addr = {axis: int(addr) for axis, addr in zip(axes, addrs)}
 
-        print(axis_addr)
+        logger.info(axis_addr)
         return axis_addr
 
     def setup_z_stage(self, axis: str, addr, step_size) -> None:
@@ -1372,5 +1373,6 @@ class TigerController:
         ]
         for command in commands:
             self.send_command(f"{command}\r")
-            print(f"Sent Command: {command}")
+            if self.verbose:
+                print(f"Sent Command: {command}")
             self.read_response()

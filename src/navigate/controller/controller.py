@@ -225,7 +225,7 @@ class Controller:
 
         #: ObjectInSubprocess: Model object in MVC architecture.
         if self.use_asi_model():
-            print("Using ASI model.")
+            logger.info("Using ASI model.")
             self.model = ObjectInSubprocess(
                 ASIModel, args, self.configuration, event_queue=self.event_queue
             )

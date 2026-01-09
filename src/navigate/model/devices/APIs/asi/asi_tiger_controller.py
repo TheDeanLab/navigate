@@ -1135,7 +1135,7 @@ class TigerController:
         num_cycles: int
             Number of cycles to run the loop. 0 for infinite
         """
-        # TODO: Investigate if these axis  outputs are shared amongst units.
+        # TODO: Investigate if these axis outputs are shared amongst units.
         # Reference values for ttls that correspond to outputs A-C
         ttls = {"A": 42, "B": 44, "C": 46,
                 "H": 42, "I": 44, "J": 46}

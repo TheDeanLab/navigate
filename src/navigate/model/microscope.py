@@ -673,7 +673,7 @@ class Microscope:
             / 1000
         )
         ps = float(waveform_constants["other_constants"].get("percent_smoothing", 0.0))
-        
+
         readout_time = 0
         readout_mode = self.configuration["experiment"]["CameraParameters"][
             self.microscope_name
@@ -685,7 +685,6 @@ class Microscope:
             "readout_direction"
         ] in ["Bidirectional", "Rev. Bidirectional"]:
             remote_focus_ramp_falling = 0
-
         # set readout out time
         self.configuration["experiment"]["CameraParameters"][self.microscope_name][
             "readout_time"
@@ -808,7 +807,6 @@ class Microscope:
 
         # Laser Settings
         self.current_laser_index = channel["laser_index"]
-        # is this needed? lasers should be off already in NI mode. This messes up ASI mode
         for k in self.laser:
             self.laser[k].turn_off()
         self.laser[str(self.laser_wavelength[self.current_laser_index])].set_power(

@@ -1546,9 +1546,6 @@ class ZStackAcquisition:
         This method updates the active channel for multichannel acquisitions, allowing
         cycling through channels.
         """
-        # # for single channel, force the channel to be reset
-        # if self.channels == 1:
-        #     self.model.active_microscope.current_channel = 0
         self.current_channel_in_list = (
             self.current_channel_in_list + 1
         ) % self.channels
@@ -1728,21 +1725,24 @@ class ASIZStackAcquisition(ZStackAcquisition):
             distance > self.stage_distance_threshold
             for distance in delta_distances
         )
-        # if self.should_pause_data_thread:
-        #     self.model.pause_data_thread()
-        #     data_thread_is_paused = True
+        if self.should_pause_data_thread:
+            self.model.pause_data_thread()
+            logger.info("Data thread paused.")
         
         pos_dict[f"{self.primary_z_axis}_abs"] = self.current_position[self.primary_z_axis] + self.start_z_position
         pos_dict[f"{self.primary_f_axis}_abs"] = self.current_position[self.primary_f_axis] + self.start_focus
 
         logger.info("Current position - Z: %d", self.current_position[self.primary_z_axis])
         self.current_pos_dict = pos_dict
-        # self.model.pause_data_thread()
+
         self.model.move_stage(pos_dict, wait_until_done=True)
         
         if self.current_position_idx > 0:
             time.sleep(1)  # wait for stage to settle
-        # self.model.resume_data_thread()
+        
+        if self.should_pause_data_thread:
+            self.model.resume_data_thread()
+            self.should_pause_data_thread = False
 
         self.model.mark_saving_flags([self.model.frame_id])
 

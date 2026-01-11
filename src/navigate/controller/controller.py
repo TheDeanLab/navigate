@@ -376,9 +376,9 @@ class Controller:
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
-        daq_type = self.configuration["configuration"]["microscopes"][microscope_name]["daq"][
-            "hardware"
-        ].get("type", "NI")
+        daq_type = self.configuration["configuration"]["microscopes"][microscope_name][
+            "daq"
+        ]["hardware"].get("type", "NI")
 
         if daq_type in ("ni", "NI"):
             return False
@@ -1483,7 +1483,7 @@ class Controller:
                 update_table(
                     table=self.multiposition_tab_controller.table,
                     pos=value[1:],
-                    axes = value[0]
+                    axes=value[0],
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)
 

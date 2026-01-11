@@ -231,8 +231,9 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
         offset *= 1000
 
         # Triangle waveform
-        self.remote_focus.single_axis_waveform(self.axis, 129, amplitude, offset,
-                                               period)
+        self.remote_focus.single_axis_waveform(
+            self.axis, 129, amplitude, offset, period
+        )
         # Waveform is free running after it is triggered
         self.remote_focus.single_axis_mode(self.axis, 4)
 
@@ -321,7 +322,7 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
         """Destructor for the ASIRemoteFocus class."""
         self.close()
 
-        
+
 if __name__ == "__main__":
     vc = RemoteFocusEquipmentSolutions()
     vc.send_command("k0\r")  # Turn off servo

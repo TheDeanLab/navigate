@@ -1842,18 +1842,20 @@ class ASIModel(Model):
         """
         super().__init__(args, configuration, event_queue)
 
-        self.acquisition_modes_feature_setting["z-stack"] = [(
-                    {"name": ASIZStackAcquisition},
-                    {"name": StackPause},
-                    {
-                        "name": LoopByCount,
-                        "args": ("experiment.MicroscopeState.timepoints",),
-                    },
-                )]
+        self.acquisition_modes_feature_setting["z-stack"] = [
+            (
+                {"name": ASIZStackAcquisition},
+                {"name": StackPause},
+                {
+                    "name": LoopByCount,
+                    "args": ("experiment.MicroscopeState.timepoints",),
+                },
+            )
+        ]
 
         self.logger.info("ASIModel initialized.")
 
-    def prepare_acquisition(self, turn_off_flags = True):
+    def prepare_acquisition(self, turn_off_flags=True):
         result = super().prepare_acquisition(turn_off_flags)
         self.active_microscope.daq.zstack = self.imaging_mode == "z-stack"
         self.active_microscope.daq.single = self.imaging_mode == "single"
@@ -1907,7 +1909,7 @@ class ASIModel(Model):
 
         # Launch the signal and data containers, and let them terminate the
         # acquisition when we have received the right number of frames.
-        
+
         while (
             not self.signal_container.end_flag
             and not self.stop_send_signal
@@ -1952,7 +1954,7 @@ class ASIModel(Model):
         self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
 
         # Run the acquisition
-        try:         
+        try:
             self.active_microscope.daq.run_acquisition()
             self.logger.info("ASIModel: Acquisition started.")
         except:  # noqa

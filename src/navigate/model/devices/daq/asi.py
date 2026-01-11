@@ -118,7 +118,7 @@ class ASIDaq(DAQBase, SerialDevice):
             ]  # convert each DictProxy in the list to a dict
         else:
             raise TypeError("Unexpected type for galvos: {}".format(type(galvos_raw)))
-        
+
         #: List: list of galvo phases.
         self.phases = [galvo["phase"] for galvo in self.galvos]
 
@@ -135,12 +135,12 @@ class ASIDaq(DAQBase, SerialDevice):
         # sets up initial PLC configuration with default delay (ms), camera delay, rfvc delay, sweep time (ms), and analog outputs dict
         self.daq.setup_control_loop([200], 0, 0, 100, 120, self.analog_outputs)
 
-        hw = self.configuration["configuration"]["microscopes"][
-                self.microscope_name
-            ]["stage"]["hardware"][0]
+        hw = self.configuration["configuration"]["microscopes"][self.microscope_name][
+            "stage"
+        ]["hardware"][0]
 
-        #: Dict: Mapping of navigate axes to tiger axes.        
-        self.axis_map = dict(zip(hw['axes'], hw['axes_mapping']))
+        #: Dict: Mapping of navigate axes to tiger axes.
+        self.axis_map = dict(zip(hw["axes"], hw["axes_mapping"]))
 
         #: Dict: Mapping of tiger axes to addresses.
         self.axis_addr = self.daq.get_axis_addr()
@@ -231,41 +231,74 @@ class ASIDaq(DAQBase, SerialDevice):
             self.waveform_constants["other_constants"].get("remote_focus_delay", 5)
         )
         if self.zstack:
-            start_pos = self.configuration["experiment"]["MicroscopeState"]["start_position"]
-            end_pos = self.configuration["experiment"]["MicroscopeState"]["end_position"]
+            start_pos = self.configuration["experiment"]["MicroscopeState"][
+                "start_position"
+            ]
+            end_pos = self.configuration["experiment"]["MicroscopeState"][
+                "end_position"
+            ]
             step_size = self.configuration["experiment"]["MicroscopeState"]["step_size"]
-            num_steps = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
+            num_steps = self.configuration["experiment"]["MicroscopeState"][
+                "number_z_steps"
+            ]
 
-            navigate_axis = self.configuration["experiment"]["MicroscopeState"]["primary_z_axis"]
+            navigate_axis = self.configuration["experiment"]["MicroscopeState"][
+                "primary_z_axis"
+            ]
             tiger_axis = self.axis_map[navigate_axis].upper()
             addr = self.axis_addr[tiger_axis]
 
-            logger.debug(f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}")
+            logger.debug(
+                f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}"
+            )
 
             # num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
-            self.daq.setup_z_stage(tiger_axis, addr, int(step_size*10))
+            self.daq.setup_z_stage(tiger_axis, addr, int(step_size * 10))
 
-            start_focus = self.configuration["experiment"]["MicroscopeState"]["start_focus"]
+            start_focus = self.configuration["experiment"]["MicroscopeState"][
+                "start_focus"
+            ]
             end_focus = self.configuration["experiment"]["MicroscopeState"]["end_focus"]
-            if (end_focus - start_focus > 0):
+            if end_focus - start_focus > 0:
                 focus_step = (end_focus - start_focus) / num_steps
-                navigate_focus_axis = self.configuration["experiment"]["MicroscopeState"]["primary_f_axis"]
+                navigate_focus_axis = self.configuration["experiment"][
+                    "MicroscopeState"
+                ]["primary_f_axis"]
                 tiger_focus_axis = self.axis_map[navigate_focus_axis].upper()
                 focus_addr = self.axis_addr[tiger_focus_axis]
 
-                self.daq.setup_z_stage(tiger_focus_axis, focus_addr, int(focus_step*10))
+                self.daq.setup_z_stage(
+                    tiger_focus_axis, focus_addr, int(focus_step * 10)
+                )
 
-            # sets up control loop with all parameters (all times in ms)            
+            # sets up control loop with all parameters (all times in ms)
             self.daq.setup_control_loop(
-                delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs, num_steps
+                delays,
+                self.camera_delay,
+                rfvc_delay,
+                exposure_time,
+                sweep_time,
+                self.analog_outputs,
+                num_steps,
             )
         elif self.single:
             self.daq.setup_control_loop(
-                delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs, 1
+                delays,
+                self.camera_delay,
+                rfvc_delay,
+                exposure_time,
+                sweep_time,
+                self.analog_outputs,
+                1,
             )
         else:
             self.daq.setup_control_loop(
-                delays, self.camera_delay, rfvc_delay, exposure_time, sweep_time, self.analog_outputs
+                delays,
+                self.camera_delay,
+                rfvc_delay,
+                exposure_time,
+                sweep_time,
+                self.analog_outputs,
             )
 
         self.current_channel_key = channel_key
@@ -305,10 +338,10 @@ class ASIDaq(DAQBase, SerialDevice):
         # turn on PLC cell 8 (kills control loop)
         # reset PLC cell 1 (Master Trigger)
         logger.info(f"ASIModel: Stopping acquisition")
-        
+
         try:
             self.daq.logic_cell_on("8")
-            #self.daq.logic_cell_off("4")
+            # self.daq.logic_cell_off("4")
             self.daq.logic_cell_off("1")
         except Exception:
             logger.debug("DAQ cannot turn off")

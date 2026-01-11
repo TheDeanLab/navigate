@@ -1137,8 +1137,7 @@ class TigerController:
         """
         # TODO: Investigate if these axis outputs are shared amongst units.
         # Reference values for ttls that correspond to outputs A-C
-        ttls = {"A": 42, "B": 44, "C": 46,
-                "H": 42, "I": 44, "J": 46}
+        ttls = {"A": 42, "B": 44, "C": 46, "H": 42, "I": 44, "J": 46}
 
         start_delay = int(delays[0] * 4)  # Unit conversion from ms to 1/4 ms
 
@@ -1158,7 +1157,7 @@ class TigerController:
         cycle_time = sweep_time * num_cycles
 
         # Convert all time values to 1/4 ms
-        exposure_time = int(exposure_time*4)
+        exposure_time = int(exposure_time * 4)
         sweep_time = (
             int(sweep_time * 4) - 2
         )  # Hardcoded -2 to account for delays within controller
@@ -1201,7 +1200,7 @@ class TigerController:
             "6 ccb x = 1 y = 192",
             # Stop sending Stage trigger signal
             "6 m e = 35",
-            "6 cca z = 0", 
+            "6 cca z = 0",
             # Cell 4, JK flop used for toggling on and off state of the loop
             # Cells 3 and 8 serve as the inputs of this cell
             "6 m e = 4",
@@ -1245,12 +1244,12 @@ class TigerController:
             f"6 cca y = 2 z = {remote_focus_output}",
             # Sets the camera signal output to the first physical PLC output
             "6 m e = 33",
-            f"6 cca z = {camera_output}",           
+            f"6 cca z = {camera_output}",
         ]
         logger.info("Number of cycles: %d", num_cycles)
         logger.info("Cycle time (ms): %d", cycle_time / 4)
         # If Single or Z-stack mode, set up the number of cycles to run
-        if (num_cycles > 0):
+        if num_cycles > 0:
             commands[7:15] = [
                 # Set PLC axis 4 to be an input to receive stage sync signal
                 "6 m e = 36",
@@ -1266,11 +1265,11 @@ class TigerController:
                 "6 m e = 5",
                 "6 cca y = 5",
                 "6 ccb x = 4 y = 100",
-                #Send Trigger to stage
+                # Send Trigger to stage
                 "6 m e = 35",
                 "6 cca z = 7",
             ]
-            
+
         # Creates object to hold galvo commands
         galvo_commands = []
         # Single Galvo case, just sets up the first Galvo
@@ -1307,7 +1306,7 @@ class TigerController:
             self.send_command(f"{command}\r")
             self.read_response()
 
-    def setup_laser(self, axis : str) -> None:
+    def setup_laser(self, axis: str) -> None:
         """Sets up a laser to be triggered by the control loop"""
         axis = int(axis) + 32
 
@@ -1322,8 +1321,8 @@ class TigerController:
         logger.debug("Waiting for loop to finish...")
         bit4 = 1
         while bit4 == 1:
-            self.send_command(f"6 rdadc z?") 
-            # returns 16-bit integer indicating state of all 16 cells, 
+            self.send_command(f"6 rdadc z?")
+            # returns 16-bit integer indicating state of all 16 cells,
             # where the 4th least significant bit gives the value of cell 4
             response = self.read_response()
             try:
@@ -1333,7 +1332,7 @@ class TigerController:
                 continue
             bit4 = result >> 3 & 1
             time.sleep(0.05)  # sleep for 10 ms before checking again
-        return 
+        return
 
     def get_axis_addr(self) -> dict:
         """Return the dict of matching axes to their addresses.

@@ -492,7 +492,7 @@ def start_device(
             else:
                 device_connection = {
                     "connection": device_connection,
-                    "asi_connection": daq_connection
+                    "asi_connection": daq_connection,
                 }
 
         return _class(microscope_name, device_connection, configuration, device_id)

@@ -1604,6 +1604,7 @@ class ZStackAcquisition:
         if self.image_writer:
             self.image_writer.cleanup()
 
+
 class ASIZStackAcquisition(ZStackAcquisition):
     """ASIZStackAcquisition class for controlling z-stack acquisition with ASI Tiger Controller.
 
@@ -1613,6 +1614,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
     acquisitions.
 
     """
+
     def __init__(
         self,
         model,
@@ -1621,7 +1623,6 @@ class ASIZStackAcquisition(ZStackAcquisition):
         saving_dir="z-stack",
         force_multiposition=False,
     ):
-        
         """Initialize the ASIZStackAcquisition class.
 
         Parameters:
@@ -1638,7 +1639,9 @@ class ASIZStackAcquisition(ZStackAcquisition):
         force_multiposition : bool, optional
             Flag to force multiposition even if not configured. Default is False.
         """
-        super().__init__(model, get_origin, saving_flag, saving_dir, force_multiposition)
+        super().__init__(
+            model, get_origin, saving_flag, saving_dir, force_multiposition
+        )
         self.current_pos_dict = None
 
     def pre_signal_func(self) -> None:
@@ -1674,7 +1677,10 @@ class ASIZStackAcquisition(ZStackAcquisition):
             self.current_position = dict(
                 zip(
                     self.stage_axes,
-                    [self.positions[self.current_position_idx][i] for i in self.axes_index],
+                    [
+                        self.positions[self.current_position_idx][i]
+                        for i in self.axes_index
+                    ],
                 )
             )
             pos_dict = dict(
@@ -1690,18 +1696,23 @@ class ASIZStackAcquisition(ZStackAcquisition):
             pos_dict = {}
 
         # calculate first z, f position
-        self.current_z_position = self.start_z_position + self.current_position[self.primary_z_axis]
-        self.current_focus_position = self.start_focus + self.current_position[self.primary_f_axis]
+        self.current_z_position = (
+            self.start_z_position + self.current_position[self.primary_z_axis]
+        )
+        self.current_focus_position = (
+            self.start_focus + self.current_position[self.primary_f_axis]
+        )
         if self.defocus is not None:
-            self.current_focus_position += self.defocus[
-                self.current_channel_in_list
-            ]
+            self.current_focus_position += self.defocus[self.current_channel_in_list]
         logger.info("self.start_z_position: %d", self.start_z_position)
         logger.info("self.current_z_position: %d", self.current_z_position)
-       
 
         if self.current_position_idx > 0:
-            delta_distances = [self.current_position[axis] - self.pre_position[axis] for axis in self.tiling_axes if axis != "theta"]
+            delta_distances = [
+                self.current_position[axis] - self.pre_position[axis]
+                for axis in self.tiling_axes
+                if axis != "theta"
+            ]
             delta_distances.append(
                 self.current_position[self.primary_z_axis]
                 - self.pre_position[self.primary_z_axis]
@@ -1713,7 +1724,9 @@ class ASIZStackAcquisition(ZStackAcquisition):
                 + self.f_stack_distance
             )
         else:
-            axes_num = len(self.tiling_axes) + 2 - (1 if "theta" in self.tiling_axes else 0)
+            axes_num = (
+                len(self.tiling_axes) + 2 - (1 if "theta" in self.tiling_axes else 0)
+            )
             delta_distances = [0] * axes_num
 
         # displacement = [delta_z, delta_f, delta_x, delta_y]
@@ -1722,24 +1735,29 @@ class ASIZStackAcquisition(ZStackAcquisition):
         # self.model.resume_data_thread() after the stage has completed the move
         # to the next position.
         self.should_pause_data_thread = any(
-            distance > self.stage_distance_threshold
-            for distance in delta_distances
+            distance > self.stage_distance_threshold for distance in delta_distances
         )
         if self.should_pause_data_thread:
             self.model.pause_data_thread()
             logger.info("Data thread paused.")
-        
-        pos_dict[f"{self.primary_z_axis}_abs"] = self.current_position[self.primary_z_axis] + self.start_z_position
-        pos_dict[f"{self.primary_f_axis}_abs"] = self.current_position[self.primary_f_axis] + self.start_focus
 
-        logger.info("Current position - Z: %d", self.current_position[self.primary_z_axis])
+        pos_dict[f"{self.primary_z_axis}_abs"] = (
+            self.current_position[self.primary_z_axis] + self.start_z_position
+        )
+        pos_dict[f"{self.primary_f_axis}_abs"] = (
+            self.current_position[self.primary_f_axis] + self.start_focus
+        )
+
+        logger.info(
+            "Current position - Z: %d", self.current_position[self.primary_z_axis]
+        )
         self.current_pos_dict = pos_dict
 
         self.model.move_stage(pos_dict, wait_until_done=True)
-        
+
         if self.current_position_idx > 0:
             time.sleep(1)  # wait for stage to settle
-        
+
         if self.should_pause_data_thread:
             self.model.resume_data_thread()
             self.should_pause_data_thread = False
@@ -1747,7 +1765,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         self.model.mark_saving_flags([self.model.frame_id])
 
         return True
-    
+
     def signal_end(self) -> bool:
         """Handle the end of the signal stage and position cycling.
 
@@ -1784,6 +1802,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
             return True
 
         return False
+
 
 class FindTissueSimple2D:
     """FindTissueSimple2D class for detecting tissue and gridding out the imaging

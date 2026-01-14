@@ -246,21 +246,7 @@ class ImageWriter:
                 if (c_idx == self.data_source.shape_c - 1) and (
                     z_idx == self.data_source.shape_z - 1
                 ):
-                    for c_save_idx in range(self.data_source.shape_c):
-                        mip_name = (
-                            "P"
-                            + str(p_idx).zfill(4)
-                            + "_"
-                            + "CH0"
-                            + str(c_save_idx)
-                            + "_"
-                            + str(t_idx).zfill(6)
-                            + ".tif"
-                        )
-                        imsave(
-                            os.path.join(self.mip_directory, mip_name),
-                            self.mip[c_save_idx, :, :],
-                        )
+                    self.save_mip(p_idx, t_idx)
             except Exception as e:
                 from traceback import format_exc
 
@@ -272,6 +258,35 @@ class ImageWriter:
                 )
                 logger.debug(f"Error - ImageWriter: {e}")
                 return
+
+    def save_mip(self, p_idx: int, t_idx: int) -> None:
+        """Save the maximum intensity projection image to disk as an 8-bit tiff."""
+        for c_save_idx in range(self.data_source.shape_c):
+            mip_name = (
+                    "P"
+                    + str(p_idx).zfill(4)
+                    + "_"
+                    + "CH0"
+                    + str(c_save_idx)
+                    + "_"
+                    + str(t_idx).zfill(6)
+                    + ".tiff"
+            )
+
+            # Scale to 8-bit for display
+            mip = self.mip[c_save_idx, :, :]
+            min_val = mip.min()
+            max_val = mip.max()
+            if max_val > min_val:
+                mip_8bit = ((mip - min_val) / (max_val - min_val) * 255).astype(
+                    np.uint8)
+            else:
+                mip_8bit = np.zeros_like(mip, dtype=np.uint8)
+
+            imsave(
+                os.path.join(self.mip_directory, mip_name),
+                mip_8bit,
+            )
 
     def generate_image_name(self, current_channel, ext=".tif"):
         """Generates a string for the filename, e.g., CH00_000000.tif.

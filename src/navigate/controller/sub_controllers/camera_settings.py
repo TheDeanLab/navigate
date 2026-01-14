@@ -32,16 +32,196 @@
 
 # Standard Library Imports
 import logging
+import os
+from typing import Optional
 
 # Third Party Imports
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.config.config import update_config_dict, get_navigate_path
+from navigate.tools.file_functions import write_to_yaml
+from navigate.controller.configuration_controller import ConfigurationController
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
+class AdvancedCameraSettingController:
+    """Controller for the Advanced Camera Settings popup."""
+
+    def __init__(
+        self,
+        popup: "AdvancedCameraSettingPopup",
+        parent_controller: "Controller",
+        *args,
+        **kwargs,
+    ) -> None:
+        """Initialize the AdvancedCameraSettingController class.
+
+        Parameters
+        ----------
+        popup : AdvancedCameraSettingPopup
+            The popup window for advanced camera settings
+        parent_controller : Controller
+            The parent controller that manages this popup
+        *args
+            Variable length argument list
+        **kwargs
+            Arbitrary keyword arguments
+        """
+
+        # Initialize the parent controller
+        self.parent_controller = parent_controller
+
+        #: PopUp: Popup window for the camera settings.
+        self.view = popup
+
+        #: ConfigurationController: Controller for the local configuration.
+        self.local_config_controller = ConfigurationController(
+            self.parent_controller.configuration
+        )
+
+        # Populate the list of microscopes in the dropdown.
+        self.view.microscope.set_values(self.local_config_controller.microscope_list)
+
+        #: str: The current microscope name.
+        self.current_microscope = self.local_config_controller.microscope_name
+
+        # Set the current microscope in the dropdown.
+        self.view.microscope.set(self.current_microscope)
+
+        #: dict: Camera configuration dictionary for the current microscope.
+        self.camera_dict = self.local_config_controller.microscope_config["camera"]
+
+        self.update_microscope(in_initialization=True)
+
+        # Add a trace to the microscope dropdown to detect microscope changes.
+        self.view.microscope.variable.trace_add("write", self.update_microscope)
+
+        # Configure traces for closing the window or pressing escape.
+        self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
+        self.view.popup.bind("<Escape>", lambda event: self.close_popup())
+
+        logger.debug("Advanced camera settings popup initialized.")
+
+    def showup(self):
+        """This function will let the popup window show in front."""
+        self.view.popup.deiconify()
+
+    def save_camera_settings(self) -> None:
+        """Save the current camera settings to the configuration file."""
+
+        # Update the camera dictionary in the main configuration.
+        update_config_dict(
+            manager=self.parent_controller.manager,
+            parent_dict=self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][self.current_microscope],
+            config_name="camera",
+            new_config=self.camera_dict,
+        )
+
+        # Save the updated configuration to a YAML file.
+        write_to_yaml(
+            content_dict=self.parent_controller.configuration["configuration"],
+            filename=os.path.join(get_navigate_path(), "config", "configuration.yaml"),
+        )
+
+        # Update the configuration controller with the new configuration.
+        self.parent_controller.configuration_controller.update_configuration()
+
+        # Update the camera view controller to apply the new flip flags immediately
+        if hasattr(self.parent_controller, "camera_view_controller"):
+            camera_config = self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][self.current_microscope]["camera"]
+            self.parent_controller.camera_view_controller.flip_flags = {
+                "x": camera_config.get("flip_x", False),
+                "y": camera_config.get("flip_y", False),
+            }
+            logger.debug(
+                f"Updated camera flip flags for {self.current_microscope}: "
+                f"{self.parent_controller.camera_view_controller.flip_flags}"
+            )
+
+    def flip_axis(self, axis: str) -> None:
+        """Flip the camera axis in the configuration.
+
+        Parameters
+        ----------
+        axis : str
+            The axis to flip, e.g., 'x' or 'y'.
+        """
+        # Update the loaded configuration.
+        self.parent_controller.configuration["configuration"]["microscopes"][
+            self.current_microscope
+        ]["camera"][f"flip_{axis}"] = self.view.flip_flags[axis].get()
+
+        # Update our local camera dictionary with the new flip flag.
+        self.camera_dict[f"flip_{axis}"] = self.view.flip_flags[axis].get()
+        logger.debug(
+            f"Updating camera {axis} flip flag to {self.camera_dict[f'flip_{axis}']}..."
+        )
+
+    def close_popup(self) -> None:
+        """Close the popup window."""
+        self.save_camera_settings()
+        self.view.popup.destroy()
+
+        if hasattr(self.parent_controller, "advanced_camera_setting_controller"):
+            del self.parent_controller.advanced_camera_setting_controller
+
+        logger.debug("Advanced camera settings popup closed and sub-controller deleted.")
+
+    def update_microscope(
+        self, *args, in_initialization: Optional[bool] = False
+    ) -> None:
+        """Update the microscope configuration when the microscope is changed.
+
+        Parameters
+        ----------
+        in_initialization : bool, optional
+            If True, this method is called during initialization and does not
+            save the previous camera settings.
+        """
+        # Save the configuration for the previous microscope before switching.
+        if not in_initialization:
+            self.save_camera_settings()
+
+        # Get the current microscope from the dropdown.
+        self.current_microscope = self.view.microscope.get()
+        self.view.clear_view()
+
+        # Update the local configuration controller with the new microscope.
+        self.local_config_controller.change_microscope(
+            microscope_name=self.current_microscope
+        )
+
+        # Update camera config dictionary
+        self.camera_dict = self.local_config_controller.microscope_config["camera"]
+
+        # Get the current flip flags for x and y axes
+        current_flip_flags = {
+            "x": self.camera_dict.get("flip_x", False),
+            "y": self.camera_dict.get("flip_y", False),
+        }
+
+        # Initialize the view with the flip flags
+        self.view.populate_view(current_flip_flags)
+
+        # Reconfigure traces for the new widgets
+        self._configure_widget_traces()
+
+    def _configure_widget_traces(self) -> None:
+        """Configure traces and commands for widgets after they're created."""
+        # Configure the flip flags for each camera axis.
+        for key, value in self.view.flip_flags.items():
+            value.trace_add("write", lambda *args, k=key: self.flip_axis(k))
+
+        # Save button trace.
+        self.view.save_button.configure(command=self.save_camera_settings)
 
 class CameraSettingController(GUIController):
     """Controller for the camera settings."""

@@ -59,7 +59,11 @@ The physical coordinate system is defined relative to the microscope geometry:
 Stage Configuration
 -------------------
 
-This defines how the stages move in the physical coordinate system. To alter these conventions to match your specific hardware, you should configure the flip flags in your ``configuration.yaml`` file under the ``stage`` section for your microscope:
+This defines how the stages move in the physical coordinate system. To alter these conventions to match your specific hardware, you can configure the flip flags in two ways:
+
+**Option 1: Direct Configuration File Editing**
+
+Edit the ``configuration.yaml`` file under the ``stage`` section for your microscope:
 
 .. code-block:: yaml
 
@@ -78,16 +82,32 @@ This defines how the stages move in the physical coordinate system. To alter the
                 flip_theta: False
                 ...
 
+Any changes made to the flip flags will take effect the next time you start **navigate**.
+
+**Option 2: Using the Software GUI** (Recommended)
+
+You can also change the stage flip flags directly in the software without manually editing the configuration file:
+
+1. Launch **navigate**
+2. Go to :menuselection:`Settings --> Stage Control --> Advanced Stage Parameters`
+3. In the Advanced Stage Parameters window, you'll find checkboxes for each axis flip flag
+4. Toggle the flip flags as needed
+5. Click **Apply** or **Save** to update your configuration
+
 Each ``flip_<axis>`` flag reverses the direction of stage movement for that axis. Set these flags to ``True`` or ``False`` to ensure your stage movements follow the standard coordinate system defined above.
 
 .. tip::
 
-    You can also configure flip flags through the Advanced Stage Parameters popup in the GUI by navigating to :menuselection:`Settings --> Stage Control --> Advanced Stage Parameters`. Changes made through the GUI will be saved to your configuration file.
+    Using the GUI method is recommended as it provides immediate visual feedback and automatically saves the changes to your configuration file. You can test stage movements immediately after adjusting the flip flags to verify correct behavior.
 
 Camera Configuration
 --------------------
 
-Depending on how the camera is mounted and whether any mirrors are in the detection path, you also need to configure the camera flip flags for x and y. These are specified in the ``camera`` section of your ``configuration.yaml`` file:
+Depending on how the camera is mounted and whether any mirrors are in the detection path, you need to configure the camera flip flags for x and y axes. You can configure these flags in two ways:
+
+**Option 1: Direct Configuration File Editing**
+
+Edit the ``configuration.yaml`` file under the ``camera`` section for your microscope:
 
 .. code-block:: yaml
 
@@ -100,6 +120,20 @@ Depending on how the camera is mounted and whether any mirrors are in the detect
                 flip_x: False
                 flip_y: False
                 ...
+
+**Option 2: Using the Software GUI** (Recommended)
+
+You can also change the camera flip flags directly in the software without manually editing the configuration file:
+
+1. Launch **navigate**
+2. Go to :menuselection:`Settings --> Stage Control --> Advanced Camera Settings`
+3. In the Advanced Camera Settings window, you'll find checkboxes for X and Y axis flip flags
+4. Toggle the flip flags as needed
+5. Click **Save** to update your configuration
+
+.. tip::
+
+    Using the GUI method is recommended as it provides immediate visual feedback and automatically saves the changes to your configuration file. Changes to camera flip flags take effect immediately - you can see the updated image orientation on the next camera frame without restarting the software.
 
 Expected Image Behavior
 -----------------------
@@ -115,7 +149,7 @@ This behavior mimics looking through a microscope eyepiece: when you move the st
 
 .. note::
 
-    Use the flip flags to ensure your camera orientation matches these expected behaviors. You may need to experiment with different combinations of ``flip_x`` and ``flip_y`` depending on your camera mounting and optical path.
+    Use the flip flags to ensure your camera orientation matches these expected behaviors. You may need to experiment with different combinations of ``flip_x`` and ``flip_y`` depending on your camera mounting and optical path. The GUI method allows you to quickly test different combinations and see the results immediately.
 
 -----------------
 

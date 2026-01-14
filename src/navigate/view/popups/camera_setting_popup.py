@@ -32,11 +32,13 @@
 
 # Standard Library Imports
 import tkinter as tk
+from tkinter import ttk
 
 # Third Party Imports
 
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.hover import HoverButton, HoverCheckButton
 from navigate.view.main_window_content.camera_tab import CameraSettingsTab
 
 # p = __name__.split(".")[1]

@@ -262,16 +262,11 @@ class ImageWriter:
     def save_mip(self, p_idx: int, t_idx: int) -> None:
         """Save the maximum intensity projection image to disk as an 8-bit tiff."""
         for c_save_idx in range(self.data_source.shape_c):
-            mip_name = (
-                    "P"
-                    + str(p_idx).zfill(4)
-                    + "_"
-                    + "CH0"
-                    + str(c_save_idx)
-                    + "_"
-                    + str(t_idx).zfill(6)
-                    + ".tiff"
-            )
+
+            p = str(p_idx).zfill(4)
+            c = str(c_save_idx).zfill(2)
+            t = str(t_idx).zfill(6)
+            mip_name = f"P{p}_CH{c}_{t}.tiff"
 
             # Scale to 8-bit for display
             mip = self.mip[c_save_idx, :, :]

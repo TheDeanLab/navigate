@@ -91,7 +91,7 @@ def create_save_path(saving_settings: dict) -> str:
     cell_type_string = saving_settings["celltype"].replace(" ", "").lower()
     label_string = saving_settings["label"].replace(" ", "").lower()
     prefix_string = saving_settings["prefix"].replace(" ", "").lower()
-    date_string = str(datetime.now().date()).replace("-", "").lower()
+    date_string = str(datetime.now().date()).replace("-", "")
 
     # Create the save directory on disk.
     save_directory = str(

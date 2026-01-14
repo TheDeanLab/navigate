@@ -1,7 +1,7 @@
 .. _configuration_file:
 
 ======================
-Configuration Overview
+Software Configuration
 ======================
 
 This section outlines the ``configuration.yaml``, ``experiment.yml``, ``rest_api_config.yml``, ``waveform_templates.yml``, and ``waveform_constants.yml`` files.

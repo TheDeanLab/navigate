@@ -377,3 +377,29 @@ class TestHamamatsuOrca:
         self.camera.close_image_series()
         self.camera.close_image_series()
         assert self.camera.is_acquiring is False
+
+    def test_set_cooling(self):
+        import time
+
+        self.camera.camera_parameters["cooling"] = True
+
+        self.camera.camera_controller.set_property_value("cooling", True)
+        time.sleep(1)
+        cooling_status = self.camera.camera_controller.get_property_value("cooling")
+        assert cooling_status is True, "Cooling should be On"
+
+        self.camera.camera_controller.set_property_value("cooling", False)
+        time.sleep(1)
+        cooling_status = self.camera.camera_controller.get_property_value("cooling")
+        assert cooling_status is False, "Cooling should be Off"
+
+        self.camera.camera_parameters["cooling"] = False
+        self.camera.camera_controller.set_property_value("cooling", False)
+        time.sleep(1)
+        cooling_status = self.camera.camera_controller.get_property_value("cooling")
+        assert cooling_status is False, "Cooling should be Off"
+    
+        self.camera.camera_controller.set_property_value("cooling", True)
+        time.sleep(1)
+        cooling_status = self.camera.camera_controller.get_property_value("cooling")
+        assert cooling_status is False, "Cooling should be Off when not supported"

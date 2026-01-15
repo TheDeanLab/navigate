@@ -139,6 +139,7 @@ class CameraBase(ABC):
             "Rev. Bidirectional",
         ]
         self.camera_parameters["supported_trigger_sources"] = ["External"]
+        self.camera_parameters["cooling"] = self.camera_parameters.get("cooling", False)
 
         # Initialize offset and variance maps, if present
         #: np.ndarray: Offset map
@@ -435,3 +436,17 @@ class CameraBase(ABC):
             Sensor mode. Options are 'Normal' or 'Light-Sheet'.
         """
         pass
+
+    def set_cooling(self, cooling: str = "Off", temperature: float = -10) -> None:
+        """Set camera cooling mode.
+
+        Parameters
+        ----------
+        cooling : str
+            Cooling mode. Options are 'On' or 'Off'.
+        temperature : float
+            Desired temperature in Celsius.
+        """
+        if self.camera_parameters["cooling"] is False:
+            logger.warning(f"{str(self)} does not support cooling.")
+            return

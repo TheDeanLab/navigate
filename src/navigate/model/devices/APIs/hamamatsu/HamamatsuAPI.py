@@ -671,6 +671,8 @@ property_dict = {
     # "IMAGE DETECTOR PIXEL WIDTH"
     "pixel_height": 4327456,  # 0x00420820, R/O, micro-meter,
     # "IMAGE DETECTOR PIXEL HEIGHT"
+    "cooling": 2097952,  # 0x00200320, R/W, mode,    "SENSOR COOLER"
+    "cooling_temperature": 2097968,  # 0x00200330, R/W, celsius,"SENSOR TEMPERATURE TARGET"
 }
 
 

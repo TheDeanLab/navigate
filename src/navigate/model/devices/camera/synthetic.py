@@ -478,3 +478,19 @@ class SyntheticCamera(CameraBase):
 
     def set_readout_direction(self, mode) -> None:
         super().set_readout_direction(mode)
+
+    def set_cooling(self, cooling: str, temperature: float) -> None:
+        """Set camera cooling.
+
+        Parameters
+        ----------
+        cooling : str
+            'On' or 'Off'
+        temperature : float
+            Desired temperature in Celsius.
+        """
+        super().set_cooling(cooling, temperature)
+        if cooling == "On":
+            logger.info(f"Camera cooling turned On. Set to {temperature} °C.")
+        else:
+            logger.info("Camera cooling turned Off.")

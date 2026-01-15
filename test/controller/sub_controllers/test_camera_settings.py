@@ -259,7 +259,8 @@ class TestCameraSettingController:
         assert self.camera_settings.in_initialization is False
 
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
-    def test_update_experiment_values(self, mode):
+    @pytest.mark.parametrize("cooling_supported", [True, False])
+    def test_update_experiment_values(self, mode, cooling_supported):
 
         microscope_name = self.camera_settings.parent_controller.configuration[
             "experiment"
@@ -282,6 +283,13 @@ class TestCameraSettingController:
         self.camera_settings.roi_widgets["Width"].set(width)
         self.camera_settings.roi_widgets["Height"].set(height)
         self.camera_settings.framerate_widgets["frames_to_average"].set(5)
+
+        # cooling settings
+        self.camera_settings.parent_controller.configuration_controller.camera_config_dict[
+            "cooling"
+        ] = cooling_supported
+        self.camera_settings.camera_control_widgets["cooling"].set("On")
+        self.camera_settings.camera_control_widgets["cooling_temperature"].set(-20)
 
         # Update experiment dict and assert
         self.camera_settings.update_experiment_values()
@@ -330,6 +338,14 @@ class TestCameraSettingController:
             == self.camera_settings.default_pixel_size
         )
         assert self.camera_settings.camera_setting_dict["frames_to_average"] == 5
+
+        if cooling_supported:
+            assert self.camera_settings.camera_setting_dict["cooling"] == "On"
+            assert (
+                self.camera_settings.camera_setting_dict["cooling_temperature"] == -20.0
+            )
+        else:
+            assert self.camera_settings.camera_setting_dict["cooling"] == "Off"
 
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
     def test_update_sensor_mode(self, mode):
@@ -433,7 +449,12 @@ class TestCameraSettingController:
 
     @pytest.mark.parametrize("mode", ["live", "z-stack", "stop", "single"])
     @pytest.mark.parametrize("readout", ["Normal", "Light-Sheet"])
-    def test_set_mode(self, mode, readout):
+    @pytest.mark.parametrize("cooling_supported", [True, False])
+    def test_set_mode(self, mode, readout, cooling_supported):
+
+        self.camera_settings.parent_controller.configuration_controller.camera_config_dict[
+            "cooling"
+        ] = cooling_supported
 
         # Populate widgets with values from experiment file
         self.camera_settings.populate_experiment_values()
@@ -498,6 +519,26 @@ class TestCameraSettingController:
         )
         for btn_name in self.camera_settings.roi_btns:
             assert str(self.camera_settings.roi_btns[btn_name]["state"]) == state
+
+        if cooling_supported:
+            assert (
+                str(self.camera_settings.camera_control_widgets["cooling"].widget["state"])
+                == state_readonly
+            )
+            assert (
+                str(self.camera_settings.camera_control_widgets["cooling_temperature"].widget["state"])
+                == state
+            )
+        else:
+            print("**** current mode is", mode, readout, cooling_supported)
+            assert (
+                str(self.camera_settings.camera_control_widgets["cooling"].widget["state"])
+                == "disabled"
+            )
+            assert (
+                str(self.camera_settings.camera_control_widgets["cooling_temperature"].widget["state"])
+                == "disabled"
+            )
 
     @pytest.mark.parametrize("zoom", ["0.63x", "1x", "2x", "3x", "4x", "5x", "6x"])
     def test_calculate_physical_dimensions(self, zoom):

@@ -494,6 +494,25 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             Frame ids from HamamatsuOrca camera.
         """
         return self.camera_controller.get_frames()
+    
+    def set_cooling(self, cooling: str, temperature: float) -> None:
+        """Set camera cooling mode and temperature.
+
+        Parameters
+        ----------
+        cooling : str
+            'On' or 'Off'
+        temperature : float
+            Desired temperature in Celsius.
+        """
+        if self.camera_parameters["cooling"] is False or cooling == "Off":
+            self.camera_controller.set_property_value("cooling", 1)
+            logger.info("Camera cooling turned Off.")
+        # 1: "Off", 2: "On"
+        elif cooling == "On":
+            self.camera_controller.set_property_value("cooling", 2)
+            self.camera_controller.set_property_value("cooling_temperature", temperature)
+            logger.info(f"Camera cooling turned On. Set to {temperature} °C.")
 
 
 @log_initialization

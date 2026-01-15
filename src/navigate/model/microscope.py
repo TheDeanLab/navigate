@@ -440,6 +440,14 @@ class Microscope:
         # set camera trigger source
         self.set_camera_trigger_mode()
         self.set_camera_sensor_mode()
+        # get cooling setting
+        cooling_setting = self.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ].get("cooling", "Off")
+        temperature_setting = self.configuration["experiment"]["CameraParameters"][ 
+            self.microscope_name
+        ].get("cooling_temperature", -10)
+        self.camera.set_cooling(cooling_setting, temperature_setting)
         if not self.set_camera_roi_and_binning():
             return None
         logger.debug(f"Running microscope {self.microscope_name}")

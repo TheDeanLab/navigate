@@ -267,6 +267,9 @@ class CameraSettingController(GUIController):
         #: dict: ROI buttons
         self.roi_btns = view.camera_roi.get_buttons()
 
+        #: dict: Camera Control widgets
+        self.camera_control_widgets = view.camera_control.get_widgets()
+
         # initialize
 
         #: int: Default pixel size
@@ -430,6 +433,12 @@ class CameraSettingController(GUIController):
         self.framerate_widgets["frames_to_average"].set(
             self.camera_setting_dict["frames_to_average"]
         )
+        self.camera_control_widgets["cooling"].set(
+            self.camera_setting_dict.get("cooling", "Off")
+        )
+        self.camera_control_widgets["cooling_temperature"].set(
+            self.camera_setting_dict.get("cooling_temperature", -10)
+        )
 
         # after initialization
         self.in_initialization = False
@@ -530,6 +539,23 @@ class CameraSettingController(GUIController):
         self.roi_widgets["Height"].set(y_pixels)
         self.camera_setting_dict["fov_x"] = self.roi_widgets["FOV_X"].get()
         self.camera_setting_dict["fov_y"] = self.roi_widgets["FOV_Y"].get()
+
+        if self.parent_controller.configuration_controller.camera_config_dict.get("cooling", False):
+            self.camera_setting_dict["cooling"] = self.camera_control_widgets[
+                "cooling"
+            ].get()
+            cooling_temperature = self.camera_control_widgets[
+                "cooling_temperature"
+            ].get()
+            try:
+                self.camera_setting_dict["cooling_temperature"] = float(cooling_temperature)
+            except (TypeError, ValueError):
+                self.camera_setting_dict["cooling_temperature"] = -10
+                self.camera_control_widgets["cooling_temperature"].set(-10)
+            
+        else:
+            self.camera_setting_dict["cooling"] = "Off"
+            self.camera_control_widgets["cooling"].set("Off")
 
         return ""
 
@@ -725,6 +751,13 @@ class CameraSettingController(GUIController):
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]["state"] = state
 
+        if self.parent_controller.configuration_controller.camera_config_dict.get("cooling", False):
+            self.camera_control_widgets["cooling"].widget["state"] = state_readonly
+            self.camera_control_widgets["cooling_temperature"].widget["state"] = state
+        else:
+            self.camera_control_widgets["cooling"].widget["state"] = "disabled"
+            self.camera_control_widgets["cooling_temperature"].widget["state"] = "disabled"
+
     def set_roi_widgets_state(self):
         """Set the status of ROI widgets"""
 
@@ -894,6 +927,17 @@ class CameraSettingController(GUIController):
             not in self.mode_widgets["Sensor"].widget["values"]
         ):
             self.update_sensor_mode(self.mode_widgets["Sensor"].widget["values"][0])
+
+        # cooling support setting
+        cooling_supported = camera_config_dict.get("cooling", False)
+        self.camera_control_widgets["cooling"].widget["values"] = ["On", "Off"]
+        if cooling_supported:
+            self.camera_control_widgets["cooling"].widget["state"] = "readonly"
+            self.camera_control_widgets["cooling_temperature"].widget["state"] = "normal"
+        else:
+            self.camera_control_widgets["cooling"].widget["state"] = "disabled"
+            self.camera_control_widgets["cooling_temperature"].widget["state"] = "disabled"
+            self.camera_control_widgets["cooling"].set("Off")
 
     def update_camera_parameters_silent(self, value):
         """Update GUI camera parameters

@@ -150,7 +150,9 @@ class CreateSavePathTestCase(unittest.TestCase):
         date_string = str(datetime.now().date()).replace("-", "")
         expected_save_directory = os.path.join(
             self.save_root,
-            f"johndoe/{date_string}_livertissue_hepatocytecelltype_sample1/cell_001",
+            "johndoe",
+            f"{date_string}_livertissue_hepatocytecelltype_sample1",
+            "cell_001",
         )
 
         # Assert that the save directory is correct

@@ -66,9 +66,14 @@ class CreateSavePathTestCase(unittest.TestCase):
             "label": "Sample1",
             "prefix": "Cell_",
         }
+
+        date_string = str(datetime.now().date()).replace("-", "")
+
         expected_save_directory = os.path.join(
             self.save_root,
-            "johndoe/20260114_liver_hepatocyte_sample1/cell_001",
+            "johndoe",
+            f"{date_string}_liver_hepatocyte_sample1",
+            "cell_001",
         )
         save_directory = create_save_path(saving_settings)
 
@@ -141,9 +146,11 @@ class CreateSavePathTestCase(unittest.TestCase):
         }
 
         save_directory = create_save_path(saving_settings)
+
+        date_string = str(datetime.now().date()).replace("-", "")
         expected_save_directory = os.path.join(
             self.save_root,
-            "johndoe/20260114_livertissue_hepatocytecelltype_sample1/cell_001",
+            f"johndoe/{date_string}_livertissue_hepatocytecelltype_sample1/cell_001",
         )
 
         # Assert that the save directory is correct

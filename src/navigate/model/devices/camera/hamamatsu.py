@@ -120,6 +120,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         self.set_trigger_mode()
 
         self.camera_parameters["supported_trigger_sources"] = ["External", "Internal"]
+        self.camera_parameters["cooling"] = True
 
     def __str__(self):
         """Return string representation of HamamatsuOrca class.

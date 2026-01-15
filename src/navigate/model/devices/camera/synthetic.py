@@ -181,6 +181,7 @@ class SyntheticCamera(CameraBase):
         self.tif_images = []
 
         self.camera_parameters["supported_trigger_sources"] = ["External", "Internal"]
+        self.camera_parameters["cooling"] = True
 
     def __str__(self) -> str:
         """String representation of SyntheticCamera class.

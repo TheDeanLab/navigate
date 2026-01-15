@@ -68,12 +68,7 @@ class CreateSavePathTestCase(unittest.TestCase):
         }
         expected_save_directory = os.path.join(
             self.save_root,
-            "John-Doe",
-            "Liver",
-            "Hepatocyte",
-            "Sample1",
-            self.date_string,
-            "Cell_001",
+            "johndoe/20260114_liver_hepatocyte_sample1/cell_001",
         )
         save_directory = create_save_path(saving_settings)
 
@@ -90,15 +85,19 @@ class CreateSavePathTestCase(unittest.TestCase):
         """Test 2: Testing with existing root directory and existing cell
         sub-directory."""
 
+        root_directory = self.save_root
+        user_string = "John Doe".replace(" ", "").lower()
+        tissue_string = "Liver".replace(" ", "").lower()
+        cell_type_string = "Hepatocyte".replace(" ", "").lower()
+        label_string = "Sample1".replace(" ", "").lower()
+        date_string = str(datetime.now().date()).replace("-", "")
+
         os.makedirs(
             os.path.join(
-                self.save_root,
-                "John-Doe",
-                "Liver",
-                "Hepatocyte",
-                "Sample1",
-                self.date_string,
-                "Cell_001",
+                root_directory,
+                user_string,
+                f"{date_string}_{tissue_string}_{cell_type_string}_{label_string}",
+                "Cell_001".lower(),
             )
         )
 
@@ -112,19 +111,17 @@ class CreateSavePathTestCase(unittest.TestCase):
         }
 
         save_directory = create_save_path(saving_settings)
+        print(save_directory)
 
         # Assert that the save directory is correct
         self.assertEqual(
             save_directory,
             os.path.join(
-                self.save_root,
-                "John-Doe",
-                "Liver",
-                "Hepatocyte",
-                "Sample1",
-                self.date_string,
-                "Cell_002",
-            ),
+                root_directory,
+                user_string,
+                f"{date_string}_{tissue_string}_{cell_type_string}_{label_string}",
+                "Cell_002".lower(),
+            )
         )
 
         # Assert that the save directory and cell directory are created
@@ -146,12 +143,7 @@ class CreateSavePathTestCase(unittest.TestCase):
         save_directory = create_save_path(saving_settings)
         expected_save_directory = os.path.join(
             self.save_root,
-            "John-Doe",
-            "Liver-Tissue",
-            "Hepatocyte-Cell-Type",
-            "Sample-1",
-            self.date_string,
-            "Cell_001",
+            "johndoe/20260114_livertissue_hepatocytecelltype_sample1/cell_001",
         )
 
         # Assert that the save directory is correct

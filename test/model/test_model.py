@@ -126,10 +126,16 @@ def test_single_acquisition(model):
     model.run_command("acquire")
 
     image_id = show_img_pipe.recv()
-    n_images = 0
-    max_iters = 10
+
+    # If three channel acquisitions happen quickly, the synthetic camera may return
+    # something like [0, 1, 2] in a single call, and only one pipe message is sent
+    # for that batch.
+    n_images = image_id + 1
+    max_iters = 20
     while image_id != "stop" and max_iters > 0:
         image_id = show_img_pipe.recv()
+        if image_id == "stop":
+            break
         n_images += 1
         max_iters -= 1
 

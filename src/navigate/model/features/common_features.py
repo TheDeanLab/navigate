@@ -1747,7 +1747,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         )
 
         logger.info(
-            "Current position - Z: %d", self.current_position[self.primary_z_axis]
+            "Current position - Z: %.2f", self.current_position[self.primary_z_axis]
         )
         self.current_pos_dict = pos_dict
 

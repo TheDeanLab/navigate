@@ -1702,8 +1702,8 @@ class ASIZStackAcquisition(ZStackAcquisition):
         )
         if self.defocus is not None:
             self.current_focus_position += self.defocus[self.current_channel_in_list]
-        logger.info("self.start_z_position: %d", self.start_z_position)
-        logger.info("self.current_z_position: %d", self.current_z_position)
+        logger.info("self.start_z_position: %.2f", self.start_z_position)
+        logger.info("self.current_z_position: %.2f", self.current_z_position)
 
         if self.current_position_idx > 0:
             delta_distances = [

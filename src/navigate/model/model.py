@@ -51,6 +51,7 @@ from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from navigate.model.features.common_features import (
     Snap,  # noqa
     ZStackAcquisition,
+    ASIZStackAcquisition,
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
@@ -592,6 +593,8 @@ class Model:
                 )
                 self.data_buffer_saving_flags = [False] * self.number_of_frames
             else:
+
+                # Retrieve dictionary of features and then initialize the signal and data containers.
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
@@ -617,6 +620,7 @@ class Model:
 
             self.signal_thread.name = f"{self.imaging_mode} signal"
 
+            # Z-stack will be in here.
             if self.is_save and self.imaging_mode != "live":
                 saving_config = {}
                 plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
@@ -887,6 +891,7 @@ class Model:
         success : bool
             Was the move successful?
         """
+        self.logger.debug("****** moving stage to: %s", pos_dict)
         try:
             r = self.active_microscope.move_stage(pos_dict, wait_until_done)
             self.logger.info(
@@ -1804,3 +1809,168 @@ class Model:
             return
         for id in frame_ids:
             self.data_buffer_saving_flags[id] = True
+
+
+class ASIModel(Model):
+    """ASI Model class.
+
+    This class is used to control microscopes equipped with the Tiger Controller as
+    the DAQ object. Assumes that only one microscope object will be enabled. Tiger
+    Controller performs all hardware operations, such as galvos, voice coils,
+    analog and digital triggering, etc. Requires a different software architecture
+    for control than NI-based daq systems.
+
+    """
+
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        configuration: Optional[Dict[str, Any]] = None,
+        event_queue: multiprocessing.Queue = None,
+    ) -> None:
+        """Initialize the ASI Model.
+
+        Parameters
+        ----------
+        args : argparse.Namespace
+            Command line arguments.
+        configuration : Optional[Dict[str, Any]]
+            Configuration dictionary. Default is None.
+        event_queue : multiprocessing.Queue
+            Event queue for communication with the controller. Default is None.
+
+        """
+        super().__init__(args, configuration, event_queue)
+
+        self.acquisition_modes_feature_setting["z-stack"] = [
+            (
+                {"name": ASIZStackAcquisition},
+                {"name": StackPause},
+                {
+                    "name": LoopByCount,
+                    "args": ("experiment.MicroscopeState.timepoints",),
+                },
+            )
+        ]
+
+        self.logger.info("ASIModel initialized.")
+
+    def prepare_acquisition(self, turn_off_flags: bool = True) -> bool:
+        result = super().prepare_acquisition(turn_off_flags)
+        self.active_microscope.daq.zstack = self.imaging_mode == "z-stack"
+        self.active_microscope.daq.single = self.imaging_mode == "single"
+        return result
+
+    def run_live_acquisition(self) -> None:
+        """Stream live image to the GUI.
+
+        Recalculates the waveforms for each image, thereby allowing people to adjust
+        acquisition parameters in real-time.
+
+        Returns
+        -------
+        None
+            Terminates when live acquisition is stopped.
+        """
+        self.stop_acquisition = False
+        self.run_acquisition()
+        while not self.stop_acquisition and not self.stop_send_signal:
+            if self.injected_flag.value:
+                self.reset_feature_list()
+            elif hasattr(self, "signal_container"):
+                self.signal_container.reset()
+
+        # Update the stage position.
+        # Allows the user to externally move the stage in the continuous mode.
+        self.get_stage_position()
+
+    def run_acquisition(self) -> None:
+        """Run acquisition along with a feature list one time.
+
+        Returns
+        -------
+        None
+            Completes after acquisition pass ends.
+        """
+        if not hasattr(self, "signal_container"):
+            self.snap_zstack()
+            return
+
+        # The data_thread is grabbing images from the camera.
+        # We can initialize the data_thread to grab a certain number of images.
+        # Data thread directly hands the images to the ImageWriter, which saves them
+        # to disk.
+
+        # Within the run_data_process, which is inside of the data_thread, we call
+        # the data_container.
+
+        # The signal thread is running this function iteratively.
+
+        # Launch the signal and data containers, and let them terminate the
+        # acquisition when we have received the right number of frames.
+
+        while (
+            not self.signal_container.end_flag
+            and not self.stop_send_signal
+            and not self.stop_acquisition
+        ):
+            self.logger.debug("in loop")
+            self.snap_zstack()
+            if not hasattr(self, "signal_container"):
+                return
+            if self.signal_container.is_closed:
+                self.logger.info("Signal container is closed.")
+                self.stop_acquisition = True
+                return
+        if self.imaging_mode != "live":
+            self.stop_acquisition = True
+
+    def snap_zstack(self) -> None:
+        """Acquire a z-stack after updating the waveforms.
+
+        Can be used in acquisitions where changing waveforms are required,
+        but there is additional overhead due to the need to write the
+        waveforms into the Tiger Controller.
+
+        Returns
+        -------
+        None
+            Completes after the image is captured and buffered.
+        """
+        if hasattr(self, "signal_container"):
+            self.signal_container.run()
+
+        # Stash current position, channel, timepoint. Do this here, because signal
+        # container functions can inject changes to the stage. NOTE: This line is
+        # wildly expensive when get_stage_position() does not cache results.
+        stage_pos = self.get_stage_position()
+        self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
+        self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
+        self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
+        self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
+        self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
+
+        # Run the acquisition
+        try:
+            self.active_microscope.daq.run_acquisition()
+            self.logger.info("ASIModel: Acquisition started.")
+        except:  # noqa
+            self.active_microscope.daq.stop_acquisition()
+            if self.active_microscope.current_channel == 0:
+                self.stop_acquisition = True
+                self.event_queue.put(
+                    (
+                        "warning",
+                        "An error happened. Please read the log files for details!",
+                    )
+                )
+                return
+            self.active_microscope.daq.prepare_acquisition(
+                f"channel_{self.active_microscope.current_channel}"
+            )
+            self.active_microscope.daq.run_acquisition()
+
+        if hasattr(self, "signal_container"):
+            self.signal_container.run(wait_response=True)
+
+        self.frame_id = (self.frame_id + 1) % self.number_of_frames

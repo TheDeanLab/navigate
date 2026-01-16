@@ -154,6 +154,10 @@ class NIDevice:
     """NIDevice - Parent National Instruments device class."""
 
 
+class ASIDevice:
+    """ASIDevice - Parent ASI device class"""
+
+
 class SequenceDevice:
     """SequenceDevice - The device loaded according to its sequence id, not serial number.
     Always need to check if the serial number is match.

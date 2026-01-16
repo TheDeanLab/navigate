@@ -70,7 +70,7 @@ from navigate.controller.sub_controllers import (
 from navigate.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
-from navigate.model.model import Model
+from navigate.model.model import Model, ASIModel
 from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
@@ -224,13 +224,23 @@ class Controller:
         )
 
         #: ObjectInSubprocess: Model object in MVC architecture.
-        self.model = ObjectInSubprocess(
-            Model,
-            args,
-            self.configuration,
-            event_queue=self.event_queue,
-            log_queue=log_queue,
-        )
+        if self.use_asi_model():
+            logger.info("Using ASI model.")
+            self.model = ObjectInSubprocess(
+                ASIModel, 
+                args, 
+                self.configuration, 
+                event_queue=self.event_queue,
+                log_queue=log_queue
+            )
+        else:
+            self.model = ObjectInSubprocess(
+                Model, 
+                args, 
+                self.configuration, 
+                event_queue=self.event_queue,
+                log_queue=log_queue
+            )
 
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
@@ -357,6 +367,34 @@ class Controller:
         self.window_height = 0
         self.view.root.after(5000, self.enable_resize)
         self.view.root.bind("<Configure>", self.resize)
+
+    def use_asi_model(self) -> bool:
+        """Check if the model uses ASI hardware.
+
+        Returns
+        -------
+        bool
+            True if the model uses ASI hardware, False if it uses NI hardware.
+
+        Raises
+        -------
+        ValueError
+            If the DAQ type is unknown.
+        """
+        microscope_name = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        daq_type = self.configuration["configuration"]["microscopes"][microscope_name][
+            "daq"
+        ]["hardware"].get("type", "NI")
+        daq_type = daq_type.lower()
+        
+        if daq_type in ("ni", "synthetic"):
+            return False
+        elif daq_type == "asi":
+            return True
+        else:
+            raise ValueError(f"Unknown daq type: {daq_type}")
 
     def update_buffer(self):
         """Update the buffer size according to the camera
@@ -1454,7 +1492,7 @@ class Controller:
                 update_table(
                     table=self.multiposition_tab_controller.table,
                     pos=value[1:],
-                    axes = value[0]
+                    axes=value[0],
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)
 

@@ -86,7 +86,7 @@ class ASIDaq(DAQBase, SerialDevice):
         #: bool: Flag for updating analog task.
         self.is_updating_analog_task = False
 
-        #: dict: Analog output tasks.
+        #: dict: Mapping of device to tiger axis.
         self.analog_outputs = {}
 
         #: Any: Device connection.
@@ -97,6 +97,12 @@ class ASIDaq(DAQBase, SerialDevice):
 
         #: str: zoom
         self.zoom = self.configuration["experiment"]["MicroscopeState"]["zoom"]
+
+        #: bool: Flag for z-stack acquisition.
+        self.zstack = False
+
+        #: bool: Flag for single acquisition.
+        self.single = False
 
         # retrieves galvo ListProxy/DictProxy from config file
         galvos_raw = self.configuration["configuration"]["microscopes"][
@@ -113,23 +119,31 @@ class ASIDaq(DAQBase, SerialDevice):
         else:
             raise TypeError("Unexpected type for galvos: {}".format(type(galvos_raw)))
 
-        # update analog outputs with galvo IDs and associated axes
-        i = 0
-        for g in self.galvos:
-            self.analog_outputs[f"galvo {i}"] = g["hardware"]["axis"]
-            i += 1
-
-        # retreive galvo phases from config
+        #: List: list of galvo phases.
         self.phases = [galvo["phase"] for galvo in self.galvos]
 
-        # update analog outputs with rfvc and associated axis
+        # update analog outputs with galvo IDs and associated axes
+        for i, g in enumerate(self.galvos):
+            self.analog_outputs[f"galvo {i}"] = g["hardware"]["axis"]
+
+        # update analog outputs with remote focus and associated axis
         remote_focus_channel = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["remote_focus"]["hardware"]["axis"]
         self.analog_outputs["remote_focus"] = remote_focus_channel
 
-        # sets up initial PLC configuration with default delay (ms), camera delay, rfvc delay, sweep time (ms), and analog outputs dict
-        self.daq.setup_control_loop([200], 0, 0, 120, self.analog_outputs)
+        # sets up initial PLC configuration with default delay (ms), camera delay, remote focus delay, sweep time (ms), and analog outputs dict
+        self.daq.setup_control_loop([200], 0, 0, 100, 120, self.analog_outputs)
+
+        hw = self.configuration["configuration"]["microscopes"][self.microscope_name][
+            "stage"
+        ]["hardware"][0]
+
+        #: Dict: Mapping of navigate axes to tiger axes.
+        self.axis_map = dict(zip(hw["axes"], hw["axes_mapping"]))
+
+        #: Dict: Mapping of tiger axes to addresses.
+        self.axis_addr = self.daq.get_axis_addr()
 
     @classmethod
     def connect(cls, port, baudrate=115200, timeout=0.25):
@@ -169,8 +183,8 @@ class ASIDaq(DAQBase, SerialDevice):
             Channel key for current channel.
         """
         # Get appropriate sweep_time for the current channel
-        sweep_time = self.sweep_times[channel_key]
-
+        exposure_time = self.exposure_times[channel_key] * 1000
+        sweep_time = self.sweep_times[channel_key] * 1000
         # loop through galvo phases to calculate time delays
         # delays[i] corresponds to the time between the ith galvo trigger and the master trigger
         n = len(self.galvos)
@@ -180,7 +194,7 @@ class ASIDaq(DAQBase, SerialDevice):
             frequency = self.waveform_constants["galvo_constants"][f"Galvo {i}"][
                 self.microscope_name
             ][self.zoom]["frequency"]
-            period = self.exposure_times[channel_key] * 1000 / float(frequency)
+            period = exposure_time / float(frequency)
 
             # round period for triangle waveform to even number, as the TG-1000 can only generate triangle waveforms with even-number-of-ms periods
             if self.galvos[i]["waveform"] == "sawtooth":
@@ -205,9 +219,10 @@ class ASIDaq(DAQBase, SerialDevice):
             i += 1
 
         # modify sweep time to sync with the first galvo if there are asi galvos in config
-        if len(delays) > 0:
-            n7 = 1000 * sweep_time // period0 + 1
-            sweep_time = period0 * n7
+        # TODO: only run the following if the galvo is not a resonant galvo
+        # if len(delays) > 0:
+        #     n7 = sweep_time // period0 + 1
+        #     sweep_time = period0 * n7
 
         self.camera_delay = float(
             self.waveform_constants["other_constants"].get("camera_delay", 5)
@@ -215,10 +230,75 @@ class ASIDaq(DAQBase, SerialDevice):
         rfvc_delay = float(
             self.waveform_constants["other_constants"].get("remote_focus_delay", 5)
         )
-        # sets up control loop with all parameters (all times in ms)
-        self.daq.setup_control_loop(
-            delays, self.camera_delay, rfvc_delay, sweep_time, self.analog_outputs
-        )
+        if self.zstack:
+            start_pos = self.configuration["experiment"]["MicroscopeState"][
+                "start_position"
+            ]
+            end_pos = self.configuration["experiment"]["MicroscopeState"][
+                "end_position"
+            ]
+            step_size = self.configuration["experiment"]["MicroscopeState"]["step_size"]
+            num_steps = self.configuration["experiment"]["MicroscopeState"][
+                "number_z_steps"
+            ]
+
+            navigate_axis = self.configuration["experiment"]["MicroscopeState"][
+                "primary_z_axis"
+            ]
+            tiger_axis = self.axis_map[navigate_axis].upper()
+            addr = self.axis_addr[tiger_axis]
+
+            logger.debug(
+                f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}"
+            )
+            
+            self.daq.setup_z_stage(tiger_axis, addr, int(step_size * 10))
+
+            start_focus = self.configuration["experiment"]["MicroscopeState"][
+                "start_focus"
+            ]
+            end_focus = self.configuration["experiment"]["MicroscopeState"]["end_focus"]
+            if end_focus - start_focus > 0:
+                focus_step = (end_focus - start_focus) / num_steps
+                navigate_focus_axis = self.configuration["experiment"][
+                    "MicroscopeState"
+                ]["primary_f_axis"]
+                tiger_focus_axis = self.axis_map[navigate_focus_axis].upper()
+                focus_addr = self.axis_addr[tiger_focus_axis]
+
+                self.daq.setup_z_stage(
+                    tiger_focus_axis, focus_addr, int(focus_step * 10)
+                )
+
+            # sets up control loop with all parameters (all times in ms)
+            self.daq.setup_control_loop(
+                delays,
+                self.camera_delay,
+                rfvc_delay,
+                exposure_time,
+                sweep_time,
+                self.analog_outputs,
+                num_steps,
+            )
+        elif self.single:
+            self.daq.setup_control_loop(
+                delays,
+                self.camera_delay,
+                rfvc_delay,
+                exposure_time,
+                sweep_time,
+                self.analog_outputs,
+                1,
+            )
+        else:
+            self.daq.setup_control_loop(
+                delays,
+                self.camera_delay,
+                rfvc_delay,
+                exposure_time,
+                sweep_time,
+                self.analog_outputs,
+            )
 
         self.current_channel_key = channel_key
         self.is_updating_analog_task = False
@@ -232,6 +312,8 @@ class ASIDaq(DAQBase, SerialDevice):
         The master trigger initiates all other waveforms via a shared trigger
         For this to work, all analog output and counter tasks have to be primed so that
         they are waiting for the trigger signal.
+
+        If it is a z-stack acquisition, wait for the loop to complete before returning.
         """
         # if self.is_updating_analog_task:
         #     self.wait_to_run_lock.acquire()
@@ -240,8 +322,11 @@ class ASIDaq(DAQBase, SerialDevice):
         # turn on PLC cell 1 (Master Trigger)
         try:
             self.daq.logic_cell_on("1")
-        except Exception:
-            logger.debug("DAQ cannot turn on")
+            logger.info("***ASIModel: Acquisition started: set logic cell 1 on***")
+            if self.zstack:
+                self.daq.wait_for_loop()
+        except Exception as e:
+            logger.error(f"DAQ Error: {e}")
             pass
 
     def stop_acquisition(self) -> None:
@@ -251,8 +336,11 @@ class ASIDaq(DAQBase, SerialDevice):
         """
         # turn on PLC cell 8 (kills control loop)
         # reset PLC cell 1 (Master Trigger)
+        logger.info(f"ASIModel: Stopping acquisition")
+
         try:
             self.daq.logic_cell_on("8")
+            # self.daq.logic_cell_off("4")
             self.daq.logic_cell_off("1")
         except Exception:
             logger.debug("DAQ cannot turn off")

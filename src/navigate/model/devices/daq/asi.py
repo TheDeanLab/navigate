@@ -251,8 +251,7 @@ class ASIDaq(DAQBase, SerialDevice):
             logger.debug(
                 f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}"
             )
-
-            # num_steps = (end_pos - start_pos + step_size - 1) // step_size # ceiling division
+            
             self.daq.setup_z_stage(tiger_axis, addr, int(step_size * 10))
 
             start_focus = self.configuration["experiment"]["MicroscopeState"][

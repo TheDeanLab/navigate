@@ -1061,6 +1061,7 @@ class TigerController:
             Tiger Controller axis
         waveform: int
             Type of waveform pattern according to https://asiimaging.com/docs/commands/sap
+            Bit 7 set (+128) means the waveform is triggered externally
         amplitude: int
             amplitude of the waveform in mV
         offset: int
@@ -1365,9 +1366,9 @@ class TigerController:
         ----------
         axis : str
             The axis of the z-stage
-        addr :
+        addr : int
             The controller address associated with the z-stage axis.
-        step_size :
+        step_size : float
             The step size used for z-stage movements during the control loop.
         """
         commands = [

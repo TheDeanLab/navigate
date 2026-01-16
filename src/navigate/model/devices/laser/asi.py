@@ -78,12 +78,19 @@ class ASILaser(LaserBase, SerialDevice):
         super().__init__(microscope_name, device_connection, configuration, device_id)
         analog = configuration["configuration"]["microscopes"][microscope_name][
             "laser"
-        ][device_id]["power"]["hardware"].get("type", None).upper()
+        ][device_id]["power"]["hardware"].get("type", None)
 
         digital = configuration["configuration"]["microscopes"][microscope_name][
             "laser"
-        ][device_id]["onoff"]["hardware"].get("type", None).upper()
+        ][device_id]["onoff"]["hardware"].get("type", None)
 
+        # Render case insensitive
+        if analog is not None:
+            analog = analog.upper()
+        if digital is not None:
+            digital = digital.upper()
+
+        # Determine modulation type
         if analog == "ASI" and digital == "ASI":
             modulation_type = "mixed"
         elif analog == "ASI":

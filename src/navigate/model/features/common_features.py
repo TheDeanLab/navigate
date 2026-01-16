@@ -74,7 +74,7 @@ class Snap:
     def __init__(self, model, saving_flag=False):
         """Initialize the Snap class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for data capture.
@@ -103,12 +103,12 @@ class Snap:
         This method captures data frames using the microscope and logs information
         about the active camera and the provided frame IDs.
 
-        Parameters:
+        Parameters
         ----------
         frame_ids : list
             A list of frame IDs for which data frames should be captured.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating the success of the data capture process.
@@ -135,7 +135,7 @@ class WaitForExternalTrigger:
     def __init__(self, model, trigger_channel="/PCIe-6738/PFI4", timeout=-1):
         """Initialize the WaitForExternalTrigger class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for synchronization.
@@ -324,7 +324,7 @@ class WaitToContinue:
     def __init__(self, model):
         """Initialize the WaitToContinue class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for synchronization.
@@ -377,7 +377,7 @@ class WaitToContinue:
         This method synchronizes the signal acquisition process with data acquisition
         and releases any locks held.
 
-        Returns:
+        Returns
         -------
         bool
            A boolean value indicating the success of the synchronization process.
@@ -413,12 +413,12 @@ class WaitToContinue:
         This method synchronizes the data acquisition process with signal acquisition
         and releases any locks held.
 
-        Parameters:
+        Parameters
         ----------
         frame_ids : list
             A list of frame IDs for which data acquisition should be performed.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating the success of the synchronization process.
@@ -470,7 +470,7 @@ class LoopByCount:
     def __init__(self, model, steps=1, step_by_frame=False, is_nested=False):
         """Initialize the LoopByCount class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for loop control.
@@ -541,7 +541,7 @@ class LoopByCount:
         steps. It determines whether to continue the loop or exit based on the
         remaining count.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether to continue the loop.
@@ -560,12 +560,12 @@ class LoopByCount:
         frames or steps. It determines whether to continue the loop or exit based on
         the remaining count.
 
-        Parameters:
+        Parameters
         ----------
         frame_ids : list
             A list of frame IDs for which data acquisition should be performed.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether to continue the loop.
@@ -583,7 +583,7 @@ class LoopByCount:
     def get_steps(self):
         """Get number of steps
 
-        Returns:
+        Returns
         --------
         int
             Number of steps.
@@ -612,7 +612,7 @@ class LoopByCount:
     def synchronize(self, thread_name):
         """Synchronize signal and data function
 
-        Parameters:
+        Parameters
         ----------
         thread_name : bool
             Signal or Data
@@ -659,7 +659,7 @@ class PrepareNextChannel:
     def __init__(self, model):
         """Initialize the PrepareNextChannel class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for channel preparation.
@@ -676,7 +676,7 @@ class PrepareNextChannel:
         This method prepares virtual microscopes, if any, followed by the active
         microscope for the next imaging channel.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating the success of the channel preparation process.
@@ -716,7 +716,7 @@ class MoveToNextPositionInMultiPositionTable:
     def __init__(self, model, resolution_value=None, zoom_value=None, offset=None):
         """Initialize the MoveToNextPositionInMultiPositionTable class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for position control.
@@ -852,7 +852,7 @@ class MoveToNextPositionInMultiPositionTable:
         controls the data thread based on stage distance thresholds, and updates
         position-related information.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether to continue the position control process.
@@ -956,7 +956,7 @@ class StackPause:
     def __init__(self, model, pause_num="experiment.MicroscopeState.timepoints"):
         """Initialize the StackPause class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for stack acquisition control.
@@ -1045,7 +1045,7 @@ class ZStackAcquisition:
     ):
         """Initialize the ZStackAcquisition class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for z-stack acquisition control.
@@ -1176,7 +1176,7 @@ class ZStackAcquisition:
                 "main": self.in_data_func,  # Run every cycle.
                 "end": self.end_data_func,  # Run every cycle.
                 "cleanup": self.cleanup_data_func,  # run at the end, regardless
-                # ofoutcome.
+                # of outcome.
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
@@ -1188,7 +1188,7 @@ class ZStackAcquisition:
     def get_microscope_state(self, microscope_state: dict) -> None:
         """Get the microscope state from the configuration.
 
-        Parameters:
+        Parameters
         ----------
         microscope_state : dict
             The microscope state configuration dictionary.
@@ -1223,7 +1223,7 @@ class ZStackAcquisition:
     def get_z_stack_parameters(self, microscope_state: dict) -> None:
         """Get z-stack parameters from the configuration.
 
-        Parameters:
+        Parameters
         ----------
         microscope_state : dict
             The microscope state configuration dictionary.
@@ -1238,7 +1238,7 @@ class ZStackAcquisition:
     def get_f_stack_parameters(self, microscope_state: dict) -> None:
         """Get focus stack parameters from the configuration.
 
-        Parameters:
+        Parameters
         ----------
         microscope_state : dict
             The microscope state configuration dictionary.
@@ -1332,7 +1332,7 @@ class ZStackAcquisition:
         and focus, managing data threads, and handling data acquisition during the
         signal stage.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether to continue the z-stack acquisition
@@ -1460,7 +1460,7 @@ class ZStackAcquisition:
         This method handles the end of the signal stage, including position cycling and
         channel updates for multichannel acquisitions.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether to end the current node.
@@ -1570,7 +1570,7 @@ class ZStackAcquisition:
         This method handles incoming data frames during data acquisition, updating the
         count of received frames and saving images if enabled.
 
-        Parameters:
+        Parameters
         ----------
         frame_ids : list
             A list of frame IDs received during data acquisition.
@@ -1586,7 +1586,7 @@ class ZStackAcquisition:
         This method checks whether all expected data frames have been received during
         data acquisition.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether all expected data frames have been
@@ -1614,7 +1614,6 @@ class ASIZStackAcquisition(ZStackAcquisition):
     acquisitions.
 
     """
-
     def __init__(
         self,
         model,
@@ -1625,7 +1624,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
     ):
         """Initialize the ASIZStackAcquisition class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for z-stack acquisition control.
@@ -1660,7 +1659,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         and focus, managing data threads, and handling data acquisition during the
         signal stage.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether to continue the z-stack acquisition
@@ -1668,7 +1667,6 @@ class ASIZStackAcquisition(ZStackAcquisition):
         """
         if self.model.stop_acquisition:
             return False
-        data_thread_is_paused = False
 
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
@@ -1772,7 +1770,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         This method handles the end of the signal stage, including position cycling and
         channel updates for multichannel acquisitions.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether to end the current node.
@@ -1822,7 +1820,7 @@ class FindTissueSimple2D:
     ):
         """Initialize the FindTissueSimple2D class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for tissue detection and gridding.
@@ -1862,7 +1860,7 @@ class FindTissueSimple2D:
         - Computes offsets for gridding based on acquired and target resolutions.
         - Grids out the 2D imaging space based on the specified overlap percentage.
 
-        Parameters:
+        Parameters
         ----------
         frame_ids : list
             A list of frame IDs corresponding to acquired frames.

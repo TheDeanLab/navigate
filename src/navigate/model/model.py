@@ -1905,7 +1905,6 @@ class ASIModel(Model):
         # the data_container.
 
         # The signal thread is running this function iteratively.
-        # self.snap_zstack()
 
         # Launch the signal and data containers, and let them terminate the
         # acquisition when we have received the right number of frames.
@@ -1925,8 +1924,6 @@ class ASIModel(Model):
                 return
         if self.imaging_mode != "live":
             self.stop_acquisition = True
-
-    # If you add nothing else, automatically uses the parent method.
 
     def snap_zstack(self) -> None:
         """Acquire a z-stack after updating the waveforms.
@@ -1972,7 +1969,6 @@ class ASIModel(Model):
                 f"channel_{self.active_microscope.current_channel}"
             )
             self.active_microscope.daq.run_acquisition()
-        # finally:
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)

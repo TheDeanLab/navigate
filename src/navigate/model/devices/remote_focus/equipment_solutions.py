@@ -321,12 +321,19 @@ class EquipmentSolutionsASIRemoteFocus(ASIRemoteFocus, SerialDevice, ASIDevice):
         try:
             self.send_command("k0\r")
             self.serial.close()
-        except Exception:
-            pass
+        except Exception as exc:
+            # Suppress all exceptions during garbage collection, but log for debugging.
+            logger.debug(
+                "Ignoring exception during EquipmentSolutionsASIRemoteFocus cleanup: %s",
+                exc,
+            )
 
     @classmethod
-    def connect(cls, port: str="COM1", baudrate: int=115200, timeout: float=1.25) -> serial.Serial:
+    def connect(cls, port: str = "COM1", baudrate: int = 115200, timeout: float = 1.25) -> serial.Serial:
         """Connect to Serial Communication Port
+
+        Parameters
+	    ----------
         port : str
             Serial Port (default is "COM1")
         baudrate : int, optional
@@ -435,10 +442,7 @@ class EquipmentSolutionsASIRemoteFocus(ASIRemoteFocus, SerialDevice, ASIDevice):
                 "Error in communicating with Voice Coil via COMPORT", self.comport
             )
 
-
-
 if __name__ == "__main__":
     vc = RemoteFocusEquipmentSolutions()
     vc.send_command("k0\r")  # Turn off servo
     vc.send_command("k1\r")  # Engage servo
-

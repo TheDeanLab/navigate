@@ -227,11 +227,19 @@ class Controller:
         if self.use_asi_model():
             logger.info("Using ASI model.")
             self.model = ObjectInSubprocess(
-                ASIModel, args, self.configuration, event_queue=self.event_queue
+                ASIModel, 
+                args, 
+                self.configuration, 
+                event_queue=self.event_queue,
+                log_queue=log_queue
             )
         else:
             self.model = ObjectInSubprocess(
-                Model, args, self.configuration, event_queue=self.event_queue
+                Model, 
+                args, 
+                self.configuration, 
+                event_queue=self.event_queue,
+                log_queue=log_queue
             )
 
         #: mp.Pipe: Pipe for sending images from model to view.
@@ -379,10 +387,11 @@ class Controller:
         daq_type = self.configuration["configuration"]["microscopes"][microscope_name][
             "daq"
         ]["hardware"].get("type", "NI")
-
-        if daq_type in ("ni", "NI"):
+        daq_type = daq_type.lower()
+        
+        if daq_type in ("ni", "synthetic"):
             return False
-        elif daq_type in ("asi", "ASI"):
+        elif daq_type == "asi":
             return True
         else:
             raise ValueError(f"Unknown daq type: {daq_type}")

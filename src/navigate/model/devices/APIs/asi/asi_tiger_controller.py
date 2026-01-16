@@ -50,6 +50,8 @@ from serial.tools import list_ports
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+#: float: Minimum wait time between serial commands [seconds]
+WAIT_TIME = 0.05
 
 class ASIException(Exception):
     """
@@ -99,8 +101,7 @@ class ASIException(Exception):
         """Overrides base Exception string to be displayed
         in traceback"""
         return f"{self.code} -> {self.message}"
-
-
+    
 class TigerController:
     """Tiger Controller class"""
 
@@ -632,10 +633,10 @@ class TigerController:
         waiting_time = 0.0
 
         while busy:
-            waiting_time += 0.05
+            waiting_time += WAIT_TIME
             if waiting_time >= timeout:
                 break
-            time.sleep(0.05)
+            time.sleep(WAIT_TIME)
             busy = self.is_device_busy()
 
         if self.verbose:
@@ -833,7 +834,7 @@ class TigerController:
         time_since_last_cmd = time.perf_counter() - self._last_cmd_send_time
 
         # Wait 50 milliseconds before pinging controller again.
-        sleep_time = 0.050 - time_since_last_cmd
+        sleep_time = WAIT_TIME - time_since_last_cmd
         if sleep_time > 0:
             time.sleep(sleep_time)
 
@@ -999,6 +1000,7 @@ class TigerController:
         axis = int(axis) + 32
         self.send_command(f"6 M E = {axis}\r")
         self.read_response()
+        # CCA Y=2 sets this axis as an output
         self.send_command(f"6 CCA Y=2 Z=64\r")
         self.read_response()
 
@@ -1169,20 +1171,21 @@ class TigerController:
         # and cell 12 is the post-delay output. So whichever delay is longer
         # (accounting for hardware delays), will get input from 12. Additionally,
         # delay is calculated as a shifted difference between the higher and lower delay
-        if remote_focus_delay > camera_delay + 3.75:
+        backplane_time = 3.75  # ms time for a signal to travel the backplane (hardware specific)
+        if remote_focus_delay > camera_delay + backplane_time:
             camera_output = 6
             remote_focus_output = 12
-            start_delay += int((camera_delay + 3.75) * 4)
-            difference_delay = int((remote_focus_delay - (camera_delay + 3.75)) * 4)
-        elif remote_focus_delay < camera_delay + 3.75:
+            start_delay += int((camera_delay + backplane_time) * 4)
+            difference_delay = int((remote_focus_delay - (camera_delay + backplane_time)) * 4)
+        elif remote_focus_delay < camera_delay + backplane_time:
             camera_output = 12
             remote_focus_output = 6
             start_delay += int(remote_focus_delay * 4)
-            difference_delay = int(((camera_delay + 3.75) - remote_focus_delay) * 4)
+            difference_delay = int(((camera_delay + backplane_time) - remote_focus_delay) * 4)
         else:
             camera_output = 6
             remote_focus_output = 6
-            start_delay += int((camera_delay + 3.75) * 4)
+            start_delay += int((camera_delay + backplane_time) * 4)
             difference_delay = 0
         self.start_delay = start_delay / 4000  # Store for reference
         commands = [
@@ -1312,7 +1315,7 @@ class TigerController:
 
         self.send_command(f"6 m e = {axis}\r")
         self.read_response()
-        self.send_command("6 cca y=2 z = 6")
+        self.send_command("6 cca y = 2 z = 6")
         self.read_response()
 
     def wait_for_loop(self) -> None:
@@ -1328,19 +1331,19 @@ class TigerController:
             try:
                 result = int(response.split(" ")[1])
             except (ValueError, IndexError):
-                # print("Couldn't read logic cell state, trying again...")
+                logger.error("Couldn't read logic cell state, trying again...")
                 continue
             bit4 = result >> 3 & 1
-            time.sleep(0.05)  # sleep for 10 ms before checking again
+            time.sleep(WAIT_TIME)  # sleep for 50 ms before checking again
         return
 
     def get_axis_addr(self) -> dict:
-        """Return the dict of matching axes to their addresses.
-
+        """Return a dictionary mapping axis names to their addresses.
+	
         Returns
         -------
-        dict[str:str]
-            List of axes for this stage
+        dict[str, int]
+            Dictionary mapping axis names (str) to their addresses (int).
         """
         self.send_command("BU X")
         response = self.read_response()
@@ -1355,13 +1358,17 @@ class TigerController:
         logger.info(axis_addr)
         return axis_addr
 
-    def setup_z_stage(self, axis: str, addr, step_size) -> None:
+    def setup_z_stage(self, axis: str, addr: int, step_size: float) -> None:
         """Sets up the z-stage to be triggered by the control loop
 
         Parameters
         ----------
         axis : str
             The axis of the z-stage
+        addr :
+            The controller address associated with the z-stage axis.
+        step_size :
+            The step size used for z-stage movements during the control loop.
         """
         commands = [
             "rm y=3",

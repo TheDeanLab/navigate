@@ -321,9 +321,3 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
     def __del__(self):
         """Destructor for the ASIRemoteFocus class."""
         self.close()
-
-
-if __name__ == "__main__":
-    vc = RemoteFocusEquipmentSolutions()
-    vc.send_command("k0\r")  # Turn off servo
-    vc.send_command("k1\r")  # Engage servo

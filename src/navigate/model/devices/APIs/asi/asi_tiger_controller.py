@@ -1339,7 +1339,7 @@ class TigerController:
 
     def get_axis_addr(self) -> dict:
         """Return a dictionary mapping axis names to their addresses.
-	
+        
         Returns
         -------
         dict[str, int]

@@ -333,7 +333,7 @@ class EquipmentSolutionsASIRemoteFocus(ASIRemoteFocus, SerialDevice, ASIDevice):
         """Connect to Serial Communication Port
 
         Parameters
-	    ----------
+        ----------
         port : str
             Serial Port (default is "COM1")
         baudrate : int, optional

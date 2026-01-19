@@ -337,7 +337,7 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
-            self.acquire_pop = AcquirePopUp(self.view)
+            self.acquire_pop = AcquirePopUp(self.view, self.parent_controller.configuration)
 
             buttons = self.acquire_pop.get_buttons()
             widgets = self.acquire_pop.get_widgets()
@@ -597,16 +597,23 @@ class AcquireBarController(GUIController):
         self.update_experiment_values(popup_window)
         self.update_bdv_settings()
 
+        # Collect all entry names to validate
         entry_names = [
             "user",
             "tissue",
             "celltype",
-            "label",
             "prefix",
         ]
 
+        # Add dynamic label entries
+        label_entries = []
+        for key in self.saving_settings.keys():
+            if key.startswith("label_") or key == "label":
+                entry_names.append(key)
+                label_entries.append(key)
+
         for name in entry_names:
-            if not self.is_valid_string(self.saving_settings[name]):
+            if name in self.saving_settings and not self.is_valid_string(self.saving_settings[name]):
                 messagebox.showwarning(
                     title="Invalid Entry",
                     message="Only alphanumeric characters, hyphens, "
@@ -616,11 +623,18 @@ class AcquireBarController(GUIController):
                 return
 
         # Verify user's input is non-zero.
+        # Check that at least one label entry is provided
+        has_valid_label = False
+        for label_key in label_entries:
+            if label_key in self.saving_settings and self.saving_settings[label_key]:
+                has_valid_label = True
+                break
+
         is_valid = (
             self.saving_settings["user"]
             and self.saving_settings["tissue"]
             and self.saving_settings["celltype"]
-            and self.saving_settings["label"]
+            and has_valid_label
         )
 
         if is_valid:

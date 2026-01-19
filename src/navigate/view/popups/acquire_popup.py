@@ -58,16 +58,21 @@ class AcquirePopUp(CommonMethods):
     """Class creates the popup that is generated when the Acquire button is pressed and
     Save File checkbox is selected."""
 
-    def __init__(self, root: tk.Tk) -> None:
+    def __init__(self, root: tk.Tk, configuration: dict = None) -> None:
         """Initialize the AcquirePopUp class
 
         Parameters
         ----------
         root : tk.Tk
             The root window
+        configuration : dict, optional
+            The configuration dictionary containing channel information
         """
         #: tk.Tk: The root window
         self.tk = root
+
+        #: dict: Configuration dictionary
+        self.configuration = configuration
 
         #: int: Width of the first column
         self.column1_width = 20
@@ -182,10 +187,6 @@ class EntryFrame:
             "user",
             "tissue",
             "celltype",
-            "label",
-            "prefix",
-            "solvent",
-            "file_type",
         ]
 
         entry_labels = [
@@ -193,11 +194,29 @@ class EntryFrame:
             "User",
             "Tissue Type",
             "Cell Type",
-            "Label",
-            "Prefix",
-            "Solvent",
-            "File Type",
         ]
+
+        # Add dynamic label entries for each selected channel
+        selected_channels = []
+        if parent.configuration and "experiment" in parent.configuration:
+            channels = parent.configuration["experiment"].get("MicroscopeState", {}).get("channels", {})
+            for channel_name, channel_info in channels.items():
+                if channel_info.get("is_selected", False):
+                    laser = channel_info.get("laser", "")
+                    # Extract wavelength (e.g., "488nm" from "488nm")
+                    wavelength = laser
+                    selected_channels.append((channel_name, wavelength))
+                    entry_names.append(f"label_{wavelength}")
+                    entry_labels.append(f"Label ({wavelength})")
+
+        # If no channels found or configuration not provided, use default single label
+        if not selected_channels:
+            entry_names.append("label")
+            entry_labels.append("Label")
+
+        # Add remaining standard entries
+        entry_names.extend(["prefix", "solvent", "file_type"])
+        entry_labels.extend(["Prefix", "Solvent", "File Type"])
 
         # Loop for each entry and label
         row_index += 1

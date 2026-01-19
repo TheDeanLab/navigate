@@ -688,6 +688,13 @@ class AcquireBarController(GUIController):
         popup_window : AcquirePopUp
             Instance of the popup save dialog.
         """
+        # Clear out old channel label entries first
+        keys_to_remove = [key for key in self.saving_settings.keys()
+                          if key.startswith("label_") or key == "label"]
+        for key in keys_to_remove:
+            del self.saving_settings[key]
+
+        # Populate saving settings from popup window
         popup_vals = popup_window.get_variables()
         for name in popup_vals:
             # remove leading and tailing whitespaces

@@ -80,10 +80,33 @@ class AcquirePopUp(CommonMethods):
         #: int: Width of the second column
         self.column2_width = 40
 
+        # Calculate the number of entry widgets dynamically
+        num_base_entries = 8  # root_directory, user, tissue, celltype, prefix,
+        # solvent, file_type
+        num_channel_labels = 0
+
+        # Count selected channels for dynamic label entries
+        if configuration and "experiment" in configuration:
+            channels = configuration["experiment"].get("MicroscopeState", {}).get("channels", {})
+            num_channel_labels = sum(1 for ch_info in channels.values() if ch_info.get("is_selected", False))
+
+        # If no channels selected, we still have 1 label field
+        if num_channel_labels == 0:
+            num_channel_labels = 1
+
+        total_entries = num_base_entries + num_channel_labels - 1  # -1 because we replace the single label with channel labels
+
+        # Calculate dynamic height: base height + (entries * height_per_entry)
+        # Base height includes tabs, buttons, separators, and padding
+        # Each entry widget takes approximately 30 pixels
+        base_height = 480  # Height for tabs, buttons, separators, and header
+        height_per_entry = 30
+        calculated_height = base_height + (total_entries * height_per_entry)
+
         #: PopUp: The popup window
         if platform.system() == "Windows":
             self.global_width = 450
-            self.global_height = 710
+            self.global_height = calculated_height
             self.popup = PopUp(
                 root,
                 name="File Saving Dialog",
@@ -92,7 +115,7 @@ class AcquirePopUp(CommonMethods):
             )
         else:
             self.global_width = 580
-            self.global_height = 730
+            self.global_height = calculated_height
             self.popup = PopUp(
                 root,
                 name="File Saving Dialog",

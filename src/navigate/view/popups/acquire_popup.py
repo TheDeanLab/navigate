@@ -87,14 +87,22 @@ class AcquirePopUp(CommonMethods):
 
         # Count selected channels for dynamic label entries
         if configuration and "experiment" in configuration:
-            channels = configuration["experiment"].get("MicroscopeState", {}).get("channels", {})
-            num_channel_labels = sum(1 for ch_info in channels.values() if ch_info.get("is_selected", False))
+            channels = (
+                configuration["experiment"]
+                .get("MicroscopeState", {})
+                .get("channels", {})
+            )
+            num_channel_labels = sum(
+                1 for ch_info in channels.values() if ch_info.get("is_selected", False)
+            )
 
         # If no channels selected, we still have 1 label field
         if num_channel_labels == 0:
             num_channel_labels = 1
 
-        total_entries = num_base_entries + num_channel_labels - 1  # -1 because we replace the single label with channel labels
+        total_entries = (
+            num_base_entries + num_channel_labels - 1
+        )  # -1 because we replace the single label with channel labels
 
         # Calculate dynamic height: base height + (entries * height_per_entry)
         # Base height includes tabs, buttons, separators, and padding
@@ -222,7 +230,11 @@ class EntryFrame:
         # Add dynamic label entries for each selected channel
         selected_channels = []
         if parent.configuration and "experiment" in parent.configuration:
-            channels = parent.configuration["experiment"].get("MicroscopeState", {}).get("channels", {})
+            channels = (
+                parent.configuration["experiment"]
+                .get("MicroscopeState", {})
+                .get("channels", {})
+            )
             for channel_name, channel_info in channels.items():
                 if channel_info.get("is_selected", False):
                     laser = channel_info.get("laser", "")

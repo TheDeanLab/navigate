@@ -337,7 +337,9 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
-            self.acquire_pop = AcquirePopUp(self.view, self.parent_controller.configuration)
+            self.acquire_pop = AcquirePopUp(
+                self.view, self.parent_controller.configuration
+            )
 
             buttons = self.acquire_pop.get_buttons()
             widgets = self.acquire_pop.get_widgets()
@@ -613,7 +615,9 @@ class AcquireBarController(GUIController):
                 label_entries.append(key)
 
         for name in entry_names:
-            if name in self.saving_settings and not self.is_valid_string(self.saving_settings[name]):
+            if name in self.saving_settings and not self.is_valid_string(
+                self.saving_settings[name]
+            ):
                 messagebox.showwarning(
                     title="Invalid Entry",
                     message="Only alphanumeric characters, hyphens, "
@@ -689,8 +693,11 @@ class AcquireBarController(GUIController):
             Instance of the popup save dialog.
         """
         # Clear out old channel label entries first
-        keys_to_remove = [key for key in self.saving_settings.keys()
-                          if key.startswith("label_") or key == "label"]
+        keys_to_remove = [
+            key
+            for key in self.saving_settings.keys()
+            if key.startswith("label_") or key == "label"
+        ]
         for key in keys_to_remove:
             del self.saving_settings[key]
 

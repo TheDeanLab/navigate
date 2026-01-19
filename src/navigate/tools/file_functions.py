@@ -97,7 +97,9 @@ def create_save_path(saving_settings: dict) -> str:
             label_entries["label"] = value
 
     # Build label string
-    if len(label_entries) > 1 or (len(label_entries) == 1 and "label" not in label_entries):
+    if len(label_entries) > 1 or (
+        len(label_entries) == 1 and "label" not in label_entries
+    ):
         # Multiple channels: create format like "488nm_{value1}_561nm_{value2}"
         sorted_wavelengths = sorted([w for w in label_entries.keys() if w != "label"])
         label_parts = []
@@ -107,7 +109,9 @@ def create_save_path(saving_settings: dict) -> str:
         label_string = "_".join(label_parts)
     else:
         # Single label or fallback
-        label_string = label_entries.get("label", list(label_entries.values())[0] if label_entries else "")
+        label_string = label_entries.get(
+            "label", list(label_entries.values())[0] if label_entries else ""
+        )
 
     # Make sure that there are no spaces in the variables
     root_directory = saving_settings["root_directory"]
@@ -121,7 +125,9 @@ def create_save_path(saving_settings: dict) -> str:
     # Create the save directory on disk.
     save_directory = str(
         os.path.join(
-            root_directory, user_string, f"{date_string}_{tissue_string}_{cell_type_string}_{label_string}"
+            root_directory,
+            user_string,
+            f"{date_string}_{tissue_string}_{cell_type_string}_{label_string}",
         )
     )
     os.makedirs(save_directory, exist_ok=True)
@@ -144,8 +150,6 @@ def create_save_path(saving_settings: dict) -> str:
     # Update the experiment dict
     saving_settings["save_directory"] = save_directory
     saving_settings["date"] = date_string
-    print(f"Data will be saved to: {save_directory}")
-
     return save_directory
 
 

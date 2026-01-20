@@ -116,7 +116,6 @@ class CreateSavePathTestCase(unittest.TestCase):
         }
 
         save_directory = create_save_path(saving_settings)
-        print(save_directory)
 
         # Assert that the save directory is correct
         self.assertEqual(

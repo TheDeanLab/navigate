@@ -86,31 +86,19 @@ def create_save_path(saving_settings: dict) -> str:
         Path to save data to.
     """
     root_directory = saving_settings["root_directory"]
-    user_string = saving_settings["user"]
-    tissue_string = saving_settings["tissue"]
-    cell_type_string = saving_settings["celltype"]
-    label_string = saving_settings["label"]
-    prefix_string = saving_settings["prefix"]
-    date_string = str(datetime.now().date())
-
-    # Make sure that there are no spaces in the variables
-    user_string = user_string.replace(" ", "-")
-    tissue_string = tissue_string.replace(" ", "-")
-    cell_type_string = cell_type_string.replace(" ", "-")
-    label_string = label_string.replace(" ", "-")
+    user_string = saving_settings["user"].replace(" ", "").lower()
+    tissue_string = saving_settings["tissue"].replace(" ", "").lower()
+    cell_type_string = saving_settings["celltype"].replace(" ", "").lower()
+    label_string = saving_settings["label"].replace(" ", "").lower()
+    prefix_string = saving_settings["prefix"].replace(" ", "").lower()
+    date_string = str(datetime.now().date()).replace("-", "")
 
     # Create the save directory on disk.
     save_directory = str(
         os.path.join(
-            root_directory,
-            user_string,
-            tissue_string,
-            cell_type_string,
-            label_string,
-            date_string,
+            root_directory, user_string, f"{date_string}_{tissue_string}_{cell_type_string}_{label_string}"
         )
     )
-
     os.makedirs(save_directory, exist_ok=True)
 
     # Determine Number of Acquisitions in Directory

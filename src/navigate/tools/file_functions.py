@@ -105,7 +105,10 @@ def create_save_path(saving_settings: dict) -> str:
         label_parts = []
         for wavelength in sorted_wavelengths:
             value = label_entries[wavelength]
-            label_parts.append(f"{wavelength}_{value}")
+            if value:
+                label_parts.append(f"{wavelength}_{value}")
+            else:
+                label_parts.append(wavelength)
         label_string = "_".join(label_parts)
     else:
         # Single label or fallback

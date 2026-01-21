@@ -615,50 +615,42 @@ class AcquireBarController(GUIController):
                 label_entries.append(key)
 
         for name in entry_names:
-            if name in self.saving_settings and not self.is_valid_string(
+            # empty label entries if key is not "label" and user did not provide input
+            if (
+                name in label_entries
+                and name != "label"
+                and not self.saving_settings[name]
+            ):
+                continue
+            # Verify user's input is valid.
+            if name in self.saving_settings and self.is_valid_string(
                 self.saving_settings[name]
             ):
-                messagebox.showwarning(
-                    title="Invalid Entry",
-                    message="Only alphanumeric characters, hyphens, "
-                    "and underscores are allowed. \n",
-                    parent=popup_window.popup,
-                )
-                return
+                continue
+            messagebox.showwarning(
+                title="Invalid Entry",
+                message="Only alphanumeric characters, hyphens, "
+                "and underscores are allowed. \n",
+                parent=popup_window.popup,
+            )
+            return
 
-        # Verify user's input is non-zero.
-        # Check that at least one label entry is provided
-        has_valid_label = False
-        for label_key in label_entries:
-            if label_key in self.saving_settings and self.saving_settings[label_key]:
-                has_valid_label = True
-                break
+        try:
+            file_directory = create_save_path(self.saving_settings)
+        except Exception:
+            messagebox.showwarning(
+                title="Directory Not Found.",
+                message="The directory specified is invalid. \n"
+                "This commonly occurs when the Root Directory is "
+                "incorrect. Please double-check and try again.",
+                parent=popup_window.popup,
+            )
+            return
 
-        is_valid = (
-            self.saving_settings["user"]
-            and self.saving_settings["tissue"]
-            and self.saving_settings["celltype"]
-            and has_valid_label
-        )
-
-        if is_valid:
-            # Verify that the path is valid.
-            try:
-                file_directory = create_save_path(self.saving_settings)
-            except Exception:
-                messagebox.showwarning(
-                    title="Directory Not Found.",
-                    message="The directory specified is invalid. \n"
-                    "This commonly occurs when the Root Directory is "
-                    "incorrect. Please double-check and try again.",
-                    parent=popup_window.popup,
-                )
-                return
-
-            self.is_acquiring = True
-            self.view.acquire_btn.configure(state="disabled")
-            popup_window.popup.dismiss()
-            self.parent_controller.execute("acquire_and_save", file_directory)
+        self.is_acquiring = True
+        self.view.acquire_btn.configure(state="disabled")
+        popup_window.popup.dismiss()
+        self.parent_controller.execute("acquire_and_save", file_directory)
 
     def exit_program(self) -> None:
         """Exit Button to close the program."""

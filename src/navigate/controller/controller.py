@@ -1243,8 +1243,6 @@ class Controller:
                 mode=mode,
                 stop=False,
             )
-            # Note: Frame rate is now updated via event_queue from the model's
-            # run_data_process method, which provides accurate timing.
 
         logger.info(
             f"Navigate Controller - Captured {images_received}, " f"{mode} Images"
@@ -1480,7 +1478,7 @@ class Controller:
 
         # Update the Framerate in the Camera Settings Tab
         self.camera_setting_controller.framerate_widgets["max_framerate"].set(
-            str(frame_rate)
+            frame_rate
         )
 
         # Update the Framerate in the Acquire Bar to provide an estimate of

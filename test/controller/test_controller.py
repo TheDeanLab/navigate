@@ -704,9 +704,11 @@ def test_capture_image(controller):
     controller.update_frame_rate(test_frame_rate)
 
     assert controller.acquire_bar_controller.framerate == test_frame_rate
+
+    test_frame_rate_str = str(test_frame_rate)
     assert controller.camera_setting_controller.framerate_widgets[
         "max_framerate"
-    ].get() == str(test_frame_rate)
+    ].get() == test_frame_rate_str
 
     assert True
 

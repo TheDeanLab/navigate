@@ -440,14 +440,6 @@ class Microscope:
         # set camera trigger source
         self.set_camera_trigger_mode()
         self.set_camera_sensor_mode()
-        # get cooling setting
-        cooling_setting = self.configuration["experiment"]["CameraParameters"][
-            self.microscope_name
-        ].get("cooling", "Off")
-        temperature_setting = self.configuration["experiment"]["CameraParameters"][ 
-            self.microscope_name
-        ].get("cooling_temperature", -10)
-        self.camera.set_cooling(cooling_setting, temperature_setting)
         if not self.set_camera_roi_and_binning():
             return None
         logger.debug(f"Running microscope {self.microscope_name}")
@@ -1142,6 +1134,17 @@ class Microscope:
             Variable input arguments.
         """
         logger.info(f"Running Command: {command}, {args}")
+        if command == "set_cooling_state":
+            if len(args) < 1:
+                state = "Off"
+            else:
+                state = args[0]
+                if args[0] not in ("On", "Off"):
+                    state = "Off"
+            self.camera.set_cooling(state)
+        elif command == "get_camera_temperature":
+            temperature = self.camera.get_temperature()
+            self.output_event_queue.put(("camera_temperature", temperature))
         if command in self.commands:
             result = self.commands[command][1](*args)
             if result:

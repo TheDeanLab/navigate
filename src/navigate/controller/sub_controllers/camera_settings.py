@@ -104,6 +104,11 @@ class AdvancedCameraSettingController:
         self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
         self.view.popup.bind("<Escape>", lambda event: self.close_popup())
 
+        # register event listeners
+        self.parent_controller.register_event_listener(
+            "camera_temperature", self.update_temperature
+        )
+
         logger.debug("Advanced camera settings popup initialized.")
 
     def showup(self):
@@ -146,6 +151,15 @@ class AdvancedCameraSettingController:
                 f"{self.parent_controller.camera_view_controller.flip_flags}"
             )
 
+        # save to experiment
+        self.parent_controller.configuration["experiment"]["CameraParameters"][
+            self.current_microscope
+        ]["trigger_source"] = self.view.inputs["trigger_source"].get()
+
+        self.parent_controller.configuration["experiment"]["CameraParameters"][
+            self.current_microscope
+        ]["cooling"] = self.view.inputs["cooling"].get()
+
     def flip_axis(self, axis: str) -> None:
         """Flip the camera axis in the configuration.
 
@@ -165,6 +179,36 @@ class AdvancedCameraSettingController:
             f"Updating camera {axis} flip flag to {self.camera_dict[f'flip_{axis}']}..."
         )
 
+    def set_cooling_state(self, *args) -> None:
+        """Set the cooling state based on the dropdown selection."""
+        cooling_state = self.view.inputs["cooling"].get()
+        if self.local_config_controller.configuration_controller.camera_config_dict.get(
+            "cooling", False
+        ):
+            # set cooling parameter to the camera
+            self.parent_controller.execute("set_camera_cooling", cooling_state)
+            self.camera_setting_dict["cooling"] = cooling_state
+        else:
+            self.camera_setting_dict["cooling"] = "Off"
+            self.view.inputs["cooling"].set("Off")
+
+    def refresh_temperature(self) -> None:
+        """Refresh the camera cooling temperature display."""
+        self.parent_controller.execute("get_camera_temperature")
+
+    def update_temperature(self, temperature: float) -> None:
+        """Update the temperature display in the popup.
+
+        Parameters
+        ----------
+        temperature : float
+            The current camera temperature.
+        """
+        if temperature is not None:
+            self.view.variables["cooling_temperature"].set(f"{temperature:.1f}")
+        else:
+            self.view.variables["cooling_temperature"].set("N/A")
+
     def close_popup(self) -> None:
         """Close the popup window."""
         self.save_camera_settings()
@@ -173,7 +217,9 @@ class AdvancedCameraSettingController:
         if hasattr(self.parent_controller, "advanced_camera_setting_controller"):
             del self.parent_controller.advanced_camera_setting_controller
 
-        logger.debug("Advanced camera settings popup closed and sub-controller deleted.")
+        logger.debug(
+            "Advanced camera settings popup closed and sub-controller deleted."
+        )
 
     def update_microscope(
         self, *args, in_initialization: Optional[bool] = False
@@ -214,6 +260,29 @@ class AdvancedCameraSettingController:
         # Reconfigure traces for the new widgets
         self._configure_widget_traces()
 
+        # populate other camera settings if needed
+        # Camera Trigger Source
+        self.camera_setting_dict = self.parent_controller.configuration["experiment"][
+            "CameraParameters"
+        ][self.current_microscope]
+        trigger_source = self.camera_setting_dict.get("trigger_source", "External")
+        self.view.inputs["trigger_source"]["values"] = self.camera_dict.get(
+            "supported_trigger_sources", ["External"]
+        )
+        if trigger_source not in self.view.inputs["trigger_source"]["values"]:
+            trigger_source = self.view.inputs["trigger_source"]["values"][0]
+        self.view.inputs["trigger_source"].set(trigger_source)
+
+        # cooling settings
+        self.view.inputs["cooling"]["values"] = ["On", "Off"]
+        if self.camera_dict.get("cooling", False):
+            cooling = self.camera_setting_dict.get("cooling", "Off")
+            self.view.inputs["cooling"].set(cooling)
+            self.view.inputs["cooling"]["state"] = "readonly"
+        else:
+            self.view.inputs["cooling"].set("Off")
+            self.view.inputs["cooling"]["state"] = "disabled"
+
     def _configure_widget_traces(self) -> None:
         """Configure traces and commands for widgets after they're created."""
         # Configure the flip flags for each camera axis.
@@ -222,6 +291,12 @@ class AdvancedCameraSettingController:
 
         # Save button trace.
         self.view.save_button.configure(command=self.save_camera_settings)
+
+        self.view.inputs["cooling"].bind("<<ComboboxSelected>>", self.set_cooling_state)
+        self.view.buttons["refresh_temperature"].configure(
+            command=self.refresh_temperature
+        )
+
 
 class CameraSettingController(GUIController):
     """Controller for the camera settings."""
@@ -266,9 +341,6 @@ class CameraSettingController(GUIController):
 
         #: dict: ROI buttons
         self.roi_btns = view.camera_roi.get_buttons()
-
-        #: dict: Camera Control widgets
-        self.camera_control_widgets = view.camera_control.get_widgets()
 
         # initialize
 
@@ -391,12 +463,6 @@ class CameraSettingController(GUIController):
             "CameraParameters"
         ][microscope_name]
 
-        # Camera Trigger Source
-        trigger_source = self.camera_setting_dict.get("trigger_source", "External")
-        if trigger_source not in self.mode_widgets["Trigger"].widget["values"]:
-            trigger_source = self.mode_widgets["Trigger"].widget["values"][0]
-        self.mode_widgets["Trigger"].set(trigger_source)
-
         # Readout Settings
         self.update_sensor_mode(self.camera_setting_dict["sensor_mode"])
 
@@ -433,12 +499,6 @@ class CameraSettingController(GUIController):
         self.framerate_widgets["frames_to_average"].set(
             self.camera_setting_dict["frames_to_average"]
         )
-        self.camera_control_widgets["cooling"].set(
-            self.camera_setting_dict.get("cooling", "Off")
-        )
-        self.camera_control_widgets["cooling_temperature"].set(
-            self.camera_setting_dict.get("cooling_temperature", -10)
-        )
 
         # after initialization
         self.in_initialization = False
@@ -455,7 +515,6 @@ class CameraSettingController(GUIController):
             *args: Variable length argument list.
         """
         # Camera Operation Mode
-        self.camera_setting_dict["trigger_source"] = self.mode_widgets["Trigger"].get()
         self.camera_setting_dict["sensor_mode"] = self.mode_widgets["Sensor"].get()
         if self.camera_setting_dict["sensor_mode"] == "Light-Sheet":
             self.camera_setting_dict["readout_direction"] = self.mode_widgets[
@@ -539,23 +598,6 @@ class CameraSettingController(GUIController):
         self.roi_widgets["Height"].set(y_pixels)
         self.camera_setting_dict["fov_x"] = self.roi_widgets["FOV_X"].get()
         self.camera_setting_dict["fov_y"] = self.roi_widgets["FOV_Y"].get()
-
-        if self.parent_controller.configuration_controller.camera_config_dict.get("cooling", False):
-            self.camera_setting_dict["cooling"] = self.camera_control_widgets[
-                "cooling"
-            ].get()
-            cooling_temperature = self.camera_control_widgets[
-                "cooling_temperature"
-            ].get()
-            try:
-                self.camera_setting_dict["cooling_temperature"] = float(cooling_temperature)
-            except (TypeError, ValueError):
-                self.camera_setting_dict["cooling_temperature"] = -10
-                self.camera_control_widgets["cooling_temperature"].set(-10)
-            
-        else:
-            self.camera_setting_dict["cooling"] = "Off"
-            self.camera_control_widgets["cooling"].set("Off")
 
         return ""
 
@@ -729,7 +771,6 @@ class CameraSettingController(GUIController):
         self.mode = mode
         state = "disabled" if mode != "stop" else "normal"
         state_readonly = "disabled" if mode != "stop" else "readonly"
-        self.mode_widgets["Trigger"].widget["state"] = state_readonly
         self.mode_widgets["Sensor"].widget["state"] = state_readonly
         if self.mode_widgets["Sensor"].get() == "Light-Sheet":
             self.mode_widgets["Readout"].widget["state"] = state_readonly
@@ -750,13 +791,6 @@ class CameraSettingController(GUIController):
         self.roi_widgets["Binning"].widget["state"] = state_readonly
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]["state"] = state
-
-        if self.parent_controller.configuration_controller.camera_config_dict.get("cooling", False):
-            self.camera_control_widgets["cooling"].widget["state"] = state_readonly
-            self.camera_control_widgets["cooling_temperature"].widget["state"] = state
-        else:
-            self.camera_control_widgets["cooling"].widget["state"] = "disabled"
-            self.camera_control_widgets["cooling_temperature"].widget["state"] = "disabled"
 
     def set_roi_widgets_state(self):
         """Set the status of ROI widgets"""
@@ -909,16 +943,6 @@ class CameraSettingController(GUIController):
             "CameraParameters"
         ][microscope_name]
 
-        self.mode_widgets["Trigger"].widget["values"] = camera_config_dict.get(
-            "supported_trigger_sources", ["External"]
-        )
-        if (
-            self.mode_widgets["Trigger"].get()
-            not in self.mode_widgets["Trigger"].widget["values"]
-        ):
-            self.mode_widgets["Trigger"].set(
-                self.mode_widgets["Trigger"].widget["values"][0]
-            )
         self.mode_widgets["Sensor"].widget["values"] = camera_config_dict.get(
             "supported_sensor_modes", ["Normal"]
         )
@@ -927,17 +951,6 @@ class CameraSettingController(GUIController):
             not in self.mode_widgets["Sensor"].widget["values"]
         ):
             self.update_sensor_mode(self.mode_widgets["Sensor"].widget["values"][0])
-
-        # cooling support setting
-        cooling_supported = camera_config_dict.get("cooling", False)
-        self.camera_control_widgets["cooling"].widget["values"] = ["On", "Off"]
-        if cooling_supported:
-            self.camera_control_widgets["cooling"].widget["state"] = "readonly"
-            self.camera_control_widgets["cooling_temperature"].widget["state"] = "normal"
-        else:
-            self.camera_control_widgets["cooling"].widget["state"] = "disabled"
-            self.camera_control_widgets["cooling_temperature"].widget["state"] = "disabled"
-            self.camera_control_widgets["cooling"].set("Off")
 
     def update_camera_parameters_silent(self, value):
         """Update GUI camera parameters

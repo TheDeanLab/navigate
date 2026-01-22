@@ -1076,6 +1076,10 @@ class Controller:
                     "live",
                 ),
             )
+        elif command in ["set_cooling_state", "get_camera_temperature"]:
+            self.threads_pool.createThread(
+                "model", lambda: self.model.run_command(command, *args)
+            )
         else:
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command(command, *args)
@@ -1454,7 +1458,7 @@ class Controller:
                 update_table(
                     table=self.multiposition_tab_controller.table,
                     pos=value[1:],
-                    axes = value[0]
+                    axes=value[0],
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)
 

@@ -1480,7 +1480,7 @@ class Controller:
 
         # Update the Framerate in the Camera Settings Tab
         self.camera_setting_controller.framerate_widgets["max_framerate"].set(
-            frame_rate
+            str(frame_rate)
         )
 
         # Update the Framerate in the Acquire Bar to provide an estimate of

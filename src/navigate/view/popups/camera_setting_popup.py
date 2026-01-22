@@ -44,6 +44,7 @@ from navigate.view.main_window_content.camera_tab import CameraSettingsTab
 # p = __name__.split(".")[1]
 # logger = logging.getLogger(p)
 
+
 class AdvancedCameraSettingPopup:
     """Popup window for advanced camera setting."""
 
@@ -62,8 +63,6 @@ class AdvancedCameraSettingPopup:
         from navigate.view.custom_widgets.popup import PopUp
         from navigate.view.custom_widgets.validation import ValidatedCombobox
         from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-        from navigate.view.custom_widgets.hover import HoverButton, HoverCheckButton
-        from tkinter import ttk
 
         #: PopUp: Popup window for the camera settings.
         self.popup = PopUp(
@@ -101,11 +100,26 @@ class AdvancedCameraSettingPopup:
         )
         self.microscope.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
 
+        #: ttk.Frame: Frame to hold camera control inputs.
+        self.camera_control_frame = ttk.Labelframe(self.frame, text="Camera Control")
+        self.camera_control_frame.grid(
+            row=2, column=0, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
+        )
+
         #: dict: Holder for column frames (LabelFrames)
         self.column_frames = {}
 
         #: int: Fixed row height (px) to ensure perfect alignment
         self.row_minsize = 34
+
+        #: dict: widgets
+        self.inputs = {}
+
+        #: dict: buttons
+        self.buttons = {}
+
+        #: dict: variables
+        self.variables = {}
 
     def populate_view(self, flip_flags: dict) -> None:
         """Populate the view with the camera flip flags.
@@ -115,10 +129,15 @@ class AdvancedCameraSettingPopup:
         flip_flags : dict
             A dictionary containing the flip flags for x and y axes.
         """
+        # flip flags settings
+        image_setting_frame = ttk.LabelFrame(self.frame, text="Imaging Settings")
+        image_setting_frame.grid(
+            row=3, column=0, columnspan=2, padx=5, pady=5, sticky="nsew"
+        )
         # Create column LabelFrames for axis labels and flip flags
         self.column_frames = {
-            "axis": ttk.LabelFrame(self.frame, text="Axis"),
-            "flip": ttk.LabelFrame(self.frame, text="Flip Direction"),
+            "axis": ttk.LabelFrame(image_setting_frame, text="Axis"),
+            "flip": ttk.LabelFrame(image_setting_frame, text="Flip Direction"),
         }
 
         # Grid the LabelFrames
@@ -175,21 +194,67 @@ class AdvancedCameraSettingPopup:
         # Save button
         self.save_button = HoverButton(self.frame, text="Save", width=10)
         self.save_button.grid(
-            row=2,
+            row=4,
             column=1,
             padx=5,
             pady=5,
             sticky="e",
         )
-        self.save_button.hover.setdescription(
-            "Click to save the camera flip flags."
-        )
+        self.save_button.hover.setdescription("Click to save the camera flip flags.")
 
         # Center the flip flag checkboxes inside their column
         self.column_frames["flip"].grid_columnconfigure(0, weight=1)
 
+        label_1 = ttk.Label(
+            self.camera_control_frame,
+            text="Cooling Settings",
+            font=("Arial", 12, "bold"),
+        )
+        label_1.grid(row=0, column=0, pady=5, padx=5, sticky="w")
+        self.inputs["cooling"] = ttk.Combobox(
+            self.camera_control_frame, width=12, state="readonly"
+        )
+        self.inputs["cooling"].grid(row=0, column=1, pady=5, padx=5)
+        label_2 = ttk.Label(
+            self.camera_control_frame,
+            text="Temperature (°C)",
+            font=("Arial", 12, "bold"),
+        )
+        label_2.grid(row=1, column=0, pady=5, padx=5, sticky="w")
+        self.variables["cooling_temperature"] = tk.StringVar()
+        self.inputs["cooling_temperature"] = ttk.Entry(
+            self.camera_control_frame,
+            textvariable=self.variables["cooling_temperature"],
+            width=12,
+            state="disabled",
+        )
+        self.inputs["cooling_temperature"].grid(row=1, column=1, pady=5, padx=5)
+        self.buttons["refresh_temperature"] = HoverButton(
+            self.camera_control_frame, text="Refresh", width=8
+        )
+        self.buttons["refresh_temperature"].grid(
+            row=1, column=2, pady=5, padx=5, sticky="w"
+        )
+        self.buttons["refresh_temperature"].hover.setdescription(
+            "Click to refresh the current cooling temperature."
+        )
+
+        label_3 = ttk.Label(
+            self.camera_control_frame, text="Trigger Source", font=("Arial", 12, "bold")
+        )
+        label_3.grid(row=2, column=0, pady=5, padx=5, sticky="w")
+        self.inputs["trigger_source"] = ttk.Combobox(
+            self.camera_control_frame, width=12, state="readonly"
+        )
+        self.inputs["trigger_source"].grid(row=2, column=1, pady=5, padx=5)
+
     def clear_view(self) -> None:
         """Clear the view by destroying all widgets and resetting variables."""
+        # destroy camera control inputs
+        for widget in self.camera_control_frame.winfo_children():
+            widget.destroy()
+        self.inputs.clear()
+
         for widget in self.flip_button.values():
             widget.destroy()
         self.flip_button.clear()
@@ -203,10 +268,14 @@ class AdvancedCameraSettingPopup:
         if self.save_button is not None:
             self.save_button.destroy()
 
-        # Clear all remaining widgets except the microscope dropdown
+        # Clear all remaining widgets except the microscope dropdown and camera control frame
         for widget in self.frame.winfo_children():
             grid_info = widget.grid_info()
-            if grid_info and widget != self.microscope:
+            if (
+                grid_info
+                and widget != self.microscope
+                and widget != self.camera_control_frame
+            ):
                 if int(grid_info.get("row", 0)) > 0:
                     widget.destroy()
 

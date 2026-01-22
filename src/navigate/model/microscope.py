@@ -1134,6 +1134,17 @@ class Microscope:
             Variable input arguments.
         """
         logger.info(f"Running Command: {command}, {args}")
+        if command == "set_cooling_state":
+            if len(args) < 1:
+                state = "Off"
+            else:
+                state = args[0]
+                if args[0] not in ("On", "Off"):
+                    state = "Off"
+            self.camera.set_cooling(state)
+        elif command == "get_camera_temperature":
+            temperature = self.camera.get_temperature()
+            self.output_event_queue.put(("camera_temperature", temperature))
         if command in self.commands:
             result = self.commands[command][1](*args)
             if result:

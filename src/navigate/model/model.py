@@ -992,12 +992,19 @@ class Model:
         None
             Terminates when acquisition ends or errors occur.
         """
+        # number of waits before aborting acquisition
         wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
         # whether acquire a specific number of frames.
         count_frame = num_of_frames > 0
 
+        # Frame rate tracking for GUI update (~10 Hz max)
+        frame_rate_update_interval_ns = 100_000_000  # 100ms = 10 Hz
+        last_frame_rate_update_ns = time.perf_counter_ns()
+        accumulated_durations_ns = []
+
+        # main data acquisition loop
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
                 self.pause_data_ready_lock.release()
@@ -1005,37 +1012,69 @@ class Model:
                 self.pause_data_event.wait()
             start_time = time.perf_counter_ns()
             frame_ids = self.active_microscope.camera.get_new_frame()
-            # if there is at least one frame available
+
+            # if there is at least one frame available, proceed. Else, wait and retry
             if not frame_ids:
                 self.logger.debug(
-                    f"Frame not received. Waiting {wait_num}"
-                    f"/{self.camera_wait_iterations} iterations"
+                    f"Frame acquisition delayed. Attempt {self.camera_wait_iterations - wait_num + 1}/"
+                    f"{self.camera_wait_iterations}. Remaining: {wait_num}. "
+                    f"Expected cause: External trigger not received."
                 )
                 wait_num -= 1
+
+                # If no frames received within the wait limit, abort acquisition
                 if wait_num <= 0:
                     error_statement = (
-                        "Acquisition aborted due to camera time out "
-                        "error. Please verify that the external "
-                        "trigger is connected and configured properly."
+                        "CAMERA TIMEOUT ERROR: Acquisition aborted.\n\n"
+                        "The camera failed to deliver a frame within the expected time window. "
+                        "This typically indicates:\n"
+                        "  • Missing or misconfigured external trigger signal\n"
+                        "  • Data acquisition card (DAQ) not properly configured\n"
+                        "  • Camera trigger settings mismatch\n\n"
+                        "Please verify:\n"
+                        "  1. External trigger cable is connected\n"
+                        "  2. DAQ trigger output is configured and active\n"
+                        "  3. Camera trigger mode matches DAQ output settings"
                     )
-
+                    self.event_queue.put(("warning", error_statement))
                     self.logger.debug(error_statement)
-                    print(error_statement)
                     break
                 continue
 
+            # If more than one frame is received, adjust duration accordingly
+            duration = (time.perf_counter_ns() - start_time) / len(frame_ids)
             self.logger.performance(
                 json.dumps(
                     {
                         "kind": "Acquire Image",
-                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "duration_ns": duration,
                         "timestamp": time.time(),
                     }
                 )
             )
 
+            # Accumulate duration for frame rate calculation
+            accumulated_durations_ns.append(duration)
+
+            # Send frame rate to GUI at ~10 Hz max
+            current_time_ns = time.perf_counter_ns()
+            if (
+                current_time_ns - last_frame_rate_update_ns
+                >= frame_rate_update_interval_ns
+            ):
+                if accumulated_durations_ns:
+                    avg_duration_ns = sum(accumulated_durations_ns) / len(
+                        accumulated_durations_ns
+                    )
+                    if avg_duration_ns > 0:
+                        frame_rate = 1e9 / avg_duration_ns
+                        self.event_queue.put(("frame_rate", frame_rate))
+                    accumulated_durations_ns.clear()
+                last_frame_rate_update_ns = current_time_ns
+
             acquired_frame_num += len(frame_ids)
 
+            # reset wait_num
             wait_num = self.camera_wait_iterations
 
             # ImageWriter to save images
@@ -1058,6 +1097,7 @@ class Model:
                 self.logger.info("Loop stop condition met.")
                 self.stop_acquisition = True
 
+        # Send stop signal to controller
         self.show_img_pipe.send("stop")
         self.logger.info("Data thread stopped.")
         self.logger.info(f"Received frames in total: {acquired_frame_num}")
@@ -1066,7 +1106,8 @@ class Model:
         if self.pause_data_ready_lock.locked():
             self.pause_data_ready_lock.release()
 
-        self.end_acquisition()  # Need this to turn off the lasers/close the shutters
+        # Turn off the lasers/close the shutters
+        self.end_acquisition()
 
     def pause_data_thread(self) -> None:
         """Pause the data thread.

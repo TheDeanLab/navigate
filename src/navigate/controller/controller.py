@@ -227,19 +227,19 @@ class Controller:
         if self.use_asi_model():
             logger.info("Using ASI model.")
             self.model = ObjectInSubprocess(
-                ASIModel, 
-                args, 
-                self.configuration, 
+                ASIModel,
+                args,
+                self.configuration,
                 event_queue=self.event_queue,
-                log_queue=log_queue
+                log_queue=log_queue,
             )
         else:
             self.model = ObjectInSubprocess(
-                Model, 
-                args, 
-                self.configuration, 
+                Model,
+                args,
+                self.configuration,
                 event_queue=self.event_queue,
-                log_queue=log_queue
+                log_queue=log_queue,
             )
 
         #: mp.Pipe: Pipe for sending images from model to view.
@@ -388,7 +388,7 @@ class Controller:
             "daq"
         ]["hardware"].get("type", "NI")
         daq_type = daq_type.lower()
-        
+
         if daq_type in ("ni", "synthetic"):
             return False
         elif daq_type == "asi":
@@ -1202,7 +1202,6 @@ class Controller:
         )
 
         self.stop_acquisition_flag = False
-        start_time = time.time()
         self.camera_setting_controller.update_readout_time()
 
         while True:
@@ -1244,26 +1243,6 @@ class Controller:
                 mode=mode,
                 stop=False,
             )
-            # update framerate
-            stop_time = time.time()
-            try:
-                frames_per_second = images_received / (stop_time - start_time)
-            except ZeroDivisionError:
-                frames_per_second = 1 / (
-                    self.configuration["experiment"]["MicroscopeState"]["channels"][
-                        "channel_1"
-                    ].get("camera_exposure_time", 200)
-                    / 1000
-                )
-
-            # Update the Framerate in the Camera Settings Tab
-            self.camera_setting_controller.framerate_widgets["max_framerate"].set(
-                frames_per_second
-            )
-
-            # Update the Framerate in the Acquire Bar to provide an estimate of
-            # the duration of time remaining.
-            self.acquire_bar_controller.framerate = frames_per_second
 
         logger.info(
             f"Navigate Controller - Captured {images_received}, " f"{mode} Images"
@@ -1478,6 +1457,34 @@ class Controller:
             stage_gui_dict[ax] = val
         self.stage_controller.set_position_silent(stage_gui_dict)
 
+    def update_frame_rate(self, frame_rate: float) -> None:
+        """Update the frame rate display in the GUI.
+
+        Updates the frame rate in the camera settings tab and the acquire bar
+        controller. This method receives the accurate frame rate calculated
+        from the model's run_data_process method.
+
+        Parameters
+        ----------
+        frame_rate : float
+            The frame rate in frames per second (Hz).
+
+        Returns
+        -------
+        None
+        """
+        # Round frame_rate to two decimal places for display
+        frame_rate = round(frame_rate, 2)
+
+        # Update the Framerate in the Camera Settings Tab
+        self.camera_setting_controller.framerate_widgets["max_framerate"].set(
+            frame_rate
+        )
+
+        # Update the Framerate in the Acquire Bar to provide an estimate of
+        # the duration of time remaining.
+        self.acquire_bar_controller.framerate = frame_rate
+
     def update_event(self):
         """Update the View/Controller based on events from the Model."""
         while True:
@@ -1508,6 +1515,10 @@ class Controller:
                     except RuntimeError:
                         time.sleep(0.001)
                         pass
+
+            elif event == "frame_rate":
+                # Update the GUI with the accurate frame rate from the model
+                self.update_frame_rate(value)
 
             elif event in self.event_listeners.keys():
                 try:

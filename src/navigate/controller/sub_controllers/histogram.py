@@ -33,9 +33,7 @@ import platform
 import threading
 import tkinter as tk
 from typing import Any
-import time
 import logging
-import json
 
 # Third Party Imports
 import numpy as np
@@ -142,6 +140,13 @@ class HistogramController:
         #: threading.Lock: Lock
         self.lock = threading.Lock()
 
+        # Matplotlib optimization: reuse plot objects for blitting
+        #: matplotlib.lines.Line2D: Line plot for histogram
+        self.line = None
+
+        #: matplotlib.patches.Rectangle: Background cache for blitting
+        self.background = None
+
         # Default location for communicating with the plugin in the model.
         if "histogram" not in self.parent_controller.configuration["gui"].keys():
             update_config_dict(
@@ -176,6 +181,9 @@ class HistogramController:
         """Update the scale of the histogram"""
         self.log_x = self.x_axis_var.get() == "log"
         self.log_y = self.y_axis_var.get() == "log"
+        # Reset line to force redraw with new scale
+        self.line = None
+        self.background = None
 
     def histogram_popup(self, event: tk.Event) -> None:
         """Histogram popup menu
@@ -239,31 +247,61 @@ class HistogramController:
         data = image.flatten()
         data = data[::down_sampling_constant]
 
-        # Plot histogram.
-        self.ax.cla()
+        # Plot histogram using original method
         counts, bins = np.histogram(data, bins=number_bins)
-        self.ax.bar(bins[:-1], counts, width=np.diff(bins), color="black", align="edge")
 
         x_maximum = np.max(data) + np.std(data)
         x_minimum = np.min(data) - np.std(data)
         x_minimum = 1 if x_minimum < 1 else x_minimum
         y_maximum = 10**6 // down_sampling_constant
 
-        self.ax.set_xlim(x_minimum, x_maximum)
-        self.ax.set_ylim(1, y_maximum)
+        # Use blitting for faster updates
+        if self.line is None:
+            # First time setup - draw everything
+            self.ax.cla()
+            # Use step plot to avoid oscillation between bins
+            self.line, = self.ax.step(bins[:-1], counts, where='post', color='black', linewidth=1)
 
-        if self.log_y:
-            self.ax.set_yscale("log")
+            self.ax.set_xlim(x_minimum, x_maximum)
+            self.ax.set_ylim(1, y_maximum)
 
-        if self.log_x:
-            self.ax.set_xscale("log")
+            if self.log_y:
+                self.ax.set_yscale("log")
 
-        self.ax.yaxis.set_major_formatter(
-            FuncFormatter(
-                lambda val, pos: f"$10^{{{int(np.log10(val))}}}$" if val > 0 else ""
+            if self.log_x:
+                self.ax.set_xscale("log")
+
+            self.ax.yaxis.set_major_formatter(
+                FuncFormatter(
+                    lambda val, pos: f"$10^{{{int(np.log10(val))}}}$" if val > 0 else ""
+                )
             )
-        )
-        self.histogram.figure_canvas.draw()
+
+            # Draw and cache background
+            self.histogram.figure_canvas.draw()
+            self.background = self.histogram.figure_canvas.copy_from_bbox(self.ax.bbox)
+        else:
+            # Fast update using blitting
+            # Update data
+            self.line.set_data(bins[:-1], counts)
+
+            # Check if axis limits need updating
+            current_xlim = self.ax.get_xlim()
+            current_ylim = self.ax.get_ylim()
+
+            if (current_xlim[0] != x_minimum or current_xlim[1] != x_maximum or
+                current_ylim[0] != 1 or current_ylim[1] != y_maximum):
+                # Limits changed, need to update axes and recache
+                self.ax.set_xlim(x_minimum, x_maximum)
+                self.ax.set_ylim(1, y_maximum)
+                self.histogram.figure_canvas.draw()
+                self.background = self.histogram.figure_canvas.copy_from_bbox(self.ax.bbox)
+            else:
+                # Limits unchanged, use fast blitting
+                self.histogram.figure_canvas.restore_region(self.background)
+                self.ax.draw_artist(self.line)
+                self.histogram.figure_canvas.blit(self.ax.bbox)
+                self.histogram.figure_canvas.flush_events()
 
     def _clear_histogram(self) -> None:
         """Clear the histogram but keep canvas interactive."""
@@ -286,3 +324,6 @@ class HistogramController:
         self.ax.set_xticks([])
         self.ax.set_yticks([])
         self.histogram.figure_canvas.draw()
+        # Reset cached state
+        self.line = None
+        self.background = None

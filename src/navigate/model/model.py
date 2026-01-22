@@ -998,6 +998,11 @@ class Model:
         # whether acquire a specific number of frames.
         count_frame = num_of_frames > 0
 
+        # Frame rate tracking for GUI update (~10 Hz max)
+        frame_rate_update_interval_ns = 100_000_000  # 100ms = 10 Hz
+        last_frame_rate_update_ns = time.perf_counter_ns()
+        accumulated_durations_ns = []
+
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
                 self.pause_data_ready_lock.release()
@@ -1024,15 +1029,30 @@ class Model:
                     break
                 continue
 
+            duration = time.perf_counter_ns() - start_time
             self.logger.performance(
                 json.dumps(
                     {
                         "kind": "Acquire Image",
-                        "duration_ns": time.perf_counter_ns() - start_time,
+                        "duration_ns": duration,
                         "timestamp": time.time(),
                     }
                 )
             )
+
+            # Accumulate duration for frame rate calculation
+            accumulated_durations_ns.append(duration)
+
+            # Send frame rate to GUI at ~10 Hz max
+            current_time_ns = time.perf_counter_ns()
+            if current_time_ns - last_frame_rate_update_ns >= frame_rate_update_interval_ns:
+                if accumulated_durations_ns:
+                    avg_duration_ns = sum(accumulated_durations_ns) / len(accumulated_durations_ns)
+                    if avg_duration_ns > 0:
+                        frame_rate = 1e9 / avg_duration_ns
+                        self.event_queue.put(("frame_rate", frame_rate))
+                    accumulated_durations_ns.clear()
+                last_frame_rate_update_ns = current_time_ns
 
             acquired_frame_num += len(frame_ids)
 

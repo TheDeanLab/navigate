@@ -227,19 +227,19 @@ class Controller:
         if self.use_asi_model():
             logger.info("Using ASI model.")
             self.model = ObjectInSubprocess(
-                ASIModel, 
-                args, 
-                self.configuration, 
+                ASIModel,
+                args,
+                self.configuration,
                 event_queue=self.event_queue,
-                log_queue=log_queue
+                log_queue=log_queue,
             )
         else:
             self.model = ObjectInSubprocess(
-                Model, 
-                args, 
-                self.configuration, 
+                Model,
+                args,
+                self.configuration,
                 event_queue=self.event_queue,
-                log_queue=log_queue
+                log_queue=log_queue,
             )
 
         #: mp.Pipe: Pipe for sending images from model to view.
@@ -388,7 +388,7 @@ class Controller:
             "daq"
         ]["hardware"].get("type", "NI")
         daq_type = daq_type.lower()
-        
+
         if daq_type in ("ni", "synthetic"):
             return False
         elif daq_type == "asi":
@@ -1477,7 +1477,7 @@ class Controller:
         """
         # Round frame_rate to two decimal places for display
         frame_rate = round(frame_rate, 2)
-        
+
         # Update the Framerate in the Camera Settings Tab
         self.camera_setting_controller.framerate_widgets["max_framerate"].set(
             frame_rate

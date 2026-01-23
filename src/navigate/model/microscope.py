@@ -34,6 +34,8 @@ import logging
 import importlib  # noqa: F401
 from multiprocessing.managers import ListProxy
 import reprlib
+import threading
+import time
 from typing import Any, Dict, List, Optional
 
 # Third-party imports
@@ -1134,7 +1136,7 @@ class Microscope:
             Variable input arguments.
         """
         logger.info(f"Running Command: {command}, {args}")
-        if command == "set_cooling_state":
+        if command == "set_camera_cooling_state":
             if len(args) < 1:
                 state = "Off"
             else:
@@ -1142,13 +1144,48 @@ class Microscope:
                 if args[0] not in ("On", "Off"):
                     state = "Off"
             self.camera.set_cooling(state)
+            if state == "On":
+                count = 10
+            else:
+                count = 1
+            if getattr(self, "camera_temperature_event", None) is None:
+                self.camera_temperature_event = threading.Event()
+            else:
+                self.camera_temperature_event.set()
+                self.camera_temperature_thread.join()
+                self.camera_temperature_event.clear()
+            self.camera_temperature_thread = threading.Thread(
+                target=self.refresh_camera_temperature, args=(count,)
+            )
+            self.camera_temperature_thread.start()
+
         elif command == "get_camera_temperature":
             temperature = self.camera.get_temperature()
             self.output_event_queue.put(("camera_temperature", temperature))
-        if command in self.commands:
+        elif command == "stop_refresh_camera_temperature":
+            self.stop_refresh_camera_temperature()
+        elif command in self.commands:
             result = self.commands[command][1](*args)
             if result:
                 device_name = self.commands[command][0]
                 self.output_event_queue.put((device_name, result))
         else:
             logger.debug(f"Unknown Command: {command}")
+
+    def refresh_camera_temperature(self, count: int = 1) -> None:
+        """Refresh camera temperature periodically."""
+        while not self.camera_temperature_event.is_set() and count > 0:
+            temperature = self.camera.get_temperature()
+            self.output_event_queue.put(("camera_temperature", temperature))
+            time.sleep(1)
+            count -= 1
+
+    def stop_refresh_camera_temperature(self) -> None:
+        """Stop refreshing camera temperature."""
+        if getattr(self, "camera_temperature_event", None):
+            self.camera_temperature_event.set()
+            if (
+                self.camera_temperature_thread
+                and self.camera_temperature_thread.is_alive()
+            ):
+                self.camera_temperature_thread.join()

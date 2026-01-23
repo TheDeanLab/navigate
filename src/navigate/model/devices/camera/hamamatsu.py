@@ -122,6 +122,11 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         self.camera_parameters["supported_trigger_sources"] = ["External", "Internal"]
         self.camera_parameters["cooling"] = True
 
+        cooling_state = self.camera_controller.get_property_value("cooling")
+        self.configuration["experiment"]["CameraParameters"][self.microscope_name][
+            "cooling"
+        ] = ("On" if cooling_state == 2 else "Off")
+
     def __str__(self):
         """Return string representation of HamamatsuOrca class.
 

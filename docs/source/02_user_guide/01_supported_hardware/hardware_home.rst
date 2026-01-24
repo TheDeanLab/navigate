@@ -6,6 +6,10 @@ Supported Hardware
 
 **navigate** provides access to a growing list of hardware devices. Information on how to configure each of these devices, including supported firmware, is provided here.
 
+The operational backbone of navigate is the data acquisition device, which synchronizes all hardware devices. 
+Navigate supports both National Instruments and Applied Scientific Instrumentation devices to perform this logic. 
+Each is accompanied with advantages and disadvantages. A discussion can be found :ref:`here <daq-ni-vs-asi>` on these devices.
+
 Additional devices are available by installing the **navigate-mmcore-plugin**. To learn more, please visit the **navigate-mmcore-plugin**
 `documentation <https://thedeanlab.github.io/navigate-mmcore-plugin/>`_.
 

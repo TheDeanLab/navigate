@@ -1,3 +1,7 @@
+.. |br| raw:: html
+
+   <br>
+
 ======================
 Data Acquisition Cards
 ======================
@@ -194,6 +198,59 @@ to communicate with the Tiger Controller
               port: COM4
 
 |
+
+------------------
+
+.. _daq-ni-vs-asi:
+
+NI Card vs. ASI Tiger Controller
+--------------------------------
+
+The following comparison considers not only the hardware differences between the two devices,
+but also the software implementation within **navigate**.
+
+.. list-table::
+   :header-rows: 1
+
+   * - **NI DAQ**
+     - **ASI Tiger Controller**
+   * - Requires independent wiring.
+     - BNC outputs on Tiger Controller.
+   * - More analog/digital channels
+     - Fewer analog/digital channels 
+   * - 100 kHz sampling rate
+     - 4 kHz evaluation rate
+   * - Arbitrary analog/digital waveforms
+     - Limited to predefined waveforms 
+       (Ramp, Triangle, Square, Sine, DC)
+   * - Software-driven triggers
+     - Hardware-driven triggers
+   * - For each image, turns on laser, |br|
+       triggers analog waveforms |br|
+       (camera + galvo + remote focus), |br|
+       then turns off laser.
+     - Sets up all waveforms at the beginning of the acquisition, |br|
+       then triggers each waveform deterministically through hardware.
+   * - Latency between software trigger |br|
+       and waveform output.
+     - Negligible latency between hardware trigger and waveform output
+   * - Software takes over between |br|
+       each image. Jitter possible.
+     - Hardware handles timing between each image. Negligible jitter. |br|
+       Software only takes over between stacks or when stop is pressed.
+
+================================================================================================================  ================================================================================================================================
+NI DAQ                                                                                                            ASI Tiger Controller
+================================================================================================================  ================================================================================================================================
+100 kHz sampling rate                                                                                             4 kHz evaluation rate
+Requires independent wiring.                                                                                      BNC outputs on Tiger Controller.
+Arbitrary analog/digital waveforms                                                                                Limited to predefined waveforms (Ramp, Triangle, Square, Sine, DC)
+More analog/digital channels                                                                                      Fewer analog/digital channels
+Software-driven triggers                                                                                          Hardware-driven triggers
+For each image, turns on laser, triggers analog waveforms (camera + galvo + remote focus), then turns off laser.  Sets up all waveforms at the beginning of the acquisition, then triggers each waveform deterministically through hardware.
+Latency between software trigger and waveform output (jitter possible)                                            Negligible latency between hardware trigger and waveform output
+Software takes over between each image. Jitter possible.                                                          Hardware handles timing between each image. Negligible jitter. Software only takes over between stacks or when stop is pressed.
+================================================================================================================  ================================================================================================================================
 
 ------------------
 

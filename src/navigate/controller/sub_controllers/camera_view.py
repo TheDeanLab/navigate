@@ -434,7 +434,8 @@ class BaseViewController(GUIController, ABaseViewController):
                 self.original_image_width,
             )
             self.update_canvas_size()
-            self.reset_display()
+            self.crosshair_x, self.crosshair_y = self.crosshair_y, self.crosshair_x
+            self.reset_display(reset_crosshair=False)
 
     def toggle_min_max_buttons(self, display: bool = False) -> None:
         """Checks the value of the autoscale widget.

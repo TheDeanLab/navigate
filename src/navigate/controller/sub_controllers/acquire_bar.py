@@ -337,7 +337,9 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
-            self.acquire_pop = AcquirePopUp(self.view)
+            self.acquire_pop = AcquirePopUp(
+                self.view, self.parent_controller.configuration
+            )
 
             buttons = self.acquire_pop.get_buttons()
             widgets = self.acquire_pop.get_widgets()
@@ -597,50 +599,58 @@ class AcquireBarController(GUIController):
         self.update_experiment_values(popup_window)
         self.update_bdv_settings()
 
+        # Collect all entry names to validate
         entry_names = [
             "user",
             "tissue",
             "celltype",
-            "label",
             "prefix",
         ]
 
+        # Add dynamic label entries
+        label_entries = []
+        for key in self.saving_settings.keys():
+            if key.startswith("label_") or key == "label":
+                entry_names.append(key)
+                label_entries.append(key)
+
         for name in entry_names:
-            if not self.is_valid_string(self.saving_settings[name]):
-                messagebox.showwarning(
-                    title="Invalid Entry",
-                    message="Only alphanumeric characters, hyphens, "
-                    "and underscores are allowed. \n",
-                    parent=popup_window.popup,
-                )
-                return
+            # empty label entries if key is not "label" and user did not provide input
+            if (
+                name in label_entries
+                and name != "label"
+                and not self.saving_settings[name]
+            ):
+                continue
+            # Verify user's input is valid.
+            if name in self.saving_settings and self.is_valid_string(
+                self.saving_settings[name]
+            ):
+                continue
+            messagebox.showwarning(
+                title="Invalid Entry",
+                message="Only alphanumeric characters, hyphens, "
+                "and underscores are allowed. \n",
+                parent=popup_window.popup,
+            )
+            return
 
-        # Verify user's input is non-zero.
-        is_valid = (
-            self.saving_settings["user"]
-            and self.saving_settings["tissue"]
-            and self.saving_settings["celltype"]
-            and self.saving_settings["label"]
-        )
+        try:
+            file_directory = create_save_path(self.saving_settings)
+        except Exception:
+            messagebox.showwarning(
+                title="Directory Not Found.",
+                message="The directory specified is invalid. \n"
+                "This commonly occurs when the Root Directory is "
+                "incorrect. Please double-check and try again.",
+                parent=popup_window.popup,
+            )
+            return
 
-        if is_valid:
-            # Verify that the path is valid.
-            try:
-                file_directory = create_save_path(self.saving_settings)
-            except Exception:
-                messagebox.showwarning(
-                    title="Directory Not Found.",
-                    message="The directory specified is invalid. \n"
-                    "This commonly occurs when the Root Directory is "
-                    "incorrect. Please double-check and try again.",
-                    parent=popup_window.popup,
-                )
-                return
-
-            self.is_acquiring = True
-            self.view.acquire_btn.configure(state="disabled")
-            popup_window.popup.dismiss()
-            self.parent_controller.execute("acquire_and_save", file_directory)
+        self.is_acquiring = True
+        self.view.acquire_btn.configure(state="disabled")
+        popup_window.popup.dismiss()
+        self.parent_controller.execute("acquire_and_save", file_directory)
 
     def exit_program(self) -> None:
         """Exit Button to close the program."""
@@ -674,6 +684,16 @@ class AcquireBarController(GUIController):
         popup_window : AcquirePopUp
             Instance of the popup save dialog.
         """
+        # Clear out old channel label entries first
+        keys_to_remove = [
+            key
+            for key in self.saving_settings.keys()
+            if key.startswith("label_") or key == "label"
+        ]
+        for key in keys_to_remove:
+            del self.saving_settings[key]
+
+        # Populate saving settings from popup window
         popup_vals = popup_window.get_variables()
         for name in popup_vals:
             # remove leading and tailing whitespaces

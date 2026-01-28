@@ -50,6 +50,8 @@ from serial.tools import list_ports
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+#: float: Minimum wait time between serial commands [seconds]
+WAIT_TIME = 0.05
 
 class ASIException(Exception):
     """
@@ -99,8 +101,7 @@ class ASIException(Exception):
         """Overrides base Exception string to be displayed
         in traceback"""
         return f"{self.code} -> {self.message}"
-
-
+    
 class TigerController:
     """Tiger Controller class"""
 
@@ -144,6 +145,9 @@ class TigerController:
 
         #: float: Last time a command was sent to the Tiger Controller
         self._last_cmd_send_time = time.perf_counter()
+
+        #: float: Time before control loop starts in order to sync galvos
+        self.start_delay = 0.0
 
     @staticmethod
     def scan_ports() -> list[str]:
@@ -629,10 +633,10 @@ class TigerController:
         waiting_time = 0.0
 
         while busy:
-            waiting_time += 0.05
+            waiting_time += WAIT_TIME
             if waiting_time >= timeout:
                 break
-            time.sleep(0.05)
+            time.sleep(WAIT_TIME)
             busy = self.is_device_busy()
 
         if self.verbose:
@@ -830,7 +834,7 @@ class TigerController:
         time_since_last_cmd = time.perf_counter() - self._last_cmd_send_time
 
         # Wait 50 milliseconds before pinging controller again.
-        sleep_time = 0.050 - time_since_last_cmd
+        sleep_time = WAIT_TIME - time_since_last_cmd
         if sleep_time > 0:
             time.sleep(sleep_time)
 
@@ -996,7 +1000,8 @@ class TigerController:
         axis = int(axis) + 32
         self.send_command(f"6 M E = {axis}\r")
         self.read_response()
-        self.send_command("6 CCA Z=64\r")
+        # CCA Y=2 sets this axis as an output
+        self.send_command(f"6 CCA Y=2 Z=64\r")
         self.read_response()
 
     def logic_card_off(self, axis: str):
@@ -1056,6 +1061,7 @@ class TigerController:
             Tiger Controller axis
         waveform: int
             Type of waveform pattern according to https://asiimaging.com/docs/commands/sap
+            Bit 7 set (+128) means the waveform is triggered externally
         amplitude: int
             amplitude of the waveform in mV
         offset: int
@@ -1063,22 +1069,22 @@ class TigerController:
         period: int
             sets the period of the waveform in ms
         """
-        print(f"Period (ms): {period}")
         # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
         if waveform % 128 == 3:
             offset = 0.5 * (offset + amplitude)
 
         amplitude = amplitude * 2
-
-        print("***", waveform, amplitude, axis, offset, period)
+        if self.verbose:
+            print(f"Period (ms): {period}")
+            print("***", waveform, amplitude, axis, offset, period)
         # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
-        self.send_command(f"3 SAP {axis}={round(waveform)}")
+        self.send_command(f"SAP {axis}={round(waveform)}")
         self.read_response()
-        self.send_command(f"3 SAA {axis}={round(amplitude)}")
+        self.send_command(f"SAA {axis}={round(amplitude)}")
         self.read_response()
-        self.send_command(f"3 SAO {axis}={round(offset)}")
+        self.send_command(f"SAO {axis}={round(offset)}")
         self.read_response()
-        self.send_command(f"3 SAF {axis}={round(period)}")
+        self.send_command(f"SAF {axis}={round(period)}")
         self.read_response()
 
     def single_axis_mode(self, axis: str, mode: int) -> None:
@@ -1097,7 +1103,7 @@ class TigerController:
         mode: int
             Integer code.
         """
-        self.send_command(f"3 SAM {axis}={mode}")
+        self.send_command(f"SAM {axis}={mode}")
         self.read_response()
 
     def setup_control_loop(
@@ -1105,8 +1111,10 @@ class TigerController:
         delays: list[float],
         camera_delay: float,
         remote_focus_delay: float,
+        exposure_time: float,
         sweep_time: float,
         analog_outputs: dict,
+        num_cycles=0,
     ) -> None:
         """
         Sets up the control loop for triggering the remote focus, Galvo/s, and Camera
@@ -1127,10 +1135,12 @@ class TigerController:
         analog_outputs: dict
             Dictionary that includes the device and the output axis on the DAC4 card,
             as specified in config
+        num_cycles: int
+            Number of cycles to run the loop. 0 for infinite
         """
         # TODO: Investigate if these axis outputs are shared amongst units.
         # Reference values for ttls that correspond to outputs A-C
-        ttls = {"A": 42, "B": 44, "C": 46}
+        ttls = {"A": 42, "B": 44, "C": 46, "H": 42, "I": 44, "J": 46}
 
         start_delay = int(delays[0] * 4)  # Unit conversion from ms to 1/4 ms
 
@@ -1145,33 +1155,40 @@ class TigerController:
         else:
             galvo2_delay = 0
         remote_focus_axis = analog_outputs["remote_focus"]
+        logger.info(f"Exposure time: {exposure_time}")
+        logger.info(f"Sweep time: {sweep_time}")
+        cycle_time = sweep_time * num_cycles
 
+        # Convert all time values to 1/4 ms
+        exposure_time = int(exposure_time * 4)
         sweep_time = (
             int(sweep_time * 4) - 2
         )  # Hardcoded -2 to account for delays within controller
-
+        cycle_time = int(cycle_time * 4)
+        num_cycles = int(num_cycles)
         # Dynamic delay processing. Instead of having each delay handled separately,
         # to save some cell space delays are programmed based on some simple
         # calculation logic. Cell 6 is the direct output for the logical loop,
         # and cell 12 is the post-delay output. So whichever delay is longer
         # (accounting for hardware delays), will get input from 12. Additionally,
         # delay is calculated as a shifted difference between the higher and lower delay
-        if remote_focus_delay > camera_delay + 2:
+        backplane_time = 3.75  # ms time for a signal to travel the backplane (hardware specific)
+        if remote_focus_delay > camera_delay + backplane_time:
             camera_output = 6
             remote_focus_output = 12
-            start_delay += int((camera_delay + 2) * 4)
-            difference_delay = int((remote_focus_delay - (camera_delay + 2)) * 4)
-        elif remote_focus_delay < camera_delay + 2:
+            start_delay += int((camera_delay + backplane_time) * 4)
+            difference_delay = int((remote_focus_delay - (camera_delay + backplane_time)) * 4)
+        elif remote_focus_delay < camera_delay + backplane_time:
             camera_output = 12
             remote_focus_output = 6
             start_delay += int(remote_focus_delay * 4)
-            difference_delay = int(((camera_delay + 2) - remote_focus_delay) * 4)
+            difference_delay = int(((camera_delay + backplane_time) - remote_focus_delay) * 4)
         else:
             camera_output = 6
             remote_focus_output = 6
-            start_delay += int((camera_delay + 2) * 4)
+            start_delay += int((camera_delay + backplane_time) * 4)
             difference_delay = 0
-
+        self.start_delay = start_delay / 4000  # Store for reference
         commands = [
             # Resets programmable logic cell configurations to constant cells
             # This handles configuring cell 1 and cell 8
@@ -1185,6 +1202,9 @@ class TigerController:
             "6 m e = 3",
             f"6 cca y = 9 z = {start_delay}",
             "6 ccb x = 1 y = 192",
+            # Stop sending Stage trigger signal
+            "6 m e = 35",
+            "6 cca z = 0",
             # Cell 4, JK flop used for toggling on and off state of the loop
             # Cells 3 and 8 serve as the inputs of this cell
             "6 m e = 4",
@@ -1197,12 +1217,12 @@ class TigerController:
             "6 ccb x = 4 y = 71",
             # Cell 6, a one-shot triggered by the rising edge of Cell 5
             "6 m e = 6",
-            "6 cca y = 8 z = 10",
+            f"6 cca y = 8 z = {exposure_time}",
             "6 ccb x = 5 y = 192",
             # Cell 7, delay cell that waits for the sweep time until retriggering.
             # Used for the main loop. Timing is dependent on the sweep_time variable
             "6 m e = 7",
-            f"6 cca y = 9 z= {sweep_time}",
+            f"6 cca y = 9 z = {sweep_time}",
             "6 ccb x = 6 y = 192",
             # Cell 9, delay used to sync the phase of the Galvos
             # This is because the Tiger Controller can not arbitrarily start waveforms
@@ -1220,7 +1240,7 @@ class TigerController:
             "6 ccb x = 6 y = 192",
             # Cell 12, a one-shot triggered by the rising edge of Cell 11
             "6 m e = 12",
-            "6 cca y = 8 z = 10",
+            "6 cca y = 8 z = 40",
             "6 ccb x = 11 y = 192",
             # Routes the output of the remote focus trigger to the TTL output from the
             # PLC
@@ -1230,6 +1250,30 @@ class TigerController:
             "6 m e = 33",
             f"6 cca z = {camera_output}",
         ]
+        logger.info("Number of cycles: %d", num_cycles)
+        logger.info("Cycle time (ms): %d", cycle_time / 4)
+        # If Single or Z-stack mode, set up the number of cycles to run
+        if num_cycles > 0:
+            commands[7:15] = [
+                # Set PLC axis 4 to be an input to receive stage sync signal
+                "6 m e = 36",
+                "6 cca y = 0",
+                # Cell 4, One-shot that stays high for num_cycles clock cycles
+                # Trigger inputs is cell 3 and Clock input is the inverse of PLC axis 4 (36+64)
+                "6 m e = 4",
+                f"6 cca y = 14 z = {num_cycles}",
+                "6 ccb x = 3 y = 100",
+                # Cell 5, AND cell used to check if the loop is still operating
+                # Cell inputs are the output of cell 4 and the inverse of PLC axis 4 (36+64)
+                # Triggers with every stage sync signal
+                "6 m e = 5",
+                "6 cca y = 5",
+                "6 ccb x = 4 y = 100",
+                # Send Trigger to stage
+                "6 m e = 35",
+                "6 cca z = 7",
+            ]
+
         # Creates object to hold galvo commands
         galvo_commands = []
         # Single Galvo case, just sets up the first Galvo
@@ -1238,7 +1282,7 @@ class TigerController:
                 # Sets the output of Cell 2 as the input to the TTL corresponding to
                 # the first Galvo pair
                 f"6 m e = {ttls[galvo1_axis]}",
-                "6 cca y = 1 z = 2",
+                "6 cca y = 2 z = 2",
             ]
         # Multiple Galvo case, has the first set of commands and the commands for the
         # second Galvo
@@ -1259,7 +1303,83 @@ class TigerController:
         # Runs the main setup commands, followed by the Galvo specific commands
         for command in commands:
             self.send_command(f"{command}\r")
+            if self.verbose:
+                print(f"Sent Command: {command}")
             self.read_response()
         for command in galvo_commands:
             self.send_command(f"{command}\r")
+            self.read_response()
+
+    def setup_laser(self, axis: str) -> None:
+        """Sets up a laser to be triggered by the control loop"""
+        axis = int(axis) + 32
+
+        self.send_command(f"6 m e = {axis}\r")
+        self.read_response()
+        self.send_command("6 cca y = 2 z = 6")
+        self.read_response()
+
+    def wait_for_loop(self) -> None:
+        """Waits for one z-stack to be imaged before returning"""
+        time.sleep(self.start_delay)
+        logger.debug("Waiting for loop to finish...")
+        bit4 = 1
+        while bit4 == 1:
+            self.send_command(f"6 rdadc z?")
+            # returns 16-bit integer indicating state of all 16 cells,
+            # where the 4th least significant bit gives the value of cell 4
+            response = self.read_response()
+            try:
+                result = int(response.split(" ")[1])
+            except (ValueError, IndexError):
+                logger.error("Couldn't read logic cell state, trying again...")
+                continue
+            bit4 = result >> 3 & 1
+            time.sleep(WAIT_TIME)  # sleep for 50 ms before checking again
+        return
+
+    def get_axis_addr(self) -> dict:
+        """Return a dictionary mapping axis names to their addresses.
+        
+        Returns
+        -------
+        dict[str, int]
+            Dictionary mapping axis names (str) to their addresses (int).
+        """
+        self.send_command("BU X")
+        response = self.read_response()
+        # Extract relevant lines
+        lines = response.strip().splitlines()
+        axes = lines[1].split(":")[1].split()
+        addrs = lines[3].split(":")[1].split()
+
+        # Build dictionary
+        axis_addr = {axis: int(addr) for axis, addr in zip(axes, addrs)}
+
+        logger.info(axis_addr)
+        return axis_addr
+
+    def setup_z_stage(self, axis: str, addr: int, step_size: float) -> None:
+        """Sets up the z-stage to be triggered by the control loop
+
+        Parameters
+        ----------
+        axis : str
+            The axis of the z-stage
+        addr : int
+            The controller address associated with the z-stage axis.
+        step_size : float
+            The step size used for z-stage movements during the control loop.
+        """
+        commands = [
+            "rm y=3",
+            f"{addr} ttl x=2 y=2",
+            f"{addr} rt y=10",
+            f"{addr} r {axis} = -{step_size}",
+            f"{addr} r {axis} = {step_size}",
+        ]
+        for command in commands:
+            self.send_command(f"{command}\r")
+            if self.verbose:
+                print(f"Sent Command: {command}")
             self.read_response()

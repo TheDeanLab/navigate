@@ -58,16 +58,21 @@ class AcquirePopUp(CommonMethods):
     """Class creates the popup that is generated when the Acquire button is pressed and
     Save File checkbox is selected."""
 
-    def __init__(self, root: tk.Tk) -> None:
+    def __init__(self, root: tk.Tk, configuration: dict = None) -> None:
         """Initialize the AcquirePopUp class
 
         Parameters
         ----------
         root : tk.Tk
             The root window
+        configuration : dict, optional
+            The configuration dictionary containing channel information
         """
         #: tk.Tk: The root window
         self.tk = root
+
+        #: dict: Configuration dictionary
+        self.configuration = configuration
 
         #: int: Width of the first column
         self.column1_width = 20
@@ -75,10 +80,41 @@ class AcquirePopUp(CommonMethods):
         #: int: Width of the second column
         self.column2_width = 40
 
+        # Calculate the number of entry widgets dynamically
+        num_base_entries = 8  # root_directory, user, tissue, celltype, prefix,
+        # solvent, file_type
+        num_channel_labels = 0
+
+        # Count selected channels for dynamic label entries
+        if configuration and "experiment" in configuration:
+            channels = (
+                configuration["experiment"]
+                .get("MicroscopeState", {})
+                .get("channels", {})
+            )
+            num_channel_labels = sum(
+                1 for ch_info in channels.values() if ch_info.get("is_selected", False)
+            )
+
+        # If no channels selected, we still have 1 label field
+        if num_channel_labels == 0:
+            num_channel_labels = 1
+
+        total_entries = (
+            num_base_entries + num_channel_labels - 1
+        )  # -1 because we replace the single label with channel labels
+
+        # Calculate dynamic height: base height + (entries * height_per_entry)
+        # Base height includes tabs, buttons, separators, and padding
+        # Each entry widget takes approximately 30 pixels
+        base_height = 480  # Height for tabs, buttons, separators, and header
+        height_per_entry = 30
+        calculated_height = base_height + (total_entries * height_per_entry)
+
         #: PopUp: The popup window
         if platform.system() == "Windows":
             self.global_width = 450
-            self.global_height = 710
+            self.global_height = calculated_height
             self.popup = PopUp(
                 root,
                 name="File Saving Dialog",
@@ -87,7 +123,7 @@ class AcquirePopUp(CommonMethods):
             )
         else:
             self.global_width = 580
-            self.global_height = 730
+            self.global_height = calculated_height
             self.popup = PopUp(
                 root,
                 name="File Saving Dialog",
@@ -182,10 +218,6 @@ class EntryFrame:
             "user",
             "tissue",
             "celltype",
-            "label",
-            "prefix",
-            "solvent",
-            "file_type",
         ]
 
         entry_labels = [
@@ -193,11 +225,33 @@ class EntryFrame:
             "User",
             "Tissue Type",
             "Cell Type",
-            "Label",
-            "Prefix",
-            "Solvent",
-            "File Type",
         ]
+
+        # Add dynamic label entries for each selected channel
+        selected_channels = []
+        if parent.configuration and "experiment" in parent.configuration:
+            channels = (
+                parent.configuration["experiment"]
+                .get("MicroscopeState", {})
+                .get("channels", {})
+            )
+            for channel_name, channel_info in channels.items():
+                if channel_info.get("is_selected", False):
+                    laser = channel_info.get("laser", "")
+                    # Extract wavelength (e.g., "488nm" from "488nm")
+                    wavelength = laser
+                    selected_channels.append((channel_name, wavelength))
+                    entry_names.append(f"label_{wavelength}")
+                    entry_labels.append(f"Label ({wavelength})")
+
+        # If no channels found or configuration not provided, use default single label
+        if not selected_channels:
+            entry_names.append("label")
+            entry_labels.append("Label")
+
+        # Add remaining standard entries
+        entry_names.extend(["prefix", "solvent", "file_type"])
+        entry_labels.extend(["Prefix", "Solvent", "File Type"])
 
         # Loop for each entry and label
         row_index += 1

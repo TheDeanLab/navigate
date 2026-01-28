@@ -85,7 +85,7 @@ class GUIController:
         """
         pass
 
-    def update_experiment_values(self):
+    def update_experiment_values(self, *args):
         """Collects all the values of widgets
 
         setting_dict is a reference of experiment dictionary

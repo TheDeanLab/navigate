@@ -85,32 +85,54 @@ def create_save_path(saving_settings: dict) -> str:
     save_directory : str
         Path to save data to.
     """
-    root_directory = saving_settings["root_directory"]
-    user_string = saving_settings["user"]
-    tissue_string = saving_settings["tissue"]
-    cell_type_string = saving_settings["celltype"]
-    label_string = saving_settings["label"]
-    prefix_string = saving_settings["prefix"]
-    date_string = str(datetime.now().date())
+    # Handle dynamic label entries for multiple channels
+    # Collect all label entries (both single "label" and channel-specific "label_XXXnm")
+    label_entries = {}
+    for key, value in saving_settings.items():
+        if key.startswith("label_"):
+            # Extract wavelength from key (e.g., "label_488nm" -> "488nm")
+            wavelength = key.replace("label_", "")
+            label_entries[wavelength] = value
+        elif key == "label":
+            label_entries["label"] = value
+
+    # Build label string
+    if len(label_entries) > 1 or (
+        len(label_entries) == 1 and "label" not in label_entries
+    ):
+        # Multiple channels: create format like "488nm_{value1}_561nm_{value2}"
+        sorted_wavelengths = sorted([w for w in label_entries.keys() if w != "label"])
+        label_parts = []
+        for wavelength in sorted_wavelengths:
+            value = label_entries[wavelength]
+            if value:
+                label_parts.append(f"{wavelength}_{value}")
+            else:
+                label_parts.append(wavelength)
+        label_string = "_".join(label_parts)
+    else:
+        # Single label or fallback
+        label_string = label_entries.get(
+            "label", list(label_entries.values())[0] if label_entries else ""
+        )
 
     # Make sure that there are no spaces in the variables
-    user_string = user_string.replace(" ", "-")
-    tissue_string = tissue_string.replace(" ", "-")
-    cell_type_string = cell_type_string.replace(" ", "-")
-    label_string = label_string.replace(" ", "-")
+    root_directory = saving_settings["root_directory"]
+    user_string = saving_settings["user"].replace(" ", "").lower()
+    tissue_string = saving_settings["tissue"].replace(" ", "").lower()
+    cell_type_string = saving_settings["celltype"].replace(" ", "").lower()
+    label_string = label_string.replace(" ", "").lower()
+    prefix_string = saving_settings["prefix"].replace(" ", "").lower()
+    date_string = str(datetime.now().date()).replace("-", "")
 
     # Create the save directory on disk.
     save_directory = str(
         os.path.join(
             root_directory,
             user_string,
-            tissue_string,
-            cell_type_string,
-            label_string,
-            date_string,
+            f"{date_string}_{tissue_string}_{cell_type_string}_{label_string}",
         )
     )
-
     os.makedirs(save_directory, exist_ok=True)
 
     # Determine Number of Acquisitions in Directory
@@ -131,7 +153,6 @@ def create_save_path(saving_settings: dict) -> str:
     # Update the experiment dict
     saving_settings["save_directory"] = save_directory
     saving_settings["date"] = date_string
-
     return save_directory
 
 

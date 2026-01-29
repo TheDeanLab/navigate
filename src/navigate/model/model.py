@@ -846,6 +846,12 @@ class Model:
         elif command == "exit":
             for camera in self.active_microscope.cameras.values():
                 camera.camera_controller.dev_close()
+        elif command in [
+            "set_camera_cooling_state",
+            "get_camera_temperature",
+            "stop_refresh_camera_temperature",
+        ]:
+            self.microscopes[args[0]].run_command(command, *args[1:], **kwargs)
         else:
             self.active_microscope.run_command(command, *args)
 

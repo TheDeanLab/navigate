@@ -583,3 +583,51 @@ class ConfigurationController:
             Dictionary with the GUI settings.
         """
         return self.configuration["configuration"]["gui"]
+
+    def is_same_camera(self, microscope_name: str) -> bool:
+        """Check if the current microscope uses the same camera as the given microscope.
+
+        Parameters
+        ----------
+        microscope_name : str
+            The name of the microscope to compare with.
+
+        Returns
+        -------
+        is_same : bool
+            True if the cameras are the same, False otherwise.
+        """
+        if self.microscope_config is None:
+            return False
+
+        if microscope_name == self.microscope_name:
+            return True
+
+        if microscope_name not in self.configuration["configuration"]["microscopes"]:
+            return False
+
+        current_camera_type = self.microscope_config["camera"]["hardware"]["type"]
+        other_camera_type = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]["hardware"]["type"]
+
+        if current_camera_type != other_camera_type:
+            return False
+
+        for param in ["serial_number", "camera_connection"]:
+            if (
+                param in self.microscope_config["camera"]["hardware"].keys()
+                and param
+                in self.configuration["configuration"]["microscopes"][microscope_name][
+                    "camera"
+                ]["hardware"].keys()
+            ):
+                current_value = self.microscope_config["camera"]["hardware"][param]
+                other_value = self.configuration["configuration"]["microscopes"][
+                    microscope_name
+                ]["camera"]["hardware"][param]
+
+                if current_value != other_value:
+                    return False
+
+        return True

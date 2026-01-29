@@ -95,6 +95,9 @@ class AdvancedCameraSettingController:
         #: dict: Camera configuration dictionary for the current microscope.
         self.camera_dict = self.local_config_controller.microscope_config["camera"]
 
+        #: event: Event for refreshing temperature button.
+        self.refresh_temperature_event = None
+
         self.update_microscope(in_initialization=True)
 
         # Add a trace to the microscope dropdown to detect microscope changes.
@@ -182,19 +185,48 @@ class AdvancedCameraSettingController:
     def set_cooling_state(self, *args) -> None:
         """Set the cooling state based on the dropdown selection."""
         cooling_state = self.view.inputs["cooling"].get()
-        if self.local_config_controller.configuration_controller.camera_config_dict.get(
-            "cooling", False
-        ):
+        if self.local_config_controller.camera_config_dict.get("cooling", False):
             # set cooling parameter to the camera
-            self.parent_controller.execute("set_camera_cooling", cooling_state)
-            self.camera_setting_dict["cooling"] = cooling_state
+            self.parent_controller.execute(
+                "set_camera_cooling_state", self.current_microscope, cooling_state
+            )
+            # stop previous temperature refresh event
+            if self.refresh_temperature_event is not None:
+                self.view.popup.after_cancel(self.refresh_temperature_event)
+
+            if cooling_state == "On":
+                self.view.buttons["refresh_temperature"]["state"] = "disabled"
+                # enable it after 10 seconds
+                self.refresh_temperature_event = self.view.popup.after(
+                    10000,
+                    lambda: self.view.buttons["refresh_temperature"].config(
+                        state="normal"
+                    ),
+                )
+            else:
+                self.view.buttons["refresh_temperature"]["state"] = "normal"
         else:
-            self.camera_setting_dict["cooling"] = "Off"
+            cooling_state = "Off"
             self.view.inputs["cooling"].set("Off")
+            self.view.buttons["refresh_temperature"]["state"] = "disabled"
+
+        # set the cooling state in the experiment configuration for the same camera
+        self.camera_setting_dict["cooling"] = cooling_state
+        for microscope_name in self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ].keys():
+            if microscope_name == self.current_microscope:
+                continue
+            if self.local_config_controller.is_same_camera(microscope_name):
+                self.parent_controller.configuration["experiment"]["CameraParameters"][
+                    microscope_name
+                ]["cooling"] = cooling_state
 
     def refresh_temperature(self) -> None:
         """Refresh the camera cooling temperature display."""
-        self.parent_controller.execute("get_camera_temperature")
+        self.parent_controller.execute(
+            "get_camera_temperature", self.current_microscope
+        )
 
     def update_temperature(self, temperature: float) -> None:
         """Update the temperature display in the popup.
@@ -235,6 +267,10 @@ class AdvancedCameraSettingController:
         # Save the configuration for the previous microscope before switching.
         if not in_initialization:
             self.save_camera_settings()
+
+        self.parent_controller.execute(
+            "stop_refresh_camera_temperature", self.current_microscope
+        )
 
         # Get the current microscope from the dropdown.
         self.current_microscope = self.view.microscope.get()

@@ -1114,7 +1114,11 @@ class Controller:
                     "live",
                 ),
             )
-        elif command in ["set_cooling_state", "get_camera_temperature"]:
+        elif command in [
+            "set_camera_cooling_state",
+            "get_camera_temperature",
+            "stop_refresh_camera_temperature",
+        ]:
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command(command, *args)
             )

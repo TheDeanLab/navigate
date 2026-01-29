@@ -574,12 +574,12 @@ class ConfigurationController:
         ].keys()
 
     @property
-    def gui_setting(self) -> dict:
+    def gui_settings(self) -> dict:
         """Return the GUI settings
 
         Returns
         -------
-        gui_setting : dict
+        gui_settings : dict
             Dictionary with the GUI settings.
         """
-        return self.configuration["configuration"]["gui"]
+        return self.configuration["gui"].get("gui", {})

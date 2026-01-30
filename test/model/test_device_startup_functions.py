@@ -32,11 +32,12 @@
 # Standard library imports
 import unittest
 from unittest.mock import MagicMock
+import multiprocessing
 
 # Third party imports
 
 # Local application imports
-from navigate.model.device_startup_functions import auto_redial
+from navigate.model.device_startup_functions import auto_redial, start_device
 
 
 class TestAutoRedial(unittest.TestCase):
@@ -82,3 +83,128 @@ class TestAutoRedial(unittest.TestCase):
         mock_func = MagicMock()
         auto_redial(mock_func, (1, 2), n_tries=1, kwarg1="test")
         mock_func.assert_called_with(1, 2, kwarg1="test")
+
+    def test_start_device_plugin(self):
+        """Test start_device_plugin behavior within auto_redial."""
+        for device_category in [
+            "camera",
+            "shutter",
+            "remote_focus",
+            "zoom",
+            "filter_wheel",
+            "stage",
+            "laser",
+            "galvo",
+        ]:
+            if "_" in device_category:
+                device_type = "".join(
+                    [part.capitalize() for part in device_category.split("_")]
+                )
+            else:
+                device_type = device_category.capitalize()
+
+            device_class_name = f"Test{device_type}"
+
+            plugin_devices = {
+                device_category: {
+                    device_class_name: {
+                        "load_device": MagicMock(
+                            return_value=f"test_{device_category}_connection"
+                        ),
+                        "start_device": MagicMock(
+                            return_value=f"Test{device_type}Instance"
+                        ),
+                    }
+                },
+            }
+            with multiprocessing.Manager() as manager:
+                if device_category in ["camera", "shutter", "remote_focus", "zoom"]:
+                    configuration = {
+                        "configuration": {
+                            "microscopes": {
+                                "TestMicroscope": {
+                                    device_category: {
+                                        "hardware": {
+                                            "type": device_class_name,
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    device_id = -1
+                elif device_category == "stage":
+                    proxy_list = manager.list(
+                        [
+                            {
+                                "type": device_class_name,
+                                "connection": "test_connection_string",
+                            }
+                        ]
+                    )
+                    configuration = {
+                        "configuration": {
+                            "microscopes": {
+                                "TestMicroscope": {
+                                    device_category: {"hardware": proxy_list}
+                                }
+                            }
+                        }
+                    }
+                    device_id = 0
+                else:
+                    proxy_list = manager.list(
+                        [
+                            {
+                                "hardware": {
+                                    "type": device_class_name,
+                                    "connection": "test_connection_string",
+                                }
+                            }
+                        ]
+                    )
+                    configuration = {
+                        "configuration": {
+                            "microscopes": {
+                                "TestMicroscope": {device_category: proxy_list}
+                            }
+                        }
+                    }
+                    device_id = 0
+
+                if device_id == -1:
+                    hardware_config = configuration["configuration"]["microscopes"][
+                        "TestMicroscope"
+                    ][device_category]["hardware"]
+                elif device_category == "stage":
+                    hardware_config = configuration["configuration"]["microscopes"][
+                        "TestMicroscope"
+                    ][device_category]["hardware"][device_id]
+                else:
+                    hardware_config = configuration["configuration"]["microscopes"][
+                        "TestMicroscope"
+                    ][device_category][device_id]["hardware"]
+
+                r = start_device(
+                    "TestMicroscope",
+                    configuration,
+                    device_category,
+                    device_id,
+                    False,
+                    None,
+                    plugin_devices,
+                )
+                assert r == f"{device_class_name}Instance"
+                plugin_devices[device_category][device_class_name][
+                    "load_device"
+                ].assert_called_once()
+                plugin_devices[device_category][device_class_name][
+                    "load_device"
+                ].assert_called_with(
+                    hardware_config,
+                    is_synthetic=False,
+                    device_type=device_category,
+                )
+                plugin_devices[device_category][device_class_name][
+                    "start_device"
+                ].assert_called_once()

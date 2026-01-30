@@ -150,7 +150,9 @@ class TestVolumeSearch:
             if event == "multiposition":
                 break
 
-        positions = np.vstack(value)  # Columns: X, Y, Z, Theta, F
+        assert value[0] == ["X", "Y", "Z", "THETA", "F"]
+
+        positions = np.vstack(value[1:])  # Columns: X, Y, Z, Theta, F
 
         # Check the bounding box. TODO: Make exact.
         min_x = (

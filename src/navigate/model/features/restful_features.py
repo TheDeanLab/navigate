@@ -256,7 +256,7 @@ class IlastikSegmentation:
         theta = self.model.configuration["experiment"]["StageParameters"]["theta"]
         f = self.model.configuration["experiment"]["StageParameters"]["f"]
         pos_x, pos_y = self.x_start, self.y_start
-        table_values = []
+        table_values = [["x", "y", "z", "theta", "f"]]
         for i in range(self.pieces_num):
             ly, ry = 0, self.pieces_size
             for j in range(self.pieces_num):

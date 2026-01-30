@@ -168,6 +168,11 @@ def test_compute_tiles_from_bounding_box(
     else:
         assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles * f_tiles
 
+    # check axes
+    expected_axes = ["X", "Y", "Z", "THETA", "F"]
+    for axis in axes:
+        assert axis.upper() in expected_axes
+
 
 @pytest.mark.parametrize("dist", listize(np.random.rand(3) * 1000))
 @pytest.mark.parametrize("overlap", listize(np.random.rand(3)))
@@ -198,7 +203,7 @@ class UpdateTableTestCase(unittest.TestCase):
     def tearDown(self) -> None:
         self.root.destroy()
 
-    def test_update_table_1(self):
+    def test_pos_match_axes(self):
         pos = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
 
         update_table(
@@ -242,6 +247,252 @@ class UpdateTableTestCase(unittest.TestCase):
             self.table.model.df["F"][3:,],
             new_positions[:, 4],
         )
+
+    def test_pos_axes_mismatch_more_axes(self):
+
+        # axes has 5 entries, pos has only 3 columns
+        pos = np.array([[1, 2, 3], [4, 5, 6], (7, 8, 9)])
+
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y", "Z", "THETA", "F"], append=False
+        )
+
+        np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
+        np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
+        np.testing.assert_array_equal(self.table.model.df["Z"], pos[:, 2])
+        assert "THETA" not in self.table.model.df.columns
+        assert "F" not in self.table.model.df.columns
+        assert self.table.currentrow == 2
+
+
+        new_positions = np.array([[10, 11, 12], [13, 14, 15]])
+        update_table(
+            self.table,
+            pos=new_positions,
+            axes=["X", "Y", "Z", "THETA", "F"],
+            append=True,
+        )
+        assert self.table.currentrow == 4
+        np.testing.assert_array_equal(
+            self.table.model.df["X"][3:,],
+            new_positions[:, 0],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Y"][3:,],
+            new_positions[:, 1],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Z"][3:,],
+            new_positions[:, 2],
+        )
+
+        assert "THETA" not in self.table.model.df.columns
+        assert "F" not in self.table.model.df.columns
+
+
+    def test_pos_axes_mismatch_more_pos(self):
+        # axes has 3 entries, pos has 5 columns
+        pos = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False
+        )
+        np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
+        np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
+        np.testing.assert_array_equal(self.table.model.df["Z"], pos[:, 2])
+        assert self.table.currentrow == 2
+        assert self.table.model.df.shape == (3, 5)
+
+    def test_pos_axes_mismatch_empty_axes(self):
+        # axes is empty, pos has 5 columns
+        pos = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
+        update_table(
+            table=self.table, pos=pos, axes=[], append=False
+        )
+        assert self.table.model.df.shape == (3, 5)
+        assert self.table.currentrow == 2
+
+    def test_pos_axes_mismatch_empty_pos(self):
+        default_shape = self.table.model.df.shape
+        default_row = self.table.currentrow
+        # axes has 5 entries, pos is empty
+        pos = np.array([[], [], [], [], []]).reshape(0, 5)
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y", "Z", "THETA", "F"], append=False
+        )
+        assert self.table.model.df.shape == default_shape
+        assert self.table.currentrow == default_row
+
+    def test_pos_axes_mismatch_both_empty(self):
+        default_shape = self.table.model.df.shape
+        default_row = self.table.currentrow
+        # axes is empty, pos is empty
+        pos = np.array([[], [], [], [], []]).reshape(0, 5)
+        update_table(
+            table=self.table, pos=pos, axes=[], append=False
+        )
+        assert self.table.model.df.shape == default_shape
+        assert self.table.currentrow == default_row
+
+    def test_append_mismatch_less_pos(self):
+        pos = np.array([[1, 2, 3], [4, 5, 6], (7, 8, 9)])
+
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False
+        )
+
+        np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
+        np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
+        np.testing.assert_array_equal(self.table.model.df["Z"], pos[:, 2])
+        assert self.table.currentrow == 2
+
+        new_positions = np.array([[10, 11], [12, 13]])
+        update_table(
+            self.table,
+            pos=new_positions,
+            axes=["X", "Y", "Z"],
+            append=True,
+        )
+        assert self.table.currentrow == 4
+        np.testing.assert_array_equal(
+            self.table.model.df["X"][3:,],
+            new_positions[:, 0],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Y"][3:,],
+            new_positions[:, 1],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Z"][3:,],
+            [np.nan, np.nan],  # Missing values should be filled with NaN
+        )
+        assert "Z" in self.table.model.df.columns
+        assert self.table.model.df.shape == (5, 3)
+
+    def test_append_mismatch_more_axes(self):
+        pos = np.array([[1, 2], [3, 4], (5, 6)])
+
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y"], append=False
+        )
+
+        np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
+        np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
+        assert self.table.currentrow == 2
+
+        new_positions = np.array([[7, 8], [10, 11]])
+        update_table(
+            self.table,
+            pos=new_positions,
+            axes=["X", "Y", "Z"],
+            append=True,
+        )
+        assert self.table.currentrow == 4
+        np.testing.assert_array_equal(
+            self.table.model.df["X"][3:,],
+            new_positions[:, 0],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Y"][3:,],
+            new_positions[:, 1],
+        )
+        assert "Z" not in self.table.model.df.columns
+        assert self.table.model.df.shape == (5, 2)  # Extra column added for Z
+
+    def test_append_mismatch_more_pos(self):
+        pos = np.array([[1, 2], [3, 4], (5, 6)])
+
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y"], append=False
+        )
+
+        np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
+        np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
+        assert self.table.currentrow == 2
+
+        new_positions = np.array([[7, 8, 9], [10, 11, 12]])
+        update_table(
+            self.table,
+            pos=new_positions,
+            axes=["X", "Y"],
+            append=True,
+        )
+        assert self.table.currentrow == 4
+        np.testing.assert_array_equal(
+            self.table.model.df["X"][3:,],
+            new_positions[:, 0],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Y"][3:,],
+            new_positions[:, 1],
+        )
+        assert self.table.model.df.shape == (5, 3)  # Extra column added for extra pos
+
+    def test_append_mismatch_axes_sequence(self):
+        pos = np.array([[1, 2, 3], [4, 5, 6], (7, 8, 9)])
+
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False
+        )
+
+        np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
+        np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
+        np.testing.assert_array_equal(self.table.model.df["Z"], pos[:, 2])
+        assert self.table.currentrow == 2
+
+        new_positions = np.array([[10, 11, 12], [13, 14, 15]])
+        update_table(
+            self.table,
+            pos=new_positions,
+            axes=["Z", "Y", "X"],
+            append=True,
+        )
+        assert self.table.currentrow == 4
+        np.testing.assert_array_equal(
+            self.table.model.df["X"][3:,],
+            new_positions[:, 2],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Y"][3:,],
+            new_positions[:, 1],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Z"][3:,],
+            new_positions[:, 0],
+        )
+
+    def test_append_mismatch_axes_partial_overlap(self):
+        pos = np.array([[1, 2, 3], [4, 5, 6], (7, 8, 9)])
+
+        update_table(
+            table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False
+        )
+
+        np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
+        np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
+        np.testing.assert_array_equal(self.table.model.df["Z"], pos[:, 2])
+        assert self.table.currentrow == 2
+
+        new_positions = np.array([[10, 11], [12, 13]])
+        update_table(
+            self.table,
+            pos=new_positions,
+            axes=["Y", "X"],
+            append=True,
+        )
+        assert self.table.currentrow == 4
+        np.testing.assert_array_equal(
+            self.table.model.df["X"][3:,],
+            new_positions[:, 1],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Y"][3:,],
+            new_positions[:, 0],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Z"][3:,],
+            [np.nan, np.nan],  # Missing values should be filled with NaN
+        )
+        assert self.table.model.df.shape == (5, 3)  # Extra column added
 
 
 if __name__ == "__main__":

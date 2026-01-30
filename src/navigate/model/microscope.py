@@ -360,7 +360,7 @@ class Microscope:
             self.stages_list.append((stage, list(device_config["axes"])))
 
         # connect daq and camera in synthetic mode
-        if is_synthetic and self.daq is not None:
+        if self.daq is not None and type(self.daq).__name__ == "SyntheticDAQ":
             self.daq.add_camera(self.microscope_name, self.camera)
 
     def update_data_buffer(
@@ -892,9 +892,15 @@ class Microscope:
         success : bool
             True if stage is successfully moved, False otherwise.
         """
-        if self.configuration["experiment"]["MicroscopeState"][
-            "image_mode"
-        ] in ("z-stack", "customized"):
+
+        # TODO: Calling the proxy dictionary costs ~3 ms, and is performed for every step
+        # in the z-stack. To optimize performance, we should retrieve the image mode
+        # once and avoid repeated dictionary lookups.
+
+        if self.configuration["experiment"]["MicroscopeState"]["image_mode"] in (
+            "z-stack",
+            "customized",
+        ):
             # cache stage positions in z-stack and customized modes.
             self.ask_stage_for_position = False
             for axis_key in pos_dict.keys():
@@ -1085,7 +1091,7 @@ class Microscope:
         else:
             exec(
                 f"self.{device_name} = start_device(name, "
-                f"self.configuration, '{device_name}', 0, "
+                f"self.configuration, '{device_name}', -1, "
                 f"self.is_synthetic, self.daq, plugin_devices)"
             )
             self.info[device_name] = device_ref_name

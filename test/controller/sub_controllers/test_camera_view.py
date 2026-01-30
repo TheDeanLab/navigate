@@ -339,7 +339,8 @@ class TestCameraViewController:
             not self.camera_view.process_image.assert_called()
 
     @pytest.mark.skip("AssertionError: Expected 'mock' to have been called.")
-    def test_digital_zoom(self):
+    @pytest.mark.parametrize("transpose", [True, False])
+    def test_digital_zoom(self, transpose):
 
         # Setup
         a, b, c, d, e, f = [random.randint(1, 100) for _ in range(6)]
@@ -356,6 +357,7 @@ class TestCameraViewController:
         self.camera_view.view.canvas_height = j  # 600
         self.camera_view.canvas_width_scale = widthsc
         self.camera_view.canvas_height_scale = heightsc
+        self.camera_view.transpose = transpose
         self.camera_view.image = np.random.randint(0, 256, (600, 800))
         self.camera_view.reset_display = MagicMock()
 
@@ -376,17 +378,28 @@ class TestCameraViewController:
         if crosshair_y < 0 or crosshair_y >= self.camera_view.view.canvas_height:
             crosshair_y = -1
 
-        new_image = self.camera_view.image[
-            y_start_index
-            * self.camera_view.canvas_height_scale : y_end_index
-            * self.camera_view.canvas_height_scale,
-            x_start_index
-            * self.camera_view.canvas_width_scale : x_end_index
-            * self.camera_view.canvas_width_scale,
-        ]
+        # Calculate expected image based on transpose flag
+        if transpose:
+            new_image = self.camera_view.image[
+                x_start_index
+                * self.camera_view.canvas_width_scale : x_end_index
+                * self.camera_view.canvas_width_scale,
+                y_start_index
+                * self.camera_view.canvas_height_scale : y_end_index
+                * self.camera_view.canvas_height_scale,
+            ]
+        else:
+            new_image = self.camera_view.image[
+                y_start_index
+                * self.camera_view.canvas_height_scale : y_end_index
+                * self.camera_view.canvas_height_scale,
+                x_start_index
+                * self.camera_view.canvas_width_scale : x_end_index
+                * self.camera_view.canvas_width_scale,
+            ]
 
         # Call func
-        self.camera_view.digital_zoom()
+        result_image = self.camera_view.digital_zoom()
 
         # Check zoom rec
         assert np.array_equal(self.camera_view.zoom_rect, new_zoom_rec)
@@ -394,8 +407,8 @@ class TestCameraViewController:
         assert np.array_equal(self.camera_view.zoom_offset, np.array([[0], [0]]))
         # Check zoom_value
         assert self.camera_view.zoom_value == 1
-        # Check zoom_image
-        assert np.array_equal(self.camera_view.zoom_image, new_image)
+        # Check returned zoom_image
+        assert np.array_equal(result_image, new_image)
         # Check crosshairs
         assert self.camera_view.crosshair_x == int(crosshair_x)
         assert self.camera_view.crosshair_y == int(crosshair_y)

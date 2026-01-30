@@ -2,6 +2,8 @@ name: deploy
 
 on:
   release:
+    types:
+      - published
   workflow_dispatch:
 
 jobs:
@@ -42,6 +44,18 @@ jobs:
           run: |
             python -m pip install --upgrade pip
             pip install -U setuptools build twine
+        - name: Sync version file with release tag
+          if: github.event_name == 'release'
+          shell: pwsh
+          run: |
+            $tag = $env:GITHUB_REF_NAME
+            if (-not $tag) { throw "GITHUB_REF_NAME is empty; cannot determine release tag." }
+
+            $version = $tag -replace '^v',''
+            if (-not $version) { throw "Computed version is empty after stripping prefix from tag '$tag'." }
+
+            Set-Content -Path "src/navigate/VERSION" -Value $version -NoNewline
+            Write-Host "Version set to $version based on release tag $tag"
         - name: Build and publish
           env:
             TWINE_USERNAME: __token__

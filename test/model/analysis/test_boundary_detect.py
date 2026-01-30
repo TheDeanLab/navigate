@@ -110,3 +110,109 @@ def test_map_boundary():
     assert map_boundary([[1, 2]]) == [(0, 1), (0, 2)]
     assert map_boundary([None, [1, 2]]) == [(1, 1), (1, 2)]
     assert map_boundary([None, [1, 2], None]) == [(1, 1), (1, 2)]
+
+
+def test_map_labels():
+
+    def generate_labeled_stack_with_3d_blobs(
+        depth=50,
+        height=1024,
+        width=1024,
+        num_labels=30,
+        blob_size=5,
+    ):
+        stack = np.zeros((depth, height, width), dtype=np.uint16)
+        targets = []
+        rng = np.random.default_rng()
+
+        r = blob_size // 2  # radius for spherical blob
+
+        for label in range(1, num_labels + 1):
+            # Choose center location, ensuring the blob stays inside boundaries
+            cz = rng.integers(r, depth - r)
+            cy = rng.integers(r, height - r)
+            cx = rng.integers(r, width - r)
+
+            # Fill a cube: 5x5x5
+            stack[
+                cz - r : cz + r + 1,
+                cy - r : cy + r + 1,
+                cx - r : cx + r + 1
+            ] = label
+
+            targets.append((cz, cy, cx))
+
+        return stack, targets
+    
+    from navigate.model.analysis.boundary_detect import map_labels
+
+    labeled_image, targets = generate_labeled_stack_with_3d_blobs(num_labels=30)
+
+    z_range, position_table, target_labels = map_labels(
+        labeled_image,
+        position = [0, 0, 0, 0, 0],
+        z_start = -100,
+        z_step = 1,
+        x_direction = "x",
+        y_direction = "y",
+        current_pixel_size = 1,
+        current_image_width = 1024,
+        current_image_height = 1024,
+        target_pixel_size = 0.5,
+        target_image_width = 1024,
+        target_image_height = 1024,
+        overlap=0.05,
+        filter_pixel_number=1,
+    )
+
+    assert z_range == 5 # blob size in z direction
+
+    assert position_table[0] == ["X", "Y", "Z", "THETA", "F"]
+
+    # check positions
+    for t in targets:
+        z, y, x = t
+        pos = [(x+1-512)*1.0, (y+1-512)*1.0, (z-2)*1.0-100, 0, 0]
+        assert pos in position_table[1:]
+        
+
+    # switch x and y direction
+    z_range, position_table, target_labels = map_labels(
+        labeled_image,
+        position = [0, 0, 0, 0, 0],
+        z_start = -300,
+        z_step = 1,
+        x_direction = "y",
+        y_direction = "x",
+        current_pixel_size = 1.25,
+        current_image_width = 1024,
+        current_image_height = 1024,
+        target_pixel_size = 0.05,
+        target_image_width = 1024,
+        target_image_height = 1024,
+        overlap=0.05,
+        filter_pixel_number=1,
+    )
+
+    assert z_range == 5 # blob size in z direction
+
+    assert position_table[0] == ["X", "Y", "Z", "THETA", "F"]
+
+    # check positions
+    target_width = int(1024 * 0.05 / 1.25)
+    target_height = int(1024 * 0.05 / 1.25)
+
+    shift_x = (target_width - 5) // 2
+    shift_y = (target_height - 5) // 2
+
+    for t in targets:
+        z, y, x = t
+        
+        x_start = x - 2 - shift_x
+        y_start = y - 2 - shift_y
+
+        x_pos = (x_start + target_width / 2 - 512) * 1.25
+        y_pos = (y_start + target_height / 2 - 512) * 1.25
+        pos = [y_pos, x_pos, (z-2)*1.0 - 300, 0, 0]
+        assert pos in position_table[1:]
+

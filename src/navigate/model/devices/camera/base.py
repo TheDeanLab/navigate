@@ -139,6 +139,7 @@ class CameraBase(ABC):
             "Rev. Bidirectional",
         ]
         self.camera_parameters["supported_trigger_sources"] = ["External"]
+        self.camera_parameters["cooling"] = self.camera_parameters.get("cooling", False)
 
         # Initialize offset and variance maps, if present
         #: np.ndarray: Offset map
@@ -239,8 +240,7 @@ class CameraBase(ABC):
         self._variance = load_map(f"{serial_number}_var")
 
         if self._offset is None or self._variance is None:
-            logger.info(
-                f"{str(self)}, Offset or variance map not found in {map_path}")
+            logger.info(f"{str(self)}, Offset or variance map not found in {map_path}")
             self._offset, self._variance = None, None
 
         return self._offset, self._variance
@@ -439,3 +439,26 @@ class CameraBase(ABC):
     def send_software_trigger(self) -> None:
         """Send a software trigger to the camera."""
         pass
+    def set_cooling(self, cooling: str = "Off") -> None:
+        """Set camera cooling mode.
+
+        Parameters
+        ----------
+        cooling : str
+            Cooling mode. Options are 'On' or 'Off'.
+        """
+        if self.camera_parameters["cooling"] is False:
+            logger.warning(f"{str(self)} does not support cooling.")
+            return
+
+    def get_temperature(self) -> Optional[float]:
+        """Get camera cooling temperature.
+
+        Returns
+        -------
+        temperature : float
+            Cooling temperature in Celsius.
+        """
+        if self.camera_parameters["cooling"] is False:
+            logger.warning(f"{str(self)} does not support cooling.")
+            return None

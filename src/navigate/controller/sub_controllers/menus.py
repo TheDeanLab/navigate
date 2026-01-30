@@ -52,7 +52,10 @@ from navigate.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
 from navigate.view.popups.feature_list_popup import FeatureListPopup
-from navigate.view.popups.camera_setting_popup import CameraSettingPopup
+from navigate.view.popups.camera_setting_popup import (
+    CameraSettingPopup,
+    AdvancedCameraSettingPopup
+)
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
 
@@ -72,6 +75,7 @@ from navigate.controller.sub_controllers import (
     AdvancedStageParametersController,
     DiagnosticsPopupController,
 )
+from navigate.controller.sub_controllers.camera_settings import AdvancedCameraSettingController
 
 # Local Tools Imports
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
@@ -640,6 +644,16 @@ class MenuController(GUIController):
                 None,
                 None,
                 "disabled",
+            ]
+
+        configuration_dict[self.view.menubar.menu_resolution][
+            'Advanced Camera Settings'
+        ] = [
+            "standard",
+            self.popup_advanced_camera_setting,
+            None,
+            None,
+            None,
             ]
         self.populate_menu(configuration_dict)
 
@@ -1402,6 +1416,22 @@ class MenuController(GUIController):
             self.uninstall_plugin_controller.showup()
             return
         self.uninstall_plugin_controller = UninstallPluginController(self.view, self)
+
+    @log_function_call
+    def popup_advanced_camera_setting(self):
+        """Pop up the Advanced Camera setting window."""
+        if hasattr(self.parent_controller, "advanced_camera_setting_controller"):
+            self.parent_controller.advanced_camera_setting_controller.showup()
+            return
+        popup = AdvancedCameraSettingPopup(self.view)
+        advanced_camera_setting_controller = AdvancedCameraSettingController(
+            popup, self.parent_controller
+        )
+        setattr(
+            self.parent_controller,
+            "advanced_camera_setting_controller",
+            advanced_camera_setting_controller,
+        )
 
     @log_function_call
     def popup_camera_setting(self, microscope_name: str) -> Callable:

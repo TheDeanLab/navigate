@@ -50,6 +50,7 @@ from navigate.model.devices.device_types import (
     SerialDevice,
     IntegratedDevice,
     NIDevice,
+    ASIDevice,
     SequenceDevice,
 )
 from navigate.model.devices.daq.base import DAQBase
@@ -484,6 +485,14 @@ def start_device(
                 device_connection = {
                     "connection": device_connection,
                     "daq_connection": daq_connection,
+                }
+        elif issubclass(_class, ASIDevice):
+            if device_connection is None:
+                device_connection = daq_connection
+            else:
+                device_connection = {
+                    "connection": device_connection,
+                    "asi_connection": daq_connection,
                 }
 
         return _class(microscope_name, device_connection, configuration, device_id)

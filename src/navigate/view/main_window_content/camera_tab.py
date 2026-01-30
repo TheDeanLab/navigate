@@ -132,24 +132,20 @@ class CameraMode(ttk.Labelframe):
 
         #: list: List of all the labels for the widgets.
         self.labels = [
-            "Trigger Mode",
             "Sensor Mode",
             "Readout Direction",
             "Number of Pixels",
         ]
 
         #: list: List of all the names for the widgets.
-        self.names = ["Trigger", "Sensor", "Readout", "Pixels"]
-
-        for i in range(len(self.labels)):
-            self.rowconfigure(i, weight=1, uniform="1")
-        for i in range(2):
-            self.columnconfigure(i, weight=1, uniform="1")
+        self.names = ["Sensor", "Readout", "Pixels"]
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Dropdown loop
         for i in range(len(self.labels)):
             label = ttk.Label(self, text=self.labels[i])
-            label.grid(row=i, column=0, pady=3, padx=5, sticky=tk.W)
+            label.grid(row=i, column=0, pady=5, padx=5, sticky=tk.NW)
 
             if i < len(self.labels) - 1:
                 self.inputs[self.names[i]] = LabelInput(
@@ -166,7 +162,7 @@ class CameraMode(ttk.Labelframe):
                     input_args={"from_": 0, "to": 10000, "increment": 1, "width": 5},
                 )
             self.inputs[self.names[i]].grid(
-                row=i, column=1, pady=3, padx=5, sticky=tk.W
+                row=i, column=1, pady=5, padx=5, sticky=tk.NW
             )
 
     def get_variables(self) -> dict:
@@ -251,10 +247,8 @@ class FramerateInfo(ttk.LabelFrame):
             "frames_to_average",
         ]
 
-        for i in range(len(self.labels)):
-            self.rowconfigure(i, weight=1, uniform="1")
-        for i in range(2):
-            self.columnconfigure(i, weight=1, uniform="1")
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         #: list: List of all the read only values for the widgets.
         self.read_only = [True, True, True, False]
@@ -262,7 +256,7 @@ class FramerateInfo(ttk.LabelFrame):
         #  Dropdown loop
         for i in range(len(self.labels)):
             label = ttk.Label(self, text=self.labels[i])
-            label.grid(row=i, column=0, pady=1, padx=5, sticky=tk.W)
+            label.grid(row=i, column=0, pady=5, padx=5, sticky=tk.NW)
 
             if self.read_only[i]:
                 self.inputs[self.names[i]] = LabelInput(
@@ -280,7 +274,7 @@ class FramerateInfo(ttk.LabelFrame):
                     input_args={"from_": 1, "to": 1000, "increment": 1.0, "width": 6},
                 )
             self.inputs[self.names[i]].grid(
-                row=i, column=1, pady=1, padx=5, sticky=tk.W
+                row=i, column=1, pady=5, padx=5, sticky=tk.NW
             )
 
     def get_variables(self) -> dict:

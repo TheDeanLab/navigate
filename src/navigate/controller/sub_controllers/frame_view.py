@@ -124,7 +124,7 @@ uniform float cMax    = 1.0;
 uniform float gamma   = 1.0;
 
 // OPM parameters
-uniform float shear_angle = 0.0;   // degrees
+uniform float shear_angle = 45.0;   // degrees
 uniform float dz = 0.4;             // um    
 uniform float px = 0.1348;          // um
 

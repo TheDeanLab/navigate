@@ -561,6 +561,7 @@ class Model:
             self.imaging_mode = self.configuration["experiment"]["MicroscopeState"][
                 "image_mode"
             ]
+            self.active_microscope.set_stage_position_cache_policy(self.imaging_mode)
             self.is_save = self.configuration["experiment"]["MicroscopeState"][
                 "is_save"
             ]

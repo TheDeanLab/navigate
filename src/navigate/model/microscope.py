@@ -99,6 +99,9 @@ class Microscope:
         #: bool: Ask stage for position.
         self.ask_stage_for_position = True
 
+        #: bool: Cache stage positions for the current imaging mode.
+        self.cache_stage_positions: bool = False
+
         #: obj: Camera object.
         self.camera = None
 
@@ -875,6 +878,24 @@ class Microscope:
         self.camera.set_exposure_time(self.current_exposure_time)
         logger.info(f"Camera exposure time set to {self.current_exposure_time}.")
 
+    def set_stage_position_cache_policy(self, image_mode: Optional[str] = None) -> None:
+        """Set the stage position caching policy.
+
+        Parameters
+        ----------
+        image_mode : Optional[str], optional
+            Imaging mode used to decide whether stage positions are cached. If None,
+            the mode is read from the configuration.
+        """
+        if image_mode is None:
+            image_mode = self.configuration["experiment"]["MicroscopeState"][
+                "image_mode"
+            ]
+
+        self.cache_stage_positions = image_mode in ("z-stack", "customized")
+
+        print(f"Stage position caching set to {self.cache_stage_positions} ")
+
     def move_stage(
         self, pos_dict: dict, wait_until_done: bool = False, update_focus: bool = True
     ) -> bool:
@@ -895,14 +916,7 @@ class Microscope:
             True if stage is successfully moved, False otherwise.
         """
 
-        # TODO: Calling the proxy dictionary costs ~3 ms, and is performed for every step
-        # in the z-stack. To optimize performance, we should retrieve the image mode
-        # once and avoid repeated dictionary lookups.
-
-        if self.configuration["experiment"]["MicroscopeState"]["image_mode"] in (
-            "z-stack",
-            "customized",
-        ):
+        if self.cache_stage_positions:
             # cache stage positions in z-stack and customized modes.
             self.ask_stage_for_position = False
             for axis_key in pos_dict.keys():

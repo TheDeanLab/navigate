@@ -1278,6 +1278,10 @@ class GLFrameViewer:
 
     def update_texture_slice_z(self, slice: np.ndarray, z: int):
 
+        # TODO: Need to follow logic of update_volume_texture, but for single slices.
+        #       Likely need to store self.slice as RGBA, pass in the current channel
+        #       number and then write to specific chan. GL format needs to be GL_RGBA.
+
         y, x = slice.shape
 
         GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)

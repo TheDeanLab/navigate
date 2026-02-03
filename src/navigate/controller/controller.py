@@ -1217,7 +1217,22 @@ class Controller:
                 break
             # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
+            dropped_frames = 0
+            if mode == "live":
+                # Drain queued frames so we only process the most recent one.
+                # This prevents the pipe backlog from causing visible display lag.
+                while self.show_img_pipe.poll():
+                    image_id = self.show_img_pipe.recv()
+                    dropped_frames += 1
+                    if image_id == "stop" or not isinstance(image_id, int):
+                        break
+
             logger.info(f"Received image from the controller: {image_id}")
+            if dropped_frames:
+                logger.debug(
+                    "Live display dropping %d queued frames to keep up.",
+                    dropped_frames,
+                )
 
             if image_id == "stop":
                 self.current_image_id = -1
@@ -1242,7 +1257,7 @@ class Controller:
             self.histogram_controller.populate_histogram(
                 image=self.data_buffer[image_id]
             )
-            images_received += 1
+            images_received += 1 + dropped_frames
 
             # Update progress bar.
             self.acquire_bar_controller.progress_bar(

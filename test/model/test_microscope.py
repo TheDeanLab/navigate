@@ -75,6 +75,7 @@ def test_prepare_acquisition(dummy_microscope):
         for k in ["camera_waveform", "remote_focus_waveform", "galvo_waveform"]
     ]
 
+
 def test_move_stage(dummy_microscope):
     import numpy as np
 
@@ -92,11 +93,12 @@ def test_move_stage(dummy_microscope):
         dummy_microscope.configuration["experiment"]["MicroscopeState"][
             "image_mode"
         ] = mode
+        dummy_microscope.set_stage_position_cache_policy(mode)
 
         # move stage to random position
         axes = ["x", "y", "z", "theta", "f"]
         for i in range(5):
-            test_axes = random.sample(axes, i+1)
+            test_axes = random.sample(axes, i + 1)
             pos_dict = {
                 f"{k}_abs": v
                 for k, v in zip(test_axes, np.random.rand(len(test_axes)) * 100)
@@ -104,6 +106,10 @@ def test_move_stage(dummy_microscope):
             dummy_microscope.move_stage(pos_dict, wait_until_done=True)
 
             assert dummy_microscope.ask_stage_for_position == expected_device_flag[mode]
+            assert (
+                dummy_microscope.cache_stage_positions
+                == (not expected_device_flag[mode])
+            )
 
             if expected_device_flag[mode] == False:
                 # assert position is cached
@@ -116,6 +122,8 @@ def test_move_stage(dummy_microscope):
     dummy_microscope.configuration["experiment"]["MicroscopeState"][
         "image_mode"
     ] = acquisition_mode
+    dummy_microscope.set_stage_position_cache_policy(acquisition_mode)
+
 
 def test_get_stage_position(dummy_microscope):
     import numpy as np
@@ -152,7 +160,8 @@ def test_get_stage_position(dummy_microscope):
         dummy_microscope.configuration["experiment"]["MicroscopeState"][
             "image_mode"
         ] = mode
-        
+        dummy_microscope.set_stage_position_cache_policy(mode)
+
         # move stage to random position
         pos_dict = {
             f"{k}_abs": v
@@ -195,6 +204,7 @@ def test_get_stage_position(dummy_microscope):
     dummy_microscope.configuration["experiment"]["MicroscopeState"][
         "image_mode"
     ] = acquisition_mode
+    dummy_microscope.set_stage_position_cache_policy(acquisition_mode)
 
     # restore report position functions
     for axis in dummy_microscope.stages:

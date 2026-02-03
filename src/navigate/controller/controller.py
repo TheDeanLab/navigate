@@ -610,6 +610,8 @@ class Controller:
                 ).update_experiment_values()
         if warning_message:
             return warning_message
+
+        self.configuration["gui"] = self.configuration_controller.gui_settings
         return ""
 
     def enable_resize(self):

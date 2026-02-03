@@ -225,6 +225,7 @@ class WaveformPopupController(GUIController):
 
     def close_window(self, *args) -> None:
         """Close the window."""
+        self.configuration_controller.gui_settings["waveform_popup"] = self.gui_settings
         self.restore_amplitude()
         self.save_waveform_constants()
         self.view.popup.dismiss()
@@ -273,9 +274,6 @@ class WaveformPopupController(GUIController):
             self.widgets[laser + " Amp"].widget.configure(increment=rf_increment)
             self.widgets[laser + " Amp"].widget.set_precision(rf_precision)
             self.widgets[laser + " Amp"].widget.trigger_focusout_validation()
-            # TODO: The offset bounds should adjust based on the amplitude bounds,
-            #       so that amp + offset does not exceed the bounds. Can be done
-            #       in update_remote_focus_settings()
             self.widgets[laser + " Off"].widget.configure(from_=self.laser_min)
             self.widgets[laser + " Off"].widget.configure(to=self.laser_max)
             self.widgets[laser + " Off"].widget.configure(increment=rf_increment)
@@ -306,9 +304,6 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Amp"].widget.set_precision(galvo_precision)
             self.widgets[galvo + " Amp"].widget["state"] = "normal"
             self.widgets[galvo + " Amp"].widget.trigger_focusout_validation()
-            # TODO: The offset bounds should adjust based on the amplitude bounds,
-            #       so that amp + offset does not exceed the bounds. Can be done
-            #       in update_remote_focus_settings()
             self.widgets[galvo + " Off"].widget.configure(from_=galvo_min)
             self.widgets[galvo + " Off"].widget.configure(to=galvo_max)
             self.widgets[galvo + " Off"].widget.configure(increment=galvo_increment)
@@ -584,6 +579,25 @@ class WaveformPopupController(GUIController):
                     ),
                 )
 
+                # Update ranges to enforce amp + off constraints
+                try:
+                    current_amp = float(self.variables[laser + " Amp"].get())
+                    current_off = float(self.variables[laser + " Off"].get())
+
+                    # For offset: min = laser_min - amp, max = laser_max - amp
+                    off_min = self.laser_min - current_amp
+                    off_max = self.laser_max - current_amp
+                    self.widgets[laser + " Off"].widget.configure(from_=off_min)
+                    self.widgets[laser + " Off"].widget.configure(to=off_max)
+
+                    # For amplitude: min = laser_min - off, max = laser_max - off
+                    amp_min = self.laser_min - current_off
+                    amp_max = self.laser_max - current_off
+                    self.widgets[laser + " Amp"].widget.configure(from_=amp_min)
+                    self.widgets[laser + " Amp"].widget.configure(to=amp_max)
+                except ValueError:
+                    pass  # Skip if values are not valid numbers
+
         return func_laser
 
     def update_waveform_parameters(self, *args: tuple, **kwargs: dict) -> None:
@@ -759,16 +773,33 @@ class WaveformPopupController(GUIController):
                     lambda: self.parent_controller.execute("update_setting", "galvo"),
                 )
 
+                # Update ranges to enforce amp + off constraints
+                try:
+                    current_amp = float(self.variables[galvo_name + " Amp"].get())
+                    current_off = float(self.variables[galvo_name + " Off"].get())
+
+                    # For offset: min = galvo_min - amp, max = galvo_max - amp
+                    off_min = self.galvo_min[galvo_name] - current_amp
+                    off_max = self.galvo_max[galvo_name] - current_amp
+                    self.widgets[galvo_name + " Off"].widget.configure(from_=off_min)
+                    self.widgets[galvo_name + " Off"].widget.configure(to=off_max)
+
+                    # For amplitude: min = galvo_min - off, max = galvo_max - off
+                    amp_min = self.galvo_min[galvo_name] - current_off
+                    amp_max = self.galvo_max[galvo_name] - current_off
+                    self.widgets[galvo_name + " Amp"].widget.configure(from_=amp_min)
+                    self.widgets[galvo_name + " Amp"].widget.configure(to=amp_max)
+                except ValueError:
+                    pass  # Skip if values are not valid numbers
+
         return func_galvo
 
     def save_waveform_constants(self) -> None:
-        """Save updated waveform parameters to yaml file."""
-        # errors = self.get_errors()
-        # if errors:
-        #     return  # Dont save if any errors TODO needs testing
+        """Save updated waveform parameters to yaml file and update gui
+        configuration."""
         save_yaml_file("", self.resolution_info, self.waveform_constants_path)
 
-    def toggle_waveform_state(self):
+    def toggle_waveform_state(self) -> None:
         """Temporarily disable waveform amplitude for quick alignment on stationary
         beam.
         """

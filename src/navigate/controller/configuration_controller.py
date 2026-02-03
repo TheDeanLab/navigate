@@ -582,4 +582,4 @@ class ConfigurationController:
         gui_settings : dict
             Dictionary with the GUI settings.
         """
-        return self.configuration["gui"].get("gui", {})
+        return self.configuration.get("gui", {})

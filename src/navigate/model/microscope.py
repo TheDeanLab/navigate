@@ -893,8 +893,7 @@ class Microscope:
             ]
 
         self.cache_stage_positions = image_mode in ("z-stack", "customized")
-
-        print(f"Stage position caching set to {self.cache_stage_positions} ")
+        logger.info(f"Stage position caching: {self.cache_stage_positions} ")
 
     def move_stage(
         self, pos_dict: dict, wait_until_done: bool = False, update_focus: bool = True

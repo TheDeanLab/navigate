@@ -154,14 +154,52 @@ class DiagnosticsPopupController:
         file_path : str
             The path where the screenshot will be saved.
         """
-        # Get the window geometry
-        x = self.view.diagnostics_frame.winfo_rootx()
-        y = self.view.diagnostics_frame.winfo_rooty()
-        width = self.view.diagnostics_frame.winfo_width()
-        height = self.view.diagnostics_frame.winfo_height()
-        screenshot = ImageGrab.grab(bbox=(x, y, x + width, y + height))
-        screenshot.save(file_path)
-        logger.info(f"Diagnostics screenshot saved to: {file_path}")
+        was_topmost = False
+        try:
+            try:
+                was_topmost = bool(int(self.view.popup.attributes("-topmost")))
+            except Exception:
+                was_topmost = False
+
+            # Ensure the diagnostics popup is on top before capture.
+            self.view.popup.lift()
+            self.view.popup.attributes("-topmost", 1)
+            self.view.popup.update_idletasks()
+
+            # Get the window geometry
+            x = self.view.diagnostics_frame.winfo_rootx()
+            y = self.view.diagnostics_frame.winfo_rooty()
+            width = self.view.diagnostics_frame.winfo_width()
+            height = self.view.diagnostics_frame.winfo_height()
+
+            if width <= 1 or height <= 1:
+                self.view.popup.update_idletasks()
+                width = self.view.diagnostics_frame.winfo_width()
+                height = self.view.diagnostics_frame.winfo_height()
+
+            bbox = (x, y, x + width, y + height)
+            grab_kwargs = {}
+            if os.name == "nt":
+                grab_kwargs["all_screens"] = True
+                try:
+                    grab_kwargs["include_layered_windows"] = True
+                    screenshot = ImageGrab.grab(bbox=bbox, **grab_kwargs)
+                except TypeError:
+                    grab_kwargs.pop("include_layered_windows", None)
+                    screenshot = ImageGrab.grab(bbox=bbox, **grab_kwargs)
+            else:
+                screenshot = ImageGrab.grab(bbox=bbox)
+
+            screenshot.save(file_path)
+            logger.info(f"Diagnostics screenshot saved to: {file_path}")
+        except Exception:
+            logger.exception("Failed to capture diagnostics screenshot.")
+        finally:
+            if not was_topmost:
+                try:
+                    self.view.popup.attributes("-topmost", 0)
+                except Exception:
+                    pass
 
     def initialize_plots(self) -> None:
         """Initialize empty plots with axes but no data."""

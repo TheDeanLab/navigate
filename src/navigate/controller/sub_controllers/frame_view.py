@@ -220,7 +220,6 @@ void main()
                         (i == 2) ? s.b : s.a;
             
             // scale and normalize
-            // TODO: same min/max applied to all, can tailor using cMin[], cMax[] later
             float cMin = cMinMax[i].x;
             float cMax = cMinMax[i].y;
             float sW = (s_i - cMin) / max(cMax - cMin, 1e-6);
@@ -776,6 +775,7 @@ class GLFrameViewer:
         self.min_max     = [0, 65535]
         self.luts        = None
         self.n_channels  = None
+        self.curr_chan   = 0
 
         # monitoring
         self.rendered_images = 0

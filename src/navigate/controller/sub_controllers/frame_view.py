@@ -126,7 +126,7 @@ uniform float gamma   = 1.0;
 uniform int nChannels = 4;
 
 // OPM parameters
-uniform float shear_angle = 0.0;   // degrees
+uniform float shear_angle = 50.0;   // degrees
 uniform float dz = 0.4;             // um    
 uniform float px = 0.1348;          // um
 

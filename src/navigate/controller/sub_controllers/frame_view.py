@@ -1658,40 +1658,40 @@ if __name__ == '__main__':
 
     vast_expt_data = {
         # day 1
-        "d1-h7-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P1001",
-        "d1-h7-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P2001",
-        "d1-h7-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P3001",
-        "d1-h7-p4":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P4001",
-        "d1-h10-p1": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P1001",
-        "d1-h10-p2": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P2002",
-        "d1-h10-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P3001",
-        "d1-h11-p1": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H11\2025-10-25\P1001",
-        "d1-h11-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H11\2025-10-25\P3003",
+        "d1-h7-p1":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P1001",
+        "d1-h7-p2":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P2001",
+        "d1-h7-p3":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P3001",
+        "d1-h7-p4":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H7\2025-10-24\P4001",
+        "d1-h10-p1": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P1001",
+        "d1-h10-p2": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P2002",
+        "d1-h10-p3": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H10\2025-10-24\P3001",
+        "d1-h11-p1": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H11\2025-10-25\P1001",
+        "d1-h11-p3": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish\Tc32\H11\2025-10-25\P3003",
         # day 2
-        "d2-h3-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P1001",
-        "d2-h3-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P2001",
-        "d2-h3-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P3001",
-        "d2-h5-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P1001",  # extravasation?
-        "d2-h5-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P2002",  # extravasation?
-        "d2-h5-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P3001",
-        "d2-h6-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P1001",
-        "d2-h6-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P2001",
-        "d2-h6-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001",
-        "d2-h7-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P1001",  # badly aberrated...
-        "d2-h7-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P2001",
-        "d2-h7-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P3001",  # extravasation?
-        "d2-h10-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H10\2025-10-25\P3001",
-        "d2-h10-p4": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H10\2025-10-25\P4001",
+        "d2-h3-p1":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P1001",
+        "d2-h3-p2":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P2001",
+        "d2-h3-p3":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H3\2025-10-25\P3001",
+        "d2-h5-p1":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P1001",  # extravasation?
+        "d2-h5-p2":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P2002",  # extravasation?
+        "d2-h5-p3":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H5\2025-10-25\P3001",
+        "d2-h6-p1":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P1001",
+        "d2-h6-p2":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P2001",
+        "d2-h6-p3":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H6\2025-10-25\P3001",
+        "d2-h7-p1":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P1001",  # badly aberrated...
+        "d2-h7-p2":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P2001",
+        "d2-h7-p3":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H7\2025-10-25\P3001",  # extravasation?
+        "d2-h10-p3": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H10\2025-10-25\P3001",
+        "d2-h10-p4": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-2\Tc32\H10\2025-10-25\P4001",
         # day 3
-        "d3-h6-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P1001",
-        "d3-h6-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P2001",  # same site as d2-h6-p1?
-        "d3-h6-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P3001",
-        "d3-h6-p4":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P4001",  # extravasation?
-        "d3-h7-p1":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P1001",  # badly aberrated...
-        "d3-h7-p2":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P2002",
-        "d3-h7-p3":  r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P3001",  # extravasation?
-        "d3-h10-p2": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H10\2025-10-26\P2001", # extravasation?
-        "d3-h10-p3": r"Z:\bioinformatics\Danuser_lab\Fiolka\LabMembers\Conor\VAST\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H10\2025-10-26\P3002", # volume looks empty...
+        "d3-h6-p1":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P1001",
+        "d3-h6-p2":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P2001",  # same site as d2-h6-p1?
+        "d3-h6-p3":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P3001",
+        "d3-h6-p4":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H6\2025-10-26\P4001",  # extravasation?
+        "d3-h7-p1":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P1001",  # badly aberrated...
+        "d3-h7-p2":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P2002",
+        "d3-h7-p3":  r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H7\2025-10-26\P3001",  # extravasation?
+        "d3-h10-p2": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H10\2025-10-26\P2001", # extravasation?
+        "d3-h10-p3": r"Z:\bioinformatics\Danuser_lab\zebrafish\VAST\Dagan\Dagan_ExtraVas_Tc32_0dpi\OPM\Fish-3\Tc32\H10\2025-10-26\P3002", # volume looks empty...
     }
     # vast_condition = "d3-h7-p3"
     vast_condition = "d2-h5-p2"

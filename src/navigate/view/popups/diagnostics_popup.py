@@ -103,6 +103,23 @@ class DiagnosticsPopup(ttk.Frame):
             "Update the diagnostic plots using the most recent data."
         )
 
+        # Create a button to reset the plots.
+        self.buttons["reset"] = HoverButton(
+            self.frame,
+            text="Reset",
+            width=10,
+        )
+        self.buttons["reset"].grid(
+            row=0,
+            column=1,
+            padx=5,
+            pady=5,
+            sticky="W",
+        )
+        self.buttons["reset"].hover.setdescription(
+            "Clear the plots and start collecting new data."
+        )
+
         # Create a button to save an image of the diagnostics.
         self.buttons["save_image"] = HoverButton(
             self.frame,
@@ -111,7 +128,7 @@ class DiagnosticsPopup(ttk.Frame):
         )
         self.buttons["save_image"].grid(
             row=0,
-            column=1,
+            column=2,
             padx=5,
             pady=5,
             sticky="W",
@@ -127,7 +144,7 @@ class DiagnosticsPopup(ttk.Frame):
         )
         self.buttons["close"].grid(
             row=0,
-            column=2,
+            column=3,
             padx=5,
             pady=5,
             sticky="W",
@@ -142,17 +159,17 @@ class DiagnosticsPopup(ttk.Frame):
         self.diagnostics_frame.grid(
             row=1,
             column=0,
-            columnspan=3,
+            columnspan=4,
             padx=5,
             pady=5,
             sticky="NSEW",
         )
 
-        for i in range(8):
+        for i in range(7):
             self.add_plot_figure("")
 
         # Configure the frames to expand
-        self.frame.grid_columnconfigure(2, weight=1)
+        self.frame.grid_columnconfigure(3, weight=1)
         self.frame.grid_rowconfigure(1, weight=1)
         uniform_grid(self.diagnostics_frame)
 

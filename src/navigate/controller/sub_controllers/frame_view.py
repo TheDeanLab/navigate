@@ -1059,13 +1059,15 @@ class GLFrameViewer:
     def add_slice(self, image: np.ndarray):
 
         if self.vol_shape is not None:
+            # if there is a mismatch between the current vol_shape
+            # and the incoming volume shape...
             if (self._N,) + image.shape != self.vol_shape:
-                # clear the volume and reallocate
+                # clear the volume shape
                 self.vol_shape = None
                 # clear texture
                 GL.glDeleteTextures(1, [self.tex_3d])
                 self.tex_3d = None
-                # try again
+                # try again (will reallocate volume)
                 self.add_slice(image)
                 
             # else bind the slice
@@ -1077,6 +1079,7 @@ class GLFrameViewer:
             new_shape = (self._N,) + image.shape
             # allocate new volume
             self.bind_volume(new_shape)
+            # try again with correct vol_shape
             self.add_slice(image)
 
     def bind_slice(self, image: np.ndarray, z: int=0):
@@ -1287,6 +1290,12 @@ class GLFrameViewer:
         GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
 
+        self.set_n_channels(4)
+
+        channel_slice = np.zeros((y, x, 4))
+
+        channel_slice[..., 0] = slice
+
         # update only the data for slice (z)
         GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 
                            0,                    # level
@@ -1296,9 +1305,9 @@ class GLFrameViewer:
                            x,                    # width
                            y,                    # height
                            1,                    # depth (one slice)
-                           GL.GL_RED,            # format
+                           GL.GL_RGBA,            # format
                            GL.GL_UNSIGNED_SHORT, # uint16
-                           slice                 # image data
+                           channel_slice.astype(np.uint16)                 # image data
         )
 
     def update_volume_texture(self, 

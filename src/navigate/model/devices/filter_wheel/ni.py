@@ -55,6 +55,8 @@ logger = logging.getLogger(p)
 class NIFilterWheel(FilterWheelBase, NIDevice):
     """DAQFilterWheel - Class for controlling filter wheels with a DAQ."""
 
+    filter_wheel_value = {}
+
     def __init__(
         self,
         microscope_name: str,
@@ -82,6 +84,8 @@ class NIFilterWheel(FilterWheelBase, NIDevice):
         self.wait_until_done_delay = self.device_config["filter_wheel_delay"]
 
         self.filter_wheel_task = None
+        if self.filter_wheel_number not in type(self).filter_wheel_value:
+            type(self).filter_wheel_value[self.filter_wheel_number] = None
 
     def __str__(self) -> str:
         """String representation of the class."""
@@ -119,6 +123,8 @@ class NIFilterWheel(FilterWheelBase, NIDevice):
             Waits duration of time necessary for filter wheel to change positions.
         """
         if self.check_if_filter_in_filter_dictionary(filter_name) is True:
+            if type(self).filter_wheel_value[self.filter_wheel_number] == filter_name:
+                return
             try:
                 # Create the nidaqmx Task, and add the DO channel.
                 self.filter_wheel_task = nidaqmx.Task()
@@ -142,6 +148,10 @@ class NIFilterWheel(FilterWheelBase, NIDevice):
                 self.filter_wheel_task.close()
             except DaqError as e:
                 logger.debug(e)
+            except Exception as e:
+                logger.exception(f"Error setting filter: {traceback.format_exc()}")
+
+            type(self).filter_wheel_value[self.filter_wheel_number] = filter_name
 
     def close(self) -> None:
         """Close the DAQ Filter Wheel

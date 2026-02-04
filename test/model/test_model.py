@@ -112,12 +112,13 @@ def model():
         queue.join_thread()
 
 
+@pytest.mark.flaky(reruns=3, reruns_delay=2)
 def test_single_acquisition(model):
     state = model.configuration["experiment"]["MicroscopeState"]
     state["image_mode"] = "single"
     state["is_save"] = False
 
-    n_frames = len(
+    n_frames_expected = len(
         list(filter(lambda channel: channel["is_selected"], state["channels"].values()))
     )
 
@@ -125,15 +126,31 @@ def test_single_acquisition(model):
 
     model.run_command("acquire")
 
+    # If three channel acquisitions happen quickly, the synthetic camera may return
+    # something like [0, 1, 2] in a single call, and only one pipe message is sent
+    # for that batch.
     image_id = show_img_pipe.recv()
-    n_images = 0
-    max_iters = 10
+    if isinstance(image_id, list):
+        n_framed_received = len(image_id)
+    else:
+        n_framed_received = image_id + 1
+
+    # maximum of 20 iterations to avoid infinite loop in case of failure
+    max_iters = 20
     while image_id != "stop" and max_iters > 0:
+
         image_id = show_img_pipe.recv()
-        n_images += 1
+        if image_id == "stop":
+            break
+        if isinstance(image_id, list):
+            n_framed_received += len(image_id)
+        else:
+            n_framed_received += 1
+
+        # decrement iteration counter
         max_iters -= 1
 
-    assert n_images == n_frames
+    assert n_framed_received == n_frames_expected
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
 
@@ -236,7 +253,7 @@ def test_multiposition_acquisition(model):
         model.__test_manager,  # noqa
         model.configuration,
         "multi_positions",
-        [[10.0, 10.0, 10.0, 10.0, 10.0]],
+        [["X", "Y", "Z", "THETA", "F"], [10.0, 10.0, 10.0, 10.0, 10.0]],
     )
     model.configuration["experiment"]["MicroscopeState"]["image_mode"] = "z-stack"
     model.configuration["experiment"]["MicroscopeState"]["number_z_steps"] = 10

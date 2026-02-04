@@ -120,6 +120,12 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         self.set_trigger_mode()
 
         self.camera_parameters["supported_trigger_sources"] = ["External", "Internal"]
+        self.camera_parameters["cooling"] = True
+
+        cooling_state = self.camera_controller.get_property_value("cooling")
+        self.configuration["experiment"]["CameraParameters"][self.microscope_name][
+            "cooling"
+        ] = ("On" if cooling_state == 2 else "Off")
 
     def __str__(self):
         """Return string representation of HamamatsuOrca class.
@@ -494,6 +500,33 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             Frame ids from HamamatsuOrca camera.
         """
         return self.camera_controller.get_frames()
+
+    def set_cooling(self, cooling: str) -> None:
+        """Set camera cooling mode and temperature.
+
+        Parameters
+        ----------
+        cooling : str
+            'On' or 'Off'
+        """
+        if self.camera_parameters["cooling"] is False or cooling == "Off":
+            self.camera_controller.set_property_value("cooling", 1)
+            logger.info("Camera cooling turned Off.")
+        # 1: "Off", 2: "On"
+        elif cooling == "On":
+            self.camera_controller.set_property_value("cooling", 2)
+            logger.info(f"Camera cooling turned On.")
+
+    def get_temperature(self) -> float:
+        """Get camera cooling temperature.
+
+        Returns
+        -------
+        temperature : float
+            Camera cooling temperature in Celsius.
+        """
+        temperature = self.camera_controller.get_property_value("temperature")
+        return temperature
 
 
 @log_initialization

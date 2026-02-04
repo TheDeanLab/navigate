@@ -31,6 +31,7 @@
 # Standard Library Imports
 import logging
 import os
+import time
 from datetime import datetime
 from tkinter import filedialog
 from typing import Optional, Iterable, Any
@@ -79,6 +80,7 @@ class DiagnosticsPopupController:
 
         #: PopUp: Popup window for the stage limits.
         self.view = popup
+        self.reset_timestamp: Optional[float] = None
 
         # Configure traces for closing the window or pressing escape.
         self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
@@ -89,6 +91,9 @@ class DiagnosticsPopupController:
         self.view.buttons["update"].configure(
             command=self.populate_plots,
         )
+
+        # Add trace to reset the plots
+        self.view.buttons["reset"].configure(command=self.reset_plots)
 
         # Add trace to save a screenshot of the popup
         self.view.buttons["save_image"].configure(command=self.capture_image)
@@ -136,6 +141,11 @@ class DiagnosticsPopupController:
         # Make sure that the save dialog has time to close before capturing the screenshot
         self.view.popup.after(100, lambda: self._take_screenshot(file_path))
 
+    def reset_plots(self) -> None:
+        """Reset plots to only display data collected after this point."""
+        self.reset_timestamp = time.time()
+        self.populate_plots()
+
     def _take_screenshot(self, file_path: str) -> None:
         """Capture a screenshot of the diagnostics popup and save it to the specified file path.
 
@@ -144,19 +154,57 @@ class DiagnosticsPopupController:
         file_path : str
             The path where the screenshot will be saved.
         """
-        # Get the window geometry
-        x = self.view.diagnostics_frame.winfo_rootx()
-        y = self.view.diagnostics_frame.winfo_rooty()
-        width = self.view.diagnostics_frame.winfo_width()
-        height = self.view.diagnostics_frame.winfo_height()
-        screenshot = ImageGrab.grab(bbox=(x, y, x + width, y + height))
-        screenshot.save(file_path)
-        logger.info(f"Diagnostics screenshot saved to: {file_path}")
+        was_topmost = False
+        try:
+            try:
+                was_topmost = bool(int(self.view.popup.attributes("-topmost")))
+            except Exception:
+                was_topmost = False
+
+            # Ensure the diagnostics popup is on top before capture.
+            self.view.popup.lift()
+            self.view.popup.attributes("-topmost", 1)
+            self.view.popup.update_idletasks()
+
+            # Get the window geometry
+            x = self.view.diagnostics_frame.winfo_rootx()
+            y = self.view.diagnostics_frame.winfo_rooty()
+            width = self.view.diagnostics_frame.winfo_width()
+            height = self.view.diagnostics_frame.winfo_height()
+
+            if width <= 1 or height <= 1:
+                self.view.popup.update_idletasks()
+                width = self.view.diagnostics_frame.winfo_width()
+                height = self.view.diagnostics_frame.winfo_height()
+
+            bbox = (x, y, x + width, y + height)
+            grab_kwargs = {}
+            if os.name == "nt":
+                grab_kwargs["all_screens"] = True
+                try:
+                    grab_kwargs["include_layered_windows"] = True
+                    screenshot = ImageGrab.grab(bbox=bbox, **grab_kwargs)
+                except TypeError:
+                    grab_kwargs.pop("include_layered_windows", None)
+                    screenshot = ImageGrab.grab(bbox=bbox, **grab_kwargs)
+            else:
+                screenshot = ImageGrab.grab(bbox=bbox)
+
+            screenshot.save(file_path)
+            logger.info(f"Diagnostics screenshot saved to: {file_path}")
+        except Exception:
+            logger.exception("Failed to capture diagnostics screenshot.")
+        finally:
+            if not was_topmost:
+                try:
+                    self.view.popup.attributes("-topmost", 0)
+                except Exception:
+                    pass
 
     def initialize_plots(self) -> None:
         """Initialize empty plots with axes but no data."""
         # Initialize each plot without data
-        for i in range(1, 8):
+        for i in range(1, len(self.view.label_frame) + 1):
             # Get figure and clear it
             fig = self.view.inputs[f"diagnostics_{i}"]
             ax = fig.axes[0]
@@ -178,7 +226,7 @@ class DiagnosticsPopupController:
     def populate_plots(self) -> None:
         """Generate and display dummy data for all diagnostic plots."""
 
-        performance_log = load_performance_log()
+        performance_log = self._filter_log_since_reset(load_performance_log())
 
         # Plot the time necessary to acquire a new image.
         times = self.extract_times(performance_log, kind="Acquire Image")
@@ -211,6 +259,21 @@ class DiagnosticsPopupController:
         # Plot the time necessary to perform all serial communications.
         times = self.extract_times(performance_log, kind="Serial")
         self.plot_histogram(panel=8, times=times, title="Serial Communication Time")
+
+    def _filter_log_since_reset(
+        self, log_content: Optional[Any]
+    ) -> Optional[list[Any]]:
+        """Filter performance logs to only include entries after reset."""
+        if self.reset_timestamp is None or not log_content:
+            return log_content
+        if not isinstance(log_content, list):
+            return log_content
+        return [
+            entry
+            for entry in log_content
+            if isinstance(entry, dict)
+            and entry.get("timestamp", 0) >= self.reset_timestamp
+        ]
 
     @staticmethod
     def extract_times(log_content: Optional[Any], kind: str = "") -> Optional[list]:

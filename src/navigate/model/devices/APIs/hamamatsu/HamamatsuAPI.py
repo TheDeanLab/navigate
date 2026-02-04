@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-    This file refers to `ZhuangLab <https://github.com/ZhuangLab/storm-control>`,
-    'dcamapi4.py' and 'dcam.py' This is a simplified version.
+This file refers to `ZhuangLab <https://github.com/ZhuangLab/storm-control>`,
+'dcamapi4.py' and 'dcam.py' This is a simplified version.
 
-    Constants can be found at 'dcamsdk4/inc/dcamapi4.h' and 'dcamsdk4/inc/dcamprop.h'
-    Function definitions can be found at 'dcamsdk4/doc/api_reference/dcamapi4_en.html'
+Constants can be found at 'dcamsdk4/inc/dcamapi4.h' and 'dcamsdk4/inc/dcamprop.h'
+Function definitions can be found at 'dcamsdk4/doc/api_reference/dcamapi4_en.html'
 """
 
 # Standard Library Imports
@@ -671,6 +671,9 @@ property_dict = {
     # "IMAGE DETECTOR PIXEL WIDTH"
     "pixel_height": 4327456,  # 0x00420820, R/O, micro-meter,
     # "IMAGE DETECTOR PIXEL HEIGHT"
+    "cooling": 2097952,  # 0x00200320, R/W, mode,    "SENSOR COOLER"
+    "cooling_temperature": 2097968,  # 0x00200330, R/W, celsius,"SENSOR TEMPERATURE TARGET"
+    "temperature": 2097936,  # 0x00200310, R/O, celsius,"SENSOR TEMPERATURE"
 }
 
 

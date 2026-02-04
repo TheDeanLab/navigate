@@ -323,51 +323,81 @@ class ChannelsTabController(GUIController):
 
         # Z-Stack Step Size
         self.stack_acq_widgets["step_size"].widget.configure(
-            from_=settings["stack_acquisition"]["step_size"].get("min", 0.01),
-            to=settings["stack_acquisition"]["step_size"].get("max", 1000),
-            increment=settings["stack_acquisition"]["step_size"].get("step", 0.01),
+            from_=settings.get("stack_acquisition", {})
+            .get("step_size", {})
+            .get("min", 0.01),
+            to=settings.get("stack_acquisition", {})
+            .get("step_size", {})
+            .get("max", 1000),
+            increment=settings.get("stack_acquisition", {})
+            .get("step_size", {})
+            .get("step", 0.01),
         )
 
         # Z-Stack Z Start Position
         self.stack_acq_widgets["start_position"].widget.configure(
-            from_=settings["stack_acquisition"]["z_start_pos"].get("min", -1000),
-            to=settings["stack_acquisition"]["z_start_pos"].get("max", 1000),
-            increment=settings["stack_acquisition"]["z_start_pos"].get("step", 1),
+            from_=settings.get("stack_acquisition", {})
+            .get("z_start_pos", {})
+            .get("min", -1000),
+            to=settings.get("stack_acquisition", {})
+            .get("z_start_pos", {})
+            .get("max", 1000),
+            increment=settings.get("stack_acquisition", {})
+            .get("z_start_pos", {})
+            .get("step", 1),
         )
 
         # Z-Stack Z End Position
         self.stack_acq_widgets["end_position"].widget.configure(
-            from_=settings["stack_acquisition"]["z_end_pos"].get("min", -1000),
-            to=settings["stack_acquisition"]["z_end_pos"].get("max", 1000),
-            increment=settings["stack_acquisition"]["z_end_pos"].get("step", 1),
+            from_=settings.get("stack_acquisition", {})
+            .get("z_end_pos", {})
+            .get("min", -1000),
+            to=settings.get("stack_acquisition", {})
+            .get("z_end_pos", {})
+            .get("max", 1000),
+            increment=settings.get("stack_acquisition", {})
+            .get("z_end_pos", {})
+            .get("step", 1),
         )
 
         # Z-Stack F Start Position
         self.stack_acq_widgets["start_focus"].widget.configure(
-            from_=settings["stack_acquisition"]["f_start_pos"].get("min", -1000),
-            to=settings["stack_acquisition"]["f_start_pos"].get("max", 1000),
-            increment=settings["stack_acquisition"]["f_start_pos"].get("step", 1),
+            from_=settings.get("stack_acquisition", {})
+            .get("f_start_pos", {})
+            .get("min", -1000),
+            to=settings.get("stack_acquisition", {})
+            .get("f_start_pos", {})
+            .get("max", 1000),
+            increment=settings.get("stack_acquisition", {})
+            .get("f_start_pos", {})
+            .get("step", 1),
         )
 
         # Z-Stack F End Position
         self.stack_acq_widgets["end_focus"].widget.configure(
-            from_=settings["stack_acquisition"]["f_end_pos"].get("min", -1000),
-            to=settings["stack_acquisition"]["f_end_pos"].get("max", 1000),
-            increment=settings["stack_acquisition"]["f_end_pos"].get("step", 1),
+            from_=settings.get("stack_acquisition", {})
+            .get("f_end_pos", {})
+            .get("min", -1000),
+            to=settings.get("stack_acquisition", {})
+            .get("f_end_pos", {})
+            .get("max", 1000),
+            increment=settings.get("stack_acquisition", {})
+            .get("f_end_pos", {})
+            .get("step", 1),
         )
 
         # Stack Pause Duration
         self.view.stack_timepoint_frame.stack_pause_spinbox.configure(
-            from_=settings["time"]["stack_pause"].get("min", 0),
-            to=settings["time"]["stack_pause"].get("max", 100),
-            increment=settings["time"]["stack_pause"].get("step", 1),
+            from_=settings.get("time", {}).get("stack_pause", {}).get("min", 0),
+            to=settings.get("time", {}).get("stack_pause", {}).get("max", 100),
+            increment=settings.get("time", {}).get("stack_pause", {}).get("step", 1),
         )
 
         # Timepoints
         self.view.stack_timepoint_frame.exp_time_spinbox.configure(
-            from_=settings["time"]["timepoints"].get("min", 1),
-            to=settings["time"]["timepoints"].get("max", 5000),
-            increment=settings["time"]["timepoints"].get("step", 1),
+            from_=settings.get("time", {}).get("timepoints", {}).get("min", 1),
+            to=settings.get("time", {}).get("timepoints", {}).get("max", 5000),
+            increment=settings.get("time", {}).get("timepoints", {}).get("step", 1),
         )
 
         # Channel settings

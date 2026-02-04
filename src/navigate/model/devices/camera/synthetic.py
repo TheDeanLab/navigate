@@ -181,6 +181,15 @@ class SyntheticCamera(CameraBase):
         self.tif_images = []
 
         self.camera_parameters["supported_trigger_sources"] = ["External", "Internal"]
+        self.camera_parameters["cooling"] = True
+        self.configuration["experiment"]["CameraParameters"][self.microscope_name][
+            "cooling"
+        ] = "Off"
+
+        #: float: camera temperature
+        self.temperature = 20.0  # Start at room temperature
+        #: float: temperature step
+        self.temperature_step = 0.0  # No change initially
 
     def __str__(self) -> str:
         """String representation of SyntheticCamera class.
@@ -478,3 +487,33 @@ class SyntheticCamera(CameraBase):
 
     def set_readout_direction(self, mode) -> None:
         super().set_readout_direction(mode)
+
+    def set_cooling(self, cooling: str) -> None:
+        """Set camera cooling.
+
+        Parameters
+        ----------
+        cooling : str
+            'On' or 'Off'
+        """
+        super().set_cooling(cooling)
+        if cooling == "On":
+            logger.info(f"Camera cooling turned On.")
+            self.temperature_step = -1.0
+        else:
+            self.temperature = 20.0
+            self.temperature_step = 0.0
+            logger.info("Camera cooling turned Off.")
+
+    def get_temperature(self) -> Optional[float]:
+        """Get camera cooling temperature.
+
+        Returns
+        -------
+        temperature : float
+            Cooling temperature in Celsius.
+        """
+        super().get_temperature()
+        self.temperature += self.temperature_step
+
+        return self.temperature  # Room temperature for synthetic camera

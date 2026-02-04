@@ -32,15 +32,306 @@
 
 # Standard Library Imports
 import logging
+import os
+from typing import Optional
 
 # Third Party Imports
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.config.config import update_config_dict, get_navigate_path
+from navigate.tools.file_functions import write_to_yaml
+from navigate.controller.configuration_controller import ConfigurationController
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+class AdvancedCameraSettingController:
+    """Controller for the Advanced Camera Settings popup."""
+
+    def __init__(
+        self,
+        popup: "AdvancedCameraSettingPopup",
+        parent_controller: "Controller",
+        *args,
+        **kwargs,
+    ) -> None:
+        """Initialize the AdvancedCameraSettingController class.
+
+        Parameters
+        ----------
+        popup : AdvancedCameraSettingPopup
+            The popup window for advanced camera settings
+        parent_controller : Controller
+            The parent controller that manages this popup
+        *args
+            Variable length argument list
+        **kwargs
+            Arbitrary keyword arguments
+        """
+
+        # Initialize the parent controller
+        self.parent_controller = parent_controller
+
+        #: PopUp: Popup window for the camera settings.
+        self.view = popup
+
+        #: ConfigurationController: Controller for the local configuration.
+        self.local_config_controller = ConfigurationController(
+            self.parent_controller.configuration
+        )
+
+        # Populate the list of microscopes in the dropdown.
+        self.view.microscope.set_values(self.local_config_controller.microscope_list)
+
+        #: str: The current microscope name.
+        self.current_microscope = self.local_config_controller.microscope_name
+
+        # Set the current microscope in the dropdown.
+        self.view.microscope.set(self.current_microscope)
+
+        #: dict: Camera configuration dictionary for the current microscope.
+        self.camera_dict = self.local_config_controller.microscope_config["camera"]
+
+        #: event: Event for refreshing temperature button.
+        self.refresh_temperature_event = None
+
+        self.update_microscope(in_initialization=True)
+
+        # Add a trace to the microscope dropdown to detect microscope changes.
+        self.view.microscope.variable.trace_add("write", self.update_microscope)
+
+        # Configure traces for closing the window or pressing escape.
+        self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
+        self.view.popup.bind("<Escape>", lambda event: self.close_popup())
+
+        # register event listeners
+        self.parent_controller.register_event_listener(
+            "camera_temperature", self.update_temperature
+        )
+
+        logger.debug("Advanced camera settings popup initialized.")
+
+    def showup(self):
+        """This function will let the popup window show in front."""
+        self.view.popup.deiconify()
+
+    def save_camera_settings(self) -> None:
+        """Save the current camera settings to the configuration file."""
+
+        # Update the camera dictionary in the main configuration.
+        update_config_dict(
+            manager=self.parent_controller.manager,
+            parent_dict=self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][self.current_microscope],
+            config_name="camera",
+            new_config=self.camera_dict,
+        )
+
+        # Save the updated configuration to a YAML file.
+        write_to_yaml(
+            content_dict=self.parent_controller.configuration["configuration"],
+            filename=os.path.join(get_navigate_path(), "config", "configuration.yaml"),
+        )
+
+        # Update the configuration controller with the new configuration.
+        self.parent_controller.configuration_controller.update_configuration()
+
+        # Update the camera view controller to apply the new flip flags immediately
+        if hasattr(self.parent_controller, "camera_view_controller"):
+            camera_config = self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][self.current_microscope]["camera"]
+            self.parent_controller.camera_view_controller.flip_flags = {
+                "x": camera_config.get("flip_x", False),
+                "y": camera_config.get("flip_y", False),
+            }
+            logger.debug(
+                f"Updated camera flip flags for {self.current_microscope}: "
+                f"{self.parent_controller.camera_view_controller.flip_flags}"
+            )
+
+        # save to experiment
+        self.parent_controller.configuration["experiment"]["CameraParameters"][
+            self.current_microscope
+        ]["trigger_source"] = self.view.inputs["trigger_source"].get()
+
+        self.parent_controller.configuration["experiment"]["CameraParameters"][
+            self.current_microscope
+        ]["cooling"] = self.view.inputs["cooling"].get()
+
+    def flip_axis(self, axis: str) -> None:
+        """Flip the camera axis in the configuration.
+
+        Parameters
+        ----------
+        axis : str
+            The axis to flip, e.g., 'x' or 'y'.
+        """
+        # Update the loaded configuration.
+        self.parent_controller.configuration["configuration"]["microscopes"][
+            self.current_microscope
+        ]["camera"][f"flip_{axis}"] = self.view.flip_flags[axis].get()
+
+        # Update our local camera dictionary with the new flip flag.
+        self.camera_dict[f"flip_{axis}"] = self.view.flip_flags[axis].get()
+        logger.debug(
+            f"Updating camera {axis} flip flag to {self.camera_dict[f'flip_{axis}']}..."
+        )
+
+    def set_cooling_state(self, *args) -> None:
+        """Set the cooling state based on the dropdown selection."""
+        cooling_state = self.view.inputs["cooling"].get()
+        if self.local_config_controller.camera_config_dict.get("cooling", False):
+            # set cooling parameter to the camera
+            self.parent_controller.execute(
+                "set_camera_cooling_state", self.current_microscope, cooling_state
+            )
+            # stop previous temperature refresh event
+            if self.refresh_temperature_event is not None:
+                self.view.popup.after_cancel(self.refresh_temperature_event)
+
+            if cooling_state == "On":
+                self.view.buttons["refresh_temperature"]["state"] = "disabled"
+                # enable it after 10 seconds
+                self.refresh_temperature_event = self.view.popup.after(
+                    10000,
+                    lambda: self.view.buttons["refresh_temperature"].config(
+                        state="normal"
+                    ),
+                )
+            else:
+                self.view.buttons["refresh_temperature"]["state"] = "normal"
+        else:
+            cooling_state = "Off"
+            self.view.inputs["cooling"].set("Off")
+            self.view.buttons["refresh_temperature"]["state"] = "disabled"
+
+        # set the cooling state in the experiment configuration for the same camera
+        self.camera_setting_dict["cooling"] = cooling_state
+        for microscope_name in self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ].keys():
+            if microscope_name == self.current_microscope:
+                continue
+            if self.local_config_controller.is_same_camera(microscope_name):
+                self.parent_controller.configuration["experiment"]["CameraParameters"][
+                    microscope_name
+                ]["cooling"] = cooling_state
+
+    def refresh_temperature(self) -> None:
+        """Refresh the camera cooling temperature display."""
+        self.parent_controller.execute(
+            "get_camera_temperature", self.current_microscope
+        )
+
+    def update_temperature(self, temperature: float) -> None:
+        """Update the temperature display in the popup.
+
+        Parameters
+        ----------
+        temperature : float
+            The current camera temperature.
+        """
+        if temperature is not None:
+            self.view.variables["cooling_temperature"].set(f"{temperature:.1f}")
+        else:
+            self.view.variables["cooling_temperature"].set("N/A")
+
+    def close_popup(self) -> None:
+        """Close the popup window."""
+        self.save_camera_settings()
+        self.view.popup.destroy()
+
+        if hasattr(self.parent_controller, "advanced_camera_setting_controller"):
+            del self.parent_controller.advanced_camera_setting_controller
+
+        logger.debug(
+            "Advanced camera settings popup closed and sub-controller deleted."
+        )
+
+    def update_microscope(
+        self, *args, in_initialization: Optional[bool] = False
+    ) -> None:
+        """Update the microscope configuration when the microscope is changed.
+
+        Parameters
+        ----------
+        in_initialization : bool, optional
+            If True, this method is called during initialization and does not
+            save the previous camera settings.
+        """
+        # Save the configuration for the previous microscope before switching.
+        if not in_initialization:
+            self.save_camera_settings()
+
+        self.parent_controller.execute(
+            "stop_refresh_camera_temperature", self.current_microscope
+        )
+
+        # Get the current microscope from the dropdown.
+        self.current_microscope = self.view.microscope.get()
+        self.view.clear_view()
+
+        # Update the local configuration controller with the new microscope.
+        self.local_config_controller.change_microscope(
+            microscope_name=self.current_microscope
+        )
+
+        # Update camera config dictionary
+        self.camera_dict = self.local_config_controller.microscope_config["camera"]
+
+        # Get the current flip flags for x and y axes
+        current_flip_flags = {
+            "x": self.camera_dict.get("flip_x", False),
+            "y": self.camera_dict.get("flip_y", False),
+        }
+
+        # Initialize the view with the flip flags
+        self.view.populate_view(current_flip_flags)
+
+        # Reconfigure traces for the new widgets
+        self._configure_widget_traces()
+
+        # populate other camera settings if needed
+        # Camera Trigger Source
+        self.camera_setting_dict = self.parent_controller.configuration["experiment"][
+            "CameraParameters"
+        ][self.current_microscope]
+        trigger_source = self.camera_setting_dict.get("trigger_source", "External")
+        self.view.inputs["trigger_source"]["values"] = self.camera_dict.get(
+            "supported_trigger_sources", ["External"]
+        )
+        if trigger_source not in self.view.inputs["trigger_source"]["values"]:
+            trigger_source = self.view.inputs["trigger_source"]["values"][0]
+        self.view.inputs["trigger_source"].set(trigger_source)
+
+        # cooling settings
+        self.view.inputs["cooling"]["values"] = ["On", "Off"]
+        if self.camera_dict.get("cooling", False):
+            cooling = self.camera_setting_dict.get("cooling", "Off")
+            self.view.inputs["cooling"].set(cooling)
+            self.view.inputs["cooling"]["state"] = "readonly"
+        else:
+            self.view.inputs["cooling"].set("Off")
+            self.view.inputs["cooling"]["state"] = "disabled"
+
+    def _configure_widget_traces(self) -> None:
+        """Configure traces and commands for widgets after they're created."""
+        # Configure the flip flags for each camera axis.
+        for key, value in self.view.flip_flags.items():
+            value.trace_add("write", lambda *args, k=key: self.flip_axis(k))
+
+        # Save button trace.
+        self.view.save_button.configure(command=self.save_camera_settings)
+
+        self.view.inputs["cooling"].bind("<<ComboboxSelected>>", self.set_cooling_state)
+        self.view.buttons["refresh_temperature"].configure(
+            command=self.refresh_temperature
+        )
 
 
 class CameraSettingController(GUIController):
@@ -208,12 +499,6 @@ class CameraSettingController(GUIController):
             "CameraParameters"
         ][microscope_name]
 
-        # Camera Trigger Source
-        trigger_source = self.camera_setting_dict.get("trigger_source", "External")
-        if trigger_source not in self.mode_widgets["Trigger"].widget["values"]:
-            trigger_source = self.mode_widgets["Trigger"].widget["values"][0]
-        self.mode_widgets["Trigger"].set(trigger_source)
-
         # Readout Settings
         self.update_sensor_mode(self.camera_setting_dict["sensor_mode"])
 
@@ -266,7 +551,6 @@ class CameraSettingController(GUIController):
             *args: Variable length argument list.
         """
         # Camera Operation Mode
-        self.camera_setting_dict["trigger_source"] = self.mode_widgets["Trigger"].get()
         self.camera_setting_dict["sensor_mode"] = self.mode_widgets["Sensor"].get()
         if self.camera_setting_dict["sensor_mode"] == "Light-Sheet":
             self.camera_setting_dict["readout_direction"] = self.mode_widgets[
@@ -523,7 +807,6 @@ class CameraSettingController(GUIController):
         self.mode = mode
         state = "disabled" if mode != "stop" else "normal"
         state_readonly = "disabled" if mode != "stop" else "readonly"
-        self.mode_widgets["Trigger"].widget["state"] = state_readonly
         self.mode_widgets["Sensor"].widget["state"] = state_readonly
         if self.mode_widgets["Sensor"].get() == "Light-Sheet":
             self.mode_widgets["Readout"].widget["state"] = state_readonly
@@ -696,16 +979,6 @@ class CameraSettingController(GUIController):
             "CameraParameters"
         ][microscope_name]
 
-        self.mode_widgets["Trigger"].widget["values"] = camera_config_dict.get(
-            "supported_trigger_sources", ["External"]
-        )
-        if (
-            self.mode_widgets["Trigger"].get()
-            not in self.mode_widgets["Trigger"].widget["values"]
-        ):
-            self.mode_widgets["Trigger"].set(
-                self.mode_widgets["Trigger"].widget["values"][0]
-            )
         self.mode_widgets["Sensor"].widget["values"] = camera_config_dict.get(
             "supported_sensor_modes", ["Normal"]
         )

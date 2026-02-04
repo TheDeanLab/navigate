@@ -227,27 +227,51 @@ class ChannelSettingController(GUIController):
 
         for i in range(self.num):
             self.view.laserpower_pulldowns[i].configure(
-                from_=settings["channel_settings"]["laser_power"].get("min", 0),
-                to=settings["channel_settings"]["laser_power"].get("max", 100),
-                increment=settings["channel_settings"]["laser_power"].get("step", 1),
+                from_=settings.get("channel_settings", {})
+                .get("laser_power", {})
+                .get("min", 0),
+                to=settings.get("channel_settings", {})
+                .get("laser_power", {})
+                .get("max", 100),
+                increment=settings.get("channel_settings", {})
+                .get("laser_power", {})
+                .get("step", 1),
             )
 
             self.view.exptime_pulldowns[i].configure(
-                from_=settings["channel_settings"]["exposure_time"].get("min", 0),
-                to=settings["channel_settings"]["exposure_time"].get("max", 100),
-                increment=settings["channel_settings"]["exposure_time"].get("step", 1),
+                from_=settings.get("channel_settings", {})
+                .get("exposure_time", {})
+                .get("min", 0),
+                to=settings.get("channel_settings", {})
+                .get("exposure_time", {})
+                .get("max", 100),
+                increment=settings.get("channel_settings", {})
+                .get("exposure_time", {})
+                .get("step", 1),
             )
 
             self.view.interval_spins[i].configure(
-                from_=settings["channel_settings"]["interval"].get("min", 0),
-                to=settings["channel_settings"]["interval"].get("max", 100),
-                increment=settings["channel_settings"]["interval"].get("step", 1),
+                from_=settings.get("channel_settings", {})
+                .get("interval", {})
+                .get("min", 0),
+                to=settings.get("channel_settings", {})
+                .get("interval", {})
+                .get("max", 100),
+                increment=settings.get("channel_settings", {})
+                .get("interval", {})
+                .get("step", 1),
             )
 
             self.view.defocus_spins[i].configure(
-                from_=settings["channel_settings"]["defocus"].get("min", 0),
-                to=settings["channel_settings"]["defocus"].get("max", 100),
-                increment=settings["channel_settings"]["defocus"].get("step", 0.01),
+                from_=settings.get("channel_settings", {})
+                .get("defocus", {})
+                .get("min", 0),
+                to=settings.get("channel_settings", {})
+                .get("defocus", {})
+                .get("max", 100),
+                increment=settings.get("channel_settings", {})
+                .get("defocus", {})
+                .get("step", 0.01),
             )
 
     def channel_callback(self, channel_id, widget_name):

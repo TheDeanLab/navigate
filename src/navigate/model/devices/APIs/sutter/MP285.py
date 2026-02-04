@@ -104,7 +104,7 @@ class MP285:
         self.wait_until_done = True
 
         #: float: Time to wait between checking if the stage is done moving
-        self.wait_time = 0.002
+        self.wait_time = 0.05
 
         #: int: Number of times to check if the stage is done moving
         self.n_waits = max(int(timeout / self.wait_time), 1)

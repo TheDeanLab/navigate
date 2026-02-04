@@ -505,7 +505,13 @@ class TestAcquireBarController:
                     widgets["user"].set("John")
                     widgets["tissue"].set("Heart")
                     widgets["celltype"].set("34T")
-                    widgets["label"].set("BCB")
+
+                    # Set dynamic label entries for each selected channel
+                    # The popup creates entries like label_488nm, label_562nm, label_642nm
+                    for key in widgets.keys():
+                        if key.startswith("label_"):
+                            widgets[key].set("BCB")
+
                     widgets["solvent"].set("uDISCO")
                     widgets["file_type"].set("OME-TIFF")
 

@@ -382,6 +382,9 @@ class BaseViewController(GUIController, ABaseViewController):
         elif self.flip_flags["y"]:
             image = image[::-1, :]
 
+        if self.transpose:
+            image = image.T
+
         return image
 
     def transpose_image(self, image: np.ndarray) -> np.ndarray:
@@ -425,8 +428,14 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         self.transpose = self.image_palette["Flip XY"].get()
         if display and self.image is not None:
-            self.image = self.flip_image(self.image)
-            self.process_image()
+            self.image = self.image.T
+            self.original_image_width, self.original_image_height = (
+                self.original_image_height,
+                self.original_image_width,
+            )
+            self.update_canvas_size()
+            self.crosshair_x, self.crosshair_y = self.crosshair_y, self.crosshair_x
+            self.reset_display(reset_crosshair=False)
 
     def toggle_min_max_buttons(self, display: bool = False) -> None:
         """Checks the value of the autoscale widget.
@@ -608,8 +617,12 @@ class BaseViewController(GUIController, ABaseViewController):
         self.number_of_channels = len(self.selected_channels)
         self.number_of_slices = int(microscope_state["number_z_steps"])
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
-        self.original_image_width = int(camera_parameters["img_x_pixels"])
-        self.original_image_height = int(camera_parameters["img_y_pixels"])
+        if self.transpose:
+            self.original_image_width = int(camera_parameters["img_y_pixels"])
+            self.original_image_height = int(camera_parameters["img_x_pixels"])
+        else:
+            self.original_image_width = int(camera_parameters["img_x_pixels"])
+            self.original_image_height = int(camera_parameters["img_y_pixels"])
 
         if self.microscope_name is None:
             self.flip_flags = (
@@ -840,6 +853,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
+
         zoom_image = self.image[
             int(y_start_index * self.canvas_height_scale) : int(
                 y_end_index * self.canvas_height_scale
@@ -1064,9 +1078,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         # Down-sampling zoom takes ~0.0002 seconds
         image = self.down_sample_image(image)
-
-        # Transposing zoom takes ~0.0000 seconds
-        image = self.transpose_image(image)
 
         # Scaling intensity zoom takes ~0.0002 seconds
         image = self.scale_image_intensity(image)
@@ -1396,8 +1407,7 @@ class CameraViewController(BaseViewController):
             self.image_palette["SNR"].grid_remove()
         else:
             self._offset, self._variance = copy.deepcopy(off), copy.deepcopy(var)
-            self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.W,
-                                           pady=3)
+            self.image_palette["SNR"].grid(row=3, column=0, sticky=tk.W, pady=3)
 
     def slider_update(self, *_) -> None:
         """Updates the image when the slider is moved."""

@@ -254,6 +254,8 @@ def load_performance_log() -> Optional[list[Any]]:
             date_dirs.append(folder)
 
     # Sort the directories by date
+    if not date_dirs:
+        return None
     latest_dir = max(date_dirs)
     performance_log_path = os.path.join(logging_path, latest_dir, "performance.log")
 

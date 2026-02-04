@@ -50,6 +50,7 @@ from navigate.model.devices.device_types import (
     SerialDevice,
     IntegratedDevice,
     NIDevice,
+    ASIDevice,
     SequenceDevice,
 )
 from navigate.model.devices.daq.base import DAQBase
@@ -485,12 +486,24 @@ def start_device(
                     "connection": device_connection,
                     "daq_connection": daq_connection,
                 }
+        elif issubclass(_class, ASIDevice):
+            if device_connection is None:
+                device_connection = daq_connection
+            else:
+                device_connection = {
+                    "connection": device_connection,
+                    "asi_connection": daq_connection,
+                }
 
         return _class(microscope_name, device_connection, configuration, device_id)
 
     elif device_category in plugin_devices:
         # device_category in ["stage", "shutter", "filter_wheel", "remote_focus", "camera", "galvo", "zoom", "laser"]
-        if device_category == "stage":
+        if device_id == -1:
+            hardware_configuration = configuration["configuration"]["microscopes"][
+                microscope_name
+            ][device_category]["hardware"]
+        elif device_category == "stage":
             hardware_configuration = configuration["configuration"]["microscopes"][
                 microscope_name
             ][device_category]["hardware"][device_id]
@@ -510,7 +523,7 @@ def start_device(
                 "load_device"
             ](
                 hardware_configuration,
-                is_synthetic,
+                is_synthetic=is_synthetic,
                 device_type=device_category,
             )
             start_function = plugin_devices[device_category][device_type][

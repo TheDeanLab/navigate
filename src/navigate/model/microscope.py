@@ -34,6 +34,8 @@ import logging
 import importlib  # noqa: F401
 from multiprocessing.managers import ListProxy
 import reprlib
+import threading
+import time
 from typing import Any, Dict, List, Optional
 
 # Third-party imports
@@ -96,6 +98,9 @@ class Microscope:
 
         #: bool: Ask stage for position.
         self.ask_stage_for_position = True
+
+        #: bool: Cache stage positions for the current imaging mode.
+        self.cache_stage_positions: bool = False
 
         #: obj: Camera object.
         self.camera = None
@@ -360,7 +365,7 @@ class Microscope:
             self.stages_list.append((stage, list(device_config["axes"])))
 
         # connect daq and camera in synthetic mode
-        if is_synthetic and self.daq is not None:
+        if self.daq is not None and type(self.daq).__name__ == "SyntheticDAQ":
             self.daq.add_camera(self.microscope_name, self.camera)
 
     def update_data_buffer(
@@ -873,6 +878,23 @@ class Microscope:
         self.camera.set_exposure_time(self.current_exposure_time)
         logger.info(f"Camera exposure time set to {self.current_exposure_time}.")
 
+    def set_stage_position_cache_policy(self, image_mode: Optional[str] = None) -> None:
+        """Set the stage position caching policy.
+
+        Parameters
+        ----------
+        image_mode : Optional[str], optional
+            Imaging mode used to decide whether stage positions are cached. If None,
+            the mode is read from the configuration.
+        """
+        if image_mode is None:
+            image_mode = self.configuration["experiment"]["MicroscopeState"][
+                "image_mode"
+            ]
+
+        self.cache_stage_positions = image_mode in ("z-stack", "customized")
+        logger.info(f"Stage position caching: {self.cache_stage_positions} ")
+
     def move_stage(
         self, pos_dict: dict, wait_until_done: bool = False, update_focus: bool = True
     ) -> bool:
@@ -892,7 +914,15 @@ class Microscope:
         success : bool
             True if stage is successfully moved, False otherwise.
         """
-        self.ask_stage_for_position = True
+
+        if self.cache_stage_positions:
+            # cache stage positions in z-stack and customized modes.
+            self.ask_stage_for_position = False
+            for axis_key in pos_dict.keys():
+                axis = axis_key[: axis_key.index("_")]
+                self.ret_pos_dict[f"{axis}_pos"] = pos_dict[axis_key]
+        else:
+            self.ask_stage_for_position = True
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
@@ -1076,7 +1106,7 @@ class Microscope:
         else:
             exec(
                 f"self.{device_name} = start_device(name, "
-                f"self.configuration, '{device_name}', 0, "
+                f"self.configuration, '{device_name}', -1, "
                 f"self.is_synthetic, self.daq, plugin_devices)"
             )
             self.info[device_name] = device_ref_name
@@ -1119,10 +1149,71 @@ class Microscope:
             Variable input arguments.
         """
         logger.info(f"Running Command: {command}, {args}")
-        if command in self.commands:
+        if command == "set_camera_cooling_state":
+            if len(args) < 1:
+                state = "Off"
+            else:
+                state = args[0]
+                if args[0] not in ("On", "Off"):
+                    state = "Off"
+            try:
+                self.camera.set_cooling(state)
+            except Exception as e:
+                logger.error(f"Failed to set camera cooling state: {e}")
+                self.output_event_queue.put(("camera_temperature", None))
+                return
+            if state == "On":
+                count = 10
+            else:
+                count = 1
+            if getattr(self, "camera_temperature_event", None) is None:
+                # Event used to signal when the camera temperature refresh thread should stop.
+                self.camera_temperature_event = threading.Event()
+            else:
+                # stop current thread if it is running
+                self.camera_temperature_event.set()
+                self.camera_temperature_thread.join()
+                self.camera_temperature_event.clear()
+            # start a new thread to refresh camera temperature
+            self.camera_temperature_thread = threading.Thread(
+                target=self._refresh_camera_temperature, args=(count,)
+            )
+            self.camera_temperature_thread.start()
+
+        elif command == "get_camera_temperature":
+            try:
+                temperature = self.camera.get_temperature()
+                self.output_event_queue.put(("camera_temperature", temperature))
+            except Exception as e:
+                logger.error(f"Failed to get camera temperature: {e}")
+                self.output_event_queue.put(("camera_temperature", None))
+        elif command == "stop_refresh_camera_temperature":
+            self.stop_refresh_camera_temperature()
+        elif command in self.commands:
             result = self.commands[command][1](*args)
             if result:
                 device_name = self.commands[command][0]
                 self.output_event_queue.put((device_name, result))
         else:
             logger.debug(f"Unknown Command: {command}")
+
+    def _refresh_camera_temperature(self, count: int = 1) -> None:
+        """Refresh camera temperature periodically."""
+        while not self.camera_temperature_event.is_set() and count > 0:
+            try:
+                temperature = self.camera.get_temperature()
+                self.output_event_queue.put(("camera_temperature", temperature))
+            except Exception as e:
+                logger.error(f"Failed to get camera temperature: {e}")
+                self.output_event_queue.put(("camera_temperature", None))
+                return
+            time.sleep(1)
+            count -= 1
+
+    def stop_refresh_camera_temperature(self) -> None:
+        """Stop refreshing camera temperature."""
+        if getattr(self, "camera_temperature_event", None):
+            self.camera_temperature_event.set()
+            camera_temperature_thread = getattr(self, "camera_temperature_thread", None)
+            if camera_temperature_thread and camera_temperature_thread.is_alive():
+                camera_temperature_thread.join()

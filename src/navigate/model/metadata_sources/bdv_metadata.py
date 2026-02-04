@@ -113,6 +113,31 @@ class BigDataViewerMetadata(XMLMetadata):
             self.rotate_angle_y = bdv_configuration["rotate"].get("Y", 0)
             self.rotate_angle_z = bdv_configuration["rotate"].get("Z", 0)
 
+    def _stage_translation_pixels(
+        self, x: float, y: float, z: float, theta: float, f: Optional[float] = None
+    ) -> npt.NDArray:
+        """Compute translation (in pixels) for BDV order [Y, X, Z]."""
+        xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
+
+        # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
+        # if they are both moving along the same physical dimension
+        if self._coupled_axes is not None:
+            for leader, follower in self._coupled_axes.items():
+                if leader.lower() not in "xyz":
+                    print(
+                        f"Unrecognized coupled axis {leader}. "
+                        "Not gonna do anything with this."
+                    )
+                    continue
+                elif leader.lower() == "x":
+                    xp += float(locals()[f"{follower.lower()}"]) / self.dx
+                elif leader.lower() == "y":
+                    yp += float(locals()[f"{follower.lower()}"]) / self.dy
+                elif leader.lower() == "z":
+                    zp += float(locals()[f"{follower.lower()}"]) / self.dz
+
+        return np.array([yp, xp, zp], dtype=float)
+
     def _derive_tile_angle_maps(self, views: list) -> tuple[list, list, list, int]:
         """Derive tile and angle identifiers from view metadata.
 
@@ -140,8 +165,8 @@ class BigDataViewerMetadata(XMLMetadata):
                 continue
 
             try:
-                mat = self.stage_positions_to_affine_matrix(**view)
-                tile_key = tuple(np.round(mat[:, 3], 6).tolist())
+                translation = self._stage_translation_pixels(**view)
+                tile_key = tuple(np.round(translation, 6).tolist())
             except Exception:
                 tile_key = ("missing", pos)
             tile_keys.append(tile_key)
@@ -482,28 +507,8 @@ class BigDataViewerMetadata(XMLMetadata):
         """
         arr = np.eye(3, 4)
 
-        # Set the transform positions
-        xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
-
-        # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
-        # if they are both moving along the same physical dimension
-        if self._coupled_axes is not None:
-            for leader, follower in self._coupled_axes.items():
-                if leader.lower() not in "xyz":
-                    print(
-                        f"Unrecognized coupled axis {leader}. "
-                        "Not gonna do anything with this."
-                    )
-                    continue
-                elif leader.lower() == "x":
-                    xp += float(locals()[f"{follower.lower()}"]) / self.dx
-                elif leader.lower() == "y":
-                    yp += float(locals()[f"{follower.lower()}"]) / self.dy
-                elif leader.lower() == "z":
-                    zp += float(locals()[f"{follower.lower()}"]) / self.dz
-
-        # Translation into pixels
-        arr[:, 3] = [yp, xp, zp]
+        # Translation into pixels (BDV order: [Y, X, Z])
+        arr[:, 3] = self._stage_translation_pixels(x, y, z, theta, f)
 
         # Rotation (theta pivots in the xz plane, about the stage y-axis).
         # Note: BDV axis order here is [Y, X, Z] to match image axes, so rotation
@@ -514,6 +519,18 @@ class BigDataViewerMetadata(XMLMetadata):
             cos_theta = np.cos(theta_rad)
             arr[1, 1], arr[2, 2] = cos_theta, cos_theta
             arr[1, 2], arr[2, 1] = -sin_theta, sin_theta
+
+            # Rotate about the volume center instead of the first voxel.
+            center = np.array(
+                [
+                    (self.shape_y - 1) / 2.0,
+                    (self.shape_x - 1) / 2.0,
+                    (self.shape_z - 1) / 2.0,
+                ],
+                dtype=float,
+            )
+            rot = arr[:, :3]
+            arr[:, 3] += center - rot.dot(center)
 
         return arr
 

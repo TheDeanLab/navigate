@@ -113,6 +113,69 @@ class BigDataViewerMetadata(XMLMetadata):
             self.rotate_angle_y = bdv_configuration["rotate"].get("Y", 0)
             self.rotate_angle_z = bdv_configuration["rotate"].get("Z", 0)
 
+    def _derive_tile_angle_maps(self, views: list) -> tuple[list, list, list, int]:
+        """Derive tile and angle identifiers from view metadata.
+
+        Parameters
+        ----------
+        views : list
+            List of view dictionaries.
+
+        Returns
+        -------
+        tuple
+            (tile_ids, angle_ids, angle_values, tile_count)
+        """
+        tile_keys = []
+        angle_keys = []
+        views_len = len(views)
+
+        for pos in range(self.positions):
+            view_idx = pos * self.shape_c * self.shape_z  # t=0, c=0, z=0
+            view = views[view_idx] if view_idx < views_len else None
+
+            if not isinstance(view, dict):
+                tile_keys.append(("missing", pos))
+                angle_keys.append(0.0)
+                continue
+
+            try:
+                mat = self.stage_positions_to_affine_matrix(**view)
+                tile_key = tuple(np.round(mat[:, 3], 6).tolist())
+            except Exception:
+                tile_key = ("missing", pos)
+            tile_keys.append(tile_key)
+
+            theta = view.get("theta", 0.0)
+            try:
+                theta_val = float(theta)
+            except (TypeError, ValueError):
+                theta_val = 0.0
+            if not np.isfinite(theta_val):
+                theta_val = 0.0
+            theta_key = round(theta_val, 6)
+            if abs(theta_key) < 1e-6:
+                theta_key = 0.0
+            angle_keys.append(theta_key)
+
+        tile_lookup = {}
+        tile_ids = []
+        for key in tile_keys:
+            if key not in tile_lookup:
+                tile_lookup[key] = len(tile_lookup)
+            tile_ids.append(tile_lookup[key])
+
+        angle_lookup = {}
+        angle_ids = []
+        for key in angle_keys:
+            if key not in angle_lookup:
+                angle_lookup[key] = len(angle_lookup)
+            angle_ids.append(angle_lookup[key])
+
+        angle_values = list(angle_lookup.keys()) or [0.0]
+
+        return tile_ids, angle_ids, angle_values, len(tile_lookup)
+
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw
     ) -> dict:
@@ -203,6 +266,10 @@ class BigDataViewerMetadata(XMLMetadata):
                 # TODO: Implement
                 pass
 
+        tile_ids, angle_ids, angle_values, tile_count = self._derive_tile_angle_maps(
+            views
+        )
+
         # Populate ViewSetups
         bdv_dict["SequenceDescription"]["ViewSetups"] = {}
         bdv_dict["SequenceDescription"]["ViewSetups"]["ViewSetup"] = []
@@ -214,7 +281,7 @@ class BigDataViewerMetadata(XMLMetadata):
             },
             {"name": "channel", "Channel": []},
             {"name": "tile", "Tile": []},
-            {"name": "angle", "Angle": {"id": {"text": 0}, "name": {"text": 0}}},
+            {"name": "angle", "Angle": []},
         ]
 
         # The actual loop that populates ViewSetup
@@ -227,6 +294,8 @@ class BigDataViewerMetadata(XMLMetadata):
             ].append(ch)
 
             for pos in range(self.positions):
+                tile_id = tile_ids[pos] if pos < len(tile_ids) else pos
+                angle_id = angle_ids[pos] if pos < len(angle_ids) else 0
                 d = {
                     "id": {"text": view_id},
                     "name": {"text": view_id},
@@ -240,8 +309,8 @@ class BigDataViewerMetadata(XMLMetadata):
                     "attributes": {
                         "illumination": {"text": "0"},
                         "channel": {"text": str(c)},
-                        "tile": {"text": str(pos)},
-                        "angle": {"text": "0"},
+                        "tile": {"text": str(tile_id)},
+                        "angle": {"text": str(angle_id)},
                     },
                 }
 
@@ -250,11 +319,20 @@ class BigDataViewerMetadata(XMLMetadata):
 
         # Finish up the Tile Attributes outside the channels loop so we have
         # one per tile
-        for pos in range(self.positions):
+        for pos in range(tile_count or self.positions):
             tile = {"id": {"text": str(pos)}, "name": {"text": str(pos)}}
             bdv_dict["SequenceDescription"]["ViewSetups"]["Attributes"][2][
                 "Tile"
             ].append(tile)
+
+        for angle_id, angle_value in enumerate(angle_values):
+            angle = {
+                "id": {"text": str(angle_id)},
+                "name": {"text": str(angle_value)},
+            }
+            bdv_dict["SequenceDescription"]["ViewSetups"]["Attributes"][3][
+                "Angle"
+            ].append(angle)
 
         # Time
         bdv_dict["SequenceDescription"]["Timepoints"] = {"type": "range"}
@@ -382,7 +460,7 @@ class BigDataViewerMetadata(XMLMetadata):
     ) -> npt.ArrayLike:
         """Convert stage positions to an affine matrix.
 
-        Ignore theta, focus for now.
+        Focus is ignored; theta is applied as a rotation about the stage y-axis.
 
         Parameters
         ----------
@@ -427,10 +505,15 @@ class BigDataViewerMetadata(XMLMetadata):
         # Translation into pixels
         arr[:, 3] = [yp, xp, zp]
 
-        # Rotation (theta pivots in the xz plane, about the y-axis)
-        # sin_theta, cos_theta = np.sin(theta), np.cos(theta)
-        # arr[0,0], arr[2,2] = cos_theta, cos_theta
-        # arr[0,2], arr[2,0] = sin_theta, -sin_theta
+        # Rotation (theta pivots in the xz plane, about the stage y-axis).
+        # Note: BDV axis order here is [Y, X, Z] to match image axes, so rotation
+        # about stage-y maps to a rotation about the BDV X axis.
+        if theta:
+            theta_rad = np.deg2rad(theta)
+            sin_theta = np.sin(theta_rad)
+            cos_theta = np.cos(theta_rad)
+            arr[1, 1], arr[2, 2] = cos_theta, cos_theta
+            arr[1, 2], arr[2, 1] = -sin_theta, sin_theta
 
         return arr
 

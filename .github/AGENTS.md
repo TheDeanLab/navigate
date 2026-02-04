@@ -13,7 +13,7 @@ description: You are a very careful software engineer and an expert in fluoresce
 ## Tools you can use
 - **Activate Environment:** `conda activate navigate`
 - **Launch Navigate:** `navigate -sh`
-- **Test:** `cd test; pytest` (must pass before commits)
+- **Test:** `PYTHONPATH=src pytest -p no:cov -o addopts=` (must pass before commits)
 - **Lint:** `black` (typically called with `black path/to/file.py`, but can be run on the whole codebase)
 
 ## Workflows
@@ -24,7 +24,7 @@ description: You are a very careful software engineer and an expert in fluoresce
   1. Keep performance top of mind; avoid adding latency in hardware I/O or image-processing paths.
   2. Apply naming conventions and project standards.
   3. Run `black` on any Python files you change.
-  4. Run tests with `cd test; pytest` and ensure they pass before commits.
+  4. Run tests with `PYTHONPATH=src pytest -p no:cov -o addopts=` and ensure they pass before commits.
 
 ## Standards
 Follow these rules for all code you write:

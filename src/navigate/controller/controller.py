@@ -1223,9 +1223,9 @@ class Controller:
                 # This prevents the pipe backlog from causing visible display lag.
                 while self.show_img_pipe.poll():
                     image_id = self.show_img_pipe.recv()
-                    dropped_frames += 1
                     if image_id == "stop" or not isinstance(image_id, int):
                         break
+                    dropped_frames += 1
 
             logger.info(f"Received image from the controller: {image_id}")
             if dropped_frames:

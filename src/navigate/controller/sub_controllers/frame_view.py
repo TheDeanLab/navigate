@@ -1607,7 +1607,7 @@ if __name__ == '__main__':
     from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
     root = tk.Tk()
-    root.geometry("500x800")
+    root.geometry("400x600")
 
     settings = tk.Frame(root).pack()
 

@@ -849,9 +849,8 @@ class ChannelsTabController(GUIController):
             self.tiling_wizard_controller.showup()
             return
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        # not tiling on theta axis right now
         tiling_wizard = TilingWizardPopup(
-            self.view, axes=[axis.upper() for axis in stage_axes if axis != "theta"]
+            self.view, axes=[axis.upper() for axis in stage_axes]
         )
         self.tiling_wizard_controller = TilingWizardController(tiling_wizard, self)
 

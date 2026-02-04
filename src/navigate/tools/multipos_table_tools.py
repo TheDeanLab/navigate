@@ -113,7 +113,7 @@ def compute_tiles_from_bounding_box(
     f_length : float
         Signed length of the FOV along focus dimension.
     overlap : float
-        Fractional overlap of ROIs.
+        Fractional overlap of ROIs. Overlap is ignored for rotation (theta).
     f_track_with_z : bool
         Make focus track with z/assume focus is z-dependent.
     **kwargs : additional keyword arguments
@@ -153,7 +153,8 @@ def compute_tiles_from_bounding_box(
     x_step = x_length * (1 - overlap)
     y_step = y_length * (1 - overlap)
     z_step = z_length * (1 - overlap)
-    theta_step = theta_length * (1 - overlap)
+    # Overlap does not apply to rotational changes.
+    theta_step = theta_length
     f_step = f_length * (1 - overlap)
 
     # grid out each dimension from (x_start, y_start, z_start) in steps

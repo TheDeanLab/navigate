@@ -1179,6 +1179,16 @@ class GLFrameViewer:
         )
 
     def make_transfer_texture(self, n_lanes: int=4):
+
+        # guard against LUT = None
+        if not self.luts:
+            self.luts = [
+                [1.0, 1.0, 1.0, 1.0],  # ch0
+                [1.0, 0.0, 0.0, 1.0],  # ch1
+                [0.0, 1.0, 0.0, 1.0],  # ch2
+                [0.0, 0.0, 1.0, 1.0],  # ch3                
+            ]
+
         print("Transfer LUTs:", self.luts)
 
         # RGBA 2D transfer textures with 4 lanes
@@ -1294,7 +1304,7 @@ class GLFrameViewer:
 
         channel_slice = np.zeros((y, x, 4))
 
-        channel_slice[..., 0] = slice
+        channel_slice[..., 2] = slice
 
         # update only the data for slice (z)
         GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 
@@ -1542,7 +1552,7 @@ class GLFrameViewer:
         self.cmd_q.put_nowait(_do)
 
 
-    def set_min_max(self, min_max: list, ch: int=0):
+    def set_min_max(self, min_max: list, ch: int=2):
         self.min_max = min_max
         
         def _do():

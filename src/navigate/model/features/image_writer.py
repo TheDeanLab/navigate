@@ -161,6 +161,17 @@ class ImageWriter:
         # initialize saving
         self.initialize_saving(sub_dir, image_name)
 
+        #: bool: Flag to indicate if Model is ASIModel
+        self.asi = self.model.asi
+
+        #: bool: Flag to indicate is imaging mode is z-stack
+        self.z_stack = self.model.imaging_mode == "z-stack"
+        #: int: data_buffer_positions queue position
+        if self.asi and self.z_stack:
+            self.read_idx = -1
+        else:
+            self.read_idx = 0
+
     def save_image(self, frame_ids):
         """Save the data to disk.
 
@@ -169,8 +180,10 @@ class ImageWriter:
         frame_ids : list[int]
             Index into self.model.data_buffer.
         """
-
         for idx in frame_ids:
+            if self.asi and self.z_stack and idx == 0:
+                self.read_idx = (self.read_idx + 1) % 20
+                print("read_idx: ", self.read_idx)
             if (idx < 0) or (idx > (self.number_of_frames - 1)):
                 msg = f"Received invalid index {idx}. Skipping this frame."
                 logger.debug(f"Received invalid index: {msg}.")
@@ -228,11 +241,11 @@ class ImageWriter:
                 start_time = time.time()
                 self.data_source.write(
                     image,
-                    x=self.model.data_buffer_positions[idx][0],
-                    y=self.model.data_buffer_positions[idx][1],
-                    z=self.model.data_buffer_positions[idx][2],
-                    theta=self.model.data_buffer_positions[idx][3],
-                    f=self.model.data_buffer_positions[idx][4],
+                    x=self.model.data_buffer_positions[idx][self.read_idx][0],
+                    y=self.model.data_buffer_positions[idx][self.read_idx][1],
+                    z=self.model.data_buffer_positions[idx][self.read_idx][2],
+                    theta=self.model.data_buffer_positions[idx][self.read_idx][3],
+                    f=self.model.data_buffer_positions[idx][self.read_idx][4],
                 )
                 logger.info(
                     f"C: {c_idx}, Z:{z_idx}, T:{t_idx}, P:{p_idx}, Write Time:"

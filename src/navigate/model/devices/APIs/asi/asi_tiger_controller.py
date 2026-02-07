@@ -129,7 +129,7 @@ class TigerController:
         self.baud_rate = baud_rate
 
         #: bool: If True, will print out messages to the console
-        self.verbose = verbose
+        self.verbose = True
 
         #: list[str]: Default axes sequence of the Tiger Controller
         self.default_axes_sequence = None
@@ -1332,7 +1332,7 @@ class TigerController:
             try:
                 result = int(response.split(" ")[1])
             except (ValueError, IndexError):
-                logger.error("Couldn't read logic cell state, trying again...")
+                logger.debug("Couldn't read logic cell state, trying again...")
                 continue
             bit4 = result >> 3 & 1
             time.sleep(WAIT_TIME)  # sleep for 50 ms before checking again

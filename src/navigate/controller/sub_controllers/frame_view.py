@@ -106,7 +106,10 @@ FRAG_3D_SRC = """
 
 out vec4 FragColor;
 
-uniform sampler3D volume;
+// volume texture array (4-channels)
+uniform sampler3D volume[4];
+
+// transfer texture
 uniform sampler2D transfer;
 
 uniform mat4 invProjView;
@@ -205,7 +208,7 @@ void main()
 
     for (float t = tEnter; t < tExit && acc.a < 0.98; t += stepWorld) {
         vec3 pos = ro + rd * t;                           // position (um)
-        vec3 uvw = (pos - boxMin_um) * invBoxSize;           // [0,1]^3
+        vec3 uvw = (pos - boxMin_um) * invBoxSize;        // [0,1]^3
 
         // sample scalar (all 4 channels in RGBA)
         vec4 s = texture(volume, uvw);            
@@ -214,11 +217,9 @@ void main()
         {
             if (i >= nChannels) break;
 
-            // select current channel (rgba)
-            float s_i = (i == 0) ? s.r :
-                        (i == 1) ? s.g :
-                        (i == 2) ? s.b : s.a;
-            
+            // select current channel
+            float s_i = texture(volume[i], uvw).r;
+
             // scale and normalize
             float cMin = cMinMax[i].x;
             float cMax = cMinMax[i].y;
@@ -750,7 +751,7 @@ class GLFrameViewer:
         self._dz       = 1.0
 
         # textures
-        self.tex_3d = None
+        self.tex_3d = [] # list for all channels
         self.tex_2d = None
         self.tex_tf = None
 
@@ -877,12 +878,15 @@ class GLFrameViewer:
 
             # 2D shader uniform inits
             self.shaders['frame'].use()
-            self.shaders['frame'].set_int('pixels', 0)    # GL_TEXTURE0
+            self.shaders['frame'].set_int('pixels', 0)      # GL_TEXTURE0
 
             # 3D shader uniform inits
             self.shaders['volume'].use()
-            self.shaders['volume'].set_int('volume', 1)   # GL_TEXTURE1
-            self.shaders['volume'].set_int('transfer', 2) # GL_TEXTURE2
+            self.shaders['volume'].set_int('volume[0]', 1)  # GL_TEXTURE1
+            self.shaders['volume'].set_int('volume[1]', 2)  # GL_TEXTURE2
+            self.shaders['volume'].set_int('volume[2]', 3)  # GL_TEXTURE3
+            self.shaders['volume'].set_int('volume[3]', 4)  # GL_TEXTURE4
+            self.shaders['volume'].set_int('transfer',  5)  # GL_TEXTURE5
             self.shaders['volume'].set_float('stepWorld', 0.25)
             self.shaders['volume'].set_float('opacity', 0.15)
 
@@ -1055,7 +1059,7 @@ class GLFrameViewer:
         # self.cmd_q.put(_do)
         self.cmd_q.put_nowait(_do)
 
-    def add_slice(self, image: np.ndarray):
+    def add_slice(self, image: np.ndarray, ch: int=0):
 
         if self.vol_shape is not None:
             # if there is a mismatch between the current vol_shape
@@ -1070,10 +1074,11 @@ class GLFrameViewer:
                 self.add_slice(image)
                 
             # else bind the slice
-            self.bind_slice(image, self._z)
+            self.bind_slice(image, self._z, ch)
 
             # N-bounded increment
-            self._z = (self._z + 1) % self._N
+            if ch == self.n_channels - 1:
+                self._z = (self._z + 1) % self._N
         else:
             new_shape = (self._N,) + image.shape
             # allocate new volume
@@ -1081,11 +1086,11 @@ class GLFrameViewer:
             # try again with correct vol_shape
             self.add_slice(image)
 
-    def bind_slice(self, image: np.ndarray, z: int=0):
+    def bind_slice(self, image: np.ndarray, z: int=0, ch: int=0):
 
         def _do():
             self._ensure_gl_ready()
-            self.update_texture_slice_z(image, z)
+            self.update_texture_slice_z(image, z, ch)
 
         self.cmd_q.put(_do)
 
@@ -1121,33 +1126,38 @@ class GLFrameViewer:
 
         self.cmd_q.put(_do)
 
-    def make_volume_texture(self, shape: tuple):
+    def make_volume_texture(self, shape: tuple, n_channels: int=4):
 
         z, y, x = shape
 
-        self.tex_3d = GL.glGenTextures(1)
-        GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
-
-        # params
-        GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
-        GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
-        GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
-        GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
-        GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_R, GL.GL_CLAMP_TO_EDGE)
+        # create 3d textures for all channels
+        self.tex_3d = list(GL.glGenTextures(n_channels))
         
-        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
-        GL.glTexImage3D(
-            GL.GL_TEXTURE_3D, 
-            0,
-            GL.GL_RGBA16,
-            x, 
-            y, 
-            z, 
-            0,
-            GL.GL_RGBA, 
-            GL.GL_UNSIGNED_SHORT,
-            None # input: [[[R0, G0, B0, A0], [R1, G1, B1, A1], ... ] ... ]
-            )        
+        for tex in self.tex_3d:
+            # bind this texture
+            GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
+
+            # params
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_R, GL.GL_CLAMP_TO_EDGE)
+            
+            # initialize (R16)
+            GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+            GL.glTexImage3D(
+                GL.GL_TEXTURE_3D, 
+                0,
+                GL.GL_R16,
+                x, 
+                y, 
+                z, 
+                0,
+                GL.GL_RED,
+                GL.GL_UNSIGNED_SHORT,
+                None # input: [[[R0, G0, B0, A0], [R1, G1, B1, A1], ... ] ... ]
+                )        
 
     def make_frame_texture(self, shape: tuple):
 
@@ -1288,7 +1298,7 @@ class GLFrameViewer:
                 )
             )
 
-    def update_texture_slice_z(self, slice: np.ndarray, z: int):
+    def update_texture_slice_z(self, slice: np.ndarray, z: int=0, ch: int=0):
 
         # TODO: Need to follow logic of update_volume_texture, but for single slices.
         #       Likely need to store self.slice as RGBA, pass in the current channel
@@ -1296,27 +1306,22 @@ class GLFrameViewer:
 
         y, x = slice.shape
 
-        GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
+        GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d[ch])
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
 
-        self.set_n_channels(4)
-
-        channel_slice = np.zeros((y, x, 4))
-
-        channel_slice[..., self.curr_chan] = slice
-
         # update only the data for slice (z)
-        GL.glTexSubImage3D(GL.GL_TEXTURE_3D, 
-                           0,                    # level
-                           0,                    # xoffset (none)
-                           0,                    # yoffset (none)
-                           int(z),               # zoffset (z-slice position)
-                           x,                    # width
-                           y,                    # height
-                           1,                    # depth (one slice)
-                           GL.GL_RGBA,            # format
-                           GL.GL_UNSIGNED_SHORT, # uint16
-                           channel_slice.astype(np.uint16)                 # image data
+        GL.glTexSubImage3D(
+            GL.GL_TEXTURE_3D, 
+            0,                                   # level
+            0,                                   # xoffset (none)
+            0,                                   # yoffset (none)
+            int(z),                              # zoffset (z-slice position)
+            x,                                   # width
+            y,                                   # height
+            1,                                   # depth (one slice)
+            GL.GL_RED,                           # format
+            GL.GL_UNSIGNED_SHORT,                # uint16
+            slice.astype(np.uint16, copy=False)  # image data
         )
 
     def update_volume_texture(self, 
@@ -1448,9 +1453,13 @@ class GLFrameViewer:
             GL.glUniformMatrix4fv(shader.loc("invProjView"), 1, GL.GL_TRUE,
                                   np.array(inv_vp, np.float32))
             
-            GL.glActiveTexture(GL.GL_TEXTURE1)
-            GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d)
-            GL.glActiveTexture(GL.GL_TEXTURE2)
+            # bind channel textures (volumes)
+            for i, tex in enumerate(self.tex_3d):
+                GL.glActiveTexture(GL.GL_TEXTURE1 + i)
+                GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
+            
+            # bind transfer texture
+            GL.glActiveTexture(GL.GL_TEXTURE5)
             GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex_tf)            
 
             GL.glDisable(GL.GL_DEPTH_TEST)

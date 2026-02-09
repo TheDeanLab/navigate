@@ -31,6 +31,7 @@
 
 
 # Standard Imports
+import platform
 import time
 import logging
 
@@ -104,8 +105,12 @@ class MS2000Controller(TigerController):
         self.serial.write_timeout = write_timeout
         self.serial.timeout = read_timeout
 
-        # set the size of the rx and tx buffers before calling open
-        self.serial.set_buffer_size(rx_size, tx_size)
+        # set_buffer_size is only available/reliable on some platforms
+        if platform.system() == "Windows" and hasattr(self.serial, "set_buffer_size"):
+            try:
+                self.serial.set_buffer_size(rx_size, tx_size)
+            except Exception as e:
+                logger.debug(f"Unable to set serial buffer size on Windows: {e}")
         try:
             self.serial.open()
         except SerialException:

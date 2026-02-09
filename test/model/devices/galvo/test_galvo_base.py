@@ -108,7 +108,7 @@ class TestGalvoBase(unittest.TestCase):
 
     def test_adjust_with_valid_input(self):
         # Test the method with valid input data
-        for waveform in ["sawtooth", "sine"]:
+        for waveform in ["sawtooth", "sine", "quadratic", "centered_cubic"]:
             self.galvo.galvo_waveform = waveform
             result = self.galvo.adjust(self.exposure_times, self.sweep_times)
 

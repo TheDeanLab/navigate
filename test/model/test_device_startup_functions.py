@@ -31,7 +31,7 @@
 
 # Standard library imports
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import multiprocessing
 
 # Third party imports
@@ -208,3 +208,49 @@ class TestAutoRedial(unittest.TestCase):
                 plugin_devices[device_category][device_class_name][
                     "start_device"
                 ].assert_called_once()
+
+    def test_start_device_kinesis_stage_uses_factory(self):
+        """Ensure KINESIS stage instantiates via start_device factory flow."""
+        with multiprocessing.Manager() as manager:
+            stage_hardware = manager.list(
+                [
+                    {
+                        "type": "KINESIS",
+                        "serial_number": "/dev/ttyUSB1",
+                        "axes": ["f"],
+                        "axes_mapping": [1],
+                        "steps_per_um": 2000.0,
+                    }
+                ]
+            )
+            configuration = {
+                "configuration": {
+                    "microscopes": {
+                        "TestMicroscope": {
+                            "stage": {
+                                "hardware": stage_hardware,
+                                "f_min": 0,
+                                "f_max": 25000,
+                            }
+                        }
+                    }
+                }
+            }
+
+            with patch(
+                "navigate.model.devices.stage.thorlabs.KINESISStage.connect",
+                return_value=MagicMock(),
+            ) as connect_mock:
+                stage = start_device(
+                    "TestMicroscope",
+                    configuration,
+                    "stage",
+                    0,
+                    False,
+                    None,
+                    {},
+                )
+
+            connect_mock.assert_called_once_with("/dev/ttyUSB1")
+            assert stage.__class__.__name__ == "KINESISStage"
+            assert stage.steps_per_um == 2000.0

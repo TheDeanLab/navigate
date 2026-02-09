@@ -12,6 +12,9 @@ National Instruments
 
 Multiple types of galvanometers have been used, including Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX. Each of these devices are externally controlled via analog signals delivered from an NI-based data acquisition card.
 
+For NI and synthetic galvos, the software supports the following waveform options:
+``sawtooth``, ``sine``, ``halfsaw``, ``quadratic``, and ``centered_cubic``.
+
 .. collapse:: Configuration File
 
     .. code-block:: yaml

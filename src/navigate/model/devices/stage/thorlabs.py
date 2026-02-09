@@ -34,7 +34,7 @@ import importlib
 import logging
 import time
 from multiprocessing.managers import ListProxy
-from typing import Any, Optional
+from typing import Any
 
 # Local Imports
 from navigate.model.devices.stage.base import StageBase
@@ -44,6 +44,32 @@ from navigate.tools.decorators import log_initialization
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+def _get_stage_device_entry(
+    configuration: dict[str, Any], microscope_name: str, device_id: int
+) -> dict[str, Any]:
+    """Return stage device config entry regardless of list/single configuration."""
+    stage_hardware = configuration["configuration"]["microscopes"][microscope_name][
+        "stage"
+    ]["hardware"]
+    if type(stage_hardware) == ListProxy:
+        return stage_hardware[device_id]
+    return stage_hardware
+
+
+def _get_device_unit_scale(device_entry: dict[str, Any]) -> float:
+    """Return device-units-per-mm with safe fallbacks for legacy configs."""
+    device_units_per_mm = device_entry.get("device_units_per_mm")
+    if device_units_per_mm is not None:
+        return float(device_units_per_mm)
+
+    # Legacy KINESIS configs may define steps_per_um instead.
+    steps_per_um = device_entry.get("steps_per_um")
+    if steps_per_um is not None:
+        return float(steps_per_um) * 1000.0
+
+    return 1000.0
 
 
 @log_initialization
@@ -300,18 +326,13 @@ class KST101Stage(StageBase):
         #: list: List of KST axes available.
         self.KST_axes = list(self.axes_mapping.values())
 
-        device_config = configuration["configuration"]["microscopes"][microscope_name][
-            "stage"
-        ]["hardware"]
-        if type(device_config) == ListProxy:
-            #: str: Serial number of the stage.
-            self.serial_number = str(device_config[device_id]["serial_number"])
-
-            #: float: Device units per mm.
-            self.device_unit_scale = device_config[device_id]["device_units_per_mm"]
-        else:
-            self.serial_number = device_config["serial_number"]
-            self.device_unit_scale = device_config["device_units_per_mm"]
+        device_entry = _get_stage_device_entry(
+            configuration, microscope_name, device_id
+        )
+        #: str: Serial number of the stage.
+        self.serial_number = str(device_entry.get("serial_number", ""))
+        #: float: Device units per mm.
+        self.device_unit_scale = _get_device_unit_scale(device_entry)
 
         if device_connection is not None:
             #: object: Thorlabs KST Stage controller
@@ -515,3 +536,107 @@ class KST101Stage(StageBase):
         Stop all stage channels move
         """
         self.kst_controller.KST_MoveStop(self.serial_number)
+
+
+@log_initialization
+class KINESISStage(StageBase):
+    """Thorlabs Kinesis stage via pylablib (serial backend)."""
+
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        device_id: int = 0,
+    ) -> None:
+        super().__init__(microscope_name, device_connection, configuration, device_id)
+
+        axes_mapping = {"x": 1, "y": 1, "z": 1, "f": 1}
+        if not self.axes_mapping:
+            if self.axes[0] not in axes_mapping:
+                raise KeyError(f"KINESIS stage does not support axis: {self.axes[0]}")
+            self.axes_mapping = {self.axes[0]: axes_mapping[self.axes[0]]}
+
+        device_entry = _get_stage_device_entry(
+            configuration, microscope_name, device_id
+        )
+        self.serial_number = str(device_entry.get("serial_number", ""))
+
+        steps_per_um = device_entry.get("steps_per_um")
+        if steps_per_um is None:
+            # Fallback to existing stage field so configs do not need to change.
+            device_units_per_mm = _get_device_unit_scale(device_entry)
+            steps_per_um = float(device_units_per_mm) / 1000.0
+        self.steps_per_um = float(steps_per_um)
+
+        self.kinesis_controller = device_connection
+
+    def __del__(self) -> None:
+        try:
+            self.stop()
+            self.kinesis_controller.close()
+        except Exception:
+            pass
+
+    @classmethod
+    def get_connect_params(cls) -> list[str]:
+        return ["serial_number"]
+
+    @classmethod
+    def connect(cls, serial_number: str) -> Any:
+        kinesis_module = importlib.import_module(
+            "navigate.model.devices.APIs.thorlabs.pykinesis_controller"
+        )
+        return kinesis_module.KinesisStage(str(serial_number), False)
+
+    def report_position(self) -> dict[str, float]:
+        try:
+            pos = self.kinesis_controller.get_current_position(self.steps_per_um)
+            setattr(self, f"{self.axes[0]}_pos", pos)
+        except Exception:
+            pass
+        return self.get_position_dict()
+
+    def move_axis_absolute(
+        self, axis: str, abs_pos: float, wait_until_done: bool = False
+    ) -> bool:
+        if axis not in self.axes_mapping:
+            return False
+
+        axis_abs = self.get_abs_position(axis, abs_pos)
+        if axis_abs == -1e50:
+            return False
+
+        self.kinesis_controller.move_to_position(
+            axis_abs, self.steps_per_um, wait_until_done
+        )
+        return True
+
+    def move_absolute(
+        self, move_dictionary: dict[str, float], wait_until_done: bool = False
+    ) -> bool:
+        result = True
+        for axis in self.axes_mapping.keys():
+            if f"{axis}_abs" not in move_dictionary:
+                continue
+            result = (
+                self.move_axis_absolute(
+                    axis, move_dictionary[f"{axis}_abs"], wait_until_done
+                )
+                and result
+            )
+        return result
+
+    def move_to_position(self, position: float, wait_until_done: bool = False) -> bool:
+        return self.move_axis_absolute(self.axes[0], position, wait_until_done)
+
+    def run_homing(self) -> None:
+        self.kinesis_controller.home_stage()
+        axis = self.axes[0]
+        midpoint = (
+            getattr(self, f"{axis}_min", 0) + getattr(self, f"{axis}_max", 25)
+        ) / 2
+        self.move_axis_absolute(axis, midpoint, wait_until_done=True)
+
+    def stop(self) -> None:
+        self.kinesis_controller.stop()

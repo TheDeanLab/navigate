@@ -400,13 +400,12 @@ class Camera:
         
         return projection
 
-    def set_ortho_view(self, pitch: float=0.0, yaw: float=0.0, radius: float=1.0):
+    def set_ortho_view(self, pitch: float=0.0, yaw: float=0.0):
         # self.position = glm.vec3(position)
         self.look_at = glm.vec3(0.0)
 
         self.pitch  = glm.radians(pitch)
         self.yaw    = glm.radians(yaw)
-        self.radius = radius
 
         self._recompute_position()
         self._update_basis()
@@ -991,13 +990,13 @@ class GLFrameViewer:
                 self.set_min_max(self.min_max)
             
             elif key == glfw.KEY_X:
-                self.camera.set_ortho_view( 0.0, 90.0, 350.0)
+                self.camera.set_ortho_view( 0.0, 90.0)
             elif key == glfw.KEY_Y:
-                self.camera.set_ortho_view( 0.0,  0.0, 350.0)
+                self.camera.set_ortho_view( 0.0,  0.0)
             elif key == glfw.KEY_Z:
-                self.camera.set_ortho_view(90.0, 90.0, 350.0)
+                self.camera.set_ortho_view(90.0, 90.0)
             elif key == glfw.KEY_C:
-                self.camera.set_ortho_view(45.0, 45.0, 350.0)
+                self.camera.set_ortho_view(45.0, 45.0)
 
     def _ensure_gl_ready(self):
         window = self.window

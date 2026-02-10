@@ -32,6 +32,7 @@
 # Standard library imports
 from math import ceil
 import csv
+import warnings
 
 # Third party imports
 import numpy as np
@@ -272,13 +273,19 @@ def update_table(table, pos, axes, append=False):
         axes.extend([" "] * (axes_count - len(axes)))
     frame = pd.DataFrame(pos, columns=[axis.upper() for axis in axes])
     if append:
-        table.model.df = table.model.df.append(frame, ignore_index=True)
+        table.model.df = pd.concat([table.model.df, frame], ignore_index=True)
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1
     table.resetColors()
-    table.redraw()
-    table.tableChanged()
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r".*convert_dtype parameter is deprecated.*",
+            category=FutureWarning,
+        )
+        table.redraw()
+        table.tableChanged()
 
 
 def write_to_csv_file(positions, file_path):

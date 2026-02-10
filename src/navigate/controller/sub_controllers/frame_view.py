@@ -193,7 +193,7 @@ void main()
     tEnter = max(tEnter, 0.0);
 
     // -------- step-size invariant opacity terms --------
-    vec3 dim = vec3(textureSize(volume, 0));       // voxel counts (X,Y,Z)
+    vec3 dim = vec3(textureSize(volume[0], 0));       // voxel counts (X,Y,Z)
 
     // “steps per voxel” along this ray (orientation aware)
     float dVoxel  = max(dot(abs(rd), spacing), 1e-6);
@@ -211,7 +211,7 @@ void main()
         vec3 uvw = (pos - boxMin_um) * invBoxSize;        // [0,1]^3
 
         // sample scalar (all 4 channels in RGBA)
-        vec4 s = texture(volume, uvw);            
+        // vec4 s = texture(volume, uvw);            
 
         for (int i = 0; i < 4; ++i)
         {
@@ -680,8 +680,11 @@ class GLFrameViewController(GUIController):
     def try_to_display_image(self, image: SharedNDArray) -> None:
 
         # stacking setup
-        n_steps   = self.microscope_state["number_z_steps"]
-        step_size = self.microscope_state["step_size"]
+        n_steps    = self.microscope_state["number_z_steps"]
+        n_channels = self.microscope_state["selected_channels"]
+        step_size  = self.microscope_state["step_size"]
+        
+        self.viewer.set_n_channels(n_channels)
         self.viewer.set_dz(step_size)
         
         if self.microscope_state["image_mode"] == "z-stack":
@@ -703,6 +706,8 @@ class GLFrameViewController(GUIController):
     
     def reset(self):
         self.viewer.rendered_images = 0
+        self.viewer._z  = 0
+        self.viewer._ch = 0
         # self.viewer.vol_shape = None
         # self.viewer.vol_min_max = None
 
@@ -747,7 +752,7 @@ class GLFrameViewer:
         # stack attribs
         self.vol_shape = None
         self._z        = 0
-        self._N        = 1
+        self._ch       = 0
         self._dz       = 1.0
 
         # textures
@@ -774,7 +779,8 @@ class GLFrameViewer:
         self.resolution  = None
         self.min_max     = [0, 65535]
         self.luts        = None
-        self.n_channels  = None
+        self.n_slices    = 1
+        self.n_channels  = 1
         self.curr_chan   = 0
 
         # monitoring
@@ -782,7 +788,7 @@ class GLFrameViewer:
         self._t0             = 0
 
     def set_slices(self, N: int):
-        self._N = N
+        self.n_slices = N
 
     def set_dz(self, dz: float):
         self._dz = dz
@@ -1059,12 +1065,12 @@ class GLFrameViewer:
         # self.cmd_q.put(_do)
         self.cmd_q.put_nowait(_do)
 
-    def add_slice(self, image: np.ndarray, ch: int=0):
+    def add_slice(self, image: np.ndarray):
 
         if self.vol_shape is not None:
             # if there is a mismatch between the current vol_shape
             # and the incoming volume shape...
-            if (self._N,) + image.shape != self.vol_shape:
+            if (self.n_slices,) + image.shape != self.vol_shape:
                 # clear the volume shape
                 self.vol_shape = None
                 # clear texture
@@ -1074,13 +1080,16 @@ class GLFrameViewer:
                 self.add_slice(image)
                 
             # else bind the slice
-            self.bind_slice(image, self._z, ch)
+            self.bind_slice(image, self._z, self._ch)
 
             # N-bounded increment
-            if ch == self.n_channels - 1:
-                self._z = (self._z + 1) % self._N
+            print(f"Add slice: self._ch = {self._ch}, self._z = {self._z}")
+            self._ch += 1
+            if self._ch == self.n_channels - 1:
+                self.ch = 0    
+                self._z = (self._z + 1) % self.n_slices
         else:
-            new_shape = (self._N,) + image.shape
+            new_shape = (self.n_slices,) + image.shape
             # allocate new volume
             self.bind_volume(new_shape)
             # try again with correct vol_shape
@@ -1126,13 +1135,15 @@ class GLFrameViewer:
 
         self.cmd_q.put(_do)
 
-    def make_volume_texture(self, shape: tuple, n_channels: int=4):
+    def make_volume_texture(self, shape: tuple):
 
         z, y, x = shape
 
         # create 3d textures for all channels
-        self.tex_3d = list(GL.glGenTextures(n_channels))
+        self.tex_3d = list(GL.glGenTextures(self.n_channels))
         
+        print(f"Created tex3d:\t{self.tex_3d}")
+
         for tex in self.tex_3d:
             # bind this texture
             GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
@@ -1305,6 +1316,8 @@ class GLFrameViewer:
         #       number and then write to specific chan. GL format needs to be GL_RGBA.
 
         y, x = slice.shape
+
+        print(f"Update slice z ch={ch}")
 
         GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d[ch])
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
@@ -1492,6 +1505,8 @@ class GLFrameViewer:
             shader = self.shaders["volume"]
             shader.use()
             shader.set_int('nChannels', n_channels)
+
+            print(f"nChannels is set to {n_channels}")
         
         self.cmd_q.put_nowait(_do)        
 

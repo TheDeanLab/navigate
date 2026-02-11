@@ -34,10 +34,37 @@
 from collections import Counter
 from functools import wraps
 import logging
+import os
+import sys
 import threading
 import traceback
 
 _patch_lock = threading.Lock()
+
+
+def _guard_disabled_by_environment() -> bool:
+    """Check whether Tk thread guard should be disabled.
+
+    Returns
+    -------
+    bool
+        ``True`` when guard installation should be skipped.
+    """
+    disable_values = {"1", "true", "yes", "on"}
+    force_values = {"1", "true", "yes", "on"}
+
+    disable_env = os.getenv("NAVIGATE_DISABLE_TK_THREAD_GUARD", "").strip().lower()
+    if disable_env in disable_values:
+        return True
+
+    # CI test environments can hit platform-specific Tcl thread errors during
+    # fixture setup/teardown. Keep the guard enabled in application runtime,
+    # but skip it under pytest unless explicitly forced.
+    force_env = os.getenv("NAVIGATE_ENABLE_TK_THREAD_GUARD_IN_TESTS", "").strip().lower()
+    if "pytest" in sys.modules and force_env not in force_values:
+        return True
+
+    return False
 
 
 def install_tk_thread_guard(root, logger: logging.Logger = None) -> bool:
@@ -57,6 +84,10 @@ def install_tk_thread_guard(root, logger: logging.Logger = None) -> bool:
     """
     if logger is None:
         logger = logging.getLogger(__name__)
+
+    if _guard_disabled_by_environment():
+        logger.info("Skipping Tk thread guard installation in this environment.")
+        return False
 
     tkapp_cls = type(root.tk)
     methods_to_wrap = (

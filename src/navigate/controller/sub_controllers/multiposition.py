@@ -47,6 +47,7 @@ import yaml
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.file_functions import save_yaml_file
+from navigate.tools.multipos_table_tools import update_rowcolors
 
 
 # Logger Setup
@@ -329,7 +330,7 @@ class MultiPositionController(GUIController):
     def insert_row_func(self) -> None:
         """Insert a row in the Multi-Position Acquisition Interface."""
         self.table.model.addRow(self.table.currentrow)
-        self.table.update_rowcolors()
+        update_rowcolors(self.table)
         self._refresh_table_view()
 
     def add_stage_position(self) -> None:
@@ -370,7 +371,7 @@ class MultiPositionController(GUIController):
             ignore_index=True,
         )
         self.table.currentrow = self.table.model.df.shape[0] - 1
-        self.table.update_rowcolors()
+        update_rowcolors(self.table)
         self._refresh_table_view()
 
     def remove_positions(self, position_flag_list: list[bool]) -> None:

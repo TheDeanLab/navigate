@@ -32,6 +32,7 @@
 # Standard library imports
 from math import ceil
 import csv
+import warnings
 
 # Third party imports
 import numpy as np
@@ -272,13 +273,64 @@ def update_table(table, pos, axes, append=False):
         axes.extend([" "] * (axes_count - len(axes)))
     frame = pd.DataFrame(pos, columns=[axis.upper() for axis in axes])
     if append:
-        table.model.df = table.model.df.append(frame, ignore_index=True)
+        table.model.df = pd.concat([table.model.df, frame], ignore_index=True)
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1
     table.resetColors()
-    table.redraw()
-    table.tableChanged()
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r".*convert_dtype parameter is deprecated.*",
+            category=FutureWarning,
+        )
+        table.redraw()
+        table.tableChanged()
+
+
+def update_rowcolors(table) -> None:
+    """Synchronize pandastable row colors with the current dataframe.
+
+    Parameters
+    ----------
+    table : object
+        Pandastable-like table instance with ``model.df`` and ``rowcolors``.
+
+    Returns
+    -------
+    None
+    """
+    df = table.model.df
+    rc = table.rowcolors
+
+    # Prefer upstream behavior when available.
+    try:
+        table.update_rowcolors()
+        return
+    except AttributeError as exc:
+        # Pandastable still uses DataFrame.append(), which pandas 2 removed.
+        if "append" not in str(exc):
+            raise
+
+    if len(df) == len(rc):
+        rc = rc.copy()
+        rc.set_index(df.index, inplace=True)
+    elif len(df) > len(rc):
+        idx = df.index.difference(rc.index)
+        rc = pd.concat([rc, pd.DataFrame(index=idx)], axis=0)
+    else:
+        idx = rc.index.difference(df.index)
+        rc = rc.drop(index=idx)
+
+    cols_to_drop = list(rc.columns.difference(df.columns))
+    if cols_to_drop:
+        rc = rc.drop(columns=cols_to_drop)
+
+    cols_to_add = list(df.columns.difference(rc.columns))
+    for col in cols_to_add:
+        rc[col] = np.nan
+
+    table.rowcolors = rc
 
 
 def write_to_csv_file(positions, file_path):

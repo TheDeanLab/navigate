@@ -35,6 +35,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import math
 import logging
+import warnings
 from typing import Callable
 
 # Third Party Imports
@@ -46,6 +47,7 @@ import yaml
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.file_functions import save_yaml_file
+from navigate.tools.multipos_table_tools import update_rowcolors
 
 
 # Logger Setup
@@ -96,6 +98,17 @@ class MultiPositionController(GUIController):
         """Eliminate tiles that do not contain tissue."""
         self.parent_controller.execute("eliminate_tiles")
 
+    def _refresh_table_view(self) -> None:
+        """Redraw table while filtering known pandastable/pandas deprecation noise."""
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r".*convert_dtype parameter is deprecated.*",
+                category=FutureWarning,
+            )
+            self.table.redraw()
+            self.table.tableChanged()
+
     def set_positions(self, positions: list[list[float]]) -> None:
         """Set positions to multi-position's table
 
@@ -143,8 +156,7 @@ class MultiPositionController(GUIController):
             )
         self.table.model.df = pd.DataFrame(data)
         self.table.currentrow = 0
-        self.table.redraw()
-        self.table.tableChanged()
+        self._refresh_table_view()
 
     def get_positions(self) -> list[list[float]]:
         """Return all positions from the Multi-Position Acquisition Interface.
@@ -274,8 +286,7 @@ class MultiPositionController(GUIController):
 
         # reset index
         self.table.resetColors()
-        self.table.redraw()
-        self.table.tableChanged()
+        self._refresh_table_view()
 
     def export_positions(self) -> None:
         """Export the positions in the Multi-Position Acquisition Interface to a
@@ -319,9 +330,8 @@ class MultiPositionController(GUIController):
     def insert_row_func(self) -> None:
         """Insert a row in the Multi-Position Acquisition Interface."""
         self.table.model.addRow(self.table.currentrow)
-        self.table.update_rowcolors()
-        self.table.redraw()
-        self.table.tableChanged()
+        update_rowcolors(self.table)
+        self._refresh_table_view()
 
     def add_stage_position(self) -> None:
         """Add the current stage position to the Multi-Position Acquisition Interface.
@@ -356,13 +366,13 @@ class MultiPositionController(GUIController):
         self.table.model.df = self.table.model.df.reindex(columns=headers)
 
         # temp = list(map(lambda k: position[k], position))
-        self.table.model.df = self.table.model.df.append(
-            pd.DataFrame([temp], columns=headers), ignore_index=True
+        self.table.model.df = pd.concat(
+            [self.table.model.df, pd.DataFrame([temp], columns=headers)],
+            ignore_index=True,
         )
         self.table.currentrow = self.table.model.df.shape[0] - 1
-        self.table.update_rowcolors()
-        self.table.redraw()
-        self.table.tableChanged()
+        update_rowcolors(self.table)
+        self._refresh_table_view()
 
     def remove_positions(self, position_flag_list: list[bool]) -> None:
         """Remove positions according to position_flag_list

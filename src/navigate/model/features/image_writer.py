@@ -166,7 +166,7 @@ class ImageWriter:
 
         #: bool: Flag to indicate is imaging mode is z-stack
         self.z_stack = self.model.imaging_mode == "z-stack"
-        #: int: data_buffer_positions queue position
+        #: int: data_buffer_positions buffer index (e.g. 0 indicates first 100 images)
         if self.asi and self.z_stack:
             self.read_idx = -1
         else:
@@ -239,13 +239,14 @@ class ImageWriter:
             # Save data to disk
             try:
                 start_time = time.time()
+                pos_idx = self.read_idx * self.number_of_frames + idx
                 self.data_source.write(
                     image,
-                    x=self.model.data_buffer_positions[idx][self.read_idx][0],
-                    y=self.model.data_buffer_positions[idx][self.read_idx][1],
-                    z=self.model.data_buffer_positions[idx][self.read_idx][2],
-                    theta=self.model.data_buffer_positions[idx][self.read_idx][3],
-                    f=self.model.data_buffer_positions[idx][self.read_idx][4],
+                    x=self.model.data_buffer_positions[pos_idx][0],
+                    y=self.model.data_buffer_positions[pos_idx][1],
+                    z=self.model.data_buffer_positions[pos_idx][2],
+                    theta=self.model.data_buffer_positions[pos_idx][3],
+                    f=self.model.data_buffer_positions[pos_idx][4],
                 )
                 logger.info(
                     f"C: {c_idx}, Z:{z_idx}, T:{t_idx}, P:{p_idx}, Write Time:"

@@ -129,7 +129,7 @@ class TigerController:
         self.baud_rate = baud_rate
 
         #: bool: If True, will print out messages to the console
-        self.verbose = True
+        self.verbose = verbose
 
         #: list[str]: Default axes sequence of the Tiger Controller
         self.default_axes_sequence = None
@@ -399,6 +399,7 @@ class TigerController:
 
         # send the serial command to the controller
         self.report_to_console(cmd)
+        print(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         try:
             self.serial.write(command)
@@ -429,6 +430,7 @@ class TigerController:
 
         # Remove leading and trailing empty spaces
         response = response.strip()
+        print(response)
         self.report_to_console(f"Received Response: {response}")
         if response.startswith(":N"):
             logger.error(f"{str(self)}, Error code received: {response}")
@@ -1051,6 +1053,7 @@ class TigerController:
         amplitude: int = 1000,
         offset: int = 500,
         period: int = 10,
+        rise_time: int = 0
     ) -> None:
         """Programs the analog waveforms using SAA, SAO, SAP, and SAF
         Default waveform is a sawtooth waveform with an amplitude of 1V, an offset of 0.5V and period of 10 ms
@@ -1086,6 +1089,14 @@ class TigerController:
         self.read_response()
         self.send_command(f"SAF {axis}={round(period)}")
         self.read_response()
+        if waveform == 132:
+            self.send_command(f"OS {axis}={round(rise_time)}")
+            self.read_response()
+            # print(f"SAP {axis}={round(waveform)}\n"
+            #       f"SAA {axis}={round(amplitude)}\n"
+            #       f"SAO {axis}={round(offset)}\n"
+            #       f"SAF {axis}={round(period)}\n"
+            #       f"OS {axis}={round(rise_time)}")
 
     def single_axis_mode(self, axis: str, mode: int) -> None:
         """Sets the single-axis mode according to the integer code.
@@ -1157,6 +1168,8 @@ class TigerController:
         remote_focus_axis = analog_outputs["remote_focus"]
         logger.info(f"Exposure time: {exposure_time}")
         logger.info(f"Sweep time: {sweep_time}")
+        print(f"Exposure time: {exposure_time}")
+        print(f"Sweep time: {sweep_time}")
         cycle_time = sweep_time * num_cycles
 
         # Convert all time values to 1/4 ms
@@ -1303,8 +1316,6 @@ class TigerController:
         # Runs the main setup commands, followed by the Galvo specific commands
         for command in commands:
             self.send_command(f"{command}\r")
-            if self.verbose:
-                print(f"Sent Command: {command}")
             self.read_response()
         for command in galvo_commands:
             self.send_command(f"{command}\r")
@@ -1380,6 +1391,4 @@ class TigerController:
         ]
         for command in commands:
             self.send_command(f"{command}\r")
-            if self.verbose:
-                print(f"Sent Command: {command}")
             self.read_response()

@@ -269,7 +269,7 @@ class Model:
         self.update_data_buffer(self.img_width, self.img_height)
 
         self.data_buffer_positions = SharedNDArray(
-            shape=(self.number_of_frames, 20, 5), dtype=float
+            shape=(self.number_of_frames, 5), dtype=float
         )  # x, y, z, theta, f
 
         #: ImageWriter: Image writer.
@@ -1224,11 +1224,11 @@ class Model:
         # wildly expensive when get_stage_position() does not cache results.
         start_time = time.perf_counter_ns()
         stage_pos = self.get_stage_position()
-        self.data_buffer_positions[self.frame_id][0][0] = stage_pos.get("x_pos", 0)
-        self.data_buffer_positions[self.frame_id][0][1] = stage_pos.get("y_pos", 0)
-        self.data_buffer_positions[self.frame_id][0][2] = stage_pos.get("z_pos", 0)
-        self.data_buffer_positions[self.frame_id][0][3] = stage_pos.get("theta_pos", 0)
-        self.data_buffer_positions[self.frame_id][0][4] = stage_pos.get("f_pos", 0)
+        self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
+        self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
+        self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
+        self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
+        self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
         self.logger.performance(
             json.dumps(
                 {
@@ -1861,6 +1861,10 @@ class ASIModel(Model):
 
         self.asi = True
 
+        self.data_buffer_positions = SharedNDArray(
+            shape=(self.number_of_frames * 20, 5), dtype=float
+        )  # x, y, z, theta, f
+
         self.logger.info("ASIModel initialized.")
 
     def prepare_acquisition(self, turn_off_flags: bool = True) -> bool:
@@ -1956,27 +1960,30 @@ class ASIModel(Model):
         z_steps = self.configuration["experiment"][
             "MicroscopeState"]["number_z_steps"]
         print(z_steps)
-        if self.imaging_mode == "z-stack":
+        if self.imaging_mode == "z-stack" and self.is_save:
             z_step_size = self.configuration["experiment"][
                 "MicroscopeState"]["step_size"]
             for i in range(z_steps):
                 idx = (self.frame_id + i) % self.number_of_frames
-                if idx % self.number_of_frames == 0:
+                if idx == 0:
                     self.write_idx = (self.write_idx + 1) % 20
                     print("write_idx: ", self.write_idx)
-                self.data_buffer_positions[idx][self.write_idx][0] = stage_pos.get(
-                    "x_pos", 0)
-                self.data_buffer_positions[idx][self.write_idx][1] = stage_pos.get("y_pos", 0)
-                self.data_buffer_positions[idx][self.write_idx][2] = (stage_pos.get("z_pos", 0) +
+                # if there are more frames than the buffer size when pre-allocating
+                # z-stack positions, increment self.write_idx to indicate the
+                # positions are being written in the "next" buffer
+                pos_idx = self.write_idx * self.number_of_frames + idx
+                self.data_buffer_positions[pos_idx][0] = stage_pos.get("x_pos", 0)
+                self.data_buffer_positions[pos_idx][1] = stage_pos.get("y_pos", 0)
+                self.data_buffer_positions[pos_idx][2] = (stage_pos.get("z_pos", 0) +
                                                       i*z_step_size)
-                self.data_buffer_positions[idx][self.write_idx][3] = stage_pos.get("theta_pos", 0)
-                self.data_buffer_positions[idx][self.write_idx][4] = stage_pos.get("f_pos", 0)
+                self.data_buffer_positions[pos_idx][3] = stage_pos.get("theta_pos", 0)
+                self.data_buffer_positions[pos_idx][4] = stage_pos.get("f_pos", 0)
         else:
-            self.data_buffer_positions[self.frame_id][0][0] = stage_pos.get("x_pos", 0)
-            self.data_buffer_positions[self.frame_id][0][1] = stage_pos.get("y_pos", 0)
-            self.data_buffer_positions[self.frame_id][0][2] = stage_pos.get("z_pos", 0)
-            self.data_buffer_positions[self.frame_id][0][3] = stage_pos.get("theta_pos", 0)
-            self.data_buffer_positions[self.frame_id][0][4] = stage_pos.get("f_pos", 0)
+            self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
+            self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
+            self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
+            self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
+            self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
 
         # Run the acquisition
         try:

@@ -261,7 +261,8 @@ class TiffDataSource(DataSource):
             }
             self.image[c].write(
                 data,
-                resolution=(1e4 / dx, 1e4 / dy, "CENTIMETER"),
+                resolution=(1e4 / dx, 1e4 / dy),
+                resolutionunit="CENTIMETER",
                 metadata=md,
                 contiguous=True,
             )

@@ -13,7 +13,7 @@ from enum import IntEnum
 CODING = "ascii"
 
 __dll = ctypes.WinDLL(
-    "C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.InertialMotor.dll"
+    r"C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.InertialMotor.dll"
 )
 
 

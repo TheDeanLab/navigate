@@ -29,7 +29,7 @@ NOTE:
 CODING = "ascii"
 
 __dll = ctypes.WinDLL(
-    "C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.StepperMotor.dll"
+    r"C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.StepperMotor.dll"
 )
 
 

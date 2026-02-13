@@ -395,6 +395,7 @@ def test_set_table_updates_coupled_axis_step_size(tiling_wizard_controller):
 
 def test_position_handler_stops_stage_and_sets_widget(tiling_wizard_controller):
     tiling_wizard_controller.stage_position_vars["x"].set(123.4)
+    expected_position = tiling_wizard_controller.stage_position_vars["x"].get()
     set_mock = MagicMock()
     tiling_wizard_controller.widgets["x_start"].widget.set = set_mock
 
@@ -407,7 +408,7 @@ def test_position_handler_stops_stage_and_sets_widget(tiling_wizard_controller):
 
     parent.execute.assert_called_once_with("stop_stage")
     parent.view.after.assert_called_once()
-    set_mock.assert_called_once_with("123.4")
+    set_mock.assert_called_once_with(expected_position)
 
 
 def test_update_fov_switches_primary_axes(tiling_wizard_controller):

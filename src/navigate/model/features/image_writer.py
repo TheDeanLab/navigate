@@ -41,7 +41,7 @@ from datetime import datetime
 
 # Third Party Imports
 import numpy as np
-from tifffile import imsave
+from tifffile import imwrite as tiff_write
 
 # Local imports
 import navigate
@@ -278,7 +278,7 @@ class ImageWriter:
             else:
                 mip_8bit = np.zeros_like(mip, dtype=np.uint8)
 
-            imsave(
+            tiff_write(
                 os.path.join(self.mip_directory, mip_name),
                 mip_8bit,
             )

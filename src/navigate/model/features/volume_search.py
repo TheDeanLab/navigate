@@ -459,7 +459,7 @@ class VolumeSearch:
             if self.debug:
                 import tifffile
 
-                tifffile.imsave(
+                tifffile.imwrite(
                     "volume_search_2d_debug_result.tif", self.volumes_selected
                 )
         return self.end_flag

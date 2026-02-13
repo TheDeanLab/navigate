@@ -56,7 +56,10 @@ class TestFakeEvent(unittest.TestCase):
 class TestStageMovement(unittest.TestCase):
     def setUp(self):
         # Create a mock parent controller and view
-        self.root = tk.Tk()
+        try:
+            self.root = tk.Tk()
+        except tk.TclError as exc:
+            self.skipTest(f"Tk unavailable in this environment: {exc}")
         self.parent_controller = MagicMock()
         self.parent_controller.stage_controller = MagicMock()
         self.view = MagicMock()
@@ -70,7 +73,8 @@ class TestStageMovement(unittest.TestCase):
         self.parent_controller.configuration["gui"]["histogram"].get.return_value = True
 
     def tearDown(self):
-        self.root.destroy()
+        if hasattr(self, "root"):
+            self.root.destroy()
 
     def test_initialize_menus(self):
         self.mc.initialize_menus()

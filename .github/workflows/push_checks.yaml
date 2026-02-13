@@ -12,8 +12,9 @@ jobs:
   test:
     runs-on: ${{ matrix.operating-system }}
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.9"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         operating-system: [windows-latest]  # [ubuntu-latest, windows-latest]
     env:
       MPLBACKEND: Agg  # https://github.com/microsoft/azure-pipelines-tasks/issues/16426

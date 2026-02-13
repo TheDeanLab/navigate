@@ -1,6 +1,7 @@
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, ANY
+import queue
 import pytest
 import numpy
 import multiprocessing as mp
@@ -749,6 +750,255 @@ def test_update_stage_controller_silent(controller):
         assert (
             float(controller.stage_controller.widget_vals[axis].get()) == pos_dict[axis]
         )
+
+
+def test_run_on_main_thread_returns_direct_result(controller):
+    result = controller._run_on_main_thread(lambda x, y: x + y, 2, 3, wait=True)
+    assert result == 5
+
+
+def test_run_on_main_thread_worker_without_dispatcher(controller, monkeypatch):
+    import navigate.controller.controller as controller_module
+
+    worker_thread = SimpleNamespace(name="worker-thread")
+    main_thread = SimpleNamespace(name="main-thread")
+
+    monkeypatch.setattr(
+        controller_module.threading, "current_thread", lambda: worker_thread
+    )
+    monkeypatch.setattr(controller_module.threading, "main_thread", lambda: main_thread)
+    monkeypatch.setattr(controller, "_event_pump_running", False)
+
+    assert controller._run_on_main_thread(lambda: "ignored", wait=False) is None
+
+    with pytest.raises(RuntimeError, match="dispatcher is not running"):
+        controller._run_on_main_thread(lambda: "ignored", wait=True)
+
+
+def test_run_on_main_thread_worker_enqueue_without_wait(controller, monkeypatch):
+    import navigate.controller.controller as controller_module
+
+    worker_thread = SimpleNamespace(name="worker-thread")
+    main_thread = SimpleNamespace(name="main-thread")
+    dispatch_queue = MagicMock()
+
+    monkeypatch.setattr(
+        controller_module.threading, "current_thread", lambda: worker_thread
+    )
+    monkeypatch.setattr(controller_module.threading, "main_thread", lambda: main_thread)
+    monkeypatch.setattr(controller, "_event_pump_running", True)
+    monkeypatch.setattr(controller, "_main_thread_dispatch_queue", dispatch_queue)
+
+    assert controller._run_on_main_thread(lambda: "ok", wait=False) is None
+    assert dispatch_queue.put.call_count == 1
+
+
+def test_run_on_main_thread_wait_result_and_error_paths(controller, monkeypatch):
+    import navigate.controller.controller as controller_module
+
+    worker_thread = SimpleNamespace(name="worker-thread")
+    main_thread = SimpleNamespace(name="main-thread")
+
+    monkeypatch.setattr(
+        controller_module.threading, "current_thread", lambda: worker_thread
+    )
+    monkeypatch.setattr(controller_module.threading, "main_thread", lambda: main_thread)
+    monkeypatch.setattr(controller, "_event_pump_running", True)
+
+    done_event = MagicMock()
+    done_event.wait.return_value = True
+    dispatch_queue = MagicMock()
+
+    def set_result(item):
+        _, _, _, _, result = item
+        result["value"] = "done"
+
+    dispatch_queue.put.side_effect = set_result
+    monkeypatch.setattr(controller_module.threading, "Event", lambda: done_event)
+    monkeypatch.setattr(controller, "_main_thread_dispatch_queue", dispatch_queue)
+
+    assert controller._run_on_main_thread(lambda: "ignored", wait=True) == "done"
+
+    def set_error(item):
+        _, _, _, _, result = item
+        result["error"] = ValueError("callback failure")
+
+    dispatch_queue.put.side_effect = set_error
+    with pytest.raises(ValueError, match="callback failure"):
+        controller._run_on_main_thread(lambda: "ignored", wait=True)
+
+
+def test_run_on_main_thread_wait_raises_if_dispatcher_stops(controller, monkeypatch):
+    import navigate.controller.controller as controller_module
+
+    worker_thread = SimpleNamespace(name="worker-thread")
+    main_thread = SimpleNamespace(name="main-thread")
+
+    monkeypatch.setattr(
+        controller_module.threading, "current_thread", lambda: worker_thread
+    )
+    monkeypatch.setattr(controller_module.threading, "main_thread", lambda: main_thread)
+    monkeypatch.setattr(controller, "_event_pump_running", True)
+    monkeypatch.setattr(controller, "_main_thread_dispatch_queue", MagicMock())
+
+    class StopThenWait:
+        def __init__(self, ctrl):
+            self.ctrl = ctrl
+            self.calls = 0
+
+        def wait(self, timeout=0.1):
+            self.calls += 1
+            if self.calls == 1:
+                self.ctrl._event_pump_running = False
+                return False
+            return True
+
+    done_event = StopThenWait(controller)
+    monkeypatch.setattr(controller_module.threading, "Event", lambda: done_event)
+
+    with pytest.raises(RuntimeError, match="stopped before callback ran"):
+        controller._run_on_main_thread(lambda: "ignored", wait=True)
+
+
+def test_drain_main_thread_dispatch_queue_sets_result_and_error(controller, monkeypatch):
+    dispatch_queue = queue.Queue()
+    monkeypatch.setattr(controller, "_main_thread_dispatch_queue", dispatch_queue)
+
+    ok_result = {"value": None, "error": None}
+    err_result = {"value": None, "error": None}
+    ok_done_event = MagicMock()
+    err_done_event = MagicMock()
+
+    dispatch_queue.put((lambda x: x + 1, (1,), {}, ok_done_event, ok_result))
+
+    def _raise_error():
+        raise ValueError("drain failure")
+
+    dispatch_queue.put((_raise_error, (), {}, err_done_event, err_result))
+
+    controller._drain_main_thread_dispatch_queue()
+
+    assert ok_result["value"] == 2
+    assert isinstance(err_result["error"], ValueError)
+    ok_done_event.set.assert_called_once()
+    err_done_event.set.assert_called_once()
+
+
+def test_schedule_event_pump_respects_running_state(controller, monkeypatch):
+    drain_mock = MagicMock()
+    update_mock = MagicMock()
+
+    monkeypatch.setattr(controller, "_drain_main_thread_dispatch_queue", drain_mock)
+    monkeypatch.setattr(controller, "update_event", update_mock)
+    monkeypatch.setattr(controller, "_event_pump_running", False)
+
+    controller._schedule_event_pump()
+    drain_mock.assert_not_called()
+    update_mock.assert_not_called()
+
+    monkeypatch.setattr(controller, "_event_pump_running", True)
+    controller.view.root.after = MagicMock(return_value="after-id")
+
+    controller._schedule_event_pump()
+    drain_mock.assert_called_once()
+    update_mock.assert_called_once()
+    controller.view.root.after.assert_called_once_with(20, controller._schedule_event_pump)
+    assert controller._event_pump_after_id == "after-id"
+
+
+def test_stop_event_pump_handles_after_cancel_error(controller, monkeypatch):
+    dispatch_queue = queue.Queue()
+    monkeypatch.setattr(controller, "_main_thread_dispatch_queue", dispatch_queue)
+    monkeypatch.setattr(controller, "_event_pump_running", True)
+    monkeypatch.setattr(controller, "_event_pump_after_id", "after-id")
+
+    controller.view.root.after_cancel = MagicMock(side_effect=RuntimeError("cancel error"))
+
+    controller._stop_event_pump()
+
+    assert controller._event_pump_running is False
+    assert controller._event_pump_after_id is None
+
+
+def test_update_event_handles_warning_multiposition_frame_rate_and_listener(
+    controller, monkeypatch
+):
+    import navigate.controller.controller as controller_module
+
+    events = queue.Queue()
+    events.put(("warning", "careful"))
+    events.put(("multiposition", [["X", "Y"], [1.0, 2.0]]))
+    events.put(("frame_rate", 12.345))
+    events.put(("custom_event", {"k": "v"}))
+
+    warning_mock = MagicMock()
+    update_table_mock = MagicMock()
+    listener_mock = MagicMock()
+
+    monkeypatch.setattr(controller, "event_queue", events)
+    monkeypatch.setattr(controller, "_event_pump_running", True)
+    monkeypatch.setattr(controller_module.messagebox, "showwarning", warning_mock)
+    monkeypatch.setattr(controller_module, "update_table", update_table_mock)
+    monkeypatch.setattr(controller, "update_frame_rate", MagicMock())
+    monkeypatch.setattr(controller, "event_listeners", {"custom_event": listener_mock})
+
+    controller.channels_tab_controller.is_multiposition_val.set = MagicMock()
+
+    controller.update_event()
+
+    warning_mock.assert_called_once_with(title="Navigate", message="careful")
+    update_table_mock.assert_called_once()
+    controller.channels_tab_controller.is_multiposition_val.set.assert_called_once_with(True)
+    controller.update_frame_rate.assert_called_once_with(12.345)
+    listener_mock.assert_called_once_with({"k": "v"})
+
+
+def test_update_event_update_stage_retry_and_stop(controller, monkeypatch):
+    import navigate.controller.controller as controller_module
+
+    events = queue.Queue()
+    events.put(("update_stage", {"x_pos": 1.0}))
+    events.put(("stop", ""))
+    events.put(("frame_rate", 99.0))
+
+    sleep_mock = MagicMock()
+    stop_mock = MagicMock()
+
+    monkeypatch.setattr(controller, "event_queue", events)
+    monkeypatch.setattr(controller, "_event_pump_running", True)
+    monkeypatch.setattr(controller_module.time, "sleep", sleep_mock)
+    monkeypatch.setattr(controller, "_stop_event_pump", stop_mock)
+    monkeypatch.setattr(controller, "update_frame_rate", MagicMock())
+
+    controller.update_stage_controller_silent = MagicMock(
+        side_effect=[RuntimeError("retry"), None]
+    )
+
+    controller.update_event()
+
+    assert controller.update_stage_controller_silent.call_count == 2
+    sleep_mock.assert_called_once_with(0.001)
+    stop_mock.assert_called_once()
+    controller.update_frame_rate.assert_not_called()
+
+
+def test_update_event_listener_exception_prints_unhandled(controller, monkeypatch):
+    events = queue.Queue()
+    events.put(("failing_listener", 17))
+
+    def _raise(_value):
+        raise RuntimeError("listener failed")
+
+    print_mock = MagicMock()
+
+    monkeypatch.setattr(controller, "event_queue", events)
+    monkeypatch.setattr(controller, "_event_pump_running", True)
+    monkeypatch.setattr(controller, "event_listeners", {"failing_listener": _raise})
+    monkeypatch.setattr("builtins.print", print_mock)
+
+    controller.update_event()
+
+    print_mock.assert_called_once_with("*** unhandled event: failing_listener, 17")
 
 
 @pytest.mark.parametrize(

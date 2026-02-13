@@ -1,0 +1,45 @@
+# Navigate Codex Guidance
+
+## Tkinter Threading Rules (Required)
+
+- Treat Tk widgets and Tk variables as main-thread-only resources.
+- Do not call Tk APIs from worker threads. This includes:
+  - `widget.configure(...)`, `widget.set(...)`, `widget.get(...)`
+  - `tk.Variable.set(...)`, `tk.Variable.get(...)`
+  - `root.after(...)`, `after_cancel(...)`, popup/messagebox calls
+- In this codebase, cross-thread UI access must go through:
+  - `Controller._run_on_main_thread(...)`
+  - The controller pump/drain loop: `_schedule_event_pump()` -> `_drain_main_thread_dispatch_queue()`
+
+## Approved UI Update Pattern
+
+- If work starts in a worker thread and needs UI updates:
+  - Put UI logic in a dedicated controller method.
+  - Call it with `self._run_on_main_thread(...)`.
+  - Use `wait=True` when ordering/consistency is required.
+- Keep heavy computation and I/O off the Tk thread.
+- Keep UI methods short and side-effect focused.
+
+## Controller Architecture Constraints
+
+- Do not reintroduce background-thread direct UI updates.
+- Do not start independent UI polling threads for event handling.
+- Keep event processing on Tk thread via `_schedule_event_pump()` / `update_event()`.
+- Preserve existing capture flow that dispatches UI work through:
+  - `_start_capture_ui`
+  - `_on_capture_started`
+  - `_update_capture_display`
+  - `_finish_capture_ui`
+
+## Guardrails and Diagnostics
+
+- `install_tk_thread_guard(...)` is used to detect off-main-thread Tk access.
+- If you add new UI paths, validate they do not trigger guard warnings.
+- In tests, avoid creating false cross-thread Tk usage; use controller dispatch helpers.
+
+## Practical Do/Don't
+
+- Do: `self._run_on_main_thread(self.some_ui_method, arg1, wait=True)`
+- Do: update model/data in worker thread, render in main thread.
+- Don't: call sub-controller widget methods directly from worker threads.
+- Don't: mutate Tk variables in worker threads, even if it "usually works".

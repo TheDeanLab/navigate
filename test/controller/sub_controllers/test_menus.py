@@ -257,3 +257,184 @@ class TestMenuController(unittest.TestCase):
             mock_join.return_value = "joined_path"
             self.menu_controller.open_configuration_files()
             mock_open_folder.assert_called_once_with("joined_path")
+
+
+@pytest.fixture
+def menu_controller_for_branches(dummy_controller):
+    return MenuController(dummy_controller.view, dummy_controller)
+
+
+@patch("navigate.controller.sub_controllers.menus.filedialog.askopenfilename")
+def test_load_experiment_branches(mock_askopenfilename, menu_controller_for_branches):
+    controller = menu_controller_for_branches
+    controller.parent_controller.populate_experiment_setting = MagicMock()
+
+    mock_askopenfilename.return_value = ""
+    controller.load_experiment()
+    controller.parent_controller.populate_experiment_setting.assert_not_called()
+
+    mock_askopenfilename.return_value = "/tmp/experiment.yml"
+    controller.load_experiment()
+    controller.parent_controller.populate_experiment_setting.assert_called_once_with(
+        "/tmp/experiment.yml"
+    )
+
+
+@patch("navigate.controller.sub_controllers.menus.save_yaml_file")
+@patch("navigate.controller.sub_controllers.menus.filedialog.asksaveasfilename")
+@patch("navigate.controller.sub_controllers.menus.messagebox.showerror")
+def test_save_experiment_branches(
+    mock_showerror, mock_asksave, mock_save_yaml, menu_controller_for_branches
+):
+    controller = menu_controller_for_branches
+
+    controller.parent_controller.update_experiment_setting = MagicMock(return_value="bad")
+    controller.save_experiment()
+    mock_showerror.assert_called_once()
+    mock_save_yaml.assert_not_called()
+
+    mock_showerror.reset_mock()
+    controller.parent_controller.update_experiment_setting = MagicMock(return_value=None)
+    mock_asksave.return_value = ""
+    controller.save_experiment()
+    mock_showerror.assert_not_called()
+    mock_save_yaml.assert_not_called()
+
+    mock_asksave.return_value = "/tmp/experiment.yml"
+    controller.save_experiment()
+    mock_save_yaml.assert_called_once()
+
+
+@patch("navigate.controller.sub_controllers.menus.save_yaml_file")
+@patch("navigate.controller.sub_controllers.menus.filedialog.asksaveasfilename")
+def test_save_waveform_constants_branches(
+    mock_asksave, mock_save_yaml, menu_controller_for_branches
+):
+    controller = menu_controller_for_branches
+    mock_asksave.return_value = ""
+    controller.save_waveform_constants()
+    mock_save_yaml.assert_not_called()
+
+    mock_asksave.return_value = "/tmp/waveforms.yml"
+    controller.save_waveform_constants()
+    mock_save_yaml.assert_called_once()
+
+
+@patch("navigate.controller.sub_controllers.menus.verify_waveform_constants")
+@patch("navigate.controller.sub_controllers.menus.update_config_dict")
+@patch("navigate.controller.sub_controllers.menus.filedialog.askopenfilename")
+def test_load_waveform_constants_branches(
+    mock_askopenfilename,
+    mock_update_config,
+    mock_verify_waveforms,
+    menu_controller_for_branches,
+):
+    controller = menu_controller_for_branches
+    mock_askopenfilename.return_value = ""
+
+    controller.load_waveform_constants()
+    mock_update_config.assert_not_called()
+
+    controller.parent_controller.waveform_popup_controller = MagicMock()
+    mock_askopenfilename.return_value = "/tmp/waveforms.yml"
+    controller.load_waveform_constants()
+
+    mock_update_config.assert_called_once()
+    mock_verify_waveforms.assert_called_once()
+    controller.parent_controller.waveform_popup_controller.populate_experiment_values.assert_called_once_with(
+        force_update=True
+    )
+
+
+@patch("navigate.controller.sub_controllers.menus.filedialog.askopenfilenames")
+def test_load_images_branches(mock_askopenfilenames, menu_controller_for_branches):
+    controller = menu_controller_for_branches
+    controller.parent_controller.model = MagicMock()
+    controller.parent_controller.model.load_images = MagicMock()
+
+    mock_askopenfilenames.return_value = ()
+    controller.load_images()
+    controller.parent_controller.model.load_images.assert_not_called()
+
+    mock_askopenfilenames.return_value = ("/tmp/a.tif", "/tmp/b.tif")
+    controller.load_images()
+    controller.parent_controller.model.load_images.assert_called_once_with(
+        ("/tmp/a.tif", "/tmp/b.tif")
+    )
+
+
+def test_toggle_stage_limits_branches(menu_controller_for_branches):
+    controller = menu_controller_for_branches
+    controller.parent_controller.execute = MagicMock()
+    controller.parent_controller.stage_limits_popup_controller = MagicMock()
+    controller.disable_stage_limits = MagicMock()
+
+    controller.disable_stage_limits.get.return_value = 1
+    controller.toggle_stage_limits()
+    assert (
+        controller.parent_controller.configuration["experiment"]["StageParameters"][
+            "limits"
+        ]
+        is False
+    )
+    controller.parent_controller.execute.assert_called_with("stage_limits", False)
+    controller.parent_controller.stage_limits_popup_controller.view.enable_stage_limits_var.set.assert_called_with(
+        False
+    )
+
+    controller.disable_stage_limits.get.return_value = 0
+    controller.toggle_stage_limits()
+    assert (
+        controller.parent_controller.configuration["experiment"]["StageParameters"][
+            "limits"
+        ]
+        is True
+    )
+    controller.parent_controller.execute.assert_called_with("stage_limits", True)
+
+
+@patch("navigate.controller.sub_controllers.menus.WaveformPopupController")
+@patch("navigate.controller.sub_controllers.menus.WaveformParameterPopupWindow")
+def test_popup_waveform_setting_branches(
+    mock_waveform_popup_window,
+    mock_waveform_popup_controller,
+    menu_controller_for_branches,
+):
+    controller = menu_controller_for_branches
+
+    controller.parent_controller.waveform_popup_controller = MagicMock()
+    controller.popup_waveform_setting()
+    controller.parent_controller.waveform_popup_controller.showup.assert_called_once()
+
+    delattr(controller.parent_controller, "waveform_popup_controller")
+    created_controller = MagicMock()
+    mock_waveform_popup_controller.return_value = created_controller
+    controller.popup_waveform_setting()
+
+    mock_waveform_popup_window.assert_called_once()
+    created_controller.populate_experiment_values.assert_called_once()
+    assert controller.parent_controller.waveform_popup_controller is created_controller
+
+
+@patch("navigate.controller.sub_controllers.menus.MicroscopePopupController")
+def test_popup_microscope_setting_branches(
+    mock_microscope_popup_controller, menu_controller_for_branches
+):
+    controller = menu_controller_for_branches
+    controller.parent_controller.model = MagicMock()
+
+    controller.parent_controller.microscope_popup_controller = MagicMock()
+    controller.popup_microscope_setting()
+    controller.parent_controller.microscope_popup_controller.showup.assert_called_once()
+
+    delattr(controller.parent_controller, "microscope_popup_controller")
+    controller.parent_controller.model.get_microscope_info = MagicMock(
+        return_value={"info": "value"}
+    )
+    created_controller = MagicMock()
+    mock_microscope_popup_controller.return_value = created_controller
+
+    controller.popup_microscope_setting()
+
+    controller.parent_controller.model.get_microscope_info.assert_called_once()
+    assert controller.parent_controller.microscope_popup_controller is created_controller

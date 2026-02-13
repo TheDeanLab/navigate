@@ -169,3 +169,194 @@ def test_export_positions_csv(mock_asksave, multiposition_controller):
 
     controller.export_positions()
     table.model.df.to_csv.assert_called_once_with("/tmp/output.csv", index=False)
+
+
+@patch("navigate.controller.sub_controllers.multiposition.filedialog.askopenfilenames")
+def test_load_positions_empty_file_selection(mock_askopen, multiposition_controller):
+    controller = multiposition_controller
+    mock_askopen.return_value = ()
+
+    controller.load_positions()
+
+    assert controller.table.model.df.empty
+
+
+@patch("navigate.controller.sub_controllers.multiposition.filedialog.askopenfilenames")
+@patch("navigate.controller.sub_controllers.multiposition.pd.read_csv")
+@patch("navigate.controller.sub_controllers.multiposition.messagebox.showwarning")
+def test_load_positions_invalid_header_warns_and_returns(
+    mock_showwarning, mock_read_csv, mock_askopen, multiposition_controller
+):
+    controller = multiposition_controller
+    mock_askopen.return_value = ("dummy_file.csv",)
+    mock_read_csv.return_value = pd.DataFrame({"BAD": [1], "COLUMNS": [2]})
+
+    controller.load_positions()
+
+    mock_showwarning.assert_called_once()
+    assert controller.table.model.df.empty
+
+
+@patch("navigate.controller.sub_controllers.multiposition.filedialog.asksaveasfilename")
+def test_export_positions_empty_filename_returns(mock_asksave, multiposition_controller):
+    controller = multiposition_controller
+    controller.table.model.df = pd.DataFrame({"X": [1]})
+    controller.table.model.df.to_csv = MagicMock()
+    mock_asksave.return_value = ""
+
+    controller.export_positions()
+
+    controller.table.model.df.to_csv.assert_not_called()
+
+
+def test_set_positions_empty_defaults_to_stage_position(multiposition_controller):
+    controller = multiposition_controller
+    stage_axes = controller.parent_controller.configuration_controller.stage_axes
+    stage_params = controller.parent_controller.configuration["experiment"]["StageParameters"]
+
+    stage_params["x"] = 11.0
+    stage_params["y"] = 22.0
+    stage_params["z"] = 33.0
+    stage_params["theta"] = 44.0
+    stage_params["f"] = 55.0
+
+    controller.set_positions([])
+
+    assert list(controller.table.model.df.columns) == [axis.upper() for axis in stage_axes]
+    assert controller.table.model.df.iloc[0].tolist() == [
+        stage_params[axis] for axis in stage_axes
+    ]
+
+
+def test_set_positions_partial_header_and_extra_column(multiposition_controller):
+    controller = multiposition_controller
+    positions = [["X"], [1, 2, 3, 4, 5, 6]]
+
+    controller.set_positions(positions)
+
+    assert list(controller.table.model.df.columns) == [
+        "X",
+        "Y",
+        "Z",
+        "THETA",
+        "F",
+        "col-0",
+    ]
+    assert controller.table.model.df.iloc[0].tolist() == [1, 2, 3, 4, 5, 6]
+
+
+@patch("navigate.controller.sub_controllers.multiposition.messagebox.showwarning")
+def test_handle_double_click_invalid_position_shows_warning(
+    mock_showwarning, multiposition_controller
+):
+    controller = multiposition_controller
+    controller.parent_controller.execute = MagicMock()
+    controller.table.model.df = pd.DataFrame(
+        {"X": [1.0], "Y": [float("nan")], "Z": [3.0], "THETA": [4.0], "F": [5.0]}
+    )
+    controller.table.get_row_clicked = MagicMock(return_value=0)
+
+    controller.handle_double_click(MagicMock())
+
+    mock_showwarning.assert_called_once()
+    controller.parent_controller.execute.assert_not_called()
+
+
+def test_handle_double_click_out_of_range_returns(multiposition_controller):
+    controller = multiposition_controller
+    controller.parent_controller.execute = MagicMock()
+    controller.table.model.df = pd.DataFrame(
+        {"X": [1.0], "Y": [2.0], "Z": [3.0], "THETA": [4.0], "F": [5.0]}
+    )
+    controller.table.get_row_clicked = MagicMock(return_value=5)
+
+    controller.handle_double_click(MagicMock())
+
+    controller.parent_controller.execute.assert_not_called()
+
+
+def test_handle_double_click_valid_position_executes_move(multiposition_controller):
+    controller = multiposition_controller
+    controller.parent_controller.execute = MagicMock()
+    controller.table.model.df = pd.DataFrame(
+        {"X": [1.0], "Y": [2.0], "Z": [3.0], "THETA": [4.0], "F": [5.0]}
+    )
+    controller.table.get_row_clicked = MagicMock(return_value=0)
+
+    controller.handle_double_click(MagicMock())
+
+    controller.parent_controller.execute.assert_called_once_with(
+        "move_stage_and_update_info",
+        {"x": 1.0, "y": 2.0, "z": 3.0, "theta": 4.0, "f": 5.0},
+    )
+
+
+def test_move_to_position_builds_event_and_delegates(multiposition_controller):
+    controller = multiposition_controller
+    controller.handle_double_click = MagicMock()
+
+    controller.move_to_position()
+
+    controller.handle_double_click.assert_called_once()
+    event = controller.handle_double_click.call_args.args[0]
+    assert event.x == 0
+    assert event.y == 0
+
+
+@patch("navigate.controller.sub_controllers.multiposition.update_rowcolors")
+def test_insert_row_func_updates_rowcolors(mock_update_rowcolors, multiposition_controller):
+    controller = multiposition_controller
+    controller.table.currentrow = 3
+    controller.table.model.addRow = MagicMock()
+
+    controller.insert_row_func()
+
+    controller.table.model.addRow.assert_called_once_with(3)
+    mock_update_rowcolors.assert_called_once_with(controller.table)
+    controller.table.redraw.assert_called()
+    controller.table.tableChanged.assert_called()
+
+
+def test_add_stage_position_uses_parent_stage_position(multiposition_controller):
+    controller = multiposition_controller
+    stage_pos = {"x": 1, "y": 2, "z": 3, "theta": 4, "f": 5}
+    controller.parent_controller.execute = MagicMock(return_value=stage_pos)
+    controller.append_position = MagicMock()
+
+    controller.add_stage_position()
+
+    controller.parent_controller.execute.assert_called_once_with("get_stage_position")
+    controller.append_position.assert_called_once_with(stage_pos)
+
+
+@patch("navigate.controller.sub_controllers.multiposition.update_rowcolors")
+def test_append_position_adds_columns_and_row(mock_update_rowcolors, multiposition_controller):
+    controller = multiposition_controller
+    controller.table.model.df = pd.DataFrame(columns=["X", "Y"])
+
+    controller.append_position({"x": 1.0, "y": 2.0, "z": 3.0})
+
+    assert list(controller.table.model.df.columns) == ["X", "Y", "Z"]
+    assert controller.table.model.df.iloc[0].tolist() == [1.0, 2.0, 3.0]
+    assert controller.table.currentrow == 0
+    mock_update_rowcolors.assert_called_once_with(controller.table)
+
+
+def test_remove_positions_filters_using_flags(multiposition_controller):
+    controller = multiposition_controller
+    controller.get_positions = MagicMock(
+        return_value=[["X", "Y"], [1, 2], [3, 4], [5, 6]]
+    )
+    controller.set_positions = MagicMock()
+
+    controller.remove_positions([True, False, True])
+
+    controller.set_positions.assert_called_once_with([["X", "Y"], [3, 4], [5, 6]])
+
+
+def test_custom_events_maps_remove_positions(multiposition_controller):
+    controller = multiposition_controller
+    events = controller.custom_events
+
+    assert "remove_positions" in events
+    assert events["remove_positions"] == controller.remove_positions

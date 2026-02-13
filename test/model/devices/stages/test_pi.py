@@ -35,7 +35,10 @@ import pytest
 import random
 
 # Third Party Imports
-from pipython import GCSError
+try:
+    from pipython.pidevice.gcserror import GCSError
+except ImportError:  # pragma: no cover - older pipython fallback
+    from pipython import GCSError
 
 # Local Imports
 from navigate.model.devices.stage.pi import PIStage

@@ -34,7 +34,6 @@
 import pytest
 
 
-@pytest.mark.hardware
 @pytest.fixture(scope="module")
 def prepare_cameras(dummy_model):
     from navigate.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg

@@ -351,7 +351,7 @@ def test_accessing_unlinked_memory_during_deserialization():
 
 
 def test_accessing_unlinked_memory_in_subprocess():
-    p = ObjectInSubprocess(TestClass)
+    p = ObjectInSubprocess(DummyClass)
     original_dimensions = (3, 3, 3, 256, 256)
     a = SharedNDArray(shape=original_dimensions, dtype="uint8")
     p.store_array(a)
@@ -411,7 +411,7 @@ def _trial_slicing_of_shared_array():
 
 
 # class TestObjectInSubprocess(unittest.TestCase):
-class TestClass:
+class DummyClass:
     """Toy class that can be put in a subprocess for testing."""
 
     def __init__(self, *args, **kwargs):
@@ -463,7 +463,7 @@ class TestClass:
 
 # def test_create_and_close_object_in_subprocess():
 #     import gc
-#     p = ObjectInSubprocess(TestClass)
+#     p = ObjectInSubprocess(DummyClass)
 #     child_process = p._.child_process
 #     del p
 #     gc.collect()
@@ -472,7 +472,7 @@ class TestClass:
 
 #     # Other objects to finalize can cause some strange behavior
 #     weakref.finalize({1,}, _dummy_function)
-#     p = ObjectInSubprocess(TestClass)
+#     p = ObjectInSubprocess(DummyClass)
 #     child_process = p._.child_process
 #     # Trigger ref count increase (ref in handled exception tb)
 #     hasattr(p, 'attribute_that_does_not_exist')
@@ -485,7 +485,7 @@ class TestClass:
 def test_create_and_close_object_in_subprocess():
     import gc
 
-    p = ObjectInSubprocess(TestClass)
+    p = ObjectInSubprocess(DummyClass)
     dummy_namespace = p._
     del p
     gc.collect()
@@ -495,7 +495,7 @@ def test_create_and_close_object_in_subprocess():
 
 def test_passing_normal_numpy_array():
     a = np.zeros((3, 3), dtype=int)
-    p = ObjectInSubprocess(TestClass)
+    p = ObjectInSubprocess(DummyClass)
     (_a,), _ = p.mirror(a)
     assert np.array_equal(a, _a), f"{a} != {_a} ({a.dtype}|{_a.dtype}"
 
@@ -504,7 +504,7 @@ def test_passing_normal_numpy_array():
 
 def test_passing_modifying_and_retrieving_shared_array():
     a = SharedNDArray(shape=(10, 10), dtype=int)
-    p = ObjectInSubprocess(TestClass)
+    p = ObjectInSubprocess(DummyClass)
     b = p.fill_and_return_array(a, 1)
     assert np.array_equal(a, b)
 
@@ -513,7 +513,7 @@ def test_passing_modifying_and_retrieving_shared_array():
 
 
 def test_attribute_access():
-    p = ObjectInSubprocess(TestClass, "attribute", x=4)
+    p = ObjectInSubprocess(DummyClass, "attribute", x=4)
     assert p.x == 4
     assert getattr(p, "arg_0") == "attribute"
     try:
@@ -526,8 +526,8 @@ def test_attribute_access():
 
 
 def test_printing_in_child_processes():
-    a = ObjectInSubprocess(TestClass)
-    b = ObjectInSubprocess(TestClass)
+    a = ObjectInSubprocess(DummyClass)
+    b = ObjectInSubprocess(DummyClass)
     expected_output = ""
     b.printing_method("Hello")
     expected_output += "Hello\n"
@@ -545,7 +545,7 @@ def test_printing_in_child_processes():
 
 
 def test_setting_attribute_of_object_in_subprocess():
-    p = ObjectInSubprocess(TestClass)
+    p = ObjectInSubprocess(DummyClass)
     try:
         hasattr(p, "z")
     except Exception:
@@ -564,7 +564,7 @@ def test_setting_attribute_of_object_in_subprocess():
 
 
 def test_array_values_after_passing_to_subprocess():
-    p = ObjectInSubprocess(TestClass)
+    p = ObjectInSubprocess(DummyClass)
     a = SharedNDArray(shape=(10, 1))
     a[:] = 1
     assert a.sum() == p.sum(a)
@@ -581,7 +581,7 @@ def test_object_in_subprocess_overhead():
     """
     print("Performance summary:")
     n_loops = 10000
-    p = ObjectInSubprocess(TestClass, x=4)
+    p = ObjectInSubprocess(DummyClass, x=4)
     t = time_it(n_loops, lambda: p.x, timeout_us=200, name="Attribute access")  # noqa
     print(f" {t:.2f} \u03BCs per get-attribute.")
     t = time_it(
@@ -619,7 +619,7 @@ def _test_array_passing(shape, pass_by, method_name, dtype, n_loops):
     dtype = np.dtype(dtype)
     direction = "<->" if method_name == "mirror" else "->"
     name = f"{shape} array {direction} {pass_by}"
-    shm_obj = ObjectInSubprocess(TestClass)
+    shm_obj = ObjectInSubprocess(DummyClass)
     if pass_by == "reference":
         a = SharedNDArray(shape, dtype=dtype)
         timeout_us = 5e3
@@ -710,7 +710,7 @@ def test_incorrect_thread_management():
     without using a custody object. This is expected to raise a
     RunTimeError.
     """
-    p = ObjectInSubprocess(TestClass)
+    p = ObjectInSubprocess(DummyClass)
     exceptions = []
 
     def unsafe_fn():
@@ -732,7 +732,7 @@ def test_incorrect_thread_management():
 def test_sending_shared_arrays():
     """Testing sending a SharedNDArray to a ObjectInSubprocess."""
 
-    p = ObjectInSubprocess(TestClass)
+    p = ObjectInSubprocess(DummyClass)
     original_dimensions = (3, 3, 3, 256, 256)
     a = SharedNDArray(shape=original_dimensions, dtype="uint8")
 

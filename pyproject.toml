@@ -25,7 +25,7 @@ dependencies = [
     'PyYAML==6.0',
     'pyserial==3.5',
     'PIPython==2.6.0.1',
-    'nidaqmx==0.5.7',
+    'nidaqmx',
     'tifffile',
     'scipy',
     'pyusb==1.2.1',

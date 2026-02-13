@@ -589,7 +589,7 @@ class Autofocus:
         """Estimate the autofocus peak using a smoothing spline.
 
         Fits a `scipy.interpolate.UnivariateSpline` to the current autofocus
-        scatter data stored in `self.plot_data` \([x, y] pairs\), evaluates the
+        scatter data stored in `self.plot_data` ([x, y] pairs), evaluates the
         fitted curve on a fine grid for plotting, and returns the estimated peak
         position along with an R^2 value computed on the original samples.
 
@@ -605,7 +605,7 @@ class Autofocus:
         Returns
         -------
         fit_data : list[list[float]]
-            Dense spline curve as a list of \[x, y] pairs with length `num`,
+            Dense spline curve as a list of [x, y] pairs with length `num`,
             suitable for overlay plotting.
         focus_position : float or None
             x-position of the maximum of the dense spline curve. `None` if no data.
@@ -618,7 +618,7 @@ class Autofocus:
         - Input data are sorted by x before fitting for stability.
         - The spline degree `k` is chosen adaptively as `min(3, max(1, n-1))`
           where `n` is the number of samples.
-        - If no data are available, the function returns \([], None, 0.0\).
+        - If no data are available, the function returns `([], None, 0.0)`.
 
         See Also
         --------

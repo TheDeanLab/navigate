@@ -833,6 +833,13 @@ class GLFrameViewer:
         self.thread.join(timeout=3.0)
         self.thread = None
 
+    def set_vol_tex_uniforms(self):
+        self.shaders['volume'].set_int('volume[0]', 1)  # GL_TEXTURE1
+        self.shaders['volume'].set_int('volume[1]', 2)  # GL_TEXTURE2
+        self.shaders['volume'].set_int('volume[2]', 3)  # GL_TEXTURE3
+        self.shaders['volume'].set_int('volume[3]', 4)  # GL_TEXTURE4
+        self.shaders['volume'].set_int('transfer',  5)  # GL_TEXTURE5
+
     def render_thread(self, window_dim, title):
         """
             Lives entirely in the child process. Needs to own both the GLFW window
@@ -888,11 +895,7 @@ class GLFrameViewer:
 
             # 3D shader uniform inits
             self.shaders['volume'].use()
-            self.shaders['volume'].set_int('volume[0]', 1)  # GL_TEXTURE1
-            self.shaders['volume'].set_int('volume[1]', 2)  # GL_TEXTURE2
-            self.shaders['volume'].set_int('volume[2]', 3)  # GL_TEXTURE3
-            self.shaders['volume'].set_int('volume[3]', 4)  # GL_TEXTURE4
-            self.shaders['volume'].set_int('transfer',  5)  # GL_TEXTURE5
+            self.set_vol_tex_uniforms()
             self.shaders['volume'].set_float('stepWorld', 0.25)
             self.shaders['volume'].set_float('opacity', 0.15)
 
@@ -1085,8 +1088,8 @@ class GLFrameViewer:
             # N-bounded increment
             print(f"Add slice: self._ch = {self._ch}, self._z = {self._z}")
             self._ch += 1
-            if self._ch == self.n_channels - 1:
-                self.ch = 0    
+            if self._ch == self.n_channels:
+                self._ch = 0    
                 self._z = (self._z + 1) % self.n_slices
         else:
             new_shape = (self.n_slices,) + image.shape
@@ -1120,15 +1123,14 @@ class GLFrameViewer:
             self._ensure_gl_ready()
             
             # (re)create textures
-            if self.tex_3d is None:
+            if not self.tex_3d:
                 self.make_volume_texture(shape)
-            if self.tex_tf is None:
+            if not self.tex_tf:
                 self.make_transfer_texture()
 
             # set uniforms
             self.shaders['volume'].use()
-            self.shaders['volume'].set_int('volume',   1)
-            self.shaders['volume'].set_int('transfer', 2)
+            self.set_vol_tex_uniforms()
             # self.shaders['volume'].set_float('stepWorld', 0.25)
             self.shaders['volume'].set_vec3('boxMin', boxMin)
             self.shaders['volume'].set_vec3('boxMax', boxMax)
@@ -1197,6 +1199,15 @@ class GLFrameViewer:
             GL.GL_UNSIGNED_SHORT,   # type (uint16)
             None
         )
+
+    def set_luts(self, luts: list):
+        """
+            luts: list of 4 RGB lists, each with values in [0.0, 1.0]
+        """
+        self.luts = [lut + [1.0] for lut in luts] # add alpha=1.0 to each LUT
+        
+        self.tex_3d = None
+        self.tex_tf = None
 
     def make_transfer_texture(self, n_lanes: int=4):
 
@@ -1317,7 +1328,7 @@ class GLFrameViewer:
 
         y, x = slice.shape
 
-        print(f"Update slice z ch={ch}")
+        print(f"Update slice z={z}\tch={ch}")
 
         GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d[ch])
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)

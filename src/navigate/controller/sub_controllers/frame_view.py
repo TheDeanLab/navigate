@@ -1330,6 +1330,8 @@ class GLFrameViewer:
 
         print(f"Update slice z={z}\tch={ch}")
 
+        print(self.tex_3d, type(self.tex_3d))
+
         GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d[ch])
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
 

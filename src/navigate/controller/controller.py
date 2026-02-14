@@ -1267,6 +1267,9 @@ class Controller:
             # OpenGL display
             if image_id == 0:
                 self.frame_view_controller.reset()
+            
+            # curr_channel = self.model.active_microscope.current_channel
+            # print(f"The current channel is: {curr_channel}")
             self.frame_view_controller.try_to_display_image(self.data_buffer[image_id])
 
             images_received += 1 + dropped_frames

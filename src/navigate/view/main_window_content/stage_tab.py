@@ -40,11 +40,12 @@ from typing import Iterable, Optional
 # Third Party Imports
 
 # Local Imports
-from navigate.view.custom_widgets.hover import HoverTkButton
+from navigate.view.custom_widgets.hover import HoverTkButton, HoverButton
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.validation import ValidatedEntry
 from navigate.view.custom_widgets.common import uniform_grid
+from navigate.view.theme import get_theme_color
 import navigate
 
 # Logger Setup
@@ -554,7 +555,11 @@ class PositionFrame(ttk.Labelframe):
 
         #: ttk.Style: Style for the position entries.
         self.position_style = ttk.Style()
-        self.position_style.configure("Position.TEntry", fieldbackground="white")
+        self.position_style.configure(
+            "Position.TEntry",
+            fieldbackground=get_theme_color("input_bg", "white"),
+            foreground=get_theme_color("text", "black"),
+        )
 
         #: list: List of frames for the position entries.
         for i in range(len(entry_names)):
@@ -607,10 +612,10 @@ class PositionFrame(ttk.Labelframe):
         frame_back_counter = 0
         if joystick_is_on:
             entry_state = "disabled"
-            frame_back_color = "#ee868a"
+            frame_back_color = get_theme_color("danger", "#ee868a")
         else:
             entry_state = "normal"
-            frame_back_color = "#f0f0f0"
+            frame_back_color = get_theme_color("surface_bg", "#f0f0f0")
         self.position_style.configure(
             "Position.TEntry", fieldbackground=frame_back_color
         )
@@ -944,19 +949,24 @@ class StopFrame(ttk.Labelframe):
             self, stage_control_tab, text=name, labelanchor="n", *args, **kwargs
         )
 
-        #: tk.Button: Stop button.
-        self.stop_btn = tk.Button(
-            self, bg="red", fg="white", text="STOP", width=20, height=6
+        #: ttk.Button: Stop button.
+        self.stop_btn = ttk.Button(
+            self, text="STOP", style="StageStop.Danger.TButton", width=20
         )
 
-        #: HoverTkButton: Joystick button.
-        self.joystick_btn = HoverTkButton(
-            self, bg="white", fg="black", text="Enable Joystick", width=20, height=2
+        #: HoverButton: Joystick button.
+        self.joystick_btn = HoverButton(
+            self,
+            text="Enable Joystick",
+            width=20,
         )
 
-        # Home button
-        self.home_btn = tk.Button(
-            self, bg="palegreen2", fg="black", text="Go Home", width=20, height=2
+        # Home button.
+        self.home_btn = ttk.Button(
+            self,
+            text="Go Home",
+            style="StageHome.Success.TButton",
+            width=20,
         )
 
         # Griding out buttons

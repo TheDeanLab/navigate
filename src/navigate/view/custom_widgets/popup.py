@@ -103,7 +103,7 @@ class PopUp(tk.Toplevel):
             Arbitrary keyword arguments
 
         """
-        tk.Toplevel.__init__(self)
+        tk.Toplevel.__init__(self, root)
         # This starts the popup window config, and makes sure that any child widgets
         # can be resized with the window
 
@@ -115,6 +115,7 @@ class PopUp(tk.Toplevel):
 
         self.columnconfigure(index=0, weight=1)
         self.rowconfigure(index=0, weight=1)
+        self.configure(bg=root.cget("bg"))
         self.resizable(tk.FALSE, tk.FALSE)  # Makes it so user cannot resize
         if top is True:
             self.attributes("-topmost", 1)  # Makes it be on top of mainapp when called
@@ -129,7 +130,7 @@ class PopUp(tk.Toplevel):
 
         # Putting popup frame into toplevel window
         #: ttk.Frame: The parent frame for any widgets you add to the popup
-        self.content_frame = ttk.Frame(self)
+        self.content_frame = ttk.Frame(self, style="Popup.TFrame")
         self.content_frame.grid(row=0, column=0, sticky=tk.NSEW)
 
     def showup(self) -> None:

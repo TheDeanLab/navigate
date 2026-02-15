@@ -41,6 +41,7 @@ from pandastable import Table, Menu, RowHeader, ColumnHeader
 
 # Local Imports
 from navigate.view.custom_widgets.common import uniform_grid
+from navigate.view.theme import get_theme_color
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -293,7 +294,7 @@ class MultiPositionColumnHeader(ColumnHeader):
     customize the column header for the multipoint table.
     """
 
-    def __init__(self, parent=None, table=None, bg="gray25"):
+    def __init__(self, parent=None, table=None, bg=None):
         """Initialize the MultiPositionColumnHeader
 
         Parameters
@@ -306,6 +307,8 @@ class MultiPositionColumnHeader(ColumnHeader):
             The background color of the column header.
         """
 
+        if bg is None:
+            bg = get_theme_color("surface_bg", "gray25")
         super().__init__(parent, table, bg)
 
     def popupMenu(self, event):

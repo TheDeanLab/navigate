@@ -46,6 +46,7 @@ from navigate.view.custom_widgets.hover import HoverCheckButton
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
+from navigate.view.theme import get_theme_color
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -92,7 +93,6 @@ class AutofocusPopup:
         ttk.Style().configure(
             "Bold.TLabelframe.Label", font=("TkDefaultFont", 14, "bold")
         )
-        ttk.Style().configure("Bold.TLabelframe.Label", foreground="#222222")
         device_frame.configure(style="Bold.TLabelframe")
         device_frame.grid(
             row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=(5, 10)
@@ -264,11 +264,14 @@ class AutofocusPopup:
             if theme not in ("aqua", "vista", "xpnative"):
                 style.map(
                     "Accent.TButton",
-                    foreground=[("pressed", "white"), ("active", "white")],
+                    foreground=[
+                        ("pressed", get_theme_color("text", "white")),
+                        ("active", get_theme_color("text", "white")),
+                    ],
                     background=[
-                        ("pressed", "#2c6be0"),
-                        ("active", "#3478f6"),
-                        ("!disabled", "#3478f6"),
+                        ("pressed", get_theme_color("accent_pressed", "#2c6be0")),
+                        ("active", get_theme_color("accent_hover", "#3478f6")),
+                        ("!disabled", get_theme_color("accent", "#3478f6")),
                     ],
                 )
         except tk.TclError:

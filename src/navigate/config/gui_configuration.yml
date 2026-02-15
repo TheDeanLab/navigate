@@ -1,3 +1,23 @@
+theme:
+  preset: classic_night
+  ttk_base_theme: clam
+  palette:
+    window_bg: "#11161d"
+    panel_bg: "#1a212b"
+    surface_bg: "#202938"
+    input_bg: "#121923"
+    border: "#2f3a4a"
+    text: "#d7dee8"
+    muted_text: "#9aa8bb"
+    accent: "#4b78b8"
+    accent_hover: "#5a88c9"
+    accent_pressed: "#3f679d"
+    danger: "#b84a4a"
+    success: "#4f8a5b"
+    tooltip_description_bg: "#283243"
+    tooltip_error_bg: "#b84a4a"
+    tooltip_text: "#d7dee8"
+
 channel_settings:
   count: 5
   laser_power:

@@ -38,6 +38,7 @@ from tkinter import ttk
 # Third Party Imports
 
 # Local Imports
+from navigate.view.theme import get_theme_color
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -186,16 +187,27 @@ class Hover(object):
         if self.tipwindow or not self.text:
             return
 
+        background = get_theme_color("surface_bg", "#ffffe0")
+        foreground = get_theme_color("tooltip_text", get_theme_color("text", "black"))
+
         # set format of hover by type
         if self.type.lower() == "description":
-            background = "#ffffe0"
+            background = get_theme_color(
+                "tooltip_description_bg",
+                get_theme_color("surface_bg", "#ffffe0"),
+            )
+            foreground = get_theme_color("tooltip_text", get_theme_color("text", "black"))
             relief = tk.SOLID
             font = ("tahoma", "8", "normal")
             x = self.widget.winfo_rootx() + self.widget.winfo_width()
             y = self.widget.winfo_rooty() + self.widget.winfo_height()
 
         elif self.type.lower() == "error":
-            background = "#ff5d66"
+            background = get_theme_color(
+                "tooltip_error_bg",
+                get_theme_color("danger", "#ff5d66"),
+            )
+            foreground = get_theme_color("tooltip_text", get_theme_color("text", "black"))
             relief = (tk.RIDGE,)
             font = ("comic sans", "8", "normal")
             x = self.widget.winfo_rootx()
@@ -209,7 +221,7 @@ class Hover(object):
             text=self.text,
             justify=tk.LEFT,
             background=background,
-            foreground="black",
+            foreground=foreground,
             relief=relief,
             borderwidth=1,
             font=font,

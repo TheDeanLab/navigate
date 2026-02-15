@@ -46,6 +46,7 @@ from typing import Any, Callable, TypeVar
 from navigate.view.main_application_window import MainApp as view
 from navigate.view.popups.camera_view_popup_window import CameraViewPopupWindow
 from navigate.view.popups.feature_list_popup import FeatureListPopup
+from navigate.view.theme import apply_theme
 
 # Local Sub-Controller Imports
 from navigate.controller.configuration_controller import ConfigurationController
@@ -256,6 +257,12 @@ class Controller:
 
         #: ConfigurationController: Configuration Controller object.
         self.configuration_controller = ConfigurationController(self.configuration)
+
+        # Apply global GUI theme before creating any view widgets.
+        try:
+            apply_theme(self.root, self.configuration.get("gui", {}))
+        except Exception:
+            logger.exception("Failed to apply GUI theme. Continuing with defaults.")
 
         #: View: View object in MVC architecture.
         self.view = view(self.root)

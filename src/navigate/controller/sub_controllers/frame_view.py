@@ -756,7 +756,7 @@ class GLFrameViewer:
         self._dz       = 1.0
 
         # textures
-        self.tex_3d = [] # list for all channels
+        self.tex_3d = None # list for all channels
         self.tex_2d = None
         self.tex_tf = None
 
@@ -1142,8 +1142,10 @@ class GLFrameViewer:
         z, y, x = shape
 
         # create 3d textures for all channels
-        self.tex_3d = list(GL.glGenTextures(self.n_channels))
+        self.tex_3d = list(GL.glGenTextures(4))
         
+        # TODO: we could be smarter about this and only create as many textures as channels, but for now just make 4 and only use what we need
+
         print(f"Created tex3d:\t{self.tex_3d}")
 
         for tex in self.tex_3d:

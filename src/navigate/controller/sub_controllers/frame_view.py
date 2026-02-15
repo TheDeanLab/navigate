@@ -1086,11 +1086,17 @@ class GLFrameViewer:
             self.bind_slice(image, self._z, self._ch)
 
             # N-bounded increment
-            print(f"Add slice: self._ch = {self._ch}, self._z = {self._z}")
+            print(f"Add slice: self._ch = {self._ch}, self._z = {self._z} / {self.n_slices}")
+
+            # TODO: self._z maxes out and resets at 100 slices, no matter what. Need to debug this.
+
             self._ch += 1
             if self._ch == self.n_channels:
                 self._ch = 0    
-                self._z = (self._z + 1) % self.n_slices
+                # self._z = (self._z + 1) % self.n_slices
+                self._z += 1
+                if self._z == self.n_slices:
+                    self._z = 0
         else:
             new_shape = (self.n_slices,) + image.shape
             # allocate new volume
@@ -1520,8 +1526,6 @@ class GLFrameViewer:
             shader = self.shaders["volume"]
             shader.use()
             shader.set_int('nChannels', n_channels)
-
-            print(f"nChannels is set to {n_channels}")
         
         self.cmd_q.put_nowait(_do)        
 

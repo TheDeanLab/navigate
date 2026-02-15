@@ -91,6 +91,66 @@ class Model:
 
     Model for Model-View-Controller Software Architecture."""
 
+    @property
+    def frame_id(self) -> int:
+        """Thread-safe frame index currently targeted in the ring buffer."""
+        with self._state_lock:
+            return self._frame_id
+
+    @frame_id.setter
+    def frame_id(self, value: int) -> None:
+        with self._state_lock:
+            self._frame_id = int(value)
+
+    @property
+    def available_image_count(self) -> int:
+        """Thread-safe count of enqueued images pending direct grab."""
+        with self._state_lock:
+            return self._available_image_count
+
+    @available_image_count.setter
+    def available_image_count(self, value: int) -> None:
+        with self._state_lock:
+            self._available_image_count = int(value)
+
+    @property
+    def stop_acquisition(self) -> bool:
+        """Thread-safe stop flag shared by signal/data threads."""
+        return self._stop_acquisition_event.is_set()
+
+    @stop_acquisition.setter
+    def stop_acquisition(self, value: bool) -> None:
+        if value:
+            self._stop_acquisition_event.set()
+            self._pause_requested_event.clear()
+            self._pause_resume_event.set()
+        else:
+            self._stop_acquisition_event.clear()
+
+    @property
+    def stop_send_signal(self) -> bool:
+        """Thread-safe signal-thread stop flag."""
+        return self._stop_send_signal_event.is_set()
+
+    @stop_send_signal.setter
+    def stop_send_signal(self, value: bool) -> None:
+        if value:
+            self._stop_send_signal_event.set()
+        else:
+            self._stop_send_signal_event.clear()
+
+    @property
+    def ask_to_pause_data_thread(self) -> bool:
+        """Thread-safe pause request flag for the data thread."""
+        return self._pause_requested_event.is_set()
+
+    @ask_to_pause_data_thread.setter
+    def ask_to_pause_data_thread(self, value: bool) -> None:
+        if value:
+            self._pause_requested_event.set()
+        else:
+            self._pause_requested_event.clear()
+
     def __init__(
         self,
         args: argparse.Namespace,
@@ -228,6 +288,30 @@ class Model:
         #: multiprocessing.Queue: Waveform queue.
         self.event_queue = event_queue
 
+        #: threading.RLock: Lock for shared numeric state.
+        self._state_lock = threading.RLock()
+
+        #: threading.Event: stop flag shared by all acquisition workers.
+        self._stop_acquisition_event = threading.Event()
+
+        #: threading.Event: stop flag for signal thread.
+        self._stop_send_signal_event = threading.Event()
+
+        #: threading.Event: request data-thread pause.
+        self._pause_requested_event = threading.Event()
+
+        #: threading.Event: data-thread acknowledged pause request.
+        self._pause_stack_event = threading.Event()
+
+        #: threading.Event: allow paused data-thread to resume.
+        self._pause_resume_event = threading.Event()
+
+        #: int: Thread-safe frame id backing store.
+        self._frame_id = 0
+
+        #: int: Thread-safe available image count backing store.
+        self._available_image_count = 0
+
         # frame signal id
         #: int: Frame ID.
         self.frame_id = 0
@@ -247,10 +331,10 @@ class Model:
         #: bool: Stop signal thread?
         self.stop_send_signal = False  # stop signal thread
 
-        #: event: Pause data event.
-        self.pause_data_event = threading.Event()
+        #: event: Deprecated alias for pause resume event.
+        self.pause_data_event = self._pause_resume_event
 
-        #: threading.Lock: Pause data ready lock.
+        #: threading.Lock: Deprecated pause synchronization lock.
         self.pause_data_ready_lock = threading.Lock()
 
         #: bool: Submit a request to pause the data thread?
@@ -400,6 +484,18 @@ class Model:
             )
 
         self.load_feature_records()
+
+    def _advance_frame_id(self) -> int:
+        """Increment and wrap the shared frame id."""
+        with self._state_lock:
+            self._frame_id = (self._frame_id + 1) % self.number_of_frames
+            return self._frame_id
+
+    def _add_available_image_count(self, delta: int) -> int:
+        """Atomically update shared available-image counter."""
+        with self._state_lock:
+            self._available_image_count += int(delta)
+            return self._available_image_count
 
     def update_data_buffer(self, img_width: int = 512, img_height: int = 512) -> None:
         """Update the Data Buffer
@@ -1014,9 +1110,13 @@ class Model:
         # main data acquisition loop
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
-                self.pause_data_ready_lock.release()
-                self.pause_data_event.clear()
-                self.pause_data_event.wait()
+                self._pause_stack_event.set()
+                self._pause_resume_event.wait()
+                self._pause_resume_event.clear()
+                self._pause_stack_event.clear()
+                if self.stop_acquisition:
+                    break
+                continue
             start_time = time.perf_counter_ns()
             frame_ids = self.active_microscope.camera.get_new_frame()
 
@@ -1109,10 +1209,6 @@ class Model:
         self.logger.info("Data thread stopped.")
         self.logger.info(f"Received frames in total: {acquired_frame_num}")
 
-        # release the lock when the data thread ends
-        if self.pause_data_ready_lock.locked():
-            self.pause_data_ready_lock.release()
-
         # Turn off the lasers/close the shutters
         self.end_acquisition()
 
@@ -1128,9 +1224,15 @@ class Model:
         """
         if not self.is_data_thread_on:
             return
-        self.pause_data_ready_lock.acquire()
+        if self.data_thread is None or not self.data_thread.is_alive():
+            return
+        self._pause_resume_event.clear()
+        self._pause_stack_event.clear()
         self.ask_to_pause_data_thread = True
-        self.pause_data_ready_lock.acquire()
+        if not self._pause_stack_event.wait(timeout=10):
+            self.logger.warning(
+                "Timed out waiting for data thread pause acknowledgement."
+            )
 
     def resume_data_thread(self) -> None:
         """Resume the data thread.
@@ -1145,9 +1247,8 @@ class Model:
         if not self.is_data_thread_on:
             return
         self.ask_to_pause_data_thread = False
-        self.pause_data_event.set()
-        if self.pause_data_ready_lock.locked():
-            self.pause_data_ready_lock.release()
+        self._pause_stack_event.clear()
+        self._pause_resume_event.set()
 
     def simplified_data_process(
         self,
@@ -1224,6 +1325,9 @@ class Model:
         if turn_off_flags:
             self.stop_acquisition = False
             self.stop_send_signal = False
+            self.ask_to_pause_data_thread = False
+            self._pause_stack_event.clear()
+            self._pause_resume_event.clear()
             self.injected_flag.value = False
             self.is_live = False
             self.available_image_count = 0
@@ -1267,13 +1371,14 @@ class Model:
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
+        frame_id = self.frame_id
         start_time = time.perf_counter_ns()
         stage_pos = self.get_stage_position()
-        self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
-        self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
-        self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
-        self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
-        self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
+        self.data_buffer_positions[frame_id][0] = stage_pos.get("x_pos", 0)
+        self.data_buffer_positions[frame_id][1] = stage_pos.get("y_pos", 0)
+        self.data_buffer_positions[frame_id][2] = stage_pos.get("z_pos", 0)
+        self.data_buffer_positions[frame_id][3] = stage_pos.get("theta_pos", 0)
+        self.data_buffer_positions[frame_id][4] = stage_pos.get("f_pos", 0)
         self.logger.performance(
             json.dumps(
                 {
@@ -1324,12 +1429,12 @@ class Model:
             )
         )
 
-        self.available_image_count += 1
+        self._add_available_image_count(1)
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
-        self.frame_id = (self.frame_id + 1) % self.number_of_frames
+        self._advance_frame_id()
 
     def grab_image(self, data_func: Optional[callable] = None) -> None:
         """Grab one image from the camera.
@@ -1381,7 +1486,7 @@ class Model:
             self.logger.info(f"Image delivered to controller: {frame_ids[0]}")
             self.show_img_pipe.send(frame_ids[-1])
 
-            self.available_image_count -= len(frame_ids)
+            self._add_available_image_count(-len(frame_ids))
 
             break
 
@@ -1992,11 +2097,12 @@ class ASIModel(Model):
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
-        self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
-        self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
-        self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
-        self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
-        self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
+        frame_id = self.frame_id
+        self.data_buffer_positions[frame_id][0] = stage_pos.get("x_pos", 0)
+        self.data_buffer_positions[frame_id][1] = stage_pos.get("y_pos", 0)
+        self.data_buffer_positions[frame_id][2] = stage_pos.get("z_pos", 0)
+        self.data_buffer_positions[frame_id][3] = stage_pos.get("theta_pos", 0)
+        self.data_buffer_positions[frame_id][4] = stage_pos.get("f_pos", 0)
 
         # Run the acquisition
         try:
@@ -2021,4 +2127,4 @@ class ASIModel(Model):
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
-        self.frame_id = (self.frame_id + 1) % self.number_of_frames
+        self._advance_frame_id()

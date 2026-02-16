@@ -677,10 +677,10 @@ class StackShortcuts(ttk.LabelFrame):
         )
 
         # Add two buttons
-        self.set_start_button = HoverTkButton(self, text="Set Start Pos/Foc")
+        self.set_start_button = HoverButton(self, text="Set Start Pos/Foc")
         self.set_start_button.grid(row=0, column=0, sticky="ew")
 
-        self.set_end_button = HoverTkButton(self, text="Set End Pos/Foc")
+        self.set_end_button = HoverButton(self, text="Set End Pos/Foc")
         self.set_end_button.grid(row=1, column=0, sticky="ew")
 
         uniform_grid(self)

@@ -30,29 +30,45 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from tkinter import ttk
-from navigate.view.popups.acquire_popup import AcquirePopUp
+from navigate.view import theme
 
 
-def test_acquirepopup_uses_ttk_controls(tk_root):
-    """Acquire popup widgets should use styled ttk controls."""
-    acq_pop = AcquirePopUp(tk_root)
-    tk_root.update_idletasks()
+def test_build_palette_applies_typography_overrides():
+    gui_settings = {
+        "theme": {
+            "preset": "classic_night",
+            "typography": {
+                "title": ["Arial", 16, "bold"],
+                "body": ["TkDefaultFont", 11],
+                "caption": ["TkDefaultFont", "8", "italic"],
+            },
+        }
+    }
 
-    assert isinstance(acq_pop.buttons["Cancel"], ttk.Button)
-    assert isinstance(acq_pop.buttons["Done"], ttk.Button)
+    preset, palette, base_theme, typography = theme._build_palette(gui_settings)
 
-    assert isinstance(acq_pop.inputs["root_directory"].label, ttk.Label)
-    assert isinstance(acq_pop.inputs["root_directory"].widget, ttk.Entry)
-    assert isinstance(acq_pop.inputs["solvent"].widget, ttk.Combobox)
-    assert isinstance(acq_pop.inputs["file_type"].widget, ttk.Combobox)
+    assert preset == "classic_night"
+    assert base_theme == "clam"
+    assert palette["window_bg"] == "#11161d"
+    assert typography["title"] == ("Arial", 16, "bold")
+    assert typography["body"] == ("TkDefaultFont", 11)
+    assert typography["caption"] == ("TkDefaultFont", 8, "italic")
 
-    assert isinstance(acq_pop.tab_frame.inputs["misc"].master, ttk.Frame)
-    assert isinstance(acq_pop.tab_frame.inputs["shear_data"], ttk.Frame)
-    assert isinstance(acq_pop.tab_frame.inputs["shear_data"].widget, ttk.Checkbutton)
-    assert isinstance(
-        acq_pop.tab_frame.inputs["lateral_down_sample"].widget,
-        ttk.Combobox,
+
+def test_to_font_tuple_falls_back_for_invalid_values():
+    fallback = ("TkDefaultFont", 10)
+
+    assert theme._to_font_tuple(["Avenir", "bad-size"], fallback) == ("Avenir", 10)
+    assert theme._to_font_tuple([], fallback) == fallback
+    assert theme._to_font_tuple("invalid", fallback) == fallback
+
+
+def test_get_theme_font_uses_active_tokens_with_fallback(monkeypatch):
+    monkeypatch.setattr(
+        theme,
+        "_ACTIVE_TYPOGRAPHY",
+        {"body": ("TkDefaultFont", 10), "title": ("TkDefaultFont", 14, "bold")},
     )
 
-    acq_pop.popup.destroy()
+    assert theme.get_theme_font("title") == ("TkDefaultFont", 14, "bold")
+    assert theme.get_theme_font("missing", ("Fira Sans", 12)) == ("Fira Sans", 12)

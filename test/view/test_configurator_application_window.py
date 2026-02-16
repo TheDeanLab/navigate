@@ -31,28 +31,25 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from tkinter import ttk
-from navigate.view.popups.acquire_popup import AcquirePopUp
+
+from navigate.view.configurator_application_window import ConfigurationAssistantWindow
 
 
-def test_acquirepopup_uses_ttk_controls(tk_root):
-    """Acquire popup widgets should use styled ttk controls."""
-    acq_pop = AcquirePopUp(tk_root)
+def test_configurator_top_window_uses_ttk_buttons(tk_root):
+    view = ConfigurationAssistantWindow(tk_root)
     tk_root.update_idletasks()
 
-    assert isinstance(acq_pop.buttons["Cancel"], ttk.Button)
-    assert isinstance(acq_pop.buttons["Done"], ttk.Button)
+    top = view.top_window
 
-    assert isinstance(acq_pop.inputs["root_directory"].label, ttk.Label)
-    assert isinstance(acq_pop.inputs["root_directory"].widget, ttk.Entry)
-    assert isinstance(acq_pop.inputs["solvent"].widget, ttk.Combobox)
-    assert isinstance(acq_pop.inputs["file_type"].widget, ttk.Combobox)
+    assert isinstance(top.new_button, ttk.Button)
+    assert isinstance(top.load_button, ttk.Button)
+    assert isinstance(top.add_button, ttk.Button)
+    assert isinstance(top.save_button, ttk.Button)
+    assert isinstance(top.cancel_button, ttk.Button)
 
-    assert isinstance(acq_pop.tab_frame.inputs["misc"].master, ttk.Frame)
-    assert isinstance(acq_pop.tab_frame.inputs["shear_data"], ttk.Frame)
-    assert isinstance(acq_pop.tab_frame.inputs["shear_data"].widget, ttk.Checkbutton)
-    assert isinstance(
-        acq_pop.tab_frame.inputs["lateral_down_sample"].widget,
-        ttk.Combobox,
-    )
-
-    acq_pop.popup.destroy()
+    top.new_button.destroy()
+    top.load_button.destroy()
+    top.add_button.destroy()
+    top.save_button.destroy()
+    top.cancel_button.destroy()
+    view.destroy()

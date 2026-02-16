@@ -185,7 +185,7 @@ class AdvancedStageParametersPopup:
             display_name = stage_name.capitalize()
 
             # Column 1: Stage name label
-            stage_lbl = tk.Label(
+            stage_lbl = ttk.Label(
                 self.column_frames["stage"],
                 text=display_name,
                 font=("Arial", 10, "bold"),

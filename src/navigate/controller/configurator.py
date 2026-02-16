@@ -43,6 +43,7 @@ from navigate.view.configurator_application_window import (
     MicroscopeTab,
     MicroscopeWindow,
 )
+from navigate.view.theme import apply_theme
 from navigate.config.configuration_database import (
     hardwares_dict,
     hardwares_config_name_dict,
@@ -75,6 +76,10 @@ class Configurator:
         sleep(1)
         splash_screen.destroy()
         self.root.deiconify()
+        try:
+            apply_theme(self.root)
+        except Exception:
+            logger.exception("Failed to apply GUI theme in configurator.")
         self.view = ConfigurationAssistantWindow(root)
         self.view.microscope_window = MicroscopeWindow(
             self.view.microscope_frame, self.view.root

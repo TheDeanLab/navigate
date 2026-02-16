@@ -318,10 +318,10 @@ class TabFrame:
         notebook = ttk.Notebook(frame, padding=(5, 2, 5, 2))
         notebook.grid(row=0, column=0, sticky=tk.NSEW)
 
-        tab1 = tk.Frame(notebook)
+        tab1 = ttk.Frame(notebook)
         tab1.columnconfigure(index=0, weight=1)
 
-        tab2 = tk.Frame(notebook)
+        tab2 = ttk.Frame(notebook)
         tab2.columnconfigure(index=0, weight=1)
         tab2.columnconfigure(index=1, weight=1)
         tab2.columnconfigure(index=2, weight=1)
@@ -333,7 +333,7 @@ class TabFrame:
 
         text = "All notes are saved in to the header of the image file."
 
-        notes_label = tk.Label(
+        notes_label = ttk.Label(
             tab1,
             text=text,
             justify=tk.LEFT,
@@ -376,7 +376,7 @@ class TabFrame:
             "All angles are in degrees."
         )
 
-        bdv_label = tk.Label(
+        bdv_label = ttk.Label(
             tab2,
             text=text,
             justify=tk.LEFT,
@@ -596,7 +596,7 @@ class TabFrame:
             "automatically be calculated. "
         )
 
-        bdv_label2 = tk.Label(
+        bdv_label2 = ttk.Label(
             tab2,
             text=text,
             justify=tk.LEFT,

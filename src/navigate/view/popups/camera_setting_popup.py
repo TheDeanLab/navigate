@@ -161,7 +161,7 @@ class AdvancedCameraSettingPopup:
             display_name = axis.upper()
 
             # Column 1: Axis name label
-            axis_lbl = tk.Label(
+            axis_lbl = ttk.Label(
                 self.column_frames["axis"],
                 text=display_name,
                 font=("Arial", 10, "bold"),

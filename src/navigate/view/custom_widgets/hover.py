@@ -38,7 +38,7 @@ from tkinter import ttk
 # Third Party Imports
 
 # Local Imports
-from navigate.view.theme import get_theme_color
+from navigate.view.theme import get_theme_color, get_theme_font
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -198,7 +198,7 @@ class Hover(object):
             )
             foreground = get_theme_color("tooltip_text", get_theme_color("text", "black"))
             relief = tk.SOLID
-            font = ("tahoma", "8", "normal")
+            font = get_theme_font("tooltip")
             x = self.widget.winfo_rootx() + self.widget.winfo_width()
             y = self.widget.winfo_rooty() + self.widget.winfo_height()
 
@@ -209,7 +209,7 @@ class Hover(object):
             )
             foreground = get_theme_color("tooltip_text", get_theme_color("text", "black"))
             relief = (tk.RIDGE,)
-            font = ("comic sans", "8", "normal")
+            font = get_theme_font("tooltip_emphasis")
             x = self.widget.winfo_rootx()
             y = self.widget.winfo_rooty() + self.widget.winfo_height()
 

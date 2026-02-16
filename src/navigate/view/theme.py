@@ -50,6 +50,7 @@ except ImportError:  # pragma: no cover - optional fallback
 
 
 _DEFAULT_THEME_PRESET = "classic_night"
+FontSpec = tuple[Any, ...]
 
 _THEME_PRESETS: dict[str, dict[str, str]] = {
     "classic_night": {
@@ -71,7 +72,25 @@ _THEME_PRESETS: dict[str, dict[str, str]] = {
     }
 }
 
+_TYPOGRAPHY_PRESETS: dict[str, dict[str, FontSpec]] = {
+    "classic_night": {
+        "caption": ("TkDefaultFont", 9),
+        "body": ("TkDefaultFont", 10),
+        "body_bold": ("TkDefaultFont", 10, "bold"),
+        "section": ("TkDefaultFont", 12, "bold"),
+        "title": ("TkDefaultFont", 14, "bold"),
+        "title_italic": ("TkDefaultFont", 14, "italic"),
+        "button": ("TkDefaultFont", 10),
+        "button_emphasis": ("TkDefaultFont", 12, "bold"),
+        "tooltip": ("TkDefaultFont", 9),
+        "tooltip_emphasis": ("TkDefaultFont", 9, "bold"),
+    }
+}
+
 _ACTIVE_PALETTE: dict[str, str] = dict(_THEME_PRESETS[_DEFAULT_THEME_PRESET])
+_ACTIVE_TYPOGRAPHY: dict[str, FontSpec] = dict(
+    _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]
+)
 _THEME_IMAGES: dict[str, tk.PhotoImage] = {}
 
 
@@ -101,6 +120,22 @@ def _get_nested(mapping: Any, keys: tuple[str, ...], default: Any) -> Any:
             except (TypeError, KeyError):
                 return default
     return default if current is None else current
+
+
+def _to_font_tuple(data: Any, fallback: FontSpec) -> FontSpec:
+    """Convert list/tuple font representations to Tk-compatible tuples."""
+    if isinstance(data, (list, tuple)) and len(data) >= 2:
+        family = str(data[0]) if data[0] else str(fallback[0])
+        try:
+            size = max(1, int(data[1]))
+        except (TypeError, ValueError):
+            try:
+                size = max(1, int(fallback[1]))
+            except (TypeError, ValueError):
+                size = 10
+        modifiers = tuple(str(item) for item in data[2:] if item not in (None, ""))
+        return (family, size, *modifiers)
+    return fallback
 
 
 def _safe_style_configure(style: ttk.Style, name: str, **kwargs: Any) -> None:
@@ -465,7 +500,9 @@ def _apply_rounded_notebook_tabs(
         return
 
 
-def _build_palette(gui_settings: Any) -> tuple[str, dict[str, str], str]:
+def _build_palette(
+    gui_settings: Any,
+) -> tuple[str, dict[str, str], str, dict[str, FontSpec]]:
     """Resolve preset + overrides from gui configuration."""
     theme_settings = _to_dict(_get_nested(gui_settings, ("theme",), {}))
     preset_name = str(theme_settings.get("preset", _DEFAULT_THEME_PRESET))
@@ -476,7 +513,17 @@ def _build_palette(gui_settings: Any) -> tuple[str, dict[str, str], str]:
     )
     palette.update(_to_dict(theme_settings.get("palette")))
 
-    return preset_name, palette, base_theme
+    typography = dict(
+        _TYPOGRAPHY_PRESETS.get(
+            preset_name, _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]
+        )
+    )
+    body_fallback = _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]["body"]
+    for key, value in _to_dict(theme_settings.get("typography")).items():
+        token = str(key)
+        typography[token] = _to_font_tuple(value, typography.get(token, body_fallback))
+
+    return preset_name, palette, base_theme, typography
 
 
 def get_theme_color(name: str, fallback: str | None = None) -> str:
@@ -488,11 +535,21 @@ def get_theme_color(name: str, fallback: str | None = None) -> str:
     return _THEME_PRESETS[_DEFAULT_THEME_PRESET].get(name, "#000000")
 
 
+def get_theme_font(name: str, fallback: FontSpec | None = None) -> FontSpec:
+    """Return a named theme font tuple with fallback."""
+    if name in _ACTIVE_TYPOGRAPHY:
+        return _ACTIVE_TYPOGRAPHY[name]
+    if fallback is not None:
+        return fallback
+    return _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]["body"]
+
+
 def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, str]]:
     """Apply the global ttk/tk theme to the root and all inheriting popups."""
-    global _ACTIVE_PALETTE
-    preset_name, palette, preferred_theme = _build_palette(gui_settings)
+    global _ACTIVE_PALETTE, _ACTIVE_TYPOGRAPHY
+    preset_name, palette, preferred_theme, typography = _build_palette(gui_settings)
     _ACTIVE_PALETTE = dict(palette)
+    _ACTIVE_TYPOGRAPHY = dict(typography)
 
     style = ttk.Style(root)
     available = style.theme_names()
@@ -513,25 +570,38 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     accent_pressed = palette["accent_pressed"]
     danger = palette["danger"]
     success = palette["success"]
+    font_caption = typography["caption"]
+    font_body = typography["body"]
+    font_body_bold = typography["body_bold"]
+    font_section = typography["section"]
+    font_title = typography["title"]
+    font_button = typography["button"]
+    font_button_emphasis = typography["button_emphasis"]
 
     root.configure(bg=window_bg)
 
     # Tk option db defaults for legacy tk.* widgets and menus.
+    root.option_add("*Font", font_body)
     root.option_add("*Background", window_bg)
     root.option_add("*Foreground", text)
     root.option_add("*Canvas.Background", surface_bg)
     root.option_add("*Canvas.HighlightBackground", border)
+    root.option_add("*Text.Font", font_body)
     root.option_add("*Text.Background", input_bg)
     root.option_add("*Text.Foreground", text)
     root.option_add("*Text.InsertBackground", text)
+    root.option_add("*Listbox.Font", font_body)
     root.option_add("*Listbox.Background", input_bg)
     root.option_add("*Listbox.Foreground", text)
+    root.option_add("*Menu.Font", font_body)
     root.option_add("*Menu.Background", panel_bg)
     root.option_add("*Menu.Foreground", text)
     root.option_add("*Menu.ActiveBackground", accent)
     root.option_add("*Menu.ActiveForeground", text)
+    root.option_add("*Button.Font", font_button)
     root.option_add("*Button.Background", surface_bg)
     root.option_add("*Button.Foreground", text)
+    root.option_add("*Label.Font", font_body)
     root.option_add("*Label.Background", window_bg)
     root.option_add("*Label.Foreground", text)
 
@@ -546,6 +616,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         lightcolor=border,
         darkcolor=border,
         focuscolor=border,
+        font=font_body,
     )
     _safe_style_map(
         style,
@@ -556,7 +627,18 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
 
     _safe_style_configure(style, "TFrame", background=panel_bg)
     _safe_style_configure(style, "Popup.TFrame", background=panel_bg)
-    _safe_style_configure(style, "TLabel", background=panel_bg, foreground=text)
+    _safe_style_configure(
+        style,
+        "TLabel",
+        background=panel_bg,
+        foreground=text,
+        font=font_body,
+    )
+    _safe_style_configure(style, "Body.TLabel", font=font_body)
+    _safe_style_configure(style, "BodyBold.TLabel", font=font_body_bold)
+    _safe_style_configure(style, "Caption.TLabel", font=font_caption)
+    _safe_style_configure(style, "Section.TLabel", font=font_section)
+    _safe_style_configure(style, "Title.TLabel", font=font_title)
     _safe_style_configure(
         style,
         "TLabelframe",
@@ -569,12 +651,14 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         "TLabelframe.Label",
         background=panel_bg,
         foreground=text,
+        font=font_section,
     )
     _safe_style_configure(
         style,
         "Bold.TLabelframe.Label",
         background=panel_bg,
         foreground=text,
+        font=font_title,
     )
 
     _safe_style_configure(
@@ -584,6 +668,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         foreground=text,
         bordercolor=border,
         padding=(8, 4),
+        font=font_button,
     )
     _safe_style_map(
         style,
@@ -596,7 +681,13 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         foreground=[("disabled", muted_text)],
     )
 
-    _safe_style_configure(style, "Accent.TButton", background=accent, foreground=text)
+    _safe_style_configure(
+        style,
+        "Accent.TButton",
+        background=accent,
+        foreground=text,
+        font=font_button_emphasis,
+    )
     _safe_style_map(
         style,
         "Accent.TButton",
@@ -609,14 +700,26 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         foreground=[("disabled", muted_text), ("!disabled", text)],
     )
 
-    _safe_style_configure(style, "Danger.TButton", background=danger, foreground=text)
-    _safe_style_configure(style, "Success.TButton", background=success, foreground=text)
+    _safe_style_configure(
+        style,
+        "Danger.TButton",
+        background=danger,
+        foreground=text,
+        font=font_button,
+    )
+    _safe_style_configure(
+        style,
+        "Success.TButton",
+        background=success,
+        foreground=text,
+        font=font_button,
+    )
     _safe_style_configure(
         style,
         "StageStop.Danger.TButton",
         background=danger,
         foreground=text,
-        font=("TkDefaultFont", 10, "bold"),
+        font=font_body_bold,
         padding=(8, 16),
     )
     _safe_style_map(
@@ -635,6 +738,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         "StageHome.Success.TButton",
         background=success,
         foreground=text,
+        font=font_button,
         padding=(8, 6),
     )
     _safe_style_map(
@@ -671,6 +775,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         fieldbackground=input_bg,
         foreground=text,
         bordercolor=border,
+        font=font_body,
     )
     _safe_style_configure(
         style,
@@ -680,6 +785,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         background=surface_bg,
         bordercolor=border,
         arrowcolor=text,
+        font=font_body,
     )
     _safe_style_map(
         style,
@@ -694,6 +800,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         foreground=text,
         background=surface_bg,
         arrowcolor=text,
+        font=font_body,
     )
     _safe_style_map(
         style,
@@ -703,8 +810,21 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         selectforeground=[("readonly", text)],
     )
 
-    _safe_style_configure(style, "TCheckbutton", background=panel_bg, foreground=text)
-    _safe_style_configure(style, "TRadiobutton", background=panel_bg, foreground=text)
+    _safe_style_configure(
+        style,
+        "TCheckbutton",
+        background=panel_bg,
+        foreground=text,
+        font=font_body,
+    )
+    _safe_style_configure(
+        style,
+        "TRadiobutton",
+        background=panel_bg,
+        foreground=text,
+        font=font_body,
+    )
+    _safe_style_configure(style, "BodyBold.TCheckbutton", font=font_body_bold)
 
     _safe_style_configure(
         style,
@@ -718,6 +838,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         background=surface_bg,
         foreground=text,
         padding=(10, 4),
+        font=font_body_bold,
     )
     _safe_style_map(
         style,

@@ -96,7 +96,7 @@ class AdvancedStageParametersPopup:
             label="Microscope",
             input_class=ValidatedCombobox,
             input_var=tk.StringVar(),
-            label_args={"font": ("Arial", 14, "bold")},
+            label_args={"style": "Title.TLabel"},
             input_args={
                 "state": "readonly",
             },
@@ -188,7 +188,7 @@ class AdvancedStageParametersPopup:
             stage_lbl = ttk.Label(
                 self.column_frames["stage"],
                 text=display_name,
-                font=("Arial", 10, "bold"),
+                style="BodyBold.TLabel",
             )
             stage_lbl.grid(row=i, column=0, padx=5, pady=0, sticky="ew")
 
@@ -329,14 +329,12 @@ class AdvancedStageParametersPopup:
                 fr.grid_rowconfigure(r, minsize=self.row_minsize)
 
         # Provide a checkbox to disable the stage limits.
-        style = ttk.Style()
-        style.configure("Custom.TCheckbutton", font=("Arial", 10, "bold"))
         self.enable_stage_limits_var = tk.BooleanVar()
         self.stage_limits_enabled = HoverCheckButton(
             self.frame,
             text="Stage Limits Enabled",
             variable=self.enable_stage_limits_var,
-            style="Custom.TCheckbutton",
+            style="BodyBold.TCheckbutton",
         )
         self.stage_limits_enabled.grid(
             row=2,

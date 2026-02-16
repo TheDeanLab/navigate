@@ -131,12 +131,19 @@ def _rounded_photo(
     height: int,
     radius: int,
     border_width: int = 1,
+    corner_bg: str | None = None,
 ) -> tk.PhotoImage | None:
     """Create and cache a rounded rectangle image for ttk element skins."""
     if Image is None or ImageDraw is None or ImageTk is None:
         return None
 
-    image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    if corner_bg is None:
+        background_rgba = (0, 0, 0, 0)
+    else:
+        # Normalize color through PIL parser to support named/hex colors.
+        background_rgba = Image.new("RGBA", (1, 1), corner_bg).getpixel((0, 0))
+
+    image = Image.new("RGBA", (width, height), background_rgba)
     draw = ImageDraw.Draw(image)
     draw.rounded_rectangle(
         (0, 0, width - 1, height - 1),
@@ -214,6 +221,7 @@ def _apply_rounded_button_styles(
             height=button_h,
             radius=radius,
             border_width=border_w,
+            corner_bg=panel_bg,
         )
         active = _rounded_photo(
             root,
@@ -224,6 +232,7 @@ def _apply_rounded_button_styles(
             height=button_h,
             radius=radius,
             border_width=border_w,
+            corner_bg=panel_bg,
         )
         pressed = _rounded_photo(
             root,
@@ -234,6 +243,7 @@ def _apply_rounded_button_styles(
             height=button_h,
             radius=radius,
             border_width=border_w,
+            corner_bg=panel_bg,
         )
         disabled = _rounded_photo(
             root,
@@ -244,6 +254,7 @@ def _apply_rounded_button_styles(
             height=button_h,
             radius=radius,
             border_width=border_w,
+            corner_bg=panel_bg,
         )
         if not all([normal, active, pressed, disabled]):
             return None
@@ -337,6 +348,7 @@ def _apply_rounded_notebook_tabs(
     root: tk.Tk,
     style: ttk.Style,
     *,
+    notebook_bg: str,
     panel_bg: str,
     surface_bg: str,
     border: str,
@@ -362,6 +374,7 @@ def _apply_rounded_notebook_tabs(
         height=tab_h,
         radius=radius,
         border_width=border_w,
+        corner_bg=notebook_bg,
     )
     selected = _rounded_photo(
         root,
@@ -372,6 +385,7 @@ def _apply_rounded_notebook_tabs(
         height=tab_h,
         radius=radius,
         border_width=border_w,
+        corner_bg=notebook_bg,
     )
     active = _rounded_photo(
         root,
@@ -382,6 +396,7 @@ def _apply_rounded_notebook_tabs(
         height=tab_h,
         radius=radius,
         border_width=border_w,
+        corner_bg=notebook_bg,
     )
     disabled = _rounded_photo(
         root,
@@ -392,6 +407,7 @@ def _apply_rounded_notebook_tabs(
         height=tab_h,
         radius=radius,
         border_width=border_w,
+        corner_bg=notebook_bg,
     )
     if not all([normal, selected, active, disabled]):
         return
@@ -712,6 +728,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     _apply_rounded_notebook_tabs(
         root,
         style,
+        notebook_bg=window_bg,
         panel_bg=panel_bg,
         surface_bg=surface_bg,
         border=border,

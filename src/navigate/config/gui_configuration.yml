@@ -17,6 +17,17 @@ theme:
     tooltip_description_bg: "#283243"
     tooltip_error_bg: "#b84a4a"
     tooltip_text: "#d7dee8"
+  typography:
+    caption: ["TkDefaultFont", 9]
+    body: ["TkDefaultFont", 10]
+    body_bold: ["TkDefaultFont", 10, "bold"]
+    section: ["TkDefaultFont", 12, "bold"]
+    title: ["TkDefaultFont", 14, "bold"]
+    title_italic: ["TkDefaultFont", 14, "italic"]
+    button: ["TkDefaultFont", 10]
+    button_emphasis: ["TkDefaultFont", 12, "bold"]
+    tooltip: ["TkDefaultFont", 9]
+    tooltip_emphasis: ["TkDefaultFont", 9, "bold"]
 
 channel_settings:
   count: 5

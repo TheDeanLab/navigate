@@ -46,7 +46,7 @@ from navigate.view.custom_widgets.hover import HoverCheckButton
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
-from navigate.view.theme import get_theme_color
+from navigate.view.theme import get_theme_color, get_theme_font
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -91,7 +91,7 @@ class AutofocusPopup:
             content_frame, text="Device Type and Focusing Axis", labelanchor="n"
         )
         ttk.Style().configure(
-            "Bold.TLabelframe.Label", font=("TkDefaultFont", 14, "bold")
+            "Bold.TLabelframe.Label", font=get_theme_font("title")
         )
         device_frame.configure(style="Bold.TLabelframe")
         device_frame.grid(
@@ -258,7 +258,9 @@ class AutofocusPopup:
         try:
             # Make it bolder/bigger with extra padding
             style.configure(
-                "Accent.TButton", font=("TkDefaultFont", 12, "bold"), padding=(14, 8)
+                "Accent.TButton",
+                font=get_theme_font("button_emphasis"),
+                padding=(14, 8),
             )
             theme = style.theme_use()
             if theme not in ("aqua", "vista", "xpnative"):
@@ -288,10 +290,11 @@ class AutofocusPopup:
         button_bar.grid_columnconfigure(0, weight=1)
 
         # Plot
+        plot_label_size = int(get_theme_font("body")[1])
         self.fig = Figure(figsize=(5, 5), dpi=100)
         self.coarse = self.fig.add_subplot(111)
-        self.coarse.set_ylabel("Discrete Cosine Transform", fontsize=10)
-        self.coarse.set_xlabel("Focus Stage Position", fontsize=10)
+        self.coarse.set_ylabel("Discrete Cosine Transform", fontsize=plot_label_size)
+        self.coarse.set_xlabel("Focus Stage Position", fontsize=plot_label_size)
         self.coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
         self.coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
 

@@ -284,8 +284,8 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
 
         # Ramp waveform that is triggered on TTL inputs
         self.remote_focus.single_axis_waveform(
-            self.axis, 128, amplitude, offset, exposure_time# + flyback_time,
-            # exposure_time
+            self.axis, 132, amplitude, offset, exposure_time + flyback_time,
+            exposure_time
         )
 
         # The waveform cycles once and waits for another TTL inputs

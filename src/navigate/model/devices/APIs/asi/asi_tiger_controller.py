@@ -399,7 +399,6 @@ class TigerController:
 
         # send the serial command to the controller
         self.report_to_console(cmd)
-        print(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         try:
             self.serial.write(command)
@@ -430,7 +429,6 @@ class TigerController:
 
         # Remove leading and trailing empty spaces
         response = response.strip()
-        print(response)
         self.report_to_console(f"Received Response: {response}")
         if response.startswith(":N"):
             logger.error(f"{str(self)}, Error code received: {response}")
@@ -1071,16 +1069,20 @@ class TigerController:
             sets the center position of the waveform in mV
         period: int
             sets the period of the waveform in ms
+        rise_time: int
+            for Variable Triangle (132), sets rise time of waveform
         """
         # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
         if waveform % 128 == 3:
             offset = 0.5 * (offset + amplitude)
 
         amplitude = amplitude * 2
+        logger.info(f"Period (ms): {period}")
+        logger.info("***", waveform, amplitude, axis, offset, period)
         if self.verbose:
             print(f"Period (ms): {period}")
             print("***", waveform, amplitude, axis, offset, period)
-        # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
+
         self.send_command(f"SAP {axis}={round(waveform)}")
         self.read_response()
         self.send_command(f"SAA {axis}={round(amplitude)}")
@@ -1092,11 +1094,6 @@ class TigerController:
         if waveform == 132:
             self.send_command(f"OS {axis}={round(rise_time)}")
             self.read_response()
-            # print(f"SAP {axis}={round(waveform)}\n"
-            #       f"SAA {axis}={round(amplitude)}\n"
-            #       f"SAO {axis}={round(offset)}\n"
-            #       f"SAF {axis}={round(period)}\n"
-            #       f"OS {axis}={round(rise_time)}")
 
     def single_axis_mode(self, axis: str, mode: int) -> None:
         """Sets the single-axis mode according to the integer code.
@@ -1141,8 +1138,10 @@ class TigerController:
             Delay in ms for the camera to turn on relative to the master trigger
         remote_focus_delay: float
             Delay in ms for the remote focus to turn on relative to the master trigger
+        exposure_time: float
+            Camera exposure time
         sweep_time: float
-            THe time in ms between each iteration of the master trigger
+            The time in ms between each iteration of the master trigger
         analog_outputs: dict
             Dictionary that includes the device and the output axis on the DAC4 card,
             as specified in config
@@ -1168,8 +1167,9 @@ class TigerController:
         remote_focus_axis = analog_outputs["remote_focus"]
         logger.info(f"Exposure time: {exposure_time}")
         logger.info(f"Sweep time: {sweep_time}")
-        print(f"Exposure time: {exposure_time}")
-        print(f"Sweep time: {sweep_time}")
+        if self.verbose:
+            print(f"Exposure time: {exposure_time}")
+            print(f"Sweep time: {sweep_time}")
         cycle_time = sweep_time * num_cycles
 
         # Convert all time values to 1/4 ms

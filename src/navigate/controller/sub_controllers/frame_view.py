@@ -1089,7 +1089,6 @@ class GLFrameViewer:
             print(f"Add slice: self._ch = {self._ch}, self._z = {self._z} / {self.n_slices}")
 
             # TODO: self._z maxes out and resets at 100 slices, no matter what. Need to debug this.
-
             self._ch += 1
             if self._ch == self.n_channels:
                 self._ch = 0    

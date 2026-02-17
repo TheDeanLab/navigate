@@ -1077,14 +1077,12 @@ class TigerController:
             offset = 0.5 * (offset + amplitude)
 
         amplitude = amplitude * 2
-        logger.info(f"Period (ms): {period}")
-        logger.info(
-            "*** waveform=%s amplitude=%s axis=%s offset=%s period=%s",
-            waveform, amplitude, axis, offset, period
-        )
+
+        logger.info("waveform=%s amplitude=%s axis=%s offset=%s period=%s",
+                    waveform, amplitude, axis, offset, period)
         if self.verbose:
-            print(f"Period (ms): {period}")
-            print("***", waveform, amplitude, axis, offset, period)
+            print("waveform=%s amplitude=%s axis=%s offset=%s period=%s", waveform,
+                  amplitude, axis, offset, period)
 
         self.send_command(f"SAP {axis}={round(waveform)}")
         self.read_response()

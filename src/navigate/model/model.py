@@ -1878,7 +1878,7 @@ class ASIModel(Model):
         args: argparse.Namespace,
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
-        log_queue: multiprocessing.Queue = None
+        log_queue: Optional[multiprocessing.Queue] = None
     ) -> None:
         """Initialize the ASI Model.
 
@@ -1890,7 +1890,8 @@ class ASIModel(Model):
             Configuration dictionary. Default is None.
         event_queue : multiprocessing.Queue
             Event queue for communication with the controller. Default is None.
-
+        log_queue : multiprocessing.Queue
+            Log queue for logging messages. Default is None.
         """
         super().__init__(args, configuration, event_queue, log_queue)
 
@@ -1904,11 +1905,17 @@ class ASIModel(Model):
                 },
             )
         ]
-
+        # write_idx is initialized to -1 because increment is done at the beginning
+        # of a loop, so the first value used to write the positions is 0
         self.write_idx = -1
 
         self.asi = True
-
+        # Because software is only consulted between stacks, all positions of the
+        # stack must be preallocated in order to save correctly. With buffer size
+        # being 100 (number_of_frames), this allocates for 2000 positions, assuming a
+        # maximum stack of 2000 frames. Every 100 positions corresponds to the buffer,
+        # and images are saved with the correct position by incrementing a write_idx
+        # in snap_zstack, and incrementing read_idx in image_writer
         self.data_buffer_positions = SharedNDArray(
             shape=(self.number_of_frames * 20, 5), dtype=float
         )  # x, y, z, theta, f
@@ -2056,5 +2063,9 @@ class ASIModel(Model):
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
-        self.frame_id = ((self.frame_id + z_steps) %
+        if self.imaging_mode == "z-stack" and self.is_save:
+            frames_advanced = z_steps
+        else:
+            frames_advanced = 1
+        self.frame_id = ((self.frame_id + frames_advanced) %
                          self.number_of_frames)

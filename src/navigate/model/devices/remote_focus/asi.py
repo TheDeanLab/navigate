@@ -245,7 +245,7 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
     def ramp(
         self,
         exposure_time: float = 0.2,
-        flyback_time: int = 20,
+        flyback_time: float = 20,
         amplitude: float = 1,
         offset: float = 0.5,
     ):
@@ -262,14 +262,8 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
         ----------
         exposure_time : Float
             Unit - Seconds
-        sweep_time : Float
-            Unit - Seconds
-        remote_focus_delay : Float
-            Unit - seconds
-        camera_delay : Float
-            Unit - seconds
-        fall : Float
-            Unit - seconds
+        flyback_time : Float
+            Unit - milliseconds
         amplitude : Float
             Unit - Volts
         offset : Float

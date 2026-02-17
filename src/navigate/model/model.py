@@ -1117,6 +1117,16 @@ class Model:
         # Turn off the lasers/close the shutters
         self.end_acquisition()
 
+    def get_current_active_channel(self) -> int:
+        """Get the current active channel from the active microscope.
+
+        Returns
+        -------
+        int
+            Current active channel.
+        """
+        return self.active_microscope.current_channel
+
     def pause_data_thread(self) -> None:
         """Pause the data thread.
 

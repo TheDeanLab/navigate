@@ -2,7 +2,7 @@ import math
 import numpy as np
 import glfw
 import glm
-from typing import Union
+from typing import Union, Optional
 import threading
 import queue
 import time
@@ -677,20 +677,82 @@ class GLFrameViewController(GUIController):
             command=self._on_minmax_changed
         )
 
+    def get_selected_channels(self, microscope_state: Optional[dict] = None) -> None:
+        """Get the selected microscope channels from the MicroscopeState.
+
+        Parameters
+        ----------
+        microscope_state : Optional[dict]
+            The microscope state dictionary object.
+        """
+        if microscope_state is None:
+            microscope_state = self.parent_controller.configuration["experiment"][
+                "MicroscopeState"
+            ]
+
+        self.selected_channels = []
+        for channel_name, channel_data in microscope_state["channels"].items():
+            if channel_data["is_selected"]:
+                channel_idx = channel_name.split("_")[-1]
+                self.selected_channels.append(f"CH{channel_idx}")
+
+    def initialize_display(self):
+        self.image_mode = self.microscope_state["image_mode"]
+        self.stack_cycling_mode = self.microscope_state["stack_cycling_mode"]
+        self.get_selected_channels(self.microscope_state)
+        self.number_of_channels = len(self.selected_channels)
+        self.number_of_slices = self.microscope_state["number_z_steps"]
+        self.total_images_per_volume = self.number_of_channels * self.number_of_slices
+        self.z_step_size = self.microscope_state["step_size"]
+        self.image_count = 0
+
+        # Shader side setup
+        self.viewer.set_dz(self.z_step_size)        
+        self.viewer.set_n_channels(self.number_of_channels)
+        self.viewer.set_slices(
+            self.number_of_slices
+            if self.image_mode == "z-stack" else 2
+            )
+
+    def identify_channel_index_and_slice(self) -> tuple:
+        """As images arrive, identify channel index and slice.
+
+        Returns
+        -------
+        channel_idx : int
+            The channel index.
+        slice_idx : int
+            The slice index.
+        """
+
+        # Reset the image count after the full acquisition of an image volume.
+        if self.image_count == self.total_images_per_volume:
+            self.image_count = 0
+
+        # Store each image to the pre-allocated memory.
+        if (
+            self.image_mode in ["live", "single"]
+            or self.image_mode != "customized"
+            and self.stack_cycling_mode == "per_z"
+        ):
+            # Every image that comes in will be the next channel.
+            channel_idx = self.image_count % self.number_of_channels
+            slice_idx = self.image_count // self.number_of_channels
+
+        elif self.image_mode != "customized" and self.stack_cycling_mode == "per_stack":
+            channel_idx = self.image_count // self.number_of_slices
+            slice_idx = self.image_count - channel_idx * self.number_of_slices
+
+        else:
+            channel_idx = 0
+            slice_idx = self.image_count % self.number_of_slices
+
+        self.image_count += 1
+        return channel_idx, slice_idx
+
     def try_to_display_image(self, image: SharedNDArray) -> None:
 
-        # stacking setup
-        n_steps    = self.microscope_state["number_z_steps"]
-        n_channels = self.microscope_state["selected_channels"]
-        step_size  = self.microscope_state["step_size"]
-        
-        self.viewer.set_n_channels(n_channels)
-        self.viewer.set_dz(step_size)
-        
-        if self.microscope_state["image_mode"] == "z-stack":
-            self.viewer.set_slices(n_steps)
-        else:
-            self.viewer.set_slices(2)
+        ch, z = self.identify_channel_index_and_slice()
 
         # TODO: CPU min/max is inefficient
         # Try to do this with Compute Shaders on GPU
@@ -700,14 +762,14 @@ class GLFrameViewController(GUIController):
 
         self.display_state = self.view.live_frame.live.get()
         if self.display_state == "OpenGL":
-            self.viewer.try_to_display_image(image)
+            self.viewer.try_to_display_image(image, z, ch)
 
     # private util functions
     
     def reset(self):
+        self.initialize_display()
+
         self.viewer.rendered_images = 0
-        self.viewer._z  = 0
-        self.viewer._ch = 0
         # self.viewer.vol_shape = None
         # self.viewer.vol_min_max = None
 
@@ -751,8 +813,6 @@ class GLFrameViewer:
 
         # stack attribs
         self.vol_shape = None
-        self._z        = 0
-        self._ch       = 0
         self._dz       = 1.0
 
         # textures
@@ -931,7 +991,7 @@ class GLFrameViewer:
                 
                 # data queue drain                   
                 try:
-                    image = self.data_q.get_nowait()
+                    image, z, ch = self.data_q.get_nowait()
                     
                     # image received: start the timer
                     # self._t0 = time.perf_counter_ns()
@@ -940,7 +1000,7 @@ class GLFrameViewer:
                     if self.mode == "frame":
                         self.update_image(image)
                     elif self.mode == "volume":
-                        self.add_slice(image)
+                        self.add_slice(image, z, ch)
                     else:
                         raise Exception(f"Invalid draw mode: {self.mode}")
                 except queue.Empty:
@@ -1019,11 +1079,13 @@ class GLFrameViewer:
         if not (window and vao and shader):
             raise RuntimeError("GL not ready yet")
         
-    def try_to_display_image(self, image: np.ndarray):
+    def try_to_display_image(self, image: np.ndarray, z: int=0, ch: int=0):
 
+        data = (image, z, ch)
+        
         try:
             # try to put the new frame into the queue
-            self.data_q.put_nowait(image)
+            self.data_q.put_nowait(data)
         
         except queue.Full:
             # queue is full: replace oldest image with newest
@@ -1038,7 +1100,7 @@ class GLFrameViewer:
             
             try:
                 # now put the new frame into the queue
-                self.data_q.put_nowait(image)
+                self.data_q.put_nowait(data)
             except queue.Full:
                 pass        
 
@@ -1068,7 +1130,7 @@ class GLFrameViewer:
         # self.cmd_q.put(_do)
         self.cmd_q.put_nowait(_do)
 
-    def add_slice(self, image: np.ndarray):
+    def add_slice(self, image: np.ndarray, z: int=0, ch: int=0):
 
         if self.vol_shape is not None:
             # if there is a mismatch between the current vol_shape
@@ -1083,25 +1145,13 @@ class GLFrameViewer:
                 self.add_slice(image)
                 
             # else bind the slice
-            self.bind_slice(image, self._z, self._ch)
-
-            # N-bounded increment
-            print(f"Add slice: self._ch = {self._ch}, self._z = {self._z} / {self.n_slices}")
-
-            # TODO: self._z maxes out and resets at 100 slices, no matter what. Need to debug this.
-            self._ch += 1
-            if self._ch == self.n_channels:
-                self._ch = 0    
-                # self._z = (self._z + 1) % self.n_slices
-                self._z += 1
-                if self._z == self.n_slices:
-                    self._z = 0
+            self.bind_slice(image, z, ch)
         else:
             new_shape = (self.n_slices,) + image.shape
             # allocate new volume
             self.bind_volume(new_shape)
             # try again with correct vol_shape
-            self.add_slice(image)
+            self.add_slice(image, z, ch)
 
     def bind_slice(self, image: np.ndarray, z: int=0, ch: int=0):
 
@@ -1116,7 +1166,6 @@ class GLFrameViewer:
         """Upload / replace the 3D volume texture (runs on GL thread)."""
         
         # first thing: make this the vol_shape and set z = 0
-        self._z = 0
         self.vol_shape = shape
 
         # object-space bounds: centered on origin
@@ -1147,11 +1196,8 @@ class GLFrameViewer:
         z, y, x = shape
 
         # create 3d textures for all channels
+        # TODO: create dynamically instead of allocating 4 up front?
         self.tex_3d = list(GL.glGenTextures(4))
-        
-        # TODO: we could be smarter about this and only create as many textures as channels, but for now just make 4 and only use what we need
-
-        print(f"Created tex3d:\t{self.tex_3d}")
 
         for tex in self.tex_3d:
             # bind this texture
@@ -1226,8 +1272,6 @@ class GLFrameViewer:
                 [0.0, 1.0, 0.0, 1.0],  # ch2
                 [0.0, 0.0, 1.0, 1.0],  # ch3                
             ]
-
-        print("Transfer LUTs:", self.luts)
 
         # RGBA 2D transfer textures with 4 lanes
         rgba = np.array(n_lanes*[np.linspace(0, 255, 256)])[..., np.newaxis] \
@@ -1329,15 +1373,7 @@ class GLFrameViewer:
 
     def update_texture_slice_z(self, slice: np.ndarray, z: int=0, ch: int=0):
 
-        # TODO: Need to follow logic of update_volume_texture, but for single slices.
-        #       Likely need to store self.slice as RGBA, pass in the current channel
-        #       number and then write to specific chan. GL format needs to be GL_RGBA.
-
         y, x = slice.shape
-
-        print(f"Update slice z={z}\tch={ch}")
-
-        print(self.tex_3d, type(self.tex_3d))
 
         GL.glBindTexture(GL.GL_TEXTURE_3D, self.tex_3d[ch])
         GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
@@ -1607,25 +1643,10 @@ class GLFrameViewer:
             if self.mode == "frame":
                 shader.set_vec2('cMinMax', min_max)
             elif self.mode == "volume" and min_max:
-                print("set_min_max:", ch, min_max)
                 shader.set_vec2(
                     f"cMinMax[{ch}]", 
                     np.array(min_max, dtype=np.float32)/65535.
                     )
-
-                # c_min, c_max = min_max
-                
-                # if self.vol_min_max is None:
-                #     self.vol_min_max = min_max
-                # else:
-                #     v_min, v_max = self.vol_min_max
-                #     self.vol_min_max = [
-                #         min([v_min, c_min]),
-                #         max([v_max, c_max])
-                #     ]
-
-                # shader.set_float('cMin', float(c_min)/65535.)
-                # shader.set_float('cMax', float(c_max)/65535.)
 
         self.cmd_q.put(_do)
 

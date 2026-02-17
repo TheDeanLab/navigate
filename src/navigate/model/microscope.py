@@ -767,9 +767,6 @@ class Microscope:
         """
         return self.exposure_times, self.sweep_times
 
-    def get_current_active_channel(self) -> int:
-        return self.current_channel
-
     def prepare_next_channel(self, update_daq_task_flag: bool = True) -> None:
         """Prepare the next channel.
 

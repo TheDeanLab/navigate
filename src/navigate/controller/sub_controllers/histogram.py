@@ -41,7 +41,7 @@ from matplotlib.ticker import FuncFormatter
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.view.main_window_content.display_notebook import HistogramFrame
-from navigate.view.theme import get_theme_color, get_theme_font
+from navigate.view.theme import get_theme_color, get_theme_matplotlib_font
 from navigate.config import update_config_dict
 from navigate.tools.decorators import performance_monitor
 
@@ -270,15 +270,14 @@ class HistogramController:
 
     def _clear_histogram(self) -> None:
         """Clear the histogram but keep canvas interactive."""
-        body_font = get_theme_font("body")
+        body_fontdict = get_theme_matplotlib_font("body")
         self.ax.cla()
         self.ax.text(
             x=0.5,
             y=0.5,
             s="Intensity Histogram Disabled\nRight Click to Enable",
             fontdict={
-                "family": str(body_font[0]),
-                "size": int(body_font[1]),
+                **body_fontdict,
                 "style": "italic",
                 "color": get_theme_color("muted_text", "gray"),
             },

@@ -149,8 +149,6 @@ class AcquirePopUp(CommonMethods):
 
         path_entries.grid(row=0, column=0, sticky=tk.NSEW, padx=0, pady=3)
         path_entries.grid_columnconfigure(index=0, weight=1)
-        # Let entry rows size to content; avoid stretching the root directory row
-        # by not assigning weight here.
 
         separator1.grid(row=1, column=0, sticky=tk.NSEW, padx=0, pady=3)
 

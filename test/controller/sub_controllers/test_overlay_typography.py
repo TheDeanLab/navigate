@@ -75,8 +75,13 @@ def test_histogram_clear_uses_theme_typography(monkeypatch):
     controller.histogram = SimpleNamespace(figure_canvas=MagicMock())
 
     monkeypatch.setattr(
-        "navigate.controller.sub_controllers.histogram.get_theme_font",
-        lambda name, fallback=None: ("TkDefaultFont", 10),
+        "navigate.controller.sub_controllers.histogram.get_theme_matplotlib_font",
+        lambda name, fallback=None: {
+            "family": "Segoe UI",
+            "size": 10,
+            "style": "normal",
+            "weight": "normal",
+        },
     )
 
     def fake_color(name, fallback=None):
@@ -101,8 +106,10 @@ def test_histogram_clear_uses_theme_typography(monkeypatch):
     controller.ax.cla.assert_called_once()
     controller.ax.text.assert_called_once()
     _, kwargs = controller.ax.text.call_args
-    assert kwargs["fontdict"]["family"] == "TkDefaultFont"
+    assert kwargs["fontdict"]["family"] == "Segoe UI"
     assert kwargs["fontdict"]["size"] == 10
+    assert kwargs["fontdict"]["style"] == "italic"
+    assert kwargs["fontdict"]["weight"] == "normal"
     assert kwargs["fontdict"]["color"] == "#9aa8bb"
     assert kwargs["bbox"]["facecolor"] == "#1a212b"
     assert kwargs["bbox"]["edgecolor"] == "#2f3a4a"

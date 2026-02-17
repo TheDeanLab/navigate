@@ -36,7 +36,7 @@
 from __future__ import annotations
 from typing import Any
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, font as tkfont
 
 # Third Party Imports
 try:
@@ -742,6 +742,63 @@ def get_theme_font(name: str, fallback: FontSpec | None = None) -> FontSpec:
     if fallback is not None:
         return fallback
     return _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]["body"]
+
+
+def _resolve_matplotlib_family(family: str) -> str:
+    """Resolve Tk named font families to concrete Matplotlib-safe family names.
+
+    Parameters
+    ----------
+    family : str
+        Font family string from theme typography.
+
+    Returns
+    -------
+    str
+        Concrete family name suitable for Matplotlib's font manager.
+    """
+    if not family:
+        return "sans-serif"
+    if family.startswith("Tk") and family.endswith("Font"):
+        try:
+            return str(tkfont.nametofont(family).actual("family"))
+        except (tk.TclError, RuntimeError, ValueError):
+            return "sans-serif"
+    return family
+
+
+def get_theme_matplotlib_font(
+    name: str, fallback: FontSpec | None = None
+) -> dict[str, Any]:
+    """Return a Matplotlib-compatible font dictionary from theme typography.
+
+    Parameters
+    ----------
+    name : str
+        Typography token to retrieve.
+    fallback : FontSpec or None, optional
+        Font tuple used when token is missing.
+
+    Returns
+    -------
+    dict[str, Any]
+        Dictionary with Matplotlib font keys.
+    """
+    spec = get_theme_font(name, fallback)
+    family = _resolve_matplotlib_family(str(spec[0]) if len(spec) >= 1 else "")
+    try:
+        size = int(spec[1]) if len(spec) >= 2 else 10
+    except (TypeError, ValueError):
+        size = 10
+    modifiers = {
+        str(item).lower() for item in spec[2:] if item not in (None, "")
+    }
+    return {
+        "family": family,
+        "size": max(1, size),
+        "style": "italic" if "italic" in modifiers else "normal",
+        "weight": "bold" if "bold" in modifiers else "normal",
+    }
 
 
 def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, str]]:

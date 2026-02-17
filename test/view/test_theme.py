@@ -72,3 +72,35 @@ def test_get_theme_font_uses_active_tokens_with_fallback(monkeypatch):
 
     assert theme.get_theme_font("title") == ("TkDefaultFont", 14, "bold")
     assert theme.get_theme_font("missing", ("Fira Sans", 12)) == ("Fira Sans", 12)
+
+
+def test_get_theme_matplotlib_font_resolves_tk_named_family(monkeypatch):
+    monkeypatch.setattr(theme, "_ACTIVE_TYPOGRAPHY", {"body": ("TkDefaultFont", 10)})
+
+    class _ResolvedFont:
+        def actual(self, key):
+            assert key == "family"
+            return "Segoe UI"
+
+    monkeypatch.setattr(theme.tkfont, "nametofont", lambda name: _ResolvedFont())
+
+    fontdict = theme.get_theme_matplotlib_font("body")
+
+    assert fontdict["family"] == "Segoe UI"
+    assert fontdict["size"] == 10
+    assert fontdict["style"] == "normal"
+    assert fontdict["weight"] == "normal"
+
+
+def test_get_theme_matplotlib_font_uses_sans_serif_when_tk_named_missing(monkeypatch):
+    monkeypatch.setattr(theme, "_ACTIVE_TYPOGRAPHY", {"body": ("TkDefaultFont", 10)})
+    monkeypatch.setattr(
+        theme.tkfont,
+        "nametofont",
+        lambda name: (_ for _ in ()).throw(theme.tk.TclError("missing")),
+    )
+
+    fontdict = theme.get_theme_matplotlib_font("body")
+
+    assert fontdict["family"] == "sans-serif"
+    assert fontdict["size"] == 10

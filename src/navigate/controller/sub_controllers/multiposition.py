@@ -100,6 +100,8 @@ class MultiPositionController(GUIController):
 
     def _refresh_table_view(self) -> None:
         """Redraw table while filtering known pandastable/pandas deprecation noise."""
+        if hasattr(self.table, "apply_theme"):
+            self.table.apply_theme(redraw=False)
         with warnings.catch_warnings():
             warnings.filterwarnings(
                 "ignore",

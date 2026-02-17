@@ -34,18 +34,30 @@
 import tkinter as tk
 from tkinter import ttk
 import logging
+from typing import Any
 
 # Third Party Imports
 import pandas as pd
 from pandastable import Table, Menu, RowHeader, ColumnHeader
+from pandastable.headers import IndexHeader
 
 # Local Imports
 from navigate.view.custom_widgets.common import uniform_grid
-from navigate.view.theme import get_theme_color
+from navigate.view.theme import get_theme_color, get_theme_font
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+def _safe_widget_configure(widget: Any, **kwargs: Any) -> None:
+    """Configure a Tk widget while ignoring unsupported options."""
+
+    for key, value in kwargs.items():
+        try:
+            widget.configure(**{key: value})
+        except (tk.TclError, AttributeError):
+            continue
 
 
 class MultiPositionTab(tk.Frame):
@@ -192,6 +204,7 @@ class MultiPointList(ttk.Frame):
         self.pt = MultiPositionTable(self, showtoolbar=False, showstatusbar=True)
         self.pt.show()
         self.pt.model.df = df
+        self.pt.apply_theme(redraw=False)
 
     def get_table(self):
         """Returns a reference to multipoint table dataframe.
@@ -229,6 +242,52 @@ class MultiPositionRowHeader(RowHeader):
             The width of the row header.
         """
         super().__init__(parent, table, width)
+        self.font = get_theme_font("body")
+        self.color = get_theme_color("surface_bg", "gray75")
+
+    def redraw(self, align="w", showkeys=False):
+        """Redraw row header and apply themed colors."""
+        super().redraw(align=align, showkeys=showkeys)
+        border_color = get_theme_color("border", "gray50")
+        text_color = get_theme_color("text", "black")
+        try:
+            self.itemconfigure("rowheader", fill=self.color, outline=border_color)
+            self.itemconfigure("text", fill=text_color, font=self.table.thefont)
+        except tk.TclError:
+            pass
+
+    def drawRect(self, row=None, tag=None, color=None, outline=None, delete=1):
+        """Draw a row-selection rectangle using themed colors."""
+        if tag is None:
+            tag = "rect"
+        if color is None:
+            color = get_theme_color("accent", "#0099CC")
+        if outline is None:
+            outline = get_theme_color("border", "gray25")
+        if delete == 1:
+            self.delete(tag)
+        inset = getattr(self, "inset", 1)
+        _, y1, _, y2 = self.table.getCellCoords(row, 0)
+        self.create_rectangle(
+            inset,
+            y1 + inset,
+            self.width - inset,
+            y2,
+            fill=color,
+            outline=outline,
+            width=0,
+            tag=tag,
+        )
+        self.lift("text")
+
+    def drawSelectedRows(self, rows=None):
+        """Draw selected rows, accepting either a list or integer."""
+        self.delete("rect")
+        rowlist = [rows] if type(rows) is not list else rows
+        for row in rowlist:
+            if row not in self.table.visiblerows:
+                continue
+            self.drawRect(row, delete=0)
 
     def popupMenu(self, event, rows=None, cols=None, outside=None):
         """Add right click behaviour for row header
@@ -310,6 +369,43 @@ class MultiPositionColumnHeader(ColumnHeader):
         if bg is None:
             bg = get_theme_color("surface_bg", "gray25")
         super().__init__(parent, table, bg)
+        self.thefont = get_theme_font("body_bold")
+        self.font = self.thefont
+        self.colselectedcolor = get_theme_color("accent", "#0099CC")
+
+    def redraw(self, align="w"):
+        """Redraw column header and apply themed line/text colors."""
+        super().redraw(align=align)
+        border_color = get_theme_color("border", "gray25")
+        text_color = get_theme_color("text", "white")
+        try:
+            self.itemconfigure("gridline", fill=border_color)
+            self.itemconfigure("text", fill=text_color, font=self.thefont)
+        except tk.TclError:
+            pass
+
+    def drawRect(self, col, tag=None, color=None, outline=None, delete=1):
+        """Draw selected column rectangle using themed colors."""
+        if tag is None:
+            tag = "rect"
+        if color is None:
+            color = self.colselectedcolor
+        if outline is None:
+            outline = get_theme_color("border", "gray25")
+        if delete == 1:
+            self.delete(tag)
+        x1, y1, x2, _ = self.table.getCellCoords(0, col)
+        self.create_rectangle(
+            x1,
+            y1 - 1,
+            x2,
+            self.height,
+            fill=color,
+            outline=outline,
+            width=1,
+            tag=tag,
+        )
+        self.lower(tag)
 
     def popupMenu(self, event):
         """Add left and right click behaviour for column header
@@ -365,6 +461,39 @@ class MultiPositionColumnHeader(ColumnHeader):
         return popupmenu
 
 
+class MultiPositionIndexHeader(IndexHeader):
+    """Theme-aware top-left corner header for the multiposition table."""
+
+    def __init__(self, parent=None, table=None, bg=None):
+        if bg is None:
+            bg = get_theme_color("surface_bg", "gray75")
+        super().__init__(parent=parent, table=table)
+        self.bgcolor = bg
+        border_color = get_theme_color("border", "gray50")
+        _safe_widget_configure(
+            self,
+            bg=bg,
+            highlightbackground=border_color,
+            highlightcolor=border_color,
+        )
+
+    def drawRect(self, x1, y1, x2, y2, fill=None, outline=None):
+        """Draw corner rectangle using active theme tokens."""
+        fill_color = fill or getattr(
+            self, "bgcolor", get_theme_color("surface_bg", "gray75")
+        )
+        border_color = outline or get_theme_color("border", "gray50")
+        self.create_rectangle(
+            x1,
+            y1,
+            x2,
+            y2,
+            fill=fill_color,
+            outline=border_color,
+            tag="rect",
+        )
+
+
 class MultiPositionTable(Table):
     """MultiPositionTable
 
@@ -389,6 +518,87 @@ class MultiPositionTable(Table):
         self.exportCSV = None
         self.insertRow = None
         self.addStagePosition = None
+        self.tablecolheader = None
+
+    def apply_theme(self, redraw=True):
+        """Apply active Navigate theme tokens to pandastable surfaces."""
+        panel_bg = get_theme_color("panel_bg", "#1a212b")
+        surface_bg = get_theme_color("surface_bg", "gray25")
+        input_bg = get_theme_color("input_bg", "white")
+        border = get_theme_color("border", "gray50")
+        text = get_theme_color("text", "black")
+        muted_text = get_theme_color("muted_text", text)
+        accent = get_theme_color("accent", "#0099CC")
+        accent_hover = get_theme_color("accent_hover", accent)
+        accent_pressed = get_theme_color("accent_pressed", accent_hover)
+
+        self.thefont = get_theme_font("body")
+        self.textcolor = text
+        self.bgcolor = input_bg
+        self.cellbackgr = input_bg
+        self.grid_color = border
+        self.selectedcolor = accent_hover
+        self.rowselectedcolor = accent
+        self.colselectedcolor = accent
+        self.multipleselectioncolor = accent_pressed
+        self.childselectedcolor = accent_hover
+        self.colheadercolor = surface_bg
+        self.rowheadercolor = surface_bg
+        self.rowheaderbgcolor = surface_bg
+
+        _safe_widget_configure(self.parentframe, bg=panel_bg)
+        _safe_widget_configure(
+            self,
+            bg=input_bg,
+            highlightbackground=border,
+            highlightcolor=border,
+        )
+
+        if hasattr(self, "rowheader") and self.rowheader is not None:
+            self.rowheader.font = get_theme_font("body")
+            self.rowheader.color = surface_bg
+            _safe_widget_configure(
+                self.rowheader,
+                bg=surface_bg,
+                highlightbackground=border,
+                highlightcolor=border,
+            )
+
+        if hasattr(self, "colheader") and self.colheader is not None:
+            self.colheader.bgcolor = surface_bg
+            self.colheader.colselectedcolor = accent
+            self.colheader.thefont = get_theme_font("body_bold")
+            self.colheader.font = get_theme_font("body_bold")
+            _safe_widget_configure(
+                self.colheader,
+                bg=surface_bg,
+                highlightbackground=border,
+                highlightcolor=border,
+            )
+
+        if hasattr(self, "rowindexheader") and self.rowindexheader is not None:
+            _safe_widget_configure(
+                self.rowindexheader,
+                bg=surface_bg,
+                highlightbackground=border,
+                highlightcolor=border,
+            )
+
+        statusbar = getattr(self, "statusbar", None)
+        if statusbar is not None:
+            _safe_widget_configure(statusbar, bg=panel_bg)
+            caption_font = get_theme_font("caption")
+            for name in ("label", "queryvar", "plotvar", "rowsvar"):
+                widget = getattr(statusbar, name, None)
+                if widget is not None:
+                    _safe_widget_configure(
+                        widget, bg=panel_bg, fg=muted_text, font=caption_font
+                    )
+            if getattr(statusbar, "label", None) is not None:
+                _safe_widget_configure(statusbar.label, fg=text)
+
+        if redraw:
+            self.redraw()
 
     def show(self, callback=None):
         """Show the table
@@ -400,15 +610,37 @@ class MultiPositionTable(Table):
         """
         super().show(callback)
 
+        try:
+            self.rowheader.destroy()
+            self.colheader.destroy()
+            self.rowindexheader.destroy()
+        except AttributeError:
+            pass
+
         #: MultiPositionRowHeader: The row header for the table.
         self.rowheader = MultiPositionRowHeader(self.parentframe, self)
         self.rowheader.grid(row=1, column=0, rowspan=1, sticky="news")
 
-        #: MultiPositionColumnHeader: The column header for the table.
-        self.tablecolheader = MultiPositionColumnHeader(
-            self.parentframe, self, bg=self.colheadercolor
+        column_header_bg = getattr(
+            self, "colheadercolor", get_theme_color("surface_bg", "gray25")
         )
-        self.tablecolheader.grid(row=0, column=1, rowspan=1, sticky="news")
+        #: MultiPositionColumnHeader: The column header for the table.
+        self.colheader = MultiPositionColumnHeader(
+            self.parentframe, self, bg=column_header_bg
+        )
+        self.colheader.grid(row=0, column=1, rowspan=1, sticky="news")
+        self.tablecolheader = self.colheader
+
+        row_index_header_bg = getattr(
+            self, "rowheadercolor", get_theme_color("surface_bg", "gray75")
+        )
+        #: MultiPositionIndexHeader: The index header for the table.
+        self.rowindexheader = MultiPositionIndexHeader(
+            self.parentframe, self, bg=row_index_header_bg
+        )
+        self.rowindexheader.grid(row=0, column=0, rowspan=1, sticky="news")
+
+        self.apply_theme(redraw=False)
 
     def popupMenu(self, event, rows=None, cols=None, outside=None):
         """Add right click behaviour for table

@@ -173,6 +173,14 @@ class AcquirePopUp(CommonMethods):
         #: TabFrame: TabFrame object
         self.tab_frame = TabFrame(parent=self, frame=tab_frame)
 
+        # Resize to the requested content size to avoid large empty gaps.
+        self.popup.update_idletasks()
+        required_height = self.popup.winfo_reqheight()
+        x_pos = self.popup.winfo_x()
+        y_pos = self.popup.winfo_y()
+        current_width = self.popup.winfo_width()
+        self.popup.geometry(f"{current_width}x{required_height}+{x_pos}+{y_pos}")
+
 
 class ButtonFrame:
     def __init__(self, parent: AcquirePopUp, frame: ttk.Frame) -> None:

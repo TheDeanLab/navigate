@@ -95,7 +95,20 @@ _THEME_IMAGES: dict[str, tk.PhotoImage] = {}
 
 
 def _to_dict(data: Any) -> dict[str, Any]:
-    """Safely convert manager-proxy mappings and plain mappings to dict."""
+    """Safely convert mapping-like input to a plain dictionary.
+
+    Parameters
+    ----------
+    data : Any
+        Mapping or mapping-proxy input that can be coerced to ``dict``; may be
+        ``None``.
+
+    Returns
+    -------
+    dict[str, Any]
+        Normalized dictionary, or an empty dictionary when conversion is not
+        possible.
+    """
     if data is None:
         return {}
     if isinstance(data, dict):
@@ -107,7 +120,22 @@ def _to_dict(data: Any) -> dict[str, Any]:
 
 
 def _get_nested(mapping: Any, keys: tuple[str, ...], default: Any) -> Any:
-    """Fetch nested values from plain dicts or manager-proxy dicts."""
+    """Fetch nested values from mapping-like objects.
+
+    Parameters
+    ----------
+    mapping : Any
+        Source mapping or mapping proxy that supports ``get`` or key access.
+    keys : tuple[str, ...]
+        Ordered path of keys to traverse within the mapping.
+    default : Any
+        Fallback value returned when traversal fails or yields ``None``.
+
+    Returns
+    -------
+    Any
+        Retrieved value if present; otherwise ``default``.
+    """
     current = mapping
     for key in keys:
         if current is None:
@@ -123,7 +151,20 @@ def _get_nested(mapping: Any, keys: tuple[str, ...], default: Any) -> Any:
 
 
 def _to_font_tuple(data: Any, fallback: FontSpec) -> FontSpec:
-    """Convert list/tuple font representations to Tk-compatible tuples."""
+    """Convert a font specification to a Tk-compatible tuple.
+
+    Parameters
+    ----------
+    data : Any
+        Font representation, typically a list or tuple of ``(family, size, *modifiers)``.
+    fallback : FontSpec
+        Font tuple used when conversion fails or values are invalid.
+
+    Returns
+    -------
+    FontSpec
+        Valid Tk font tuple with a minimum size of 1.
+    """
     if isinstance(data, (list, tuple)) and len(data) >= 2:
         family = str(data[0]) if data[0] else str(fallback[0])
         try:
@@ -139,7 +180,23 @@ def _to_font_tuple(data: Any, fallback: FontSpec) -> FontSpec:
 
 
 def _safe_style_configure(style: ttk.Style, name: str, **kwargs: Any) -> None:
-    """Configure style keys while tolerating platform-specific unsupported options."""
+    """Configure ttk styles while tolerating unsupported options.
+
+    Parameters
+    ----------
+    style : ttk.Style
+        Target ttk style manager.
+    name : str
+        Style name to configure.
+    **kwargs : Any
+        Style options forwarded to ``style.configure``; unsupported options are
+        ignored.
+
+    Returns
+    -------
+    None
+        This function mutates the ttk style in place.
+    """
     for key, value in kwargs.items():
         try:
             style.configure(name, **{key: value})
@@ -148,7 +205,23 @@ def _safe_style_configure(style: ttk.Style, name: str, **kwargs: Any) -> None:
 
 
 def _safe_style_map(style: ttk.Style, name: str, **kwargs: Any) -> None:
-    """Map style keys while tolerating platform-specific unsupported options."""
+    """Map ttk style states while tolerating unsupported options.
+
+    Parameters
+    ----------
+    style : ttk.Style
+        Target ttk style manager.
+    name : str
+        Style name to map.
+    **kwargs : Any
+        State-specific options forwarded to ``style.map``; unsupported options are
+        ignored.
+
+    Returns
+    -------
+    None
+        This function mutates the ttk style in place.
+    """
     for key, value in kwargs.items():
         try:
             style.map(name, **{key: value})
@@ -168,7 +241,34 @@ def _rounded_photo(
     border_width: int = 1,
     corner_bg: str | None = None,
 ) -> tk.PhotoImage | None:
-    """Create and cache a rounded rectangle image for ttk element skins."""
+    """Create and cache a rounded rectangle image for ttk element skins.
+
+    Parameters
+    ----------
+    root : tk.Tk
+        Root window used as the master for generated images.
+    image_name : str
+        Cache key for the generated ``PhotoImage``.
+    fill_color : str
+        Fill color for the rounded rectangle.
+    border_color : str
+        Outline color for the rounded rectangle.
+    width : int
+        Width of the generated image in pixels.
+    height : int
+        Height of the generated image in pixels.
+    radius : int
+        Corner radius of the rounded rectangle.
+    border_width : int, optional
+        Outline thickness in pixels, by default 1.
+    corner_bg : str or None, optional
+        Background color to blend corners with; transparent when ``None``.
+
+    Returns
+    -------
+    tk.PhotoImage or None
+        Cached ``PhotoImage`` when PIL is available; otherwise ``None``.
+    """
     if Image is None or ImageDraw is None or ImageTk is None:
         return None
 
@@ -208,7 +308,42 @@ def _apply_rounded_button_styles(
     success: str,
     radius: int = 5,
 ) -> None:
-    """Install rounded image-backed ttk button styles."""
+    """Install rounded image-backed ttk button styles.
+
+    Parameters
+    ----------
+    root : tk.Tk
+        Root window used for image creation.
+    style : ttk.Style
+        ttk style manager receiving the new styles.
+    panel_bg : str
+        Panel background color used to blend disabled states.
+    surface_bg : str
+        Surface background color for neutral states.
+    border : str
+        Border color for button outlines.
+    text : str
+        Foreground color for enabled text.
+    muted_text : str
+        Foreground color for disabled text.
+    accent : str
+        Base accent color for emphasized buttons.
+    accent_hover : str
+        Hover-state accent color.
+    accent_pressed : str
+        Pressed-state accent color.
+    danger : str
+        Danger-state accent color.
+    success : str
+        Success-state accent color.
+    radius : int, optional
+        Corner radius for rounded buttons, by default 5.
+
+    Returns
+    -------
+    None
+        Styles are added to ``style`` in place.
+    """
     if Image is None:
         return
 
@@ -392,7 +527,36 @@ def _apply_rounded_notebook_tabs(
     text: str,
     radius: int = 3,
 ) -> None:
-    """Install rounded image-backed ttk notebook tabs."""
+    """Install rounded image-backed ttk notebook tabs.
+
+    Parameters
+    ----------
+    root : tk.Tk
+        Root window used for image creation.
+    style : ttk.Style
+        ttk style manager receiving the new tab style.
+    notebook_bg : str
+        Notebook background color for corner blending.
+    panel_bg : str
+        Panel background color for selected and disabled tabs.
+    surface_bg : str
+        Surface background color for unselected tabs.
+    border : str
+        Border color for tab outlines.
+    accent_hover : str
+        Accent color for active (hover) state.
+    muted_text : str
+        Foreground color for disabled tabs.
+    text : str
+        Foreground color for enabled tabs.
+    radius : int, optional
+        Corner radius for rounded tabs, by default 3.
+
+    Returns
+    -------
+    None
+        Styles are added to ``style`` in place.
+    """
     if Image is None:
         return
 
@@ -503,7 +667,19 @@ def _apply_rounded_notebook_tabs(
 def _build_palette(
     gui_settings: Any,
 ) -> tuple[str, dict[str, str], str, dict[str, FontSpec]]:
-    """Resolve preset + overrides from gui configuration."""
+    """Resolve theme preset and overrides from GUI configuration.
+
+    Parameters
+    ----------
+    gui_settings : Any
+        Nested configuration object containing ``theme`` overrides.
+
+    Returns
+    -------
+    tuple[str, dict[str, str], str, dict[str, FontSpec]]
+        ``(preset_name, palette, base_theme, typography)`` reflecting merged
+        theme settings.
+    """
     theme_settings = _to_dict(_get_nested(gui_settings, ("theme",), {}))
     preset_name = str(theme_settings.get("preset", _DEFAULT_THEME_PRESET))
     base_theme = str(theme_settings.get("ttk_base_theme", "clam"))
@@ -514,9 +690,7 @@ def _build_palette(
     palette.update(_to_dict(theme_settings.get("palette")))
 
     typography = dict(
-        _TYPOGRAPHY_PRESETS.get(
-            preset_name, _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]
-        )
+        _TYPOGRAPHY_PRESETS.get(preset_name, _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET])
     )
     body_fallback = _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]["body"]
     for key, value in _to_dict(theme_settings.get("typography")).items():
@@ -527,7 +701,20 @@ def _build_palette(
 
 
 def get_theme_color(name: str, fallback: str | None = None) -> str:
-    """Return a named theme color from active palette with fallback."""
+    """Return a named theme color from the active palette.
+
+    Parameters
+    ----------
+    name : str
+        Color token to retrieve.
+    fallback : str or None, optional
+        Color returned when the token is missing, by default ``None``.
+
+    Returns
+    -------
+    str
+        Resolved color value.
+    """
     if name in _ACTIVE_PALETTE:
         return _ACTIVE_PALETTE[name]
     if fallback is not None:
@@ -536,7 +723,20 @@ def get_theme_color(name: str, fallback: str | None = None) -> str:
 
 
 def get_theme_font(name: str, fallback: FontSpec | None = None) -> FontSpec:
-    """Return a named theme font tuple with fallback."""
+    """Return a named theme font tuple with fallback support.
+
+    Parameters
+    ----------
+    name : str
+        Typography token to retrieve.
+    fallback : FontSpec or None, optional
+        Font tuple returned when the token is missing, by default ``None``.
+
+    Returns
+    -------
+    FontSpec
+        Resolved font tuple.
+    """
     if name in _ACTIVE_TYPOGRAPHY:
         return _ACTIVE_TYPOGRAPHY[name]
     if fallback is not None:
@@ -545,7 +745,20 @@ def get_theme_font(name: str, fallback: FontSpec | None = None) -> FontSpec:
 
 
 def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, str]]:
-    """Apply the global ttk/tk theme to the root and all inheriting popups."""
+    """Apply the global ttk/tk theme to the root and all inheriting popups.
+
+    Parameters
+    ----------
+    root : tk.Tk
+        Root Tk instance to style.
+    gui_settings : Any, optional
+        GUI configuration containing theme overrides, by default ``None``.
+
+    Returns
+    -------
+    tuple[str, dict[str, str]]
+        ``(preset_name, palette)`` describing the applied theme.
+    """
     global _ACTIVE_PALETTE, _ACTIVE_TYPOGRAPHY
     preset_name, palette, preferred_theme, typography = _build_palette(gui_settings)
     _ACTIVE_PALETTE = dict(palette)

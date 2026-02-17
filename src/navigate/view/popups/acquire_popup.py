@@ -34,7 +34,6 @@
 import logging
 from tkinter import ttk
 import tkinter as tk
-from tkinter.scrolledtext import ScrolledText
 import platform
 
 # Third Party Imports
@@ -81,8 +80,9 @@ class AcquirePopUp(CommonMethods):
         self.column2_width = 40
 
         # Calculate the number of entry widgets dynamically
-        num_base_entries = 8  # root_directory, user, tissue, celltype, prefix,
+        # root_directory, user, tissue, celltype, prefix,
         # solvent, file_type
+        num_base_entries = 8
         num_channel_labels = 0
 
         # Count selected channels for dynamic label entries
@@ -149,7 +149,8 @@ class AcquirePopUp(CommonMethods):
 
         path_entries.grid(row=0, column=0, sticky=tk.NSEW, padx=0, pady=3)
         path_entries.grid_columnconfigure(index=0, weight=1)
-        path_entries.grid_rowconfigure(index=1, weight=1)
+        # Let entry rows size to content; avoid stretching the root directory row
+        # by not assigning weight here.
 
         separator1.grid(row=1, column=0, sticky=tk.NSEW, padx=0, pady=3)
 
@@ -358,16 +359,25 @@ class TabFrame:
         )
 
         row_index += 1
+        misc_frame = ttk.Frame(tab1)
+        misc_frame.grid(row=row_index, column=0, columnspan=1, sticky=tk.NSEW)
+        misc_frame.columnconfigure(index=0, weight=1)
+        misc_frame.rowconfigure(index=0, weight=1)
+
+        misc_scrollbar = ttk.Scrollbar(misc_frame, orient=tk.VERTICAL)
         self.inputs = {
-            "misc": ScrolledText(
-                tab1,
+            "misc": tk.Text(
+                misc_frame,
                 wrap=tk.WORD,
                 height=20,
                 width=parent.column2_width + parent.column2_width - 35,
+                yscrollcommand=misc_scrollbar.set,
             )
         }
+        misc_scrollbar.config(command=self.inputs["misc"].yview)
 
-        self.inputs["misc"].grid(row=row_index, column=0, columnspan=1, sticky=tk.NSEW)
+        self.inputs["misc"].grid(row=0, column=0, sticky=tk.NSEW)
+        misc_scrollbar.grid(row=0, column=1, sticky=tk.NS)
 
         row_index = 0
         text = (

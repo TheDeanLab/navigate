@@ -790,9 +790,7 @@ def get_theme_matplotlib_font(
         size = int(spec[1]) if len(spec) >= 2 else 10
     except (TypeError, ValueError):
         size = 10
-    modifiers = {
-        str(item).lower() for item in spec[2:] if item not in (None, "")
-    }
+    modifiers = {str(item).lower() for item in spec[2:] if item not in (None, "")}
     return {
         "family": family,
         "size": max(1, size),
@@ -1044,6 +1042,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         "TEntry",
         fieldbackground=input_bg,
         foreground=text,
+        insertcolor=text,
         bordercolor=border,
         font=font_body,
     )
@@ -1052,6 +1051,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         "TSpinbox",
         fieldbackground=input_bg,
         foreground=text,
+        insertcolor=text,
         background=surface_bg,
         bordercolor=border,
         arrowcolor=text,
@@ -1068,6 +1068,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         "TCombobox",
         fieldbackground=input_bg,
         foreground=text,
+        insertcolor=text,
         background=surface_bg,
         arrowcolor=text,
         font=font_body,

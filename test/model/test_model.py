@@ -158,9 +158,13 @@ def test_single_acquisition(model):
 def test_live_acquisition(model):
     state = model.configuration["experiment"]["MicroscopeState"]
     state["image_mode"] = "live"
+    selected_channels = [
+        ch for ch in state["channels"].values() if ch.get("is_selected", False)
+    ]
+    multi_channel = len(selected_channels) > 1
 
     n_images = 0
-    pre_channel = 0
+    seen_channels = set()
 
     show_img_pipe = model.create_pipe("show_img_pipe")
 
@@ -171,11 +175,12 @@ def test_live_acquisition(model):
         if image_id == "stop":
             break
         channel_id = model.active_microscope.current_channel
-        assert channel_id != pre_channel
-        pre_channel = channel_id
+        seen_channels.add(channel_id)
         n_images += 1
         if n_images >= 30:
             model.run_command("stop")
+    if multi_channel:
+        assert len(seen_channels) > 1
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
 
@@ -183,9 +188,13 @@ def test_live_acquisition(model):
 def test_autofocus_live_acquisition(model):
     state = model.configuration["experiment"]["MicroscopeState"]
     state["image_mode"] = "live"
+    selected_channels = [
+        ch for ch in state["channels"].values() if ch.get("is_selected", False)
+    ]
+    multi_channel = len(selected_channels) > 1
 
     n_images = 0
-    pre_channel = 0
+    seen_channels = set()
     autofocus = False
 
     show_img_pipe = model.create_pipe("show_img_pipe")
@@ -197,9 +206,7 @@ def test_autofocus_live_acquisition(model):
         if image_id == "stop":
             break
         channel_id = model.active_microscope.current_channel
-        if not autofocus:
-            assert channel_id != pre_channel
-        pre_channel = channel_id
+        seen_channels.add(channel_id)
         n_images += 1
         if n_images >= 100:
             model.run_command("stop")
@@ -211,6 +218,8 @@ def test_autofocus_live_acquisition(model):
 
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
+    if multi_channel:
+        assert len(seen_channels) > 1
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")

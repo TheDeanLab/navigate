@@ -1,3 +1,34 @@
+theme:
+  preset: classic_night
+  ttk_base_theme: clam
+  palette:
+    window_bg: "#11161d"
+    panel_bg: "#1a212b"
+    surface_bg: "#202938"
+    input_bg: "#121923"
+    border: "#2f3a4a"
+    text: "#d7dee8"
+    muted_text: "#9aa8bb"
+    accent: "#4b78b8"
+    accent_hover: "#5a88c9"
+    accent_pressed: "#3f679d"
+    danger: "#b84a4a"
+    success: "#4f8a5b"
+    tooltip_description_bg: "#283243"
+    tooltip_error_bg: "#b84a4a"
+    tooltip_text: "#d7dee8"
+  typography:
+    caption: ["TkDefaultFont", 9]
+    body: ["TkDefaultFont", 10]
+    body_bold: ["TkDefaultFont", 10, "bold"]
+    section: ["TkDefaultFont", 12, "bold"]
+    title: ["TkDefaultFont", 14, "bold"]
+    title_italic: ["TkDefaultFont", 14, "italic"]
+    button: ["TkDefaultFont", 10]
+    button_emphasis: ["TkDefaultFont", 12, "bold"]
+    tooltip: ["TkDefaultFont", 9]
+    tooltip_emphasis: ["TkDefaultFont", 9, "bold"]
+
 channel_settings:
   count: 5
   laser_power:

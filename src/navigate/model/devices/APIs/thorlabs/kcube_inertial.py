@@ -5,7 +5,6 @@ See Thorlabs.MotionControl.KCube.InertialMotor.h for more functions to implement
 Tested on Thorlabs KIM001.
 """
 
-
 import ctypes
 import ctypes.wintypes
 from enum import IntEnum
@@ -13,7 +12,7 @@ from enum import IntEnum
 CODING = "ascii"
 
 __dll = ctypes.WinDLL(
-    "C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.InertialMotor.dll"
+    r"C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.InertialMotor.dll"
 )
 
 

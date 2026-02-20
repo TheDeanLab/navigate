@@ -35,7 +35,6 @@ import tkinter as tk
 from tkinter import messagebox
 import logging
 import threading
-import queue
 from typing import Dict, Optional
 import tempfile
 import os
@@ -55,6 +54,7 @@ from navigate.model.analysis.camera import compute_signal_to_noise
 from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path, update_config_dict
 from navigate.tools.decorators import performance_monitor
+from navigate.view.theme import get_theme_color, get_theme_font
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -198,12 +198,10 @@ class BaseViewController(GUIController, ABaseViewController):
         #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
 
-        #: queue.Queue: single-slot queue for display frames
-        self._disp_q = queue.Queue(maxsize=1)
-
-        #: threading.Thread: single persistent display worker
-        self._disp_thread = threading.Thread(target=self._display_worker, daemon=True)
-        self._disp_thread.start()
+        #: Optional[np.ndarray]: latest queued frame waiting to render.
+        self._pending_display_image = None
+        #: Optional[str]: after_idle callback id for coalesced display updates.
+        self._display_after_id = None
 
         #: int: The maximum counts of the image.
         self.max_counts = None
@@ -460,10 +458,10 @@ class BaseViewController(GUIController, ABaseViewController):
             self.update_min_max_counts(display=display)
 
     def try_to_display_image(self, image: np.ndarray) -> None:
-        """Try to display an image using a single worker and a 1-deep queue.
+        """Try to display an image using a coalesced main-thread callback.
 
-        This enqueues the most recent frame and drops older frames if the queue is full.
-        Also, rate-limits enqueues to `self.max_fps` (default 20 Hz).
+        The latest frame wins if multiple arrive before the next GUI idle cycle.
+        Also rate-limits enqueues to `self.max_fps` (default 20 Hz).
         """
 
         # Throttle to max_fps (0 disables throttle)
@@ -476,40 +474,26 @@ class BaseViewController(GUIController, ABaseViewController):
             return
         self._last_enqueue_time = now
 
+        # Keep only the most recent image until the next idle cycle.
+        self._pending_display_image = image
+        if self._display_after_id is None:
+            self._display_after_id = self.view.after_idle(self._flush_pending_display)
+
+    def _flush_pending_display(self) -> None:
+        """Render the latest queued frame on the Tk main thread."""
+        self._display_after_id = None
+        image = self._pending_display_image
+        self._pending_display_image = None
+        if image is None:
+            return
         try:
-            # Try to put the new frame into the queue.
-            self._disp_q.put_nowait(image)
+            self.display_image(image)
+        except Exception as e:
+            logger.exception("Error in display callback: %s", e)
 
-        except queue.Full:
-            # If the queue is already full, we replace the oldest frame with the new
-            # one.
-            try:
-                # Attempt to remove the oldest frame if it exists
-                _ = self._disp_q.get_nowait()
-
-                # Confirm that we successfully removed the oldest frame
-                self._disp_q.task_done()
-            except queue.Empty:
-                pass
-
-            try:
-                # Now put the new frame into the queue
-                self._disp_q.put_nowait(image)
-
-            except queue.Full:
-                # Just in case...
-                pass
-
-    def _display_worker(self) -> None:
-        """Background worker that serially processes display requests."""
-        while True:
-            image = self._disp_q.get()
-            try:
-                self.display_image(image)
-            except Exception as e:
-                logger.exception("Error in display worker: %s", e)
-            finally:
-                self._disp_q.task_done()
+        # If a newer frame arrived while rendering, schedule one more idle draw.
+        if self._pending_display_image is not None and self._display_after_id is None:
+            self._display_after_id = self.view.after_idle(self._flush_pending_display)
 
     def display_image(self, image: np.ndarray) -> None:
         """Display an image.
@@ -1880,8 +1864,8 @@ class MIPViewController(BaseViewController):
             self.canvas_width // 2,
             self.canvas_height // 2,
             text="Maximum Intensity Projection Disabled\nRight Click to Enable",
-            font=("Arial", 14, "italic"),
-            fill="gray",
+            font=get_theme_font("title_italic"),
+            fill=get_theme_color("muted_text", "gray"),
             anchor="center",
             justify="center",
         )

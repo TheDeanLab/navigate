@@ -30,12 +30,9 @@
 
 # Standard Library Imports
 import platform
-import threading
 import tkinter as tk
 from typing import Any
-import time
 import logging
-import json
 
 # Third Party Imports
 import numpy as np
@@ -44,6 +41,7 @@ from matplotlib.ticker import FuncFormatter
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.view.main_window_content.display_notebook import HistogramFrame
+from navigate.view.theme import get_theme_color, get_theme_matplotlib_font
 from navigate.config import update_config_dict
 from navigate.tools.decorators import performance_monitor
 
@@ -136,11 +134,10 @@ class HistogramController:
             command=self.update_experiment,
         )
 
-        #: threading.Thread: Histogram thread
-        self.histogram_thread = None
-
-        #: threading.Lock: Lock
-        self.lock = threading.Lock()
+        #: Optional[str]: Tk after-id for a coalesced histogram redraw
+        self._histogram_after_id = None
+        #: SharedNDArray: latest frame pending for histogram update
+        self._pending_histogram_image = None
 
         # Default location for communicating with the plugin in the model.
         if "histogram" not in self.parent_controller.configuration["gui"].keys():
@@ -191,27 +188,33 @@ class HistogramController:
             self.menu.grab_release()
 
     def populate_histogram(self, image: SharedNDArray) -> None:
-        """Populate the histogram in a dedicated thread.
+        """Populate the histogram on the Tk thread.
 
         Parameters
         ----------
         image : SharedNDArray
             Image data
         """
-        if not self.histogram_enabled.get():
-            # Draw a disabled state
-            if self.histogram_thread is None or not self.histogram_thread.is_alive():
-                self.histogram_thread = threading.Thread(target=self._clear_histogram)
-                self.histogram_thread.start()
+        self._pending_histogram_image = image
+        if self._histogram_after_id is not None:
             return
 
-        if self.histogram_thread and self.histogram_thread.is_alive():
-            return
-
-        self.histogram_thread = threading.Thread(
-            target=self._populate_histogram, args=(image,)
+        widget = self.histogram.figure_canvas.get_tk_widget()
+        self._histogram_after_id = widget.after_idle(
+            self._flush_pending_histogram_update
         )
-        self.histogram_thread.start()
+
+    def _flush_pending_histogram_update(self) -> None:
+        """Render the latest queued histogram update."""
+        self._histogram_after_id = None
+        image = self._pending_histogram_image
+        self._pending_histogram_image = None
+        if image is None:
+            return
+        if not self.histogram_enabled.get():
+            self._clear_histogram()
+            return
+        self._populate_histogram(image)
 
     @performance_monitor(prefix="Histogram")
     def _populate_histogram(self, image: SharedNDArray) -> None:
@@ -267,20 +270,24 @@ class HistogramController:
 
     def _clear_histogram(self) -> None:
         """Clear the histogram but keep canvas interactive."""
+        body_fontdict = get_theme_matplotlib_font("body")
         self.ax.cla()
         self.ax.text(
             x=0.5,
             y=0.5,
             s="Intensity Histogram Disabled\nRight Click to Enable",
             fontdict={
-                "family": "Arial",
-                "size": 10,
+                **body_fontdict,
                 "style": "italic",
-                "color": "gray",
+                "color": get_theme_color("muted_text", "gray"),
             },
             ha="center",
             va="center",
-            bbox=dict(facecolor="white", edgecolor="none", boxstyle="round,pad=0.5"),
+            bbox=dict(
+                facecolor=get_theme_color("panel_bg", "white"),
+                edgecolor=get_theme_color("border", "none"),
+                boxstyle="round,pad=0.5",
+            ),
             transform=self.ax.transAxes,
         )
         self.ax.set_xticks([])

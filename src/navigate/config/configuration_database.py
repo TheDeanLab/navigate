@@ -583,7 +583,7 @@ mirror_hardware_widgets = {
         "Input",
         "string",
         None,
-        "Example: D:\WaveKitX64\MirrorFiles\Beads.wcs",
+        r"Example: D:\WaveKitX64\MirrorFiles\Beads.wcs",
     ],
     "n_modes": ["Number of Modes", "Input", "int", None, "Example: 32", 32],
 }

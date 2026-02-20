@@ -200,7 +200,12 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
                     self.triangle(sweep_time, amplitude, offset)
 
                 else:
-                    self.ramp(exposure_time, amplitude, remote_focus_offset)
+                    remote_focus_ramp_falling = (
+                            float(waveform_constants["other_constants"][
+                                      "remote_focus_ramp_falling"])
+                    )
+                    self.ramp(exposure_time, remote_focus_ramp_falling, amplitude,
+                              remote_focus_offset)
 
     def triangle(
         self,
@@ -240,6 +245,7 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
     def ramp(
         self,
         exposure_time: float = 0.2,
+        flyback_time: float = 20,
         amplitude: float = 1,
         offset: float = 0.5,
     ):
@@ -256,14 +262,8 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
         ----------
         exposure_time : Float
             Unit - Seconds
-        sweep_time : Float
-            Unit - Seconds
-        remote_focus_delay : Float
-            Unit - seconds
-        camera_delay : Float
-            Unit - seconds
-        fall : Float
-            Unit - seconds
+        flyback_time : Float
+            Unit - milliseconds
         amplitude : Float
             Unit - Volts
         offset : Float
@@ -277,8 +277,10 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
 
         # Ramp waveform that is triggered on TTL inputs
         self.remote_focus.single_axis_waveform(
-            self.axis, 128, amplitude, offset, exposure_time
+            self.axis, 132, amplitude, offset, exposure_time + flyback_time,
+            exposure_time
         )
+
         # The waveform cycles once and waits for another TTL inputs
         self.remote_focus.single_axis_mode(self.axis, 2)
 

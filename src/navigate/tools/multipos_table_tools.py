@@ -251,7 +251,7 @@ def update_table(table, pos, axes, append=False):
         Instance of multiposition table in GUI
     pos: list or np.array
         List or np.array of positions to be added to table. Each row contains an X, Y,
-        Z, R, F position
+        Z, THETA, F position
     axes: list of str
         List of axes
     append: bool
@@ -351,7 +351,7 @@ def write_to_csv_file(positions, file_path):
     try:
         with open(file_path, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["X", "Y", "Z", "R", "F"])
+            writer.writerow(["X", "Y", "Z", "THETA", "F"])
 
             for p in positions:
                 writer.writerow(p)

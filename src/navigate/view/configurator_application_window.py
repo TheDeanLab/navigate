@@ -143,24 +143,24 @@ class TopWindow(ttk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        self.new_button = tk.Button(root, text="New Configuration")
+        self.new_button = ttk.Button(root, text="New Configuration")
         self.new_button.grid(row=0, column=0, sticky=tk.NE, padx=3, pady=(10, 1))
         self.new_button.config(width=15)
 
-        self.load_button = tk.Button(root, text="Load Configuration")
+        self.load_button = ttk.Button(root, text="Load Configuration")
         self.load_button.grid(row=0, column=1, sticky=tk.NE, padx=3, pady=(10, 1))
         self.load_button.config(width=15)
 
-        self.add_button = tk.Button(root, text="Add A Microscope")
+        self.add_button = ttk.Button(root, text="Add A Microscope")
         self.add_button.grid(row=0, column=2, sticky=tk.NE, padx=3, pady=(10, 1))
         self.add_button.config(width=15)
 
-        self.save_button = tk.Button(root, text="Save")
+        self.save_button = ttk.Button(root, text="Save")
         self.save_button.grid(row=0, column=3, sticky=tk.NE, padx=3, pady=(10, 1))
         self.save_button.config(width=15)
 
-        #: tk.Button: The button to cancel the application.
-        self.cancel_button = tk.Button(root, text="Cancel")
+        #: ttk.Button: The button to cancel the application.
+        self.cancel_button = ttk.Button(root, text="Cancel")
         self.cancel_button.grid(row=0, column=4, sticky=tk.NE, padx=3, pady=(10, 1))
         self.cancel_button.config(width=15)
 
@@ -293,7 +293,7 @@ class HardwareTab(ttk.Frame):
             Arbitrary keyword arguments
         """
         # Init Frame
-        tk.Frame.__init__(self, *args, **kwargs)
+        ttk.Frame.__init__(self, *args, **kwargs)
 
         self.name = name
 

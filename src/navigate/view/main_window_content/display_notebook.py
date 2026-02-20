@@ -73,7 +73,7 @@ class CameraNotebook(DockableNotebook):
         DockableNotebook.__init__(self, frame, *args, **kwargs)
 
         # Putting notebook 2 into top right frame
-        self.grid(row=0, column=0)
+        self.grid(row=0, column=0, sticky=tk.NSEW)
 
         #: CameraTab: The camera tab.
         self.camera_tab = CameraTab(self)

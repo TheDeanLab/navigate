@@ -84,7 +84,7 @@ class AcquireBar(ttk.Frame):
 
         # Acquire Button
         #: ttk.Button: Button to start acquisition
-        self.acquire_btn = ttk.Button(self, text="Acquire")
+        self.acquire_btn = ttk.Button(self, text="▶ Acquire", style="Accent.TButton")
 
         # Read Only Pull down menu: continuous, z-stack, single acquisition, projection.
         #: tk.StringVar: Variable to hold the current option selected

@@ -121,11 +121,17 @@ def controller(tk_root):
         args=args,
     )
 
+    # Keep a strong reference to the real subprocess-backed model so replacing
+    # controller.model below does not trigger ObjectInSubprocess finalization
+    # during fixture setup.
+    real_model = controller.model
+
     # To make sure the testcases won't hang on because of the model.event_queue
     # The changes here won't affect other testcases,
     # because the testcases from other files use DummyController
     # and DummyModel instead of this controller fixture
     controller.model = MagicMock()
+    controller._real_model_for_cleanup = real_model
     controller.threads_pool = MagicMock()
     controller.model.get_offset_variance_maps.return_value = (None, None)
 
@@ -152,6 +158,14 @@ def controller(tk_root):
     if getattr(controller, "show_img_pipe", None):
         try:
             controller.show_img_pipe.close()
+        except Exception:
+            pass
+
+    # Explicitly terminate the original subprocess-backed model after tests.
+    real_model = getattr(controller, "_real_model_for_cleanup", None)
+    if real_model is not None:
+        try:
+            real_model.terminate()
         except Exception:
             pass
 

@@ -40,6 +40,7 @@ import logging
 
 # Local imports
 from navigate.view.custom_widgets.hover import Hover
+from navigate.view.theme import get_theme_color
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -168,7 +169,13 @@ class ValidatedMixin:
             Whether to turn the error message on or off
 
         """
-        self.config(foreground=("red" if on else "black"))
+        self.config(
+            foreground=(
+                get_theme_color("danger", "red")
+                if on
+                else get_theme_color("text", "black")
+            )
+        )
 
     def _validate(self, proposed, current, char, event, index, action):
         """Validate the input of the widget

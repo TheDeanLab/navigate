@@ -515,6 +515,22 @@ The file saving dialog pops up if an :ref:`acquisition mode <ui_acquisition_bar>
 * :guilabel:`File Type` indicates what type of file to save to.
 * :guilabel:`Notes` is for any additional information the user wants to store with the file.
 
+.. _ui_performance_diagnostics:
+
+Performance Diagnostics
+-----------------------
+
+.. image:: images/performance_diagnostics.png
+
+The :guilabel:`Performance Diagnostics` window is launched from :guilabel:`File` → :guilabel:`Performance Diagnostics`. It summarizes performance metrics recorded by the software and displays them as histograms.
+
+* :guilabel:`Update` refreshes the plots using the most recent performance log data.
+* :guilabel:`Reset` clears the plots and only shows data collected after the reset.
+* :guilabel:`Save Image` saves a screenshot of the window.
+* :guilabel:`Close` closes the popup.
+
+The plots include timing distributions for image acquisition, image display, histogram population, DAQ trigger timing, stage position queries, Z/F stage moves, and serial communication.
+
 .. _ui_waveform_parameters:
 
 Waveform Parameters
@@ -583,4 +599,3 @@ The :guilabel:`Autofocus Settings` panel controls parameters of the autofocus :r
 * :guilabel:`Autofocus` runs the autofocus with the set parameters.
 
 Once the settings have been updated here, any run autofocus operation will use the new settings.
-

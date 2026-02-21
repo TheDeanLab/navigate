@@ -102,7 +102,33 @@ class TilingWizardController(GUIController):
         stage_axes = (
             self.parent_controller.parent_controller.configuration_controller.stage_axes
         )
-        self._axes = list(stage_axes)
+        self._axes = []
+        seen_axes = set()
+        for axis in stage_axes:
+            axis_name = str(axis).lower()
+            if axis_name in seen_axes:
+                continue
+            seen_axes.add(axis_name)
+
+            required_vars = [
+                f"{axis_name}_start",
+                f"{axis_name}_end",
+                f"{axis_name}_dist",
+                f"{axis_name}_fov",
+                f"{axis_name}_tiles",
+            ]
+            required_buttons = [f"{axis_name}_start", f"{axis_name}_end"]
+            if all(name in self.variables for name in required_vars) and all(
+                name in self.buttons for name in required_buttons
+            ):
+                self._axes.append(axis_name)
+            else:
+                logger.debug(
+                    "Controller - Tiling Wizard - Skipping axis '%s' because popup "
+                    "widgets are not present.",
+                    axis_name,
+                )
+
         self.is_validated = {axis: True for axis in self._axes}
         self.load_settings()
 
@@ -311,9 +337,14 @@ class TilingWizardController(GUIController):
             tiling_setting[f"{axis}_length"] = fov
 
         if "theta" not in self._axes:
-            tiling_setting["theta_start"] = float(
-                self.stage_position_vars["theta"].get()
-            )
+            theta_var = self.stage_position_vars.get("theta")
+            theta_start = 0.0
+            if theta_var is not None:
+                try:
+                    theta_start = float(theta_var.get())
+                except (TypeError, ValueError):
+                    theta_start = 0.0
+            tiling_setting["theta_start"] = theta_start
             tiling_setting["theta_tiles"] = 1
             tiling_setting["theta_length"] = 0
 

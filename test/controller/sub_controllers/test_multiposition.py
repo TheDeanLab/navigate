@@ -157,15 +157,10 @@ def test_export_positions_yaml(mock_save_yaml, mock_asksave, multiposition_contr
 def test_export_positions_csv(mock_asksave, multiposition_controller):
     """Test exporting positions to CSV"""
     controller = multiposition_controller
-    table = controller.table
-
-    df = pd.DataFrame(
-        {"X": [1, 2], "Y": [3, 4], "Z": [5, 6], "THETA": [0, 0], "F": [0, 0]}
-    )
-    table.model.df = df
-    table.model.df.to_csv = MagicMock()
+    export_df = MagicMock()
+    controller._get_full_positions_df = MagicMock(return_value=export_df)
 
     mock_asksave.return_value = "/tmp/output.csv"
 
     controller.export_positions()
-    table.model.df.to_csv.assert_called_once_with("/tmp/output.csv", index=False)
+    export_df.to_csv.assert_called_once_with("/tmp/output.csv", index=False)

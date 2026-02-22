@@ -42,10 +42,17 @@ def test_build_palette_applies_typography_overrides():
                 "body": ["TkDefaultFont", 11],
                 "caption": ["TkDefaultFont", "8", "italic"],
             },
+            "spacing": {
+                "space_4": "9",
+                "padding_button": [12, 6],
+                "padding_notebook_tab": 7,
+            },
         }
     }
 
-    preset, palette, base_theme, typography = theme._build_palette(gui_settings)
+    preset, palette, base_theme, typography, spacing = theme._build_palette(
+        gui_settings
+    )
 
     assert preset == "classic_night"
     assert base_theme == "clam"
@@ -53,6 +60,9 @@ def test_build_palette_applies_typography_overrides():
     assert typography["title"] == ("Arial", 16, "bold")
     assert typography["body"] == ("TkDefaultFont", 11)
     assert typography["caption"] == ("TkDefaultFont", 8, "italic")
+    assert spacing["space_4"] == 9
+    assert spacing["padding_button"] == (12, 6)
+    assert spacing["padding_notebook_tab"] == (7, 7)
 
 
 def test_to_font_tuple_falls_back_for_invalid_values():
@@ -72,6 +82,24 @@ def test_get_theme_font_uses_active_tokens_with_fallback(monkeypatch):
 
     assert theme.get_theme_font("title") == ("TkDefaultFont", 14, "bold")
     assert theme.get_theme_font("missing", ("Fira Sans", 12)) == ("Fira Sans", 12)
+
+
+def test_get_theme_spacing_and_padding_use_active_tokens(monkeypatch):
+    monkeypatch.setattr(
+        theme,
+        "_ACTIVE_SPACING",
+        {
+            "space_4": 8,
+            "padding_button": (8, 4),
+            "uniform_padding": 6,
+        },
+    )
+
+    assert theme.get_theme_spacing("space_4") == 8
+    assert theme.get_theme_spacing("missing", 5) == 5
+    assert theme.get_theme_padding("padding_button") == (8, 4)
+    assert theme.get_theme_padding("uniform_padding") == (6, 6)
+    assert theme.get_theme_padding("missing", (1, 2, 3, 4)) == (1, 2, 3, 4)
 
 
 def test_get_theme_matplotlib_font_resolves_tk_named_family(monkeypatch):

@@ -102,6 +102,22 @@ def test_get_theme_spacing_and_padding_use_active_tokens(monkeypatch):
     assert theme.get_theme_padding("missing", (1, 2, 3, 4)) == (1, 2, 3, 4)
 
 
+def test_get_theme_space_and_padding_px_use_generated_tokens(monkeypatch):
+    monkeypatch.setattr(
+        theme,
+        "_ACTIVE_SPACING",
+        {
+            "space_px_5": 7,
+            "padding_px_3_4": (9, 10),
+        },
+    )
+
+    assert theme.get_theme_space_px(5) == 7
+    assert theme.get_theme_space_px(11) == 11
+    assert theme.get_theme_padding_px((3, 4)) == (9, 10)
+    assert theme.get_theme_padding_px((1, 2, 3, 4)) == (1, 2, 3, 4)
+
+
 def test_get_theme_matplotlib_font_resolves_tk_named_family(monkeypatch):
     monkeypatch.setattr(theme, "_ACTIVE_TYPOGRAPHY", {"body": ("TkDefaultFont", 10)})
 

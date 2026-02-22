@@ -42,6 +42,7 @@ from matplotlib.figure import Figure
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.hover import HoverButton
 from navigate.view.custom_widgets.common import uniform_grid
+from navigate.view.theme import get_theme_padding_px, get_theme_space_px
 
 
 class DiagnosticsPopup(ttk.Frame):
@@ -81,8 +82,8 @@ class DiagnosticsPopup(ttk.Frame):
         self.frame.grid(
             row=0,
             column=0,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="NSEW",
         )
 
@@ -95,8 +96,8 @@ class DiagnosticsPopup(ttk.Frame):
         self.buttons["update"].grid(
             row=0,
             column=0,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="W",
         )
         self.buttons["update"].hover.setdescription(
@@ -112,8 +113,8 @@ class DiagnosticsPopup(ttk.Frame):
         self.buttons["reset"].grid(
             row=0,
             column=1,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="W",
         )
         self.buttons["reset"].hover.setdescription(
@@ -129,8 +130,8 @@ class DiagnosticsPopup(ttk.Frame):
         self.buttons["save_image"].grid(
             row=0,
             column=2,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="W",
         )
         self.buttons["save_image"].hover.setdescription(
@@ -145,8 +146,8 @@ class DiagnosticsPopup(ttk.Frame):
         self.buttons["close"].grid(
             row=0,
             column=3,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="W",
         )
         self.buttons["close"].hover.setdescription("Close the diagnostics window.")
@@ -154,14 +155,14 @@ class DiagnosticsPopup(ttk.Frame):
         # Create a label frame
         self.diagnostics_frame = ttk.LabelFrame(
             self.frame,
-            padding=(5, 5, 5, 5),
+            padding=get_theme_padding_px((5, 5, 5, 5)),
         )
         self.diagnostics_frame.grid(
             row=1,
             column=0,
             columnspan=4,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="NSEW",
         )
 
@@ -187,13 +188,13 @@ class DiagnosticsPopup(ttk.Frame):
         self.label_frame[counter + 1] = ttk.LabelFrame(
             self.diagnostics_frame,
             text=title,
-            padding=(5, 5, 5, 5),
+            padding=get_theme_padding_px((5, 5, 5, 5)),
         )
         self.label_frame[counter + 1].grid(
             row=i,
             column=j,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="NSEW",
         )
         # Configure the grid to expand if new rows are added

@@ -942,6 +942,50 @@ def get_theme_padding(
     return (0, 0)
 
 
+def get_theme_space_px(value: int, fallback: int | None = None) -> int:
+    """Resolve pixel spacing through tokenized lookup.
+
+    Parameters
+    ----------
+    value : int
+        Desired pixel spacing.
+    fallback : int or None, optional
+        Fallback value when the generated token is missing. When omitted, the
+        sanitized ``value`` is used.
+
+    Returns
+    -------
+    int
+        Resolved spacing value.
+    """
+    normalized = _to_nonnegative_int(value)
+    if normalized is None:
+        normalized = 0
+    fallback_value = _to_nonnegative_int(fallback)
+    resolved_fallback = normalized if fallback_value is None else fallback_value
+    return get_theme_spacing(f"space_px_{normalized}", resolved_fallback)
+
+
+def get_theme_padding_px(values: tuple[int, ...]) -> tuple[int, ...]:
+    """Resolve pixel padding through tokenized lookup.
+
+    Parameters
+    ----------
+    values : tuple[int, ...]
+        Desired Tk padding tuple of length 1, 2, or 4.
+
+    Returns
+    -------
+    tuple[int, ...]
+        Resolved padding tuple.
+    """
+    normalized = _to_spacing_tuple(values)
+    if normalized is None:
+        normalized = (0, 0)
+    token = "padding_px_" + "_".join(str(item) for item in normalized)
+    return get_theme_padding(token, normalized)
+
+
 def _resolve_matplotlib_family(family: str) -> str:
     """Resolve Tk named font families to concrete Matplotlib-safe family names.
 

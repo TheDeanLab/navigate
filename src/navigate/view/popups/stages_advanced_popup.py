@@ -38,6 +38,7 @@ from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.hover import HoverButton, HoverCheckButton
+from navigate.view.theme import get_theme_space_px
 
 
 class AdvancedStageParametersPopup:
@@ -101,7 +102,7 @@ class AdvancedStageParametersPopup:
                 "state": "readonly",
             },
         )
-        self.microscope.grid(row=0, column=0, columnspan=3, padx=5, pady=5, sticky="ew")
+        self.microscope.grid(row=0, column=0, columnspan=3, padx=get_theme_space_px(5), pady=get_theme_space_px(5), sticky="ew")
 
         #: dict: Holder for column frames (LabelFrames)
         self.column_frames = {}
@@ -156,14 +157,14 @@ class AdvancedStageParametersPopup:
         }
 
         # Grid the LabelFrames in one row so they look like columns
-        self.column_frames["stage"].grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
-        self.column_frames["min"].grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
-        self.column_frames["max"].grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
-        self.column_frames["home"].grid(row=1, column=3, padx=5, pady=5, sticky="nsew")
+        self.column_frames["stage"].grid(row=1, column=0, padx=get_theme_space_px(5), pady=get_theme_space_px(5), sticky="nsew")
+        self.column_frames["min"].grid(row=1, column=1, padx=get_theme_space_px(5), pady=get_theme_space_px(5), sticky="nsew")
+        self.column_frames["max"].grid(row=1, column=2, padx=get_theme_space_px(5), pady=get_theme_space_px(5), sticky="nsew")
+        self.column_frames["home"].grid(row=1, column=3, padx=get_theme_space_px(5), pady=get_theme_space_px(5), sticky="nsew")
         self.column_frames["offset"].grid(
-            row=1, column=4, padx=5, pady=5, sticky="nsew"
+            row=1, column=4, padx=get_theme_space_px(5), pady=get_theme_space_px(5), sticky="nsew"
         )
-        self.column_frames["flip"].grid(row=1, column=5, padx=5, pady=5, sticky="nsew")
+        self.column_frames["flip"].grid(row=1, column=5, padx=get_theme_space_px(5), pady=get_theme_space_px(5), sticky="nsew")
 
         # Make the columns expand nicely
         for c in range(6):
@@ -190,7 +191,7 @@ class AdvancedStageParametersPopup:
                 text=display_name,
                 style="BodyBold.TLabel",
             )
-            stage_lbl.grid(row=i, column=0, padx=5, pady=0, sticky="ew")
+            stage_lbl.grid(row=i, column=0, padx=get_theme_space_px(5), pady=get_theme_space_px(0), sticky="ew")
 
             # collect row widgets for height normalization
             self._row_widgets.setdefault(i, []).append(stage_lbl)
@@ -205,7 +206,7 @@ class AdvancedStageParametersPopup:
                 increment=1,
             )
             self.spinboxes[stage_name + "_min"].set(min_dict.get(stage_name, 0.0))
-            self.spinboxes[stage_name + "_min"].grid(row=i, column=0, padx=5, pady=0)
+            self.spinboxes[stage_name + "_min"].grid(row=i, column=0, padx=get_theme_space_px(5), pady=get_theme_space_px(0))
             self.spinboxes[stage_name + "_min"].hover.setdescription(
                 "The desired minimum limit for the stage."
             )
@@ -215,7 +216,7 @@ class AdvancedStageParametersPopup:
             self.buttons[stage_name + "_min"] = HoverButton(
                 self.column_frames["min"], text="Update", width=button_width
             )
-            self.buttons[stage_name + "_min"].grid(row=i, column=1, padx=5, pady=0)
+            self.buttons[stage_name + "_min"].grid(row=i, column=1, padx=get_theme_space_px(5), pady=get_theme_space_px(0))
             self.buttons[stage_name + "_min"].hover.setdescription(
                 "Click to update the minimum limit for this stage to the current "
                 "position."
@@ -232,7 +233,7 @@ class AdvancedStageParametersPopup:
                 increment=1,
             )
             self.spinboxes[stage_name + "_max"].set(max_dict.get(stage_name, 0.0))
-            self.spinboxes[stage_name + "_max"].grid(row=i, column=0, padx=5, pady=0)
+            self.spinboxes[stage_name + "_max"].grid(row=i, column=0, padx=get_theme_space_px(5), pady=get_theme_space_px(0))
             self.spinboxes[stage_name + "_max"].hover.setdescription(
                 "The desired maximum limit for the stage."
             )
@@ -242,7 +243,7 @@ class AdvancedStageParametersPopup:
             self.buttons[stage_name + "_max"] = HoverButton(
                 self.column_frames["max"], text="Update", width=button_width
             )
-            self.buttons[stage_name + "_max"].grid(row=i, column=1, padx=5, pady=0)
+            self.buttons[stage_name + "_max"].grid(row=i, column=1, padx=get_theme_space_px(5), pady=get_theme_space_px(0))
             self.buttons[stage_name + "_max"].hover.setdescription(
                 "Click to update the maximum limit for this stage to the current "
                 "position."
@@ -267,7 +268,7 @@ class AdvancedStageParametersPopup:
             if home_position is None or home_position == "None":
                 home_position = ""
             self.spinboxes[stage_name + "_home"].set(home_position)
-            self.spinboxes[stage_name + "_home"].grid(row=i, column=0, padx=5, pady=0)
+            self.spinboxes[stage_name + "_home"].grid(row=i, column=0, padx=get_theme_space_px(5), pady=get_theme_space_px(0))
             self.spinboxes[stage_name + "_home"].hover.setdescription(
                 "The desired home position for the stage."
             )
@@ -277,7 +278,7 @@ class AdvancedStageParametersPopup:
             self.buttons[stage_name + "_home"] = HoverButton(
                 self.column_frames["home"], text="Update", width=button_width
             )
-            self.buttons[stage_name + "_home"].grid(row=i, column=1, padx=5, pady=0)
+            self.buttons[stage_name + "_home"].grid(row=i, column=1, padx=get_theme_space_px(5), pady=get_theme_space_px(0))
             self.buttons[stage_name + "_home"].hover.setdescription(
                 "Click to update the home position for this stage to the current "
                 "position."
@@ -294,7 +295,7 @@ class AdvancedStageParametersPopup:
                 increment=1,
             )
             self.spinboxes[stage_name + "_offset"].set(offsets.get(stage_name, 0.0))
-            self.spinboxes[stage_name + "_offset"].grid(row=i, column=0, padx=5, pady=0)
+            self.spinboxes[stage_name + "_offset"].grid(row=i, column=0, padx=get_theme_space_px(5), pady=get_theme_space_px(0))
             self.spinboxes[stage_name + "_offset"].hover.setdescription(
                 f"The relative offset between different microscope instances for the "
                 f"{stage_name} axis."
@@ -311,8 +312,8 @@ class AdvancedStageParametersPopup:
                 row=i,
                 column=0,
                 columnspan=1,
-                padx=5,
-                pady=0,
+                padx=get_theme_space_px(5),
+                pady=get_theme_space_px(0),
                 sticky="",
             )
             self.flip_button[stage_name].hover.setdescription(
@@ -340,8 +341,8 @@ class AdvancedStageParametersPopup:
             row=2,
             column=0,
             columnspan=3,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="w",
         )
         self.stage_limits_enabled.hover.setdescription(
@@ -355,8 +356,8 @@ class AdvancedStageParametersPopup:
             row=2,
             column=5,
             columnspan=1,
-            padx=5,
-            pady=5,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
             sticky="e",
         )
         self.save_button.hover.setdescription(

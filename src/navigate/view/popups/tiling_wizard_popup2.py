@@ -94,10 +94,13 @@ class TilingWizardPopup:
 
         # Add one row per axis
         for row, ax in enumerate(axes):
+            display_ax = ax.upper()
+            if ax.lower() == "theta":
+                display_ax = "\N{GREEK CAPITAL THETA SYMBOL}"
             # Set start position
             start_var = f"{ax.lower()}_start"
             self.buttons[start_var] = ttk.Button(
-                self.popup.content_frame, text=f"Set {ax.upper()} Start"
+                self.popup.content_frame, text=f"Set {display_ax} Start"
             )
             self.buttons[start_var].grid(
                 row=row, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
@@ -116,7 +119,7 @@ class TilingWizardPopup:
             # Set end position
             end_var = f"{ax.lower()}_end"
             self.buttons[end_var] = ttk.Button(
-                self.popup.content_frame, text=f"Set {ax.upper()} End"
+                self.popup.content_frame, text=f"Set {display_ax} End"
             )
             self.buttons[end_var].grid(
                 row=row, column=2, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
@@ -136,7 +139,7 @@ class TilingWizardPopup:
             dist_var = f"{ax.lower()}_dist"
             self.inputs[dist_var] = LabelInput(
                 parent=self.popup.content_frame,
-                label=f"{ax.upper()} Distance",
+                label=f"{display_ax} Distance",
                 input_class=ValidatedEntry,
                 input_var=tk.StringVar(),
                 input_args={"width": 5},
@@ -150,9 +153,12 @@ class TilingWizardPopup:
             # of vertical pixels on the camera multiplied by the effective
             # pixel size)
             fov_var = f"{ax.lower()}_fov"
+            fov_label = f"{display_ax} FOV Dist"
+            if ax.lower() == "theta":
+                fov_label = f"{display_ax} Step"
             self.inputs[fov_var] = LabelInput(
                 parent=self.popup.content_frame,
-                label=f"{ax.upper()} FOV Dist",
+                label=fov_label,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
                 input_args={

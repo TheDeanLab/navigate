@@ -183,3 +183,42 @@ def test_bdv_xml_dict(dummy_model, stack_cycling_mode):
                         else:
                             affine_c = view_registrations[i]["ViewTransform"][0]["affine"]["text"]
                             assert affine == affine_c
+
+
+def test_bdv_xml_dict_angle_tile_mapping():
+    from navigate.model.metadata_sources.bdv_metadata import BigDataViewerMetadata
+
+    md = BigDataViewerMetadata()
+    md.dx = md.dy = md.dz = 1
+    md.shape_x = 10
+    md.shape_y = 12
+    md.shape_z = 1
+    md.shape_c = 1
+    md.shape_t = 1
+    md.positions = 3
+
+    views = [
+        {"x": 0.0, "y": 0.0, "z": 0.0, "theta": 0.0, "f": 0.0},
+        {"x": 0.0, "y": 0.0, "z": 0.0, "theta": 60.0, "f": 0.0},
+        {"x": 0.0, "y": 0.0, "z": 0.0, "theta": 120.0, "f": 0.0},
+    ]
+
+    xml_dict = md.bdv_xml_dict("test_file.n5", views)
+
+    view_setups = xml_dict["SequenceDescription"]["ViewSetups"]["ViewSetup"]
+    assert len(view_setups) == 3
+
+    angle_attrs = xml_dict["SequenceDescription"]["ViewSetups"]["Attributes"][3][
+        "Angle"
+    ]
+    tile_attrs = xml_dict["SequenceDescription"]["ViewSetups"]["Attributes"][2]["Tile"]
+
+    assert len(tile_attrs) == 1
+    assert [a["id"]["text"] for a in angle_attrs] == ["0", "1", "2"]
+
+    assert [vs["attributes"]["tile"]["text"] for vs in view_setups] == ["0", "0", "0"]
+    assert [vs["attributes"]["angle"]["text"] for vs in view_setups] == [
+        "0",
+        "1",
+        "2",
+    ]

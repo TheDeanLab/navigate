@@ -40,6 +40,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.theme import get_theme_padding_px
 
 
 class CameraMapSettingPopup(PopUp):
@@ -79,7 +80,7 @@ class CameraMapSettingPopup(PopUp):
         #: dict: Dictionary of input widgets.
         self.inputs = {}
 
-        title = ttk.Label(self.content_frame, text="File: ", padding=(2, 5, 0, 0))
+        title = ttk.Label(self.content_frame, text="File: ", padding=get_theme_padding_px((2, 5, 0, 0)))
         title.grid(row=0, column=0, sticky=tk.NSEW)
 
         #: tk.StringVar: File name.
@@ -88,31 +89,31 @@ class CameraMapSettingPopup(PopUp):
             self.content_frame, textvariable=self.file_name
         )
         self.inputs["file_name"].grid(
-            row=0, column=1, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)
+            row=0, column=1, sticky=tk.NSEW, padx=get_theme_padding_px((0, 5)), pady=get_theme_padding_px((15, 0))
         )
 
         #: ttk.Button: Open file button.
         self.open_btn = ttk.Button(self.content_frame, text="Open")
-        self.open_btn.grid(row=0, column=2, pady=(0, 10))
+        self.open_btn.grid(row=0, column=2, pady=get_theme_padding_px((0, 10)))
 
-        title = ttk.Label(self.content_frame, text="Camera: ", padding=(2, 5, 0, 0))
+        title = ttk.Label(self.content_frame, text="Camera: ", padding=get_theme_padding_px((2, 5, 0, 0)))
         #: tk.StringVar: Camera name.
         self.camera = tk.StringVar()
         title.grid(row=0, column=3, sticky=tk.NSEW)
         self.inputs["camera"] = ttk.OptionMenu(self.content_frame, self.camera)
         self.inputs["camera"].grid(
-            row=0, column=4, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)
+            row=0, column=4, sticky=tk.NSEW, padx=get_theme_padding_px((0, 5)), pady=get_theme_padding_px((15, 0))
         )
         #: ttk.Button: Create maps button.
         self.map_btn = ttk.Button(self.content_frame, text="Create maps")
-        self.map_btn.grid(row=0, column=5, pady=(0, 10))
+        self.map_btn.grid(row=0, column=5, pady=get_theme_padding_px((0, 10)))
 
         # Plot
         self.fig, self.axs = subplots(1, 2, figsize=(5, 5))
         canvas = FigureCanvasTkAgg(self.fig, master=self.content_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=1, column=0, columnspan=6, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
+            row=1, column=0, columnspan=6, sticky=tk.NSEW, padx=get_theme_padding_px((5, 5)), pady=get_theme_padding_px((5, 5))
         )
 
     def get_widgets(self):

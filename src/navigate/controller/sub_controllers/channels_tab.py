@@ -48,7 +48,7 @@ from navigate.controller.sub_controllers.channels_settings import (
 )
 from navigate.controller.sub_controllers.tiling import TilingWizardController
 from navigate.view.main_window_content.channels_tab import ChannelsTab
-from navigate.view.popups.tiling_wizard_popup2 import TilingWizardPopup
+from navigate.view.popups.tiling_wizard_popup import TilingWizardPopup
 
 # Logger Setup
 p = __name__.split(".")[1]

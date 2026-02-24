@@ -29,7 +29,8 @@ Launch the Software Package
    navigate -sh
 
 .. image:: ../images/MainApp.png
-     :alt: Opening **navigate**.
+   :align: center
+   :alt: Opening **navigate**.
 
 Configure the Channel Settings
 ==============================
@@ -38,14 +39,16 @@ Configure the Channel Settings
 * Under the :guilabel:`Channel Settings` section, select the number of channels needed for imaging. For each channel selected, you will need to configure the acquisition settings:
 
     .. image:: ../images/channel-selector.png
-      :alt: Channel settings in the **navigate** software package.
+       :align: center
+       :alt: Channel settings in the **navigate** software package.
 
     * Select the appropriate :guilabel:`Laser` from the dropdown menu.  
     * Select the appropriate :guilabel:`Power` for the laser.  
     * Select the appropriate emission :guilabel:`Filter` from the dropdown menu.
 
     .. image:: ../images/channel-selector-filter.png
-      :alt: Changing the emission filter in **navigate**.
+       :align: center
+       :alt: Changing the emission filter in **navigate**.
 
     * Specify the camera :guilabel:`Exp. Time (ms)`. A good default value is ``100`` or ``200`` ms.  
     * Specify the :guilabel:`Interval` to be ``1.0``. While this feature is not currently implemented, future releases will allow users to image different channels at different time intervals.  
@@ -58,10 +61,12 @@ Configure the Camera Settings
 * For standard imaging applications, select :guilabel:`Normal` in the :guilabel:`Sensor Modes` dropdown menu within the :guilabel:`Camera Modes` section.  
 * If you are using the rolling shutter, select :guilabel:`Light-Sheet` and specify its :guilabel:`Readout Direction` and :guilabel:`Number of Pixels`.
 
-    .. note:: For more information on how to configure the rolling shutter for ASLM operation, please refer to :ref:`ASLM <setup_aslm>`.
+.. note:: For more information on how to configure the rolling shutter for ASLM operation, please refer to :ref:`ASLM <setup_aslm>`.
 
-    .. image:: images/beginner/sensor-mode.png
-       :alt: Changing the camera sensor mode in **navigate**.
+
+.. image:: ../images/sensor-mode.png
+   :align: center
+   :alt: Changing the camera sensor mode in **navigate**.
 
 * Choose the size of your camera's field of view.  
     * Specify the :guilabel:`Region of Interest Settings` by entering the appropriate :guilabel:`Number of Pixels` for both the :guilabel:`Width` and :guilabel:`Height` values. Alternatively, one can select from one of several default values in the :guilabel:`Default FOVs` section.
@@ -74,8 +79,9 @@ Configure the Camera Settings
               pixel_size:
                 20x: 0.325 # magnification, and pixel size in microns
 
-    .. image:: images/beginner/ROI-definition.png
-         :alt: Changing the camera region of interest in **navigate**.
+    .. image:: ../images/ROI-definition.png
+       :align: center
+       :alt: Changing the camera region of interest in **navigate**.
 
 .. note:: If multiple channels are selected, each channel will be acquired with the same camera :guilabel:`Sensor Mode`, :guilabel:`Readout Direction`, and :guilabel:`Region of Interest Settings`.
 
@@ -84,15 +90,17 @@ Acquire in a Continuous Scan Mode
 
 * Select "Continuous Scan" in the dropdown next to the :guilabel:`Acquire` button in the :ref:`acquisition bar <ui_acquisition_bar>`.
 
-    .. image:: images/beginner/continuous-scan-dropdown.png
-         :alt: Selecting the continuous scan mode in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/continuous-scan-dropdown.png
+       :align: center
+       :alt: Selecting the continuous scan mode in **navigate**.
 
 * Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 
     .. note:: If multiple channels are selected, each channel will be imaged sequentially. The order of imaging is determined by the order of the channels in the :guilabel:`Channel Settings` section of the :guilabel:`Channels` tab, and will proceed from the top to the bottom of this channel list.
 
-    .. image:: images/beginner/continuous-scan-acquire.png
-         :alt: Launching the continuous scan mode in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/continuous-scan-acquire.png
+       :align: center
+       :alt: Launching the continuous scan mode in **navigate**.
 
 * Move the stage to identify the location of the sample.  
     * Select the :guilabel:`Stage Control` tab, and use the graphical user interface to move the stage. This includes buttons for moving the stage in ``X``, ``Y``, ``Z``, ``F``, and ``Theta`` directions.  
@@ -106,38 +114,44 @@ Acquire in a Continuous Scan Mode
 
     .. warning:: One should always be careful when moving the stage. If the stage is moved too quickly, the sample and/or microscope may be damaged. We strongly recommend that you implement stage limits in your configuration file. Please refer to the :ref:`configuration settings <configuration_file>` for more information.
 
-    .. image:: images/beginner/stage-movement-panel.png
-        :alt: Moving the stage in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/stage-movement-panel.png
+       :align: center
+       :alt: Moving the stage in **navigate**.
 
 * Press the :guilabel:`Stop` button in the acquisition bar to stop acquisition.
 
-    .. image:: images/beginner/stop-acquisition.png
-        :alt: Stopping the continuous scan mode in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/stop-acquisition.png
+       :align: center
+       :alt: Stopping the continuous scan mode in **navigate**.
 
 Acquiring a Single Image
 =========================
 
 * Check the :guilabel:`Save Data` box in the :guilabel:`Timepoint Settings` section under the :guilabel:`Channels` tab to save the acquired images. Check this box before acquiring data.
 
-    .. image:: images/beginner/save-data.png
-        :alt: Saving data in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/save-data.png
+       :align: center
+       :alt: Saving data in **navigate**.
 
 * Select :guilabel:`Single Acquisition` from the dropdown next to the :guilabel:`Acquire` button.
 
-    .. image:: images/beginner/single-acquisition-dropdown.png
-        :alt: Selecting the single acquisition mode in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/single-acquisition-dropdown.png
+       :align: center
+       :alt: Selecting the single acquisition mode in **navigate**.
 
 * Press :guilabel:`Acquire` to open the :guilabel:`File Saving Dialog` interface. Enter the sample parameters, notes, location to save file, and filetype in the :guilabel:`File Saving Dialog` that pops up.
 
-    .. image:: images/beginner/save-dialog-box.png
-        :alt: Saving data in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/save-dialog-box.png
+       :align: center
+       :alt: Saving data in **navigate**.
 
 * Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will automatically stop once the image is acquired.
 
     .. note:: Each acquisition will be saved in a separate folder (e.g., ``Cell01``, ``Cell02``, ...) within the directory specified in the :guilabel:`File Saving Dialog` interface. Data will not be overwritten between acquisitions.
 
-    .. image:: images/beginner/save-dialog-box-acquire.png
-        :alt: Saving data in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/save-dialog-box-acquire.png
+       :align: center
+       :alt: Saving data in **navigate**.
 
 .. _i_want_to_z_stack:
 
@@ -146,23 +160,27 @@ Acquiring a Z-Stack
 
 * Using the :guilabel:`Stage Control`, go to the desired z-position in the sample. Make sure that the sample is in focus. To use the autofocus feature, please refer to the :ref:`Autofocus Settings <ui_autofocus>`.
 
-    .. image:: images/beginner/stage-control-start-pos-zstack.png
-        :alt: Adjusting the stage position in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/stage-control-start-pos-zstack.png
+       :align: center
+       :alt: Adjusting the stage position in **navigate**.
 
 * Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (μm)` press :guilabel:`Set Start Pos`.
 
-    .. image:: images/beginner/press-start-pos.png
-        :alt: Adjusting the stage position in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/press-start-pos.png
+       :align: center
+       :alt: Adjusting the stage position in **navigate**.
 
 * Using the :guilabel:`Stage Control`, go to a different z-position within the sample. Again, make sure that the sample is in focus.
 
-    .. image:: images/beginner/stage-control-end-pos-zstack.png
-        :alt: Adjusting the stage position in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/stage-control-end-pos-zstack.png
+       :align: center
+       :alt: Adjusting the stage position in **navigate**.
 
 * Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (μm)` press :guilabel:`Set End Pos`.
 
-    .. image:: images/beginner/press-end-pos.png
-        :alt: Adjusting the stage position in **navigate**.
+    .. image:: 03_i_want_to/images/beginner/press-end-pos.png
+       :align: center
+       :alt: Adjusting the stage position in **navigate**.
 
     .. note:: If there is a shift in ``F`` between the start and stop positions, the ``F`` axis will be ramped synchronously with ``Z`` to maintain focus. Check :ref:`configuration settings <configuration_file>` for more information to determine if focus is enabled in hardware. Refer to :ref:`Imaging on a mesoSPIM BT <acquire_mesospimbt>` section for an example of how to acquire a z-stack with a focus ramp.
 
@@ -180,17 +198,20 @@ Acquiring a Z-Stack
                   step: 0.1
 
     .. image:: images/beginner/define-step-size.png
+       :align: center
 
 * If using multiple channels for imaging, select either :guilabel:`Per Z` or :guilabel:`Per Stack` under :guilabel:`Laser Cycling Settings` in the :guilabel:`Stack Acquisition Settings (μm)` section under the :guilabel:`Channels` tab.
 
     * :guilabel:`Per Z` acquires all channels before moving the stage to a new position.  
     * :guilabel:`Per Stack` acquires all images in a stack acquisition for a single channel before moving the stage back to the start position and restarting acquisition for the subsequent channel until all channels are imaged.
 
-    .. image:: images/beginner/laser-cycling-settings.png
+    .. image:: 03_i_want_to/images/beginner/laser-cycling-settings.png
+       :align: center
 
 * Select :guilabel:`Z-Stack` from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
 
-    .. image:: images/beginner/z-stack-acquisition.png
+    .. image:: 03_i_want_to/images/beginner/z-stack-acquisition.png
+       :align: center
 
 * Enter the sample parameters, notes, location to save file, and filetype in the :guilabel:`File Saving Dialog` that pops up.  
 * Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will automatically stop once the image series is acquired.

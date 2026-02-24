@@ -48,6 +48,14 @@ class CaptureSpec:
 
 def settle_window(root: tk.Tk, passes: int = 3, delay_ms: int = 200) -> None:
     """Allow Tk to finish layout/idle rendering before screenshot capture."""
+    try:
+        root.deiconify()
+        root.lift()
+        root.attributes("-topmost", True)
+        root.focus_force()
+    except tk.TclError:
+        pass
+
     for _ in range(passes):
         root.update_idletasks()
         idle_done = {"value": False}
@@ -179,6 +187,52 @@ def _union_bbox(*bboxes: Tuple[int, int, int, int]) -> Tuple[int, int, int, int]
     return min_x, min_y, max_x - min_x, max_y - min_y
 
 
+def _capture_combobox_dropdown(
+    root: tk.Tk,
+    combobox,
+    frame_widget,
+    out_path: str,
+    cli_args: argparse.Namespace,
+    pad: int = 2,
+) -> str:
+    values = combobox.cget("values")
+    if values:
+        combobox.set(values[0])
+
+    popup_path = None
+    try:
+        combobox.focus_set()
+        root.tk.call("ttk::combobox::Post", combobox)
+        settle_window(root, passes=max(3, cli_args.passes), delay_ms=cli_args.delay_ms)
+        popup_path = str(root.tk.call("ttk::combobox::PopdownWindow", combobox))
+    except tk.TclError:
+        # Fallback: click-open behavior if the Tcl Post command is unavailable.
+        combobox.event_generate("<Button-1>")
+        settle_window(root, passes=max(3, cli_args.passes), delay_ms=cli_args.delay_ms)
+        try:
+            popup_path = str(root.tk.call("ttk::combobox::PopdownWindow", combobox))
+        except tk.TclError:
+            popup_path = None
+
+    frame_bbox = tk_window_bbox(frame_widget, pad=pad)
+    if popup_path:
+        try:
+            popup_bbox = _bbox_from_path(root, popup_path, pad=pad)
+            bbox = _union_bbox(frame_bbox, popup_bbox)
+        except tk.TclError:
+            bbox = frame_bbox
+    else:
+        bbox = frame_bbox
+
+    captured = _capture_bbox(bbox, out_path)
+    try:
+        root.tk.call("ttk::combobox::Unpost", combobox)
+    except tk.TclError:
+        pass
+    settle_window(root, passes=1, delay_ms=cli_args.delay_ms)
+    return captured
+
+
 def _capture_main_window(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
@@ -227,45 +281,50 @@ def _capture_channel_selector_filter_dropdown(
         raise RuntimeError("No filter wheel combobox widgets available to capture.")
 
     filter_combo = frame.filterwheel_pulldowns[0]
-    values = filter_combo.cget("values")
-    if values:
-        # Ensure the combobox shows a concrete value in the field.
-        filter_combo.set(values[0])
-
-    popup_path = None
-    try:
-        filter_combo.focus_set()
-        root.tk.call("ttk::combobox::Post", filter_combo)
-        settle_window(root, passes=max(3, cli_args.passes), delay_ms=cli_args.delay_ms)
-        popup_path = str(root.tk.call("ttk::combobox::PopdownWindow", filter_combo))
-    except tk.TclError:
-        # Fallback: click-open behavior if the Tcl Post command is unavailable.
-        filter_combo.event_generate("<Button-1>")
-        settle_window(root, passes=max(3, cli_args.passes), delay_ms=cli_args.delay_ms)
-        try:
-            popup_path = str(root.tk.call("ttk::combobox::PopdownWindow", filter_combo))
-        except tk.TclError:
-            popup_path = None
-
-    frame_bbox = tk_window_bbox(frame, pad=2)
-    if popup_path:
-        try:
-            popup_bbox = _bbox_from_path(root, popup_path, pad=2)
-            bbox = _union_bbox(frame_bbox, popup_bbox)
-        except tk.TclError:
-            bbox = frame_bbox
-    else:
-        bbox = frame_bbox
-
     out_path = os.path.join(cli_args.output_root, "channel-selector-filter.png")
-    captured = _capture_bbox(bbox, out_path)
+    return _capture_combobox_dropdown(
+        root=root,
+        combobox=filter_combo,
+        frame_widget=frame,
+        out_path=out_path,
+        cli_args=cli_args,
+        pad=2,
+    )
 
-    try:
-        root.tk.call("ttk::combobox::Unpost", filter_combo)
-    except tk.TclError:
-        pass
-    settle_window(root, passes=1, delay_ms=cli_args.delay_ms)
-    return captured
+
+def _capture_sensor_mode_dropdown(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    camera_settings_tab = controller.view.settings.camera_settings_tab
+    controller.view.settings.select(camera_settings_tab)
+    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+
+    camera_mode_frame = camera_settings_tab.camera_mode
+    sensor_input = camera_mode_frame.inputs["Sensor"]
+    sensor_combo = sensor_input.widget
+    out_path = os.path.join(cli_args.output_root, "sensor-mode.png")
+    return _capture_combobox_dropdown(
+        root=root,
+        combobox=sensor_combo,
+        frame_widget=camera_mode_frame,
+        out_path=out_path,
+        cli_args=cli_args,
+        pad=2,
+    )
+
+
+def _capture_roi_definition(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    camera_settings_tab = controller.view.settings.camera_settings_tab
+    controller.view.settings.select(camera_settings_tab)
+    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    out_path = os.path.join(cli_args.output_root, "ROI-definition.png")
+    return _capture_widget(camera_settings_tab.camera_roi, out_path, pad=2)
 
 
 def _capture_camera_tab(
@@ -301,6 +360,20 @@ CAPTURES: List[CaptureSpec] = [
         description="Camera settings notebook tab",
         context="controller",
         runner=lambda ctx, args: _capture_settings_tab(ctx, args, "camera_settings_tab"),
+    ),
+    CaptureSpec(
+        name="sensor-mode",
+        group="main-ui",
+        description="Camera Mode frame with Sensor combobox dropdown opened",
+        context="controller",
+        runner=_capture_sensor_mode_dropdown,
+    ),
+    CaptureSpec(
+        name="roi-definition",
+        group="main-ui",
+        description="Region of Interest Settings frame in Camera Settings",
+        context="controller",
+        runner=_capture_roi_definition,
     ),
     CaptureSpec(
         name="settings-channels",

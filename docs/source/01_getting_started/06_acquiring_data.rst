@@ -1,45 +1,34 @@
 .. _beginner:
 
 ===========================
-Acquire an Image (Beginner)
+Acquiring Data
 ===========================
 
 This guide will describe how to acquire a single image and a z-stack using the **navigate** software package.
 
-Launching the Software Package
-==============================
+This section assumes you have already completed:
 
-Open Anaconda Prompt
---------------------
+* :ref:`Software Installation <software_installation>`
+* :ref:`Configuring Navigate <configuring_navigate>`
 
-To start, you need to open the Anaconda Prompt. Follow these steps:  
-1. On Windows, click on the Start menu.  
-2. Type ``Anaconda Prompt`` into the search bar.  
-3. Click on the Anaconda Prompt application to open it.
-
-.. note:: Ensure that Anaconda and **navigate** are already installed on your system. If not, please refer to our :ref:`Quick_Start_Guide` for more information.
-
-Activate Conda Environment
---------------------------
-
-Once the Anaconda Prompt is open, activate the desired conda environment. By default, the command prompt will open the base environment (as shown in parentheses). To activate **navigate** environment, type the following command into the Anaconda command window and press :kbd:`Enter`:
-
-.. code-block:: console
-
-   (base) conda activate navigate
+If your microscope hardware is not fully configured yet, you can still complete all
+steps below in synthetic hardware mode using Virtual Devices.
 
 Launch the Software Package
----------------------------
+===========================
 
-After activating the environment, **navigate** should now be shown in parentheses. After you have already :ref:`configured <setup_microscope>` **navigate**, you can launch it by typing the following command into the Anaconda command window:
+1. Activate the same environment you used during installation.
+2. Launch **navigate**:
 
 .. code-block:: console
 
-   (navigate) navigate
+   # Use configured hardware
+   navigate
 
-The **navigate** software package will launch and the main window will appear.
+   # Or use Virtual Devices (synthetic hardware mode)
+   navigate -sh
 
-.. image:: images/beginner/open-navigate.png
+.. image:: ../images/MainApp.png
      :alt: Opening **navigate**.
 
 Configure the Channel Settings
@@ -48,14 +37,14 @@ Configure the Channel Settings
 * Select the :guilabel:`Channels` tab, which is located on the upper left of the main window.  
 * Under the :guilabel:`Channel Settings` section, select the number of channels needed for imaging. For each channel selected, you will need to configure the acquisition settings:
 
-    .. image:: images/beginner/channel-selector.png
+    .. image:: ../images/channel-selector.png
       :alt: Channel settings in the **navigate** software package.
 
     * Select the appropriate :guilabel:`Laser` from the dropdown menu.  
     * Select the appropriate :guilabel:`Power` for the laser.  
     * Select the appropriate emission :guilabel:`Filter` from the dropdown menu.
 
-    .. image:: images/beginner/channel-selector-filter.png
+    .. image:: ../images/channel-selector-filter.png
       :alt: Changing the emission filter in **navigate**.
 
     * Specify the camera :guilabel:`Exp. Time (ms)`. A good default value is ``100`` or ``200`` ms.  
@@ -108,7 +97,7 @@ Acquire in a Continuous Scan Mode
 * Move the stage to identify the location of the sample.  
     * Select the :guilabel:`Stage Control` tab, and use the graphical user interface to move the stage. This includes buttons for moving the stage in ``X``, ``Y``, ``Z``, ``F``, and ``Theta`` directions.  
       * The step size for each axis can be adjusted with the spinbox next to each button.  
-      * For stages loaded in a synthetic mode, buttons will be disabled.  
+      * For stage axes configured as Virtual Devices, buttons will be disabled.  
       * Absolute positions can be entered in the text boxes next to each button.  
       * Check :ref:`configuration settings <configuration_file>` for more information.  
     * Alternatively, if available, use the manufacturer-provided joystick to position the sample.

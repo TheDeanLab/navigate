@@ -24,6 +24,11 @@
 
 **navigate** is an open-source Python software for light-sheet microscope control. It focuses on smart microscopy applications by providing reusable acquisition and analysis routines, termed :ref:`features <features>`, that can be chained together arbitrarily to create custom acquisition protocols. **navigate** is accompanied by `Altair <https://thedeanlab.github.io/altair/>`_, our open-source light-sheet microscope designs. **navigate** is designed to accommodate the needs of a diverse user base, from biologists with no programming experience to advanced technology developers.
 
+**Start Here**
+==============
+
+If you are new to **navigate**, begin with :ref:`Software Installation <software_installation>`.
+
 **Key Features**
 ================
 
@@ -33,6 +38,16 @@
 - Extensible plugin architecture for developers
 - Integration with open-source light-sheet microscope designs
 
+**Need Help?**
+==============
+
+- Start with :ref:`Troubleshooting <troubleshooting-home>` for common setup and runtime problems.
+- Check :ref:`Known Issues <issues-home>` for current limitations and workarounds.
+- If you cannot find a solution, open an issue on `GitHub Issues <https://github.com/TheDeanLab/navigate/issues>`_.
+
+.. important::
+
+   **Operating system compatibility:** **navigate** is primarily operated on Windows and has also been used on Linux in some environments. See :ref:`Software Installation <software_installation>` for setup recommendations.
 
 .. seealso::
 
@@ -40,17 +55,19 @@
 
 .. warning::
 
-    Please be advised that while the Dean Lab has implemented several safeguards in the automation of hardware, including but not limited to stage limits, voltage minimums, and maximums, are more, there are inherent risks associated with the use of such automated systems. Despite these precautions, the complexity and nature of automated hardware can lead to unpredictable outcomes. Therefore, the Dean Lab and UT Southwestern expressly disclaim any responsibility for any damages, losses, or injuries that may arise from or be related to the use of **navigate**. Users should be aware of these risks and agree to utilize **navigate** at their own risk.
+    Please be advised that while the Dean Lab has implemented several safeguards in the automation of hardware, including but not limited to stage limits and voltage minimums and maximums, there are inherent risks associated with the use of such automated systems. Despite these precautions, the complexity and nature of automated hardware can lead to unpredictable outcomes. Therefore, the Dean Lab and UT Southwestern expressly disclaim any responsibility for any damages, losses, or injuries that may arise from or be related to the use of **navigate**. Users should be aware of these risks and agree to use **navigate** at their own risk.
 
 
 .. toctree::
    :caption: Getting Started
    :maxdepth: 1
 
-   01_getting_started/01_quick_start/01_quick_start
-   01_getting_started/02_software_installation/02_software_installation
-   01_getting_started/03_i_want_to/03_i_want_to
-
+   01_getting_started/01_minimum_computer_requirements
+   01_getting_started/02_power_management
+   01_getting_started/03_software_installation
+   01_getting_started/04_launching_navigate
+   01_getting_started/05_configuring_navigate
+   01_getting_started/06_acquiring_data
 
 .. toctree::
    :caption: User Guide
@@ -100,11 +117,18 @@
    05_reference/implementations/implementations
    05_reference/api
 
+**How to Cite**
+================
+
+If **navigate** contributes to your research, please cite our publication on `PubMed <https://pubmed.ncbi.nlm.nih.gov/39261640/>`_.
+
+Marin Z, Wang X, Collison DW, McFadden C, Lin J, Borges HM, Chen B, Mehra D, Shen Q, Gałecki S, Daetwyler S, Sheppard SJ, Thien P, Porter BA, Conzen SD, Shepherd DP, Fiolka R, Dean KM. Navigate: an open-source platform for smart light-sheet microscopy. Nat Methods. 2024 Nov;21(11):1967-1969. doi: 10.1038/s41592-024-02413-4. PMID: 39261640; PMCID: PMC11540721.
+
 
 **Authors**
 ============
 
-**navigate** includes key contributions from individuals both inside and outside of `The Dean Lab <https://www.dean-lab.org>`_. Please see the GtiHub repository for a full list of contributors. We welcome community contributions - see our :ref:`contributing guidelines <contributing_guidelines>` for more information on how to get involved.
+**navigate** includes key contributions from individuals both inside and outside of `The Dean Lab <https://www.dean-lab.org>`_. Please see the GitHub repository for a full list of contributors. We welcome community contributions - see our :ref:`contributing guidelines <contributing_guidelines>` for more information on how to get involved.
 
 
 **Funding**

@@ -1,10 +1,13 @@
 .. _power_management:
 
-Computer Power Management and Firmware Configuration
-====================================================
+Computer Power Configuration
+============================
 
 Why this matters
 ----------------
+
+.. important::
+   Treat this configuration as a baseline requirement for production performance, not a last-resort troubleshooting step. Start with :ref:`Required Power/Firmware Settings <required_power_firmware_settings>`, then use this page for detailed procedures and validation.
 
 Navigate can drive sustained high data rates (camera readout, storage I/O, network transfer)
 while also running CPU- and memory-intensive processing. On modern platforms, the *host's*
@@ -24,8 +27,8 @@ At a high level, the goal is to keep the platform in a *deterministic performanc
 * BIOS/UEFI disables deep idle states that add wake-up latency (C-states), while leaving
   frequency scaling and turbo enabled (P-states + Turbo).
 
-Protocol: Windows host configuration
-------------------------------------
+Windows Host Configuration
+--------------------------
 
 1. Update baseline software and firmware
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -40,30 +43,10 @@ Protocol: Windows host configuration
 **Recommended (general):** High performance (works broadly).
 **Optional (where available):** Ultimate Performance (not present on all editions).
 
-*Check the current scheme:*
-
-.. code-block:: powershell
-
-   powercfg /getactivescheme
-   powercfg /list
-
-*Set High performance (alias):*
-
-.. code-block:: powershell
-
-   powercfg /setactive SCHEME_MIN
-
-*Optional: enable + set Ultimate Performance (if supported on your edition):*
-
-.. code-block:: powershell
-
-   powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
-   powercfg /setactive e9a42b02-d5df-448d-aa00-03f14749eb61
-
-**GUI validation (recommended):**
+**How to set:**
 Control Panel → Power Options → select **High performance** (or **Ultimate Performance**).
 
-**Additional Windows power knobs to set (AC power):**
+**Additional Windows Settings (AC power):**
 Power Options → Change plan settings → Advanced power settings:
 
 * Processor power management:
@@ -89,10 +72,11 @@ Device Manager → System devices → look for **Intel(R) Management Engine Inte
 Windows can deliver additional driver updates through **Optional updates**. Although it is referred to as "optional", these updates often include important chipset, storage, and network drivers
 that improve performance and stability.
 
+**How to set:**
 Settings → Windows Update → Advanced options → Optional updates → Driver updates
 
-Protocol: BIOS/UEFI configuration
----------------------------------
+BIOS/UEFI Configuration
+-----------------------
 
 The exact BIOS menu paths vary by vendor and CPU generation, but the concepts are similar.
 
@@ -102,25 +86,22 @@ The exact BIOS menu paths vary by vendor and CPU generation, but the concepts ar
 * **Disable Node Interleaving** - recommended for modern non-uniform memory access (NUMA)-aware Operating Systems.
 
 .. important::
-   Some platforms do not expose an explicit **Node Interleaving** toggle (or it is hidden
-   when the platform defaults to NUMA mode). In that case, verify NUMA is active in the OS
-   (multiple NUMA nodes visible) and proceed with the remaining power settings.
+   Some platforms do not expose an explicit **Node Interleaving** setting (or it is hidden
+   when the platform defaults to NUMA mode).
 
 2. Power and idle-state controls (C-states, P-states)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-These settings are commonly found under:
-
+**How to set:**
 Advanced → Advanced CPU Configuration → Advanced Power Management Configuration
 
-The intent is:
-
+Key settings:
 * Keep **Turbo + P-states enabled** (fast frequency scaling).
 * Disable **deep core/package C-states** (avoid wake-up latency and jitter).
 * Disable **autonomous hardware power management** (keep behavior deterministic).
 
-Recommended BIOS settings (with 1-line descriptions)
-----------------------------------------------------
+Recommended BIOS settings
+-------------------------
 
 .. list-table:: BIOS settings reference (performance mode)
    :header-rows: 1
@@ -178,7 +159,7 @@ Recommended BIOS settings (with 1-line descriptions)
      - C0/C1
      - Caps package idle to shallow states only (best for consistent multi-socket performance).
 
-Validation and troubleshooting
+Validation and Troubleshooting
 -----------------------------
 
 *Generate an energy report (helps spot platform power issues):*
@@ -198,27 +179,3 @@ If performance is still lower than expected, re-check:
 * BIOS: C-states (core + package) truly disabled / limited to C0/C1.
 * Windows: power plan is High/Ultimate Performance and PCIe link state power management is Off.
 * Drivers: chipset and MEI installed; vendor storage/NIC drivers installed if required.
-
-References:
------------------------
-
-* Microsoft powercfg documentation:
-  https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options
-
-* Windows power and performance tuning (server guidance):
-  https://learn.microsoft.com/en-us/windows-server/administration/performance-tuning/hardware/power/power-performance-tuning
-
-* Windows Optional updates / driver delivery:
-  https://support.microsoft.com/en-us/windows/automatically-get-recommended-and-updated-hardware-drivers-0549a8d9-4842-8acb-75fa-a6faadb62507
-  https://learn.microsoft.com/en-us/windows-hardware/drivers/dashboard/understanding-windows-update-automatic-and-optional-rules-for-driver-distribution
-
-* Intel Management Engine overview:
-  https://www.intel.com/content/www/us/en/support/articles/000008927/software/chipset-software.html
-
-* C-state guidance (example vendor guidance for performance impact):
-  https://edc.intel.com/content/www/us/en/design/products/ethernet/appnote-perf-tuning-guide-700-series-linux/%E2%80%8Bc-state-control/
-  https://www.cisco.com/c/en/us/products/collateral/servers-unified-computing/ucs-c-series-rack-servers/bios-tuning-guide-ucs-m8-intel-xeon-wp.html
-
-* Node interleaving background:
-  https://frankdenneman.nl/2010/12/28/node-interleaving-enable-or-disable/
-

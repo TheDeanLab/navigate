@@ -275,6 +275,9 @@ class Model:
         #: ImageWriter: Image writer.
         self.image_writer = None
 
+        #: bool: Flag to indicate if model is ASIModel
+        self.asi = False
+
         #: list: add on feature in customized mode
         self.addon_feature = None
 
@@ -1875,6 +1878,7 @@ class ASIModel(Model):
         args: argparse.Namespace,
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
+        log_queue: Optional[multiprocessing.Queue] = None
     ) -> None:
         """Initialize the ASI Model.
 
@@ -1886,9 +1890,10 @@ class ASIModel(Model):
             Configuration dictionary. Default is None.
         event_queue : multiprocessing.Queue
             Event queue for communication with the controller. Default is None.
-
+        log_queue : multiprocessing.Queue
+            Log queue for logging messages. Default is None.
         """
-        super().__init__(args, configuration, event_queue)
+        super().__init__(args, configuration, event_queue, log_queue)
 
         self.acquisition_modes_feature_setting["z-stack"] = [
             (
@@ -1900,6 +1905,20 @@ class ASIModel(Model):
                 },
             )
         ]
+        # write_idx is initialized to -1 because increment is done at the beginning
+        # of a loop, so the first value used to write the positions is 0
+        self.write_idx = -1
+
+        self.asi = True
+        # Because software is only consulted between stacks, all positions of the
+        # stack must be preallocated in order to save correctly. With buffer size
+        # being 100 (number_of_frames), this allocates for 2000 positions, assuming a
+        # maximum stack of 2000 frames. Every 100 positions corresponds to the buffer,
+        # and images are saved with the correct position by incrementing a write_idx
+        # in snap_zstack, and incrementing read_idx in image_writer
+        self.data_buffer_positions = SharedNDArray(
+            shape=(self.number_of_frames * 20, 5), dtype=float
+        )  # x, y, z, theta, f
 
         self.logger.info("ASIModel initialized.")
 
@@ -1992,11 +2011,34 @@ class ASIModel(Model):
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
-        self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
-        self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
-        self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
-        self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
-        self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
+        self.logger.info("stage_pos: %s", stage_pos)
+        z_steps = self.configuration["experiment"][
+            "MicroscopeState"]["number_z_steps"]
+        if self.imaging_mode == "z-stack" and self.is_save:
+            z_step_size = self.configuration["experiment"][
+                "MicroscopeState"]["step_size"]
+            for i in range(z_steps):
+                idx = (self.frame_id + i) % self.number_of_frames
+                if idx == 0:
+                    self.write_idx = (self.write_idx + 1) % 20
+                    self.logger.info("data_buffer_positions write_idx: %s",
+                                     self.write_idx)
+                # if there are more frames than the buffer size when pre-allocating
+                # z-stack positions, increment self.write_idx to indicate the
+                # positions are being written in the "next" buffer
+                pos_idx = self.write_idx * self.number_of_frames + idx
+                self.data_buffer_positions[pos_idx][0] = stage_pos.get("x_pos", 0)
+                self.data_buffer_positions[pos_idx][1] = stage_pos.get("y_pos", 0)
+                self.data_buffer_positions[pos_idx][2] = (stage_pos.get("z_pos", 0) +
+                                                      i*z_step_size)
+                self.data_buffer_positions[pos_idx][3] = stage_pos.get("theta_pos", 0)
+                self.data_buffer_positions[pos_idx][4] = stage_pos.get("f_pos", 0)
+        else:
+            self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
+            self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
+            self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
+            self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
+            self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
 
         # Run the acquisition
         try:
@@ -2021,4 +2063,9 @@ class ASIModel(Model):
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
-        self.frame_id = (self.frame_id + 1) % self.number_of_frames
+        if self.imaging_mode == "z-stack" and self.is_save:
+            frames_advanced = z_steps
+        else:
+            frames_advanced = 1
+        self.frame_id = ((self.frame_id + frames_advanced) %
+                         self.number_of_frames)

@@ -32,6 +32,7 @@
 # Standard library imports
 from math import ceil
 import csv
+import warnings
 
 # Third party imports
 import numpy as np
@@ -113,7 +114,7 @@ def compute_tiles_from_bounding_box(
     f_length : float
         Signed length of the FOV along focus dimension.
     overlap : float
-        Fractional overlap of ROIs.
+        Fractional overlap of ROIs. Overlap is ignored for rotation (theta).
     f_track_with_z : bool
         Make focus track with z/assume focus is z-dependent.
     **kwargs : additional keyword arguments
@@ -153,7 +154,8 @@ def compute_tiles_from_bounding_box(
     x_step = x_length * (1 - overlap)
     y_step = y_length * (1 - overlap)
     z_step = z_length * (1 - overlap)
-    theta_step = theta_length * (1 - overlap)
+    # Overlap does not apply to rotational changes.
+    theta_step = theta_length
     f_step = f_length * (1 - overlap)
 
     # grid out each dimension from (x_start, y_start, z_start) in steps
@@ -249,7 +251,7 @@ def update_table(table, pos, axes, append=False):
         Instance of multiposition table in GUI
     pos: list or np.array
         List or np.array of positions to be added to table. Each row contains an X, Y,
-        Z, R, F position
+        Z, THETA, F position
     axes: list of str
         List of axes
     append: bool
@@ -272,13 +274,64 @@ def update_table(table, pos, axes, append=False):
         axes.extend([" "] * (axes_count - len(axes)))
     frame = pd.DataFrame(pos, columns=[axis.upper() for axis in axes])
     if append:
-        table.model.df = table.model.df.append(frame, ignore_index=True)
+        table.model.df = pd.concat([table.model.df, frame], ignore_index=True)
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1
     table.resetColors()
-    table.redraw()
-    table.tableChanged()
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r".*convert_dtype parameter is deprecated.*",
+            category=FutureWarning,
+        )
+        table.redraw()
+        table.tableChanged()
+
+
+def update_rowcolors(table) -> None:
+    """Synchronize pandastable row colors with the current dataframe.
+
+    Parameters
+    ----------
+    table : object
+        Pandastable-like table instance with ``model.df`` and ``rowcolors``.
+
+    Returns
+    -------
+    None
+    """
+    df = table.model.df
+    rc = table.rowcolors
+
+    # Prefer upstream behavior when available.
+    try:
+        table.update_rowcolors()
+        return
+    except AttributeError as exc:
+        # Pandastable still uses DataFrame.append(), which pandas 2 removed.
+        if "append" not in str(exc):
+            raise
+
+    if len(df) == len(rc):
+        rc = rc.copy()
+        rc.set_index(df.index, inplace=True)
+    elif len(df) > len(rc):
+        idx = df.index.difference(rc.index)
+        rc = pd.concat([rc, pd.DataFrame(index=idx)], axis=0)
+    else:
+        idx = rc.index.difference(df.index)
+        rc = rc.drop(index=idx)
+
+    cols_to_drop = list(rc.columns.difference(df.columns))
+    if cols_to_drop:
+        rc = rc.drop(columns=cols_to_drop)
+
+    cols_to_add = list(df.columns.difference(rc.columns))
+    for col in cols_to_add:
+        rc[col] = np.nan
+
+    table.rowcolors = rc
 
 
 def write_to_csv_file(positions, file_path):
@@ -298,7 +351,7 @@ def write_to_csv_file(positions, file_path):
     try:
         with open(file_path, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["X", "Y", "Z", "R", "F"])
+            writer.writerow(["X", "Y", "Z", "THETA", "F"])
 
             for p in positions:
                 writer.writerow(p)

@@ -54,11 +54,8 @@ class FeatureIcon(ttk.Button):
         """
         ttk.Button.__init__(self, parent, text=feature_name)
 
-        # Create a style
-        style = ttk.Style()
-        style.configure("Custom.TButton", background="red")
         if set_bg:
-            self.configure(style="Custom.TButton")
+            self.configure(style="Danger.TButton")
 
         self.configure(padding=(10, 20))
 
@@ -99,9 +96,6 @@ class FeatureConfigPopup:
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
-
-        # Change background of popup window to white
-        self.popup.configure(bg="white")
 
         # Creating content frame
         content_frame = self.popup.get_frame()
@@ -228,8 +222,6 @@ class FeatureListPopup:
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
-        # Change background of popup window to white
-        self.popup.configure(bg="white")
         self.popup.resizable(tk.TRUE, tk.TRUE)
         self.popup.grid_columnconfigure(0, weight=1)
         self.popup.grid_rowconfigure(0, weight=1)
@@ -363,9 +355,6 @@ class FeatureAdvancedSettingPopup:
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
-        # Change background of popup window to white
-        self.popup.configure(bg="white")
-
         # Creating content frame
         content_frame = self.popup.get_frame()
 

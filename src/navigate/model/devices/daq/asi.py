@@ -167,8 +167,8 @@ class ASIDaq(DAQBase, SerialDevice):
         tiger_controller = TigerController(port, baudrate)
         tiger_controller.connect_to_serial()
         if not tiger_controller.is_open():
-            logger.error("ASI stage connection failed.")
-            raise Exception("ASI stage connection failed.")
+            logger.error("ASI DAQ connection failed.")
+            raise Exception("ASI DAQ connection failed.")
         return tiger_controller
 
     def prepare_acquisition(self, channel_key: str) -> None:

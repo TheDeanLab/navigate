@@ -93,7 +93,7 @@ class AdvancedCameraSettingPopup:
             label="Microscope",
             input_class=ValidatedCombobox,
             input_var=tk.StringVar(),
-            label_args={"font": ("Arial", 14, "bold")},
+            label_args={"style": "Title.TLabel"},
             input_args={
                 "state": "readonly",
             },
@@ -161,10 +161,10 @@ class AdvancedCameraSettingPopup:
             display_name = axis.upper()
 
             # Column 1: Axis name label
-            axis_lbl = tk.Label(
+            axis_lbl = ttk.Label(
                 self.column_frames["axis"],
                 text=display_name,
-                font=("Arial", 10, "bold"),
+                style="BodyBold.TLabel",
             )
             axis_lbl.grid(row=i, column=0, padx=5, pady=0, sticky="ew")
 
@@ -208,7 +208,7 @@ class AdvancedCameraSettingPopup:
         label_1 = ttk.Label(
             self.camera_control_frame,
             text="Cooling Settings",
-            font=("Arial", 12, "bold"),
+            style="Section.TLabel",
         )
         label_1.grid(row=0, column=0, pady=5, padx=5, sticky="w")
         self.inputs["cooling"] = ttk.Combobox(
@@ -218,7 +218,7 @@ class AdvancedCameraSettingPopup:
         label_2 = ttk.Label(
             self.camera_control_frame,
             text="Temperature (°C)",
-            font=("Arial", 12, "bold"),
+            style="Section.TLabel",
         )
         label_2.grid(row=1, column=0, pady=5, padx=5, sticky="w")
         self.variables["cooling_temperature"] = tk.StringVar()
@@ -240,7 +240,9 @@ class AdvancedCameraSettingPopup:
         )
 
         label_3 = ttk.Label(
-            self.camera_control_frame, text="Trigger Source", font=("Arial", 12, "bold")
+            self.camera_control_frame,
+            text="Trigger Source",
+            style="Section.TLabel",
         )
         label_3.grid(row=2, column=0, pady=5, padx=5, sticky="w")
         self.inputs["trigger_source"] = ttk.Combobox(

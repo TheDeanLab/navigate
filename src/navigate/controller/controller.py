@@ -4,14 +4,11 @@
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
-
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
-
 #      * Redistributions in binary form must reproduce the above copyright
 #      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
-
 #      * Neither the name of the copyright holders nor the names of its
 #      contributors may be used to endorse or promote products derived from this
 #      software without specific prior written permission.
@@ -31,14 +28,17 @@
 
 
 #  Standard Library Imports
+from __future__ import annotations
 from multiprocessing import Manager
 import tkinter
 from tkinter import messagebox
 import multiprocessing as mp
 import threading
+import queue
 import sys
 import os
 import time
+from typing import Any, Callable, TypeVar
 
 # Third Party Imports
 
@@ -46,6 +46,7 @@ import time
 from navigate.view.main_application_window import MainApp as view
 from navigate.view.popups.camera_view_popup_window import CameraViewPopupWindow
 from navigate.view.popups.feature_list_popup import FeatureListPopup
+from navigate.view.theme import apply_theme
 
 # Local Sub-Controller Imports
 from navigate.controller.configuration_controller import ConfigurationController
@@ -63,8 +64,6 @@ from navigate.controller.sub_controllers import (
     MenuController,
     PluginsController,
     HistogramController,
-    # MicroscopePopupController,
-    # AdaptiveOpticsPopupController,
 )
 
 from navigate.controller.thread_pool import SynchronizedThreadPool
@@ -92,6 +91,7 @@ from navigate.tools.file_functions import (
 from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.multipos_table_tools import update_table
 from navigate.tools.common_functions import combine_funcs
+from navigate.tools.tk_thread_guard import install_tk_thread_guard
 
 # Logger Setup
 import logging
@@ -99,61 +99,65 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+_T = TypeVar("_T")
+
 
 class Controller:
     """Navigate Controller"""
 
     def __init__(
         self,
-        root,
-        splash_screen,
-        configuration_path,
-        experiment_path,
-        waveform_constants_path,
-        rest_api_path,
-        waveform_templates_path,
-        gui_configuration_path,
-        multi_positions_path,
-        log_queue,
-        args,
-    ):
+        root: tkinter.Tk,
+        splash_screen: tkinter.Toplevel,
+        configuration_path: str | os.PathLike[str],
+        experiment_path: str | os.PathLike[str],
+        waveform_constants_path: str | os.PathLike[str],
+        rest_api_path: str | os.PathLike[str],
+        waveform_templates_path: str | os.PathLike[str],
+        gui_configuration_path: str | os.PathLike[str],
+        multi_positions_path: str | os.PathLike[str],
+        log_queue: mp.Queue | None,
+        args: Any,
+    ) -> None:
         """Initialize the Navigate Controller.
 
         Parameters
         ----------
-        root : Tk top-level widget.
-            Tk.tk GUI instance.
-        splash_screen : Tk top-level widget.
-            Tk.tk GUI instance.
-        configuration_path : Path
-            Path to the configuration yaml file.
-            Provides global microscope configuration parameters.
-        experiment_path : Path
-            Path to the experiment yaml file.
-            Provides experiment-specific microscope configuration.
-        waveform_constants_path : Path
-            Path to the waveform constants yaml file.
-            Provides magnification and wavelength-specific parameters.
-        rest_api_path : Path
-            Path to the REST API yaml file.
-            Provides REST API configuration parameters.
-        waveform_templates_path : Path
-            Path to the waveform templates yaml file.
-            Provides waveform templates for each channel.
-        gui_configuration_path : Path
-            Path to the GUI configuration yaml file.
-            Provides GUI configuration parameters.
-        log_queue : Optional[mp.Queue]
-            The queue for logging events from multiple processes.
-        *args :
-            Command line input arguments for non-default
-            file paths or using synthetic hardware modes.
+        root : tkinter.Tk
+            Tk root window.
+        splash_screen : tkinter.Toplevel
+            Splash window shown before the main window is initialized.
+        configuration_path : str | os.PathLike[str]
+            Path to the global configuration YAML file.
+        experiment_path : str | os.PathLike[str]
+            Path to the experiment YAML file.
+        waveform_constants_path : str | os.PathLike[str]
+            Path to the waveform constants YAML file.
+        rest_api_path : str | os.PathLike[str]
+            Path to the REST API configuration YAML file.
+        waveform_templates_path : str | os.PathLike[str]
+            Path to the waveform templates YAML file.
+        gui_configuration_path : str | os.PathLike[str]
+            Path to the GUI configuration YAML file.
+        multi_positions_path : str | os.PathLike[str]
+            Path to the multi-position YAML file.
+        log_queue : multiprocessing.Queue | None
+            Queue used for cross-process logging.
+        args : Any
+            Command-line arguments used for runtime options.
+
+        Returns
+        -------
+        None
         """
         logger.info(f"Navigate GIT Hash: {get_git_revision_hash()}")
         logger.info(f"Navigate Version: {get_version_from_file()}")
 
         #: Tk top-level widget: Tk.tk GUI instance.
         self.root = root
+
+        # Install thread guard to catch improper Tk calls from non-main threads
+        install_tk_thread_guard(self.root, logger)
 
         #: bool: Flag to indicate if the GUI is ready for resizing.
         self.resize_ready_flag = False
@@ -254,6 +258,12 @@ class Controller:
         #: ConfigurationController: Configuration Controller object.
         self.configuration_controller = ConfigurationController(self.configuration)
 
+        # Apply global GUI theme before creating any view widgets.
+        try:
+            apply_theme(self.root, self.configuration.get("gui", {}))
+        except Exception:
+            logger.exception("Failed to apply GUI theme. Continuing with defaults.")
+
         #: View: View object in MVC architecture.
         self.view = view(self.root)
 
@@ -314,8 +324,15 @@ class Controller:
         # Bonus config
         self.update_acquire_control()
 
-        t = threading.Thread(target=self.update_event)
-        t.start()
+        #: bool: Whether the Tk main-loop event pump is running.
+        self._event_pump_running = True
+
+        #: Optional[str]: Tk after callback id for the event pump.
+        self._event_pump_after_id = None
+
+        #: queue.Queue: cross-thread call queue to execute work on Tk thread.
+        self._main_thread_dispatch_queue = queue.Queue()
+        self._schedule_event_pump()
 
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
@@ -396,20 +413,12 @@ class Controller:
         else:
             raise ValueError(f"Unknown daq type: {daq_type}")
 
-    def update_buffer(self):
-        """Update the buffer size according to the camera
-        dimensions listed in the experimental parameters.
+    def update_buffer(self) -> None:
+        """Update the shared image buffer for the active camera geometry.
 
         Returns
         -------
-        self.img_width : int
-            Number of x_pixels from microscope configuration file.
-        self.image_height : int
-            Number of y_pixels from microscope configuration file.
-        self.data_buffer : SharedNDArray
-            Pre-allocated shared memory array.
-            Size dictated by x_pixels, y_pixels, an number_of_frames in
-            configuration file.
+        None
         """
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
@@ -434,21 +443,255 @@ class Controller:
         self.img_width = img_width
         self.img_height = img_height
 
-    def update_acquire_control(self):
-        """Update the acquire control based on the current experiment parameters."""
+    def update_acquire_control(self) -> None:
+        """Bind Acquire Bar controls to the current stage control handlers.
+
+        Returns
+        -------
+        None
+        """
         self.view.acquire_bar.stop_stage.config(
             command=self.stage_controller.stop_button_handler
         )
 
-    def change_microscope(self, microscope_name, zoom=None):
+    def _run_on_main_thread(
+        self, func: Callable[..., _T], *args: Any, wait: bool = False, **kwargs: Any
+    ) -> _T | None:
+        """Run a callable on the Tk main thread.
+
+        Parameters
+        ----------
+        func : Callable[..., _T]
+            Callable to execute on the Tk main thread.
+        *args : Any
+            Positional arguments passed to ``func``.
+        wait : bool, optional
+            If ``True``, block until ``func`` completes and return its result.
+            If ``False``, enqueue the call and return immediately.
+        **kwargs : Any
+            Keyword arguments passed to ``func``.
+
+        Returns
+        -------
+        _T | None
+            Result from ``func`` when executed synchronously, otherwise ``None``.
+
+        Raises
+        ------
+        RuntimeError
+            Raised when synchronous execution is requested but the Tk dispatcher
+            is unavailable.
+        Exception
+            Re-raises exceptions thrown by ``func`` during synchronous execution.
+        """
+        if threading.current_thread() is threading.main_thread():
+            return func(*args, **kwargs)
+
+        if not self._event_pump_running:
+            message = "Tk main-thread dispatcher is not running."
+            if wait:
+                raise RuntimeError(message)
+            logger.debug(message)
+            return None
+
+        done_event = threading.Event() if wait else None
+        result = {"value": None, "error": None}
+        self._main_thread_dispatch_queue.put((func, args, kwargs, done_event, result))
+
+        if not wait:
+            return None
+
+        while not done_event.wait(timeout=0.1):
+            if not self._event_pump_running:
+                raise RuntimeError(
+                    "Tk main-thread dispatcher stopped before callback ran."
+                )
+        if result["error"] is not None:
+            raise result["error"]
+        return result["value"]
+
+    def _drain_main_thread_dispatch_queue(self) -> None:
+        """Execute queued cross-thread callbacks on the Tk main thread.
+
+        Returns
+        -------
+        None
+        """
+        while True:
+            try:
+                func, args, kwargs, done_event, result = (
+                    self._main_thread_dispatch_queue.get_nowait()
+                )
+            except queue.Empty:
+                return
+
+            try:
+                result["value"] = func(*args, **kwargs)
+            except Exception as exc:
+                result["error"] = exc
+            finally:
+                if done_event:
+                    done_event.set()
+
+    def _schedule_event_pump(self) -> None:
+        """Schedule the next Tk event-pump iteration.
+
+        Returns
+        -------
+        None
+        """
+        if not self._event_pump_running:
+            return
+        self._drain_main_thread_dispatch_queue()
+        self.update_event()
+        if self._event_pump_running:
+            self._event_pump_after_id = self.view.root.after(
+                20, self._schedule_event_pump
+            )
+
+    def _stop_event_pump(self) -> None:
+        """Stop the Tk event queue polling loop.
+
+        Returns
+        -------
+        None
+        """
+        self._event_pump_running = False
+        self._drain_main_thread_dispatch_queue()
+        if self._event_pump_after_id:
+            try:
+                self.view.root.after_cancel(self._event_pump_after_id)
+            except Exception:
+                pass
+            self._event_pump_after_id = None
+
+    def _start_capture_ui(self, mode: str) -> None:
+        """Initialize capture-related widgets on the Tk thread.
+
+        Parameters
+        ----------
+        mode : str
+            Active acquisition mode.
+
+        Returns
+        -------
+        None
+        """
+        self.camera_view_controller.image_count = 0
+        self.mip_setting_controller.image_count = 0
+        self.acquire_bar_controller.progress_bar(
+            images_received=0,
+            microscope_state=self.configuration["experiment"]["MicroscopeState"],
+            mode=mode,
+            stop=False,
+        )
+
+    def _handle_capture_start_error(self, error: Exception) -> None:
+        """Display capture startup errors on the Tk thread.
+
+        Parameters
+        ----------
+        error : Exception
+            Exception raised while starting capture.
+
+        Returns
+        -------
+        None
+        """
+        messagebox.showerror(
+            title="Error:",
+            message=f"WARNING:\n{error}",
+        )
+        self.set_mode_of_sub("stop")
+
+    def _on_capture_started(self, microscope_name: str) -> None:
+        """Apply post-start capture UI updates on the Tk thread.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Active microscope name for camera parameter lookup.
+
+        Returns
+        -------
+        None
+        """
+        self.acquire_bar_controller.view.acquire_btn.configure(text="Stop")
+        self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
+        self.camera_view_controller.initialize_non_live_display(
+            self.configuration["experiment"]["MicroscopeState"],
+            self.configuration["experiment"]["CameraParameters"][microscope_name],
+        )
+        self.mip_setting_controller.initialize_non_live_display(
+            self.configuration["experiment"]["MicroscopeState"],
+            self.configuration["experiment"]["CameraParameters"][microscope_name],
+        )
+        self.camera_setting_controller.update_readout_time()
+
+    def _update_capture_display(
+        self, image_id: int, mode: str, images_received: int
+    ) -> None:
+        """Display a captured frame and update related capture widgets.
+
+        Parameters
+        ----------
+        image_id : int
+            Index into ``self.data_buffer`` for the image to display.
+        mode : str
+            Active acquisition mode.
+        images_received : int
+            Number of frames processed so far.
+
+        Returns
+        -------
+        None
+        """
+        image = self.data_buffer[image_id]
+        self.camera_view_controller.try_to_display_image(image=image)
+        self.mip_setting_controller.try_to_display_image(image=image)
+        self.histogram_controller.populate_histogram(image=image)
+        self.acquire_bar_controller.progress_bar(
+            images_received=images_received,
+            microscope_state=self.configuration["experiment"]["MicroscopeState"],
+            mode=mode,
+            stop=False,
+        )
+
+    def _finish_capture_ui(self, mode: str, images_received: int) -> None:
+        """Finalize capture widgets on the Tk thread.
+
+        Parameters
+        ----------
+        mode : str
+            Active acquisition mode.
+        images_received : int
+            Total number of frames processed during capture.
+
+        Returns
+        -------
+        None
+        """
+        self.acquire_bar_controller.progress_bar(
+            images_received=images_received,
+            microscope_state=self.configuration["experiment"]["MicroscopeState"],
+            mode=mode,
+            stop=True,
+        )
+        self.set_mode_of_sub("stop")
+
+    def change_microscope(self, microscope_name: str, zoom: str | None = None) -> None:
         """Change the microscope configuration.
 
         Parameters
         ----------
-        microscope_name : string
-            Name of the microscope to change to.
-        zoom : string
-            Name of the zoom value to change to.
+        microscope_name : str
+            Name of the microscope to switch to.
+        zoom : str | None, optional
+            Zoom value to set for the microscope. If ``None``, keep current zoom.
+
+        Returns
+        -------
+        None
         """
         self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
@@ -471,18 +714,26 @@ class Controller:
         ):
             self.waveform_popup_controller.populate_experiment_values()
 
-    def initialize_cam_view(self):
+    def initialize_cam_view(self) -> None:
         """Populate view and maximum intensity projection tabs.
 
         Communicates with the camera view controller and mip setting controller to
         set the minimum and maximum counts, as well as the default channel settings.
+
+        Returns
+        -------
+        None
         """
         # Populating Min and Max Counts
         self.camera_view_controller.initialize("minmax", [0, 2**16 - 1])
         self.mip_setting_controller.initialize("minmax", [0, 2**16 - 1])
         self.camera_view_controller.initialize("image", [1, 0, 0])
 
-    def populate_experiment_setting(self, file_name=None, in_initialize=False):
+    def populate_experiment_setting(
+        self,
+        file_name: str | os.PathLike[str] | None = None,
+        in_initialize: bool = False,
+    ) -> None:
         """Load experiment file and populate model.experiment and configure view.
 
         Confirms that the experiment file exists.
@@ -490,10 +741,16 @@ class Controller:
         Populates the GUI with these settings.
 
         Parameters
-        __________
-        file_name : string
-            file_name = path to the non-default experiment yaml file.
+        ----------
+        file_name : str | os.PathLike[str] | None, optional
+            Path to a non-default experiment YAML file to load.
+        in_initialize : bool, optional
+            ``True`` when called during controller initialization to skip reloading
+            experiment YAML from disk.
 
+        Returns
+        -------
+        None
         """
         # read the new file and update info of the configuration dict
         if not in_initialize:
@@ -544,17 +801,17 @@ class Controller:
         self.set_mode_of_sub("stop")
         self.stage_controller.initialize()
 
-    def update_experiment_setting(self):
-        """Update model.experiment according to values in the GUI
+    def update_experiment_setting(self) -> str:
+        """Update experiment settings from GUI state.
 
-        Collect settings from sub-controllers will validate the value, if something
-        is wrong, it will return False
+        Collect settings from sub-controllers, validate values, and synchronize
+        configuration data used by model commands.
 
         Returns
         -------
-        string
-            Warning info if any
-
+        str
+            Concatenated warning message if validation fails, otherwise an empty
+            string.
         """
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
@@ -612,28 +869,41 @@ class Controller:
             return warning_message
         return ""
 
-    def enable_resize(self):
-        """Enable window resizing."""
+    def enable_resize(self) -> None:
+        """Enable window resize handling.
+
+        Returns
+        -------
+        None
+        """
         self.resize_ready_flag = True
 
-    def resize(self, event):
+    def resize(self, event: tkinter.Event) -> None:
         """Resize the GUI.
 
         Parameters
-        __________
-        event : event
-            event = <Configure x=0 y=0 width=1200 height=600>
+        ----------
+        event : tkinter.Event
+            Tk ``<Configure>`` event emitted during window size changes.
+
+        Returns
+        -------
+        None
         """
 
-        def refresh(width, height):
+        def refresh(width: int, height: int) -> None:
             """Refresh the GUI.
 
             Parameters
-            __________
+            ----------
             width : int
                 Width of the GUI.
             height : int
                 Height of the GUI.
+
+            Returns
+            -------
+            None
             """
             self.view.scroll_frame.resize(width, height)
             self.view.right_frame.config(
@@ -656,7 +926,7 @@ class Controller:
             300, lambda: refresh(event.width, event.height)
         )
 
-    def prepare_acquire_data(self):
+    def prepare_acquire_data(self) -> bool:
         """Prepare the acquisition data.
 
         Updates model.experiment.
@@ -680,13 +950,17 @@ class Controller:
         self.update_buffer()
         return True
 
-    def set_mode_of_sub(self, mode):
+    def set_mode_of_sub(self, mode: str) -> None:
         """Communicates imaging mode to sub-controllers.
 
         Parameters
-        __________
+        ----------
         mode : str
-            The string = 'live', 'stop'
+            Imaging mode such as ``"live"`` or ``"stop"``.
+
+        Returns
+        -------
+        None
         """
         self.channels_tab_controller.set_mode(mode)
         self.camera_view_controller.set_mode(mode)
@@ -706,18 +980,24 @@ class Controller:
             self.acquire_bar_controller.stop_acquire()
             # self.menu_controller.feature_id_val.set(0)
 
-    def execute(self, command, *args):
-        """Functions listens to the Sub_Gui_Controllers.
+    def execute(self, command: str, *args: Any) -> Any:
+        """Handle controller commands from sub-controllers and UI callbacks.
 
-        The controller.experiment is passed as an argument to the model, which then
-        overwrites the model.experiment. Workaround due to model being in a sub-process.
+        The controller configuration is synchronized with model state and commands are
+        dispatched to worker threads or executed locally based on command type.
 
         Parameters
-        __________
-        command : string
-            The string includes 'stage', 'stop_stage', 'move_stage_and_update_info',
-        args* : Iterable.
-            Function-specific passes
+        ----------
+        command : str
+            Command name routed to controller/model operations.
+        *args : Any
+            Command-specific positional arguments.
+
+        Returns
+        -------
+        Any
+            Command-dependent return value. Most commands return ``None``; some, such
+            as ``"get_stage_position"``, return structured data.
         """
 
         if command == "stage":
@@ -1092,6 +1372,7 @@ class Controller:
             self.model.run_command("terminate")
             self.model = None
             self.event_queue.put(("stop", ""))
+            self._stop_event_pump()
             self.threads_pool.clear()
             sys.exit()
 
@@ -1134,7 +1415,7 @@ class Controller:
             f"Navigate Controller - command passed from child, {command}, {args}"
         )
 
-    def sloppy_stop(self):
+    def sloppy_stop(self) -> None:
         """Keep trying to stop the model until successful.
 
         TODO: Delete this function!!!
@@ -1150,6 +1431,10 @@ class Controller:
         We should instead pause the model thread pool
         and interject our stop command, or clear the queue
         in threads_pool.
+
+        Returns
+        -------
+        None
         """
         e = RuntimeError
         while e == RuntimeError:
@@ -1159,58 +1444,37 @@ class Controller:
             except RuntimeError:
                 e = RuntimeError
 
-    def capture_image(self, command, mode, *args):
+    def capture_image(self, command: str, mode: str, *args: Any) -> None:
         """Trigger the model to capture images.
 
         Parameters
         ----------
-        command : string
-            'acquire' or 'autofocus'
-        mode : string
-            'continuous', 'z-stack', 'single', or 'projection'
-        args : function-specific passes.
-        """
-        self.camera_view_controller.image_count = 0
-        self.mip_setting_controller.image_count = 0
+        command : str
+            Capture command passed to the model (for example ``"acquire"``).
+        mode : str
+            Acquisition mode (for example ``"continuous"`` or ``"single"``).
+        *args : Any
+            Command-specific positional arguments.
 
-        # Start up Progress Bars
+        Returns
+        -------
+        None
+        """
+        self._run_on_main_thread(self._start_capture_ui, mode, wait=True)
         images_received = 0
-        self.acquire_bar_controller.progress_bar(
-            images_received=images_received,
-            microscope_state=self.configuration["experiment"]["MicroscopeState"],
-            mode=mode,
-            stop=False,
-        )
         try:
             work_thread = self.threads_pool.createThread(
                 "model", lambda: self.model.run_command(command, *args)
             )
             work_thread.join()
         except Exception as e:
-            messagebox.showerror(
-                title="Error:",
-                message=f"WARNING:\n{e}",
-            )
-            self.set_mode_of_sub("stop")
+            self._run_on_main_thread(self._handle_capture_start_error, e, wait=True)
             return
-        self.acquire_bar_controller.view.acquire_btn.configure(text="Stop")
-        self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
-
-        self.camera_view_controller.initialize_non_live_display(
-            self.configuration["experiment"]["MicroscopeState"],
-            self.configuration["experiment"]["CameraParameters"][microscope_name],
-        )
-
-        self.mip_setting_controller.initialize_non_live_display(
-            self.configuration["experiment"]["MicroscopeState"],
-            self.configuration["experiment"]["CameraParameters"][microscope_name],
-        )
-
+        self._run_on_main_thread(self._on_capture_started, microscope_name, wait=True)
         self.stop_acquisition_flag = False
-        self.camera_setting_controller.update_readout_time()
 
         while True:
             if self.stop_acquisition_flag:
@@ -1245,26 +1509,16 @@ class Controller:
                     f"Navigate Controller - Something wrong happened, stop the model!, "
                     f"{image_id}"
                 )
-                self.execute("stop_acquire")
+                self._run_on_main_thread(self.execute, "stop_acquire")
+                continue
 
-            # Display the image and update the histogram
-            self.camera_view_controller.try_to_display_image(
-                image=self.data_buffer[image_id]
-            )
-            self.mip_setting_controller.try_to_display_image(
-                image=self.data_buffer[image_id]
-            )
-            self.histogram_controller.populate_histogram(
-                image=self.data_buffer[image_id]
-            )
             images_received += 1 + dropped_frames
-
-            # Update progress bar.
-            self.acquire_bar_controller.progress_bar(
-                images_received=images_received,
-                microscope_state=self.configuration["experiment"]["MicroscopeState"],
-                mode=mode,
-                stop=False,
+            self._run_on_main_thread(
+                self._update_capture_display,
+                image_id,
+                mode,
+                images_received,
+                wait=True,
             )
 
         logger.info(
@@ -1276,21 +1530,27 @@ class Controller:
         if plugin_obj and hasattr(plugin_obj, "end_acquisition_controller"):
             getattr(plugin_obj, "end_acquisition_controller")(self)
 
-        # Stop Progress Bars
-        self.acquire_bar_controller.progress_bar(
-            images_received=images_received,
-            microscope_state=self.configuration["experiment"]["MicroscopeState"],
-            mode=mode,
-            stop=True,
+        self._run_on_main_thread(
+            self._finish_capture_ui,
+            mode,
+            images_received,
+            wait=True,
         )
-        self.set_mode_of_sub("stop")
 
-    def launch_additional_microscopes(self):
-        """Launch additional microscopes."""
+    def launch_additional_microscopes(self) -> None:
+        """Launch and wire up auxiliary microscope display windows.
+
+        Returns
+        -------
+        None
+        """
 
         def display_images(
-            microscope_name, camera_view_controller, show_img_pipe, data_buffer
-        ):
+            microscope_name: str,
+            camera_view_controller: CameraViewController,
+            show_img_pipe: Any,
+            data_buffer: Any,
+        ) -> None:
             """Display images from additional microscopes.
 
             Parameters
@@ -1305,10 +1565,16 @@ class Controller:
                 Pre-allocated shared memory array.
                 Size dictated by x_pixels, y_pixels, and number_of_frames in
                 configuration file.
+
+            Returns
+            -------
+            None
             """
-            camera_view_controller.initialize_non_live_display(
+            self._run_on_main_thread(
+                camera_view_controller.initialize_non_live_display,
                 self.configuration["experiment"]["MicroscopeState"],
                 self.configuration["experiment"]["CameraParameters"][microscope_name],
+                wait=True,
             )
             images_received = 0
             while True:
@@ -1329,7 +1595,8 @@ class Controller:
 
                 # Display the Image in the View
                 try:
-                    camera_view_controller.try_to_display_image(
+                    self._run_on_main_thread(
+                        camera_view_controller.try_to_display_image,
                         image=data_buffer[image_id],
                     )
                 except tkinter._tkinter.TclError:
@@ -1400,7 +1667,9 @@ class Controller:
             )
             capture_img_thread.start()
 
-    def destroy_virtual_microscope(self, microscope_name, destroy_window=True):
+    def destroy_virtual_microscope(
+        self, microscope_name: str, destroy_window: bool = True
+    ) -> None:
         """Destroy virtual microscopes.
 
         Parameters
@@ -1409,6 +1678,10 @@ class Controller:
             The microscope name
         destroy_window : bool
             The flag to dismiss window.
+
+        Returns
+        -------
+        None
         """
         if microscope_name not in self.additional_microscopes:
             return
@@ -1425,13 +1698,17 @@ class Controller:
             ] = None
             del self.additional_microscopes[microscope_name]
 
-    def move_stage(self, pos_dict):
+    def move_stage(self, pos_dict: dict[str, Any]) -> None:
         """Trigger the model to move the stage.
 
         Parameters
         ----------
-        pos_dict : dict
+        pos_dict : dict[str, Any]
             Dictionary of axis positions
+
+        Returns
+        -------
+        None
         """
         # Update our local stage dictionary
         update_stage_dict(self, pos_dict)
@@ -1439,20 +1716,33 @@ class Controller:
         # Pass to model
         self.model.move_stage(pos_dict)
 
-    def query_select_microscope(self, *args):
-        """Query a specific microscope for its stage positions."""
-        microscope_name = args[0]
+    def query_select_microscope(self, microscope_name: str) -> None:
+        """Query a specific microscope for its current stage positions.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Microscope name to query from the model.
+
+        Returns
+        -------
+        None
+        """
         stage_positions = self.model.query_select_microscope(microscope_name)
 
         # Inject updated positions back into the advanced stage parameters popup.
         if hasattr(self, "stage_limits_popup_controller"):
             self.stage_limits_popup_controller.positions = stage_positions
 
-    def stop_stage(self):
+    def stop_stage(self) -> None:
         """Stop the stage.
 
         Grab the stopped position from the stage
         and update the GUI control values accordingly.
+
+        Returns
+        -------
+        None
         """
         self.model.stop_stage()
 
@@ -1463,16 +1753,24 @@ class Controller:
         ----------
         microscope_name : str
             Microscope name.
+
+        Returns
+        -------
+        None
         """
         self.model.update_stage_limits(microscope_name)
 
-    def update_stage_controller_silent(self, ret_pos_dict):
+    def update_stage_controller_silent(self, ret_pos_dict: dict[str, Any]) -> None:
         """Send updates to the stage GUI
 
         Parameters
         ----------
-        ret_pos_dict : dict
+        ret_pos_dict : dict[str, Any]
             Dictionary of axis positions
+
+        Returns
+        -------
+        None
         """
         stage_gui_dict = {}
         for axis, val in ret_pos_dict.items():
@@ -1508,10 +1806,20 @@ class Controller:
         # the duration of time remaining.
         self.acquire_bar_controller.framerate = frame_rate
 
-    def update_event(self):
-        """Update the View/Controller based on events from the Model."""
-        while True:
-            event, value = self.event_queue.get()
+    def update_event(self) -> None:
+        """Update the View/Controller based on events from the Model.
+
+        This method runs on the Tk thread and drains all pending model events.
+
+        Returns
+        -------
+        None
+        """
+        while self._event_pump_running:
+            try:
+                event, value = self.event_queue.get_nowait()
+            except queue.Empty:
+                break
 
             if event == "warning":
                 # Display a warning that arises from the model as a top-level GUI popup
@@ -1524,10 +1832,12 @@ class Controller:
                     pos=value[1:],
                     axes=value[0],
                 )
+                self.multiposition_tab_controller.clear_hidden_position_columns()
                 self.channels_tab_controller.is_multiposition_val.set(True)
 
             elif event == "stop":
                 # Stop the software
+                self._stop_event_pump()
                 break
 
             elif event == "update_stage":
@@ -1549,15 +1859,21 @@ class Controller:
                 except Exception:
                     print(f"*** unhandled event: {event}, {value}")
 
-    def add_acquisition_mode(self, name, acquisition_obj):
+    def add_acquisition_mode(
+        self, name: str, acquisition_obj: Callable[[str], Any]
+    ) -> None:
         """Add and Acquisition Mode.
 
         Parameters
         ----------
-        name : string
+        name : str
             Name of the acquisition mode.
-        acquisition_obj : object
-            Object of the acquisition mode.
+        acquisition_obj : Callable[[str], Any]
+            Factory or class that produces an acquisition mode object.
+
+        Returns
+        -------
+        None
         """
         if name in self.plugin_acquisition_modes:
             print(f"*** plugin acquisition mode {name} exists, can't add another one!")
@@ -1565,25 +1881,37 @@ class Controller:
         self.plugin_acquisition_modes[name] = acquisition_obj(name)
         self.acquire_bar_controller.add_mode(name)
 
-    def register_event_listener(self, event_name, event_handler):
+    def register_event_listener(
+        self, event_name: str, event_handler: Callable[[Any], None]
+    ) -> None:
         """Register an event listener.
 
         Parameters
         ----------
-        event_name : string
+        event_name : str
             Name of the event.
-        event_handler : callable
+        event_handler : Callable[[Any], None]
             The function to handle the event.
+
+        Returns
+        -------
+        None
         """
         self.event_listeners[event_name] = event_handler
 
-    def register_event_listeners(self, events):
+    def register_event_listeners(
+        self, events: dict[str, Callable[[Any], None]]
+    ) -> None:
         """Register multiple event listeners.
 
         Parameters
         ----------
-        events : dict
+        events : dict[str, Callable[[Any], None]]
             Dictionary of event names and handlers.
+
+        Returns
+        -------
+        None
         """
         for event_name, event_handler in events.items():
             self.register_event_listener(event_name, event_handler)

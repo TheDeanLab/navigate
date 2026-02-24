@@ -33,8 +33,8 @@
 # Standard Library Imports
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import math
 import logging
+import warnings
 from typing import Callable
 
 # Third Party Imports
@@ -46,6 +46,7 @@ import yaml
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.file_functions import save_yaml_file
+from navigate.tools.multipos_table_tools import update_rowcolors
 
 
 # Logger Setup
@@ -55,6 +56,8 @@ logger = logging.getLogger(p)
 
 class MultiPositionController(GUIController):
     """Controller for the Multi-Position Acquisition Interface."""
+
+    _hidden_position_columns = ("X_PIXEL", "Y_PIXEL")
 
     def __init__(self, view, parent_controller=None) -> None:
         """Initialize the Multi-Position Acquisition Interface.
@@ -74,6 +77,7 @@ class MultiPositionController(GUIController):
         self.table.exportCSV = self.export_positions
         self.table.insertRow = self.insert_row_func
         self.table.addStagePosition = self.add_stage_position
+        self._hidden_position_df = pd.DataFrame(columns=self._hidden_position_columns)
 
         # Traces
         self.view.master.tiling_buttons.buttons["tiling"].config(
@@ -96,6 +100,77 @@ class MultiPositionController(GUIController):
         """Eliminate tiles that do not contain tissue."""
         self.parent_controller.execute("eliminate_tiles")
 
+    def _refresh_table_view(self) -> None:
+        """Redraw table while filtering known pandastable/pandas deprecation noise."""
+        if hasattr(self.table, "apply_theme"):
+            self.table.apply_theme(redraw=False)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r".*convert_dtype parameter is deprecated.*",
+                category=FutureWarning,
+            )
+            self.table.redraw()
+            self.table.tableChanged()
+
+    @staticmethod
+    def _is_valid_numeric(value: object) -> bool:
+        """Return True if value is a finite numeric scalar."""
+        return isinstance(value, (int, float, np.integer, np.floating)) and not pd.isna(
+            value
+        )
+
+    def _normalize_dataframe_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize known column aliases and case."""
+        normalized_df = df.copy()
+        normalized_df.columns = [str(col).upper() for col in normalized_df.columns]
+        stage_axes = self.parent_controller.configuration_controller.stage_axes
+        if "theta" in stage_axes:
+            if "THETA" not in normalized_df.columns and "R" in normalized_df.columns:
+                normalized_df = normalized_df.rename(columns={"R": "THETA"})
+            elif "THETA" in normalized_df.columns and "R" in normalized_df.columns:
+                normalized_df = normalized_df.drop(columns=["R"])
+        return normalized_df
+
+    def _set_dataframe(self, df: pd.DataFrame) -> None:
+        """Set visible table data while preserving hidden YAML-only columns."""
+        normalized_df = self._normalize_dataframe_columns(df)
+        hidden_cols = [
+            col for col in self._hidden_position_columns if col in normalized_df.columns
+        ]
+        self.table.model.df = normalized_df.drop(columns=hidden_cols, errors="ignore")
+        self._hidden_position_df = normalized_df[hidden_cols].copy()
+        self._sync_hidden_position_df()
+
+    def _sync_hidden_position_df(self) -> None:
+        """Keep hidden metadata rows aligned with visible table rows."""
+        table_index = self.table.model.df.index
+        self._hidden_position_df = self._hidden_position_df.reindex(table_index)
+        for col in self._hidden_position_columns:
+            if col not in self._hidden_position_df.columns:
+                self._hidden_position_df[col] = np.nan
+        self._hidden_position_df = self._hidden_position_df[
+            list(self._hidden_position_columns)
+        ]
+
+    def clear_hidden_position_columns(self) -> None:
+        """Clear hidden metadata columns while preserving row alignment."""
+        self._hidden_position_df = pd.DataFrame(index=self.table.model.df.index)
+        self._sync_hidden_position_df()
+
+    def _get_full_positions_df(self) -> pd.DataFrame:
+        """Return visible table data merged with hidden metadata columns."""
+        visible_df = self._normalize_dataframe_columns(self.table.model.df)
+        self._sync_hidden_position_df()
+        hidden_cols = [
+            col
+            for col in self._hidden_position_columns
+            if self._hidden_position_df[col].notna().any()
+        ]
+        if not hidden_cols:
+            return visible_df
+        return pd.concat([visible_df, self._hidden_position_df[hidden_cols]], axis=1)
+
     def set_positions(self, positions: list[list[float]]) -> None:
         """Set positions to multi-position's table
 
@@ -114,13 +189,14 @@ class MultiPositionController(GUIController):
             # get the current stage position
             positions = [[stage_position[axis] for axis in stage_axes]]
         # check if the positions contain the headers (column names)
-        cmp_header = [axis.upper() in positions[0] for axis in stage_axes]
-        # if positions[0] contains ["X", "Y", "Z", "R", "F"], then consider it as headers
+        first_row = [str(val).upper() for val in positions[0]]
+        cmp_header = [axis.upper() in first_row for axis in stage_axes]
+        # if positions[0] contains stage-axis headers, then consider it as headers
         # else add headers to the table
         if not all(cmp_header):
             # if the first row contains some headers, update the headers
             if any(cmp_header):
-                headers = positions[0]
+                headers = list(first_row)
                 for i, flag in enumerate(cmp_header):
                     if not flag:
                         headers.append(stage_axes[i].upper())
@@ -129,8 +205,13 @@ class MultiPositionController(GUIController):
                 headers = [axis.upper() for axis in stage_axes]
                 start_index = 0
         else:
-            headers = positions[0]
+            headers = list(first_row)
             start_index = 1
+        if start_index >= len(positions):
+            self._set_dataframe(pd.DataFrame(columns=headers))
+            self.table.currentrow = 0
+            self._refresh_table_view()
+            return
         # if there are some missing headers, add them
         if len(headers) < len(positions[start_index]):
             headers = headers + [
@@ -141,10 +222,9 @@ class MultiPositionController(GUIController):
             data[name] = list(
                 pos[i] if i < len(pos) else np.nan for pos in positions[start_index:]
             )
-        self.table.model.df = pd.DataFrame(data)
+        self._set_dataframe(pd.DataFrame(data))
         self.table.currentrow = 0
-        self.table.redraw()
-        self.table.tableChanged()
+        self._refresh_table_view()
 
     def get_positions(self) -> list[list[float]]:
         """Return all positions from the Multi-Position Acquisition Interface.
@@ -154,24 +234,22 @@ class MultiPositionController(GUIController):
         positions : list[list[float]]
             positions in the format of [[x, y, z, theta, f], ]
         """
-        positions = [list(self.table.model.df.columns)]
+        df = self._get_full_positions_df()
+        positions = [list(df.columns)]
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        axes_index = []
-        for axis in stage_axes:
-            if axis.upper() in positions[0]:
-                axes_index.append(positions[0].index(axis.upper()))
-        # axes_index = [positions[0].index(axis) for axis in [axis.upper() for axis in stage_axes]]
-        rows = self.table.model.df.shape[0]
+        required_headers = [axis.upper() for axis in stage_axes]
+        missing_headers = [axis for axis in required_headers if axis not in positions[0]]
+        if missing_headers:
+            logger.warning(
+                "Missing required stage headers in multiposition table: %s",
+                missing_headers,
+            )
+            return positions
+        axes_index = [positions[0].index(axis) for axis in required_headers]
+        rows = df.shape[0]
         for i in range(rows):
-            temp = list(self.table.model.df.iloc[i])
-            if len(
-                list(
-                    filter(
-                        lambda v: isinstance(v, (float, int)) and not math.isnan(v),
-                        [temp[i] for i in axes_index],
-                    )
-                )
-            ) == len(axes_index):
+            temp = list(df.iloc[i])
+            if all(self._is_valid_numeric(temp[axis_idx]) for axis_idx in axes_index):
                 positions.append(temp)
         return positions
 
@@ -196,19 +274,21 @@ class MultiPositionController(GUIController):
         # df.iloc uses position index
         temp = list(df.iloc[rowclicked])
         stage_axes = self.parent_controller.configuration_controller.stage_axes
-        axes_index = [
-            df.columns.get_loc(axis) for axis in [axis.upper() for axis in stage_axes]
-        ]
+        try:
+            axes_index = [
+                df.columns.get_loc(axis)
+                for axis in [axis.upper() for axis in stage_axes]
+            ]
+        except KeyError:
+            messagebox.showwarning(
+                title="Warning",
+                message="The selected position is invalid, can't go to this position!",
+            )
+            logger.info("position is invalid: missing one or more stage axes")
+            return
         # validate position
         # we currently only move to a position doesn't contain nan
-        if len(
-            list(
-                filter(
-                    lambda v: isinstance(v, (float, int)) and not math.isnan(v),
-                    [temp[i] for i in axes_index],
-                )
-            )
-        ) != len(stage_axes):
+        if not all(self._is_valid_numeric(temp[axis_idx]) for axis_idx in axes_index):
             messagebox.showwarning(
                 title="Warning",
                 message="The selected position is invalid, can't go to this position!",
@@ -256,7 +336,7 @@ class MultiPositionController(GUIController):
             df = pd.read_csv(filename[0])
 
         # validate the csv/yml file
-        df.columns = map(lambda v: v.upper(), df.columns)
+        df = self._normalize_dataframe_columns(df)
         stage_axes = self.parent_controller.configuration_controller.stage_axes
         cmp_header = [
             axis in df.columns for axis in [axis.upper() for axis in stage_axes]
@@ -269,13 +349,12 @@ class MultiPositionController(GUIController):
             messagebox.showwarning(title="Warning", message=message)
             logger.info(message)
             return
-        self.table.model.df = df
+        self._set_dataframe(df)
         self.table.currentrow = 0
 
         # reset index
         self.table.resetColors()
-        self.table.redraw()
-        self.table.tableChanged()
+        self._refresh_table_view()
 
     def export_positions(self) -> None:
         """Export the positions in the Multi-Position Acquisition Interface to a
@@ -298,9 +377,8 @@ class MultiPositionController(GUIController):
 
         if filename.endswith(".yml"):
             file_directory, file_name_only = os.path.split(filename)
-            data = [
-                self.table.model.df.columns.tolist()
-            ] + self.table.model.df.values.tolist()
+            export_df = self._get_full_positions_df()
+            data = [export_df.columns.tolist()] + export_df.values.tolist()
             save_yaml_file(
                 file_directory=file_directory,
                 content_dict=data,
@@ -308,7 +386,8 @@ class MultiPositionController(GUIController):
             )
             return
 
-        self.table.model.df.to_csv(filename, index=False)
+        export_df = self._get_full_positions_df()
+        export_df.to_csv(filename, index=False)
 
     def move_to_position(self) -> None:
         """Move to a position within the Multi-Position Acquisition Interface."""
@@ -319,9 +398,9 @@ class MultiPositionController(GUIController):
     def insert_row_func(self) -> None:
         """Insert a row in the Multi-Position Acquisition Interface."""
         self.table.model.addRow(self.table.currentrow)
-        self.table.update_rowcolors()
-        self.table.redraw()
-        self.table.tableChanged()
+        self._sync_hidden_position_df()
+        update_rowcolors(self.table)
+        self._refresh_table_view()
 
     def add_stage_position(self) -> None:
         """Add the current stage position to the Multi-Position Acquisition Interface.
@@ -340,29 +419,39 @@ class MultiPositionController(GUIController):
             position in the format of {axis: value}
         """
         headers = list(self.table.model.df.columns)
+        normalized_position = {str(key).lower(): value for key, value in position.items()}
+        hidden_values = {}
 
         temp = []
         for col_name in headers:
-            if col_name.lower() in position:
-                temp.append(position[col_name.lower()])
+            if col_name.lower() in normalized_position:
+                temp.append(normalized_position[col_name.lower()])
             else:
                 temp.append(np.nan)
-        for col_name in position:
-            if col_name.upper() not in headers:
-                headers.append(col_name.upper())
-                temp.append(position[col_name])
+        for col_name in normalized_position:
+            column_name = col_name.upper()
+            if column_name in self._hidden_position_columns:
+                hidden_values[column_name] = normalized_position[col_name]
+                continue
+            if column_name not in headers:
+                headers.append(column_name)
+                temp.append(normalized_position[col_name])
 
         # update the column headers
         self.table.model.df = self.table.model.df.reindex(columns=headers)
 
         # temp = list(map(lambda k: position[k], position))
-        self.table.model.df = self.table.model.df.append(
-            pd.DataFrame([temp], columns=headers), ignore_index=True
+        self.table.model.df = pd.concat(
+            [self.table.model.df, pd.DataFrame([temp], columns=headers)],
+            ignore_index=True,
         )
         self.table.currentrow = self.table.model.df.shape[0] - 1
-        self.table.update_rowcolors()
-        self.table.redraw()
-        self.table.tableChanged()
+        self._sync_hidden_position_df()
+        row_index = self.table.model.df.index[self.table.currentrow]
+        for col_name, value in hidden_values.items():
+            self._hidden_position_df.at[row_index, col_name] = value
+        update_rowcolors(self.table)
+        self._refresh_table_view()
 
     def remove_positions(self, position_flag_list: list[bool]) -> None:
         """Remove positions according to position_flag_list

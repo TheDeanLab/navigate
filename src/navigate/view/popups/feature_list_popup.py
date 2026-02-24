@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,13 @@ class FeatureConfigPopup:
             input_var=tk.StringVar(),
             input_args={"width": 30, "state": "readonly"},
         )
-        self.feature_name_widget.grid(row=0, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        self.feature_name_widget.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         self.feature_name_widget.set(feature_name)
         self.feature_name_widget.set_values(features)
 
@@ -122,14 +128,25 @@ class FeatureConfigPopup:
 
         #: ttk.Frame: Parameter frame
         self.parameter_frame = ttk.Frame(content_frame)
-        self.parameter_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(30), pady=get_theme_space_px(30))
+        self.parameter_frame.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(30),
+            pady=get_theme_space_px(30),
+        )
 
         row = 3
         if "true" in kwargs:
             self.preview_btn_true = ttk.Button(content_frame, text="Preview (True)")
             self.preview_btn_true.grid(row=row, column=0, sticky=tk.NSEW)
             separator = ttk.Separator(content_frame)
-            separator.grid(row=row + 1, column=0, sticky=tk.NSEW, pady=get_theme_padding_px((0, 10)))
+            separator.grid(
+                row=row + 1,
+                column=0,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((0, 10)),
+            )
             self.feature_list_true_frame = FeatureListFrame(content_frame)
             self.feature_list_true_frame.grid(row=row + 2, column=0, sticky=tk.NSEW)
             row += 3
@@ -138,7 +155,12 @@ class FeatureConfigPopup:
             self.preview_btn_false = ttk.Button(content_frame, text="Preview (False)")
             self.preview_btn_false.grid(row=row, column=0, sticky=tk.NSEW)
             separator = ttk.Separator(content_frame)
-            separator.grid(row=row + 1, column=0, sticky=tk.NSEW, pady=get_theme_padding_px((0, 10)))
+            separator.grid(
+                row=row + 1,
+                column=0,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((0, 10)),
+            )
             self.feature_list_false_frame = FeatureListFrame(content_frame)
             self.feature_list_false_frame.grid(row=row + 2, column=0, sticky=tk.NSEW)
 
@@ -185,7 +207,13 @@ class FeatureConfigPopup:
 
             self.inputs.append(temp)
             self.inputs_type.append(type(args_value[i]))
-            temp.grid(row=i + 2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(30), pady=get_theme_space_px(10))
+            temp.grid(
+                row=i + 2,
+                column=0,
+                sticky=tk.NSEW,
+                padx=get_theme_space_px(30),
+                pady=get_theme_space_px(10),
+            )
             if arg_input_class is ttk.Combobox:
                 temp.set_values(values)
                 temp.widget.config(state="readonly")
@@ -246,14 +274,24 @@ class FeatureListPopup:
         )
 
         self.inputs["feature_list_name"].grid(
-            row=0, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3)
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
         )
         self.inputs["feature_list_name"].grid_columnconfigure(0, weight=0)
         self.inputs["feature_list_name"].grid_columnconfigure(1, weight=1)
         self.inputs["feature_list_name"].grid_rowconfigure(0, weight=1)
 
         separator = ttk.Separator(content_frame)
-        separator.grid(row=2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        separator.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
 
         scroll_frame = ttk.Frame(content_frame)
         scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
@@ -275,24 +313,48 @@ class FeatureListPopup:
         scrollbar.pack(side="bottom", fill="x")
 
         separator = ttk.Separator(content_frame)
-        separator.grid(row=4, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        separator.grid(
+            row=4,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         self.inputs["content"] = tk.Text(content_frame, width=100, height=10)
-        self.inputs["content"].grid(row=5, column=0, sticky=tk.NSEW, padx=get_theme_space_px(10), pady=get_theme_space_px(3))
+        self.inputs["content"].grid(
+            row=5,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(10),
+            pady=get_theme_space_px(3),
+        )
 
         #: dict: Dictionary of buttons
         self.buttons = {}
         button_frame = ttk.Frame(content_frame)
         button_frame.grid(row=6, column=0, sticky=tk.NSEW)
         self.buttons["preview"] = ttk.Button(button_frame, text="Preview")
-        self.buttons["preview"].grid(row=0, column=0, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        self.buttons["preview"].grid(
+            row=0, column=0, padx=get_theme_space_px(3), pady=get_theme_space_px(3)
+        )
         if self.add_new_list_flag:
             self.buttons["add"] = ttk.Button(button_frame, text="Add")
-            self.buttons["add"].grid(row=0, column=1, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+            self.buttons["add"].grid(
+                row=0, column=1, padx=get_theme_space_px(3), pady=get_theme_space_px(3)
+            )
         else:
             self.buttons["confirm"] = ttk.Button(button_frame, text="Confirm")
-            self.buttons["confirm"].grid(row=0, column=1, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+            self.buttons["confirm"].grid(
+                row=0, column=1, padx=get_theme_space_px(3), pady=get_theme_space_px(3)
+            )
         self.buttons["cancel"] = ttk.Button(button_frame, text="Cancel")
-        self.buttons["cancel"].grid(row=0, column=2, sticky=tk.SE, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        self.buttons["cancel"].grid(
+            row=0,
+            column=2,
+            sticky=tk.SE,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
 
 
 class FeatureListFrame(ttk.Frame):
@@ -319,7 +381,13 @@ class FeatureListFrame(ttk.Frame):
         scrollbar.pack(side="bottom", fill="x")
 
         self.content = tk.Text(self, width=100, height=5)
-        self.content.grid(row=2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(10), pady=get_theme_space_px(3))
+        self.content.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(10),
+            pady=get_theme_space_px(3),
+        )
 
 
 class FeatureAdvancedSettingPopup:
@@ -372,7 +440,13 @@ class FeatureAdvancedSettingPopup:
             input_var=tk.StringVar(),
             input_args={"width": 30, "state": "readonly"},
         )
-        self.feature_name_widget.grid(row=0, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        self.feature_name_widget.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         self.feature_name_widget.set(feature_name)
         self.feature_name_widget.set_values(features)
 
@@ -381,7 +455,13 @@ class FeatureAdvancedSettingPopup:
 
         #: ttk.Frame: Parameter frame
         self.parameter_frame = ttk.Frame(content_frame)
-        self.parameter_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(30), pady=get_theme_space_px(30))
+        self.parameter_frame.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(30),
+            pady=get_theme_space_px(30),
+        )
         #: dict: Dictionary of argument frames
         self.arg_frames = {}
 
@@ -421,16 +501,30 @@ class FeatureAdvancedSettingPopup:
                 for k, v in parameter_config[arg_name].items():
                     self.add_new_row(arg_name, k, v)
             add_button = ttk.Button(self.parameter_frame, text="Add")
-            add_button.grid(row=row_id, column=0, sticky=tk.NW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+            add_button.grid(
+                row=row_id,
+                column=0,
+                sticky=tk.NW,
+                padx=get_theme_space_px(3),
+                pady=get_theme_space_px(3),
+            )
             self.buttons[arg_name] = add_button
             row_id += 1
             separator = ttk.Separator(self.parameter_frame)
-            separator.grid(row=row_id, column=0, sticky=tk.NSEW, pady=get_theme_space_px(10))
+            separator.grid(
+                row=row_id, column=0, sticky=tk.NSEW, pady=get_theme_space_px(10)
+            )
             row_id += 1
 
         if len(args_name) > 1:
             save_button = ttk.Button(self.parameter_frame, text="Save")
-            save_button.grid(row=row_id, column=0, sticky=tk.NE, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+            save_button.grid(
+                row=row_id,
+                column=0,
+                sticky=tk.NE,
+                padx=get_theme_space_px(3),
+                pady=get_theme_space_px(3),
+            )
             #: ttk.Button: Save button
             self.save_button = save_button
 
@@ -455,7 +549,13 @@ class FeatureAdvancedSettingPopup:
             input_var=tk.StringVar(),
             input_args={"width": 50},
         )
-        ref_value_entry.grid(row=r, column=1, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        ref_value_entry.grid(
+            row=r,
+            column=1,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         ref_value_entry.set(k)
         value_entry = LabelInput(
             parent=arg_frame,
@@ -464,12 +564,30 @@ class FeatureAdvancedSettingPopup:
             input_var=tk.StringVar(),
             input_args={"width": 50},
         )
-        value_entry.grid(row=r, column=2, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        value_entry.grid(
+            row=r,
+            column=2,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         value_entry.set(v)
         load_button = ttk.Button(arg_frame, text="Load")
-        load_button.grid(row=r, column=3, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        load_button.grid(
+            row=r,
+            column=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         delete_button = ttk.Button(arg_frame, text="Delete")
-        delete_button.grid(row=r, column=4, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        delete_button.grid(
+            row=r,
+            column=4,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         delete_button.config(command=self.delete_row(arg_name, r))
         self.inputs[arg_name].append(
             (ref_value_entry, value_entry, load_button, delete_button)

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -196,7 +196,9 @@ class Hover(object):
                 "tooltip_description_bg",
                 get_theme_color("surface_bg", "#ffffe0"),
             )
-            foreground = get_theme_color("tooltip_text", get_theme_color("text", "black"))
+            foreground = get_theme_color(
+                "tooltip_text", get_theme_color("text", "black")
+            )
             relief = tk.SOLID
             font = get_theme_font("tooltip")
             x = self.widget.winfo_rootx() + self.widget.winfo_width()
@@ -207,7 +209,9 @@ class Hover(object):
                 "tooltip_error_bg",
                 get_theme_color("danger", "#ff5d66"),
             )
-            foreground = get_theme_color("tooltip_text", get_theme_color("text", "black"))
+            foreground = get_theme_color(
+                "tooltip_text", get_theme_color("text", "black")
+            )
             relief = (tk.RIDGE,)
             font = get_theme_font("tooltip_emphasis")
             x = self.widget.winfo_rootx()

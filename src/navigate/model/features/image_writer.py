@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -288,7 +288,8 @@ class ImageWriter:
             max_val = mip.max()
             if max_val > min_val:
                 mip_8bit = ((mip - min_val) / (max_val - min_val) * 255).astype(
-                    np.uint8)
+                    np.uint8
+                )
             else:
                 mip_8bit = np.zeros_like(mip, dtype=np.uint8)
 

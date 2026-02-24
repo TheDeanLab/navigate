@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -91,10 +91,16 @@ class MicroscopeSettingPopupWindow:
         self.buttons = {}
 
         # Frames for widgets
-        label_frame = ttk.Frame(content_frame, padding=get_theme_padding_px((0, 0, 0, 0)))
+        label_frame = ttk.Frame(
+            content_frame, padding=get_theme_padding_px((0, 0, 0, 0))
+        )
         #: ttk.Frame: Frame for microscope information
-        self.microscopes_frame = ttk.Frame(content_frame, padding=get_theme_padding_px((0, 0, 0, 0)))
-        button_frame = ttk.Frame(content_frame, padding=get_theme_padding_px((0, 0, 0, 0)))
+        self.microscopes_frame = ttk.Frame(
+            content_frame, padding=get_theme_padding_px((0, 0, 0, 0))
+        )
+        button_frame = ttk.Frame(
+            content_frame, padding=get_theme_padding_px((0, 0, 0, 0))
+        )
 
         # Griding Frames
         label_frame.grid(row=0, column=0, sticky=tk.NSEW)
@@ -111,22 +117,42 @@ class MicroscopeSettingPopupWindow:
         self.labels.append("Setting")
 
         for i, name in enumerate(self.labels):
-            row = ttk.Label(label_frame, text=name, padding=get_theme_padding_px((2, 0, 0, 0)))
+            row = ttk.Label(
+                label_frame, text=name, padding=get_theme_padding_px((2, 0, 0, 0))
+            )
             if i == 0:
-                row.grid(row=i, column=0, padx=get_theme_padding_px((0, 5)), pady=get_theme_padding_px((5, 30)))
+                row.grid(
+                    row=i,
+                    column=0,
+                    padx=get_theme_padding_px((0, 5)),
+                    pady=get_theme_padding_px((5, 30)),
+                )
             else:
-                row.grid(row=i, column=0, padx=get_theme_padding_px((0, 5)), pady=get_theme_padding_px((0, 22)))
+                row.grid(
+                    row=i,
+                    column=0,
+                    padx=get_theme_padding_px((0, 5)),
+                    pady=get_theme_padding_px((0, 22)),
+                )
 
         self.list_microscope_info(microscope_info)
 
         # button
         self.buttons["confirm"] = ttk.Button(button_frame, text="Confirm")
         self.buttons["confirm"].grid(
-            row=0, column=0, sticky=tk.SE, padx=get_theme_padding_px((5, 0)), pady=get_theme_padding_px((0, 5))
+            row=0,
+            column=0,
+            sticky=tk.SE,
+            padx=get_theme_padding_px((5, 0)),
+            pady=get_theme_padding_px((0, 5)),
         )
         self.buttons["cancel"] = ttk.Button(button_frame, text="Cancel")
         self.buttons["cancel"].grid(
-            row=0, column=1, sticky=tk.SE, padx=get_theme_padding_px((5, 0)), pady=get_theme_padding_px((0, 5))
+            row=0,
+            column=1,
+            sticky=tk.SE,
+            padx=get_theme_padding_px((5, 0)),
+            pady=get_theme_padding_px((0, 5)),
         )
 
     def list_microscope_info(self, microscope_info):
@@ -139,11 +165,21 @@ class MicroscopeSettingPopupWindow:
         """
         c = 0
         for microscope_name in microscope_info.keys():
-            frame = ttk.Frame(self.microscopes_frame, padding=get_theme_padding_px((0, 0, 0, 0)))
+            frame = ttk.Frame(
+                self.microscopes_frame, padding=get_theme_padding_px((0, 0, 0, 0))
+            )
             frame.grid(row=0, column=c, sticky=tk.NSEW)
             c += 1
-            m_name = ttk.Label(frame, text=microscope_name, padding=get_theme_padding_px((2, 0, 0, 0)))
-            m_name.grid(row=0, column=0, sticky=tk.NSEW, padx=get_theme_padding_px((0, 5)), pady=get_theme_padding_px((5, 16)))
+            m_name = ttk.Label(
+                frame, text=microscope_name, padding=get_theme_padding_px((2, 0, 0, 0))
+            )
+            m_name.grid(
+                row=0,
+                column=0,
+                sticky=tk.NSEW,
+                padx=get_theme_padding_px((0, 5)),
+                pady=get_theme_padding_px((5, 16)),
+            )
             for i in range(1, len(self.labels) - 1):
                 device_ref_name = build_ref_name(
                     "_", *self.labels[i].lower().split(" ")
@@ -156,7 +192,13 @@ class MicroscopeSettingPopupWindow:
                 )
                 entry.set(microscope_info[microscope_name].get(device_ref_name, ""))
                 entry.widget["state"] = "disabled"
-                entry.grid(row=i, column=0, sticky=tk.NSEW, padx=get_theme_padding_px((2, 5)), pady=get_theme_padding_px((2, 0)))
+                entry.grid(
+                    row=i,
+                    column=0,
+                    sticky=tk.NSEW,
+                    padx=get_theme_padding_px((2, 5)),
+                    pady=get_theme_padding_px((2, 0)),
+                )
                 self.inputs[f"{microscope_name} {device_ref_name}"] = entry
             # usage
             combo = LabelInput(
@@ -166,7 +208,11 @@ class MicroscopeSettingPopupWindow:
                 label_args={"padding": (0, 0, 5, 20)},
             )
             combo.grid(
-                row=len(self.labels), column=0, sticky=tk.SE, padx=get_theme_padding_px((2, 5)), pady=get_theme_padding_px((2, 0))
+                row=len(self.labels),
+                column=0,
+                sticky=tk.SE,
+                padx=get_theme_padding_px((2, 5)),
+                pady=get_theme_padding_px((2, 0)),
             )
             self.inputs[f"{microscope_name}"] = combo
 

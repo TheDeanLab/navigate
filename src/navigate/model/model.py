@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
@@ -1878,7 +1878,7 @@ class ASIModel(Model):
         args: argparse.Namespace,
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
-        log_queue: Optional[multiprocessing.Queue] = None
+        log_queue: Optional[multiprocessing.Queue] = None,
     ) -> None:
         """Initialize the ASI Model.
 
@@ -2012,25 +2012,27 @@ class ASIModel(Model):
         # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
         self.logger.info("stage_pos: %s", stage_pos)
-        z_steps = self.configuration["experiment"][
-            "MicroscopeState"]["number_z_steps"]
+        z_steps = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
         if self.imaging_mode == "z-stack" and self.is_save:
-            z_step_size = self.configuration["experiment"][
-                "MicroscopeState"]["step_size"]
+            z_step_size = self.configuration["experiment"]["MicroscopeState"][
+                "step_size"
+            ]
             for i in range(z_steps):
                 idx = (self.frame_id + i) % self.number_of_frames
                 if idx == 0:
                     self.write_idx = (self.write_idx + 1) % 20
-                    self.logger.info("data_buffer_positions write_idx: %s",
-                                     self.write_idx)
+                    self.logger.info(
+                        "data_buffer_positions write_idx: %s", self.write_idx
+                    )
                 # if there are more frames than the buffer size when pre-allocating
                 # z-stack positions, increment self.write_idx to indicate the
                 # positions are being written in the "next" buffer
                 pos_idx = self.write_idx * self.number_of_frames + idx
                 self.data_buffer_positions[pos_idx][0] = stage_pos.get("x_pos", 0)
                 self.data_buffer_positions[pos_idx][1] = stage_pos.get("y_pos", 0)
-                self.data_buffer_positions[pos_idx][2] = (stage_pos.get("z_pos", 0) +
-                                                      i*z_step_size)
+                self.data_buffer_positions[pos_idx][2] = (
+                    stage_pos.get("z_pos", 0) + i * z_step_size
+                )
                 self.data_buffer_positions[pos_idx][3] = stage_pos.get("theta_pos", 0)
                 self.data_buffer_positions[pos_idx][4] = stage_pos.get("f_pos", 0)
         else:
@@ -2067,5 +2069,4 @@ class ASIModel(Model):
             frames_advanced = z_steps
         else:
             frames_advanced = 1
-        self.frame_id = ((self.frame_id + frames_advanced) %
-                         self.number_of_frames)
+        self.frame_id = (self.frame_id + frames_advanced) % self.number_of_frames

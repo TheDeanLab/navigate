@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ from navigate.view.popups.waveform_parameter_popup_window import (
 from navigate.view.popups.feature_list_popup import FeatureListPopup
 from navigate.view.popups.camera_setting_popup import (
     CameraSettingPopup,
-    AdvancedCameraSettingPopup
+    AdvancedCameraSettingPopup,
 )
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
@@ -75,7 +75,9 @@ from navigate.controller.sub_controllers import (
     AdvancedStageParametersController,
     DiagnosticsPopupController,
 )
-from navigate.controller.sub_controllers.camera_settings import AdvancedCameraSettingController
+from navigate.controller.sub_controllers.camera_settings import (
+    AdvancedCameraSettingController,
+)
 
 # Local Tools Imports
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
@@ -647,14 +649,14 @@ class MenuController(GUIController):
             ]
 
         configuration_dict[self.view.menubar.menu_resolution][
-            'Advanced Camera Settings'
+            "Advanced Camera Settings"
         ] = [
             "standard",
             self.popup_advanced_camera_setting,
             None,
             None,
             None,
-            ]
+        ]
         self.populate_menu(configuration_dict)
 
         # plugins

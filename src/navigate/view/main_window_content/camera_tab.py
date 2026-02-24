@@ -394,7 +394,7 @@ class ROI(ttk.Labelframe):
         self.binning = "Binning"
 
         # Buttons
-        btn_labels = ["Use All Pixels", "1600x1600", "1024x1024", "512x512"]
+        btn_labels = ["All Pixels", "1600x1600", "1024x1024", "512x512"]
         btn_names = ["All", "1600", "1024", "512"]
 
         # Loop for each frame

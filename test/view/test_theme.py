@@ -148,3 +148,19 @@ def test_get_theme_matplotlib_font_uses_sans_serif_when_tk_named_missing(monkeyp
 
     assert fontdict["family"] == "sans-serif"
     assert fontdict["size"] == 10
+
+
+def test_get_theme_matplotlib_font_uses_sans_serif_for_private_tk_family(monkeypatch):
+    monkeypatch.setattr(theme, "_ACTIVE_TYPOGRAPHY", {"body": ("TkDefaultFont", 10)})
+
+    class _ResolvedFont:
+        def actual(self, key):
+            assert key == "family"
+            return ".AppleSystemUIFont"
+
+    monkeypatch.setattr(theme.tkfont, "nametofont", lambda name: _ResolvedFont())
+
+    fontdict = theme.get_theme_matplotlib_font("body")
+
+    assert fontdict["family"] == "sans-serif"
+    assert fontdict["size"] == 10

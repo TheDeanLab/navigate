@@ -185,9 +185,13 @@ def test_set_table(tiling_wizard_controller):
         tiling_wizard_controller.stack_acq_widgets["end_position"].get()
     )
 
-    # Default to fixed theta
-    r_start = tiling_wizard_controller.stage_position_vars["theta"].get()
-    r_stop = tiling_wizard_controller.stage_position_vars["theta"].get()
+    # Default to fixed theta. Empty widget values are treated as 0.0.
+    r_start = float(
+        tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0
+    )
+    r_stop = float(
+        tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0
+    )
 
     f_start = float(tiling_wizard_controller.variables["f_start"].get()) - float(
         tiling_wizard_controller.stack_acq_widgets["start_focus"].get()

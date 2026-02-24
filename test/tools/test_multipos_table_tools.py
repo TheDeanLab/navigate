@@ -129,7 +129,8 @@ def test_compute_tiles_from_bounding_box(
     x_max = x_start + (1 - overlap) * x_length * (x_tiles - 1)
     y_max = y_start + (1 - overlap) * y_length * (y_tiles - 1)
     z_max = z_start + (1 - overlap) * z_length * (z_tiles - 1)
-    theta_max = theta_start + (1 - overlap) * theta_length * (theta_tiles - 1)
+    # Rotation overlap is intentionally ignored in compute_tiles_from_bounding_box.
+    theta_max = theta_start + theta_length * (theta_tiles - 1)
     f_max = f_start + (1 - overlap) * f_length * (f_tiles - 1)
 
     # check extrema

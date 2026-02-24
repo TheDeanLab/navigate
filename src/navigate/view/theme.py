@@ -1001,12 +1001,20 @@ def _resolve_matplotlib_family(family: str) -> str:
     """
     if not family:
         return "sans-serif"
+
+    resolved_family = family
     if family.startswith("Tk") and family.endswith("Font"):
         try:
-            return str(tkfont.nametofont(family).actual("family"))
+            resolved_family = str(tkfont.nametofont(family).actual("family"))
         except (tk.TclError, RuntimeError, ValueError):
             return "sans-serif"
-    return family
+
+    # Tk on macOS can resolve to private Cocoa aliases (e.g. ".AppleSystemUIFont")
+    # that Matplotlib cannot locate via font_manager.
+    if resolved_family.startswith("."):
+        return "sans-serif"
+
+    return resolved_family
 
 
 def get_theme_matplotlib_font(

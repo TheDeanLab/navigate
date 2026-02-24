@@ -1832,6 +1832,7 @@ class Controller:
                     pos=value[1:],
                     axes=value[0],
                 )
+                self.multiposition_tab_controller.clear_hidden_position_columns()
                 self.channels_tab_controller.is_multiposition_val.set(True)
 
             elif event == "stop":

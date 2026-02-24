@@ -198,7 +198,7 @@ class MultiPointList(ttk.Frame):
         """
         super().__init__(settings_tab, *args, **kwargs)
 
-        df = pd.DataFrame({"X": [0], "Y": [0], "Z": [0], "R": [0], "F": [0]})
+        df = pd.DataFrame({"X": [0], "Y": [0], "Z": [0], "THETA": [0], "F": [0]})
 
         #: MultiPositionTable: The PandasTable instance that is being used.
         self.pt = MultiPositionTable(self, showtoolbar=False, showstatusbar=True)
@@ -564,6 +564,21 @@ class MultiPositionTable(Table):
 
         if redraw:
             self.redraw()
+
+    def resized(self, event):
+        """Guard resize redraws against transient column-index mismatches."""
+        try:
+            super().resized(event)
+        except IndexError:
+            logger.debug("Retrying multiposition resize redraw after IndexError.")
+            self.after_idle(self._safe_redraw_visible)
+
+    def _safe_redraw_visible(self):
+        """Retry visible redraw safely after resize-related races."""
+        try:
+            self.redrawVisible()
+        except IndexError:
+            logger.debug("Skipping multiposition redraw due to transient IndexError.")
 
     def show(self, callback=None):
         """Show the table

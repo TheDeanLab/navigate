@@ -7,6 +7,7 @@ import numpy
 import multiprocessing as mp
 import logging
 import platform
+import tkinter as tk
 from logging.handlers import QueueHandler
 
 from navigate.log_files.log_functions import log_setup
@@ -82,7 +83,23 @@ def _remove_queue_handlers(target_queue=None):
 
 
 @pytest.fixture(scope="module")
-def controller(tk_root):
+def controller_root():
+    """Isolated Tk root for this module to avoid shared session root side effects."""
+    root = tk.Tk()
+    yield root
+    try:
+        root.update_idletasks()
+        root.update()
+    except Exception:
+        pass
+    try:
+        root.destroy()
+    except Exception:
+        pass
+
+
+@pytest.fixture(scope="module")
+def controller(controller_root):
     from navigate.controller.controller import Controller
 
     base_directory = Path.joinpath(
@@ -109,7 +126,7 @@ def controller(tk_root):
     log_queue, log_listener = _normalize_log_setup(start_listener)
 
     controller = Controller(
-        root=tk_root,
+        root=controller_root,
         splash_screen=DummySplashScreen(),
         configuration_path=configuration_path,
         experiment_path=experiment_path,

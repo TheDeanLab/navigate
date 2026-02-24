@@ -14,7 +14,7 @@ import tkinter as tk
 from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, Iterable, List, Tuple
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_ROOT = Path(SCRIPT_DIR).parent
@@ -64,6 +64,139 @@ def settle_window(root: tk.Tk, passes: int = 3, delay_ms: int = 200) -> None:
             root.update()
         root.after(delay_ms)
         root.update()
+
+
+MODE_LABELS = {
+    "live": "Continuous Scan",
+    "z-stack": "Z-Stack",
+    "single": "Single Acquisition",
+}
+
+
+def _iter_widgets(widget: tk.Misc) -> Iterable[tk.Misc]:
+    yield widget
+    try:
+        children = widget.winfo_children()
+    except tk.TclError:
+        return
+    for child in children:
+        yield from _iter_widgets(child)
+
+
+def _suppress_hover_tooltips(root: tk.Tk) -> None:
+    """Disable transient hover tips to keep screenshots clean and repeatable."""
+    for widget in _iter_widgets(root):
+        hover = getattr(widget, "hover", None)
+        if hover is None:
+            continue
+        try:
+            hover.hidetip()
+        except Exception:
+            pass
+        try:
+            hover.update_type("disabled")
+        except Exception:
+            pass
+
+
+def _prepare_for_capture(root: tk.Tk, cli_args: argparse.Namespace) -> None:
+    """Settle geometry and clear transient hover artifacts before capture."""
+    try:
+        root.event_generate("<Motion>", warp=True, x=2, y=2)
+    except tk.TclError:
+        pass
+    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    _suppress_hover_tooltips(root)
+    settle_window(root, passes=1, delay_ms=cli_args.delay_ms)
+
+
+def _select_settings_tab(ctx: Dict[str, object], tab_attr: str) -> None:
+    controller = ctx["controller"]
+    tab = getattr(controller.view.settings, tab_attr)
+    controller.view.settings.select(tab)
+
+
+def _set_mode(ctx: Dict[str, object], mode: str) -> None:
+    controller = ctx["controller"]
+    if mode not in MODE_LABELS:
+        raise ValueError(f"Unsupported mode for capture: {mode}")
+    controller.acquire_bar_controller.set_mode(mode)
+    controller.channels_tab_controller.set_mode("stop")
+
+
+def _set_idle_acquire_bar(ctx: Dict[str, object]) -> None:
+    controller = ctx["controller"]
+    acquire_ctrl = controller.acquire_bar_controller
+    acquire_bar = acquire_ctrl.view
+    acquire_ctrl.is_acquiring = False
+    acquire_bar.acquire_btn.configure(text="Acquire", state="normal")
+    acquire_bar.pull_down.state(["!disabled", "readonly"])
+    acquire_bar.CurAcq.stop()
+    acquire_bar.OvrAcq.stop()
+    acquire_bar.CurAcq["mode"] = "determinate"
+    acquire_bar.OvrAcq["mode"] = "determinate"
+    acquire_bar.CurAcq["value"] = 0
+    acquire_bar.OvrAcq["value"] = 0
+    acquire_bar.total_acquisition_label.config(text="00:00:00")
+
+
+def _set_mock_live_acquiring(ctx: Dict[str, object]) -> None:
+    controller = ctx["controller"]
+    acquire_ctrl = controller.acquire_bar_controller
+    acquire_bar = acquire_ctrl.view
+    _set_mode(ctx, "live")
+    acquire_ctrl.is_acquiring = True
+    acquire_bar.acquire_btn.configure(text="Stop", state="normal")
+    acquire_bar.pull_down.state(["disabled", "readonly"])
+    acquire_bar.CurAcq.stop()
+    acquire_bar.OvrAcq.stop()
+    acquire_bar.CurAcq["mode"] = "determinate"
+    acquire_bar.OvrAcq["mode"] = "determinate"
+    acquire_bar.CurAcq["value"] = 72
+    acquire_bar.OvrAcq["value"] = 38
+    acquire_bar.total_acquisition_label.config(text="--:--:--")
+
+
+def _set_stage_positions(ctx: Dict[str, object], z: float, f: float) -> None:
+    controller = ctx["controller"]
+    stage_parameters = controller.configuration["experiment"]["StageParameters"]
+    stage_parameters["z"] = float(z)
+    stage_parameters["f"] = float(f)
+    controller.stage_controller.widget_vals["z"].set(float(z))
+    controller.stage_controller.widget_vals["f"].set(float(f))
+
+
+def _dismiss_save_dialog(ctx: Dict[str, object]) -> None:
+    controller = ctx["controller"]
+    acquire_pop = controller.acquire_bar_controller.acquire_pop
+    if acquire_pop is None:
+        return
+    popup = getattr(acquire_pop, "popup", None)
+    if popup is None:
+        return
+    try:
+        popup.dismiss()
+    except Exception:
+        pass
+    controller.acquire_bar_controller.acquire_pop = None
+
+
+def _open_save_dialog(ctx: Dict[str, object], cli_args: argparse.Namespace):
+    controller = ctx["controller"]
+    _dismiss_save_dialog(ctx)
+    _select_settings_tab(ctx, "channels_tab")
+    _set_mode(ctx, "single")
+    timepoint = controller.view.settings.channels_tab.stack_timepoint_frame
+    timepoint.save_data.set(True)
+    controller.acquire_bar_controller.set_save_option(True)
+    _prepare_for_capture(ctx["root"], cli_args)
+    controller.acquire_bar_controller.launch_popup_window()
+    acquire_pop = controller.acquire_bar_controller.acquire_pop
+    if acquire_pop is None:
+        raise RuntimeError("Failed to open save dialog popup for capture.")
+    popup = acquire_pop.popup
+    _prepare_for_capture(ctx["root"], cli_args)
+    return acquire_pop, popup
 
 
 def _splash_image_path() -> str:
@@ -187,32 +320,59 @@ def _union_bbox(*bboxes: Tuple[int, int, int, int]) -> Tuple[int, int, int, int]
     return min_x, min_y, max_x - min_x, max_y - min_y
 
 
+def _is_mapped_path(root: tk.Tk, widget_path: str) -> bool:
+    try:
+        return bool(int(root.tk.call("winfo", "ismapped", widget_path)))
+    except tk.TclError:
+        return False
+
+
 def _capture_combobox_dropdown(
     root: tk.Tk,
     combobox,
     frame_widget,
     out_path: str,
     cli_args: argparse.Namespace,
+    selected_value: str = "",
     pad: int = 2,
 ) -> str:
+    _prepare_for_capture(root, cli_args)
     values = combobox.cget("values")
-    if values:
+    if selected_value:
+        combobox.set(selected_value)
+    elif values:
         combobox.set(values[0])
 
     popup_path = None
-    try:
-        combobox.focus_set()
-        root.tk.call("ttk::combobox::Post", combobox)
-        settle_window(root, passes=max(3, cli_args.passes), delay_ms=cli_args.delay_ms)
-        popup_path = str(root.tk.call("ttk::combobox::PopdownWindow", combobox))
-    except tk.TclError:
-        # Fallback: click-open behavior if the Tcl Post command is unavailable.
-        combobox.event_generate("<Button-1>")
-        settle_window(root, passes=max(3, cli_args.passes), delay_ms=cli_args.delay_ms)
+    popup_base = None
+    openers = (
+        lambda: combobox.event_generate("<Button-1>"),
+        lambda: root.tk.call("ttk::combobox::Post", combobox),
+    )
+    for open_dropdown in openers:
         try:
-            popup_path = str(root.tk.call("ttk::combobox::PopdownWindow", combobox))
+            combobox.focus_set()
+            open_dropdown()
+            settle_window(
+                root,
+                passes=max(3, cli_args.passes),
+                delay_ms=cli_args.delay_ms,
+            )
+            popup_base = str(root.tk.call("ttk::combobox::PopdownWindow", combobox))
         except tk.TclError:
-            popup_path = None
+            popup_base = None
+
+        if popup_base is None:
+            continue
+
+        # On Tk, the popdown listbox lives under "<popup>.f.l".
+        popup_listbox = f"{popup_base}.f.l"
+        if _is_mapped_path(root, popup_listbox):
+            popup_path = popup_listbox
+            break
+        if _is_mapped_path(root, popup_base):
+            popup_path = popup_base
+            break
 
     frame_bbox = tk_window_bbox(frame_widget, pad=pad)
     if popup_path:
@@ -236,7 +396,8 @@ def _capture_combobox_dropdown(
 def _capture_main_window(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
-    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    _set_idle_acquire_bar(ctx)
+    _prepare_for_capture(root, cli_args)
     out_path = os.path.join(
         cli_args.output_root, f"{controller.view.__class__.__name__}.png"
     )
@@ -248,9 +409,10 @@ def _capture_settings_tab(
 ) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _select_settings_tab(ctx, attr_name)
     tab = getattr(controller.view.settings, attr_name)
-    controller.view.settings.select(tab)
-    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    _prepare_for_capture(root, cli_args)
     out_path = os.path.join(cli_args.output_root, f"{tab.__class__.__name__}.png")
     return _capture_widget(controller.view.settings, out_path)
 
@@ -260,9 +422,10 @@ def _capture_channel_selector(
 ) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
     channels_tab = controller.view.settings.channels_tab
-    controller.view.settings.select(channels_tab)
-    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    _select_settings_tab(ctx, "channels_tab")
+    _prepare_for_capture(root, cli_args)
     out_path = os.path.join(cli_args.output_root, "channel-selector.png")
     return _capture_widget(channels_tab.channel_widgets_frame, out_path, pad=2)
 
@@ -272,9 +435,10 @@ def _capture_channel_selector_filter_dropdown(
 ) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
     channels_tab = controller.view.settings.channels_tab
-    controller.view.settings.select(channels_tab)
-    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    _select_settings_tab(ctx, "channels_tab")
+    _prepare_for_capture(root, cli_args)
 
     frame = channels_tab.channel_widgets_frame
     if not frame.filterwheel_pulldowns:
@@ -297,9 +461,10 @@ def _capture_sensor_mode_dropdown(
 ) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
     camera_settings_tab = controller.view.settings.camera_settings_tab
-    controller.view.settings.select(camera_settings_tab)
-    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    _select_settings_tab(ctx, "camera_settings_tab")
+    _prepare_for_capture(root, cli_args)
 
     camera_mode_frame = camera_settings_tab.camera_mode
     sensor_input = camera_mode_frame.inputs["Sensor"]
@@ -320,9 +485,10 @@ def _capture_roi_definition(
 ) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
     camera_settings_tab = controller.view.settings.camera_settings_tab
-    controller.view.settings.select(camera_settings_tab)
-    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    _select_settings_tab(ctx, "camera_settings_tab")
+    _prepare_for_capture(root, cli_args)
     out_path = os.path.join(cli_args.output_root, "ROI-definition.png")
     return _capture_widget(camera_settings_tab.camera_roi, out_path, pad=2)
 
@@ -332,11 +498,255 @@ def _capture_camera_tab(
 ) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
     tab = getattr(controller.view.camera_waveform, attr_name)
     controller.view.camera_waveform.select(tab)
-    settle_window(root, passes=cli_args.passes, delay_ms=cli_args.delay_ms)
+    _prepare_for_capture(root, cli_args)
     out_path = os.path.join(cli_args.output_root, f"{tab.__class__.__name__}.png")
     return _capture_widget(controller.view.camera_waveform, out_path)
+
+
+def _capture_acquire_mode_dropdown(
+    ctx: Dict[str, object],
+    cli_args: argparse.Namespace,
+    mode: str,
+    out_name: str,
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _select_settings_tab(ctx, "channels_tab")
+    _set_mode(ctx, mode)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, out_name)
+    return _capture_combobox_dropdown(
+        root=root,
+        combobox=controller.view.acquire_bar.pull_down,
+        frame_widget=controller.view,
+        out_path=out_path,
+        cli_args=cli_args,
+        selected_value=MODE_LABELS[mode],
+        pad=2,
+    )
+
+
+def _capture_continuous_scan_acquire(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _select_settings_tab(ctx, "channels_tab")
+    _set_mock_live_acquiring(ctx)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "continuous-scan-acquire.png")
+    return _capture_widget(controller.view, out_path)
+
+
+def _capture_stage_movement_panel(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_mock_live_acquiring(ctx)
+    _select_settings_tab(ctx, "stage_control_tab")
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-movement-panel.png")
+    return _capture_widget(controller.view, out_path)
+
+
+def _capture_stop_acquisition(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_mock_live_acquiring(ctx)
+    _select_settings_tab(ctx, "channels_tab")
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stop-acquisition.png")
+    return _capture_widget(controller.view, out_path)
+
+
+def _capture_save_data(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_mode(ctx, "single")
+    _select_settings_tab(ctx, "channels_tab")
+    channels_tab = controller.view.settings.channels_tab
+    channels_tab.stack_timepoint_frame.save_data.set(True)
+    controller.acquire_bar_controller.set_save_option(True)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "save-data.png")
+    return _capture_widget(channels_tab.stack_timepoint_frame, out_path, pad=2)
+
+
+def _capture_save_dialog_box(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    _, popup = _open_save_dialog(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "save-dialog-box.png")
+    try:
+        return _capture_widget(popup, out_path, pad=2)
+    finally:
+        _dismiss_save_dialog(ctx)
+        _set_idle_acquire_bar(ctx)
+
+
+def _capture_save_dialog_box_acquire(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    acquire_pop, popup = _open_save_dialog(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "save-dialog-box-acquire.png")
+    try:
+        done_button = acquire_pop.get_buttons()["Done"]
+        done_button.focus_set()
+        _prepare_for_capture(ctx["root"], cli_args)
+        return _capture_widget(popup, out_path, pad=2)
+    finally:
+        _dismiss_save_dialog(ctx)
+        _set_idle_acquire_bar(ctx)
+
+
+def _set_default_z_stack_positions(ctx: Dict[str, object]) -> None:
+    controller = ctx["controller"]
+    _set_mode(ctx, "z-stack")
+    _set_stage_positions(ctx, z=3101.8, f=208.02)
+    controller.channels_tab_controller.update_start_position()
+    _set_stage_positions(ctx, z=3521.8, f=208.02)
+    controller.channels_tab_controller.update_end_position()
+
+
+def _capture_stage_control_start_pos_zstack(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_mode(ctx, "z-stack")
+    _set_stage_positions(ctx, z=3101.8, f=208.02)
+    _select_settings_tab(ctx, "stage_control_tab")
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-control-start-pos-zstack.png")
+    return _capture_widget(controller.view, out_path)
+
+
+def _capture_press_start_pos(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_mode(ctx, "z-stack")
+    _set_stage_positions(ctx, z=3101.8, f=208.02)
+    controller.channels_tab_controller.update_start_position()
+    _select_settings_tab(ctx, "channels_tab")
+    stack_frame = controller.view.settings.channels_tab.stack_acq_frame
+    stack_frame.buttons["set_start"].focus_set()
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "press-start-pos.png")
+    return _capture_widget(stack_frame, out_path, pad=2)
+
+
+def _capture_stage_control_end_pos_zstack(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_default_z_stack_positions(ctx)
+    _select_settings_tab(ctx, "stage_control_tab")
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-control-end-pos-zstack.png")
+    return _capture_widget(controller.view, out_path)
+
+
+def _capture_press_end_pos(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_default_z_stack_positions(ctx)
+    _select_settings_tab(ctx, "channels_tab")
+    stack_frame = controller.view.settings.channels_tab.stack_acq_frame
+    stack_frame.buttons["set_end"].focus_set()
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "press-end-pos.png")
+    return _capture_widget(stack_frame, out_path, pad=2)
+
+
+def _capture_define_step_size(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_default_z_stack_positions(ctx)
+    _select_settings_tab(ctx, "channels_tab")
+    stack_frame = controller.view.settings.channels_tab.stack_acq_frame
+    controller.channels_tab_controller.stack_acq_vals["step_size"].set(10.0)
+    stack_frame.inputs["step_size"].widget.focus_set()
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "define-step-size.png")
+    return _capture_widget(stack_frame, out_path, pad=2)
+
+
+def _capture_laser_cycling_settings(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_default_z_stack_positions(ctx)
+    _select_settings_tab(ctx, "channels_tab")
+    stack_frame = controller.view.settings.channels_tab.stack_acq_frame
+    cycling_combo = stack_frame.inputs["cycling"].widget
+    out_path = os.path.join(cli_args.output_root, "laser-cycling-settings.png")
+    return _capture_combobox_dropdown(
+        root=root,
+        combobox=cycling_combo,
+        frame_widget=stack_frame,
+        out_path=out_path,
+        cli_args=cli_args,
+        selected_value="Per Stack",
+        pad=2,
+    )
+
+
+def _capture_continuous_scan_dropdown(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    return _capture_acquire_mode_dropdown(
+        ctx,
+        cli_args,
+        mode="live",
+        out_name="continuous-scan-dropdown.png",
+    )
+
+
+def _capture_single_acquisition_dropdown(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    return _capture_acquire_mode_dropdown(
+        ctx,
+        cli_args,
+        mode="single",
+        out_name="single-acquisition-dropdown.png",
+    )
+
+
+def _capture_z_stack_acquisition(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    _set_default_z_stack_positions(ctx)
+    return _capture_acquire_mode_dropdown(
+        ctx,
+        cli_args,
+        mode="z-stack",
+        out_name="z-stack-acquisition.png",
+    )
 
 
 def _capture_configurator(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
@@ -423,6 +833,111 @@ CAPTURES: List[CaptureSpec] = [
         description="MIP display tab",
         context="controller",
         runner=lambda ctx, args: _capture_camera_tab(ctx, args, "mip_tab"),
+    ),
+    CaptureSpec(
+        name="continuous-scan-dropdown",
+        group="acquiring-data",
+        description="Acquire mode dropdown opened on Continuous Scan",
+        context="controller",
+        runner=_capture_continuous_scan_dropdown,
+    ),
+    CaptureSpec(
+        name="continuous-scan-acquire",
+        group="acquiring-data",
+        description="Main window in mock continuous acquisition state",
+        context="controller",
+        runner=_capture_continuous_scan_acquire,
+    ),
+    CaptureSpec(
+        name="stage-movement-panel",
+        group="acquiring-data",
+        description="Stage control panel during mock continuous acquisition",
+        context="controller",
+        runner=_capture_stage_movement_panel,
+    ),
+    CaptureSpec(
+        name="stop-acquisition",
+        group="acquiring-data",
+        description="Acquire bar in stop-enabled state",
+        context="controller",
+        runner=_capture_stop_acquisition,
+    ),
+    CaptureSpec(
+        name="save-data",
+        group="acquiring-data",
+        description="Timepoint settings frame with Save Data enabled",
+        context="controller",
+        runner=_capture_save_data,
+    ),
+    CaptureSpec(
+        name="single-acquisition-dropdown",
+        group="acquiring-data",
+        description="Acquire mode dropdown opened on Single Acquisition",
+        context="controller",
+        runner=_capture_single_acquisition_dropdown,
+    ),
+    CaptureSpec(
+        name="save-dialog-box",
+        group="acquiring-data",
+        description="File Saving Dialog popup",
+        context="controller",
+        runner=_capture_save_dialog_box,
+    ),
+    CaptureSpec(
+        name="save-dialog-box-acquire",
+        group="acquiring-data",
+        description="File Saving Dialog popup with Acquire Data button focused",
+        context="controller",
+        runner=_capture_save_dialog_box_acquire,
+    ),
+    CaptureSpec(
+        name="stage-control-start-pos-zstack",
+        group="acquiring-data",
+        description="Stage tab at Z-stack start position",
+        context="controller",
+        runner=_capture_stage_control_start_pos_zstack,
+    ),
+    CaptureSpec(
+        name="press-start-pos",
+        group="acquiring-data",
+        description="Stack acquisition frame after setting Z-stack start",
+        context="controller",
+        runner=_capture_press_start_pos,
+    ),
+    CaptureSpec(
+        name="stage-control-end-pos-zstack",
+        group="acquiring-data",
+        description="Stage tab at Z-stack end position",
+        context="controller",
+        runner=_capture_stage_control_end_pos_zstack,
+    ),
+    CaptureSpec(
+        name="press-end-pos",
+        group="acquiring-data",
+        description="Stack acquisition frame after setting Z-stack end",
+        context="controller",
+        runner=_capture_press_end_pos,
+    ),
+    CaptureSpec(
+        name="define-step-size",
+        group="acquiring-data",
+        description="Stack acquisition frame with step size entry selected",
+        context="controller",
+        runner=_capture_define_step_size,
+    ),
+    CaptureSpec(
+        name="laser-cycling-settings",
+        group="acquiring-data",
+        description="Laser cycling combobox dropdown in stack acquisition settings",
+        context="controller",
+        runner=_capture_laser_cycling_settings,
+    ),
+    CaptureSpec(
+        name="z-stack-acquisition",
+        group="acquiring-data",
+        description="Acquire mode dropdown opened on Z-Stack",
+        context="controller",
+        runner=_capture_z_stack_acquisition,
     ),
     CaptureSpec(
         name="configurator",

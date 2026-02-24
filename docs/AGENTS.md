@@ -42,9 +42,27 @@ Treat warnings as actionable, especially missing references, missing images, and
 - Prefer Sphinx roles over plain backticks where applicable.
 - Use explicit labels for major sections/pages and cross-reference with `:ref:`.
 - Reference sections/pages directly; avoid “see above/below”.
+- Avoid generic link text like “here”; use descriptive link labels.
 - Update `.. toctree::` entries whenever page structure changes.
 - Include meaningful image `:alt:` text.
 - Fix typos and grammar while editing.
+
+## Hardware Docs Conventions
+
+For files under `docs/source/02_user_guide/01_supported_hardware/`:
+
+- Every page should define a top-level reference label near the top of the file.
+- Avoid orphan pages: if a page is referenced for installation details (for example
+  camera driver setup), it must be included in a visible `.. toctree::` in that section.
+- Keep directives lowercase and consistent (`.. note::`, `.. warning::`, `.. tip::`).
+- In `hardware_home.rst`, keep a short preflight callout that:
+  - states Windows-first hardware support (with Linux used in some environments),
+  - points users to software installation/configuration prerequisites,
+  - points users to Virtual Devices mode (`navigate -sh`) when hardware is not yet connected.
+- Keep the hardware devices toctree concise (`:maxdepth: 2`).
+- In `camera.rst`, keep the local driver-installation toctree for:
+  - `dcam_api.rst`
+  - `pvcam.rst`
 
 ## Preferred Sphinx Roles
 

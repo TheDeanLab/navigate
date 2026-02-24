@@ -76,6 +76,10 @@ docs = [
     "mss"
 ]
 
+photometrics = [
+    "PyVCAM"
+    ]
+
 robot = [
     "mecademicpy",
 ]

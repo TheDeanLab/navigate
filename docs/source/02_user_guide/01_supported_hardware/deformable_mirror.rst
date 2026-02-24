@@ -1,3 +1,4 @@
+.. _deformable_mirror_configuration:
 
 ==================
 Deformable Mirrors

@@ -266,6 +266,12 @@ class DummyModel:
         self.data_buffer_positions = np.zeros(
             shape=(self.number_of_frames, 5), dtype=float
         )  # z-index, x, y, z, theta, f
+        #: bool: Flag to indicate if model is ASIModel.
+        self.asi = False
+        #: str: Current imaging mode.
+        self.imaging_mode = self.configuration["experiment"]["MicroscopeState"][
+            "image_mode"
+        ]
         #: dict: The camera dictionary.
         self.camera = {}
         #: str: The active microscope name.

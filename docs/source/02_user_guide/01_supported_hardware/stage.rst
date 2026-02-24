@@ -59,7 +59,7 @@ first establish communication with the device using `ASI provided software <http
                   type: ASI
                   serial_number: 001
                   axes: [x, y, z, theta, f]
-                  axes_mapping: [A, B, C, D, E]
+                  axes_mapping: [X, Y, Z, M, F]
                   feedback_alignment: [90, 90, 90, 5, 90]
                   volts_per_micron: 0.0
                   min: 0.0

@@ -5,7 +5,6 @@ See Thorlabs.MotionControl.KCube.InertialMotor.h for more functions to implement
 Tested on Thorlabs KIM001.
 """
 
-
 import ctypes
 import ctypes.wintypes
 from enum import IntEnum

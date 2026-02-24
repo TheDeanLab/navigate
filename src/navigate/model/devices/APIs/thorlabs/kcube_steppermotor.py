@@ -13,6 +13,7 @@ Tested on Thorlabs KST101.
 import ctypes
 import ctypes.wintypes
 from enum import IntEnum
+
 # from System import Decimal  # necessary for real world units
 
 """
@@ -418,6 +419,7 @@ def KST_StartPolling(serial_no, milliseconds):
 __dll.SCC_StopPolling.argtypes = [ctypes.c_char_p]
 __dll.SCC_StopPolling.restype = ctypes.c_short
 
+
 def KST_StopPolling(serial_no):
     """
     Stops the internal polling loop.
@@ -470,17 +472,16 @@ __dll.SCC_MoveToPosition.errcheck = errcheck
 
 
 def KST_MoveToPosition(serial_no, position):
-    """Move to position
-    """
+    """Move to position"""
     return __dll.SCC_MoveToPosition(serial_no.encode(CODING), int(position))
-    
-    
+
+
 __dll.SCC_GetPosition.argtypes = [ctypes.c_char_p]
 __dll.SCC_GetPosition.restype = ctypes.c_int
 
 
 def KST_GetCurrentPosition(serial_no):
-    """Get the current position      
+    """Get the current position
 
     Parmeters
     ---------
@@ -492,18 +493,18 @@ def KST_GetCurrentPosition(serial_no):
     int
         Current position.
     """
-     # check if polling is active, if not RequestPosition
-    if __dll.SCC_PollingDuration(serial_no.encode(CODING))==0:
+    # check if polling is active, if not RequestPosition
+    if __dll.SCC_PollingDuration(serial_no.encode(CODING)) == 0:
         KST_RequestPosition(serial_no)
-    
+
     return __dll.SCC_GetPosition(serial_no.encode(CODING))
 
 
 __dll.SCC_MoveAbsolute.argtypes = [ctypes.c_char_p]
 __dll.SCC_MoveAbsolute.restype = ctypes.c_short
 __dll.SCC_MoveAbsolute.errcheck = errcheck
-                        
-                                                
+
+
 def KST_MoveAbsolute(serial_no):
     """
     Move absolute to set position.
@@ -520,7 +521,7 @@ def KST_MoveAbsolute(serial_no):
     int
         The error code or 0 if successful.
     """
-    
+
     return __dll.SCC_MoveAbsolute(serial_no.encode(CODING))
 
 
@@ -545,7 +546,7 @@ def KST_SetAbsolutePosition(serial_no, position):
     int
         The error code or 0 if successful.
     """
-    
+
     return __dll.SCC_SetMoveAbsolutePosition(serial_no.encode(CODING), int(position))
 
 
@@ -578,12 +579,15 @@ def KST_MoveJog(serial_no, jog_direction):
         The error code or 0 if successful.
     """
 
-    return __dll.SCC_MoveJog(serial_no.encode(CODING), MOT_TravelDirection(jog_direction))
+    return __dll.SCC_MoveJog(
+        serial_no.encode(CODING), MOT_TravelDirection(jog_direction)
+    )
 
 
 __dll.SCC_StopProfiled.argtypes = [ctypes.c_char_p]
 __dll.SCC_StopProfiled.restype = ctypes.c_short
 __dll.SCC_StopProfiled.errcheck = errcheck
+
 
 def KST_MoveStop(serial_no):
     """
@@ -605,7 +609,7 @@ def KST_MoveStop(serial_no):
     # SCC_StopImmediate(char const * serialNo)
     # NOTE: for stopping using the current velocity params use:
     # return __dll.SCC_StopProfiled(serial_no.encode(CODING))
-    
+
     return __dll.SCC_StopProfiled(serial_no.encode(CODING))
 
 
@@ -615,15 +619,14 @@ __dll.SCC_Home.errcheck = errcheck
 
 
 def KST_HomeDevice(serial_no):
-    """Home Device
-    """
+    """Home Device"""
     return __dll.SCC_Home(serial_no.encode(CODING))
 
+
 def KST_SetVelocityParams(serial_no, velocity):
-    """Set velocity profile required for move
-    """
+    """Set velocity profile required for move"""
     current_velocity = 0
     current_accel = 0
-    
+
     __dll.SCC_GetVelParams(serial_no.encode(CODING), current_velocity, current_accel)
     __dll.SCC_SetVelParams(serial_no.encode(CODING), current_accel, velocity)

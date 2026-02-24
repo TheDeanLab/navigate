@@ -95,14 +95,41 @@ class TilingWizardController(GUIController):
         self._percent_overlap = 10.0  # default to 10% overlap
 
         #: dict: flags indicating if all the value are correct to set the table
-        self.is_validated = {"x": True, "y": True, "z": True, "f": True}
+        self.is_validated = {}
 
         # Initialize widgets to previous values
         #: list: List of axes to iterate over
         stage_axes = (
             self.parent_controller.parent_controller.configuration_controller.stage_axes
         )
-        self._axes = [axis for axis in stage_axes if axis != "theta"]
+        self._axes = []
+        seen_axes = set()
+        for axis in stage_axes:
+            axis_name = str(axis).lower()
+            if axis_name in seen_axes:
+                continue
+            seen_axes.add(axis_name)
+
+            required_vars = [
+                f"{axis_name}_start",
+                f"{axis_name}_end",
+                f"{axis_name}_dist",
+                f"{axis_name}_fov",
+                f"{axis_name}_tiles",
+            ]
+            required_buttons = [f"{axis_name}_start", f"{axis_name}_end"]
+            if all(name in self.variables for name in required_vars) and all(
+                name in self.buttons for name in required_buttons
+            ):
+                self._axes.append(axis_name)
+            else:
+                logger.debug(
+                    "Controller - Tiling Wizard - Skipping axis '%s' because popup "
+                    "widgets are not present.",
+                    axis_name,
+                )
+
+        self.is_validated = {axis: True for axis in self._axes}
         self.load_settings()
 
         # Ref to widgets in other views
@@ -219,11 +246,20 @@ class TilingWizardController(GUIController):
 
         self.variables["percent_overlap"].set(self._percent_overlap)
         self.variables["total_tiles"].set(1)
+        stage_step = (
+            self.parent_controller.parent_controller.configuration_controller.stage_step
+        )
         for ax in self._axes:
             self.variables[f"{ax}_start"].set(positions.get(f"{ax}_start", 0.0))
             self.variables[f"{ax}_end"].set(positions.get(f"{ax}_end", 0.0))
             self.variables[f"{ax}_dist"].set(positions.get(f"{ax}_dist", 0.0))
-            self.variables[f"{ax}_fov"].set(positions.get(f"{ax}_fov", 0.0))
+            if f"{ax}_fov" in positions:
+                default_fov = positions.get(f"{ax}_fov", 0.0)
+            elif ax == "theta":
+                default_fov = stage_step.get("theta", 0.0)
+            else:
+                default_fov = 0.0
+            self.variables[f"{ax}_fov"].set(default_fov)
             self.variables[f"{ax}_tiles"].set(positions.get(f"{ax}_tiles", 1))
 
     def close_window(self, *args) -> None:
@@ -300,9 +336,17 @@ class TilingWizardController(GUIController):
             tiling_setting[f"{axis}_tiles"] = tiles
             tiling_setting[f"{axis}_length"] = fov
 
-        tiling_setting["theta_start"] = float(self.stage_position_vars["theta"].get())
-        tiling_setting["theta_tiles"] = 1
-        tiling_setting["theta_length"] = 0
+        if "theta" not in self._axes:
+            theta_var = self.stage_position_vars.get("theta")
+            theta_start = 0.0
+            if theta_var is not None:
+                try:
+                    theta_start = float(theta_var.get())
+                except (TypeError, ValueError):
+                    theta_start = 0.0
+            tiling_setting["theta_start"] = theta_start
+            tiling_setting["theta_tiles"] = 1
+            tiling_setting["theta_length"] = 0
 
         overlap = float(self._percent_overlap) / 100
         columns, table_values = compute_tiles_from_bounding_box(
@@ -363,8 +407,6 @@ class TilingWizardController(GUIController):
         else:
             axis = self._axes
 
-        overlay = float(self._percent_overlap) / 100
-
         for ax in axis:
             self.is_validated[ax] = True
             fov_value = self.variables[f"{ax}_fov"].get()
@@ -375,12 +417,17 @@ class TilingWizardController(GUIController):
                 dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
                 fov = abs(float(self.variables[f"{ax}_fov"].get()))  # um
 
-                if ax.lower() == "x" or ax.lower() == "y":
+                if ax.lower() in ("x", "y", "theta"):
                     # + fov because distance is center of the fov to center of
                     # the fov and so we are covering a distance that is 2 *
                     # 1/2 * fov larger than dist
                     dist += fov
 
+                overlay = (
+                    0
+                    if ax.lower() == "theta"
+                    else float(self._percent_overlap) / 100
+                )
                 num_tiles = calc_num_tiles(dist, overlay, fov)
 
                 self.variables[f"{ax}_tiles"].set(num_tiles)
@@ -521,6 +568,10 @@ class TilingWizardController(GUIController):
                         self.stack_acq_widgets["start_focus"].get()
                     )
                     axis = self.primary_f_axis
+                elif ax == "theta":
+                    continue
+                else:
+                    continue
 
                 # for ax in self._axes:
                 # self._fov[ax] = locals().get(ax)

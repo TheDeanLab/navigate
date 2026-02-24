@@ -33,7 +33,6 @@
 # Standard Library Imports
 import unittest
 from unittest.mock import MagicMock, patch
-import tkinter as tk
 
 # Third Party Imports
 import pytest
@@ -55,15 +54,29 @@ class TestFakeEvent(unittest.TestCase):
 
 class TestStageMovement(unittest.TestCase):
     def setUp(self):
+        # Patch tkinter variables so tests do not require a real Tcl/Tk runtime.
+        self.stringvar_patcher = patch(
+            "navigate.controller.sub_controllers.menus.tk.StringVar",
+            return_value=MagicMock(),
+        )
+        self.intvar_patcher = patch(
+            "navigate.controller.sub_controllers.menus.tk.IntVar",
+            return_value=MagicMock(),
+        )
+        self.booleanvar_patcher = patch(
+            "navigate.controller.sub_controllers.menus.tk.BooleanVar",
+            return_value=MagicMock(),
+        )
+        self.stringvar_patcher.start()
+        self.intvar_patcher.start()
+        self.booleanvar_patcher.start()
+
         # Create a mock parent controller and view
-        try:
-            self.root = tk.Tk()
-        except tk.TclError as exc:
-            self.skipTest(f"Tk unavailable in this environment: {exc}")
         self.parent_controller = MagicMock()
         self.parent_controller.stage_controller = MagicMock()
         self.view = MagicMock()
-        self.view.root = self.root
+        self.view.root = MagicMock()
+        self.parent_controller.view = self.view
 
         # Initialize the menu controller
         self.mc = MenuController(self.view, self.parent_controller)
@@ -73,8 +86,9 @@ class TestStageMovement(unittest.TestCase):
         self.parent_controller.configuration["gui"]["histogram"].get.return_value = True
 
     def tearDown(self):
-        if hasattr(self, "root"):
-            self.root.destroy()
+        self.booleanvar_patcher.stop()
+        self.intvar_patcher.stop()
+        self.stringvar_patcher.stop()
 
     def test_initialize_menus(self):
         self.mc.initialize_menus()

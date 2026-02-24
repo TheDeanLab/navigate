@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+from tkinter import ttk
 
 # Third Party Imports
 from PIL import Image, ImageDraw, ImageFont
@@ -66,7 +67,7 @@ def text_array(text: str, offset: tuple = (0, 0)):
 
 
 def create_arrow_image(
-    xys, image_width=300, image_height=200, direction="right", image=None
+    xys, image_width=300, image_height=200, direction="right", image=None, fill=None
 ):
     """Create/Update a Image Object
 
@@ -84,6 +85,9 @@ def create_arrow_image(
         arrow directions: "left", "right", "up", "down"
     image: Image/None
         update an exist Image object/create a new Image object
+    fill: str
+        fill color of the arrow
+
 
     Returns
     -------
@@ -94,9 +98,15 @@ def create_arrow_image(
     if not image:
         image = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
+    if fill is None:
+        style = ttk.Style()
+        fill = style.lookup("TLabel", "foreground", default="black")
+        if fill.startswith("system"):
+            fill = "black"
+
     # draw line
     for i in range(len(xys) - 1):
-        draw.line([xys[i], xys[i + 1]], fill="black", width=2)
+        draw.line([xys[i], xys[i + 1]], fill=fill, width=2)
 
     # draw arrow
     circle_x, circle_y = xys[-1]
@@ -112,6 +122,6 @@ def create_arrow_image(
     elif direction == "down":
         bounding_circle = ((circle_x, circle_y - 10), 10)
         rotation = 180
-    draw.regular_polygon(bounding_circle, n_sides=3, rotation=rotation, fill="black")
+    draw.regular_polygon(bounding_circle, n_sides=3, rotation=rotation, fill=fill)
 
     return image

@@ -475,7 +475,6 @@ class Autofocus:
         if settings.get("robust_fit", False):
             fit_data, fit_focus_position, r_squared = self.robust_autofocus()
 
-
             # If the fit is good, use the fit focus position, else use the max entropy
             if r_squared > 0.9:
                 self.focus_pos = fit_focus_position

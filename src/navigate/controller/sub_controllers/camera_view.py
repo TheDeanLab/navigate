@@ -54,6 +54,7 @@ from navigate.model.analysis.camera import compute_signal_to_noise
 from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path, update_config_dict
 from navigate.tools.decorators import performance_monitor
+from navigate.view.theme import get_theme_color, get_theme_font
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -1863,8 +1864,8 @@ class MIPViewController(BaseViewController):
             self.canvas_width // 2,
             self.canvas_height // 2,
             text="Maximum Intensity Projection Disabled\nRight Click to Enable",
-            font=("Arial", 14, "italic"),
-            fill="gray",
+            font=get_theme_font("title_italic"),
+            fill=get_theme_color("muted_text", "gray"),
             anchor="center",
             justify="center",
         )

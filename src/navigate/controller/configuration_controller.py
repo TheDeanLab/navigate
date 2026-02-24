@@ -256,13 +256,13 @@ class ConfigurationController:
             Step size in x (same step size for y), z, theta, and f.
         """
         if self.microscope_config is not None:
-            stage_dict = self.microscope_config["stage"]
+            stage_dict = self.microscope_config.get("stage", {})
             steps = {
-                "x": stage_dict["x_step"],
-                "y": stage_dict["y_step"],
-                "z": stage_dict["z_step"],
-                "theta": stage_dict["theta_step"],
-                "f": stage_dict["f_step"],
+                "x": stage_dict.get("x_step", 1),
+                "y": stage_dict.get("y_step", 1),
+                "z": stage_dict.get("z_step", 1),
+                "theta": stage_dict.get("theta_step", 1),
+                "f": stage_dict.get("f_step", 1),
             }
         else:
             steps = {"x": 10, "y": 10, "z": 10, "theta": 10, "f": 10}

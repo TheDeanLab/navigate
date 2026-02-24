@@ -189,9 +189,13 @@ def test_set_table(tiling_wizard_controller):
         tiling_wizard_controller.stack_acq_widgets["end_position"].get()
     )
 
-    # Default to fixed theta
-    r_start = float(tiling_wizard_controller.stage_position_vars["theta"].get())
-    r_stop = float(tiling_wizard_controller.stage_position_vars["theta"].get())
+    # Default to fixed theta. Empty widget values are treated as 0.0.
+    r_start = float(
+        tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0
+    )
+    r_stop = float(
+        tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0
+    )
 
     f_start = float(tiling_wizard_controller.variables["f_start"].get()) - float(
         tiling_wizard_controller.stack_acq_widgets["start_focus"].get()
@@ -235,6 +239,11 @@ def test_load_settings_uses_defaults_when_missing_file():
     controller = TilingWizardController.__new__(TilingWizardController)
     controller._percent_overlap = 13.0
     controller._axes = ["x", "y", "z", "f"]
+    controller.parent_controller = SimpleNamespace(
+        parent_controller=SimpleNamespace(
+            configuration_controller=SimpleNamespace(stage_step={"theta": 0.0})
+        )
+    )
     controller.variables = {"percent_overlap": Var(), "total_tiles": Var()}
     for axis in controller._axes:
         controller.variables[f"{axis}_start"] = Var()
@@ -278,6 +287,11 @@ def test_load_settings_reads_existing_yaml_values():
     controller = TilingWizardController.__new__(TilingWizardController)
     controller._percent_overlap = 15.0
     controller._axes = ["x"]
+    controller.parent_controller = SimpleNamespace(
+        parent_controller=SimpleNamespace(
+            configuration_controller=SimpleNamespace(stage_step={"theta": 0.0})
+        )
+    )
     controller.variables = {
         "percent_overlap": Var(),
         "total_tiles": Var(),

@@ -1051,6 +1051,7 @@ class TigerController:
         amplitude: int = 1000,
         offset: int = 500,
         period: int = 10,
+        rise_time: int = 0
     ) -> None:
         """Programs the analog waveforms using SAA, SAO, SAP, and SAF
         Default waveform is a sawtooth waveform with an amplitude of 1V, an offset of 0.5V and period of 10 ms
@@ -1068,16 +1069,21 @@ class TigerController:
             sets the center position of the waveform in mV
         period: int
             sets the period of the waveform in ms
+        rise_time: int
+            for Variable Triangle (132), sets rise time of waveform
         """
         # takes amplitude and offset from navigate and modifies them to how the TG-1000 takes them
         if waveform % 128 == 3:
             offset = 0.5 * (offset + amplitude)
 
         amplitude = amplitude * 2
+
+        logger.info("waveform=%s amplitude=%s axis=%s offset=%s period=%s",
+                    waveform, amplitude, axis, offset, period)
         if self.verbose:
-            print(f"Period (ms): {period}")
-            print("***", waveform, amplitude, axis, offset, period)
-        # TODO: 3 is the address of the GALVO DAC. May need to make this configurable.
+            print("waveform=%s amplitude=%s axis=%s offset=%s period=%s", waveform,
+                  amplitude, axis, offset, period)
+
         self.send_command(f"SAP {axis}={round(waveform)}")
         self.read_response()
         self.send_command(f"SAA {axis}={round(amplitude)}")
@@ -1086,6 +1092,9 @@ class TigerController:
         self.read_response()
         self.send_command(f"SAF {axis}={round(period)}")
         self.read_response()
+        if waveform == 132:
+            self.send_command(f"OS {axis}={round(rise_time)}")
+            self.read_response()
 
     def single_axis_mode(self, axis: str, mode: int) -> None:
         """Sets the single-axis mode according to the integer code.
@@ -1130,8 +1139,10 @@ class TigerController:
             Delay in ms for the camera to turn on relative to the master trigger
         remote_focus_delay: float
             Delay in ms for the remote focus to turn on relative to the master trigger
+        exposure_time: float
+            Camera exposure time
         sweep_time: float
-            THe time in ms between each iteration of the master trigger
+            The time in ms between each iteration of the master trigger
         analog_outputs: dict
             Dictionary that includes the device and the output axis on the DAC4 card,
             as specified in config
@@ -1157,6 +1168,9 @@ class TigerController:
         remote_focus_axis = analog_outputs["remote_focus"]
         logger.info(f"Exposure time: {exposure_time}")
         logger.info(f"Sweep time: {sweep_time}")
+        if self.verbose:
+            print(f"Exposure time: {exposure_time}")
+            print(f"Sweep time: {sweep_time}")
         cycle_time = sweep_time * num_cycles
 
         # Convert all time values to 1/4 ms
@@ -1303,8 +1317,6 @@ class TigerController:
         # Runs the main setup commands, followed by the Galvo specific commands
         for command in commands:
             self.send_command(f"{command}\r")
-            if self.verbose:
-                print(f"Sent Command: {command}")
             self.read_response()
         for command in galvo_commands:
             self.send_command(f"{command}\r")
@@ -1332,7 +1344,7 @@ class TigerController:
             try:
                 result = int(response.split(" ")[1])
             except (ValueError, IndexError):
-                logger.error("Couldn't read logic cell state, trying again...")
+                logger.debug("Couldn't read logic cell state, trying again...")
                 continue
             bit4 = result >> 3 & 1
             time.sleep(WAIT_TIME)  # sleep for 50 ms before checking again
@@ -1380,6 +1392,4 @@ class TigerController:
         ]
         for command in commands:
             self.send_command(f"{command}\r")
-            if self.verbose:
-                print(f"Sent Command: {command}")
             self.read_response()

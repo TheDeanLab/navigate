@@ -64,6 +64,22 @@ class ChannelSettingController(GUIController):
         #: ConfigurationController: The configuration controller.
         self.configuration_controller = configuration_controller
 
+        #: str: The mode of the channel setting controller. Either 'live' or 'stop'.
+        self.mode = "stop"
+
+        #: bool: Whether the channel setting controller is in initialization.
+        self.in_initialization = True
+
+        #: int: The event id.
+        self.event_id = None
+
+        #: dict: The channel setting dictionary.
+        self.channel_setting_dict = None
+
+        self.rebuild_view()
+
+    def rebuild_view(self) -> None:
+        """Rebuild channel widgets from the active microscope configuration."""
         # num: numbers of channels
         self.num = self.configuration_controller.number_of_channels
         self.number_of_filter_wheels = (
@@ -78,18 +94,6 @@ class ChannelSettingController(GUIController):
             filter_wheel_names=self.configuration_controller.filter_wheel_names,
             filter_wheel_types=filter_wheel_types,
         )
-
-        #: str: The mode of the channel setting controller. Either 'live' or 'stop'.
-        self.mode = "stop"
-
-        #: bool: Whether the channel setting controller is in initialization.
-        self.in_initialization = True
-
-        #: int: The event id.
-        self.event_id = None
-
-        #: dict: The channel setting dictionary.
-        self.channel_setting_dict = None
 
         # widget command binds
         for i in range(self.num):

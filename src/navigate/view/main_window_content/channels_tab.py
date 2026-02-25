@@ -229,6 +229,7 @@ class ChannelCreator(ttk.Labelframe):
         filter_wheel_types : list
             The types of filter wheels
         """
+        self.reset_frame()
 
         self.create_labels(filter_wheel_names, filter_wheels, filter_wheel_types)
 
@@ -353,7 +354,10 @@ class ChannelCreator(ttk.Labelframe):
             )
 
     def create_labels(
-        self, filter_wheel_names: list, filter_wheels: int, filter_wheel_types: list = None
+        self,
+        filter_wheel_names: list,
+        filter_wheels: int,
+        filter_wheel_types: list = None,
     ) -> None:
         """Create the labels for the columns.
 
@@ -393,8 +397,32 @@ class ChannelCreator(ttk.Labelframe):
                 row=0, column=0, sticky=tk.N, pady=self.pad_y, padx=self.pad_x
             )
 
+    def reset_frame(self) -> None:
+        """Destroy existing channel widgets and clear references."""
+        for child in self.winfo_children():
+            child.destroy()
+
+        self.channel_variables = []
+        self.channel_checks = []
+        self.laser_variables = []
+        self.laser_pulldowns = []
+        self.laserpower_variables = []
+        self.laserpower_pulldowns = []
+        self.filterwheel_variables = []
+        self.filterwheel_pulldowns = []
+        self.exptime_variables = []
+        self.exptime_pulldowns = []
+        self.interval_variables = []
+        self.interval_spins = []
+        self.defocus_variables = []
+        self.defocus_spins = []
+        self.labels = []
+        self.frame_columns = []
+
     @staticmethod
-    def is_synthetic_filter_wheel(filter_wheel_idx: int, filter_wheel_types: list) -> bool:
+    def is_synthetic_filter_wheel(
+        filter_wheel_idx: int, filter_wheel_types: list
+    ) -> bool:
         """Return whether a filter wheel type should be hidden in the GUI."""
         if filter_wheel_types is None or filter_wheel_idx >= len(filter_wheel_types):
             return False

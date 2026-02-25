@@ -77,6 +77,21 @@ class ChannelSettingController(GUIController):
         self.channel_setting_dict = None
 
         self.rebuild_view()
+        self.initialize()
+
+    @staticmethod
+    def _get_dropdown_values(dropdown):
+        """Return combobox values as a tuple."""
+        values = dropdown["values"]
+        if not values:
+            return ()
+        if isinstance(values, tuple):
+            return values
+        if isinstance(values, list):
+            return tuple(values)
+        if isinstance(values, str):
+            return tuple(dropdown.tk.splitlist(values))
+        return tuple(values)
 
     def rebuild_view(self) -> None:
         """Rebuild channel widgets from the active microscope configuration."""
@@ -193,23 +208,20 @@ class ChannelSettingController(GUIController):
         to be populated with a default value.
         """
         for i in range(self.num):
-            if (
-                self.view.laser_pulldowns[i].get()
-                not in self.view.laser_pulldowns[i]["values"]
-            ):
-                self.view.laser_pulldowns[i].set(
-                    self.view.laser_pulldowns[i]["values"][0]
-                )
+            laser_values = self._get_dropdown_values(self.view.laser_pulldowns[i])
+            if laser_values and self.view.laser_pulldowns[i].get() not in laser_values:
+                self.view.laser_pulldowns[i].set(laser_values[0])
 
             for j in range(self.number_of_filter_wheels):
                 idx = i * self.number_of_filter_wheels + j
+                filter_values = self._get_dropdown_values(
+                    self.view.filterwheel_pulldowns[idx]
+                )
                 if (
-                    self.view.filterwheel_pulldowns[idx].get()
-                    not in self.view.filterwheel_pulldowns[idx]["values"]
+                    filter_values
+                    and self.view.filterwheel_pulldowns[idx].get() not in filter_values
                 ):
-                    self.view.filterwheel_pulldowns[idx].set(
-                        self.view.filterwheel_pulldowns[idx]["values"][0]
-                    )
+                    self.view.filterwheel_pulldowns[idx].set(filter_values[0])
 
             if self.view.exptime_pulldowns[i].get() == "":
                 self.view.exptime_pulldowns[i].set(100.0)
@@ -475,14 +487,16 @@ class ChannelSettingController(GUIController):
         if not value:
             return -1
         if dropdown_name == "laser":
+            values = self._get_dropdown_values(self.view.laser_pulldowns[0])
             try:
-                laser_id = self.view.laser_pulldowns[0]["values"].index(value)
+                laser_id = values.index(value)
             except ValueError:
                 return 0
             return laser_id
         elif dropdown_name.startswith("filter"):
             idx = int(dropdown_name[dropdown_name.rfind("_") + 1 :])
-            return self.view.filterwheel_pulldowns[idx]["values"].index(value)
+            values = self._get_dropdown_values(self.view.filterwheel_pulldowns[idx])
+            return values.index(value)
         return -1
 
     def verify_experiment_values(self):

@@ -144,6 +144,57 @@ def test_get_configuration_paths_create_dir(monkeypatch):
     delete_folder("TESTPATH")
 
 
+def test_verify_configuration_sets_filter_wheel_visibility():
+    manager = Manager()
+    try:
+        current_path = os.path.abspath(os.path.dirname(__file__))
+        root_path = os.path.dirname(os.path.dirname(current_path))
+        config_path = os.path.join(root_path, "src", "navigate", "config")
+        configuration_file = os.path.join(config_path, "configuration.yaml")
+
+        raw_configuration = load_yaml_file(configuration_file)
+        microscopes_raw = raw_configuration["microscopes"]
+
+        ref_filter_wheels = []
+        filter_wheel_ids_by_microscope = {}
+        for microscope_name, microscope_config in microscopes_raw.items():
+            filter_wheel_config = microscope_config["filter_wheel"]
+            if isinstance(filter_wheel_config, dict):
+                filter_wheel_config = [filter_wheel_config]
+
+            filter_wheel_ids = []
+            for wheel_config in filter_wheel_config:
+                filter_wheel_id = config.build_ref_name(
+                    "-",
+                    wheel_config["hardware"]["type"],
+                    wheel_config["hardware"]["wheel_number"],
+                )
+                filter_wheel_ids.append(filter_wheel_id)
+                if filter_wheel_id not in ref_filter_wheels:
+                    ref_filter_wheels.append(filter_wheel_id)
+
+            filter_wheel_ids_by_microscope[microscope_name] = set(filter_wheel_ids)
+
+        expected_visibility = {
+            microscope_name: [
+                ref_name in filter_wheel_ids_by_microscope[microscope_name]
+                for ref_name in ref_filter_wheels
+            ]
+            for microscope_name in microscopes_raw.keys()
+        }
+
+        configuration = config.load_configs(manager, configuration=configuration_file)
+        config.verify_configuration(manager, configuration)
+        microscopes = configuration["configuration"]["microscopes"]
+
+        for microscope_name, expected in expected_visibility.items():
+            visibility = microscopes[microscope_name]["filter_wheel_visibility"]
+            assert isinstance(visibility, ListProxy)
+            assert list(visibility) == expected
+    finally:
+        manager.shutdown()
+
+
 # test that the system is exited if no file is provided to load_yaml_config
 def test_load_yaml_config_no_file():
     """Test that the system exits if no file is provided."""

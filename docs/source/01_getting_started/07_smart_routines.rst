@@ -7,7 +7,7 @@ Smart Acquisition Routines
 
 **navigate**'s :ref:`feature container <user_guide_features>` lets you build acquisition routines by chaining existing :ref:`features <user_guide_features>` into lists. See :ref:`Currently Implemented Features <currently_implemented_features>` for the complete list. You can also build additional features as :ref:`plugins <plugin>`.
 
-This walkthrough builds a routine that scans multiple positions and takes z-stacks only where tissue is detected.
+One common problem in light-sheet microscopy is wasting time acquiring z-stacks in empty space. With the feature container, you can build a routine that checks for tissue at each position and only acquires z-stacks where tissue is detected. This section walks through building such a routine.
 
 Prerequisites
 =============
@@ -23,13 +23,9 @@ Example Setup
 
 The example below assumes two positions in the multiposition table: one with tissue and one without tissue.
 
-.. image:: 03_i_want_to/images/intermediate/multiposition_tissue.png
+.. image:: ../images/multiposition_tissue.png
    :align: center
-   :alt: Multiposition entry showing tissue present.
-
-.. image:: 03_i_want_to/images/intermediate/multiposition_empty.png
-   :align: center
-   :alt: Multiposition entry showing no tissue present.
+   :alt: Multiposition table. One position will have tissue, and the other will not.
 
 Step 1: Create the Base Feature List
 ====================================
@@ -44,7 +40,7 @@ Step 1: Create the Base Feature List
 
 4. Click :guilabel:`Preview`.
 
-.. image:: 03_i_want_to/images/feature_gui_1.png
+.. image:: ../images/feature_gui_1.png
    :align: center
    :alt: Feature list editor showing PrepareNextChannel as the first node.
 
@@ -56,22 +52,26 @@ Step 2: Add Position Traversal
 ==============================
 
 1. Right-click ``PrepareNextChannel`` and select :guilabel:`Insert After`.
-2. Click the new node and choose ``MoveToNextPositionInMultiPositionTable``.
-3. Close the node selection popup.
+2. Confirm a second placeholder node appears after ``PrepareNextChannel``.
+3. Click the new node and choose ``MoveToNextPositionInMultiPositionTable``.
 
-.. image:: 03_i_want_to/images/feature_gui_2.png
+.. image:: ../images/feature_gui_3.png
    :align: center
-   :alt: Feature node context menu showing Insert After.
+   :alt: Feature list showing a second placeholder node inserted after PrepareNextChannel.
 
-.. image:: 03_i_want_to/images/feature_gui_3.png
-   :align: center
-   :alt: Feature list showing a second node inserted after PrepareNextChannel.
+4. Configure the new node. Here, one can set the resolution_value, zoom_value, and offset.
 
-.. image:: 03_i_want_to/images/feature_gui_4.png
+.. todo::
+   Add more informationa bout the fields in this popup, including resolution_value, zoom_value, and offset.
+
+.. image:: ../images/feature_gui_4.png
    :align: center
    :alt: Feature selection popup used to choose MoveToNextPositionInMultiPositionTable.
 
-.. image:: 03_i_want_to/images/feature_gui_5.png
+
+5. Close the node selection popup.
+
+.. image:: ../images/feature_gui_5.png
    :align: center
    :alt: Feature list showing PrepareNextChannel followed by MoveToNextPositionInMultiPositionTable.
 
@@ -85,15 +85,15 @@ Step 3: Add Tissue Detection
 1. Right-click ``MoveToNextPositionInMultiPositionTable`` and select :guilabel:`Insert After`.
 2. Set the new node to ``DetectTissueInStackAndReturn``.
 
-.. image:: 03_i_want_to/images/feature_gui_6.png
+.. image:: ../images/feature_gui_6.png
    :align: center
    :alt: DetectTissueInStackAndReturn settings in the feature list editor.
 
-Key parameters:
+3. Configure the ``DetectTissueInStackAndReturn`` node with the following parameters:
 
-1. :guilabel:`planes`: number of z-planes checked for tissue.
-2. :guilabel:`percentage`: required image fraction containing tissue to return ``true``.
-3. :guilabel:`detect_func`: tissue detection function from :doc:`remove_empty_tiles </05_reference/_autosummary/navigate.model.features.remove_empty_tiles>`. If set to ``None``, **navigate** uses ``detect_tissue()``.
+    1. :guilabel:`planes`: number of z-planes checked for tissue.
+    2. :guilabel:`percentage`: required image fraction containing tissue to return ``true``.
+    3. :guilabel:`detect_func`: tissue detection function from :doc:`remove_empty_tiles </05_reference/_autosummary/navigate.model.features.remove_empty_tiles>`. If set to ``None``, **navigate** uses ``detect_tissue()``.
 
 .. tip::
 
@@ -107,11 +107,13 @@ Step 4: Add Loop Control
 3. Set ``steps`` to ``experiment.MicroscopeState.multiposition_count``.
 4. Group the repeated section in parentheses ``()`` and click :guilabel:`Preview`.
 
-.. image:: 03_i_want_to/images/feature_gui_7.png
+.. image:: ../images/feature_gui_7.png
    :align: center
    :alt: LoopByCount node inserted after tissue detection.
 
-.. image:: 03_i_want_to/images/feature_gui_8.png
+5. Confirm that the displayed routine shows the looped section in the graphical user interface.
+
+.. image:: ../images/feature_gui_8.png
    :align: center
    :alt: Preview showing the looped section enclosed in parentheses.
 
@@ -136,13 +138,9 @@ Step 5: Convert Tissue Detection to a Decision Node
 2. Click :guilabel:`Preview`.
 3. Click the node to open the decision editor and verify both branches.
 
-.. image:: 03_i_want_to/images/feature_gui_9.png
+.. image:: ../images/feature_gui_9.png
    :align: center
    :alt: Feature list preview showing DetectTissueInStackAndReturn as a decision node.
-
-.. image:: 03_i_want_to/images/feature_gui_10.png
-   :align: center
-   :alt: Decision editor showing true and false branch configuration.
 
 .. tip::
 

@@ -756,6 +756,318 @@ def _capture_configurator(ctx: Dict[str, object], cli_args: argparse.Namespace) 
     return _capture_widget(root, out_path)
 
 
+SMART_ROUTINE_CONTENT_BASE = '[{"name": PrepareNextChannel}]'
+SMART_ROUTINE_CONTENT_DOUBLE_PREP = (
+    '[{"name": PrepareNextChannel}, {"name": PrepareNextChannel}]'
+)
+SMART_ROUTINE_CONTENT_MOVE_NEXT = (
+    '[{"name": PrepareNextChannel}, {"name": MoveToNextPositionInMultiPositionTable}]'
+)
+SMART_ROUTINE_CONTENT_DETECT = (
+    '[{"name": PrepareNextChannel}, {"name": MoveToNextPositionInMultiPositionTable}, '
+    '{"name": DetectTissueInStackAndReturn}]'
+)
+SMART_ROUTINE_CONTENT_LOOP = (
+    '[{"name": PrepareNextChannel}, {"name": MoveToNextPositionInMultiPositionTable}, '
+    '{"name": DetectTissueInStackAndReturn}, {"name": LoopByCount}]'
+)
+SMART_ROUTINE_CONTENT_LOOP_GROUPED = (
+    '[{"name": PrepareNextChannel}, ({"name": MoveToNextPositionInMultiPositionTable}, '
+    '{"name": DetectTissueInStackAndReturn}, {"name": LoopByCount})]'
+)
+SMART_ROUTINE_CONTENT_DECISION = (
+    '[{"name": PrepareNextChannel}, ({"name": MoveToNextPositionInMultiPositionTable}, '
+    '{"name": DetectTissueInStackAndReturn, "args": (1, 0.5, None), '
+    '"true": [{"name": ZStackAcquisition, "args": (False, False, "z-stack")}], '
+    '"false": "continue"}, {"name": LoopByCount})]'
+)
+
+
+def _close_feature_list_popup(ctx: Dict[str, object]) -> None:
+    controller = ctx["controller"]
+    popup_controller = getattr(controller, "features_popup_controller", None)
+    if popup_controller is None:
+        return
+    try:
+        popup_controller.exit_func()
+    except Exception:
+        try:
+            popup_controller.view.popup.dismiss()
+        except Exception:
+            pass
+    finally:
+        if hasattr(controller, "features_popup_controller"):
+            try:
+                delattr(controller, "features_popup_controller")
+            except Exception:
+                pass
+
+
+def _open_feature_list_popup(
+    ctx: Dict[str, object],
+    cli_args: argparse.Namespace,
+    content: str,
+    feature_list_name: str = "TestFeature",
+):
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _select_settings_tab(ctx, "channels_tab")
+    _close_feature_list_popup(ctx)
+    controller.menu_controller.popup_feature_list_setting()
+    popup_controller = controller.features_popup_controller
+    popup_view = popup_controller.view
+    popup_view.inputs["feature_list_name"].set(feature_list_name)
+    popup_view.inputs["content"].delete("1.0", tk.END)
+    popup_view.inputs["content"].insert("1.0", content)
+    popup_controller.feature_list_graph_controller.draw_feature_list_graph(
+        new_list_flag=True
+    )
+    _prepare_for_capture(popup_view.popup, cli_args)
+    return popup_controller
+
+
+def _capture_feature_list_popup_state(
+    ctx: Dict[str, object],
+    cli_args: argparse.Namespace,
+    *,
+    content: str,
+    out_name: str,
+) -> str:
+    popup_controller = _open_feature_list_popup(ctx, cli_args, content=content)
+    out_path = os.path.join(cli_args.output_root, out_name)
+    try:
+        _prepare_for_capture(popup_controller.view.popup, cli_args)
+        return _capture_widget(popup_controller.view.popup, out_path, pad=2)
+    finally:
+        _close_feature_list_popup(ctx)
+
+
+def _capture_feature_gui_1(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    return _capture_feature_list_popup_state(
+        ctx,
+        cli_args,
+        content=SMART_ROUTINE_CONTENT_BASE,
+        out_name="feature_gui_1.png",
+    )
+
+
+def _capture_feature_gui_2(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    popup_controller = _open_feature_list_popup(
+        ctx, cli_args, content=SMART_ROUTINE_CONTENT_BASE
+    )
+    out_path = os.path.join(cli_args.output_root, "feature_gui_2.png")
+    context_menu = None
+    try:
+        feature_graph = popup_controller.feature_list_graph_controller
+        feature_buttons = feature_graph.feature_list_view.winfo_children()
+        if not feature_buttons:
+            raise RuntimeError("Feature list graph did not render any nodes.")
+        anchor = feature_buttons[0]
+        context_menu = tk.Menu(feature_graph.feature_list_view, tearoff=0)
+        context_menu.add_command(label="Delete")
+        context_menu.add_command(label="Insert Before")
+        context_menu.add_command(label="Insert After")
+        _prepare_for_capture(popup_controller.view.popup, cli_args)
+        context_menu.post(
+            anchor.winfo_rootx() + 8, anchor.winfo_rooty() + anchor.winfo_height() + 6
+        )
+        settle_window(
+            popup_controller.view.popup,
+            passes=max(2, cli_args.passes),
+            delay_ms=cli_args.delay_ms,
+        )
+        return _capture_widget(popup_controller.view.popup, out_path, pad=2)
+    finally:
+        if context_menu is not None:
+            try:
+                context_menu.unpost()
+                context_menu.destroy()
+            except Exception:
+                pass
+        _close_feature_list_popup(ctx)
+
+
+def _capture_feature_gui_3(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    return _capture_feature_list_popup_state(
+        ctx,
+        cli_args,
+        content=SMART_ROUTINE_CONTENT_DOUBLE_PREP,
+        out_name="feature_gui_3.png",
+    )
+
+
+def _capture_feature_gui_4(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    popup_controller = _open_feature_list_popup(
+        ctx, cli_args, content=SMART_ROUTINE_CONTENT_DOUBLE_PREP
+    )
+    out_path = os.path.join(cli_args.output_root, "feature_gui_4.png")
+    try:
+        feature_graph = popup_controller.feature_list_graph_controller
+        feature_graph.show_config_popup(1)(None)
+        if not feature_graph.child_popups:
+            raise RuntimeError("Failed to open feature configuration popup.")
+        config_popup = feature_graph.child_popups[-1]
+        config_popup.feature_name_widget.set("MoveToNextPositionInMultiPositionTable")
+        config_popup.feature_name_widget.widget.event_generate("<<ComboboxSelected>>")
+        _prepare_for_capture(config_popup.popup, cli_args)
+        return _capture_widget(config_popup.popup, out_path, pad=2)
+    finally:
+        try:
+            popup_controller.close_child_popups()
+        except Exception:
+            pass
+        _close_feature_list_popup(ctx)
+
+
+def _capture_feature_gui_5(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    return _capture_feature_list_popup_state(
+        ctx,
+        cli_args,
+        content=SMART_ROUTINE_CONTENT_MOVE_NEXT,
+        out_name="feature_gui_5.png",
+    )
+
+
+def _capture_feature_gui_6(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    return _capture_feature_list_popup_state(
+        ctx,
+        cli_args,
+        content=SMART_ROUTINE_CONTENT_DETECT,
+        out_name="feature_gui_6.png",
+    )
+
+
+def _capture_feature_gui_7(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    return _capture_feature_list_popup_state(
+        ctx,
+        cli_args,
+        content=SMART_ROUTINE_CONTENT_LOOP,
+        out_name="feature_gui_7.png",
+    )
+
+
+def _capture_feature_gui_8(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    return _capture_feature_list_popup_state(
+        ctx,
+        cli_args,
+        content=SMART_ROUTINE_CONTENT_LOOP_GROUPED,
+        out_name="feature_gui_8.png",
+    )
+
+
+def _capture_feature_gui_9(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    return _capture_feature_list_popup_state(
+        ctx,
+        cli_args,
+        content=SMART_ROUTINE_CONTENT_DECISION,
+        out_name="feature_gui_9.png",
+    )
+
+
+def _capture_feature_gui_10(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    popup_controller = _open_feature_list_popup(
+        ctx, cli_args, content=SMART_ROUTINE_CONTENT_DECISION
+    )
+    out_path = os.path.join(cli_args.output_root, "feature_gui_10.png")
+    try:
+        feature_graph = popup_controller.feature_list_graph_controller
+        feature_graph.show_config_popup(2)(None)
+        if not feature_graph.child_popups:
+            raise RuntimeError("Failed to open decision-node configuration popup.")
+        config_popup = feature_graph.child_popups[-1]
+        _prepare_for_capture(config_popup.popup, cli_args)
+        return _capture_widget(config_popup.popup, out_path, pad=2)
+    finally:
+        try:
+            popup_controller.close_child_popups()
+        except Exception:
+            pass
+        _close_feature_list_popup(ctx)
+
+
+def _set_example_multiposition_table(ctx: Dict[str, object]) -> None:
+    controller = ctx["controller"]
+    stage_axes = controller.configuration_controller.stage_axes
+    row_1 = {
+        "x": -2400.0,
+        "y": -13000.0,
+        "z": 4845.4,
+        "theta": 208.02,
+        "f": -27016.0,
+    }
+    row_2 = {
+        "x": 1584.7,
+        "y": -13000.0,
+        "z": 4845.4,
+        "theta": 208.02,
+        "f": -27016.0,
+    }
+    headers = [axis.upper() for axis in stage_axes]
+    positions = [
+        headers,
+        [row_1.get(axis.lower(), 0.0) for axis in stage_axes],
+        [row_2.get(axis.lower(), 0.0) for axis in stage_axes],
+    ]
+    controller.multiposition_tab_controller.set_positions(positions)
+
+
+def _select_multiposition_row(ctx: Dict[str, object], row_index: int) -> None:
+    table = ctx["controller"].multiposition_tab_controller.table
+    max_row = max(0, table.model.df.shape[0] - 1)
+    selected = min(max(row_index, 0), max_row)
+    table.currentrow = selected
+    try:
+        table.setSelectedRow(selected)
+    except Exception:
+        pass
+    try:
+        table.redraw()
+        table.tableChanged()
+    except Exception:
+        pass
+
+
+def _capture_multiposition_example(
+    ctx: Dict[str, object],
+    cli_args: argparse.Namespace,
+    *,
+    out_name: str,
+    row_index: int,
+) -> str:
+    controller = ctx["controller"]
+    _set_mock_live_acquiring(ctx)
+    _select_settings_tab(ctx, "multiposition_tab")
+    _set_example_multiposition_table(ctx)
+    _select_multiposition_row(ctx, row_index)
+    _prepare_for_capture(ctx["root"], cli_args)
+    out_path = os.path.join(cli_args.output_root, out_name)
+    return _capture_widget(controller.view, out_path)
+
+
+def _capture_multiposition_tissue(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    return _capture_multiposition_example(
+        ctx,
+        cli_args,
+        out_name="multiposition_tissue.png",
+        row_index=0,
+    )
+
+
+def _capture_multiposition_empty(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    return _capture_multiposition_example(
+        ctx,
+        cli_args,
+        out_name="multiposition_empty.png",
+        row_index=1,
+    )
+
+
 CAPTURES: List[CaptureSpec] = [
     CaptureSpec(
         name="main-window",
@@ -945,6 +1257,90 @@ CAPTURES: List[CaptureSpec] = [
         description="Configuration assistant window",
         context="configurator",
         runner=_capture_configurator,
+    ),
+    CaptureSpec(
+        name="multiposition-tissue",
+        group="smart-routines",
+        description="Main window with multiposition tab and first row selected",
+        context="controller",
+        runner=_capture_multiposition_tissue,
+    ),
+    CaptureSpec(
+        name="multiposition-empty",
+        group="smart-routines",
+        description="Main window with multiposition tab and second row selected",
+        context="controller",
+        runner=_capture_multiposition_empty,
+    ),
+    CaptureSpec(
+        name="feature-gui-1",
+        group="smart-routines",
+        description="Feature list popup with initial PrepareNextChannel node",
+        context="controller",
+        runner=_capture_feature_gui_1,
+    ),
+    CaptureSpec(
+        name="feature-gui-2",
+        group="smart-routines",
+        description="Feature list popup with context menu near the first node",
+        context="controller",
+        runner=_capture_feature_gui_2,
+    ),
+    CaptureSpec(
+        name="feature-gui-3",
+        group="smart-routines",
+        description="Feature list popup with duplicated PrepareNextChannel node",
+        context="controller",
+        runner=_capture_feature_gui_3,
+    ),
+    CaptureSpec(
+        name="feature-gui-4",
+        group="smart-routines",
+        description="Feature selection/config popup for second node",
+        context="controller",
+        runner=_capture_feature_gui_4,
+    ),
+    CaptureSpec(
+        name="feature-gui-5",
+        group="smart-routines",
+        description="Feature list popup with MoveToNextPosition node",
+        context="controller",
+        runner=_capture_feature_gui_5,
+    ),
+    CaptureSpec(
+        name="feature-gui-6",
+        group="smart-routines",
+        description="Feature list popup with DetectTissueInStackAndReturn node",
+        context="controller",
+        runner=_capture_feature_gui_6,
+    ),
+    CaptureSpec(
+        name="feature-gui-7",
+        group="smart-routines",
+        description="Feature list popup with LoopByCount added",
+        context="controller",
+        runner=_capture_feature_gui_7,
+    ),
+    CaptureSpec(
+        name="feature-gui-8",
+        group="smart-routines",
+        description="Feature list popup with loop grouping parentheses",
+        context="controller",
+        runner=_capture_feature_gui_8,
+    ),
+    CaptureSpec(
+        name="feature-gui-9",
+        group="smart-routines",
+        description="Feature list popup with DetectTissue decision node",
+        context="controller",
+        runner=_capture_feature_gui_9,
+    ),
+    CaptureSpec(
+        name="feature-gui-10",
+        group="smart-routines",
+        description="Decision-node configuration popup with true/false branches",
+        context="controller",
+        runner=_capture_feature_gui_10,
     ),
 ]
 

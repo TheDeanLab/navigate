@@ -247,7 +247,8 @@ class TestCameraSettingController:
         channels = self.camera_settings.parent_controller.configuration["experiment"][
             "MicroscopeState"
         ]["channels"]
-        exposure_time = channels[list(channels.keys())[0]]["camera_exposure_time"]
+        exposure_time = channels[list(channels.keys())[0]].get(("camera_exposure_time",
+                                                              200))
         assert (
             self.camera_settings.framerate_widgets["exposure_time"].get()
             == exposure_time

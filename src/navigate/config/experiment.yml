@@ -66,3 +66,4 @@ MicroscopeState:
   waveform_template: Default
 MultiPositions:
   [[15000.0,12000.0,15500.0,0.0,70000.0], [35000.0,42000.0,15500.0,0.0,70000.0]]
+smart_microscope_mode: True

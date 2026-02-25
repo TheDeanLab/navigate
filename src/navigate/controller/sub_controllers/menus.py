@@ -657,6 +657,17 @@ class MenuController(GUIController):
             None,
             None,
         ]
+
+        configuration_dict[self.view.menubar.menu_resolution][
+            "Camera Offset and Variance Maps"
+        ] = [
+            "standard",
+            self.popup_camera_map_setting,
+            None,
+            None,
+            None,
+        ]
+
         self.populate_menu(configuration_dict)
 
         # plugins
@@ -717,10 +728,6 @@ class MenuController(GUIController):
         # disable ilastik menu
         self.view.menubar.menu_features.entryconfig(
             "Ilastik Segmentation", state="disabled"
-        )
-        self.view.menubar.menu_features.add_command(
-            label="Camera offset and variance maps",
-            command=self.popup_camera_map_setting,
         )
         self.view.menubar.menu_features.add_command(
             label="Load Customized Feature List", command=self.load_feature_list

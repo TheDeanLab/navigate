@@ -1,3 +1,5 @@
+.. _add_new_hardware_device:
+
 ======================================
  Add a New Hardware Device (Advanced)
 ======================================
@@ -95,7 +97,7 @@ Testing and Validation
 ----------------------
 - Thoroughly test the new hardware integration to ensure it functions correctly within navigate, across all intended use cases and configurations.
 - The naming convention for test files is: `test_` + module name.
-- Device test files are located in `test\model\devices\`
+- Device test files are located in ``test/model/devices/``
 - Device testing utilizes the `pytest` package.
 
 By following these steps, you can effectively integrate new hardware into the **navigate** platform, enhancing its functionality and ensuring it meets specific experimental needs.

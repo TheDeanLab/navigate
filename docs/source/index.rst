@@ -68,6 +68,7 @@ If you are new to **navigate**, begin with :ref:`Software Installation <software
    01_getting_started/04_launching_navigate
    01_getting_started/05_configuring_navigate
    01_getting_started/06_acquiring_data
+   01_getting_started/07_smart_routines
 
 .. toctree::
    :caption: User Guide
@@ -90,6 +91,7 @@ If you are new to **navigate**, begin with :ref:`Software Installation <software
    03_contributing/04_feature_container/feature_container
    03_contributing/05_restapi/restapi
    03_contributing/06_plugin/plugin_home
+   03_contributing/07_hardware_integration/hardware_integration
 
 .. toctree::
    :caption: Troubleshooting & Known Issues

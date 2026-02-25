@@ -205,7 +205,11 @@ class ChannelCreator(ttk.Labelframe):
         self.frame_columns = []
 
     def populate_frame(
-        self, channels: int, filter_wheels: int, filter_wheel_names: list
+        self,
+        channels: int,
+        filter_wheels: int,
+        filter_wheel_names: list,
+        filter_wheel_types: list = None,
     ) -> None:
         """Populates the frame with the widgets.
 
@@ -222,9 +226,11 @@ class ChannelCreator(ttk.Labelframe):
             The number of filter wheels
         filter_wheel_names : list
             The names of the filter wheels
+        filter_wheel_types : list
+            The types of filter wheels
         """
 
-        self.create_labels(filter_wheel_names, filter_wheels)
+        self.create_labels(filter_wheel_names, filter_wheels, filter_wheel_types)
 
         # Configure the columns for consistent spacing
         for i in range(len(self.label_text)):
@@ -286,6 +292,8 @@ class ChannelCreator(ttk.Labelframe):
                     )
                 )
                 self.filterwheel_pulldowns[-1].config(state="readonly")
+                if self.is_synthetic_filter_wheel(i, filter_wheel_types):
+                    continue
                 self.filterwheel_pulldowns[-1].grid(
                     row=num + 1,
                     column=(column_id := column_id + 1),
@@ -344,7 +352,9 @@ class ChannelCreator(ttk.Labelframe):
                 pady=self.pad_y,
             )
 
-    def create_labels(self, filter_wheel_names: list, filter_wheels: int) -> None:
+    def create_labels(
+        self, filter_wheel_names: list, filter_wheels: int, filter_wheel_types: list = None
+    ) -> None:
         """Create the labels for the columns.
 
         Function to create the labels for the columns of the Channel Creator frame.
@@ -355,6 +365,8 @@ class ChannelCreator(ttk.Labelframe):
             A list of the names of the filter wheels
         filter_wheels : int
             Number of filter wheels
+        filter_wheel_types : list
+            The types of filter wheels
         """
         # Create the labels for the columns.
         self.label_text = [
@@ -363,6 +375,8 @@ class ChannelCreator(ttk.Labelframe):
             "Power",
         ]
         for i in range(filter_wheels):
+            if self.is_synthetic_filter_wheel(i, filter_wheel_types):
+                continue
             self.label_text.append(filter_wheel_names[i])
 
         self.label_text += ["Exp. Time (ms)", "Interval", "Defocus"]
@@ -378,6 +392,15 @@ class ChannelCreator(ttk.Labelframe):
             self.labels[idx].grid(
                 row=0, column=0, sticky=tk.N, pady=self.pad_y, padx=self.pad_x
             )
+
+    @staticmethod
+    def is_synthetic_filter_wheel(filter_wheel_idx: int, filter_wheel_types: list) -> bool:
+        """Return whether a filter wheel type should be hidden in the GUI."""
+        if filter_wheel_types is None or filter_wheel_idx >= len(filter_wheel_types):
+            return False
+
+        filter_wheel_type = str(filter_wheel_types[filter_wheel_idx]).strip().lower()
+        return filter_wheel_type in ("synthetic", "syntheticfilterwheel")
 
 
 class StackAcquisitionFrame(ttk.Labelframe):

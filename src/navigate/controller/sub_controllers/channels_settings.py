@@ -69,10 +69,14 @@ class ChannelSettingController(GUIController):
         self.number_of_filter_wheels = (
             self.configuration_controller.number_of_filter_wheels
         )
+        filter_wheel_types = getattr(
+            self.configuration_controller, "filter_wheel_types", []
+        )
         self.view.populate_frame(
             channels=self.num,
             filter_wheels=self.number_of_filter_wheels,
             filter_wheel_names=self.configuration_controller.filter_wheel_names,
+            filter_wheel_types=filter_wheel_types,
         )
 
         #: str: The mode of the channel setting controller. Either 'live' or 'stop'.
@@ -189,13 +193,15 @@ class ChannelSettingController(GUIController):
                     self.view.laser_pulldowns[i]["values"][0]
                 )
 
-            if (
-                self.view.filterwheel_pulldowns[i].get()
-                not in self.view.filterwheel_pulldowns[i]["values"]
-            ):
-                self.view.filterwheel_pulldowns[i].set(
-                    self.view.filterwheel_pulldowns[i]["values"][0]
-                )
+            for j in range(self.number_of_filter_wheels):
+                idx = i * self.number_of_filter_wheels + j
+                if (
+                    self.view.filterwheel_pulldowns[idx].get()
+                    not in self.view.filterwheel_pulldowns[idx]["values"]
+                ):
+                    self.view.filterwheel_pulldowns[idx].set(
+                        self.view.filterwheel_pulldowns[idx]["values"][0]
+                    )
 
             if self.view.exptime_pulldowns[i].get() == "":
                 self.view.exptime_pulldowns[i].set(100.0)

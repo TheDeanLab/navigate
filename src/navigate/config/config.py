@@ -969,6 +969,7 @@ def verify_configuration(manager, configuration):
     ref_list = {
         "filter_wheel": [],
     }
+    filter_wheel_ids_by_microscope = {}
     required_devices = [
         "camera",
         "filter_wheel",
@@ -1040,15 +1041,32 @@ def verify_configuration(manager, configuration):
             )
 
         temp_config = device_config[microscope_name]["filter_wheel"]
+        current_filter_wheel_ids = []
         for _, filter_wheel_config in enumerate(temp_config):
             filter_wheel_idx = build_ref_name(
                 "-",
                 filter_wheel_config["hardware"]["type"],
                 filter_wheel_config["hardware"]["wheel_number"],
             )
+            current_filter_wheel_ids.append(filter_wheel_idx)
             if filter_wheel_idx not in ref_list["filter_wheel"]:
                 ref_list["filter_wheel"].append(filter_wheel_idx)
                 filter_wheel_seq.append(filter_wheel_config)
+        filter_wheel_ids_by_microscope[microscope_name] = current_filter_wheel_ids
+
+    # Record which filter wheel entries belong to each microscope before
+    # sequence alignment inserts shared placeholders.
+    for microscope_name in device_config.keys():
+        present_ids = set(filter_wheel_ids_by_microscope.get(microscope_name, []))
+        filter_wheel_visibility = [
+            ref_name in present_ids for ref_name in ref_list["filter_wheel"]
+        ]
+        update_config_dict(
+            manager,
+            device_config[microscope_name],
+            "filter_wheel_visibility",
+            filter_wheel_visibility,
+        )
 
     # make sure all microscopes have the same filter wheel sequence
     if len(device_config.keys()) > 1:

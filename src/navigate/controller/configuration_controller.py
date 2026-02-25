@@ -554,6 +554,30 @@ class ConfigurationController:
         return filter_wheel_types
 
     @property
+    def filter_wheel_visibility(self) -> list[bool]:
+        """Return a list indicating which filter wheels are native to microscope.
+
+        Returns
+        -------
+        filter_wheel_visibility : list
+            ``True`` for wheels that are defined for this microscope.
+        """
+        if self.microscope_config is None:
+            return []
+
+        visibility = self.microscope_config.get("filter_wheel_visibility")
+        if isinstance(visibility, ListProxy):
+            visibility = list(visibility)
+
+        if not isinstance(visibility, list):
+            return [True] * self.number_of_filter_wheels
+
+        if len(visibility) != self.number_of_filter_wheels:
+            return [True] * self.number_of_filter_wheels
+
+        return [bool(value) for value in visibility]
+
+    @property
     def filter_wheel_names(self) -> list[str]:
         """Return a list of filter wheel names
 

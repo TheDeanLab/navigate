@@ -88,11 +88,15 @@ class ChannelSettingController(GUIController):
         filter_wheel_types = getattr(
             self.configuration_controller, "filter_wheel_types", []
         )
+        filter_wheel_visibility = getattr(
+            self.configuration_controller, "filter_wheel_visibility", []
+        )
         self.view.populate_frame(
             channels=self.num,
             filter_wheels=self.number_of_filter_wheels,
             filter_wheel_names=self.configuration_controller.filter_wheel_names,
             filter_wheel_types=filter_wheel_types,
+            filter_wheel_visibility=filter_wheel_visibility,
         )
 
         # widget command binds

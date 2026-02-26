@@ -32,7 +32,6 @@
 import logging
 import platform
 import threading
-import time
 import tkinter as tk
 from typing import Any, Optional
 
@@ -119,12 +118,6 @@ class HistogramController:
 
         #: float: Target TVD approximation accuracy for sample sizing
         self._hist_accuracy = 0.05
-
-        #: int: Frame counter for temporary profiling prints
-        self._perf_frame_counter = 0
-
-        #: int: Print every N frames after startup
-        self._perf_print_interval = 25
 
         #: bool: Whether this backend supports artist blitting
         self._blit_supported = all(
@@ -230,10 +223,6 @@ class HistogramController:
         scale_changed = self._apply_axis_scale_settings()
         if scale_changed:
             self._invalidate_blit_cache()
-            self._print_performance_trace(
-                "Scale toggled; forcing full redraw on next histogram update.",
-                force=True,
-            )
 
     def histogram_popup(self, event: tk.Event) -> None:
         """Histogram popup menu
@@ -259,16 +248,7 @@ class HistogramController:
         if threading.get_ident() != self._main_thread_ident:
             run_on_main = getattr(self.parent_controller, "_run_on_main_thread", None)
             if callable(run_on_main):
-                self._print_performance_trace(
-                    "populate_histogram called off main thread; re-dispatching.",
-                    force=True,
-                )
                 run_on_main(self.populate_histogram, image, wait=False)
-            else:
-                self._print_performance_trace(
-                    "populate_histogram called off main thread with no dispatcher; dropping frame.",
-                    force=True,
-                )
             return
 
         self._pending_histogram_image = image
@@ -312,9 +292,6 @@ class HistogramController:
         image : SharedNDArray
             Image Data
         """
-        self._perf_frame_counter += 1
-        start_total = time.perf_counter()
-
         self._ensure_histogram_artist()
 
         # Estimate total variation distance.
@@ -328,9 +305,7 @@ class HistogramController:
         if data.size == 0:
             return
 
-        start_histogram = time.perf_counter()
         counts, bins, backend = self._calculate_histogram_counts(data)
-        histogram_ms = (time.perf_counter() - start_histogram) * 1000.0
 
         plot_counts = np.maximum(counts, 1.0) if self.log_y else counts
         baseline = 1.0 if self.log_y else 0.0
@@ -370,19 +345,7 @@ class HistogramController:
             self._last_ylim = new_ylim
             force_full_redraw = True
 
-        start_render = time.perf_counter()
         self._render_histogram(force_full_redraw=force_full_redraw)
-        render_ms = (time.perf_counter() - start_render) * 1000.0
-
-        total_ms = (time.perf_counter() - start_total) * 1000.0
-        self._print_performance_trace(
-            (
-                f"frame={self._perf_frame_counter}, backend={backend}, "
-                f"sampled_pixels={data.size}/{actual_pixels}, bins={self._number_bins}, "
-                f"hist_ms={histogram_ms:.3f}, draw_ms={render_ms:.3f}, "
-                f"total_ms={total_ms:.3f}, mode={'blit' if self._last_render_used_blit else 'full'}"
-            )
-        )
 
     def _clear_histogram(self) -> None:
         """Clear the histogram but keep canvas interactive."""
@@ -499,7 +462,6 @@ class HistogramController:
             return
 
         fill_color = get_theme_color("accent", "#4b78b8")
-        edge_color = get_theme_color("accent_hover", fill_color)
         edges = np.arange(self._number_bins + 1, dtype=np.float64)
         values = np.ones(self._number_bins, dtype=np.float64)
         baseline = 1.0 if self.log_y else 0.0
@@ -510,10 +472,10 @@ class HistogramController:
             baseline=baseline,
             fill=True,
             facecolor=fill_color,
-            edgecolor=edge_color,
-            linewidth=1.1,
-            alpha=0.9,
-            antialiased=True,
+            edgecolor=fill_color,
+            linewidth=15,
+            alpha=1.0,
+            antialiased=False,
         )
         self._histogram_artist.set_snap(True)
         self._histogram_artist.set_animated(self._blit_supported)
@@ -531,7 +493,18 @@ class HistogramController:
         if data_max <= data_min:
             data_max = data_min + 1.0
 
-        bins = np.linspace(data_min, data_max, self._number_bins + 1, dtype=np.float64)
+        # if data_min + self._number_bins >= data_max:
+        #     number_bins = max(2, int(data_max - data_min))
+        # else:
+        #     number_bins = self._number_bins
+
+        if data_max <= self._number_bins:
+            number_bins = max(data_max, 2)
+        else:
+            number_bins = self._number_bins
+
+        number_bins = int(number_bins)
+        bins = np.linspace(data_min, data_max, number_bins + 1, dtype=np.float64)
 
         if cv2 is not None:
             backend = "cv2.calcHist"
@@ -544,7 +517,7 @@ class HistogramController:
                     [cv_data],
                     [0],
                     None,
-                    [self._number_bins],
+                    [number_bins],
                     [bins[0], histogram_range_max],
                 )
                 return counts.ravel().astype(np.float64, copy=False), bins, backend
@@ -621,17 +594,3 @@ class HistogramController:
             abs_tol, rel_tol * max(1.0, abs(current[1]), abs(target[1]))
         )
         return lower_changed or upper_changed
-
-    def _print_performance_trace(self, message: str, force: bool = False) -> None:
-        """Temporary trace prints for histogram profiling."""
-        if force:
-            print(f"[HistogramPerf] {message}")
-            return
-        if self._perf_frame_counter <= 5:
-            print(f"[HistogramPerf] {message}")
-            return
-        if (
-            self._perf_print_interval > 0
-            and self._perf_frame_counter % self._perf_print_interval == 0
-        ):
-            print(f"[HistogramPerf] {message}")

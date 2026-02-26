@@ -115,7 +115,7 @@ class HistogramController:
         self._histogram_disabled_overlay_drawn = False
 
         #: int: Number of histogram bins
-        self._number_bins = 256
+        self._number_bins = 2**10
 
         #: float: Target TVD approximation accuracy for sample sizing
         self._hist_accuracy = 0.05
@@ -460,10 +460,6 @@ class HistogramController:
         self.ax.grid(True, axis="y", color=border, alpha=0.35, linewidth=0.6)
         self.ax.grid(False, axis="x")
         self.ax.set_axisbelow(True)
-        self.ax.set_xlabel(
-            "Intensity", color=text, fontsize=body_fontdict.get("size", 10)
-        )
-        self.ax.set_ylabel("Count", color=text, fontsize=body_fontdict.get("size", 10))
 
     def _apply_axis_scale_settings(self) -> bool:
         """Apply axis scale toggles and formatter; return True when changed."""
@@ -517,7 +513,9 @@ class HistogramController:
             edgecolor=edge_color,
             linewidth=1.1,
             alpha=0.9,
+            antialiased=True,
         )
+        self._histogram_artist.set_snap(True)
         self._histogram_artist.set_animated(self._blit_supported)
         self._histogram_artist_ready = True
 

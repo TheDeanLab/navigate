@@ -78,7 +78,7 @@ class HistogramController:
         self.parent_controller = parent_controller
 
         #: FigureBase: The histogram figure.
-        self.ax = self.histogram.figure.add_axes([0.075, 0.25, 0.88, 0.65])
+        self.ax = self.histogram.figure.add_axes([0.01, 0.20, 0.98, 0.79])
 
         # Event Bindings
         widget = self.histogram.figure_canvas.get_tk_widget()
@@ -147,19 +147,36 @@ class HistogramController:
         self._last_xlim = None
         self._last_ylim = None
 
+        menu_background = get_theme_color("panel_bg", "#1a212b")
+        menu_foreground = get_theme_color("text", "#d7dee8")
+        menu_disabled_foreground = get_theme_color("muted_text", "#9aa8bb")
+        menu_active_background = get_theme_color("accent", "#4b78b8")
+        menu_active_foreground = get_theme_color("text", menu_foreground)
+        menu_select_color = get_theme_color("accent_hover", menu_active_background)
+
         #: tk.Menu: Histogram popup menu
         self.menu = tk.Menu(widget, tearoff=0)
+        self.menu.configure(
+            background=menu_background,
+            foreground=menu_foreground,
+            disabledforeground=menu_disabled_foreground,
+            activebackground=menu_active_background,
+            activeforeground=menu_active_foreground,
+            selectcolor=menu_select_color,
+        )
         self.menu.add_radiobutton(
             label="Log X",
             variable=self.x_axis_var,
             value="log",
             command=self.update_scale,
+            selectcolor=menu_select_color,
         )
         self.menu.add_radiobutton(
             label="Linear X",
             variable=self.x_axis_var,
             value="linear",
             command=self.update_scale,
+            selectcolor=menu_select_color,
         )
         self.menu.add_separator()
         self.menu.add_radiobutton(
@@ -167,12 +184,14 @@ class HistogramController:
             variable=self.y_axis_var,
             value="log",
             command=self.update_scale,
+            selectcolor=menu_select_color,
         )
         self.menu.add_radiobutton(
             label="Linear Y",
             variable=self.y_axis_var,
             value="linear",
             command=self.update_scale,
+            selectcolor=menu_select_color,
         )
         self.menu.add_separator()
         self.menu.add_checkbutton(
@@ -181,6 +200,7 @@ class HistogramController:
             onvalue=True,
             offvalue=False,
             command=self.update_experiment,
+            selectcolor=menu_select_color,
         )
 
         # Default location for communicating with the plugin in the model.
@@ -408,7 +428,6 @@ class HistogramController:
         border = get_theme_color("border", "#2f3a4a")
         text = get_theme_color("text", "#d7dee8")
         muted_text = get_theme_color("muted_text", text)
-        body_fontdict = get_theme_matplotlib_font("body")
 
         if hasattr(self.histogram, "figure"):
             self.histogram.figure.set_facecolor(panel_bg)
@@ -416,11 +435,14 @@ class HistogramController:
         self.ax.tick_params(
             axis="both",
             which="both",
-            direction="inout",
+            direction="out",
             labelsize=8,
+            labelleft=False,
+            labelright=False,
             reset=True,
             colors=muted_text,
         )
+        self.ax.minorticks_on()
         for spine in self.ax.spines.values():
             spine.set_color(border)
         self.ax.grid(True, axis="y", color=border, alpha=0.35, linewidth=0.6)
@@ -457,6 +479,7 @@ class HistogramController:
                 )
             self._y_formatter_mode = formatter_mode
             changed = True
+        self.ax.minorticks_on()
         return changed
 
     def _ensure_histogram_artist(self) -> None:

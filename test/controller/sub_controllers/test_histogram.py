@@ -240,3 +240,24 @@ def test_flush_pending_histogram_update_reinitializes_after_disabled_overlay():
     controller._initialize_histogram_axes.assert_called_once_with()
     controller._populate_histogram.assert_called_once_with(image)
     assert controller._histogram_disabled_overlay_drawn is False
+
+
+def test_apply_theme_hides_y_tick_labels():
+    controller = _build_controller()
+    controller.histogram = SimpleNamespace(figure=MagicMock())
+    controller.ax = MagicMock()
+    controller.ax.spines = {
+        "left": MagicMock(),
+        "right": MagicMock(),
+        "top": MagicMock(),
+        "bottom": MagicMock(),
+    }
+
+    controller._apply_theme_to_histogram_axes()
+
+    _, kwargs = controller.ax.tick_params.call_args
+    assert kwargs["axis"] == "both"
+    assert kwargs["direction"] == "out"
+    assert kwargs["labelleft"] is False
+    assert kwargs["labelright"] is False
+    controller.ax.minorticks_on.assert_called()

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ from navigate.controller.sub_controllers.channels_settings import (
 )
 from navigate.controller.sub_controllers.tiling import TilingWizardController
 from navigate.view.main_window_content.channels_tab import ChannelsTab
-from navigate.view.popups.tiling_wizard_popup2 import TilingWizardPopup
+from navigate.view.popups.tiling_wizard_popup import TilingWizardPopup
 
 # Logger Setup
 p = __name__.split(".")[1]

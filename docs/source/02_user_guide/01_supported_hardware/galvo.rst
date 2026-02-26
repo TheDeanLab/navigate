@@ -1,3 +1,5 @@
+.. _galvo_configuration:
+
 =============
 Galvanometers
 =============
@@ -47,8 +49,9 @@ Applied Scientific Instrumentation
 ----------------------------------
 
 In principle, this hardware type can support any analog-controlled galvanometer,
-including those from Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX. 
-Each of these devices are externally controlled via analog signals delivered from the ASI Tiger Controller (`TG-1000 <https://asiimaging.com/docs/products/tiger>`_).
+including those from Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX.
+Each of these devices is externally controlled via analog signals delivered from the
+ASI Tiger Controller (`TG-1000 <https://asiimaging.com/docs/products/tiger>`_).
  
 Galvanometers can take two types of analog waveforms: sawtooth and sine.
 The sawtooth waveform is a periodic analog waveform. There are three duty cycle values 

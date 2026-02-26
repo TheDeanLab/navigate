@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
@@ -32,12 +32,14 @@
 # Standard Library Imports
 import threading
 import logging
+
 # Local Imports
 from navigate.model.utils.exceptions import UserVisibleException
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class ThreadWithWarning(threading.Thread):
     """A custom thread class that raises a warning to the user if any error is raised."""
@@ -62,4 +64,3 @@ class ThreadWithWarning(threading.Thread):
             if hasattr(self, "_warning_queue") and isinstance(e, UserVisibleException):
                 self._warning_queue.put(("warning", str(e)))
             raise e
-

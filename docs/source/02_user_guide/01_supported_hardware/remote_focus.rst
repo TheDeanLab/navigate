@@ -1,3 +1,5 @@
+.. _remote_focus_configuration:
+
 =======================
 Remote Focusing Devices
 =======================

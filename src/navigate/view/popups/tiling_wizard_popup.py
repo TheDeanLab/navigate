@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ from tkinter import ttk
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedEntry
+from navigate.view.theme import get_theme_padding_px
 
 # Logging Setup
 p = __name__.split(".")[1]
@@ -50,147 +51,209 @@ class TilingWizardPopup:
     """Popup for tiling parameters in View."""
 
     def __init__(self, root, *args, **kwargs):
-        """Initialize the Tile Wizard Popup
+        """Initialize the popup
 
         Parameters
         ----------
         root : tk.Tk
-            The root window.
-        *args : list
-            Arguments.
-        **kwargs : dict
-            Keyword arguments.
+            The root Tk instance
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
         """
-
-        #: PopUp: The popup window.
+        #: tk.TopLevel: The popup window
         self.popup = PopUp(
             root,
-            "Multi-Position Tiling Wizard",
-            "630x420+330+330",
+            name="Multi-Position Tiling Wizard",
+            size="800x250+10+10",
             top=False,
             transient=False,
         )
 
-        # Storing the content frame of the popup, this will be the parent of
-        # the widgets
-        content_frame = self.popup.get_frame()
-        content_frame.columnconfigure(0, pad=5)
-        content_frame.columnconfigure(1, pad=5)
-        content_frame.rowconfigure(0, pad=5)
-        content_frame.rowconfigure(1, pad=5)
-        content_frame.rowconfigure(2, pad=5)
+        # Grab the axes we want to grid out. Optionally,
+        # we can pass these in the kwargs
+        axes = kwargs.get("axes", ["X", "Y", "Z", "F"])
 
-        # Formatting
-        tk.Grid.columnconfigure(content_frame, "all", weight=1)
-        tk.Grid.rowconfigure(content_frame, "all", weight=1)
+        nrow = len(axes) + 2  # +2 for percent overlay, total number of tiles, populate
+        # <set x-start> [x-start] <set-x-end> [x-end]
+        # [x-distance] [x-fov-width] [x-tiles]
+        ncol = 7
 
-        # Sub Frames
-        action_buttons = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
-        pos_grid = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
-        data = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
+        # Set the size of the popup
+        self.popup.geometry(f"800x{40*nrow}+10+10")
 
-        action_buttons.grid(row=0, sticky=tk.NSEW)
-        pos_grid.grid(row=1, sticky=tk.NSEW)
-        data.grid(row=2, sticky=tk.NSEW)
-
-        #: dict: Dictionary for all the variables
+        # Set up the grid on the popup's frame
+        for col in range(ncol):
+            self.popup.content_frame.columnconfigure(col, pad=5, weight=1)
+        for row in range(nrow):
+            self.popup.content_frame.rowconfigure(row, pad=5, weight=1)
+        #: dict: The GUI elements used for input, mostly ttk.Frames
         self.inputs = {}
-        #: dict: Dictionary for all the buttons
+        #: dict: The GUI elements used for buttons, mostly ttk.Buttons
         self.buttons = {}
 
-        names = [
-            "set_table",
-            "x_start",
-            "x_end",
-            "y_start",
-            "y_end",
-            "z_start",
-            "z_end",
-        ]
+        # Add one row per axis
+        for row, ax in enumerate(axes):
+            # Set start position
+            start_var = f"{ax.lower()}_start"
+            self.buttons[start_var] = ttk.Button(
+                self.popup.content_frame, text=f"Set {ax.upper()} Start"
+            )
+            self.buttons[start_var].grid(
+                row=row,
+                column=0,
+                sticky=tk.NSEW,
+                padx=get_theme_padding_px((5, 0)),
+                pady=get_theme_padding_px((5, 0)),
+            )
+            self.inputs[start_var] = LabelInput(
+                parent=self.popup.content_frame,
+                input_class=ValidatedSpinbox,
+                input_var=tk.StringVar(),
+                input_args={"width": 5},
+            )
+            self.inputs[start_var].grid(
+                row=row,
+                column=1,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
+            )
+            self.inputs[start_var].widget.state(["disabled"])
 
-        entry_names = ["x_dist", "x_tiles", "y_dist", "y_tiles", "z_dist", "z_tiles"]
+            # Set end position
+            end_var = f"{ax.lower()}_end"
+            self.buttons[end_var] = ttk.Button(
+                self.popup.content_frame, text=f"Set {ax.upper()} End"
+            )
+            self.buttons[end_var].grid(
+                row=row,
+                column=2,
+                sticky=tk.NSEW,
+                padx=get_theme_padding_px((5, 0)),
+                pady=get_theme_padding_px((5, 0)),
+            )
+            self.inputs[end_var] = LabelInput(
+                parent=self.popup.content_frame,
+                input_class=ValidatedSpinbox,
+                input_var=tk.StringVar(),
+                input_args={"width": 5},
+            )
+            self.inputs[end_var].grid(
+                row=row,
+                column=3,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
+            )
+            self.inputs[end_var].widget.state(["disabled"])
 
-        dist_labels = [
-            "X Distance",
-            "Num. Tiles",
-            "Y Distance",
-            "Num. Tiles",
-            "Z Distance",
-            "Num. Tiles",
-        ]
-
-        # Action buttons
-        btn_labels = [
-            "Populate Multi-Position Table",
-            "Set X Start",
-            "Set X End",
-            "Set Y Start",
-            "Set Y End",
-            "Set Z Start",
-            "Set Z End",
-        ]
-
-        # Position buttons
-        for i in range(len(names)):
-            if i == 0:
-                self.buttons[names[i]] = ttk.Button(action_buttons, text=btn_labels[i])
-                self.buttons[names[i]].grid(
-                    row=0, column=i, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
-                )
-            if i > 0:
-                self.buttons[names[i]] = ttk.Button(pos_grid, text=btn_labels[i])
-                self.buttons[names[i]].grid(
-                    row=i - 1, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
-                )
-
-                # Validated Spinbox
-                self.inputs[names[i]] = LabelInput(
-                    parent=pos_grid,
-                    input_class=ValidatedSpinbox,
-                    input_var=tk.StringVar(),
-                )
-                self.inputs[names[i]].grid(
-                    row=i - 1, column=1, sticky=tk.NSEW, pady=(20, 0), padx=5
-                )
-                self.inputs[names[i]].widget.state(["disabled"])
-
-        # Dist and Tile entries
-        for i in range(len(entry_names)):
-            self.inputs[entry_names[i]] = LabelInput(
-                parent=pos_grid,
-                label=dist_labels[i],
+            # Distance between start and end of this axis
+            dist_var = f"{ax.lower()}_dist"
+            self.inputs[dist_var] = LabelInput(
+                parent=self.popup.content_frame,
+                label=f"{ax.upper()} Distance",
                 input_class=ValidatedEntry,
                 input_var=tk.StringVar(),
+                input_args={"width": 5},
             )
-            self.inputs[entry_names[i]].grid(
-                row=i, column=2, sticky=tk.NSEW, padx=(5, 0), pady=(17, 0)
+            self.inputs[dist_var].grid(
+                row=row,
+                column=4,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
             )
-            self.inputs[entry_names[i]].widget.state(["disabled"])
+            self.inputs[dist_var].widget.state(["disabled"])
 
-        self.inputs["percent_overlay"] = LabelInput(
-            parent=data,
-            label="Percent Overlay",
+            # FOV width for this particular axis (e.g. for X it is the number
+            # of vertical pixels on the camera multiplied by the effective
+            # pixel size)
+            fov_var = f"{ax.lower()}_fov"
+            self.inputs[fov_var] = LabelInput(
+                parent=self.popup.content_frame,
+                label=f"{ax.upper()} FOV Dist",
+                input_class=ValidatedSpinbox,
+                input_var=tk.StringVar(),
+                input_args={
+                    "width": 5,
+                    "from_": "-Infinity",
+                    "to": "Infinity",
+                    "increment": 100.0,
+                },
+            )
+            self.inputs[fov_var].grid(
+                row=row,
+                column=5,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
+            )
+            # self.inputs[fov_var].widget.state(["disabled"])
+
+            # Number of tiles, roughly ceil((ax_end - ax_start) / fov_width)
+            # (not accounting for percent overlap)
+            tiles_var = f"{ax.lower()}_tiles"
+            self.inputs[tiles_var] = LabelInput(
+                parent=self.popup.content_frame,
+                label="Num. Tiles",
+                input_class=ValidatedEntry,
+                input_var=tk.StringVar(),
+                input_args={"width": 5},
+            )
+            self.inputs[tiles_var].grid(
+                row=row,
+                column=6,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
+            )
+            self.inputs[tiles_var].widget.state(["disabled"])
+
+        # In the final row, add percent overlap, total number of tiles, populate button
+        self.inputs["percent_overlap"] = LabelInput(
+            parent=self.popup.content_frame,
+            label="% Overlap",
             input_class=ValidatedSpinbox,
             input_var=tk.StringVar(),
             input_args={"width": 5, "increment": 5, "from_": 0, "to": 100},
         )
-        self.inputs["percent_overlay"].grid(
-            row=0, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
+        self.inputs["percent_overlap"].grid(
+            row=len(axes),
+            column=5,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 0)),
+            pady=get_theme_padding_px((5, 0)),
         )
 
         self.inputs["total_tiles"] = LabelInput(
-            parent=data,
+            parent=self.popup.content_frame,
             label="Total Tiles",
             input_class=ValidatedEntry,
             input_var=tk.StringVar(),
+            input_args={"width": 5},
         )
         self.inputs["total_tiles"].widget.state(["disabled"])
         self.inputs["total_tiles"].grid(
-            row=0, column=2, sticky=tk.NSEW, padx=5, pady=(5, 0)
+            row=len(axes),
+            column=6,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 0)),
+            pady=get_theme_padding_px((5, 0)),
         )
 
-        # Formatting
-        self.inputs["total_tiles"].grid(padx=(160, 0))
+        self.buttons["set_table"] = ttk.Button(
+            self.popup.content_frame, text="Populate Multi-Position Table"
+        )
+        self.buttons["set_table"].grid(
+            row=len(axes) + 1,
+            column=5,
+            columnspan=2,
+            sticky=tk.NE,
+            padx=get_theme_padding_px((0, 5)),
+            pady=get_theme_padding_px((5, 0)),
+        )
 
     # Getters
     def get_variables(self):
@@ -204,10 +267,7 @@ class TilingWizardPopup:
         variables : dict
             A dictionary of all the variables that are tied to each widget name.
         """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get_variable()
-        return variables
+        return {key: widget.get_variable() for key, widget in self.inputs.items()}
 
     def get_widgets(self):
         """Get the widgets

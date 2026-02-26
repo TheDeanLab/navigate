@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@ import logging
 
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.theme import get_theme_padding_px
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -81,29 +82,50 @@ class ilastik_setting_popup:
             width=50,
             state="readonly",
         )
-        project_name_entry.grid(row=1, column=0, pady=(10, 10), padx=(0, 10))
+        project_name_entry.grid(
+            row=1,
+            column=0,
+            pady=get_theme_padding_px((10, 10)),
+            padx=get_theme_padding_px((0, 10)),
+        )
         #: ttk.Button: Button for loading ilastik project
         self.load_project_btn = ttk.Button(
             content_frame, text="Load Ilastik Project", width=30
         )
-        self.load_project_btn.grid(row=1, column=1, pady=(10, 10), padx=(0, 10))
+        self.load_project_btn.grid(
+            row=1,
+            column=1,
+            pady=get_theme_padding_px((10, 10)),
+            padx=get_theme_padding_px((0, 10)),
+        )
 
         tkinter.Label(content_frame, text="Select all target labels:").grid(
             row=2, sticky=NW
         )
         #: ttk.Frame: Frame for labels
-        self.label_frame = ttk.Frame(content_frame, padding="3 3 12 12")
+        self.label_frame = ttk.Frame(
+            content_frame, padding=get_theme_padding_px((3, 3, 12, 12))
+        )
         self.label_frame.grid(row=3, columnspan=2, sticky=NSEW)
         default_colors = ["red", "#0082c8", "#ffe119"]
         for i in range(3):
             label_widget = ttk.Checkbutton(self.label_frame, text="Label" + str(i + 1))
             label_widget.grid(
-                row=1 + i, column=0, pady=(0, 10), padx=(20, 5), sticky="W"
+                row=1 + i,
+                column=0,
+                pady=get_theme_padding_px((0, 10)),
+                padx=get_theme_padding_px((20, 5)),
+                sticky="W",
             )
             color_block = tkinter.Label(
                 self.label_frame, background=default_colors[i], width=3, height=1
             )
-            color_block.grid(row=1 + i, column=1, pady=(0, 10), padx=(0, 10))
+            color_block.grid(
+                row=1 + i,
+                column=1,
+                pady=get_theme_padding_px((0, 10)),
+                padx=get_theme_padding_px((0, 10)),
+            )
 
         # segmentation usage
         tkinter.Label(content_frame, text="Choose the way to use segmentation:").grid(
@@ -111,15 +133,33 @@ class ilastik_setting_popup:
         )
         #: tkinter.Checkbutton: Checkbutton for showing segmentation
         self.show_on_gui = tkinter.Checkbutton(content_frame, text="Show Segmentation")
-        self.show_on_gui.grid(row=5, column=0, padx=(20, 0), pady=(10, 20), sticky="W")
+        self.show_on_gui.grid(
+            row=5,
+            column=0,
+            padx=get_theme_padding_px((20, 0)),
+            pady=get_theme_padding_px((10, 20)),
+            sticky="W",
+        )
 
         #: tkinter.Checkbutton: Checkbutton for marking position
         self.mark_position = tkinter.Checkbutton(content_frame, text="Mark Position")
-        self.mark_position.grid(row=5, column=1, padx=(0, 0), pady=(10, 20), sticky="W")
+        self.mark_position.grid(
+            row=5,
+            column=1,
+            padx=get_theme_padding_px((0, 0)),
+            pady=get_theme_padding_px((10, 20)),
+            sticky="W",
+        )
 
         #: ttk.Button: Button for confirming setting
         self.confirm_btn = ttk.Button(content_frame, text="Confirm Setting", width=30)
-        self.confirm_btn.grid(row=7, column=1, sticky="SE", padx=(0, 10), pady=(0, 10))
+        self.confirm_btn.grid(
+            row=7,
+            column=1,
+            sticky="SE",
+            padx=get_theme_padding_px((0, 10)),
+            pady=get_theme_padding_px((0, 10)),
+        )
 
     def get_buttons(self):
         """Get all buttons

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -265,7 +265,6 @@ class UpdateTableTestCase(unittest.TestCase):
         assert "F" not in self.table.model.df.columns
         assert self.table.currentrow == 2
 
-
         new_positions = np.array([[10, 11, 12], [13, 14, 15]])
         update_table(
             self.table,
@@ -290,13 +289,10 @@ class UpdateTableTestCase(unittest.TestCase):
         assert "THETA" not in self.table.model.df.columns
         assert "F" not in self.table.model.df.columns
 
-
     def test_pos_axes_mismatch_more_pos(self):
         # axes has 3 entries, pos has 5 columns
         pos = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
-        update_table(
-            table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False
-        )
+        update_table(table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False)
         np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
         np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
         np.testing.assert_array_equal(self.table.model.df["Z"], pos[:, 2])
@@ -306,9 +302,7 @@ class UpdateTableTestCase(unittest.TestCase):
     def test_pos_axes_mismatch_empty_axes(self):
         # axes is empty, pos has 5 columns
         pos = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
-        update_table(
-            table=self.table, pos=pos, axes=[], append=False
-        )
+        update_table(table=self.table, pos=pos, axes=[], append=False)
         assert self.table.model.df.shape == (3, 5)
         assert self.table.currentrow == 2
 
@@ -328,18 +322,14 @@ class UpdateTableTestCase(unittest.TestCase):
         default_row = self.table.currentrow
         # axes is empty, pos is empty
         pos = np.array([[], [], [], [], []]).reshape(0, 5)
-        update_table(
-            table=self.table, pos=pos, axes=[], append=False
-        )
+        update_table(table=self.table, pos=pos, axes=[], append=False)
         assert self.table.model.df.shape == default_shape
         assert self.table.currentrow == default_row
 
     def test_append_mismatch_less_pos(self):
         pos = np.array([[1, 2, 3], [4, 5, 6], (7, 8, 9)])
 
-        update_table(
-            table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False
-        )
+        update_table(table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False)
 
         np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
         np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
@@ -372,9 +362,7 @@ class UpdateTableTestCase(unittest.TestCase):
     def test_append_mismatch_more_axes(self):
         pos = np.array([[1, 2], [3, 4], (5, 6)])
 
-        update_table(
-            table=self.table, pos=pos, axes=["X", "Y"], append=False
-        )
+        update_table(table=self.table, pos=pos, axes=["X", "Y"], append=False)
 
         np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
         np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
@@ -402,9 +390,7 @@ class UpdateTableTestCase(unittest.TestCase):
     def test_append_mismatch_more_pos(self):
         pos = np.array([[1, 2], [3, 4], (5, 6)])
 
-        update_table(
-            table=self.table, pos=pos, axes=["X", "Y"], append=False
-        )
+        update_table(table=self.table, pos=pos, axes=["X", "Y"], append=False)
 
         np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
         np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
@@ -431,9 +417,7 @@ class UpdateTableTestCase(unittest.TestCase):
     def test_append_mismatch_axes_sequence(self):
         pos = np.array([[1, 2, 3], [4, 5, 6], (7, 8, 9)])
 
-        update_table(
-            table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False
-        )
+        update_table(table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False)
 
         np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
         np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
@@ -464,9 +448,7 @@ class UpdateTableTestCase(unittest.TestCase):
     def test_append_mismatch_axes_partial_overlap(self):
         pos = np.array([[1, 2, 3], [4, 5, 6], (7, 8, 9)])
 
-        update_table(
-            table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False
-        )
+        update_table(table=self.table, pos=pos, axes=["X", "Y", "Z"], append=False)
 
         np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
         np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])

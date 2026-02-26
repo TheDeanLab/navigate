@@ -41,7 +41,11 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx_toolbox.collapse",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.todo"
 ]
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = False
 
 autosectionlabel_prefix_document = True
 
@@ -95,6 +99,7 @@ autodoc_mock_imports = [
     "navigate.model.devices.APIs",
     "navigate.model.devices.camera.photometrics",
     "navigate.model.devices.camera.ximea",
+    "navigate.model.devices.camera.daheng",
     "pyvcam",
     "ximea",
 ]

@@ -1,3 +1,5 @@
+.. _developer_install:
+
 Developer Install
 =================
 

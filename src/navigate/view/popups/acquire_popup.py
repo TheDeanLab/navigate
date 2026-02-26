@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
 from navigate.model.data_sources import FILE_TYPES
 from navigate.view.custom_widgets.common import CommonMethods
+from navigate.view.theme import get_theme_padding_px, get_theme_space_px
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -141,24 +142,58 @@ class AcquirePopUp(CommonMethods):
         content_frame.columnconfigure(index=0, weight=1)
         content_frame.rowconfigure(index=0, weight=1)
 
-        path_entries = ttk.Frame(content_frame, padding=(5, 5, 5, 5))
-        tab_frame = ttk.Frame(content_frame, padding=(5, 5, 5, 5))
-        button_frame = ttk.Frame(content_frame, padding=(5, 5, 5, 5))
+        path_entries = ttk.Frame(
+            content_frame, padding=get_theme_padding_px((5, 5, 5, 5))
+        )
+        tab_frame = ttk.Frame(content_frame, padding=get_theme_padding_px((5, 5, 5, 5)))
+        button_frame = ttk.Frame(
+            content_frame, padding=get_theme_padding_px((5, 5, 5, 5))
+        )
         separator1 = ttk.Separator(content_frame, orient="horizontal")
         separator2 = ttk.Separator(content_frame, orient="horizontal")
 
-        path_entries.grid(row=0, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        path_entries.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
+        )
         path_entries.grid_columnconfigure(index=0, weight=1)
 
-        separator1.grid(row=1, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        separator1.grid(
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
+        )
 
-        tab_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        tab_frame.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
+        )
         tab_frame.grid_columnconfigure(index=0, weight=1)
         tab_frame.grid_rowconfigure(index=1, weight=1)
 
-        separator2.grid(row=3, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        separator2.grid(
+            row=3,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
+        )
 
-        button_frame.grid(row=4, column=0, sticky=tk.NSEW, padx=0, pady=3)
+        button_frame.grid(
+            row=4,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
+        )
         button_frame.grid_columnconfigure(index=0, weight=1)
         button_frame.grid_rowconfigure(index=1, weight=1)
 
@@ -197,8 +232,12 @@ class ButtonFrame:
             frame, text="Cancel Acquisition", width=width
         )
         parent.buttons["Done"] = ttk.Button(frame, text="Acquire Data", width=width)
-        parent.buttons["Cancel"].grid(row=0, column=0, padx=5, sticky=tk.NSEW)
-        parent.buttons["Done"].grid(row=0, column=1, padx=5, sticky=tk.NSEW)
+        parent.buttons["Cancel"].grid(
+            row=0, column=0, padx=get_theme_space_px(5), sticky=tk.NSEW
+        )
+        parent.buttons["Done"].grid(
+            row=0, column=1, padx=get_theme_space_px(5), sticky=tk.NSEW
+        )
 
 
 class EntryFrame:
@@ -217,7 +256,14 @@ class EntryFrame:
 
         #: ttk.Label: Label for the entries
         label = ttk.Label(frame, text=text)
-        label.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW, pady=5, padx=0)
+        label.grid(
+            row=0,
+            column=0,
+            columnspan=2,
+            sticky=tk.NSEW,
+            pady=get_theme_space_px(5),
+            padx=get_theme_space_px(0),
+        )
 
         # Creating Entry Widgets
         entry_names = [
@@ -300,14 +346,16 @@ class EntryFrame:
                 column=0,
                 columnspan=1,
                 sticky=tk.NSEW,
-                padx=(0, 0),
-                pady=(1, 1),
+                padx=get_theme_padding_px((0, 0)),
+                pady=get_theme_padding_px((1, 1)),
             )
 
             # Labels
-            parent.inputs[entry_names[i]].label.grid(padx=(5, 5))
+            parent.inputs[entry_names[i]].label.grid(padx=get_theme_padding_px((5, 5)))
             parent.inputs[entry_names[i]].label.config(width=parent.column1_width)
-            parent.inputs[entry_names[i]].widget.grid(padx=(0, 0), pady=(1, 1))
+            parent.inputs[entry_names[i]].widget.grid(
+                padx=get_theme_padding_px((0, 0)), pady=get_theme_padding_px((1, 1))
+            )
             row_index += 1
 
 
@@ -322,7 +370,7 @@ class TabFrame:
         frame : ttk.Frame
             The TabFrame Window.
         """
-        notebook = ttk.Notebook(frame, padding=(5, 2, 5, 2))
+        notebook = ttk.Notebook(frame, padding=get_theme_padding_px((5, 2, 5, 2)))
         notebook.grid(row=0, column=0, sticky=tk.NSEW)
 
         tab1 = ttk.Frame(notebook)
@@ -354,14 +402,19 @@ class TabFrame:
             columnspan=3,
             rowspan=2,
             sticky=tk.NSEW,
-            pady=(5, 5),
+            pady=get_theme_padding_px((5, 5)),
         )
 
         row_index += 2
         separator1 = ttk.Separator(tab1, orient="horizontal")
 
         separator1.grid(
-            row=row_index, column=0, columnspan=3, sticky=tk.NSEW, padx=0, pady=3
+            row=row_index,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
         )
 
         row_index += 1
@@ -406,7 +459,7 @@ class TabFrame:
             columnspan=3,
             rowspan=2,
             sticky=tk.NSEW,
-            pady=(5, 5),
+            pady=get_theme_padding_px((5, 5)),
         )
 
         row_index += 2
@@ -423,8 +476,8 @@ class TabFrame:
             column=0,
             columnspan=1,
             sticky=tk.NSEW,
-            padx=(5, 5),
-            pady=(1, 1),
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         values = ["XZ", "YZ", "XY"]
@@ -438,7 +491,12 @@ class TabFrame:
         )
 
         self.inputs["shear_dimension"].grid(
-            row=row_index, column=1, columnspan=1, sticky=tk.W, padx=(5, 5), pady=(1, 1)
+            row=row_index,
+            column=1,
+            columnspan=1,
+            sticky=tk.W,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         self.inputs["shear_angle"] = LabelInput(
@@ -454,14 +512,24 @@ class TabFrame:
             },
         )
         self.inputs["shear_angle"].grid(
-            row=row_index, column=2, columnspan=1, sticky=tk.W, padx=(5, 5), pady=(1, 1)
+            row=row_index,
+            column=2,
+            columnspan=1,
+            sticky=tk.W,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         row_index += 1
         separator1 = ttk.Separator(tab2, orient="horizontal")
 
         separator1.grid(
-            row=row_index, column=0, columnspan=3, sticky=tk.NSEW, padx=0, pady=3
+            row=row_index,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
         )
 
         row_index += 1
@@ -479,12 +547,12 @@ class TabFrame:
             column=0,
             columnspan=1,
             sticky=tk.NSEW,
-            padx=(5, 5),
-            pady=(1, 1),
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         # Insert a new frame here, and then add the widgets to that frame
-        rotate_notebook = ttk.Notebook(tab2, padding=(5, 2, 5, 2))
+        rotate_notebook = ttk.Notebook(tab2, padding=get_theme_padding_px((5, 2, 5, 2)))
         rotate_notebook.grid(row=row_index, column=1, columnspan=2, sticky=tk.NSEW)
         for i in range(3):
             rotate_notebook.columnconfigure(index=i, weight=1)
@@ -503,7 +571,12 @@ class TabFrame:
         )
 
         self.inputs["rotate_angle_x"].grid(
-            row=0, column=0, columnspan=1, sticky=tk.W, padx=(5, 5), pady=(1, 1)
+            row=0,
+            column=0,
+            columnspan=1,
+            sticky=tk.W,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         self.inputs["rotate_angle_y"] = LabelInput(
@@ -519,7 +592,12 @@ class TabFrame:
             },
         )
         self.inputs["rotate_angle_y"].grid(
-            row=0, column=1, columnspan=1, sticky=tk.W, padx=(5, 5), pady=(1, 1)
+            row=0,
+            column=1,
+            columnspan=1,
+            sticky=tk.W,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         self.inputs["rotate_angle_z"] = LabelInput(
@@ -535,20 +613,35 @@ class TabFrame:
             },
         )
         self.inputs["rotate_angle_z"].grid(
-            row=0, column=2, columnspan=1, sticky=tk.W, padx=(5, 5), pady=(1, 1)
+            row=0,
+            column=2,
+            columnspan=1,
+            sticky=tk.W,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         row_index += 1
         separator1 = ttk.Separator(tab2, orient="horizontal")
 
         separator1.grid(
-            row=row_index, column=0, columnspan=3, sticky=tk.NSEW, padx=0, pady=3
+            row=row_index,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
         )
 
         row_index += 1
         separator2 = ttk.Separator(tab2, orient="horizontal")
         separator2.grid(
-            row=row_index, column=0, columnspan=3, sticky=tk.NSEW, padx=0, pady=3
+            row=row_index,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
         )
 
         row_index += 1
@@ -566,8 +659,8 @@ class TabFrame:
             column=0,
             columnspan=1,
             sticky=tk.NSEW,
-            padx=(5, 5),
-            pady=(1, 1),
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         values = ["1x", "2x", "4x", "8x", "16x", "32x", "64x", "128x"]
@@ -581,7 +674,12 @@ class TabFrame:
         )
 
         self.inputs["lateral_down_sample"].grid(
-            row=row_index, column=1, columnspan=1, sticky=tk.W, padx=(5, 5), pady=(1, 1)
+            row=row_index,
+            column=1,
+            columnspan=1,
+            sticky=tk.W,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         values = ["1x", "2x", "4x", "8x", "16x", "32x", "64x", "128x"]
@@ -595,13 +693,23 @@ class TabFrame:
         )
 
         self.inputs["axial_down_sample"].grid(
-            row=row_index, column=2, columnspan=1, sticky=tk.W, padx=(5, 5), pady=(1, 1)
+            row=row_index,
+            column=2,
+            columnspan=1,
+            sticky=tk.W,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((1, 1)),
         )
 
         row_index += 1
         separator3 = ttk.Separator(tab2, orient="horizontal")
         separator3.grid(
-            row=row_index, column=0, columnspan=3, sticky=tk.NSEW, padx=0, pady=3
+            row=row_index,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_space_px(3),
         )
 
         row_index += 1
@@ -626,5 +734,5 @@ class TabFrame:
             columnspan=3,
             rowspan=2,
             sticky=tk.NSEW,
-            pady=(5, 5),
+            pady=get_theme_padding_px((5, 5)),
         )

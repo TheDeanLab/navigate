@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ from unittest.mock import Mock, patch
 
 from navigate.model.devices.filter_wheel.ni import NIFilterWheel
 
+
 class TestNIFilterWheel(unittest.TestCase):
     def setUp(self):
         # self.mock_task = Mock()
@@ -46,28 +47,30 @@ class TestNIFilterWheel(unittest.TestCase):
             "configuration": {
                 "microscopes": {
                     "TestScope": {
-                        "filter_wheel": [{
-                            "available_filters": {
+                        "filter_wheel": [
+                            {
+                                "available_filters": {
                                     "filter_1": "Channel/line0",
                                     "filter_2": "Channel/line0",
                                 },
-                            "hardware": {
-                                "type": "NI",
-                                "wheel_number": 1,
+                                "hardware": {
+                                    "type": "NI",
+                                    "wheel_number": 1,
+                                },
+                                "filter_wheel_delay": 0.5,
                             },
-                            "filter_wheel_delay": 0.5,
-                        },
-                        {
-                            "available_filters": {
+                            {
+                                "available_filters": {
                                     "filter_3": "Channel/line1",
                                     "filter_4": "Channel/line1",
                                 },
-                            "hardware": {
-                                "type": "NI",
-                                "wheel_number": 2,
+                                "hardware": {
+                                    "type": "NI",
+                                    "wheel_number": 2,
+                                },
+                                "filter_wheel_delay": 0.5,
                             },
-                            "filter_wheel_delay": 0.5,
-                        }]
+                        ]
                     }
                 }
             }
@@ -87,7 +90,7 @@ class TestNIFilterWheel(unittest.TestCase):
             device_id=1,
         )
 
-    @patch('navigate.model.devices.filter_wheel.ni.nidaqmx.Task')
+    @patch("navigate.model.devices.filter_wheel.ni.nidaqmx.Task")
     def test_set_filter_valid(self, mock_task):
         self.filter_wheel.set_filter("filter_1")
         assert mock_task.called_once()
@@ -112,7 +115,7 @@ class TestNIFilterWheel(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.filter_wheel.set_filter(-1)
 
-    @patch('navigate.model.devices.filter_wheel.ni.nidaqmx.Task')
+    @patch("navigate.model.devices.filter_wheel.ni.nidaqmx.Task")
     def test_multiple_filter_wheels_independent(self, mock_task):
         self.filter_wheel.set_filter("filter_1")
         self.filter_wheel_2.set_filter("filter_3")
@@ -123,4 +126,3 @@ class TestNIFilterWheel(unittest.TestCase):
         self.filter_wheel_2.set_filter("filter_4")
         self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_1")
         self.assertEqual(self.filter_wheel_2.filter_wheel_value[2], "filter_4")
-

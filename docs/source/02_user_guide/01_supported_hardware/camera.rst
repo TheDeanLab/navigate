@@ -7,6 +7,15 @@ Cameras
 The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.
 
+Driver Installation
+-------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   Hamamatsu Drivers <dcam_api.rst>
+   Photometrics Drivers <pvcam.rst>
+
 -------------------
 
 Daheng
@@ -15,8 +24,8 @@ Daheng
 MER2-1220-32U3C
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-More information on the Daheng MER2-1220-32U3C camera can be found
-`here <https://en.daheng-imaging.com/show-106-1997-1.html>`_.
+More information on the Daheng MER2-1220-32U3C camera can be found on the
+`Daheng product page <https://en.daheng-imaging.com/show-106-1997-1.html>`_.
 
 .. warning::
 
@@ -24,7 +33,7 @@ More information on the Daheng MER2-1220-32U3C camera can be found
 
 .. note::
 
-    This camera requires Daheng Imaging's proprietary Python SDK and must be installed manually. Download the SDK `here <https://www.daheng-imaging.com/>`_. Locate 'gxipy' under: Development/Samples/Python/gxipy and then install it using pip. Also, this camera class uses the Line0 trigger input by default for external triggering.
+    This camera requires Daheng Imaging's proprietary Python SDK and must be installed manually. Download the SDK from `Daheng Imaging <https://www.daheng-imaging.com/>`_. Locate 'gxipy' under: Development/Samples/Python/gxipy and then install it using pip. Also, this camera class uses the Line0 trigger input by default for external triggering.
 
 .. collapse:: Configuration File
 
@@ -50,8 +59,7 @@ Hamamatsu
 
 .. note::
 
-    **navigate** has been tested with the following versions of the Hamamatsu's
-    drivers:
+    **navigate** has been tested with the following Hamamatsu driver/firmware versions:
 
     - DCAM API: 20.7.641, 21.7.4321, 22.9.6509, 22.11.4321, 23.12.6736
     - Camera Firmware: 2.21B, 2.53.A, 3.20.A, 4.30.B,
@@ -187,7 +195,7 @@ Photometrics
 
 .. note::
 
-    **navigate** has been tested with the following versions of the Photometric's drivers:
+    **navigate** has been tested with the following Photometrics driver versions:
     - PVCAM: 3.9.13
 
 -----------------

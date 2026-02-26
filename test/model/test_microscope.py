@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -106,17 +106,16 @@ def test_move_stage(dummy_microscope):
             dummy_microscope.move_stage(pos_dict, wait_until_done=True)
 
             assert dummy_microscope.ask_stage_for_position == expected_device_flag[mode]
-            assert (
-                dummy_microscope.cache_stage_positions
-                == (not expected_device_flag[mode])
+            assert dummy_microscope.cache_stage_positions == (
+                not expected_device_flag[mode]
             )
 
             if expected_device_flag[mode] == False:
                 # assert position is cached
                 for axis in test_axes:
-                    assert round(dummy_microscope.ret_pos_dict[axis + "_pos"], 2) == round(
-                        pos_dict[f"{axis}_abs"], 2
-                    )
+                    assert round(
+                        dummy_microscope.ret_pos_dict[axis + "_pos"], 2
+                    ) == round(pos_dict[f"{axis}_abs"], 2)
 
     # set back acquisition mode
     dummy_microscope.configuration["experiment"]["MicroscopeState"][
@@ -140,11 +139,13 @@ def test_get_stage_position(dummy_microscope):
             report_position_funcs[axis] = stage.report_position
 
     is_called = dict([(axis, False) for axis in dummy_microscope.stages])
+
     def report_position_mock(axis):
         def func():
             for a in axes_dict[axis]:
                 is_called[a] = True
             return report_position_funcs[axis]()
+
         return func
 
     for axis in dummy_microscope.stages:
@@ -198,7 +199,6 @@ def test_get_stage_position(dummy_microscope):
         assert dummy_microscope.ask_stage_for_position is False
         for axis in is_called:
             assert is_called[axis] is False
-        
 
     # set back acquisition mode
     dummy_microscope.configuration["experiment"]["MicroscopeState"][

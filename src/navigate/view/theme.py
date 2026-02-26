@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 
 # Standard Library Imports
 from __future__ import annotations
-from typing import Any
+from typing import Any, Union
 import tkinter as tk
 from tkinter import ttk, font as tkfont
 
@@ -51,6 +51,7 @@ except ImportError:  # pragma: no cover - optional fallback
 
 _DEFAULT_THEME_PRESET = "classic_night"
 FontSpec = tuple[Any, ...]
+SpacingSpec = Union[int, tuple[int, ...]]
 
 _THEME_PRESETS: dict[str, dict[str, str]] = {
     "classic_night": {
@@ -87,10 +88,30 @@ _TYPOGRAPHY_PRESETS: dict[str, dict[str, FontSpec]] = {
     }
 }
 
+_SPACING_PRESETS: dict[str, dict[str, SpacingSpec]] = {
+    "classic_night": {
+        "space_0": 0,
+        "space_1": 2,
+        "space_2": 4,
+        "space_3": 6,
+        "space_4": 8,
+        "space_5": 10,
+        "space_6": 12,
+        "space_7": 16,
+        "space_8": 20,
+        "space_9": 24,
+        "padding_button": (8, 4),
+        "padding_stage_stop_button": (8, 16),
+        "padding_stage_home_button": (8, 6),
+        "padding_notebook_tab": (10, 4),
+    }
+}
+
 _ACTIVE_PALETTE: dict[str, str] = dict(_THEME_PRESETS[_DEFAULT_THEME_PRESET])
 _ACTIVE_TYPOGRAPHY: dict[str, FontSpec] = dict(
     _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]
 )
+_ACTIVE_SPACING: dict[str, SpacingSpec] = dict(_SPACING_PRESETS[_DEFAULT_THEME_PRESET])
 _THEME_IMAGES: dict[str, tk.PhotoImage] = {}
 
 
@@ -177,6 +198,108 @@ def _to_font_tuple(data: Any, fallback: FontSpec) -> FontSpec:
         modifiers = tuple(str(item) for item in data[2:] if item not in (None, ""))
         return (family, size, *modifiers)
     return fallback
+
+
+def _to_nonnegative_int(data: Any) -> int | None:
+    """Convert numeric-like input to a nonnegative integer.
+
+    Parameters
+    ----------
+    data : Any
+        Value to convert.
+
+    Returns
+    -------
+    int or None
+        Converted integer when successful; otherwise ``None``.
+    """
+    if isinstance(data, bool):
+        return None
+    try:
+        return max(0, int(data))
+    except (TypeError, ValueError):
+        return None
+
+
+def _to_spacing_tuple(data: Any) -> tuple[int, ...] | None:
+    """Convert sequence-like spacing input to a Tk padding tuple.
+
+    Parameters
+    ----------
+    data : Any
+        Sequence-like value expected to contain 1, 2, or 4 numeric entries.
+
+    Returns
+    -------
+    tuple[int, ...] or None
+        Padding tuple or ``None`` when conversion fails.
+    """
+    if not isinstance(data, (list, tuple)):
+        return None
+    if len(data) not in (1, 2, 4):
+        return None
+
+    values: list[int] = []
+    for item in data:
+        value = _to_nonnegative_int(item)
+        if value is None:
+            return None
+        values.append(value)
+
+    if len(values) == 1:
+        return (values[0], values[0])
+    return tuple(values)
+
+
+def _coerce_spacing_value(data: Any, fallback: SpacingSpec) -> SpacingSpec:
+    """Coerce spacing input to match an existing token shape.
+
+    Parameters
+    ----------
+    data : Any
+        Candidate spacing override.
+    fallback : SpacingSpec
+        Existing token value used to determine the target type.
+
+    Returns
+    -------
+    SpacingSpec
+        Coerced spacing token, or the fallback when conversion fails.
+    """
+    scalar = _to_nonnegative_int(data)
+    if isinstance(fallback, int):
+        return fallback if scalar is None else scalar
+
+    if scalar is not None:
+        return (scalar,) * len(fallback)
+
+    value = _to_spacing_tuple(data)
+    if value is None:
+        return fallback
+    if len(value) == len(fallback):
+        return value
+    if len(value) == 2 and len(fallback) == 4:
+        return (value[0], value[1], value[0], value[1])
+    return fallback
+
+
+def _parse_spacing_value(data: Any) -> SpacingSpec | None:
+    """Parse scalar or tuple spacing values without a typed fallback.
+
+    Parameters
+    ----------
+    data : Any
+        Candidate spacing token value.
+
+    Returns
+    -------
+    SpacingSpec or None
+        Parsed spacing value when valid; otherwise ``None``.
+    """
+    scalar = _to_nonnegative_int(data)
+    if scalar is not None:
+        return scalar
+    return _to_spacing_tuple(data)
 
 
 def _safe_style_configure(style: ttk.Style, name: str, **kwargs: Any) -> None:
@@ -666,7 +789,13 @@ def _apply_rounded_notebook_tabs(
 
 def _build_palette(
     gui_settings: Any,
-) -> tuple[str, dict[str, str], str, dict[str, FontSpec]]:
+) -> tuple[
+    str,
+    dict[str, str],
+    str,
+    dict[str, FontSpec],
+    dict[str, SpacingSpec],
+]:
     """Resolve theme preset and overrides from GUI configuration.
 
     Parameters
@@ -676,9 +805,9 @@ def _build_palette(
 
     Returns
     -------
-    tuple[str, dict[str, str], str, dict[str, FontSpec]]
-        ``(preset_name, palette, base_theme, typography)`` reflecting merged
-        theme settings.
+    tuple[str, dict[str, str], str, dict[str, FontSpec], dict[str, SpacingSpec]]
+        ``(preset_name, palette, base_theme, typography, spacing)`` reflecting
+        merged theme settings.
     """
     theme_settings = _to_dict(_get_nested(gui_settings, ("theme",), {}))
     preset_name = str(theme_settings.get("preset", _DEFAULT_THEME_PRESET))
@@ -697,7 +826,19 @@ def _build_palette(
         token = str(key)
         typography[token] = _to_font_tuple(value, typography.get(token, body_fallback))
 
-    return preset_name, palette, base_theme, typography
+    spacing = dict(
+        _SPACING_PRESETS.get(preset_name, _SPACING_PRESETS[_DEFAULT_THEME_PRESET])
+    )
+    for key, value in _to_dict(theme_settings.get("spacing")).items():
+        token = str(key)
+        if token in spacing:
+            spacing[token] = _coerce_spacing_value(value, spacing[token])
+            continue
+        parsed_spacing = _parse_spacing_value(value)
+        if parsed_spacing is not None:
+            spacing[token] = parsed_spacing
+
+    return preset_name, palette, base_theme, typography, spacing
 
 
 def get_theme_color(name: str, fallback: str | None = None) -> str:
@@ -742,6 +883,107 @@ def get_theme_font(name: str, fallback: FontSpec | None = None) -> FontSpec:
     if fallback is not None:
         return fallback
     return _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]["body"]
+
+
+def get_theme_spacing(name: str, fallback: int | None = None) -> int:
+    """Return a named spacing token from the active layout scale.
+
+    Parameters
+    ----------
+    name : str
+        Spacing token to retrieve.
+    fallback : int or None, optional
+        Value returned when the token is missing or non-scalar.
+
+    Returns
+    -------
+    int
+        Resolved spacing value.
+    """
+    value = _ACTIVE_SPACING.get(name)
+    if isinstance(value, int):
+        return value
+    if fallback is not None:
+        return fallback
+    default_value = _SPACING_PRESETS[_DEFAULT_THEME_PRESET].get(name)
+    return default_value if isinstance(default_value, int) else 0
+
+
+def get_theme_padding(
+    name: str,
+    fallback: tuple[int, ...] | None = None,
+) -> tuple[int, ...]:
+    """Return a named padding token from the active layout system.
+
+    Parameters
+    ----------
+    name : str
+        Padding token to retrieve.
+    fallback : tuple[int, ...] or None, optional
+        Tuple returned when the token is missing.
+
+    Returns
+    -------
+    tuple[int, ...]
+        Resolved padding tuple.
+    """
+    value = _ACTIVE_SPACING.get(name)
+    if isinstance(value, tuple):
+        return value
+    if isinstance(value, int):
+        return (value, value)
+    if fallback is not None:
+        return fallback
+    default_value = _SPACING_PRESETS[_DEFAULT_THEME_PRESET].get(name)
+    if isinstance(default_value, tuple):
+        return default_value
+    if isinstance(default_value, int):
+        return (default_value, default_value)
+    return (0, 0)
+
+
+def get_theme_space_px(value: int, fallback: int | None = None) -> int:
+    """Resolve pixel spacing through tokenized lookup.
+
+    Parameters
+    ----------
+    value : int
+        Desired pixel spacing.
+    fallback : int or None, optional
+        Fallback value when the generated token is missing. When omitted, the
+        sanitized ``value`` is used.
+
+    Returns
+    -------
+    int
+        Resolved spacing value.
+    """
+    normalized = _to_nonnegative_int(value)
+    if normalized is None:
+        normalized = 0
+    fallback_value = _to_nonnegative_int(fallback)
+    resolved_fallback = normalized if fallback_value is None else fallback_value
+    return get_theme_spacing(f"space_px_{normalized}", resolved_fallback)
+
+
+def get_theme_padding_px(values: tuple[int, ...]) -> tuple[int, ...]:
+    """Resolve pixel padding through tokenized lookup.
+
+    Parameters
+    ----------
+    values : tuple[int, ...]
+        Desired Tk padding tuple of length 1, 2, or 4.
+
+    Returns
+    -------
+    tuple[int, ...]
+        Resolved padding tuple.
+    """
+    normalized = _to_spacing_tuple(values)
+    if normalized is None:
+        normalized = (0, 0)
+    token = "padding_px_" + "_".join(str(item) for item in normalized)
+    return get_theme_padding(token, normalized)
 
 
 def _resolve_matplotlib_family(family: str) -> str:
@@ -822,10 +1064,13 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     tuple[str, dict[str, str]]
         ``(preset_name, palette)`` describing the applied theme.
     """
-    global _ACTIVE_PALETTE, _ACTIVE_TYPOGRAPHY
-    preset_name, palette, preferred_theme, typography = _build_palette(gui_settings)
+    global _ACTIVE_PALETTE, _ACTIVE_TYPOGRAPHY, _ACTIVE_SPACING
+    preset_name, palette, preferred_theme, typography, spacing = _build_palette(
+        gui_settings
+    )
     _ACTIVE_PALETTE = dict(palette)
     _ACTIVE_TYPOGRAPHY = dict(typography)
+    _ACTIVE_SPACING = dict(spacing)
 
     style = ttk.Style(root)
     available = style.theme_names()
@@ -853,6 +1098,10 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     font_title = typography["title"]
     font_button = typography["button"]
     font_button_emphasis = typography["button_emphasis"]
+    button_padding = get_theme_padding("padding_button")
+    stage_stop_button_padding = get_theme_padding("padding_stage_stop_button")
+    stage_home_button_padding = get_theme_padding("padding_stage_home_button")
+    notebook_tab_padding = get_theme_padding("padding_notebook_tab")
 
     root.configure(bg=window_bg)
 
@@ -943,7 +1192,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         background=surface_bg,
         foreground=text,
         bordercolor=border,
-        padding=(8, 4),
+        padding=button_padding,
         font=font_button,
     )
     _safe_style_map(
@@ -996,7 +1245,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         background=danger,
         foreground=text,
         font=font_body_bold,
-        padding=(8, 16),
+        padding=stage_stop_button_padding,
     )
     _safe_style_map(
         style,
@@ -1015,7 +1264,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         background=success,
         foreground=text,
         font=font_button,
-        padding=(8, 6),
+        padding=stage_home_button_padding,
     )
     _safe_style_map(
         style,
@@ -1116,7 +1365,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
         "TNotebook.Tab",
         background=surface_bg,
         foreground=text,
-        padding=(10, 4),
+        padding=notebook_tab_padding,
         font=font_body_bold,
     )
     _safe_style_map(

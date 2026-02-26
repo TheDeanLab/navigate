@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@ import tkinter as tk
 
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.theme import get_theme_padding_px
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -77,7 +78,7 @@ class PluginsPopup:
         self.variables = {}
 
         label = ttk.Label(content_frame, text="Plugin Name", width=30)
-        label.grid(row=0, column=1, padx=(30, 10), sticky=tk.NE)
+        label.grid(row=0, column=1, padx=get_theme_padding_px((30, 10)), sticky=tk.NE)
 
         label = ttk.Label(content_frame, text="Location", width=60)
         label.grid(row=0, column=2, sticky=tk.NE)
@@ -104,7 +105,9 @@ class PluginsPopup:
             )
             check.grid(row=i, column=0, sticky=tk.NW)
             label = ttk.Label(self.plugins_frame, text=plugin_name)
-            label.grid(row=i, column=1, padx=(5, 10), sticky=tk.NSEW)
+            label.grid(
+                row=i, column=1, padx=get_theme_padding_px((5, 10)), sticky=tk.NSEW
+            )
             label = ttk.Label(self.plugins_frame, text=plugin_config[plugin_name])
             label.grid(row=i, column=2, sticky=tk.NSEW)
             self.variables.append(var)

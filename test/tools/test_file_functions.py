@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -126,7 +126,7 @@ class CreateSavePathTestCase(unittest.TestCase):
                 user_string,
                 f"{date_string}_{tissue_string}_{cell_type_string}_{label_string}",
                 "Cell_002".lower(),
-            )
+            ),
         )
 
         # Assert that the save directory and cell directory are created

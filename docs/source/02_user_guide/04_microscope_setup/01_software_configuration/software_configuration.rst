@@ -1,7 +1,7 @@
 .. _configuration_file:
 
 ======================
-Software Configuration
+Advanced Configuration
 ======================
 
 This section outlines the ``configuration.yaml``, ``experiment.yml``, ``rest_api_config.yml``, ``waveform_templates.yml``, and ``waveform_constants.yml`` files.
@@ -14,28 +14,6 @@ Initial Configuration
 In order for the **navigate** software to function, you will need to configure the specifications of the various hardware that you will be using in the ``configuration.yaml`` file.
 
 An example ``configuration.yaml`` file is provided in the ``navigate\config`` directory. However, to avoid conflicts between different microscopes after pulling new changes from GitHub, **navigate** by default loads a local version of the ``configuration.yaml`` file. This file is stored in the ``C:\Users\Username\AppData\Local\.navigate\config`` directory on Windows or ``~/.navigate`` on Mac/Linux.
-
------------------
-
-Configuration Wizard
--------------------------
-
-To help you set up your configuration file, we have created a configuration wizard that will guide you through the process of creating your ``configuration.yaml`` file. To launch the configuration wizard, open your Terminal or Anaconda Prompt, activate your **navigate** Python environment and launch the software by typing: ``navigate -c``.
-
-   .. image:: images/configurator.PNG
-     :width: 400px
-     :align: center
-
-The configuration wizard provides a convenient way for configuring your hardware. For each microscope, which can be renamed or deleted by right-clicking on the microscope tab, you will be asked to specify the hardware that you are using. Each hardware type is listed as its own independent tab, and required parameters are shown on the left column, a field for the parameter is shown in the middle, and an example of the parameter is shown on the right.
-
-Additional microscope instances can be added by clicking the :guilabel:`Add A Microscope` button. Should one want to start from scratch, the :guilabel:`New Configuration` button will clear the current configuration. If you have a configuration that you would like to modify, you can load it by clicking the :guilabel:`Load Configuration` button. Once you have completed the configuration, you can save it by clicking the :guilabel:`Save` button. For **navigate** to use the configuration file by default, it should be saved as ``configuration.yaml`` in the following directory, depending upon your operating system:
-
-* Windows: ``C:\Users\Username\AppData\Local\.navigate\config``
-* Mac/Linux: ``~/.navigate``
-
-.. note::
-
-   The configuration wizard is actively being developed, and may not support every device type or configuration option. If you encounter any issues with the configuration wizard, please let us know by creating an issue on `GitHub <https://github.com/TheDeanLab/navigate/issues/new/choose>`_.
 
 -----------------
 

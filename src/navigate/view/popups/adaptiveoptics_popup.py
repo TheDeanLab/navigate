@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # Local application imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.theme import get_theme_padding_px, get_theme_space_px
 
 import logging
 
@@ -183,18 +184,18 @@ class AdaptiveOpticsPopup:
             label_pos="top",
             input_args={"width": 15},
         )
-        self.inputs["iterations"].grid(row=0, column=1, pady=5)
+        self.inputs["iterations"].grid(row=0, column=1, pady=get_theme_space_px(5))
         self.inputs["steps"] = LabelInput(
             tw_widget_frame, label="Steps:", label_pos="top", input_args={"width": 15}
         )
-        self.inputs["steps"].grid(row=1, column=1, pady=5)
+        self.inputs["steps"].grid(row=1, column=1, pady=get_theme_space_px(5))
         self.inputs["amplitude"] = LabelInput(
             tw_widget_frame,
             label="Amplitude:",
             label_pos="top",
             input_args={"width": 15},
         )
-        self.inputs["amplitude"].grid(row=2, column=1, pady=5)
+        self.inputs["amplitude"].grid(row=2, column=1, pady=get_theme_space_px(5))
 
         tw_start_from_var = tk.StringVar()
         ttk.Label(tw_widget_frame, text="Start from:").grid(row=3, column=1)
@@ -203,7 +204,7 @@ class AdaptiveOpticsPopup:
         )
         tw_start_from_combo["values"] = ("flat", "current")
         tw_start_from_combo.state(["readonly"])
-        tw_start_from_combo.grid(row=4, column=1, pady=5)
+        tw_start_from_combo.grid(row=4, column=1, pady=get_theme_space_px(5))
         tw_start_from_combo.current(0)
         self.inputs["from"] = {
             "button": tw_start_from_combo,
@@ -221,7 +222,7 @@ class AdaptiveOpticsPopup:
             "DCT Shannon Entropy",
         )
         tw_metric_combo.state(["readonly"])
-        tw_metric_combo.grid(row=6, column=1, pady=5)
+        tw_metric_combo.grid(row=6, column=1, pady=get_theme_space_px(5))
         tw_metric_combo.current(0)
         self.inputs["metric"] = {"button": tw_metric_combo, "variable": tw_metric_var}
 
@@ -235,7 +236,7 @@ class AdaptiveOpticsPopup:
             "gauss",
         )
         tw_fitfunc_combo.state(["readonly"])
-        tw_fitfunc_combo.grid(row=8, column=1, pady=5)
+        tw_fitfunc_combo.grid(row=8, column=1, pady=get_theme_space_px(5))
         tw_fitfunc_combo.current(0)
         self.inputs["fitfunc"] = {
             "button": tw_fitfunc_combo,
@@ -244,7 +245,7 @@ class AdaptiveOpticsPopup:
 
         #: ttk.Button: Tony Wilson Button
         self.tony_wilson_button = ttk.Button(tw_widget_frame, text="RUN", width=15)
-        self.tony_wilson_button.grid(row=9, column=1, pady=5)
+        self.tony_wilson_button.grid(row=9, column=1, pady=get_theme_space_px(5))
 
         control_frame = ttk.Frame(content_frame)
         control_frame.grid(row=0, column=0)
@@ -255,37 +256,37 @@ class AdaptiveOpticsPopup:
 
         #: ttk.Button: Set Button
         self.set_button = ttk.Button(button_frame, text="Set", width=15)
-        self.set_button.grid(row=0, column=0, pady=5)
+        self.set_button.grid(row=0, column=0, pady=get_theme_space_px(5))
 
         #: ttk.Button: Flat Button
         self.flat_button = ttk.Button(button_frame, text="Flat", width=15)
-        self.flat_button.grid(row=1, column=0, pady=5)
+        self.flat_button.grid(row=1, column=0, pady=get_theme_space_px(5))
 
         #: ttk.Button: Zero Button
         self.zero_button = ttk.Button(button_frame, text="Zero", width=15)
-        self.zero_button.grid(row=2, column=0, pady=5)
+        self.zero_button.grid(row=2, column=0, pady=get_theme_space_px(5))
 
         #: ttk.Button: Clear Button
         self.clear_button = ttk.Button(button_frame, text="Clear All", width=15)
-        self.clear_button.grid(row=3, column=0, pady=5)
+        self.clear_button.grid(row=3, column=0, pady=get_theme_space_px(5))
 
         #: ttk.Button: Save Button
         self.save_wcs_button = ttk.Button(button_frame, text="Save WCS File", width=15)
-        self.save_wcs_button.grid(row=0, column=1, pady=5)
+        self.save_wcs_button.grid(row=0, column=1, pady=get_theme_space_px(5))
 
         #: ttk.Button: Load Button
         self.from_wcs_button = ttk.Button(button_frame, text="From WCS File", width=15)
-        self.from_wcs_button.grid(row=1, column=1, pady=5)
+        self.from_wcs_button.grid(row=1, column=1, pady=get_theme_space_px(5))
 
         #: ttk.Button: Select All Button
         self.select_all_modes = ttk.Button(button_frame, text="Select All", width=15)
-        self.select_all_modes.grid(row=2, column=1, pady=5)
+        self.select_all_modes.grid(row=2, column=1, pady=get_theme_space_px(5))
 
         #: ttk.Button: Deselect All Button
         self.deselect_all_modes = ttk.Button(
             button_frame, text="Deselect All", width=15
         )
-        self.deselect_all_modes.grid(row=3, column=1, pady=5)
+        self.deselect_all_modes.grid(row=3, column=1, pady=get_theme_space_px(5))
 
         scroll = ScrollFrame(control_frame)
 
@@ -342,7 +343,11 @@ class AdaptiveOpticsPopup:
         canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=0, column=0, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((5, 5)),
         )
 
         #: matplotlib.figure.Figure: Figure
@@ -358,7 +363,11 @@ class AdaptiveOpticsPopup:
         canvas = FigureCanvasTkAgg(self.fig_tw, master=self.tab_tw)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=0, column=0, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((5, 5)),
         )
 
     def onFrameConfigure(self, event):

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -251,7 +251,7 @@ class ASIDaq(DAQBase, SerialDevice):
             logger.debug(
                 f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}"
             )
-            
+
             self.daq.setup_z_stage(tiger_axis, addr, int(step_size * 10))
 
             start_focus = self.configuration["experiment"]["MicroscopeState"][

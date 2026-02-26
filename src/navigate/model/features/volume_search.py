@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -587,7 +587,7 @@ class VolumeSearch3D:
                 pos_dict[f"{axis}_pos"] for axis in ["x", "y", "z", "theta", "f"]
             ]
         else:
-            position = self.model.configuration["multi_positions"][self.position_id+1]
+            position = self.model.configuration["multi_positions"][self.position_id + 1]
         # current stage position is the end of z
         position[2] -= z_end
 

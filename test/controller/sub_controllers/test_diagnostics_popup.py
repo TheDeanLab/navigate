@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -64,14 +64,10 @@ def test_extract_times_filters_by_kind():
         {"kind": "Histogram", "duration_ns": 500_000_000},
     ]
 
-    times = DiagnosticsPopupController.extract_times(
-        log_content, kind="Acquire Image"
-    )
+    times = DiagnosticsPopupController.extract_times(log_content, kind="Acquire Image")
     assert times == pytest.approx([1.0, 2.0])
 
-    assert DiagnosticsPopupController.extract_times(
-        log_content, kind="Missing"
-    ) is None
+    assert DiagnosticsPopupController.extract_times(log_content, kind="Missing") is None
     assert DiagnosticsPopupController.extract_times(None, kind="Acquire Image") is None
     assert DiagnosticsPopupController.extract_times("bad", kind="Acquire Image") is None
 

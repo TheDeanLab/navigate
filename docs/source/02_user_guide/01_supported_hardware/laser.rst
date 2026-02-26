@@ -1,7 +1,13 @@
+.. _laser_configuration:
+
 ======
 Lasers
 ======
-We currently support laser control via voltage signals. In the near-future, we will consider implementing laser control via serial communication for power control, but digital modulation will still be controlled via voltage signals. The ``onoff`` entry is for digital modulation. The ``power`` entry is for analog modulation.
+
+**navigate** currently supports laser control via voltage signals. Future releases may
+add serial communication for power control, while digital modulation remains voltage
+controlled. In the configuration file, ``onoff`` is used for digital modulation and
+``power`` is used for analog modulation.
 
 ---------------------
 

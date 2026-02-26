@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -134,67 +134,62 @@ def test_map_labels():
             cx = rng.integers(r, width - r)
 
             # Fill a cube: 5x5x5
-            stack[
-                cz - r : cz + r + 1,
-                cy - r : cy + r + 1,
-                cx - r : cx + r + 1
-            ] = label
+            stack[cz - r : cz + r + 1, cy - r : cy + r + 1, cx - r : cx + r + 1] = label
 
             targets.append((cz, cy, cx))
 
         return stack, targets
-    
+
     from navigate.model.analysis.boundary_detect import map_labels
 
     labeled_image, targets = generate_labeled_stack_with_3d_blobs(num_labels=30)
 
     z_range, position_table, target_labels = map_labels(
         labeled_image,
-        position = [0, 0, 0, 0, 0],
-        z_start = -100,
-        z_step = 1,
-        x_direction = "x",
-        y_direction = "y",
-        current_pixel_size = 1,
-        current_image_width = 1024,
-        current_image_height = 1024,
-        target_pixel_size = 0.5,
-        target_image_width = 1024,
-        target_image_height = 1024,
+        position=[0, 0, 0, 0, 0],
+        z_start=-100,
+        z_step=1,
+        x_direction="x",
+        y_direction="y",
+        current_pixel_size=1,
+        current_image_width=1024,
+        current_image_height=1024,
+        target_pixel_size=0.5,
+        target_image_width=1024,
+        target_image_height=1024,
         overlap=0.05,
         filter_pixel_number=1,
     )
 
-    assert z_range == 5 # blob size in z direction
+    assert z_range == 5  # blob size in z direction
 
     assert position_table[0] == ["X", "Y", "Z", "THETA", "F"]
 
     # check positions
     for t in targets:
         z, y, x = t
-        pos = [(x+1-512)*1.0, (y+1-512)*1.0, (z-2)*1.0-100, 0, 0]
+        pos = [(x + 1 - 512) * 1.0, (y + 1 - 512) * 1.0, (z - 2) * 1.0 - 100, 0, 0]
         assert pos in position_table[1:]
-        
 
     # switch x and y direction
     z_range, position_table, target_labels = map_labels(
         labeled_image,
-        position = [0, 0, 0, 0, 0],
-        z_start = -300,
-        z_step = 1,
-        x_direction = "y",
-        y_direction = "x",
-        current_pixel_size = 1.25,
-        current_image_width = 1024,
-        current_image_height = 1024,
-        target_pixel_size = 0.05,
-        target_image_width = 1024,
-        target_image_height = 1024,
+        position=[0, 0, 0, 0, 0],
+        z_start=-300,
+        z_step=1,
+        x_direction="y",
+        y_direction="x",
+        current_pixel_size=1.25,
+        current_image_width=1024,
+        current_image_height=1024,
+        target_pixel_size=0.05,
+        target_image_width=1024,
+        target_image_height=1024,
         overlap=0.05,
         filter_pixel_number=1,
     )
 
-    assert z_range == 5 # blob size in z direction
+    assert z_range == 5  # blob size in z direction
 
     assert position_table[0] == ["X", "Y", "Z", "THETA", "F"]
 
@@ -207,12 +202,11 @@ def test_map_labels():
 
     for t in targets:
         z, y, x = t
-        
+
         x_start = x - 2 - shift_x
         y_start = y - 2 - shift_y
 
         x_pos = (x_start + target_width / 2 - 512) * 1.25
         y_pos = (y_start + target_height / 2 - 512) * 1.25
-        pos = [y_pos, x_pos, (z-2)*1.0 - 300, 0, 0]
+        pos = [y_pos, x_pos, (z - 2) * 1.0 - 300, 0, 0]
         assert pos in position_table[1:]
-

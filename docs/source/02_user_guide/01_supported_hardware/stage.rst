@@ -1,11 +1,17 @@
+.. _stage_configuration:
+
 ======
 Stages
 ======
 
-Our software empowers users with a flexible solution for configuring multiple stages, catering to diverse microscope modalities. Each stage can be customized to suit the specific requirements of a particular modality or shared across  various modalities. Our unique approach allows seamless integration of stages from different manufacturers, enabling users to mix and match components for a truly versatile and optimized setup tailored to their research needs.
+**navigate** supports flexible stage configurations across different microscope
+modalities. Stages can be configured per modality or shared across modalities, and
+multiple manufacturers can be combined in a single system.
 
-.. Note::
-    The software provides configure specific hardware axes to software axes. This is specified in the configuration file. For example, if specified as follows, the software x, y, z, and f axes can be mapped to the hardware axes M, Y, X, and Z, respectively.
+.. note::
+    You can map software axes to specific hardware axes in the configuration file. For
+    example, software ``x``, ``y``, ``z``, and ``f`` can be mapped to hardware axes
+    ``M``, ``Y``, ``X``, and ``Z``, respectively:
 
     .. code-block:: yaml
 
@@ -21,8 +27,8 @@ Tiger Controller
 ~~~~~~~~~~~~~~~~
 
 
-The ASI `Tiger Controller <https://www.asiimaging.com/controllers/tiger-controller/>`_. is
-a multi-purpose controller for ASI stages, filter wheels, dichroic sliders,
+The ASI `Tiger Controller <https://www.asiimaging.com/controllers/tiger-controller/>`_
+is a multi-purpose controller for ASI stages, filter wheels, dichroic sliders,
 and more. We communicate with Tiger Controllers via a serial port. It is recommended that you
 first establish communication with the device using `ASI provided software <https://asiimaging.com/docs/products/tiger>`_.
 
@@ -44,7 +50,7 @@ first establish communication with the device using `ASI provided software <http
     potentially damage one another.
 
 .. tip::
-    ASI stage's include a configuration option, ``feedback_alignment``, which
+    ASI stages include a configuration option, ``feedback_alignment``, which
     corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/commands/aalign>`_.
 
 .. collapse:: Configuration File

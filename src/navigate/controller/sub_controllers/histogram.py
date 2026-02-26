@@ -78,7 +78,7 @@ class HistogramController:
         self.parent_controller = parent_controller
 
         #: FigureBase: The histogram figure.
-        self.ax = self.histogram.figure.add_axes([0.01, 0.20, 0.98, 0.79])
+        self.ax = self.histogram.figure.add_axes([0.02, 0.20, 0.96, 0.78])
 
         # Event Bindings
         widget = self.histogram.figure_canvas.get_tk_widget()
@@ -499,7 +499,7 @@ class HistogramController:
             fill=True,
             facecolor=fill_color,
             edgecolor=fill_color,
-            linewidth=15,
+            linewidth=25,
             alpha=1.0,
             antialiased=False,
         )

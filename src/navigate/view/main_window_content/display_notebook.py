@@ -192,10 +192,10 @@ class CameraTab(tk.Frame):
         self.is_docked = True
 
         #: int: The width of the canvas.
-        self.canvas_width = 512
+        self.canvas_width = 550
 
         #: int: The height of the canvas.
-        self.canvas_height = 512
+        self.canvas_height = 550
 
         #: tk.Canvas: The canvas that will hold the camera image.
         self.canvas = tk.Canvas(
@@ -224,8 +224,10 @@ class CameraTab(tk.Frame):
         self.slider.grid_remove()
 
         #: HistogramFrame: The frame that will hold the histogram.
-        self.histogram = HistogramFrame(self.cam_image)
-        self.histogram.grid(row=2, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.histogram = HistogramFrame(self)
+        self.histogram.grid(
+            row=2, column=0, columnspan=2, sticky=tk.NSEW, padx=5, pady=5
+        )
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.lut = IntensityFrame(self.display_setting)

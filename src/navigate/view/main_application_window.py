@@ -148,7 +148,7 @@ class MainApp(ttk.Frame):
             row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3
         )
         self.left_frame.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
-        self.right_frame.grid(row=1, column=1, sticky=tk.NW, padx=3, pady=3)
+        self.right_frame.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
 
         #: SettingsNotebook: The settings notebook for the application
         self.settings = SettingsNotebook(self.left_frame, self.root)

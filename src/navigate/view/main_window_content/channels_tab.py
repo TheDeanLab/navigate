@@ -556,13 +556,41 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
 
         image_directory = Path(__file__).resolve().parent
+        image_path = image_directory.joinpath("images", "cubic_bottom_to_top.png")
 
-        self.image = tk.PhotoImage(
-            file=image_directory.joinpath("images", "cubic_bottom_to_top.png")
-        )
+        self.image = None
+        try:
+            loaded_image = tk.PhotoImage(file=str(image_path))
+            if str(loaded_image):
+                self.image = loaded_image
+            else:
+                logger.warning(
+                    "Stack acquisition image handle is empty for %s. "
+                    "Falling back to a text label.",
+                    image_path,
+                )
+        except tk.TclError:
+            logger.warning(
+                "Unable to load stack acquisition image at %s. "
+                "Falling back to a text label.",
+                image_path,
+                exc_info=True,
+            )
 
-        # Use ttk.Label
-        self.cubic_image_label = ttk.Label(self.cubic_frame, image=self.image)
+        if self.image is not None:
+            try:
+                self.cubic_image_label = ttk.Label(self.cubic_frame, image=self.image)
+            except tk.TclError:
+                logger.warning(
+                    "Unable to attach stack acquisition image to label. "
+                    "Falling back to a text label.",
+                    exc_info=True,
+                )
+                self.image = None
+
+        if self.image is None:
+            self.cubic_image_label = ttk.Label(self.cubic_frame, text="")
+
         self.cubic_image_label.grid(
             row=0,
             rowspan=2,

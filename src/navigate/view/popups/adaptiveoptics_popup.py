@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -343,7 +343,11 @@ class AdaptiveOpticsPopup:
         canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=0, column=0, sticky=tk.NSEW, padx=get_theme_padding_px((5, 5)), pady=get_theme_padding_px((5, 5))
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((5, 5)),
         )
 
         #: matplotlib.figure.Figure: Figure
@@ -359,7 +363,11 @@ class AdaptiveOpticsPopup:
         canvas = FigureCanvasTkAgg(self.fig_tw, master=self.tab_tw)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=0, column=0, sticky=tk.NSEW, padx=get_theme_padding_px((5, 5)), pady=get_theme_padding_px((5, 5))
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 5)),
+            pady=get_theme_padding_px((5, 5)),
         )
 
     def onFrameConfigure(self, event):

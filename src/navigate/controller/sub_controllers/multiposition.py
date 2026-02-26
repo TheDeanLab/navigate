@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -238,7 +238,9 @@ class MultiPositionController(GUIController):
         positions = [list(df.columns)]
         stage_axes = self.parent_controller.configuration_controller.stage_axes
         required_headers = [axis.upper() for axis in stage_axes]
-        missing_headers = [axis for axis in required_headers if axis not in positions[0]]
+        missing_headers = [
+            axis for axis in required_headers if axis not in positions[0]
+        ]
         if missing_headers:
             logger.warning(
                 "Missing required stage headers in multiposition table: %s",
@@ -419,7 +421,9 @@ class MultiPositionController(GUIController):
             position in the format of {axis: value}
         """
         headers = list(self.table.model.df.columns)
-        normalized_position = {str(key).lower(): value for key, value in position.items()}
+        normalized_position = {
+            str(key).lower(): value for key, value in position.items()
+        }
         hidden_values = {}
 
         temp = []

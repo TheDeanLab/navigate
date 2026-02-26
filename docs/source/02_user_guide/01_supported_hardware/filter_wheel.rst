@@ -1,3 +1,5 @@
+.. _filter_wheel_configuration:
+
 =============
 Filter Wheels
 =============
@@ -47,9 +49,9 @@ file as follows:
 
 .. note::
 
-    The `name` parameter under `hardware` is optional. If not provided, the name of the
-    device will be default to Filter 0, Filter 1, ... Filter N in the GUI. However, if
-    is is provided, then the GUI will automatically use the name provided as a label.
+    The ``name`` parameter under ``hardware`` is optional. If it is not provided, the
+    device label defaults to ``Filter 0``, ``Filter 1``, ..., ``Filter N`` in the GUI.
+    If it is provided, the GUI uses the configured name as the label.
 
 -----------
 

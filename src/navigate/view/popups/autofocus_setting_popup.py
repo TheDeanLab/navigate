@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -95,12 +95,15 @@ class AutofocusPopup:
         device_frame = ttk.Labelframe(
             content_frame, text="Device Type and Focusing Axis", labelanchor="n"
         )
-        ttk.Style().configure(
-            "Bold.TLabelframe.Label", font=get_theme_font("title")
-        )
+        ttk.Style().configure("Bold.TLabelframe.Label", font=get_theme_font("title"))
         device_frame.configure(style="Bold.TLabelframe")
         device_frame.grid(
-            row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=get_theme_space_px(10), pady=get_theme_padding_px((5, 10))
+            row=0,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(10),
+            pady=get_theme_padding_px((5, 10)),
         )
 
         self.inputs["device"] = LabelInput(
@@ -111,7 +114,13 @@ class AutofocusPopup:
             input_args={"width": 20, "state": "readonly"},
             label_args={"padding": (0, 0, 10, 0)},
         )
-        self.inputs["device"].grid(row=0, column=0, pady=get_theme_space_px(6), padx=get_theme_space_px(10), sticky=tk.W)
+        self.inputs["device"].grid(
+            row=0,
+            column=0,
+            pady=get_theme_space_px(6),
+            padx=get_theme_space_px(10),
+            sticky=tk.W,
+        )
 
         self.inputs["device_ref"] = LabelInput(
             parent=device_frame,
@@ -121,7 +130,13 @@ class AutofocusPopup:
             input_args={"width": 20, "state": "readonly"},
             label_args={"padding": (0, 0, 10, 0)},
         )
-        self.inputs["device_ref"].grid(row=0, column=1, pady=get_theme_space_px(6), padx=get_theme_space_px(10), sticky=tk.W)
+        self.inputs["device_ref"].grid(
+            row=0,
+            column=1,
+            pady=get_theme_space_px(6),
+            padx=get_theme_space_px(10),
+            sticky=tk.W,
+        )
 
         # Section 2.
         scan_frame = ttk.Labelframe(
@@ -131,7 +146,12 @@ class AutofocusPopup:
             style="Bold.TLabelframe",
         )
         scan_frame.grid(
-            row=1, column=0, columnspan=3, sticky=tk.NSEW, padx=get_theme_space_px(10), pady=get_theme_padding_px((0, 10))
+            row=1,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(10),
+            pady=get_theme_padding_px((0, 10)),
         )
 
         for c in range(3):
@@ -144,7 +164,11 @@ class AutofocusPopup:
             "Step Size  (" + "\N{GREEK SMALL LETTER MU}" + "m)",
         ]
         for i in range(3):
-            title = ttk.Label(scan_frame, text=title_labels[i], padding=get_theme_padding_px((2, 5, 0, 0)))
+            title = ttk.Label(
+                scan_frame,
+                text=title_labels[i],
+                padding=get_theme_padding_px((2, 5, 0, 0)),
+            )
             title.grid(row=starting_row_id, column=i, sticky=tk.EW)
 
         setting_names = ["coarse", "fine", "robust_fit"]
@@ -222,7 +246,12 @@ class AutofocusPopup:
             style="Bold.TLabelframe",
         )
         options_frame.grid(
-            row=2, column=0, columnspan=3, sticky=tk.NSEW, padx=get_theme_space_px(10), pady=get_theme_padding_px((0, 10))
+            row=2,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(10),
+            pady=get_theme_padding_px((0, 10)),
         )
         for c in range(3):
             options_frame.grid_columnconfigure(c, weight=1)
@@ -231,7 +260,13 @@ class AutofocusPopup:
         robust_fit = HoverCheckButton(
             options_frame, text=setting_labels[2], variable=variable
         )
-        robust_fit.grid(row=0, column=0, sticky=tk.W, padx=get_theme_space_px(6), pady=get_theme_space_px(6))
+        robust_fit.grid(
+            row=0,
+            column=0,
+            sticky=tk.W,
+            padx=get_theme_space_px(6),
+            pady=get_theme_space_px(6),
+        )
         self.setting_vars["robust_fit"] = variable
         robust_fit.hover.setdescription(
             "Fit the data with an inverse power tent to identify the ideal focus."
@@ -241,7 +276,13 @@ class AutofocusPopup:
         spline_fit = HoverCheckButton(
             options_frame, text="Spline Fit", variable=variable
         )
-        spline_fit.grid(row=0, column=1, sticky=tk.W, padx=get_theme_space_px(6), pady=get_theme_space_px(6))
+        spline_fit.grid(
+            row=0,
+            column=1,
+            sticky=tk.W,
+            padx=get_theme_space_px(6),
+            pady=get_theme_space_px(6),
+        )
         self.setting_vars["spline_fit"] = variable
         spline_fit.hover.setdescription(
             "Fit the data with a spline to identify the ideal focus."
@@ -251,7 +292,13 @@ class AutofocusPopup:
         test_significance = HoverCheckButton(
             options_frame, text="Test Significance", variable=variable
         )
-        test_significance.grid(row=0, column=2, sticky=tk.W, padx=get_theme_space_px(6), pady=get_theme_space_px(6))
+        test_significance.grid(
+            row=0,
+            column=2,
+            sticky=tk.W,
+            padx=get_theme_space_px(6),
+            pady=get_theme_space_px(6),
+        )
         self.setting_vars["test_significance"] = variable
         test_significance.hover.setdescription(
             "Only accept focus positions that provide a statistically significant "
@@ -285,7 +332,12 @@ class AutofocusPopup:
             pass
         button_bar = ttk.Frame(content_frame)
         button_bar.grid(
-            row=3, column=0, columnspan=3, sticky=tk.NSEW, padx=get_theme_space_px(10), pady=get_theme_padding_px((0, 6))
+            row=3,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(10),
+            pady=get_theme_padding_px((0, 6)),
         )
 
         self.autofocus_btn = ttk.Button(

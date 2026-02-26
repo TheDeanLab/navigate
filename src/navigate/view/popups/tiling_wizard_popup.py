@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -101,7 +101,11 @@ class TilingWizardPopup:
                 self.popup.content_frame, text=f"Set {ax.upper()} Start"
             )
             self.buttons[start_var].grid(
-                row=row, column=0, sticky=tk.NSEW, padx=get_theme_padding_px((5, 0)), pady=get_theme_padding_px((5, 0))
+                row=row,
+                column=0,
+                sticky=tk.NSEW,
+                padx=get_theme_padding_px((5, 0)),
+                pady=get_theme_padding_px((5, 0)),
             )
             self.inputs[start_var] = LabelInput(
                 parent=self.popup.content_frame,
@@ -110,7 +114,11 @@ class TilingWizardPopup:
                 input_args={"width": 5},
             )
             self.inputs[start_var].grid(
-                row=row, column=1, sticky=tk.NSEW, pady=get_theme_padding_px((5, 0)), padx=get_theme_padding_px((5, 0))
+                row=row,
+                column=1,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
             )
             self.inputs[start_var].widget.state(["disabled"])
 
@@ -120,7 +128,11 @@ class TilingWizardPopup:
                 self.popup.content_frame, text=f"Set {ax.upper()} End"
             )
             self.buttons[end_var].grid(
-                row=row, column=2, sticky=tk.NSEW, padx=get_theme_padding_px((5, 0)), pady=get_theme_padding_px((5, 0))
+                row=row,
+                column=2,
+                sticky=tk.NSEW,
+                padx=get_theme_padding_px((5, 0)),
+                pady=get_theme_padding_px((5, 0)),
             )
             self.inputs[end_var] = LabelInput(
                 parent=self.popup.content_frame,
@@ -129,7 +141,11 @@ class TilingWizardPopup:
                 input_args={"width": 5},
             )
             self.inputs[end_var].grid(
-                row=row, column=3, sticky=tk.NSEW, pady=get_theme_padding_px((5, 0)), padx=get_theme_padding_px((5, 0))
+                row=row,
+                column=3,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
             )
             self.inputs[end_var].widget.state(["disabled"])
 
@@ -143,7 +159,11 @@ class TilingWizardPopup:
                 input_args={"width": 5},
             )
             self.inputs[dist_var].grid(
-                row=row, column=4, sticky=tk.NSEW, pady=get_theme_padding_px((5, 0)), padx=get_theme_padding_px((5, 0))
+                row=row,
+                column=4,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
             )
             self.inputs[dist_var].widget.state(["disabled"])
 
@@ -164,7 +184,11 @@ class TilingWizardPopup:
                 },
             )
             self.inputs[fov_var].grid(
-                row=row, column=5, sticky=tk.NSEW, pady=get_theme_padding_px((5, 0)), padx=get_theme_padding_px((5, 0))
+                row=row,
+                column=5,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
             )
             # self.inputs[fov_var].widget.state(["disabled"])
 
@@ -179,7 +203,11 @@ class TilingWizardPopup:
                 input_args={"width": 5},
             )
             self.inputs[tiles_var].grid(
-                row=row, column=6, sticky=tk.NSEW, pady=get_theme_padding_px((5, 0)), padx=get_theme_padding_px((5, 0))
+                row=row,
+                column=6,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((5, 0)),
+                padx=get_theme_padding_px((5, 0)),
             )
             self.inputs[tiles_var].widget.state(["disabled"])
 
@@ -192,7 +220,11 @@ class TilingWizardPopup:
             input_args={"width": 5, "increment": 5, "from_": 0, "to": 100},
         )
         self.inputs["percent_overlap"].grid(
-            row=len(axes), column=5, sticky=tk.NSEW, padx=get_theme_padding_px((5, 0)), pady=get_theme_padding_px((5, 0))
+            row=len(axes),
+            column=5,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 0)),
+            pady=get_theme_padding_px((5, 0)),
         )
 
         self.inputs["total_tiles"] = LabelInput(
@@ -204,7 +236,11 @@ class TilingWizardPopup:
         )
         self.inputs["total_tiles"].widget.state(["disabled"])
         self.inputs["total_tiles"].grid(
-            row=len(axes), column=6, sticky=tk.NSEW, padx=get_theme_padding_px((5, 0)), pady=get_theme_padding_px((5, 0))
+            row=len(axes),
+            column=6,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 0)),
+            pady=get_theme_padding_px((5, 0)),
         )
 
         self.buttons["set_table"] = ttk.Button(

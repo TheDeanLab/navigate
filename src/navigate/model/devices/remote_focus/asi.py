@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -200,12 +200,17 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
                     self.triangle(sweep_time, amplitude, offset)
 
                 else:
-                    remote_focus_ramp_falling = (
-                            float(waveform_constants["other_constants"][
-                                      "remote_focus_ramp_falling"])
+                    remote_focus_ramp_falling = float(
+                        waveform_constants["other_constants"][
+                            "remote_focus_ramp_falling"
+                        ]
                     )
-                    self.ramp(exposure_time, remote_focus_ramp_falling, amplitude,
-                              remote_focus_offset)
+                    self.ramp(
+                        exposure_time,
+                        remote_focus_ramp_falling,
+                        amplitude,
+                        remote_focus_offset,
+                    )
 
     def triangle(
         self,
@@ -277,8 +282,12 @@ class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
 
         # Ramp waveform that is triggered on TTL inputs
         self.remote_focus.single_axis_waveform(
-            self.axis, 132, amplitude, offset, exposure_time + flyback_time,
-            exposure_time
+            self.axis,
+            132,
+            amplitude,
+            offset,
+            exposure_time + flyback_time,
+            exposure_time,
         )
 
         # The waveform cycles once and waits for another TTL inputs

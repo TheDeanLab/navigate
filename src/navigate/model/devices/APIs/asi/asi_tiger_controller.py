@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@ logger = logging.getLogger(p)
 #: float: Minimum wait time between serial commands [seconds]
 WAIT_TIME = 0.05
 
+
 class ASIException(Exception):
     """
     Exception raised when error code from ASI Console is received.
@@ -101,7 +102,8 @@ class ASIException(Exception):
         """Overrides base Exception string to be displayed
         in traceback"""
         return f"{self.code} -> {self.message}"
-    
+
+
 class TigerController:
     """Tiger Controller class"""
 
@@ -1051,7 +1053,7 @@ class TigerController:
         amplitude: int = 1000,
         offset: int = 500,
         period: int = 10,
-        rise_time: int = 0
+        rise_time: int = 0,
     ) -> None:
         """Programs the analog waveforms using SAA, SAO, SAP, and SAF
         Default waveform is a sawtooth waveform with an amplitude of 1V, an offset of 0.5V and period of 10 ms
@@ -1078,11 +1080,23 @@ class TigerController:
 
         amplitude = amplitude * 2
 
-        logger.info("waveform=%s amplitude=%s axis=%s offset=%s period=%s",
-                    waveform, amplitude, axis, offset, period)
+        logger.info(
+            "waveform=%s amplitude=%s axis=%s offset=%s period=%s",
+            waveform,
+            amplitude,
+            axis,
+            offset,
+            period,
+        )
         if self.verbose:
-            print("waveform=%s amplitude=%s axis=%s offset=%s period=%s", waveform,
-                  amplitude, axis, offset, period)
+            print(
+                "waveform=%s amplitude=%s axis=%s offset=%s period=%s",
+                waveform,
+                amplitude,
+                axis,
+                offset,
+                period,
+            )
 
         self.send_command(f"SAP {axis}={round(waveform)}")
         self.read_response()
@@ -1186,17 +1200,23 @@ class TigerController:
         # and cell 12 is the post-delay output. So whichever delay is longer
         # (accounting for hardware delays), will get input from 12. Additionally,
         # delay is calculated as a shifted difference between the higher and lower delay
-        backplane_time = 3.75  # ms time for a signal to travel the backplane (hardware specific)
+        backplane_time = (
+            3.75  # ms time for a signal to travel the backplane (hardware specific)
+        )
         if remote_focus_delay > camera_delay + backplane_time:
             camera_output = 6
             remote_focus_output = 12
             start_delay += int((camera_delay + backplane_time) * 4)
-            difference_delay = int((remote_focus_delay - (camera_delay + backplane_time)) * 4)
+            difference_delay = int(
+                (remote_focus_delay - (camera_delay + backplane_time)) * 4
+            )
         elif remote_focus_delay < camera_delay + backplane_time:
             camera_output = 12
             remote_focus_output = 6
             start_delay += int(remote_focus_delay * 4)
-            difference_delay = int(((camera_delay + backplane_time) - remote_focus_delay) * 4)
+            difference_delay = int(
+                ((camera_delay + backplane_time) - remote_focus_delay) * 4
+            )
         else:
             camera_output = 6
             remote_focus_output = 6
@@ -1352,7 +1372,7 @@ class TigerController:
 
     def get_axis_addr(self) -> dict:
         """Return a dictionary mapping axis names to their addresses.
-        
+
         Returns
         -------
         dict[str, int]

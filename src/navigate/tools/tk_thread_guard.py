@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,9 @@ def _guard_disabled_by_environment() -> bool:
     # CI test environments can hit platform-specific Tcl thread errors during
     # fixture setup/teardown. Keep the guard enabled in application runtime,
     # but skip it under pytest unless explicitly forced.
-    force_env = os.getenv("NAVIGATE_ENABLE_TK_THREAD_GUARD_IN_TESTS", "").strip().lower()
+    force_env = (
+        os.getenv("NAVIGATE_ENABLE_TK_THREAD_GUARD_IN_TESTS", "").strip().lower()
+    )
     if "pytest" in sys.modules and force_env not in force_values:
         return True
 

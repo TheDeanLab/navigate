@@ -2,18 +2,59 @@
 
    <br>
 
+.. _hardware_daq:
+
 ======================
 Data Acquisition Cards
 ======================
 
-Data acquisition cards deliver and receive analog and digital signals.
-To acquire an image, the software calculates all of the analog and digital waveforms and
-queues these waveforms on the data acquisition card. Upon receipt of a trigger (either from the software itself,
-or an external piece of hardware), all
-of the analog and digital signals are delivered in parallel. This provides
-deterministic behavior on a per-frame basis, which is necessary for proper acquisition of light-sheet data.
-It does not however provide us with deterministic behavior between image
-frames, and some jitter in timing is anticipated.
+Data acquisition cards deliver and receive analog and digital signals. To acquire an image, the software calculates all of the analog and digital waveforms and queues these waveforms on the data acquisition card. Upon receipt of a trigger (either from the software itself, or an external piece of hardware), all of the analog and digital signals are delivered in parallel. This provides deterministic behavior on a per-frame basis, which is necessary for proper acquisition of light-sheet data. It does not however provide us with deterministic behavior between image frames, and some jitter in timing is anticipated.
+
+
+------------------
+
+.. _daq-ni-vs-asi:
+
+National Instruments vs. ASI
+-----------------------------
+
+The following comparison considers not only the hardware differences between the two devices,
+but also the software implementation within **navigate**.
+
+.. list-table::
+   :header-rows: 1
+
+   * - **NI DAQ**
+     - **ASI Tiger Controller**
+   * - Requires independent wiring.
+     - BNC outputs on Tiger Controller.
+   * - More analog/digital channels
+     - Fewer analog/digital channels
+   * - 100 kHz sampling rate
+     - 4 kHz evaluation rate
+   * - Arbitrary analog/digital waveforms
+     - Limited to predefined waveforms
+       (Ramp, Triangle, Square, Sine, DC)
+   * - Software-driven triggers
+     - Hardware-driven triggers
+   * - For each image, turns on laser, |br|
+       triggers analog waveforms |br|
+       (camera + galvo + remote focus), |br|
+       then turns off laser.
+     - Sets up all waveforms at the beginning of the acquisition, |br|
+       then triggers each waveform deterministically through hardware.
+   * - Latency between software trigger |br|
+       and waveform output.
+     - Negligible latency between hardware trigger and waveform output
+   * - Software takes over between |br|
+       each image. Jitter possible.
+     - Hardware handles timing between each image. Negligible jitter. |br|
+       Software only takes over between stacks or when stop is pressed.
+
+Information on setting up one particular ASI setup can be found in the
+`Altair getting started guide <https://thedeanlab.github.io/altair/getting_started/getting_started.html>`_.
+This is the recommended setup for `Altair <https://thedeanlab.github.io/altair/index.html>`_, a microscope designed by the Dean Lab for dissemination purposes.
+
 
 ------------------
 
@@ -112,7 +153,7 @@ turn lasers on simultaneously, we could distribute the lasers across independent
 
 .. collapse:: Device Pinout
 
-    .. image:: images/6738_pinout.png
+    .. image:: ../../images/6738_pinout.png
 
 |
 
@@ -130,7 +171,7 @@ located on ``connector 0``.
 
 .. collapse:: Device Pinout
 
-    .. image:: images/6259_pinout.png
+    .. image:: ../../images/6259_pinout.png
 
 |
 
@@ -145,7 +186,7 @@ outputs can be wired up as is most convenient.
 
 .. collapse:: Device Pinout
 
-    .. image:: images/6723_pinout.png
+    .. image:: ../../images/6723_pinout.png
 
 ------------------
 
@@ -153,7 +194,7 @@ Applied Scientific Instrumentation
 ----------------------------------
 
 Tiger Controller
-~~~~~~~~~~~~~~~~
+""""""""""""""""
 
 .. warning::
 
@@ -162,8 +203,8 @@ Tiger Controller
 
 The ASI `Tiger Controller <https://www.asiimaging.com/controllers/tiger-controller/>`_ is
 a multi-purpose controller for ASI stages, filter wheels, and dichroic sliders.
-It can also control lasers, shutters, remote focusing devices, and galvanometers. More info 
-for these devices can be found on their respective documention pages.
+It can also control lasers, shutters, remote focusing devices, and galvanometers. More
+information for these devices can be found on their respective documentation pages.
 
 Remote focus device, galvanometer, and analog laser control is done by the `TGGALVO <https://asiimaging.com/docs/tggalvo>`_ control card. 
 Shutter and digital laser control is done by the `TGPLC <https://asiimaging.com/docs/tiger_programmable_logic_card>`_ control card.
@@ -198,49 +239,6 @@ to communicate with the Tiger Controller
               port: COM4
 
 |
-
-------------------
-
-.. _daq-ni-vs-asi:
-
-NI Card vs. ASI Tiger Controller
-"""""""""""""""""""""""""""""""""
-
-The following comparison considers not only the hardware differences between the two devices,
-but also the software implementation within **navigate**.
-
-.. list-table::
-   :header-rows: 1
-
-   * - **NI DAQ**
-     - **ASI Tiger Controller**
-   * - Requires independent wiring.
-     - BNC outputs on Tiger Controller.
-   * - More analog/digital channels
-     - Fewer analog/digital channels 
-   * - 100 kHz sampling rate
-     - 4 kHz evaluation rate
-   * - Arbitrary analog/digital waveforms
-     - Limited to predefined waveforms 
-       (Ramp, Triangle, Square, Sine, DC)
-   * - Software-driven triggers
-     - Hardware-driven triggers
-   * - For each image, turns on laser, |br|
-       triggers analog waveforms |br|
-       (camera + galvo + remote focus), |br|
-       then turns off laser.
-     - Sets up all waveforms at the beginning of the acquisition, |br|
-       then triggers each waveform deterministically through hardware.
-   * - Latency between software trigger |br|
-       and waveform output.
-     - Negligible latency between hardware trigger and waveform output
-   * - Software takes over between |br|
-       each image. Jitter possible.
-     - Hardware handles timing between each image. Negligible jitter. |br|
-       Software only takes over between stacks or when stop is pressed.
-
-Information on setting up one particular ASI setup can be found `here <https://thedeanlab.github.io/altair/getting_started/getting_started.html>`_.
-This is the recommended setup for `Altair <https://thedeanlab.github.io/altair/index.html>`_, a microscope designed by the Dean Lab for dissemination purposes.
 
 ------------------
 

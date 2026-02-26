@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -329,7 +329,9 @@ class EquipmentSolutionsASIRemoteFocus(ASIRemoteFocus, SerialDevice, ASIDevice):
             )
 
     @classmethod
-    def connect(cls, port: str = "COM1", baudrate: int = 115200, timeout: float = 1.25) -> serial.Serial:
+    def connect(
+        cls, port: str = "COM1", baudrate: int = 115200, timeout: float = 1.25
+    ) -> serial.Serial:
         """Connect to Serial Communication Port
 
         Parameters
@@ -441,6 +443,7 @@ class EquipmentSolutionsASIRemoteFocus(ASIRemoteFocus, SerialDevice, ASIDevice):
             raise UserWarning(
                 "Error in communicating with Voice Coil via COMPORT", self.comport
             )
+
 
 if __name__ == "__main__":
     vc = RemoteFocusEquipmentSolutions()

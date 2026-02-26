@@ -1,3 +1,5 @@
+.. _shutter_configuration:
+
 ========
 Shutters
 ========
@@ -48,7 +50,7 @@ National Instruments
 
 We can control these shutters using a digital output from a National Instruments (NI) data acquisition card.
 
-.. Note::
+.. note::
 
     If the shutter opens and closes immediately upon starting an acquisition, try a
     different port for the digital I/O on the NI data acquisition card. Some NI devices
@@ -58,7 +60,7 @@ We can control these shutters using a digital output from a National Instruments
     shutter causes this issue, but switching the shutter to any port 1 channel fixed it.
     In comparison, for the `NI PCIe-6259 <https://www.ni
     .com/docs/en-US/bundle/pci-pcie-pxi-pxie-usb-6259-specs/page/specs.html>`_,
-    using port 0 had no averse effects.
+    using port 0 had no adverse effects.
 
 .. collapse:: Configuration File
 

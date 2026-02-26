@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,9 @@ class PluginsPopup:
             )
             check.grid(row=i, column=0, sticky=tk.NW)
             label = ttk.Label(self.plugins_frame, text=plugin_name)
-            label.grid(row=i, column=1, padx=get_theme_padding_px((5, 10)), sticky=tk.NSEW)
+            label.grid(
+                row=i, column=1, padx=get_theme_padding_px((5, 10)), sticky=tk.NSEW
+            )
             label = ttk.Label(self.plugins_frame, text=plugin_config[plugin_name])
             label.grid(row=i, column=2, sticky=tk.NSEW)
             self.variables.append(var)

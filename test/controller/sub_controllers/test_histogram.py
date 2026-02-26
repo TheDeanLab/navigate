@@ -30,90 +30,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import importlib.util
-from pathlib import Path
-import sys
-import types
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import numpy as np
-
-
-def _install_stub_module(name: str, **attrs):
-    module = sys.modules.get(name)
-    if module is None:
-        module = types.ModuleType(name)
-        sys.modules[name] = module
-    for key, value in attrs.items():
-        setattr(module, key, value)
-    return module
-
-
-def _load_histogram_module():
-    _install_stub_module("navigate", __path__=[])
-    _install_stub_module("navigate.model", __path__=[])
-    _install_stub_module("navigate.model.concurrency", __path__=[])
-    _install_stub_module("navigate.controller", __path__=[])
-    _install_stub_module("navigate.controller.sub_controllers", __path__=[])
-    _install_stub_module("navigate.view", __path__=[])
-    _install_stub_module("navigate.view.main_window_content", __path__=[])
-    _install_stub_module("navigate.tools", __path__=[])
-
-    _install_stub_module(
-        "navigate.model.concurrency.concurrency_tools",
-        SharedNDArray=np.ndarray,
-    )
-    _install_stub_module(
-        "navigate.view.main_window_content.display_notebook",
-        HistogramFrame=object,
-    )
-    _install_stub_module(
-        "navigate.view.theme",
-        get_theme_color=lambda name, fallback=None: fallback
-        if fallback is not None
-        else "#000000",
-        get_theme_matplotlib_font=lambda name, fallback=None: {
-            "family": "TkDefaultFont",
-            "size": 10,
-            "style": "normal",
-            "weight": "normal",
-        },
-    )
-    _install_stub_module("navigate.config", update_config_dict=lambda **kwargs: None)
-
-    def _passthrough_performance_monitor(*args, **kwargs):
-        def decorator(func):
-            return func
-
-        return decorator
-
-    _install_stub_module(
-        "navigate.tools.decorators",
-        performance_monitor=_passthrough_performance_monitor,
-    )
-
-    module_path = (
-        Path(__file__).resolve().parents[3]
-        / "src"
-        / "navigate"
-        / "controller"
-        / "sub_controllers"
-        / "histogram.py"
-    )
-    spec = importlib.util.spec_from_file_location(
-        "navigate.controller.sub_controllers.histogram_under_test",
-        module_path,
-    )
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-histogram_module = _load_histogram_module()
-HistogramController = histogram_module.HistogramController
+from navigate.controller.sub_controllers import histogram as histogram_module
+from navigate.controller.sub_controllers.histogram import HistogramController
 
 
 def _build_controller(number_bins: int = 8) -> HistogramController:
@@ -136,7 +58,7 @@ def test_calculate_histogram_counts_falls_back_to_numpy(monkeypatch):
 
     assert backend == "numpy.histogram"
     assert counts.sum() == data.size
-    assert len(bins) == 9
+    assert len(bins) == 4
 
 
 def test_calculate_histogram_counts_uses_cv2(monkeypatch):

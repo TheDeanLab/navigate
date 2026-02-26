@@ -272,7 +272,10 @@ class HistogramController:
                 self._clear_histogram()
                 self._histogram_disabled_overlay_drawn = True
             return
-        self._histogram_disabled_overlay_drawn = False
+        if self._histogram_disabled_overlay_drawn:
+            # Remove the disabled placeholder overlay and rebuild artists once.
+            self._initialize_histogram_axes()
+            self._histogram_disabled_overlay_drawn = False
         try:
             self._populate_histogram(image)
         except Exception as exc:

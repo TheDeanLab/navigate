@@ -30,12 +30,111 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import importlib.util
+from pathlib import Path
+import sys
+import types
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import numpy as np
-from navigate.controller.sub_controllers import histogram as histogram_module
-from navigate.controller.sub_controllers.histogram import HistogramController
+
+
+def _install_stub_module(originals: dict[str, object], name: str, **attrs):
+    if name not in originals:
+        originals[name] = sys.modules.get(name)
+    module = types.ModuleType(name)
+    for key, value in attrs.items():
+        setattr(module, key, value)
+    sys.modules[name] = module
+    return module
+
+
+def _restore_modules(originals: dict[str, object]) -> None:
+    for name, original in originals.items():
+        if original is None:
+            sys.modules.pop(name, None)
+        else:
+            sys.modules[name] = original
+
+
+def _load_histogram_module():
+    originals: dict[str, object] = {}
+    module_name = "navigate.controller.sub_controllers.histogram_under_test"
+    module_path = (
+        Path(__file__).resolve().parents[3]
+        / "src"
+        / "navigate"
+        / "controller"
+        / "sub_controllers"
+        / "histogram.py"
+    )
+
+    _install_stub_module(originals, "navigate", __path__=[])
+    _install_stub_module(originals, "navigate.model", __path__=[])
+    _install_stub_module(originals, "navigate.model.concurrency", __path__=[])
+    _install_stub_module(originals, "navigate.controller", __path__=[])
+    _install_stub_module(originals, "navigate.controller.sub_controllers", __path__=[])
+    _install_stub_module(originals, "navigate.view", __path__=[])
+    _install_stub_module(originals, "navigate.view.main_window_content", __path__=[])
+    _install_stub_module(originals, "navigate.tools", __path__=[])
+    _install_stub_module(
+        originals,
+        "navigate.model.concurrency.concurrency_tools",
+        SharedNDArray=np.ndarray,
+    )
+    _install_stub_module(
+        originals,
+        "navigate.view.main_window_content.display_notebook",
+        HistogramFrame=object,
+    )
+    _install_stub_module(
+        originals,
+        "navigate.view.theme",
+        get_theme_color=lambda name, fallback=None: fallback
+        if fallback is not None
+        else "#000000",
+        get_theme_matplotlib_font=lambda name, fallback=None: {
+            "family": "TkDefaultFont",
+            "size": 10,
+            "style": "normal",
+            "weight": "normal",
+        },
+    )
+    _install_stub_module(
+        originals, "navigate.config", update_config_dict=lambda **kwargs: None
+    )
+
+    def _passthrough_performance_monitor(*args, **kwargs):
+        def decorator(func):
+            return func
+
+        return decorator
+
+    _install_stub_module(
+        originals,
+        "navigate.tools.decorators",
+        performance_monitor=_passthrough_performance_monitor,
+    )
+
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+
+    if module_name not in originals:
+        originals[module_name] = sys.modules.get(module_name)
+    sys.modules[module_name] = module
+
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        _restore_modules(originals)
+
+    return module
+
+
+histogram_module = _load_histogram_module()
+HistogramController = histogram_module.HistogramController
 
 
 def _build_controller(number_bins: int = 8) -> HistogramController:
@@ -121,3 +220,23 @@ def test_populate_histogram_redispatches_off_main_thread():
     assert args[0] == controller.populate_histogram
     assert np.array_equal(args[1], image)
     assert kwargs == {"wait": False}
+
+
+def test_flush_pending_histogram_update_reinitializes_after_disabled_overlay():
+    controller = _build_controller()
+    image = np.zeros((4, 4), dtype=np.uint16)
+
+    controller._histogram_after_id = "after-id"
+    controller._pending_histogram_image = image
+    controller.histogram_enabled = SimpleNamespace(get=lambda: True)
+    controller._histogram_disabled_overlay_drawn = True
+    controller._initialize_histogram_axes = MagicMock()
+    controller._populate_histogram = MagicMock()
+
+    controller._flush_pending_histogram_update()
+
+    assert controller._histogram_after_id is None
+    assert controller._pending_histogram_image is None
+    controller._initialize_histogram_axes.assert_called_once_with()
+    controller._populate_histogram.assert_called_once_with(image)
+    assert controller._histogram_disabled_overlay_drawn is False

@@ -128,10 +128,10 @@ class MIPTab(tk.Frame):
         self.is_docked = True
 
         #: int: The width of the canvas.
-        self.canvas_width = 512
+        self.canvas_width = 550
 
         #: int: The height of the canvas.
-        self.canvas_height = 512
+        self.canvas_height = 550
 
         #: tk.Canvas: The canvas that will hold the camera image.
         self.canvas = tk.Canvas(

@@ -499,7 +499,7 @@ class HistogramController:
             fill=True,
             facecolor=fill_color,
             edgecolor=fill_color,
-            linewidth=25,
+            linewidth=1,
             alpha=1.0,
             antialiased=False,
         )

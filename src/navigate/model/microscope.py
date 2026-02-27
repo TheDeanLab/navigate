@@ -923,6 +923,7 @@ class Microscope:
                 self.ret_pos_dict[f"{axis}_pos"] = pos_dict[axis_key]
         else:
             self.ask_stage_for_position = True
+
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]

@@ -755,6 +755,19 @@ class MoveToNextPositionInMultiPositionTable:
         #: int: The stage distance threshold for pausing the data thread.
         self.stage_distance_threshold = 1000
 
+        #: float: Any theta movement larger than this value triggers a data-thread
+        #: pause to avoid imaging while rotating.
+        self.theta_move_tolerance = 0.01
+
+        #: float: Position tolerance for verifying stage-target completion.
+        self.stage_move_tolerance = 0.05
+
+        #: float: Max time (s) to wait for stage target verification.
+        self.stage_move_timeout = 30.0
+
+        #: float: Polling interval (s) for stage target verification.
+        self.stage_move_poll_interval = 0.01
+
         #: str: The microscope name/resolution name
         self.resolution_value = resolution_value
 
@@ -844,6 +857,31 @@ class MoveToNextPositionInMultiPositionTable:
                         )
         logger.debug(f"Using stage offset {self.offset}")
 
+    def _wait_for_stage_target(self, target_pos: dict) -> bool:
+        """Block until the stage reaches the requested target positions."""
+        timeout_time = time.monotonic() + self.stage_move_timeout
+        microscope = getattr(self.model, "active_microscope", None)
+        while time.monotonic() < timeout_time:
+            # z-stack/customized modes cache stage positions. Force hardware query so
+            # this check validates real motion completion.
+            if microscope is not None and hasattr(microscope, "ask_stage_for_position"):
+                microscope.ask_stage_for_position = True
+            current_pos = self.model.get_stage_position()
+            if all(
+                abs(current_pos.get(f"{axis}_pos", float("inf")) - target) <=
+                self.stage_move_tolerance
+                for axis, target in target_pos.items()
+            ):
+                return True
+            if getattr(self.model, "stop_acquisition", False):
+                return False
+            time.sleep(self.stage_move_poll_interval)
+        logger.warning(
+            "MoveToNextPositionInMultiPositionTable: timed out waiting for stage "
+            f"target {target_pos}."
+        )
+        return False
+
     def signal_func(self):
         """Move to the next position in the multi-position table and control the data
         thread.
@@ -898,9 +936,15 @@ class MoveToNextPositionInMultiPositionTable:
         delta_distances = [
             abs(pos_dict[axis] - pre_stage_pos[axis]) for axis in self.stage_axes
         ]
+        theta_moved = (
+            "theta" in pos_dict
+            and "theta" in pre_stage_pos
+            and abs(pos_dict["theta"] - pre_stage_pos["theta"])
+            > self.theta_move_tolerance
+        )
         should_pause_data_thread = any(
             distance > self.stage_distance_threshold for distance in delta_distances
-        )
+        ) or theta_moved
         if should_pause_data_thread:
             self.model.pause_data_thread()
 
@@ -912,6 +956,7 @@ class MoveToNextPositionInMultiPositionTable:
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
         logger.debug(f"MoveToNextPositionInMultiPosition: " f"{pos_dict}")
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
+        self._wait_for_stage_target(pos_dict)
 
         logger.debug("MoveToNextPositionInMultiPosition: move done")
 
@@ -1128,6 +1173,10 @@ class ZStackAcquisition:
         #  different kinds of stage devices.
         #: int: The stage distance threshold for pausing the data thread.
         self.stage_distance_threshold = 1000
+
+        #: float: Any theta movement larger than this value triggers a data-thread
+        #: pause.
+        self.theta_move_tolerance = 0.01
 
         #: dict: A dictionary of the previous position in the multi-position table.
         self.pre_position = None
@@ -1381,18 +1430,22 @@ class ZStackAcquisition:
 
             if self.current_position_idx > 0:
                 delta_distances = [
-                    self.current_position[axis] - self.pre_position[axis]
+                    abs(self.current_position[axis] - self.pre_position[axis])
                     for axis in self.tiling_axes
                     if axis != "theta"
                 ]
                 delta_distances.append(
-                    self.current_position[self.primary_z_axis]
-                    - self.pre_position[self.primary_z_axis]
+                    abs(
+                        self.current_position[self.primary_z_axis]
+                        - self.pre_position[self.primary_z_axis]
+                    )
                     + self.z_stack_distance
                 )
                 delta_distances.append(
-                    self.current_position[self.primary_f_axis]
-                    - self.pre_position[self.primary_f_axis]
+                    abs(
+                        self.current_position[self.primary_f_axis]
+                        - self.pre_position[self.primary_f_axis]
+                    )
                     + self.f_stack_distance
                 )
             else:
@@ -1409,9 +1462,15 @@ class ZStackAcquisition:
             # self.model.resume_data_thread() after the stage has completed the move
             # to the next position.
 
+            theta_moved = (
+                self.current_position_idx > 0
+                and "theta" in self.tiling_axes
+                and abs(self.current_position["theta"] - self.pre_position["theta"])
+                > self.theta_move_tolerance
+            )
             self.should_pause_data_thread = any(
                 distance > self.stage_distance_threshold for distance in delta_distances
-            )
+            ) or theta_moved
             if self.should_pause_data_thread:
                 self.model.pause_data_thread()
                 data_thread_is_paused = True
@@ -1708,18 +1767,22 @@ class ASIZStackAcquisition(ZStackAcquisition):
 
         if self.current_position_idx > 0:
             delta_distances = [
-                self.current_position[axis] - self.pre_position[axis]
+                abs(self.current_position[axis] - self.pre_position[axis])
                 for axis in self.tiling_axes
                 if axis != "theta"
             ]
             delta_distances.append(
-                self.current_position[self.primary_z_axis]
-                - self.pre_position[self.primary_z_axis]
+                abs(
+                    self.current_position[self.primary_z_axis]
+                    - self.pre_position[self.primary_z_axis]
+                )
                 + self.z_stack_distance
             )
             delta_distances.append(
-                self.current_position[self.primary_f_axis]
-                - self.pre_position[self.primary_f_axis]
+                abs(
+                    self.current_position[self.primary_f_axis]
+                    - self.pre_position[self.primary_f_axis]
+                )
                 + self.f_stack_distance
             )
         else:
@@ -1733,9 +1796,15 @@ class ASIZStackAcquisition(ZStackAcquisition):
         # if it is too far, then we can call self.model.pause_data_thread() and
         # self.model.resume_data_thread() after the stage has completed the move
         # to the next position.
+        theta_moved = (
+            self.current_position_idx > 0
+            and "theta" in self.tiling_axes
+            and abs(self.current_position["theta"] - self.pre_position["theta"])
+            > self.theta_move_tolerance
+        )
         self.should_pause_data_thread = any(
             distance > self.stage_distance_threshold for distance in delta_distances
-        )
+        ) or theta_moved
         if self.should_pause_data_thread:
             self.model.pause_data_thread()
             logger.info("Data thread paused.")

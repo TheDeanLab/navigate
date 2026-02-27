@@ -114,7 +114,7 @@ class HistogramController:
         self._histogram_disabled_overlay_drawn = False
 
         #: int: Number of histogram bins
-        self._number_bins = 2**10
+        self._number_bins = 2**8
 
         #: float: Target TVD approximation accuracy for sample sizing
         self._hist_accuracy = 0.05
@@ -380,12 +380,6 @@ class HistogramController:
             self._last_ylim = new_ylim
             force_full_redraw = True
 
-        if force_full_redraw:
-            print(
-                f"Full redraw - Axis limits updated to x:{new_xlim}, y:{new_ylim} with "
-                f"log_x={self.log_x}, log_y={self.log_y}"
-            )
-
         self._render_histogram(force_full_redraw=force_full_redraw)
 
     def _clear_histogram(self) -> None:
@@ -594,16 +588,12 @@ class HistogramController:
                 canvas.restore_region(self._histogram_background)
                 self.ax.draw_artist(self._histogram_artist)
                 canvas.blit(self.ax.bbox)
-                print("Histogram rendered using blitting after full redraw")
             return
 
         canvas.restore_region(self._histogram_background)
         self.ax.draw_artist(self._histogram_artist)
         canvas.blit(self.ax.bbox)
         self._last_render_used_blit = True
-        print(
-            f"Histogram rendered using blitting: {self._histogram_artist.get_path().vertices.shape[0]} vertices"
-        )
 
     def _invalidate_blit_cache(self) -> None:
         """Clear cached background so the next render uses a full draw."""

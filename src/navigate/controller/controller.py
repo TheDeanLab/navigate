@@ -287,6 +287,9 @@ class Controller:
         )
 
         # GLFrameViewController: Camera view using GLFW and OpenGL
+        # TODO: This may not be needed. We are not reusing BaseViewController as we should.
+        #       If we structure GL rendering in BaseViewController, we can eliminate the need for this separate controller 
+        #       and integrate GL rendering directly into CameraViewController.
         self.frame_view_controller = GLFrameViewController(
             self.view.camera_waveform.camera_tab, self
         )
@@ -658,8 +661,6 @@ class Controller:
         self.camera_view_controller.try_to_display_image(image=image)
         
         # OpenGL rendering
-        if images_received == 0:
-            self.frame_view_controller.reset()
         self.frame_view_controller.try_to_display_image(image=image)
         
         self.mip_setting_controller.try_to_display_image(image=image)
@@ -1525,6 +1526,10 @@ class Controller:
                 )
                 self._run_on_main_thread(self.execute, "stop_acquire")
                 continue
+
+            # TODO: This is a hack... Not needed if we structure handle GL rendering in BaseViewController
+            if images_received == 0:
+                self.frame_view_controller.reset()
 
             images_received += 1 + dropped_frames
             self._run_on_main_thread(

@@ -303,7 +303,7 @@ class RenderFrame(ttk.Labelframe):
 
         #: ttk.Combobox: The combobox that holds the live display functionality.
         self.live = ttk.Combobox(self, textvariable=self.live_var, width=6)
-        self.live["values"] = ("Live", "Slice")
+        self.live["values"] = ("Live", "Slice", "OpenGL")
         self.live.set("Live")
         self.live.grid(row=0, column=0, sticky=tk.W)
         self.live.state(["!disabled", "readonly"])

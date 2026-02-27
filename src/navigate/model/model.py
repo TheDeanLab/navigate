@@ -1059,6 +1059,7 @@ class Model:
                         "kind": "Acquire Image",
                         "duration_ns": duration,
                         "timestamp": time.time(),
+                        "image_id": frame_ids[-1]
                     }
                 )
             )
@@ -1118,6 +1119,16 @@ class Model:
 
         # Turn off the lasers/close the shutters
         self.end_acquisition()
+
+    def get_current_active_channel(self) -> int:
+        """Get the current active channel from the active microscope.
+
+        Returns
+        -------
+        int
+            Current active channel.
+        """
+        return self.active_microscope.current_channel
 
     def pause_data_thread(self) -> None:
         """Pause the data thread.
@@ -1323,6 +1334,7 @@ class Model:
                     "kind": "DAQ Triggers",
                     "duration_ns": time.perf_counter_ns() - start_time,
                     "timestamp": time.time(),
+                    "image_id": self.available_image_count # should be self.frame_id ?
                 }
             )
         )

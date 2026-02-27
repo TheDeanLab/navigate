@@ -64,6 +64,9 @@ from navigate.controller.sub_controllers import (
     MenuController,
     PluginsController,
     HistogramController,
+    GLFrameViewController
+    # MicroscopePopupController,
+    # AdaptiveOpticsPopupController,
 )
 
 from navigate.controller.thread_pool import SynchronizedThreadPool
@@ -281,6 +284,11 @@ class Controller:
         #: MultiPositionController: Multi-Position Tab Sub-Controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
+        )
+
+        # GLFrameViewController: Camera view using GLFW and OpenGL
+        self.frame_view_controller = GLFrameViewController(
+            self.view.camera_waveform.camera_tab, self
         )
 
         #: CameraViewController: Camera View Tab Sub-Controller.

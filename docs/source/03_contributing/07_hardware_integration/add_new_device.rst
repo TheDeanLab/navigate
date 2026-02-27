@@ -1,8 +1,8 @@
 .. _add_new_hardware_device:
 
-=====================================
-Add a New Hardware Device (Advanced)
-=====================================
+=========================
+Add a New Hardware Device
+=========================
 
 **navigate** supports several standard device categories:
 

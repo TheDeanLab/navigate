@@ -819,7 +819,7 @@ class WaveformPopupController(GUIController):
             self.advanced_setting_popup.popup.attributes("-topmost", 1)
         else:
             self.advanced_setting_popup = AdvancedWaveformParameterPopupWindow(
-                self.view
+                self.view.popup
             )
             # close the window
             self.advanced_setting_popup.popup.protocol(

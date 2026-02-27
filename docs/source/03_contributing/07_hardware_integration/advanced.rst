@@ -1,8 +1,8 @@
 .. _advanced:
 
-=======================================
-Write a Custom Device Plugin (Advanced)
-=======================================
+=========================
+Add a New Hardware Plugin
+=========================
 
 **navigate**'s :ref:`plugin system <plugin>` enables users to add new devices, features, and acquisition modes. In this guide, we add a new device type called ``CustomDevice`` and a dedicated GUI window to control it. This hypothetical device can move a set distance, rotate by a specified angle, and stop on command.
 

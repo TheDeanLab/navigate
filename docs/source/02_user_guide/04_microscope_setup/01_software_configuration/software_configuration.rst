@@ -4,49 +4,63 @@
 Advanced Configuration
 ======================
 
-This section describes the ``configuration.yaml``, ``experiment.yml``,
-``rest_api_config.yml``, ``waveform_templates.yml``, and
-``waveform_constants.yml`` files.
+This page is the detailed reference for ``configuration.yaml`` and related
+configuration files.
 
-Initial Configuration
----------------------
+Before You Continue
+-------------------
 
-To run **navigate**, configure the hardware specification for your microscope in
-``configuration.yaml``.
+If you are still building your first working configuration, follow
+:ref:`Configuring Navigate <configuring_navigate>` first. That page is optimized
+for first-time setup.
 
-An example ``configuration.yaml`` file is provided in ``navigate/config``.
-To avoid conflicts between microscopes when pulling updates from GitHub,
-**navigate** loads a local copy by default. This local file is stored in
-``C:\Users\Username\AppData\Local\.navigate\config`` on Windows, or
-``~/.navigate/config`` on macOS and Linux.
+Use this page when you need to:
 
-Manual Configuration
---------------------
+* define multiple microscopes and inheritance,
+* map hardware stage axes to logical axes,
+* configure stage limits, offsets, and flip flags,
+* tune zoom and waveform-related configuration files.
 
-If you prefer manual configuration, launch **navigate** in synthetic hardware
-mode first. In a terminal (or Anaconda Prompt), activate your **navigate**
-environment and run ``navigate -sh``.
+Configuration Files At A Glance
+-------------------------------
 
-When started in synthetic mode, **navigate** creates a local copy of
-``navigate/config/configuration.yaml`` in
-``C:\Users\Username\AppData\Local\.navigate\config`` on Windows, or
-``~/.navigate/config`` on macOS and Linux.
+* ``configuration.yaml``: hardware definitions, microscope definitions, limits,
+  mappings, and core behavior.
+* ``gui_configuration.yml``: GUI widget behavior defaults (for example, control
+  step sizes and related widget behavior).
+* ``multi_positions.yml``: saved multi-position table contents used by
+  multi-position workflows.
+* ``experiment.yml``: current runtime state (auto-updated by **navigate**).
+* ``waveform_constants.yml``: saved waveform parameter values.
+* ``waveform_templates.yml``: default waveform-repeat behavior.
+* ``rest_api_config.yml``: REST API endpoint configuration for API-dependent
+  plugins.
 
-After this first launch, edit only the local ``configuration.yaml`` file in
-``.navigate/config``.
+By default, **navigate** uses a local configuration directory:
+
+* Windows: ``C:\Users\Username\AppData\Local\.navigate\config``
+* macOS/Linux: ``~/.navigate/config``
 
 .. tip::
 
-   Once **navigate** is open in synthetic hardware mode, you can open
-   ``configuration.yaml`` from :menuselection:`File --> Open Configuration Files`.
+   To open this directory from the GUI, use
+   :menuselection:`File --> Open Configuration Files`.
 
-It can be helpful to open
-``C:\Users\Username\AppData\Local\.navigate\config\configuration.yaml`` while
-reading the sections below.
+Safe Editing Notes
+------------------
 
-For a practical walkthrough, see
-:ref:`Setting up an Axially Swept Light-Sheet Microscope <setup_aslm>`.
-For additional examples, see :ref:`Implementations <implemented_microscopes>`.
+The highest-impact fields for behavior and hardware safety are:
+
+* ``axes_mapping``
+* ``flip_<axis>`` entries
+* stage limits (``*_min`` / ``*_max``)
+* stage offsets (``*_offset``)
+
+After editing these fields, validate motion carefully before acquisition.
+
+For practical configuration examples, see
+:ref:`Setting up an Axially Swept Light-Sheet Microscope <setup_aslm>` and
+:ref:`Implementations <implemented_microscopes>`.
 
 .. _multiple_microscopes:
 
@@ -181,6 +195,21 @@ can use offsets to move to the same sample location.
 Finally, set flip flags (``flip_x``, ``flip_y``, ``flip_z``, ``flip_f``) to
 match expected directionality. Correct flip configuration is required for
 reliable :ref:`multi-position <ui_multiposition>` behavior.
+
+.. _software_configuration_additional_axes:
+
+Additional Non-Canonical Stage Axes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In addition to canonical logical axes ``X``, ``Y``, ``Z``, ``F``, and
+``Theta``, you can define additional stage axes for specialized hardware.
+Define these axes the same way as other stage entries, including appropriate
+``*_min`` / ``*_max`` limits and ``*_offset`` values.
+
+Additional axis identifiers must be unique within the microscope and must not
+reuse canonical identifiers (``X``, ``Y``, ``Z``, ``F``, ``Theta``; similarly
+``x``, ``y``, ``z``, ``f``, ``theta`` in YAML entries). Map custom hardware API
+axes to these logical names through ``axes`` and ``axes_mapping``.
 
 .. _software_configuration_stages:
 
@@ -325,3 +354,14 @@ The ``rest_api_config.yml`` file defines REST API endpoints used for get/post
 operations. This is only needed when using plugins that depend on the REST API,
 such as ilastik integration. For setup details, see
 :ref:`case_study_ilastik`.
+
+Post-Edit Validation Checklist
+------------------------------
+
+After manual configuration edits:
+
+1. Launch in synthetic mode first (``navigate -sh``) to confirm the file loads.
+2. Launch with hardware and verify stage-direction behavior on each axis.
+3. Confirm limits and offsets by testing short, safe moves near expected bounds.
+4. Verify camera orientation and flip behavior against stage movement.
+5. Confirm multi-position moves go in the expected direction before running long acquisitions.

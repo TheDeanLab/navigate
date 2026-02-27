@@ -176,3 +176,27 @@ def test_estimate_galvo_setting_with_string(waveform_popup_controller):
 
     # Check to see what the view was called with.
     waveform_popup_controller.view.inputs[galvo_name].widget.set.assert_called_once()
+
+
+def test_display_advanced_setting_window_creates_popup(waveform_popup_controller):
+    """Regression test for advanced popup root parent type.
+
+    The advanced popup must be created using a Tk-backed parent widget
+    (``view.popup``), not the wrapper view object itself.
+    """
+    waveform_popup_controller.populate_experiment_values(force_update=True)
+
+    if hasattr(waveform_popup_controller, "advanced_setting_popup"):
+        waveform_popup_controller.advanced_setting_popup.popup.dismiss()
+        delattr(waveform_popup_controller, "advanced_setting_popup")
+
+    waveform_popup_controller.display_advanced_setting_window()
+
+    assert hasattr(waveform_popup_controller, "advanced_setting_popup")
+    assert (
+        waveform_popup_controller.advanced_setting_popup.popup.master
+        is waveform_popup_controller.view.popup
+    )
+
+    waveform_popup_controller.advanced_setting_popup.popup.dismiss()
+    delattr(waveform_popup_controller, "advanced_setting_popup")

@@ -93,6 +93,11 @@ Multi-Position
 
 The :guilabel:`Multi-Position` notebook defines stage coordinates for tiled and multi-region acquisition.
 
+.. _ui_multiposition_table:
+
+Multi-Position Table
+--------------------
+
 1. Double-click a row index to move the stage to that row.
 2. Double-click a cell to edit a coordinate value.
 3. Right-click a row index to insert, add, or delete positions.

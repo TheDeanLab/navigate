@@ -8,6 +8,7 @@ updated in focused batches or all at once.
 
 import argparse
 import json
+import math
 import os
 import sys
 import tkinter as tk
@@ -16,6 +17,8 @@ from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Tuple
+
+import numpy as np
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_ROOT = Path(SCRIPT_DIR).parent
@@ -772,6 +775,172 @@ def _capture_camera_tab(
     _prepare_for_capture(root, cli_args)
     out_path = os.path.join(cli_args.output_root, f"{tab.__class__.__name__}.png")
     return _capture_widget(controller.view.camera_waveform, out_path)
+
+
+def _capture_histogram_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    camera_tab = notebook.camera_tab
+    notebook.select(camera_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "histogram-frame.png")
+    return _capture_widget(camera_tab.histogram, out_path, pad=2)
+
+
+def _capture_intensity_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    camera_tab = notebook.camera_tab
+    notebook.select(camera_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "intensity-frame.png")
+    return _capture_widget(camera_tab.lut, out_path, pad=2)
+
+
+def _capture_metrics_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    camera_tab = notebook.camera_tab
+    notebook.select(camera_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "metrics-frame.png")
+    return _capture_widget(camera_tab.image_metrics, out_path, pad=2)
+
+
+def _capture_render_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    camera_tab = notebook.camera_tab
+    notebook.select(camera_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "render-frame.png")
+    return _capture_widget(camera_tab.live_frame, out_path, pad=2)
+
+
+def _capture_mip_render_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    mip_tab = notebook.mip_tab
+    notebook.select(mip_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "mip-render-frame.png")
+    return _capture_widget(mip_tab.render, out_path, pad=2)
+
+
+def _populate_waveform_plot_preview(waveform_tab) -> None:
+    """Draw representative waveforms for documentation screenshots."""
+    fig = waveform_tab.fig
+    fig.clear()
+
+    ax_remote_focus = fig.add_subplot(211)
+    ax_galvo = fig.add_subplot(212, sharex=ax_remote_focus)
+
+    time_axis = [i * 0.01 for i in range(101)]
+    remote_focus = [0.8 * math.sin(2 * math.pi * t * 1.2) for t in time_axis]
+    galvo_a = [0.6 * math.sin(2 * math.pi * t * 0.9 + 0.6) for t in time_axis]
+    galvo_b = [0.4 * math.sin(2 * math.pi * t * 1.4 - 0.3) for t in time_axis]
+
+    ax_remote_focus.plot(time_axis, remote_focus, color="#1f77b4", linewidth=1.6)
+    ax_remote_focus.axvline(x=0.35, color="black", linestyle=":", linewidth=1.0)
+    ax_remote_focus.set_ylabel("RF (V)")
+    ax_remote_focus.grid(alpha=0.25)
+
+    ax_galvo.plot(time_axis, galvo_a, color="#d62728", linewidth=1.4, label="Galvo 0")
+    ax_galvo.plot(time_axis, galvo_b, color="#2ca02c", linewidth=1.4, label="Galvo 1")
+    ax_galvo.axvline(x=0.35, color="black", linestyle=":", linewidth=1.0)
+    ax_galvo.set_xlabel("Time (ms)")
+    ax_galvo.set_ylabel("Galvo (V)")
+    ax_galvo.grid(alpha=0.25)
+    ax_galvo.legend(loc="upper right", fontsize=7, frameon=False)
+
+    fig.tight_layout()
+    waveform_tab.canvas.draw()
+
+
+def _ensure_waveform_preview_dict(controller) -> None:
+    """Provide fallback waveform data for Waveforms tab screenshot capture."""
+    waveform_ctrl = getattr(controller, "waveform_tab_controller", None)
+    if waveform_ctrl is None:
+        return
+    if hasattr(waveform_ctrl, "waveform_dict"):
+        return
+
+    samples = np.array([i * 0.01 for i in range(101)], dtype=float)
+    waveform_ctrl.waveform_dict = {
+        "camera_waveform": {
+            "CH1": np.array([1 if 0.32 <= t <= 0.38 else 0 for t in samples], dtype=float)
+        },
+        "remote_focus_waveform": {
+            "CH1": np.array(
+                [0.8 * math.sin(2 * math.pi * t * 1.2) for t in samples], dtype=float
+            )
+        },
+        "galvo_waveform": [
+            {
+                "CH1": np.array(
+                    [0.6 * math.sin(2 * math.pi * t * 0.9 + 0.6) for t in samples],
+                    dtype=float,
+                )
+            },
+            {
+                "CH1": np.array(
+                    [0.4 * math.sin(2 * math.pi * t * 1.4 - 0.3) for t in samples],
+                    dtype=float,
+                )
+            },
+        ],
+    }
+
+
+def _capture_waveform_plots_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    waveform_tab = notebook.waveform_tab
+    _ensure_waveform_preview_dict(controller)
+    notebook.select(waveform_tab)
+    _populate_waveform_plot_preview(waveform_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "waveform-plots-frame.png")
+    return _capture_widget(waveform_tab.waveform_plots, out_path, pad=2)
+
+
+def _capture_waveform_settings_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    waveform_tab = notebook.waveform_tab
+    _ensure_waveform_preview_dict(controller)
+    notebook.select(waveform_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "waveform-settings-frame.png")
+    return _capture_widget(waveform_tab.waveform_settings, out_path, pad=2)
 
 
 def _capture_acquire_mode_dropdown(
@@ -1864,6 +2033,55 @@ CAPTURES: List[CaptureSpec] = [
         description="Camera display tab",
         context="controller",
         runner=lambda ctx, args: _capture_camera_tab(ctx, args, "camera_tab"),
+    ),
+    CaptureSpec(
+        name="histogram-frame",
+        group="main-ui",
+        description="HistogramFrame in Camera display tab",
+        context="controller",
+        runner=_capture_histogram_frame,
+    ),
+    CaptureSpec(
+        name="intensity-frame",
+        group="main-ui",
+        description="IntensityFrame in Camera display tab",
+        context="controller",
+        runner=_capture_intensity_frame,
+    ),
+    CaptureSpec(
+        name="metrics-frame",
+        group="main-ui",
+        description="MetricsFrame in Camera display tab",
+        context="controller",
+        runner=_capture_metrics_frame,
+    ),
+    CaptureSpec(
+        name="render-frame",
+        group="main-ui",
+        description="RenderFrame in Camera display tab",
+        context="controller",
+        runner=_capture_render_frame,
+    ),
+    CaptureSpec(
+        name="mip-render-frame",
+        group="main-ui",
+        description="MipRenderFrame in MIP display tab",
+        context="controller",
+        runner=_capture_mip_render_frame,
+    ),
+    CaptureSpec(
+        name="waveform-plots-frame",
+        group="main-ui",
+        description="Waveform plots frame in Waveform tab",
+        context="controller",
+        runner=_capture_waveform_plots_frame,
+    ),
+    CaptureSpec(
+        name="waveform-settings-frame",
+        group="main-ui",
+        description="WaveformSettingsFrame in Waveform tab",
+        context="controller",
+        runner=_capture_waveform_settings_frame,
     ),
     CaptureSpec(
         name="mip-tab",

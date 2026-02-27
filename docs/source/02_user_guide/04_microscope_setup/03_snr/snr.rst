@@ -2,6 +2,9 @@
 Signal-to-Noise Visualization Mode
 ==================================
 
+.. _snr_mode:
+
+
 Signal-to-noise ratio (SNR) visualization helps assess image quality in
 real time. It is useful for microscope alignment and low-signal workflows.
 

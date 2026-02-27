@@ -13,7 +13,7 @@ File Saving Dialog (Misc. Notes Tab)
    :align: center
    :alt: File Saving Dialog popup showing the Misc. Notes tab.
 
-This dialog appears when acquisition starts in a save-enabled mode (non-continuous) with :ref:`Save Data <ui_timepoint_settings>` enabled.
+This dialog appears when acquisition starts in a save-enabled mode (non-continuous) with :ref:`Save Data <ui_timepoint_settings>` enabled. You can provide text in the :guilabel:`Misc. Notes` field to be saved alongside acquisition metadata.
 
 .. _ui_file_save_dialog_bdv:
 
@@ -24,7 +24,7 @@ File Saving Dialog (BDV Settings Tab)
    :align: center
    :alt: File Saving Dialog popup showing the BDV Settings tab.
 
-Use this tab to configure BDV-related shear, rotation, and downsampling metadata.
+Use this tab to configure BDV-related shear, rotation, and downsampling metadata. This information will be saved in the BDV XML file alongside acquired data when :ref:`Save Data <ui_timepoint_settings>` is enabled, enabling the correct spatial interpretation of your data in BDV and compatible tools. More about BDV can be found on the ImageJ website: https://imagej.net/plugins/bdv/.
 
 .. _ui_autofocus:
 
@@ -36,6 +36,21 @@ Autofocus Settings
    :alt: Autofocus Settings popup.
 
 This popup configures autofocus behavior used by :ref:`features <user_guide_features>`.
+You can open it from :ref:`Quick Launch Buttons <ui_quick_launch_buttons>` or
+from the :menuselection:`Autofocus` menu.
+
+By default, autofocus runs in two passes: one coarse and one fine. The coarse
+pass uses larger step sizes to locate the best focus region, and the fine pass
+searches locally around that coarse peak. If the peak lies outside the defined
+search range, the routine currently does not expand the range automatically.
+The routine can run on different focusing axes when compatible stage hardware
+is available.
+
+To run autofocus, press :guilabel:`Start Autofocus`. The focus metric is the
+Shannon entropy of the discrete cosine transform, which is used to find the
+region of highest contrast (best focus). Spline-fit and test-significance
+buttons are already present in preparation for additional intelligent autofocus
+functionality in future updates.
 
 .. _ui_waveform_parameters:
 
@@ -48,23 +63,14 @@ Waveform Parameters
 
 Use this popup to configure waveform amplitudes, offsets, timing, and smoothing used by :ref:`Waveform Settings <ui_waveform_settings>`.
 
-Advanced Galvo Setting (Channel 1 Tab)
-======================================
+Advanced Galvo Setting
+======================
 
 .. image:: ../../images/popup_advanced_waveform_channel_1.png
    :align: center
    :alt: Advanced Galvo Setting popup showing the Channel 1 tab.
 
-This advanced popup is opened from Waveform Parameters and provides channel-specific galvo amplitude and offset settings.
-
-Advanced Galvo Setting (Channel 2 Tab)
-======================================
-
-.. image:: ../../images/popup_advanced_waveform_channel_2.png
-   :align: center
-   :alt: Advanced Galvo Setting popup showing the Channel 2 tab.
-
-When multiple factors are configured, each channel/factor is shown on a separate tab.
+This advanced popup is opened from Waveform Parameters and provides channel-specific galvo amplitude and offset settings. When more than one channel is configured, each channel's settings are shown on a separate tab.
 
 .. _ui_configure_microscopes:
 
@@ -75,7 +81,10 @@ Configure Microscopes
    :align: center
    :alt: Configure Microscopes popup.
 
-This window selects the primary microscope and helps inspect multi-microscope hardware assignments.
+Open this popup from :menuselection:`Microscope Configuration --> Configure Microscope`
+in :ref:`ui_microscope_configuration`.
+This window selects the primary microscope and helps inspect multi-microscope
+hardware assignments.
 
 Advanced Stage Parameters
 =========================
@@ -84,7 +93,11 @@ Advanced Stage Parameters
    :align: center
    :alt: Advanced Stage Parameters popup.
 
-Use this popup to review and edit per-axis min/max/home limits, offsets, and axis direction flips.
+Open this popup from :menuselection:`Stage Control --> Advanced Stage Parameters`.
+It is useful for configuring stage limits, stage home/offset values, and axis
+flip flags used to align microscope coordinate behavior.
+
+For coordinate-system setup guidance, see :ref:`coordinate_system`.
 
 .. _ui_multiposition_tiling_wizard:
 
@@ -103,15 +116,6 @@ Open it from :ref:`ui_multiposition_buttons` in :ref:`ui_multiposition`.
 3. Click :guilabel:`Populate Multi-Position Table`.
 
 
-Camera Settings Popup
-=====================
-
-.. image:: ../../images/popup_camera_settings.png
-   :align: center
-   :alt: Camera Settings popup window.
-
-This window exposes camera settings in a detached popup format for the selected microscope.
-
 Advanced Camera Settings
 ========================
 
@@ -121,15 +125,6 @@ Advanced Camera Settings
 
 Use this popup for advanced camera control options, including microscope selection and image-direction settings.
 
-Additional Camera View
-======================
-
-.. image:: ../../images/popup_additional_camera_view.png
-   :align: center
-   :alt: Additional Camera View popup window.
-
-This popup provides an extra camera display window for side-by-side viewing workflows.
-
 Camera Map Settings
 ===================
 
@@ -137,7 +132,7 @@ Camera Map Settings
    :align: center
    :alt: Camera Map Settings popup.
 
-This popup supports loading dark-frame stacks and generating camera offset/variance maps.
+This popup supports loading dark-frame stacks and generating camera offset/variance maps. More information can be found in the :ref:`SNR Visualization Mode <snr_mode>` section of the developer deep dive.
 
 .. _ui_performance_diagnostics:
 
@@ -150,8 +145,8 @@ Performance Diagnostics
 
 Open from :menuselection:`File --> Performance Diagnostics` to inspect acquisition, display, and histogram timing behavior.
 
-Adaptive Optics (Tony Wilson Tab)
-=================================
+Adaptive Optics
+===============
 
 .. image:: ../../images/popup_adaptive_optics_tony_wilson.png
    :align: center

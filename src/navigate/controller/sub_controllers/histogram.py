@@ -147,6 +147,12 @@ class HistogramController:
         self._last_xlim = None
         self._last_ylim = None
 
+        #: float: Relative tolerance for axis limit changes to trigger redraw
+        self._axis_limit_rel_tol = 0.05
+
+        #: float: Absolute tolerance for axis limit changes to trigger redraw
+        self._axis_limit_abs_tol = 1.0
+
         menu_background = get_theme_color("panel_bg", "#1a212b")
         menu_foreground = get_theme_color("text", "#d7dee8")
         menu_disabled_foreground = get_theme_color("muted_text", "#9aa8bb")
@@ -354,7 +360,10 @@ class HistogramController:
 
         new_xlim = (x_minimum, x_maximum)
         if self._limits_need_update(
-            self._last_xlim, new_xlim, rel_tol=0.03, abs_tol=1.0
+            self._last_xlim,
+            new_xlim,
+            rel_tol=self._axis_limit_rel_tol,
+            abs_tol=self._axis_limit_abs_tol,
         ):
             self.ax.set_xlim(*new_xlim)
             self._last_xlim = new_xlim
@@ -362,7 +371,10 @@ class HistogramController:
 
         new_ylim = (y_minimum, y_maximum)
         if self._limits_need_update(
-            self._last_ylim, new_ylim, rel_tol=0.08, abs_tol=1.0
+            self._last_ylim,
+            new_ylim,
+            rel_tol=self._axis_limit_rel_tol,
+            abs_tol=self._axis_limit_abs_tol,
         ):
             self.ax.set_ylim(*new_ylim)
             self._last_ylim = new_ylim
@@ -576,12 +588,16 @@ class HistogramController:
                 canvas.restore_region(self._histogram_background)
                 self.ax.draw_artist(self._histogram_artist)
                 canvas.blit(self.ax.bbox)
+                print("Histogram rendered using blitting after full redraw")
             return
 
         canvas.restore_region(self._histogram_background)
         self.ax.draw_artist(self._histogram_artist)
         canvas.blit(self.ax.bbox)
         self._last_render_used_blit = True
+        print(
+            f"Histogram rendered using blitting: {self._histogram_artist.get_path().vertices.shape[0]} vertices"
+        )
 
     def _invalidate_blit_cache(self) -> None:
         """Clear cached background so the next render uses a full draw."""

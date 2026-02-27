@@ -148,10 +148,10 @@ class HistogramController:
         self._last_ylim = None
 
         #: float: Relative tolerance for axis limit changes to trigger redraw
-        self._axis_limit_rel_tol = 0.05
+        self._axis_limit_rel_tol = 0.5
 
         #: float: Absolute tolerance for axis limit changes to trigger redraw
-        self._axis_limit_abs_tol = 1.0
+        self._axis_limit_abs_tol = 500
 
         menu_background = get_theme_color("panel_bg", "#1a212b")
         menu_foreground = get_theme_color("text", "#d7dee8")
@@ -379,6 +379,12 @@ class HistogramController:
             self.ax.set_ylim(*new_ylim)
             self._last_ylim = new_ylim
             force_full_redraw = True
+
+        if force_full_redraw:
+            print(
+                f"Full redraw - Axis limits updated to x:{new_xlim}, y:{new_ylim} with "
+                f"log_x={self.log_x}, log_y={self.log_y}"
+            )
 
         self._render_histogram(force_full_redraw=force_full_redraw)
 
@@ -629,6 +635,7 @@ class HistogramController:
         """Return True when axis limits changed more than tolerance."""
         if current is None:
             return True
+
         lower_changed = abs(current[0] - target[0]) > max(
             abs_tol, rel_tol * max(1.0, abs(current[0]), abs(target[0]))
         )

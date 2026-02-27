@@ -656,6 +656,7 @@ class Controller:
         """
         image = self.data_buffer[image_id]
         self.camera_view_controller.try_to_display_image(image=image)
+        self.frame_view_controller.try_to_display_image(image=image)
         self.mip_setting_controller.try_to_display_image(image=image)
         self.histogram_controller.populate_histogram(image=image)
         self.acquire_bar_controller.progress_bar(

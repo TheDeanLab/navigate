@@ -3,6 +3,9 @@ import random
 from unittest.mock import MagicMock
 
 
+_MISSING = object()
+
+
 @pytest.fixture(scope="module")
 def waveform_popup_controller(dummy_view, dummy_controller):
     from navigate.controller.sub_controllers.waveform_popup import (
@@ -128,54 +131,103 @@ def test_configure_widget_range(waveform_popup_controller):
 def test_estimate_galvo_setting_empty_string(waveform_popup_controller):
     """Test if the function returns without calling the camera setting controller."""
     # Galvo name
-    galvo_name = "galvo_0"
+    galvo_name = "Galvo 0 Freq"
+    original_camera_setting_controller = getattr(
+        waveform_popup_controller.parent_controller,
+        "camera_setting_controller",
+        _MISSING,
+    )
 
-    # Mocked camera setting controller
-    waveform_popup_controller.parent_controller.camera_setting_controller = MagicMock()
-    waveform_popup_controller.parent_controller.camera_setting_controller.mode_widgets[
-        "Pixels"
-    ].get = MagicMock(return_value="")
-    waveform_popup_controller.parent_controller.camera_setting_controller.framerate_widgets[
-        "exposure_time"
-    ].get = MagicMock()
+    try:
+        # Mocked camera setting controller
+        waveform_popup_controller.parent_controller.camera_setting_controller = (
+            MagicMock()
+        )
+        waveform_popup_controller.parent_controller.camera_setting_controller.mode_widgets[
+            "Pixels"
+        ].get = MagicMock(return_value="")
+        waveform_popup_controller.parent_controller.camera_setting_controller.framerate_widgets[
+            "exposure_time"
+        ].get = MagicMock()
 
-    waveform_popup_controller.estimate_galvo_setting(galvo_name)
-    waveform_popup_controller.parent_controller.camera_setting_controller.framerate_widgets[
-        "exposure_time"
-    ].get.assert_not_called()
+        waveform_popup_controller.estimate_galvo_setting(galvo_name)
+        waveform_popup_controller.parent_controller.camera_setting_controller.framerate_widgets[
+            "exposure_time"
+        ].get.assert_not_called()
+    finally:
+        if original_camera_setting_controller is _MISSING:
+            delattr(
+                waveform_popup_controller.parent_controller,
+                "camera_setting_controller",
+            )
+        else:
+            waveform_popup_controller.parent_controller.camera_setting_controller = (
+                original_camera_setting_controller
+            )
 
 
 def test_estimate_galvo_setting_with_string(waveform_popup_controller):
     """Test if the function calls the camera setting controller."""
     # Galvo name
-    galvo_name = "galvo_0"
+    galvo_name = "Galvo 0 Freq"
     number_of_pixels = 50
-
-    # Mocked camera setting controller
-    waveform_popup_controller.parent_controller.camera_setting_controller = MagicMock()
-    waveform_popup_controller.parent_controller.camera_setting_controller.mode_widgets[
-        "Pixels"
-    ].get = MagicMock(return_value=str(number_of_pixels))
-    waveform_popup_controller.parent_controller.camera_setting_controller.framerate_widgets[
-        "exposure_time"
-    ].get = MagicMock()
-
-    # Mocked model
-    waveform_popup_controller.parent_controller.model = MagicMock()
-    mock_model = waveform_popup_controller.parent_controller.model
-    mock_model.get_camera_line_interval_and_exposure_time = MagicMock(
-        return_value=(0.05, 50, 500)
+    original_camera_setting_controller = getattr(
+        waveform_popup_controller.parent_controller,
+        "camera_setting_controller",
+        _MISSING,
     )
+    original_model = getattr(
+        waveform_popup_controller.parent_controller,
+        "model",
+        _MISSING,
+    )
+    original_set = waveform_popup_controller.view.inputs[galvo_name].widget.set
 
-    # Mocked view
-    waveform_popup_controller.view = MagicMock()
-    waveform_popup_controller.view.inputs[galvo_name].widget.set = MagicMock()
+    try:
+        # Mocked camera setting controller
+        waveform_popup_controller.parent_controller.camera_setting_controller = (
+            MagicMock()
+        )
+        waveform_popup_controller.parent_controller.camera_setting_controller.mode_widgets[
+            "Pixels"
+        ].get = MagicMock(return_value=str(number_of_pixels))
+        waveform_popup_controller.parent_controller.camera_setting_controller.framerate_widgets[
+            "exposure_time"
+        ].get = MagicMock()
 
-    # Call the function
-    waveform_popup_controller.estimate_galvo_setting(galvo_name)
+        # Mocked model
+        waveform_popup_controller.parent_controller.model = MagicMock()
+        mock_model = waveform_popup_controller.parent_controller.model
+        mock_model.get_camera_line_interval_and_exposure_time = MagicMock(
+            return_value=(0.05, 50, 500)
+        )
 
-    # Check to see what the view was called with.
-    waveform_popup_controller.view.inputs[galvo_name].widget.set.assert_called_once()
+        # Mocked widget setter on the real view, to avoid leaking a mocked view
+        # into subsequent tests that require a real Tk parent.
+        waveform_popup_controller.view.inputs[galvo_name].widget.set = MagicMock()
+
+        # Call the function
+        waveform_popup_controller.estimate_galvo_setting(galvo_name)
+
+        # Check to see what the view was called with.
+        waveform_popup_controller.view.inputs[
+            galvo_name
+        ].widget.set.assert_called_once()
+    finally:
+        waveform_popup_controller.view.inputs[galvo_name].widget.set = original_set
+        if original_camera_setting_controller is _MISSING:
+            delattr(
+                waveform_popup_controller.parent_controller,
+                "camera_setting_controller",
+            )
+        else:
+            waveform_popup_controller.parent_controller.camera_setting_controller = (
+                original_camera_setting_controller
+            )
+        if original_model is _MISSING:
+            delattr(waveform_popup_controller.parent_controller, "model")
+        else:
+            waveform_popup_controller.parent_controller.model = original_model
 
 
 def test_display_advanced_setting_window_creates_popup(waveform_popup_controller):

@@ -4,23 +4,19 @@
 Write a Custom Device Plugin (Advanced)
 =======================================
 
-**navigate**'s :ref:`plugin system <plugin>` enables users to easily incorporate new devices and integrate new features and acquisition modes. In this guide, we will add a new device type, titled ``CustomDevice``, and a dedicated GUI window to control it. This hypothetical ``CustomDevice`` is capable of moving a certain distance, rotating a specified number of degrees, and applying a force to halt its movement.
+**navigate**'s :ref:`plugin system <plugin>` enables users to add new devices, features, and acquisition modes. In this guide, we add a new device type called ``CustomDevice`` and a dedicated GUI window to control it. This hypothetical device can move a set distance, rotate by a specified angle, and stop on command.
 
-**navigate** plugins are implemented using a Model-View-Controller architecture. The model contains the device-specific code, the view contains the GUI code, and the controller contains the code that communicates between the model and the view.
-
------------------
+**navigate** plugins follow a Model-View-Controller architecture. The model contains device-specific code, the view contains GUI code, and the controller coordinates communication between them.
 
 Initial Steps
 -------------
 
-To ease the addition of a new plugin, we have created a template plugin that can be used as a starting point.
+Use the template plugin as your starting point.
 
 * Go to `navigate-plugin-template <https://github.com/TheDeanLab/navigate-plugin-template>`_.
-* In the upper right, click "Use this template" and then "Create a new repository".
+* In the upper right, click ``Use this template``, then ``Create a new repository``.
 * In this repository, rename the ``plugin_device`` folder to ``custom_device``.
 * Rename the file ``plugin_device.py`` to ``custom_device.py``.
-
------------------
 
 Model Code
 ----------
@@ -57,15 +53,15 @@ Create a new custom device using the following code.
             """ Stop the Custom Device """
             print("*** Stopping the Custom Device!")
 
-        def turn(self, angle=0.1):
-            """ Turn the Custom Device
+        def rotate(self, angle=0.1):
+            """ Rotate the Custom Device
 
             Parameters
             ----------
             angle : float
                 The angle of the rotation. Default is 0.1 degree.
             """
-            print("*** Custom Device is turning by", angle)
+            print("*** Custom Device is rotating by", angle)
 
         @property
         def commands(self):
@@ -82,7 +78,7 @@ Create a new custom device using the following code.
                 "rotate_custom_device": lambda *args: self.rotate(args[0]),
             }
 
-All devices should be accompanied by synthetic versions, which enables the software to run without the hardware connected. Thus, in a manner that is similar to the ``CustomDevice`` class, we edit the code in ``synthetic_device.py``, albeit without any calls to the device itself.
+All devices should include synthetic versions, which allow the software to run without physical hardware connected. Following the same pattern as ``CustomDevice``, implement ``synthetic_device.py`` without hardware I/O calls.
 
 .. code-block:: python
 
@@ -108,11 +104,11 @@ All devices should be accompanied by synthetic versions, which enables the softw
             step_size : float
                 The step size of the movement. Default is 1.0 micron.
             """
-            print("*** Synthetic Device receive command: move", step_size)
+            print("*** Synthetic Device received command: move", step_size)
 
         def stop(self):
             """ Stop the Synthetic Device """
-            print("*** Synthetic Device receive command: stop")
+            print("*** Synthetic Device received command: stop")
 
         def rotate(self, angle=0.1):
             """ Turn the Synthetic Device
@@ -122,7 +118,7 @@ All devices should be accompanied by synthetic versions, which enables the softw
             angle : float
                 The angle of the rotation. Default is 0.1 degree.
             """
-            print("*** Synthetic Device receive command: turn", angle)
+            print("*** Synthetic Device received command: rotate", angle)
 
         @property
         def commands(self):
@@ -139,9 +135,9 @@ All devices should be accompanied by synthetic versions, which enables the softw
                 "rotate_custom_device": lambda *args: self.rotate(args[0]),
             }
 
-Edit ``device_startup_functions.py`` to tell **navigate** how to connect to and start the ``CustomDevice``. This is the portion of the code that actually makes a connection to the hardware. ``load_device()`` should return an object that can control the hardware.
+Edit ``device_startup_functions.py`` to tell **navigate** how to connect to and start ``CustomDevice``. This is where hardware connections are created. ``load_device()`` should return a connection object.
 
-**navigate** establishes communication with each device independently, and passes the instance of that device to class that controls it (e.g., in this case, the `CustomDevice` class). This allows **navigate** to be initialized with multiple microscope :ref:`configurations <multiple_microscopes>`, some of which may share devices.
+**navigate** initializes each device connection independently and passes that connection to the class that controls it (in this example, ``CustomDevice``). This allows startup with multiple microscope :ref:`configurations <multiple_microscopes>`, including configurations that share devices.
 
 .. code-block:: python
 
@@ -218,13 +214,11 @@ Edit ``device_startup_functions.py`` to tell **navigate** how to connect to and 
                 "custom_synthetic_device",
                 os.path.join(Path(__file__).resolve().parent, "synthetic_device.py"),
             )
-            return synthetic_device.SyntheticDevice(
+            return synthetic_device.SyntheticCustomDevice(
                 microscope_name, device_connection, configuration
             )
         else:
             device_not_found(microscope_name, device_type)
-
------------------
 
 View Code
 ---------
@@ -304,18 +298,17 @@ To add a GUI control window, go to the ``view`` folder, rename ``plugin_name_fra
 
 .. tip::
 
-    **navigate** comes equipped with a large number of validated widgets, which prevent users from entering invalid values that can crash the program or result in undesirable outcomes. It is highly recommended that you use these, which include the following:
+    **navigate** provides validated widgets that reduce user-input errors and runtime failures. Recommended options include:
 
-        * The ``LabelInput`` widget conveniently combines a label and an input widget into a single object. It is used to create the ``step_size`` and ``angle`` widgets in the code above.
-        * The ``LabelInput`` widget can accept multiple types of ``input_class`` objects, which can include standard tkinter widgets (e.g., spinbox, entry, etc.) or custom widgets. In this example, we use the ``ttk.Entry`` widget.
-        * Other examples of validated widgets include a ``ValidatedSpinbox``, ``ValidatedEntry``, ``ValidatedCombobox``, and ``ValidatedMixin``.
-        * Please see the :any:`navigate.view.custom_widgets` module for more details.
+    * ``LabelInput``, which combines a label and an input widget (used above for ``step_size`` and ``angle``).
+    * Standard Tk widgets such as ``ttk.Entry`` via ``input_class``.
+    * Additional validated widgets such as ``ValidatedSpinbox``, ``ValidatedEntry``, ``ValidatedCombobox``, and ``ValidatedMixin``.
 
------------------
+    See :any:`navigate.view.custom_widgets` for details.
 
 Controller Code
-----------------
-Now, let's build a controller. Open the ``controller`` folder, rename ``plugin_name_controller.py`` to ``custom_device_controller.py``, and edit the code as follows.
+---------------
+Next, build the controller. Open the ``controller`` folder, rename ``plugin_name_controller.py`` to ``custom_device_controller.py``, and edit the code as follows.
 
 .. code-block:: python
 
@@ -387,13 +380,11 @@ Now, let's build a controller. Open the ``controller`` folder, rename ``plugin_n
             """
             self.parent_controller.execute("stop_custom_device")
 
-In each case above, the sub-controller for the ``custom-device`` establishes what actions should take place once a button in the view is clicked. In this case, the methods ``move_device``, ``rotate_device``, and ``stop_device``. This triggers a sequence of events:
+In this example, the ``custom_device`` sub-controller maps button clicks to ``move_device``, ``rotate_device``, and ``stop_device``. This triggers the following sequence:
 
     * The sub-controller passes the command to the parent controller, which is the main controller for the software.
-    * The parent controller passes the command to the model, which is operating in its own sub-process, using an event queue. This eliminates the need for the controller to know anything about the model and prevents race conditions.
-    * The model then executes command, and any updates to the controller from the model are relayed using another event queue.
-
------------------
+    * The parent controller passes the command to the model, which runs in its own subprocess, using an event queue. This avoids tight coupling and reduces race conditions.
+    * The model executes the command, and model-to-controller updates are relayed through another event queue.
 
 Plugin Configuration
 --------------------
@@ -424,10 +415,10 @@ Remove the folder ``./model/features``, the file ``feature_list.py``, and the fi
         └── plugin_config.yml
 
 Install the plugin using one of two methods:
-    * Install a plugin by putting the whole plugin folder directly into ``navigate/plugins/``. In this example, put ``custom_device`` folder and all its contents into ``navigate/plugins``.
+    * Install by placing the entire plugin folder directly in ``navigate/plugins/``. In this example, place the ``custom_device`` folder and all contents under ``navigate/plugins/``.
     * Alternatively, install this plugin through the menu :menuselection:`Plugins --> Install Plugin` by selecting the plugin folder.
 
-The plugin is ready to use. For this plugin, you can now specify a CustomDevice in the ``configuration.yaml`` as follows.
+The plugin is now ready to use. You can reference ``CustomDevice`` in ``configuration.yaml`` as follows.
 
 .. code-block:: yaml
 

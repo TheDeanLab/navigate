@@ -1,20 +1,15 @@
+.. _issues-home:
+
 ============
 Known Issues
 ============
 
-This page lists known issues with the **navigate** software that currently do not have an obvious solution. Please report any other issues you encounter on GitHub.
+This section lists known limitations and behavior that may affect performance or usability in specific setups.
 
-.. _issues-home:
-
-In this section, we outline some common challenges encountered in setting up a microscope system and provide solutions to address these issues effectively.
+If you encounter additional issues, please report them on `GitHub <https://github.com/TheDeanLab/navigate/issues>`_.
 
 .. toctree::
    :maxdepth: 1
 
    01_channel_switching
    02_histogram
-
-
-
-
-

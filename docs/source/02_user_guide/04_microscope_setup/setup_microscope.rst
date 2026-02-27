@@ -1,8 +1,11 @@
 .. _setup_microscope:
 
 =======================
-Setting Up A Microscope
+Setting Up a Microscope
 =======================
+
+This section covers software-level microscope setup, including coordinate
+conventions, configuration files, multi-camera operation, and SNR map setup.
 
 .. toctree::
    :maxdepth: 2

@@ -4,279 +4,324 @@
 Advanced Configuration
 ======================
 
-This section outlines the ``configuration.yaml``, ``experiment.yml``, ``rest_api_config.yml``, ``waveform_templates.yml``, and ``waveform_constants.yml`` files.
-
------------------
+This section describes the ``configuration.yaml``, ``experiment.yml``,
+``rest_api_config.yml``, ``waveform_templates.yml``, and
+``waveform_constants.yml`` files.
 
 Initial Configuration
-=====================
+---------------------
 
-In order for the **navigate** software to function, you will need to configure the specifications of the various hardware that you will be using in the ``configuration.yaml`` file.
+To run **navigate**, configure the hardware specification for your microscope in
+``configuration.yaml``.
 
-An example ``configuration.yaml`` file is provided in the ``navigate\config`` directory. However, to avoid conflicts between different microscopes after pulling new changes from GitHub, **navigate** by default loads a local version of the ``configuration.yaml`` file. This file is stored in the ``C:\Users\Username\AppData\Local\.navigate\config`` directory on Windows or ``~/.navigate`` on Mac/Linux.
-
------------------
+An example ``configuration.yaml`` file is provided in ``navigate/config``.
+To avoid conflicts between microscopes when pulling updates from GitHub,
+**navigate** loads a local copy by default. This local file is stored in
+``C:\Users\Username\AppData\Local\.navigate\config`` on Windows, or
+``~/.navigate/config`` on macOS and Linux.
 
 Manual Configuration
--------------------------
+--------------------
 
-If you prefer to manually configure your ``configuration.yaml`` file, we recommend launching the software in the synthetic hardware mode initially. Within your Terminal, or Anaconda Prompt, activate your **navigate** Python environment and launch the software in the synthetic hardware mode by typing: ``navigate -sh``.
+If you prefer manual configuration, launch **navigate** in synthetic hardware
+mode first. In a terminal (or Anaconda Prompt), activate your **navigate**
+environment and run ``navigate -sh``.
 
-Upon launching the software in the synthetic hardware mode, **navigate** will create a copy of the ``navigate\config\configuration.yaml`` file in ``C:\Users\Username\AppData\Local\.navigate\config`` on Windows or ``~/.navigate`` on Mac/Linux.
+When started in synthetic mode, **navigate** creates a local copy of
+``navigate/config/configuration.yaml`` in
+``C:\Users\Username\AppData\Local\.navigate\config`` on Windows, or
+``~/.navigate/config`` on macOS and Linux.
 
-Thereafter, you should only modify the ``configuration.yaml`` file in your local ``.navigate\config`` directory.
+After this first launch, edit only the local ``configuration.yaml`` file in
+``.navigate/config``.
 
 .. tip::
 
-    Once **navigate** is open in the synthetic hardware mode, you can open the ``configuration.yaml`` file by going to :menuselection:`File` menu and selecting :ref:`Open Configuration Files <ui_file_menu>`.
+   Once **navigate** is open in synthetic hardware mode, you can open
+   ``configuration.yaml`` from :menuselection:`File --> Open Configuration Files`.
 
-It may help to open ``C:\Users\Username\AppData\Local\.navigate\config\configuration.yaml`` and follow along in this file when reading the next sections.
+It can be helpful to open
+``C:\Users\Username\AppData\Local\.navigate\config\configuration.yaml`` while
+reading the sections below.
 
-See the :ref:`Setting up an Axially Swept Light-Sheet Microscope <setup_aslm>` case study for a general walkthrough of how to build your own configuration file and see :ref:`Implementations <implemented_microscopes>` for examples of configuration files.
-
------------------
+For a practical walkthrough, see
+:ref:`Setting up an Axially Swept Light-Sheet Microscope <setup_aslm>`.
+For additional examples, see :ref:`Implementations <implemented_microscopes>`.
 
 .. _multiple_microscopes:
 
 Microscope Configurations
 -------------------------
 
-The ``configuration.yaml`` file contains the microscope configurations that you will be using with the software. Each microscope is represented as a YAML dictionary.
+The ``configuration.yaml`` file contains one or more microscope definitions.
+Each microscope is represented as a YAML dictionary.
 
-Switching between each microscope is readily performed in **navigate**, enabling you to switch between different configurations or imaging modes, each with their own unique or shared hardware:
+Switching between microscopes in **navigate** allows you to move between
+configurations or imaging modes that may use shared or unique hardware.
 
 .. code-block:: yaml
 
-    microscopes:
-        microscope1:
-            ...
-            ...
-        microscope2:
-            ...
-            ...
+   microscopes:
+       microscope1:
+           ...
+       microscope2:
+           ...
 
-Here, ``microscope1`` and ``microscope2`` are names of two different microscopes using different combinations of the hardware. The names of the microscopes must not include spaces or special characters such as ``<``, ``\``, ``#``, ``%``, or ``?``.
+Here, ``microscope1`` and ``microscope2`` are microscope names that use
+different hardware combinations. Microscope names should not contain spaces or
+special characters such as ``<``, ``\``, ``#``, ``%``, or ``?``.
 
 Microscope Inheritance
--------------------------
+----------------------
 
-When setting up a ``configuration.yaml`` file with multiple microscopes, the file can grow quite large and repetitive, especially if the microscopes share many of the same hardware components. To avoid this, **navigate** allows for inheritance of hardware components from one microscope to another. In the following example, ``microscope2`` inherits all of the hardware components from ``microscope1`` except for the camera, since this is specified in the ``microscope2`` section.
+When multiple microscopes share most hardware, the configuration file can
+become repetitive. **navigate** supports inheritance to reduce duplication.
+In the following example, ``microscope2`` inherits from ``microscope1`` and
+overrides only the camera configuration.
 
 .. code-block:: yaml
 
-    microscopes:
-        microscope1:
-            camera:
-                hardware:
-                    type: HamamatsuOrca
-                    ...
-            ...
-        microscope2(microscope1):
-            camera:
-                hardware:
-                    type: HamamatsuFusion
-                    ...
-            ...
-
------------------
+   microscopes:
+       microscope1:
+           camera:
+               hardware:
+                   type: HamamatsuOrca
+                   ...
+           ...
+       microscope2(microscope1):
+           camera:
+               hardware:
+                   type: HamamatsuFusion
+                   ...
+           ...
 
 Microscope Hardware Specification
 ---------------------------------
 
-Each microscope is expected to have a ``daq``, ``camera``, ``remote_focus_device``, ``galvo``, ``filter_wheel``, ``stage``, ``zoom``, ``shutter``, ``mirror`` and ``lasers`` section of the YAML dictionary. As in the hardware section, unused devices can be specified as synthetic.
+Each microscope definition is expected to include ``daq``, ``camera``,
+``remote_focus_device``, ``galvo``, ``filter_wheel``, ``stage``, ``zoom``,
+``shutter``, ``mirror``, and ``lasers`` sections. Unused devices can be set to
+synthetic implementations.
 
-Most of the information to set up these devices can be found in the :ref:`Supported Hardware <hardware_overview>` section of the documentation. Additional explanations of a few specific sections of the microscope configuration are below. Notably, the ``zoom`` section of the ``configuration.yaml`` specifies effective pixel size.
+Most setup details are documented in :ref:`Supported Hardware <hardware_overview>`.
+Additional explanations for commonly edited microscope sections are provided
+below.
 
 .. _configure_stages:
 
 Stage Subsection
 ^^^^^^^^^^^^^^^^
 
-The stage section of the microscope 1) puts the stage control from the ``hardware`` section into the microscope 2) sets boundaries for stage movement and 3) optionally specifies joystick-controlled axes.
+The ``stage`` section of each microscope definition does three things:
+
+1. Maps stage hardware from the ``hardware`` section into the microscope.
+2. Defines software movement limits for each axis.
+3. Optionally defines joystick-controlled axes.
 
 .. code-block:: yaml
 
-    microscopes:
-        microscope1:
-            stage:
-                hardware:
-                  -
-                    name: stage
-                    type: ASI
-                    serial_number: 123456789
-                    axes: [x, y, z, f] # Software
-                    axes_mapping: [M, Y, X, Z] # M Shear axis mapping
+   microscopes:
+       microscope1:
+           stage:
+               hardware:
+                 -
+                   name: stage
+                   type: ASI
+                   serial_number: 123456789
+                   axes: [x, y, z, f] # Software axes
+                   axes_mapping: [M, Y, X, Z] # Hardware API axis mapping
 
-                  -
-                    name: stage
-                    type: SyntheticStage
-                    serial_number: 987654321
-                    axes: [theta]
+                 -
+                   name: stage
+                   type: SyntheticStage
+                   serial_number: 987654321
+                   axes: [theta]
 
-            joystick_axes: [x, y, z]
-            x_max: 100000
-            x_min: -100000
-            y_max: 100000
-            y_min: -100000
-            z_max: 100000
-            z_min: -100000
-            f_max: 100000
-            f_min: -100000
-            theta_max: 360
-            theta_min: 0
+           joystick_axes: [x, y, z]
+           x_max: 100000
+           x_min: -100000
+           y_max: 100000
+           y_min: -100000
+           z_max: 100000
+           z_min: -100000
+           f_max: 100000
+           f_min: -100000
+           theta_max: 360
+           theta_min: 0
 
-            x_offset: 0
-            y_offset: 0
-            z_offset: 0
-            theta_offset: 0
-            f_offset: 0
+           x_offset: 0
+           y_offset: 0
+           z_offset: 0
+           theta_offset: 0
+           f_offset: 0
 
-            flip_x: False
-            flip_y: False
-            flip_z: False
-            flip_f: False
+           flip_x: False
+           flip_y: False
+           flip_z: False
+           flip_f: False
 
-First, we set the axes controlled by each piece of hardware and a mapping from the hardware's API axes to our software's axes. For example, the ASI ``M`` axis is mapped onto our software's ``X`` axis below.
+First, define software axes for each stage device and map API axis names to
+software axis names with ``axes_mapping``. In the example above, ASI ``M`` is
+mapped to software ``X``.
 
-For ``stages``, **navigate** requires that stages are configured for each microscope in ``X``, ``Y``, ``Z``, ``F``, and ``Theta``. If no physical stage is present, then that axes should be defined as a ``SyntheticStage``, as shown above for ``Theta``.
+For ``stages``, **navigate** expects the logical axes ``X``, ``Y``, ``Z``,
+``F``, and ``Theta`` to be available for each microscope. If a physical axis is
+not present, define it as a ``SyntheticStage`` (as shown for ``Theta``).
 
-Below this, we specify that only ``X``, ``Y`` and ``Z`` axes may be controlled by a joystick and we set the stage bounds for each of the axes.
+The ``joystick_axes`` entry defines which logical axes may be controlled by a
+joystick.
 
-Below this, we set the minimum and maximum values for each axis. This can be used to set boundaries that prevent the stage from crashing into the sides of a chamber.
+Axis bounds (``*_min`` and ``*_max``) define safe software movement limits to
+help prevent collisions.
 
-Below this, we set the offset for each stage axis. This is an offset relative to other microscopes (e.g. ``microscope2``) specified in ``configuration.yaml``. In this case, ``microscope1`` is the reference microscope. Additional microscopes may ask the stage to move to a different offset in order to observe the sample at the same position as ``microscope1``.
+Axis offsets (``*_offset``) are used to register microscopes relative to each
+other. If ``microscope1`` is the reference microscope, an inherited microscope
+can use offsets to move to the same sample location.
 
-Finally, we set the flip flags. These are important for getting :ref:`multiposition <ui_multiposition>` acquisitions to run properly. We set a convention in the software to expect that increasing value along an axis brings the sample further into our field of view. That is, increasing the x-axis position should bring the sample further to the right in the frame (in the case :ref:`Flip XY <ui_lut>` is toggled on) and increasing the y-axis position should bring the sample down. Increasing the z-position should bring the sample closer to the objective. If the stage behaves the opposite of any of these ways, it is prudent to set the flip flag. If set properly, the calculations for moving through multiple positions will be performed correctly. These only need to be configured once when setting up the microscope.
-
------------------
+Finally, set flip flags (``flip_x``, ``flip_y``, ``flip_z``, ``flip_f``) to
+match expected directionality. Correct flip configuration is required for
+reliable :ref:`multi-position <ui_multiposition>` behavior.
 
 .. _software_configuration_stages:
 
 Stage Axes Definition
 ^^^^^^^^^^^^^^^^^^^^^
 
-Many times, the coordinate system of the stage hardware do not agree with the optical definition of each axes identity. For example, many stages define their vertical dimension as ``Z``, whereas optically, we often define this axis as ``X``. Thus, there is often a need to map the mechanical axes to the optical axes, and this is done with the ``axes_mapping`` dictionary entry in the stage hardware section. By default, stage axes are read in as ``X``, ``Y``, ``Z``, ``Theta``, ``F``, where ``Theta`` is rotation and ``F`` is focus, but this can be changed by changing axes mapping.
+Stage hardware coordinate systems often differ from optical coordinate
+conventions. Use ``axes_mapping`` to map mechanical axes to **navigate** logical
+axes.
+
+By default, logical axes are interpreted as ``X``, ``Y``, ``Z``, ``Theta``
+(rotation), and ``F`` (focus).
 
 .. code-block:: yaml
 
-    axes: [x, y, z, theta, f]
-    axes_mapping: [x, y, z, r, f]
+   axes: [x, y, z, theta, f]
+   axes_mapping: [x, y, z, r, f]
 
-If, on a certain microscope, the ``Z`` stage axis corresponds to the optical Y-axis, and vice versa, you would then have to import the stages as following:
+If a microscope's hardware ``Z`` axis corresponds to optical ``Y`` and hardware
+``Y`` corresponds to optical ``Z``, map them as:
 
 .. code-block:: yaml
 
-    axes: [x, y, z, theta, f]
-    axes_mapping: [x, z, y, r, f]
-
------------------
+   axes: [x, y, z, theta, f]
+   axes_mapping: [x, z, y, r, f]
 
 Joystick Axes Definition
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you are using a joystick, it is possible to disable GUI control of the stage axes that the joystick can interact with. The axes that the joystick can interact with appear in the stage field as following:
+If you use a joystick, GUI controls can be disabled for joystick-controlled
+axes. Define joystick axes in the stage section:
 
 .. code-block:: yaml
 
-    joystick_axes: [x, y, z]
+   joystick_axes: [x, y, z]
 
-.. Note::
+.. note::
 
-    These axes should agree with the optical axes. If, on the same microscope as mentioned in the :ref:`Stage Axes Definition <software_configuration_stages>` section, the joystick were to control the optical y-axis corresponding to the stage z axis, you would have to put ``Y`` in the joystick axes brackets as following:
+   Joystick axes should be defined in logical (optical) coordinates.
+   For the axis-mapping example above, if joystick motion controls optical
+   ``Y`` (hardware ``Z``), set:
 
 .. code-block:: yaml
 
-    joystick_axes: [y]
-
------------------
+   joystick_axes: [y]
 
 Zoom Subsection
 ^^^^^^^^^^^^^^^
 
-The ``zoom`` section of ``configuration.yaml`` specifies control over microscope zoom lenses, or devices that change the magnification of the imaging system. For example, we use the `Dynamixel Smart Actuator <https://www.dynamixel.com/>`_ to control the rotating zoom wheel on an Olympus MVXPLAPO 1x/0.25.
+The ``zoom`` section configures zoom devices (or other magnification-changing
+hardware). For example, a Dynamixel actuator can control an Olympus MVXPLAPO
+zoom wheel.
 
 .. code-block:: yaml
 
-    microscopes:
-        microscope1:
-            zoom:
-                hardware:
-                    name: zoom
-                    type: DynamixelZoom
-                    servo_id: 1
-                position:
-                    0.63x: 0
-                    1x: 627
-                    2x: 1711
-                    3x: 2301
-                    4x: 2710
-                    5x: 3079
-                    6x: 3383
-                pixel_size:
-                    0.63x: 9.7
-                    1x: 6.38
-                    2x: 3.14
-                    3x: 2.12
-                    4x: 1.609
-                    5x: 1.255
-                    6x: 1.044
-                stage_positions:
-                    BABB:
-                        f:
-                            0.63x: 0
-                            1x: 1
-                            2x: 2
-                            3x: 3
-                            4x: 4
-                            5x: 5
-                            6x: 6
+   microscopes:
+       microscope1:
+           zoom:
+               hardware:
+                   name: zoom
+                   type: DynamixelZoom
+                   servo_id: 1
+               position:
+                   0.63x: 0
+                   1x: 627
+                   2x: 1711
+                   3x: 2301
+                   4x: 2710
+                   5x: 3079
+                   6x: 3383
+               pixel_size:
+                   0.63x: 9.7
+                   1x: 6.38
+                   2x: 3.14
+                   3x: 2.12
+                   4x: 1.609
+                   5x: 1.255
+                   6x: 1.044
+               stage_positions:
+                   BABB:
+                       f:
+                           0.63x: 0
+                           1x: 1
+                           2x: 2
+                           3x: 3
+                           4x: 4
+                           5x: 5
+                           6x: 6
 
-The ``positions`` specify the voltage of the actuator at different zoom positions. The ``pixel_size`` specifies the effective pixel size of the system at each zoom. The ``stage_positions`` account for focal shifts in between the different zoom values (the MVXPLAPO does not have a consistent focal plane). These may change depending on the immersion media. Here it is specified for a ``BABB`` (Benzyl Alcohol Benzyl Benzoate) immersion media.
+Here, ``position`` defines actuator position values per zoom level.
+``pixel_size`` defines effective pixel size at each zoom setting.
+``stage_positions`` can compensate focus shifts between zoom values for specific
+immersion media (for example, ``BABB``).
 
-Regardless of whether or not your microscope uses a zoom device, you must have a ``zoom`` entry, indicating the effective pixel size of your system in micrometers. For example,
+Even if your microscope has no zoom actuator, include a ``zoom`` section that
+defines effective pixel size:
 
 .. code-block:: yaml
 
-    zoom:
-      hardware:
-        name: zoom
-        type: SyntheticZoom
-        servo_id: 1
-      position:
-        N/A: 0
-      pixel_size:
-        N/A: 0.168
-
------------------
+   zoom:
+     hardware:
+       name: zoom
+       type: SyntheticZoom
+       servo_id: 1
+     position:
+       N/A: 0
+     pixel_size:
+       N/A: 0.168
 
 .. _experiment_file:
 
 Experiment File
-===============
+---------------
 
-The ``experiment.yml`` file stores information about the current state of the program. This includes laser and camera parameters, saving options, z-stack settings and much more. This file does not need to be edited by the user. The program will update it automatically and save changes automatically on exit.
-
------------------
+The ``experiment.yml`` file stores the current software state, including laser
+parameters, camera parameters, save options, and z-stack settings. Users
+normally do not need to edit this file manually. **navigate** updates it
+automatically during use and on exit.
 
 .. _configure_waveforms_constants:
 
 Waveform Constants File
-=======================
+-----------------------
 
-The ``waveform_constants.yml`` file stores the waveform parameters that can be edited by going to :menuselection:`Microscope Configuration --> Waveform Parameters`. This file does not need to be edited by the user. The program will update it automatically and save changes automatically on exit.
-
------------------
+The ``waveform_constants.yml`` file stores waveform parameters exposed through
+:menuselection:`Microscope Configuration --> Waveform Parameters`.
+Users normally do not need to edit this file manually. **navigate** updates it
+automatically during use and on exit.
 
 .. _configure_waveform_templates:
 
 Waveform Templates File
-=======================
+-----------------------
 
-The waveform templates file stores default behavior for the number of repeats for specific waveforms. This file only needs to be edited if the user wishes to introduce a new waveform behavior to the application.
+The ``waveform_templates.yml`` file stores default repeat behavior for specific
+waveforms. Edit this file only when adding new waveform behaviors.
 
------------------
+REST API Configuration File
+---------------------------
 
-Rest API Configuration File
-===========================
-
-The REST API configuration file specifies where the REST API should look to get and post data. This is only needed if you are using a plugin that requires the REST API, such as our communication with `ilastik <https://www.ilastik.org>`_. More information on how to setup the REST API for communication with ilastik can be found :ref:`here <case_study_ilastik>`.
+The ``rest_api_config.yml`` file defines REST API endpoints used for get/post
+operations. This is only needed when using plugins that depend on the REST API,
+such as ilastik integration. For setup details, see
+:ref:`case_study_ilastik`.

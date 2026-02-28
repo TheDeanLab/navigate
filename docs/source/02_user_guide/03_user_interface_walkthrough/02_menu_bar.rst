@@ -45,7 +45,8 @@ This menu allows users to:
 1. Select between microscope instances listed at the top of the menu.
 2. Choose microscope magnifications from the submenu shown to the right when multiple magnifications are available.
 3. Open :ref:`Waveform Parameters <ui_waveform_parameters>`.
-4. Open :ref:`Configure Microscopes <ui_configure_microscopes>`.
+4. Open :menuselection:`Microscope Configuration --> Configure Microscope` to
+   launch :ref:`Configure Microscopes <ui_configure_microscopes>`.
 5. Open :guilabel:`Advanced Camera Settings` for camera cooling controls, trigger settings, and camera flip flags that control display orientation.
 
 When operating a multi-microscope system, camera settings can be configured independently for each microscope.

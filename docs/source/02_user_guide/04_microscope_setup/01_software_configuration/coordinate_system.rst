@@ -4,238 +4,212 @@
 Microscope Coordinate System
 ============================
 
-This section details the expected coordinate system conventions for **navigate**-controlled microscopes.
+This section defines the coordinate-system conventions expected by
+**navigate**.
 
------------------
+Problem And Motivation
+----------------------
 
-Problem / Motivation
-====================
+Smart-acquisition routines assume all microscopes follow the same axis
+conventions. In practice, rigs often differ in stage polarity and camera
+orientation. To ensure consistent behavior across setups, **navigate** defines a
+standard coordinate system for microscope configuration.
 
-Smart-acquisition routines assume every microscope shares the same axis conventions, but each rig currently has different stage polarities and camera orientations. To ensure consistent behavior across different microscope setups, **navigate** defines a standardized coordinate system that should be followed when configuring new microscopes.
+When these conventions are followed and flip flags are set correctly in
+``configuration.yaml``:
 
-By adhering to these conventions and properly configuring the flip flags in your ``configuration.yaml`` file, you can ensure that:
-
-* Stage movements are intuitive and predictable
-* Camera image orientation matches stage movements
-* Multi-microscope configurations work correctly
-* Smart-acquisition features function as expected
-
------------------
+- Stage movements are more intuitive and predictable.
+- Camera image orientation aligns with stage movement.
+- Multi-microscope configurations remain consistent.
+- Smart-acquisition routines behave as expected.
 
 Standard Light-Sheet Microscope
-================================
+-------------------------------
 
-For the standard light-sheet microscope, with a single illumination and detection objective, we define the following coordinate system:
+For a standard light-sheet microscope with one illumination objective and one
+detection objective, **navigate** uses the following axis definitions.
 
 Axis Definitions
-----------------
+^^^^^^^^^^^^^^^^
 
-The physical coordinate system is defined relative to the microscope geometry:
+The physical coordinate system is defined relative to microscope geometry.
 
-**Z-Axis (Detection Axis)**
-  * **-z** is towards the detection objective
-  * **+z** is away from the detection objective
-
-**Y-Axis (Illumination Axis)**
-  * **-y** is towards the illumination objective
-  * **+y** is away from the illumination objective
-
-**X-Axis (Horizontal Axis)**
-  * **-x** is towards the optical table
-  * **+x** is away from the optical table
-
-**F-Axis (Focus Axis)**
-  * **-f** moves the detection objective towards the chamber
-  * **+f** moves the detection objective away from the chamber
-
-**Theta-Axis (Rotation Axis)**
-  * **-theta** is counter-clockwise rotation
-  * **+theta** is clockwise rotation
+- **Z-axis (Detection Axis)**: ``-z`` is toward the detection objective;
+  ``+z`` is away from the detection objective.
+- **Y-axis (Illumination Axis)**: ``-y`` is toward the illumination objective;
+  ``+y`` is away from the illumination objective.
+- **X-axis (Horizontal Axis)**: ``-x`` is toward the optical table; ``+x`` is
+  away from the optical table.
+- **F-axis (Focus Axis)**: ``-f`` moves the detection objective toward the
+  chamber; ``+f`` moves the detection objective away from the chamber.
+- **Theta-axis (Rotation Axis)**: ``-theta`` is counterclockwise rotation;
+  ``+theta`` is clockwise rotation.
 
 .. important::
 
-    **Negative moves are associated with an increased collision/crash risk.** This convention helps operators quickly identify potentially dangerous movements.
+   Negative moves are associated with higher collision risk. This convention
+   helps operators quickly identify potentially dangerous directions.
 
 Stage Configuration
--------------------
+^^^^^^^^^^^^^^^^^^^
 
-This defines how the stages move in the physical coordinate system. To alter these conventions to match your specific hardware, you can configure the flip flags in two ways:
+Stage directionality is configured with stage flip flags.
 
-**Option 1: Direct Configuration File Editing**
-
-Edit the ``configuration.yaml`` file under the ``stage`` section for your microscope:
+Option 1: Edit ``configuration.yaml`` directly.
 
 .. code-block:: yaml
 
-    microscopes:
-        microscope1:
-            stage:
-                hardware:
-                    type: ASI
-                    ...
-                x_min: -10000
-                x_max: 10000
-                flip_x: False
-                flip_y: False
-                flip_z: False
-                flip_f: False
-                flip_theta: False
-                ...
+   microscopes:
+       microscope1:
+           stage:
+               hardware:
+                   type: ASI
+                   ...
+               x_min: -10000
+               x_max: 10000
+               flip_x: False
+               flip_y: False
+               flip_z: False
+               flip_f: False
+               flip_theta: False
+               ...
 
-Any changes made to the flip flags will take effect the next time you start **navigate**.
+Changes to flip flags take effect after restarting **navigate**.
 
-**Option 2: Using the Software GUI** (Recommended)
+Option 2 (recommended): Configure through the GUI.
 
-You can also change the stage flip flags directly in the software without manually editing the configuration file:
+1. Launch **navigate**.
+2. Go to :menuselection:`Settings --> Stage Control --> Advanced Stage Parameters`.
+3. Toggle the axis flip checkboxes as needed.
+4. Click :guilabel:`Apply` or :guilabel:`Save`.
 
-1. Launch **navigate**
-2. Go to :menuselection:`Settings --> Stage Control --> Advanced Stage Parameters`
-3. In the Advanced Stage Parameters window, you'll find checkboxes for each axis flip flag
-4. Toggle the flip flags as needed
-5. Click **Apply** or **Save** to update your configuration
-
-Each ``flip_<axis>`` flag reverses the direction of stage movement for that axis. Set these flags to ``True`` or ``False`` to ensure your stage movements follow the standard coordinate system defined above.
+Each ``flip_<axis>`` flag reverses stage direction for that axis.
 
 .. tip::
 
-    Using the GUI method is recommended as it provides immediate visual feedback and automatically saves the changes to your configuration file. You can test stage movements immediately after adjusting the flip flags to verify correct behavior.
+   The GUI workflow is usually faster for setup because you can test movement
+   immediately after each change.
 
 Camera Configuration
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
-Depending on how the camera is mounted and whether any mirrors are in the detection path, you need to configure the camera flip flags for x and y axes. You can configure these flags in two ways:
+Depending on camera mounting and optical reflections, configure camera flip
+flags for X and Y.
 
-**Option 1: Direct Configuration File Editing**
-
-Edit the ``configuration.yaml`` file under the ``camera`` section for your microscope:
+Option 1: Edit ``configuration.yaml`` directly.
 
 .. code-block:: yaml
 
-    microscopes:
-        microscope1:
-            camera:
-                hardware:
-                    type: HamamatsuOrca
-                    ...
-                flip_x: False
-                flip_y: False
-                ...
+   microscopes:
+       microscope1:
+           camera:
+               hardware:
+                   type: HamamatsuOrca
+                   ...
+               flip_x: False
+               flip_y: False
+               ...
 
-**Option 2: Using the Software GUI** (Recommended)
+Option 2 (recommended): Configure through the GUI.
 
-You can also change the camera flip flags directly in the software without manually editing the configuration file:
-
-1. Launch **navigate**
-2. Go to :menuselection:`Settings --> Stage Control --> Advanced Camera Settings`
-3. In the Advanced Camera Settings window, you'll find checkboxes for X and Y axis flip flags
-4. Toggle the flip flags as needed
-5. Click **Save** to update your configuration
+1. Launch **navigate**.
+2. Go to :menuselection:`Settings --> Stage Control --> Advanced Camera Settings`.
+3. Toggle X/Y flip checkboxes as needed.
+4. Click :guilabel:`Save`.
 
 .. tip::
 
-    Using the GUI method is recommended as it provides immediate visual feedback and automatically saves the changes to your configuration file. Changes to camera flip flags take effect immediately - you can see the updated image orientation on the next camera frame without restarting the software.
+   GUI changes to camera flip flags are visible on subsequent frames, which
+   helps with rapid orientation checks.
 
 Expected Image Behavior
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
-In general, the image on the camera should move in a manner that is consistent with the stage movement:
+Camera movement should appear consistent with stage movement:
 
-* When you press the **+x button** (located on the right), the sample will appear to move to the **left** in the image (i.e., we are trying to look further to the right)
-* When you press the **+y button** (up), the sample will appear to move **down** in the image
-* When you press the **-x button** (left), the sample will appear to move to the **right** in the image
-* When you press the **-y button** (down), the sample will appear to move **up** in the image
+- Pressing **+x** (right) makes the sample appear to move left.
+- Pressing **+y** (up) makes the sample appear to move down.
+- Pressing **-x** (left) makes the sample appear to move right.
+- Pressing **-y** (down) makes the sample appear to move up.
 
-This behavior mimics looking through a microscope eyepiece: when you move the stage to the right, the sample appears to move left in your field of view.
+This is equivalent to standard microscope behavior: moving the stage in one
+direction shifts the image in the opposite direction.
 
 .. note::
 
-    Use the flip flags to ensure your camera orientation matches these expected behaviors. You may need to experiment with different combinations of ``flip_x`` and ``flip_y`` depending on your camera mounting and optical path. The GUI method allows you to quickly test different combinations and see the results immediately.
-
------------------
+   If your image movement does not match this behavior, adjust ``flip_x`` and
+   ``flip_y`` until movement is consistent.
 
 Multi-Sided Microscope Variants
-================================
+-------------------------------
 
-For multi-directional versions of a microscope (e.g., two-sided illumination or dual-view detection), the movements are always defined **relative to the primary microscope instance**.
+For multi-directional variants (for example, dual-side illumination or
+dual-view detection), movement conventions are defined relative to the primary
+microscope instance.
 
 Configuration Example
----------------------
-
-When you have multiple microscopes defined in your ``configuration.yaml`` file, all movements are defined relative to the first microscope:
+^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
-    microscopes:
-        Microscope1_Left_Illumination:
-            stage:
-                ...
-            camera:
-                ...
-        Microscope2_Right_Illumination(Microscope1_Left_Illumination):
-            camera:
-                hardware:
-                    type: HamamatsuFusion
-                    ...
-                flip_x: True  # May need to flip relative to primary
-                flip_y: False
-                ...
+   microscopes:
+       Microscope1_Left_Illumination:
+           stage:
+               ...
+           camera:
+               ...
+       Microscope2_Right_Illumination(Microscope1_Left_Illumination):
+           camera:
+               hardware:
+                   type: HamamatsuFusion
+                   ...
+               flip_x: True
+               flip_y: False
+               ...
 
 Coordinate System Behavior
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* The **primary microscope** (first defined) establishes the coordinate system
-* All **secondary microscopes** inherit this coordinate system
-* Secondary microscopes may require different flip flags to maintain consistency with the primary coordinate system
-* Stage movements affect all microscopes simultaneously (since they typically share the same stage)
-* Camera orientations may differ between microscopes and should be configured independently
+- The primary microscope establishes the coordinate system.
+- Secondary microscopes inherit that coordinate system.
+- Secondary microscopes may require different camera flip flags.
+- Stage movements typically affect all microscopes that share a stage.
+- Camera orientation should be calibrated per microscope view.
 
 Common Scenarios
-----------------
+^^^^^^^^^^^^^^^^
 
-**Two-Sided Illumination**
-  When imaging with two illumination objectives (e.g., left and right):
-
-  * Both views share the same stage coordinate system
-  * Camera flip flags may differ between the two views
-  * The detection objective and stage movements remain the same
-
-**Dual-View Detection**
-  When imaging with two detection objectives:
-
-  * Each detection path may have different optical elements
-  * Camera orientations should be calibrated to match the primary coordinate system
-  * F-axis movements may affect only one detection path (configure accordingly)
+- **Two-sided illumination**: both views share the same stage coordinate
+  system; camera flip flags may differ between views.
+- **Dual-view detection**: detection paths can include different optical
+  elements; camera orientation should be calibrated to the primary coordinate
+  system; F-axis behavior can differ by optical path.
 
 .. tip::
 
-    After configuring a multi-sided microscope, test stage movements while viewing both cameras to ensure the image movements are consistent and intuitive across all views.
+   After configuring a multi-sided microscope, verify stage movement behavior
+   while viewing all active cameras.
 
------------------
+Oblique-Plane Microscopes
+-------------------------
 
-Oblique-Plane Microscope
-=========================
-
-For oblique plane microscopes, the coordinate system becomes more complex due to the angled illumination and detection geometry. The relationship between stage movements and image coordinates is not orthogonal, requiring special consideration.
+For oblique-plane microscopes, coordinate handling is more complex because
+illumination and detection geometry is angled. Stage and image coordinates may
+require additional transformations.
 
 .. warning::
 
-    **Oblique plane microscope coordinate system documentation is under development.** More detailed information will be provided in a future release.
+   Oblique-plane coordinate-system documentation is still under development.
 
 Preliminary Considerations
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When configuring an oblique plane microscope, consider the following:
+When configuring oblique-plane systems:
 
-* The angle between the illumination and detection objectives affects the coordinate transformation
-* Stage movements in the physical coordinate system may require geometric transformations to achieve intuitive image movements
-* The flip flags alone may not be sufficient to achieve the desired behavior
-* Custom transformation matrices may be needed for advanced acquisition features
+- Illumination/detection angle affects coordinate transforms.
+- Physical stage motion may not map directly to intuitive image motion.
+- Flip flags alone may not be sufficient.
+- Advanced workflows may require custom transform matrices.
 
-Stay Tuned
-----------
-
-We are actively developing comprehensive coordinate system support for oblique plane microscopes. If you are setting up an oblique plane microscope with **navigate**, please contact the development team for the latest guidance and beta features.
-
-.. note::
-
-    For questions or assistance with oblique plane microscope configuration, please create an issue on the **navigate** `GitHub repository <https://github.com/TheDeanLab/navigate/issues/new/choose>`_.
+For assistance or the latest guidance, open an issue on the **navigate**
+`GitHub repository <https://github.com/TheDeanLab/navigate/issues/new/choose>`_.

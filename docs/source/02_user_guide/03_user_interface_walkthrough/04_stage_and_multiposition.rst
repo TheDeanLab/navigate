@@ -7,9 +7,9 @@ Stage And Multiposition
 Stage Control
 =============
 
-.. image:: images/settings_stage.png
+.. image:: ../../images/stage-control-tab-frame.png
    :align: center
-   :alt: Stage Control settings notebook.
+   :alt: Stage Control tab.
 
 The :guilabel:`Stage Control` notebook provides movement controls for ``X``, ``Y``, ``Z``, ``focus``, and ``Theta``, plus emergency stop and joystick controls.
 
@@ -22,6 +22,10 @@ The :guilabel:`Stage Control` notebook provides movement controls for ``X``, ``Y
 Stage Positions
 ---------------
 
+.. image:: ../../images/stage-positions-frame.png
+   :align: center
+   :alt: Stage Positions frame.
+
 Entry boxes display live stage coordinates. Editing a value moves that axis to the entered coordinate.
 
 .. warning::
@@ -31,25 +35,45 @@ Entry boxes display live stage coordinates. Editing a value moves that axis to t
 XY Movement
 -----------
 
+.. image:: ../../images/stage-xy-movement-frame.png
+   :align: center
+   :alt: XY Movement frame.
+
 Arrow buttons move ``X`` and ``Y``. The center entry sets step size in microns.
 
 Z Movement
 ----------
+
+.. image:: ../../images/stage-z-movement-frame.png
+   :align: center
+   :alt: Z Movement frame.
 
 Controls ``Z`` movement and its step size.
 
 Focus Movement
 --------------
 
+.. image:: ../../images/stage-focus-movement-frame.png
+   :align: center
+   :alt: Focus Movement frame.
+
 Controls ``focus`` movement and its step size.
 
 Theta Movement
 --------------
 
+.. image:: ../../images/stage-theta-movement-frame.png
+   :align: center
+   :alt: Theta Movement frame.
+
 Controls ``Theta`` (rotation) movement and its step size.
 
 Buttons
 -------
+
+.. image:: ../../images/stage-buttons-frame.png
+   :align: center
+   :alt: Stage movement interrupt and joystick controls.
 
 1. :guilabel:`STOP` halts all stage axes.
 2. :guilabel:`Enable Joystick` / :guilabel:`Disable Joystick` toggles software control ownership for mapped joystick axes.
@@ -58,59 +82,38 @@ Buttons
 
    On large displays, right-click a notebook tab and choose :guilabel:`Popout Tab` to create a detached stage-control panel.
 
-   .. image:: images/popout_right_click.png
-      :align: center
-      :alt: Right-click popout menu for notebook tabs.
-
-   .. image:: images/popout_stage.png
-      :align: center
-      :alt: Stage control tab shown as a popup window.
-
 .. _ui_multiposition:
 
 Multi-Position
 ==============
 
-.. image:: images/settings_multiposition.png
+.. image:: ../../images/MultiPositionTab.png
    :align: center
    :alt: Multi-Position settings notebook.
 
 The :guilabel:`Multi-Position` notebook defines stage coordinates for tiled and multi-region acquisition.
-
-Multi-Position Buttons
-----------------------
-
-1. :guilabel:`Launch Tiling Wizard`
-2. :guilabel:`Eliminate Empty Positions` (currently unimplemented)
-3. :guilabel:`Save Positions To Disk`
-4. :guilabel:`Load Positions From Disk`
 
 .. _ui_multiposition_table:
 
 Multi-Position Table
 --------------------
 
-The table stores stage coordinates included in multi-position runs.
-
-.. image:: images/multiposition_right_click.png
-   :align: center
-   :alt: Right-click menu in the Multi-Position table.
-
 1. Double-click a row index to move the stage to that row.
 2. Double-click a cell to edit a coordinate value.
 3. Right-click a row index to insert, add, or delete positions.
 
-.. _ui_multiposition_tiling_wizard:
+.. _ui_multiposition_buttons:
 
-Multi-Position Tiling Wizard
-============================
+Multi-Position Buttons
+----------------------
 
-.. image:: images/tiling_wizard.png
+.. image:: ../../images/multiposition-buttons-frame.png
    :align: center
-   :alt: Tiling wizard window.
+   :alt: Multi-Position buttons frame.
 
-The tiling wizard calculates tiled position grids from start/end coordinates, field-of-view size, and overlap.
+1. :guilabel:`Launch Tiling Wizard` opens :ref:`ui_multiposition_tiling_wizard`.
+2. :guilabel:`Eliminate Empty Positions` (currently unimplemented)
+3. :guilabel:`Save Positions To Disk`
+4. :guilabel:`Load Positions From Disk`
 
-1. Set axis start and end positions.
-2. Confirm FOV distance and overlap.
-3. Click :guilabel:`Populate Multi-Position Table`.
+Popup details for the tiling workflow are documented in :ref:`ui_multiposition_tiling_wizard`.

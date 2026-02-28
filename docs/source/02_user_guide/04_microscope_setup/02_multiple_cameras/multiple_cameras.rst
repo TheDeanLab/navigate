@@ -1,57 +1,68 @@
-====================
+================
 Multiple Cameras
-====================
+================
 
-**navigate** is crafted for extensibility to enable the virtualization of multiple microscopes using the same and/or
-different devices, including cameras.
-
--------------------------------------
+**navigate** supports multi-camera acquisition across shared or independent
+microscope definitions.
 
 Enabling Multi-Camera Operation
-#################################
+-------------------------------
 
-**navigate** gives users the flexibility to capture images with multiple cameras. Prior to launching **navigate**, it is important that both cameras are functioning with the computer, and that they share the same external trigger signal from the data acquisition card. See :ref:`camera_configuration` for more information.
+Before launching **navigate**, confirm both cameras are recognized by the host
+computer and receive the same external trigger from the data acquisition card.
+See :ref:`camera_configuration` for hardware setup details.
 
-
-#. Select and click menu :menuselection:`Microscope Configuration --> Configure Microscope`.
+1. Open :menuselection:`Microscope Configuration --> Configure Microscope`.
 
    .. image:: images/multi_cams_1.png
+      :align: center
+      :alt: Menu path to open Configure Microscope.
 
-   There will be a pop-up window displaying a list of all available microscopes with its hardware details.
+   A popup appears with available microscope configurations and hardware details.
 
    .. image:: images/multi_cams_2.png
-     :width: 400px
-     :align: center
+      :width: 400px
+      :align: center
+      :alt: Configure Microscope popup listing microscope configurations.
 
-   There are three settings options for each microscope.
+   Each microscope entry has three configurable options.
 
    .. image:: images/multi_cams_3.png
-     :width: 400px
-     :align: center
+      :width: 400px
+      :align: center
+      :alt: Per-microscope options shown in Configure Microscope.
 
-#. Set `Primary Microscope` and `Additional Microscope`, then click `Confirm`.
+2. Set :guilabel:`Primary Microscope` and :guilabel:`Additional Microscope`,
+   then click :guilabel:`Confirm`.
 
    .. image:: images/multi_cams_4.png
-     :width: 400px
-     :align: center
+      :width: 400px
+      :align: center
+      :alt: Primary and additional microscope selections.
 
-#. Then set `Acquisition mode` and click `Acquiring` the same way as using one camera. There will be a pop-up window displaying images obtained from an additional camera.
+3. Choose acquisition mode and click :guilabel:`Acquire` as usual.
+   A popup window appears with images from the additional camera.
 
    .. image:: images/multi_cams_5.png
-
-----------------------------------------------
+      :align: center
+      :alt: Additional camera view popup during acquisition.
 
 Disabling Multi-Camera Operation
-################################
+--------------------------------
 
-Once you're finished acquiring images with multiple cameras, remember to reset to the single-camera mode.
+When finished with multi-camera acquisition, reset to single-camera mode.
 
-#. Select and click menu :menuselection:`Microscope Configuration --> Configure Microscope`.
+1. Open :menuselection:`Microscope Configuration --> Configure Microscope`.
 
    .. image:: images/multi_cams_1.png
+      :align: center
+      :alt: Menu path to open Configure Microscope.
 
-#. Set `Primary Microscope` and set the "additional microscope" as `Not Use`. Then click `Confirm`.
+2. Set :guilabel:`Primary Microscope`, then set
+   :guilabel:`Additional Microscope` to :guilabel:`Not Use`.
+   Click :guilabel:`Confirm`.
 
    .. image:: images/multi_cams_9.png
-     :width: 400px
-     :align: center
+      :width: 400px
+      :align: center
+      :alt: Configure Microscope popup with Additional Microscope set to Not Use.

@@ -1,83 +1,79 @@
 .. _plugin:
 
-====================
+===================
 Plugin Architecture
-====================
+===================
 
-**navigate** is designed with extensibility. Users can seamlessly integrate custom GUI plugins, device plugins, new feature plugins, and even define specific acquisition modes.
-
--------------------------------------
+**navigate** is designed for extensibility. You can use plugins to add GUI elements, hardware devices, feature objects, feature lists, and custom acquisition modes.
 
 Introduction to Plugins
-########################
+=======================
 
-The **navigate** **plugin system** gives users the flexibility to extend its functionality according to their specific needs. **navigate** will load plugins automatically and users can use their plugins with **navigate** seamlessly.
-
------------
+The plugin system allows users to extend **navigate** without modifying the core codebase. Installed plugins are discovered automatically at startup.
 
 Installing a Plugin
-####################
+===================
 
-Once you've built a plugin or downloaded a **navigate** plugin, you can easily install it. Here, we have downloaded the `Navigate Confocal-Projection Plugin <https://github.com/TheDeanLab/navigate-confocal-projection>`_.
+After you build or download a plugin, you can install it from the GUI. In this example, we use the `navigate-confocal-projection plugin <https://github.com/TheDeanLab/navigate-confocal-projection>`_.
 
-#. You can install the **navigate-confocal-projection** plugin by selecting the menu :menuselection:`Plugins --> Install Plugin`.
+#. Open :menuselection:`Plugins --> Install Plugin`.
 
    .. image:: images/plugin_1.png
       :width: 60%
       :align: center
+      :alt: Plugins menu showing Install Plugin option
 
-#. Select the folder `ConfocalProjectionPlugin` and click :guilabel:`Select`.
+#. Select the plugin folder (for example, ``ConfocalProjectionPlugin``) and click :guilabel:`Select`.
 
    .. image:: images/plugin_2.png
       :width: 60%
       :align: center
+      :alt: Folder selection dialog for plugin installation
 
-#. You should receive a message indicating that the plugin has been installed successfully.
+#. Confirm the success message.
 
    .. image:: images/plugin_3.png
       :width: 60%
       :align: center
+      :alt: Confirmation message after plugin installation
 
-#. Restart **navigate** to use this installed plugin.
-
------------
+#. Restart **navigate** to load the plugin.
 
 Uninstalling a Plugin
-#####################
+=====================
 
-Uninstalling a plugin is very easy.
-
-#. Select :menuselection:`Plugins --> Uninstall Plugins`. This will open a popup window where you can see all of the currently installed plugins.
+#. Open :menuselection:`Plugins --> Uninstall Plugins`.
 
    .. image:: images/plugin_4.png
       :width: 60%
       :align: center
+      :alt: Plugins menu showing Uninstall Plugins option
 
-#. Select the plugin you want to uninstall.
+#. Select the plugin to remove.
 
    .. image:: images/plugin_5.png
       :width: 60%
       :align: center
+      :alt: Plugin selection window for uninstall
 
 #. Click :guilabel:`Uninstall`.
 
    .. image:: images/plugin_6.png
       :width: 60%
       :align: center
+      :alt: Confirmation flow for plugin uninstall
 
-#. Restart **navigate** to fully remove the uninstalled plugin.
-
--------------------------------------
+#. Restart **navigate** to complete removal.
 
 Designing a Plugin
-##########################
+==================
 
-Using a Plugin Template
--------------------------------------
+Using the Plugin Template
+-------------------------
 
-A comprehensive **plugin template** is provided. Users could download the **plugin template** from `github <https://github.com/TheDeanLab/navigate-plugin-template>`_ and build plugins on it.
+Use the official `navigate-plugin-template <https://github.com/TheDeanLab/navigate-plugin-template>`_ as a starting point.
 
-Plugin Structure:
+Plugin structure:
 
 .. code-block:: none
 
@@ -92,27 +88,25 @@ Plugin Structure:
         │   │       ├── plugin_device.py
         │   │       └── synthetic_plugin_device.py
         │   └── features/
-        │           ├── plugin_feature.py
-        │           ├── ...
-        │
+        │       ├── plugin_feature.py
+        │       ├── ...
         ├── view/
         │   ├── plugin_name_frame.py
         │   ├── ...
-        │
         ├── feature_list.py
         ├── plugin_acquisition_mode.py
         └── plugin_config.yml
 
 .. note::
 
-    The template shows a plugin with GUI, device, feature, feature_list and acquisition mode. If your plugin only incorporates some of these components, you should remove unused folders and files.
-
--------------------------------------
+   The template includes optional components (GUI, devices, features, feature lists, and acquisition modes). Remove any folders or files you do not use.
 
 Plugin Configuration
 --------------------
 
-There should always have a ``plugin_config.yml`` file under the plugin folder, which tells **navigate** the plugin name, the GUI as a Tab or Popup and custom acquisition mode name. A typical plugin config is:
+Each plugin should include a ``plugin_config.yml`` file in the plugin root. It defines plugin metadata, view type, and optional acquisition modes.
+
+Example:
 
 .. code-block:: none
 
@@ -122,32 +116,29 @@ There should always have a ``plugin_config.yml`` file under the plugin folder, w
       - name: Plugin Acquisition
         file_name: plugin_acquisition_mode.py
 
--------------------------------------
-
 Plugin GUI Elements
---------------------
+-------------------
 
-**navigate** supports plugins with their own GUIs. A custom plugin GUI can be integrated as a tab or a popup. Users should specify a view option in ``plugin_config.yml``. If it is a popup, users can find the plugin under the :guilabel:`Plugins` menu in the **navigate** window. If it is a tab, it will appear next to the :ref:`Settings Notebooks <ui_settings_notebooks>`.
+Plugins can contribute GUI elements as either tabs or popups. Set the desired view in ``plugin_config.yml``.
 
-When creating a new plugin with a GUI, ensure that the plugin name is consistent with the naming conventions for the associated Python files (``plugin_name_controller.py`` and ``plugin_name_frame.py``). Both Python filenames should be in lowercase.
+- If ``view: Popup`` is used, the plugin appears under the :guilabel:`Plugins` menu.
+- If ``view: Tab`` is used, the plugin appears beside the :ref:`Settings Notebooks <ui_settings_notebooks>`.
 
-For example, if your plugin is named "My Plugin" (there is a space in between), the associated Python files should be named: ``my_plugin_frame.py`` and ``my_plugin_controller.py``.
-
--------------------------------------
+Use consistent lowercase filenames for GUI/controller modules. For example, if the plugin name is ``My Plugin``, use ``my_plugin_frame.py`` and ``my_plugin_controller.py``.
 
 Plugin Devices
-------------------
+--------------
 
-The **navigate** plugin architecture allows you to integrate new hardware device. There can be more than one device inside a plugin. If they are different kinds of device, please put them into different folders. For each kind of device, there should be a ``device_startup_functions.py`` telling **navigate** how to start the device and indicating the reference name of the device to be used in ``configuration.yaml``.
+Plugins can define one or more hardware device types. For each device type, create a dedicated folder and provide ``device_startup_functions.py`` to define connection and startup behavior.
 
-Device type name and reference name are given as following:
+Device type names and reference keys are declared as:
 
 .. code-block:: python
 
-    DEVICE_TYPE_NAME = "plugin_device"  # Same as in configuration.yaml, for example "stage", "filter_wheel", "remote_focus_device"...
+    DEVICE_TYPE_NAME = "plugin_device"  # For example: "stage", "filter_wheel"
     DEVICE_REF_LIST = ["type", "serial_number"]
 
-A function to load the device connection should be given,
+Implement a connection loader:
 
 .. code-block:: python
 
@@ -155,7 +146,7 @@ A function to load the device connection should be given,
         # ...
         return device_connection
 
-A function to start the device should be given,
+Implement device startup:
 
 .. code-block:: python
 
@@ -163,27 +154,22 @@ A function to start the device should be given,
         # ...
         return device_object
 
-The template for ``device_startup_functions.py`` can be found in the `plugin template <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins_template/model/devices/plugin_device/device_startup_functions.py>`_.
-
--------------------------------------
+See the template implementation in `device_startup_functions.py <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins_template/model/devices/plugin_device/device_startup_functions.py>`_.
 
 Plugin Features
--------------------------
+---------------
 
-**navigate** allows users to add new features. New feature objects and feature lists can each be a plugin or components of a plugin. Features and feature lists are automatically loaded into **navigate**.
+Plugins can contribute new feature objects and feature lists. These are discovered and loaded automatically at startup.
 
-Please visit `here <https://thedeanlab.github.io/navigate/contributing/feature_container.html>`_ for details about how to build a new feature object and feature list.
-
--------------------------------------
+For implementation details, see :ref:`Feature Container <features>`.
 
 Custom Acquisition Modes
 ------------------------
 
-Navigate offers seamless support for custom acquisition modes, and registering a new mode is straightforward.
+Plugins can register custom acquisition modes.
 
-1. Download the template for `plugin_acquisition_mode.py <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins_template/plugin_acquisition_mode.py>`_
-
-2. Update the ``feature_list``.
+1. Start from the template `plugin_acquisition_mode.py <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins_template/plugin_acquisition_mode.py>`_.
+2. Update ``feature_list``.
 
 .. code-block:: python
 
@@ -196,9 +182,7 @@ Navigate offers seamless support for custom acquisition modes, and registering a
                 # update here
             ]
 
-3. Update the functions.
-
-Users should tell **navigate** what to do before and after acquisition using the following functions.
+3. Implement controller/model lifecycle hooks as needed:
 
 .. code-block:: python
 
@@ -214,7 +198,7 @@ Users should tell **navigate** what to do before and after acquisition using the
     def end_acquisition_model(self, model):
         # update here
 
-4. Register the acquisition mode in ``plugin_config.yml``.
+4. Register the mode in ``plugin_config.yml``:
 
 .. code-block:: none
 
@@ -222,6 +206,4 @@ Users should tell **navigate** what to do before and after acquisition using the
         - name: Custom Acquisition
           file_name: plugin_acquisition_mode.py
 
------------
-
-For more plugin examples, please visit the plugins in the table of contents menu on the left.
+For additional real-world examples, see the plugin repositories linked in the main documentation navigation.

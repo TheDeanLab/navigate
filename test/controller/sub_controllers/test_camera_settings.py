@@ -253,10 +253,6 @@ class TestCameraSettingController:
             self.camera_settings.framerate_widgets["exposure_time"].get()
             == exposure_time
         )
-        assert (
-            self.camera_settings.framerate_widgets["frames_to_average"].get()
-            == camera_setting_dict["frames_to_average"]
-        )
         assert self.camera_settings.in_initialization is False
 
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
@@ -282,7 +278,6 @@ class TestCameraSettingController:
         width, height = random.randint(1, 2000), random.randint(1, 2000)
         self.camera_settings.roi_widgets["Width"].set(width)
         self.camera_settings.roi_widgets["Height"].set(height)
-        self.camera_settings.framerate_widgets["frames_to_average"].set(5)
 
         # Update experiment dict and assert
         self.camera_settings.update_experiment_values()
@@ -330,7 +325,6 @@ class TestCameraSettingController:
             self.camera_settings.camera_setting_dict["pixel_size"]
             == self.camera_settings.default_pixel_size
         )
-        assert self.camera_settings.camera_setting_dict["frames_to_average"] == 5
 
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
     def test_update_sensor_mode(self, mode):
@@ -482,14 +476,6 @@ class TestCameraSettingController:
                 str(self.camera_settings.mode_widgets["Pixels"].widget["state"])
                 == "disabled"
             )
-        assert (
-            str(
-                self.camera_settings.framerate_widgets["frames_to_average"].widget[
-                    "state"
-                ]
-            )
-            == state
-        )
         assert str(self.camera_settings.roi_widgets["Width"].widget["state"]) == state
         assert str(self.camera_settings.roi_widgets["Height"].widget["state"]) == state
         assert (

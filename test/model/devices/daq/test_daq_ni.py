@@ -174,7 +174,11 @@ def test_create_analog_output_tasks_expands_based_on_waveform_length(monkeypatch
             "sample_rate": 2000,
             "samples": 999,
             "trigger_source": "/PXI6259/PFI0",
-            "waveform": {"channel_1": np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19])},
+            "waveform": {
+                "channel_1": np.array(
+                    [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+                ),
+            },
         },
     }
     monkeypatch.setattr("navigate.model.devices.daq.ni.nidaqmx.Task", _FakeTask)

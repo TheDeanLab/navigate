@@ -62,6 +62,30 @@ def _run_command(command):
         )
 
 
+def _ensure_importable(module_name):
+    """Install a module with pip if it is not importable."""
+    import_check = subprocess.run(
+        [sys.executable, "-c", f"import {module_name}"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if import_check.returncode == 0:
+        return
+    _run_command(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--disable-pip-version-check",
+            "--no-input",
+            "--upgrade",
+            module_name,
+        ]
+    )
+
+
 @pytest.fixture(scope="module")
 def installed_mmcore_plugin():
     """Install mmcore plugin from GitHub for integration testing."""
@@ -84,6 +108,7 @@ def installed_mmcore_plugin():
             MMCORE_PLUGIN_INSTALL_SPEC,
         ]
     )
+    _ensure_importable("pymmcore")
     return MMCORE_PLUGIN_PACKAGE
 
 
@@ -152,7 +177,12 @@ def test_mmcore_plugin_loads_in_plugins_model(installed_mmcore_plugin, tmp_path)
         devices_dict, plugin_acquisition_modes = model.load_plugins()
 
     assert (navigate_home / "feature_lists").exists()
-    assert "multiple_devices" in devices_dict
+    assert "multiple_devices" in devices_dict, (
+        "MMCore plugin devices were not registered. "
+        f"Registered device keys: {list(devices_dict.keys())}. "
+        "This commonly occurs when plugin runtime dependencies (for example, "
+        "`pymmcore`) are unavailable."
+    )
     assert devices_dict["multiple_devices"]["ref_list"] == ["type"]
     assert callable(devices_dict["multiple_devices"]["load_device"])
     assert callable(devices_dict["multiple_devices"]["start_device"])

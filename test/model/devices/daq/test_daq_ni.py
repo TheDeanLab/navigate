@@ -32,6 +32,7 @@
 # Standard Library Imports
 
 # Third Party Imports
+import numpy as np
 import pytest
 
 # Local Imports
@@ -76,3 +77,118 @@ def test_daq_ni_functions():
             getattr(daq, f)(*a)
         else:
             getattr(daq, f)()
+
+
+class _FakeAOChannels:
+    def __init__(self):
+        self.add_ao_voltage_chan_calls = []
+
+    def add_ao_voltage_chan(self, channel):
+        self.add_ao_voltage_chan_calls.append(channel)
+
+
+class _FakeTiming:
+    def __init__(self):
+        self.cfg_samp_clk_timing_calls = []
+
+    def cfg_samp_clk_timing(self, rate, sample_mode, samps_per_chan):
+        self.cfg_samp_clk_timing_calls.append(
+            {
+                "rate": rate,
+                "sample_mode": sample_mode,
+                "samps_per_chan": samps_per_chan,
+            }
+        )
+
+
+class _FakeTask:
+    def __init__(self):
+        self.ao_channels = _FakeAOChannels()
+        self.timing = _FakeTiming()
+        self.write_calls = []
+
+    def write(self, data):
+        self.write_calls.append(np.asarray(data))
+
+    def stop(self):
+        pass
+
+    def close(self):
+        pass
+
+
+def test_create_analog_output_tasks_uses_channel_sweep_time(monkeypatch):
+    from navigate.model.devices.daq.ni import NIDAQ
+    from test.model.dummy import DummyModel
+
+    model = DummyModel()
+    daq = NIDAQ(model.configuration)
+    daq.sample_rate = 10
+    daq.sweep_times = {"channel_1": 0.7}
+    daq.waveform_repeat_num = 1
+    daq.waveform_expand_num = 1
+    daq.analog_outputs = {
+        "PXI6259/ao0": {
+            "sample_rate": 5000,
+            "samples": 2,
+            "trigger_source": "/PXI6259/PFI0",
+            "waveform": {"channel_1": np.arange(7)},
+        },
+        "PXI6259/ao1": {
+            "sample_rate": 2000,
+            "samples": 2,
+            "trigger_source": "/PXI6259/PFI0",
+            "waveform": {"channel_1": np.arange(7) + 10},
+        },
+    }
+    monkeypatch.setattr("navigate.model.devices.daq.ni.nidaqmx.Task", _FakeTask)
+
+    daq.create_analog_output_tasks("channel_1")
+
+    assert daq.n_sample == 7
+    task = daq.analog_output_tasks["PXI6259"]
+    timing_call = task.timing.cfg_samp_clk_timing_calls[0]
+    assert timing_call["rate"] == daq.sample_rate
+    assert timing_call["samps_per_chan"] == 7
+    assert task.write_calls[0].shape == (2, 7)
+
+
+def test_create_analog_output_tasks_expands_based_on_waveform_length(monkeypatch):
+    from navigate.model.devices.daq.ni import NIDAQ
+    from test.model.dummy import DummyModel
+
+    model = DummyModel()
+    daq = NIDAQ(model.configuration)
+    daq.sample_rate = 10
+    daq.sweep_times = {"channel_1": 0.5}
+    daq.waveform_repeat_num = 1
+    daq.waveform_expand_num = 2
+    daq.analog_outputs = {
+        "PXI6259/ao0": {
+            "sample_rate": 5000,
+            "samples": 999,
+            "trigger_source": "/PXI6259/PFI0",
+            "waveform": {"channel_1": np.array([1, 2, 3, 4, 5])},
+        },
+        "PXI6259/ao1": {
+            "sample_rate": 2000,
+            "samples": 999,
+            "trigger_source": "/PXI6259/PFI0",
+            "waveform": {
+                "channel_1": np.array(
+                    [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+                ),
+            },
+        },
+    }
+    monkeypatch.setattr("navigate.model.devices.daq.ni.nidaqmx.Task", _FakeTask)
+
+    daq.create_analog_output_tasks("channel_1")
+
+    expected_waveform = np.array([1, 2, 3, 4, 5, 1, 2, 3, 4, 5])
+    np.testing.assert_array_equal(
+        daq.analog_outputs["PXI6259/ao0"]["waveform"]["channel_1"],
+        expected_waveform,
+    )
+    task = daq.analog_output_tasks["PXI6259"]
+    assert task.write_calls[0].shape == (2, 10)

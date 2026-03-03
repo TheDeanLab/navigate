@@ -224,8 +224,10 @@ class CameraTab(tk.Frame):
         self.slider.grid_remove()
 
         #: HistogramFrame: The frame that will hold the histogram.
-        self.histogram = HistogramFrame(self.cam_image)
-        self.histogram.grid(row=2, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.histogram = HistogramFrame(self)
+        self.histogram.grid(
+            row=2, column=0, columnspan=2, sticky=tk.NSEW, padx=5, pady=5
+        )
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.lut = IntensityFrame(self.display_setting)
@@ -261,20 +263,37 @@ class HistogramFrame(ttk.Labelframe):
         text_label = "Intensity Histogram"
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         #: ttk.Frame: The frame for the histogram.
         self.frame = ttk.Frame(self)
-        self.frame.grid(row=4, column=0, sticky=tk.NSEW, padx=5, pady=5)
-
-        #: tk.Canvas: The canvas for the histogram.
-        self.canvas = tk.Canvas(self.frame, width=512, height=512 // 6)
-        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.frame.grid(row=0, column=0, sticky=tk.NSEW, padx=0, pady=0)
+        self.frame.grid_rowconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(0, weight=1)
 
         #: matplotlib.figure.Figure: The figure for the histogram.
-        self.figure = Figure(figsize=(3, 1))
+        self.figure = Figure(figsize=(1, 1))
 
         #: FigureCanvasTkAgg: The canvas for the histogram.
         self.figure_canvas = FigureCanvasTkAgg(self.figure, self.frame)
         self.figure_canvas.get_tk_widget().grid(row=0, column=0, sticky=tk.NSEW)
+        self._last_resize_pixels = (0, 0)
+        self.frame.bind("<Configure>", self._resize_figure_to_frame)
+
+    def _resize_figure_to_frame(self, event: tk.Event) -> None:
+        """Resize the embedded Matplotlib figure to fill the frame area."""
+        width = int(getattr(event, "width", 0))
+        height = int(getattr(event, "height", 0))
+        if width <= 1 or height <= 1:
+            return
+        if self._last_resize_pixels == (width, height):
+            return
+
+        self._last_resize_pixels = (width, height)
+        dpi = float(self.figure.get_dpi()) or 100.0
+        self.figure.set_size_inches(width / dpi, height / dpi, forward=False)
+        self.figure_canvas.draw_idle()
 
 
 class RenderFrame(ttk.Labelframe):

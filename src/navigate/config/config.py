@@ -383,7 +383,6 @@ def verify_experiment_config(manager, configuration):
         "readout_direction": "Top-to-Bottom",
         "number_of_pixels": 10,
         "binning": "1x1",
-        "frames_to_average": 1,
         "databuffer_size": 100,
         "is_centered": True,
         "center_x": 1024,
@@ -460,7 +459,7 @@ def verify_experiment_config(manager, configuration):
             camera_setting_dict["readout_direction"] = "Top-to-Bottom"
 
         # databuffer_size, number_of_pixels
-        for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:
+        for k in ["databuffer_size", "number_of_pixels"]:
             try:
                 camera_setting_dict[k] = int(camera_setting_dict[k])
             except ValueError:

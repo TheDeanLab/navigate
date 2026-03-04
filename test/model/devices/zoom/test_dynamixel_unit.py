@@ -98,6 +98,43 @@ def test_move_wait_until_done_reads_until_in_range(monkeypatch):
     assert api.read4ByteTxRx.call_count == 2
 
 
+def test_move_wait_until_done_with_boundary_value_skips_polling(monkeypatch):
+    api = _build_api_mock()
+    api.read4ByteTxRx = Mock(return_value=110)
+    monkeypatch.setattr(dynamixel_module, "dynamixel", api)
+    sleep_mock = Mock()
+    monkeypatch.setattr(dynamixel_module.time, "sleep", sleep_mock)
+    monkeypatch.setattr(dynamixel_module.time, "time", Mock(return_value=0))
+
+    zoom = dynamixel_module.DynamixelZoom("scope", 90, _build_configuration())
+    zoom.goal_position_offset = 10
+
+    zoom.move(position=100, wait_until_done=True)
+
+    api.read4ByteTxRx.assert_called_once()
+    sleep_mock.assert_not_called()
+
+
+def test_move_wait_until_done_above_upper_limit_polls_until_in_range(monkeypatch):
+    api = _build_api_mock()
+    api.read4ByteTxRx = Mock(side_effect=[130, 110])
+    monkeypatch.setattr(dynamixel_module, "dynamixel", api)
+    sleep_mock = Mock()
+    monkeypatch.setattr(dynamixel_module.time, "sleep", sleep_mock)
+    monkeypatch.setattr(
+        dynamixel_module.time, "time", Mock(side_effect=[0, 0.1, 0.2, 0.3])
+    )
+
+    zoom = dynamixel_module.DynamixelZoom("scope", 91, _build_configuration())
+    zoom.timeout = 10
+    zoom.goal_position_offset = 10
+
+    zoom.move(position=100, wait_until_done=True)
+
+    assert api.read4ByteTxRx.call_count == 2
+    sleep_mock.assert_called_once_with(0.05)
+
+
 def test_move_wait_until_done_times_out(monkeypatch):
     api = _build_api_mock()
     api.read4ByteTxRx = Mock(return_value=0)
@@ -129,3 +166,13 @@ def test_del_swallows_close_errors(monkeypatch):
 
     # Should not raise.
     zoom.__del__()
+
+
+def test_del_closes_port_when_close_succeeds(monkeypatch):
+    api = _build_api_mock()
+    monkeypatch.setattr(dynamixel_module, "dynamixel", api)
+    zoom = dynamixel_module.DynamixelZoom("scope", 654, _build_configuration())
+
+    zoom.__del__()
+
+    api.closePort.assert_called_once_with(654)

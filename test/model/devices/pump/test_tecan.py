@@ -30,10 +30,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-import pytest
 from unittest.mock import patch
 
-# Third Party Imports
+import pytest
 
 # Local Imports
 from navigate.model.devices.pump.tecan import XCaliburPump
@@ -41,13 +40,14 @@ from navigate.model.utils.exceptions import UserVisibleException
 
 
 class FakeSerial:
-    def __init__(self, port, baudrate, timeout):
-        self.commands = []  # Record of all sent commands (as bytes).
-        self.is_open = True  # Pretend the serial port is open.
-        self.last_command = None  # Stores the last command sent (as string, no \r).
-        self.command_responses = (
-            {}
-        )  # Maps command strings (e.g., "S5") to fake byte responses.
+    def __init__(self, port="FAKE", baudrate=9600, timeout=0.5):
+        self.commands = []
+        self.is_open = True
+        self.last_command = None
+        self.last_read_n = None
+        self.command_responses = {}
+        self.write_exception = None
+        self.read_exception = None
 
         self.port = port
         self.baudrate = baudrate
@@ -60,81 +60,277 @@ class FakeSerial:
         self.is_open = False
 
     def write(self, data: bytes):
-        """
-        Simulate sending a command to the pump.
-
-        - Updates last_command with the stripped string version (used for read lookup).
-        - Appends the raw byte-formatted command to the commands list to keep track of which order the commands are sent.
-        """
+        if self.write_exception:
+            raise self.write_exception
 
         self.last_command = data.decode("ascii").strip()
         self.commands.append(data)
 
     def read(self, n: int) -> bytes:
-        """
-        Simulate receiving a response from the pump.
+        if self.read_exception:
+            raise self.read_exception
 
-        If a response has been predefined for the last command (e.g., to simulate an error or custom reply),
-        that specific response is returned.
+        self.last_read_n = n
 
-        Otherwise, a default success response (b"/00") is returned to simulate normal operation.
-        """
         if self.last_command in self.command_responses:
             return self.command_responses[self.last_command]
-        return b"/00"  # If no command has been sent yet, return the "success" response as fallback.
+
+        return b"/00"
 
 
 @pytest.fixture
 def fake_pump():
-    """
-    Fixture that returns an XCaliburPump with a mocked serial connection.
-    """
-
-    # Pick some speeds within the known bounds 0-40.
     min_speed_code = 2
     max_speed_code = 19
-    port = "FAKE"
-    baudrate = 9600
-    timeout = 0.5
 
-    fake_serial = FakeSerial(port=port, baudrate=baudrate, timeout=timeout)
+    fake_serial = FakeSerial()
 
-    config = {
-        "min_speed_code": min_speed_code,
-        "max_speed_code": max_speed_code,
-        "fine_positioning": False,
-    }
-
-    pump = XCaliburPump(
+    return XCaliburPump(
         microscope_name="TestPump",
         device_connection=fake_serial,
-        configuration=config,
+        configuration={
+            "min_speed_code": min_speed_code,
+            "max_speed_code": max_speed_code,
+            "fine_positioning": False,
+        },
     )
 
-    return pump
+
+@patch("navigate.model.devices.pump.tecan.Serial")
+def test_connect_uses_serial_at_module_import_boundary(mock_serial_class):
+    fake_serial = FakeSerial()
+    mock_serial_class.return_value = fake_serial
+
+    serial_connection = XCaliburPump.connect(port="FAKE", baudrate=9600, timeout=0.5)
+
+    assert serial_connection is fake_serial
+    mock_serial_class.assert_called_once_with(port="FAKE", baudrate=9600, timeout=0.5)
 
 
-def test_set_speed_command_rejected(fake_pump):
-    """
-    Simulate a firmware-level rejection of a valid speed code.
+def test_initialize_pump_success(fake_pump):
+    fake_pump.serial.command_responses["ZR"] = b"/00"
 
-    This test configures the FakeSerial to return error code '/03' (Invalid Operand)
-    in response to a speed code that is within the allowed local range. This models a case
-    where the driver sends a syntactically valid command (e.g., 'S4'), but the pump
-    firmware rejects the operand value due to internal state or configuration.
+    fake_pump.initialize_pump()
 
-    The test verifies that the driver:
-    - Sends the command correctly.
-    - Parses the response.
-    - Raises a RuntimeError with an appropriate error message.
-    """
-    valid_speed = fake_pump.max_speed_code - 1  # Within bounds.
+    assert fake_pump.serial.commands[-1] == b"ZR\r"
 
-    fake_pump.serial.command_responses["S" + str(valid_speed)] = (
-        b"/03"  # Simulate command-response.
+
+def test_initialize_pump_error(fake_pump):
+    fake_pump.serial.command_responses["ZR"] = b"/01"
+
+    with pytest.raises(UserVisibleException, match="Pump error /1: Initialization error"):
+        fake_pump.initialize_pump()
+
+    assert fake_pump.serial.commands[-1] == b"ZR\r"
+
+
+def test_send_command_success_returns_encoded_bytes(fake_pump):
+    sent = fake_pump.send_command("ZR")
+
+    assert sent == b"ZR\r"
+    assert fake_pump.serial.commands[-1] == b"ZR\r"
+
+
+def test_send_command_raises_if_serial_is_none():
+    pump = XCaliburPump(
+        microscope_name="TestPump",
+        device_connection=FakeSerial(),
+        configuration={},
     )
+    pump.serial = None
 
-    # Make sure the pre-defined response raises the correct error.
+    with pytest.raises(UserVisibleException, match="Serial object is None"):
+        pump.send_command("ZR")
+
+
+def test_send_command_raises_if_serial_port_not_open(fake_pump):
+    fake_pump.serial.is_open = False
+
+    with pytest.raises(UserVisibleException, match="Serial port not open"):
+        fake_pump.send_command("ZR")
+
+
+def test_send_command_wraps_write_exception(fake_pump):
+    fake_pump.serial.write_exception = RuntimeError("write failed")
+
+    with pytest.raises(
+        UserVisibleException,
+        match=r"Error sending command 'ZR': write failed",
+    ):
+        fake_pump.send_command("ZR")
+
+
+def test_read_response_success_decodes_and_tracks_expected_byte_count(fake_pump):
+    fake_pump.serial.command_responses["ZR"] = b"/00  "
+    fake_pump.send_command("ZR")
+
+    response = fake_pump.read_response(expected_bytes=7)
+
+    assert response == "/00"
+    assert fake_pump.serial.last_read_n == 7
+
+
+def test_read_response_raises_if_serial_is_none():
+    pump = XCaliburPump(
+        microscope_name="TestPump",
+        device_connection=FakeSerial(),
+        configuration={},
+    )
+    pump.serial = None
+
+    with pytest.raises(UserVisibleException, match="Serial object is None"):
+        pump.read_response()
+
+
+def test_read_response_raises_if_serial_port_not_open(fake_pump):
+    fake_pump.serial.is_open = False
+
+    with pytest.raises(UserVisibleException, match="Serial port not open"):
+        fake_pump.read_response()
+
+
+def test_read_response_wraps_empty_response(fake_pump):
+    fake_pump.serial.command_responses["ZR"] = b""
+    fake_pump.send_command("ZR")
+
+    with pytest.raises(
+        UserVisibleException,
+        match="Error during read: .*No response received",
+    ):
+        fake_pump.read_response()
+
+
+def test_read_response_wraps_decode_error(fake_pump):
+    fake_pump.serial.command_responses["ZR"] = b"\xff"
+    fake_pump.send_command("ZR")
+
+    with pytest.raises(UserVisibleException, match="Error during read"):
+        fake_pump.read_response()
+
+
+def test_read_response_wraps_serial_read_exception(fake_pump):
+    fake_pump.serial.read_exception = TimeoutError("timed out")
+
+    with pytest.raises(UserVisibleException, match="Error during read: timed out"):
+        fake_pump.read_response()
+
+
+def test_parse_response_success_returns_zero(fake_pump):
+    assert fake_pump.parse_response("/00") == "0"
+
+
+def test_parse_response_raises_for_missing_start_character(fake_pump):
+    with pytest.raises(UserVisibleException, match="Malformed response"):
+        fake_pump.parse_response("00")
+
+
+def test_parse_response_raises_for_incomplete_response(fake_pump):
+    with pytest.raises(UserVisibleException, match="Incomplete response"):
+        fake_pump.parse_response("/0")
+
+
+def test_parse_response_raises_for_known_error_code(fake_pump):
+    with pytest.raises(
+        UserVisibleException,
+        match="Pump error /3: Invalid operand - bad parameter value",
+    ):
+        fake_pump.parse_response("/03")
+
+
+def test_parse_response_raises_for_unknown_error_code(fake_pump):
+    with pytest.raises(UserVisibleException, match="Pump error /X: Unknown error code: X"):
+        fake_pump.parse_response("/0X")
+
+
+def test_disconnect_closes_open_serial_connection(fake_pump):
+    assert fake_pump.serial.is_open is True
+
+    fake_pump.disconnect()
+
+    assert fake_pump.serial.is_open is False
+
+
+def test_disconnect_noop_if_serial_already_closed(fake_pump):
+    fake_pump.serial.is_open = False
+
+    fake_pump.disconnect()
+
+    assert fake_pump.serial.is_open is False
+
+
+def test_disconnect_noop_if_serial_is_none(fake_pump):
+    fake_pump.serial = None
+
+    fake_pump.disconnect()
+
+
+def test_get_status_sends_query_and_returns_raw_response(fake_pump):
+    fake_pump.serial.command_responses["?"] = b"/0A "
+
+    response = fake_pump.get_status()
+
+    assert response == "/0A"
+    assert fake_pump.serial.commands[-1] == b"?\r"
+
+
+def test_move_absolute_accepts_mode_specific_max_values(fake_pump):
+    fake_pump.fine_positioning = False
+    fake_pump.serial.command_responses["A3000"] = b"/00"
+    fake_pump.move_absolute(3000)
+    assert fake_pump.serial.commands[-1] == b"A3000\r"
+
+    fake_pump.fine_positioning = True
+    fake_pump.serial.command_responses["A24000"] = b"/00"
+    fake_pump.move_absolute(24000)
+    assert fake_pump.serial.commands[-1] == b"A24000\r"
+
+
+@pytest.mark.parametrize(
+    "fine_positioning,position",
+    [
+        (False, -1),
+        (False, 3001),
+        (True, 24001),
+    ],
+)
+def test_move_absolute_out_of_bounds_raises(fake_pump, fine_positioning, position):
+    fake_pump.fine_positioning = fine_positioning
+
+    with pytest.raises(UserVisibleException, match="out of bounds"):
+        fake_pump.move_absolute(position)
+
+
+@pytest.mark.parametrize("steps", [50, -7, 0])
+def test_move_relative_sends_command(fake_pump, steps):
+    fake_pump.move_relative(steps)
+
+    assert fake_pump.serial.commands[-1] == f"M{steps}\r".encode()
+
+
+def test_move_relative_rejected_by_pump_raises(fake_pump):
+    fake_pump.serial.command_responses["M-1"] = b"/09"
+
+    with pytest.raises(UserVisibleException, match="Pump error /9: Plunger overload"):
+        fake_pump.move_relative(-1)
+
+
+@pytest.mark.parametrize("speed", [2, 19])
+def test_set_speed_accepts_configured_min_and_max(fake_pump, speed):
+    fake_pump.set_speed(speed)
+
+    assert fake_pump.serial.commands[-1] == f"S{speed}\r".encode()
+
+
+@pytest.mark.parametrize("speed", [1, 20])
+def test_set_speed_rejects_out_of_bounds_codes(fake_pump, speed):
+    with pytest.raises(UserVisibleException, match=r"Speed code .* out of bounds \(2-19\)"):
+        fake_pump.set_speed(speed)
+
+
+def test_set_speed_command_rejected_by_pump(fake_pump):
+    valid_speed = fake_pump.max_speed_code - 1
+    fake_pump.serial.command_responses[f"S{valid_speed}"] = b"/03"
+
     with pytest.raises(
         UserVisibleException,
         match="Pump error /3: Invalid operand - bad parameter value",
@@ -142,180 +338,83 @@ def test_set_speed_command_rejected(fake_pump):
         fake_pump.set_speed(valid_speed)
 
 
-@patch("navigate.model.devices.pump.tecan.Serial")
-def test_connect_and_initialize_success(
-    mock_serial_class,
-):  # Argument passed automatically from patch (mocked version of Serial).
-    """
-    Simulate a successful connection using FakeSerial via patching.
-    """
-    # Create a custom FakeSerial instance to return instead of MagicMock.
-    fake_serial = FakeSerial(port="FAKE", baudrate=9600, timeout=0.5)
-    fake_serial.command_responses["ZR"] = b"/00"  # Simulate valid response.
+@pytest.mark.parametrize(
+    "method_name,command",
+    [
+        ("valve_input", "I"),
+        ("valve_output", "O"),
+        ("valve_bypass", "B"),
+        ("valve_extra", "E"),
+    ],
+)
+def test_valve_commands_send_expected_command(fake_pump, method_name, command):
+    getattr(fake_pump, method_name)()
 
-    # Tell the mock object what to return instead of Serial.
-    mock_serial_class.return_value = fake_serial
-
-    # Simulate the connect call that is done when all device connections are set up.
-    # Will be the same as fake_serial if successful.
-    serial_connection = XCaliburPump.connect(port="FAKE", baudrate=9600, timeout=0.5)
-
-    mock_serial_class.assert_called_once_with(port="FAKE", baudrate=9600, timeout=0.5)
-
-    # Create the pump and call connect - now it will receive the FakeSerial.
-    pump = XCaliburPump(
-        microscope_name="TestPump",
-        device_connection=serial_connection,
-        configuration={},
-    )
-
-    pump.initialize_pump()
-
-    # Assertions
-    assert pump.serial == fake_serial
-    assert fake_serial.commands[-1] == b"ZR\r"
-    assert fake_serial.is_open
+    assert fake_pump.serial.commands[-1] == f"{command}\r".encode()
 
 
-@patch("serial.Serial")
-def test_initialization_error(
-    mock_serial_class,
-):  # Argument passed automatically from patch (mocked version of Serial).
-    """
-    Simulate a pump that fails to initialize (command 'ZR', response '/01').
+@pytest.mark.parametrize(
+    "method_name,command",
+    [
+        ("valve_input", "I"),
+        ("valve_output", "O"),
+        ("valve_bypass", "B"),
+        ("valve_extra", "E"),
+    ],
+)
+def test_valve_commands_propagate_pump_errors(fake_pump, method_name, command):
+    fake_pump.serial.command_responses[command] = b"/01"
 
-    Verifies that:
-    - The 'ZR' command is sent.
-    - The driver raises RuntimeError when pump reports an init failure.
-    """
-    # Create a custom FakeSerial instance to return instead of MagicMock.
-    fake_serial = FakeSerial(port="FAKE", baudrate=9600, timeout=0.5)
-    fake_serial.command_responses["ZR"] = b"/01"  # Simulate "fail" response.
-
-    # Make sure Serial() returns this custom fake.
-    mock_serial_class.return_value = fake_serial
-
-    # Create the pump.
-    pump = XCaliburPump(
-        microscope_name="TestPump",
-        device_connection=fake_serial,
-        configuration={},
-    )
-
-    # Expect a RuntimeError due to /01 response.
-    with pytest.raises(
-        UserVisibleException, match="Pump error /1: Initialization error"
-    ):
-        pump.initialize_pump()
-
-    # Check that the correct command was sent.
-    assert pump.serial.commands[-1] == b"ZR\r"
+    with pytest.raises(UserVisibleException, match="Pump error /1: Initialization error"):
+        getattr(fake_pump, method_name)()
 
 
-# NOTE: We do not wrap or handle exceptions in XCaliburPump.connect().
-# Errors like Serial(port=...) failures are allowed to propagate.
-# Therefore, no test is needed for connect() error handling.
-
-
-def test_send_command_raises_if_serial_is_none():
-    """
-    Verifies that send_command() raises if self.serial is None.
-    """
-    fake_serial = FakeSerial(port="FAKE", baudrate=9600, timeout=0.5)
-
-    pump = XCaliburPump(
-        microscope_name="TestPump",
-        device_connection=fake_serial,
-        configuration={},
-    )
-    pump.serial = None  # Simulate uninitialized or failed connection
-
-    with pytest.raises(UserVisibleException, match="Serial object is None"):
-        pump.send_command("ZR")
-
-
-def test_move_absolute_success_standard_and_fine_modes(fake_pump):
-    """
-    Test that move_absolute() sends the correct command and succeeds in both
-    standard and fine positioning modes, assuming valid position input.
-
-    Verifies that:
-    - The correct 'A{pos}' command is sent.
-    - The pump responds with success.
-    - No exception is raised.
-    """
-    # --- Standard mode ---
-    fake_pump.fine_positioning = False
-    position_std = 3000  # Max allowed position in standard (non-fine) mode.
-
-    # Predefine the pump's response to this specific absolute move command.
-    fake_pump.serial.command_responses[f"A{position_std}"] = b"/00"
-
-    # Send the move_absolute command (which internally sends 'A{position}' + parses response).
-    fake_pump.move_absolute(position_std)
-
-    # Verify that the correct byte-encoded command was sent to the serial interface.
-    assert fake_pump.serial.commands[-1] == f"A{position_std}\r".encode()
-
-    # --- Fine positioning mode ---
-    fake_pump.fine_positioning = True
-    position_fine = 24000  # Max allowed position in fine mode.
-    fake_pump.serial.command_responses[f"A{position_fine}"] = b"/00"
-
-    fake_pump.move_absolute(position_fine)
-    assert fake_pump.serial.commands[-1] == f"A{position_fine}\r".encode()
-
-
-def test_move_absolute_out_of_bounds_raises(fake_pump):
-    """
-    Verify that move_absolute() raises UserVisibleException when given a position
-    outside the valid range for the current positioning mode.
-    """
-    # Standard mode: max is 3000.
-    fake_pump.fine_positioning = False
-    with pytest.raises(UserVisibleException, match="out of bounds"):
-        fake_pump.move_absolute(3000 + 1)
-
-    # Fine mode: max is 24000.
-    fake_pump.fine_positioning = True
-    with pytest.raises(UserVisibleException, match="out of bounds"):
-        fake_pump.move_absolute(24000 + 1)
-
-
-def test_set_fine_positioning_mode_toggle(fake_pump):
-    """
-    Verify that set_fine_positioning_mode() sends the correct 'N' and 'R' commands,
-    handles responses properly, and updates the fine_positioning attribute.
-    """
-
-    # Mock responses for enabling fine positioning.
-    # "N1" loads the fine mode into the buffer; "R" applies the change.
-    # Both return "/00" to simulate success.
+def test_set_fine_positioning_mode_toggle_success(fake_pump):
     fake_pump.serial.command_responses["N1"] = b"/00"
-    fake_pump.serial.command_responses["R"] = b"/00"
-
-    # Enable fine positioning mode.
-    fake_pump.set_fine_positioning_mode(True)
-
-    # Check that the internal state was updated.
-    assert fake_pump.fine_positioning is True
-
-    # Confirm that the correct commands were sent in the correct order
-    # inside set_fine_positioning_mode().
-    assert fake_pump.serial.commands[-2] == b"N1\r"
-    assert fake_pump.serial.commands[-1] == b"R\r"
-
-    # Now test disabling fine positioning mode.
-    # "N0" loads standard mode; "R" applies it. Again, simulate success.
     fake_pump.serial.command_responses["N0"] = b"/00"
     fake_pump.serial.command_responses["R"] = b"/00"
 
+    fake_pump.set_fine_positioning_mode(True)
+    assert fake_pump.fine_positioning is True
+    assert fake_pump.serial.commands[-2:] == [b"N1\r", b"R\r"]
+
     fake_pump.set_fine_positioning_mode(False)
+    assert fake_pump.fine_positioning is False
+    assert fake_pump.serial.commands[-2:] == [b"N0\r", b"R\r"]
+
+
+def test_set_fine_positioning_mode_failure_on_load_preserves_state_and_skips_apply(fake_pump):
+    fake_pump.fine_positioning = False
+    fake_pump.serial.command_responses["N1"] = b"/03"
+
+    with pytest.raises(
+        UserVisibleException,
+        match="Pump error /3: Invalid operand - bad parameter value",
+    ):
+        fake_pump.set_fine_positioning_mode(True)
 
     assert fake_pump.fine_positioning is False
-    assert fake_pump.serial.commands[-2] == b"N0\r"
-    assert fake_pump.serial.commands[-1] == b"R\r"
+    assert fake_pump.serial.commands == [b"N1\r"]
 
 
-# TODO: Once pump is integrated into Model/Controller, test that
-# UserVisibleException raised by pump results in a warning event.
+def test_set_fine_positioning_mode_failure_on_apply_preserves_previous_state(fake_pump):
+    fake_pump.fine_positioning = True
+    fake_pump.serial.command_responses["N0"] = b"/00"
+    fake_pump.serial.command_responses["R"] = b"/04"
+
+    with pytest.raises(
+        UserVisibleException,
+        match="Pump error /4: Invalid command sequence - check protocol structure",
+    ):
+        fake_pump.set_fine_positioning_mode(False)
+
+    assert fake_pump.fine_positioning is True
+    assert fake_pump.serial.commands == [b"N0\r", b"R\r"]
+
+
+def test_get_max_position_reflects_mode(fake_pump):
+    fake_pump.fine_positioning = False
+    assert fake_pump.get_max_position() == 3000
+
+    fake_pump.fine_positioning = True
+    assert fake_pump.get_max_position() == 24000

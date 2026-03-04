@@ -87,8 +87,11 @@ def test_move_wait_until_done_reads_until_in_range(monkeypatch):
     api = _build_api_mock()
     api.read4ByteTxRx = Mock(side_effect=[0, 95])
     monkeypatch.setattr(dynamixel_module, "dynamixel", api)
-    monkeypatch.setattr(dynamixel_module.time, "sleep", Mock())
-    monkeypatch.setattr(dynamixel_module.time, "time", Mock(side_effect=[0, 0.1, 0.2]))
+    fake_clock = SimpleNamespace(
+        sleep=Mock(),
+        time=Mock(side_effect=[0, 0.1, 0.2]),
+    )
+    monkeypatch.setattr(dynamixel_module, "time", fake_clock)
 
     zoom = dynamixel_module.DynamixelZoom("scope", 88, _build_configuration())
     zoom.timeout = 10
@@ -103,8 +106,11 @@ def test_move_wait_until_done_with_boundary_value_skips_polling(monkeypatch):
     api.read4ByteTxRx = Mock(return_value=110)
     monkeypatch.setattr(dynamixel_module, "dynamixel", api)
     sleep_mock = Mock()
-    monkeypatch.setattr(dynamixel_module.time, "sleep", sleep_mock)
-    monkeypatch.setattr(dynamixel_module.time, "time", Mock(return_value=0))
+    fake_clock = SimpleNamespace(
+        sleep=sleep_mock,
+        time=Mock(return_value=0),
+    )
+    monkeypatch.setattr(dynamixel_module, "time", fake_clock)
 
     zoom = dynamixel_module.DynamixelZoom("scope", 90, _build_configuration())
     zoom.goal_position_offset = 10
@@ -120,10 +126,11 @@ def test_move_wait_until_done_above_upper_limit_polls_until_in_range(monkeypatch
     api.read4ByteTxRx = Mock(side_effect=[130, 110])
     monkeypatch.setattr(dynamixel_module, "dynamixel", api)
     sleep_mock = Mock()
-    monkeypatch.setattr(dynamixel_module.time, "sleep", sleep_mock)
-    monkeypatch.setattr(
-        dynamixel_module.time, "time", Mock(side_effect=[0, 0.1, 0.2, 0.3])
+    fake_clock = SimpleNamespace(
+        sleep=sleep_mock,
+        time=Mock(side_effect=[0, 0.1, 0.2, 0.3]),
     )
+    monkeypatch.setattr(dynamixel_module, "time", fake_clock)
 
     zoom = dynamixel_module.DynamixelZoom("scope", 91, _build_configuration())
     zoom.timeout = 10
@@ -139,8 +146,11 @@ def test_move_wait_until_done_times_out(monkeypatch):
     api = _build_api_mock()
     api.read4ByteTxRx = Mock(return_value=0)
     monkeypatch.setattr(dynamixel_module, "dynamixel", api)
-    monkeypatch.setattr(dynamixel_module.time, "sleep", Mock())
-    monkeypatch.setattr(dynamixel_module.time, "time", Mock(side_effect=[0, 20]))
+    fake_clock = SimpleNamespace(
+        sleep=Mock(),
+        time=Mock(side_effect=[0, 20]),
+    )
+    monkeypatch.setattr(dynamixel_module, "time", fake_clock)
 
     zoom = dynamixel_module.DynamixelZoom("scope", 99, _build_configuration())
     zoom.timeout = 1

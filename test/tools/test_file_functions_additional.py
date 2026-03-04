@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from navigate.tools import file_functions
@@ -92,6 +93,6 @@ def test_delete_folder_ignores_permission_and_os_errors(monkeypatch):
     # Should swallow exceptions and finish cleanly.
     file_functions.delete_folder(root)
 
-    assert ("remove", f"{root}/locked_file") in calls
-    assert ("rmdir", f"{root}/locked_dir") in calls
+    assert ("remove", os.path.join(root, "locked_file")) in calls
+    assert ("rmdir", os.path.join(root, "locked_dir")) in calls
     assert ("rmdir", root) in calls

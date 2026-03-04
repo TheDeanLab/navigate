@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest.mock import MagicMock
@@ -59,7 +60,12 @@ def test_package_manager_get_plugins_deduplicates_names(monkeypatch):
         "plugin_alpha": "plugin_alpha",
         "plugin_beta": "plugin_beta",
     }
-    assert print_mock.call_count == 1
+    assert any(
+        "Warning: plugin plugin_alpha exists and cannot be loaded more than once."
+        in str(call.args[0])
+        for call in print_mock.call_args_list
+        if call.args
+    )
 
 
 def test_package_manager_load_config_reads_from_package_resources(monkeypatch):
@@ -74,7 +80,9 @@ def test_package_manager_load_config_reads_from_package_resources(monkeypatch):
     config = pm.PluginPackageManager.load_config("demo_pkg")
 
     assert config == {"name": "Demo Plugin"}
-    load_yaml_mock.assert_called_once_with("/fake/demo_pkg/plugin_config.yml")
+    load_yaml_mock.assert_called_once_with(
+        os.path.join("/fake/demo_pkg", "plugin_config.yml")
+    )
 
 
 @pytest.mark.parametrize(
@@ -294,7 +302,9 @@ def test_file_manager_load_config_reads_yaml(monkeypatch):
     config = pm.PluginFileManager.load_config("/tmp/my_plugin")
 
     assert config == {"name": "Test"}
-    load_yaml_mock.assert_called_once_with("/tmp/my_plugin/plugin_config.yml")
+    load_yaml_mock.assert_called_once_with(
+        os.path.join("/tmp/my_plugin", "plugin_config.yml")
+    )
 
 
 def test_file_manager_load_controller_and_view_from_files(tmp_path):

@@ -1,3 +1,4 @@
+import os
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 
@@ -290,7 +291,7 @@ def test_install_plugin_saves_new_plugin(menu_controller, monkeypatch):
     controller.install_plugin()
 
     save.assert_called_once_with(
-        "/tmp/navigate-home/config",
+        os.path.join("/tmp/navigate-home", "config"),
         {"DemoPlugin": "/plugins/demo"},
         "plugins_config.yml",
     )

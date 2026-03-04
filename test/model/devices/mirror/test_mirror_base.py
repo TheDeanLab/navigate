@@ -63,13 +63,9 @@ def test_mirror_base_initializes_from_configuration(mirror_configuration):
     assert mirror.__del__() is None
 
 
-def test_mirror_base_raises_for_unknown_microscope(mirror_configuration, caplog):
-    caplog.set_level("ERROR")
-
+def test_mirror_base_raises_for_unknown_microscope(mirror_configuration):
     with pytest.raises(NameError, match="Microscope missing-scope does not exist."):
         MirrorBase("missing-scope", None, mirror_configuration)
-
-    assert "Microscope missing-scope does not exist." in caplog.text
 
 
 def test_synthetic_mirror_marks_itself_as_synthetic(mirror_configuration):

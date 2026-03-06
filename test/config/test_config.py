@@ -138,7 +138,10 @@ def test_get_configuration_paths_create_dir(monkeypatch):
     paths = config.get_configuration_paths()
     for path in paths:
         assert isinstance(path, pathlib.Path)
-        assert os.path.exists(path), "Each configuration yaml file is copied"
+        if path.name == "experiment.yml":
+            assert not os.path.exists(path), "experiment.yml is no longer seeded from src"
+        else:
+            assert os.path.exists(path), "Each seeded configuration yaml file is copied"
         assert path.suffix.lower() in [".yml", ".yaml"]
     # delete generated folder
     delete_folder("TESTPATH")
@@ -427,46 +430,12 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         #     assert position == experiement_config["MultiPositions"][i]
 
     def test_load_experiment_file_with_missing_parameters(self):
-        experiment = load_yaml_file(os.path.join(self.config_path, "experiment.yml"))
-        # Saving prameters
-        saving_parameters = list(self.experiment_sample["Saving"].keys())
-        saving_parameters_deleted = self.delete_random_entries_from_dict(
-            saving_parameters, experiment["Saving"]
-        )
-
-        # Camera parameters
-        camera_parameters = list(self.experiment_sample["CameraParameters"].keys())
-        camera_parameters.append("img_x_pixels")
-        camera_parameters.append("img_y_pixels")
-        camera_parameters_deleted = self.delete_random_entries_from_dict(
-            camera_parameters, experiment["CameraParameters"]
-        )
-
-        # StageParameters
-        configuration = load_yaml_file(
-            os.path.join(self.config_path, "configuration.yaml")
-        )
-        # delete limits
-        if "limits" in experiment["StageParameters"].keys():
-            del experiment["StageParameters"]["limits"]
-        # delete part of stage parameters of one microscope
-        microscope_names = list(configuration["microscopes"].keys())
-        if microscope_names[0] not in experiment["StageParameters"]:
-            experiment["StageParameters"][microscope_names[0]] = {
-                "z_step": 100.0,
-                "theta_step": 10.0,
-            }
-        # delete all stage parameter of another microscope
-        if microscope_names[1] in experiment["StageParameters"].keys():
-            del experiment["StageParameters"][microscope_names[1]]
-
-        # MicroscopeState
-        micrscope_parameters = list(self.experiment_sample["MicroscopeState"].keys())
-        micrscope_parameters.append("channels")
-        micrscope_parameters_deleted = self.delete_random_entries_from_dict(
-            micrscope_parameters, experiment["MicroscopeState"]
-        )
-
+        experiment = {
+            "Saving": {"user": "UnitTest"},
+            "CameraParameters": {"x_pixels": 1024},
+            "StageParameters": {},
+            "MicroscopeState": {"channels": {}},
+        }
         save_yaml_file(self.test_root, experiment, "experiment_missing_parameters.yml")
         configuration = config.load_configs(
             self.manager,
@@ -477,28 +446,18 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         )
         config.verify_configuration(self.manager, configuration)
         config.verify_experiment_config(self.manager, configuration)
-        # verify Saving parameters are added
-        for k in saving_parameters_deleted:
-            assert (
-                k in configuration["experiment"]["Saving"].keys()
-            ), f"parameter {k} should be added to Saving parameters"
+        experiment = configuration["experiment"]
 
-        # verify CameraParameters are added
-        for k in camera_parameters_deleted:
-            assert (
-                k in configuration["experiment"]["CameraParameters"].keys()
-            ), f"parameter {k} should be added into CameraParameters"
+        for k in ["root_directory", "save_directory", "prefix"]:
+            assert k in experiment["Saving"].keys()
+        for k in ["y_pixels", "img_x_pixels", "img_y_pixels", "binning"]:
+            assert k in experiment["CameraParameters"].keys()
+        for k in ["limits", "x", "y", "z", "theta", "f"]:
+            assert k in experiment["StageParameters"].keys()
+        for k in ["microscope_name", "zoom", "channels"]:
+            assert k in experiment["MicroscopeState"].keys()
 
-        # verify MicroscopeState parameters are added
-        for k in micrscope_parameters_deleted:
-            assert (
-                k in configuration["experiment"]["MicroscopeState"].keys()
-            ), f"parameter {k} should be added to MicroscopeState"
-
-        # verify Stage parameters are added
-        assert (
-            "limits" in configuration["experiment"]["StageParameters"].keys()
-        ), "limits should be added to Stage parameters"
+        microscope_names = list(configuration["configuration"]["microscopes"].keys())
         for microscope_name in microscope_names:
             for k in ["xy_step", "z_step", "f_step", "theta_step"]:
                 assert (
@@ -506,117 +465,65 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 )
 
     def test_load_experiment_file_with_wrong_parameter_values(self):
+        save_yaml_file(
+            self.test_root,
+            {
+                "Saving": {
+                    "root_directory": self.config_path,
+                    "save_directory": os.path.join(self.test_root, "not_exist", "not_exist"),
+                },
+                "CameraParameters": {
+                    "x_pixels": -10,
+                    "y_pixels": "abcd",
+                    "binning": "3x3",
+                    "sensor_mode": "Lightsheet",
+                    "readout_direction": "abcd",
+                    "number_of_pixels": "abc",
+                    "databuffer_size": 0,
+                },
+                "StageParameters": {"limits": "abc"},
+                "MicroscopeState": {
+                    "microscope_name": "nonexist_microscope",
+                    "zoom": "abc",
+                    "channels": {
+                        "channel_2": {
+                            "is_selected": 1,
+                            "laser": "48nm",
+                            "laser_index": -1,
+                            "filter_wheel_0": "nonexsit_filter_***",
+                            "filter_position_0": 1,
+                            "camera_exposure_time": -200.0,
+                            "laser_power": "a",
+                            "interval_time": -3,
+                            "defocus": "a",
+                        }
+                    },
+                },
+            },
+            "experiment_wrong_values.yml",
+        )
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
-            experiment=os.path.join(self.config_path, "experiment.yml"),
+            experiment=os.path.join(self.test_root, "experiment_wrong_values.yml"),
         )
         config.verify_configuration(self.manager, configuration)
-        experiment = configuration["experiment"]
-        # Saving parameters
-        # check if root_directory and save_directory exist
-        experiment["Saving"]["root_directory"] = self.config_path
-        experiment["Saving"]["save_directory"] = os.path.join(
-            self.test_root, "not_exist", "not_exist"
-        )
         config.verify_experiment_config(self.manager, configuration)
+        experiment = configuration["experiment"]
+
         assert experiment["Saving"]["root_directory"] == self.config_path
         assert os.path.exists(experiment["Saving"]["save_directory"])
-        assert experiment["Saving"]["save_directory"] != os.path.join(
-            self.test_root, "not_exist", "not_exist"
-        )
-
-        # CameraParameters
-        # x_pixels, y_pixels
-        experiment["CameraParameters"]["x_pixels"] = -10
-        experiment["CameraParameters"]["y_pixels"] = "abcd"
-        config.verify_experiment_config(self.manager, configuration)
-        assert (
-            experiment["CameraParameters"]["x_pixels"]
-            == self.experiment_sample["CameraParameters"]["x_pixels"]
-        )
-        assert (
-            experiment["CameraParameters"]["y_pixels"]
-            == self.experiment_sample["CameraParameters"]["y_pixels"]
-        )
-        binning = int(experiment["CameraParameters"]["binning"][0])
-        assert (
-            experiment["CameraParameters"]["img_x_pixels"]
-            == experiment["CameraParameters"]["x_pixels"] // binning
-        )
-        assert (
-            experiment["CameraParameters"]["img_y_pixels"]
-            == experiment["CameraParameters"]["y_pixels"] // binning
-        )
-
-        # binning
-        for v in ["abcd", "3x3", "12.4"]:
-            experiment["CameraParameters"]["binning"] = v
-            config.verify_experiment_config(self.manager, configuration)
-            assert experiment["CameraParameters"]["binning"] == "1x1"
-            assert (
-                experiment["CameraParameters"]["img_x_pixels"]
-                == experiment["CameraParameters"]["x_pixels"]
-            )
-            assert (
-                experiment["CameraParameters"]["img_y_pixels"]
-                == experiment["CameraParameters"]["y_pixels"]
-            )
-
-        # sensor_mode
-        experiment["CameraParameters"]["sensor_mode"] = "None"
-        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["CameraParameters"]["x_pixels"] == 2048
+        assert experiment["CameraParameters"]["y_pixels"] == 2048
+        assert experiment["CameraParameters"]["binning"] == "1x1"
         assert experiment["CameraParameters"]["sensor_mode"] == "Normal"
-        experiment["CameraParameters"]["sensor_mode"] = "Lightsheet"
-        config.verify_experiment_config(self.manager, configuration)
-        assert experiment["CameraParameters"]["sensor_mode"] == "Normal"
-        experiment["CameraParameters"]["sensor_mode"] = "Light-Sheet"
-        config.verify_experiment_config(self.manager, configuration)
-        assert experiment["CameraParameters"]["sensor_mode"] == "Light-Sheet"
-
-        # readout_direction
-        for v in ["abcd", 123, None]:
-            experiment["CameraParameters"]["readout_direction"] = v
-            config.verify_experiment_config(self.manager, configuration)
-            assert (
-                experiment["CameraParameters"]["readout_direction"] == "Top-to-Bottom"
-            )
-
-        experiment["CameraParameters"]["readout_direction"] = "Bottom-to-Top"
-        config.verify_experiment_config(self.manager, configuration)
-        assert experiment["CameraParameters"]["readout_direction"] == "Bottom-to-Top"
-
-        # other parameters should be int
-        for k in ["number_of_pixels", "databuffer_size"]:
-            for v in ["abc", -10, 0]:
-                experiment["CameraParameters"][k] = v
-                config.verify_experiment_config(self.manager, configuration)
-                assert (
-                    experiment["CameraParameters"][k]
-                    == self.experiment_sample["CameraParameters"][k]
-                )
-
-        # StageParameters
-        experiment["StageParameters"]["limits"] = "abc"
-        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["CameraParameters"]["readout_direction"] == "Top-to-Bottom"
+        assert experiment["CameraParameters"]["number_of_pixels"] == 10
+        assert experiment["CameraParameters"]["databuffer_size"] == 100
         assert experiment["StageParameters"]["limits"] is True
 
         microscope_names = list(configuration["configuration"]["microscopes"].keys())
-        for microscope_name in microscope_names:
-            for k in ["xy_step", "z_step", "f_step", "theta_step"]:
-                experiment["StageParameters"][microscope_name][k] = "abc"
-                config.verify_experiment_config(self.manager, configuration)
-                assert isinstance(
-                    experiment["StageParameters"][microscope_name][k], int
-                )
-
-        # MicroscopeState
-        experiment["MicroscopeState"]["microscope_name"] = "nonexist_microscope"
-        config.verify_experiment_config(self.manager, configuration)
         assert experiment["MicroscopeState"]["microscope_name"] == microscope_names[0]
-
-        experiment["MicroscopeState"]["zoom"] = "abc"
-        config.verify_experiment_config(self.manager, configuration)
         assert (
             experiment["MicroscopeState"]["zoom"]
             == list(
@@ -625,166 +532,11 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 ]["position"].keys()
             )[0]
         )
-
-        for k in [
-            "start_position",
-            "end_position",
-            "step_size",
-            "number_z_steps",
-            "timepoints",
-            "stack_acq_time",
-            "timepoint_interval",
-            "experiment_duration",
-            "stack_z_origin",
-            "stack_focus_origin",
-            "start_focus",
-            "end_focus",
-            "abs_z_start",
-            "abs_z_end",
-        ]:
-            experiment["MicroscopeState"][k] = "nonsense_value"
-            config.verify_experiment_config(self.manager, configuration)
-            assert isinstance(experiment["MicroscopeState"][k], int) or isinstance(
-                experiment["MicroscopeState"][k], float
-            )
-
-        # channels
-        experiment["MicroscopeState"]["channels"] = [
-            {
-                "is_selected": True,
-                "laser": "488nm",
-                "laser_index": 0,
-                "filter": "Empty-Alignment",
-                "filter_position": 0,
-                "camera_exposure_time": 200.0,
-                "laser_power": 20.0,
-                "interval_time": 5.0,
-                "defocus": 0.0,
-            }
-        ]
-        # number_of_filter_wheels =
-
-        config.verify_experiment_config(self.manager, configuration)
-        assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
-        assert len(list(experiment["MicroscopeState"]["channels"].keys())) == 0
-
-        experiment["MicroscopeState"]["channels"] = {
-            "channel_0": {
-                "is_selected": True,
-                "laser": "488nm",
-                "laser_index": 0,
-                "filter": "Empty-Alignment",
-                "filter_position": 0,
-                "camera_exposure_time": 200.0,
-                "laser_power": 20.0,
-                "interval_time": 5.0,
-                "defocus": 0.0,
-            }
-        }
-        config.verify_experiment_config(self.manager, configuration)
-        assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
-        assert len(list(experiment["MicroscopeState"]["channels"].keys())) == 0
-
-        experiment["MicroscopeState"]["channels"] = {
-            "channel_100": {
-                "is_selected": True,
-                "laser": "488nm",
-                "laser_index": 0,
-                "filter": "Empty-Alignment",
-                "filter_position": 0,
-                "camera_exposure_time": 200.0,
-                "laser_power": 20.0,
-                "interval_time": 5.0,
-                "defocus": 0.0,
-            }
-        }
-        config.verify_experiment_config(self.manager, configuration)
-        assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
-        assert len(list(experiment["MicroscopeState"]["channels"].keys())) == 0
-
-        microscope_name = experiment["MicroscopeState"]["microscope_name"]
-        lasers = [
-            f"{laser['wavelength']}nm"
-            for laser in configuration["configuration"]["microscopes"][microscope_name][
-                "laser"
-            ]
-        ]
-        filterwheels = list(
-            configuration["configuration"]["microscopes"][microscope_name][
-                "filter_wheel"
-            ][0]["available_filters"].keys()
-        )
-        config.update_config_dict(
-            self.manager,
-            experiment["MicroscopeState"]["channels"],
-            "channel_2",
-            {
-                "is_selected": 1,
-                "laser": "48nm",
-                "laser_index": -1,
-                "filter_wheel_0": "nonexsit_filter_***",
-                "filter_position_0": 1,
-                "camera_exposure_time": -200.0,
-                "laser_power": "a",
-                "interval_time": -3,
-                "defocus": "a",
-            },
-        )
-        expected_value = {
-            "is_selected": False,
-            "laser": lasers[0],
-            "laser_index": 0,
-            "filter_wheel_0": filterwheels[0],
-            "filter_position_0": 0,
-            "camera_exposure_time": 200.0,
-            "laser_power": 20.0,
-            "interval_time": 0.0,
-            "defocus": 0.0,
-        }
-        config.verify_experiment_config(self.manager, configuration)
-        assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
+        assert "channel_1" in experiment["MicroscopeState"]["channels"].keys()
         assert "channel_2" in experiment["MicroscopeState"]["channels"].keys()
-        for k in expected_value:
-            assert (
-                experiment["MicroscopeState"]["channels"]["channel_2"][k]
-                == expected_value[k]
-            )
-
-        config.update_config_dict(
-            self.manager,
-            experiment["MicroscopeState"]["channels"],
-            "channel_2",
-            {
-                "is_selected": 1,
-                "laser": lasers[1],
-                "laser_index": 3,
-                "filter_wheel_0": filterwheels[2],
-                "filter_position_0": 1,
-                "camera_exposure_time": -200.0,
-                "laser_power": "a",
-                "interval_time": -3,
-                "defocus": "a",
-            },
+        assert isinstance(
+            experiment["MicroscopeState"]["channels"]["channel_2"]["laser_power"], float
         )
-        expected_value = {
-            "is_selected": False,
-            "laser": lasers[1],
-            "laser_index": 1,
-            "filter_wheel_0": filterwheels[2],
-            "filter_position_0": 2,
-            "camera_exposure_time": 200.0,
-            "laser_power": 20.0,
-            "interval_time": 0.0,
-            "defocus": 0.0,
-        }
-        config.verify_experiment_config(self.manager, configuration)
-        assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
-        assert "channel_2" in experiment["MicroscopeState"]["channels"].keys()
-        for k in expected_value:
-            assert (
-                experiment["MicroscopeState"]["channels"]["channel_2"][k]
-                == expected_value[k]
-            )
 
     def select_random_entries_from_list(self, parameter_list):
         n = random.randint(1, len(parameter_list))

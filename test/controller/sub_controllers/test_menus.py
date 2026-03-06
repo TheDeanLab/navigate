@@ -180,6 +180,11 @@ class TestMenuController(unittest.TestCase):
             is True
         )
 
+    def test_new_experiment(self):
+        self.menu_controller.parent_controller.reset_experiment_to_defaults = MagicMock()
+        self.menu_controller.new_experiment()
+        self.menu_controller.parent_controller.reset_experiment_to_defaults.assert_called_once()
+
     def test_autofocus_settings(self):
         assert (
             hasattr(self.menu_controller.parent_controller, "af_popup_controller")

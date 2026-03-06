@@ -918,9 +918,7 @@ class MenuController(GUIController):
     @log_function_call
     def new_experiment(self, *args) -> None:
         """Create a new experiment file."""
-        self.parent_controller.populate_experiment_setting(
-            self.parent_controller.default_experiment_file
-        )
+        self.parent_controller.reset_experiment_to_defaults()
 
     @log_function_call
     def load_experiment(self, *args) -> None:

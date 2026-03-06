@@ -38,6 +38,7 @@ import queue
 import sys
 import os
 import time
+from pathlib import Path
 from typing import Any, Callable, TypeVar
 
 # Third Party Imports
@@ -217,6 +218,19 @@ class Controller:
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
 
+        default_experiment_path = Path.joinpath(
+            Path(get_navigate_path()), "config", "experiment.yml"
+        )
+        if (
+            Path(self.experiment_path) == default_experiment_path
+            and not default_experiment_path.exists()
+        ):
+            save_yaml_file(
+                file_directory=str(default_experiment_path.parent),
+                content_dict=self.configuration["experiment"],
+                filename=default_experiment_path.name,
+            )
+
         positions = load_yaml_file(multi_positions_path)
         positions = verify_positions_config(positions)
         self.configuration["multi_positions"] = positions
@@ -248,9 +262,6 @@ class Controller:
 
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
-
-        #: string: Path to the default experiment yaml file.
-        self.default_experiment_file = self.experiment_path
 
         #: string: Path to the waveform constants yaml file.
         self.waveform_constants_path = waveform_constants_path
@@ -754,9 +765,19 @@ class Controller:
         """
         # read the new file and update info of the configuration dict
         if not in_initialize:
-            update_config_dict(
-                self.manager, self.configuration, "experiment", file_name
-            )
+            if file_name is not None:
+                did_update = update_config_dict(
+                    self.manager, self.configuration, "experiment", file_name
+                )
+                if not did_update:
+                    messagebox.showerror(
+                        title="Warning",
+                        message=(
+                            "Unable to load experiment settings from the selected "
+                            "file.\nPlease verify the file path and YAML format."
+                        ),
+                    )
+                    return
             verify_experiment_config(self.manager, self.configuration)
 
         # update buffer
@@ -800,6 +821,14 @@ class Controller:
         # set widget modes
         self.set_mode_of_sub("stop")
         self.stage_controller.initialize()
+
+    def reset_experiment_to_defaults(self) -> None:
+        """Reset experiment settings to generated defaults."""
+        update_config_dict(self.manager, self.configuration, "experiment", {})
+        verify_experiment_config(self.manager, self.configuration)
+        self.populate_experiment_setting(in_initialize=True)
+        if hasattr(self, "plugin_controller"):
+            self.plugin_controller.populate_experiment_setting()
 
     def update_experiment_setting(self) -> str:
         """Update experiment settings from GUI state.

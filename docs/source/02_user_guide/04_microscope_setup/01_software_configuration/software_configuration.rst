@@ -30,7 +30,8 @@ Configuration Files At A Glance
   step sizes and related widget behavior).
 * ``multi_positions.yml``: saved multi-position table contents used by
   multi-position workflows.
-* ``experiment.yml``: current runtime state (auto-updated by **navigate**).
+* ``experiment.yml``: current runtime state (auto-generated if missing and
+  auto-updated by **navigate**).
 * ``waveform_constants.yml``: saved waveform parameter values.
 * ``waveform_templates.yml``: default waveform-repeat behavior.
 * ``rest_api_config.yml``: REST API endpoint configuration for API-dependent
@@ -327,7 +328,8 @@ Experiment File
 The ``experiment.yml`` file stores the current software state, including laser
 parameters, camera parameters, save options, and z-stack settings. Users
 normally do not need to edit this file manually. **navigate** updates it
-automatically during use and on exit.
+automatically during use and on exit. If this file is missing or malformed,
+**navigate** regenerates a safe default based on ``configuration.yaml``.
 
 .. _configure_waveforms_constants:
 

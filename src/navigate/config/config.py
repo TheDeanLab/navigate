@@ -114,6 +114,14 @@ def get_configuration_paths():
         "gui_configuration.yml",
         "multi_positions.yml",
     ]
+    files_seeded_from_source = {
+        "configuration.yaml",
+        "waveform_constants.yml",
+        "rest_api_config.yml",
+        "waveform_templates.yml",
+        "gui_configuration.yml",
+        "multi_positions.yml",
+    }
 
     base_directory = Path(__file__).resolve().parent
     paths = []
@@ -121,7 +129,7 @@ def get_configuration_paths():
         copy_file_path = Path.joinpath(base_directory, file)
         file_path = Path.joinpath(configuration_directory, file)
         paths.append(file_path)
-        if not os.path.exists(file_path):
+        if file in files_seeded_from_source and not os.path.exists(file_path):
             shutil.copyfile(copy_file_path, file_path)
 
     return [path for path in paths]
@@ -147,16 +155,44 @@ def load_configs(manager, **kwargs):
         sys.exit(1)
 
     config_dict = manager.dict()
+    recoverable_configs = {"experiment"}
     for config_name, file_path in kwargs.items():
         file_path = Path(file_path)
-        assert file_path.exists(), "Configuration File not found: {}".format(file_path)
-        with open(file_path) as f:
-            try:
-                config_data = yaml.load(f, Loader=yaml.FullLoader)
-                build_nested_dict(manager, config_dict, config_name, config_data)
-            except yaml.YAMLError as yaml_error:
-                print(f"Configuration - Yaml Error: {yaml_error}")
-                sys.exit(1)
+        config_data = {}
+
+        if not file_path.exists():
+            if config_name not in recoverable_configs:
+                assert file_path.exists(), "Configuration File not found: {}".format(
+                    file_path
+                )
+        else:
+            with open(file_path) as f:
+                try:
+                    loaded_data = yaml.load(f, Loader=yaml.FullLoader)
+                    config_data = {} if loaded_data is None else loaded_data
+                except yaml.YAMLError as yaml_error:
+                    if config_name not in recoverable_configs:
+                        print(f"Configuration - Yaml Error: {yaml_error}")
+                        sys.exit(1)
+                        continue
+
+                    timestamp = time.strftime("%Y%m%d_%H%M%S")
+                    backup_file = file_path.with_name(
+                        f"{file_path.stem}.invalid.{timestamp}{file_path.suffix}"
+                    )
+                    try:
+                        shutil.move(str(file_path), str(backup_file))
+                    except OSError:
+                        logger.exception("Failed to back up invalid experiment file.")
+                    logger.warning(
+                        "Invalid experiment file detected at %s. Falling back to "
+                        "generated defaults. Backup: %s",
+                        file_path,
+                        backup_file,
+                    )
+                    config_data = {}
+
+        build_nested_dict(manager, config_dict, config_name, config_data)
 
     # return combined dictionary
     return config_dict
@@ -221,7 +257,12 @@ def update_config_dict(
             file_path.endswith(".yml") or file_path.endswith(".yaml")
         ):
             with open(file_path) as f:
-                new_config = yaml.load(f, Loader=yaml.FullLoader)
+                try:
+                    loaded_config = yaml.load(f, Loader=yaml.FullLoader)
+                except yaml.YAMLError:
+                    logger.exception("Failed to parse yaml file %s", file_path)
+                    return False
+                new_config = {} if loaded_config is None else loaded_config
         else:
             return False
 
@@ -239,16 +280,31 @@ def verify_experiment_config(manager, configuration):
     configuration: configuration object
         contains all the yaml files
     """
-    if type(configuration["experiment"]) is not DictProxy:
+    if "experiment" not in configuration or type(configuration["experiment"]) is not DictProxy:
         update_config_dict(manager, configuration, "experiment", {})
+    experiment = configuration["experiment"]
+
+    def to_int(value, default):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return default
+
+    def to_float(value, default):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    microscope_configs = configuration["configuration"]["microscopes"]
+    microscope_names = list(microscope_configs.keys())
+    if len(microscope_names) == 0:
+        return
 
     # verify/build autofocus parameter setting
-    # get autofocus supported devices(stages, remote_focus) from configuration.yaml file
     device_dict = {}
-    # get devices: stages, NI remote_focus
-    device_config = configuration["configuration"]["microscopes"]
-    for microscope_name in device_config.keys():
-        microscope_config = device_config[microscope_name]
+    for microscope_name in microscope_names:
+        microscope_config = microscope_configs[microscope_name]
         device_dict[microscope_name] = {}
         if (
             "remote_focus" in microscope_config.keys()
@@ -279,19 +335,20 @@ def verify_experiment_config(manager, configuration):
         "test_significance": False,
     }
     if (
-        "AutoFocusParameters" not in configuration["experiment"]
-        or type(configuration["experiment"]["AutoFocusParameters"]) is not DictProxy
+        "AutoFocusParameters" not in experiment
+        or type(experiment["AutoFocusParameters"]) is not DictProxy
     ):
-        update_config_dict(
-            manager, configuration["experiment"], "AutoFocusParameters", {}
-        )
-    autofocus_setting_dict = configuration["experiment"]["AutoFocusParameters"]
-    # verify if all the devices have been added to the autofocus parameter dict
+        update_config_dict(manager, experiment, "AutoFocusParameters", {})
+    autofocus_setting_dict = experiment["AutoFocusParameters"]
+
     for microscope_name in device_dict:
         if microscope_name not in autofocus_setting_dict.keys():
             update_config_dict(manager, autofocus_setting_dict, microscope_name, {})
         for device in device_dict[microscope_name]:
-            if device not in autofocus_setting_dict[microscope_name].keys():
+            if (
+                device not in autofocus_setting_dict[microscope_name].keys()
+                or type(autofocus_setting_dict[microscope_name][device]) is not DictProxy
+            ):
                 update_config_dict(
                     manager,
                     autofocus_setting_dict[microscope_name],
@@ -302,6 +359,8 @@ def verify_experiment_config(manager, configuration):
                 if (
                     device_ref
                     not in autofocus_setting_dict[microscope_name][device].keys()
+                    or type(autofocus_setting_dict[microscope_name][device][device_ref])
+                    is not DictProxy
                 ):
                     update_config_dict(
                         manager,
@@ -309,38 +368,23 @@ def verify_experiment_config(manager, configuration):
                         device_ref,
                         autofocus_sample_setting,
                     )
-                else:
-                    # add missing parameters
-                    for k in autofocus_sample_setting.keys():
-                        if (
-                            k
-                            not in autofocus_setting_dict[microscope_name][device][
-                                device_ref
-                            ].keys()
-                        ):
-                            autofocus_setting_dict[microscope_name][device][device_ref][
-                                k
-                            ] = autofocus_sample_setting[k]
+                    continue
 
-    # remove non-consistent autofocus parameter
-    for microscope_name in autofocus_setting_dict.keys():
+                for k, v in autofocus_sample_setting.items():
+                    if k not in autofocus_setting_dict[microscope_name][device][device_ref]:
+                        autofocus_setting_dict[microscope_name][device][device_ref][k] = v
+
+    for microscope_name in list(autofocus_setting_dict.keys()):
         if microscope_name not in device_dict:
             autofocus_setting_dict.pop(microscope_name)
-        else:
-            for device in autofocus_setting_dict[microscope_name].keys():
-                if device not in device_dict[microscope_name]:
-                    autofocus_setting_dict[microscope_name].pop(device)
-                else:
-                    for device_ref in autofocus_setting_dict[microscope_name][
-                        device
-                    ].keys():
-                        if (
-                            device_ref
-                            not in autofocus_setting_dict[microscope_name][device]
-                        ):
-                            autofocus_setting_dict[microscope_name][device].pop(
-                                device_ref
-                            )
+            continue
+        for device in list(autofocus_setting_dict[microscope_name].keys()):
+            if device not in device_dict[microscope_name]:
+                autofocus_setting_dict[microscope_name].pop(device)
+                continue
+            for device_ref in list(autofocus_setting_dict[microscope_name][device].keys()):
+                if device_ref not in device_dict[microscope_name][device]:
+                    autofocus_setting_dict[microscope_name][device].pop(device_ref)
 
     # saving info
     saving_dict_sample = {
@@ -355,22 +399,23 @@ def verify_experiment_config(manager, configuration):
         "date": time.strftime("%Y-%m-%d"),
         "solvent": "BABB",
     }
-    if (
-        "Saving" not in configuration["experiment"]
-        or type(configuration["experiment"]["Saving"]) is not DictProxy
-    ):
-        update_config_dict(
-            manager, configuration["experiment"], "Saving", saving_dict_sample
-        )
-    saving_setting_dict = configuration["experiment"]["Saving"]
-    for k in saving_dict_sample:
-        if k not in saving_setting_dict:
-            saving_setting_dict[k] = saving_dict_sample[k]
+    if "Saving" not in experiment or type(experiment["Saving"]) is not DictProxy:
+        update_config_dict(manager, experiment, "Saving", saving_dict_sample)
+    saving_setting_dict = experiment["Saving"]
+    for key in list(saving_setting_dict.keys()):
+        if key not in saving_dict_sample:
+            saving_setting_dict.pop(key)
+    for key, value in saving_dict_sample.items():
+        if key not in saving_setting_dict:
+            saving_setting_dict[key] = value
 
-    # if root directory/saving directory doesn't exist
-    if not os.path.exists(saving_setting_dict["root_directory"]):
+    if not isinstance(saving_setting_dict["root_directory"], str) or not os.path.exists(
+        saving_setting_dict["root_directory"]
+    ):
         saving_setting_dict["root_directory"] = saving_dict_sample["root_directory"]
-    if not os.path.exists(saving_setting_dict["save_directory"]):
+    if not isinstance(saving_setting_dict["save_directory"], str) or not os.path.exists(
+        saving_setting_dict["save_directory"]
+    ):
         saving_setting_dict["save_directory"] = saving_dict_sample["save_directory"]
 
     # camera parameters
@@ -390,64 +435,74 @@ def verify_experiment_config(manager, configuration):
         "readout_time": 0,
     }
     if (
-        "CameraParameters" not in configuration["experiment"]
-        or type(configuration["experiment"]["CameraParameters"]) is not DictProxy
+        "CameraParameters" not in experiment
+        or type(experiment["CameraParameters"]) is not DictProxy
     ):
-        update_config_dict(
-            manager,
-            configuration["experiment"],
-            "CameraParameters",
-            camera_parameters_dict_sample,
-        )
-    microscope_names = [""] + list(configuration["configuration"]["microscopes"].keys())
-    for microscope_name in microscope_names:
-        camera_setting_dict = configuration["experiment"]["CameraParameters"]
-        if microscope_name:
-            if (
-                microscope_name not in camera_setting_dict
-                or type(camera_setting_dict[microscope_name]) is not DictProxy
-            ):
-                update_config_dict(
-                    manager,
-                    camera_setting_dict,
-                    microscope_name,
-                    camera_parameters_dict_sample,
-                )
-            camera_setting_dict = camera_setting_dict[microscope_name]
+        update_config_dict(manager, experiment, "CameraParameters", camera_parameters_dict_sample)
+    camera_root = experiment["CameraParameters"]
 
-        for k in camera_parameters_dict_sample:
-            if k not in camera_setting_dict.keys():
-                camera_setting_dict[k] = camera_parameters_dict_sample[k]
-        # binning
+    for key in list(camera_root.keys()):
+        if key not in camera_parameters_dict_sample and key not in microscope_names:
+            camera_root.pop(key)
+
+    for microscope_name in microscope_names:
+        if (
+            microscope_name not in camera_root
+            or type(camera_root[microscope_name]) is not DictProxy
+        ):
+            update_config_dict(
+                manager,
+                camera_root,
+                microscope_name,
+                camera_parameters_dict_sample,
+            )
+
+    for microscope_name in [""] + microscope_names:
+        camera_setting_dict = (
+            camera_root if microscope_name == "" else camera_root[microscope_name]
+        )
+        allowed_keys = set(camera_parameters_dict_sample.keys())
+        if microscope_name == "":
+            allowed_keys.update(microscope_names)
+        for key in list(camera_setting_dict.keys()):
+            if key not in allowed_keys:
+                camera_setting_dict.pop(key)
+        for key, value in camera_parameters_dict_sample.items():
+            if key not in camera_setting_dict:
+                camera_setting_dict[key] = value
+
         if camera_setting_dict["binning"] not in ["1x1", "2x2", "4x4"]:
             camera_setting_dict["binning"] = "1x1"
-        # x_pixels and y_pixels
-        try:
-            camera_setting_dict["x_pixels"] = int(camera_setting_dict["x_pixels"])
-        except ValueError:
-            camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
 
-        try:
-            camera_setting_dict["y_pixels"] = int(camera_setting_dict["y_pixels"])
-        except ValueError:
-            camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
-
-        # image width and height
+        camera_setting_dict["x_pixels"] = to_int(
+            camera_setting_dict["x_pixels"], camera_parameters_dict_sample["x_pixels"]
+        )
+        camera_setting_dict["y_pixels"] = to_int(
+            camera_setting_dict["y_pixels"], camera_parameters_dict_sample["y_pixels"]
+        )
         if camera_setting_dict["x_pixels"] <= 0:
             camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
         if camera_setting_dict["y_pixels"] <= 0:
             camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
+
+        if type(camera_setting_dict["is_centered"]) is not bool:
+            camera_setting_dict["is_centered"] = camera_parameters_dict_sample["is_centered"]
+
         x_binning = int(camera_setting_dict["binning"][0])
         y_binning = int(camera_setting_dict["binning"][2])
-        img_x_pixels = camera_setting_dict["x_pixels"] // x_binning
-        img_y_pixels = camera_setting_dict["y_pixels"] // y_binning
-        camera_setting_dict["img_x_pixels"] = img_x_pixels
-        camera_setting_dict["img_y_pixels"] = img_y_pixels
+        camera_setting_dict["img_x_pixels"] = camera_setting_dict["x_pixels"] // x_binning
+        camera_setting_dict["img_y_pixels"] = camera_setting_dict["y_pixels"] // y_binning
         if camera_setting_dict["is_centered"]:
             camera_setting_dict["center_x"] = camera_setting_dict["x_pixels"] // 2
             camera_setting_dict["center_y"] = camera_setting_dict["y_pixels"] // 2
+        else:
+            camera_setting_dict["center_x"] = to_int(
+                camera_setting_dict["center_x"], camera_parameters_dict_sample["center_x"]
+            )
+            camera_setting_dict["center_y"] = to_int(
+                camera_setting_dict["center_y"], camera_parameters_dict_sample["center_y"]
+            )
 
-        # sensor mode
         if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:
             camera_setting_dict["sensor_mode"] = "Normal"
         if camera_setting_dict["readout_direction"] not in [
@@ -458,43 +513,54 @@ def verify_experiment_config(manager, configuration):
         ]:
             camera_setting_dict["readout_direction"] = "Top-to-Bottom"
 
-        # databuffer_size, number_of_pixels
-        for k in ["databuffer_size", "number_of_pixels"]:
-            try:
-                camera_setting_dict[k] = int(camera_setting_dict[k])
-            except ValueError:
-                camera_setting_dict[k] = camera_parameters_dict_sample[k]
-            if camera_setting_dict[k] < 1:
-                camera_setting_dict[k] = camera_parameters_dict_sample[k]
+        for key in ["databuffer_size", "number_of_pixels"]:
+            camera_setting_dict[key] = to_int(
+                camera_setting_dict[key], camera_parameters_dict_sample[key]
+            )
+            if camera_setting_dict[key] < 1:
+                camera_setting_dict[key] = camera_parameters_dict_sample[key]
+        camera_setting_dict["readout_time"] = to_float(
+            camera_setting_dict["readout_time"], camera_parameters_dict_sample["readout_time"]
+        )
 
     # stage parameters
     stage_dict_sample = {}
-    device_config = configuration["configuration"]["microscopes"]
-    for microscope_name in device_config.keys():
+    for microscope_name in microscope_names:
         stage_dict_sample[microscope_name] = {}
-        for k in ["z_step", "f_step", "theta_step"]:
-            stage_dict_sample[microscope_name][k] = int(
-                device_config[microscope_name]["stage"].get(k, 30)
-            )
-        stage_dict_sample[microscope_name]["xy_step"] = min(
-            device_config[microscope_name]["stage"].get("x_step", 500),
-            device_config[microscope_name]["stage"].get("y_step", 500),
+        stage_config = microscope_configs[microscope_name]["stage"]
+        for key in ["z_step", "f_step", "theta_step"]:
+            stage_dict_sample[microscope_name][key] = to_int(stage_config.get(key, 30), 30)
+        stage_dict_sample[microscope_name]["xy_step"] = to_int(
+            min(stage_config.get("x_step", 500), stage_config.get("y_step", 500)), 500
         )
+
+    stage_position_sample = {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "theta": 0.0,
+        "f": 0.0,
+    }
 
     if (
-        "StageParameters" not in configuration["experiment"]
-        or type(configuration["experiment"]["StageParameters"]) is not DictProxy
+        "StageParameters" not in experiment
+        or type(experiment["StageParameters"]) is not DictProxy
     ):
-        update_config_dict(
-            manager, configuration["experiment"], "StageParameters", stage_dict_sample
-        )
-    stage_setting_dict = configuration["experiment"]["StageParameters"]
-    if "limits" not in stage_setting_dict.keys():
-        stage_setting_dict["limits"] = True
-    elif type(stage_setting_dict["limits"]) is not bool:
+        update_config_dict(manager, experiment, "StageParameters", {})
+    stage_setting_dict = experiment["StageParameters"]
+
+    allowed_stage_keys = set(["limits", *stage_position_sample.keys(), *microscope_names])
+    for key in list(stage_setting_dict.keys()):
+        if key not in allowed_stage_keys:
+            stage_setting_dict.pop(key)
+
+    if "limits" not in stage_setting_dict.keys() or type(stage_setting_dict["limits"]) is not bool:
         stage_setting_dict["limits"] = True
 
-    for microscope_name in stage_dict_sample:
+    for key, default_value in stage_position_sample.items():
+        stage_setting_dict[key] = to_float(stage_setting_dict.get(key), default_value)
+
+    for microscope_name in microscope_names:
         if (
             microscope_name not in stage_setting_dict.keys()
             or type(stage_setting_dict[microscope_name]) is not DictProxy
@@ -505,31 +571,24 @@ def verify_experiment_config(manager, configuration):
                 microscope_name,
                 stage_dict_sample[microscope_name],
             )
-        else:
-            for k in stage_dict_sample[microscope_name]:
-                if k not in stage_setting_dict[microscope_name].keys():
-                    stage_setting_dict[microscope_name][k] = stage_dict_sample[
-                        microscope_name
-                    ][k]
-                else:
-                    try:
-                        stage_setting_dict[microscope_name][k] = int(
-                            stage_setting_dict[microscope_name][k]
-                        )
-                    except ValueError:
-                        stage_setting_dict[microscope_name][k] = stage_dict_sample[
-                            microscope_name
-                        ][k]
+        microscope_stage_dict = stage_setting_dict[microscope_name]
+        for key in list(microscope_stage_dict.keys()):
+            if key not in stage_dict_sample[microscope_name]:
+                microscope_stage_dict.pop(key)
+        for key, default_value in stage_dict_sample[microscope_name].items():
+            microscope_stage_dict[key] = to_int(
+                microscope_stage_dict.get(key), default_value
+            )
 
     # microscope state parameters
-    microscope_name = configuration["configuration"]["microscopes"].keys()[0]
-    zoom = configuration["configuration"]["microscopes"][microscope_name]["zoom"][
-        "position"
-    ].keys()[0]
+    default_microscope_name = microscope_names[0]
+    default_zoom = list(
+        microscope_configs[default_microscope_name]["zoom"]["position"].keys()
+    )[0]
     microscope_state_dict_sample = {
-        "microscope_name": microscope_name,
+        "microscope_name": default_microscope_name,
         "image_mode": "live",
-        "zoom": zoom,
+        "zoom": default_zoom,
         "stack_cycling_mode": "per_stack",
         "start_position": 0.0,
         "end_position": 100.0,
@@ -542,137 +601,168 @@ def verify_experiment_config(manager, configuration):
         "timepoint_interval": 0,
         "experiment_duration": 1.03,
         "is_multiposition": False,
-        "stack_z_origin": 0,
-        "stack_focus_origin": 0,
+        "stack_z_origin": 0.0,
+        "stack_focus_origin": 0.0,
         "start_focus": 0.0,
         "end_focus": 0.0,
         "abs_z_start": 0.0,
         "abs_z_end": 100.0,
         "waveform_template": "Default",
+        "speed": "Auto",
+        "primary_z_axis": "z",
+        "primary_f_axis": "f",
+        "secondary_stack_settings": {},
+        "selected_channels": [],
+        "scanrange": 0.0,
+        "shear_amp": 0.0,
     }
     if (
-        "MicroscopeState" not in configuration["experiment"]
-        or type(configuration["experiment"]["MicroscopeState"]) is not DictProxy
+        "MicroscopeState" not in experiment
+        or type(experiment["MicroscopeState"]) is not DictProxy
     ):
         update_config_dict(
             manager,
-            configuration["experiment"],
+            experiment,
             "MicroscopeState",
             microscope_state_dict_sample,
         )
-    microscope_setting_dict = configuration["experiment"]["MicroscopeState"]
-    for k in microscope_state_dict_sample:
-        if k not in microscope_setting_dict.keys():
-            microscope_setting_dict[k] = microscope_state_dict_sample[k]
-        elif not isinstance(
-            microscope_setting_dict[k], type(microscope_state_dict_sample[k])
-        ):
-            if isinstance(microscope_state_dict_sample[k], float):
-                try:
-                    microscope_setting_dict[k] = float(microscope_setting_dict[k])
-                except ValueError:
-                    microscope_setting_dict[k] = microscope_state_dict_sample[k]
-            elif isinstance(microscope_state_dict_sample[k], int):
-                try:
-                    microscope_setting_dict[k] = int(microscope_setting_dict[k])
-                except ValueError:
-                    microscope_setting_dict[k] = microscope_state_dict_sample[k]
-            else:
-                microscope_setting_dict[k] = microscope_state_dict_sample[k]
+    microscope_setting_dict = experiment["MicroscopeState"]
+    for key, sample_value in microscope_state_dict_sample.items():
+        if key not in microscope_setting_dict:
+            microscope_setting_dict[key] = sample_value
+            continue
+        if isinstance(sample_value, bool):
+            if type(microscope_setting_dict[key]) is not bool:
+                microscope_setting_dict[key] = sample_value
+        elif isinstance(sample_value, int):
+            microscope_setting_dict[key] = to_int(microscope_setting_dict[key], sample_value)
+        elif isinstance(sample_value, float):
+            microscope_setting_dict[key] = to_float(
+                microscope_setting_dict[key], sample_value
+            )
+        elif isinstance(sample_value, str):
+            if not isinstance(microscope_setting_dict[key], str):
+                microscope_setting_dict[key] = sample_value
+        elif isinstance(sample_value, list):
+            if type(microscope_setting_dict[key]) not in [list, ListProxy]:
+                microscope_setting_dict[key] = sample_value
+        elif isinstance(sample_value, dict):
+            if type(microscope_setting_dict[key]) not in [dict, DictProxy]:
+                microscope_setting_dict[key] = sample_value
 
-    # verify microscope name
-    if (
-        microscope_setting_dict["microscope_name"]
-        not in configuration["configuration"]["microscopes"].keys()
-    ):
-        microscope_setting_dict["microscope_name"] = microscope_name
+    if microscope_setting_dict["microscope_name"] not in microscope_names:
+        microscope_setting_dict["microscope_name"] = default_microscope_name
     microscope_name = microscope_setting_dict["microscope_name"]
-    # zoom
-    if (
-        microscope_setting_dict["zoom"]
-        not in configuration["configuration"]["microscopes"][microscope_name]["zoom"][
-            "position"
-        ].keys()
-    ):
-        microscope_setting_dict["zoom"] = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["zoom"]["position"].keys()[0]
-    # channels
+
+    valid_zoom_values = list(microscope_configs[microscope_name]["zoom"]["position"].keys())
+    if microscope_setting_dict["zoom"] not in valid_zoom_values:
+        microscope_setting_dict["zoom"] = valid_zoom_values[0]
+
     if (
         "channels" not in microscope_setting_dict
         or type(microscope_setting_dict["channels"]) is not DictProxy
     ):
         update_config_dict(manager, microscope_setting_dict, "channels", {})
+    channel_setting_dict = microscope_setting_dict["channels"]
+
     laser_list = [
         f"{laser['wavelength']}nm"
-        for laser in configuration["configuration"]["microscopes"][microscope_name][
-            "laser"
-        ]
+        for laser in microscope_configs[microscope_name]["laser"]
     ]
-    number_of_filter_wheels = len(
-        configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"]
-    )
+    number_of_filter_wheels = len(microscope_configs[microscope_name]["filter_wheel"])
     filterwheel_list = [
         list(filter_wheel_config["available_filters"].keys())
-        for filter_wheel_config in configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["filter_wheel"]
+        for filter_wheel_config in microscope_configs[microscope_name]["filter_wheel"]
     ]
-    prefix = "channel_"
-    channel_nums = configuration["configuration"]["gui"]["channels"]["count"]
-    channel_setting_dict = microscope_setting_dict["channels"]
-    selected_channel_num = 0
-    for channel in channel_setting_dict.keys():
-        if not channel.startswith(prefix):
-            del channel_setting_dict[channel]
+    channel_nums = to_int(configuration["configuration"]["gui"]["channels"]["count"], 5)
+    channel_prefix = "channel_"
+
+    for channel in list(channel_setting_dict.keys()):
+        if not channel.startswith(channel_prefix):
+            channel_setting_dict.pop(channel)
             continue
-        channel_id = int(channel[len(prefix) :]) - 1
+        try:
+            channel_id = int(channel[len(channel_prefix) :]) - 1
+        except (TypeError, ValueError):
+            channel_setting_dict.pop(channel)
+            continue
         if channel_id < 0 or channel_id >= channel_nums:
-            del channel_setting_dict[channel]
-            continue
-        channel_value = channel_setting_dict[channel]
-        # make sure channel values are right
-        # laser
+            channel_setting_dict.pop(channel)
+
+    def build_channel_sample(channel_idx):
+        sample = {
+            "is_selected": channel_idx == 0,
+            "laser": laser_list[0],
+            "laser_index": 0,
+            "camera_exposure_time": 200.0,
+            "laser_power": 20.0,
+            "interval_time": 0.0,
+            "defocus": 0.0,
+        }
+        for i in range(number_of_filter_wheels):
+            sample[f"filter_wheel_{i}"] = filterwheel_list[i][0]
+            sample[f"filter_position_{i}"] = 0
+        return sample
+
+    for channel_idx in range(channel_nums):
+        channel_key = f"{channel_prefix}{channel_idx + 1}"
+        if (
+            channel_key not in channel_setting_dict
+            or type(channel_setting_dict[channel_key]) is not DictProxy
+        ):
+            update_config_dict(
+                manager,
+                channel_setting_dict,
+                channel_key,
+                build_channel_sample(channel_idx),
+            )
+
+    selected_channel_num = 0
+    for channel_idx in range(channel_nums):
+        channel_key = f"{channel_prefix}{channel_idx + 1}"
+        channel_value = channel_setting_dict[channel_key]
+        channel_sample = build_channel_sample(channel_idx)
+        for key in list(channel_value.keys()):
+            if key not in channel_sample:
+                channel_value.pop(key)
+        for key, value in channel_sample.items():
+            if key not in channel_value:
+                channel_value[key] = value
+
         if channel_value["laser"] not in laser_list:
             channel_value["laser"] = laser_list[0]
         channel_value["laser_index"] = laser_list.index(channel_value["laser"])
-        # filter wheel
+
         for i in range(number_of_filter_wheels):
             ref_name = f"filter_wheel_{i}"
-            if (
-                ref_name not in channel_value
-                or channel_value[ref_name] not in filterwheel_list[i]
-            ):
+            if channel_value[ref_name] not in filterwheel_list[i]:
                 channel_value[ref_name] = filterwheel_list[i][0]
             channel_value[f"filter_position_{i}"] = filterwheel_list[i].index(
                 channel_value[ref_name]
             )
-        if "filter" in channel_value:
-            channel_value.pop("filter")
-        if "filter_position" in channel_value:
-            channel_value.pop("filter_position")
-        # is_selected
-        if (
-            "is_selected" not in channel_value.keys()
-            or type(channel_value["is_selected"]) != bool
-        ):
-            channel_value["is_selected"] = False
+
+        if type(channel_value["is_selected"]) is not bool:
+            channel_value["is_selected"] = channel_sample["is_selected"]
         if channel_value["is_selected"]:
             selected_channel_num += 1
-        # camera_exposure_time and defoucus should be float
-        temp = {
-            "laser_power": 20.0,
-            "camera_exposure_time": 200.0,
-            "interval_time": 0.0,
-            "defocus": 0.0,
-        }
-        for k in temp:
-            try:
-                channel_value[k] = float(channel_value[k])
-            except ValueError:
-                channel_value[k] = temp[k]
-            if channel_value[k] < 0:
-                channel_value[k] = temp[k]
+
+        for key in ["laser_power", "camera_exposure_time", "interval_time", "defocus"]:
+            channel_value[key] = to_float(channel_value[key], channel_sample[key])
+            if channel_value[key] < 0:
+                channel_value[key] = channel_sample[key]
+
+    if selected_channel_num == 0 and channel_nums > 0:
+        channel_setting_dict[f"{channel_prefix}1"]["is_selected"] = True
+
+    microscope_setting_dict["selected_channels"] = [
+        f"{channel_prefix}{idx + 1}"
+        for idx in range(channel_nums)
+        if channel_setting_dict[f"{channel_prefix}{idx + 1}"]["is_selected"]
+    ]
+
+    # remove known legacy section from old experiment templates
+    if "User" in experiment:
+        experiment.pop("User")
 
 
 def verify_waveform_constants(manager, configuration):

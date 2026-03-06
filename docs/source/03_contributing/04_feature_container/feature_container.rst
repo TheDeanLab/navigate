@@ -91,7 +91,8 @@ In the example below, we create a feature that moves to a specified position in 
                current_position = self.model.get_stage_position()
                self.target_position = dict([(axis[:-4], value) for axis, value in current_position.items()])
 
-   More GUI parameters are defined in `experiment.yml <https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml>`_.
+   More GUI parameters are stored in the runtime ``experiment.yml`` file under the local
+   ``.navigate/config`` directory.
 
 - Use the stage to move to this position.
 

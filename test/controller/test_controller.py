@@ -358,6 +358,16 @@ def test_populate_experiment_setting(controller):
     assert True
 
 
+def test_reset_experiment_to_defaults_updates_plugins(controller):
+    controller.populate_experiment_setting = MagicMock()
+    controller.plugin_controller = MagicMock()
+
+    controller.reset_experiment_to_defaults()
+
+    controller.populate_experiment_setting.assert_called_once_with(in_initialize=True)
+    controller.plugin_controller.populate_experiment_setting.assert_called_once()
+
+
 def test_prepare_acquire_data(controller):
 
     # Test without warning message

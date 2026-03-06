@@ -906,10 +906,7 @@ class Controller:
             None
             """
             self.view.scroll_frame.resize(width, height)
-            self.view.right_frame.config(
-                width=width - self.view.left_frame.winfo_width() - 3,
-                height=height - self.view.left_frame.winfo_height(),
-            )
+            self.view.update_idletasks()
 
         if not self.resize_ready_flag:
             return

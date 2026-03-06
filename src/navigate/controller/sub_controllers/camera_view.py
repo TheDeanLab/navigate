@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+from __future__ import annotations
 import platform
 import tkinter as tk
 from tkinter import messagebox
@@ -223,6 +224,9 @@ class BaseViewController(GUIController, ABaseViewController):
 
         #: event: The resize event ID.
         self.resize_event_id = None
+
+        #: event: The bound widget resize handler ID.
+        self.resize_binding_id = None
 
         #: list: The selected channels being acquired.
         self.selected_channels = None
@@ -793,10 +797,11 @@ class BaseViewController(GUIController, ABaseViewController):
                 title="Warning", message="Can't move to there! Invalid stage position!"
             )
 
-    def update_canvas_size(self) -> None:
+    def update_canvas_size(
+        self, width: int | None = None, height: int | None = None
+    ) -> None:
         """Update the canvas size."""
-        r_canvas_width = int(self.view.canvas["width"])
-        r_canvas_height = int(self.view.canvas["height"])
+        r_canvas_width, r_canvas_height = self._get_canvas_widget_size(width, height)
         img_ratio = self.original_image_width / self.original_image_height
         canvas_ratio = r_canvas_width / r_canvas_height
 
@@ -811,6 +816,8 @@ class BaseViewController(GUIController, ABaseViewController):
         self.canvas_height_scale = float(
             self.original_image_height / self.canvas_height
         )
+        self.view.canvas_width = self.canvas_width
+        self.view.canvas_height = self.canvas_height
 
     def digital_zoom(self) -> np.ndarray:
         """Apply digital zoom.
@@ -959,6 +966,25 @@ class BaseViewController(GUIController, ABaseViewController):
         y = self.parent_controller.view.winfo_pointery()
         return x, y
 
+    def _get_canvas_widget_size(
+        self, width: int | None = None, height: int | None = None
+    ) -> tuple[int, int]:
+        """Return the actual drawable canvas size with stable fallbacks."""
+        resolved_width = int(width) if width is not None else 0
+        resolved_height = int(height) if height is not None else 0
+
+        if resolved_width <= 1:
+            resolved_width = int(self.canvas.winfo_width())
+        if resolved_height <= 1:
+            resolved_height = int(self.canvas.winfo_height())
+
+        if resolved_width <= 1:
+            resolved_width = int(self.canvas.cget("width"))
+        if resolved_height <= 1:
+            resolved_height = int(self.canvas.cget("height"))
+
+        return max(1, resolved_width), max(1, resolved_height)
+
     def _ensure_canvas_image(self, w: int, h: int, mode: str) -> None:
         """Create/recreate the backing PhotoImage when size or mode changes.
 
@@ -1099,61 +1125,45 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         if not self.parent_controller.resize_ready_flag:
             return
-        if event.width < 512 or event.height < 512:
+        event_widget = getattr(event, "widget", None)
+        resolved_widget = getattr(event_widget, "widget", event_widget)
+        if resolved_widget not in (self.view, self.canvas):
             return
-        if event.widget != self.view:
+
+        width = int(getattr(event, "width", 0))
+        height = int(getattr(event, "height", 0))
+        if width <= 1 or height <= 1:
             return
-        if self.view.is_docked:
-            left_width = self.parent_controller.view.left_frame.winfo_width()
-            top_height = self.parent_controller.view.top_frame.winfo_height()
-            w_width = self.parent_controller.view.winfo_width()
-            w_height = self.parent_controller.view.winfo_height()
-            width = max(w_width - left_width - 16, 560 + self.view.lut.winfo_width())
-            height = max(w_height - top_height - 50, 670)
-        else:
-            width = event.width
-            height = event.height - 24
 
         if self.resize_event_id:
             self.view.after_cancel(self.resize_event_id)
-        self.resize_event_id = self.view.after(300, lambda: self.refresh(width, height))
+        self.resize_event_id = self.view.after(
+            100, lambda w=width, h=height: self.refresh(w, h)
+        )
 
-    def refresh(self, width: int, height: int) -> None:
+    def refresh(self, width: int | None = None, height: int | None = None) -> None:
         """Refresh the window.
 
         Parameters
         ----------
-        width : int
-            Width of the window.
-        height : int
-            Height of the window.
+        width : int or None
+            Width of the canvas viewport.
+        height : int or None
+            Height of the canvas viewport.
         """
+        width, height = self._get_canvas_widget_size(width, height)
         if (
             self.width
             and self.height
-            and abs(width - self.width) < 10
-            and abs(height - self.height) < 10
+            and abs(width - self.width) < 2
+            and abs(height - self.height) < 2
         ):
             return
-        self.canvas_width = width - self.view.lut.winfo_width() - 24
-        widget_height = 0
-        for widget in self.view.cam_image.winfo_children():
-            if widget != self.view.canvas:
-                if self.view.is_docked or widget.winfo_ismapped():
-                    widget_height += widget.winfo_height() + 5
-                    if widget.winfo_height() < 30:
-                        widget_height += 30
-
-        self.canvas_height = (
-            height - widget_height - (50 if self.view.is_docked else -5)
-        )
-        self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
-        self.view.update_idletasks()
 
         self.width, self.height = width, height
 
         # if resize the window during acquisition, the image showing should be updated
-        self.update_canvas_size()
+        self.update_canvas_size(width, height)
         self.reset_display(False)
 
     def update_min_max_counts(self, display: bool = False):
@@ -1247,7 +1257,7 @@ class CameraViewController(BaseViewController):
         # Slider Binding
         self.view.slider.bind("<Motion>", self.slider_update)
 
-        self.resize_event_id = self.view.bind("<Configure>", self.resize)
+        self.resize_binding_id = self.view.canvas.bind("<Configure>", self.resize)
 
         #: str: The display state.
         self.display_state = "Live"
@@ -1645,7 +1655,7 @@ class MIPViewController(BaseViewController):
         #: dict: The render widgets.
         self.render_widgets = self.view.render.get_widgets()
 
-        self.resize_event_id = self.view.bind("<Configure>", self.resize)
+        self.resize_binding_id = self.view.canvas.bind("<Configure>", self.resize)
 
         #: bool: The display enabled flag.
         self.display_enabled = tk.BooleanVar()

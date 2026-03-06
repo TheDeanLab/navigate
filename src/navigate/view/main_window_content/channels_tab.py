@@ -43,7 +43,7 @@ from pathlib import Path
 from navigate.view.custom_widgets.hover import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from navigate.view.custom_widgets.common import uniform_grid
+from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
 import navigate
 
 # Logger Setup
@@ -83,32 +83,68 @@ class ChannelsTab(tk.Frame):
 
         #: ChannelCreator: The frame that holds the channel settings
         self.channel_widgets_frame = ChannelCreator(self)
-        self.channel_widgets_frame.grid(
-            row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+        themed_grid(
+            self.channel_widgets_frame,
+            row=0,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=10,
+            pady=10,
         )
 
         #: StackAcquisitionFrame: The frame that holds the stack acquisition settings
         self.stack_acq_frame = StackAcquisitionFrame(self)
-        self.stack_acq_frame.grid(
-            row=1, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+        themed_grid(
+            self.stack_acq_frame,
+            row=1,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=10,
+            pady=10,
         )
 
         #: StackTimePointFrame: The frame that holds the time settings
         self.stack_timepoint_frame = StackTimePointFrame(self)
-        self.stack_timepoint_frame.grid(
-            row=3, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+        themed_grid(
+            self.stack_timepoint_frame,
+            row=2,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=10,
+            pady=10,
         )
 
         #: MultiPointFrame: The frame that holds the multipoint settings
         self.multipoint_frame = MultiPointFrame(self)
-        self.multipoint_frame.grid(
-            row=4, column=0, columnspan=1, sticky=tk.NSEW, padx=10, pady=10
+        themed_grid(
+            self.multipoint_frame,
+            row=3,
+            column=0,
+            columnspan=1,
+            sticky=tk.NSEW,
+            padx=10,
+            pady=10,
         )
 
         #: QuickLaunchFrame: The frame that holds the quick launch buttons
         self.quick_launch = QuickLaunchFrame(self)
-        self.quick_launch.grid(
-            row=4, column=1, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
+        themed_grid(
+            self.quick_launch,
+            row=3,
+            column=1,
+            columnspan=2,
+            sticky=tk.NSEW,
+            padx=10,
+            pady=10,
+        )
+
+        configure_grid(
+            self,
+            columns={0: 1, 1: 1, 2: 1},
+            rows={0: 3, 1: 2, 2: 1, 3: 1},
         )
 
 
@@ -203,6 +239,7 @@ class ChannelCreator(ttk.Labelframe):
 
         #: list: List of the frames for the columns
         self.frame_columns = []
+        configure_grid(self, columns={0: 1})
 
     def populate_frame(
         self, channels: int, filter_wheels: int, filter_wheel_names: list
@@ -606,6 +643,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
 
         uniform_grid(self)
+        uniform_grid(self.stack_frame)
 
         # Initialize DescriptionHovers
         self.inputs["step_size"].widget.hover.setdescription("The Z-stack step size.")
@@ -936,6 +974,7 @@ class StackTimePointFrame(ttk.Labelframe):
         )
         self.total_time_spinval.grid(row=2, column=3, sticky=tk.NSEW, pady=(2, 6))
         self.total_time_spinval.state(["disabled"])
+        configure_grid(self, columns={0: 0, 1: 1, 2: 0, 3: 1}, rows={0: 1, 1: 1, 2: 1})
 
     def get_variables(self) -> dict:
         """Returns a dictionary of all the variables that are tied to each widget name.
@@ -999,6 +1038,7 @@ class MultiPointFrame(ttk.Labelframe):
         self.buttons["tiling"].grid(
             row=0, column=2, sticky=tk.NSEW, padx=(10, 0), pady=(4, 4)
         )
+        configure_grid(self, columns={0: 0, 1: 0, 2: 1}, rows={0: 1})
 
 
 class QuickLaunchFrame(ttk.Labelframe):
@@ -1034,3 +1074,4 @@ class QuickLaunchFrame(ttk.Labelframe):
         self.buttons["autofocus_button"].grid(
             row=1, column=2, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4)
         )
+        configure_grid(self, columns={0: 1, 1: 1, 2: 1}, rows={0: 1, 1: 1})

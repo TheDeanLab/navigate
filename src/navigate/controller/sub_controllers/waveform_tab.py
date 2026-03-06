@@ -40,6 +40,7 @@ from tkinter import NSEW
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
+from navigate.view.custom_widgets.common import themed_grid
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -145,8 +146,11 @@ class WaveformTabController(GUIController):
         """Initialize the plots in the waveform tab."""
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
-        self.view.canvas.get_tk_widget().grid(
-            row=5, column=0, columnspan=3, sticky=NSEW, padx=(5, 5), pady=(5, 5)
+        themed_grid(
+            self.view.canvas.get_tk_widget(),
+            row=0,
+            column=0,
+            sticky=NSEW,
         )
 
     def plot_waveforms(self, event):

@@ -252,7 +252,7 @@ class TigerController:
             raise ASIException(":N-5")
 
         for i in range(len(axis_types) - 1, -1, -1):
-            if axis_types[i] not in ["x", "z", "t"]:
+            if axis_types[i] not in ["x", "z", "t", "p"]:
                 motor_axes.pop(i)
         return motor_axes
 
@@ -564,7 +564,6 @@ class TigerController:
         dictionary:
              {axis: position}
         """
-
         if self.default_axes_sequence:
             cmd = f"WHERE {' '.join(axes)}\r"
             self.send_command(cmd)
@@ -672,7 +671,8 @@ class TigerController:
         pct : float
             Percentage of the maximum speed
         """
-        if self.default_axes_sequence is None:
+        local_axes_sequence = [axis for axis in self.default_axes_sequence if axis != "P"]
+        if local_axes_sequence is None:
             logger.error(
                 f"{str(self)}, Default axes sequence is not set. Cannot set speed."
             )
@@ -682,20 +682,21 @@ class TigerController:
         if self._max_speeds is None:
             # First, set the speed crazy high
             self.send_command(
-                f"SPEED {' '.join([f'{ax}=1000' for ax in self.default_axes_sequence])}\r"  # noqa
+                f"SPEED {' '.join([f'{ax}=1000' for ax in local_axes_sequence])}\r"  #
+                # noqa
             )
             self.read_response()
 
             # Next query the maximum speed
             self.send_command(
-                f"SPEED {' '.join([f'{ax}?' for ax in self.default_axes_sequence])}\r"
+                f"SPEED {' '.join([f'{ax}?' for ax in local_axes_sequence])}\r"
             )
             res = self.read_response()
             self._max_speeds = [float(x.split("=")[1]) for x in res.split()[1:]]
 
         # Now set to pct
         self.send_command(
-            f"SPEED {' '.join([f'{ax}={pct*speed:.7f}' for ax, speed in zip(self.default_axes_sequence, self._max_speeds)])}\r"  # noqa
+            f"SPEED {' '.join([f'{ax}={pct*speed:.7f}' for ax, speed in zip(local_axes_sequence, self._max_speeds)])}\r"  # noqa
         )
         self.read_response()
 

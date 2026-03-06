@@ -39,6 +39,8 @@ from navigate.model.devices.filter_wheel.ni import NIFilterWheel
 
 class TestNIFilterWheel(unittest.TestCase):
     def setUp(self):
+        NIFilterWheel.filter_wheel_value = {}
+
         # self.mock_task = Mock()
         self.mock_device_connection = Mock()
         # self.mock_device_connection.create_task.return_value = self.mock_task
@@ -57,7 +59,7 @@ class TestNIFilterWheel(unittest.TestCase):
                                     "type": "NI",
                                     "wheel_number": 1,
                                 },
-                                "filter_wheel_delay": 0.5,
+                                "filter_wheel_delay": 0.0,
                             },
                             {
                                 "available_filters": {
@@ -68,7 +70,7 @@ class TestNIFilterWheel(unittest.TestCase):
                                     "type": "NI",
                                     "wheel_number": 2,
                                 },
-                                "filter_wheel_delay": 0.5,
+                                "filter_wheel_delay": 0.0,
                             },
                         ]
                     }
@@ -93,7 +95,7 @@ class TestNIFilterWheel(unittest.TestCase):
     @patch("navigate.model.devices.filter_wheel.ni.nidaqmx.Task")
     def test_set_filter_valid(self, mock_task):
         self.filter_wheel.set_filter("filter_1")
-        assert mock_task.called_once()
+        mock_task.assert_called_once()
         self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_1")
 
         # set to the same value again, should not call write
@@ -104,7 +106,7 @@ class TestNIFilterWheel(unittest.TestCase):
         # set to a different value
         self.filter_wheel.set_filter("filter_2")
         self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_2")
-        assert mock_task.called_once()
+        self.assertEqual(mock_task.call_count, 1)
 
         # set to the same value again, should not call write
         mock_task.reset_mock()
@@ -126,3 +128,63 @@ class TestNIFilterWheel(unittest.TestCase):
         self.filter_wheel_2.set_filter("filter_4")
         self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_1")
         self.assertEqual(self.filter_wheel_2.filter_wheel_value[2], "filter_4")
+
+    @patch("navigate.model.devices.filter_wheel.ni.nidaqmx.Task")
+    def test_set_filter_handles_daq_error(self, mock_task):
+        class FakeDaqError(Exception):
+            pass
+
+        with patch("navigate.model.devices.filter_wheel.ni.DaqError", FakeDaqError):
+            mock_task.side_effect = FakeDaqError("simulated daq failure")
+            self.filter_wheel.set_filter("filter_1")
+
+        self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_1")
+
+    @patch("navigate.model.devices.filter_wheel.ni.nidaqmx.Task")
+    def test_set_filter_handles_unexpected_exception(self, mock_task):
+        mock_task.side_effect = RuntimeError("unexpected failure")
+        with patch("navigate.model.devices.filter_wheel.ni.logger.exception") as log:
+            self.filter_wheel.set_filter("filter_1")
+        self.assertEqual(self.filter_wheel.filter_wheel_value[1], "filter_1")
+        log.assert_called_once()
+
+    def test_str_and_enter(self):
+        self.assertEqual(str(self.filter_wheel), "DAQFilterWheel")
+        self.assertIs(self.filter_wheel.__enter__(), self.filter_wheel)
+
+    def test_exit_closes_task(self):
+        mock_task = Mock()
+        self.filter_wheel.filter_wheel_task = mock_task
+
+        assert self.filter_wheel.__exit__()
+        mock_task.stop.assert_called_once()
+        mock_task.close.assert_called_once()
+        self.filter_wheel.filter_wheel_task = None
+
+    def test_exit_swallows_task_cleanup_error(self):
+        mock_task = Mock()
+        mock_task.stop.side_effect = RuntimeError("stop failed")
+        self.filter_wheel.filter_wheel_task = mock_task
+
+        assert self.filter_wheel.__exit__()
+        mock_task.stop.assert_called_once()
+        self.filter_wheel.filter_wheel_task = None
+
+    def test_del_closes_task(self):
+        mock_task = Mock()
+        self.filter_wheel.filter_wheel_task = mock_task
+
+        self.filter_wheel.__del__()
+        mock_task.stop.assert_called_once()
+        mock_task.close.assert_called_once()
+        self.filter_wheel.filter_wheel_task = None
+
+    def test_del_logs_exception_when_cleanup_fails(self):
+        mock_task = Mock()
+        mock_task.stop.side_effect = RuntimeError("stop failed")
+        self.filter_wheel.filter_wheel_task = mock_task
+
+        with patch("navigate.model.devices.filter_wheel.ni.logger.exception") as log:
+            self.filter_wheel.__del__()
+        log.assert_called_once()
+        self.filter_wheel.filter_wheel_task = None

@@ -1,21 +1,21 @@
 # Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
-
+#
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
-
+#
 #      * Redistributions in binary form must reproduce the above copyright
 #      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
-
+#
 #      * Neither the name of the copyright holders nor the names of its
 #      contributors may be used to endorse or promote products derived from this
 #      software without specific prior written permission.
-
+#
 # NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
 # THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
 # CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -29,31 +29,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import unittest
-from navigate.model.devices.shutter.synthetic import SyntheticShutter
-from test.model.dummy import DummyModel
+
+from navigate.model.devices.shutter.base import ShutterBase
 
 
-class TestLaserBase(unittest.TestCase):
-    """Unit Test for ShutterBase Class"""
+class _ConcreteShutter(ShutterBase):
+    def open_shutter(self):
+        self.shutter_state = True
 
-    dummy_model = DummyModel()
-    microscope_name = "Mesoscale"
-
-    def test_shutter_base_attributes(self):
-        shutter = SyntheticShutter(
-            self.microscope_name, None, self.dummy_model.configuration
-        )
-
-        # Methods
-        assert hasattr(shutter, "open_shutter") and callable(
-            getattr(shutter, "open_shutter")
-        )
-        assert hasattr(shutter, "close_shutter") and callable(
-            getattr(shutter, "close_shutter")
-        )
-        assert hasattr(shutter, "state")
+    def close_shutter(self):
+        self.shutter_state = False
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_shutter_base_default_state_and_attributes():
+    configuration = {"k": "v"}
+    shutter = _ConcreteShutter("ScopeA", "device", configuration)
+
+    assert shutter.microscope_name == "ScopeA"
+    assert shutter.device_connection == "device"
+    assert shutter.configuration == configuration
+    assert shutter.state is False
+    assert str(shutter) == "ShutterBase"
+
+
+def test_shutter_base_state_property_tracks_changes():
+    shutter = _ConcreteShutter("ScopeA", None, {})
+    shutter.open_shutter()
+    assert shutter.state is True
+
+    shutter.close_shutter()
+    assert shutter.state is False
+
+    shutter.__del__()

@@ -28,29 +28,51 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
-from navigate.model.devices.shutter.synthetic import SyntheticShutter
+import pytest
 
-
-def test_synthetic_shutter_state_transitions():
-    shutter = SyntheticShutter("TestScope", None, {})
-
-    assert shutter.state is False
-
-    shutter.open_shutter()
-    assert shutter.state is True
-
-    shutter.close_shutter()
-    assert shutter.state is False
-
-    shutter.__del__()
+from navigate.model.devices.mirror.base import MirrorBase
+from navigate.model.devices.mirror.synthetic import SyntheticMirror
 
 
-def test_synthetic_shutter_base_attributes():
-    shutter = SyntheticShutter("TestScope", "device", {"k": "v"})
+@pytest.fixture
+def mirror_configuration():
+    return {
+        "configuration": {
+            "microscopes": {
+                "scope-a": {
+                    "mirror": {
+                        "channel": "demo",
+                        "flat_value": 0,
+                    }
+                }
+            }
+        }
+    }
 
-    assert shutter.microscope_name == "TestScope"
-    assert shutter.device_connection == "device"
-    assert shutter.configuration == {"k": "v"}
-    assert str(shutter) == "ShutterBase"
+
+def test_mirror_base_initializes_from_configuration(mirror_configuration):
+    controller = object()
+    mirror = MirrorBase("scope-a", controller, mirror_configuration)
+
+    assert mirror.configuration is mirror_configuration
+    assert mirror.mirror_controller is controller
+    assert mirror.mirror_parameters == {"channel": "demo", "flat_value": 0}
+    assert mirror.is_synthetic is False
+    assert str(mirror) == "MirrorBase"
+    assert mirror.__del__() is None
+
+
+def test_mirror_base_raises_for_unknown_microscope(mirror_configuration):
+    with pytest.raises(NameError, match="Microscope missing-scope does not exist."):
+        MirrorBase("missing-scope", None, mirror_configuration)
+
+
+def test_synthetic_mirror_marks_itself_as_synthetic(mirror_configuration):
+    mirror = SyntheticMirror("scope-a", "controller", mirror_configuration)
+
+    assert isinstance(mirror, MirrorBase)
+    assert mirror.is_synthetic is True
+    assert mirror.mirror_controller == "controller"
+    assert mirror.flat() is None
+    assert mirror.__del__() is None

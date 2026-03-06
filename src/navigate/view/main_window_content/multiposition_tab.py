@@ -42,7 +42,7 @@ from pandastable import Table, Menu, RowHeader, ColumnHeader
 from pandastable.headers import IndexHeader
 
 # Local Imports
-from navigate.view.custom_widgets.common import uniform_grid
+from navigate.view.custom_widgets.common import configure_grid, themed_grid
 from navigate.view.theme import get_theme_color, get_theme_font
 
 # Logger Setup
@@ -87,18 +87,28 @@ class MultiPositionTab(tk.Frame):
         #: MultiPointFrame: The frame that contains the widgets for the multipoint
         # experiment settings.
         self.tiling_buttons = MultiPointFrame(self)
-        self.tiling_buttons.grid(
-            row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+        themed_grid(
+            self.tiling_buttons,
+            row=0,
+            column=0,
+            sticky=tk.EW,
+            padx="layout_panel_gap",
+            pady=("layout_panel_gap", "layout_section_gap"),
         )
 
         #: MultiPointList: The frame that contains the widgets for the multipoint
         # experiment settings.
         self.multipoint_list = MultiPointList(self)
-        self.multipoint_list.grid(
-            row=6, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+        themed_grid(
+            self.multipoint_list,
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            padx="layout_panel_gap",
+            pady=("layout_section_gap", "layout_panel_gap"),
         )
 
-        uniform_grid(self)
+        configure_grid(self, columns={0: 1}, rows={0: 0, 1: 1})
 
 
 class MultiPointFrame(ttk.Labelframe):
@@ -141,12 +151,17 @@ class MultiPointFrame(ttk.Labelframe):
             else:
                 row, column = 0, 1
 
-            button.grid(
-                row=row, column=column, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4)
+            themed_grid(
+                button,
+                row=row,
+                column=column,
+                sticky=tk.NSEW,
+                padx="space_2",
+                pady="space_2",
             )
             counter += 1
 
-        uniform_grid(self)
+        configure_grid(self, columns={0: 1, 1: 1}, rows={0: 1, 1: 1})
 
     def get_variables(self):
         """Returns a dictionary of all the variables that are tied to each widget name.
@@ -204,6 +219,7 @@ class MultiPointList(ttk.Frame):
         self.pt = MultiPositionTable(self, showtoolbar=False, showstatusbar=True)
         self.pt.show()
         self.pt.model.df = df
+        configure_grid(self, columns={0: 0, 1: 1}, rows={0: 0, 1: 1, 2: 0})
 
     def get_table(self):
         """Returns a reference to multipoint table dataframe.

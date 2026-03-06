@@ -38,6 +38,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
+from navigate.view.custom_widgets.common import configure_grid, themed_grid
 from navigate.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
 from navigate.view.custom_widgets.hover import (
     HoverButton,
@@ -45,10 +46,19 @@ from navigate.view.custom_widgets.hover import (
     HoverRadioButton,
     HoverCheckButton,
 )
+from navigate.view.theme import get_theme_spacing
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+def _resolve_pad_value(value):
+    """Resolve a padding value or spacing token to pixels."""
+
+    if isinstance(value, str):
+        return get_theme_spacing(value)
+    return int(value)
 
 
 class LabelInput(ttk.Frame):
@@ -138,7 +148,7 @@ class LabelInput(ttk.Frame):
         else:
             #: ttk.Label: The label of the input widget
             self.label = ttk.Label(self, text=label, **label_args)
-            self.label.grid(row=0, column=0, sticky=tk.EW)
+            themed_grid(self.label, row=0, column=0, sticky=tk.EW)
             input_args["textvariable"] = input_var
 
         """Call the passed widget type constructor with the passed args"""
@@ -147,15 +157,11 @@ class LabelInput(ttk.Frame):
 
         """Specify label position"""
         if label_pos == "top":
-            self.widget.grid(row=1, column=0, sticky=(tk.W + tk.E))
-            self.columnconfigure(0, weight=1)
-            self.rowconfigure(index=0, weight=1)
-            self.rowconfigure(index=1, weight=1)
+            themed_grid(self.widget, row=1, column=0, sticky=tk.EW)
+            configure_grid(self, columns={0: 1}, rows={0: 0, 1: 1})
         else:
-            self.widget.grid(row=0, column=1, sticky=(tk.W + tk.E))
-            self.rowconfigure(0, weight=1)
-            self.columnconfigure(index=0, weight=1)
-            self.columnconfigure(index=1, weight=1)
+            themed_grid(self.widget, row=0, column=1, sticky=tk.EW)
+            configure_grid(self, columns={0: 0, 1: 1}, rows={0: 1})
 
     def get(self, default=None):
         """Returns the value of the input widget
@@ -301,4 +307,7 @@ class LabelInput(ttk.Frame):
         --------
         >>> widget.pad_input(10, 10, 10, 10)
         """
-        self.widget.grid(padx=(left, right), pady=(up, down))
+        self.widget.grid_configure(
+            padx=(_resolve_pad_value(left), _resolve_pad_value(right)),
+            pady=(_resolve_pad_value(up), _resolve_pad_value(down)),
+        )

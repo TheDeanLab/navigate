@@ -44,6 +44,7 @@ from navigate.view.custom_widgets.hover import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
+from navigate.view.theme import get_theme_spacing
 import navigate
 
 # Logger Setup
@@ -89,8 +90,8 @@ class ChannelsTab(tk.Frame):
             column=0,
             columnspan=3,
             sticky=tk.NSEW,
-            padx=10,
-            pady=10,
+            padx="layout_panel_gap",
+            pady=("layout_panel_gap", "layout_section_gap"),
         )
 
         #: StackAcquisitionFrame: The frame that holds the stack acquisition settings
@@ -101,8 +102,8 @@ class ChannelsTab(tk.Frame):
             column=0,
             columnspan=3,
             sticky=tk.NSEW,
-            padx=10,
-            pady=10,
+            padx="layout_panel_gap",
+            pady="layout_section_gap",
         )
 
         #: StackTimePointFrame: The frame that holds the time settings
@@ -113,8 +114,8 @@ class ChannelsTab(tk.Frame):
             column=0,
             columnspan=3,
             sticky=tk.NSEW,
-            padx=10,
-            pady=10,
+            padx="layout_panel_gap",
+            pady="layout_section_gap",
         )
 
         #: MultiPointFrame: The frame that holds the multipoint settings
@@ -125,8 +126,8 @@ class ChannelsTab(tk.Frame):
             column=0,
             columnspan=1,
             sticky=tk.NSEW,
-            padx=10,
-            pady=10,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady=("layout_section_gap", "layout_panel_gap"),
         )
 
         #: QuickLaunchFrame: The frame that holds the quick launch buttons
@@ -137,8 +138,8 @@ class ChannelsTab(tk.Frame):
             column=1,
             columnspan=2,
             sticky=tk.NSEW,
-            padx=10,
-            pady=10,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=("layout_section_gap", "layout_panel_gap"),
         )
 
         configure_grid(
@@ -176,10 +177,10 @@ class ChannelCreator(ttk.Labelframe):
         ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs)
 
         #: int: The default padding for widgets in the x direction
-        self.pad_x = 1
+        self.pad_x = get_theme_spacing("space_1")
 
         #: int: The default padding for widgets in the y direction
-        self.pad_y = 1
+        self.pad_y = get_theme_spacing("space_1")
 
         #: list: List of the variables for the channel check buttons
         self.channel_variables = []
@@ -264,10 +265,11 @@ class ChannelCreator(ttk.Labelframe):
         self.create_labels(filter_wheel_names, filter_wheels)
 
         # Configure the columns for consistent spacing
-        for i in range(len(self.label_text)):
-            self.columnconfigure(i, weight=1)
-        for i in range(channels):
-            self.rowconfigure(i, weight=1, uniform="1")
+        configure_grid(
+            self,
+            columns={i: 1 for i in range(len(self.label_text))},
+            rows={i + 1: {"weight": 1, "uniform": "1"} for i in range(channels)},
+        )
 
         # Creates the widgets for each channel - populates the rows.
         for num in range(0, channels):
@@ -447,8 +449,14 @@ class StackAcquisitionFrame(ttk.Labelframe):
 
         self.stack_frame = ttk.Frame(self)
         self.additional_stack_frame = ttk.Frame(self)
-        self.stack_frame.grid(row=0, column=0, sticky=tk.NSEW)
-        self.additional_stack_frame.grid(row=1, column=0, sticky=tk.NSEW)
+        themed_grid(
+            self.stack_frame,
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            pady=(0, "layout_section_gap"),
+        )
+        themed_grid(self.additional_stack_frame, row=1, column=0, sticky=tk.NSEW)
 
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -595,7 +603,8 @@ class StackAcquisitionFrame(ttk.Labelframe):
         image_directory = Path(__file__).resolve().parent
 
         self.image = tk.PhotoImage(
-            file=image_directory.joinpath("images", "cubic_bottom_to_top.png")
+            master=self,
+            file=image_directory.joinpath("images", "cubic_bottom_to_top.png"),
         )
 
         # Use ttk.Label

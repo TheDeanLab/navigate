@@ -45,10 +45,16 @@ from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.common import CommonMethods, uniform_grid
+from navigate.view.theme import get_theme_font, get_theme_space_px
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+def _space(px: int) -> int:
+    """Resolve spacing through the active GUI theme token map."""
+    return get_theme_space_px(px, px)
 
 
 class CameraNotebook(DockableNotebook):
@@ -137,7 +143,10 @@ class MIPTab(tk.Frame):
         self.canvas = tk.Canvas(
             self.cam_image, width=self.canvas_width, height=self.canvas_height
         )
-        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        outer_pad = _space(5)
+        self.canvas.grid(
+            row=0, column=0, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
 
         #: matplotlib.figure.Figure: The figure that will hold the camera image.
         self.matplotlib_figure = Figure(figsize=(6.0, 6.0), tight_layout=True)
@@ -147,15 +156,19 @@ class MIPTab(tk.Frame):
 
         #: DisplayModeFrame: The frame that controls single-channel vs overlay display.
         self.display_mode = DisplayModeFrame(self)
-        self.display_mode.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.display_mode.grid(
+            row=0, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.lut = IntensityFrame(self)
-        self.lut.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.lut.grid(row=1, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad)
 
         #: RenderFrame: The frame that will hold the live display functionality.
         self.render = MipRenderFrame(self)
-        self.render.grid(row=2, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.render.grid(
+            row=2, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
 
         uniform_grid(self)
 
@@ -205,7 +218,10 @@ class CameraTab(tk.Frame):
         self.canvas = tk.Canvas(
             self.cam_image, width=self.canvas_width, height=self.canvas_height
         )
-        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        outer_pad = _space(5)
+        self.canvas.grid(
+            row=0, column=0, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
 
         #: matplotlib.figure.Figure: The figure that will hold the camera image.
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
@@ -223,31 +239,44 @@ class CameraTab(tk.Frame):
             showvalue=0,
             label="Slice",
         )
-        self.slider.configure(state="disabled")
-        self.slider.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.slider.configure(state="disabled", font=get_theme_font("caption"))
+        self.slider.grid(
+            row=1, column=0, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
         self.slider.grid_remove()
 
         #: HistogramFrame: The frame that will hold the histogram.
         self.histogram = HistogramFrame(self)
         self.histogram.grid(
-            row=2, column=0, columnspan=2, sticky=tk.NSEW, padx=5, pady=5
+            row=2,
+            column=0,
+            columnspan=2,
+            sticky=tk.NSEW,
+            padx=outer_pad,
+            pady=outer_pad,
         )
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.display_mode = DisplayModeFrame(self.display_setting)
-        self.display_mode.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.display_mode.grid(
+            row=0, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.lut = IntensityFrame(self.display_setting)
-        self.lut.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.lut.grid(row=1, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad)
 
         #: MetricsFrame: The frame that will hold the camera selection and counts.
         self.image_metrics = MetricsFrame(self.display_setting)
-        self.image_metrics.grid(row=2, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.image_metrics.grid(
+            row=2, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
 
         #: RenderFrame: The frame that will hold the live display functionality.
         self.live_frame = RenderFrame(self.display_setting)
-        self.live_frame.grid(row=3, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.live_frame.grid(
+            row=3, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
 
 
 class HistogramFrame(ttk.Labelframe):
@@ -276,7 +305,13 @@ class HistogramFrame(ttk.Labelframe):
 
         #: ttk.Frame: The frame for the histogram.
         self.frame = ttk.Frame(self)
-        self.frame.grid(row=0, column=0, sticky=tk.NSEW, padx=0, pady=0)
+        self.frame.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=_space(0),
+            pady=_space(0),
+        )
         self.frame.grid_rowconfigure(0, weight=1)
         self.frame.grid_columnconfigure(0, weight=1)
 
@@ -325,7 +360,10 @@ class DisplayModeFrame(ttk.Labelframe, CommonMethods):
         self.inputs["mode"].widget["values"] = ("Single", "Overlay")
         self.inputs["mode"].set("Single")
         self.inputs["mode"].widget.state(["!disabled", "readonly"])
-        self.inputs["mode"].grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        compact_pad = _space(3)
+        self.inputs["mode"].grid(
+            row=0, column=0, sticky=tk.NSEW, padx=compact_pad, pady=compact_pad
+        )
 
         uniform_grid(self)
 
@@ -415,8 +453,13 @@ class MipRenderFrame(ttk.Labelframe, CommonMethods):
         }
         self.inputs["perspective"].widget.state(["!disabled", "readonly"])
         self.inputs["channel"].widget.state(["!disabled", "readonly"])
-        self.inputs["perspective"].grid(row=0, column=0, sticky=tk.EW, padx=3, pady=3)
-        self.inputs["channel"].grid(row=1, column=0, sticky=tk.EW, padx=3, pady=3)
+        compact_pad = _space(3)
+        self.inputs["perspective"].grid(
+            row=0, column=0, sticky=tk.EW, padx=compact_pad, pady=compact_pad
+        )
+        self.inputs["channel"].grid(
+            row=1, column=0, sticky=tk.EW, padx=compact_pad, pady=compact_pad
+        )
         self.columnconfigure(0, weight=1)
 
         uniform_grid(self)
@@ -462,7 +505,10 @@ class WaveformTab(tk.Frame):
 
         #: WaveformSettingsFrame: The frame that will hold the waveform settings.
         self.waveform_settings = WaveformSettingsFrame(self)
-        self.waveform_settings.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        outer_pad = _space(5)
+        self.waveform_settings.grid(
+            row=1, column=0, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        )
 
         uniform_grid(self)
 
@@ -499,7 +545,10 @@ class WaveformSettingsFrame(ttk.Labelframe, CommonMethods):
             )
         }
 
-        self.inputs["sample_rate"].grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        compact_pad = _space(3)
+        self.inputs["sample_rate"].grid(
+            row=0, column=0, sticky=tk.NSEW, padx=compact_pad, pady=compact_pad
+        )
 
         self.inputs["waveform_template"] = LabelInput(
             parent=self,
@@ -509,7 +558,7 @@ class WaveformSettingsFrame(ttk.Labelframe, CommonMethods):
             input_args={"width": 20},
         )
         self.inputs["waveform_template"].grid(
-            row=0, column=1, sticky=tk.NSEW, padx=3, pady=3
+            row=0, column=1, sticky=tk.NSEW, padx=compact_pad, pady=compact_pad
         )
 
         uniform_grid(self)
@@ -545,6 +594,8 @@ class MetricsFrame(ttk.Labelframe, CommonMethods):
         self.names = ["Frames", "Image", "Channel"]
 
         # Loop for widgets
+        outer_pad = _space(5)
+        compact_pad = _space(3)
         for i in range(len(self.labels)):
             if i == 0:
                 self.inputs[self.names[i]] = LabelInput(
@@ -556,7 +607,11 @@ class MetricsFrame(ttk.Labelframe, CommonMethods):
                     label_pos="top",
                 )
                 self.inputs[self.names[i]].grid(
-                    row=i, column=0, sticky=tk.NSEW, padx=5, pady=3
+                    row=i,
+                    column=0,
+                    sticky=tk.NSEW,
+                    padx=outer_pad,
+                    pady=compact_pad,
                 )
             if i > 0:
                 self.inputs[self.names[i]] = LabelInput(
@@ -568,7 +623,11 @@ class MetricsFrame(ttk.Labelframe, CommonMethods):
                     label_pos="top",
                 )
                 self.inputs[self.names[i]].grid(
-                    row=i, column=0, sticky=tk.NSEW, padx=5, pady=3
+                    row=i,
+                    column=0,
+                    sticky=tk.NSEW,
+                    padx=outer_pad,
+                    pady=compact_pad,
                 )
                 self.inputs[self.names[i]].configure(width=5)
 
@@ -618,6 +677,8 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._active_multichannel_max = tk.IntVar(value=2**16 - 1)
         self._active_multichannel_alpha = tk.DoubleVar(value=100.0)
         self._active_multichannel_gamma = tk.DoubleVar(value=1.0)
+        dense_pad = _space(2)
+        compact_pad = _space(3)
 
         self.single_channel_frame = ttk.Frame(self)
         self.single_channel_frame.grid(row=0, column=0, sticky=tk.NSEW)
@@ -626,7 +687,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self.multichannel_frame.grid_remove()
 
         ttk.Label(self.multichannel_frame, text="Channel").grid(
-            row=0, column=0, sticky=tk.W, padx=2, pady=2
+            row=0, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_channel_widget = ttk.Combobox(
             self.multichannel_frame,
@@ -635,11 +696,11 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             state="disabled",
         )
         self._multichannel_channel_widget.grid(
-            row=0, column=1, sticky=tk.EW, padx=2, pady=2
+            row=0, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
         )
 
         ttk.Label(self.multichannel_frame, text="LUT").grid(
-            row=1, column=0, sticky=tk.W, padx=2, pady=2
+            row=1, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_lut_widget = ttk.Combobox(
             self.multichannel_frame,
@@ -648,19 +709,23 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             state="readonly",
             values=self.multichannel_color_labels,
         )
-        self._multichannel_lut_widget.grid(row=1, column=1, sticky=tk.EW, padx=2, pady=2)
+        self._multichannel_lut_widget.grid(
+            row=1, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
 
         ttk.Label(self.multichannel_frame, text="Visible").grid(
-            row=2, column=0, sticky=tk.W, padx=2, pady=2
+            row=2, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_visible_widget = ttk.Checkbutton(
             self.multichannel_frame,
             variable=self._active_multichannel_visible,
         )
-        self._multichannel_visible_widget.grid(row=2, column=1, sticky=tk.W, padx=2, pady=2)
+        self._multichannel_visible_widget.grid(
+            row=2, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
 
         ttk.Label(self.multichannel_frame, text="Alpha").grid(
-            row=3, column=0, sticky=tk.W, padx=2, pady=2
+            row=3, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_alpha_widget = ttk.Scale(
             self.multichannel_frame,
@@ -669,10 +734,12 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             to=100.0,
             orient=tk.HORIZONTAL,
         )
-        self._multichannel_alpha_widget.grid(row=3, column=1, sticky=tk.EW, padx=2, pady=2)
+        self._multichannel_alpha_widget.grid(
+            row=3, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
 
         ttk.Label(self.multichannel_frame, text="Gamma").grid(
-            row=4, column=0, sticky=tk.W, padx=2, pady=2
+            row=4, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_gamma_widget = ttk.Spinbox(
             self.multichannel_frame,
@@ -682,21 +749,23 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             increment=0.01,
             width=9,
         )
-        self._multichannel_gamma_widget.grid(row=4, column=1, sticky=tk.EW, padx=2, pady=2)
+        self._multichannel_gamma_widget.grid(
+            row=4, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
 
         ttk.Label(self.multichannel_frame, text="Autoscale").grid(
-            row=5, column=0, sticky=tk.W, padx=2, pady=2
+            row=5, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_autoscale_widget = ttk.Checkbutton(
             self.multichannel_frame,
             variable=self._active_multichannel_autoscale,
         )
         self._multichannel_autoscale_widget.grid(
-            row=5, column=1, sticky=tk.W, padx=2, pady=2
+            row=5, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
 
         ttk.Label(self.multichannel_frame, text="Min Counts").grid(
-            row=6, column=0, sticky=tk.W, padx=2, pady=2
+            row=6, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_min_widget = ttk.Spinbox(
             self.multichannel_frame,
@@ -706,10 +775,12 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             increment=1,
             width=9,
         )
-        self._multichannel_min_widget.grid(row=6, column=1, sticky=tk.EW, padx=2, pady=2)
+        self._multichannel_min_widget.grid(
+            row=6, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
 
         ttk.Label(self.multichannel_frame, text="Max Counts").grid(
-            row=7, column=0, sticky=tk.W, padx=2, pady=2
+            row=7, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_max_widget = ttk.Spinbox(
             self.multichannel_frame,
@@ -719,7 +790,9 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             increment=1,
             width=9,
         )
-        self._multichannel_max_widget.grid(row=7, column=1, sticky=tk.EW, padx=2, pady=2)
+        self._multichannel_max_widget.grid(
+            row=7, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
 
         self._multichannel_channel_widget.bind(
             "<<ComboboxSelected>>",
@@ -776,7 +849,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
                 input_args={"value": self.color_values[i]},
             )
             self.inputs[self.color_labels[i]].grid(
-                row=row, column=0, sticky=tk.W, pady=3
+                row=row, column=0, sticky=tk.W, pady=compact_pad
             )
             row += 1
 
@@ -791,7 +864,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             input_class=ttk.Checkbutton,
             input_var=self.transpose,
         )
-        self.inputs[self.trans].grid(row=row, column=0, sticky=tk.W, pady=3)
+        self.inputs[self.trans].grid(row=row, column=0, sticky=tk.W, pady=compact_pad)
         row += 1
 
         #: tk.BooleanVar: The variable that holds the autoscale flag.
@@ -811,7 +884,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             input_class=ttk.Checkbutton,
             input_var=self.autoscale,
         )
-        self.inputs[self.auto].grid(row=row, column=0, sticky=tk.W, pady=3)
+        self.inputs[self.auto].grid(row=row, column=0, sticky=tk.W, pady=compact_pad)
         row += 1
 
         # Max and Min Counts
@@ -827,8 +900,8 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
                 row=row,
                 column=0,
                 sticky=tk.W,
-                padx=3,
-                pady=3,
+                padx=compact_pad,
+                pady=compact_pad,
             )
             row += 1
 
@@ -938,13 +1011,19 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._multichannel_syncing = True
         try:
             if self._multichannel_overlay_mode and len(self._multichannel_channels) > 1:
-                self._multichannel_channel_widget["values"] = self._multichannel_channels
+                self._multichannel_channel_widget["values"] = (
+                    self._multichannel_channels
+                )
                 self._multichannel_channel_widget.configure(state="readonly")
                 active_channel = self._active_multichannel_channel.get()
                 if active_channel not in self._multichannel_channels:
-                    self._active_multichannel_channel.set(self._multichannel_channels[0])
+                    self._active_multichannel_channel.set(
+                        self._multichannel_channels[0]
+                    )
             else:
-                self._multichannel_channel_widget["values"] = (self._all_channels_label,)
+                self._multichannel_channel_widget["values"] = (
+                    self._all_channels_label,
+                )
                 self._multichannel_channel_widget.configure(state="disabled")
                 self._active_multichannel_channel.set(self._all_channels_label)
         finally:
@@ -975,8 +1054,39 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             self._set_multichannel_minmax_state()
         self._notify_multichannel_change(field)
 
+    def _safe_get_float(self, tk_var: Any, fallback: float) -> float:
+        """Read a Tk variable as float while tolerating transient invalid edits."""
+        try:
+            return float(tk_var.get())
+        except (tk.TclError, TypeError, ValueError):
+            return float(fallback)
+
+    def _safe_get_bool(self, tk_var: Any, fallback: bool) -> bool:
+        """Read a Tk variable as bool while tolerating transient invalid edits."""
+        try:
+            value = tk_var.get()
+        except (tk.TclError, TypeError, ValueError):
+            return bool(fallback)
+
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in ("", "none"):
+                return bool(fallback)
+            if normalized in ("0", "false", "off", "no"):
+                return False
+            if normalized in ("1", "true", "on", "yes"):
+                return True
+        return bool(value)
+
+    def _safe_get_string(self, tk_var: Any, fallback: str) -> str:
+        """Read a Tk variable as string while tolerating transient invalid edits."""
+        try:
+            return str(tk_var.get())
+        except (tk.TclError, TypeError, ValueError):
+            return str(fallback)
+
     def _store_active_multichannel_values(self) -> None:
-        channel = self._active_multichannel_channel.get()
+        channel = self._safe_get_string(self._active_multichannel_channel, "")
         if not channel:
             return
         targets = (
@@ -986,18 +1096,49 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         )
         for target_channel in targets:
             state = self._multichannel_channel_states.setdefault(target_channel, {})
-            state["lut_name"] = self._active_multichannel_lut.get()
-            state["autoscale"] = bool(self._active_multichannel_autoscale.get())
-            state["min_counts"] = float(self._active_multichannel_min.get())
-            state["max_counts"] = float(self._active_multichannel_max.get())
-            state["visible"] = bool(self._active_multichannel_visible.get())
+            lut_name = self._safe_get_string(
+                self._active_multichannel_lut,
+                str(state.get("lut_name", "Green")),
+            ).strip()
+            state["lut_name"] = (
+                lut_name if lut_name else str(state.get("lut_name", "Green"))
+            )
+            state["autoscale"] = self._safe_get_bool(
+                self._active_multichannel_autoscale,
+                bool(state.get("autoscale", True)),
+            )
+            state["min_counts"] = self._safe_get_float(
+                self._active_multichannel_min,
+                float(state.get("min_counts", 0.0)),
+            )
+            state["max_counts"] = self._safe_get_float(
+                self._active_multichannel_max,
+                float(state.get("max_counts", float(2**16 - 1))),
+            )
+            state["visible"] = self._safe_get_bool(
+                self._active_multichannel_visible,
+                bool(state.get("visible", True)),
+            )
             state["alpha"] = max(
                 0.0,
-                min(1.0, float(self._active_multichannel_alpha.get()) / 100.0),
+                min(
+                    1.0,
+                    self._safe_get_float(
+                        self._active_multichannel_alpha,
+                        float(state.get("alpha", 1.0)) * 100.0,
+                    )
+                    / 100.0,
+                ),
             )
             state["gamma"] = max(
                 0.0,
-                min(2.0, float(self._active_multichannel_gamma.get())),
+                min(
+                    2.0,
+                    self._safe_get_float(
+                        self._active_multichannel_gamma,
+                        float(state.get("gamma", 1.0)),
+                    ),
+                ),
             )
 
     def _load_active_multichannel_values(self) -> None:
@@ -1013,11 +1154,11 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             self._active_multichannel_lut.set(state.get("lut_name", "Green"))
             self._active_multichannel_autoscale.set(bool(state.get("autoscale", True)))
             self._active_multichannel_min.set(int(state.get("min_counts", 0.0)))
-            self._active_multichannel_max.set(int(state.get("max_counts", float(2**16 - 1))))
-            self._active_multichannel_visible.set(bool(state.get("visible", True)))
-            self._active_multichannel_alpha.set(
-                float(state.get("alpha", 1.0)) * 100.0
+            self._active_multichannel_max.set(
+                int(state.get("max_counts", float(2**16 - 1)))
             )
+            self._active_multichannel_visible.set(bool(state.get("visible", True)))
+            self._active_multichannel_alpha.set(float(state.get("alpha", 1.0)) * 100.0)
             self._active_multichannel_gamma.set(
                 max(0.0, min(2.0, float(state.get("gamma", 1.0))))
             )
@@ -1026,7 +1167,11 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._set_multichannel_minmax_state()
 
     def _set_multichannel_minmax_state(self) -> None:
-        state = "disabled" if self._active_multichannel_autoscale.get() else "normal"
+        autoscale_enabled = self._safe_get_bool(
+            self._active_multichannel_autoscale,
+            True,
+        )
+        state = "disabled" if autoscale_enabled else "normal"
         self._multichannel_min_widget["state"] = state
         self._multichannel_max_widget["state"] = state
 
@@ -1042,7 +1187,9 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             return {}
         return state.copy()
 
-    def set_multichannel_channel_state(self, channel: str, state: Dict[str, Any]) -> None:
+    def set_multichannel_channel_state(
+        self, channel: str, state: Dict[str, Any]
+    ) -> None:
         """Populate controls for one channel from cached state."""
         merged = self._multichannel_channel_states.get(channel, {}).copy()
         merged.update(state)

@@ -45,7 +45,7 @@ from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.common import CommonMethods, uniform_grid
-from navigate.view.theme import get_theme_font, get_theme_space_px
+from navigate.view.theme import get_theme_font, get_theme_spacing
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -54,7 +54,8 @@ logger = logging.getLogger(p)
 
 def _space(px: int) -> int:
     """Resolve spacing through the active GUI theme token map."""
-    return get_theme_space_px(px, px)
+    normalized_px = max(0, int(px))
+    return get_theme_spacing(f"space_{normalized_px}", normalized_px)
 
 
 class CameraNotebook(DockableNotebook):

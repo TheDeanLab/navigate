@@ -1676,6 +1676,9 @@ class MIPViewController(BaseViewController):
         #: int: Scaling factor for ratio of lateral and axial dimensions.
         self.Z_image_value = None
 
+        #: float: Ratio of axial spacing to lateral pixel size.
+        self.axial_to_lateral_ratio = 1.0
+
         #: np.ndarray: The image data.
         self.image = None
 
@@ -1855,14 +1858,90 @@ class MIPViewController(BaseViewController):
         if display_mode == "XY":
             image = self.xy_mip[channel_idx]
         elif display_mode == "ZY":
-            image = self.zy_mip[channel_idx, :].T
+            # ZY uses the Y-by-Z projection (stored in zx_mip as Z-by-Y).
+            image = self.zx_mip[channel_idx, :].T
         else:
-            image = self.zx_mip[channel_idx, :]
+            # ZX uses the X-by-Z projection (stored in zy_mip as Z-by-X).
+            image = self.zy_mip[channel_idx, :].T
+
+        image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
 
         image = self.flip_image(image)
         # map the image to canvas size()
         image = self.down_sample_image(image, True)
         return image
+
+    def _compute_axial_to_lateral_ratio(
+        self, microscope_state: dict, camera_parameters: dict
+    ) -> float:
+        """Compute axial/lateral spacing ratio for isotropic orthogonal rendering."""
+        lateral_size_um = None
+        fov_x = camera_parameters.get("fov_x")
+        img_x_pixels = camera_parameters.get("img_x_pixels", self.XY_image_width)
+        try:
+            if fov_x is not None and img_x_pixels not in (None, 0):
+                lateral_size_um = abs(float(fov_x)) / float(img_x_pixels)
+        except (TypeError, ValueError, ZeroDivisionError):
+            lateral_size_um = None
+
+        if lateral_size_um is None or lateral_size_um <= 0:
+            microscope_name = microscope_state.get("microscope_name")
+            zoom = microscope_state.get("zoom")
+            try:
+                lateral_size_um = float(
+                    self.parent_controller.configuration["configuration"]["microscopes"][
+                        microscope_name
+                    ]["zoom"]["pixel_size"][zoom]
+                )
+            except Exception:
+                lateral_size_um = None
+
+        axial_size_um = None
+        step_size = microscope_state.get("step_size")
+        try:
+            if step_size not in (None, ""):
+                axial_size_um = abs(float(step_size))
+        except (TypeError, ValueError):
+            axial_size_um = None
+
+        if (axial_size_um is None or axial_size_um <= 0) and self.number_of_slices > 1:
+            try:
+                z_start = float(microscope_state.get("abs_z_start", 0.0))
+                z_end = float(microscope_state.get("abs_z_end", 0.0))
+                axial_size_um = abs(z_end - z_start) / float(self.number_of_slices - 1)
+            except (TypeError, ValueError, ZeroDivisionError):
+                axial_size_um = None
+
+        if (
+            lateral_size_um is None
+            or lateral_size_um <= 0
+            or axial_size_um is None
+            or axial_size_um <= 0
+        ):
+            return 1.0
+
+        return max(axial_size_um / lateral_size_um, 1e-6)
+
+    def _rescale_orthogonal_for_anisotropy(
+        self, image: np.ndarray, display_mode: str
+    ) -> np.ndarray:
+        """Rescale orthogonal projections along Z so display spacing is isotropic."""
+        if display_mode == "XY":
+            return image
+
+        ratio = float(getattr(self, "axial_to_lateral_ratio", 1.0))
+        if np.isclose(ratio, 1.0, rtol=1e-3, atol=1e-3):
+            return image
+
+        target_width = max(1, int(round(image.shape[1] * ratio)))
+        if target_width == image.shape[1]:
+            return image
+
+        return cv2.resize(
+            image,
+            (target_width, image.shape[0]),
+            interpolation=cv2.INTER_NEAREST,
+        )
 
     def initialize_non_live_display(
         self, microscope_state: dict, camera_parameters: dict
@@ -1882,15 +1961,14 @@ class MIPViewController(BaseViewController):
         self.perspective = self.render_widgets["perspective"].get()
         self.XY_image_width = self.original_image_width
         self.XY_image_height = self.original_image_height
-        z_range = microscope_state["abs_z_end"] - microscope_state["abs_z_start"]
-
-        # TODO: may stretch by the value of binning.
-        if z_range == 0:
-            self.Z_image_value = 1
-        else:
-            self.Z_image_value = int(
-                self.XY_image_width * camera_parameters["fov_x"] / z_range
-            )
+        self.axial_to_lateral_ratio = self._compute_axial_to_lateral_ratio(
+            microscope_state,
+            camera_parameters,
+        )
+        self.Z_image_value = max(
+            1,
+            int(round(self.number_of_slices * self.axial_to_lateral_ratio)),
+        )
         self.prepare_mip_view()
         self.update_perspective()
 

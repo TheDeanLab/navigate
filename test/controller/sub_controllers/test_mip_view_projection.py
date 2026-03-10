@@ -41,6 +41,14 @@ from navigate.controller.sub_controllers.camera_view import (
 )
 
 
+class _Getter:
+    def __init__(self, value):
+        self.value = value
+
+    def get(self):
+        return self.value
+
+
 def test_try_to_display_image_updates_orthogonal_projections(monkeypatch):
     controller = MIPViewController.__new__(MIPViewController)
     controller.image_mode = "z-stack"
@@ -124,3 +132,75 @@ def test_try_to_display_image_clears_and_returns_when_disabled(monkeypatch):
     np.testing.assert_array_equal(controller.zy_mip, np.full((1, 2, 2), 99))
     np.testing.assert_array_equal(controller.zx_mip, np.full((1, 2, 2), 99))
     controller._clear_mip.assert_called_once_with()
+
+
+def test_get_mip_image_uses_correct_projection_and_anisotropic_scaling_zy():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.axial_to_lateral_ratio = 2.0
+    controller.selected_channels = ["CH1"]
+    controller.render_widgets = {
+        "perspective": _Getter("ZY"),
+        "channel": _Getter("CH1"),
+    }
+    controller.flip_image = lambda image: image
+    controller.down_sample_image = lambda image, *_: image
+    controller.xy_mip = np.zeros((1, 2, 3), dtype=np.uint16)
+    controller.zy_mip = np.zeros((1, 4, 3), dtype=np.uint16)
+    controller.zx_mip = np.array(
+        [
+            [
+                [1, 2],
+                [3, 4],
+                [5, 6],
+                [7, 8],
+            ]
+        ],
+        dtype=np.uint16,
+    )
+
+    image = controller.get_mip_image()
+
+    # ZY should source from zx_mip (Z-by-Y), transpose to Y-by-Z, then scale Z width.
+    expected = np.array([[1, 3, 5, 7], [2, 4, 6, 8]], dtype=np.uint16)
+    expected = np.repeat(expected, 2, axis=1)
+    np.testing.assert_array_equal(image, expected)
+
+
+def test_get_mip_image_uses_correct_projection_and_anisotropic_scaling_zx():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.axial_to_lateral_ratio = 1.5
+    controller.selected_channels = ["CH1"]
+    controller.render_widgets = {
+        "perspective": _Getter("ZX"),
+        "channel": _Getter("CH1"),
+    }
+    controller.flip_image = lambda image: image
+    controller.down_sample_image = lambda image, *_: image
+    controller.xy_mip = np.zeros((1, 2, 3), dtype=np.uint16)
+    controller.zy_mip = np.array(
+        [
+            [
+                [10, 11, 12],
+                [20, 21, 22],
+                [30, 31, 32],
+                [40, 41, 42],
+            ]
+        ],
+        dtype=np.uint16,
+    )
+    controller.zx_mip = np.zeros((1, 4, 2), dtype=np.uint16)
+
+    image = controller.get_mip_image()
+
+    # ZX should source from zy_mip (Z-by-X), transpose to X-by-Z, then scale Z width.
+    expected = np.array(
+        [
+            [10, 20, 30, 40],
+            [11, 21, 31, 41],
+            [12, 22, 32, 42],
+        ],
+        dtype=np.uint16,
+    )
+    # 4 * 1.5 -> 6 columns
+    expected = np.repeat(expected, [2, 1, 2, 1], axis=1)
+    np.testing.assert_array_equal(image, expected)

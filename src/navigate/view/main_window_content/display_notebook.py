@@ -34,7 +34,7 @@
 import tkinter as tk
 from tkinter import ttk
 import logging
-from typing import Iterable, Dict, Any, Optional
+from typing import Callable, Iterable, Dict, Any, Optional
 
 # Third Party Imports
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -597,14 +597,18 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         #: dict: The dictionary that holds the single-channel widgets.
-        self.inputs = {}
-        #: dict: Channel-specific multichannel controls.
-        self.multichannel_inputs = {}
-        self._multichannel_channel_states = {}
-        self._multichannel_on_change = None
+        self.inputs: Dict[str, Any] = {}
+        #: dict: Channel-specific compact control states keyed by channel name.
+        self._multichannel_channel_states: Dict[str, Dict[str, Any]] = {}
+        #: Optional[Callable[[str, str], None]]: Callback for per-channel control changes.
+        self._multichannel_on_change: Optional[Callable[[str, str], None]] = None
+        #: bool: Guard to prevent recursive callbacks while synchronizing control values.
         self._multichannel_syncing = False
+        #: bool: Whether channel selector should expose concrete channels (Overlay mode).
         self._multichannel_overlay_mode = False
-        self._multichannel_channels = []
+        #: list[str]: Active acquisition channels for compact controls.
+        self._multichannel_channels: list[str] = []
+        #: str: Label used for the disabled aggregate selector in single mode.
         self._all_channels_label = "All"
         self._active_multichannel_channel = tk.StringVar()
         self._active_multichannel_lut = tk.StringVar()
@@ -861,7 +865,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self,
         channels: Iterable[str],
         default_luts: Iterable[str],
-        on_change=None,
+        on_change: Optional[Callable[[str, str], None]] = None,
     ) -> None:
         """Configure compact per-channel controls for multichannel display."""
         channels = list(channels)
@@ -869,7 +873,6 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._multichannel_channels = channels
         self._multichannel_on_change = on_change
         if len(channels) == 0:
-            self.multichannel_inputs = {}
             self._multichannel_channel_widget["values"] = ()
             self._active_multichannel_channel.set("")
             self._multichannel_channel_widget.configure(state="disabled")
@@ -897,10 +900,6 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
                 merged = defaults.copy()
                 merged.update(cached)
                 self._multichannel_channel_states[channel] = merged
-
-            self.multichannel_inputs = {
-                channel: self._multichannel_channel_states[channel] for channel in channels
-            }
         finally:
             self._multichannel_syncing = False
 
@@ -914,7 +913,16 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         overlay_mode: bool,
         channels: Optional[Iterable[str]] = None,
     ) -> None:
-        """Configure channel selector behavior for Single vs Overlay display mode."""
+        """Configure channel selector behavior for single vs overlay display mode.
+
+        Parameters
+        ----------
+        overlay_mode : bool
+            When True, the selector is enabled and channel names are listed. When
+            False, the selector is disabled and set to ``"All"``.
+        channels : Optional[Iterable[str]]
+            Optional explicit channel list. If None, uses the currently cached list.
+        """
         if channels is not None:
             self._multichannel_channels = list(channels)
         else:
@@ -1022,8 +1030,8 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._multichannel_min_widget["state"] = state
         self._multichannel_max_widget["state"] = state
 
-    def get_multichannel_widgets(self) -> Dict[str, Any]:
-        """Return channel-mapped multichannel LUT/autoscale/min/max controls."""
+    def get_multichannel_widgets(self) -> Dict[str, Dict[str, Any]]:
+        """Return channel-mapped compact control state."""
         return self._multichannel_channel_states
 
     def get_multichannel_channel_state(self, channel: str) -> Dict[str, Any]:

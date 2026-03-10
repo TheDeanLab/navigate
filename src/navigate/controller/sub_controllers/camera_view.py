@@ -583,7 +583,7 @@ class BaseViewController(GUIController, ABaseViewController):
         return
 
     def _update_multichannel_channel_selector_mode(self) -> None:
-        """Set LUT channel selector behavior for Single vs Overlay modes."""
+        """Set LUT channel selector behavior for single vs overlay modes."""
         if not hasattr(self.view, "lut"):
             return
         if hasattr(self.view.lut, "set_multichannel_channel_selector_mode"):
@@ -605,7 +605,14 @@ class BaseViewController(GUIController, ABaseViewController):
             self.process_image()
 
     def _redraw_current_view(self) -> None:
-        """Redraw with the active display pipeline to keep LUT state consistent."""
+        """Redraw with the active display pipeline to keep LUT state consistent.
+
+        Notes
+        -----
+        When channels are selected, this intentionally redraws through the current
+        compact LUT path (single or overlay mode) rather than the legacy
+        ``process_image`` path to prevent transient LUT fallback flashes.
+        """
         if self._has_selected_channels():
             self._refresh_after_display_mode_change()
         elif getattr(self, "image", None) is not None:
@@ -1865,7 +1872,21 @@ class CameraViewController(BaseViewController):
         self,
         current_image: Optional[np.ndarray] = None,
     ) -> tuple[Dict[str, np.ndarray], Dict[str, Any], bool]:
-        """Collect one image/signature per selected channel for camera overlay rendering."""
+        """Collect one image/signature per selected channel for camera overlay.
+
+        Parameters
+        ----------
+        current_image : Optional[np.ndarray]
+            Optional latest incoming image. When provided, this is used for the
+            matching latest channel/slice tuple to avoid an immediate spool reload.
+
+        Returns
+        -------
+        tuple[Dict[str, np.ndarray], Dict[str, Any], bool]
+            ``(channel_images, channel_signatures, all_channels_available)`` where
+            ``all_channels_available`` is True only when every selected channel has
+            data for the target slice.
+        """
         channel_images: Dict[str, np.ndarray] = {}
         channel_signatures: Dict[str, Any] = {}
         all_channels_available = True

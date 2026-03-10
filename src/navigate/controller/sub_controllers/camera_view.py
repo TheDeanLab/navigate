@@ -459,7 +459,9 @@ class BaseViewController(GUIController, ABaseViewController):
 
     def _has_selected_channels(self) -> bool:
         """Return whether at least one acquisition channel is active."""
-        return isinstance(self.selected_channels, list) and len(self.selected_channels) > 0
+        return (
+            isinstance(self.selected_channels, list) and len(self.selected_channels) > 0
+        )
 
     def _has_multiple_selected_channels(self) -> bool:
         """Return whether more than one acquisition channel is active."""
@@ -473,7 +475,9 @@ class BaseViewController(GUIController, ABaseViewController):
             if self.selected_channels:
                 return self.selected_channels[0]
             return None
-        if hasattr(self.view, "lut") and hasattr(self.view.lut, "get_multichannel_active_channel"):
+        if hasattr(self.view, "lut") and hasattr(
+            self.view.lut, "get_multichannel_active_channel"
+        ):
             channel = self.view.lut.get_multichannel_active_channel()
             if channel in self.selected_channels:
                 return channel
@@ -644,7 +648,9 @@ class BaseViewController(GUIController, ABaseViewController):
 
     def _build_overlay_colormap(self, lut_name: str) -> np.ndarray:
         """Build an OpenCV BGR colormap table for an ImageJ-like channel color."""
-        color_bgr = IMAGEJ_CHANNEL_COLOR_BGR.get(lut_name, IMAGEJ_CHANNEL_COLOR_BGR["Gray"])
+        color_bgr = IMAGEJ_CHANNEL_COLOR_BGR.get(
+            lut_name, IMAGEJ_CHANNEL_COLOR_BGR["Gray"]
+        )
         ramp = np.arange(256, dtype=np.uint8)
         colormap = np.empty((256, 1, 3), dtype=np.uint8)
         for i, channel_value in enumerate(color_bgr):
@@ -780,7 +786,9 @@ class BaseViewController(GUIController, ABaseViewController):
         channel_state = self._get_channel_overlay_state(channel)
         if not channel_state["visible"]:
             self._last_frame_display_max = 0.0
-            empty_rgb = np.zeros((self.canvas_height, self.canvas_width, 3), dtype=np.uint8)
+            empty_rgb = np.zeros(
+                (self.canvas_height, self.canvas_width, 3), dtype=np.uint8
+            )
             return self.add_crosshair(empty_rgb)
 
         colorized, channel_max = self._get_colorized_channel_buffer(
@@ -849,7 +857,9 @@ class BaseViewController(GUIController, ABaseViewController):
 
         if overlay_bgr is None:
             self._last_frame_display_max = 0.0
-            empty_rgb = np.zeros((self.canvas_height, self.canvas_width, 3), dtype=np.uint8)
+            empty_rgb = np.zeros(
+                (self.canvas_height, self.canvas_width, 3), dtype=np.uint8
+            )
             return self.add_crosshair(empty_rgb)
 
         self._last_frame_display_max = max_intensity
@@ -2203,7 +2213,6 @@ class CameraViewController(BaseViewController):
         elif self.rolling_frames == 1:
             rolling_average = self._last_frame_display_max
         elif self._max_intensity_history_idx >= self.rolling_frames:
-
             rolling_average = (
                 sum(
                     self.max_intensity_history[
@@ -2487,7 +2496,9 @@ class MIPViewController(BaseViewController):
         """
         self.render_widgets["channel"].widget["values"] = self.selected_channels
         if isinstance(self.selected_channels, list):
-            self._mip_channel_revision = {channel: 0 for channel in self.selected_channels}
+            self._mip_channel_revision = {
+                channel: 0 for channel in self.selected_channels
+            }
         self._update_channel_selector_for_display_mode()
         self.preallocate_matrices()
 
@@ -2526,6 +2537,58 @@ class MIPViewController(BaseViewController):
 
         self._zy_reduce_buf = np.empty((1, self.original_image_width), dtype=np.uint16)
         self._zx_reduce_buf = np.empty((self.original_image_height, 1), dtype=np.uint16)
+
+    def _ensure_mip_buffers_compatible(self, image: np.ndarray) -> np.ndarray:
+        """Ensure MIP buffers match incoming frame shape and dtype.
+
+        Parameters
+        ----------
+        image : np.ndarray
+            Incoming 2D frame from the capture buffer.
+
+        Returns
+        -------
+        np.ndarray
+            Frame converted (when needed) to the dtype used by MIP buffers.
+        """
+        frame = np.asarray(image)
+        if frame.ndim != 2:
+            frame = np.squeeze(frame)
+        if frame.ndim != 2:
+            raise ValueError("MIP rendering requires a 2D frame.")
+
+        frame_height, frame_width = frame.shape
+        xy_mip = getattr(self, "xy_mip", None)
+        needs_realloc = xy_mip is None or xy_mip.shape[1:] != (
+            frame_height,
+            frame_width,
+        )
+        if needs_realloc:
+            self.original_image_height = frame_height
+            self.original_image_width = frame_width
+            self.preallocate_matrices()
+            xy_mip = self.xy_mip
+
+        target_dtype = xy_mip.dtype
+        if frame.dtype != target_dtype:
+            frame = frame.astype(target_dtype, copy=False)
+
+        zy_reduce_buf = getattr(self, "_zy_reduce_buf", None)
+        if (
+            zy_reduce_buf is None
+            or zy_reduce_buf.shape != (1, frame_width)
+            or zy_reduce_buf.dtype != target_dtype
+        ):
+            self._zy_reduce_buf = np.empty((1, frame_width), dtype=target_dtype)
+        zx_reduce_buf = getattr(self, "_zx_reduce_buf", None)
+        if (
+            zx_reduce_buf is None
+            or zx_reduce_buf.shape != (frame_height, 1)
+            or zx_reduce_buf.dtype != target_dtype
+        ):
+            self._zx_reduce_buf = np.empty((frame_height, 1), dtype=target_dtype)
+
+        return frame
 
     def _update_channel_selector_for_display_mode(self) -> None:
         """Disable MIP legacy channel selector when compact channel picker is active."""
@@ -2567,7 +2630,9 @@ class MIPViewController(BaseViewController):
             return channel
         return self.selected_channels[0] if self.selected_channels else None
 
-    def _collect_mip_overlay_channels(self) -> tuple[Dict[str, np.ndarray], Dict[str, Any]]:
+    def _collect_mip_overlay_channels(
+        self,
+    ) -> tuple[Dict[str, np.ndarray], Dict[str, Any]]:
         """Collect per-channel MIP projections/signatures for overlay rendering."""
         channel_images: Dict[str, np.ndarray] = {}
         channel_signatures: Dict[str, Any] = {}
@@ -2628,9 +2693,9 @@ class MIPViewController(BaseViewController):
             zoom = microscope_state.get("zoom")
             try:
                 lateral_size_um = float(
-                    self.parent_controller.configuration["configuration"]["microscopes"][
-                        microscope_name
-                    ]["zoom"]["pixel_size"][zoom]
+                    self.parent_controller.configuration["configuration"][
+                        "microscopes"
+                    ][microscope_name]["zoom"]["pixel_size"][zoom]
                 )
             except Exception:
                 lateral_size_um = None
@@ -2778,12 +2843,7 @@ class MIPViewController(BaseViewController):
                 self._clear_mip()
             return
 
-        zy_reduce_buf = getattr(self, "_zy_reduce_buf", None)
-        if zy_reduce_buf is None or zy_reduce_buf.shape[1] != image.shape[1]:
-            self._zy_reduce_buf = np.empty((1, image.shape[1]), dtype=np.uint16)
-        zx_reduce_buf = getattr(self, "_zx_reduce_buf", None)
-        if zx_reduce_buf is None or zx_reduce_buf.shape[0] != image.shape[0]:
-            self._zx_reduce_buf = np.empty((image.shape[0], 1), dtype=np.uint16)
+        image = self._ensure_mip_buffers_compatible(image)
 
         # Orthogonal maximum intensity projections.
         cv2.max(self.xy_mip[channel_idx], image, self.xy_mip[channel_idx])
@@ -2794,12 +2854,14 @@ class MIPViewController(BaseViewController):
         cv2.reduce(image, 1, cv2.REDUCE_MAX, self._zx_reduce_buf)
         cv2.max(zx_slice, self._zx_reduce_buf, zx_slice)
         selected_channels = getattr(self, "selected_channels", None)
-        if (
-            isinstance(selected_channels, list)
-            and 0 <= channel_idx < len(selected_channels)
+        if isinstance(selected_channels, list) and 0 <= channel_idx < len(
+            selected_channels
         ):
             channel_name = selected_channels[channel_idx]
-            if not hasattr(self, "_mip_channel_revision") or self._mip_channel_revision is None:
+            if (
+                not hasattr(self, "_mip_channel_revision")
+                or self._mip_channel_revision is None
+            ):
                 self._mip_channel_revision = {}
             self._mip_channel_revision[channel_name] = (
                 self._mip_channel_revision.get(channel_name, 0) + 1

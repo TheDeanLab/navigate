@@ -135,6 +135,58 @@ def test_try_to_display_image_clears_and_returns_when_disabled(monkeypatch):
     controller._clear_mip.assert_called_once_with()
 
 
+def test_try_to_display_image_casts_frame_dtype_for_opencv_max(monkeypatch):
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.image_mode = "z-stack"
+    controller.display_enabled = SimpleNamespace(get=lambda: True)
+    controller._clear_mip = MagicMock()
+    controller.identify_channel_index_and_slice = lambda: (0, 0)
+    controller.number_of_channels = 1
+    controller.number_of_slices = 2
+    controller.original_image_height = 2
+    controller.original_image_width = 3
+    controller.xy_mip = np.zeros((1, 2, 3), dtype=np.uint16)
+    controller.zy_mip = np.zeros((1, 2, 3), dtype=np.uint16)
+    controller.zx_mip = np.zeros((1, 2, 2), dtype=np.uint16)
+    controller._zy_reduce_buf = np.empty((1, 3), dtype=np.uint16)
+    controller._zx_reduce_buf = np.empty((2, 1), dtype=np.uint16)
+
+    monkeypatch.setattr(BaseViewController, "try_to_display_image", lambda *_: None)
+
+    image = np.array([[1.2, 2.8, 3.1], [4.9, 5.0, 6.7]], dtype=np.float32)
+    controller.try_to_display_image(image)
+
+    np.testing.assert_array_equal(controller.xy_mip[0], image.astype(np.uint16))
+    assert controller.xy_mip.dtype == np.uint16
+
+
+def test_try_to_display_image_reallocates_mip_buffers_when_shape_changes(monkeypatch):
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.image_mode = "z-stack"
+    controller.display_enabled = SimpleNamespace(get=lambda: True)
+    controller._clear_mip = MagicMock()
+    controller.identify_channel_index_and_slice = lambda: (0, 1)
+    controller.number_of_channels = 1
+    controller.number_of_slices = 2
+    controller.original_image_height = 2
+    controller.original_image_width = 2
+    controller.xy_mip = np.zeros((1, 2, 2), dtype=np.uint16)
+    controller.zy_mip = np.zeros((1, 2, 2), dtype=np.uint16)
+    controller.zx_mip = np.zeros((1, 2, 2), dtype=np.uint16)
+    controller._zy_reduce_buf = np.empty((1, 2), dtype=np.uint16)
+    controller._zx_reduce_buf = np.empty((2, 1), dtype=np.uint16)
+
+    monkeypatch.setattr(BaseViewController, "try_to_display_image", lambda *_: None)
+
+    image = np.arange(200, 212, dtype=np.uint16).reshape(3, 4)
+    controller.try_to_display_image(image)
+
+    assert controller.xy_mip.shape == (1, 3, 4)
+    assert controller.zy_mip.shape == (1, 2, 4)
+    assert controller.zx_mip.shape == (1, 2, 3)
+    np.testing.assert_array_equal(controller.xy_mip[0], image)
+
+
 def test_get_mip_image_uses_correct_projection_and_anisotropic_scaling_zy():
     controller = MIPViewController.__new__(MIPViewController)
     controller.axial_to_lateral_ratio = 2.0
@@ -342,8 +394,12 @@ def test_collect_mip_overlay_channels_returns_perspective_signatures():
 
     channel_images, channel_signatures = controller._collect_mip_overlay_channels()
 
-    np.testing.assert_array_equal(channel_images["CH1"], np.full((2, 2), 1, dtype=np.uint16))
-    np.testing.assert_array_equal(channel_images["CH2"], np.full((2, 2), 2, dtype=np.uint16))
+    np.testing.assert_array_equal(
+        channel_images["CH1"], np.full((2, 2), 1, dtype=np.uint16)
+    )
+    np.testing.assert_array_equal(
+        channel_images["CH2"], np.full((2, 2), 2, dtype=np.uint16)
+    )
     assert channel_signatures["CH1"] == ("mip", 0, "ZX", 3)
     assert channel_signatures["CH2"] == ("mip", 1, "ZX", 7)
 
@@ -443,7 +499,9 @@ def test_collect_camera_overlay_channels_requires_all_selected_channels():
     )
 
     assert not all_available
-    np.testing.assert_array_equal(channel_images["CH1"], np.full((2, 2), 7, dtype=np.uint16))
+    np.testing.assert_array_equal(
+        channel_images["CH1"], np.full((2, 2), 7, dtype=np.uint16)
+    )
     assert "CH2" not in channel_images
     assert channel_signatures["CH1"] == ("camera", 0, 0, 1)
 
@@ -457,9 +515,9 @@ def test_camera_display_image_overlay_skips_partial_channel_frames():
         {"CH1": ("camera", 0, 0, 1)},
         False,
     )
-    controller._compose_overlay_from_channels = lambda *_args, **_kwargs: (_ for _ in ()).throw(
-        AssertionError("should not compose overlay from incomplete channels")
-    )
+    controller._compose_overlay_from_channels = lambda *_args, **_kwargs: (
+        _ for _ in ()
+    ).throw(AssertionError("should not compose overlay from incomplete channels"))
     controller.overlay_mask = lambda image: image
     controller.populate_image = MagicMock()
     controller.update_max_counts = MagicMock()

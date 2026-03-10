@@ -295,6 +295,8 @@ class BaseViewController(GUIController, ABaseViewController):
         self.overlay_channel_settings: Dict[str, Dict[str, Any]] = {}
         #: dict: Cached BGR LUT tables for overlay colors.
         self._overlay_colormap_cache: Dict[str, np.ndarray] = {}
+        #: dict: Cache of colorized channel buffers keyed by source/settings signature.
+        self._colorized_channel_cache: Dict[tuple, tuple[np.ndarray, float]] = {}
         #: np.ndarray: Reused additive overlay buffer in BGR.
         self._overlay_bgr_buf: Optional[np.ndarray] = None
         #: bool: Guard for suppressing callback loops while syncing controls.
@@ -449,9 +451,25 @@ class BaseViewController(GUIController, ABaseViewController):
         mode_widget = self.display_mode_widgets.get("mode")
         if mode_widget is None:
             return False
-        if not isinstance(self.selected_channels, list) or len(self.selected_channels) <= 1:
+        if not self._has_multiple_selected_channels():
             return False
         return mode_widget.get() == "Overlay"
+
+    def _has_multiple_selected_channels(self) -> bool:
+        """Return whether more than one acquisition channel is active."""
+        return isinstance(self.selected_channels, list) and len(self.selected_channels) > 1
+
+    def _get_multichannel_active_channel(self) -> Optional[str]:
+        """Get the active channel from compact LUT controls."""
+        if not self._has_multiple_selected_channels():
+            if isinstance(self.selected_channels, list) and self.selected_channels:
+                return self.selected_channels[0]
+            return None
+        if hasattr(self.view, "lut") and hasattr(self.view.lut, "get_multichannel_active_channel"):
+            channel = self.view.lut.get_multichannel_active_channel()
+            if channel in self.selected_channels:
+                return channel
+        return self.selected_channels[0] if self.selected_channels else None
 
     def _default_overlay_lut_for_channel(self, index: int) -> str:
         """Pick a default ImageJ-like color for a channel index."""
@@ -468,6 +486,8 @@ class BaseViewController(GUIController, ABaseViewController):
                     "autoscale": True,
                     "min_counts": float(self.min_counts),
                     "max_counts": float(self.max_counts),
+                    "visible": True,
+                    "alpha": 1.0,
                 }
 
     def _sync_overlay_controls_from_cache(self) -> None:
@@ -499,11 +519,11 @@ class BaseViewController(GUIController, ABaseViewController):
                 self.overlay_channel_settings.setdefault(channel_name, {}).update(state)
 
     def _on_multichannel_control_changed(self, channel: str, _field: str) -> None:
-        """Handle per-channel overlay LUT/autoscale/min/max changes from the UI."""
+        """Handle per-channel display changes from the compact multichannel UI."""
         if self._syncing_overlay_controls:
             return
         self._sync_overlay_cache_from_controls(channel)
-        if self._should_use_overlay_mode():
+        if self._has_multiple_selected_channels():
             self._refresh_after_display_mode_change()
 
     def _configure_display_mode_controls(self) -> None:
@@ -546,7 +566,9 @@ class BaseViewController(GUIController, ABaseViewController):
         if not hasattr(self.view, "lut"):
             return
         if hasattr(self.view.lut, "set_multichannel_controls_visible"):
-            self.view.lut.set_multichannel_controls_visible(self._should_use_overlay_mode())
+            self.view.lut.set_multichannel_controls_visible(
+                self._has_multiple_selected_channels()
+            )
 
     def _update_channel_selector_for_display_mode(self) -> None:
         """Hook for subclasses to disable irrelevant single-channel selectors."""
@@ -611,9 +633,106 @@ class BaseViewController(GUIController, ABaseViewController):
             self._overlay_colormap_cache[lut_name] = colormap
         return colormap
 
+    def _get_channel_overlay_state(self, channel: str) -> Dict[str, Any]:
+        """Return normalized display settings for one selected channel."""
+        self._ensure_overlay_channel_settings()
+        state = self.overlay_channel_settings.get(channel, {})
+        return {
+            "lut_name": str(state.get("lut_name", "Gray")),
+            "autoscale": bool(state.get("autoscale", True)),
+            "min_counts": float(state.get("min_counts", self.min_counts)),
+            "max_counts": float(state.get("max_counts", self.max_counts)),
+            "visible": bool(state.get("visible", True)),
+            "alpha": max(0.0, min(1.0, float(state.get("alpha", 1.0)))),
+        }
+
+    def _get_colorized_channel_buffer(
+        self,
+        channel: str,
+        image: np.ndarray,
+        y_slice: slice,
+        x_slice: slice,
+        channel_state: Dict[str, Any],
+        signature: Optional[Any] = None,
+    ) -> tuple[np.ndarray, float]:
+        """Return a BGR colorized channel buffer, using cache when signature is stable."""
+        cache_key = None
+        if signature is not None:
+            cache_key = (
+                channel,
+                signature,
+                int(y_slice.start or 0),
+                int(y_slice.stop or -1),
+                int(x_slice.start or 0),
+                int(x_slice.stop or -1),
+                int(self.canvas_width),
+                int(self.canvas_height),
+                str(channel_state["lut_name"]),
+                bool(channel_state["autoscale"]),
+                float(channel_state["min_counts"]),
+                float(channel_state["max_counts"]),
+            )
+            cached = self._colorized_channel_cache.get(cache_key)
+            if cached is not None:
+                return cached
+
+        image = self._crop_image_with_zoom(image, y_slice, x_slice)
+        image = self.down_sample_image(image)
+        scaled, channel_max = self._scale_image_intensity_with_bounds(
+            image=image,
+            autoscale=bool(channel_state["autoscale"]),
+            min_counts=float(channel_state["min_counts"]),
+            max_counts=float(channel_state["max_counts"]),
+        )
+        color_lut = self._get_overlay_colormap(str(channel_state["lut_name"]))
+        colorized = cv2.applyColorMap(scaled, color_lut)
+
+        if cache_key is not None:
+            self._colorized_channel_cache[cache_key] = (colorized, channel_max)
+            if len(self._colorized_channel_cache) > 256:
+                first_key = next(iter(self._colorized_channel_cache))
+                self._colorized_channel_cache.pop(first_key, None)
+        return colorized, channel_max
+
+    @staticmethod
+    def _apply_channel_alpha(colorized_bgr: np.ndarray, alpha: float) -> np.ndarray:
+        """Apply per-channel alpha to a BGR buffer."""
+        alpha = max(0.0, min(1.0, float(alpha)))
+        if alpha >= 1.0:
+            return colorized_bgr
+        return cv2.convertScaleAbs(colorized_bgr, alpha=alpha, beta=0.0)
+
+    def _render_single_multichannel_frame(
+        self,
+        channel: str,
+        image: np.ndarray,
+        channel_signature: Optional[Any] = None,
+    ) -> np.ndarray:
+        """Render one channel using compact multichannel LUT controls."""
+        y_slice, x_slice = self._prepare_zoom_window()
+        channel_state = self._get_channel_overlay_state(channel)
+        if not channel_state["visible"]:
+            self._last_frame_display_max = 0.0
+            empty_rgb = np.zeros((self.canvas_height, self.canvas_width, 3), dtype=np.uint8)
+            return self.add_crosshair(empty_rgb)
+
+        colorized, channel_max = self._get_colorized_channel_buffer(
+            channel=channel,
+            image=image,
+            y_slice=y_slice,
+            x_slice=x_slice,
+            channel_state=channel_state,
+            signature=channel_signature,
+        )
+        colorized = self._apply_channel_alpha(colorized, channel_state["alpha"])
+        self._last_frame_display_max = float(channel_max)
+        rgb = cv2.cvtColor(colorized, cv2.COLOR_BGR2RGB)
+        return self.add_crosshair(rgb)
+
     def _compose_overlay_from_channels(
         self,
         channel_images: Dict[str, np.ndarray],
+        channel_signatures: Optional[Dict[str, Any]] = None,
     ) -> Optional[np.ndarray]:
         """Compose channel images into a single additive RGB overlay frame."""
         if not channel_images:
@@ -628,35 +747,43 @@ class BaseViewController(GUIController, ABaseViewController):
             if image is None:
                 continue
 
-            image = self._crop_image_with_zoom(image, y_slice, x_slice)
-            image = self.down_sample_image(image)
+            channel_state = self._get_channel_overlay_state(channel)
+            if not channel_state["visible"]:
+                continue
 
-            channel_state = self.overlay_channel_settings.get(channel, {})
-            scaled, channel_max = self._scale_image_intensity_with_bounds(
+            signature = (
+                None if channel_signatures is None else channel_signatures.get(channel)
+            )
+            colorized, channel_max = self._get_colorized_channel_buffer(
+                channel=channel,
                 image=image,
-                autoscale=bool(channel_state.get("autoscale", True)),
-                min_counts=float(channel_state.get("min_counts", self.min_counts)),
-                max_counts=float(channel_state.get("max_counts", self.max_counts)),
+                y_slice=y_slice,
+                x_slice=x_slice,
+                channel_state=channel_state,
+                signature=signature,
             )
-            max_intensity = max(max_intensity, channel_max)
-            color_lut = self._get_overlay_colormap(
-                str(channel_state.get("lut_name", "Gray"))
+
+            max_intensity = max(max_intensity, float(channel_max))
+            colorized_for_compose = self._apply_channel_alpha(
+                colorized,
+                channel_state["alpha"],
             )
-            colorized = cv2.applyColorMap(scaled, color_lut)
 
             if overlay_bgr is None:
                 if (
                     self._overlay_bgr_buf is None
-                    or self._overlay_bgr_buf.shape != colorized.shape
+                    or self._overlay_bgr_buf.shape != colorized_for_compose.shape
                 ):
-                    self._overlay_bgr_buf = np.empty_like(colorized)
-                self._overlay_bgr_buf[:] = colorized
+                    self._overlay_bgr_buf = np.empty_like(colorized_for_compose)
+                self._overlay_bgr_buf[:] = colorized_for_compose
                 overlay_bgr = self._overlay_bgr_buf
             else:
-                cv2.add(overlay_bgr, colorized, overlay_bgr)
+                cv2.add(overlay_bgr, colorized_for_compose, overlay_bgr)
 
         if overlay_bgr is None:
-            return None
+            self._last_frame_display_max = 0.0
+            empty_rgb = np.zeros((self.canvas_height, self.canvas_width, 3), dtype=np.uint8)
+            return self.add_crosshair(empty_rgb)
 
         self._last_frame_display_max = max_intensity
         overlay_rgb = cv2.cvtColor(overlay_bgr, cv2.COLOR_BGR2RGB)
@@ -911,6 +1038,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.number_of_channels = len(self.selected_channels)
         self.number_of_slices = int(microscope_state["number_z_steps"])
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
+        self._colorized_channel_cache.clear()
         if self.transpose:
             self.original_image_width = int(camera_parameters["img_y_pixels"])
             self.original_image_height = int(camera_parameters["img_x_pixels"])
@@ -1566,6 +1694,8 @@ class CameraViewController(BaseViewController):
         self._latest_channel_idx = 0
         #: int: Last observed slice index from acquisition stream.
         self._latest_slice_idx = 0
+        #: dict: Per-channel/slice revision counters for overlay cache signatures.
+        self._channel_slice_revision: Dict[tuple[int, int], int] = {}
 
         #: int: The number of frames to average.
         self.rolling_frames = 1
@@ -1646,7 +1776,7 @@ class CameraViewController(BaseViewController):
         """Disable single-channel selectors while overlay mode is active."""
         if self.display_state != "Slice":
             return
-        if self._should_use_overlay_mode():
+        if self._has_multiple_selected_channels() or self._should_use_overlay_mode():
             self.view.live_frame.channel.configure(state="disabled")
         else:
             self.view.live_frame.channel.state(["!disabled", "readonly"])
@@ -1674,19 +1804,24 @@ class CameraViewController(BaseViewController):
 
     def _collect_camera_overlay_channels(
         self,
-        current_image: np.ndarray,
-    ) -> Dict[str, np.ndarray]:
-        """Collect one image per selected channel for camera overlay rendering."""
+        current_image: Optional[np.ndarray] = None,
+    ) -> tuple[Dict[str, np.ndarray], Dict[str, Any]]:
+        """Collect one image/signature per selected channel for camera overlay rendering."""
         channel_images: Dict[str, np.ndarray] = {}
+        channel_signatures: Dict[str, Any] = {}
         if not isinstance(self.selected_channels, list):
-            return channel_images
+            return channel_images, channel_signatures
 
         target_slice = self._get_overlay_target_slice()
         latest_channel_idx = int(getattr(self, "_latest_channel_idx", 0))
         latest_slice_idx = int(getattr(self, "_latest_slice_idx", target_slice))
 
         for channel_idx, channel_name in enumerate(self.selected_channels):
-            if channel_idx == latest_channel_idx and latest_slice_idx == target_slice:
+            if (
+                current_image is not None
+                and channel_idx == latest_channel_idx
+                and latest_slice_idx == target_slice
+            ):
                 image = current_image
             else:
                 image = self.spooled_images.load_image(
@@ -1696,8 +1831,34 @@ class CameraViewController(BaseViewController):
             if image is None:
                 continue
             channel_images[channel_name] = self.flip_image(image)
+            revision = int(
+                getattr(self, "_channel_slice_revision", {}).get(
+                    (channel_idx, int(target_slice)),
+                    0,
+                )
+            )
+            channel_signatures[channel_name] = (
+                "camera",
+                channel_idx,
+                int(target_slice),
+                revision,
+            )
 
-        return channel_images
+        return channel_images, channel_signatures
+
+    def _build_camera_channel_signature(
+        self,
+        channel_index: int,
+        slice_index: int,
+    ) -> tuple[str, int, int, int]:
+        """Build a stable signature used for per-slice channel cache reuse."""
+        revision = int(
+            getattr(self, "_channel_slice_revision", {}).get(
+                (int(channel_index), int(slice_index)),
+                0,
+            )
+        )
+        return ("camera", int(channel_index), int(slice_index), revision)
 
     def try_to_display_image(self, image: np.ndarray) -> None:
         """Try to display an image.
@@ -1717,6 +1878,8 @@ class CameraViewController(BaseViewController):
         channel_idx, slice_idx = self.identify_channel_index_and_slice()
         self._latest_channel_idx = channel_idx
         self._latest_slice_idx = slice_idx
+        key = (channel_idx, slice_idx)
+        self._channel_slice_revision[key] = self._channel_slice_revision.get(key, 0) + 1
         self.image_metrics["Channel"].set(int(self.selected_channels[channel_idx][2:]))
 
         # Save the image to the spooled image loader.
@@ -1727,7 +1890,17 @@ class CameraViewController(BaseViewController):
         # Update image according to the display state.
         self.display_state = self.view.live_frame.live.get()
         if self.display_state == "Live":
-            super().try_to_display_image(image)
+            if self._should_use_overlay_mode():
+                super().try_to_display_image(image)
+            elif self._has_multiple_selected_channels():
+                active_channel = self._get_multichannel_active_channel()
+                if (
+                    active_channel in self.selected_channels
+                    and channel_idx == self.selected_channels.index(active_channel)
+                ):
+                    super().try_to_display_image(image)
+            else:
+                super().try_to_display_image(image)
 
         elif self.display_state == "Slice":
             requested_slice = self.view.slider.get()
@@ -1735,8 +1908,14 @@ class CameraViewController(BaseViewController):
                 if slice_idx == requested_slice:
                     super().try_to_display_image(image)
             else:
-                requested_channel = self.view.live_frame.channel.get()
-                requested_channel = int(requested_channel[-1]) - 1
+                if self._has_multiple_selected_channels():
+                    active_channel = self._get_multichannel_active_channel()
+                    if active_channel not in self.selected_channels:
+                        return
+                    requested_channel = self.selected_channels.index(active_channel)
+                else:
+                    requested_channel = self.view.live_frame.channel.get()
+                    requested_channel = int(requested_channel[-1]) - 1
                 if slice_idx == requested_slice and channel_idx == requested_channel:
                     super().try_to_display_image(image)
 
@@ -1753,6 +1932,7 @@ class CameraViewController(BaseViewController):
             Camera parameters.
         """
         super().initialize_non_live_display(microscope_state, camera_parameters)
+        self._channel_slice_revision = {}
         self.view.live_frame.channel["values"] = self.selected_channels
         self.view.live_frame.channel.set(self.selected_channels[0])
         self._configure_display_mode_controls()
@@ -1777,15 +1957,11 @@ class CameraViewController(BaseViewController):
 
         slider_index = self.view.slider.get()
         if self._should_use_overlay_mode():
-            channel_images: Dict[str, np.ndarray] = {}
-            for channel_index, channel_name in enumerate(self.selected_channels):
-                image = self.spooled_images.load_image(
-                    channel=channel_index,
-                    slice_index=slider_index,
-                )
-                if image is not None:
-                    channel_images[channel_name] = self.flip_image(image)
-            img_out = self._compose_overlay_from_channels(channel_images)
+            channel_images, channel_signatures = self._collect_camera_overlay_channels()
+            img_out = self._compose_overlay_from_channels(
+                channel_images,
+                channel_signatures=channel_signatures,
+            )
             img_out = self.overlay_mask(img_out)
             if img_out is None:
                 return
@@ -1793,8 +1969,14 @@ class CameraViewController(BaseViewController):
             self.update_max_counts()
             return
 
-        channel_index = self.view.live_frame.channel.get()
-        channel_index = self.selected_channels.index(channel_index)
+        if self._has_multiple_selected_channels():
+            active_channel = self._get_multichannel_active_channel()
+            if active_channel not in self.selected_channels:
+                return
+            channel_index = self.selected_channels.index(active_channel)
+        else:
+            channel_index = self.view.live_frame.channel.get()
+            channel_index = self.selected_channels.index(channel_index)
         image = self.spooled_images.load_image(
             channel=channel_index, slice_index=slider_index
         )
@@ -1803,7 +1985,23 @@ class CameraViewController(BaseViewController):
             return
 
         self.image = self.flip_image(image)
-        self.process_image()
+        if self._has_multiple_selected_channels():
+            active_channel = self._get_multichannel_active_channel()
+            if active_channel not in self.selected_channels:
+                return
+            channel_signature = self._build_camera_channel_signature(
+                channel_index=channel_index,
+                slice_index=slider_index,
+            )
+            img_out = self._render_single_multichannel_frame(
+                active_channel,
+                self.image,
+                channel_signature=channel_signature,
+            )
+            img_out = self.overlay_mask(img_out)
+            self.view.after(0, lambda img=img_out: self.populate_image(img))
+        else:
+            self.process_image()
         self.update_max_counts()
 
     def update_display_state(self, *_) -> None:
@@ -1829,7 +2027,7 @@ class CameraViewController(BaseViewController):
             )
             self.view.slider.configure(state="normal")
             self.view.slider.grid()
-            if self._should_use_overlay_mode():
+            if self._has_multiple_selected_channels() or self._should_use_overlay_mode():
                 self.view.live_frame.channel.configure(state="disabled")
             else:
                 self.view.live_frame.channel.state(["!disabled", "readonly"])
@@ -1953,8 +2151,13 @@ class CameraViewController(BaseViewController):
         """
         if self._should_use_overlay_mode():
             self._sync_overlay_cache_from_controls()
-            channel_images = self._collect_camera_overlay_channels(image)
-            img_out = self._compose_overlay_from_channels(channel_images)
+            channel_images, channel_signatures = self._collect_camera_overlay_channels(
+                image
+            )
+            img_out = self._compose_overlay_from_channels(
+                channel_images,
+                channel_signatures=channel_signatures,
+            )
             img_out = self.overlay_mask(img_out)
             if img_out is not None:
                 self.view.after(0, lambda img=img_out: self.populate_image(img))
@@ -1962,6 +2165,26 @@ class CameraViewController(BaseViewController):
             return
 
         self.image = self.flip_image(image)
+
+        if self._has_multiple_selected_channels():
+            self._sync_overlay_cache_from_controls()
+            active_channel = self._get_multichannel_active_channel()
+            if active_channel not in self.selected_channels:
+                return
+            channel_index = self.selected_channels.index(active_channel)
+            channel_signature = self._build_camera_channel_signature(
+                channel_index=channel_index,
+                slice_index=int(getattr(self, "_latest_slice_idx", 0)),
+            )
+            img_out = self._render_single_multichannel_frame(
+                active_channel,
+                self.image,
+                channel_signature=channel_signature,
+            )
+            img_out = self.overlay_mask(img_out)
+            self.view.after(0, lambda img=img_out: self.populate_image(img))
+            self.update_max_counts()
+            return
 
         if self._snr_selected:
             self.image = compute_signal_to_noise(
@@ -2062,6 +2285,9 @@ class MIPViewController(BaseViewController):
 
         #: np.ndarray: Scratch buffer for ZX max-reduction updates.
         self._zx_reduce_buf = None
+
+        #: dict: Per-channel revision counters for MIP projection updates.
+        self._mip_channel_revision: Dict[str, int] = {}
 
         #: bool: The autoscale flag.
         self.autoscale = True
@@ -2170,6 +2396,8 @@ class MIPViewController(BaseViewController):
         Pre-allocate the matrices for the MIP.
         """
         self.render_widgets["channel"].widget["values"] = self.selected_channels
+        if isinstance(self.selected_channels, list):
+            self._mip_channel_revision = {channel: 0 for channel in self.selected_channels}
         self._update_channel_selector_for_display_mode()
         self.preallocate_matrices()
 
@@ -2210,8 +2438,8 @@ class MIPViewController(BaseViewController):
         self._zx_reduce_buf = np.empty((self.original_image_height, 1), dtype=np.uint16)
 
     def _update_channel_selector_for_display_mode(self) -> None:
-        """Disable MIP single-channel selector when overlay mode is active."""
-        if self._should_use_overlay_mode():
+        """Disable MIP legacy channel selector when compact channel picker is active."""
+        if self._has_multiple_selected_channels():
             self.render_widgets["channel"].widget.state(["disabled"])
         else:
             self.render_widgets["channel"].widget.state(["!disabled", "readonly"])
@@ -2240,18 +2468,38 @@ class MIPViewController(BaseViewController):
             image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
         return self.flip_image(image)
 
-    def _collect_mip_overlay_channels(self) -> Dict[str, np.ndarray]:
-        """Collect per-channel MIP projections for overlay rendering."""
-        channel_images: Dict[str, np.ndarray] = {}
+    def _get_active_mip_channel_name(self) -> Optional[str]:
+        """Get active channel for MIP single-channel rendering."""
         if not isinstance(self.selected_channels, list):
-            return channel_images
+            return None
+        if self._has_multiple_selected_channels():
+            channel = self._get_multichannel_active_channel()
+        else:
+            channel = self.render_widgets["channel"].get()
+        if channel in self.selected_channels:
+            return channel
+        return self.selected_channels[0] if self.selected_channels else None
+
+    def _collect_mip_overlay_channels(self) -> tuple[Dict[str, np.ndarray], Dict[str, Any]]:
+        """Collect per-channel MIP projections/signatures for overlay rendering."""
+        channel_images: Dict[str, np.ndarray] = {}
+        channel_signatures: Dict[str, Any] = {}
+        if not isinstance(self.selected_channels, list):
+            return channel_images, channel_signatures
+        mip_channel_revision = getattr(self, "_mip_channel_revision", {})
         display_mode = self.render_widgets["perspective"].get()
         for channel_idx, channel_name in enumerate(self.selected_channels):
             channel_images[channel_name] = self._get_mip_projection_for_channel(
                 channel_idx,
                 display_mode,
             )
-        return channel_images
+            channel_signatures[channel_name] = (
+                "mip",
+                channel_idx,
+                str(display_mode),
+                int(mip_channel_revision.get(channel_name, 0)),
+            )
+        return channel_images, channel_signatures
 
     def get_mip_image(self) -> np.ndarray or None:
         """Get MIP image according to perspective and channel id
@@ -2265,12 +2513,11 @@ class MIPViewController(BaseViewController):
         if any(view is None for view in views):
             return None
 
-        channel = self.render_widgets["channel"].get()
-        if channel in self.selected_channels:
-            channel_idx = self.selected_channels.index(channel)
-        else:
+        channel = self._get_active_mip_channel_name()
+        if channel is None:
             return
 
+        channel_idx = self.selected_channels.index(channel)
         image = self._get_mip_projection_for_channel(channel_idx)
         # map the image to canvas size()
         image = self.down_sample_image(image, True)
@@ -2406,6 +2653,9 @@ class MIPViewController(BaseViewController):
             Camera parameters.
         """
         super().initialize_non_live_display(microscope_state, camera_parameters)
+        self._mip_channel_revision = {
+            channel: 0 for channel in (self.selected_channels or [])
+        }
         if isinstance(self.selected_channels, list) and len(self.selected_channels) > 0:
             self.render_widgets["channel"].set(self.selected_channels[0])
         self._configure_display_mode_controls()
@@ -2456,6 +2706,17 @@ class MIPViewController(BaseViewController):
         zx_slice = self.zx_mip[channel_idx, slice_idx].reshape(-1, 1)
         cv2.reduce(image, 1, cv2.REDUCE_MAX, self._zx_reduce_buf)
         cv2.max(zx_slice, self._zx_reduce_buf, zx_slice)
+        selected_channels = getattr(self, "selected_channels", None)
+        if (
+            isinstance(selected_channels, list)
+            and 0 <= channel_idx < len(selected_channels)
+        ):
+            channel_name = selected_channels[channel_idx]
+            if not hasattr(self, "_mip_channel_revision") or self._mip_channel_revision is None:
+                self._mip_channel_revision = {}
+            self._mip_channel_revision[channel_name] = (
+                self._mip_channel_revision.get(channel_name, 0) + 1
+            )
 
         super().try_to_display_image(image)
 
@@ -2489,10 +2750,34 @@ class MIPViewController(BaseViewController):
         """
         if self._should_use_overlay_mode():
             self._sync_overlay_cache_from_controls()
-            channel_images = self._collect_mip_overlay_channels()
-            overlay = self._compose_overlay_from_channels(channel_images)
+            channel_images, channel_signatures = self._collect_mip_overlay_channels()
+            overlay = self._compose_overlay_from_channels(
+                channel_images,
+                channel_signatures=channel_signatures,
+            )
             if overlay is not None:
                 self.populate_image(overlay)
+            return
+
+        if self._has_multiple_selected_channels():
+            self._sync_overlay_cache_from_controls()
+            active_channel = self._get_active_mip_channel_name()
+            if active_channel not in self.selected_channels:
+                return
+            channel_index = self.selected_channels.index(active_channel)
+            projection = self._get_mip_projection_for_channel(channel_index)
+            channel_signature = (
+                "mip",
+                channel_index,
+                str(self.render_widgets["perspective"].get()),
+                int(self._mip_channel_revision.get(active_channel, 0)),
+            )
+            img_out = self._render_single_multichannel_frame(
+                active_channel,
+                projection,
+                channel_signature=channel_signature,
+            )
+            self.populate_image(img_out)
             return
 
         self.image = self.get_mip_image()
@@ -2510,10 +2795,34 @@ class MIPViewController(BaseViewController):
             return
         if self._should_use_overlay_mode():
             self._sync_overlay_cache_from_controls()
-            channel_images = self._collect_mip_overlay_channels()
-            overlay = self._compose_overlay_from_channels(channel_images)
+            channel_images, channel_signatures = self._collect_mip_overlay_channels()
+            overlay = self._compose_overlay_from_channels(
+                channel_images,
+                channel_signatures=channel_signatures,
+            )
             if overlay is not None:
                 self.populate_image(overlay)
+            return
+
+        if self._has_multiple_selected_channels():
+            self._sync_overlay_cache_from_controls()
+            active_channel = self._get_active_mip_channel_name()
+            if active_channel not in self.selected_channels:
+                return
+            channel_index = self.selected_channels.index(active_channel)
+            projection = self._get_mip_projection_for_channel(channel_index)
+            channel_signature = (
+                "mip",
+                channel_index,
+                str(self.render_widgets["perspective"].get()),
+                int(self._mip_channel_revision.get(active_channel, 0)),
+            )
+            img_out = self._render_single_multichannel_frame(
+                active_channel,
+                projection,
+                channel_signature=channel_signature,
+            )
+            self.populate_image(img_out)
             return
 
         self.image = self.get_mip_image()

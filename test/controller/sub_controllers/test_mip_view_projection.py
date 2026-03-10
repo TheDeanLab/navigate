@@ -300,3 +300,85 @@ def test_should_use_overlay_mode_requires_multiple_channels():
 
     controller.selected_channels = ["CH1", "CH2"]
     assert controller._should_use_overlay_mode()
+
+
+def test_get_mip_image_uses_compact_active_channel_for_multichannel_single_mode():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.selected_channels = ["CH1", "CH2"]
+    controller.render_widgets = {
+        "perspective": _Getter("XY"),
+        "channel": _Getter("CH1"),
+    }
+    controller._get_multichannel_active_channel = lambda: "CH2"
+    controller.flip_image = lambda image: image
+    controller.down_sample_image = lambda image, *_: image
+    controller.xy_mip = np.array(
+        [
+            [[1, 2], [3, 4]],
+            [[10, 20], [30, 40]],
+        ],
+        dtype=np.uint16,
+    )
+    controller.zy_mip = np.zeros((2, 2, 2), dtype=np.uint16)
+    controller.zx_mip = np.zeros((2, 2, 2), dtype=np.uint16)
+
+    image = controller.get_mip_image()
+
+    np.testing.assert_array_equal(
+        image,
+        np.array([[10, 20], [30, 40]], dtype=np.uint16),
+    )
+
+
+def test_collect_mip_overlay_channels_returns_perspective_signatures():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.selected_channels = ["CH1", "CH2"]
+    controller.render_widgets = {"perspective": _Getter("ZX")}
+    controller._mip_channel_revision = {"CH1": 3, "CH2": 7}
+    controller._get_mip_projection_for_channel = lambda idx, mode: np.full(
+        (2, 2), idx + 1, dtype=np.uint16
+    )
+
+    channel_images, channel_signatures = controller._collect_mip_overlay_channels()
+
+    np.testing.assert_array_equal(channel_images["CH1"], np.full((2, 2), 1, dtype=np.uint16))
+    np.testing.assert_array_equal(channel_images["CH2"], np.full((2, 2), 2, dtype=np.uint16))
+    assert channel_signatures["CH1"] == ("mip", 0, "ZX", 3)
+    assert channel_signatures["CH2"] == ("mip", 1, "ZX", 7)
+
+
+def test_render_single_multichannel_frame_applies_channel_alpha():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.selected_channels = ["CH1"]
+    controller.overlay_channel_settings = {
+        "CH1": {
+            "lut_name": "Red",
+            "autoscale": False,
+            "min_counts": 0.0,
+            "max_counts": 255.0,
+            "visible": True,
+            "alpha": 0.5,
+        }
+    }
+    controller._overlay_colormap_cache = {}
+    controller._colorized_channel_cache = {}
+    controller.min_counts = 0.0
+    controller.max_counts = 255.0
+    controller.canvas_width = 3
+    controller.canvas_height = 3
+    controller._prepare_zoom_window = lambda: (slice(None), slice(None))
+    controller._crop_image_with_zoom = lambda image, y_slice, x_slice: image[
+        y_slice, x_slice
+    ]
+    controller.down_sample_image = lambda image: image
+    controller.add_crosshair = lambda image: image
+
+    out = controller._render_single_multichannel_frame(
+        "CH1",
+        np.full((3, 3), 100, dtype=np.uint8),
+        channel_signature=("mip", 0, "XY", 1),
+    )
+
+    assert out.shape == (3, 3, 3)
+    np.testing.assert_array_equal(out[0, 0], np.array([50, 0, 0], dtype=np.uint8))
+    assert controller._last_frame_display_max == 100.0

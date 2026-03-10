@@ -600,12 +600,129 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self.inputs = {}
         #: dict: Channel-specific multichannel controls.
         self.multichannel_inputs = {}
+        self._multichannel_channel_states = {}
+        self._multichannel_on_change = None
+        self._multichannel_syncing = False
+        self._active_multichannel_channel = tk.StringVar()
+        self._active_multichannel_lut = tk.StringVar()
+        self._active_multichannel_visible = tk.BooleanVar(value=True)
+        self._active_multichannel_autoscale = tk.BooleanVar(value=True)
+        self._active_multichannel_min = tk.IntVar(value=0)
+        self._active_multichannel_max = tk.IntVar(value=2**16 - 1)
+        self._active_multichannel_alpha = tk.DoubleVar(value=100.0)
 
         self.single_channel_frame = ttk.Frame(self)
         self.single_channel_frame.grid(row=0, column=0, sticky=tk.NSEW)
         self.multichannel_frame = ttk.Frame(self)
         self.multichannel_frame.grid(row=0, column=0, sticky=tk.NSEW)
         self.multichannel_frame.grid_remove()
+
+        ttk.Label(self.multichannel_frame, text="Channel").grid(
+            row=0, column=0, sticky=tk.W, padx=2, pady=2
+        )
+        self._multichannel_channel_widget = ttk.Combobox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_channel,
+            width=9,
+            state="readonly",
+        )
+        self._multichannel_channel_widget.grid(
+            row=0, column=1, sticky=tk.EW, padx=2, pady=2
+        )
+
+        ttk.Label(self.multichannel_frame, text="LUT").grid(
+            row=1, column=0, sticky=tk.W, padx=2, pady=2
+        )
+        self._multichannel_lut_widget = ttk.Combobox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_lut,
+            width=9,
+            state="readonly",
+            values=self.multichannel_color_labels,
+        )
+        self._multichannel_lut_widget.grid(row=1, column=1, sticky=tk.EW, padx=2, pady=2)
+
+        ttk.Label(self.multichannel_frame, text="Visible").grid(
+            row=2, column=0, sticky=tk.W, padx=2, pady=2
+        )
+        self._multichannel_visible_widget = ttk.Checkbutton(
+            self.multichannel_frame,
+            variable=self._active_multichannel_visible,
+        )
+        self._multichannel_visible_widget.grid(row=2, column=1, sticky=tk.W, padx=2, pady=2)
+
+        ttk.Label(self.multichannel_frame, text="Alpha").grid(
+            row=3, column=0, sticky=tk.W, padx=2, pady=2
+        )
+        self._multichannel_alpha_widget = ttk.Scale(
+            self.multichannel_frame,
+            variable=self._active_multichannel_alpha,
+            from_=0.0,
+            to=100.0,
+            orient=tk.HORIZONTAL,
+        )
+        self._multichannel_alpha_widget.grid(row=3, column=1, sticky=tk.EW, padx=2, pady=2)
+
+        ttk.Label(self.multichannel_frame, text="Autoscale").grid(
+            row=4, column=0, sticky=tk.W, padx=2, pady=2
+        )
+        self._multichannel_autoscale_widget = ttk.Checkbutton(
+            self.multichannel_frame,
+            variable=self._active_multichannel_autoscale,
+        )
+        self._multichannel_autoscale_widget.grid(
+            row=4, column=1, sticky=tk.W, padx=2, pady=2
+        )
+
+        ttk.Label(self.multichannel_frame, text="Min Counts").grid(
+            row=5, column=0, sticky=tk.W, padx=2, pady=2
+        )
+        self._multichannel_min_widget = ttk.Spinbox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_min,
+            from_=0,
+            to=2**16 - 1,
+            increment=1,
+            width=9,
+        )
+        self._multichannel_min_widget.grid(row=5, column=1, sticky=tk.EW, padx=2, pady=2)
+
+        ttk.Label(self.multichannel_frame, text="Max Counts").grid(
+            row=6, column=0, sticky=tk.W, padx=2, pady=2
+        )
+        self._multichannel_max_widget = ttk.Spinbox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_max,
+            from_=0,
+            to=2**16 - 1,
+            increment=1,
+            width=9,
+        )
+        self._multichannel_max_widget.grid(row=6, column=1, sticky=tk.EW, padx=2, pady=2)
+
+        self._multichannel_channel_widget.bind(
+            "<<ComboboxSelected>>",
+            self._on_multichannel_channel_selected,
+        )
+        self._multichannel_lut_widget.bind(
+            "<<ComboboxSelected>>",
+            lambda *_: self._on_multichannel_value_changed("lut"),
+        )
+        self._active_multichannel_visible.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("visible")
+        )
+        self._active_multichannel_alpha.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("alpha")
+        )
+        self._active_multichannel_autoscale.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("autoscale")
+        )
+        self._active_multichannel_min.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("min")
+        )
+        self._active_multichannel_max.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("max")
+        )
 
         #: list: The list of LUTs for the image display.
         self.color_labels = [
@@ -724,150 +841,124 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         default_luts: Iterable[str],
         on_change=None,
     ) -> None:
-        """Build per-channel LUT/autoscale/min/max controls."""
-        for child in self.multichannel_frame.winfo_children():
-            child.destroy()
-        self.multichannel_inputs = {}
-
+        """Configure compact per-channel controls for multichannel display."""
         channels = list(channels)
         default_luts = list(default_luts)
+        self._multichannel_on_change = on_change
         if len(channels) == 0:
+            self.multichannel_inputs = {}
             return
 
-        headers = ("Channel", "LUT", "Auto", "Min", "Max")
-        for col, label in enumerate(headers):
-            ttk.Label(self.multichannel_frame, text=label).grid(
-                row=0,
-                column=col,
-                sticky=tk.W,
-                padx=2,
-                pady=(0, 4),
-            )
-
-        for row, channel in enumerate(channels, start=1):
-            ttk.Label(self.multichannel_frame, text=channel).grid(
-                row=row, column=0, sticky=tk.W, padx=2, pady=2
-            )
-
-            lut_var = tk.StringVar()
-            lut_widget = ttk.Combobox(
-                self.multichannel_frame,
-                textvariable=lut_var,
-                width=9,
-                state="readonly",
-                values=self.multichannel_color_labels,
-            )
-            lut_default = (
-                default_luts[row - 1]
-                if row - 1 < len(default_luts)
-                else self.multichannel_color_labels[(row - 1) % len(self.multichannel_color_labels)]
-            )
-            lut_var.set(lut_default)
-            lut_widget.grid(row=row, column=1, sticky=tk.W, padx=2, pady=2)
-
-            autoscale_var = tk.BooleanVar(value=True)
-            autoscale_widget = ttk.Checkbutton(
-                self.multichannel_frame,
-                variable=autoscale_var,
-            )
-            autoscale_widget.grid(row=row, column=2, sticky=tk.W, padx=2, pady=2)
-
-            min_var = tk.IntVar(value=0)
-            min_widget = ttk.Spinbox(
-                self.multichannel_frame,
-                textvariable=min_var,
-                from_=0,
-                to=2**16 - 1,
-                increment=1,
-                width=7,
-            )
-            min_widget.grid(row=row, column=3, sticky=tk.W, padx=2, pady=2)
-
-            max_var = tk.IntVar(value=2**16 - 1)
-            max_widget = ttk.Spinbox(
-                self.multichannel_frame,
-                textvariable=max_var,
-                from_=0,
-                to=2**16 - 1,
-                increment=1,
-                width=7,
-            )
-            max_widget.grid(row=row, column=4, sticky=tk.W, padx=2, pady=2)
-
-            self.multichannel_inputs[channel] = {
-                "lut_var": lut_var,
-                "lut_widget": lut_widget,
-                "autoscale_var": autoscale_var,
-                "autoscale_widget": autoscale_widget,
-                "min_var": min_var,
-                "min_widget": min_widget,
-                "max_var": max_var,
-                "max_widget": max_widget,
-            }
-            self._set_multichannel_minmax_state(channel)
-
-            if on_change is not None:
-                lut_widget.bind(
-                    "<<ComboboxSelected>>",
-                    lambda *_args, c=channel: on_change(c, "lut"),
-                )
-                autoscale_var.trace_add(
-                    "write",
-                    lambda *_args, c=channel: self._on_multichannel_autoscale_change(
-                        c, on_change
+        self._multichannel_syncing = True
+        try:
+            for index, channel in enumerate(channels):
+                defaults = {
+                    "lut_name": (
+                        default_luts[index]
+                        if index < len(default_luts)
+                        else self.multichannel_color_labels[
+                            index % len(self.multichannel_color_labels)
+                        ]
                     ),
-                )
-                min_var.trace_add(
-                    "write",
-                    lambda *_args, c=channel: on_change(c, "min"),
-                )
-                max_var.trace_add(
-                    "write",
-                    lambda *_args, c=channel: on_change(c, "max"),
-                )
+                    "autoscale": True,
+                    "min_counts": 0.0,
+                    "max_counts": float(2**16 - 1),
+                    "visible": True,
+                    "alpha": 1.0,
+                }
+                cached = self._multichannel_channel_states.get(channel, {})
+                merged = defaults.copy()
+                merged.update(cached)
+                self._multichannel_channel_states[channel] = merged
 
-        uniform_grid(self.multichannel_frame)
+            self.multichannel_inputs = {
+                channel: self._multichannel_channel_states[channel] for channel in channels
+            }
+            self._multichannel_channel_widget["values"] = channels
+            active_channel = self._active_multichannel_channel.get()
+            if active_channel not in channels:
+                self._active_multichannel_channel.set(channels[0])
+        finally:
+            self._multichannel_syncing = False
 
-    def _on_multichannel_autoscale_change(self, channel: str, on_change) -> None:
-        self._set_multichannel_minmax_state(channel)
-        if on_change is not None:
-            on_change(channel, "autoscale")
+        self._load_active_multichannel_values()
+        self._set_multichannel_minmax_state()
 
-    def _set_multichannel_minmax_state(self, channel: str) -> None:
-        controls = self.multichannel_inputs.get(channel)
-        if controls is None:
+    def _on_multichannel_channel_selected(self, *_args) -> None:
+        self._load_active_multichannel_values()
+        self._notify_multichannel_change("channel")
+
+    def _notify_multichannel_change(self, field: str) -> None:
+        channel = self._active_multichannel_channel.get()
+        if self._multichannel_on_change is None or not channel:
             return
-        state = "disabled" if controls["autoscale_var"].get() else "normal"
-        controls["min_widget"]["state"] = state
-        controls["max_widget"]["state"] = state
+        self._multichannel_on_change(channel, field)
+
+    def _on_multichannel_value_changed(self, field: str) -> None:
+        if self._multichannel_syncing:
+            return
+        self._store_active_multichannel_values()
+        if field == "autoscale":
+            self._set_multichannel_minmax_state()
+        self._notify_multichannel_change(field)
+
+    def _store_active_multichannel_values(self) -> None:
+        channel = self._active_multichannel_channel.get()
+        if not channel:
+            return
+        state = self._multichannel_channel_states.setdefault(channel, {})
+        state["lut_name"] = self._active_multichannel_lut.get()
+        state["autoscale"] = bool(self._active_multichannel_autoscale.get())
+        state["min_counts"] = float(self._active_multichannel_min.get())
+        state["max_counts"] = float(self._active_multichannel_max.get())
+        state["visible"] = bool(self._active_multichannel_visible.get())
+        state["alpha"] = max(0.0, min(1.0, float(self._active_multichannel_alpha.get()) / 100.0))
+
+    def _load_active_multichannel_values(self) -> None:
+        channel = self._active_multichannel_channel.get()
+        state = self._multichannel_channel_states.get(channel, {})
+        if not state:
+            return
+        self._multichannel_syncing = True
+        try:
+            self._active_multichannel_lut.set(state.get("lut_name", "Green"))
+            self._active_multichannel_autoscale.set(bool(state.get("autoscale", True)))
+            self._active_multichannel_min.set(int(state.get("min_counts", 0.0)))
+            self._active_multichannel_max.set(int(state.get("max_counts", float(2**16 - 1))))
+            self._active_multichannel_visible.set(bool(state.get("visible", True)))
+            self._active_multichannel_alpha.set(
+                float(state.get("alpha", 1.0)) * 100.0
+            )
+        finally:
+            self._multichannel_syncing = False
+        self._set_multichannel_minmax_state()
+
+    def _set_multichannel_minmax_state(self) -> None:
+        state = "disabled" if self._active_multichannel_autoscale.get() else "normal"
+        self._multichannel_min_widget["state"] = state
+        self._multichannel_max_widget["state"] = state
 
     def get_multichannel_widgets(self) -> Dict[str, Any]:
         """Return channel-mapped multichannel LUT/autoscale/min/max controls."""
-        return self.multichannel_inputs
+        return self._multichannel_channel_states
 
     def get_multichannel_channel_state(self, channel: str) -> Dict[str, Any]:
         """Return current settings for one channel."""
-        controls = self.multichannel_inputs.get(channel)
-        if controls is None:
+        self._store_active_multichannel_values()
+        state = self._multichannel_channel_states.get(channel)
+        if state is None:
             return {}
-        return {
-            "lut_name": controls["lut_var"].get(),
-            "autoscale": bool(controls["autoscale_var"].get()),
-            "min_counts": float(controls["min_var"].get()),
-            "max_counts": float(controls["max_var"].get()),
-        }
+        return state.copy()
 
     def set_multichannel_channel_state(self, channel: str, state: Dict[str, Any]) -> None:
         """Populate controls for one channel from cached state."""
-        controls = self.multichannel_inputs.get(channel)
-        if controls is None:
-            return
-        if "lut_name" in state and state["lut_name"]:
-            controls["lut_var"].set(state["lut_name"])
-        if "autoscale" in state:
-            controls["autoscale_var"].set(bool(state["autoscale"]))
-        if "min_counts" in state:
-            controls["min_var"].set(int(state["min_counts"]))
-        if "max_counts" in state:
-            controls["max_var"].set(int(state["max_counts"]))
-        self._set_multichannel_minmax_state(channel)
+        merged = self._multichannel_channel_states.get(channel, {}).copy()
+        merged.update(state)
+        self._multichannel_channel_states[channel] = merged
+        if channel == self._active_multichannel_channel.get():
+            self._load_active_multichannel_values()
+
+    def get_multichannel_active_channel(self) -> str:
+        """Return the currently selected channel in compact multichannel controls."""
+        self._store_active_multichannel_values()
+        return self._active_multichannel_channel.get()

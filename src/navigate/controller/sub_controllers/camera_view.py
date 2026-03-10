@@ -566,6 +566,7 @@ class BaseViewController(GUIController, ABaseViewController):
                 on_change=self._on_multichannel_control_changed,
             )
             self._sync_overlay_controls_from_cache()
+            self._update_multichannel_channel_selector_mode()
 
         self._update_display_mode_visibility()
         self._update_channel_selector_for_display_mode()
@@ -581,8 +582,19 @@ class BaseViewController(GUIController, ABaseViewController):
         """Hook for subclasses to disable irrelevant single-channel selectors."""
         return
 
+    def _update_multichannel_channel_selector_mode(self) -> None:
+        """Set LUT channel selector behavior for Single vs Overlay modes."""
+        if not hasattr(self.view, "lut"):
+            return
+        if hasattr(self.view.lut, "set_multichannel_channel_selector_mode"):
+            self.view.lut.set_multichannel_channel_selector_mode(
+                overlay_mode=self._should_use_overlay_mode(),
+                channels=self.selected_channels or [],
+            )
+
     def _on_display_mode_changed(self, *_) -> None:
         """Handle single-channel vs multichannel overlay mode changes."""
+        self._update_multichannel_channel_selector_mode()
         self._update_display_mode_visibility()
         self._update_channel_selector_for_display_mode()
         self._refresh_after_display_mode_change()

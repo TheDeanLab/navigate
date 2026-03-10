@@ -34,7 +34,7 @@
 import tkinter as tk
 from tkinter import ttk
 import logging
-from typing import Iterable, Dict, Any
+from typing import Iterable, Dict, Any, Optional
 
 # Third Party Imports
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -603,6 +603,9 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._multichannel_channel_states = {}
         self._multichannel_on_change = None
         self._multichannel_syncing = False
+        self._multichannel_overlay_mode = False
+        self._multichannel_channels = []
+        self._all_channels_label = "All"
         self._active_multichannel_channel = tk.StringVar()
         self._active_multichannel_lut = tk.StringVar()
         self._active_multichannel_visible = tk.BooleanVar(value=True)
@@ -863,6 +866,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         """Configure compact per-channel controls for multichannel display."""
         channels = list(channels)
         default_luts = list(default_luts)
+        self._multichannel_channels = channels
         self._multichannel_on_change = on_change
         if len(channels) == 0:
             self.multichannel_inputs = {}
@@ -897,14 +901,44 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             self.multichannel_inputs = {
                 channel: self._multichannel_channel_states[channel] for channel in channels
             }
-            self._multichannel_channel_widget["values"] = channels
-            if len(channels) > 1:
+        finally:
+            self._multichannel_syncing = False
+
+        self.set_multichannel_channel_selector_mode(
+            overlay_mode=self._multichannel_overlay_mode,
+            channels=channels,
+        )
+
+    def set_multichannel_channel_selector_mode(
+        self,
+        overlay_mode: bool,
+        channels: Optional[Iterable[str]] = None,
+    ) -> None:
+        """Configure channel selector behavior for Single vs Overlay display mode."""
+        if channels is not None:
+            self._multichannel_channels = list(channels)
+        else:
+            self._multichannel_channels = list(self._multichannel_channels)
+        self._multichannel_overlay_mode = bool(overlay_mode)
+
+        if len(self._multichannel_channels) == 0:
+            self._multichannel_channel_widget["values"] = ()
+            self._active_multichannel_channel.set("")
+            self._multichannel_channel_widget.configure(state="disabled")
+            return
+
+        self._multichannel_syncing = True
+        try:
+            if self._multichannel_overlay_mode and len(self._multichannel_channels) > 1:
+                self._multichannel_channel_widget["values"] = self._multichannel_channels
                 self._multichannel_channel_widget.configure(state="readonly")
+                active_channel = self._active_multichannel_channel.get()
+                if active_channel not in self._multichannel_channels:
+                    self._active_multichannel_channel.set(self._multichannel_channels[0])
             else:
+                self._multichannel_channel_widget["values"] = (self._all_channels_label,)
                 self._multichannel_channel_widget.configure(state="disabled")
-            active_channel = self._active_multichannel_channel.get()
-            if active_channel not in channels:
-                self._active_multichannel_channel.set(channels[0])
+                self._active_multichannel_channel.set(self._all_channels_label)
         finally:
             self._multichannel_syncing = False
 
@@ -918,6 +952,10 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
     def _notify_multichannel_change(self, field: str) -> None:
         channel = self._active_multichannel_channel.get()
         if self._multichannel_on_change is None or not channel:
+            return
+        if channel == self._all_channels_label:
+            for selected_channel in self._multichannel_channels:
+                self._multichannel_on_change(selected_channel, field)
             return
         self._multichannel_on_change(channel, field)
 
@@ -933,18 +971,33 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         channel = self._active_multichannel_channel.get()
         if not channel:
             return
-        state = self._multichannel_channel_states.setdefault(channel, {})
-        state["lut_name"] = self._active_multichannel_lut.get()
-        state["autoscale"] = bool(self._active_multichannel_autoscale.get())
-        state["min_counts"] = float(self._active_multichannel_min.get())
-        state["max_counts"] = float(self._active_multichannel_max.get())
-        state["visible"] = bool(self._active_multichannel_visible.get())
-        state["alpha"] = max(0.0, min(1.0, float(self._active_multichannel_alpha.get()) / 100.0))
-        state["gamma"] = max(0.0, min(2.0, float(self._active_multichannel_gamma.get())))
+        targets = (
+            list(self._multichannel_channels)
+            if channel == self._all_channels_label
+            else [channel]
+        )
+        for target_channel in targets:
+            state = self._multichannel_channel_states.setdefault(target_channel, {})
+            state["lut_name"] = self._active_multichannel_lut.get()
+            state["autoscale"] = bool(self._active_multichannel_autoscale.get())
+            state["min_counts"] = float(self._active_multichannel_min.get())
+            state["max_counts"] = float(self._active_multichannel_max.get())
+            state["visible"] = bool(self._active_multichannel_visible.get())
+            state["alpha"] = max(
+                0.0,
+                min(1.0, float(self._active_multichannel_alpha.get()) / 100.0),
+            )
+            state["gamma"] = max(
+                0.0,
+                min(2.0, float(self._active_multichannel_gamma.get())),
+            )
 
     def _load_active_multichannel_values(self) -> None:
         channel = self._active_multichannel_channel.get()
-        state = self._multichannel_channel_states.get(channel, {})
+        source_channel = channel
+        if channel == self._all_channels_label and self._multichannel_channels:
+            source_channel = self._multichannel_channels[0]
+        state = self._multichannel_channel_states.get(source_channel, {})
         if not state:
             return
         self._multichannel_syncing = True
@@ -992,4 +1045,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
     def get_multichannel_active_channel(self) -> str:
         """Return the currently selected channel in compact multichannel controls."""
         self._store_active_multichannel_values()
-        return self._active_multichannel_channel.get()
+        channel = self._active_multichannel_channel.get()
+        if channel == self._all_channels_label and self._multichannel_channels:
+            return self._multichannel_channels[0]
+        return channel

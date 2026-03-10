@@ -469,3 +469,66 @@ def test_camera_display_image_overlay_skips_partial_channel_frames():
 
     controller.populate_image.assert_not_called()
     controller.update_max_counts.assert_not_called()
+
+
+def test_move_crosshair_uses_active_display_pipeline_for_selected_channels():
+    controller = CameraViewController.__new__(CameraViewController)
+    controller.selected_channels = ["CH1", "CH2"]
+    controller.zoom_rect = np.array([[0.0, 100.0], [0.0, 50.0]])
+    controller.zoom_scale = 1.0
+    controller.move_to_x = 25.0
+    controller.move_to_y = 10.0
+    controller._refresh_after_display_mode_change = MagicMock()
+    controller.process_image = MagicMock()
+
+    controller.move_crosshair()
+
+    assert controller.offset_crosshair is True
+    assert controller.crosshair_x == 0.25
+    assert controller.crosshair_y == 0.2
+    controller._refresh_after_display_mode_change.assert_called_once_with()
+    controller.process_image.assert_not_called()
+
+
+def test_reset_display_uses_active_pipeline_for_selected_channels():
+    controller = CameraViewController.__new__(CameraViewController)
+    controller.selected_channels = ["CH1"]
+    controller.canvas_width = 256
+    controller.canvas_height = 128
+    controller.zoom_width = 20
+    controller.zoom_height = 10
+    controller.zoom_rect = np.array([[3.0, 11.0], [2.0, 7.0]])
+    controller.zoom_offset = np.array([[2.0], [1.0]])
+    controller.zoom_value = 1.7
+    controller.zoom_scale = 2.5
+    controller._refresh_after_display_mode_change = MagicMock()
+    controller.process_image = MagicMock()
+    controller.offset_crosshair = True
+    controller.crosshair_x = 0.1
+    controller.crosshair_y = 0.2
+
+    controller.reset_display(display_flag=True, reset_crosshair=False)
+
+    assert controller.zoom_width == 256
+    assert controller.zoom_height == 128
+    np.testing.assert_array_equal(controller.zoom_rect, np.array([[0, 256], [0, 128]]))
+    np.testing.assert_array_equal(controller.zoom_offset, np.array([[0], [0]]))
+    assert controller.zoom_value == 1
+    assert controller.zoom_scale == 1
+    controller._refresh_after_display_mode_change.assert_called_once_with()
+    controller.process_image.assert_not_called()
+
+
+def test_reset_display_without_selected_channels_uses_process_image():
+    controller = CameraViewController.__new__(CameraViewController)
+    controller.selected_channels = None
+    controller.canvas_width = 64
+    controller.canvas_height = 64
+    controller.image = np.zeros((2, 2), dtype=np.uint16)
+    controller._refresh_after_display_mode_change = MagicMock()
+    controller.process_image = MagicMock()
+
+    controller.reset_display(display_flag=True, reset_crosshair=True)
+
+    controller.process_image.assert_called_once_with()
+    controller._refresh_after_display_mode_change.assert_not_called()

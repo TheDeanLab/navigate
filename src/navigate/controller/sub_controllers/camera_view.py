@@ -604,6 +604,13 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.image is not None:
             self.process_image()
 
+    def _redraw_current_view(self) -> None:
+        """Redraw with the active display pipeline to keep LUT state consistent."""
+        if self._has_selected_channels():
+            self._refresh_after_display_mode_change()
+        elif getattr(self, "image", None) is not None:
+            self.process_image()
+
     def _scale_image_intensity_with_bounds(
         self,
         image: np.ndarray,
@@ -1158,7 +1165,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.zoom_value = 1
         self.zoom_scale = 1
         if display_flag:
-            self.process_image()
+            self._redraw_current_view()
 
     def move_crosshair(self) -> None:
         """Move the crosshair to a non-default position."""
@@ -1167,7 +1174,7 @@ class BaseViewController(GUIController, ABaseViewController):
         height = (self.zoom_rect[1][1] - self.zoom_rect[1][0]) / self.zoom_scale
         self.crosshair_x = self.move_to_x / width
         self.crosshair_y = self.move_to_y / height
-        self.process_image()
+        self._redraw_current_view()
 
     def mark_position(self) -> None:
         """Marks the current position of the microscope in
@@ -1578,11 +1585,7 @@ class BaseViewController(GUIController, ABaseViewController):
     def left_click(self, *_) -> None:
         """Toggles cross-hair on image upon left click event."""
         self.apply_cross_hair = not self.apply_cross_hair
-        if self._has_selected_channels():
-            # Keep redraws on the active compact LUT path (single or overlay).
-            self._refresh_after_display_mode_change()
-        elif self.image is not None:
-            self.process_image()
+        self._redraw_current_view()
 
     def resize(self, event: tk.Event) -> None:
         """Resize the window.
@@ -1705,7 +1708,7 @@ class BaseViewController(GUIController, ABaseViewController):
         elif self.zoom_width < 5 or self.zoom_height < 5:
             return
 
-        self.process_image()
+        self._redraw_current_view()
 
 
 class CameraViewController(BaseViewController):

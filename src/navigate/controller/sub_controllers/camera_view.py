@@ -1861,12 +1861,13 @@ class CameraViewController(BaseViewController):
     def _collect_camera_overlay_channels(
         self,
         current_image: Optional[np.ndarray] = None,
-    ) -> tuple[Dict[str, np.ndarray], Dict[str, Any]]:
+    ) -> tuple[Dict[str, np.ndarray], Dict[str, Any], bool]:
         """Collect one image/signature per selected channel for camera overlay rendering."""
         channel_images: Dict[str, np.ndarray] = {}
         channel_signatures: Dict[str, Any] = {}
+        all_channels_available = True
         if not isinstance(self.selected_channels, list):
-            return channel_images, channel_signatures
+            return channel_images, channel_signatures, False
 
         target_slice = self._get_overlay_target_slice()
         latest_channel_idx = int(getattr(self, "_latest_channel_idx", 0))
@@ -1885,6 +1886,7 @@ class CameraViewController(BaseViewController):
                     slice_index=target_slice,
                 )
             if image is None:
+                all_channels_available = False
                 continue
             channel_images[channel_name] = self.flip_image(image)
             revision = int(
@@ -1900,7 +1902,9 @@ class CameraViewController(BaseViewController):
                 revision,
             )
 
-        return channel_images, channel_signatures
+        if len(channel_images) != len(self.selected_channels):
+            all_channels_available = False
+        return channel_images, channel_signatures, all_channels_available
 
     def _build_camera_channel_signature(
         self,
@@ -2013,7 +2017,11 @@ class CameraViewController(BaseViewController):
 
         slider_index = self.view.slider.get()
         if self._should_use_overlay_mode():
-            channel_images, channel_signatures = self._collect_camera_overlay_channels()
+            channel_images, channel_signatures, all_available = (
+                self._collect_camera_overlay_channels()
+            )
+            if not all_available:
+                return
             img_out = self._compose_overlay_from_channels(
                 channel_images,
                 channel_signatures=channel_signatures,
@@ -2207,9 +2215,11 @@ class CameraViewController(BaseViewController):
         """
         if self._should_use_overlay_mode():
             self._sync_overlay_cache_from_controls()
-            channel_images, channel_signatures = self._collect_camera_overlay_channels(
-                image
+            channel_images, channel_signatures, all_available = (
+                self._collect_camera_overlay_channels(image)
             )
+            if not all_available:
+                return
             img_out = self._compose_overlay_from_channels(
                 channel_images,
                 channel_signatures=channel_signatures,

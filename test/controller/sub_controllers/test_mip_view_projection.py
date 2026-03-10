@@ -37,6 +37,7 @@ import numpy as np
 
 from navigate.controller.sub_controllers.camera_view import (
     BaseViewController,
+    CameraViewController,
     MIPViewController,
 )
 
@@ -420,3 +421,51 @@ def test_render_single_multichannel_frame_applies_gamma_mapping():
 
     # gamma=2 maps 128 -> round((128/255)^2*255) = 64, Red LUT => RGB [64, 0, 0]
     np.testing.assert_array_equal(out[0, 0], np.array([64, 0, 0], dtype=np.uint8))
+
+
+def test_collect_camera_overlay_channels_requires_all_selected_channels():
+    controller = CameraViewController.__new__(CameraViewController)
+    controller.selected_channels = ["CH1", "CH2"]
+    controller.display_state = "Live"
+    controller._latest_channel_idx = 0
+    controller._latest_slice_idx = 0
+    controller._channel_slice_revision = {(0, 0): 1}
+    controller._get_overlay_target_slice = lambda: 0
+    controller.flip_image = lambda image: image
+
+    def _load_image(channel, slice_index):
+        assert slice_index == 0
+        return None if channel == 1 else np.full((2, 2), 99, dtype=np.uint16)
+
+    controller.spooled_images = SimpleNamespace(load_image=_load_image)
+    channel_images, channel_signatures, all_available = (
+        controller._collect_camera_overlay_channels(np.full((2, 2), 7, dtype=np.uint16))
+    )
+
+    assert not all_available
+    np.testing.assert_array_equal(channel_images["CH1"], np.full((2, 2), 7, dtype=np.uint16))
+    assert "CH2" not in channel_images
+    assert channel_signatures["CH1"] == ("camera", 0, 0, 1)
+
+
+def test_camera_display_image_overlay_skips_partial_channel_frames():
+    controller = CameraViewController.__new__(CameraViewController)
+    controller._should_use_overlay_mode = lambda: True
+    controller._sync_overlay_cache_from_controls = lambda *_args, **_kwargs: None
+    controller._collect_camera_overlay_channels = lambda image: (
+        {"CH1": image},
+        {"CH1": ("camera", 0, 0, 1)},
+        False,
+    )
+    controller._compose_overlay_from_channels = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+        AssertionError("should not compose overlay from incomplete channels")
+    )
+    controller.overlay_mask = lambda image: image
+    controller.populate_image = MagicMock()
+    controller.update_max_counts = MagicMock()
+    controller.view = SimpleNamespace(after=lambda *_args, **_kwargs: None)
+
+    controller.display_image(np.full((2, 2), 7, dtype=np.uint16))
+
+    controller.populate_image.assert_not_called()
+    controller.update_max_counts.assert_not_called()

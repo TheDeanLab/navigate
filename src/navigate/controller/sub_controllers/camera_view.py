@@ -316,6 +316,50 @@ class BaseViewController(GUIController, ABaseViewController):
         self.menu.add_command(label="Move Here", command=self.move_stage)
         self.menu.add_command(label="Mark Position", command=self.mark_position)
 
+        self._bind_visibility_events()
+
+    def _bind_visibility_events(self) -> None:
+        """Bind visibility events so hidden tabs can defer redraw work."""
+        notebook = getattr(self.view, "master", None)
+        if notebook is not None and hasattr(notebook, "bind"):
+            notebook.bind(
+                "<<NotebookTabChanged>>",
+                self._on_visibility_changed,
+                add="+",
+            )
+        if hasattr(self.view, "bind"):
+            self.view.bind("<Map>", self._on_visibility_changed, add="+")
+
+    def _on_visibility_changed(self, *_) -> None:
+        """Render the latest pending frame when this view becomes visible."""
+        self._request_display_if_needed()
+
+    def _is_display_visible(self) -> bool:
+        """Return whether this view is currently visible to the user."""
+        view = getattr(self, "view", None)
+        if view is None:
+            return False
+        if not getattr(view, "is_docked", True):
+            return bool(getattr(view, "winfo_ismapped", lambda: False)())
+
+        notebook = getattr(view, "master", None)
+        if notebook is None:
+            return True
+        try:
+            current_tab = notebook.select()
+        except Exception:
+            return False
+        return bool(current_tab) and str(current_tab) == str(view)
+
+    def _request_display_if_needed(self) -> None:
+        """Queue a display callback if there is pending data and the view is visible."""
+        if self._pending_display_image is None:
+            return
+        if not self._is_display_visible():
+            return
+        if self._display_after_id is None:
+            self._display_after_id = self.view.after_idle(self._flush_pending_display)
+
     def _on_minmax_changed(self, *args) -> None:
         """Debounce updates to min/max entry changes by 100 ms."""
 
@@ -476,12 +520,16 @@ class BaseViewController(GUIController, ABaseViewController):
 
         # Keep only the most recent image until the next idle cycle.
         self._pending_display_image = image
+        if not self._is_display_visible():
+            return
         if self._display_after_id is None:
             self._display_after_id = self.view.after_idle(self._flush_pending_display)
 
     def _flush_pending_display(self) -> None:
         """Render the latest queued frame on the Tk main thread."""
         self._display_after_id = None
+        if not self._is_display_visible():
+            return
         image = self._pending_display_image
         self._pending_display_image = None
         if image is None:
@@ -492,7 +540,11 @@ class BaseViewController(GUIController, ABaseViewController):
             logger.exception("Error in display callback: %s", e)
 
         # If a newer frame arrived while rendering, schedule one more idle draw.
-        if self._pending_display_image is not None and self._display_after_id is None:
+        if (
+            self._pending_display_image is not None
+            and self._display_after_id is None
+            and self._is_display_visible()
+        ):
             self._display_after_id = self.view.after_idle(self._flush_pending_display)
 
     def display_image(self, image: np.ndarray) -> None:
@@ -1636,6 +1688,12 @@ class MIPViewController(BaseViewController):
         #: np.ndarray: The maximum intensity projection in the XY plane.
         self.xy_mip = None
 
+        #: np.ndarray: Scratch buffer for ZY max-reduction updates.
+        self._zy_reduce_buf = None
+
+        #: np.ndarray: Scratch buffer for ZX max-reduction updates.
+        self._zx_reduce_buf = None
+
         #: bool: The autoscale flag.
         self.autoscale = True
 
@@ -1683,6 +1741,11 @@ class MIPViewController(BaseViewController):
         self.parent_controller.configuration["gui"]["mip_display"]["enabled"] = state
         # Communicate changes back to the menu controller.
         self.parent_controller.menu_controller.mip_enabled.set(state)
+        if state:
+            self._request_display_if_needed()
+            self.display_mip_image()
+        elif self._is_display_visible():
+            self._clear_mip()
 
     def initialize(self, name: str, data: list) -> None:
         """Initialize the MIP view.
@@ -1767,6 +1830,9 @@ class MIPViewController(BaseViewController):
             dtype=np.uint16,
         )
 
+        self._zy_reduce_buf = np.empty((1, self.original_image_width), dtype=np.uint16)
+        self._zx_reduce_buf = np.empty((self.original_image_height, 1), dtype=np.uint16)
+
     def get_mip_image(self) -> np.ndarray or None:
         """Get MIP image according to perspective and channel id
 
@@ -1842,17 +1908,25 @@ class MIPViewController(BaseViewController):
             return
 
         if not self.display_enabled.get():
-            self._clear_mip()
+            if self._is_display_visible():
+                self._clear_mip()
             return
 
+        zy_reduce_buf = getattr(self, "_zy_reduce_buf", None)
+        if zy_reduce_buf is None or zy_reduce_buf.shape[1] != image.shape[1]:
+            self._zy_reduce_buf = np.empty((1, image.shape[1]), dtype=np.uint16)
+        zx_reduce_buf = getattr(self, "_zx_reduce_buf", None)
+        if zx_reduce_buf is None or zx_reduce_buf.shape[0] != image.shape[0]:
+            self._zx_reduce_buf = np.empty((image.shape[0], 1), dtype=np.uint16)
+
         # Orthogonal maximum intensity projections.
-        self.xy_mip[channel_idx] = np.maximum(self.xy_mip[channel_idx], image)
-        self.zy_mip[channel_idx, slice_idx] = np.maximum(
-            self.zy_mip[channel_idx, slice_idx], np.max(image, axis=0)
-        )
-        self.zx_mip[channel_idx, slice_idx] = np.maximum(
-            self.zx_mip[channel_idx, slice_idx], np.max(image, axis=1)
-        )
+        cv2.max(self.xy_mip[channel_idx], image, self.xy_mip[channel_idx])
+        zy_slice = self.zy_mip[channel_idx, slice_idx].reshape(1, -1)
+        cv2.reduce(image, 0, cv2.REDUCE_MAX, self._zy_reduce_buf)
+        cv2.max(zy_slice, self._zy_reduce_buf, zy_slice)
+        zx_slice = self.zx_mip[channel_idx, slice_idx].reshape(-1, 1)
+        cv2.reduce(image, 1, cv2.REDUCE_MAX, self._zx_reduce_buf)
+        cv2.max(zx_slice, self._zx_reduce_buf, zx_slice)
 
         super().try_to_display_image(image)
 
@@ -1890,6 +1964,8 @@ class MIPViewController(BaseViewController):
     def display_mip_image(self, *_) -> None:
         """Display MIP image in non-live view."""
 
+        if not self._is_display_visible():
+            return
         if self.perspective != self.render_widgets["perspective"].get():
             self.update_perspective()
         if self.mode != "stop":

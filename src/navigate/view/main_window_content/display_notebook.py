@@ -122,7 +122,7 @@ class MIPTab(tk.Frame):
 
         #: ttk.Frame: The frame that will hold the camera image.
         self.cam_image = ttk.Frame(self)
-        self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
+        self.cam_image.grid(row=0, column=0, rowspan=2, sticky=tk.NSEW)
 
         #: bool: The docked flag.
         self.is_docked = True

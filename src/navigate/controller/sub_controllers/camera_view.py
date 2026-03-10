@@ -1679,6 +1679,9 @@ class MIPViewController(BaseViewController):
         #: float: Ratio of axial spacing to lateral pixel size.
         self.axial_to_lateral_ratio = 1.0
 
+        #: int: Pixel gap between panes in the multi-perspective layout.
+        self.multi_view_gap = 6
+
         #: np.ndarray: The image data.
         self.image = None
 
@@ -1776,8 +1779,13 @@ class MIPViewController(BaseViewController):
         self.image_palette["Autoscale"].widget.invoke()
         self.image_palette["SNR"].grid_remove()
 
-        self.render_widgets["perspective"].widget["values"] = ("XY", "ZY", "ZX")
-        self.render_widgets["perspective"].set("XY")
+        self.render_widgets["perspective"].widget["values"] = (
+            "Multi",
+            "XY",
+            "ZY",
+            "ZX",
+        )
+        self.render_widgets["perspective"].set("Multi")
 
         self.get_selected_channels()
         if isinstance(self.selected_channels, list) and len(self.selected_channels) > 0:
@@ -1855,16 +1863,18 @@ class MIPViewController(BaseViewController):
         else:
             return
 
-        if display_mode == "XY":
+        if display_mode == "Multi":
+            image = self._compose_multi_perspective(channel_idx)
+        elif display_mode == "XY":
             image = self.xy_mip[channel_idx]
         elif display_mode == "ZY":
-            # ZY uses the Y-by-Z projection (stored in zx_mip as Z-by-Y).
+            # ZY is displayed as Y-by-Z (Z axis along image width).
             image = self.zx_mip[channel_idx, :].T
+            image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
         else:
-            # ZX uses the X-by-Z projection (stored in zy_mip as Z-by-X).
-            image = self.zy_mip[channel_idx, :].T
-
-        image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
+            # ZX is displayed as Z-by-X (Z axis along image height).
+            image = self.zy_mip[channel_idx, :]
+            image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
 
         image = self.flip_image(image)
         # map the image to canvas size()
@@ -1925,7 +1935,10 @@ class MIPViewController(BaseViewController):
     def _rescale_orthogonal_for_anisotropy(
         self, image: np.ndarray, display_mode: str
     ) -> np.ndarray:
-        """Rescale orthogonal projections along Z so display spacing is isotropic."""
+        """Rescale orthogonal projections along Z so display spacing is isotropic.
+
+        ZY keeps Z on image width; ZX keeps Z on image height.
+        """
         if display_mode == "XY":
             return image
 
@@ -1933,15 +1946,60 @@ class MIPViewController(BaseViewController):
         if np.isclose(ratio, 1.0, rtol=1e-3, atol=1e-3):
             return image
 
-        target_width = max(1, int(round(image.shape[1] * ratio)))
-        if target_width == image.shape[1]:
+        if display_mode == "ZY":
+            target_width = max(1, int(round(image.shape[1] * ratio)))
+            if target_width == image.shape[1]:
+                return image
+            return cv2.resize(
+                image,
+                (target_width, image.shape[0]),
+                interpolation=cv2.INTER_NEAREST,
+            )
+
+        target_height = max(1, int(round(image.shape[0] * ratio)))
+        if target_height == image.shape[0]:
             return image
 
         return cv2.resize(
             image,
-            (target_width, image.shape[0]),
+            (image.shape[1], target_height),
             interpolation=cv2.INTER_NEAREST,
         )
+
+    def _compose_multi_perspective(self, channel_idx: int) -> np.ndarray:
+        """Compose XY center, YZ right, XZ bottom into one monochrome frame."""
+        xy = self.xy_mip[channel_idx]
+        yz = self._rescale_orthogonal_for_anisotropy(
+            self.zx_mip[channel_idx, :].T,
+            "ZY",
+        )
+        xz = self._rescale_orthogonal_for_anisotropy(
+            self.zy_mip[channel_idx, :],
+            "ZX",
+        )
+
+        gap = int(getattr(self, "multi_view_gap", 6))
+        left_pad = yz.shape[1] // 2
+        top_pad = xz.shape[0] // 2
+
+        total_height = top_pad + xy.shape[0] + gap + xz.shape[0]
+        total_width = left_pad + xy.shape[1] + gap + yz.shape[1]
+        fill_value = int(min(xy.min(), yz.min(), xz.min()))
+        composite = np.full(
+            (total_height, total_width),
+            fill_value=fill_value,
+            dtype=xy.dtype,
+        )
+
+        xy_y0, xy_x0 = top_pad, left_pad
+        composite[xy_y0 : xy_y0 + xy.shape[0], xy_x0 : xy_x0 + xy.shape[1]] = xy
+
+        yz_x0 = xy_x0 + xy.shape[1] + gap
+        composite[xy_y0 : xy_y0 + yz.shape[0], yz_x0 : yz_x0 + yz.shape[1]] = yz
+
+        xz_y0 = xy_y0 + xy.shape[0] + gap
+        composite[xz_y0 : xz_y0 + xz.shape[0], xy_x0 : xy_x0 + xz.shape[1]] = xz
+        return composite
 
     def initialize_non_live_display(
         self, microscope_state: dict, camera_parameters: dict
@@ -2067,15 +2125,26 @@ class MIPViewController(BaseViewController):
 
         display_mode = self.render_widgets["perspective"].get()
         self.perspective = display_mode
-        if display_mode == "XY":
+        if display_mode == "Multi":
+            z_scaled = max(1, self.Z_image_value)
+            gap = int(getattr(self, "multi_view_gap", 6))
+            left_pad = z_scaled // 2
+            top_pad = z_scaled // 2
+            self.original_image_width = (
+                left_pad + self.XY_image_width + gap + z_scaled
+            )
+            self.original_image_height = (
+                top_pad + self.XY_image_height + gap + z_scaled
+            )
+        elif display_mode == "XY":
             self.original_image_width = self.XY_image_width
             self.original_image_height = self.XY_image_height
         elif display_mode == "ZY":
             self.original_image_width = self.Z_image_value
             self.original_image_height = self.XY_image_height
         elif display_mode == "ZX":
-            self.original_image_width = self.Z_image_value
-            self.original_image_height = self.XY_image_width
+            self.original_image_width = self.XY_image_width
+            self.original_image_height = self.Z_image_value
 
         self.update_canvas_size()
         self.reset_display(False)

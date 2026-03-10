@@ -192,15 +192,46 @@ def test_get_mip_image_uses_correct_projection_and_anisotropic_scaling_zx():
 
     image = controller.get_mip_image()
 
-    # ZX should source from zy_mip (Z-by-X), transpose to X-by-Z, then scale Z width.
+    # ZX should source from zy_mip (Z-by-X) and scale Z along image height.
     expected = np.array(
         [
-            [10, 20, 30, 40],
-            [11, 21, 31, 41],
-            [12, 22, 32, 42],
+            [10, 11, 12],
+            [20, 21, 22],
+            [30, 31, 32],
+            [40, 41, 42],
         ],
         dtype=np.uint16,
     )
-    # 4 * 1.5 -> 6 columns
-    expected = np.repeat(expected, [2, 1, 2, 1], axis=1)
+    # 4 * 1.5 -> 6 rows
+    expected = np.repeat(expected, [2, 1, 2, 1], axis=0)
     np.testing.assert_array_equal(image, expected)
+
+
+def test_get_mip_image_multi_perspective_composition():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.axial_to_lateral_ratio = 1.0
+    controller.multi_view_gap = 1
+    controller.selected_channels = ["CH1"]
+    controller.render_widgets = {
+        "perspective": _Getter("Multi"),
+        "channel": _Getter("CH1"),
+    }
+    controller.flip_image = lambda image: image
+    controller.down_sample_image = lambda image, *_: image
+
+    controller.xy_mip = np.array([[[100, 101], [102, 103]]], dtype=np.uint16)
+    # ZY source (zx_mip -> transpose => 2x2)
+    controller.zx_mip = np.array([[[10, 20], [30, 40]]], dtype=np.uint16)
+    # ZX source (zy_mip => 2x2)
+    controller.zy_mip = np.array([[[50, 60], [70, 80]]], dtype=np.uint16)
+
+    image = controller.get_mip_image()
+
+    # ratio=1, gap=1, left/top pads=1 -> output shape 6x6.
+    assert image.shape == (6, 6)
+    # XY center
+    np.testing.assert_array_equal(image[1:3, 1:3], np.array([[100, 101], [102, 103]]))
+    # YZ right
+    np.testing.assert_array_equal(image[1:3, 4:6], np.array([[10, 30], [20, 40]]))
+    # ZX bottom
+    np.testing.assert_array_equal(image[4:6, 1:3], np.array([[50, 60], [70, 80]]))

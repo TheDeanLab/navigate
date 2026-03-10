@@ -382,3 +382,41 @@ def test_render_single_multichannel_frame_applies_channel_alpha():
     assert out.shape == (3, 3, 3)
     np.testing.assert_array_equal(out[0, 0], np.array([50, 0, 0], dtype=np.uint8))
     assert controller._last_frame_display_max == 100.0
+
+
+def test_render_single_multichannel_frame_applies_gamma_mapping():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.selected_channels = ["CH1"]
+    controller.overlay_channel_settings = {
+        "CH1": {
+            "lut_name": "Red",
+            "autoscale": False,
+            "min_counts": 0.0,
+            "max_counts": 255.0,
+            "visible": True,
+            "alpha": 1.0,
+            "gamma": 2.0,
+        }
+    }
+    controller._overlay_colormap_cache = {}
+    controller._gamma_lut_cache = {}
+    controller._colorized_channel_cache = {}
+    controller.min_counts = 0.0
+    controller.max_counts = 255.0
+    controller.canvas_width = 2
+    controller.canvas_height = 2
+    controller._prepare_zoom_window = lambda: (slice(None), slice(None))
+    controller._crop_image_with_zoom = lambda image, y_slice, x_slice: image[
+        y_slice, x_slice
+    ]
+    controller.down_sample_image = lambda image: image
+    controller.add_crosshair = lambda image: image
+
+    out = controller._render_single_multichannel_frame(
+        "CH1",
+        np.full((2, 2), 128, dtype=np.uint8),
+        channel_signature=("mip", 0, "XY", 2),
+    )
+
+    # gamma=2 maps 128 -> round((128/255)^2*255) = 64, Red LUT => RGB [64, 0, 0]
+    np.testing.assert_array_equal(out[0, 0], np.array([64, 0, 0], dtype=np.uint8))

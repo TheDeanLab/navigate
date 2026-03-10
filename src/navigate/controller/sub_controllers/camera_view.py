@@ -295,6 +295,8 @@ class BaseViewController(GUIController, ABaseViewController):
         self.overlay_channel_settings: Dict[str, Dict[str, Any]] = {}
         #: dict: Cached BGR LUT tables for overlay colors.
         self._overlay_colormap_cache: Dict[str, np.ndarray] = {}
+        #: dict: Cached 8-bit gamma lookup tables for display mapping.
+        self._gamma_lut_cache: Dict[int, np.ndarray] = {}
         #: dict: Cache of colorized channel buffers keyed by source/settings signature.
         self._colorized_channel_cache: Dict[tuple, tuple[np.ndarray, float]] = {}
         #: np.ndarray: Reused additive overlay buffer in BGR.
@@ -494,6 +496,7 @@ class BaseViewController(GUIController, ABaseViewController):
                     "max_counts": float(self.max_counts),
                     "visible": True,
                     "alpha": 1.0,
+                    "gamma": 1.0,
                 }
 
     def _sync_overlay_controls_from_cache(self) -> None:
@@ -568,13 +571,11 @@ class BaseViewController(GUIController, ABaseViewController):
         self._update_channel_selector_for_display_mode()
 
     def _update_display_mode_visibility(self) -> None:
-        """Show single-channel or multichannel LUT controls according to mode."""
+        """Show the compact LUT controls (always used for this UI)."""
         if not hasattr(self.view, "lut"):
             return
         if hasattr(self.view.lut, "set_multichannel_controls_visible"):
-            self.view.lut.set_multichannel_controls_visible(
-                self._has_selected_channels()
-            )
+            self.view.lut.set_multichannel_controls_visible(True)
 
     def _update_channel_selector_for_display_mode(self) -> None:
         """Hook for subclasses to disable irrelevant single-channel selectors."""
@@ -639,6 +640,35 @@ class BaseViewController(GUIController, ABaseViewController):
             self._overlay_colormap_cache[lut_name] = colormap
         return colormap
 
+    @staticmethod
+    def _normalize_gamma(gamma: float) -> float:
+        """Clamp display gamma to the supported range [0.0, 2.0]."""
+        return max(0.0, min(2.0, float(gamma)))
+
+    def _build_gamma_lut(self, gamma: float) -> np.ndarray:
+        """Build a uint8 lookup table for intensity gamma correction."""
+        gamma = self._normalize_gamma(gamma)
+        if np.isclose(gamma, 1.0, atol=1e-6):
+            return np.arange(256, dtype=np.uint8).reshape(-1, 1)
+        if gamma <= 0.0:
+            lut = np.full((256, 1), 255, dtype=np.uint8)
+            lut[0, 0] = 0
+            return lut
+
+        ramp = np.linspace(0.0, 1.0, 256, dtype=np.float32)
+        corrected = np.power(ramp, gamma)
+        return np.rint(corrected * 255.0).clip(0, 255).astype(np.uint8).reshape(-1, 1)
+
+    def _get_gamma_lut(self, gamma: float) -> np.ndarray:
+        """Fetch a cached gamma LUT for 8-bit intensity remapping."""
+        normalized = self._normalize_gamma(gamma)
+        cache_key = int(round(normalized * 1000.0))
+        lut = self._gamma_lut_cache.get(cache_key)
+        if lut is None:
+            lut = self._build_gamma_lut(normalized)
+            self._gamma_lut_cache[cache_key] = lut
+        return lut
+
     def _get_channel_overlay_state(self, channel: str) -> Dict[str, Any]:
         """Return normalized display settings for one selected channel."""
         self._ensure_overlay_channel_settings()
@@ -650,6 +680,7 @@ class BaseViewController(GUIController, ABaseViewController):
             "max_counts": float(state.get("max_counts", self.max_counts)),
             "visible": bool(state.get("visible", True)),
             "alpha": max(0.0, min(1.0, float(state.get("alpha", 1.0)))),
+            "gamma": self._normalize_gamma(state.get("gamma", 1.0)),
         }
 
     def _get_colorized_channel_buffer(
@@ -677,6 +708,7 @@ class BaseViewController(GUIController, ABaseViewController):
                 bool(channel_state["autoscale"]),
                 float(channel_state["min_counts"]),
                 float(channel_state["max_counts"]),
+                float(channel_state["gamma"]),
             )
             cached = self._colorized_channel_cache.get(cache_key)
             if cached is not None:
@@ -690,6 +722,9 @@ class BaseViewController(GUIController, ABaseViewController):
             min_counts=float(channel_state["min_counts"]),
             max_counts=float(channel_state["max_counts"]),
         )
+        gamma = self._normalize_gamma(channel_state.get("gamma", 1.0))
+        if not np.isclose(gamma, 1.0, atol=1e-6):
+            scaled = cv2.LUT(scaled, self._get_gamma_lut(gamma))
         color_lut = self._get_overlay_colormap(str(channel_state["lut_name"]))
         colorized = cv2.applyColorMap(scaled, color_lut)
 
@@ -1530,8 +1565,11 @@ class BaseViewController(GUIController, ABaseViewController):
 
     def left_click(self, *_) -> None:
         """Toggles cross-hair on image upon left click event."""
-        if self.image is not None:
-            self.apply_cross_hair = not self.apply_cross_hair
+        self.apply_cross_hair = not self.apply_cross_hair
+        if self._has_selected_channels():
+            # Keep redraws on the active compact LUT path (single or overlay).
+            self._refresh_after_display_mode_change()
+        elif self.image is not None:
             self.process_image()
 
     def resize(self, event: tk.Event) -> None:

@@ -227,11 +227,11 @@ def test_get_mip_image_multi_perspective_composition():
 
     image = controller.get_mip_image()
 
-    # ratio=1, gap=1, left/top pads=1 -> output shape 6x6.
-    assert image.shape == (6, 6)
-    # XY center
-    np.testing.assert_array_equal(image[1:3, 1:3], np.array([[100, 101], [102, 103]]))
+    # gap=1 with no outer padding -> output shape 5x5.
+    assert image.shape == (5, 5)
+    # XY upper-left
+    np.testing.assert_array_equal(image[0:2, 0:2], np.array([[100, 101], [102, 103]]))
     # YZ right
-    np.testing.assert_array_equal(image[1:3, 4:6], np.array([[10, 30], [20, 40]]))
+    np.testing.assert_array_equal(image[0:2, 3:5], np.array([[10, 30], [20, 40]]))
     # ZX bottom
-    np.testing.assert_array_equal(image[4:6, 1:3], np.array([[50, 60], [70, 80]]))
+    np.testing.assert_array_equal(image[3:5, 0:2], np.array([[50, 60], [70, 80]]))

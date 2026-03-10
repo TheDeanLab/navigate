@@ -1979,11 +1979,8 @@ class MIPViewController(BaseViewController):
         )
 
         gap = int(getattr(self, "multi_view_gap", 6))
-        left_pad = yz.shape[1] // 2
-        top_pad = xz.shape[0] // 2
-
-        total_height = top_pad + xy.shape[0] + gap + xz.shape[0]
-        total_width = left_pad + xy.shape[1] + gap + yz.shape[1]
+        total_height = xy.shape[0] + gap + xz.shape[0]
+        total_width = xy.shape[1] + gap + yz.shape[1]
         fill_value = int(min(xy.min(), yz.min(), xz.min()))
         composite = np.full(
             (total_height, total_width),
@@ -1991,7 +1988,7 @@ class MIPViewController(BaseViewController):
             dtype=xy.dtype,
         )
 
-        xy_y0, xy_x0 = top_pad, left_pad
+        xy_y0, xy_x0 = 0, 0
         composite[xy_y0 : xy_y0 + xy.shape[0], xy_x0 : xy_x0 + xy.shape[1]] = xy
 
         yz_x0 = xy_x0 + xy.shape[1] + gap
@@ -2128,14 +2125,8 @@ class MIPViewController(BaseViewController):
         if display_mode == "Multi":
             z_scaled = max(1, self.Z_image_value)
             gap = int(getattr(self, "multi_view_gap", 6))
-            left_pad = z_scaled // 2
-            top_pad = z_scaled // 2
-            self.original_image_width = (
-                left_pad + self.XY_image_width + gap + z_scaled
-            )
-            self.original_image_height = (
-                top_pad + self.XY_image_height + gap + z_scaled
-            )
+            self.original_image_width = self.XY_image_width + gap + z_scaled
+            self.original_image_height = self.XY_image_height + gap + z_scaled
         elif display_mode == "XY":
             self.original_image_width = self.XY_image_width
             self.original_image_height = self.XY_image_height
@@ -2167,6 +2158,11 @@ class MIPViewController(BaseViewController):
             Down-sampled image data.
         """
         sx, sy = self.canvas_width, self.canvas_height
+        if self.render_widgets["perspective"].get() == "Multi":
+            sx = int(self.view.canvas["width"])
+            sy = int(self.view.canvas["height"])
+            self.canvas_width = sx
+            self.canvas_height = sy
         down_sampled_image = cv2.resize(image, (sx, sy))
         if reset_original:
             self.original_image_width = self.canvas_width

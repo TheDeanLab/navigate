@@ -847,6 +847,9 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._multichannel_on_change = on_change
         if len(channels) == 0:
             self.multichannel_inputs = {}
+            self._multichannel_channel_widget["values"] = ()
+            self._active_multichannel_channel.set("")
+            self._multichannel_channel_widget.configure(state="disabled")
             return
 
         self._multichannel_syncing = True
@@ -875,6 +878,10 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
                 channel: self._multichannel_channel_states[channel] for channel in channels
             }
             self._multichannel_channel_widget["values"] = channels
+            if len(channels) > 1:
+                self._multichannel_channel_widget.configure(state="readonly")
+            else:
+                self._multichannel_channel_widget.configure(state="disabled")
             active_channel = self._active_multichannel_channel.get()
             if active_channel not in channels:
                 self._active_multichannel_channel.set(channels[0])

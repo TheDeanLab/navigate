@@ -455,14 +455,20 @@ class BaseViewController(GUIController, ABaseViewController):
             return False
         return mode_widget.get() == "Overlay"
 
+    def _has_selected_channels(self) -> bool:
+        """Return whether at least one acquisition channel is active."""
+        return isinstance(self.selected_channels, list) and len(self.selected_channels) > 0
+
     def _has_multiple_selected_channels(self) -> bool:
         """Return whether more than one acquisition channel is active."""
-        return isinstance(self.selected_channels, list) and len(self.selected_channels) > 1
+        return self._has_selected_channels() and len(self.selected_channels) > 1
 
     def _get_multichannel_active_channel(self) -> Optional[str]:
         """Get the active channel from compact LUT controls."""
+        if not self._has_selected_channels():
+            return None
         if not self._has_multiple_selected_channels():
-            if isinstance(self.selected_channels, list) and self.selected_channels:
+            if self.selected_channels:
                 return self.selected_channels[0]
             return None
         if hasattr(self.view, "lut") and hasattr(self.view.lut, "get_multichannel_active_channel"):
@@ -523,7 +529,7 @@ class BaseViewController(GUIController, ABaseViewController):
         if self._syncing_overlay_controls:
             return
         self._sync_overlay_cache_from_controls(channel)
-        if self._has_multiple_selected_channels():
+        if self._has_selected_channels():
             self._refresh_after_display_mode_change()
 
     def _configure_display_mode_controls(self) -> None:
@@ -543,7 +549,7 @@ class BaseViewController(GUIController, ABaseViewController):
             self.display_mode_widgets["mode"].set("Single")
             mode_widget.state(["disabled"])
             if hasattr(self.view, "display_mode"):
-                self.view.display_mode.grid_remove()
+                self.view.display_mode.grid()
 
         self._ensure_overlay_channel_settings()
         if hasattr(self.view.lut, "configure_multichannel_controls"):
@@ -567,7 +573,7 @@ class BaseViewController(GUIController, ABaseViewController):
             return
         if hasattr(self.view.lut, "set_multichannel_controls_visible"):
             self.view.lut.set_multichannel_controls_visible(
-                self._has_multiple_selected_channels()
+                self._has_selected_channels()
             )
 
     def _update_channel_selector_for_display_mode(self) -> None:
@@ -1776,7 +1782,7 @@ class CameraViewController(BaseViewController):
         """Disable single-channel selectors while overlay mode is active."""
         if self.display_state != "Slice":
             return
-        if self._has_multiple_selected_channels() or self._should_use_overlay_mode():
+        if self._has_selected_channels():
             self.view.live_frame.channel.configure(state="disabled")
         else:
             self.view.live_frame.channel.state(["!disabled", "readonly"])
@@ -1892,7 +1898,7 @@ class CameraViewController(BaseViewController):
         if self.display_state == "Live":
             if self._should_use_overlay_mode():
                 super().try_to_display_image(image)
-            elif self._has_multiple_selected_channels():
+            elif self._has_selected_channels():
                 active_channel = self._get_multichannel_active_channel()
                 if (
                     active_channel in self.selected_channels
@@ -1908,7 +1914,7 @@ class CameraViewController(BaseViewController):
                 if slice_idx == requested_slice:
                     super().try_to_display_image(image)
             else:
-                if self._has_multiple_selected_channels():
+                if self._has_selected_channels():
                     active_channel = self._get_multichannel_active_channel()
                     if active_channel not in self.selected_channels:
                         return
@@ -1969,7 +1975,7 @@ class CameraViewController(BaseViewController):
             self.update_max_counts()
             return
 
-        if self._has_multiple_selected_channels():
+        if self._has_selected_channels():
             active_channel = self._get_multichannel_active_channel()
             if active_channel not in self.selected_channels:
                 return
@@ -1985,7 +1991,7 @@ class CameraViewController(BaseViewController):
             return
 
         self.image = self.flip_image(image)
-        if self._has_multiple_selected_channels():
+        if self._has_selected_channels():
             active_channel = self._get_multichannel_active_channel()
             if active_channel not in self.selected_channels:
                 return
@@ -2027,7 +2033,7 @@ class CameraViewController(BaseViewController):
             )
             self.view.slider.configure(state="normal")
             self.view.slider.grid()
-            if self._has_multiple_selected_channels() or self._should_use_overlay_mode():
+            if self._has_selected_channels():
                 self.view.live_frame.channel.configure(state="disabled")
             else:
                 self.view.live_frame.channel.state(["!disabled", "readonly"])
@@ -2166,7 +2172,7 @@ class CameraViewController(BaseViewController):
 
         self.image = self.flip_image(image)
 
-        if self._has_multiple_selected_channels():
+        if self._has_selected_channels():
             self._sync_overlay_cache_from_controls()
             active_channel = self._get_multichannel_active_channel()
             if active_channel not in self.selected_channels:
@@ -2439,7 +2445,7 @@ class MIPViewController(BaseViewController):
 
     def _update_channel_selector_for_display_mode(self) -> None:
         """Disable MIP legacy channel selector when compact channel picker is active."""
-        if self._has_multiple_selected_channels():
+        if self._has_selected_channels():
             self.render_widgets["channel"].widget.state(["disabled"])
         else:
             self.render_widgets["channel"].widget.state(["!disabled", "readonly"])
@@ -2470,12 +2476,9 @@ class MIPViewController(BaseViewController):
 
     def _get_active_mip_channel_name(self) -> Optional[str]:
         """Get active channel for MIP single-channel rendering."""
-        if not isinstance(self.selected_channels, list):
+        if not self._has_selected_channels():
             return None
-        if self._has_multiple_selected_channels():
-            channel = self._get_multichannel_active_channel()
-        else:
-            channel = self.render_widgets["channel"].get()
+        channel = self._get_multichannel_active_channel()
         if channel in self.selected_channels:
             return channel
         return self.selected_channels[0] if self.selected_channels else None
@@ -2759,7 +2762,7 @@ class MIPViewController(BaseViewController):
                 self.populate_image(overlay)
             return
 
-        if self._has_multiple_selected_channels():
+        if self._has_selected_channels():
             self._sync_overlay_cache_from_controls()
             active_channel = self._get_active_mip_channel_name()
             if active_channel not in self.selected_channels:
@@ -2804,7 +2807,7 @@ class MIPViewController(BaseViewController):
                 self.populate_image(overlay)
             return
 
-        if self._has_multiple_selected_channels():
+        if self._has_selected_channels():
             self._sync_overlay_cache_from_controls()
             active_channel = self._get_active_mip_channel_name()
             if active_channel not in self.selected_channels:

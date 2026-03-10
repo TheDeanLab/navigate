@@ -235,3 +235,68 @@ def test_get_mip_image_multi_perspective_composition():
     np.testing.assert_array_equal(image[0:2, 3:5], np.array([[10, 30], [20, 40]]))
     # ZX bottom
     np.testing.assert_array_equal(image[3:5, 0:2], np.array([[50, 60], [70, 80]]))
+
+
+def test_overlay_channel_defaults_follow_imagej_order():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.selected_channels = ["CH1", "CH2", "CH3", "CH4"]
+    controller.overlay_channel_settings = {}
+    controller.min_counts = 0
+    controller.max_counts = 65535
+
+    controller._ensure_overlay_channel_settings()
+
+    assert controller.overlay_channel_settings["CH1"]["lut_name"] == "Green"
+    assert controller.overlay_channel_settings["CH2"]["lut_name"] == "Red"
+    assert controller.overlay_channel_settings["CH3"]["lut_name"] == "Magenta"
+    assert controller.overlay_channel_settings["CH4"]["lut_name"] == "Cyan"
+
+
+def test_compose_overlay_from_channels_adds_colorized_channels():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.selected_channels = ["CH1", "CH2"]
+    controller.overlay_channel_settings = {
+        "CH1": {
+            "lut_name": "Red",
+            "autoscale": False,
+            "min_counts": 0.0,
+            "max_counts": 255.0,
+        },
+        "CH2": {
+            "lut_name": "Green",
+            "autoscale": False,
+            "min_counts": 0.0,
+            "max_counts": 255.0,
+        },
+    }
+    controller._overlay_colormap_cache = {}
+    controller._overlay_bgr_buf = None
+    controller.min_counts = 0.0
+    controller.max_counts = 255.0
+    controller._prepare_zoom_window = lambda: (slice(None), slice(None))
+    controller._crop_image_with_zoom = lambda image, y_slice, x_slice: image[
+        y_slice, x_slice
+    ]
+    controller.down_sample_image = lambda image: image
+    controller.add_crosshair = lambda image: image
+
+    image = controller._compose_overlay_from_channels(
+        {
+            "CH1": np.full((3, 3), 100, dtype=np.uint8),
+            "CH2": np.full((3, 3), 50, dtype=np.uint8),
+        }
+    )
+
+    assert image.shape == (3, 3, 3)
+    np.testing.assert_array_equal(image[0, 0], np.array([100, 50, 0], dtype=np.uint8))
+    assert controller._last_frame_display_max == 100.0
+
+
+def test_should_use_overlay_mode_requires_multiple_channels():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.display_mode_widgets = {"mode": _Getter("Overlay")}
+    controller.selected_channels = ["CH1"]
+    assert not controller._should_use_overlay_mode()
+
+    controller.selected_channels = ["CH1", "CH2"]
+    assert controller._should_use_overlay_mode()

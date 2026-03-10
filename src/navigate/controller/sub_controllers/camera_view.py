@@ -35,7 +35,7 @@ import tkinter as tk
 from tkinter import messagebox
 import logging
 import threading
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 import tempfile
 import os
 import time
@@ -59,6 +59,27 @@ from navigate.view.theme import get_theme_color, get_theme_font
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+IMAGEJ_CHANNEL_COLOR_BGR = {
+    "Green": (0, 255, 0),
+    "Red": (0, 0, 255),
+    "Magenta": (255, 0, 255),
+    "Cyan": (255, 255, 0),
+    "Yellow": (0, 255, 255),
+    "Blue": (255, 0, 0),
+    "Orange": (0, 165, 255),
+    "Gray": (255, 255, 255),
+}
+IMAGEJ_DEFAULT_COLOR_ORDER = (
+    "Green",
+    "Red",
+    "Magenta",
+    "Cyan",
+    "Yellow",
+    "Blue",
+    "Orange",
+    "Gray",
+)
 
 
 class ABaseViewController(metaclass=abc.ABCMeta):
@@ -204,10 +225,10 @@ class BaseViewController(GUIController, ABaseViewController):
         self._display_after_id = None
 
         #: int: The maximum counts of the image.
-        self.max_counts = None
+        self.max_counts = 2**16 - 1
 
         #: int: The minimum counts of the image.
-        self.min_counts = None
+        self.min_counts = 0
 
         #: int: The number of channels in the image.
         self.number_of_channels = 0
@@ -265,6 +286,19 @@ class BaseViewController(GUIController, ABaseViewController):
 
         #: dict: The dictionary of image palette widgets.
         self.image_palette = view.lut.get_widgets()
+        #: dict: The display mode widgets.
+        self.display_mode_widgets = (
+            view.display_mode.get_widgets() if hasattr(view, "display_mode") else {}
+        )
+
+        #: dict: Cached per-channel overlay display settings.
+        self.overlay_channel_settings: Dict[str, Dict[str, Any]] = {}
+        #: dict: Cached BGR LUT tables for overlay colors.
+        self._overlay_colormap_cache: Dict[str, np.ndarray] = {}
+        #: np.ndarray: Reused additive overlay buffer in BGR.
+        self._overlay_bgr_buf: Optional[np.ndarray] = None
+        #: bool: Guard for suppressing callback loops while syncing controls.
+        self._syncing_overlay_controls = False
 
         #: Optional[str]: after() id for debouncing min/max updates
         self._minmax_after_id = None
@@ -290,6 +324,12 @@ class BaseViewController(GUIController, ABaseViewController):
         self.image_palette["Flip XY"].widget.config(
             command=lambda: self.update_transpose_state(display=True)
         )
+
+        if "mode" in self.display_mode_widgets:
+            self.display_mode_widgets["mode"].widget.bind(
+                "<<ComboboxSelected>>",
+                self._on_display_mode_changed,
+            )
 
         #: int: The x position of the mouse.
         self.move_to_x = None
@@ -403,6 +443,224 @@ class BaseViewController(GUIController, ABaseViewController):
             camera_view_controller mode.
         """
         self.mode = mode
+
+    def _should_use_overlay_mode(self) -> bool:
+        """Return whether multichannel overlay mode is currently active."""
+        mode_widget = self.display_mode_widgets.get("mode")
+        if mode_widget is None:
+            return False
+        if not isinstance(self.selected_channels, list) or len(self.selected_channels) <= 1:
+            return False
+        return mode_widget.get() == "Overlay"
+
+    def _default_overlay_lut_for_channel(self, index: int) -> str:
+        """Pick a default ImageJ-like color for a channel index."""
+        return IMAGEJ_DEFAULT_COLOR_ORDER[index % len(IMAGEJ_DEFAULT_COLOR_ORDER)]
+
+    def _ensure_overlay_channel_settings(self) -> None:
+        """Ensure every selected channel has persisted overlay display settings."""
+        if not isinstance(self.selected_channels, list):
+            return
+        for index, channel in enumerate(self.selected_channels):
+            if channel not in self.overlay_channel_settings:
+                self.overlay_channel_settings[channel] = {
+                    "lut_name": self._default_overlay_lut_for_channel(index),
+                    "autoscale": True,
+                    "min_counts": float(self.min_counts),
+                    "max_counts": float(self.max_counts),
+                }
+
+    def _sync_overlay_controls_from_cache(self) -> None:
+        """Populate multichannel controls from cached per-channel state."""
+        if not hasattr(self.view, "lut"):
+            return
+        if not hasattr(self.view.lut, "set_multichannel_channel_state"):
+            return
+        self._syncing_overlay_controls = True
+        try:
+            for channel in self.selected_channels or []:
+                self.view.lut.set_multichannel_channel_state(
+                    channel,
+                    self.overlay_channel_settings.get(channel, {}),
+                )
+        finally:
+            self._syncing_overlay_controls = False
+
+    def _sync_overlay_cache_from_controls(self, channel: Optional[str] = None) -> None:
+        """Persist the latest multichannel control values into controller cache."""
+        if not hasattr(self.view, "lut"):
+            return
+        if not hasattr(self.view.lut, "get_multichannel_channel_state"):
+            return
+        channels = [channel] if channel else list(self.selected_channels or [])
+        for channel_name in channels:
+            state = self.view.lut.get_multichannel_channel_state(channel_name)
+            if state:
+                self.overlay_channel_settings.setdefault(channel_name, {}).update(state)
+
+    def _on_multichannel_control_changed(self, channel: str, _field: str) -> None:
+        """Handle per-channel overlay LUT/autoscale/min/max changes from the UI."""
+        if self._syncing_overlay_controls:
+            return
+        self._sync_overlay_cache_from_controls(channel)
+        if self._should_use_overlay_mode():
+            self._refresh_after_display_mode_change()
+
+    def _configure_display_mode_controls(self) -> None:
+        """Configure display mode widgets and channel-scaled LUT controls."""
+        if "mode" not in self.display_mode_widgets or not hasattr(self.view, "lut"):
+            return
+
+        mode_widget = self.display_mode_widgets["mode"].widget
+        has_multiple_channels = (
+            isinstance(self.selected_channels, list) and len(self.selected_channels) > 1
+        )
+        if has_multiple_channels:
+            mode_widget.state(["!disabled", "readonly"])
+            if hasattr(self.view, "display_mode"):
+                self.view.display_mode.grid()
+        else:
+            self.display_mode_widgets["mode"].set("Single")
+            mode_widget.state(["disabled"])
+            if hasattr(self.view, "display_mode"):
+                self.view.display_mode.grid_remove()
+
+        self._ensure_overlay_channel_settings()
+        if hasattr(self.view.lut, "configure_multichannel_controls"):
+            default_luts = [
+                self.overlay_channel_settings[channel]["lut_name"]
+                for channel in (self.selected_channels or [])
+            ]
+            self.view.lut.configure_multichannel_controls(
+                channels=self.selected_channels or [],
+                default_luts=default_luts,
+                on_change=self._on_multichannel_control_changed,
+            )
+            self._sync_overlay_controls_from_cache()
+
+        self._update_display_mode_visibility()
+        self._update_channel_selector_for_display_mode()
+
+    def _update_display_mode_visibility(self) -> None:
+        """Show single-channel or multichannel LUT controls according to mode."""
+        if not hasattr(self.view, "lut"):
+            return
+        if hasattr(self.view.lut, "set_multichannel_controls_visible"):
+            self.view.lut.set_multichannel_controls_visible(self._should_use_overlay_mode())
+
+    def _update_channel_selector_for_display_mode(self) -> None:
+        """Hook for subclasses to disable irrelevant single-channel selectors."""
+        return
+
+    def _on_display_mode_changed(self, *_) -> None:
+        """Handle single-channel vs multichannel overlay mode changes."""
+        self._update_display_mode_visibility()
+        self._update_channel_selector_for_display_mode()
+        self._refresh_after_display_mode_change()
+
+    def _refresh_after_display_mode_change(self) -> None:
+        """Hook for subclasses to refresh display after display mode changes."""
+        if self.image is not None:
+            self.process_image()
+
+    def _scale_image_intensity_with_bounds(
+        self,
+        image: np.ndarray,
+        autoscale: bool,
+        min_counts: float,
+        max_counts: float,
+    ) -> tuple[np.ndarray, float]:
+        """Scale an image to uint8 using channel-specific or single-channel bounds."""
+        min_value, max_value, _, _ = cv2.minMaxLoc(image)
+
+        if autoscale:
+            if max_value > min_value:
+                scale = 255.0 / (max_value - min_value)
+                beta = -min_value * scale
+                return cv2.convertScaleAbs(image, alpha=scale, beta=beta), max_value
+            return np.ones_like(image, dtype=np.uint8) * 255, max_value
+
+        if max_counts > min_counts:
+            scale = 255.0 / (max_counts - min_counts)
+            beta = -min_counts * scale
+            return cv2.convertScaleAbs(image, alpha=scale, beta=beta), max_value
+
+        return np.ones_like(image, dtype=np.uint8) * 255, max_value
+
+    def _build_overlay_colormap(self, lut_name: str) -> np.ndarray:
+        """Build an OpenCV BGR colormap table for an ImageJ-like channel color."""
+        color_bgr = IMAGEJ_CHANNEL_COLOR_BGR.get(lut_name, IMAGEJ_CHANNEL_COLOR_BGR["Gray"])
+        ramp = np.arange(256, dtype=np.uint8)
+        colormap = np.empty((256, 1, 3), dtype=np.uint8)
+        for i, channel_value in enumerate(color_bgr):
+            if channel_value >= 255:
+                colormap[:, 0, i] = ramp
+            elif channel_value <= 0:
+                colormap[:, 0, i] = 0
+            else:
+                colormap[:, 0, i] = (
+                    ramp.astype(np.uint16) * int(channel_value) // 255
+                ).astype(np.uint8)
+        return colormap
+
+    def _get_overlay_colormap(self, lut_name: str) -> np.ndarray:
+        """Fetch a cached OpenCV BGR colormap table for channel overlay rendering."""
+        colormap = self._overlay_colormap_cache.get(lut_name)
+        if colormap is None:
+            colormap = self._build_overlay_colormap(lut_name)
+            self._overlay_colormap_cache[lut_name] = colormap
+        return colormap
+
+    def _compose_overlay_from_channels(
+        self,
+        channel_images: Dict[str, np.ndarray],
+    ) -> Optional[np.ndarray]:
+        """Compose channel images into a single additive RGB overlay frame."""
+        if not channel_images:
+            return None
+
+        y_slice, x_slice = self._prepare_zoom_window()
+        overlay_bgr = None
+        max_intensity = 0.0
+
+        for channel in self.selected_channels or []:
+            image = channel_images.get(channel)
+            if image is None:
+                continue
+
+            image = self._crop_image_with_zoom(image, y_slice, x_slice)
+            image = self.down_sample_image(image)
+
+            channel_state = self.overlay_channel_settings.get(channel, {})
+            scaled, channel_max = self._scale_image_intensity_with_bounds(
+                image=image,
+                autoscale=bool(channel_state.get("autoscale", True)),
+                min_counts=float(channel_state.get("min_counts", self.min_counts)),
+                max_counts=float(channel_state.get("max_counts", self.max_counts)),
+            )
+            max_intensity = max(max_intensity, channel_max)
+            color_lut = self._get_overlay_colormap(
+                str(channel_state.get("lut_name", "Gray"))
+            )
+            colorized = cv2.applyColorMap(scaled, color_lut)
+
+            if overlay_bgr is None:
+                if (
+                    self._overlay_bgr_buf is None
+                    or self._overlay_bgr_buf.shape != colorized.shape
+                ):
+                    self._overlay_bgr_buf = np.empty_like(colorized)
+                self._overlay_bgr_buf[:] = colorized
+                overlay_bgr = self._overlay_bgr_buf
+            else:
+                cv2.add(overlay_bgr, colorized, overlay_bgr)
+
+        if overlay_bgr is None:
+            return None
+
+        self._last_frame_display_max = max_intensity
+        overlay_rgb = cv2.cvtColor(overlay_bgr, cv2.COLOR_BGR2RGB)
+        return self.add_crosshair(overlay_rgb)
 
     def flip_image(self, image: np.ndarray) -> np.ndarray:
         """Flip the image according to the flip flags.
@@ -673,6 +931,7 @@ class BaseViewController(GUIController, ABaseViewController):
                 "y": camera_config.get("flip_y", False),
             }
 
+        self._configure_display_mode_controls()
         self.update_canvas_size()
         self.reset_display(False, False)
 
@@ -864,17 +1123,8 @@ class BaseViewController(GUIController, ABaseViewController):
             self.original_image_height / self.canvas_height
         )
 
-    def digital_zoom(self) -> np.ndarray:
-        """Apply digital zoom.
-
-        The x and y positions are between 0 and the canvas width and height
-        respectively.
-
-        Returns
-        -------
-        image : np.ndarray
-            Image after digital zoom applied
-        """
+    def _prepare_zoom_window(self) -> tuple[slice, slice]:
+        """Update zoom state and return crop slices for Y and X."""
         self.zoom_rect = self.zoom_rect - self.zoom_offset
         self.zoom_rect = self.zoom_rect * self.zoom_value
         self.zoom_rect = self.zoom_rect + self.zoom_offset
@@ -890,15 +1140,31 @@ class BaseViewController(GUIController, ABaseViewController):
         y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
 
-        zoom_image = self.image[
-            int(y_start_index * self.canvas_height_scale) : int(
-                y_end_index * self.canvas_height_scale
-            ),
-            int(x_start_index * self.canvas_width_scale) : int(
-                x_end_index * self.canvas_width_scale
-            ),
-        ]
+        y_slice = slice(
+            int(y_start_index * self.canvas_height_scale),
+            int(y_end_index * self.canvas_height_scale),
+        )
+        x_slice = slice(
+            int(x_start_index * self.canvas_width_scale),
+            int(x_end_index * self.canvas_width_scale),
+        )
+        return y_slice, x_slice
 
+    def _crop_image_with_zoom(
+        self,
+        image: np.ndarray,
+        y_slice: slice,
+        x_slice: slice,
+    ) -> np.ndarray:
+        """Crop a source image using zoom slices."""
+        return image[y_slice, x_slice]
+
+    def digital_zoom(self, source_image: Optional[np.ndarray] = None) -> np.ndarray:
+        """Apply digital zoom to the current image or a provided source image."""
+        if source_image is None:
+            source_image = self.image
+        y_slice, x_slice = self._prepare_zoom_window()
+        zoom_image = self._crop_image_with_zoom(source_image, y_slice, x_slice)
         return zoom_image
 
     def down_sample_image(self, image: np.ndarray) -> np.ndarray:
@@ -941,25 +1207,14 @@ class BaseViewController(GUIController, ABaseViewController):
         image : np.ndarray
             Scaled image data (uint8).
         """
-        # Compute min/max once and reuse; also store display max
-        min_value, max_value, _, _ = cv2.minMaxLoc(image)
+        scaled, max_value = self._scale_image_intensity_with_bounds(
+            image=image,
+            autoscale=self.autoscale,
+            min_counts=self.min_counts,
+            max_counts=self.max_counts,
+        )
         self._last_frame_display_max = max_value
-
-        if self.autoscale:
-            # In the off chance that we get a flat image, we set the min and max.
-            if max_value > min_value:
-                scale = 255.0 / (max_value - min_value)
-                beta = -min_value * scale
-                return cv2.convertScaleAbs(image, alpha=scale, beta=beta)
-
-        # If autoscale is disabled, we use the min/max counts from the GUI.
-        if self.max_counts > self.min_counts:
-            scale = 255.0 / (self.max_counts - self.min_counts)
-            beta = -self.min_counts * scale
-            return cv2.convertScaleAbs(image, alpha=scale, beta=beta)
-
-        # If the user has provided incorrect min/max values, we return a flat image.
-        return np.ones_like(image, dtype=np.uint8) * 255
+        return scaled
 
     def add_crosshair(self, image: np.ndarray) -> np.ndarray:
         """Adds a cross-hair to the image.
@@ -992,8 +1247,12 @@ class BaseViewController(GUIController, ABaseViewController):
                 crosshair_x = -1
             if crosshair_y < 0 or crosshair_y >= self.canvas_height:
                 crosshair_y = -1
-            image[:, int(crosshair_x)] = 255
-            image[int(crosshair_y), :] = 255
+            if image.ndim == 2:
+                image[:, int(crosshair_x)] = 255
+                image[int(crosshair_y), :] = 255
+            else:
+                image[:, int(crosshair_x), :] = 255
+                image[int(crosshair_y), :, :] = 255
 
         return image
 
@@ -1303,6 +1562,10 @@ class CameraViewController(BaseViewController):
 
         #: str: The display state.
         self.display_state = "Live"
+        #: int: Last observed channel index from acquisition stream.
+        self._latest_channel_idx = 0
+        #: int: Last observed slice index from acquisition stream.
+        self._latest_slice_idx = 0
 
         #: int: The number of frames to average.
         self.rolling_frames = 1
@@ -1379,6 +1642,63 @@ class CameraViewController(BaseViewController):
             image = cv2.addWeighted(image, 1 - alpha, seg_mask, alpha, 0)
         return image
 
+    def _update_channel_selector_for_display_mode(self) -> None:
+        """Disable single-channel selectors while overlay mode is active."""
+        if self.display_state != "Slice":
+            return
+        if self._should_use_overlay_mode():
+            self.view.live_frame.channel.configure(state="disabled")
+        else:
+            self.view.live_frame.channel.state(["!disabled", "readonly"])
+
+    def _refresh_after_display_mode_change(self) -> None:
+        """Re-render the current camera view after display mode transitions."""
+        self.update_display_state()
+        if self.display_state == "Slice":
+            self.slider_update()
+        elif self._pending_display_image is not None:
+            self._request_display_if_needed()
+        elif self.spooled_images is not None:
+            latest_image = self.spooled_images.load_image(
+                channel=int(getattr(self, "_latest_channel_idx", 0)),
+                slice_index=int(getattr(self, "_latest_slice_idx", 0)),
+            )
+            if latest_image is not None:
+                self.display_image(latest_image)
+
+    def _get_overlay_target_slice(self) -> int:
+        """Get the current slice index used for camera overlay composition."""
+        if self.display_state == "Slice":
+            return int(self.view.slider.get())
+        return int(getattr(self, "_latest_slice_idx", 0))
+
+    def _collect_camera_overlay_channels(
+        self,
+        current_image: np.ndarray,
+    ) -> Dict[str, np.ndarray]:
+        """Collect one image per selected channel for camera overlay rendering."""
+        channel_images: Dict[str, np.ndarray] = {}
+        if not isinstance(self.selected_channels, list):
+            return channel_images
+
+        target_slice = self._get_overlay_target_slice()
+        latest_channel_idx = int(getattr(self, "_latest_channel_idx", 0))
+        latest_slice_idx = int(getattr(self, "_latest_slice_idx", target_slice))
+
+        for channel_idx, channel_name in enumerate(self.selected_channels):
+            if channel_idx == latest_channel_idx and latest_slice_idx == target_slice:
+                image = current_image
+            else:
+                image = self.spooled_images.load_image(
+                    channel=channel_idx,
+                    slice_index=target_slice,
+                )
+            if image is None:
+                continue
+            channel_images[channel_name] = self.flip_image(image)
+
+        return channel_images
+
     def try_to_display_image(self, image: np.ndarray) -> None:
         """Try to display an image.
 
@@ -1395,6 +1715,8 @@ class CameraViewController(BaseViewController):
         """
         # Identify the channel index and slice index, update GUI.
         channel_idx, slice_idx = self.identify_channel_index_and_slice()
+        self._latest_channel_idx = channel_idx
+        self._latest_slice_idx = slice_idx
         self.image_metrics["Channel"].set(int(self.selected_channels[channel_idx][2:]))
 
         # Save the image to the spooled image loader.
@@ -1409,10 +1731,14 @@ class CameraViewController(BaseViewController):
 
         elif self.display_state == "Slice":
             requested_slice = self.view.slider.get()
-            requested_channel = self.view.live_frame.channel.get()
-            requested_channel = int(requested_channel[-1]) - 1
-            if slice_idx == requested_slice and channel_idx == requested_channel:
-                super().try_to_display_image(image)
+            if self._should_use_overlay_mode():
+                if slice_idx == requested_slice:
+                    super().try_to_display_image(image)
+            else:
+                requested_channel = self.view.live_frame.channel.get()
+                requested_channel = int(requested_channel[-1]) - 1
+                if slice_idx == requested_slice and channel_idx == requested_channel:
+                    super().try_to_display_image(image)
 
     def initialize_non_live_display(
         self, microscope_state: dict, camera_parameters: dict
@@ -1427,9 +1753,10 @@ class CameraViewController(BaseViewController):
             Camera parameters.
         """
         super().initialize_non_live_display(microscope_state, camera_parameters)
-        self.update_display_state()
         self.view.live_frame.channel["values"] = self.selected_channels
         self.view.live_frame.channel.set(self.selected_channels[0])
+        self._configure_display_mode_controls()
+        self.update_display_state()
         self.spooled_images = SpooledImageLoader(
             channels=self.number_of_channels,
             size_y=self.original_image_height,
@@ -1449,6 +1776,23 @@ class CameraViewController(BaseViewController):
         """Updates the image when the slider is moved."""
 
         slider_index = self.view.slider.get()
+        if self._should_use_overlay_mode():
+            channel_images: Dict[str, np.ndarray] = {}
+            for channel_index, channel_name in enumerate(self.selected_channels):
+                image = self.spooled_images.load_image(
+                    channel=channel_index,
+                    slice_index=slider_index,
+                )
+                if image is not None:
+                    channel_images[channel_name] = self.flip_image(image)
+            img_out = self._compose_overlay_from_channels(channel_images)
+            img_out = self.overlay_mask(img_out)
+            if img_out is None:
+                return
+            self.view.after(0, lambda img=img_out: self.populate_image(img))
+            self.update_max_counts()
+            return
+
         channel_index = self.view.live_frame.channel.get()
         channel_index = self.selected_channels.index(channel_index)
         image = self.spooled_images.load_image(
@@ -1485,10 +1829,12 @@ class CameraViewController(BaseViewController):
             )
             self.view.slider.configure(state="normal")
             self.view.slider.grid()
-            self.view.live_frame.channel.state(["!disabled", "readonly"])
-            # was normal
-            if self.view.live_frame.channel.get() not in self.selected_channels:
-                self.view.live_frame.channel.set(self.selected_channels[0])
+            if self._should_use_overlay_mode():
+                self.view.live_frame.channel.configure(state="disabled")
+            else:
+                self.view.live_frame.channel.state(["!disabled", "readonly"])
+                if self.view.live_frame.channel.get() not in self.selected_channels:
+                    self.view.live_frame.channel.set(self.selected_channels[0])
 
     def initialize(self, name: str, data: list):
         """Sets widgets based on data given from main controller/config.
@@ -1515,6 +1861,14 @@ class CameraViewController(BaseViewController):
             self.image_palette["Max"].set(max_value)
             self.image_palette["Min"].widget["state"] = "disabled"
             self.image_palette["Max"].widget["state"] = "disabled"
+            self.min_counts = float(min_value)
+            self.max_counts = float(max_value)
+
+            self._ensure_overlay_channel_settings()
+            for channel in self.selected_channels or []:
+                self.overlay_channel_settings[channel]["min_counts"] = float(min_value)
+                self.overlay_channel_settings[channel]["max_counts"] = float(max_value)
+            self._sync_overlay_controls_from_cache()
 
         self.image_palette["Flip XY"].widget.invoke()
 
@@ -1597,6 +1951,15 @@ class CameraViewController(BaseViewController):
         image : np.ndarray
             Image data.
         """
+        if self._should_use_overlay_mode():
+            self._sync_overlay_cache_from_controls()
+            channel_images = self._collect_camera_overlay_channels(image)
+            img_out = self._compose_overlay_from_channels(channel_images)
+            img_out = self.overlay_mask(img_out)
+            if img_out is not None:
+                self.view.after(0, lambda img=img_out: self.populate_image(img))
+                self.update_max_counts()
+            return
 
         self.image = self.flip_image(image)
 
@@ -1790,6 +2153,7 @@ class MIPViewController(BaseViewController):
         self.get_selected_channels()
         if isinstance(self.selected_channels, list) and len(self.selected_channels) > 0:
             self.render_widgets["channel"].set(self.selected_channels[0])
+        self._configure_display_mode_controls()
 
         # event binding
         self.render_widgets["perspective"].get_variable().trace_add(
@@ -1806,6 +2170,7 @@ class MIPViewController(BaseViewController):
         Pre-allocate the matrices for the MIP.
         """
         self.render_widgets["channel"].widget["values"] = self.selected_channels
+        self._update_channel_selector_for_display_mode()
         self.preallocate_matrices()
 
     def preallocate_matrices(self) -> None:
@@ -1844,6 +2209,50 @@ class MIPViewController(BaseViewController):
         self._zy_reduce_buf = np.empty((1, self.original_image_width), dtype=np.uint16)
         self._zx_reduce_buf = np.empty((self.original_image_height, 1), dtype=np.uint16)
 
+    def _update_channel_selector_for_display_mode(self) -> None:
+        """Disable MIP single-channel selector when overlay mode is active."""
+        if self._should_use_overlay_mode():
+            self.render_widgets["channel"].widget.state(["disabled"])
+        else:
+            self.render_widgets["channel"].widget.state(["!disabled", "readonly"])
+
+    def _refresh_after_display_mode_change(self) -> None:
+        """Refresh MIP display after changing single/overlay mode."""
+        self._update_channel_selector_for_display_mode()
+        self.display_mip_image()
+
+    def _get_mip_projection_for_channel(
+        self,
+        channel_idx: int,
+        perspective: Optional[str] = None,
+    ) -> np.ndarray:
+        """Return one channel's MIP projection for the selected perspective."""
+        display_mode = perspective or self.render_widgets["perspective"].get()
+        if display_mode == "Multi":
+            image = self._compose_multi_perspective(channel_idx)
+        elif display_mode == "XY":
+            image = self.xy_mip[channel_idx]
+        elif display_mode == "ZY":
+            image = self.zx_mip[channel_idx, :].T
+            image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
+        else:
+            image = self.zy_mip[channel_idx, :]
+            image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
+        return self.flip_image(image)
+
+    def _collect_mip_overlay_channels(self) -> Dict[str, np.ndarray]:
+        """Collect per-channel MIP projections for overlay rendering."""
+        channel_images: Dict[str, np.ndarray] = {}
+        if not isinstance(self.selected_channels, list):
+            return channel_images
+        display_mode = self.render_widgets["perspective"].get()
+        for channel_idx, channel_name in enumerate(self.selected_channels):
+            channel_images[channel_name] = self._get_mip_projection_for_channel(
+                channel_idx,
+                display_mode,
+            )
+        return channel_images
+
     def get_mip_image(self) -> np.ndarray or None:
         """Get MIP image according to perspective and channel id
 
@@ -1856,27 +2265,13 @@ class MIPViewController(BaseViewController):
         if any(view is None for view in views):
             return None
 
-        display_mode = self.render_widgets["perspective"].get()
         channel = self.render_widgets["channel"].get()
         if channel in self.selected_channels:
             channel_idx = self.selected_channels.index(channel)
         else:
             return
 
-        if display_mode == "Multi":
-            image = self._compose_multi_perspective(channel_idx)
-        elif display_mode == "XY":
-            image = self.xy_mip[channel_idx]
-        elif display_mode == "ZY":
-            # ZY is displayed as Y-by-Z (Z axis along image width).
-            image = self.zx_mip[channel_idx, :].T
-            image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
-        else:
-            # ZX is displayed as Z-by-X (Z axis along image height).
-            image = self.zy_mip[channel_idx, :]
-            image = self._rescale_orthogonal_for_anisotropy(image, display_mode)
-
-        image = self.flip_image(image)
+        image = self._get_mip_projection_for_channel(channel_idx)
         # map the image to canvas size()
         image = self.down_sample_image(image, True)
         return image
@@ -1967,7 +2362,7 @@ class MIPViewController(BaseViewController):
         )
 
     def _compose_multi_perspective(self, channel_idx: int) -> np.ndarray:
-        """Compose XY center, YZ right, XZ bottom into one monochrome frame."""
+        """Compose XY main pane, YZ right, XZ bottom into one monochrome frame."""
         xy = self.xy_mip[channel_idx]
         yz = self._rescale_orthogonal_for_anisotropy(
             self.zx_mip[channel_idx, :].T,
@@ -2013,6 +2408,7 @@ class MIPViewController(BaseViewController):
         super().initialize_non_live_display(microscope_state, camera_parameters)
         if isinstance(self.selected_channels, list) and len(self.selected_channels) > 0:
             self.render_widgets["channel"].set(self.selected_channels[0])
+        self._configure_display_mode_controls()
         self.perspective = self.render_widgets["perspective"].get()
         self.XY_image_width = self.original_image_width
         self.XY_image_height = self.original_image_height
@@ -2091,6 +2487,14 @@ class MIPViewController(BaseViewController):
         image : np.ndarray
             Image data.
         """
+        if self._should_use_overlay_mode():
+            self._sync_overlay_cache_from_controls()
+            channel_images = self._collect_mip_overlay_channels()
+            overlay = self._compose_overlay_from_channels(channel_images)
+            if overlay is not None:
+                self.populate_image(overlay)
+            return
+
         self.image = self.get_mip_image()
         self.process_image()
 
@@ -2099,10 +2503,19 @@ class MIPViewController(BaseViewController):
 
         if not self._is_display_visible():
             return
+        self._update_channel_selector_for_display_mode()
         if self.perspective != self.render_widgets["perspective"].get():
             self.update_perspective()
         if self.mode != "stop":
             return
+        if self._should_use_overlay_mode():
+            self._sync_overlay_cache_from_controls()
+            channel_images = self._collect_mip_overlay_channels()
+            overlay = self._compose_overlay_from_channels(channel_images)
+            if overlay is not None:
+                self.populate_image(overlay)
+            return
+
         self.image = self.get_mip_image()
         if self.image is not None:
             self.process_image()

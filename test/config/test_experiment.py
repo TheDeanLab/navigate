@@ -109,7 +109,6 @@ class TextExperimentFile(unittest.TestCase):
             "number_of_pixels": int,
             "binning": str,
             "pixel_size": float,
-            "frames_to_average": float,
             "databuffer_size": int,
         }
 

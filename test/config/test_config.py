@@ -301,7 +301,6 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "readout_direction": "Top-to-Bottom",
             "number_of_pixels": 10,
             "binning": "1x1",
-            "frames_to_average": 1,
             "databuffer_size": 100,
         }
 
@@ -588,7 +587,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         assert experiment["CameraParameters"]["readout_direction"] == "Bottom-to-Top"
 
         # other parameters should be int
-        for k in ["number_of_pixels", "databuffer_size", "frames_to_average"]:
+        for k in ["number_of_pixels", "databuffer_size"]:
             for v in ["abc", -10, 0]:
                 experiment["CameraParameters"][k] = v
                 config.verify_experiment_config(self.manager, configuration)

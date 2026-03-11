@@ -33,11 +33,26 @@ import pytest
 
 
 @pytest.fixture
-def dummy_zoom(dummy_model):
+def dummy_zoom():
     from navigate.model.devices.zoom.synthetic import SyntheticZoom
 
+    microscope_name = "ScopeA"
+    configuration = {
+        "configuration": {
+            "microscopes": {
+                microscope_name: {
+                    "zoom": {
+                        "position": {"0.63x": 100, "1x": 200, "2x": 300},
+                    }
+                }
+            }
+        }
+    }
+
     return SyntheticZoom(
-        dummy_model.active_microscope_name, None, dummy_model.configuration
+        microscope_name,
+        None,
+        configuration,
     )
 
 
@@ -54,23 +69,51 @@ def test_zoom_base_attributes(dummy_zoom):
 
 
 def test_build_stage_dict(dummy_zoom):
-    import random
+    original_stage_positions = dummy_zoom.configuration.get("stage_positions", None)
+    a, b, c = 120, 320, 470
+    try:
+        dummy_zoom.configuration["stage_positions"] = {
+            "BABB": {"f": {"0.63x": a, "1x": b, "2x": c}}
+        }
+        dummy_zoom.build_stage_dict()
 
-    a, b, c = random.randint(1, 1000), random.randint(1, 1000), random.randint(1, 1000)
-    dummy_zoom.configuration["stage_positions"] = {
-        "BABB": {"f": {"0.63x": a, "1x": b, "2x": c}}
-    }
-    dummy_zoom.build_stage_dict()
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["0.63x"] == 0
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["1x"] == b - a
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["2x"] == c - a
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["0.63x"] == a - b
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["1x"] == 0
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["2x"] == c - b
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["0.63x"] == a - c
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["1x"] == b - c
+        assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["2x"] == 0
+    finally:
+        if original_stage_positions is None:
+            dummy_zoom.configuration.pop("stage_positions", None)
+        else:
+            dummy_zoom.configuration["stage_positions"] = original_stage_positions
 
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["0.63x"] == 0
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["1x"] == b - a
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["2x"] == c - a
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["0.63x"] == a - b
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["1x"] == 0
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["2x"] == c - b
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["0.63x"] == a - c
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["1x"] == b - c
-    assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["2x"] == 0
+
+def test_build_stage_dict_without_stage_positions_sets_none(dummy_zoom):
+    original_stage_positions = dummy_zoom.configuration.get("stage_positions", None)
+    try:
+        dummy_zoom.configuration.pop("stage_positions", None)
+        dummy_zoom.build_stage_dict()
+
+        assert dummy_zoom.stage_offsets is None
+    finally:
+        if original_stage_positions is not None:
+            dummy_zoom.configuration["stage_positions"] = original_stage_positions
+
+
+def test_zoom_base_default_methods(dummy_zoom):
+    from navigate.model.devices.zoom.base import ZoomBase
+
+    assert str(dummy_zoom) == "ZoomBase"
+    assert dummy_zoom.move(position=1, wait_until_done=True) is None
+    assert dummy_zoom.read_position() is None
+
+    # Exercise the base no-op destructor path directly.
+    assert ZoomBase.__del__(dummy_zoom) is None
 
 
 def test_set_zoom(dummy_zoom):

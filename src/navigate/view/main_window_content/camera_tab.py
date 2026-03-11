@@ -236,7 +236,6 @@ class FramerateInfo(ttk.LabelFrame):
             "Exposure Time (ms)",
             "Readout Time (ms)",
             "Framerate (Hz)",
-            "Images to Average",
         ]
 
         #: list: List of all the names for the widget values.
@@ -244,14 +243,13 @@ class FramerateInfo(ttk.LabelFrame):
             "exposure_time",
             "readout_time",
             "max_framerate",
-            "frames_to_average",
         ]
 
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         #: list: List of all the read only values for the widgets.
-        self.read_only = [True, True, True, False]
+        self.read_only = [True, True, True]
 
         #  Dropdown loop
         for i in range(len(self.labels)):

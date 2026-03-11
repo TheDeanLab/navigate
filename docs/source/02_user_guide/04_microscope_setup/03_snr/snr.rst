@@ -2,27 +2,34 @@
 Signal-to-Noise Visualization Mode
 ==================================
 
-The Signal-to-Noise Ratio (SNR) Visualization Mode is designed to help users assess the quality of their images by visualizing the signal-to-noise ratio in real-time. This mode is particularly useful for identifying areas of high and low signal quality, which is helpful when aligning a microscope or when working with low-light conditions.
+.. _snr_mode:
 
-In the future, we will provide a method to acquire the offset and variance maps directly from within *navigate*. For now, users will need to provide these maps manually using commercial software provided by the camera manufacturer or by using custom scripts.
 
--------------------------------
+Signal-to-noise ratio (SNR) visualization helps assess image quality in
+real time. It is useful for microscope alignment and low-signal workflows.
 
-Acquiring Offset and Variance Maps
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Future releases will support direct acquisition of offset/variance maps from
+within **navigate**. For now, generate these maps with camera-vendor software
+or custom scripts.
 
-In general, it is a good idea to acquire the data used to derive the offset and variance maps at a similar exposure time as the one used for imaging. To calculate the offset and variance maps, users can follow these general steps:
+Acquiring Offset And Variance Maps
+----------------------------------
 
-1. **Capture Dark Frames**: With the camera lens cap on, capture a series of dark frames (e.g., 1000 frames). These frames will be used to calculate the offset map.
+As a guideline, acquire data for offset/variance maps using an exposure time
+similar to your imaging workflow.
 
-2. **Calculate the Offset Map**: Compute the minimum of the dark frames to create the offset map. This map represents the baseline signal level of the camera.
+1. **Capture dark frames.** Block incoming light and capture a stack of dark
+   frames (for example, 1000 frames).
+2. **Calculate the offset map.** Compute the minimum across dark frames.
+3. **Calculate the variance map.** Compute the variance across dark frames.
+4. **Save both maps.** Save offset/variance images as TIFF files in a
+   ``camera_maps`` folder under the **navigate** home directory.
 
-3. **Calculate the Variance Map**: Compute the variance of the dark frames to create the variance map. This map represents the noise characteristics of the camera.
+   - Windows: ``C:\Users\<username>\AppData\Local\.navigate\camera_maps\``
+   - macOS/Linux: ``~/.navigate/camera_maps/``
+   - Filenames:
+     ``<camera_serial_number>_off.tiff`` and
+     ``<camera_serial_number>_var.tiff``
 
-4. **Save the Maps**: Save the offset and variance maps as tiff images in a folder titled `camera_maps` in navigate's home directory.
-
-    - For Windows-based users: ``C:\AppData\Local\.navigate\camera_maps\``.
-    - For Linux and MacOS users: ``/home/<username>/.navigate/camera_maps/``.
-    - The files should be named as ``<camera_serial_number>_off.tiff`` and ``<camera_serial_number>_var.tiff``, where ``<camera_serial_number>`` is the serial number of the camera being used. By providing the serial number, users can easily switch between different cameras without needing to reconfigure the settings each time.
-
-5. **Launch navigate**: Next time you launch **navigate**, it will automatically detect the presence of the offset and variance maps in the specified directory and provide the appropriate options to enable the SNR visualization mode.
+5. Launch **navigate**. On startup, **navigate** detects available maps in the
+   configured directory and exposes SNR visualization options for that camera.

@@ -88,6 +88,7 @@ If you are new to **navigate**, begin with :ref:`Software Installation <software
    03_contributing/01_contributing_guidelines/01_contributing_guidelines
    03_contributing/02_developer_install/02_developer_install
    03_contributing/03_software_architecture/software_architecture
+   03_contributing/03_software_architecture/software_architecture_developer_concepts
    03_contributing/04_feature_container/feature_container
    03_contributing/05_restapi/restapi
    03_contributing/06_plugin/plugin_home

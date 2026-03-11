@@ -8,13 +8,17 @@ updated in focused batches or all at once.
 
 import argparse
 import json
+import math
 import os
 import sys
 import tkinter as tk
+from tkinter import ttk
 from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
-from typing import Callable, Dict, Iterable, List, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
+
+import numpy as np
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_ROOT = Path(SCRIPT_DIR).parent
@@ -195,7 +199,7 @@ def _open_save_dialog(ctx: Dict[str, object], cli_args: argparse.Namespace):
     if acquire_pop is None:
         raise RuntimeError("Failed to open save dialog popup for capture.")
     popup = acquire_pop.popup
-    _prepare_for_capture(ctx["root"], cli_args)
+    _prepare_for_capture(popup, cli_args)
     return acquire_pop, popup
 
 
@@ -327,6 +331,152 @@ def _is_mapped_path(root: tk.Tk, widget_path: str) -> bool:
         return False
 
 
+def _popup_capture_target(
+    cli_args: argparse.Namespace,
+    popup_name: str,
+    legacy_names: Tuple[str, ...] = (),
+) -> Tuple[str, bool]:
+    """Resolve popup screenshot output path and legacy skip behavior.
+
+    Returns
+    -------
+    Tuple[str, bool]
+        (path, should_skip_capture)
+    """
+    out_path = os.path.join(cli_args.output_root, f"popup_{popup_name}.png")
+    if os.path.exists(out_path):
+        return out_path, True
+
+    for legacy_name in legacy_names:
+        legacy_path = os.path.join(cli_args.output_root, legacy_name)
+        if os.path.exists(legacy_path):
+            return legacy_path, True
+
+    return out_path, False
+
+
+def _extract_popup_toplevel(popup_obj):
+    """Return the top-level widget to capture for a popup object."""
+    if isinstance(popup_obj, tk.Toplevel):
+        return popup_obj
+    popup = getattr(popup_obj, "popup", None)
+    if popup is not None:
+        return popup
+    raise RuntimeError(f"Could not resolve popup toplevel from {type(popup_obj)!r}.")
+
+
+def _dismiss_popup_obj(popup_obj) -> None:
+    """Best-effort close for popup objects and popup toplevels."""
+    try:
+        popup = _extract_popup_toplevel(popup_obj)
+    except Exception:
+        return
+
+    try:
+        popup.dismiss()
+        return
+    except Exception:
+        pass
+
+    try:
+        popup.destroy()
+    except Exception:
+        pass
+
+
+def _find_notebook_by_tab_text(root_widget, tab_text: str):
+    """Find the first ttk.Notebook containing a tab with matching text."""
+    for widget in _iter_widgets(root_widget):
+        if isinstance(widget, ttk.Notebook):
+            try:
+                for tab_id in widget.tabs():
+                    if widget.tab(tab_id, "text") == tab_text:
+                        return widget
+            except tk.TclError:
+                continue
+    return None
+
+
+def _select_notebook_tab(root_widget, tab_text: str) -> bool:
+    """Select a notebook tab by text if present."""
+    notebook = _find_notebook_by_tab_text(root_widget, tab_text)
+    if notebook is None:
+        return False
+    try:
+        for tab_id in notebook.tabs():
+            if notebook.tab(tab_id, "text") == tab_text:
+                notebook.select(tab_id)
+                return True
+    except tk.TclError:
+        return False
+    return False
+
+
+def _capture_popup_obj(
+    ctx: Dict[str, object],
+    cli_args: argparse.Namespace,
+    popup_obj,
+    popup_name: str,
+    *,
+    legacy_names: Tuple[str, ...] = (),
+    tab_text: Optional[str] = None,
+    pad: int = 2,
+) -> str:
+    """Capture a popup object to popup_<name>.png with optional legacy-skip."""
+    out_path, should_skip = _popup_capture_target(
+        cli_args, popup_name, legacy_names=legacy_names
+    )
+    if should_skip:
+        return out_path
+
+    popup = _extract_popup_toplevel(popup_obj)
+    try:
+        if tab_text:
+            _select_notebook_tab(popup, tab_text)
+        _prepare_for_capture(popup, cli_args)
+        if tab_text:
+            _select_notebook_tab(popup, tab_text)
+            _prepare_for_capture(popup, cli_args)
+        return _capture_widget(popup, out_path, pad=pad)
+    finally:
+        _dismiss_popup_obj(popup_obj)
+
+
+def _cleanup_controller_popup_attr(
+    controller,
+    attr_name: str,
+    close_methods: Tuple[str, ...] = ("close_popup", "close_window", "exit_func"),
+) -> None:
+    """Best-effort teardown for popup controllers stored on the main controller."""
+    popup_controller = getattr(controller, attr_name, None)
+    if popup_controller is None:
+        return
+
+    for method_name in close_methods:
+        method = getattr(popup_controller, method_name, None)
+        if callable(method):
+            try:
+                method()
+                break
+            except Exception:
+                pass
+
+    if hasattr(controller, attr_name):
+        maybe_controller = getattr(controller, attr_name)
+        # If still present, try direct popup dismissal.
+        view = getattr(maybe_controller, "view", None)
+        if view is not None:
+            _dismiss_popup_obj(view)
+        popup = getattr(maybe_controller, "popup", None)
+        if popup is not None:
+            _dismiss_popup_obj(popup)
+        if hasattr(controller, attr_name):
+            try:
+                delattr(controller, attr_name)
+            except Exception:
+                pass
+
+
 def _capture_combobox_dropdown(
     root: tk.Tk,
     combobox,
@@ -402,6 +552,15 @@ def _capture_main_window(ctx: Dict[str, object], cli_args: argparse.Namespace) -
         cli_args.output_root, f"{controller.view.__class__.__name__}.png"
     )
     return _capture_widget(controller.view, out_path)
+
+
+def _capture_acquire_bar(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "acquire-bar.png")
+    return _capture_widget(controller.view.acquire_bar, out_path, pad=2)
 
 
 def _capture_settings_tab(
@@ -480,6 +639,118 @@ def _capture_sensor_mode_dropdown(
     )
 
 
+def _capture_camera_mode_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    camera_settings_tab = controller.view.settings.camera_settings_tab
+    _select_settings_tab(ctx, "camera_settings_tab")
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "camera-mode-frame.png")
+    return _capture_widget(camera_settings_tab.camera_mode, out_path, pad=2)
+
+
+def _capture_framerate_info_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    camera_settings_tab = controller.view.settings.camera_settings_tab
+    _select_settings_tab(ctx, "camera_settings_tab")
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "framerate-info-frame.png")
+    return _capture_widget(camera_settings_tab.framerate_info, out_path, pad=2)
+
+
+def _capture_region_of_interest_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    camera_settings_tab = controller.view.settings.camera_settings_tab
+    _select_settings_tab(ctx, "camera_settings_tab")
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "region-of-interest-frame.png")
+    return _capture_widget(camera_settings_tab.camera_roi, out_path, pad=2)
+
+
+def _prepare_stage_control_capture(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+):
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_mode(ctx, "single")
+    _select_settings_tab(ctx, "stage_control_tab")
+    stage_tab = controller.view.settings.stage_control_tab
+    try:
+        stage_tab.force_enable_all_axes()
+    except Exception:
+        pass
+    _prepare_for_capture(root, cli_args)
+    return stage_tab
+
+
+def _capture_stage_control_tab_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    stage_tab = _prepare_stage_control_capture(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-control-tab-frame.png")
+    return _capture_widget(stage_tab, out_path, pad=2)
+
+
+def _capture_stage_positions_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    stage_tab = _prepare_stage_control_capture(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-positions-frame.png")
+    return _capture_widget(stage_tab.position_frame, out_path, pad=2)
+
+
+def _capture_stage_xy_movement_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    stage_tab = _prepare_stage_control_capture(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-xy-movement-frame.png")
+    return _capture_widget(stage_tab.xy_frame, out_path, pad=2)
+
+
+def _capture_stage_z_movement_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    stage_tab = _prepare_stage_control_capture(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-z-movement-frame.png")
+    return _capture_widget(stage_tab.z_frame, out_path, pad=2)
+
+
+def _capture_stage_focus_movement_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    stage_tab = _prepare_stage_control_capture(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-focus-movement-frame.png")
+    return _capture_widget(stage_tab.f_frame, out_path, pad=2)
+
+
+def _capture_stage_theta_movement_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    stage_tab = _prepare_stage_control_capture(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-theta-movement-frame.png")
+    return _capture_widget(stage_tab.theta_frame, out_path, pad=2)
+
+
+def _capture_stage_buttons_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    stage_tab = _prepare_stage_control_capture(ctx, cli_args)
+    out_path = os.path.join(cli_args.output_root, "stage-buttons-frame.png")
+    return _capture_widget(stage_tab.stop_frame, out_path, pad=2)
+
+
 def _capture_roi_definition(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
@@ -504,6 +775,172 @@ def _capture_camera_tab(
     _prepare_for_capture(root, cli_args)
     out_path = os.path.join(cli_args.output_root, f"{tab.__class__.__name__}.png")
     return _capture_widget(controller.view.camera_waveform, out_path)
+
+
+def _capture_histogram_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    camera_tab = notebook.camera_tab
+    notebook.select(camera_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "histogram-frame.png")
+    return _capture_widget(camera_tab.histogram, out_path, pad=2)
+
+
+def _capture_intensity_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    camera_tab = notebook.camera_tab
+    notebook.select(camera_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "intensity-frame.png")
+    return _capture_widget(camera_tab.lut, out_path, pad=2)
+
+
+def _capture_metrics_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    camera_tab = notebook.camera_tab
+    notebook.select(camera_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "metrics-frame.png")
+    return _capture_widget(camera_tab.image_metrics, out_path, pad=2)
+
+
+def _capture_render_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    camera_tab = notebook.camera_tab
+    notebook.select(camera_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "render-frame.png")
+    return _capture_widget(camera_tab.live_frame, out_path, pad=2)
+
+
+def _capture_mip_render_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    mip_tab = notebook.mip_tab
+    notebook.select(mip_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "mip-render-frame.png")
+    return _capture_widget(mip_tab.render, out_path, pad=2)
+
+
+def _populate_waveform_plot_preview(waveform_tab) -> None:
+    """Draw representative waveforms for documentation screenshots."""
+    fig = waveform_tab.fig
+    fig.clear()
+
+    ax_remote_focus = fig.add_subplot(211)
+    ax_galvo = fig.add_subplot(212, sharex=ax_remote_focus)
+
+    time_axis = [i * 0.01 for i in range(101)]
+    remote_focus = [0.8 * math.sin(2 * math.pi * t * 1.2) for t in time_axis]
+    galvo_a = [0.6 * math.sin(2 * math.pi * t * 0.9 + 0.6) for t in time_axis]
+    galvo_b = [0.4 * math.sin(2 * math.pi * t * 1.4 - 0.3) for t in time_axis]
+
+    ax_remote_focus.plot(time_axis, remote_focus, color="#1f77b4", linewidth=1.6)
+    ax_remote_focus.axvline(x=0.35, color="black", linestyle=":", linewidth=1.0)
+    ax_remote_focus.set_ylabel("RF (V)")
+    ax_remote_focus.grid(alpha=0.25)
+
+    ax_galvo.plot(time_axis, galvo_a, color="#d62728", linewidth=1.4, label="Galvo 0")
+    ax_galvo.plot(time_axis, galvo_b, color="#2ca02c", linewidth=1.4, label="Galvo 1")
+    ax_galvo.axvline(x=0.35, color="black", linestyle=":", linewidth=1.0)
+    ax_galvo.set_xlabel("Time (ms)")
+    ax_galvo.set_ylabel("Galvo (V)")
+    ax_galvo.grid(alpha=0.25)
+    ax_galvo.legend(loc="upper right", fontsize=7, frameon=False)
+
+    fig.tight_layout()
+    waveform_tab.canvas.draw()
+
+
+def _ensure_waveform_preview_dict(controller) -> None:
+    """Provide fallback waveform data for Waveforms tab screenshot capture."""
+    waveform_ctrl = getattr(controller, "waveform_tab_controller", None)
+    if waveform_ctrl is None:
+        return
+    if hasattr(waveform_ctrl, "waveform_dict"):
+        return
+
+    samples = np.array([i * 0.01 for i in range(101)], dtype=float)
+    waveform_ctrl.waveform_dict = {
+        "camera_waveform": {
+            "CH1": np.array([1 if 0.32 <= t <= 0.38 else 0 for t in samples], dtype=float)
+        },
+        "remote_focus_waveform": {
+            "CH1": np.array(
+                [0.8 * math.sin(2 * math.pi * t * 1.2) for t in samples], dtype=float
+            )
+        },
+        "galvo_waveform": [
+            {
+                "CH1": np.array(
+                    [0.6 * math.sin(2 * math.pi * t * 0.9 + 0.6) for t in samples],
+                    dtype=float,
+                )
+            },
+            {
+                "CH1": np.array(
+                    [0.4 * math.sin(2 * math.pi * t * 1.4 - 0.3) for t in samples],
+                    dtype=float,
+                )
+            },
+        ],
+    }
+
+
+def _capture_waveform_plots_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    waveform_tab = notebook.waveform_tab
+    _ensure_waveform_preview_dict(controller)
+    notebook.select(waveform_tab)
+    _populate_waveform_plot_preview(waveform_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "waveform-plots-frame.png")
+    return _capture_widget(waveform_tab.waveform_plots, out_path, pad=2)
+
+
+def _capture_waveform_settings_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    notebook = controller.view.camera_waveform
+    waveform_tab = notebook.waveform_tab
+    _ensure_waveform_preview_dict(controller)
+    notebook.select(waveform_tab)
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "waveform-settings-frame.png")
+    return _capture_widget(waveform_tab.waveform_settings, out_path, pad=2)
 
 
 def _capture_acquire_mode_dropdown(
@@ -582,6 +1019,48 @@ def _capture_save_data(
     return _capture_widget(channels_tab.stack_timepoint_frame, out_path, pad=2)
 
 
+def _capture_multiposition_acquisition_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_mode(ctx, "single")
+    _select_settings_tab(ctx, "channels_tab")
+    channels_tab = controller.view.settings.channels_tab
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "multiposition-acquisition-frame.png")
+    return _capture_widget(channels_tab.multipoint_frame, out_path, pad=2)
+
+
+def _capture_quick_launch_buttons_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_mode(ctx, "single")
+    _select_settings_tab(ctx, "channels_tab")
+    channels_tab = controller.view.settings.channels_tab
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "quick-launch-buttons-frame.png")
+    return _capture_widget(channels_tab.quick_launch, out_path, pad=2)
+
+
+def _capture_multiposition_buttons_frame(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    root = ctx["root"]
+    controller = ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _set_mode(ctx, "single")
+    _select_settings_tab(ctx, "multiposition_tab")
+    multiposition_tab = controller.view.settings.multiposition_tab
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "multiposition-buttons-frame.png")
+    return _capture_widget(multiposition_tab.tiling_buttons, out_path, pad=2)
+
+
 def _capture_save_dialog_box(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
@@ -602,7 +1081,7 @@ def _capture_save_dialog_box_acquire(
     try:
         done_button = acquire_pop.get_buttons()["Done"]
         done_button.focus_set()
-        _prepare_for_capture(ctx["root"], cli_args)
+        _prepare_for_capture(popup, cli_args)
         return _capture_widget(popup, out_path, pad=2)
     finally:
         _dismiss_save_dialog(ctx)
@@ -1068,6 +1547,324 @@ def _capture_multiposition_empty(
     )
 
 
+def _capture_popup_save_dialog_misc_notes(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    out_path, should_skip = _popup_capture_target(
+        cli_args,
+        "save_dialog_misc_notes",
+        legacy_names=("save-dialog-box.png",),
+    )
+    if should_skip:
+        return out_path
+
+    _, popup = _open_save_dialog(ctx, cli_args)
+    try:
+        _select_notebook_tab(popup, "Misc. Notes")
+        _prepare_for_capture(popup, cli_args)
+        return _capture_widget(popup, out_path, pad=2)
+    finally:
+        _dismiss_save_dialog(ctx)
+        _set_idle_acquire_bar(ctx)
+
+
+def _capture_popup_save_dialog_bdv_settings(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    out_path, should_skip = _popup_capture_target(
+        cli_args, "save_dialog_bdv_settings"
+    )
+    if should_skip:
+        return out_path
+
+    _, popup = _open_save_dialog(ctx, cli_args)
+    try:
+        _select_notebook_tab(popup, "BDV Settings")
+        _prepare_for_capture(popup, cli_args)
+        return _capture_widget(popup, out_path, pad=2)
+    finally:
+        _dismiss_save_dialog(ctx)
+        _set_idle_acquire_bar(ctx)
+
+
+def _capture_popup_autofocus(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
+
+    popup_obj = AutofocusPopup(ctx["controller"].view)
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "autofocus_settings")
+
+
+def _capture_popup_camera_map_settings(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.camera_map_setting_popup import CameraMapSettingPopup
+
+    popup_obj = CameraMapSettingPopup(ctx["controller"].view)
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "camera_map_settings")
+
+
+def _capture_popup_advanced_camera_settings(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.camera_setting_popup import AdvancedCameraSettingPopup
+
+    popup_obj = AdvancedCameraSettingPopup(ctx["controller"].view)
+    popup_obj.populate_view({"x": False, "y": False})
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "advanced_camera_settings")
+
+
+def _capture_popup_camera_settings(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.camera_setting_popup import CameraSettingPopup
+
+    microscope_name = ctx["controller"].configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
+    popup_obj = CameraSettingPopup(ctx["controller"].view, microscope_name)
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "camera_settings")
+
+
+def _capture_popup_additional_camera_view(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.camera_view_popup_window import CameraViewPopupWindow
+
+    microscope_name = ctx["controller"].configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
+    popup_obj = CameraViewPopupWindow(ctx["controller"].view, microscope_name)
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "additional_camera_view")
+
+
+def _capture_popup_performance_diagnostics(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
+
+    popup_obj = DiagnosticsPopup(ctx["controller"].view)
+    return _capture_popup_obj(
+        ctx,
+        cli_args,
+        popup_obj,
+        "performance_diagnostics",
+    )
+
+
+def _capture_popup_feature_list(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.feature_list_popup import FeatureListPopup
+
+    popup_obj = FeatureListPopup(ctx["controller"].view, title="Add New Feature List")
+    popup_obj.inputs["feature_list_name"].set("Example Feature List")
+    popup_obj.inputs["content"].insert("1.0", SMART_ROUTINE_CONTENT_BASE)
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "feature_list")
+
+
+def _capture_popup_feature_config(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.feature_list_popup import FeatureConfigPopup
+
+    popup_obj = FeatureConfigPopup(
+        ctx["controller"].view,
+        title="Feature Configuration",
+        features=["PrepareNextChannel", "LoopByCount", "ZStackAcquisition"],
+        feature_name="LoopByCount",
+        args_name=["channels", "continue_flag"],
+        args_value=["(channels,)", True],
+    )
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "feature_config")
+
+
+def _capture_popup_feature_advanced_settings(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.feature_list_popup import FeatureAdvancedSettingPopup
+
+    popup_obj = FeatureAdvancedSettingPopup(
+        ctx["controller"].view,
+        title="Advanced Setting",
+        features=["PrepareNextChannel", "LoopByCount", "DetectTissueInStackAndReturn"],
+        feature_name="LoopByCount",
+    )
+    popup_obj.build_widgets(
+        args_name=["callbacks", "conditions"],
+        parameter_config={
+            "callbacks": {"example_callback": "None"},
+            "conditions": {"example_condition": "None"},
+        },
+    )
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "feature_advanced_settings")
+
+
+def _capture_popup_ilastik_settings(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.ilastik_setting_popup import ilastik_setting_popup
+
+    popup_obj = ilastik_setting_popup(ctx["controller"].view)
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "ilastik_settings")
+
+
+def _capture_popup_configure_microscopes(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.microscope_setting_popup_window import (
+        MicroscopeSettingPopupWindow,
+    )
+
+    microscope_info = ctx["controller"].model.get_microscope_info()
+    popup_obj = MicroscopeSettingPopupWindow(ctx["controller"].view, microscope_info)
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "configure_microscopes")
+
+
+def _capture_popup_plugins(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.plugins_popup import PluginsPopup
+
+    popup_obj = PluginsPopup(ctx["controller"].view)
+    popup_obj.build_widgets(
+        {
+            "Example Plugin": "/path/to/example/plugin",
+            "Calibration Plugin": "/path/to/calibration/plugin",
+        }
+    )
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "plugins")
+
+
+def _capture_popup_stage_advanced_parameters(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
+
+    controller = ctx["controller"]
+    microscope_name = controller.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
+    stage_axes = [axis for axis in controller.configuration_controller.stage_axes]
+    stage_cfg = controller.configuration["configuration"]["microscopes"][
+        microscope_name
+    ]["stage"]
+
+    min_dict = {axis: stage_cfg.get(f"{axis}_min", -10000.0) for axis in stage_axes}
+    max_dict = {axis: stage_cfg.get(f"{axis}_max", 10000.0) for axis in stage_axes}
+    flip_axes = {axis: stage_cfg.get(f"flip_{axis}", False) for axis in stage_axes}
+    offsets = {axis: stage_cfg.get(f"{axis}_offset", 0.0) for axis in stage_axes}
+    home_dict = {axis: stage_cfg.get(f"{axis}_home", 0.0) for axis in stage_axes}
+
+    popup_obj = AdvancedStageParametersPopup(controller.view)
+    popup_obj.populate_view(
+        stages=stage_axes,
+        min_dict=min_dict,
+        max_dict=max_dict,
+        flip_axes=flip_axes,
+        offsets=offsets,
+        home_dict=home_dict,
+    )
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "advanced_stage_parameters")
+
+
+def _capture_popup_tiling_wizard(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.tiling_wizard_popup import TilingWizardPopup
+
+    axes = [axis.upper() for axis in ctx["controller"].configuration_controller.stage_axes]
+    popup_obj = TilingWizardPopup(ctx["controller"].view, axes=axes)
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "tiling_wizard")
+
+
+def _capture_popup_waveform_parameters(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.waveform_parameter_popup_window import (
+        WaveformParameterPopupWindow,
+    )
+
+    popup_obj = WaveformParameterPopupWindow(
+        ctx["controller"].view, ctx["controller"].configuration_controller
+    )
+    return _capture_popup_obj(ctx, cli_args, popup_obj, "waveform_parameters")
+
+
+def _build_advanced_waveform_popup(ctx: Dict[str, object]):
+    from navigate.view.popups.waveform_parameter_popup_window import (
+        AdvancedWaveformParameterPopupWindow,
+    )
+
+    popup_obj = AdvancedWaveformParameterPopupWindow(ctx["controller"].view)
+    popup_obj.generate_parameter_frame(
+        factors=["Channel 1", "Channel 2"],
+        galvos=[
+            [(0.10, 0.00), (0.12, 0.02)],
+            [(0.08, 0.01), (0.09, 0.02)],
+            [(0.06, 0.01), (0.07, 0.03)],
+        ],
+    )
+    return popup_obj
+
+
+def _capture_popup_advanced_waveform_channel_1(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    popup_obj = _build_advanced_waveform_popup(ctx)
+    return _capture_popup_obj(
+        ctx,
+        cli_args,
+        popup_obj,
+        "advanced_waveform_channel_1",
+        tab_text="Channel 1",
+    )
+
+
+def _capture_popup_advanced_waveform_channel_2(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    popup_obj = _build_advanced_waveform_popup(ctx)
+    return _capture_popup_obj(
+        ctx,
+        cli_args,
+        popup_obj,
+        "advanced_waveform_channel_2",
+        tab_text="Channel 2",
+    )
+
+
+def _capture_popup_adaptive_optics_tony_wilson(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.adaptiveoptics_popup import AdaptiveOpticsPopup
+
+    popup_obj = AdaptiveOpticsPopup(ctx["controller"].view)
+    return _capture_popup_obj(
+        ctx,
+        cli_args,
+        popup_obj,
+        "adaptive_optics_tony_wilson",
+        tab_text="Tony Wilson",
+    )
+
+
+def _capture_popup_adaptive_optics_cnn_ao(
+    ctx: Dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    from navigate.view.popups.adaptiveoptics_popup import AdaptiveOpticsPopup
+
+    popup_obj = AdaptiveOpticsPopup(ctx["controller"].view)
+    return _capture_popup_obj(
+        ctx,
+        cli_args,
+        popup_obj,
+        "adaptive_optics_cnn_ao",
+        tab_text="CNN-AO",
+    )
+
+
 CAPTURES: List[CaptureSpec] = [
     CaptureSpec(
         name="main-window",
@@ -1075,6 +1872,13 @@ CAPTURES: List[CaptureSpec] = [
         description="Main navigate application window",
         context="controller",
         runner=_capture_main_window,
+    ),
+    CaptureSpec(
+        name="acquire-bar",
+        group="main-ui",
+        description="Acquire bar frame at the top of the main window",
+        context="controller",
+        runner=_capture_acquire_bar,
     ),
     CaptureSpec(
         name="settings-camera",
@@ -1089,6 +1893,27 @@ CAPTURES: List[CaptureSpec] = [
         description="Camera Mode frame with Sensor combobox dropdown opened",
         context="controller",
         runner=_capture_sensor_mode_dropdown,
+    ),
+    CaptureSpec(
+        name="camera-mode-frame",
+        group="main-ui",
+        description="Camera Mode labelframe in Camera Settings tab",
+        context="controller",
+        runner=_capture_camera_mode_frame,
+    ),
+    CaptureSpec(
+        name="framerate-info-frame",
+        group="main-ui",
+        description="Framerate Info labelframe in Camera Settings tab",
+        context="controller",
+        runner=_capture_framerate_info_frame,
+    ),
+    CaptureSpec(
+        name="region-of-interest-frame",
+        group="main-ui",
+        description="Region of Interest Settings frame in Camera Settings tab",
+        context="controller",
+        runner=_capture_region_of_interest_frame,
     ),
     CaptureSpec(
         name="roi-definition",
@@ -1119,11 +1944,74 @@ CAPTURES: List[CaptureSpec] = [
         runner=_capture_channel_selector_filter_dropdown,
     ),
     CaptureSpec(
+        name="multiposition-acquisition-frame",
+        group="main-ui",
+        description="Multi-Position Acquisition labelframe in Channels tab",
+        context="controller",
+        runner=_capture_multiposition_acquisition_frame,
+    ),
+    CaptureSpec(
+        name="quick-launch-buttons-frame",
+        group="main-ui",
+        description="Quick Launch Buttons labelframe in Channels tab",
+        context="controller",
+        runner=_capture_quick_launch_buttons_frame,
+    ),
+    CaptureSpec(
         name="settings-stage-control",
         group="main-ui",
         description="Stage control settings notebook tab",
         context="controller",
         runner=lambda ctx, args: _capture_settings_tab(ctx, args, "stage_control_tab"),
+    ),
+    CaptureSpec(
+        name="stage-control-tab-frame",
+        group="main-ui",
+        description="Stage Control tab frame",
+        context="controller",
+        runner=_capture_stage_control_tab_frame,
+    ),
+    CaptureSpec(
+        name="stage-positions-frame",
+        group="main-ui",
+        description="Stage Positions frame in Stage Control tab",
+        context="controller",
+        runner=_capture_stage_positions_frame,
+    ),
+    CaptureSpec(
+        name="stage-xy-movement-frame",
+        group="main-ui",
+        description="XY Movement frame in Stage Control tab",
+        context="controller",
+        runner=_capture_stage_xy_movement_frame,
+    ),
+    CaptureSpec(
+        name="stage-z-movement-frame",
+        group="main-ui",
+        description="Z Movement frame in Stage Control tab",
+        context="controller",
+        runner=_capture_stage_z_movement_frame,
+    ),
+    CaptureSpec(
+        name="stage-focus-movement-frame",
+        group="main-ui",
+        description="Focus Movement frame in Stage Control tab",
+        context="controller",
+        runner=_capture_stage_focus_movement_frame,
+    ),
+    CaptureSpec(
+        name="stage-theta-movement-frame",
+        group="main-ui",
+        description="Theta Movement frame in Stage Control tab",
+        context="controller",
+        runner=_capture_stage_theta_movement_frame,
+    ),
+    CaptureSpec(
+        name="stage-buttons-frame",
+        group="main-ui",
+        description="Stage movement interrupt and joystick buttons frame",
+        context="controller",
+        runner=_capture_stage_buttons_frame,
     ),
     CaptureSpec(
         name="settings-multiposition",
@@ -1133,11 +2021,67 @@ CAPTURES: List[CaptureSpec] = [
         runner=lambda ctx, args: _capture_settings_tab(ctx, args, "multiposition_tab"),
     ),
     CaptureSpec(
+        name="multiposition-buttons-frame",
+        group="main-ui",
+        description="Multi-Position buttons frame in Multi-Position tab",
+        context="controller",
+        runner=_capture_multiposition_buttons_frame,
+    ),
+    CaptureSpec(
         name="camera-tab",
         group="main-ui",
         description="Camera display tab",
         context="controller",
         runner=lambda ctx, args: _capture_camera_tab(ctx, args, "camera_tab"),
+    ),
+    CaptureSpec(
+        name="histogram-frame",
+        group="main-ui",
+        description="HistogramFrame in Camera display tab",
+        context="controller",
+        runner=_capture_histogram_frame,
+    ),
+    CaptureSpec(
+        name="intensity-frame",
+        group="main-ui",
+        description="IntensityFrame in Camera display tab",
+        context="controller",
+        runner=_capture_intensity_frame,
+    ),
+    CaptureSpec(
+        name="metrics-frame",
+        group="main-ui",
+        description="MetricsFrame in Camera display tab",
+        context="controller",
+        runner=_capture_metrics_frame,
+    ),
+    CaptureSpec(
+        name="render-frame",
+        group="main-ui",
+        description="RenderFrame in Camera display tab",
+        context="controller",
+        runner=_capture_render_frame,
+    ),
+    CaptureSpec(
+        name="mip-render-frame",
+        group="main-ui",
+        description="MipRenderFrame in MIP display tab",
+        context="controller",
+        runner=_capture_mip_render_frame,
+    ),
+    CaptureSpec(
+        name="waveform-plots-frame",
+        group="main-ui",
+        description="Waveform plots frame in Waveform tab",
+        context="controller",
+        runner=_capture_waveform_plots_frame,
+    ),
+    CaptureSpec(
+        name="waveform-settings-frame",
+        group="main-ui",
+        description="WaveformSettingsFrame in Waveform tab",
+        context="controller",
+        runner=_capture_waveform_settings_frame,
     ),
     CaptureSpec(
         name="mip-tab",
@@ -1201,6 +2145,153 @@ CAPTURES: List[CaptureSpec] = [
         description="File Saving Dialog popup with Acquire Data button focused",
         context="controller",
         runner=_capture_save_dialog_box_acquire,
+    ),
+    CaptureSpec(
+        name="popup-save-dialog-misc-notes",
+        group="popups",
+        description="Save dialog popup with Misc. Notes tab",
+        context="controller",
+        runner=_capture_popup_save_dialog_misc_notes,
+    ),
+    CaptureSpec(
+        name="popup-save-dialog-bdv-settings",
+        group="popups",
+        description="Save dialog popup with BDV Settings tab",
+        context="controller",
+        runner=_capture_popup_save_dialog_bdv_settings,
+    ),
+    CaptureSpec(
+        name="popup-autofocus-settings",
+        group="popups",
+        description="Autofocus settings popup",
+        context="controller",
+        runner=_capture_popup_autofocus,
+    ),
+    CaptureSpec(
+        name="popup-camera-map-settings",
+        group="popups",
+        description="Camera map settings popup",
+        context="controller",
+        runner=_capture_popup_camera_map_settings,
+    ),
+    CaptureSpec(
+        name="popup-camera-settings",
+        group="popups",
+        description="Camera settings popup window",
+        context="controller",
+        runner=_capture_popup_camera_settings,
+    ),
+    CaptureSpec(
+        name="popup-advanced-camera-settings",
+        group="popups",
+        description="Advanced camera settings popup",
+        context="controller",
+        runner=_capture_popup_advanced_camera_settings,
+    ),
+    CaptureSpec(
+        name="popup-additional-camera-view",
+        group="popups",
+        description="Additional camera view popup window",
+        context="controller",
+        runner=_capture_popup_additional_camera_view,
+    ),
+    CaptureSpec(
+        name="popup-performance-diagnostics",
+        group="popups",
+        description="Performance diagnostics popup",
+        context="controller",
+        runner=_capture_popup_performance_diagnostics,
+    ),
+    CaptureSpec(
+        name="popup-feature-list",
+        group="popups",
+        description="Feature list popup",
+        context="controller",
+        runner=_capture_popup_feature_list,
+    ),
+    CaptureSpec(
+        name="popup-feature-config",
+        group="popups",
+        description="Feature configuration popup",
+        context="controller",
+        runner=_capture_popup_feature_config,
+    ),
+    CaptureSpec(
+        name="popup-feature-advanced-settings",
+        group="popups",
+        description="Feature advanced settings popup",
+        context="controller",
+        runner=_capture_popup_feature_advanced_settings,
+    ),
+    CaptureSpec(
+        name="popup-ilastik-settings",
+        group="popups",
+        description="Ilastik settings popup",
+        context="controller",
+        runner=_capture_popup_ilastik_settings,
+    ),
+    CaptureSpec(
+        name="popup-configure-microscopes",
+        group="popups",
+        description="Configure microscopes popup",
+        context="controller",
+        runner=_capture_popup_configure_microscopes,
+    ),
+    CaptureSpec(
+        name="popup-plugins",
+        group="popups",
+        description="Plugins popup window",
+        context="controller",
+        runner=_capture_popup_plugins,
+    ),
+    CaptureSpec(
+        name="popup-advanced-stage-parameters",
+        group="popups",
+        description="Advanced stage parameters popup",
+        context="controller",
+        runner=_capture_popup_stage_advanced_parameters,
+    ),
+    CaptureSpec(
+        name="popup-tiling-wizard",
+        group="popups",
+        description="Tiling wizard popup",
+        context="controller",
+        runner=_capture_popup_tiling_wizard,
+    ),
+    CaptureSpec(
+        name="popup-waveform-parameters",
+        group="popups",
+        description="Waveform parameter settings popup",
+        context="controller",
+        runner=_capture_popup_waveform_parameters,
+    ),
+    CaptureSpec(
+        name="popup-advanced-waveform-channel-1",
+        group="popups",
+        description="Advanced waveform popup, Channel 1 tab",
+        context="controller",
+        runner=_capture_popup_advanced_waveform_channel_1,
+    ),
+    CaptureSpec(
+        name="popup-advanced-waveform-channel-2",
+        group="popups",
+        description="Advanced waveform popup, Channel 2 tab",
+        context="controller",
+        runner=_capture_popup_advanced_waveform_channel_2,
+    ),
+    CaptureSpec(
+        name="popup-adaptive-optics-tony-wilson",
+        group="popups",
+        description="Adaptive optics popup, Tony Wilson tab",
+        context="controller",
+        runner=_capture_popup_adaptive_optics_tony_wilson,
+    ),
+    CaptureSpec(
+        name="popup-adaptive-optics-cnn-ao",
+        group="popups",
+        description="Adaptive optics popup, CNN-AO tab",
+        context="controller",
+        runner=_capture_popup_adaptive_optics_cnn_ao,
     ),
     CaptureSpec(
         name="stage-control-start-pos-zstack",

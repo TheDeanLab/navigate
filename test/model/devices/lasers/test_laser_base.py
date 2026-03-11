@@ -1,21 +1,43 @@
 from navigate.model.devices.laser.synthetic import SyntheticLaser
-from test.model.dummy import DummyModel
-import random
+
+
+def _laser_configuration():
+    return {
+        "configuration": {
+            "microscopes": {
+                "TestScope": {
+                    "laser": [
+                        {
+                            "power": {
+                                "hardware": {
+                                    "type": "Synthetic",
+                                    "channel": "Dev1/ao0",
+                                    "min": 0.0,
+                                    "max": 5.0,
+                                }
+                            },
+                            "onoff": {
+                                "hardware": {
+                                    "type": "Synthetic",
+                                    "channel": "Dev1/port0/line0",
+                                    "min": 0.0,
+                                    "max": 5.0,
+                                }
+                            },
+                        }
+                    ]
+                }
+            }
+        }
+    }
 
 
 def test_laser_base_functions():
+    laser = SyntheticLaser("TestScope", None, _laser_configuration(), 0)
 
-    model = DummyModel()
-    microscope_name = model.configuration["experiment"]["MicroscopeState"][
-        "microscope_name"
-    ]
-    laser = SyntheticLaser(microscope_name, None, model.configuration, 0)
+    laser.set_power(42)
+    assert laser.laser_intensity == 42
 
-    funcs = ["set_power", "turn_on", "turn_off", "close"]
-    args = [[random.random()], None, None, None]
-
-    for f, a in zip(funcs, args):
-        if a is not None:
-            getattr(laser, f)(*a)
-        else:
-            getattr(laser, f)()
+    laser.turn_on()
+    laser.turn_off()
+    laser.close()

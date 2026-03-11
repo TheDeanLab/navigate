@@ -16,6 +16,7 @@ ASLM
 .. image:: images/ASLM.png
    :width: 100%
    :align: center
+   :alt: Live-cell ASLM system and representative collagen-embedded cell images
 
 *(Top) Collagen-embedded cells imaged with ASLM. Segmented cells shown on the left, and the corresponding raw data shown on the right. Data from Driscoll et al, Nat. Methods. 2019. Scale bars, 10 microns. (Bottom) images of the live-cell ASLM implementation.*
 
@@ -78,14 +79,15 @@ Optical Tiling OPM
 .. image:: images/tiling_opm.png
    :width: 100%
    :align: center
+   :alt: Optical Tiling OPM system and representative monolayer imaging data
 
-*(Left) Image of a monolayer of keratinoctyes imaged with the Optical Tiling OPM. Region shown with a red box is magnified and shown through time below. (Right, top and bottom) Images of the Optical Tiling OPM system.*
+*(Left) Image of a monolayer of keratinocytes imaged with the Optical Tiling OPM. Region shown with a red box is magnified and shown through time below. (Right, top and bottom) Images of the Optical Tiling OPM system.*
 
 The Oblique Plane Microscope (OPM) described here is engineered for high-resolution, fast volumetric imaging of large fluorescent samples, such as cell monolayers, spheroids, and zebrafish embryos. This system addresses the common challenge of achieving high spatiotemporal resolution throughout a large field of view, which is often restricted in OPM setups due to optics associated with the tertiary imaging system.
 
 To overcome these constraints, the microscope incorporates a novel dual-axis scan unit, enabling rapid, high-resolution imaging across a volume of 800 × 500 × 200 microns. Furthermore, the system integrates a multi-perspective projection imaging technique, which significantly enhances the volumetric interrogation rate to over 10 Hz. This feature facilitates quick scanning across a large field of view in a dimensionally reduced format, allowing for the swift identification and detailed imaging of specific regions of interest.
 
-The custom-built oblique plane microscope is built in an inverted geometry. Illumination is provided obliquely at a 40-degree angle using an Olympus 20X/NA 1.05 water immersion objective, and fluorescence is captured in an epi-fluorescence format by the same objective. The fluorescence signal is then relayed through an Olympus 20x/NA 0.8 secondary objective and redirected by a custom glass-tipped tertiary objective set at a 40-degree angle. Images are captured using a Hamamatsu Flash 4.0 sCMOS camera. Multi-well plate plate imaging is available through mechanical sample scanning.
+The custom-built oblique plane microscope uses an inverted geometry. Illumination is provided obliquely at a 40-degree angle using an Olympus 20X/NA 1.05 water-immersion objective, and fluorescence is captured in an epi-fluorescence format by the same objective. The fluorescence signal is then relayed through an Olympus 20X/NA 0.8 secondary objective and redirected by a custom glass-tipped tertiary objective set at a 40-degree angle. Images are captured using a Hamamatsu Flash 4.0 sCMOS camera. Multi-well-plate imaging is available through mechanical sample scanning.
 
 **Instrument Location**: The University of Texas Southwestern Medical Center, Dallas, TX
 
@@ -138,6 +140,7 @@ AO OPM
 .. image:: images/ao_opm.png
    :width: 100%
    :align: center
+   :alt: AO OPM system and zebrafish vasculature before and after adaptive optics correction
 
 *(Left) Images of zebrafish vasculature before and after application of sensorless adaptive optics. (Right) image of the OPM equipped with adaptive optics.*
 
@@ -181,8 +184,6 @@ The custom-built OPM is optimized for zebrafish studies and incorporates a VAST 
          - N/A
        * - Other
          - VAST large object flow cytometry system and Imagine Optics deformable mirror for wavefront correction.
-       * - Other
-         - NA
 
     .. collapse:: Configuration File
 
@@ -199,10 +200,11 @@ CT-ASLM - v1
 .. image:: images/ctaslmv1.png
    :width: 100%
    :align: center
+   :alt: CT-ASLM v1 representative cleared mouse hippocampus image
 
 *Image of a CLARITY-cleared mouse hippocampus imaged with the CT-ASLM. Specimen was placed in glycerol, which results in slight swelling of the specimen, thereby improving the imaging resolution.*
 
-The Cleared Tissue Axially Swept Light-Sheet Microscope (CT-ASLM) - Version 1 combines subcellular detail with tissue-scale anatomical views. This microscope provides an isotropic resolution of ~700 nm, which is provides insight into complex 3D morphologies in large tissue contexts. It achieves a field of view of 870 x 870 microns in water and 737 x 737 microns in BABB, and is equipped with NA 0.4 multi-immersion objectives from Applied Scientific Instrumentation. Illumination is provided with Coherent OBIS solid-state lasers with wavelengths of 405 nm, 488 nm, 561 nm, and 637 nm. Images are acquired with a Hamamatsu ORCA Flash 4.0 sCMOS camera. It is also equipped with a fast filter wheel and 3D motorized stage from Sutter Instruments, which enables tiling of large volumes. For acquisition of Z-stacks, the microscope uses a piezo stage from Mad City Labs. Examples of how to use the CT-ASLM for imaging cleared tissues are provided in the :ref:`Case Studies <cs_ctaslm>` section of the documentation.
+The Cleared Tissue Axially Swept Light-Sheet Microscope (CT-ASLM) - Version 1 combines subcellular detail with tissue-scale anatomical views. This microscope provides an isotropic resolution of ~700 nm, which provides insight into complex 3D morphologies in large tissue contexts. It achieves a field of view of 870 x 870 microns in water and 737 x 737 microns in BABB, and is equipped with NA 0.4 multi-immersion objectives from Applied Scientific Instrumentation. Illumination is provided with Coherent OBIS solid-state lasers at 405 nm, 488 nm, 561 nm, and 637 nm. Images are acquired with a Hamamatsu ORCA Flash 4.0 sCMOS camera. It also includes a fast filter wheel and a 3D motorized stage from Sutter Instruments for large-volume tiling. For z-stack acquisition, the microscope uses a piezo stage from Mad City Labs. Examples of cleared-tissue workflows are provided in the :ref:`Case Studies <cs_ctaslm>` section.
 
 **Instrument Location**: The University of Texas Southwestern Medical Center, Dallas, TX
 
@@ -255,6 +257,7 @@ CT-ASLM - v2
 .. image:: images/ctaslmv2.png
    :width: 100%
    :align: center
+   :alt: CT-ASLM v2 representative image of peripheral nervous system in the hematopoietic niche
 
 *Image of the peripheral nervous system in the hematopoietic stem cell niche. Nerves are shown in green, and hematopoietic progenitor cells in magenta.*
 
@@ -311,10 +314,11 @@ Expansion ASLM
 .. image:: images/expansion_aslm.png
    :width: 100%
    :align: center
+   :alt: Expansion ASLM system and representative expanded liver tissue image
 
 *(Left) Image of an expanded liver section imaged with the Expansion ASLM. (Right) Image of the Expansion ASLM system.*
 
-This upright variant of Axially Swept Light-Sheet Microscopy (ASLM) boasts a field of view that is 3.2 times larger than its predecessors, measuring 774 x 435 microns with a raw and isotropic resolution of approximately 420 nm. The upright sample geometry is advantageous for imaging fragile, expanded tissues, as well as samples that have large lateral extents. The system is equipped with an Omicron LightHub Ultra laser launch that features multiple fiber outputs and provides emission wavelengths at 405, 488, 561, and 642 nm. The microscope utilizes a high-sensitivity back-thinned Hamamatsu Lightning sCMOS camera and includes a fast filter wheel. Imaging is performed with 0.7 NA multi-immersion objectives and a FTP-2000 motorized stage from Applied Scientific Instrumentation. The microscope supports multiple imaging modes to accommodate different research needs. These include the classical step-and-settle routine, where the stage moves between image acquisitions. For large samples, the stage can operate at a constant velocity, with images captured at predetermined intervals, minimizing the latency typically associated with the step-and-settle method and improving throughput. An example of microscope operation in a constant velocity acquisition mode is presented :ref:`here <Constant Velocity Acquisition>`. Lastly, the microscope can operate in a mechanically sheared acquisition format, where two stages are scanned simultaneously. This approach aligns data automatically in its correct spatial context, significantly reducing the need for computational post-processing and eliminating data interpolation and duplication.
+This upright variant of Axially Swept Light-Sheet Microscopy (ASLM) has a field of view 3.2 times larger than earlier systems (774 x 435 microns) with raw isotropic resolution of approximately 420 nm. The upright sample geometry is advantageous for fragile expanded tissues and samples with large lateral extent. The system uses an Omicron LightHub Ultra laser launch with 405, 488, 561, and 642 nm lines, a high-sensitivity Hamamatsu Lightning sCMOS camera, a fast filter wheel, 0.7 NA multi-immersion objectives, and an ASI FTP-2000 stage. It supports step-and-settle imaging, constant-velocity imaging (see :ref:`Constant Velocity Acquisition <Constant Velocity Acquisition>`), and mechanically sheared dual-stage acquisition to reduce post-processing overhead.
 
 **Instrument Location**: The University of Texas Southwestern Medical Center, Dallas, TX
 
@@ -344,7 +348,7 @@ This upright variant of Axially Swept Light-Sheet Microscopy (ASLM) boasts a fie
        * - Filter Wheel
          - 2x ASI 6-Position 32 mm Filter Wheels
        * - Remote Focusing Units
-         - ThorLabs BLINK
+         - Thorlabs BLINK
        * - Data Acquisition Cards
          - National Instruments PXIe-1073 chassis equipped with PXI6733 and PXI6259
        * - Galvo
@@ -369,6 +373,7 @@ MCT-ASLM
 .. image:: images/mct_aslm.png
    :width: 100%
    :align: center
+   :alt: MCT-ASLM system perspectives and multiscale lung imaging example
 
 *(Top) Two different perspectives of the multiscale cleared tissue Axially Swept Light-Sheet Microscope (MCT-ASLM). (Bottom) A mouse lung imaged at 1x, 6x, and 37x magnification. Automatic event-driven switching between the low-resolution and high-resolution modes. Scale bars, 50 microns.*
 
@@ -438,6 +443,7 @@ Spectral TIRF
 .. image:: images/spectral_tirf.png
    :width: 100%
    :align: center
+   :alt: Spectral ring-TIRF microscope system
 
 *Images of the custom-built ring-TIRF microscope.*
 
@@ -497,6 +503,7 @@ Robotic MesoSPIM
 .. image:: images/robot.png
    :width: 100%
    :align: center
+   :alt: Robotic benchtop mesoSPIM with Meca500 robotic arm
 
 *A CAD image of the single sided variant of the benchtop mesoSPIM equipped with a Meca500 robotic arm and a Thorlabs rotary stage for automatic sample loading and unloading.*
 

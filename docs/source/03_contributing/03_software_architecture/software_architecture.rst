@@ -1,56 +1,61 @@
-=======================
-Software Architecture
-=======================
-
-.. image:: images/architecture.png
-    :align: center
-    :alt: Software Architecture
-
 .. _software-architecture-section:
 
-Model View Controller (MVC)
-============================
+=====================
+Software Architecture
+=====================
 
-The architecture of **navigate** is designed following the industry-standard Model-View-Controller (MVC) pattern. In this structure:
+.. image:: images/architecture.png
+   :align: center
+   :alt: High-level software architecture diagram for navigate
 
-- **Model**: The model operates in its own subprocess and is responsible for communicating with hardware and performing image handling and processing tasks. Communication with the controller is managed through event queues, ensuring efficient data handling.
-- **View**: The view is responsible for displaying the user interface and communicating with the controller. Each graphical user interface (GUI) window, such as the camera display and autofocusing module, is controlled by a dedicated sub-controller. These sub-controllers are responsible for relaying information back to the main controller, maintaining a clear separation of functionality.
-- **Controller**: Acts as the central unit that manages the flow of data between the model and the view components, coordinating the application's overall functionality. It relays user input in the form of traces and commands to the model and relays model output in the form of images and data to the view.
+Model-View-Controller (MVC)
+===========================
 
-Extendability
-============================
+The architecture of **navigate** follows the Model-View-Controller (MVC) pattern. In this structure:
 
-To maximize the extendability of **navigate**, it incorporates:
+- **Model**: Runs in its own subprocess and is responsible for hardware communication and image handling. Communication with the controller is managed through event queues.
+- **View**: Displays the graphical user interface (GUI) and communicates with the controller. Each GUI area (for example, camera display and autofocus) is managed by a dedicated sub-controller.
+- **Controller**: Coordinates data flow between model and view. It relays user input to the model and routes model output (images, status, metrics) back to the view.
 
-- **REST-API Level**: A RESTful API layer is included to facilitate communication with external libraries, ensuring compatibility and extendability. Data is exchanged to the external environment through a http server, allowing for rapid and seamless integration with other systems. Data does not need to be saved locally to be loaded by the external system.
-- **Plugin Layer**: Offers the flexibility to integrate non-supported devices through plugins, enhancing the system's adaptability to various hardware.
+Extensibility
+=============
+
+To maximize extensibility, **navigate** includes:
+
+- **REST API layer**: A REST interface allows **navigate** to exchange data with external tools through an HTTP server, without forcing intermediate file saves.
+- **Plugin layer**: Plugins provide a supported path to add new devices, features, and workflows.
 
 Data Acquisition and Processing
 ===============================
 
 **navigate** employs a feature container for running acquisition routines, characterized by:
 
-- **Reconfigurable Workflows**: Supports custom data acquisition workflows, which are adaptable and can integrate computer vision feedback mechanisms for enhanced functionality.
-- **Threading and Parallelization**: To optimize performance, threading and parallelization techniques are extensively utilized, allowing for efficient handling of large objects and data processing.
-- **Tree Data Structure**: The system's backbone for alignment, imaging, and image analysis is a reconfigurable tree data structure. This enables the creation of customizable acquisition "recipes" tailored to specific specimens.
-- **Image Analysis Routines**: Custom routines for image analysis can also be loaded into **navigate** during run-time. Image analysis is performed on images in memory that are stored as numpy arrays, ensuring rapid processing.
+- **Reconfigurable workflows**: Custom acquisition workflows can include computer-vision feedback.
+- **Threading and parallelization**: Large data objects and acquisition tasks are handled with concurrency where needed.
+- **Tree data structure**: Acquisition, imaging, and analysis steps are represented as a reconfigurable tree of operations.
+- **Image analysis routines**: Custom analysis can run at runtime on in-memory NumPy arrays.
 
 Feature Lists
-============================
+=============
 
 Feature lists are highly versatile, capable of:
 
-- **Sequential Execution**: Acquisition routes can be executed in a predefined order, ensuring systematic data collection.
-- **Logic Gates Integration**: Incorporates conditional logic (e.g., if/then, try/except) and loop structures (while, for-loops), providing flexibility in data acquisition and processing.
-- **Non-Imaging Processes**: Supports the inclusion of non-imaging-based processes, such as solvent exchange, broadening the application scope of the system.
+- **Sequential execution**: Acquisition routes can run in a predefined order.
+- **Logic integration**: Conditional branches and loop structures can be embedded in the workflow.
+- **Non-imaging processes**: Hardware operations such as solvent exchange can be integrated with imaging tasks.
 
 Microscope Objects
-============================
+==================
 
-**navigate** supports the definition of multiple microscope objects, which can be configured in the `configuration.yaml` file. Each microscope object:
+**navigate** supports multiple microscope objects defined in :file:`configuration.yaml`. Each microscope object:
 
-- **Independent or Shared Hardware**: Can have its own independent hardware or share hardware components with other microscope instances, providing flexibility in system design.
-- **Multi-Modal Imaging**: Enables seamless definition of multi-modal imaging systems, allowing for integration of different imaging modalities within the same workflow.
-- **Custom Acquisition Routines**: Supports the creation of distinct image acquisition routines for each microscope object, which can be switched dynamically as part of larger feature workflows or biological event handling.
+- **Independent or shared hardware**: A microscope can own its hardware or share components with other microscope definitions.
+- **Multi-modal imaging**: Different imaging modalities can coexist in one system.
+- **Custom acquisition routines**: Each microscope can map to different acquisition routines and switch at runtime.
 
 This architecture allows for highly adaptable and reconfigurable imaging systems tailored to complex experimental needs.
+
+Developer Deep Dive
+===================
+
+For implementation-level details that are useful when editing the codebase, see :doc:`Developer Architecture Concepts <software_architecture_developer_concepts>`.

@@ -1,8 +1,9 @@
 ========
-REST-API
+REST API
 ========
 
-**navigate** has the ability to communicate with other image analysis software through REST-API interfaces. In general, the REST-API is used to communicate with software that has different or conflicting dependencies with the **navigate** codebase. Data is transferred via HTTP requests and responses,
-which is faster and more efficient than locally saving the data and then loading it into another piece of software, but slower than direct access of the data in memory.
+**navigate** can communicate with external image-analysis software through a REST API. This integration pattern is useful when external tools require dependencies that conflict with the core **navigate** environment.
 
-An example of using our REST-API to communicate with ilastik, a widely used image segmentation tool, is provided in our Case Studies section :ref:`here <case_study_ilastik>`. The navigate ilastik Server plugin can be found `here <https://github.com/TheDeanLab/navigate-ilastik-server>`_.
+Data is exchanged through HTTP requests and responses. This is usually more efficient than writing data to disk and reloading it in another application, although it is typically slower than direct in-memory access.
+
+For an example integration with ilastik, see :ref:`the ilastik case study <case_study_ilastik>`. The corresponding plugin is available in the `navigate ilastik Server repository <https://github.com/TheDeanLab/navigate-ilastik-server>`_.

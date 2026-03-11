@@ -31,7 +31,7 @@
 
 # Standard Library Imports
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 import time
 
 # Third Party Imports
@@ -135,6 +135,46 @@ class TestASIFilterWheel(unittest.TestCase):
         self.filter_wheel.close()
         self.filter_wheel.filter_wheel.move_filter_wheel_to_home.assert_called()
         self.filter_wheel.filter_wheel.is_open.assert_called()
+
+    @patch("navigate.model.devices.filter_wheel.asi.TigerController")
+    def test_connect_success(self, tiger_controller_cls):
+        tiger_controller = Mock()
+        tiger_controller.is_open.return_value = True
+        tiger_controller_cls.return_value = tiger_controller
+
+        result = ASIFilterWheel.connect("COM7", baudrate=115200, timeout=0.25)
+
+        self.assertIs(result, tiger_controller)
+        tiger_controller_cls.assert_called_once_with("COM7", 115200)
+        tiger_controller.connect_to_serial.assert_called_once()
+
+    @patch("navigate.model.devices.filter_wheel.asi.TigerController")
+    def test_connect_failure_raises(self, tiger_controller_cls):
+        tiger_controller = Mock()
+        tiger_controller.is_open.return_value = False
+        tiger_controller_cls.return_value = tiger_controller
+
+        with self.assertRaises(Exception):
+            ASIFilterWheel.connect("COM8")
+
+        tiger_controller.connect_to_serial.assert_called_once()
+
+    def test_set_filter_reraises_movement_exception(self):
+        self.mock_device_connection.move_filter_wheel.side_effect = RuntimeError(
+            "movement failed"
+        )
+
+        with self.assertRaises(RuntimeError):
+            self.filter_wheel.set_filter("filter3", wait_until_done=False)
+
+    def test_close_noop_when_controller_not_open(self):
+        self.mock_device_connection.reset_mock()
+        self.mock_device_connection.is_open.return_value = False
+
+        self.filter_wheel.close()
+
+        self.filter_wheel.filter_wheel.move_filter_wheel_to_home.assert_not_called()
+        self.filter_wheel.filter_wheel.disconnect_from_serial.assert_not_called()
 
 
 if __name__ == "__main__":

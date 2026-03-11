@@ -1,103 +1,91 @@
 .. _add_new_hardware_device:
 
-======================================
- Add a New Hardware Device (Advanced)
-======================================
+=========================
+Add a New Hardware Device
+=========================
 
-**navigate** includes several standard hardware device types. These include:
+**navigate** supports several standard device categories:
 
 - Cameras
-- Data Acquisition Cards
-- Filter Wheels
-- Galvo Scanners
+- Data acquisition cards
+- Deformable mirrors
+- Filter wheels
+- Galvo scanners
 - Lasers
-- Deformable Mirrors
-- Remote Focusing Systems
+- Remote-focusing systems
 - Shutters
 - Stages
-- Zoom Devices
+- Zoom devices
 
-To add a new piece of hardware to one of these device types requires knowledge about the software's device abstraction layer. Here’s a detailed guide to help you integrate a new ``CustomStage`` device into **navigate**. The same principles work for other device types.
+This guide explains how to add a new device (for example, ``CustomStage``) to one of these categories.
 
 .. note::
-    A strong knowledge of Python and object-oriented programming is required to integrate new hardware devices into **navigate**.
 
-----------------
+   Integrating new hardware requires solid Python and object-oriented programming experience.
 
-What is the Device Abstraction Layer?
+What Is the Device Abstraction Layer?
 -------------------------------------
 
-To ensure compatibility and extendability, **navigate** utilizes a device abstraction layer, which allows the same commands to be used across different hardware devices. For example, all stages in **navigate** are programmed to include the `stop()` command, which can be used to stop the stage's movement. When someone hits the :guilabel:`Stop Stage` button on the GUI, this action is relayed from the ``Controller`` to the ``Model`` and ultimately the ``CustomStage``, which communicates with the hardware in a device-specific format to stop the stage's movement.
-
---------------
+The device abstraction layer provides a shared control interface across vendors. For example, stage classes expose a common ``stop()`` method. When a user clicks :guilabel:`Stop Stage`, that command flows from controller to model to the concrete stage class (for example, ``CustomStage``), where it is translated into device-specific communication.
 
 Device Integration Approaches
 -----------------------------
 
-There are two primary approaches to integrating new hardware into **navigate**:
+There are two primary integration paths:
 
-- **Plugin**: If you want to continue to work with an up-to-date version of **navigate**, consider integrating your new hardware device as a plugin. This allows you to pull updates from the main repository without losing your custom hardware integration. It also allows you to integrate non-standard device types. Learn more about the plugin architecture :ref:`here <plugin>`, and how to write a custom plugin :ref:`here <advanced>`.
-- **Fork**: Alternatively, you can fork the **navigate** repository on GitHub and modify it directly. This is useful for custom, in-house developments. In select circumstances, you can contribute your changes back to the main repository through a pull request. Please contact the **navigate** development team for guidance on this approach.
-
---------------
+- **Plugin**: Recommended if you want to track upstream updates while maintaining custom hardware support. Plugins can also introduce non-standard device types. See :ref:`Plugin Architecture <plugin>` and :ref:`Write a Custom Device Plugin <advanced>`.
+- **Fork**: Useful for internal development where deep core changes are required. In some cases, these changes can later be proposed upstream.
 
 Device Class Creation
 ---------------------
-- New hardware devices must have a corresponding device class in navigate. To ensure consistency and reduce redundancy, each device must inherit the appropriate abstract base class. For instance, a ``CustomStage`` device would inherit from ``StageBase``.
-- Classes should follow CamelCase naming conventions and reflect the device they control (e.g., ``NewportStage`` for a stage from the manufacturer Newport).
-- Place the new device class within the appropriate device directory, `src/navigate/model/devices/`.
-- Place related API or hardware documentation within the appropriate manufacturer directory, typically under `src/navigate/model/devices/APIs/`.
 
---------------
+- Create a device class in the appropriate directory under :file:`src/navigate/model/devices/`.
+- Inherit from the correct abstract base class (for example, ``StageBase`` for a stage).
+- Use CamelCase class names that describe the device (for example, ``NewportStage``).
+- Place manufacturer-specific API wrappers in the relevant manufacturer/API directory.
 
 Establish Device Communication
 ------------------------------
 
-- Each device requires a unique method to initialize a connection, which may involve APIs, serial communication, or other protocols. This method should be separate from the device class and is typically located at the beginning of the device file.
-- For example, a function named `build_custom_stage_connection()` would handle the connection setup for ``CustomStage`` class.
-- By separating the connection setup from the device class, you can easily interact with the hardware device outside of the larger **navigate** ecosystem, which can be useful for debugging and testing (e.g., within a Jupyter notebook).
-
---------------
+- Implement a dedicated connection function (for example, ``build_custom_stage_connection()``).
+- Keep connection setup separate from the device class when possible.
+- This separation allows direct hardware tests outside the full **navigate** runtime (for example, in a notebook or standalone script).
 
 Device Class Constructor
 ------------------------
 
-- The constructor for the device class (`__init__`) should accept parameters for the `microscope_name`, `device_connection`, `configuration_file`, and an optional `device_ID` (useful when multiple instances of the same device are used).
-- The constructor should load and enforce device settings from the `configuration_file`. For a new stage, this could be defining the axes mapping between **navigate** and the device, `{x:'X', y:'Y', z:'Z'}`.
-- Ensure the device class uses the connection established by your `build_custom_stage_connection` method.
+- Define ``__init__`` with the required startup parameters (typically ``microscope_name``, ``device_connection``, ``configuration``, and optional device identifiers).
+- Load and validate settings from the configuration.
+- Reuse the established connection object instead of creating a second connection inside the class.
 
---------------
+For stages, this often includes mapping **navigate** axes to device axes (for example, ``{"x": "X", "y": "Y", "z": "Z"}``).
 
 Device Class Methods
 --------------------
 
-- Implement any necessary device-specific methods within your device class.
-- Essential methods are inherited from the base class (e.g., ``StageBase`` for the ``CustomStage``), but you can override them or add new methods as needed for specialized functionality.
-
---------------
+- Implement required methods from the base class.
+- Override defaults where needed for vendor behavior.
+- Add device-specific methods only when they do not break shared interface expectations.
 
 Startup and Configuration
 -------------------------
 
-- Utilize or modify methods within `src/navigate/model/device_startup_functions` to configure and start your device upon system initialization.
-- These functions should handle configuration parsing and the device communication setup.
-- Implement a retry mechanism, such as `auto_redial`, to handle communication issues robustly, attempting multiple times before failing.
+- Register startup logic in :file:`src/navigate/model/device_startup_functions`.
+- Parse configuration values and construct the connection/device objects there.
+- Use retry logic (for example, ``auto_redial``) to handle transient communication failures.
 
---------------
+Integration with Microscope Configurations
+------------------------------------------
 
-Integration with Microscope Object Configurations
--------------------------------------------------
-
-- Each microscope configuration in **navigate** that uses the new device should receive a reference to the established communication object.
-- This setup is defined in the *configuration.yaml* and handled within the `device_startup_functions`, ensuring each configuration has access to the necessary hardware.
-
---------------
+- Add the new device under the correct microscope entries in :file:`configuration.yaml`.
+- Ensure startup wiring injects the new device connection into each configured microscope object that needs it.
 
 Testing and Validation
 ----------------------
-- Thoroughly test the new hardware integration to ensure it functions correctly within navigate, across all intended use cases and configurations.
-- The naming convention for test files is: `test_` + module name.
-- Device test files are located in ``test/model/devices/``
-- Device testing utilizes the `pytest` package.
 
-By following these steps, you can effectively integrate new hardware into the **navigate** platform, enhancing its functionality and ensuring it meets specific experimental needs.
+- Test the integration across the supported acquisition modes and expected error paths.
+- Name test files as ``test_<module_name>.py``.
+- Place device tests under :file:`test/model/devices/`.
+- Use ``pytest`` for hardware and synthetic-path validation.
+
+Following this workflow keeps new integrations consistent with the existing architecture and reduces long-term maintenance risk.

@@ -383,3 +383,57 @@ def test_toggle_multiposition(channels_tab_controller, is_multiposition):
             == is_multiposition
         )
         uts.assert_called()
+
+
+def test_update_timepoint_setting_uses_multiposition_count(channels_tab_controller):
+    channels_tab_controller.populate_experiment_values()
+    channels_tab_controller.in_initialization = False
+    channels_tab_controller.is_multiposition = True
+
+    for idx, channel in enumerate(
+        channels_tab_controller.microscope_state_dict["channels"].values()
+    ):
+        channel["is_selected"] = idx == 0
+        channel["camera_exposure_time"] = 100.0
+
+    channels_tab_controller.timepoint_vals["timepoints"].set("2")
+    channels_tab_controller.timepoint_vals["stack_pause"].set("0")
+    channels_tab_controller.stack_acq_vals["number_z_steps"].set("3")
+    channels_tab_controller.stack_acq_vals["cycling"].set("Per Stack")
+
+    with patch.object(
+        channels_tab_controller.parent_controller.multiposition_tab_controller,
+        "get_position_num",
+        return_value=4,
+    ) as get_position_num:
+        channels_tab_controller.update_timepoint_setting()
+
+    get_position_num.assert_called_once()
+    assert channels_tab_controller.microscope_state_dict["stack_acq_time"] > 0
+    assert channels_tab_controller.microscope_state_dict["experiment_duration"] > 0
+
+
+def test_update_timepoint_setting_without_multiposition_lookup(channels_tab_controller):
+    channels_tab_controller.populate_experiment_values()
+    channels_tab_controller.in_initialization = False
+    channels_tab_controller.is_multiposition = False
+
+    for idx, channel in enumerate(
+        channels_tab_controller.microscope_state_dict["channels"].values()
+    ):
+        channel["is_selected"] = idx == 0
+        channel["camera_exposure_time"] = 100.0
+
+    channels_tab_controller.timepoint_vals["timepoints"].set("1")
+    channels_tab_controller.timepoint_vals["stack_pause"].set("0")
+    channels_tab_controller.stack_acq_vals["number_z_steps"].set("2")
+    channels_tab_controller.stack_acq_vals["cycling"].set("Per Stack")
+
+    with patch.object(
+        channels_tab_controller.parent_controller.multiposition_tab_controller,
+        "get_position_num",
+    ) as get_position_num:
+        channels_tab_controller.update_timepoint_setting()
+
+    get_position_num.assert_not_called()
+    assert channels_tab_controller.microscope_state_dict["stack_acq_time"] > 0

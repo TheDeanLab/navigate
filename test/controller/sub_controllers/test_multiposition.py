@@ -193,7 +193,9 @@ def test_load_positions_invalid_header_warns_and_returns(
 
 
 @patch("navigate.controller.sub_controllers.multiposition.filedialog.asksaveasfilename")
-def test_export_positions_empty_filename_returns(mock_asksave, multiposition_controller):
+def test_export_positions_empty_filename_returns(
+    mock_asksave, multiposition_controller
+):
     controller = multiposition_controller
     controller.table.model.df = pd.DataFrame({"X": [1]})
     controller.table.model.df.to_csv = MagicMock()
@@ -207,7 +209,9 @@ def test_export_positions_empty_filename_returns(mock_asksave, multiposition_con
 def test_set_positions_empty_defaults_to_stage_position(multiposition_controller):
     controller = multiposition_controller
     stage_axes = controller.parent_controller.configuration_controller.stage_axes
-    stage_params = controller.parent_controller.configuration["experiment"]["StageParameters"]
+    stage_params = controller.parent_controller.configuration["experiment"][
+        "StageParameters"
+    ]
 
     stage_params["x"] = 11.0
     stage_params["y"] = 22.0
@@ -217,7 +221,9 @@ def test_set_positions_empty_defaults_to_stage_position(multiposition_controller
 
     controller.set_positions([])
 
-    assert list(controller.table.model.df.columns) == [axis.upper() for axis in stage_axes]
+    assert list(controller.table.model.df.columns) == [
+        axis.upper() for axis in stage_axes
+    ]
     assert controller.table.model.df.iloc[0].tolist() == [
         stage_params[axis] for axis in stage_axes
     ]
@@ -299,14 +305,18 @@ def test_move_to_position_builds_event_and_delegates(multiposition_controller):
 
 
 @patch("navigate.controller.sub_controllers.multiposition.update_rowcolors")
-def test_insert_row_func_updates_rowcolors(mock_update_rowcolors, multiposition_controller):
+def test_insert_row_func_updates_rowcolors(
+    mock_update_rowcolors, multiposition_controller
+):
     controller = multiposition_controller
+    controller.table.model.df = pd.DataFrame({"X": [1.0, 2.0], "Y": [3.0, 4.0]})
     controller.table.currentrow = 3
-    controller.table.model.addRow = MagicMock()
 
     controller.insert_row_func()
 
-    controller.table.model.addRow.assert_called_once_with(3)
+    assert controller.table.model.df.shape == (3, 2)
+    assert controller.table.model.df.iloc[2].isna().all()
+    assert controller.table.currentrow == 2
     mock_update_rowcolors.assert_called_once_with(controller.table)
     controller.table.redraw.assert_called()
     controller.table.tableChanged.assert_called()
@@ -325,7 +335,9 @@ def test_add_stage_position_uses_parent_stage_position(multiposition_controller)
 
 
 @patch("navigate.controller.sub_controllers.multiposition.update_rowcolors")
-def test_append_position_adds_columns_and_row(mock_update_rowcolors, multiposition_controller):
+def test_append_position_adds_columns_and_row(
+    mock_update_rowcolors, multiposition_controller
+):
     controller = multiposition_controller
     controller.table.model.df = pd.DataFrame(columns=["X", "Y"])
 

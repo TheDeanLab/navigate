@@ -42,6 +42,10 @@ from pandastable import Table, Menu, RowHeader, ColumnHeader
 from pandastable.headers import IndexHeader
 
 # Local Imports
+from navigate.tools.dataframe_compat import (
+    insert_blank_row,
+    sync_rowcolors_with_dataframe,
+)
 from navigate.view.custom_widgets.common import uniform_grid
 from navigate.view.theme import get_theme_color, get_theme_font
 
@@ -489,6 +493,24 @@ class MultiPositionTable(Table):
         self.exportCSV = None
         self.insertRow = None
         self.addStagePosition = None
+
+    def update_rowcolors(self) -> None:
+        """Keep rowcolors aligned with table data across pandas versions."""
+        self.rowcolors = sync_rowcolors_with_dataframe(
+            self.model.df, getattr(self, "rowcolors", None)
+        )
+
+    def addRow(self) -> None:
+        """Insert a blank row without using deprecated pandas append APIs."""
+        row = self.getSelectedRow()
+        if row is None:
+            row = self.model.df.shape[0]
+
+        self.model.df = insert_blank_row(self.model.df, row)
+        self.currentrow = max(0, min(int(row), self.model.df.shape[0] - 1))
+        self.update_rowcolors()
+        self.redraw()
+        self.tableChanged()
 
     def apply_theme(self, redraw=True):
         """Apply active Navigate theme tokens to pandastable surfaces."""

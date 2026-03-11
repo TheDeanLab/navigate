@@ -255,6 +255,57 @@ class TestCameraViewController:
         self.camera_view.parent_controller.stage_pos["y"] += offset_y
         assert new_pos == self.camera_view.parent_controller.stage_pos
 
+    def test_mark_position_executes_mark_position_with_offsets(self, monkeypatch):
+        execute = MagicMock()
+
+        def execute_side_effect(command, *args):
+            if command == "get_stage_position":
+                return {"x": "10", "y": "20"}
+            return None
+
+        execute.side_effect = execute_side_effect
+        self.camera_view.parent_controller.execute = execute
+
+        monkeypatch.setattr(self.camera_view, "calculate_offset", lambda: (1.5, 2.0))
+        self.camera_view.move_to_x = 60
+        self.camera_view.move_to_y = 30
+        self.camera_view.zoom_scale = 2
+        self.camera_view.canvas_width_scale = 1.5
+        self.camera_view.canvas_height_scale = 2.0
+
+        self.camera_view.mark_position()
+
+        assert execute.call_args_list[0].args == ("query_stages",)
+        assert execute.call_args_list[1].args == ("get_stage_position",)
+        assert execute.call_args_list[2].args[0] == "mark_position"
+        marked_position = execute.call_args_list[2].args[1]
+        assert marked_position["x"] == 11.5
+        assert marked_position["y"] == 18.0
+        assert marked_position["x_pixel"] == 45.0
+        assert marked_position["y_pixel"] == 30.0
+
+    def test_mark_position_skips_mark_when_stage_position_missing(self):
+        execute = MagicMock()
+
+        def execute_side_effect(command, *args):
+            if command == "get_stage_position":
+                return None
+            return None
+
+        execute.side_effect = execute_side_effect
+        self.camera_view.parent_controller.execute = execute
+        self.camera_view.move_to_x = 0
+        self.camera_view.move_to_y = 0
+        self.camera_view.zoom_scale = 1
+        self.camera_view.canvas_width_scale = 1
+        self.camera_view.canvas_height_scale = 1
+
+        self.camera_view.mark_position()
+
+        assert ("query_stages",) == execute.call_args_list[0].args
+        assert ("get_stage_position",) == execute.call_args_list[1].args
+        assert all(call.args[0] != "mark_position" for call in execute.call_args_list)
+
     def test_reset_display(self, monkeypatch):
 
         # Mock process image function

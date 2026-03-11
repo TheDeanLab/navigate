@@ -180,6 +180,40 @@ class TestMenuController(unittest.TestCase):
             is True
         )
 
+    def test_initialize_menus_wires_multiposition_stage_commands(self):
+        multiposition_controller = (
+            self.menu_controller.parent_controller.multiposition_tab_controller
+        )
+        multiposition_controller.load_positions = MagicMock()
+        multiposition_controller.export_positions = MagicMock()
+        multiposition_controller.add_stage_position = MagicMock()
+        self.menu_controller.parent_controller.configuration["gui"]["histogram"] = {
+            "enabled": True
+        }
+
+        self.menu_controller.initialize_menus()
+        stage_menu = self.menu_controller.view.menubar.menu_multi_positions
+
+        def invoke_latest_entry(label):
+            end_idx = int(stage_menu.index("end"))
+            matches = []
+            for idx in range(end_idx + 1):
+                try:
+                    if stage_menu.entrycget(idx, "label") == label:
+                        matches.append(idx)
+                except Exception:
+                    continue
+            assert matches, f"Missing stage menu entry: {label}"
+            stage_menu.invoke(matches[-1])
+
+        invoke_latest_entry("Load Positions")
+        invoke_latest_entry("Export Positions")
+        invoke_latest_entry("Append Current Position")
+
+        multiposition_controller.load_positions.assert_called_once()
+        multiposition_controller.export_positions.assert_called_once()
+        multiposition_controller.add_stage_position.assert_called_once()
+
     def test_autofocus_settings(self):
         assert (
             hasattr(self.menu_controller.parent_controller, "af_popup_controller")

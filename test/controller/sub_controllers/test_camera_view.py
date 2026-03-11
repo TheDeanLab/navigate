@@ -475,18 +475,9 @@ class TestCameraViewController:
         test_image = np.random.rand(100, 100)
         self.zoom_image = test_image
 
-        # set the widget size
-        widget = type("MyWidget", (object,), {"widget": self.camera_view.view})
-        event = type(
-            "MyEvent",
-            (object,),
-            {
-                "widget": widget,
-                "width": np.random.randint(5, 1000),
-                "height": np.random.randint(5, 1000),
-            },
-        )
-        self.camera_view.resize(event)
+        # set a deterministic target canvas size for down-sampling
+        self.camera_view.canvas_width = 100
+        self.camera_view.canvas_height = 80
 
         # monkeypatch cv2.resize
         def mocked_resize(src, dsize, interpolation=1):
@@ -499,8 +490,8 @@ class TestCameraViewController:
 
         # assert that the image has been resized correctly
         assert np.shape(down_sampled_image) == (
-            self.camera_view.view.canvas_width,
-            self.camera_view.view.canvas_height,
+            self.camera_view.canvas_width,
+            self.camera_view.canvas_height,
         )
 
         # assert that the image has not been modified

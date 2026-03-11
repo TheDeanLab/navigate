@@ -34,12 +34,14 @@
 import tkinter as tk
 from tkinter import ttk
 import logging
+from contextlib import contextmanager
 from typing import Any
 
 # Third Party Imports
 import pandas as pd
 from pandastable import Table, Menu, RowHeader, ColumnHeader
 from pandastable.headers import IndexHeader
+from pandastable import images as pt_images
 
 # Local Imports
 from navigate.tools.dataframe_compat import (
@@ -62,6 +64,23 @@ def _safe_widget_configure(widget: Any, **kwargs: Any) -> None:
             widget.configure(**{key: value})
         except (tk.TclError, AttributeError):
             continue
+
+
+@contextmanager
+def _bind_pandastable_image_master(master: Any):
+    """Ensure pandastable icon images are created in the current Tk interpreter."""
+
+    original_photo_image = pt_images.tk.PhotoImage
+
+    def _photo_image_with_master(*args: Any, **kwargs: Any):
+        kwargs.setdefault("master", master)
+        return original_photo_image(*args, **kwargs)
+
+    pt_images.tk.PhotoImage = _photo_image_with_master
+    try:
+        yield
+    finally:
+        pt_images.tk.PhotoImage = original_photo_image
 
 
 class MultiPositionTab(tk.Frame):
@@ -610,7 +629,11 @@ class MultiPositionTable(Table):
         callback : function
             The function that is called when the table is shown.
         """
-        super().show(callback)
+        # Pandastable creates statusbar icon PhotoImage objects without explicit
+        # masters. In multi-root test sessions this can bind icons to another Tk
+        # interpreter and later raise: image "pyimage..." doesn't exist.
+        with _bind_pandastable_image_master(self.parentframe):
+            super().show(callback)
 
         try:
             self.rowheader.destroy()

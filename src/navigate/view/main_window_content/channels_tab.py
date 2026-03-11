@@ -560,7 +560,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
 
         self.image = None
         try:
-            loaded_image = tk.PhotoImage(file=str(image_path))
+            loaded_image = tk.PhotoImage(master=self.cubic_frame, file=str(image_path))
             if str(loaded_image):
                 self.image = loaded_image
             else:

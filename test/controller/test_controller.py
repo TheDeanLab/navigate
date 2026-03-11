@@ -14,7 +14,10 @@ from logging.handlers import QueueHandler
 class _NullQueue:
     """Minimal queue-like sink for logging; avoids mp feeder threads on Windows."""
 
-    def put(self, _):  # QueueHandler calls .put()
+    def put(self, _):
+        pass
+
+    def put_nowait(self, _):  # QueueHandler.enqueue() uses put_nowait()
         pass
 
     def close(self):

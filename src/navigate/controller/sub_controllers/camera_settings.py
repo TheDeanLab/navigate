@@ -879,11 +879,9 @@ class CameraSettingController(GUIController):
         ideally by calling a command from the camera.
         """
         sensor_mode = self.mode_widgets["Sensor"].get()
+        readout_time = self.camera_setting_dict.get("readout_time", 0)
 
-        if sensor_mode == "Normal":
-            readout_time = self.camera_setting_dict["readout_time"]
-
-        elif sensor_mode == "Light-Sheet":
+        if sensor_mode == "Light-Sheet":
             #  Progressive sensor mode operation
             readout_time = 0
 

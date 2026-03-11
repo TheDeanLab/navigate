@@ -1,6 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock, ANY
+from unittest.mock import MagicMock, ANY, patch
 import queue
 import pytest
 import numpy
@@ -9,8 +9,6 @@ import logging
 import platform
 import tkinter as tk
 from logging.handlers import QueueHandler
-
-from navigate.log_files.log_functions import log_setup
 
 
 class _NullQueue:
@@ -618,10 +616,41 @@ def test_execute_acquire_and_acquire_and_save(controller):
     #                 controller.acquire_bar_controller.mode,
     #             ),
     #         )
-    #         controller.stop_acquisition_flag = True
-    #         controller.threads_pool.createThread.reset_mock()
-
     pass
+
+
+def test_execute_acquire_handles_missing_feature_popup_controller_after_wait(controller):
+    controller.acquire_bar_controller.mode = "customized"
+    controller.menu_controller.feature_id_val.set(1)
+    controller.prepare_acquire_data = MagicMock(return_value=True)
+    controller.acquire_bar_controller.stop_acquire = MagicMock()
+    controller.launch_additional_microscopes = MagicMock()
+    controller.threads_pool.createThread = MagicMock()
+    controller.set_mode_of_sub = MagicMock()
+
+    feature_popup = SimpleNamespace(popup=object())
+    popup_controller = SimpleNamespace(
+        populate_feature_list=MagicMock(),
+        start_acquisiton_flag=True,
+    )
+
+    def close_popup_and_remove_controller(_popup):
+        if hasattr(controller, "features_popup_controller"):
+            delattr(controller, "features_popup_controller")
+
+    controller.view.wait_window = MagicMock(side_effect=close_popup_and_remove_controller)
+
+    with patch(
+        "navigate.controller.controller.FeatureListPopup",
+        return_value=feature_popup,
+    ), patch(
+        "navigate.controller.controller.FeaturePopupController",
+        return_value=popup_controller,
+    ):
+        controller.execute("acquire")
+
+    controller.set_mode_of_sub.assert_called_once_with("stop")
+    controller.threads_pool.createThread.assert_not_called()
 
 
 def test_execute_stop_acquire(controller):

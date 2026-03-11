@@ -297,6 +297,72 @@ def test_build_feature_list_text_formats_args_and_branches():
     assert '"false": [false_branch]' in content
 
 
+class _DummyGraphWidget:
+    def __init__(self, width=228):
+        self.width = width
+
+    def bind(self, *_args, **_kwargs):
+        pass
+
+    def grid(self, *_args, **_kwargs):
+        pass
+
+    def winfo_width(self):
+        return self.width
+
+    def __setitem__(self, _key, _value):
+        pass
+
+
+def test_draw_feature_list_graph_uses_theme_background_for_loop_arrows():
+    controller = FeatureListGraphController.__new__(FeatureListGraphController)
+    controller.feature_list_view = MagicMock()
+    controller.feature_list_view.winfo_children.return_value = []
+    controller.features = [
+        {"name": lambda *_args: None},
+        {"name": lambda *_args: None},
+        {"name": lambda *_args: None},
+    ]
+    controller.feature_structure = [0, "(", 1, 2, ")"]
+
+    loop_arrow_image = object()
+    loop_arrow_label = MagicMock()
+
+    with patch(
+        "navigate.controller.sub_controllers.features_popup.FeatureIcon",
+        side_effect=lambda *_args, **_kwargs: _DummyGraphWidget(width=228),
+    ), patch(
+        "navigate.controller.sub_controllers.features_popup.ArrowLabel",
+        side_effect=lambda *_args, **_kwargs: _DummyGraphWidget(width=104),
+    ), patch(
+        "navigate.controller.sub_controllers.features_popup.create_arrow_image",
+        return_value=loop_arrow_image,
+    ), patch(
+        "navigate.controller.sub_controllers.features_popup.ImageTk.PhotoImage",
+        return_value="loop_photo",
+    ) as photo_mock, patch(
+        "navigate.controller.sub_controllers.features_popup.tk.Label",
+        return_value=loop_arrow_label,
+    ) as label_mock, patch(
+        "navigate.controller.sub_controllers.features_popup.get_theme_color",
+        return_value="#1a212b",
+    ):
+        controller.draw_feature_list_graph(new_list_flag=False)
+
+    photo_mock.assert_called_once_with(
+        loop_arrow_image,
+        master=controller.feature_list_view,
+    )
+    label_mock.assert_called_once_with(
+        controller.feature_list_view,
+        image="loop_photo",
+        bg="#1a212b",
+        borderwidth=0,
+        highlightthickness=0,
+    )
+    loop_arrow_label.grid.assert_called_once()
+
+
 class FakeMenu:
     def __init__(self, *_args, **_kwargs):
         self.commands = {}

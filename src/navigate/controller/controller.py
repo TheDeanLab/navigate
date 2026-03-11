@@ -1308,8 +1308,13 @@ class Controller:
                     self.view.wait_window(feature_list_popup.popup)
 
                     # do not run acquisition if "cancel" is selected
-                    temp = self.features_popup_controller.start_acquisiton_flag
-                    delattr(self, "features_popup_controller")
+                    temp = getattr(
+                        getattr(self, "features_popup_controller", None),
+                        "start_acquisiton_flag",
+                        False,
+                    )
+                    if hasattr(self, "features_popup_controller"):
+                        delattr(self, "features_popup_controller")
                     if not temp:
                         self.set_mode_of_sub("stop")
                         return

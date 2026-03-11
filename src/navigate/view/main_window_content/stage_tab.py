@@ -224,6 +224,7 @@ class StageControlTab(tk.Frame):
                 self,
                 f"{name}",
                 tk.PhotoImage(
+                    master=self,
                     file=image_directory.joinpath("images", f"{name}.png")
                 ).subsample(2, 2),
             )

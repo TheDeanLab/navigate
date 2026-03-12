@@ -7,15 +7,27 @@ on:
       - develop
   pull_request:
   workflow_dispatch:
+    inputs:
+      diagnostic_no_cov:
+        description: "Run pytest without coverage and live log CLI to diagnose teardown hangs"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   test:
     runs-on: ${{ matrix.operating-system }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10"]
-        operating-system: [windows-latest]  # [ubuntu-latest, windows-latest]
+        include:
+          - operating-system: windows-latest
+            python-version: "3.9"
+            python-tag: py39
+          - operating-system: windows-latest
+            python-version: "3.10"
+            python-tag: py310
     env:
       MPLBACKEND: Agg  # https://github.com/microsoft/azure-pipelines-tasks/issues/16426
     steps:
@@ -29,18 +41,41 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e '.[dev]'
       - name: Test with pytest
+        timeout-minutes: 35
         env:
-            NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
+          NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
+          COVERAGE_FILE: .coverage.${{ matrix.python-tag }}
         run: |
-          python3 -m pytest
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ github.event.inputs.diagnostic_no_cov }}" -eq "true") {
+            python3 -m pytest --no-cov -o log_cli=false
+          } else {
+            python3 -m pytest
+            if (Test-Path coverage.xml) {
+              Move-Item -Force coverage.xml "coverage-${{ matrix.python-tag }}.xml"
+            } else {
+              Write-Error "coverage.xml was not produced."
+            }
+          }
+      - name: Dump Python processes (Windows)
+        if: ${{ failure() && runner.os == 'Windows' }}
+        shell: pwsh
+        run: |
+          Write-Host "Tasklist snapshot for python processes:"
+          tasklist /v /fo table | Select-String -Pattern "python"
+          Write-Host "Detailed process snapshot for python executables:"
+          Get-CimInstance Win32_Process |
+            Where-Object { $_.Name -match '^python(3)?(\.exe)?$' } |
+            Select-Object ProcessId, ParentProcessId, Name, CommandLine |
+            Format-List
       - name: Codecov
+        if: ${{ !(github.event_name == 'workflow_dispatch' && github.event.inputs.diagnostic_no_cov == 'true') }}
         uses: codecov/codecov-action@v3.1.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/reports/
           env_vars: OS,PYTHON
           fail_ci_if_error: false
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
+          files: ./coverage-${{ matrix.python-tag }}.xml
+          flags: unittests-${{ matrix.python-tag }}
+          name: codecov-${{ matrix.operating-system }}-${{ matrix.python-tag }}
           verbose: true

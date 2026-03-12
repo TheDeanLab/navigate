@@ -143,7 +143,8 @@ class ConfigurationController:
             "laser": self.lasers_info,
         }
         for i, filter_wheel_config in enumerate(self.microscope_config["filter_wheel"]):
-            setting[f"filter_wheel_{i}"] = list(
+            filter_wheel_name = filter_wheel_config.get("name", f"FilterWheel-{i}")
+            setting[filter_wheel_name] = list(
                 filter_wheel_config["available_filters"].keys()
             )
         return setting
@@ -589,7 +590,7 @@ class ConfigurationController:
         filter_wheel_names = []
         if self.microscope_config is not None:
             for i in range(self.number_of_filter_wheels):
-                name = self.microscope_config["filter_wheel"][i]["hardware"].get(
+                name = self.microscope_config["filter_wheel"][i].get(
                     "name", f"Filter Wheel {i}"
                 )
                 filter_wheel_names.append(name)

@@ -96,6 +96,8 @@ class ChannelSettingController(GUIController):
     def rebuild_view(self) -> None:
         """Rebuild channel widgets from the active microscope configuration."""
         # num: numbers of channels
+        # add a flag to avoid triggering callback when initializing the view
+        self.in_initialization = True
         self.num = self.configuration_controller.number_of_channels
         self.number_of_filter_wheels = (
             self.configuration_controller.number_of_filter_wheels
@@ -103,15 +105,11 @@ class ChannelSettingController(GUIController):
         filter_wheel_types = getattr(
             self.configuration_controller, "filter_wheel_types", []
         )
-        filter_wheel_visibility = getattr(
-            self.configuration_controller, "filter_wheel_visibility", []
-        )
         self.view.populate_frame(
             channels=self.num,
             filter_wheels=self.number_of_filter_wheels,
             filter_wheel_names=self.configuration_controller.filter_wheel_names,
             filter_wheel_types=filter_wheel_types,
-            filter_wheel_visibility=filter_wheel_visibility,
         )
 
         # widget command binds
@@ -154,13 +152,14 @@ class ChannelSettingController(GUIController):
     def initialize(self):
         """Populates the laser and filter wheel options in the View."""
         setting_dict = self.configuration_controller.channels_info
+        filter_wheel_names = self.configuration_controller.filter_wheel_names
         for i in range(self.num):
             self.view.laser_pulldowns[i]["values"] = setting_dict["laser"]
             for j in range(self.number_of_filter_wheels):
-                ref_name = f"filter_wheel_{j}"
+                ref_name = filter_wheel_names[j]
                 self.view.filterwheel_pulldowns[i * self.number_of_filter_wheels + j][
                     "values"
-                ] = setting_dict[ref_name]
+                ] = setting_dict.get(ref_name, "")
         self.show_verbose_info("channel has been initialized")
 
     def populate_experiment_values(self, setting_dict):
@@ -185,6 +184,7 @@ class ChannelSettingController(GUIController):
         self.populate_empty_values()
         self.channel_setting_dict = setting_dict
         prefix = "channel_"
+        filter_wheel_names = self.configuration_controller.filter_wheel_names
         for channel in setting_dict.keys():
             channel_id = int(channel[len(prefix) :]) - 1
             channel_vals = self.get_vals_by_channel(channel_id)
@@ -192,7 +192,19 @@ class ChannelSettingController(GUIController):
                 return
             channel_value = setting_dict[channel]
             for name in channel_vals:
-                channel_vals[name].set(channel_value[name])
+                if channel_value.get(name, None):
+                    # don't set the value if the filter wheel value not in the dropdown options
+                    if name in filter_wheel_names and channel_value[
+                        name
+                    ] not in self._get_dropdown_values(
+                        self.view.filterwheel_pulldowns[
+                            channel_id * self.number_of_filter_wheels
+                            + filter_wheel_names.index(name)
+                        ]
+                    ):
+                        continue
+
+                    channel_vals[name].set(channel_value[name])
 
             # validate exposure_time, interval, laser_power
             self.view.exptime_pulldowns[channel_id].trigger_focusout_validation()
@@ -347,13 +359,6 @@ class ChannelSettingController(GUIController):
                 setting_dict["laser_index"] = self.get_index(
                     "laser", channel_vals["laser"].get()
                 )
-            elif widget_name.startswith("filter"):
-                for i in range(self.number_of_filter_wheels):
-                    ref_name = f"filter_wheel_{i}"
-                    setting_dict[ref_name] = channel_vals[ref_name].get()
-                    setting_dict[f"filter_position_{i}"] = self.get_index(
-                        ref_name, channel_vals[ref_name].get()
-                    )
             elif widget_name in [
                 "laser_power",
                 "camera_exposure_time",
@@ -462,8 +467,9 @@ class ChannelSettingController(GUIController):
             "interval_time": self.view.interval_variables[index],
             "defocus": self.view.defocus_variables[index],
         }
+        filter_wheel_names = self.configuration_controller.filter_wheel_names
         for i in range(self.number_of_filter_wheels):
-            ref_name = f"filter_wheel_{i}"
+            ref_name = filter_wheel_names[i]
             result[ref_name] = self.view.filterwheel_variables[
                 index * self.number_of_filter_wheels + i
             ]

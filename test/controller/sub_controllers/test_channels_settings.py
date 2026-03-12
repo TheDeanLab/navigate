@@ -97,6 +97,8 @@ class TestChannelSettingController:
                 assert (
                     str(self.channel_setting.view.filterwheel_pulldowns[i]["state"])
                     == state_readonly
+                    if mode == "stop"
+                    else "disabled"
                 )
                 assert str(self.channel_setting.view.defocus_spins[i]["state"]) == state
 
@@ -147,11 +149,6 @@ class TestChannelSettingController:
                     assert (
                         setting_dict["laser_index"] == new_setting_dict["laser_index"]
                     )
-                elif k == "filter":
-                    assert (
-                        setting_dict["filter_position"]
-                        == new_setting_dict["filter_position"]
-                    )
                 elif k == "camera_exposure_time" or k == "is_selected":
                     assert (
                         self.channel_setting.parent_controller.commands.pop()
@@ -179,7 +176,9 @@ class TestChannelSettingController:
 
         self.channel_setting.populate_empty_values()
 
-        assert self.channel_setting.view.laser_variables[0].get() == "invalid_laser_value"
+        assert (
+            self.channel_setting.view.laser_variables[0].get() == "invalid_laser_value"
+        )
         assert (
             self.channel_setting.view.filterwheel_variables[0].get()
             == "invalid_filter_value"

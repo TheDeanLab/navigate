@@ -44,7 +44,11 @@ from navigate.view.custom_widgets.hover import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
-from navigate.view.theme import get_theme_spacing
+from navigate.view.theme import (
+    get_theme_padding_px,
+    get_theme_spacing,
+    get_theme_space_px,
+)
 import navigate
 
 # Logger Setup
@@ -478,7 +482,11 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 input_args={"width": 6},
             )
             self.inputs[start_names[i]].grid(
-                row=i + 1, column=0, sticky="N", pady=2, padx=(6, 0)
+                row=i + 1,
+                column=0,
+                sticky="N",
+                pady=get_theme_space_px(2),
+                padx=get_theme_padding_px((6, 0)),
             )
             self.inputs[start_names[i]].label.grid(sticky="N")
 
@@ -486,7 +494,13 @@ class StackAcquisitionFrame(ttk.Labelframe):
         self.buttons["set_start"] = HoverButton(
             self.stack_frame, text="Set Start Pos/Foc"
         )
-        self.buttons["set_start"].grid(row=3, column=0, sticky="N", pady=2, padx=(6, 0))
+        self.buttons["set_start"].grid(
+            row=3,
+            column=0,
+            sticky="N",
+            pady=get_theme_space_px(2),
+            padx=get_theme_padding_px((6, 0)),
+        )
 
         # End Pos Frame (Vertically Oriented)
         end_names = ["end_position", "end_focus"]
@@ -504,13 +518,23 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 input_args={"width": 6},
             )
             self.inputs[end_names[i]].grid(
-                row=i + 1, column=1, sticky="N", pady=2, padx=(6, 0)
+                row=i + 1,
+                column=1,
+                sticky="N",
+                pady=get_theme_space_px(2),
+                padx=get_theme_padding_px((6, 0)),
             )
             self.inputs[end_names[i]].label.grid(sticky="N")
 
         # End Button
         self.buttons["set_end"] = HoverButton(self.stack_frame, text="Set End Pos/Foc")
-        self.buttons["set_end"].grid(row=3, column=1, sticky="N", pady=2, padx=(6, 0))
+        self.buttons["set_end"].grid(
+            row=3,
+            column=1,
+            sticky="N",
+            pady=get_theme_space_px(2),
+            padx=get_theme_padding_px((6, 0)),
+        )
 
         #: ttk.Label: The label for the step size
         step_size_label = ttk.Label(self.stack_frame, text="Step Size")
@@ -521,7 +545,12 @@ class StackAcquisitionFrame(ttk.Labelframe):
             input_var=tk.DoubleVar(),
             input_args={"width": 6},
         )
-        self.inputs["step_size"].grid(row=1, column=2, sticky="N", padx=6)
+        self.inputs["step_size"].grid(
+            row=1,
+            column=2,
+            sticky="N",
+            padx=get_theme_space_px(6),
+        )
 
         # Slice Frame (Vertically oriented)
         #: ttk.Label: The label to add empty space to the slice frame
@@ -536,7 +565,11 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
         self.inputs["number_z_steps"].widget.configure(state="disabled")
         self.inputs["number_z_steps"].grid(
-            row=1, column=3, sticky="NSEW", pady=2, padx=(6, 0)
+            row=1,
+            column=3,
+            sticky="NSEW",
+            pady=get_theme_space_px(2),
+            padx=get_theme_padding_px((6, 0)),
         )
 
         # devices
@@ -549,7 +582,12 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
         self.inputs["z_device"].state(["disabled", "readonly"])
         self.inputs["z_device"].grid(
-            row=4, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+            row=4,
+            column=0,
+            columnspan=2,
+            sticky="NSEW",
+            padx=get_theme_space_px(6),
+            pady=get_theme_space_px(5),
         )
 
         self.inputs["f_device"] = LabelInput(
@@ -561,7 +599,12 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
         self.inputs["f_device"].state(["disabled", "readonly"])
         self.inputs["f_device"].grid(
-            row=5, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+            row=5,
+            column=0,
+            columnspan=2,
+            sticky="NSEW",
+            padx=get_theme_space_px(6),
+            pady=get_theme_space_px(5),
         )
 
         # Laser Cycling Settings
@@ -574,7 +617,12 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
         self.inputs["cycling"].state(["readonly"])
         self.inputs["cycling"].grid(
-            row=6, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+            row=6,
+            column=0,
+            columnspan=2,
+            sticky="NSEW",
+            padx=get_theme_space_px(6),
+            pady=get_theme_space_px(5),
         )
 
         self.inputs["speed"] = LabelInput(
@@ -586,7 +634,12 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
         self.inputs["speed"].state(["disabled", "readonly"])
         self.inputs["speed"].grid(
-            row=7, column=0, columnspan=2, sticky="NSEW", padx=5, pady=5
+            row=7,
+            column=0,
+            columnspan=2,
+            sticky="NSEW",
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
         )
 
         self.cubic_frame = ttk.Frame(self.stack_frame)
@@ -596,8 +649,8 @@ class StackAcquisitionFrame(ttk.Labelframe):
             column=2,
             columnspan=2,
             sticky=tk.NE,
-            padx=(5, 15),
-            pady=(5, 0),
+            padx=get_theme_padding_px((5, 15)),
+            pady=get_theme_padding_px((5, 0)),
         )
 
         image_directory = Path(__file__).resolve().parent
@@ -615,8 +668,8 @@ class StackAcquisitionFrame(ttk.Labelframe):
             column=0,
             columnspan=2,
             sticky=tk.NSEW,
-            padx=(5, 0),
-            pady=(5, 0),
+            padx=get_theme_padding_px((5, 0)),
+            pady=get_theme_padding_px((5, 0)),
         )
 
         self.inputs["top"] = LabelInput(
@@ -626,7 +679,13 @@ class StackAcquisitionFrame(ttk.Labelframe):
             input_var=tk.DoubleVar(),
             input_args={"width": 6},
         )
-        self.inputs["top"].grid(row=0, column=2, sticky=tk.EW, padx=0, pady=(15, 0))
+        self.inputs["top"].grid(
+            row=0,
+            column=2,
+            sticky=tk.EW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_padding_px((15, 0)),
+        )
         self.inputs["top"].widget.configure(state="disabled")
 
         self.inputs["bottom"] = LabelInput(
@@ -636,7 +695,13 @@ class StackAcquisitionFrame(ttk.Labelframe):
             input_var=tk.DoubleVar(),
             input_args={"width": 6},
         )
-        self.inputs["bottom"].grid(row=1, column=2, sticky=tk.EW, padx=0, pady=(10, 0))
+        self.inputs["bottom"].grid(
+            row=1,
+            column=2,
+            sticky=tk.EW,
+            padx=get_theme_space_px(0),
+            pady=get_theme_padding_px((10, 0)),
+        )
         self.inputs["bottom"].widget.configure(state="disabled")
 
         self.inputs["z_offset"] = LabelInput(
@@ -648,7 +713,12 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
         self.inputs["z_offset"].widget.configure(state="disabled")
         self.inputs["z_offset"].grid(
-            row=0, column=0, columnspan=2, sticky="NSEW", padx=6, pady=5
+            row=0,
+            column=0,
+            columnspan=2,
+            sticky="NSEW",
+            padx=get_theme_space_px(6),
+            pady=get_theme_space_px(5),
         )
 
         uniform_grid(self)
@@ -723,11 +793,23 @@ class StackAcquisitionFrame(ttk.Labelframe):
 
         # Create the additional stack widgets here
         separator = ttk.Separator(self.additional_stack_frame, orient=tk.HORIZONTAL)
-        separator.grid(row=0, column=0, columnspan=10, sticky=tk.NSEW, pady=(5, 0))
+        separator.grid(
+            row=0,
+            column=0,
+            columnspan=10,
+            sticky=tk.NSEW,
+            pady=get_theme_padding_px((5, 0)),
+        )
 
         # Stacking on axes
         label = ttk.Label(self.additional_stack_frame, text="Stacking on axes:")
-        label.grid(row=1, column=0, sticky=tk.NSEW, padx=(5, 30), pady=(5, 0))
+        label.grid(
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 30)),
+            pady=get_theme_padding_px((5, 0)),
+        )
 
         for axis in axes:
             self.additional_stack_setting_variables[f"stack_{axis}"] = tk.BooleanVar()
@@ -741,13 +823,18 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 row=1,
                 column=axes.index(axis) + 1,
                 sticky=tk.NW,
-                padx=(5, 10),
-                pady=(5, 0),
+                padx=get_theme_padding_px((5, 10)),
+                pady=get_theme_padding_px((5, 0)),
             )
 
         self.additional_stack_setting_frame = ttk.Frame(self.additional_stack_frame)
         self.additional_stack_setting_frame.grid(
-            row=2, column=0, columnspan=10, sticky=tk.NSEW, padx=(5, 30), pady=(5, 0)
+            row=2,
+            column=0,
+            columnspan=10,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((5, 30)),
+            pady=get_theme_padding_px((5, 0)),
         )
         self.additional_stack_setting_labels = {}
 
@@ -755,17 +842,35 @@ class StackAcquisitionFrame(ttk.Labelframe):
             ["Axis", "Device", "Offset (" + "\N{GREEK SMALL LETTER MU}" + "m)"]
         ):  # , "Step", "Slice Num"]):
             label = ttk.Label(self.additional_stack_setting_frame, text=label_text)
-            label.grid(row=0, column=i, sticky=tk.NSEW, padx=10, pady=2)
+            label.grid(
+                row=0,
+                column=i,
+                sticky=tk.NSEW,
+                padx=get_theme_space_px(10),
+                pady=get_theme_space_px(2),
+            )
         for i, axis in enumerate(axes):
             label = ttk.Label(self.additional_stack_setting_frame, text=axis.upper())
-            label.grid(row=i + 1, column=0, sticky=tk.NSEW, padx=10, pady=2)
+            label.grid(
+                row=i + 1,
+                column=0,
+                sticky=tk.NSEW,
+                padx=get_theme_space_px(10),
+                pady=get_theme_space_px(2),
+            )
             label.grid_remove()
             self.additional_stack_setting_labels[axis] = label
             # Create the device label
             label = ttk.Label(
                 self.additional_stack_setting_frame, text=self.devices_dict[axis]
             )
-            label.grid(row=i + 1, column=1, sticky=tk.NSEW, padx=10, pady=2)
+            label.grid(
+                row=i + 1,
+                column=1,
+                sticky=tk.NSEW,
+                padx=get_theme_space_px(10),
+                pady=get_theme_space_px(2),
+            )
             label.grid_remove()
             self.additional_stack_setting_labels[f"{axis}_device"] = label
             # Create the offset spinbox
@@ -778,7 +883,11 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 textvariable=self.additional_stack_setting_variables[index_name],
             )
             self.inputs[index_name].grid(
-                row=i + 1, column=2, sticky=tk.NSEW, padx=10, pady=2
+                row=i + 1,
+                column=2,
+                sticky=tk.NSEW,
+                padx=get_theme_space_px(10),
+                pady=get_theme_space_px(2),
             )
             self.inputs[index_name].grid_remove()
 
@@ -895,7 +1004,13 @@ class StackTimePointFrame(ttk.Labelframe):
 
         #: ttk.Label: The label for the save data checkbox
         self.laser_label = ttk.Label(self, text="Save Data")
-        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 5), pady=(4, 0))
+        self.laser_label.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 5)),
+            pady=get_theme_padding_px((4, 0)),
+        )
 
         #: tk.BooleanVar: The variable for the save data checkbox
         self.save_data = tk.BooleanVar()
@@ -903,13 +1018,22 @@ class StackTimePointFrame(ttk.Labelframe):
 
         #: ttk.Checkbutton: The save data checkbox
         self.save_check = ttk.Checkbutton(self, text="", variable=self.save_data)
-        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 0))
+        self.save_check.grid(
+            row=0,
+            column=1,
+            sticky=tk.NSEW,
+            pady=get_theme_padding_px((4, 0)),
+        )
         self.inputs["save_check"] = self.save_check
 
         #: ttk.Label: The label for the timepoints spinbox
         self.filterwheel_label = ttk.Label(self, text="Timepoints")
         self.filterwheel_label.grid(
-            row=1, column=0, sticky=tk.NSEW, padx=(4, 5), pady=2
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 5)),
+            pady=get_theme_space_px(2),
         )
 
         #: tk.StringVar: The variable for the timepoints spinbox
@@ -919,12 +1043,23 @@ class StackTimePointFrame(ttk.Labelframe):
         self.exp_time_spinbox = ValidatedSpinbox(
             self, textvariable=self.exp_time_spinval, width=3
         )
-        self.exp_time_spinbox.grid(row=1, column=1, sticky=tk.NSEW, pady=2)
+        self.exp_time_spinbox.grid(
+            row=1,
+            column=1,
+            sticky=tk.NSEW,
+            pady=get_theme_space_px(2),
+        )
         self.inputs["time_spin"] = self.exp_time_spinbox
 
         #: ttk.Label: The label for the stack acquisition time spinbox
         self.exp_time_label = ttk.Label(self, text="Stack Acq. Time")
-        self.exp_time_label.grid(row=2, column=0, sticky=tk.NSEW, padx=(4, 5), pady=2)
+        self.exp_time_label.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 5)),
+            pady=get_theme_space_px(2),
+        )
 
         #: tk.StringVar: The variable for the stack acquisition time spinbox
         self.stack_acq_spinval = tk.StringVar()
@@ -933,12 +1068,23 @@ class StackTimePointFrame(ttk.Labelframe):
         self.stack_acq_spinbox = ttk.Spinbox(
             self, textvariable=self.stack_acq_spinval, width=6
         )
-        self.stack_acq_spinbox.grid(row=2, column=1, sticky=tk.NSEW, pady=2)
+        self.stack_acq_spinbox.grid(
+            row=2,
+            column=1,
+            sticky=tk.NSEW,
+            pady=get_theme_space_px(2),
+        )
         self.stack_acq_spinbox.state(["disabled"])
 
         #: ttk.Label: The label for the stack pause spinbox
         self.exp_time_label = ttk.Label(self, text="Stack Pause (s)")
-        self.exp_time_label.grid(row=0, column=2, sticky=tk.NSEW, padx=(4, 5), pady=2)
+        self.exp_time_label.grid(
+            row=0,
+            column=2,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 5)),
+            pady=get_theme_space_px(2),
+        )
 
         #: tk.StringVar: The variable for the stack pause spinbox
         self.stack_pause_spinval = tk.StringVar()
@@ -947,12 +1093,23 @@ class StackTimePointFrame(ttk.Labelframe):
         self.stack_pause_spinbox = ValidatedSpinbox(
             self, textvariable=self.stack_pause_spinval, width=6
         )
-        self.stack_pause_spinbox.grid(row=0, column=3, sticky=tk.NSEW, pady=2)
+        self.stack_pause_spinbox.grid(
+            row=0,
+            column=3,
+            sticky=tk.NSEW,
+            pady=get_theme_space_px(2),
+        )
         self.inputs["stack_pause"] = self.stack_pause_spinbox
 
         #: ttk.Label: The label for the time point interval spinbox
         self.exp_time_label = ttk.Label(self, text="Time Interval (hh:mm:ss)")
-        self.exp_time_label.grid(row=1, column=2, sticky=tk.NSEW, padx=(4, 5), pady=2)
+        self.exp_time_label.grid(
+            row=1,
+            column=2,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 5)),
+            pady=get_theme_space_px(2),
+        )
 
         #: tk.StringVar: The variable for the time point interval spinbox
         self.timepoint_interval_spinval = tk.StringVar()
@@ -963,13 +1120,22 @@ class StackTimePointFrame(ttk.Labelframe):
         self.timepoint_interval_spinbox = ttk.Spinbox(
             self, textvariable=self.timepoint_interval_spinval, width=6
         )
-        self.timepoint_interval_spinbox.grid(row=1, column=3, sticky=tk.NSEW, pady=2)
+        self.timepoint_interval_spinbox.grid(
+            row=1,
+            column=3,
+            sticky=tk.NSEW,
+            pady=get_theme_space_px(2),
+        )
         self.timepoint_interval_spinbox.state(["disabled"])  # Starts it disabled
 
         #: ttk.Label: The label for the total time spinbox
         self.exp_time_label = ttk.Label(self, text="Experiment Duration (hh:mm:ss)")
         self.exp_time_label.grid(
-            row=2, column=2, sticky=tk.NSEW, padx=(4, 5), pady=(2, 6)
+            row=2,
+            column=2,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 5)),
+            pady=get_theme_padding_px((2, 6)),
         )
 
         #: tk.StringVar: The variable for the total time spinbox
@@ -981,7 +1147,12 @@ class StackTimePointFrame(ttk.Labelframe):
         self.total_time_spinval = ttk.Spinbox(
             self, textvariable=self.total_time_spinval, width=6
         )
-        self.total_time_spinval.grid(row=2, column=3, sticky=tk.NSEW, pady=(2, 6))
+        self.total_time_spinval.grid(
+            row=2,
+            column=3,
+            sticky=tk.NSEW,
+            pady=get_theme_padding_px((2, 6)),
+        )
         self.total_time_spinval.state(["disabled"])
         configure_grid(self, columns={0: 0, 1: 1, 2: 0, 3: 1}, rows={0: 1, 1: 1, 2: 1})
 
@@ -1033,19 +1204,34 @@ class MultiPointFrame(ttk.Labelframe):
 
         #: ttk.Label: The label for the save data checkbox
         self.laser_label = ttk.Label(self, text="Enable")
-        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4))
+        self.laser_label.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 4)),
+            pady=get_theme_padding_px((4, 4)),
+        )
 
         #: tk.BooleanVar: The variable for the save data checkbox
         self.on_off = tk.BooleanVar()
 
         #: ttk.Checkbutton: The save data checkbox
         self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
-        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 4))
+        self.save_check.grid(
+            row=0,
+            column=1,
+            sticky=tk.NSEW,
+            pady=get_theme_padding_px((4, 4)),
+        )
 
         #: dict: Dictionary of the buttons in the frame
         self.buttons = {"tiling": ttk.Button(self, text="Launch Tiling Wizard")}
         self.buttons["tiling"].grid(
-            row=0, column=2, sticky=tk.NSEW, padx=(10, 0), pady=(4, 4)
+            row=0,
+            column=2,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((10, 0)),
+            pady=get_theme_padding_px((4, 4)),
         )
         configure_grid(self, columns={0: 0, 1: 0, 2: 1}, rows={0: 1})
 
@@ -1077,10 +1263,18 @@ class QuickLaunchFrame(ttk.Labelframe):
             "waveform_parameters": ttk.Button(self, text="Waveform Parameters")
         }
         self.buttons["waveform_parameters"].grid(
-            row=0, column=2, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4)
+            row=0,
+            column=2,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 4)),
+            pady=get_theme_padding_px((4, 4)),
         )
         self.buttons["autofocus_button"] = ttk.Button(self, text="Autofocus Settings")
         self.buttons["autofocus_button"].grid(
-            row=1, column=2, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4)
+            row=1,
+            column=2,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((4, 4)),
+            pady=get_theme_padding_px((4, 4)),
         )
         configure_grid(self, columns={0: 1, 1: 1, 2: 1}, rows={0: 1, 1: 1})

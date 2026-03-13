@@ -611,13 +611,13 @@ def verify_experiment_config(manager, configuration):
         ]
     ]
     number_of_filter_wheels = len(
-        configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"]
+        configuration["configuration"]["microscopes"][microscope_name].get("filter_wheel", [])
     )
     filterwheel_list = [
         list(filter_wheel_config["available_filters"].keys())
         for filter_wheel_config in configuration["configuration"]["microscopes"][
             microscope_name
-        ]["filter_wheel"]
+        ].get("filter_wheel", [])
     ]
     prefix = "channel_"
     channel_nums = configuration["configuration"]["gui"]["channels"]["count"]

@@ -142,7 +142,7 @@ class ConfigurationController:
         setting = {
             "laser": self.lasers_info,
         }
-        for i, filter_wheel_config in enumerate(self.microscope_config["filter_wheel"]):
+        for i, filter_wheel_config in enumerate(self.microscope_config.get("filter_wheel", [])):
             filter_wheel_name = filter_wheel_config.get("name", f"FilterWheel-{i}")
             setting[filter_wheel_name] = list(
                 filter_wheel_config["available_filters"].keys()
@@ -533,7 +533,7 @@ class ConfigurationController:
         """
 
         if self.microscope_config is not None:
-            return len(self.microscope_config["filter_wheel"])
+            return len(self.microscope_config.get("filter_wheel", []))
         return 1
 
     @property

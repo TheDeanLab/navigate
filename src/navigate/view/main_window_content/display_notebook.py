@@ -678,6 +678,8 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._active_multichannel_max = tk.IntVar(value=2**16 - 1)
         self._active_multichannel_alpha = tk.DoubleVar(value=100.0)
         self._active_multichannel_gamma = tk.DoubleVar(value=1.0)
+        self.transpose = tk.BooleanVar()
+        self.trans = "Flip XY"
         dense_pad = _space(2)
         compact_pad = _space(3)
 
@@ -714,16 +716,22 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             row=1, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
         )
 
-        ttk.Label(self.multichannel_frame, text="Visible").grid(
-            row=2, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        self._multichannel_visible_input = LabelInput(
+            parent=self.multichannel_frame,
+            label="Visible",
+            input_class=ttk.Checkbutton,
+            input_var=self._active_multichannel_visible,
+            label_pos="left",
         )
-        self._multichannel_visible_widget = ttk.Checkbutton(
-            self.multichannel_frame,
-            variable=self._active_multichannel_visible,
+        self._multichannel_visible_input.grid(
+            row=2,
+            column=0,
+            columnspan=2,
+            sticky=tk.EW,
+            padx=dense_pad,
+            pady=dense_pad,
         )
-        self._multichannel_visible_widget.grid(
-            row=2, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
-        )
+        self._multichannel_visible_widget = self._multichannel_visible_input.widget
 
         ttk.Label(self.multichannel_frame, text="Alpha").grid(
             row=3, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
@@ -754,19 +762,41 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             row=4, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
         )
 
-        ttk.Label(self.multichannel_frame, text="Autoscale").grid(
-            row=5, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        self.inputs[self.trans] = LabelInput(
+            parent=self.multichannel_frame,
+            label=self.trans,
+            input_class=ttk.Checkbutton,
+            input_var=self.transpose,
+            label_pos="left",
         )
-        self._multichannel_autoscale_widget = ttk.Checkbutton(
-            self.multichannel_frame,
-            variable=self._active_multichannel_autoscale,
-        )
-        self._multichannel_autoscale_widget.grid(
-            row=5, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        self.inputs[self.trans].grid(
+            row=5,
+            column=0,
+            columnspan=2,
+            sticky=tk.EW,
+            padx=dense_pad,
+            pady=dense_pad,
         )
 
+        self._multichannel_autoscale_input = LabelInput(
+            parent=self.multichannel_frame,
+            label="Autoscale",
+            input_class=ttk.Checkbutton,
+            input_var=self._active_multichannel_autoscale,
+            label_pos="left",
+        )
+        self._multichannel_autoscale_input.grid(
+            row=6,
+            column=0,
+            columnspan=2,
+            sticky=tk.EW,
+            padx=dense_pad,
+            pady=dense_pad,
+        )
+        self._multichannel_autoscale_widget = self._multichannel_autoscale_input.widget
+
         ttk.Label(self.multichannel_frame, text="Min Counts").grid(
-            row=6, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+            row=7, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_min_widget = ttk.Spinbox(
             self.multichannel_frame,
@@ -777,11 +807,11 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             width=9,
         )
         self._multichannel_min_widget.grid(
-            row=6, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+            row=7, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
         )
 
         ttk.Label(self.multichannel_frame, text="Max Counts").grid(
-            row=7, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+            row=8, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
         self._multichannel_max_widget = ttk.Spinbox(
             self.multichannel_frame,
@@ -792,7 +822,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             width=9,
         )
         self._multichannel_max_widget.grid(
-            row=7, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+            row=8, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
         )
 
         self._multichannel_channel_widget.bind(
@@ -853,20 +883,6 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
                 row=row, column=0, sticky=tk.W, pady=compact_pad
             )
             row += 1
-
-        #: tk.BooleanVar: The variable that holds the flip xy flag.
-        self.transpose = tk.BooleanVar()
-
-        #: str: The name of the flip xy flag.
-        self.trans = "Flip XY"
-        self.inputs[self.trans] = LabelInput(
-            parent=self.single_channel_frame,
-            label=self.trans,
-            input_class=ttk.Checkbutton,
-            input_var=self.transpose,
-        )
-        self.inputs[self.trans].grid(row=row, column=0, sticky=tk.W, pady=compact_pad)
-        row += 1
 
         #: tk.BooleanVar: The variable that holds the autoscale flag.
         self.autoscale = tk.BooleanVar()

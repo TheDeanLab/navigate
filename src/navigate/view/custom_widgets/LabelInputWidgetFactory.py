@@ -74,6 +74,18 @@ class LabelInput(ttk.Frame):
 
     """
 
+    _selection_widgets = (
+        ttk.Checkbutton,
+        ttk.Radiobutton,
+        HoverCheckButton,
+        HoverRadioButton,
+    )
+    _button_widgets = _selection_widgets + (
+        ttk.Button,
+        HoverButton,
+        HoverTkButton,
+    )
+
     def __init__(
         self,
         parent,
@@ -122,24 +134,28 @@ class LabelInput(ttk.Frame):
         self.variable = input_var
         #: tk.Widget: The widget of the input widget
         self.input_class = input_class
+        #: Optional[ttk.Label]: The label paired with the input widget when present.
+        self.label = None
+
+        # Selection widgets should honor label placement like other form controls
+        # when a left or top label is requested.
+        external_label = (
+            input_class not in self._button_widgets
+            or (input_class in self._selection_widgets and label_pos in ("left", "top"))
+        )
 
         """ Create widgets based on their type, considering formatting differences."""
-        if input_class in (
-            ttk.Checkbutton,
-            ttk.Button,
-            ttk.Radiobutton,
-            HoverButton,
-            HoverTkButton,
-            HoverCheckButton,
-            HoverRadioButton,
-        ):
-            input_args["text"] = label
-            input_args["variable"] = input_var
-        else:
+        if external_label:
             #: ttk.Label: The label of the input widget
             self.label = ttk.Label(self, text=label, **label_args)
-            self.label.grid(row=0, column=0, sticky=tk.EW)
-            input_args["textvariable"] = input_var
+            if input_class in self._button_widgets:
+                input_args["variable"] = input_var
+            else:
+                input_args["textvariable"] = input_var
+        else:
+            input_args.setdefault("text", label)
+            if input_class in self._button_widgets:
+                input_args["variable"] = input_var
 
         """Call the passed widget type constructor with the passed args"""
         #: tk.Widget: The widget of the input widget
@@ -147,15 +163,27 @@ class LabelInput(ttk.Frame):
 
         """Specify label position"""
         if label_pos == "top":
-            self.widget.grid(row=1, column=0, sticky=(tk.W + tk.E))
+            if self.label is not None:
+                self.label.grid(row=0, column=0, sticky=tk.EW)
+                widget_row = 1
+                self.rowconfigure(index=0, weight=1)
+                self.rowconfigure(index=1, weight=1)
+            else:
+                widget_row = 0
+                self.rowconfigure(index=0, weight=1)
+            self.widget.grid(row=widget_row, column=0, sticky=(tk.W + tk.E))
             self.columnconfigure(0, weight=1)
-            self.rowconfigure(index=0, weight=1)
-            self.rowconfigure(index=1, weight=1)
         else:
-            self.widget.grid(row=0, column=1, sticky=(tk.W + tk.E))
+            if self.label is not None:
+                self.label.grid(row=0, column=0, sticky=tk.EW)
+                widget_column = 1
+                self.columnconfigure(index=0, weight=1)
+                self.columnconfigure(index=1, weight=1)
+            else:
+                widget_column = 0
+                self.columnconfigure(index=0, weight=1)
+            self.widget.grid(row=0, column=widget_column, sticky=(tk.W + tk.E))
             self.rowconfigure(0, weight=1)
-            self.columnconfigure(index=0, weight=1)
-            self.columnconfigure(index=1, weight=1)
 
     def get(self, default=None):
         """Returns the value of the input widget

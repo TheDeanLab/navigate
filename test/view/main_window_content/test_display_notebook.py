@@ -128,16 +128,16 @@ def test_flip_xy_control_is_attached_to_compact_lut_frame(tk_root) -> None:
 
     assert frame.inputs["Flip XY"].master == frame.multichannel_frame
     assert frame.inputs["Flip XY"].label.cget("text") == "Flip XY"
-    assert frame._multichannel_visible_input.master == frame.multichannel_frame
-    assert frame._multichannel_visible_input.label.cget("text") == "Visible"
-    assert frame._multichannel_visible_widget.master == frame._multichannel_visible_input
+    assert frame._multichannel_visible_label.master == frame.multichannel_frame
+    assert frame._multichannel_visible_label.cget("text") == "Visible"
+    assert frame._multichannel_visible_widget.master == frame.multichannel_frame
     assert frame._multichannel_visible_widget.cget("text") == ""
-    assert frame._multichannel_autoscale_input.master == frame.multichannel_frame
-    assert frame._multichannel_autoscale_input.label.cget("text") == "Autoscale"
-    assert (
-        frame._multichannel_autoscale_widget.master
-        == frame._multichannel_autoscale_input
-    )
+    assert frame._multichannel_autoscale_label.master == frame.multichannel_frame
+    assert frame._multichannel_autoscale_label.cget("text") == "Autoscale"
+    assert frame._multichannel_autoscale_widget.master == frame.multichannel_frame
     assert frame._multichannel_autoscale_widget.cget("text") == ""
+    assert int(frame._multichannel_visible_widget.grid_info()["column"]) == 1
+    assert int(frame._multichannel_transpose_widget.grid_info()["column"]) == 1
+    assert int(frame._multichannel_autoscale_widget.grid_info()["column"]) == 1
     assert frame.multichannel_frame.winfo_manager() == "grid"
     assert frame.single_channel_frame.winfo_manager() == ""

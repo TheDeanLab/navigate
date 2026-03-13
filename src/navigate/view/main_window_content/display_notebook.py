@@ -42,7 +42,10 @@ from matplotlib.figure import Figure
 
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
-from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.LabelInputWidgetFactory import (
+    LabelInput,
+    WidgetInputAdapter,
+)
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.common import CommonMethods, uniform_grid
 from navigate.view.theme import get_theme_font, get_theme_spacing
@@ -716,22 +719,19 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             row=1, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
         )
 
-        self._multichannel_visible_input = LabelInput(
-            parent=self.multichannel_frame,
-            label="Visible",
-            input_class=ttk.Checkbutton,
-            input_var=self._active_multichannel_visible,
-            label_pos="left",
+        self._multichannel_visible_label = ttk.Label(
+            self.multichannel_frame, text="Visible"
         )
-        self._multichannel_visible_input.grid(
-            row=2,
-            column=0,
-            columnspan=2,
-            sticky=tk.EW,
-            padx=dense_pad,
-            pady=dense_pad,
+        self._multichannel_visible_label.grid(
+            row=2, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
-        self._multichannel_visible_widget = self._multichannel_visible_input.widget
+        self._multichannel_visible_widget = ttk.Checkbutton(
+            self.multichannel_frame,
+            variable=self._active_multichannel_visible,
+        )
+        self._multichannel_visible_widget.grid(
+            row=2, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
 
         ttk.Label(self.multichannel_frame, text="Alpha").grid(
             row=3, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
@@ -762,38 +762,38 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             row=4, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
         )
 
-        self.inputs[self.trans] = LabelInput(
-            parent=self.multichannel_frame,
-            label=self.trans,
-            input_class=ttk.Checkbutton,
-            input_var=self.transpose,
-            label_pos="left",
+        self._multichannel_transpose_label = ttk.Label(
+            self.multichannel_frame, text=self.trans
         )
-        self.inputs[self.trans].grid(
-            row=5,
-            column=0,
-            columnspan=2,
-            sticky=tk.EW,
-            padx=dense_pad,
-            pady=dense_pad,
+        self._multichannel_transpose_label.grid(
+            row=5, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_transpose_widget = ttk.Checkbutton(
+            self.multichannel_frame,
+            variable=self.transpose,
+        )
+        self._multichannel_transpose_widget.grid(
+            row=5, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self.inputs[self.trans] = WidgetInputAdapter(
+            self._multichannel_transpose_widget,
+            variable=self.transpose,
+            label=self._multichannel_transpose_label,
         )
 
-        self._multichannel_autoscale_input = LabelInput(
-            parent=self.multichannel_frame,
-            label="Autoscale",
-            input_class=ttk.Checkbutton,
-            input_var=self._active_multichannel_autoscale,
-            label_pos="left",
+        self._multichannel_autoscale_label = ttk.Label(
+            self.multichannel_frame, text="Autoscale"
         )
-        self._multichannel_autoscale_input.grid(
-            row=6,
-            column=0,
-            columnspan=2,
-            sticky=tk.EW,
-            padx=dense_pad,
-            pady=dense_pad,
+        self._multichannel_autoscale_label.grid(
+            row=6, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
         )
-        self._multichannel_autoscale_widget = self._multichannel_autoscale_input.widget
+        self._multichannel_autoscale_widget = ttk.Checkbutton(
+            self.multichannel_frame,
+            variable=self._active_multichannel_autoscale,
+        )
+        self._multichannel_autoscale_widget.grid(
+            row=6, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
 
         ttk.Label(self.multichannel_frame, text="Min Counts").grid(
             row=7, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
@@ -923,7 +923,8 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             row += 1
 
         uniform_grid(self.single_channel_frame)
-        uniform_grid(self.multichannel_frame)
+        self.multichannel_frame.grid_columnconfigure(0, weight=0)
+        self.multichannel_frame.grid_columnconfigure(1, weight=1)
         uniform_grid(self)
         # Default to the compact LUT editor from startup, before acquisition begins.
         self.set_multichannel_controls_visible(True)

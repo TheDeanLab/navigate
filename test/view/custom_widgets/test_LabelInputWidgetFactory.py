@@ -55,3 +55,19 @@ def test_label_input_button_keeps_inline_text_when_left_aligned(tk_root):
     assert label_input.label is None
     assert label_input.widget.cget("text") == "Apply"
     assert int(label_input.widget.grid_info()["column"]) == 0
+
+
+def test_widget_input_adapter_exposes_label_input_style_accessors(tk_root):
+    from navigate.view.custom_widgets.LabelInputWidgetFactory import WidgetInputAdapter
+
+    label = ttk.Label(tk_root, text="Flip XY")
+    variable = tk.BooleanVar(master=tk_root, value=False)
+    widget = ttk.Checkbutton(tk_root, variable=variable)
+    adapter = WidgetInputAdapter(widget, variable=variable, label=label)
+
+    adapter.set(True)
+
+    assert adapter.master == tk_root
+    assert adapter.label is label
+    assert adapter.get() is True
+    assert adapter.get_variable() is variable

@@ -31,9 +31,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+import logging
 import tkinter as tk
 from tkinter import ttk
-import logging
+from typing import Any
 
 # Third Party Imports
 
@@ -330,3 +331,62 @@ class LabelInput(ttk.Frame):
         >>> widget.pad_input(10, 10, 10, 10)
         """
         self.widget.grid(padx=(left, right), pady=(up, down))
+
+
+class WidgetInputAdapter:
+    """Expose a standalone widget through the same accessors as ``LabelInput``.
+
+    This is useful when the parent container owns the grid layout directly and a
+    nested ``LabelInput`` frame would disrupt column alignment.
+
+    Parameters
+    ----------
+    widget : tk.Widget
+        Widget to expose through the adapter.
+    variable : Any, optional
+        Tk variable bound to the widget, by default None.
+    label : ttk.Label, optional
+        Optional external label paired with the widget, by default None.
+    """
+
+    def __init__(self, widget, variable=None, label=None):
+        """Initialize the widget adapter."""
+        self.widget = widget
+        self.variable = variable
+        self.label = label
+        self.master = widget.master
+
+    def get(self, default=None):
+        """Return the current widget value."""
+        try:
+            if self.variable is not None:
+                return self.variable.get()
+            elif isinstance(self.widget, tk.Text):
+                return self.widget.get("1.0", tk.END)
+            return self.widget.get()
+        except (TypeError, tk.TclError):
+            if default is not None:
+                return default
+            return ""
+
+    def get_variable(self):
+        """Return the Tk variable associated with the widget."""
+        return self.variable
+
+    def set(self, value, *args: Any, **kwargs: Any):
+        """Set the widget value through the bound variable when possible."""
+        if isinstance(self.variable, tk.BooleanVar):
+            self.variable.set(bool(value))
+        elif self.variable is not None:
+            self.variable.set(value, *args, **kwargs)
+        elif type(self.widget).__name__.endswith("button"):
+            if value:
+                self.widget.select()
+            else:
+                self.widget.deselect()
+        elif isinstance(self.widget, tk.Text):
+            self.widget.delete("1.0", tk.END)
+            self.widget.insert("1.0", value)
+        else:
+            self.widget.delete(0, tk.END)
+            self.widget.insert(0, value)

@@ -31,9 +31,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+import logging
 import tkinter as tk
 from tkinter import ttk
-import logging
+from typing import Any
 
 # Third Party Imports
 
@@ -73,6 +74,18 @@ class LabelInput(ttk.Frame):
                label_args={"height": 2, "width": 4})
 
     """
+
+    _selection_widgets = (
+        ttk.Checkbutton,
+        ttk.Radiobutton,
+        HoverCheckButton,
+        HoverRadioButton,
+    )
+    _button_widgets = _selection_widgets + (
+        ttk.Button,
+        HoverButton,
+        HoverTkButton,
+    )
 
     def __init__(
         self,
@@ -122,24 +135,28 @@ class LabelInput(ttk.Frame):
         self.variable = input_var
         #: tk.Widget: The widget of the input widget
         self.input_class = input_class
+        #: Optional[ttk.Label]: The label paired with the input widget when present.
+        self.label = None
+
+        # Selection widgets should honor label placement like other form controls
+        # when a left or top label is requested.
+        external_label = (
+            input_class not in self._button_widgets
+            or (input_class in self._selection_widgets and label_pos in ("left", "top"))
+        )
 
         """ Create widgets based on their type, considering formatting differences."""
-        if input_class in (
-            ttk.Checkbutton,
-            ttk.Button,
-            ttk.Radiobutton,
-            HoverButton,
-            HoverTkButton,
-            HoverCheckButton,
-            HoverRadioButton,
-        ):
-            input_args["text"] = label
-            input_args["variable"] = input_var
-        else:
+        if external_label:
             #: ttk.Label: The label of the input widget
             self.label = ttk.Label(self, text=label, **label_args)
-            self.label.grid(row=0, column=0, sticky=tk.EW)
-            input_args["textvariable"] = input_var
+            if input_class in self._button_widgets:
+                input_args["variable"] = input_var
+            else:
+                input_args["textvariable"] = input_var
+        else:
+            input_args.setdefault("text", label)
+            if input_class in self._button_widgets:
+                input_args["variable"] = input_var
 
         """Call the passed widget type constructor with the passed args"""
         #: tk.Widget: The widget of the input widget
@@ -147,15 +164,27 @@ class LabelInput(ttk.Frame):
 
         """Specify label position"""
         if label_pos == "top":
-            self.widget.grid(row=1, column=0, sticky=(tk.W + tk.E))
+            if self.label is not None:
+                self.label.grid(row=0, column=0, sticky=tk.EW)
+                widget_row = 1
+                self.rowconfigure(index=0, weight=1)
+                self.rowconfigure(index=1, weight=1)
+            else:
+                widget_row = 0
+                self.rowconfigure(index=0, weight=1)
+            self.widget.grid(row=widget_row, column=0, sticky=(tk.W + tk.E))
             self.columnconfigure(0, weight=1)
-            self.rowconfigure(index=0, weight=1)
-            self.rowconfigure(index=1, weight=1)
         else:
-            self.widget.grid(row=0, column=1, sticky=(tk.W + tk.E))
+            if self.label is not None:
+                self.label.grid(row=0, column=0, sticky=tk.EW)
+                widget_column = 1
+                self.columnconfigure(index=0, weight=1)
+                self.columnconfigure(index=1, weight=1)
+            else:
+                widget_column = 0
+                self.columnconfigure(index=0, weight=1)
+            self.widget.grid(row=0, column=widget_column, sticky=(tk.W + tk.E))
             self.rowconfigure(0, weight=1)
-            self.columnconfigure(index=0, weight=1)
-            self.columnconfigure(index=1, weight=1)
 
     def get(self, default=None):
         """Returns the value of the input widget
@@ -302,3 +331,62 @@ class LabelInput(ttk.Frame):
         >>> widget.pad_input(10, 10, 10, 10)
         """
         self.widget.grid(padx=(left, right), pady=(up, down))
+
+
+class WidgetInputAdapter:
+    """Expose a standalone widget through the same accessors as ``LabelInput``.
+
+    This is useful when the parent container owns the grid layout directly and a
+    nested ``LabelInput`` frame would disrupt column alignment.
+
+    Parameters
+    ----------
+    widget : tk.Widget
+        Widget to expose through the adapter.
+    variable : Any, optional
+        Tk variable bound to the widget, by default None.
+    label : ttk.Label, optional
+        Optional external label paired with the widget, by default None.
+    """
+
+    def __init__(self, widget, variable=None, label=None):
+        """Initialize the widget adapter."""
+        self.widget = widget
+        self.variable = variable
+        self.label = label
+        self.master = widget.master
+
+    def get(self, default=None):
+        """Return the current widget value."""
+        try:
+            if self.variable is not None:
+                return self.variable.get()
+            elif isinstance(self.widget, tk.Text):
+                return self.widget.get("1.0", tk.END)
+            return self.widget.get()
+        except (TypeError, tk.TclError):
+            if default is not None:
+                return default
+            return ""
+
+    def get_variable(self):
+        """Return the Tk variable associated with the widget."""
+        return self.variable
+
+    def set(self, value, *args: Any, **kwargs: Any):
+        """Set the widget value through the bound variable when possible."""
+        if isinstance(self.variable, tk.BooleanVar):
+            self.variable.set(bool(value))
+        elif self.variable is not None:
+            self.variable.set(value, *args, **kwargs)
+        elif type(self.widget).__name__.endswith("button"):
+            if value:
+                self.widget.select()
+            else:
+                self.widget.deselect()
+        elif isinstance(self.widget, tk.Text):
+            self.widget.delete("1.0", tk.END)
+            self.widget.insert("1.0", value)
+        else:
+            self.widget.delete(0, tk.END)
+            self.widget.insert(0, value)

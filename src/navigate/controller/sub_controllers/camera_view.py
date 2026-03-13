@@ -1530,13 +1530,13 @@ class BaseViewController(GUIController, ABaseViewController):
             self._photo = ImageTk.PhotoImage(base)
             self._photo_mode = mode
 
-            if getattr(self, "_img_item", None) is None:
-                self._img_item = self.canvas.create_image(
-                    0, 0, image=self._photo, anchor="nw"
-                )
-            else:
-                # Reuse the same canvas item, just rebind the image
-                self.canvas.itemconfig(self._img_item, image=self._photo)
+        if getattr(self, "_img_item", None) is None:
+            self._img_item = self.canvas.create_image(
+                0, 0, image=self._photo, anchor="nw"
+            )
+        else:
+            # Reuse the same canvas item, just rebind the image
+            self.canvas.itemconfig(self._img_item, image=self._photo)
 
     def populate_image(self, image: np.ndarray) -> None:
         """Update the Tk canvas using a persistent PhotoImage + paste.
@@ -2882,6 +2882,7 @@ class MIPViewController(BaseViewController):
     def _clear_mip(self) -> None:
         """Clear the mip but keep canvas interactive."""
         self.canvas.delete("all")
+        self._img_item = None
         self.tk_image = None
         self.canvas.create_text(
             self.canvas_width // 2,
@@ -3040,8 +3041,7 @@ class MIPViewController(BaseViewController):
         """
         sx, sy = self.canvas_width, self.canvas_height
         if self.render_widgets["perspective"].get() == "Multi":
-            sx = int(self.view.canvas["width"])
-            sy = int(self.view.canvas["height"])
+            sx, sy = self._get_canvas_widget_size()
             self.canvas_width = sx
             self.canvas_height = sy
         down_sampled_image = cv2.resize(image, (sx, sy))

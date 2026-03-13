@@ -45,7 +45,7 @@ from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.validation import ValidatedEntry
 from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
-from navigate.view.theme import get_theme_color
+from navigate.view.theme import get_theme_color, get_theme_space_px
 import navigate
 
 # Logger Setup
@@ -498,7 +498,7 @@ class OtherAxisFrame(ttk.Labelframe):
             rowspan=1,
             columnspan=1,
             padx="space_1",
-            pady=0,
+            pady=get_theme_space_px(0),
         )
         themed_grid(
             self.increment_box,
@@ -507,7 +507,7 @@ class OtherAxisFrame(ttk.Labelframe):
             rowspan=1,
             columnspan=1,
             padx="space_1",
-            pady=0,
+            pady=get_theme_space_px(0),
         )
         themed_grid(
             space_2,
@@ -516,7 +516,7 @@ class OtherAxisFrame(ttk.Labelframe):
             rowspan=1,
             columnspan=1,
             padx="space_1",
-            pady=0,
+            pady=get_theme_space_px(0),
         )
         themed_grid(
             self.down_btn,

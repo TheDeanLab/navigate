@@ -50,6 +50,39 @@ class _Getter:
         return self.value
 
 
+class _CanvasSizeStub:
+    def __init__(self, width, height, *, requested_width=1, requested_height=1):
+        self._width = width
+        self._height = height
+        self._requested_width = requested_width
+        self._requested_height = requested_height
+
+    def winfo_width(self):
+        return self._width
+
+    def winfo_height(self):
+        return self._height
+
+    def cget(self, key):
+        if key == "width":
+            return self._requested_width
+        if key == "height":
+            return self._requested_height
+        raise KeyError(key)
+
+
+class _PhotoStub:
+    def __init__(self, width, height):
+        self._width = width
+        self._height = height
+
+    def width(self):
+        return self._width
+
+    def height(self):
+        return self._height
+
+
 def test_try_to_display_image_updates_orthogonal_projections(monkeypatch):
     controller = MIPViewController.__new__(MIPViewController)
     controller.image_mode = "z-stack"
@@ -288,6 +321,51 @@ def test_get_mip_image_multi_perspective_composition():
     np.testing.assert_array_equal(image[0:2, 3:5], np.array([[10, 30], [20, 40]]))
     # ZX bottom
     np.testing.assert_array_equal(image[3:5, 0:2], np.array([[50, 60], [70, 80]]))
+
+
+def test_mip_down_sample_image_multi_uses_canvas_widget_size():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.render_widgets = {"perspective": _Getter("Multi")}
+    controller.canvas = _CanvasSizeStub(640, 480, requested_width=1, requested_height=1)
+    controller.canvas_width = 1
+    controller.canvas_height = 1
+
+    image = np.arange(25, dtype=np.uint16).reshape(5, 5)
+    down_sampled = controller.down_sample_image(image)
+
+    assert down_sampled.shape == (480, 640)
+    assert controller.canvas_width == 640
+    assert controller.canvas_height == 480
+
+
+def test_clear_mip_resets_cached_canvas_image_item():
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.canvas = MagicMock()
+    controller.canvas_width = 320
+    controller.canvas_height = 240
+    controller._img_item = 42
+    controller.tk_image = object()
+
+    controller._clear_mip()
+
+    controller.canvas.delete.assert_called_once_with("all")
+    controller.canvas.create_text.assert_called_once()
+    assert controller._img_item is None
+    assert controller.tk_image is None
+
+
+def test_ensure_canvas_image_recreates_missing_canvas_item_without_new_photo():
+    controller = BaseViewController.__new__(BaseViewController)
+    controller.canvas = MagicMock()
+    controller._photo = _PhotoStub(10, 20)
+    controller._photo_mode = "RGB"
+    controller._img_item = None
+
+    controller._ensure_canvas_image(10, 20, "RGB")
+
+    controller.canvas.create_image.assert_called_once_with(
+        0, 0, image=controller._photo, anchor="nw"
+    )
 
 
 def test_overlay_channel_defaults_follow_imagej_order():

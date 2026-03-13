@@ -14,7 +14,8 @@ Camera View
 The :guilabel:`Camera View` notebook shows the current image and display controls.
 
 1. Left-clicking the image toggles crosshairs.
-2. The right panel includes :ref:`LUT <ui_lut>`, image metrics, and display mode controls.
+2. The right panel includes :guilabel:`Display Mode`, :ref:`LUT <ui_lut>`, image metrics, and image display controls.
+3. Display updates are deferred when the tab is hidden, then refreshed with the newest frame when the view is visible again.
 
 HistogramFrame
 --------------
@@ -34,10 +35,17 @@ IntensityFrame
    :align: center
    :alt: IntensityFrame in the Camera View tab.
 
-1. Select :guilabel:`Gray`, :guilabel:`Gradient`, or :guilabel:`Rainbow` display LUT.
-2. :guilabel:`Flip XY` transposes display axes.
-3. :guilabel:`Autoscale` toggles automatic min/max display scaling.
-4. :guilabel:`Min Counts` and :guilabel:`Max Counts` are used when autoscale is disabled.
+This frame now uses one compact LUT editor for both single-channel and multichannel workflows in both Camera and MIP tabs.
+
+1. :guilabel:`Channel` selects which channel settings are being edited.
+2. In :guilabel:`Single` mode, channel selection is fixed to :guilabel:`All` and disabled.
+3. In :guilabel:`Overlay` mode (with multiple active channels), channel selection is enabled so each channel can be configured independently.
+4. :guilabel:`LUT` uses ImageJ-style colors (:guilabel:`Green`, :guilabel:`Red`, :guilabel:`Magenta`, :guilabel:`Cyan`, :guilabel:`Yellow`, :guilabel:`Blue`, :guilabel:`Orange`, :guilabel:`Gray`).
+5. :guilabel:`Visible` toggles channel contribution on/off.
+6. :guilabel:`Alpha` controls per-channel opacity from 0 to 100%.
+7. :guilabel:`Gamma` controls per-channel gamma from 0.0 to 2.0 (default 1.0).
+8. :guilabel:`Autoscale` applies per-channel automatic min/max scaling.
+9. :guilabel:`Min Counts` and :guilabel:`Max Counts` are used when autoscale is disabled.
 
 MetricsFrame
 ------------
@@ -58,6 +66,7 @@ RenderFrame
    :alt: RenderFrame in the Camera View tab.
 
 This frame switches between live and slice display modes.
+When channel-aware LUT controls are active, the channel selection in this frame is disabled.
 
 MipRenderFrame
 --------------
@@ -67,6 +76,10 @@ MipRenderFrame
    :alt: MipRenderFrame in the MIP tab.
 
 This frame controls MIP perspective and channel selection.
+
+1. :guilabel:`Perspective` provides :guilabel:`Multi`, :guilabel:`XY`, :guilabel:`ZY`, and :guilabel:`ZX` views.
+2. In :guilabel:`Multi` perspective, the XY MIP is shown with YZ on the right and XZ on the bottom.
+3. YZ and ZX views are rescaled from acquisition metadata so axial and lateral spacing display isotropically.
 
 .. _ui_waveform_settings:
 

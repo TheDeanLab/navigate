@@ -36,7 +36,7 @@ It is implemented as a :ref:`feature list <user_guide_features>`, shown in its :
       )
     ]
 
-The sequence begins with the `PrepareNextChannel` feature and loops over `experiment.MicroscopeState.selected_channels`. As such, continuous mode will display a live preview of all :ref:`selected color channels <ui_channel_settings>` in sequence, then return the first color channel and start again.
+The sequence begins with the `PrepareNextChannel` feature and loops over `experiment.MicroscopeState.selected_channels`. As such, continuous mode will display a live preview of all :ref:`selected color channels <ui_channel_settings>` in sequence, then return the first color channel and start again. In the display notebook, users can choose :guilabel:`Single` view (one channel at a time) or :guilabel:`Overlay` view (multichannel composite) without changing acquisition order.
 
 ----------------
 

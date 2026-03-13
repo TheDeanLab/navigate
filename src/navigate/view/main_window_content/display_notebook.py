@@ -34,7 +34,7 @@
 import tkinter as tk
 from tkinter import ttk
 import logging
-from typing import Iterable, Dict, Any
+from typing import Callable, Iterable, Dict, Any, Optional
 
 # Third Party Imports
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -42,14 +42,22 @@ from matplotlib.figure import Figure
 
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
-from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.LabelInputWidgetFactory import (
+    LabelInput,
+    WidgetInputAdapter,
+)
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.common import (
     CommonMethods,
     configure_grid,
     themed_grid,
 )
-from navigate.view.theme import get_theme_color, get_theme_padding, get_theme_spacing
+from navigate.view.theme import (
+    get_theme_color,
+    get_theme_font,
+    get_theme_padding,
+    get_theme_spacing,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -137,7 +145,7 @@ class MIPTab(tk.Frame):
             self.cam_image,
             row=0,
             column=0,
-            rowspan=2,
+            rowspan=3,
             sticky=tk.NSEW,
             padx=("layout_panel_gap", "layout_section_gap"),
             pady="layout_panel_gap",
@@ -170,10 +178,10 @@ class MIPTab(tk.Frame):
         #:  FigureCanvasTkAgg: The canvas that will hold the camera image.
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
-        #: IntensityFrame: The frame that will hold the scale settings/palette color.
-        self.lut = IntensityFrame(self)
+        #: DisplayModeFrame: The frame that controls single-channel vs overlay display.
+        self.display_mode = DisplayModeFrame(self)
         themed_grid(
-            self.lut,
+            self.display_mode,
             row=0,
             column=1,
             sticky=tk.NSEW,
@@ -181,11 +189,22 @@ class MIPTab(tk.Frame):
             pady=("layout_panel_gap", "layout_section_gap"),
         )
 
+        #: IntensityFrame: The frame that will hold the scale settings/palette color.
+        self.lut = IntensityFrame(self)
+        themed_grid(
+            self.lut,
+            row=1,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=(0, "layout_section_gap"),
+        )
+
         #: RenderFrame: The frame that will hold the live display functionality.
         self.render = MipRenderFrame(self)
         themed_grid(
             self.render,
-            row=1,
+            row=2,
             column=1,
             sticky=tk.NSEW,
             padx=("layout_section_gap", "layout_panel_gap"),
@@ -198,7 +217,7 @@ class MIPTab(tk.Frame):
                 0: {"weight": 1, "minsize": canvas_min_size},
                 1: {"weight": 0, "minsize": sidebar_min_width},
             },
-            rows={0: 1, 1: 0},
+            rows={0: 0, 1: 0, 2: 1},
         )
         configure_grid(self.cam_image, columns={0: 1}, rows={0: 1})
 
@@ -292,7 +311,7 @@ class CameraTab(tk.Frame):
             showvalue=0,
             label="Slice",
         )
-        self.slider.configure(state="disabled")
+        self.slider.configure(state="disabled", font=get_theme_font("caption"))
         themed_grid(
             self.slider,
             row=1,
@@ -314,15 +333,25 @@ class CameraTab(tk.Frame):
             pady=(0, "layout_panel_gap"),
         )
 
+        #: DisplayModeFrame: The frame that controls single-channel vs overlay display.
+        self.display_mode = DisplayModeFrame(self.display_setting)
+        themed_grid(self.display_mode, row=0, column=0, sticky=tk.NSEW)
+
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.lut = IntensityFrame(self.display_setting)
-        themed_grid(self.lut, row=0, column=0, sticky=tk.NSEW)
+        themed_grid(
+            self.lut,
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            pady=("layout_section_gap", 0),
+        )
 
         #: MetricsFrame: The frame that will hold the camera selection and counts.
         self.image_metrics = MetricsFrame(self.display_setting)
         themed_grid(
             self.image_metrics,
-            row=1,
+            row=2,
             column=0,
             sticky=tk.NSEW,
             pady=("layout_section_gap", 0),
@@ -332,7 +361,7 @@ class CameraTab(tk.Frame):
         self.live_frame = RenderFrame(self.display_setting)
         themed_grid(
             self.live_frame,
-            row=2,
+            row=3,
             column=0,
             sticky=tk.NSEW,
             pady=("layout_section_gap", 0),
@@ -357,7 +386,7 @@ class CameraTab(tk.Frame):
         configure_grid(
             self.display_setting,
             columns={0: 1},
-            rows={0: 0, 1: 0, 2: 0, 3: 1},
+            rows={0: 0, 1: 0, 2: 0, 3: 0},
         )
 
 
@@ -412,6 +441,32 @@ class HistogramFrame(ttk.Labelframe):
         dpi = float(self.figure.get_dpi()) or 100.0
         self.figure.set_size_inches(width / dpi, height / dpi, forward=False)
         self.figure_canvas.draw_idle()
+
+
+class DisplayModeFrame(ttk.Labelframe, CommonMethods):
+    """Display mode controls for single-channel or overlay rendering."""
+
+    def __init__(
+        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
+        text_label = "Display Mode"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
+        ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
+
+        self.inputs = {
+            "mode": LabelInput(
+                parent=self,
+                label="Mode",
+                input_class=ttk.Combobox,
+                input_var=tk.StringVar(),
+                input_args={"width": 9},
+            )
+        }
+        self.inputs["mode"].widget["values"] = ("Single", "Overlay")
+        self.inputs["mode"].set("Single")
+        self.inputs["mode"].widget.state(["!disabled", "readonly"])
+        themed_grid(self.inputs["mode"], row=0, column=0, sticky=tk.NSEW)
+        configure_grid(self, columns={0: 1}, rows={0: 0})
 
 
 class RenderFrame(ttk.Labelframe):
@@ -734,8 +789,197 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
-        #: dict: The dictionary that holds the widgets.
-        self.inputs = {}
+        #: dict: The dictionary that holds the single-channel widgets.
+        self.inputs: Dict[str, Any] = {}
+        #: dict: Channel-specific compact control states keyed by channel name.
+        self._multichannel_channel_states: Dict[str, Dict[str, Any]] = {}
+        #: Optional[Callable[[str, str], None]]: Callback for per-channel control changes.
+        self._multichannel_on_change: Optional[Callable[[str, str], None]] = None
+        #: bool: Guard to prevent recursive callbacks while synchronizing control values.
+        self._multichannel_syncing = False
+        #: bool: Whether channel selector should expose concrete channels (Overlay mode).
+        self._multichannel_overlay_mode = False
+        #: list[str]: Active acquisition channels for compact controls.
+        self._multichannel_channels: list[str] = []
+        #: str: Label used for the disabled aggregate selector in single mode.
+        self._all_channels_label = "All"
+        self._active_multichannel_channel = tk.StringVar()
+        self._active_multichannel_lut = tk.StringVar()
+        self._active_multichannel_visible = tk.BooleanVar(value=True)
+        self._active_multichannel_autoscale = tk.BooleanVar(value=True)
+        self._active_multichannel_min = tk.IntVar(value=0)
+        self._active_multichannel_max = tk.IntVar(value=2**16 - 1)
+        self._active_multichannel_alpha = tk.DoubleVar(value=100.0)
+        self._active_multichannel_gamma = tk.DoubleVar(value=1.0)
+        self.transpose = tk.BooleanVar()
+        self.trans = "Flip XY"
+        dense_pad = get_theme_spacing("space_2")
+
+        self.single_channel_frame = ttk.Frame(self)
+        themed_grid(self.single_channel_frame, row=0, column=0, sticky=tk.NSEW)
+        self.multichannel_frame = ttk.Frame(self)
+        themed_grid(self.multichannel_frame, row=0, column=0, sticky=tk.NSEW)
+        self.multichannel_frame.grid_remove()
+
+        ttk.Label(self.multichannel_frame, text="Channel").grid(
+            row=0, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_channel_widget = ttk.Combobox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_channel,
+            width=9,
+            state="disabled",
+        )
+        self._multichannel_channel_widget.grid(
+            row=0, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
+
+        ttk.Label(self.multichannel_frame, text="LUT").grid(
+            row=1, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_lut_widget = ttk.Combobox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_lut,
+            width=9,
+            state="readonly",
+            values=self.multichannel_color_labels,
+        )
+        self._multichannel_lut_widget.grid(
+            row=1, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
+
+        self._multichannel_visible_label = ttk.Label(
+            self.multichannel_frame, text="Visible"
+        )
+        self._multichannel_visible_label.grid(
+            row=2, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_visible_widget = ttk.Checkbutton(
+            self.multichannel_frame,
+            variable=self._active_multichannel_visible,
+        )
+        self._multichannel_visible_widget.grid(
+            row=2, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+
+        ttk.Label(self.multichannel_frame, text="Alpha").grid(
+            row=3, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_alpha_widget = ttk.Scale(
+            self.multichannel_frame,
+            variable=self._active_multichannel_alpha,
+            from_=0.0,
+            to=100.0,
+            orient=tk.HORIZONTAL,
+        )
+        self._multichannel_alpha_widget.grid(
+            row=3, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
+
+        ttk.Label(self.multichannel_frame, text="Gamma").grid(
+            row=4, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_gamma_widget = ttk.Spinbox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_gamma,
+            from_=0.0,
+            to=2.0,
+            increment=0.01,
+            width=9,
+        )
+        self._multichannel_gamma_widget.grid(
+            row=4, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
+
+        self._multichannel_transpose_label = ttk.Label(
+            self.multichannel_frame, text=self.trans
+        )
+        self._multichannel_transpose_label.grid(
+            row=5, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_transpose_widget = ttk.Checkbutton(
+            self.multichannel_frame,
+            variable=self.transpose,
+        )
+        self._multichannel_transpose_widget.grid(
+            row=5, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self.inputs[self.trans] = WidgetInputAdapter(
+            self._multichannel_transpose_widget,
+            variable=self.transpose,
+            label=self._multichannel_transpose_label,
+        )
+
+        self._multichannel_autoscale_label = ttk.Label(
+            self.multichannel_frame, text="Autoscale"
+        )
+        self._multichannel_autoscale_label.grid(
+            row=6, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_autoscale_widget = ttk.Checkbutton(
+            self.multichannel_frame,
+            variable=self._active_multichannel_autoscale,
+        )
+        self._multichannel_autoscale_widget.grid(
+            row=6, column=1, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+
+        ttk.Label(self.multichannel_frame, text="Min Counts").grid(
+            row=7, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_min_widget = ttk.Spinbox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_min,
+            from_=0,
+            to=2**16 - 1,
+            increment=1,
+            width=9,
+        )
+        self._multichannel_min_widget.grid(
+            row=7, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
+
+        ttk.Label(self.multichannel_frame, text="Max Counts").grid(
+            row=8, column=0, sticky=tk.W, padx=dense_pad, pady=dense_pad
+        )
+        self._multichannel_max_widget = ttk.Spinbox(
+            self.multichannel_frame,
+            textvariable=self._active_multichannel_max,
+            from_=0,
+            to=2**16 - 1,
+            increment=1,
+            width=9,
+        )
+        self._multichannel_max_widget.grid(
+            row=8, column=1, sticky=tk.EW, padx=dense_pad, pady=dense_pad
+        )
+
+        self._multichannel_channel_widget.bind(
+            "<<ComboboxSelected>>",
+            self._on_multichannel_channel_selected,
+        )
+        self._multichannel_lut_widget.bind(
+            "<<ComboboxSelected>>",
+            lambda *_: self._on_multichannel_value_changed("lut"),
+        )
+        self._active_multichannel_visible.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("visible")
+        )
+        self._active_multichannel_alpha.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("alpha")
+        )
+        self._active_multichannel_gamma.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("gamma")
+        )
+        self._active_multichannel_autoscale.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("autoscale")
+        )
+        self._active_multichannel_min.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("min")
+        )
+        self._active_multichannel_max.trace_add(
+            "write", lambda *_: self._on_multichannel_value_changed("max")
+        )
 
         #: list: The list of LUTs for the image display.
         self.color_labels = [
@@ -758,7 +1002,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self.color = tk.StringVar()
         for i in range(len(self.color_labels)):
             self.inputs[self.color_labels[i]] = LabelInput(
-                parent=self,
+                parent=self.single_channel_frame,
                 label=self.color_labels[i],
                 input_class=ttk.Radiobutton,
                 input_var=self.color,
@@ -772,27 +1016,6 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
                 pady=("layout_control_gap", 0),
             )
             row += 1
-
-        #: tk.BooleanVar: The variable that holds the flip xy flag.
-        self.transpose = tk.BooleanVar()
-
-        #: str: The name of the flip xy flag.
-        self.trans = "Flip XY"
-        self.inputs[self.trans] = LabelInput(
-            parent=self,
-            label=self.trans,
-            input_class=ttk.Checkbutton,
-            input_var=self.transpose,
-        )
-        themed_grid(
-            self.inputs[self.trans],
-            row=row,
-            column=0,
-            sticky=tk.W,
-            pady=("layout_control_gap", 0),
-        )
-        row += 1
-
         #: tk.BooleanVar: The variable that holds the autoscale flag.
         self.autoscale = tk.BooleanVar()
 
@@ -805,7 +1028,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         #: list: The list of min and max names.
         self.minmax_names = ["Min", "Max"]
         self.inputs[self.auto] = LabelInput(
-            parent=self,
+            parent=self.single_channel_frame,
             label=self.auto,
             input_class=ttk.Checkbutton,
             input_var=self.autoscale,
@@ -822,7 +1045,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         # Max and Min Counts
         for i in range(len(self.minmax)):
             self.inputs[self.minmax_names[i]] = LabelInput(
-                parent=self,
+                parent=self.single_channel_frame,
                 label=self.minmax[i],
                 input_class=ttk.Spinbox,
                 input_var=tk.IntVar(),
@@ -838,4 +1061,302 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             )
             row += 1
 
-        configure_grid(self, columns={0: 1})
+        configure_grid(self.single_channel_frame, columns={0: 1})
+        configure_grid(self.multichannel_frame, columns={0: 0, 1: 1})
+        configure_grid(self, columns={0: 1}, rows={0: 1})
+        # Default to the compact LUT editor from startup, before acquisition begins.
+        self.set_multichannel_controls_visible(True)
+
+    @property
+    def multichannel_color_labels(self):
+        """Standard ImageJ-like colors for multichannel overlays."""
+        return (
+            "Green",
+            "Red",
+            "Magenta",
+            "Cyan",
+            "Yellow",
+            "Blue",
+            "Orange",
+            "Gray",
+        )
+
+    def set_multichannel_controls_visible(self, visible: bool) -> None:
+        """Toggle between single-channel and multichannel control groups."""
+        if visible:
+            self.single_channel_frame.grid_remove()
+            self.multichannel_frame.grid()
+        else:
+            self.multichannel_frame.grid_remove()
+            self.single_channel_frame.grid()
+
+    def configure_multichannel_controls(
+        self,
+        channels: Iterable[str],
+        default_luts: Iterable[str],
+        on_change: Optional[Callable[[str, str], None]] = None,
+    ) -> None:
+        """Configure compact per-channel controls for multichannel display."""
+        channels = list(channels)
+        default_luts = list(default_luts)
+        self._multichannel_channels = channels
+        self._multichannel_on_change = on_change
+        if len(channels) == 0:
+            self._multichannel_channel_widget["values"] = ()
+            self._active_multichannel_channel.set("")
+            self._multichannel_channel_widget.configure(state="disabled")
+            return
+
+        self._multichannel_syncing = True
+        try:
+            for index, channel in enumerate(channels):
+                defaults = {
+                    "lut_name": (
+                        default_luts[index]
+                        if index < len(default_luts)
+                        else self.multichannel_color_labels[
+                            index % len(self.multichannel_color_labels)
+                        ]
+                    ),
+                    "autoscale": True,
+                    "min_counts": 0.0,
+                    "max_counts": float(2**16 - 1),
+                    "visible": True,
+                    "alpha": 1.0,
+                    "gamma": 1.0,
+                }
+                cached = self._multichannel_channel_states.get(channel, {})
+                merged = defaults.copy()
+                merged.update(cached)
+                self._multichannel_channel_states[channel] = merged
+        finally:
+            self._multichannel_syncing = False
+
+        self.set_multichannel_channel_selector_mode(
+            overlay_mode=self._multichannel_overlay_mode,
+            channels=channels,
+        )
+
+    def set_multichannel_channel_selector_mode(
+        self,
+        overlay_mode: bool,
+        channels: Optional[Iterable[str]] = None,
+    ) -> None:
+        """Configure channel selector behavior for single vs overlay display mode.
+
+        Parameters
+        ----------
+        overlay_mode : bool
+            When True, the selector is enabled and channel names are listed. When
+            False, the selector is disabled and set to ``"All"``.
+        channels : Optional[Iterable[str]]
+            Optional explicit channel list. If None, uses the currently cached list.
+        """
+        if channels is not None:
+            self._multichannel_channels = list(channels)
+        else:
+            self._multichannel_channels = list(self._multichannel_channels)
+        self._multichannel_overlay_mode = bool(overlay_mode)
+
+        if len(self._multichannel_channels) == 0:
+            self._multichannel_channel_widget["values"] = ()
+            self._active_multichannel_channel.set("")
+            self._multichannel_channel_widget.configure(state="disabled")
+            return
+
+        self._multichannel_syncing = True
+        try:
+            if self._multichannel_overlay_mode and len(self._multichannel_channels) > 1:
+                self._multichannel_channel_widget["values"] = (
+                    self._multichannel_channels
+                )
+                self._multichannel_channel_widget.configure(state="readonly")
+                active_channel = self._active_multichannel_channel.get()
+                if active_channel not in self._multichannel_channels:
+                    self._active_multichannel_channel.set(
+                        self._multichannel_channels[0]
+                    )
+            else:
+                self._multichannel_channel_widget["values"] = (
+                    self._all_channels_label,
+                )
+                self._multichannel_channel_widget.configure(state="disabled")
+                self._active_multichannel_channel.set(self._all_channels_label)
+        finally:
+            self._multichannel_syncing = False
+
+        self._load_active_multichannel_values()
+        self._set_multichannel_minmax_state()
+
+    def _on_multichannel_channel_selected(self, *_args) -> None:
+        self._load_active_multichannel_values()
+        self._notify_multichannel_change("channel")
+
+    def _notify_multichannel_change(self, field: str) -> None:
+        channel = self._active_multichannel_channel.get()
+        if self._multichannel_on_change is None or not channel:
+            return
+        if channel == self._all_channels_label:
+            for selected_channel in self._multichannel_channels:
+                self._multichannel_on_change(selected_channel, field)
+            return
+        self._multichannel_on_change(channel, field)
+
+    def _on_multichannel_value_changed(self, field: str) -> None:
+        if self._multichannel_syncing:
+            return
+        self._store_active_multichannel_values()
+        if field == "autoscale":
+            self._set_multichannel_minmax_state()
+        self._notify_multichannel_change(field)
+
+    def _safe_get_float(self, tk_var: Any, fallback: float) -> float:
+        """Read a Tk variable as float while tolerating transient invalid edits."""
+        try:
+            return float(tk_var.get())
+        except (tk.TclError, TypeError, ValueError):
+            return float(fallback)
+
+    def _safe_get_bool(self, tk_var: Any, fallback: bool) -> bool:
+        """Read a Tk variable as bool while tolerating transient invalid edits."""
+        try:
+            value = tk_var.get()
+        except (tk.TclError, TypeError, ValueError):
+            return bool(fallback)
+
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in ("", "none"):
+                return bool(fallback)
+            if normalized in ("0", "false", "off", "no"):
+                return False
+            if normalized in ("1", "true", "on", "yes"):
+                return True
+        return bool(value)
+
+    def _safe_get_string(self, tk_var: Any, fallback: str) -> str:
+        """Read a Tk variable as string while tolerating transient invalid edits."""
+        try:
+            return str(tk_var.get())
+        except (tk.TclError, TypeError, ValueError):
+            return str(fallback)
+
+    def _store_active_multichannel_values(self) -> None:
+        channel = self._safe_get_string(self._active_multichannel_channel, "")
+        if not channel:
+            return
+        targets = (
+            list(self._multichannel_channels)
+            if channel == self._all_channels_label
+            else [channel]
+        )
+        for target_channel in targets:
+            state = self._multichannel_channel_states.setdefault(target_channel, {})
+            lut_name = self._safe_get_string(
+                self._active_multichannel_lut,
+                str(state.get("lut_name", "Green")),
+            ).strip()
+            state["lut_name"] = (
+                lut_name if lut_name else str(state.get("lut_name", "Green"))
+            )
+            state["autoscale"] = self._safe_get_bool(
+                self._active_multichannel_autoscale,
+                bool(state.get("autoscale", True)),
+            )
+            state["min_counts"] = self._safe_get_float(
+                self._active_multichannel_min,
+                float(state.get("min_counts", 0.0)),
+            )
+            state["max_counts"] = self._safe_get_float(
+                self._active_multichannel_max,
+                float(state.get("max_counts", float(2**16 - 1))),
+            )
+            state["visible"] = self._safe_get_bool(
+                self._active_multichannel_visible,
+                bool(state.get("visible", True)),
+            )
+            state["alpha"] = max(
+                0.0,
+                min(
+                    1.0,
+                    self._safe_get_float(
+                        self._active_multichannel_alpha,
+                        float(state.get("alpha", 1.0)) * 100.0,
+                    )
+                    / 100.0,
+                ),
+            )
+            state["gamma"] = max(
+                0.0,
+                min(
+                    2.0,
+                    self._safe_get_float(
+                        self._active_multichannel_gamma,
+                        float(state.get("gamma", 1.0)),
+                    ),
+                ),
+            )
+
+    def _load_active_multichannel_values(self) -> None:
+        channel = self._active_multichannel_channel.get()
+        source_channel = channel
+        if channel == self._all_channels_label and self._multichannel_channels:
+            source_channel = self._multichannel_channels[0]
+        state = self._multichannel_channel_states.get(source_channel, {})
+        if not state:
+            return
+        self._multichannel_syncing = True
+        try:
+            self._active_multichannel_lut.set(state.get("lut_name", "Green"))
+            self._active_multichannel_autoscale.set(bool(state.get("autoscale", True)))
+            self._active_multichannel_min.set(int(state.get("min_counts", 0.0)))
+            self._active_multichannel_max.set(
+                int(state.get("max_counts", float(2**16 - 1)))
+            )
+            self._active_multichannel_visible.set(bool(state.get("visible", True)))
+            self._active_multichannel_alpha.set(float(state.get("alpha", 1.0)) * 100.0)
+            self._active_multichannel_gamma.set(
+                max(0.0, min(2.0, float(state.get("gamma", 1.0))))
+            )
+        finally:
+            self._multichannel_syncing = False
+        self._set_multichannel_minmax_state()
+
+    def _set_multichannel_minmax_state(self) -> None:
+        autoscale_enabled = self._safe_get_bool(
+            self._active_multichannel_autoscale,
+            True,
+        )
+        state = "disabled" if autoscale_enabled else "normal"
+        self._multichannel_min_widget["state"] = state
+        self._multichannel_max_widget["state"] = state
+
+    def get_multichannel_widgets(self) -> Dict[str, Dict[str, Any]]:
+        """Return channel-mapped compact control state."""
+        return self._multichannel_channel_states
+
+    def get_multichannel_channel_state(self, channel: str) -> Dict[str, Any]:
+        """Return current settings for one channel."""
+        self._store_active_multichannel_values()
+        state = self._multichannel_channel_states.get(channel)
+        if state is None:
+            return {}
+        return state.copy()
+
+    def set_multichannel_channel_state(
+        self, channel: str, state: Dict[str, Any]
+    ) -> None:
+        """Populate controls for one channel from cached state."""
+        merged = self._multichannel_channel_states.get(channel, {}).copy()
+        merged.update(state)
+        self._multichannel_channel_states[channel] = merged
+        if channel == self._active_multichannel_channel.get():
+            self._load_active_multichannel_values()
+
+    def get_multichannel_active_channel(self) -> str:
+        """Return the currently selected channel in compact multichannel controls."""
+        self._store_active_multichannel_values()
+        channel = self._active_multichannel_channel.get()
+        if channel == self._all_channels_label and self._multichannel_channels:
+            return self._multichannel_channels[0]
+        return channel

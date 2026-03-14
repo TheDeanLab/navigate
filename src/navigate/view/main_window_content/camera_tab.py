@@ -41,7 +41,7 @@ from tkinter import ttk
 import navigate
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedEntry
-from navigate.view.custom_widgets.common import uniform_grid
+from navigate.view.custom_widgets.common import configure_grid, themed_grid
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -81,22 +81,41 @@ class CameraSettingsTab(tk.Frame):
 
         #: tk.Frame: The camera mode frame
         self.camera_mode = CameraMode(self)
-        self.camera_mode.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
+        themed_grid(
+            self.camera_mode,
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady=("layout_panel_gap", "layout_section_gap"),
+        )
 
         # Framerate Label Frame
         #: tk.Frame: The framerate label frame
         self.framerate_info = FramerateInfo(self)
-        self.framerate_info.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
+        themed_grid(
+            self.framerate_info,
+            row=0,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=("layout_panel_gap", "layout_section_gap"),
+        )
 
         # Region of Interest Settings
         #: tk.Frame: The region of interest settings frame
         self.camera_roi = ROI(self)
-        self.camera_roi.grid(
-            row=1, column=0, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
+        themed_grid(
+            self.camera_roi,
+            row=1,
+            column=0,
+            columnspan=2,
+            sticky=tk.NSEW,
+            padx="layout_panel_gap",
+            pady=("layout_section_gap", "layout_panel_gap"),
         )
 
-        # Uniform Grid
-        uniform_grid(self)
+        configure_grid(self, columns={0: 1, 1: 1}, rows={0: 1, 1: 2})
 
 
 class CameraMode(ttk.Labelframe):
@@ -139,13 +158,19 @@ class CameraMode(ttk.Labelframe):
 
         #: list: List of all the names for the widgets.
         self.names = ["Sensor", "Readout", "Pixels"]
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
+        configure_grid(self, columns={0: 0, 1: 1}, rows=len(self.labels))
 
         # Dropdown loop
         for i in range(len(self.labels)):
             label = ttk.Label(self, text=self.labels[i])
-            label.grid(row=i, column=0, pady=5, padx=5, sticky=tk.NW)
+            themed_grid(
+                label,
+                row=i,
+                column=0,
+                sticky=tk.NW,
+                padx="layout_control_gap",
+                pady="space_1",
+            )
 
             if i < len(self.labels) - 1:
                 self.inputs[self.names[i]] = LabelInput(
@@ -161,8 +186,13 @@ class CameraMode(ttk.Labelframe):
                     input_var=tk.StringVar(),
                     input_args={"from_": 0, "to": 10000, "increment": 1, "width": 5},
                 )
-            self.inputs[self.names[i]].grid(
-                row=i, column=1, pady=5, padx=5, sticky=tk.NW
+            themed_grid(
+                self.inputs[self.names[i]],
+                row=i,
+                column=1,
+                sticky=tk.NW,
+                padx="layout_control_gap",
+                pady="space_1",
             )
 
     def get_variables(self) -> dict:
@@ -245,8 +275,7 @@ class FramerateInfo(ttk.LabelFrame):
             "max_framerate",
         ]
 
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
+        configure_grid(self, columns={0: 0, 1: 1}, rows=len(self.labels))
 
         #: list: List of all the read only values for the widgets.
         self.read_only = [True, True, True]
@@ -254,7 +283,14 @@ class FramerateInfo(ttk.LabelFrame):
         #  Dropdown loop
         for i in range(len(self.labels)):
             label = ttk.Label(self, text=self.labels[i])
-            label.grid(row=i, column=0, pady=5, padx=5, sticky=tk.NW)
+            themed_grid(
+                label,
+                row=i,
+                column=0,
+                sticky=tk.NW,
+                padx="layout_control_gap",
+                pady="space_1",
+            )
 
             if self.read_only[i]:
                 self.inputs[self.names[i]] = LabelInput(
@@ -271,8 +307,13 @@ class FramerateInfo(ttk.LabelFrame):
                     input_var=tk.DoubleVar(),
                     input_args={"from_": 1, "to": 1000, "increment": 1.0, "width": 6},
                 )
-            self.inputs[self.names[i]].grid(
-                row=i, column=1, pady=5, padx=5, sticky=tk.NW
+            themed_grid(
+                self.inputs[self.names[i]],
+                row=i,
+                column=1,
+                sticky=tk.NW,
+                padx="layout_control_gap",
+                pady="space_1",
             )
 
     def get_variables(self) -> dict:
@@ -337,41 +378,65 @@ class ROI(ttk.Labelframe):
         text_label = "Region of Interest Settings"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
+        configure_grid(self, columns={0: 1, 1: 1}, rows={0: 1, 1: 1})
 
         # Parent Label Frames for widgets
         #: ttk.LabelFrame: The parent frame for any the camera size.
         self.roi_frame = ttk.LabelFrame(self, text="Number of Pixels")
-        self.roi_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
+        themed_grid(
+            self.roi_frame,
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady=("layout_panel_gap", "layout_section_gap"),
+        )
 
         # Button Frame
         #: ttk.LabelFrame: The parent frame for default FOV options.
         self.btn_frame = ttk.LabelFrame(self, text="Default FOVs")
-        self.btn_frame.grid(row=0, column=1, sticky=tk.NSEW, padx=(40, 10), pady=10)
+        themed_grid(
+            self.btn_frame,
+            row=0,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=("layout_panel_gap", "layout_section_gap"),
+        )
 
         # FOV
         #: ttk.LabelFrame: The parent frame for the FOV size.
         self.fov_frame = ttk.LabelFrame(self, text="FOV Dimensions (microns)")
-        self.fov_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=10, pady=10)
+        themed_grid(
+            self.fov_frame,
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady=("layout_section_gap", "layout_panel_gap"),
+        )
 
         # ROI boundary
         #: ttk.LabelFrame: The parent frame for the boundary of the FOV.
         self.roi_boundary_frame = ttk.LabelFrame(self, text="ROI Boundary")
-        self.roi_boundary_frame.grid(
-            row=1, column=1, sticky=tk.NSEW, padx=(40, 10), pady=10
+        themed_grid(
+            self.roi_boundary_frame,
+            row=1,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=("layout_section_gap", "layout_panel_gap"),
         )
 
         # Formatting
-        tk.Grid.columnconfigure(self.roi_frame, "all", weight=1)
-        tk.Grid.rowconfigure(self.roi_frame, "all", weight=1)
-        tk.Grid.columnconfigure(self.btn_frame, "all", weight=1)
-        tk.Grid.rowconfigure(self.btn_frame, "all", weight=1)
-        tk.Grid.columnconfigure(self.fov_frame, "all", weight=1)
-        tk.Grid.rowconfigure(self.fov_frame, "all", weight=1)
-        tk.Grid.columnconfigure(self.roi_boundary_frame, "all", weight=1)
-        tk.Grid.rowconfigure(self.roi_boundary_frame, "all", weight=1)
+        configure_grid(self.roi_frame, columns={0: 1}, rows={0: 1, 1: 1, 2: 1, 3: 1})
+        configure_grid(self.btn_frame, columns={0: 1}, rows=4)
+        configure_grid(self.fov_frame, columns={0: 1}, rows={0: 1, 1: 1})
+        configure_grid(
+            self.roi_boundary_frame,
+            columns={0: 0, 1: 1, 2: 1},
+            rows={0: 0, 1: 1, 2: 1},
+        )
 
         #: dict: Dictionary of all the widgets in the frame.
         self.inputs = {}
@@ -401,7 +466,14 @@ class ROI(ttk.Labelframe):
             self.buttons[btn_names[i]] = ttk.Button(
                 self.btn_frame, text=btn_labels[i], width=9
             )
-            self.buttons[btn_names[i]].grid(row=i, column=0, pady=5, padx=35)
+            themed_grid(
+                self.buttons[btn_names[i]],
+                row=i,
+                column=0,
+                sticky=tk.NSEW,
+                padx="layout_control_gap",
+                pady="space_1",
+            )
 
         for i in range(2):
             # Num Pix frame
@@ -412,7 +484,13 @@ class ROI(ttk.Labelframe):
                 input_var=tk.IntVar(),
                 input_args={"from_": 0, "increment": 2.0, "width": 5},
             )
-            self.inputs[roi_labels[i]].grid(row=i, column=0, pady=5, padx=5)
+            themed_grid(
+                self.inputs[roi_labels[i]],
+                row=i,
+                column=0,
+                padx="layout_control_gap",
+                pady="space_1",
+            )
 
             # FOV Frame
             self.inputs[fov_names[i]] = LabelInput(
@@ -422,7 +500,13 @@ class ROI(ttk.Labelframe):
                 input_var=tk.IntVar(),
                 input_args={"width": 7, "required": True},
             )
-            self.inputs[fov_names[i]].grid(row=i, column=0, pady=1, padx=5)
+            themed_grid(
+                self.inputs[fov_names[i]],
+                row=i,
+                column=0,
+                padx="layout_control_gap",
+                pady="space_1",
+            )
 
         # ROI boundary
         self.inputs["is_centered"] = LabelInput(
@@ -431,13 +515,32 @@ class ROI(ttk.Labelframe):
             input_class=ttk.Checkbutton,
             input_var=tk.BooleanVar(),
         )
-        self.inputs["is_centered"].grid(
-            row=0, columnspan=3, padx=(10, 0), pady=(10, 5), sticky=tk.NW
+        themed_grid(
+            self.inputs["is_centered"],
+            row=0,
+            columnspan=3,
+            sticky=tk.NW,
+            padx=("layout_control_gap", 0),
+            pady=("layout_control_gap", "space_1"),
         )
         top_label = ttk.Label(self.roi_boundary_frame, text="Top-Left:")
         bottom_label = ttk.Label(self.roi_boundary_frame, text="Bottom-Right:")
-        top_label.grid(row=1, column=0, padx=10, pady=1, sticky=tk.NW)
-        bottom_label.grid(row=2, column=0, padx=10, pady=1, sticky=tk.NW)
+        themed_grid(
+            top_label,
+            row=1,
+            column=0,
+            sticky=tk.NW,
+            padx="layout_control_gap",
+            pady="space_1",
+        )
+        themed_grid(
+            bottom_label,
+            row=2,
+            column=0,
+            sticky=tk.NW,
+            padx="layout_control_gap",
+            pady="space_1",
+        )
         for i in range(len(roi_boundary_names)):
             self.inputs[roi_boundary_names[i]] = LabelInput(
                 parent=self.roi_boundary_frame,
@@ -447,8 +550,13 @@ class ROI(ttk.Labelframe):
                 input_var=tk.IntVar(),
                 input_args={"from_": 0, "to": 2048, "increment": 1.0, "width": 6},
             )
-            self.inputs[roi_boundary_names[i]].grid(
-                row=i // 2 + 1, column=i % 2 + 1, pady=1, padx=5, sticky=tk.NW
+            themed_grid(
+                self.inputs[roi_boundary_names[i]],
+                row=i // 2 + 1,
+                column=i % 2 + 1,
+                sticky=tk.NW,
+                padx="layout_control_gap",
+                pady="space_1",
             )
             self.inputs[roi_boundary_names[i]].label.grid(padx=(0, 10), sticky=tk.NW)
 
@@ -460,7 +568,13 @@ class ROI(ttk.Labelframe):
             input_var=tk.StringVar(),
             input_args={"width": 5},
         )
-        self.inputs[self.binning].grid(row=3, column=0, pady=5, padx=5)
+        themed_grid(
+            self.inputs[self.binning],
+            row=3,
+            column=0,
+            padx="layout_control_gap",
+            pady="space_1",
+        )
 
         # Number of Pixels
         self.inputs["Width"].grid(pady=(10, 5))

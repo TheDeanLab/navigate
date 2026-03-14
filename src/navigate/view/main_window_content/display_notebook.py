@@ -47,18 +47,21 @@ from navigate.view.custom_widgets.LabelInputWidgetFactory import (
     WidgetInputAdapter,
 )
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
-from navigate.view.custom_widgets.common import CommonMethods, uniform_grid
-from navigate.view.theme import get_theme_font, get_theme_spacing
+from navigate.view.custom_widgets.common import (
+    CommonMethods,
+    configure_grid,
+    themed_grid,
+)
+from navigate.view.theme import (
+    get_theme_color,
+    get_theme_font,
+    get_theme_padding,
+    get_theme_spacing,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
-
-def _space(px: int) -> int:
-    """Resolve spacing through the active GUI theme token map."""
-    normalized_px = max(0, int(px))
-    return get_theme_spacing(f"space_{normalized_px}", normalized_px)
 
 
 class CameraNotebook(DockableNotebook):
@@ -83,7 +86,7 @@ class CameraNotebook(DockableNotebook):
         DockableNotebook.__init__(self, frame, *args, **kwargs)
 
         # Putting notebook 2 into top right frame
-        self.grid(row=0, column=0, sticky=tk.NSEW)
+        themed_grid(self, row=0, column=0, sticky=tk.NSEW)
 
         #: CameraTab: The camera tab.
         self.camera_tab = CameraTab(self)
@@ -101,7 +104,7 @@ class CameraNotebook(DockableNotebook):
         self.add(self.mip_tab, text="MIP", sticky=tk.NSEW)
         self.add(self.waveform_tab, text="Waveforms", sticky=tk.NSEW)
 
-        uniform_grid(self)
+        configure_grid(self, columns={0: 1}, rows={0: 1})
 
 
 class MIPTab(tk.Frame):
@@ -122,6 +125,7 @@ class MIPTab(tk.Frame):
             Arbitrary keyword arguments.
         """
         #  Init Frame
+        kwargs.setdefault("bg", get_theme_color("panel_bg"))
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
 
         #: int: The index of the tab.
@@ -130,27 +134,43 @@ class MIPTab(tk.Frame):
         #: Bool: The docked flag.
         self.is_docked = True
 
+        canvas_min_size = get_theme_spacing("layout_canvas_min_size")
+        sidebar_min_width = get_theme_spacing("layout_sidebar_min_width")
+
         #: ttk.Frame: The frame that will hold the camera image.
-        self.cam_image = ttk.Frame(self)
-        self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
+        self.cam_image = ttk.Frame(
+            self, padding=get_theme_padding("padding_canvas_surface")
+        )
+        themed_grid(
+            self.cam_image,
+            row=0,
+            column=0,
+            rowspan=3,
+            sticky=tk.NSEW,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady="layout_panel_gap",
+        )
 
         #: bool: The docked flag.
         self.is_docked = True
 
         #: int: The width of the canvas.
-        self.canvas_width = 512
+        self.canvas_width = canvas_min_size
 
         #: int: The height of the canvas.
-        self.canvas_height = 512
+        self.canvas_height = canvas_min_size
 
         #: tk.Canvas: The canvas that will hold the camera image.
         self.canvas = tk.Canvas(
-            self.cam_image, width=self.canvas_width, height=self.canvas_height
+            self.cam_image,
+            width=1,
+            height=1,
+            borderwidth=0,
+            highlightthickness=0,
+            relief=tk.FLAT,
+            background=get_theme_color("surface_bg"),
         )
-        outer_pad = _space(5)
-        self.canvas.grid(
-            row=0, column=0, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
-        )
+        themed_grid(self.canvas, row=0, column=0, sticky=tk.NSEW)
 
         #: matplotlib.figure.Figure: The figure that will hold the camera image.
         self.matplotlib_figure = Figure(figsize=(6.0, 6.0), tight_layout=True)
@@ -160,21 +180,46 @@ class MIPTab(tk.Frame):
 
         #: DisplayModeFrame: The frame that controls single-channel vs overlay display.
         self.display_mode = DisplayModeFrame(self)
-        self.display_mode.grid(
-            row=0, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        themed_grid(
+            self.display_mode,
+            row=0,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=("layout_panel_gap", "layout_section_gap"),
         )
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.lut = IntensityFrame(self)
-        self.lut.grid(row=1, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad)
+        themed_grid(
+            self.lut,
+            row=1,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=(0, "layout_section_gap"),
+        )
 
         #: RenderFrame: The frame that will hold the live display functionality.
         self.render = MipRenderFrame(self)
-        self.render.grid(
-            row=2, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        themed_grid(
+            self.render,
+            row=2,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=(0, "layout_panel_gap"),
         )
 
-        uniform_grid(self)
+        configure_grid(
+            self,
+            columns={
+                0: {"weight": 1, "minsize": canvas_min_size},
+                1: {"weight": 0, "minsize": sidebar_min_width},
+            },
+            rows={0: 0, 1: 0, 2: 1},
+        )
+        configure_grid(self.cam_image, columns={0: 1}, rows={0: 1})
 
 
 class CameraTab(tk.Frame):
@@ -195,37 +240,60 @@ class CameraTab(tk.Frame):
             Arbitrary keyword arguments.
         """
         #  Init Frame
+        kwargs.setdefault("bg", get_theme_color("panel_bg"))
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
 
         #: int: The index of the tab.
         self.index = 0
 
-        #: ttk.Frame: The frame that will hold the camera image.
-        self.cam_image = ttk.Frame(self)
-        self.cam_image.grid(row=0, column=0, sticky=tk.NSEW)
-        self.display_setting = ttk.Frame(self)
-        self.display_setting.grid(row=0, column=1, sticky=tk.NSEW)
+        canvas_min_size = get_theme_spacing("layout_canvas_min_size")
+        histogram_min_height = get_theme_spacing("layout_histogram_min_height")
+        sidebar_min_width = get_theme_spacing("layout_sidebar_min_width")
 
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        #: ttk.Frame: The frame that will hold the camera image.
+        self.cam_image = ttk.Frame(
+            self, padding=get_theme_padding("padding_canvas_surface")
+        )
+        themed_grid(
+            self.cam_image,
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady="layout_panel_gap",
+        )
+        self.display_setting = ttk.Frame(
+            self, padding=get_theme_padding("padding_panel_card")
+        )
+        themed_grid(
+            self.display_setting,
+            row=0,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady="layout_panel_gap",
+        )
 
         #: bool: The docked flag.
         self.is_docked = True
 
         #: int: The width of the canvas.
-        self.canvas_width = 512
+        self.canvas_width = canvas_min_size
 
         #: int: The height of the canvas.
-        self.canvas_height = 512
+        self.canvas_height = canvas_min_size
 
         #: tk.Canvas: The canvas that will hold the camera image.
         self.canvas = tk.Canvas(
-            self.cam_image, width=self.canvas_width, height=self.canvas_height
+            self.cam_image,
+            width=1,
+            height=1,
+            borderwidth=0,
+            highlightthickness=0,
+            relief=tk.FLAT,
+            background=get_theme_color("surface_bg"),
         )
-        outer_pad = _space(5)
-        self.canvas.grid(
-            row=0, column=0, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
-        )
+        themed_grid(self.canvas, row=0, column=0, sticky=tk.NSEW)
 
         #: matplotlib.figure.Figure: The figure that will hold the camera image.
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
@@ -244,42 +312,81 @@ class CameraTab(tk.Frame):
             label="Slice",
         )
         self.slider.configure(state="disabled", font=get_theme_font("caption"))
-        self.slider.grid(
-            row=1, column=0, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        themed_grid(
+            self.slider,
+            row=1,
+            column=0,
+            sticky=tk.EW,
+            pady=("layout_section_gap", 0),
         )
         self.slider.grid_remove()
 
         #: HistogramFrame: The frame that will hold the histogram.
         self.histogram = HistogramFrame(self)
-        self.histogram.grid(
-            row=2,
+        themed_grid(
+            self.histogram,
+            row=1,
             column=0,
             columnspan=2,
             sticky=tk.NSEW,
-            padx=outer_pad,
-            pady=outer_pad,
+            padx="layout_panel_gap",
+            pady=(0, "layout_panel_gap"),
         )
 
-        #: IntensityFrame: The frame that will hold the scale settings/palette color.
+        #: DisplayModeFrame: The frame that controls single-channel vs overlay display.
         self.display_mode = DisplayModeFrame(self.display_setting)
-        self.display_mode.grid(
-            row=0, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
-        )
+        themed_grid(self.display_mode, row=0, column=0, sticky=tk.NSEW)
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.lut = IntensityFrame(self.display_setting)
-        self.lut.grid(row=1, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad)
+        themed_grid(
+            self.lut,
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            pady=("layout_section_gap", 0),
+        )
 
         #: MetricsFrame: The frame that will hold the camera selection and counts.
         self.image_metrics = MetricsFrame(self.display_setting)
-        self.image_metrics.grid(
-            row=2, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        themed_grid(
+            self.image_metrics,
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            pady=("layout_section_gap", 0),
         )
 
         #: RenderFrame: The frame that will hold the live display functionality.
         self.live_frame = RenderFrame(self.display_setting)
-        self.live_frame.grid(
-            row=3, column=1, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        themed_grid(
+            self.live_frame,
+            row=3,
+            column=0,
+            sticky=tk.NSEW,
+            pady=("layout_section_gap", 0),
+        )
+
+        configure_grid(
+            self,
+            columns={
+                0: {"weight": 1, "minsize": canvas_min_size},
+                1: {"weight": 0, "minsize": sidebar_min_width},
+            },
+            rows={
+                0: {"weight": 4, "minsize": canvas_min_size},
+                1: {"weight": 1, "minsize": histogram_min_height},
+            },
+        )
+        configure_grid(
+            self.cam_image,
+            columns={0: 1},
+            rows={0: {"weight": 1, "minsize": canvas_min_size}, 1: 0},
+        )
+        configure_grid(
+            self.display_setting,
+            columns={0: 1},
+            rows={0: 0, 1: 0, 2: 0, 3: 0},
         )
 
 
@@ -302,22 +409,15 @@ class HistogramFrame(ttk.Labelframe):
         """
 
         text_label = "Intensity Histogram"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        configure_grid(self, columns={0: 1}, rows={0: 1})
 
         #: ttk.Frame: The frame for the histogram.
         self.frame = ttk.Frame(self)
-        self.frame.grid(
-            row=0,
-            column=0,
-            sticky=tk.NSEW,
-            padx=_space(0),
-            pady=_space(0),
-        )
-        self.frame.grid_rowconfigure(0, weight=1)
-        self.frame.grid_columnconfigure(0, weight=1)
+        themed_grid(self.frame, row=0, column=0, sticky=tk.NSEW)
+        configure_grid(self.frame, columns={0: 1}, rows={0: 1})
 
         #: matplotlib.figure.Figure: The figure for the histogram.
         self.figure = Figure(figsize=(1, 1))
@@ -350,6 +450,7 @@ class DisplayModeFrame(ttk.Labelframe, CommonMethods):
         self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
     ) -> None:
         text_label = "Display Mode"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         self.inputs = {
@@ -364,12 +465,8 @@ class DisplayModeFrame(ttk.Labelframe, CommonMethods):
         self.inputs["mode"].widget["values"] = ("Single", "Overlay")
         self.inputs["mode"].set("Single")
         self.inputs["mode"].widget.state(["!disabled", "readonly"])
-        compact_pad = _space(3)
-        self.inputs["mode"].grid(
-            row=0, column=0, sticky=tk.NSEW, padx=compact_pad, pady=compact_pad
-        )
-
-        uniform_grid(self)
+        themed_grid(self.inputs["mode"], row=0, column=0, sticky=tk.NSEW)
+        configure_grid(self, columns={0: 1}, rows={0: 0})
 
 
 class RenderFrame(ttk.Labelframe):
@@ -391,6 +488,7 @@ class RenderFrame(ttk.Labelframe):
         """
         # Init Frame
         text_label = "Image Display"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         #: tk.StringVar: The variable that holds the live display functionality.
@@ -400,17 +498,23 @@ class RenderFrame(ttk.Labelframe):
         self.live = ttk.Combobox(self, textvariable=self.live_var, width=6)
         self.live["values"] = ("Live", "Slice")
         self.live.set("Live")
-        self.live.grid(row=0, column=0, sticky=tk.W)
+        themed_grid(self.live, row=0, column=0, sticky=tk.EW)
         self.live.state(["!disabled", "readonly"])
 
         self.channel_var = tk.StringVar()
         self.channel = ttk.Combobox(self, textvariable=self.channel_var, width=6)
         self.channel["values"] = "CH1"
         self.channel.set("CH1")
-        self.channel.grid(row=1, column=0, sticky=tk.W)
+        themed_grid(
+            self.channel,
+            row=1,
+            column=0,
+            sticky=tk.EW,
+            pady=("layout_control_gap", 0),
+        )
         self.channel.state(["disabled", "readonly"])
 
-        uniform_grid(self)
+        configure_grid(self, columns={0: 1}, rows={0: 0, 1: 0})
 
 
 class MipRenderFrame(ttk.Labelframe, CommonMethods):
@@ -432,6 +536,7 @@ class MipRenderFrame(ttk.Labelframe, CommonMethods):
         """
         # Init Frame
         text_label = "Image Display"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         # Label Strings
@@ -457,16 +562,15 @@ class MipRenderFrame(ttk.Labelframe, CommonMethods):
         }
         self.inputs["perspective"].widget.state(["!disabled", "readonly"])
         self.inputs["channel"].widget.state(["!disabled", "readonly"])
-        compact_pad = _space(3)
-        self.inputs["perspective"].grid(
-            row=0, column=0, sticky=tk.EW, padx=compact_pad, pady=compact_pad
+        themed_grid(self.inputs["perspective"], row=0, column=0, sticky=tk.EW)
+        themed_grid(
+            self.inputs["channel"],
+            row=1,
+            column=0,
+            sticky=tk.EW,
+            pady=("layout_control_gap", 0),
         )
-        self.inputs["channel"].grid(
-            row=1, column=0, sticky=tk.EW, padx=compact_pad, pady=compact_pad
-        )
-        self.columnconfigure(0, weight=1)
-
-        uniform_grid(self)
+        configure_grid(self, columns={0: 1}, rows={0: 0, 1: 0})
 
 
 class WaveformTab(tk.Frame):
@@ -488,6 +592,7 @@ class WaveformTab(tk.Frame):
 
         """
         # Init Frame
+        kwargs.setdefault("bg", get_theme_color("panel_bg"))
         tk.Frame.__init__(self, camera_tab, *args, **kwargs)
 
         #: int: The index of the tab.
@@ -497,8 +602,17 @@ class WaveformTab(tk.Frame):
         self.is_docked = True
 
         #: ttk.Frame: The frame that will hold the waveform plots.
-        self.waveform_plots = ttk.Frame(self)
-        self.waveform_plots.grid(row=0, column=0, sticky=tk.NSEW)
+        self.waveform_plots = ttk.Frame(
+            self, padding=get_theme_padding("padding_canvas_surface")
+        )
+        themed_grid(
+            self.waveform_plots,
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx="layout_panel_gap",
+            pady="layout_panel_gap",
+        )
 
         #: matplotlib.figure.Figure: The figure that will hold the waveform plots.
         self.fig = Figure(figsize=(6, 6), dpi=100)
@@ -509,12 +623,24 @@ class WaveformTab(tk.Frame):
 
         #: WaveformSettingsFrame: The frame that will hold the waveform settings.
         self.waveform_settings = WaveformSettingsFrame(self)
-        outer_pad = _space(5)
-        self.waveform_settings.grid(
-            row=1, column=0, sticky=tk.NSEW, padx=outer_pad, pady=outer_pad
+        themed_grid(
+            self.waveform_settings,
+            row=1,
+            column=0,
+            sticky=tk.EW,
+            padx="layout_panel_gap",
+            pady=(0, "layout_panel_gap"),
         )
 
-        uniform_grid(self)
+        configure_grid(
+            self,
+            columns={0: 1},
+            rows={
+                0: {"weight": 1, "minsize": get_theme_spacing("layout_canvas_min_size")},
+                1: 0,
+            },
+        )
+        configure_grid(self.waveform_plots, columns={0: 1}, rows={0: 1})
 
 
 class WaveformSettingsFrame(ttk.Labelframe, CommonMethods):
@@ -536,6 +662,7 @@ class WaveformSettingsFrame(ttk.Labelframe, CommonMethods):
         """
         # Init Frame
         text_label = "Settings"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
         ttk.Labelframe.__init__(self, waveform_tab, text=text_label, *args, **kwargs)
 
         #: dict: The dictionary that holds the widgets.
@@ -549,10 +676,7 @@ class WaveformSettingsFrame(ttk.Labelframe, CommonMethods):
             )
         }
 
-        compact_pad = _space(3)
-        self.inputs["sample_rate"].grid(
-            row=0, column=0, sticky=tk.NSEW, padx=compact_pad, pady=compact_pad
-        )
+        themed_grid(self.inputs["sample_rate"], row=0, column=0, sticky=tk.NSEW)
 
         self.inputs["waveform_template"] = LabelInput(
             parent=self,
@@ -561,11 +685,15 @@ class WaveformSettingsFrame(ttk.Labelframe, CommonMethods):
             input_var=tk.StringVar(),
             input_args={"width": 20},
         )
-        self.inputs["waveform_template"].grid(
-            row=0, column=1, sticky=tk.NSEW, padx=compact_pad, pady=compact_pad
+        themed_grid(
+            self.inputs["waveform_template"],
+            row=0,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", 0),
         )
 
-        uniform_grid(self)
+        configure_grid(self, columns={0: 0, 1: 1}, rows={0: 0})
 
 
 class MetricsFrame(ttk.Labelframe, CommonMethods):
@@ -586,6 +714,7 @@ class MetricsFrame(ttk.Labelframe, CommonMethods):
             Arbitrary keyword arguments.
         """
         text_label = "Image Metrics"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         #: dict: The dictionary that holds the widgets.
@@ -598,8 +727,6 @@ class MetricsFrame(ttk.Labelframe, CommonMethods):
         self.names = ["Frames", "Image", "Channel"]
 
         # Loop for widgets
-        outer_pad = _space(5)
-        compact_pad = _space(3)
         for i in range(len(self.labels)):
             if i == 0:
                 self.inputs[self.names[i]] = LabelInput(
@@ -610,12 +737,13 @@ class MetricsFrame(ttk.Labelframe, CommonMethods):
                     input_args={"from_": 1, "to": 32, "increment": 1, "width": 5},
                     label_pos="top",
                 )
-                self.inputs[self.names[i]].grid(
+                themed_grid(
+                    self.inputs[self.names[i]],
                     row=i,
                     column=0,
                     sticky=tk.NSEW,
-                    padx=outer_pad,
-                    pady=compact_pad,
+                    padx="layout_control_gap",
+                    pady=("layout_control_gap", 0),
                 )
             if i > 0:
                 self.inputs[self.names[i]] = LabelInput(
@@ -626,16 +754,17 @@ class MetricsFrame(ttk.Labelframe, CommonMethods):
                     input_args={"width": 5, "state": "disabled"},
                     label_pos="top",
                 )
-                self.inputs[self.names[i]].grid(
+                themed_grid(
+                    self.inputs[self.names[i]],
                     row=i,
                     column=0,
                     sticky=tk.NSEW,
-                    padx=outer_pad,
-                    pady=compact_pad,
+                    padx="layout_control_gap",
+                    pady=("layout_control_gap", 0),
                 )
                 self.inputs[self.names[i]].configure(width=5)
 
-        uniform_grid(self)
+        configure_grid(self, columns={0: 1})
 
 
 class IntensityFrame(ttk.Labelframe, CommonMethods):
@@ -657,6 +786,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         """
         # Init Frame
         text_label = "LUT"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
         ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
 
         #: dict: The dictionary that holds the single-channel widgets.
@@ -683,13 +813,12 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
         self._active_multichannel_gamma = tk.DoubleVar(value=1.0)
         self.transpose = tk.BooleanVar()
         self.trans = "Flip XY"
-        dense_pad = _space(2)
-        compact_pad = _space(3)
+        dense_pad = get_theme_spacing("space_2")
 
         self.single_channel_frame = ttk.Frame(self)
-        self.single_channel_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        themed_grid(self.single_channel_frame, row=0, column=0, sticky=tk.NSEW)
         self.multichannel_frame = ttk.Frame(self)
-        self.multichannel_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        themed_grid(self.multichannel_frame, row=0, column=0, sticky=tk.NSEW)
         self.multichannel_frame.grid_remove()
 
         ttk.Label(self.multichannel_frame, text="Channel").grid(
@@ -879,11 +1008,14 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
                 input_var=self.color,
                 input_args={"value": self.color_values[i]},
             )
-            self.inputs[self.color_labels[i]].grid(
-                row=row, column=0, sticky=tk.W, pady=compact_pad
+            themed_grid(
+                self.inputs[self.color_labels[i]],
+                row=row,
+                column=0,
+                sticky=tk.W,
+                pady=("layout_control_gap", 0),
             )
             row += 1
-
         #: tk.BooleanVar: The variable that holds the autoscale flag.
         self.autoscale = tk.BooleanVar()
 
@@ -901,7 +1033,13 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
             input_class=ttk.Checkbutton,
             input_var=self.autoscale,
         )
-        self.inputs[self.auto].grid(row=row, column=0, sticky=tk.W, pady=compact_pad)
+        themed_grid(
+            self.inputs[self.auto],
+            row=row,
+            column=0,
+            sticky=tk.W,
+            pady=("layout_control_gap", 0),
+        )
         row += 1
 
         # Max and Min Counts
@@ -913,19 +1051,19 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
                 input_var=tk.IntVar(),
                 input_args={"from_": 1, "to": 2**16 - 1, "increment": 1, "width": 5},
             )
-            self.inputs[self.minmax_names[i]].grid(
+            themed_grid(
+                self.inputs[self.minmax_names[i]],
                 row=row,
                 column=0,
-                sticky=tk.W,
-                padx=compact_pad,
-                pady=compact_pad,
+                sticky=tk.EW,
+                padx="layout_control_gap",
+                pady=("layout_control_gap", 0),
             )
             row += 1
 
-        uniform_grid(self.single_channel_frame)
-        self.multichannel_frame.grid_columnconfigure(0, weight=0)
-        self.multichannel_frame.grid_columnconfigure(1, weight=1)
-        uniform_grid(self)
+        configure_grid(self.single_channel_frame, columns={0: 1})
+        configure_grid(self.multichannel_frame, columns={0: 0, 1: 1})
+        configure_grid(self, columns={0: 1}, rows={0: 1})
         # Default to the compact LUT editor from startup, before acquisition begins.
         self.set_multichannel_controls_visible(True)
 

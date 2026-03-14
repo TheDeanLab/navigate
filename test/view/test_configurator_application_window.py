@@ -32,7 +32,20 @@
 
 from tkinter import ttk
 
+from navigate.view.custom_widgets.CollapsibleFrame import CollapsibleFrame
 from navigate.view.configurator_application_window import ConfigurationAssistantWindow
+from navigate.view.theme import get_theme_padding_px, get_theme_space_px
+
+
+def _grid_padding_pair(value):
+    text = str(value).strip()
+    if text.startswith("(") and text.endswith(")"):
+        parts = [int(part.strip()) for part in text[1:-1].split(",") if part.strip()]
+    else:
+        parts = [int(part) for part in text.split()]
+    if len(parts) == 1:
+        return (parts[0], parts[0])
+    return tuple(parts)
 
 
 def test_configurator_top_window_uses_ttk_buttons(tk_root):
@@ -53,3 +66,37 @@ def test_configurator_top_window_uses_ttk_buttons(tk_root):
     top.save_button.destroy()
     top.cancel_button.destroy()
     view.destroy()
+
+
+def test_configurator_window_uses_themed_spacing(tk_root):
+    view = ConfigurationAssistantWindow(tk_root)
+    tk_root.update_idletasks()
+
+    assert _grid_padding_pair(view.top_frame.grid_info()["padx"]) == (
+        get_theme_space_px(3),
+        get_theme_space_px(3),
+    )
+    assert _grid_padding_pair(view.microscope_frame.grid_info()["pady"]) == (
+        get_theme_space_px(3),
+        get_theme_space_px(3),
+    )
+    assert _grid_padding_pair(view.top_window.new_button.grid_info()["pady"]) == (
+        get_theme_padding_px((10, 1))
+    )
+
+    view.top_window.new_button.destroy()
+    view.top_window.load_button.destroy()
+    view.top_window.add_button.destroy()
+    view.top_window.save_button.destroy()
+    view.top_window.cancel_button.destroy()
+    view.destroy()
+
+
+def test_collapsible_frame_header_uses_themed_spacing(tk_root):
+    frame = CollapsibleFrame(tk_root, title="Hardware")
+    frame.grid(row=0, column=0, sticky="nsew")
+    tk_root.update_idletasks()
+
+    assert int(frame.label.cget("padx")) == get_theme_space_px(5)
+
+    frame.destroy()

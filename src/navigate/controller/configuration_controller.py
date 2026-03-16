@@ -142,8 +142,9 @@ class ConfigurationController:
         setting = {
             "laser": self.lasers_info,
         }
-        for i, filter_wheel_config in enumerate(self.microscope_config["filter_wheel"]):
-            setting[f"filter_wheel_{i}"] = list(
+        for i, filter_wheel_config in enumerate(self.microscope_config.get("filter_wheel", [])):
+            filter_wheel_name = filter_wheel_config.get("name", f"FilterWheel-{i}")
+            setting[filter_wheel_name] = list(
                 filter_wheel_config["available_filters"].keys()
             )
         return setting
@@ -532,8 +533,50 @@ class ConfigurationController:
         """
 
         if self.microscope_config is not None:
-            return len(self.microscope_config["filter_wheel"])
+            return len(self.microscope_config.get("filter_wheel", []))
         return 1
+
+    @property
+    def filter_wheel_types(self) -> list[str]:
+        """Return a list of filter wheel hardware types.
+
+        Returns
+        -------
+        filter_wheel_types : list
+            List of filter wheel hardware types.
+        """
+        filter_wheel_types = []
+        if self.microscope_config is not None:
+            for i in range(self.number_of_filter_wheels):
+                hardware_config = self.microscope_config["filter_wheel"][i].get(
+                    "hardware", {}
+                )
+                filter_wheel_types.append(hardware_config.get("type", ""))
+        return filter_wheel_types
+
+    @property
+    def filter_wheel_visibility(self) -> list[bool]:
+        """Return a list indicating which filter wheels are native to microscope.
+
+        Returns
+        -------
+        filter_wheel_visibility : list
+            ``True`` for wheels that are defined for this microscope.
+        """
+        if self.microscope_config is None:
+            return []
+
+        visibility = self.microscope_config.get("filter_wheel_visibility")
+        if isinstance(visibility, ListProxy):
+            visibility = list(visibility)
+
+        if not isinstance(visibility, list):
+            return [True] * self.number_of_filter_wheels
+
+        if len(visibility) != self.number_of_filter_wheels:
+            return [True] * self.number_of_filter_wheels
+
+        return [bool(value) for value in visibility]
 
     @property
     def filter_wheel_names(self) -> list[str]:
@@ -547,7 +590,7 @@ class ConfigurationController:
         filter_wheel_names = []
         if self.microscope_config is not None:
             for i in range(self.number_of_filter_wheels):
-                name = self.microscope_config["filter_wheel"][i]["hardware"].get(
+                name = self.microscope_config["filter_wheel"][i].get(
                     "name", f"Filter Wheel {i}"
                 )
                 filter_wheel_names.append(name)

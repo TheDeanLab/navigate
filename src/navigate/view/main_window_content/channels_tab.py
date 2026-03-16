@@ -247,7 +247,12 @@ class ChannelCreator(ttk.Labelframe):
         configure_grid(self, columns={0: 1})
 
     def populate_frame(
-        self, channels: int, filter_wheels: int, filter_wheel_names: list
+        self,
+        channels: int,
+        filter_wheels: int,
+        filter_wheel_names: list,
+        filter_wheel_types: list = None,
+        filter_wheel_visibility: list = None,
     ) -> None:
         """Populates the frame with the widgets.
 
@@ -264,9 +269,19 @@ class ChannelCreator(ttk.Labelframe):
             The number of filter wheels
         filter_wheel_names : list
             The names of the filter wheels
+        filter_wheel_types : list
+            The types of filter wheels
+        filter_wheel_visibility : list
+            Indicates whether each filter wheel belongs to this microscope
         """
+        self.reset_frame()
 
-        self.create_labels(filter_wheel_names, filter_wheels)
+        self.create_labels(
+            filter_wheel_names,
+            filter_wheels,
+            filter_wheel_types,
+            filter_wheel_visibility,
+        )
 
         # Configure the columns for consistent spacing
         configure_grid(
@@ -329,6 +344,10 @@ class ChannelCreator(ttk.Labelframe):
                     )
                 )
                 self.filterwheel_pulldowns[-1].config(state="readonly")
+                if self.should_hide_filter_wheel(
+                    i, filter_wheel_types, filter_wheel_visibility
+                ):
+                    continue
                 self.filterwheel_pulldowns[-1].grid(
                     row=num + 1,
                     column=(column_id := column_id + 1),
@@ -387,7 +406,13 @@ class ChannelCreator(ttk.Labelframe):
                 pady=self.pad_y,
             )
 
-    def create_labels(self, filter_wheel_names: list, filter_wheels: int) -> None:
+    def create_labels(
+        self,
+        filter_wheel_names: list,
+        filter_wheels: int,
+        filter_wheel_types: list = None,
+        filter_wheel_visibility: list = None,
+    ) -> None:
         """Create the labels for the columns.
 
         Function to create the labels for the columns of the Channel Creator frame.
@@ -398,6 +423,10 @@ class ChannelCreator(ttk.Labelframe):
             A list of the names of the filter wheels
         filter_wheels : int
             Number of filter wheels
+        filter_wheel_types : list
+            The types of filter wheels
+        filter_wheel_visibility : list
+            Indicates whether each filter wheel belongs to this microscope
         """
         # Create the labels for the columns.
         self.label_text = [
@@ -406,6 +435,10 @@ class ChannelCreator(ttk.Labelframe):
             "Power",
         ]
         for i in range(filter_wheels):
+            if self.should_hide_filter_wheel(
+                i, filter_wheel_types, filter_wheel_visibility
+            ):
+                continue
             self.label_text.append(filter_wheel_names[i])
 
         self.label_text += ["Exp. Time (ms)", "Interval", "Defocus"]
@@ -421,6 +454,56 @@ class ChannelCreator(ttk.Labelframe):
             self.labels[idx].grid(
                 row=0, column=0, sticky=tk.N, pady=self.pad_y, padx=self.pad_x
             )
+
+    def reset_frame(self) -> None:
+        """Destroy existing channel widgets and clear references."""
+        for child in self.winfo_children():
+            child.destroy()
+
+        self.channel_variables = []
+        self.channel_checks = []
+        self.laser_variables = []
+        self.laser_pulldowns = []
+        self.laserpower_variables = []
+        self.laserpower_pulldowns = []
+        self.filterwheel_variables = []
+        self.filterwheel_pulldowns = []
+        self.exptime_variables = []
+        self.exptime_pulldowns = []
+        self.interval_variables = []
+        self.interval_spins = []
+        self.defocus_variables = []
+        self.defocus_spins = []
+        self.labels = []
+        self.frame_columns = []
+
+    @staticmethod
+    def is_synthetic_filter_wheel(
+        filter_wheel_idx: int, filter_wheel_types: list
+    ) -> bool:
+        """Return whether a filter wheel type should be hidden in the GUI."""
+        if filter_wheel_types is None or filter_wheel_idx >= len(filter_wheel_types):
+            return False
+
+        filter_wheel_type = str(filter_wheel_types[filter_wheel_idx]).strip().lower()
+        return filter_wheel_type in ("synthetic", "syntheticfilterwheel")
+
+    @classmethod
+    def should_hide_filter_wheel(
+        cls,
+        filter_wheel_idx: int,
+        filter_wheel_types: list,
+        filter_wheel_visibility: list,
+    ) -> bool:
+        """Return whether a filter wheel should be hidden in the GUI."""
+        if (
+            filter_wheel_visibility is not None
+            and filter_wheel_idx < len(filter_wheel_visibility)
+            and not filter_wheel_visibility[filter_wheel_idx]
+        ):
+            return True
+
+        return cls.is_synthetic_filter_wheel(filter_wheel_idx, filter_wheel_types)
 
 
 class StackAcquisitionFrame(ttk.Labelframe):

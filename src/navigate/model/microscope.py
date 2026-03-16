@@ -170,7 +170,7 @@ class Microscope:
             "mirror": ["type"],
         }
 
-        device_name_dict = {"laser": "wavelength"}
+        device_name_dict = {"laser": "wavelength", "filter_wheel": "name"}
 
         laser_list = self.configuration["configuration"]["microscopes"][
             self.microscope_name

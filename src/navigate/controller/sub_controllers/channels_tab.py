@@ -190,6 +190,7 @@ class ChannelsTabController(GUIController):
         main window.
         """
         config = self.parent_controller.configuration_controller
+        self.channel_setting_controller.rebuild_view()
         self.stack_acq_widgets["cycling"].widget["values"] = ["Per Z", "Per Stack"]
 
         # Set the default stage for acquiring a z-stack.

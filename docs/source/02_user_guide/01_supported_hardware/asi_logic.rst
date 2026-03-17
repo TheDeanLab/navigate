@@ -10,7 +10,7 @@ Z-Stack Acquisition
 
 The diagrams in this section describe the ASI Tiger PLC logic only. They show how
 the logic card sequences triggers between the backplane and the front connectors
-during acquisition; waveform generation itself remains on the TGDAQ.
+during acquisition; waveform generation itself remains on the TGDAC.
 
 In the standard Z-stack workflow shown below, the sequence is:
 
@@ -20,9 +20,9 @@ In the standard Z-stack workflow shown below, the sequence is:
    second galvo trigger. Together, these cells align the galvo timing with the
    upcoming exposure.
 3. In parallel, cell 3 (``Start Delay``) inserts the common startup delay, while
-   cell 4 (``One Shot``) emits ``numZSteps`` clock pulses, one pulse for each
+   cell 4 (``One Shot``) stays on for ``numZSteps`` clock pulses, one pulse for each
    axial position in the stack.
-4. Cell 5 gates the cell 4 pulse train with the inverted stage-sync input. A
+4. Cell 5 gates cell 4 with the inverted stage-sync input. A
    trigger is released only when the stage indicates that the next exposure can
    proceed.
 5. In the default configuration, cell 6 drives the camera and lasers through the
@@ -32,12 +32,12 @@ In the standard Z-stack workflow shown below, the sequence is:
 6. Cell 7 waits for the configured ``Sweep Time`` and then issues the next stage
    trigger through the front connectors, advancing to the next Z position.
 
-This loop repeats until cell 4 has emitted all ``numZSteps`` pulses. At that
+This loop repeats until cell 4 receives all ``numZSteps`` pulses. At that
 point, the PLC sequence completes and software regains control. Because the PLC
 owns the timing within the stack, inter-frame timing remains deterministic and
 software intervention is limited to stack boundaries or an operator stop command.
 
-All backplane triggers are received by the TGDAQ. The TGDAQ can be configured to
+All backplane triggers are received by the TGDAC. The TGDAC can be configured to
 emit one waveform per trigger or to begin continuous waveform output on the first
 trigger and continue until software stops it.
 
@@ -62,13 +62,16 @@ Continuous Acquisition
 
 Continuous acquisition uses a related PLC pattern, but replaces the finite
 ``numZSteps`` stack counter with a free-running loop. Cell 1 starts the sequence,
-cells 2, 9, and 10 generate the paired galvo triggers, and cell 3 provides time
-for serial-command processing before cell 4 latches the continuous state. Cells
-5, 6, and 7 then form the repeating RFVC loop: cell 5 enables the next RFVC
-trigger while cell 7 is inactive, cell 6 issues that trigger, and cell 7 delays
+cells 2, 9, and 10 generate the paired galvo triggers, and cell 3 inserts the 
+common startup delay before cell 4 latches the continuous state. Cells 5, 6, and 7 
+then form the repeating RFVC (remote focus voice coil) loop: cell 5 enables the next 
+RFVC trigger while cell 7 is inactive, cell 6 issues that trigger, and cell 7 delays
 the next loop iteration. From cell 6, cells 11 and 12 apply the camera delay and
 then assert the camera trigger output. The loop continues until software clears
 the continuous-acquisition state.
+
+The same dynamic allocation of cells 11 and 12 shown in the Z-stack mode diagram is used 
+to swap the camera and remote-focus timing paths, but is not shown in the diagram below.
 
 .. image:: ../../images/plc_continuous.png
    :align: center

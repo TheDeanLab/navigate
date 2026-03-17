@@ -53,7 +53,7 @@ but also the software implementation within **navigate**.
 
 Information on setting up one particular ASI setup can be found in the
 `Altair getting started guide <https://thedeanlab.github.io/altair/getting_started/getting_started.html>`_.
-This is the recommended setup for `Altair <https://thedeanlab.github.io/altair/index.html>`_, a microscope designed by the Dean Lab for dissemination purposes. A diagram and discussion on how the logic is implemented in **navigate** can be found :ref:`here <asi_logic>` .
+This is the recommended setup for `Altair <https://thedeanlab.github.io/altair/index.html>`_, a microscope designed by the Dean Lab for dissemination purposes. A diagram and discussion on how the logic is implemented in **navigate** can be found :ref:`here <asi_logic>`.
 
 
 ------------------

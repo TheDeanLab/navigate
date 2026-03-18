@@ -168,6 +168,23 @@ class TestWaveforms(unittest.TestCase):
                 np.max(data), np.abs(amplitude), delta=np.abs(amplitude) / 100
             )
 
+    def test_triangle_wave_amplitude(self):
+        sample_rate = 100000
+        sweep_time = 0.4
+        amplitude = 1.5
+        data = waveforms.triangle_wave(
+            sample_rate=sample_rate, sweep_time=sweep_time, amplitude=amplitude
+        )
+        self.assertAlmostEqual(np.max(data), amplitude, delta=amplitude / 100)
+        self.assertAlmostEqual(np.min(data), -amplitude, delta=amplitude / 100)
+
+    def test_triangle_wave_offset(self):
+        offset = 0.5
+        amplitude = 1.5
+        data = waveforms.triangle_wave(amplitude=amplitude, offset=offset)
+        self.assertAlmostEqual(np.max(data), amplitude + offset, delta=amplitude / 100)
+        self.assertAlmostEqual(np.min(data), offset - amplitude, delta=amplitude / 100)
+
     def test_square_amplitude(self):
         sample_rate = 100000
         sweep_time = 0.4

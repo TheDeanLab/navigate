@@ -351,6 +351,44 @@ def sawtooth(
     return waveform
 
 
+def triangle_wave(
+    sample_rate=100000,
+    sweep_time=0.4,
+    frequency=10,
+    amplitude=1,
+    offset=0,
+    phase=0,
+):
+    """Returns a zero-centered triangle waveform.
+
+    Parameters
+    ----------
+    sample_rate : Integer
+        Unit - Hz
+    sweep_time : Float
+        Unit - Seconds
+    frequency : Float
+        Unit - Hz
+    amplitude : Float
+        Unit - Volts
+    offset : Float
+        Unit - Volts
+    phase : Float
+        Unit - Seconds
+
+    Returns
+    -------
+    waveform : np.array
+    """
+
+    samples = int(np.multiply(sample_rate, sweep_time))
+    t = np.linspace(0, sweep_time, samples)
+    waveform = signal.sawtooth(2 * np.pi * frequency * (t - phase), width=0.5)
+    waveform = amplitude * waveform + offset
+
+    return waveform
+
+
 def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
     """
     Returns a numpy array with a DC value

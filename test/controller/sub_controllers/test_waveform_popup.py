@@ -50,6 +50,12 @@ def test_populate_experiment_values(waveform_popup_controller):
         for k in remote_focus_dict.keys():
             assert widgets[k + " Amp"].get() == remote_focus_dict[k]["amplitude"]
             assert widgets[k + " Off"].get() == remote_focus_dict[k]["offset"]
+            assert widgets[k + " Dither Amp"].get() == str(
+                remote_focus_dict[k].get("dither_amplitude", 0)
+            )
+            assert widgets[k + " Dither Freq"].get() == str(
+                remote_focus_dict[k].get("dither_frequency", 0)
+            )
 
         # galvo
         galvo_dict = waveform_constants["galvo_constants"]
@@ -97,6 +103,8 @@ def test_populate_experiment_values(waveform_popup_controller):
         temp = waveform_constants["remote_focus_constants"][resolution][zoom][k]
         temp["amplitude"] = amplitude
         temp["offset"] = offset
+        temp["dither_amplitude"] = round(random.random(), 2)
+        temp["dither_frequency"] = round(random.random() * 100, 2)
 
     # update galvo
     for g in waveform_constants["galvo_constants"].keys():

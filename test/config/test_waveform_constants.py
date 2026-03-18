@@ -53,7 +53,12 @@ class TestWaveformConstants(unittest.TestCase):
         with open(yaml_path) as file:
             data = yaml.safe_load(file)
 
-        expected_keys = ["amplitude", "offset"]
+        expected_keys = [
+            "amplitude",
+            "offset",
+            "dither_amplitude",
+            "dither_frequency",
+        ]
 
         microscope_names = data["remote_focus_constants"].keys()
         for microscope_name in microscope_names:

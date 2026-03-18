@@ -75,8 +75,18 @@ def _build_config(
             "remote_focus_constants": {
                 "test_mode": {
                     "1x": {
-                        "488": {"amplitude": "2.5", "offset": "0.1"},
-                        "561": {"amplitude": "1.0", "offset": "0.0"},
+                        "488": {
+                            "amplitude": "2.5",
+                            "offset": "0.1",
+                            "dither_amplitude": "0",
+                            "dither_frequency": "0",
+                        },
+                        "561": {
+                            "amplitude": "1.0",
+                            "offset": "0.0",
+                            "dither_amplitude": "0",
+                            "dither_frequency": "0",
+                        },
                     }
                 }
             },
@@ -207,3 +217,47 @@ def test_adjust_triangle_branch_without_smoothing(base_module, monkeypatch):
     triangle_mock.assert_called_once()
     ramp_mock.assert_not_called()
     smooth_mock.assert_not_called()
+
+
+def test_adjust_adds_dither_after_smoothing(base_module, monkeypatch):
+    config = _build_config(percent_smoothing="25")
+    laser_constants = config["waveform_constants"]["remote_focus_constants"]["test_mode"][
+        "1x"
+    ]["488"]
+    laser_constants["dither_amplitude"] = "0.25"
+    laser_constants["dither_frequency"] = "4"
+
+    rf = _make_remote_focus(base_module, config)
+
+    def fake_ramp(**kwargs):
+        return np.array([0.1, 0.2, 0.3], dtype=float)
+
+    smooth_mock = MagicMock(
+        return_value=np.array([0.4, 0.5, 0.6, 0.7], dtype=float)
+    )
+    dither_kwargs = {}
+
+    def fake_triangle_wave(**kwargs):
+        dither_kwargs.update(kwargs)
+        return np.array([0.1, -0.1, 0.1], dtype=float)
+
+    monkeypatch.setattr(base_module, "remote_focus_ramp", fake_ramp)
+    monkeypatch.setattr(base_module, "smooth_waveform", smooth_mock)
+    monkeypatch.setattr(base_module, "triangle_wave", fake_triangle_wave)
+    monkeypatch.setattr(
+        base_module,
+        "remote_focus_ramp_triangular",
+        MagicMock(side_effect=AssertionError("triangle branch not expected")),
+    )
+
+    waveforms = rf.adjust(
+        exposure_times={"ch1": 0.1, "ch2": 0.05},
+        sweep_times={"ch1": 0.3, "ch2": 0.15},
+    )
+
+    np.testing.assert_allclose(waveforms["ch1"], np.array([0.5, 0.4, 0.7]))
+    assert dither_kwargs["sample_rate"] == 10
+    assert dither_kwargs["sweep_time"] == pytest.approx(0.3)
+    assert dither_kwargs["frequency"] == 4.0
+    assert dither_kwargs["amplitude"] == 0.25
+    assert dither_kwargs["offset"] == 0

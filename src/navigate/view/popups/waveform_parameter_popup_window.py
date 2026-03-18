@@ -201,7 +201,13 @@ class WaveformParameterPopupWindow:
 
         # Laser Frame
         laser_labels = self.configuration_controller.lasers_info
-        title_labels = ["Laser", "Amplitude", "Offset"]
+        title_labels = [
+            "Laser",
+            "Amplitude",
+            "Offset",
+            "Dither Amplitude",
+            "Dither Frequency",
+        ]
         # Loop for widgets
         for i in range(len(title_labels)):
             # Title labels
@@ -244,7 +250,38 @@ class WaveformParameterPopupWindow:
             )
 
             self.inputs[laser_labels[i] + " Off"].grid(
-                row=i + 1, column=2, sticky=tk.NSEW, pady=get_theme_padding_px((20, 0))
+                row=i + 1,
+                column=2,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((20, 0)),
+                padx=get_theme_padding_px((0, 5)),
+            )
+
+            self.inputs[laser_labels[i] + " Dither Amp"] = LabelInput(
+                parent=self.remote_focus_frame,
+                input_class=ValidatedSpinbox,
+                input_var=tk.StringVar(),
+            )
+
+            self.inputs[laser_labels[i] + " Dither Amp"].grid(
+                row=i + 1,
+                column=3,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((20, 0)),
+                padx=get_theme_padding_px((0, 5)),
+            )
+
+            self.inputs[laser_labels[i] + " Dither Freq"] = LabelInput(
+                parent=self.remote_focus_frame,
+                input_class=ValidatedSpinbox,
+                input_var=tk.StringVar(),
+            )
+
+            self.inputs[laser_labels[i] + " Dither Freq"].grid(
+                row=i + 1,
+                column=4,
+                sticky=tk.NSEW,
+                pady=get_theme_padding_px((20, 0)),
             )
 
         galvo_labels = list(

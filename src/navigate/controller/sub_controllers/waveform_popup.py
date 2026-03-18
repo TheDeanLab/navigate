@@ -126,6 +126,9 @@ class WaveformPopupController(GUIController):
         #: float: the maximum value of remote focus device
         self.laser_max = 1.0
 
+        #: float: the maximum dither amplitude for the remote focus device.
+        self.dither_amplitude_max = 1.0
+
         #: dict: Dictionary of galvo minimum values
         self.galvo_min = {}
 
@@ -153,6 +156,18 @@ class WaveformPopupController(GUIController):
             self.variables[laser + " Off"].trace_add(
                 "write",
                 self.update_remote_focus_settings(laser + " Off", laser, "offset"),
+            )
+            self.variables[laser + " Dither Amp"].trace_add(
+                "write",
+                self.update_remote_focus_settings(
+                    laser + " Dither Amp", laser, "dither_amplitude"
+                ),
+            )
+            self.variables[laser + " Dither Freq"].trace_add(
+                "write",
+                self.update_remote_focus_settings(
+                    laser + " Dither Freq", laser, "dither_frequency"
+                ),
             )
 
         # Changes to the galvo constants (amplitude, offset, etc.)
@@ -246,6 +261,13 @@ class WaveformPopupController(GUIController):
         self.laser_max = self.configuration_controller.remote_focus_dict["hardware"][
             "max"
         ]
+        self.dither_amplitude_max = max(abs(self.laser_min), abs(self.laser_max))
+        dither_frequency_max = (
+            self.parent_controller.configuration["configuration"]["microscopes"][
+                self.resolution
+            ]["daq"]["sample_rate"]
+            / 2
+        )
 
         precision = int(
             self.configuration_controller.remote_focus_dict["hardware"].get(
@@ -279,6 +301,26 @@ class WaveformPopupController(GUIController):
             self.widgets[laser + " Off"].widget.configure(increment=self.increment)
             self.widgets[laser + " Off"].widget.set_precision(precision)
             self.widgets[laser + " Off"].widget.trigger_focusout_validation()
+
+            self.widgets[laser + " Dither Amp"].widget.configure(from_=0)
+            self.widgets[laser + " Dither Amp"].widget.configure(
+                to=self.dither_amplitude_max
+            )
+            self.widgets[laser + " Dither Amp"].widget.configure(
+                increment=self.increment
+            )
+            self.widgets[laser + " Dither Amp"].widget.set_precision(precision)
+            self.widgets[laser + " Dither Amp"].widget.trigger_focusout_validation()
+
+            self.widgets[laser + " Dither Freq"].widget.configure(from_=0)
+            self.widgets[laser + " Dither Freq"].widget.configure(
+                to=dither_frequency_max
+            )
+            self.widgets[laser + " Dither Freq"].widget.configure(
+                increment=max(self.increment, 0.1)
+            )
+            self.widgets[laser + " Dither Freq"].widget.set_precision(precision)
+            self.widgets[laser + " Dither Freq"].widget.trigger_focusout_validation()
 
         for galvo, d in zip(self.galvos, self.galvo_dict):
             galvo_min = d["hardware"]["min"]
@@ -398,15 +440,20 @@ class WaveformPopupController(GUIController):
         # get magnification setting
         self.mag = self.widgets["Mag"].widget.get()
         for laser in self.lasers:
+            remote_focus_settings = self.resolution_info["remote_focus_constants"][
+                self.resolution
+            ][self.mag][laser]
             self.variables[laser + " Amp"].set(
-                self.resolution_info["remote_focus_constants"][self.resolution][
-                    self.mag
-                ][laser]["amplitude"]
+                remote_focus_settings.get("amplitude", 0)
             )
             self.variables[laser + " Off"].set(
-                self.resolution_info["remote_focus_constants"][self.resolution][
-                    self.mag
-                ][laser]["offset"]
+                remote_focus_settings.get("offset", 0)
+            )
+            self.variables[laser + " Dither Amp"].set(
+                remote_focus_settings.get("dither_amplitude", 0)
+            )
+            self.variables[laser + " Dither Freq"].set(
+                remote_focus_settings.get("dither_frequency", 0)
             )
 
         # do not tell the model to update galvo
@@ -496,9 +543,12 @@ class WaveformPopupController(GUIController):
         # and when changing magnification it will run 0.63x
         # before whatever mag is selected
         def func_laser(*args):
-            value = self.resolution_info["remote_focus_constants"][self.resolution][
-                self.mag
-            ][laser][remote_focus_name]
+            remote_focus_settings = self.resolution_info["remote_focus_constants"][
+                self.resolution
+            ][self.mag][laser]
+            value = remote_focus_settings.get(remote_focus_name, "0")
+            if remote_focus_name not in remote_focus_settings:
+                remote_focus_settings[remote_focus_name] = value
 
             # Will only run code if value in constants does not match whats in GUI
             # for Amp or Off AND in Live mode
@@ -517,13 +567,20 @@ class WaveformPopupController(GUIController):
                     value = float(variable_value)
                 except ValueError:
                     return
-                if value < self.laser_min or value > self.laser_max:
+                min_value = self.laser_min
+                max_value = self.laser_max
+                if remote_focus_name == "dither_amplitude":
+                    min_value = 0
+                    max_value = self.dither_amplitude_max
+                elif remote_focus_name == "dither_frequency":
+                    min_value = 0
+                    max_value = None
+
+                if value < min_value or (max_value is not None and value > max_value):
                     return
-                self.resolution_info["remote_focus_constants"][self.resolution][
-                    self.mag
-                ][laser][remote_focus_name] = variable_value
+                remote_focus_settings[remote_focus_name] = variable_value
                 logger.debug(
-                    f"Remote Focus Amplitude/Offset Changed:, {variable_value}"
+                    f"Remote Focus {remote_focus_name} Changed:, {variable_value}"
                 )
 
                 # Delay feature.
@@ -749,8 +806,14 @@ class WaveformPopupController(GUIController):
                 self.amplitude_dict[laser] = self.resolution_info[
                     "remote_focus_constants"
                 ][self.resolution][self.mag][laser]["amplitude"]
+                self.amplitude_dict[laser + " dither"] = self.resolution_info[
+                    "remote_focus_constants"
+                ][self.resolution][self.mag][laser].get("dither_amplitude", 0)
                 self.variables[laser + " Amp"].set(0)
+                self.variables[laser + " Dither Amp"].set(0)
                 self.widgets[laser + " Amp"].widget.config(state="disabled")
+                self.widgets[laser + " Dither Amp"].widget.config(state="disabled")
+                self.widgets[laser + " Dither Freq"].widget.config(state="disabled")
 
             for galvo in self.galvos:
                 self.amplitude_dict[galvo] = self.resolution_info["galvo_constants"][
@@ -800,7 +863,12 @@ class WaveformPopupController(GUIController):
             self.resolution_info["remote_focus_constants"][resolution][mag][laser][
                 "amplitude"
             ] = self.amplitude_dict[laser]
+            self.resolution_info["remote_focus_constants"][resolution][mag][laser][
+                "dither_amplitude"
+            ] = self.amplitude_dict[laser + " dither"]
             self.widgets[laser + " Amp"].widget.config(state="normal")
+            self.widgets[laser + " Dither Amp"].widget.config(state="normal")
+            self.widgets[laser + " Dither Freq"].widget.config(state="normal")
         for galvo in self.galvos:
             self.resolution_info["galvo_constants"][galvo][resolution][mag][
                 "amplitude"

@@ -42,6 +42,7 @@ from navigate.model.waveforms import (
     remote_focus_ramp,
     smooth_waveform,
     remote_focus_ramp_triangular,
+    triangle_wave,
 )
 from navigate.tools.decorators import log_initialization
 
@@ -196,6 +197,20 @@ class RemoteFocusBase(ABC):
             waveform_constants["other_constants"]["percent_smoothing"]
         )
 
+        def get_remote_focus_setting(
+            remote_focus_settings: dict[str, Any], key: str, default: str = "0"
+        ) -> float:
+            value = remote_focus_settings.get(key, default)
+            if value in ("-", ".", ""):
+                remote_focus_settings[key] = default
+                value = default
+
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                remote_focus_settings[key] = default
+                return float(default)
+
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
             channel = microscope_state["channels"][channel_key]
@@ -212,33 +227,26 @@ class RemoteFocusBase(ABC):
                 samples = int(self.sample_rate * self.sweep_time)
 
                 # Remote Focus Parameters
-                temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][
-                    laser
-                ]["amplitude"]
-                if temp == "-" or temp == ".":
-                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
-                        laser
-                    ]["amplitude"] = "0"
-
-                remote_focus_amplitude = float(
-                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
-                        laser
-                    ]["amplitude"]
+                remote_focus_settings = waveform_constants["remote_focus_constants"][
+                    imaging_mode
+                ][zoom][laser]
+                remote_focus_amplitude = get_remote_focus_setting(
+                    remote_focus_settings, "amplitude"
                 )
-
-                # Validation for when user puts a '-' in spinbox
-                temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][
-                    laser
-                ]["offset"]
-                if temp == "-" or temp == ".":
-                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
-                        laser
-                    ]["offset"] = "0"
-
-                remote_focus_offset = float(
-                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
-                        laser
-                    ]["offset"]
+                remote_focus_offset = get_remote_focus_setting(
+                    remote_focus_settings, "offset"
+                )
+                dither_amplitude = max(
+                    0.0,
+                    get_remote_focus_setting(
+                        remote_focus_settings, "dither_amplitude"
+                    ),
+                )
+                dither_frequency = max(
+                    0.0,
+                    get_remote_focus_setting(
+                        remote_focus_settings, "dither_frequency"
+                    ),
                 )
                 if offset is not None:
                     remote_focus_offset += offset
@@ -277,6 +285,18 @@ class RemoteFocusBase(ABC):
                         waveform=self.waveform_dict[channel_key],
                         percent_smoothing=percent_smoothing,
                     )[:samples]
+
+                if dither_amplitude > 0 and dither_frequency > 0:
+                    waveform_length = len(self.waveform_dict[channel_key])
+                    self.waveform_dict[channel_key] = self.waveform_dict[
+                        channel_key
+                    ] + triangle_wave(
+                        sample_rate=self.sample_rate,
+                        sweep_time=waveform_length / self.sample_rate,
+                        frequency=dither_frequency,
+                        amplitude=dither_amplitude,
+                        offset=0,
+                    )[:waveform_length]
 
                 # Clip any values outside the hardware limits
                 self.waveform_dict[channel_key][

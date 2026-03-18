@@ -744,8 +744,10 @@ def verify_waveform_constants(manager, configuration):
                         waveform_dict[microscope_name][zoom],
                         laser,
                         {
-                            "amplitude": 0,
-                            "offset": 0,
+                            "amplitude": "0",
+                            "offset": "0",
+                            "dither_amplitude": "0",
+                            "dither_frequency": "0",
                             # "percent_smoothing": "0",
                             # "delay": config_dict["remote_focus"][
                             #     "delay"
@@ -756,6 +758,8 @@ def verify_waveform_constants(manager, configuration):
                     for k in [
                         "amplitude",
                         "offset",
+                        "dither_amplitude",
+                        "dither_frequency",
                         # "percent_smoothing",
                         # "delay",
                     ]:

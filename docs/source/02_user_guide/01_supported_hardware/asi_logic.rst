@@ -56,7 +56,23 @@ stage-ready gate, and the ``Sweep Time`` stage advance are otherwise unchanged.
    :align: center
    :alt: ASI Tiger PLC control logic for Z-stack acquisition with remote focus preceding camera trigger.
 
+To complete the loop, BNC cables must be connected to trigger the stage, and to receive
+the stage sync signal. PLC connection 3 triggers the stage, and PLC connection 4 receives 
+the sync signal. This is pictured below:
 
+.. figure:: ../../images/plc_stage_connection.png
+   :align: center
+   :alt: ASI Tiger BNC connections for stage trigger and sync signals.
+
+
+In some cases, both the focus stage and z-stage are incremented together during a Z-stack.
+In this case, the stage sync signal must be taken from the slowest-moving stage (Standard 
+stages are slower than piezo stages). The stage trigger must be split between the two stages, as shown below:
+
+.. figure:: ../../images/plc_stage_connection2.png
+   :align: center
+   :alt: ASI Tiger BNC connections for dual-stage Z-stack acquisition.
+   
 Continuous Acquisition
 ----------------------
 

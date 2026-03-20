@@ -253,6 +253,7 @@ class ASIDaq(DAQBase, SerialDevice):
             )
 
             self.daq.setup_z_stage(tiger_axis, addr, int(step_size * 10))
+            self.analog_outputs["galvo_scan"] = tiger_axis
 
             start_focus = self.configuration["experiment"]["MicroscopeState"][
                 "start_focus"

@@ -252,7 +252,7 @@ class TigerController:
             raise ASIException(":N-5")
 
         for i in range(len(axis_types) - 1, -1, -1):
-            if axis_types[i] not in ["x", "z", "t", "p"]:
+            if axis_types[i] not in ["x", "z", "t", "p", "y"]:
                 motor_axes.pop(i)
         return motor_axes
 
@@ -671,7 +671,10 @@ class TigerController:
         pct : float
             Percentage of the maximum speed
         """
-        local_axes_sequence = [axis for axis in self.default_axes_sequence if axis != "P"]
+        local_axes_sequence = [
+            axis for axis in self.default_axes_sequence
+            if axis not in ["P", "Q", "A", "B", "C", "D"]
+        ]
         if local_axes_sequence is None:
             logger.error(
                 f"{str(self)}, Default axes sequence is not set. Cannot set speed."
@@ -1166,6 +1169,8 @@ class TigerController:
         """
         # TODO: Investigate if these axis outputs are shared amongst units.
         # Reference values for ttls that correspond to outputs A-C
+        laser_scanning = False
+
         ttls = {"A": 42, "B": 44, "C": 46, "H": 42, "I": 44, "J": 46}
 
         start_delay = int(delays[0] * 4)  # Unit conversion from ms to 1/4 ms
@@ -1289,25 +1294,44 @@ class TigerController:
         logger.info("Cycle time (ms): %d", cycle_time / 4)
         # If Single or Z-stack mode, set up the number of cycles to run
         if num_cycles > 0:
-            commands[7:15] = [
-                # Set PLC axis 4 to be an input to receive stage sync signal
-                "6 m e = 36",
-                "6 cca y = 0",
-                # Cell 4, One-shot that stays high for num_cycles clock cycles
-                # Trigger inputs is cell 3 and Clock input is the inverse of PLC axis 4 (36+64)
-                "6 m e = 4",
-                f"6 cca y = 14 z = {num_cycles}",
-                "6 ccb x = 3 y = 100",
-                # Cell 5, AND cell used to check if the loop is still operating
-                # Cell inputs are the output of cell 4 and the inverse of PLC axis 4 (36+64)
-                # Triggers with every stage sync signal
-                "6 m e = 5",
-                "6 cca y = 5",
-                "6 ccb x = 4 y = 100",
-                # Send Trigger to stage
-                "6 m e = 35",
-                "6 cca z = 7",
-            ]
+            if laser_scanning:
+                galvo_scan = analog_outputs["galvo_scan"]
+                commands[7:15] = [
+                    # Cell 4, One-shot that stays high for num_cycles clock cycles
+                    # Trigger inputs is cell 3 and Clock input is the inverse of cell 7 (7+64)
+                    "6 m e = 4",
+                    f"6 cca y = 14 z = {num_cycles}",
+                    "6 ccb x = 3 y = 71",
+                    # Cell 5, AND cell used to check if the loop is still operating
+                    # Cell inputs are the output of cell 4 and the inverse of cell 7 (7+64)
+                    # Triggers with every stage sync signal
+                    "6 m e = 5",
+                    "6 cca y = 5",
+                    "6 ccb x = 4 y = 71",
+                    # Send galvo trigger to backplane
+                    f"6 m e = {ttls[galvo_scan]}",
+                    "6 cca z = 7",
+                ]
+            else:
+                commands[7:15] = [
+                    # Set PLC axis 4 to be an input to receive stage sync signal
+                    "6 m e = 36",
+                    "6 cca y = 0",
+                    # Cell 4, One-shot that stays high for num_cycles clock cycles
+                    # Trigger inputs is cell 3 and Clock input is the inverse of PLC axis 4 (36+64)
+                    "6 m e = 4",
+                    f"6 cca y = 14 z = {num_cycles}",
+                    "6 ccb x = 3 y = 100",
+                    # Cell 5, AND cell used to check if the loop is still operating
+                    # Cell inputs are the output of cell 4 and the inverse of PLC axis 4 (36+64)
+                    # Triggers with every stage sync signal
+                    "6 m e = 5",
+                    "6 cca y = 5",
+                    "6 ccb x = 4 y = 100",
+                    # Send Trigger to stage
+                    "6 m e = 35",
+                    "6 cca z = 7",
+                ]
 
         # Creates object to hold galvo commands
         galvo_commands = []
@@ -1414,3 +1438,4 @@ class TigerController:
         for command in commands:
             self.send_command(f"{command}\r")
             self.read_response()
+            

@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import unittest
+from unittest.mock import Mock, patch
 
 # Third-Party Imports
 import numpy as np
@@ -59,7 +60,7 @@ class TextArrayTestCase(unittest.TestCase):
     def test_text_array_output_type(self):
         """Confirm output is np.ndarray object"""
         text_output = text_array(text="Navigate")
-        assert type(text_output) == np.ndarray
+        assert isinstance(text_output, np.ndarray)
 
     def test_text_array_output_height(self):
         """Confirm that the output is approximately the correct height
@@ -80,28 +81,32 @@ class TextArrayTestCase(unittest.TestCase):
 class TestCreateArrowImage(unittest.TestCase):
     def test_create_arrow_image(self):
         xys = [(50, 50), (150, 50), (200, 100)]
-        image = create_arrow_image(xys, direction="right")
-        self.assertIsInstance(image, Image.Image)
-        self.assertEqual(image.width, 300)
-        self.assertEqual(image.height, 200)
+        style = Mock()
+        style.lookup.return_value = "systemWindowText"
 
-        xys = [(50, 50), (150, 50), (200, 100)]
-        image = create_arrow_image(xys, 400, 300, direction="left")
-        self.assertIsInstance(image, Image.Image)
-        self.assertEqual(image.width, 400)
-        self.assertEqual(image.height, 300)
+        with patch("navigate.tools.image.ttk.Style", return_value=style):
+            image = create_arrow_image(xys, direction="right")
+            self.assertIsInstance(image, Image.Image)
+            self.assertEqual(image.width, 300)
+            self.assertEqual(image.height, 200)
 
-        image2 = create_arrow_image(xys, 500, 400, direction="up", image=image)
-        self.assertIsInstance(image2, Image.Image)
-        self.assertEqual(image2.width, 400)
-        self.assertEqual(image2.height, 300)
-        assert image == image2
+            xys = [(50, 50), (150, 50), (200, 100)]
+            image = create_arrow_image(xys, 400, 300, direction="left")
+            self.assertIsInstance(image, Image.Image)
+            self.assertEqual(image.width, 400)
+            self.assertEqual(image.height, 300)
 
-        image3 = create_arrow_image(xys, 500, 400, direction="down", image=image)
-        self.assertIsInstance(image3, Image.Image)
-        self.assertEqual(image3.width, 400)
-        self.assertEqual(image3.height, 300)
-        assert image == image3
+            image2 = create_arrow_image(xys, 500, 400, direction="up", image=image)
+            self.assertIsInstance(image2, Image.Image)
+            self.assertEqual(image2.width, 400)
+            self.assertEqual(image2.height, 300)
+            assert image == image2
+
+            image3 = create_arrow_image(xys, 500, 400, direction="down", image=image)
+            self.assertIsInstance(image3, Image.Image)
+            self.assertEqual(image3.width, 400)
+            self.assertEqual(image3.height, 300)
+            assert image == image3
 
 
 if __name__ == "__main__":

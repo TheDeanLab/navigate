@@ -32,18 +32,35 @@
 # Standard library imports
 import unittest
 import pytest
-import tkinter as tk
-from tkinter import ttk
 from math import ceil
+from types import SimpleNamespace
 
 # Third party imports
 import numpy as np
+import pandas as pd
 
 # Local application imports
 from navigate.tools.multipos_table_tools import (
     update_table,
 )
-from navigate.view.main_window_content.multiposition_tab import MultiPositionTable
+
+
+class _HeadlessTable:
+    def __init__(self):
+        self.model = SimpleNamespace(df=pd.DataFrame())
+        self.currentrow = -1
+        self.reset_colors_called = 0
+        self.redraw_called = 0
+        self.table_changed_called = 0
+
+    def resetColors(self):
+        self.reset_colors_called += 1
+
+    def redraw(self):
+        self.redraw_called += 1
+
+    def tableChanged(self):
+        self.table_changed_called += 1
 
 
 @pytest.mark.parametrize("pair", zip([5.6, -3.8, 0], [1, -1, 1]))
@@ -56,7 +73,7 @@ def test_sign(pair):
 
 
 def listize(x):
-    if type(x) == np.ndarray:
+    if isinstance(x, np.ndarray):
         return list(x)
     else:
         return [x]
@@ -186,8 +203,7 @@ def test_calc_num_tiles(dist, overlap, roi_length):
     # roi_length = 525
     expected_num_tiles = ceil(
         # abs(dist - overlap * roi_length) / abs(roi_length - overlap * roi_length)
-        (dist - overlap * roi_length)
-        / (roi_length - overlap * roi_length)
+        (dist - overlap * roi_length) / (roi_length - overlap * roi_length)
     )
 
     result = calc_num_tiles(dist, overlap, roi_length)
@@ -197,12 +213,10 @@ def test_calc_num_tiles(dist, overlap, roi_length):
 
 class UpdateTableTestCase(unittest.TestCase):
     def setUp(self):
-        self.root = tk.Tk()
-        self.frame = ttk.Frame()
-        self.table = MultiPositionTable(parent=self.frame)
+        self.table = _HeadlessTable()
 
     def tearDown(self) -> None:
-        self.root.destroy()
+        pass
 
     def test_pos_match_axes(self):
         pos = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
@@ -250,7 +264,6 @@ class UpdateTableTestCase(unittest.TestCase):
         )
 
     def test_pos_axes_mismatch_more_axes(self):
-
         # axes has 5 entries, pos has only 3 columns
         pos = np.array([[1, 2, 3], [4, 5, 6], (7, 8, 9)])
 

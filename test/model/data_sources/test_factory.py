@@ -1,6 +1,6 @@
-import logging
 import sys
 import types
+from unittest.mock import Mock
 
 import pytest
 
@@ -30,11 +30,11 @@ def test_get_data_source_returns_expected_class(
     assert data_sources.get_data_source(file_type) is fake_class
 
 
-def test_get_data_source_logs_and_raises_for_unknown_type(caplog):
-    with caplog.at_level(logging.ERROR, logger="model"):
-        with pytest.raises(
-            NotImplementedError, match="Unknown file type CSV. Cannot open."
-        ):
-            data_sources.get_data_source("CSV")
+def test_get_data_source_logs_and_raises_for_unknown_type(monkeypatch):
+    logger = Mock()
+    monkeypatch.setattr(data_sources, "logger", logger)
 
-    assert "Unknown file type CSV. Cannot open." in caplog.text
+    with pytest.raises(NotImplementedError, match="Unknown file type CSV. Cannot open."):
+        data_sources.get_data_source("CSV")
+
+    logger.error.assert_called_once_with("Unknown file type CSV. Cannot open.")

@@ -1,6 +1,6 @@
 import json
 import logging
-import multiprocessing as mp
+import queue
 from datetime import datetime, timedelta
 
 from navigate.log_files.log_functions import (
@@ -11,6 +11,27 @@ from navigate.log_files.log_functions import (
     load_performance_log,
     log_setup,
 )
+
+
+def _snapshot_handlers():
+    snapshots = {}
+    root_logger = logging.getLogger()
+    snapshots[root_logger] = list(root_logger.handlers)
+
+    for name, obj in logging.root.manager.loggerDict.items():
+        if isinstance(obj, logging.Logger):
+            logger = logging.getLogger(name)
+            snapshots[logger] = list(logger.handlers)
+
+    return snapshots
+
+
+def _restore_handlers(snapshots):
+    for logger, handlers in snapshots.items():
+        for handler in list(logger.handlers):
+            logger.removeHandler(handler)
+            handler.close()
+        logger.handlers = handlers
 
 
 def test_find_filename_only_matches_filename_key():
@@ -63,19 +84,32 @@ def test_load_performance_log_reads_latest_valid_log_and_skips_invalid_json(
     assert load_performance_log() == [{"run": "latest"}, {"step": 2}]
 
 
-def test_log_setup_returns_provided_queue_and_start_listener_creates_listener(tmp_path):
-    provided_queue = mp.Queue()
-    returned_queue = log_setup("logging.yml", tmp_path, queue=provided_queue)
+def test_log_setup_returns_provided_queue_and_start_listener_creates_listener(
+    tmp_path, monkeypatch
+):
+    handler_snapshots = _snapshot_handlers()
+    monkeypatch.setattr(
+        "navigate.log_files.log_functions.mp.Queue", lambda *args, **kwargs: queue.Queue()
+    )
 
-    assert returned_queue is provided_queue
-
-    log_queue, listener = log_setup("logging.yml", tmp_path, start_listener=True)
+    provided_queue = queue.Queue()
+    listener = None
     try:
+        returned_queue = log_setup("logging.yml", tmp_path, queue=provided_queue)
+
+        assert returned_queue is provided_queue
+
+        log_queue, listener = log_setup("logging.yml", tmp_path, start_listener=True)
         assert log_queue is not None
         logger = logging.getLogger("model")
         logger.log(PERFORMANCE, json.dumps({"kind": "perf"}))
     finally:
-        listener.stop()
+        try:
+            if listener is not None:
+                listener.stop()
+        finally:
+            _restore_handlers(handler_snapshots)
+            logging.shutdown()
 
     timestamp_dirs = [path for path in tmp_path.iterdir() if path.is_dir()]
     assert timestamp_dirs

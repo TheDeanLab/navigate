@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from navigate.tools.main_functions import create_parser, evaluate_parser_input_arguments
@@ -124,6 +126,6 @@ def test_evaluate_parser_input_arguments_rejects_missing_waveform_constants_file
 
     with pytest.raises(
         AssertionError,
-        match=f"waveform_constants_file Path {missing_file} not valid",
+        match=re.escape(f"waveform_constants_file Path {missing_file} not valid"),
     ):
         evaluate_parser_input_arguments(args)

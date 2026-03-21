@@ -166,6 +166,20 @@ class BigDataViewerDataSource(PyramidalDataSource):
         # find current channel
         c, z, t, pos = self._cztp_indices(self._current_frame, self.metadata.per_stack)
 
+        # Extend the file only when we are actually about to write into a new
+        # position. Doing this after the previous frame causes an extra,
+        # unwritten position worth of setups to be serialized at the end of a
+        # complete acquisition.
+        if pos >= self.positions:
+            old_positions = self.positions
+            self.setup(
+                self.shape_c * old_positions,
+                self.shape_c * (pos + 1),
+                create_flag=False,
+            )
+            self.positions = pos + 1
+            self.metadata.positions = self.positions
+
         if not (z or c or t or pos):
             self.setup()
 
@@ -195,15 +209,9 @@ class BigDataViewerDataSource(PyramidalDataSource):
 
         self._current_frame += 1
 
-        # Check if this was the last frame to write
-        c, z, t, pos = self._cztp_indices(self._current_frame, self.metadata.per_stack)
-        if (z == 0) and (c == 0) and ((t >= self.shape_t) or (pos >= self.positions)):
-            self.setup(
-                self.shape_c * self.positions,
-                self.shape_c * (pos + 1),
-                create_flag=False,
-            )
-            self.positions = pos + 1
+    def _setup_id(self, c, p):
+        """Get the setup id for a channel and position."""
+        return p * self.shape_c + c
 
     def _h5_ds_name(self, t, c, p):
         """Get the HDF5 dataset name for the given timepoint, channel, and position.
@@ -223,7 +231,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
             The dataset name.
         """
         time_group_name = f"t{t:05}"
-        setup_group_name = f"s{(c*self.positions+p):02}"
+        setup_group_name = f"s{self._setup_id(c, p):02}"
         ds_name = "/".join([time_group_name, setup_group_name, "???", "cells"])
         return ds_name
 
@@ -245,7 +253,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
             The dataset name.
         """
         time_group_name = f"timepoint{t}"
-        setup_group_name = f"setup{(c*self.positions+p)}"
+        setup_group_name = f"setup{self._setup_id(c, p)}"
         ds_name = "/".join([setup_group_name, time_group_name, "s???"])
         return ds_name
 

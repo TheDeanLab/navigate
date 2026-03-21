@@ -86,3 +86,6 @@ Source = "https://github.com/TheDeanLab/navigate"
 
 [tool.setuptools.dynamic]
 version = {file = "src/navigate/VERSION"}
+
+[tool.coverage.run]
+relative_files = true

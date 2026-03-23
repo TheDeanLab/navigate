@@ -424,7 +424,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "tissue": "Lung",
             "celltype": "MV3",
             "label": "GFP",
-            "file_type": "TIFF",
+            "file_type": "OME-Zarr",
             "date": time.strftime("%Y-%m-%d"),
             "solvent": "BABB",
         }

@@ -459,7 +459,7 @@ class VolumeSearch:
             if self.debug:
                 import tifffile
 
-                tifffile.imsave(
+                tifffile.imwrite(
                     "volume_search_2d_debug_result.tif", self.volumes_selected
                 )
         return self.end_flag
@@ -628,9 +628,6 @@ class VolumeSearch3D:
                             f"configuration.yaml file!"
                         )
 
-        current_pixel_size = self.model.configuration["configuration"]["microscopes"][
-            current_microscope_name
-        ]["zoom"]["pixel_size"][current_zoom_value]
         current_image_width = self.model.configuration["experiment"][
             "CameraParameters"
         ][current_microscope_name]["img_x_pixels"]

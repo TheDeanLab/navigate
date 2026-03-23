@@ -101,13 +101,16 @@ class AcquireBarController(GUIController):
         # framerate information.
         self.framerate = 0
 
-        #: dict: The ProxyDict for the BDV configuration.
-        self.bdv_configuration = self.parent_controller.configuration["experiment"].get(
-            "BDVParameters", None
+        #: dict: The ProxyDict for the OME-Zarr configuration.
+        self.ome_zarr_configuration = self.parent_controller.configuration[
+            "experiment"
+        ].get(
+            "OMEZarrParameters",
+            self.parent_controller.configuration["experiment"].get("BDVParameters"),
         )
 
-        #: dict: BDV Widgets. Keys are primary widgets, values are lists.
-        self.bdv_widgets = {
+        #: dict: OME-Zarr widgets. Keys are primary widgets, values are lists.
+        self.ome_zarr_widgets = {
             "shear_data": ["shear_dimension", "shear_angle"],
             "rotate_data": ["rotate_angle_x", "rotate_angle_y", "rotate_angle_z"],
             "down_sample_data": ["lateral_down_sample", "axial_down_sample"],
@@ -358,15 +361,15 @@ class AcquireBarController(GUIController):
             file_type = widgets["file_type"].get_variable()
             file_type.trace_add("write", lambda *args: self.update_file_type(file_type))
 
-            self.set_bdv_settings()
+            self.set_ome_zarr_settings()
 
-            for widget in self.bdv_widgets.keys():
+            for widget in self.ome_zarr_widgets.keys():
                 # Traces for the main widgets
                 self.acquire_pop.tab_frame.inputs[widget].get_variable().trace_add(
                     "write",
-                    lambda *args, main_widget=widget, dep_widget=self.bdv_widgets[
+                    lambda *args, main_widget=widget, dep_widget=self.ome_zarr_widgets[
                         widget
-                    ]: self.toggle_bdv_widgets(main_widget, dep_widget),
+                    ]: self.toggle_ome_zarr_widgets(main_widget, dep_widget),
                 )
 
             for k, v in self.saving_settings.items():
@@ -382,97 +385,112 @@ class AcquireBarController(GUIController):
             self.view.pull_down.state(["disabled", "readonly"])
             self.parent_controller.execute("acquire")
 
-    def set_bdv_settings(self) -> None:
-        """Set the BDV Settings from the configuration file.
+    def set_ome_zarr_settings(self) -> None:
+        """Set the OME-Zarr settings from the configuration file.
 
         If the settings are not in the configuration file, they will be added.
         """
         update_config = False
 
-        if self.bdv_configuration is None:
+        if self.ome_zarr_configuration is None:
             update_config = True
-            self.bdv_configuration = {}
+            self.ome_zarr_configuration = {}
 
         # Shear Parameters
-        if self.bdv_configuration.get("shear", None) is None:
+        if self.ome_zarr_configuration.get("shear", None) is None:
             update_config = True
-            self.bdv_configuration["shear"] = {
+            self.ome_zarr_configuration["shear"] = {
                 "shear_data": False,
                 "shear_dimension": "YZ",
                 "shear_angle": 0,
             }
         self.acquire_pop.tab_frame.inputs["shear_data"].set(
-            self.bdv_configuration["shear"].get("shear_data", False)
+            self.ome_zarr_configuration["shear"].get("shear_data", False)
         )
         self.acquire_pop.tab_frame.inputs["shear_dimension"].set(
-            self.bdv_configuration["shear"].get("shear_dimension", "YZ")
+            self.ome_zarr_configuration["shear"].get("shear_dimension", "YZ")
         )
         self.acquire_pop.tab_frame.inputs["shear_angle"].set(
-            self.bdv_configuration["shear"].get("shear_angle", 0)
+            self.ome_zarr_configuration["shear"].get("shear_angle", 0)
         )
 
         # Rotation Parameters
-        if self.bdv_configuration.get("rotate", None) is None:
+        if self.ome_zarr_configuration.get("rotate", None) is None:
             update_config = True
-            self.bdv_configuration["rotate"] = {
+            self.ome_zarr_configuration["rotate"] = {
                 "rotate_data": False,
                 "X": 0,
                 "Y": 0,
                 "Z": 0,
             }
         self.acquire_pop.tab_frame.inputs["rotate_data"].set(
-            self.bdv_configuration["rotate"].get("rotate_data", False)
+            self.ome_zarr_configuration["rotate"].get("rotate_data", False)
         )
         self.acquire_pop.tab_frame.inputs["rotate_angle_x"].set(
-            self.bdv_configuration["rotate"].get("X", 0)
+            self.ome_zarr_configuration["rotate"].get("X", 0)
         )
         self.acquire_pop.tab_frame.inputs["rotate_angle_y"].set(
-            self.bdv_configuration["rotate"].get("Y", 0)
+            self.ome_zarr_configuration["rotate"].get("Y", 0)
         )
         self.acquire_pop.tab_frame.inputs["rotate_angle_z"].set(
-            self.bdv_configuration["rotate"].get("Z", 0)
+            self.ome_zarr_configuration["rotate"].get("Z", 0)
         )
 
         # Down Sample Parameters
-        if self.bdv_configuration.get("down_sample", None) is None:
+        if self.ome_zarr_configuration.get("down_sample", None) is None:
             update_config = True
-            self.bdv_configuration["down_sample"] = {
-                "down_sample": False,
-                "lateral_down_sample": 1,
-                "axial_down_sample": 1,
+            self.ome_zarr_configuration["down_sample"] = {
+                "enabled": False,
+                "scale_factors": [2, 4, 8, 16],
             }
+        if self.ome_zarr_configuration.get("chunk_shape", None) is None:
+            update_config = True
+            self.ome_zarr_configuration["chunk_shape"] = [1, 1, 8, 256, 256]
+        if self.ome_zarr_configuration.get("shard_shape", None) is None:
+            update_config = True
+            self.ome_zarr_configuration["shard_shape"] = [1, 1, 32, 256, 256]
+        if self.ome_zarr_configuration.get("compression", None) is None:
+            update_config = True
+            self.ome_zarr_configuration["compression"] = "zstd-bitshuffle-fast"
+
+        scale_factors = [
+            max(int(scale_factor), 1)
+            for scale_factor in self.ome_zarr_configuration["down_sample"].get(
+                "scale_factors", [2, 4, 8, 16]
+            )
+        ]
+        max_scale = max(scale_factors, default=1)
         self.acquire_pop.tab_frame.inputs["down_sample_data"].set(
-            self.bdv_configuration["down_sample"].get("down_sample", False)
+            self.ome_zarr_configuration["down_sample"].get("enabled", False)
         )
         self.acquire_pop.tab_frame.inputs["lateral_down_sample"].set(
-            str(self.bdv_configuration["down_sample"].get("lateral_down_sample", 1))
-            + "x"
+            str(max_scale) + "x"
         )
         self.acquire_pop.tab_frame.inputs["axial_down_sample"].set(
-            str(self.bdv_configuration["down_sample"].get("axial_down_sample", 1)) + "x"
+            str(max_scale) + "x"
         )
 
         if update_config:
             update_config_dict(
                 self.parent_controller.manager,
                 self.parent_controller.configuration["experiment"],
-                "BDVParameters",
-                self.bdv_configuration,
+                "OMEZarrParameters",
+                self.ome_zarr_configuration,
             )
-            self.bdv_configuration = self.parent_controller.configuration["experiment"][
-                "BDVParameters"
-            ]
+            self.ome_zarr_configuration = self.parent_controller.configuration[
+                "experiment"
+            ]["OMEZarrParameters"]
 
         # Set the state of the dependent widgets
-        for widget in self.bdv_widgets.keys():
-            self.toggle_bdv_widgets(widget, self.bdv_widgets[widget])
+        for widget in self.ome_zarr_widgets.keys():
+            self.toggle_ome_zarr_widgets(widget, self.ome_zarr_widgets[widget])
 
-    def update_bdv_settings(self) -> None:
-        """Update the BDV settings."""
-        if self.bdv_configuration is not None:
-            # Set the widget variables according to the BDV configuration
+    def update_ome_zarr_settings(self) -> None:
+        """Update the OME-Zarr settings."""
+        if self.ome_zarr_configuration is not None:
+            # Set the widget variables according to the OME-Zarr configuration
             # Shear Parameters
-            self.bdv_configuration["shear"]["shear_data"] = bool(
+            self.ome_zarr_configuration["shear"]["shear_data"] = bool(
                 (
                     update := self.acquire_pop.tab_frame.inputs[
                         "shear_data"
@@ -481,15 +499,15 @@ class AcquireBarController(GUIController):
             )
 
             if update:
-                self.bdv_configuration["shear"]["shear_dimension"] = str(
+                self.ome_zarr_configuration["shear"]["shear_dimension"] = str(
                     self.acquire_pop.tab_frame.inputs["shear_dimension"].variable.get()
                 )
-                self.bdv_configuration["shear"]["shear_angle"] = float(
+                self.ome_zarr_configuration["shear"]["shear_angle"] = float(
                     self.acquire_pop.tab_frame.inputs["shear_angle"].variable.get()
                 )
 
             # Rotation Parameters
-            self.bdv_configuration["rotate"]["rotate_data"] = bool(
+            self.ome_zarr_configuration["rotate"]["rotate_data"] = bool(
                 (
                     update := self.acquire_pop.tab_frame.inputs[
                         "rotate_data"
@@ -498,18 +516,18 @@ class AcquireBarController(GUIController):
             )
 
             if update:
-                self.bdv_configuration["rotate"]["X"] = float(
+                self.ome_zarr_configuration["rotate"]["X"] = float(
                     self.acquire_pop.tab_frame.inputs["rotate_angle_x"].variable.get()
                 )
-                self.bdv_configuration["rotate"]["Y"] = float(
+                self.ome_zarr_configuration["rotate"]["Y"] = float(
                     self.acquire_pop.tab_frame.inputs["rotate_angle_y"].variable.get()
                 )
-                self.bdv_configuration["rotate"]["Z"] = float(
+                self.ome_zarr_configuration["rotate"]["Z"] = float(
                     self.acquire_pop.tab_frame.inputs["rotate_angle_z"].variable.get()
                 )
 
             # Down Sample Parameters
-            self.bdv_configuration["down_sample"]["down_sample"] = bool(
+            self.ome_zarr_configuration["down_sample"]["enabled"] = bool(
                 (
                     update := self.acquire_pop.tab_frame.inputs[
                         "down_sample_data"
@@ -518,19 +536,35 @@ class AcquireBarController(GUIController):
             )
 
             if update:
-                self.bdv_configuration["down_sample"]["lateral_down_sample"] = int(
+                lateral_down_sample = int(
                     self.acquire_pop.tab_frame.inputs[
                         "lateral_down_sample"
                     ].variable.get()[:-1]
                 )
-
-                self.bdv_configuration["down_sample"]["axial_down_sample"] = int(
+                axial_down_sample = int(
                     self.acquire_pop.tab_frame.inputs[
                         "axial_down_sample"
                     ].variable.get()[:-1]
                 )
+                max_scale = max(lateral_down_sample, axial_down_sample, 1)
+                self.ome_zarr_configuration["down_sample"]["scale_factors"] = [
+                    scale_factor
+                    for scale_factor in [2, 4, 8, 16]
+                    if scale_factor <= max_scale
+                ]
+            else:
+                self.ome_zarr_configuration["down_sample"]["scale_factors"] = [
+                    2,
+                    4,
+                    8,
+                    16,
+                ]
 
-    def toggle_bdv_widgets(self, main_widget: str, dependent_widgets: list) -> None:
+            self.ome_zarr_configuration["chunk_shape"] = [1, 1, 8, 256, 256]
+            self.ome_zarr_configuration["shard_shape"] = [1, 1, 32, 256, 256]
+            self.ome_zarr_configuration["compression"] = "zstd-bitshuffle-fast"
+
+    def toggle_ome_zarr_widgets(self, main_widget: str, dependent_widgets: list) -> None:
         """Toggles the state of the dependent widgets.
 
         Parameters
@@ -597,7 +631,7 @@ class AcquireBarController(GUIController):
 
         # update saving settings according to user's input
         self.update_experiment_values(popup_window)
-        self.update_bdv_settings()
+        self.update_ome_zarr_settings()
 
         # Collect all entry names to validate
         entry_names = [

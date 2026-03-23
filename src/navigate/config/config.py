@@ -350,7 +350,7 @@ def verify_experiment_config(manager, configuration):
         "tissue": "Lung",
         "celltype": "MV3",
         "label": "GFP",
-        "file_type": "TIFF",
+        "file_type": "OME-Zarr",
         "prefix": "Cell_",
         "date": time.strftime("%Y-%m-%d"),
         "solvent": "BABB",
@@ -372,6 +372,64 @@ def verify_experiment_config(manager, configuration):
         saving_setting_dict["root_directory"] = saving_dict_sample["root_directory"]
     if not os.path.exists(saving_setting_dict["save_directory"]):
         saving_setting_dict["save_directory"] = saving_dict_sample["save_directory"]
+
+    ome_zarr_defaults = {
+        "shear": {
+            "shear_data": False,
+            "shear_dimension": "YZ",
+            "shear_angle": 0,
+        },
+        "rotate": {
+            "rotate_data": False,
+            "X": 0,
+            "Y": 0,
+            "Z": 0,
+        },
+        "down_sample": {
+            "enabled": False,
+            "scale_factors": [2, 4, 8, 16],
+        },
+        "chunk_shape": [1, 1, 8, 256, 256],
+        "shard_shape": [1, 1, 32, 256, 256],
+        "compression": "zstd-bitshuffle-fast",
+    }
+    legacy_bdv_parameters = configuration["experiment"].get("BDVParameters", None)
+    if (
+        "OMEZarrParameters" not in configuration["experiment"]
+        or type(configuration["experiment"]["OMEZarrParameters"]) is not DictProxy
+    ):
+        if type(legacy_bdv_parameters) is DictProxy:
+            down_sample = legacy_bdv_parameters.get("down_sample", {})
+            if down_sample.get("down_sample", False):
+                max_factor = max(
+                    int(down_sample.get("lateral_down_sample", 1)),
+                    int(down_sample.get("axial_down_sample", 1)),
+                    1,
+                )
+                ome_zarr_defaults["down_sample"]["enabled"] = max_factor > 1
+                ome_zarr_defaults["down_sample"]["scale_factors"] = [
+                    factor for factor in [2, 4, 8, 16] if factor <= max_factor
+                ]
+            for key in ("shear", "rotate"):
+                if key in legacy_bdv_parameters:
+                    ome_zarr_defaults[key] = dict(legacy_bdv_parameters[key])
+        update_config_dict(
+            manager,
+            configuration["experiment"],
+            "OMEZarrParameters",
+            ome_zarr_defaults,
+        )
+    else:
+        ome_zarr_parameters = configuration["experiment"]["OMEZarrParameters"]
+        for key, value in ome_zarr_defaults.items():
+            if key not in ome_zarr_parameters.keys():
+                ome_zarr_parameters[key] = value
+        if "down_sample" not in ome_zarr_parameters:
+            ome_zarr_parameters["down_sample"] = ome_zarr_defaults["down_sample"]
+        else:
+            for key, value in ome_zarr_defaults["down_sample"].items():
+                if key not in ome_zarr_parameters["down_sample"].keys():
+                    ome_zarr_parameters["down_sample"][key] = value
 
     # camera parameters
     camera_parameters_dict_sample = {

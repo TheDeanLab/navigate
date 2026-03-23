@@ -318,7 +318,7 @@ class EntryFrame:
                 )
                 parent.inputs[entry_names[i]].widget.state(["!disabled", "readonly"])
                 parent.inputs[entry_names[i]].set_values(tuple(FILE_TYPES))
-                parent.inputs[entry_names[i]].set("TIFF")
+                parent.inputs[entry_names[i]].set("OME-Zarr")
 
             elif entry_names[i] == "solvent":
                 parent.inputs[entry_names[i]] = LabelInput(
@@ -382,7 +382,7 @@ class TabFrame:
         tab2.columnconfigure(index=2, weight=1)
 
         notebook.add(tab1, text="Misc. Notes")
-        notebook.add(tab2, text="BDV Settings")
+        notebook.add(tab2, text="OME-Zarr Settings")
 
         row_index = 0
 
@@ -440,9 +440,8 @@ class TabFrame:
 
         row_index = 0
         text = (
-            "HDF5, N5, and Zarr files are saved with BDV metadata, "
-            "enabling immediate visualization with BigDataViewer. "
-            "All angles are in degrees."
+            "OME-Zarr data are saved as a single-well HCS plate with synthetic "
+            "well A/1 and one field per Navigate position. All angles are in degrees."
         )
 
         bdv_label = ttk.Label(

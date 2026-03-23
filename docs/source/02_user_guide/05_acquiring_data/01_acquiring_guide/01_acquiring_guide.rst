@@ -9,7 +9,11 @@ This provides detailed descriptions of **navigate**'s acquisition modes and savi
 Standard Acquisition Modes
 ==========================
 
-**navigate** features standard acquisition modes including Continuous/Live, Single Frame, and Z-Stack, which can be saved to TIFF, OME-TIFF, HDF5, N5, and OME-Zarr data formats. Saving is toggled under the GUI's :ref:`timepoint settings <ui_timepoint_settings>`.
+**navigate** features standard acquisition modes including Continuous/Live, Single
+Frame, and Z-Stack, which can be saved to OME-Zarr and OME-TIFF data formats. OME-Zarr
+is the default and recommended format for new multidimensional acquisitions, while
+OME-TIFF remains available for compatibility workflows. Saving is toggled under the
+GUI's :ref:`timepoint settings <ui_timepoint_settings>`.
 
 These modes (and other custom modes) can be selected in the program's :ref:`acquisition bar <ui_acquisition_bar>` dropdown list. Each acquisition mode is implemented as a :ref:`feature list <user_guide_features>` and can be used in sequence with other features that can, for example, :ref:`make smart decisions <intermediate>`.
 

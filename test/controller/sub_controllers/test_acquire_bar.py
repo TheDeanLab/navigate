@@ -468,10 +468,10 @@ class TestAcquireBarController:
                             == file
                         )
                     # Resetting file type back to orginal
-                    widgets["file_type"].set("TIFF")
+                    widgets["file_type"].set("OME-Zarr")
                     assert (
                         self.acquire_bar_controller.saving_settings["file_type"]
-                        == "TIFF"
+                        == "OME-Zarr"
                     )
 
                 # Check that loop thru saving settings is correct

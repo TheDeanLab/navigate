@@ -1,230 +1,249 @@
 # Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+from __future__ import annotations
 
-#      * Redistributions of source code must retain the above copyright notice,
-#      this list of conditions and the following disclaimer.
-
-#      * Redistributions in binary form must reproduce the above copyright
-#      notice, this list of conditions and the following disclaimer in the
-#      documentation and/or other materials provided with the distribution.
-
-#      * Neither the name of the copyright holders nor the names of its
-#      contributors may be used to endorse or promote products derived from this
-#      software without specific prior written permission.
-
-# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-
-# Standard library imports
-from typing import Optional, Union, List, Dict
 import logging
+from typing import Dict, Iterable, List, Optional, Union
 
-# Third-party imports
 import numpy.typing as npt
+from ome_zarr_models.v05.coordinate_transformations import (
+    VectorScale,
+    VectorTranslation,
+)
+from ome_zarr_models.v05.hcs import HCS, HCSAttrs, Well
+from ome_zarr_models.v05.image import Axis, Dataset, Image, ImageAttrs, Multiscale
+from ome_zarr_models.v05.image_label import ImageLabelAttrs
+from ome_zarr_models.v05.image_label_types import Label
+from ome_zarr_models.v05.labels import LabelsAttrs
+from ome_zarr_models.v05.plate import Column, Plate, Row, WellInPlate
+from ome_zarr_models.v05.well import WellAttrs
+from ome_zarr_models.v05.well_types import WellImage, WellMeta
 
-# Local application imports
+from navigate import __commit__, __version__
+from navigate.tools import xml_tools
+
 from .metadata import Metadata
 
-NGFF_VERSION = "0.4"
+NGFF_VERSION = "0.5"
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
 class OMEZarrMetadata(Metadata):
-    """Class to generate OME-Zarr metadata."""
+    """Canonical OME-Zarr v0.5 metadata builder for Navigate."""
 
     @property
-    def _axes(self) -> Dict:
-        """Return tczyx axes in navigate units.
-
-        https://ngff.openmicroscopy.org/0.4/#axes-md
-
-        Returns
-        -------
-        List
-            A list of dictionaries containing the axis name, type, and unit.
-        """
-        axes = [
-            {"name": "t", "type": "time", "unit": "second"},
-            {"name": "c", "type": "channel"},
-            {"name": "z", "type": "space", "unit": "micrometer"},
-            {"name": "y", "type": "space", "unit": "micrometer"},
-            {"name": "x", "type": "space", "unit": "micrometer"},
+    def axes(self) -> List[Axis]:
+        return [
+            Axis(name="t", type="time", unit="second"),
+            Axis(name="c", type="channel"),
+            Axis(name="z", type="space", unit="micrometer"),
+            Axis(name="y", type="space", unit="micrometer"),
+            Axis(name="x", type="space", unit="micrometer"),
         ]
 
-        return axes
+    @property
+    def axes_names(self) -> tuple[str, ...]:
+        return tuple(axis.name for axis in self.axes)
 
     def _stage_positions_to_translation_transform(
         self, x: float, y: float, z: float, theta: float, f: Optional[float] = None
     ) -> List[float]:
-        """Grab the translation from the stage.
-
-        Ignore theta, focus for now.
-
-        Parameters
-        ----------
-        x : float
-            The x position of the stage (um).
-        y : float
-            The y position of the stage (um).
-        z : float
-            The z position of the stage (um).
-        theta : float
-            The theta position of the stage (deg).
-        f : float
-            The focus position of the stage (um).
-
-        Returns
-        -------
-        List
-            A translation for each axis.
-        """
-
-        # Set the transform positions
         xp, yp, zp = x, y, z
-
-        # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
-        # if they are both moving along the same physical dimension
         if self._coupled_axes is not None:
             for leader, follower in self._coupled_axes.items():
                 if leader.lower() not in "xyz":
-                    print(
-                        f"Unrecognized coupled axis {leader}. "
-                        "Not gonna do anything with this."
-                    )
+                    logger.warning("Ignoring unsupported coupled axis %s.", leader)
                     continue
-                elif leader.lower() == "x":
-                    xp += float(locals()[f"{follower.lower()}"])
+                follower_value = float(locals().get(follower.lower(), 0.0) or 0.0)
+                if leader.lower() == "x":
+                    xp += follower_value
                 elif leader.lower() == "y":
-                    yp += float(locals()[f"{follower.lower()}"])
+                    yp += follower_value
                 elif leader.lower() == "z":
-                    zp += float(locals()[f"{follower.lower()}"])
-
-        # t, c, z, y, x
+                    zp += follower_value
         return [0.0, 0.0, zp, yp, xp]
 
-    def _scale_transform(
-        self, subdiv: Union[npt.ArrayLike, List] = [1, 1, 1]
-    ) -> List[float]:
-        """Calculate the image scale after subdivision.
-
-        Parameters
-        ----------
-        subdiv : List
-            The subdivision of the dataset.
-
-        Returns
-        -------
-        List
-            The scale of the dataset.
-        """
-        return [
-            1,  # t
-            1,  # c
-            self.dz * subdiv[2],
-            self.dy * subdiv[1],
-            self.dx * subdiv[0],
-        ]
+    def _scale_transform(self, scale_factor: Union[int, npt.ArrayLike, List]) -> List[float]:
+        if isinstance(scale_factor, int):
+            zx = float(scale_factor)
+            zy = float(scale_factor)
+            zz = float(scale_factor)
+        else:
+            values = list(scale_factor)
+            if len(values) != 3:
+                raise ValueError("Scale factor must contain exactly 3 spatial values.")
+            zx, zy, zz = map(float, values)
+        return [1.0, 1.0, self.dz * zz, self.dy * zy, self.dx * zx]
 
     def _coordinate_transformations(
-        self, scale: Optional[List] = None, translation: Optional[List] = None
-    ) -> Dict:
-        """Package scale and translation in a dict.
+        self, scale: List[float], translation: Optional[List[float]] = None
+    ) -> list:
+        transformations = [VectorScale(type="scale", scale=scale)]
+        if translation is not None:
+            transformations.append(
+                VectorTranslation(type="translation", translation=translation)
+            )
+        return transformations
 
-        Parameters
-        ----------
-        scale : List
-            The scale of the dataset.
-        translation : List
-            The translation of the dataset.
+    def hcs_attributes(self, positions: int) -> dict:
+        plate = Plate(
+            rows=[Row(name="A")],
+            columns=[Column(name="1")],
+            wells=[WellInPlate(path="A/1", rowIndex=0, columnIndex=0)],
+            field_count=max(int(positions), 1),
+            version=NGFF_VERSION,
+        )
+        return {
+            "ome": HCSAttrs(version=NGFF_VERSION, plate=plate).model_dump(
+                mode="json", exclude_none=True
+            )
+        }
 
-        Returns
-        -------
-        Dict
-            A dictionary containing the transformation.
-        """
-        transformation = []
-        if (
-            scale is None
-            or not isinstance(scale, list)
-            or len(scale) != len(self._axes)
-        ):
-            if translation is not None:
-                logger.error("Translation cannot be provided without scale.")
-                raise UserWarning("Translation cannot be provided without scale.")
-            return transformation
-        else:
-            transformation.append({"type": "scale", "scale": scale})
+    def well_attributes(self, field_names: Iterable[str]) -> dict:
+        images = [WellImage(path=str(name)) for name in field_names]
+        return {
+            "ome": WellAttrs(
+                version=NGFF_VERSION,
+                well=WellMeta(images=images, version=NGFF_VERSION),
+            ).model_dump(mode="json", exclude_none=True)
+        }
 
-        if (
-            translation is not None
-            and isinstance(translation, list)
-            and len(translation) == len(self._axes)
-        ):
-            transformation.append({"type": "translation", "translation": translation})
-
-        return transformation
-
-    def multiscales_dict(
+    def image_attributes(
         self,
         name: str,
-        paths: list,
-        resolutions: Union[npt.ArrayLike, List],
+        paths: list[str],
+        scale_factors: Union[npt.ArrayLike, List[int]],
         view: Optional[Dict] = None,
-    ) -> Dict:
-        """Create a multiscale dictionary for the OME-Zarr metadata.
-
-        https://ngff.openmicroscopy.org/0.4/index.html#multiscale-md
-
-        Parameters
-        ----------
-        name : str
-            The name of the dataset.
-        paths : list
-            The paths of the dataset.
-        resolutions : List
-            The resolutions of the dataset.
-        view : Dict
-            The view of the dataset.
-
-        Returns
-        -------
-        Dict
-            A dictionary containing the multiscale metadata.
-        """
-        d = {"version": NGFF_VERSION, "name": name, "axes": self._axes}
-
+    ) -> dict:
         datasets = []
-        for path, res in zip(paths, resolutions):
-            scale = self._scale_transform(res)
-            dd = {
-                "path": path,
-                "coordinateTransformations": self._coordinate_transformations(scale),
-            }
-            datasets.append(dd)
-        d["datasets"] = datasets
+        for path, factor in zip(paths, scale_factors):
+            scale = self._scale_transform(factor)
+            datasets.append(
+                Dataset(
+                    path=path,
+                    coordinateTransformations=self._coordinate_transformations(scale),
+                )
+            )
+        multiscale = Multiscale(
+            axes=self.axes,
+            datasets=tuple(datasets),
+            name=name,
+            coordinateTransformations=(
+                None
+                if view is None
+                else tuple(
+                    self._coordinate_transformations(
+                        [1.0] * len(self.axes),
+                        self._stage_positions_to_translation_transform(**view),
+                    )
+                )
+            ),
+            metadata={"method": "subsample"},
+            type="subsample",
+        )
+        return {
+            "ome": ImageAttrs(version=NGFF_VERSION, multiscales=[multiscale]).model_dump(
+                mode="json", exclude_none=True
+            )
+        }
 
-        if view is not None:
-            scale = [1.0] * len(self._axes)
-            translation = self._stage_positions_to_translation_transform(**view)
-            d["coordinateTransformations"] = self._coordinate_transformations(
-                scale, translation
+    def labels_attributes(self, label_paths: list[str]) -> dict:
+        return {
+            "ome": LabelsAttrs(version=NGFF_VERSION, labels=label_paths).model_dump(
+                mode="json", exclude_none=True
+            )
+        }
+
+    def image_label_attributes(
+        self, label_name: str, multiscale_paths: list[str], scale_factors: list[int]
+    ) -> dict:
+        datasets = []
+        for path, factor in zip(multiscale_paths, scale_factors):
+            datasets.append(
+                Dataset(
+                    path=path,
+                    coordinateTransformations=self._coordinate_transformations(
+                        self._scale_transform(factor)
+                    ),
+                )
+            )
+        multiscale = Multiscale(
+            axes=self.axes,
+            datasets=tuple(datasets),
+            name=label_name,
+            metadata={"method": "subsample"},
+            type="subsample",
+        )
+        return {
+            "ome": ImageLabelAttrs(
+                version=NGFF_VERSION,
+                image_label=Label(
+                    source={"image": "../../../0"},
+                    properties={"name": label_name},
+                ),
+                multiscales=[multiscale],
+            ).model_dump(mode="json", exclude_none=True)
+        }
+
+    def validate_hcs_group(self, group) -> HCS:
+        return HCS.from_zarr(group)
+
+    def validate_well_group(self, group) -> Well:
+        return Well.from_zarr(group)
+
+    def validate_image_group(self, group) -> Image:
+        return Image.from_zarr(group)
+
+    def metadata_only_xml(self, field_names: list[str]) -> str:
+        channels = [
+            {"ID": f"Channel:0:{idx}", "SamplesPerPixel": "1", "LightPath": {}}
+            for idx in range(self.shape_c)
+        ]
+        images = []
+        for idx, field_name in enumerate(field_names):
+            images.append(
+                {
+                    "ID": f"Image:{idx}",
+                    "Name": field_name,
+                    "Pixels": {
+                        "ID": f"Pixels:{idx}",
+                        "BigEndian": "false",
+                        "Interleaved": "false",
+                        "Type": str(self.dtype if hasattr(self, "dtype") else "uint16"),
+                        "SizeX": self.shape_x,
+                        "SizeY": self.shape_y,
+                        "SizeZ": self.shape_z,
+                        "SizeC": self.shape_c,
+                        "SizeT": self.shape_t,
+                        "DimensionOrder": "XYZCT",
+                        "PhysicalSizeX": self.dx,
+                        "PhysicalSizeY": self.dy,
+                        "PhysicalSizeZ": self.dz,
+                        "TimeIncrement": self.dt,
+                        "Channel": channels,
+                        "MetadataOnly": {},
+                    },
+                }
             )
 
-        return d
+        ome_dict = {
+            "Creator": f"Navigate,v{__version__}, Commit {__commit__}, Dean Lab at UTSW",
+            "xmlns": "http://www.openmicroscopy.org/Schemas/OME/2016-06",
+            "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "xsi:schemaLocation": "http://www.openmicroscopy.org/Schemas/OME/2016-06 "
+            "https://www.openmicroscopy.org/Schemas/OME/2016-06/ome.xsd",
+            "Image": images,
+            "StructuredAnnotations": {
+                "ListAnnotation": {
+                    "ID": "Annotation:misc",
+                    "Description": {"text": self.misc},
+                }
+            },
+        }
+        xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+        xml += f"<!-- Created by Navigate, v{__version__}, Commit {__commit__} -->\n"
+        xml += xml_tools.dict_to_xml(ome_dict, "OME")
+        return xml

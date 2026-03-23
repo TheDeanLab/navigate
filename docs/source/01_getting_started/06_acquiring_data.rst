@@ -152,7 +152,7 @@ Acquiring a Single Image
        :align: center
        :alt: Selecting the single acquisition mode in **navigate**.
 
-* Press :guilabel:`Acquire` to open the :guilabel:`File Saving Dialog` interface. Enter the sample parameters, notes, location to save file, and filetype in the :guilabel:`File Saving Dialog` that pops up.
+* Press :guilabel:`Acquire` to open the :guilabel:`File Saving Dialog` interface. Enter the sample parameters, notes, location to save file, and save format in the :guilabel:`File Saving Dialog` that pops up. OME-Zarr is the default and recommended choice for new acquisitions.
 
     .. image:: ../images/save-dialog-box.png
        :align: center
@@ -224,5 +224,5 @@ Acquiring a Z-Stack
     .. image:: ../images/z-stack-acquisition.png
        :align: center
 
-* Enter the sample parameters, notes, location to save file, and filetype in the :guilabel:`File Saving Dialog` that pops up.  
+* Enter the sample parameters, notes, location to save file, and save format in the :guilabel:`File Saving Dialog` that pops up. OME-Zarr is the default and recommended choice for new acquisitions.  
 * Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will automatically stop once the image series is acquired.

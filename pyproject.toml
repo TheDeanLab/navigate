@@ -14,15 +14,17 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
-requires-python = ">=3.9.7"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     'matplotlib-inline==0.1.3',
-    'PyYAML==6.0',
+    'PyYAML>=6.0.2,<7',
     'pyserial==3.5',
     'PIPython==2.6.0.1',
     'nidaqmx==0.5.7',
@@ -35,12 +37,13 @@ dependencies = [
     'numpy; sys_platform != "darwin"',
     'numpy; sys_platform == "darwin"',
     'scikit-image',
-    'zarr',
+    'zarr>=3.1.1,<4',
     'fsspec; sys_platform != "darwin"',
     'fsspec; sys_platform == "darwin"',
     'h5py',
     'requests',
     'psutil==6.0.0',
+    'ome-zarr-models>=1.6',
     ]
 
 [project.scripts]
@@ -59,7 +62,8 @@ dev = [
     "pytest-rerunfailures",
     "ipykernel",
     "jupyterlab",
-    "pydantic-ome-ngff==0.5.3"
+    "ome-zarr",
+    "bioio-ome-zarr"
     ]
 
 docs = [

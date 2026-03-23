@@ -1,197 +1,222 @@
 # Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-from typing import Optional, Dict, Any
 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+from __future__ import annotations
 
-#      * Redistributions of source code must retain the above copyright notice,
-#      this list of conditions and the following disclaimer.
+from typing import Any, Dict, Optional
 
-#      * Redistributions in binary form must reproduce the above copyright
-#      notice, this list of conditions and the following disclaimer in the
-#      documentation and/or other materials provided with the distribution.
-
-#      * Neither the name of the copyright holders nor the names of its
-#      contributors may be used to endorse or promote products derived from this
-#      software without specific prior written permission.
-
-# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-
-# Standard library imports
-
-# Third-party imports
-import zarr
+import numpy as np
 import numpy.typing as npt
-import zarr.storage
+import zarr
 
-# Local application imports
+from .ome_zarr_writer import OMEZarrV3StoreWriter
 from .pyramidal_data_source import PyramidalDataSource
+from .storage_adapter import OMEZarrStorageAdapter
 from ..metadata_sources.zarr_metadata import OMEZarrMetadata
-
-GROUP_PREFIX = "p"
 
 
 class OMEZarrDataSource(PyramidalDataSource):
-    """OME-Zarr data source.
+    """OME-Zarr data source backed by a Zarr v3 single-well HCS layout."""
 
-    This class implements an OME-Zarr image data source using the Zarr v2 format.
-    """
+    default_chunk_shape = (1, 1, 8, 256, 256)
+    default_shard_shape = (1, 1, 32, 256, 256)
+    default_scale_factors = (1, 2, 4, 8, 16)
 
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
-        """Initialize the OME-Zarr data source.
-
-        Parameters
-        ----------
-        file_name : str
-            Name of the file to open.
-        mode : str
-            Mode to open the file in.
-        """
-
-        #: OMEZarrMetadata: Metadata object for the OME-Zarr data source.
         self.metadata = OMEZarrMetadata()
-        self.__store = None
-        self._current_position = -1
+        self.image = None
+        self._writer: Optional[OMEZarrV3StoreWriter] = None
+        self._adapter = OMEZarrStorageAdapter(file_name or "")
+        self.chunk_shape = self.default_chunk_shape
+        self.shard_shape = self.default_shard_shape
+        self.scale_factors = self.default_scale_factors
 
         super().__init__(file_name=file_name, mode=mode)
 
-    def get_slice(self, x, y, c, z=0, t=0, p=0, subdiv=0) -> npt.ArrayLike:
-        """Get a 3D slice of the dataset for a single c, t, p, subdiv.
+    @property
+    def artifact_refs(self):
+        return self._adapter.artifact_manifest(range(self.positions))
 
-        Parameters
-        ----------
-        x : int or slice
-            x indices to grab
-        y : int or slice
-            y indices to grab
-        c : int
-            Single channel
-        z : int or slice
-            z indices to grab
-        t : int
-            Single timepoint
-        p : int
-            Single position
-        subdiv : int
-            Subdivision of the dataset to index along
-
-        Returns
-        -------
-        npt.ArrayLike
-            3D (z, y, x) slice of data set
-        """
-        dataset_name = f"{GROUP_PREFIX}{p}_{subdiv}"
-        return self.image[dataset_name][t, c, z, y, x]
-
-    def setup(self):
-        """Set up the Zarr writer."""
-        # Use FSStore as a universal backend
-        self.__store = zarr.storage.FSStore(self.file_name, mode=self.mode)
-
-        #: zarr.group: Zarr group object for the image data source.
-        self.image = zarr.group(store=self.__store, overwrite=True)
-        self._current_position = -1
-
-    def new_position(self, pos, view):
-        """Create new arrays on the fly for each position in self.positions.
-
-        Parameters
-        ----------
-        pos : int
-            Position index
-        view : str
-            View name
-        """
-        name = f"{GROUP_PREFIX}{pos}"
-        paths = []
-        # Create the subdivisions...
-        for si, zyx_shape in enumerate(self.shapes):
-            shape = tuple([self.shape_t, self.shape_c] + list(zyx_shape))
-            setup = f"{name}_{si}"
-            arr = self.image.create(
-                name=setup,
-                shape=shape,
-                chunks=(1,) * len(shape[:-2]) + shape[-2:],
-                dtype=self.dtype,
-            )
-            # xarray multidim
-            paths.append(arr.path)
-            arr.attrs["_ARRAY_DIMENSIONS"] = shape
-
-        # Append setup to multiscales
-        scales = self.image.attrs.get("multiscales", [])
-        scales.append(
-            self.metadata.multiscales_dict(name, paths, self.resolutions, view)
+    def setup(self) -> None:
+        self._adapter = OMEZarrStorageAdapter(self.file_name)
+        self._writer = OMEZarrV3StoreWriter(
+            file_name=self.file_name,
+            metadata=self.metadata,
+            dtype=self.dtype,
+            chunk_shape=self.chunk_shape,
+            shard_shape=self.shard_shape,
+            scale_factors=self.scale_factors,
         )
-        self.image.attrs["multiscales"] = scales
+        self._writer.setup()
+        self.image = self._writer.image
+
+    def set_metadata_from_configuration_experiment(
+        self, configuration: Dict[str, Any], microscope_name: str = None
+    ) -> None:
+        super().set_metadata_from_configuration_experiment(configuration, microscope_name)
+        self._apply_storage_parameters(configuration)
+
+    def set_metadata(self, metadata_config: dict) -> None:
+        super().set_metadata(metadata_config)
+        self._apply_storage_parameters(self.metadata.configuration)
+
+    def _apply_storage_parameters(self, configuration: Optional[Dict[str, Any]]) -> None:
+        experiment = configuration.get("experiment", {}) if configuration else {}
+        params = experiment.get("OMEZarrParameters", {})
+        if params is None:
+            params = {}
+
+        self.chunk_shape = self._normalize_axis_shape(
+            params.get("chunk_shape", self.default_chunk_shape),
+            self.default_chunk_shape,
+        )
+        self.shard_shape = self._normalize_axis_shape(
+            params.get("shard_shape", self.default_shard_shape),
+            self.default_shard_shape,
+        )
+
+        down_sample = params.get("down_sample", {})
+        if down_sample and down_sample.get("enabled", False):
+            configured_scale_factors = tuple(
+                sorted(
+                    {
+                        max(int(factor), 1)
+                        for factor in down_sample.get(
+                            "scale_factors", self.default_scale_factors[1:]
+                        )
+                    }
+                )
+            )
+            self.scale_factors = (1,) + tuple(
+                factor for factor in configured_scale_factors if factor > 1
+            )
+        else:
+            self.scale_factors = (1,)
+
+        if self._writer is not None:
+            self._writer.chunk_shape = self.chunk_shape
+            self._writer.shard_shape = self.shard_shape
+            self._writer.scale_factors = self.scale_factors
+
+    @staticmethod
+    def _normalize_axis_shape(
+        value: Any, fallback: tuple[int, int, int, int, int]
+    ) -> tuple[int, int, int, int, int]:
+        try:
+            normalized = tuple(max(int(axis), 1) for axis in list(value))
+        except (TypeError, ValueError):
+            return fallback
+        if len(normalized) != len(fallback):
+            return fallback
+        return normalized
+
+    def get_slice(self, x, y, c, z=0, t=0, p=0, subdiv=0) -> npt.ArrayLike:
+        field_group = self.image[self._adapter.field_group_path(int(p))]
+        level_name = str(int(subdiv))
+        return field_group[level_name][t, c, z, y, x]
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
-        """Writes 2D image to the data source.
-
-        Parameters
-        ----------
-        data : npt.ArrayLike
-            2D image data
-        kw : dict
-            Keyword arguments
-        """
-        #: str: Mode of the data source.
         self.mode = "w"
 
-        if self.__store is None:
+        if self._writer is None:
             self.setup()
 
-        c, z, t, p = self._cztp_indices(
+        c_index, z_index, t_index, p_index = self._cztp_indices(
             self._current_frame, self.metadata.per_stack
-        )  # find current channel
-
-        if self._current_position != p:
-            self._current_position = p
-            if len(kw) > 0:
-                self.new_position(p, kw)
-            else:
-                self.new_position(p)
-
-        # TODO: Make sure this also functions.
-        for ri, res in enumerate(self.resolutions):
-            dx, dy, dz = res
-            dataset_name = f"{GROUP_PREFIX}{p}_{ri}"
-            zs = min(z // dz, self.shapes[ri, 0] - 1)
-            self.image[dataset_name][t, c, zs, ...] = data[::dy, ::dx].astype(
-                self.dtype
-            )
-
+        )
+        view = kw if kw else None
+        self._writer.write_plane(
+            position_index=p_index,
+            time_index=t_index,
+            channel_index=c_index,
+            z_index=z_index,
+            data=data,
+            view=view,
+        )
+        self.image = self._writer.image
         self._current_frame += 1
 
     def read(self) -> None:
-        """Reads data from the image file."""
         self.mode = "r"
-        self.__store = zarr.storage.FSStore(self.file_name, mode=self.mode)
-        self.image = zarr.group(store=self.__store)
-        # TODO: parse the image metadata
-        self.get_shape_from_metadata()
+        self._adapter = OMEZarrStorageAdapter(self.file_name)
+        self.image = zarr.open_group(self.file_name, mode="r")
+        well_group = self.image[self._adapter.well_path]
+        field_names = sorted(name for name in list(well_group.keys()) if name.isdigit())
+        if not field_names:
+            return
+
+        first_field = well_group[field_names[0]]
+        level0 = first_field["0"]
+        self.shape_t, self.shape_c, self.shape_z, self.shape_y, self.shape_x = (
+            int(axis) for axis in level0.shape
+        )
+        self.positions = len(field_names)
+
+        multiscales = first_field.attrs.get("ome", {}).get("multiscales", [])
+        if multiscales:
+            datasets = multiscales[0].get("datasets", [])
+            resolutions = [[1, 1, 1]]
+            for dataset in datasets[1:]:
+                transforms = dataset.get("coordinateTransformations", [])
+                scale = next(
+                    (
+                        transform.get("scale")
+                        for transform in transforms
+                        if transform.get("type") == "scale"
+                    ),
+                    None,
+                )
+                if scale is None:
+                    continue
+                resolutions.append(
+                    [
+                        max(int(round(scale[4] / self.dx)), 1),
+                        max(int(round(scale[3] / self.dy)), 1),
+                        max(int(round(scale[2] / self.dz)), 1),
+                    ]
+                )
+            self._resolutions = np.array(resolutions, dtype=int)
+
+    def get_data(
+        self,
+        timepoint: int = 0,
+        position: int = 0,
+        channel: int = 0,
+        z: int = -1,
+        resolution: int = 1,
+    ) -> npt.ArrayLike:
+        level_index = 0
+        if resolution > 1:
+            if resolution in self.scale_factors:
+                level_index = self.scale_factors.index(resolution)
+            else:
+                level_index = min(len(self.scale_factors) - 1, int(resolution))
+
+        field_group = self.image[self._adapter.field_group_path(position)]
+        level = field_group[str(level_index)]
+        if z < 0:
+            return level[timepoint, channel]
+        return level[timepoint, channel, z]
 
     def close(self) -> None:
-        """Close the image file."""
         if self._closed:
-            if self.__store is not None:
-                self.__store = None
+            self._writer = None
+            self.image = None
             return
-        self._check_shape(self._current_frame - 1, self.metadata.per_stack)
-        self.__store.close()
-        self._closed = True
-        self.__store = None
+
+        try:
+            if self.mode == "w" and self._writer is not None:
+                self._check_shape(self._current_frame - 1, self.metadata.per_stack)
+                self._writer.finalize(
+                    shape_t=self.shape_t,
+                    shape_c=self.shape_c,
+                    shape_z=self.shape_z,
+                    positions=self.positions,
+                )
+                self.image = self._writer.image
+        finally:
+            if self._writer is not None:
+                self._writer.close()
+            self._writer = None
+            self.image = None
+            self._closed = True

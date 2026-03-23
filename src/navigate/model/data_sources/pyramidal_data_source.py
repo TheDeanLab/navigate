@@ -166,33 +166,34 @@ class PyramidalDataSource(DataSource):
         """
         self._subdivisions = None
         self._shapes = None
+        self._resolutions = np.array([[1, 1, 1]], dtype=int)
 
-        if (
-            "BDVParameters" in configuration["experiment"].keys()
-            and "down_sample" in configuration["experiment"]["BDVParameters"].keys()
+        experiment = configuration.get("experiment", {})
+        ome_zarr_parameters = experiment.get("OMEZarrParameters", {})
+        down_sample = ome_zarr_parameters.get("down_sample", {})
+        if down_sample.get("enabled", False):
+            scale_factors = [1]
+            for factor in down_sample.get("scale_factors", [2, 4, 8, 16]):
+                factor = max(int(factor), 1)
+                if factor not in scale_factors:
+                    scale_factors.append(factor)
+            self._resolutions = np.array(
+                [[factor, factor, factor] for factor in scale_factors], dtype=int
+            )
+        elif (
+            "BDVParameters" in experiment.keys()
+            and "down_sample" in experiment["BDVParameters"].keys()
         ):
-            down_sample = configuration["experiment"]["BDVParameters"][
-                "down_sample"
-            ].get("down_sample", False)
-
-            if down_sample:
-                max_xy = configuration["experiment"]["BDVParameters"][
-                    "down_sample"
-                ].get("lateral_down_sample", 1)
-                max_z = configuration["experiment"]["BDVParameters"]["down_sample"].get(
-                    "axial_down_sample", 1
-                )
-
-                xy_values = [2**i for i in range(int(np.log2(max_xy)) + 1)]
-                z_values = [2**i for i in range(int(np.log2(max_z)) + 1)]
-
-                max_len = max(len(xy_values), len(z_values))
-                xy_values.extend([xy_values[-1]] * (max_len - len(xy_values)))
-                z_values.extend([z_values[-1]] * (max_len - len(z_values)))
-
-                #: npt.NDArray: The resolution of each down-sampled pyramid level.
+            legacy_down_sample = experiment["BDVParameters"]["down_sample"]
+            if legacy_down_sample.get("down_sample", False):
+                max_xy = int(legacy_down_sample.get("lateral_down_sample", 1))
+                max_z = int(legacy_down_sample.get("axial_down_sample", 1))
+                max_factor = max(max_xy, max_z, 1)
+                scale_factors = [1] + [
+                    factor for factor in [2, 4, 8, 16] if factor <= max_factor
+                ]
                 self._resolutions = np.array(
-                    [[xy, xy, z] for xy, z in zip(xy_values, z_values)], dtype=int
+                    [[factor, factor, factor] for factor in scale_factors], dtype=int
                 )
 
         return super().set_metadata_from_configuration_experiment(

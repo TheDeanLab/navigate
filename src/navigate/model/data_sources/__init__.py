@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 
 """ File type specific data sources. """
 
-FILE_TYPES = ["TIFF", "OME-TIFF", "H5", "N5", "OME-Zarr"]
+FILE_TYPES = ["OME-Zarr", "OME-TIFF"]
 
 
 def get_data_source(file_type: str):

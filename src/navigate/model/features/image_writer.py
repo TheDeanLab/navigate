@@ -41,7 +41,7 @@ from datetime import datetime
 
 # Third Party Imports
 import numpy as np
-from tifffile import imsave
+from tifffile import imwrite
 
 # Local imports
 import navigate
@@ -293,7 +293,7 @@ class ImageWriter:
             else:
                 mip_8bit = np.zeros_like(mip, dtype=np.uint8)
 
-            imsave(
+            imwrite(
                 os.path.join(self.mip_directory, mip_name),
                 mip_8bit,
             )
@@ -394,11 +394,14 @@ class ImageWriter:
         self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
         logger.info(f"Saving Data as File Type: {self.file_type}")
 
-        current_channel = self.model.active_microscope.current_channel
-        ext = "." + self.file_type.lower().replace(" ", ".").replace("-", ".")
-        if image_name is None:
-            image_name = self.generate_image_name(current_channel, ext=ext)
-        file_name = os.path.join(self.save_directory, image_name)
+        if self.file_type == "OME-Zarr":
+            file_name = os.path.join(self.save_directory, "data_store.ome.zarr")
+        else:
+            current_channel = self.model.active_microscope.current_channel
+            ext = "." + self.file_type.lower().replace(" ", ".").replace("-", ".")
+            if image_name is None:
+                image_name = self.generate_image_name(current_channel, ext=ext)
+            file_name = os.path.join(self.save_directory, image_name)
 
         return file_name
 

@@ -16,15 +16,20 @@ File Saving Dialog (Misc. Notes Tab)
 This dialog appears when acquisition starts in a save-enabled mode (non-continuous) with :ref:`Save Data <ui_timepoint_settings>` enabled. You can provide text in the :guilabel:`Misc. Notes` field to be saved alongside acquisition metadata.
 
 .. _ui_file_save_dialog_bdv:
+.. _ui_file_save_dialog_omezarr:
 
-File Saving Dialog (BDV Settings Tab)
-=====================================
+File Saving Dialog (OME-Zarr Settings Tab)
+==========================================
 
 .. image:: ../../images/popup_save_dialog_bdv_settings.png
    :align: center
-   :alt: File Saving Dialog popup showing the BDV Settings tab.
+   :alt: File Saving Dialog popup showing the OME-Zarr Settings tab.
 
-Use this tab to configure BDV-related shear, rotation, and downsampling metadata. This information will be saved in the BDV XML file alongside acquired data when :ref:`Save Data <ui_timepoint_settings>` is enabled, enabling the correct spatial interpretation of your data in BDV and compatible tools. More about BDV can be found on the ImageJ website: https://imagej.net/plugins/bdv/.
+Use this tab to configure OME-Zarr shear, rotation, and downsampling metadata. When
+:ref:`Save Data <ui_timepoint_settings>` is enabled and OME-Zarr is selected, this
+information is saved in ``data_store.ome.zarr`` alongside the acquisition metadata so
+downstream tools can interpret the stored volume correctly. More about the save format
+is available in :ref:`file_formats`.
 
 .. _ui_autofocus:
 

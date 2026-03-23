@@ -4,49 +4,76 @@
 Supported File Formats
 ======================
 
-The choice of file format for saving imaging data in microscopy is crucial because it affects write speed, data integrity, accessibility, and analysis efficiency. Formats like TIFF and its derivative OME-TIFF are widely used due to their ability to store metadata and support multiple imaging channels. However, modern formats such as Zarr, N5, and HDF5, including OME-Zarr, cater to the needs of large-scale, multi-dimensional datasets by enabling efficient data storage, access, and processing at cloud-compute scales.
+The choice of file format for saving imaging data in microscopy is crucial because it
+affects write speed, data integrity, accessibility, and analysis efficiency. In
+**navigate**, OME-Zarr is now the primary save format because it combines standardized
+microscopy metadata with chunked, multiscale storage for large multidimensional
+datasets. It also matches the storage contract used by the lab's downstream analysis
+software, reducing format translation steps and keeping acquisition and analysis
+tightly coupled.
 
-To enable ambitious imaging projects, **navigate** comes pre-packaged with TIFF,
-OME-TIFF, OME-Zarr, and HDF5/N5 (`BigDataViewer <https://imagej.net/plugins/bdv/>`_)
-file saving formats. OME, or Open Microscopy Environment, is a standardized metadata
-model that ensures that imaging data can be accurately understood, shared, and analyzed
-across different software platforms and research groups.
+To support both modern analysis workflows and compatibility with existing tools,
+**navigate** writes OME-Zarr and OME-TIFF. OME, or Open Microscopy Environment, is a
+standardized metadata model that helps ensure imaging data can be accurately
+understood, shared, and analyzed across different software platforms and research
+groups.
 
 .. note::
 
     The performance of saving to these data sources is limited by write speed to disk. To achieve maximal saving speed, we recommend saving all data to a local solid state drive. See :ref:`Hardware Considerations <computer_considerations>` for more information.
 
-File Types:
------------
-
-TIFF/OME-TIFF
-~~~~~~~~~~~~~
-
-**navigate** uses the `tifffile <https://pypi.org/project/tifffile/>`_ package to write TIFF, BigTIFF, and OME-TIFF data to file. The **navigate** package creates a custom :doc:`OME-TIFF XML <../../05_reference/_autosummary/navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata>` to store metadata.
-
-BigDataViewer H5/N5
-~~~~~~~~~~~~~~~~~~~
-
-**navigate** uses `h5py <https://docs.h5py.org/en/stable/index.html>`_ (H5) and
-`zarr <https://zarr.readthedocs.io/en/stable/>`_ (N5) to store data in a BigDataViewer
-file format. This is a pyramidal format, necessitating the saving of both the original
-data and downsampled versions of this data. The additional data slows down write speed.
-The N5 format can be faster than H5 because it allows for multithreaded writes.
+File Types
+----------
 
 OME-Zarr
 ~~~~~~~~
 
-OME-Zarr is a Zarr file format that adheres to strict metadata specifications
-(`OME-NGFF 0.4 <https://ngff.openmicroscopy.org/0.4/index.html>`_). It allows for
-pyramidal data writing, storage of segmentation labels with the dataset, and updating
-the pyramidal structure on the fly.
+**navigate** uses `zarr <https://zarr.readthedocs.io/en/stable/>`_ and
+`ome-zarr-models <https://ome-zarr-models-py.readthedocs.io/en/stable/>`_ to write
+acquisitions in the `OME-NGFF 0.5 <https://ngff.openmicroscopy.org/0.5/index.html>`_
+format. Each acquisition is materialized as ``data_store.ome.zarr`` inside the save
+directory. The store root is written as a single-well HCS plate with synthetic well
+``A/1``, and each Navigate position is saved as one field image beneath that well.
+Field images are stored as multiscale ``TCZYX`` arrays named ``0``, ``1``, ``2``, and
+so on.
+
+OME-Zarr is the recommended default for new acquisitions because it scales well to
+large multidimensional and multi-position datasets, keeps rich acquisition metadata
+close to the image data, and leaves room for future derived data such as labels or
+tables in the same datastore. During acquisition, **navigate** writes the
+full-resolution level first and finalizes the multiscale pyramid when the acquisition
+closes.
+
+OME-TIFF
+~~~~~~~~
+
+**navigate** uses the `tifffile <https://pypi.org/project/tifffile/>`_ package to
+write OME-TIFF data to file. The **navigate** package creates a custom
+:doc:`OME-TIFF XML <../../05_reference/_autosummary/navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata>`
+to store metadata. OME-TIFF remains available as a compatibility format for workflows
+that expect TIFF-based interchange or software that does not yet read the current
+OME-Zarr layout.
 
 -------------------
 
-Image Writing Benchmarks
-------------------------
+Historical Image Writing Benchmarks
+-----------------------------------
 
-To evaluate the performance of saving imaging data in different formats, we conducted benchmarks on a Windows 10 system. We assessed the median disk write time for TIFF, OME-TIFF, H5, N5, and OME-Zarr formats across image resolutions of 512x512, 1024x1024, and 2048x2048 under two conditions: (A) capturing 1000 single-plane images and (B) acquiring a single z-stack composed of 1000 planes. All times are measured in milliseconds. Results are presented below. For z-stack imaging, TIFF and OME-TIFF formats achieved write speeds of up to approximately 300 Hz for a 2048x2048 camera resolution, surpassing the operational speeds of most contemporary sCMOS cameras. The Big-TIFF variant was used for both TIFF and OME-TIFF formats to accommodate the large file sizes.
+The benchmark tables below were collected on the previous file-writing stack and are
+retained as historical context. They are useful for showing the general disk-speed
+limits involved in microscopy acquisition, but they should not be interpreted as a
+benchmark of the current OME-Zarr v0.5 / Zarr v3 writer.
+
+To evaluate the historical save-path performance, we conducted benchmarks on a
+Windows 10 system. We assessed the median disk write time for TIFF, OME-TIFF, H5, N5,
+and OME-Zarr formats across image resolutions of 512x512, 1024x1024, and 2048x2048
+under two conditions: (A) capturing 1000 single-plane images and (B) acquiring a
+single z-stack composed of 1000 planes. All times are measured in milliseconds.
+Results are presented below. For z-stack imaging, TIFF and OME-TIFF formats achieved
+write speeds of up to approximately 300 Hz for a 2048x2048 camera resolution,
+surpassing the operational speeds of most contemporary sCMOS cameras. The Big-TIFF
+variant was used for both TIFF and OME-TIFF formats to accommodate the large file
+sizes.
 
 Timelapse Imaging
 ~~~~~~~~~~~~~~~~~
@@ -89,7 +116,10 @@ Z-Stack Imaging
 Additional Sources of Overhead
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The initial setup for writing H5/N5 files introduces significant overhead, and to a lesser extent for TIFF and OME-TIFF files, which elevates the average write time. However, the median write time remains consistently low and stable across most of the acquisition.
+In the historical H5/N5 measurements, initial setup introduced significant overhead,
+and to a lesser extent TIFF and OME-TIFF did as well, which elevated the average
+write time. However, the median write time remained consistently low and stable
+across most of the acquisition.
 
 Computer Specifications for Benchmarks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

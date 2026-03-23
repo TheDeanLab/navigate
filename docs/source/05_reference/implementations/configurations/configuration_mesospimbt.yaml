@@ -168,15 +168,20 @@ gui:
     count: 5
 
 
-# BDVParameters:
-# # The following parameters are used to configure the BigDataViewer
-#   # visualization. See the BigDataViewer documentation for more details.
-#   # https://imagej.net/BigDataViewer
-#   shear:
-#     shear_data: True
-#     shear_dimension: YZ # XZ, YZ, or XY
-#     shear_angle: 45
-#   rotate:
-#     rotate_data: False
-#     rotate_dimension: X # X, Y, Z
-#     rotate_angle: 0
+OMEZarrParameters:
+  # The following parameters are used to configure OME-Zarr output.
+  shear:
+    shear_data: True
+    shear_dimension: YZ # XZ, YZ, or XY
+    shear_angle: 45
+  rotate:
+    rotate_data: False
+    X: 0
+    Y: 0
+    Z: 0
+  down_sample:
+    enabled: False
+    scale_factors: [2, 4, 8, 16]
+  chunk_shape: [1, 1, 8, 256, 256]
+  shard_shape: [1, 1, 32, 256, 256]
+  compression: zstd-bitshuffle-fast

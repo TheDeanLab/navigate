@@ -1,15 +1,13 @@
+import json
 import os
+from pathlib import Path
 
-import pytest
 import numpy as np
-
-try:
-    from pydantic import ValidationError
-    from pydantic_ome_ngff.v04.multiscale import Group
-
-    pydantic = True
-except (ImportError, TypeError):
-    pydantic = False
+import pytest
+import zarr
+from ome_zarr_models.v05.hcs import HCS
+from ome_zarr_models.v05.image import Image
+from ome_zarr_models.v05.well import Well
 
 from navigate.tools.file_functions import delete_folder
 
@@ -50,7 +48,7 @@ def zarr_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
     ] = multiposition
     model.configuration["experiment"]["MicroscopeState"]["timepoints"] = timepoints
 
-    model.configuration["experiment"]["BDVParameters"] = {
+    model.configuration["experiment"]["OMEZarrParameters"] = {
         "shear": {
             "shear_data": True,
             "shear_dimension": "YZ",
@@ -63,10 +61,12 @@ def zarr_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
             "Z": 0,
         },
         "down_sample": {
-            "down_sample": False,
-            "axial_down_sample": 1,
-            "lateral_down_sample": 1,
+            "enabled": True,
+            "scale_factors": [2, 4],
         },
+        "chunk_shape": [1, 1, 8, 256, 256],
+        "shard_shape": [1, 1, 32, 256, 256],
+        "compression": "zstd-bitshuffle-fast",
     }
 
     if per_stack:
@@ -103,7 +103,7 @@ def zarr_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
             theta=data_positions[i, 3],
             f=data_positions[i, 4],
         )
-        if stop_early and np.random.rand() > 0.5:
+        if stop_early and i >= max(1, n_images // 3):
             break
 
     return ds
@@ -127,6 +127,63 @@ def close_zarr_ds(ds, file_name=None):
         pass
 
 
+def assert_hcs_store(ds):
+    store_path = Path(ds.file_name)
+    root = zarr.open_group(store_path, mode="r")
+    HCS.from_zarr(root)
+
+    well_group = root["A/1"]
+    Well.from_zarr(well_group)
+
+    field_names = sorted(name for name in list(well_group.keys()) if name.isdigit())
+    assert field_names == [str(position) for position in range(ds.positions)]
+
+    for field_name in field_names:
+        field_group = well_group[field_name]
+        Image.from_zarr(field_group)
+        level0 = field_group["0"]
+        assert level0.shape == (
+            ds.shape_t,
+            ds.shape_c,
+            ds.shape_z,
+            ds.shape_y,
+            ds.shape_x,
+        )
+        if len(ds.scale_factors) > 1:
+            for level_index in range(1, len(ds.scale_factors)):
+                assert str(level_index) in field_group
+
+    artifacts_path = store_path / "navigate" / "metadata" / "artifacts.json"
+    acquisition_path = store_path / "navigate" / "metadata" / "acquisition.json"
+    configuration_path = store_path / "navigate" / "metadata" / "configuration.json"
+    metadata_xml_path = store_path / "OME" / "METADATA.ome.xml"
+
+    assert artifacts_path.exists()
+    assert acquisition_path.exists()
+    assert configuration_path.exists()
+    assert metadata_xml_path.exists()
+
+    with open(artifacts_path, encoding="utf-8") as handle:
+        artifact_manifest = json.load(handle)
+    with open(acquisition_path, encoding="utf-8") as handle:
+        acquisition = json.load(handle)
+    with open(configuration_path, encoding="utf-8") as handle:
+        configuration = json.load(handle)
+
+    manifest_paths = {
+        (artifact["kind"], artifact["artifact_id"]): artifact["path"]
+        for artifact in artifact_manifest["artifacts"]
+    }
+    assert manifest_paths[("metadata_blob", "artifacts")] == (
+        "navigate/metadata/artifacts.json"
+    )
+    for position in range(ds.positions):
+        assert manifest_paths[("image_collection", f"field:{position}")] == f"A/1/{position}"
+
+    assert acquisition["field_names"] == field_names
+    assert "microscopes" in configuration
+
+
 @pytest.mark.parametrize("multiposition", [True, False])
 @pytest.mark.parametrize("per_stack", [True, False])
 @pytest.mark.parametrize("z_stack", [True, False])
@@ -137,15 +194,9 @@ def test_zarr_write(multiposition, per_stack, z_stack, stop_early, size):
     fn = "test.zarr"
 
     ds = zarr_ds(fn, multiposition, per_stack, z_stack, stop_early, size)
-
-    if pydantic:
-        try:
-            Group.from_zarr(ds.image)
-        except ValidationError as e:
-            print(e)
-            assert False
-
     file_name = ds.file_name
+    ds.close()
+    assert_hcs_store(ds)
 
     close_zarr_ds(ds, file_name=file_name)
 

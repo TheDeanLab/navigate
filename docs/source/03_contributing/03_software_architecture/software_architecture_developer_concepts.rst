@@ -180,7 +180,14 @@ ImageWriter Save Pipeline and Disk-Safety Guards
 
 Data Source and Metadata Abstraction Layer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-File formats are implemented behind :class:`DataSource` abstractions (TIFF/OME-TIFF, OME-Zarr, BDV-related paths), while metadata conversion is handled by metadata-source classes. This separation allows format-specific storage logic and shared acquisition metadata logic to evolve independently. New formats should follow this pattern rather than embedding file-format logic directly into acquisition threads.
+File formats are implemented behind :class:`DataSource` abstractions, while metadata
+conversion is handled by metadata-source classes. For acquisition, the primary save
+paths are OME-TIFF and OME-Zarr, and the OME-Zarr path now also uses a storage-adapter
+layer that maps logical artifacts onto the canonical HCS layout inside
+``data_store.ome.zarr``. This separation allows format-specific storage logic and
+shared acquisition metadata logic to evolve independently. New formats should follow
+this pattern rather than embedding file-format logic directly into acquisition
+threads.
 
 Controller/Sub-Controller Boundaries and Event Bus
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -758,7 +758,7 @@ class GLFrameViewController(GUIController):
         # Try to do this with Compute Shaders on GPU
         if self.autoscale.get():
             cMin, cMax, _, _ = cv2.minMaxLoc(image)
-            self.viewer.set_min_max([cMin, cMax])
+            self.set_min_max([cMin, cMax])
 
         self.display_state = self.view.live_frame.live.get()
         if self.display_state == "OpenGL":
@@ -790,7 +790,11 @@ class GLFrameViewController(GUIController):
         except AssertionError:
             return
 
-        self.viewer.set_min_max([min_counts, max_counts])
+        self.set_min_max([min_counts, max_counts])
+
+    def set_min_max(self, min_max: list):
+        for ch in range(self.number_of_channels):
+            self.viewer.set_min_max(min_max, ch=ch)
 
 class GLFrameViewer:
 

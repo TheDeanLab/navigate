@@ -38,6 +38,7 @@ import logging
 
 # Local Imports
 from navigate.model.devices.mirror.base import MirrorBase
+from navigate.model.devices.device_types import IntegratedDevice
 from navigate.model.devices.APIs.imagineoptics.imop import IMOP_Mirror
 from navigate.tools.decorators import log_initialization
 
@@ -47,8 +48,30 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class ImagineOpticsMirror(MirrorBase):
+class ImagineOpticsMirror(MirrorBase, IntegratedDevice):
     """ImageineOpticsMirror mirror class."""
+
+    @classmethod
+    def get_connect_params(cls) -> list[str]:
+        """No connection parameters needed - uses hardcoded file paths.
+        
+        Returns
+        -------
+        list
+            Empty list since no config parameters are needed.
+        """
+        return []
+
+    @classmethod
+    def connect(cls) -> IMOP_Mirror:
+        """Create and return IMOP_Mirror connection.
+        
+        Returns
+        -------
+        IMOP_Mirror
+            The mirror controller instance.
+        """
+        return IMOP_Mirror()
 
     def __init__(
         self, microscope_name, device_connection, configuration, *args, **kwargs
@@ -59,14 +82,15 @@ class ImagineOpticsMirror(MirrorBase):
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : dict
-            Dictionary containing the device connection information.
+        device_connection : IMOP_Mirror
+            The cached IMOP_Mirror connection instance from the factory.
         configuration : dict
             Dictionary containing the configuration information.
         """
         super().__init__(microscope_name, device_connection, configuration)
 
-        self.mirror_controller = IMOP_Mirror()
+        # obj: mirror controller (IMOP_Mirror)
+        self.mirror_controller = device_connection
 
         flat_path = configuration["configuration"]["microscopes"][microscope_name][
             "mirror"

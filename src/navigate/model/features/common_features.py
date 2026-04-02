@@ -1261,8 +1261,8 @@ class ZStackAcquisition:
 
         # restore z, f
         pos_dict = self.model.get_stage_position()
-        self.restore_z = pos_dict["z_pos"]
-        self.restore_f = pos_dict["f_pos"]
+        self.restore_z = pos_dict[f"{self.primary_z_axis}_pos"]
+        self.restore_f = pos_dict[f"{self.primary_f_axis}_pos"]
 
         # position: x, y, z, theta, f
         # If multiposition, get the header to know which stage is which, and then

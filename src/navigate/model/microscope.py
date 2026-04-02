@@ -450,12 +450,12 @@ class Microscope:
         logger.debug(f"Running microscope {self.microscope_name}")
         self.report_camera_settings()
         # Initialize Image Series - Attaches camera buffer and start imaging
-        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+        r = self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
 
         # calculate all the waveform
         self.shutter.open_shutter()
-
-        return self.calculate_all_waveform()
+        print("preparing acquisition")
+        return r is True and self.calculate_all_waveform()
 
     def get_available_channels(self) -> None:
         """Get the available channels for imaging.
@@ -545,7 +545,7 @@ class Microscope:
         center_y = self.configuration["experiment"]["CameraParameters"][
             self.microscope_name
         ]["center_y"]
-        self.camera.set_ROI(img_width, img_height, center_x, center_y)
+        # self.camera.set_ROI(img_width, img_height, center_x, center_y)
         return self.camera.set_ROI_and_binning(
             img_width,
             img_height,

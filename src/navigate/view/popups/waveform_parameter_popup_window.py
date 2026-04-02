@@ -455,7 +455,7 @@ class WaveformParameterPopupWindow:
                 # label=rf_waveform_labels[i],
                 input_var=tk.StringVar(),
                 # label_args={"padding": (2, 5, 5, 0)},
-                input_args={"from_": 0, "to": 100, "increment": 0.1},
+                input_args={"from_": 0, "to": 200, "increment": 1},
             )
             self.inputs[dict_labels[i]].grid(
                 row=i // 2 + row_id + 2, column=(i % 2) * 2 + 1, sticky=tk.NSEW

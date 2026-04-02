@@ -248,8 +248,10 @@ class ASIDaq(DAQBase, SerialDevice):
             tiger_axis = self.axis_map[navigate_axis].upper()
             addr = self.axis_addr[tiger_axis]
 
+            logger.debug(f"**** ASI tiger axis address: {self.axis_addr}, {tiger_axis}, {addr}")
+
             logger.debug(
-                f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}"
+                f"ASIModel: Starting {tiger_axis}-stack from {start_pos} to {end_pos} by {step_size}, current stage position {addr}"
             )
 
             self.daq.setup_z_stage(tiger_axis, addr, int(step_size * 10))

@@ -648,7 +648,7 @@ class Model:
             self.signal_thread.start()
             if self.is_data_thread_on:
                 self.data_thread.start()
-
+            # self.pause_data_thread()
             # TODO: virtual microscopes only work with data thread on currently.
             for m in self.virtual_microscopes:
                 image_writer = (
@@ -827,7 +827,7 @@ class Model:
             Called when user halts the acquisition
             """
             self.stop_acquisition = True
-
+            # self.resume_data_thread()
             if hasattr(self, "signal_container"):
                 self.signal_container.end_flag = True
             if self.signal_thread:

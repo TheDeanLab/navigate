@@ -103,7 +103,7 @@ class PhotometricsCamera(CameraBase):
         self.microscope_name = microscope_name
 
         #: obj: Camera Controller
-        self.device_connection = device_connection
+        self.camera_controller = device_connection
 
         #: dict: Configuration of the microscope
         self.configuration = configuration
@@ -129,6 +129,11 @@ class PhotometricsCamera(CameraBase):
         #: list: Frame IDs
         self._frame_ids = []
 
+        #: calculated exposure time
+        self._calculated_exposuretime = 0
+
+        self.count = 0
+
         #: dict: Camera parameters
         self.camera_parameters["x_pixels"] = self.camera_controller.sensor_size[0]
         self.camera_parameters["y_pixels"] = self.camera_controller.sensor_size[1]
@@ -140,13 +145,44 @@ class PhotometricsCamera(CameraBase):
         self.camera_controller.prog_scan_dir = 0
 
         # Photometrics camera settings from config file
-        self.camera_controller.readout_port = self.camera_parameters.get(
-            "readout_port", 0
+        self._set_readout_port_speed_and_gain()
+
+
+    def _set_readout_port_speed_and_gain(self) -> None:
+        """Set the imaging mode of the camera.
+
+        0 = Sensitivity
+        1 = Speed
+        2 = Dynamic Range
+        3 = Sub-Electron
+
+        Defaults to dynamic range mode.
+
+        parameters
+        ----------
+        readout_port : int
+            The imaging mode of the camera
+        """
+        readout_port = self.camera_parameters.get(
+            "readout_port", 2
         )
-        self.camera_controller.speed_table_index = self.camera_parameters.get(
-            "speed_table_index", 1
-        )
-        self.camera_controller.gain = self.camera_parameters.get("gain", 1)
+        self.camera_controller.readout_port = readout_port
+
+        if readout_port == 1:
+            # Speed mode. Speed can only be 0, gain can be 1 or 2
+            self.camera_controller.speed_table_index = 0
+
+            # Gain modes. 1 = Sensitivity (8bit), 2 = Full well (8bit)
+            self.camera_controller.gain = self.camera_parameters.get("gain", 1)
+
+        else:
+            # Sub-electron, sensitivity, and dynamic range modes.  Speed can only be 0,
+            # gain can only be 1
+            self.camera_controller.speed_table_index = 0
+            self.camera_controller.gain = 1
+
+        print("Readout port:", readout_port)
+
 
     def __str__(self) -> str:
         """Return string representation of PhotometricsBase object.
@@ -359,38 +395,65 @@ class PhotometricsCamera(CameraBase):
         full_chip_exposure_time : float
             Full chip exposure time (s)
         """
-
         # size of ROI
         number_rows = self.y_pixels
 
         # transform exposure time to milliseconds for Photometrics API.
         full_chip_exposure_time = full_chip_exposure_time * 1000
-
-        # equations to calculate ASLM parameters
-        line_delay = self.camera_parameters.get("unitforlinedelay", 1) / 1000
-        aslm_line_exposure = int(
-            np.ceil(full_chip_exposure_time / (1 + (1 + number_rows) / shutter_width))
-        )
-        aslm_line_delay = (
-            int(
-                np.ceil(
-                    (full_chip_exposure_time - aslm_line_exposure)
-                    / ((number_rows + 1) * line_delay)
-                )
+        print("self._calculated_exposuretime: ", self._calculated_exposuretime)
+        print("full_chip_exposure_time: ", full_chip_exposure_time)
+        if int(np.ceil(self._calculated_exposuretime)) != int(
+                np.ceil(full_chip_exposure_time)):
+            # equations to calculate ASLM parameters
+            line_delay = self.camera_parameters.get("unitforlinedelay", 1) / 1000
+            aslm_line_exposure = int(
+                np.ceil(full_chip_exposure_time / (1 + (1 + number_rows) / shutter_width))
             )
-            - 1
-        )
+            aslm_line_delay = (
+                int(
+                    np.ceil(
+                        (full_chip_exposure_time - aslm_line_exposure) / ((number_rows + 1) * line_delay)
+                    )
+                )
+                - 1
+            )
 
-        aslm_acquisition_time = (
-            (aslm_line_delay + 1) * number_rows * line_delay
-            + aslm_line_exposure
-            + (aslm_line_delay + 1) * line_delay
-        )
 
+            acquisition_time_with_integerdelay = (
+                (aslm_line_delay + 1) * number_rows * line_delay + aslm_line_exposure  + (aslm_line_delay + 1) * line_delay
+            )
+            #shorten line exposure by the difference between
+            # acquisition_time_with_integerdelay and the desired exposure time
+
+            #aslm_line_exposure = aslm_line_exposure -  (
+            # acquisition_time_with_integerdelay - full_chip_exposure_time)
+            print("line exposure 2: ",aslm_line_exposure)
+            if self.count == 0:
+                self.count += 1
+            else:
+                self._calculated_exposuretime = acquisition_time_with_integerdelay
+        else:
+            aslm_line_exposure =  self._exposure_time
+            aslm_line_delay = self._scan_delay
+            acquisition_time_with_integerdelay = full_chip_exposure_time
+
+        print("new exposure: ", full_chip_exposure_time)
         self.camera_parameters["line_interval"] = aslm_line_exposure
         self._exposure_time = aslm_line_exposure
         self._scan_delay = aslm_line_delay
-        return aslm_line_exposure / 1000, aslm_line_delay, aslm_acquisition_time / 1000
+        print("line delay: ", aslm_line_delay)
+        print("line exposure: ", aslm_line_exposure)
+
+        return aslm_line_exposure / 1000, aslm_line_delay, acquisition_time_with_integerdelay / 1000
+
+        # line_delay_unit = self.camera_parameters.get("unitforlinedelay", 3.75)
+        # exposure_time = (full_chip_exposure_time - ((shutter_width + 1) *
+        #                  line_delay_unit) / 1000000) / number_rows
+        # print("**** exposure time, line delay, full chip exposure time:",
+        #       exposure_time, shutter_width, full_chip_exposure_time)
+        # return exposure_time, shutter_width, full_chip_exposure_time
+
+
 
     def set_binning(self, binning_string: str) -> bool:
         """Set Photometrics binning mode.
@@ -489,7 +552,7 @@ class PhotometricsCamera(CameraBase):
 
     def initialize_image_series(
         self, data_buffer: Optional[list] = None, number_of_frames: int = 100
-    ) -> None:
+    ) -> bool:
         """Initialize Photometrics image series. This is for starting stacks etc.
 
         Parameters
@@ -501,7 +564,7 @@ class PhotometricsCamera(CameraBase):
         number_of_frames : int
             Number of frames.  Default is 100.
         """
-
+        print("initializing image series")
         # set camera parameters depending on acquisition mode
         self._scan_mode = self.camera_controller.prog_scan_mode
         if self._scan_mode == 1:
@@ -509,6 +572,7 @@ class PhotometricsCamera(CameraBase):
             self.camera_controller.exp_mode = "Edge Trigger"
             self.camera_controller.prog_scan_line_delay = self._scan_delay
             self.camera_controller.exp_out_mode = 4
+            self.camera_controller.speed_table_index = 0
 
         else:
             # Normal mode
@@ -535,7 +599,13 @@ class PhotometricsCamera(CameraBase):
         # a call to the camera here.
         # Start live will be called a second time from the exposure time function,
         # with the current exposure time.
-        self.camera_controller.start_live()
+        try:
+            self.camera_controller.start_live()
+        except Exception as e:
+            print("**** can't start live imaging!", e.__traceback__)
+            return False
+
+        return True
 
     def _receive_images(self) -> list[int]:
         """

@@ -405,7 +405,8 @@ class Camera:
 
         # Get the total supported ROIs
         roiCount = self.get_param(const.PARAM_ROI_COUNT, const.ATTR_MAX)
-
+        print("roiCount: ", roiCount)
+        print("self.__rois: ", len(self.__rois))
         # Check if current ROI list only contains the default
         usingDefaultRoi = False
         if len(self.__rois) == 1:

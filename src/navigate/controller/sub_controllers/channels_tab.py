@@ -522,8 +522,6 @@ class ChannelsTabController(GUIController):
         # get the primary z-stack and focus axis
         primary_z_stage = self.stack_acq_vals["z_device"].get()
         primary_z_axis = primary_z_stage.split(" - ")[1]
-        primary_f_stage = self.stack_acq_vals["f_device"].get()
-        primary_f_axis = primary_f_stage.split(" - ")[1]
 
         # Shift the start/stop positions by the relative position
         flip_flags = self.parent_controller.configuration_controller.stage_flip_flags

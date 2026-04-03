@@ -223,6 +223,23 @@ class TigerController:
             #: list[str]: Default axes sequence of the Tiger Controller
             self.default_axes_sequence = self.get_default_motor_axis_sequence()
 
+    def get_axis_info(self, axis: str):
+        """Get axis info and print to console.
+
+        Sends the INFO command for the specified axis and prints the
+        detailed axis information returned by the controller.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        """
+        print("Axis Info:", axis)
+        self.send_command(f"Info {axis}")
+        response = self.read_response()
+        for line in response.split("\r"):
+            print(line)
+
     def get_default_motor_axis_sequence(self) -> list[str]:
         """Get the default motor axis sequence from the ASI device
 
@@ -671,7 +688,9 @@ class TigerController:
         pct : float
             Percentage of the maximum speed
         """
-        local_axes_sequence = [axis for axis in self.default_axes_sequence if axis != "P"]
+        local_axes_sequence = [
+            axis for axis in self.default_axes_sequence if axis != "P"
+        ]
         if local_axes_sequence is None:
             logger.error(
                 f"{str(self)}, Default axes sequence is not set. Cannot set speed."

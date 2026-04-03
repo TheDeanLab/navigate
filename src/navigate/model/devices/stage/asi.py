@@ -154,6 +154,9 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)
 
+            for ax in self.asi_axes.keys():
+                self.asi_controller.get_axis_info(ax)
+
     def __del__(self) -> None:
         """Delete the ASI Stage connection."""
         try:

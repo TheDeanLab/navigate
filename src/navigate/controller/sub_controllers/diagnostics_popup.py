@@ -236,25 +236,29 @@ class DiagnosticsPopupController:
         times = self.extract_times(performance_log, kind="Image Display")
         self.plot_histogram(panel=2, times=times, title="Image Display Times")
 
+        # Plot the histogram of the display times from GLFrameViewer
+        times = self.extract_times(performance_log, kind="GL: Update Texture")
+        self.plot_histogram(panel=3, times=times, title="[OpenGL] Image Display Times")
+
         # Plot the histogram of the times necessary to populate the histogram.
         times = self.extract_times(performance_log, kind="Histogram")
-        self.plot_histogram(panel=3, times=times, title="Histogram Population Times")
+        self.plot_histogram(panel=4, times=times, title="Histogram Population Times")
 
         # Plot the time necessary to turn on/off lasers and send out triggers.
         # The time should closely match the waveform length (exposure time + delay).
         times = self.extract_times(performance_log, kind="DAQ Triggers")
-        self.plot_histogram(panel=4, times=times, title="DAQ Trigger Time")
+        self.plot_histogram(panel=5, times=times, title="DAQ Trigger Time")
 
         times = self.extract_times(performance_log, kind="Stage Position")
-        self.plot_histogram(panel=5, times=times, title="Get Stage Positions Time")
+        self.plot_histogram(panel=6, times=times, title="Get Stage Positions Time")
 
         # Plot the time necessary to move the Z and F stages.
         times = self.extract_times(performance_log, kind="Z/F Move")
-        self.plot_histogram(panel=6, times=times, title="Z/F Stage Move Duration")
+        self.plot_histogram(panel=7, times=times, title="Z/F Stage Move Duration")
 
         # Plot the time necessary to perform all serial communications.
         times = self.extract_times(performance_log, kind="Serial")
-        self.plot_histogram(panel=7, times=times, title="Serial Communication Time")
+        self.plot_histogram(panel=8, times=times, title="Serial Communication Time")
 
     def _filter_log_since_reset(
         self, log_content: Optional[Any]

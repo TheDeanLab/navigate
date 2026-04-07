@@ -64,9 +64,6 @@ from navigate.controller.sub_controllers import (
     MenuController,
     PluginsController,
     HistogramController,
-    GLFrameViewController
-    # MicroscopePopupController,
-    # AdaptiveOpticsPopupController,
 )
 
 from navigate.controller.thread_pool import SynchronizedThreadPool
@@ -284,14 +281,6 @@ class Controller:
         #: MultiPositionController: Multi-Position Tab Sub-Controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
-        )
-
-        # GLFrameViewController: Camera view using GLFW and OpenGL
-        # TODO: This may not be needed. We are not reusing BaseViewController as we should.
-        #       If we structure GL rendering in BaseViewController, we can eliminate the need for this separate controller 
-        #       and integrate GL rendering directly into CameraViewController.
-        self.frame_view_controller = GLFrameViewController(
-            self.view.camera_waveform.camera_tab, self
         )
 
         #: CameraViewController: Camera View Tab Sub-Controller.
@@ -659,9 +648,6 @@ class Controller:
         """
         image = self.data_buffer[image_id]
         self.camera_view_controller.try_to_display_image(image=image)
-        
-        # OpenGL rendering
-        self.frame_view_controller.try_to_display_image(image=image)
         
         self.mip_setting_controller.try_to_display_image(image=image)
         self.histogram_controller.populate_histogram(image=image)
@@ -1523,10 +1509,6 @@ class Controller:
                 )
                 self._run_on_main_thread(self.execute, "stop_acquire")
                 continue
-
-            # TODO: This is a hack... Not needed if we structure handle GL rendering in BaseViewController
-            if images_received == 0:
-                self.frame_view_controller.reset()
 
             images_received += 1 + dropped_frames
             self._run_on_main_thread(

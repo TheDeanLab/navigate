@@ -14,7 +14,6 @@ import cv2
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
-from navigate.tools.decorators import performance_monitor
 
 logger = None
 if __name__ != "__main__":

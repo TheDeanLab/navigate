@@ -427,5 +427,222 @@ class GLVolumeViewBackend:
     def __init__(self):
         
         # concurrency
-        self.cmd_q = queue.Queue()
-        self.data_q = queue.Queue()
+        self.cmd_q      = queue.Queue()
+        self.data_q     = queue.Queue()
+        self.is_running = threading.Event()
+        self.is_ready   = threading.Event()
+        self.thread     = None
+
+        # GLFW window
+        self.window = None
+
+        # GL objects (to be created in render() thread
+        #             after GL context is initialized)
+        self.shader      = None
+        self.vao         = None
+        self.camera      = None
+        self.frame_timer = FrameTimer(every=1.0)
+
+        # textures
+        self.volume_texture   = None
+        self.transfer_texture = None
+
+        # image properties
+        self.max_n_color_channels = 4
+
+    def start(self, window_dim: tuple=(800, 600)):
+        """Start the rendering thread and create the GLFW window."""
+        if self.thread and self.thread.is_alive():
+            return  # already running
+
+        self.is_running.set()
+        self.thread = threading.Thread(
+            target=self._render_thread, 
+            args=(window_dim,)
+            )
+        self.thread.start()
+
+        # Wait until the render thread signals it's ready
+        self.is_ready.wait()
+    
+    def stop(self):
+        """Stop the rendering thread and clean up resources."""
+        if not self.thread or not self.thread.is_alive():
+            return  # already stopped
+        
+        self.is_running.clear()
+
+        # Wake the queues (if waiting)
+        self.cmd_q.put(lambda: None)
+        self.data_q.put(lambda: None)
+
+        # Kill the thread
+        if self.thread:
+            self.thread.join()
+            self.thread = None
+    
+    def _set_glfw_window_visible(self, visible: bool=True):
+        if self.window:
+            glfw.set_window_attrib(
+                self.window, 
+                glfw.VISIBLE, 
+                glfw.TRUE if visible else glfw.FALSE
+                )
+            self.window_visible = visible
+
+    def _render_thread(self, window_dim: tuple):
+        global GL
+
+        try:
+            # Initialize GLFW
+            if not glfw.init():
+                raise RuntimeError("Failed to initialize GLFW!")
+            
+            # Create window and GL context
+            glfw.window_hint(glfw.VISIBLE, glfw.FALSE)  # start hidden until ready
+            glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
+            glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+            glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+            self.window = glfw.create_window(window_dim[0], window_dim[1], "Volume Viewer", None, None)
+
+            # Set GL context
+            try:
+                glfw.make_context_current(self.window)
+            except:
+                glfw.destroy_window(self.window)
+                glfw.terminate()
+                raise RuntimeError("Failed to create OpenGL context! Your system may not support the required OpenGL version.")
+
+            # Import GL after context creation
+            from OpenGL import GL as _GL
+            GL = _GL
+
+            # Set up OpenGL state
+            self._init_gl_resources()
+
+            # signal that we're ready to receive commands and data
+            self.is_ready.set()  
+
+            # run the render loop
+            self._render_loop()
+
+        except Exception as e:
+            print("[GL Thread] Fatal Error:", e)
+            traceback.print_exc()
+            self.is_ready().set()  # unblock start() if waiting
+        
+        finally:
+            # clean up GL textures
+            if self.transfer_texture:
+                GL.glDeleteTextures([self.transfer_texture])
+            if self.volume_texture:
+                GL.glDeleteTextures([self.volume_texture])
+            # try to terminate GLFW
+            try:
+                if self.window:
+                    glfw.destroy_window(self.window)
+                glfw.terminate()
+            except Exception:
+                pass
+
+    def _render_loop(self):
+        """Main render loop: process commands/data, update camera, get data and draw."""
+        
+        # Flag to ensure GPU isn't wasted rendering when there are no changes to render.
+        render_needed = False
+
+        while self.is_running.is_set() and not glfw.window_should_close(self.window):
+            
+            # Handle incoming commands
+            while True:
+                # Poll for new command
+                try:
+                    cmd = self.cmd_q.get_nowait()
+                except queue.Empty:
+                    break
+
+                # Try to execute command
+                try:
+                    cmd() # execute
+                except Exception as e:
+                    print(f"[GL Thread] Error Executing cmd={cmd}:", e)
+                    traceback.print_exc()
+                    break
+
+                # If command executes successfully, mark that we need to render
+                render_needed = True
+
+            # Handle incoming image data
+            while True:
+                try:
+                    image, z, ch = self.data_q.get_nowait()
+                except queue.Empty:
+                    break
+
+                self.add_slice(image, z, ch)
+
+                # We need to render after getting new image data
+                render_needed = True
+            
+            # Render scene (if needed)
+            if render_needed:
+                self._render_scene()
+                render_needed = False
+
+            # Get user input
+            glfw.poll_events()            
+
+    def _render_scene(self):
+        """Renders the full-screen quad with the raymarching shader."""
+        # Texture guard
+        if not (self.volume_texture and self.transfer_texture):
+            return
+
+        # Update timer
+        self.timer.tick(verbose=False)
+
+        # Set viewport (handles window resizing and frame vs volume mode)
+        vx, vy, vw, vh = self._config_gl_viewport()
+        GL.glViewport(vx, vy, vw, vh)
+
+        
+
+    def _init_gl_resources(self):
+        """Initialize shaders and set uniforms, create VAO, and set up camera."""
+
+        # Compile shader
+        self.shader = Shader(
+            vs="./shaders/simple_quad.vert", 
+            fs="./shaders/raymarch.frag", 
+            from_file=True
+            )
+
+        # Set up full-screen quad VAO
+        self.vao = GL.glGenVertexArrays(1)
+
+        # Set up camera
+        self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(100))
+
+        # Set initial shader uniforms
+        self.shader.use()
+        self._set_volume_texture_uniforms()
+        self.shader.set_float("stepWorld", 0.25)
+        self.shader.set_float("opacity", 0.15)
+
+    def _set_volume_texture_uniforms(self):
+        """Assign shader texture units for volume (n-color channels) and transfer function."""
+
+        for i in range(self.max_n_color_channels):
+            self.shader.set_int(f"volume[{i}]", i) # volume[i] = GL_TEXTUREi
+        
+        # transfer = GL_TEXTURE[max_n_color_channels] (the last texture unit)
+        self.shader.set_int("transfer", self.max_n_color_channels)
+
+    def _config_gl_viewport(self):
+        # if volume, just make viewport the full window
+        vp_w, vp_h = glfw.get_framebuffer_size(self.window)
+        x0, y0 = (0, 0)
+
+        viewport = (int(x0), int(y0), int(vp_w), int(vp_h))
+
+        return viewport

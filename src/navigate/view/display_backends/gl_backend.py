@@ -449,12 +449,14 @@ class GLVolumeViewBackend:
         self.frame_timer = FrameTimer(every=1.0)
 
         # textures
-        self.volume_textures   = None
+        self.volume_textures  = None
         self.transfer_texture = None
 
         # image properties
         self.max_n_color_channels = 4
-        self.luts = None
+        self.luts                 = None
+        self.volume_shape         = None
+        self.num_slices           = 1
 
     def start(self, window_dim: tuple=(800, 600)):
         """Start the rendering thread and create the GLFW window."""
@@ -486,7 +488,36 @@ class GLVolumeViewBackend:
         if self.thread:
             self.thread.join()
             self.thread = None
-    
+
+    def add_slice(self, image: np.ndarray, z: int, ch: int):
+        """Submit a single slice (z, ch) of the volume for rendering."""
+
+        if self.volume_shape is not None:
+            incoming_shape = (self.n_slices,) + image.shape
+            
+            # Guard against shape mismatch
+            if incoming_shape != self.volume_shape:
+                # Clear current vol shape
+                self.volume_shape = None
+                # Free textures
+                self._gl_clear_textures()
+                # Try again
+                self.add_slice(image, z, ch)
+
+            # If no mismatch, we can request the slice upload
+            self._request_slice_upload(image, z, ch)
+        else:
+            # Send a request to the queue to create a new volume texture with the new shape
+            self._request_new_volume_texture((self.num_slices,) + image.shape)
+
+            # Try to add the slice again (after texture is created)
+            self.add_slice(image, z, ch)
+
+    def set_num_channels_and_slices(self, n_channels: int, n_slices: int):
+        """Set the expected number of color channels and slices in the volume."""
+        self.max_n_color_channels = n_channels
+        self.num_slices = n_slices
+
     def _set_glfw_window_visible(self, visible: bool=True):
         if self.window:
             glfw.set_window_attrib(
@@ -495,6 +526,14 @@ class GLVolumeViewBackend:
                 glfw.TRUE if visible else glfw.FALSE
                 )
             self.window_visible = visible
+
+    def _ensure_gl_ready(self):
+        window = self.window
+        vao = self.vao
+        shader = self.shader
+
+        if not (window and vao and shader):
+            raise RuntimeError("GL not ready yet")
 
     def _render_thread(self, window_dim: tuple):
         global GL
@@ -665,11 +704,11 @@ class GLVolumeViewBackend:
 
         # Set initial shader uniforms
         self.shader.use()
-        self._set_volume_texture_uniforms()
+        self._set_volume_texture_units()
         self.shader.set_float("stepWorld", 0.25)
         self.shader.set_float("opacity", 0.15)
 
-    def _set_volume_texture_uniforms(self):
+    def _set_volume_texture_units(self):
         """Assign shader texture units for volume (n-color channels) and transfer function."""
 
         for i in range(self.max_n_color_channels):
@@ -689,8 +728,77 @@ class GLVolumeViewBackend:
         # Set on shader side
         self.shader.use()
         self.shader.set_vec2("viewport", (vw, vh))
+
+    # --- Command Enqueuing Helpers ---
     
+    def _request_new_volume_texture(self, shape: tuple):
+        """Enqueue a command to create a new GL volume texture with the given shape."""
+        
+        # Define new volume shape
+        self.volume_shape = shape
+
+        # Object-space boundaries: centered on origin
+        nx, ny, nz = 0.5*np.float32(shape) - 0.5
+        box_min = (-nx, -ny, -nz)
+        box_max = (nx, ny, nz)
+
+        # Enqueue command to create new volume texture
+        def _do():
+            self._ensure_gl_ready()
+
+            # Create textures (if needed)
+            if not self.volume_textures:
+                self._gl_make_volume_texture(shape)
+            if not self.transfer_texture:
+                self._gl_make_transfer_texture()
+            
+            # Set shader uniforms related to volume dimensions
+            self.shader.use()
+            self.shader.set_vec3("boxMin", box_min)
+            self.shader.set_vec3("boxMax", box_max)
+
+            # Reset volume texture unit assignments (unecessary..? if we always assign the same units, but safe to do here after creating new textures)
+            self._set_volume_texture_units()
+
+        # Submit to the command queue
+        self.cmd_q.put(_do)
+
+    def _request_slice_upload(self, image: np.ndarray, z: int, ch: int):
+        """Enqueue a command to upload a single slice (z, ch) of the volume texture."""
+        
+        def _do():
+            self._ensure_gl_ready()
+            self._gl_upload_slice_z(image, z, ch)
+
+        # Submit to the command queue
+        self.cmd_q.put(_do)
+
     # --- GL Texture Creation and Updating ---
+
+    def _gl_upload_slice_z(self, slice: np.ndarray, z: int, ch: int):
+        """Upload a single slice (z) of a single color channel (ch) to the volume texture."""
+        
+        ny, nx = slice.shape
+        tex = self.volume_textures[ch]
+
+        GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+
+        # update only the data for slice (z)
+        GL.glTexSubImage3D(
+            GL.GL_TEXTURE_3D, 
+            0,                                   # level
+            0,                                   # xoffset (none)
+            0,                                   # yoffset (none)
+            int(z),                              # zoffset (z-slice position)
+            nx,                                  # width
+            ny,                                  # height
+            1,                                   # depth (one slice)
+            GL.GL_RED,                           # format
+            GL.GL_UNSIGNED_SHORT,                # uint16
+            slice.astype(np.uint16, copy=False)  # image data
+        )
+
     def _gl_make_volume_texture(self, shape: tuple):
         """Allocate a GL 3D texture for a single color channel with the given shape."""
         

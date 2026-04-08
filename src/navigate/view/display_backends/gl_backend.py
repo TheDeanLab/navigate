@@ -454,6 +454,7 @@ class GLVolumeViewBackend:
 
         # image properties
         self.max_n_color_channels = 4
+        self.luts = None
 
     def start(self, window_dim: tuple=(800, 600)):
         """Start the rendering thread and create the GLFW window."""
@@ -538,10 +539,8 @@ class GLVolumeViewBackend:
         
         finally:
             # clean up GL textures
-            if self.transfer_texture:
-                GL.glDeleteTextures([self.transfer_texture])
-            if self.volume_textures:
-                GL.glDeleteTextures(len(self.volume_textures), self.volume_textures)
+            self._gl_clear_textures()
+
             # try to terminate GLFW
             try:
                 if self.window:
@@ -549,6 +548,15 @@ class GLVolumeViewBackend:
                 glfw.terminate()
             except Exception:
                 pass
+
+    def _gl_clear_textures(self):
+        """Delete existing GL textures and reset state."""
+        if self.transfer_texture:
+            GL.glDeleteTextures([self.transfer_texture])
+            self.transfer_texture = None
+        if self.volume_textures:
+            GL.glDeleteTextures(len(self.volume_textures), self.volume_textures)
+            self.volume_textures = None
 
     def _render_loop(self):
         """Main render loop: process commands/data, update camera, get data and draw."""
@@ -591,13 +599,13 @@ class GLVolumeViewBackend:
             
             # Render scene (if needed)
             if render_needed:
-                self._render_scene()
+                self._gl_render_scene()
                 render_needed = False
 
             # Get user input
             glfw.poll_events()            
 
-    def _render_scene(self):
+    def _gl_render_scene(self):
         """Renders the full-screen quad with the raymarching shader."""
         # Texture guard
         if not (self.volume_textures and self.transfer_texture):
@@ -681,3 +689,76 @@ class GLVolumeViewBackend:
         # Set on shader side
         self.shader.use()
         self.shader.set_vec2("viewport", (vw, vh))
+    
+    # --- GL Texture Creation and Updating ---
+    def _gl_make_volume_texture(self, shape: tuple):
+        """Allocate a GL 3D texture for a single color channel with the given shape."""
+        
+        nx, ny, nz = shape
+
+        # First create volume_textures
+        self.volume_textures = list(GL.glGenTextures(self.max_n_color_channels))
+
+        for tex in self.volume_textures:
+            # Bind tex to a texture unit and set parameters
+            GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
+            
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+            GL.glTexParameteri(GL.GL_TEXTURE_3D, GL.GL_TEXTURE_WRAP_R, GL.GL_CLAMP_TO_EDGE)
+
+            # Initialize empty R16 volume texture (single channel, 16-bit unsigned)
+            GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+            GL.glTexImage3D(
+                GL.GL_TEXTURE_3D, 
+                0, 
+                GL.GL_R16, 
+                nx, ny, nz, 
+                0, 
+                GL.GL_RED, 
+                GL.GL_UNSIGNED_SHORT, 
+                None # input: [[[R0, G0, B0, A0], [R1, G1, B1, A1], ... ] ... ]
+            )
+
+    def _gl_make_transfer_texture(self):
+        """Create transfer function texture (2D)"""
+        
+        # Guard against LUT is None
+        if not self.luts:
+            self.luts = [
+                [1., 1., 1., 1.], # ch0: white
+                [1., 0., 0., 1.], # ch1: red
+                [0., 1., 0., 1.], # ch2: green
+                [0., 0., 1., 1.]  # ch3: blue
+            ]
+
+        # RGBA 2D transfer textures with 4 lanes
+        rgba = np.array(self.max_n_color_channels \
+                        * [np.linspace(0, 255, 256)])[..., np.newaxis] \
+                        * np.array(self.luts)[:, np.newaxis, :]
+        rgba = rgba.astype(np.uint8)
+
+        # Create transfer texture
+        self.transfer_texture = GL.glGenTextures(1)
+        self.glBindTexture(GL.GL_TEXTURE_2D, self.transfer_texture)
+
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+        
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+        GL.glTexImage2D(
+            GL.GL_TEXTURE_2D, 
+            0,
+            GL.GL_RGBA8,
+            256, 
+            4, 
+            0,
+            GL.GL_RGBA, 
+            GL.GL_UNSIGNED_BYTE,
+            rgba # shape: (4 lanes x 256 levels x 4 rgba)
+        )               
+       

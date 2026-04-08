@@ -98,11 +98,16 @@ class Shader:
 
         GL.glUniform3fv(self.loc(name), 1, np.float32(v))
 
-    def set_mat4(self, name : str, m : Union[list, np.ndarray, glm.mat4]):
+    def set_mat4(self, name : str, m : Union[list, np.ndarray, glm.mat4], transpose: bool=False):
         if isinstance(m, glm.mat4):
             m = m.to_list()
-
-        GL.glUniformMatrix4fv(self.loc(name), 1, GL.GL_FALSE, np.float32(m))
+    
+        GL.glUniformMatrix4fv(
+            self.loc(name), 
+            1, 
+            GL.GL_FALSE if not transpose else GL.GL_TRUE, 
+            np.float32(m)
+            )
 
 class Camera:
     """
@@ -444,7 +449,7 @@ class GLVolumeViewBackend:
         self.frame_timer = FrameTimer(every=1.0)
 
         # textures
-        self.volume_texture   = None
+        self.volume_textures   = None
         self.transfer_texture = None
 
         # image properties
@@ -535,8 +540,8 @@ class GLVolumeViewBackend:
             # clean up GL textures
             if self.transfer_texture:
                 GL.glDeleteTextures([self.transfer_texture])
-            if self.volume_texture:
-                GL.glDeleteTextures([self.volume_texture])
+            if self.volume_textures:
+                GL.glDeleteTextures(len(self.volume_textures), self.volume_textures)
             # try to terminate GLFW
             try:
                 if self.window:
@@ -595,17 +600,44 @@ class GLVolumeViewBackend:
     def _render_scene(self):
         """Renders the full-screen quad with the raymarching shader."""
         # Texture guard
-        if not (self.volume_texture and self.transfer_texture):
+        if not (self.volume_textures and self.transfer_texture):
             return
 
         # Update timer
         self.timer.tick(verbose=False)
 
         # Set viewport (handles window resizing and frame vs volume mode)
-        vx, vy, vw, vh = self._config_gl_viewport()
-        GL.glViewport(vx, vy, vw, vh)
-
+        self._config_gl_viewport()
         
+        # Clear screen
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+
+        # Update camera
+        self.camera.update(self.timer.delta_time)
+
+        # Camera view-projection matrix
+        inverse_proj_view = glm.inverse(
+            self.camera.projection * self.camera.view
+        )
+        self.shader.use()
+        self.shader.set_mat4("invProjView", inverse_proj_view)
+
+        # Bind volume textures for all n-channels
+        for i, tex in enumerate(self.volume_textures):
+            GL.glActiveTexture(GL.GL_TEXTURE0 + i)
+            GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
+
+        # Bind transfer function texture (last texture unit)
+        GL.glActiveTexture(GL.GL_TEXTURE0 + self.max_n_color_channels)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.transfer_texture)
+
+        # Disable depth test, culling, and blending for volume rendering
+        GL.glDisable(GL.GL_DEPTH_TEST | GL.GL_CULL_FACE | GL.GL_BLEND)
+
+        # Draw full-screen quad (no VBO needed, vertices are generated in shader)
+        GL.glBindVertexArray(self.vao)
+        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+        GL.glBindVertexArray(0) # Unbind VAO
 
     def _init_gl_resources(self):
         """Initialize shaders and set uniforms, create VAO, and set up camera."""
@@ -640,9 +672,12 @@ class GLVolumeViewBackend:
 
     def _config_gl_viewport(self):
         # if volume, just make viewport the full window
-        vp_w, vp_h = glfw.get_framebuffer_size(self.window)
-        x0, y0 = (0, 0)
+        vw, vh = glfw.get_framebuffer_size(self.window)
+        vx, vy = (0, 0)
 
-        viewport = (int(x0), int(y0), int(vp_w), int(vp_h))
+        # Set GL viewport
+        GL.glViewport(vx, vy, vw, vh)
 
-        return viewport
+        # Set on shader side
+        self.shader.use()
+        self.shader.set_vec2("viewport", (vw, vh))

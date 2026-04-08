@@ -2344,6 +2344,26 @@ class CameraViewController(BaseViewController):
         return {"ilastik_mask": self.display_mask}
 
 
+class GLCameraViewController(CameraViewController):
+    """GL Camera View Controller Class."""
+
+    def __init__(self, view, parent_controller=None, gl_enable=False) -> None:
+        """Wrap CameraViewController with OpenGL rendering capabilities.
+
+        Parameters
+        ----------
+        view : GLCameraTab
+            The GL Camera tkinter frame that contains the widgets.
+        parent_controller : Controller
+            The parent controller of the camera view controller.
+        gl_enable : bool
+            Whether to enable OpenGL rendering.
+        """
+        super().__init__(view, parent_controller)
+
+        if gl_enable:
+            pass
+
 class MIPViewController(BaseViewController):
     """MIP View Controller Class."""
 

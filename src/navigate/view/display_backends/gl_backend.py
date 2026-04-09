@@ -32,9 +32,9 @@ class Shader:
             Whether the shader sources are in files, by default False.
         """
         if from_file:
-            with open(vs, "r") as f:
+            with open(vs, "r", encoding="utf-8") as f:
                 vs = f.read()
-            with open(fs, "r") as f:
+            with open(fs, "r", encoding="utf-8") as f:
                 fs = f.read()
             f.close()
 
@@ -493,7 +493,7 @@ class GLVolumeViewBackend:
         """Submit a single slice (z, ch) of the volume for rendering."""
 
         if self.volume_shape is not None:
-            incoming_shape = (self.n_slices,) + image.shape
+            incoming_shape = (self.num_slices,) + image.shape
             
             # Guard against shape mismatch
             if incoming_shape != self.volume_shape:
@@ -574,7 +574,7 @@ class GLVolumeViewBackend:
         except Exception as e:
             print("[GL Thread] Fatal Error:", e)
             traceback.print_exc()
-            self.is_ready().set()  # unblock start() if waiting
+            self.is_ready.set()  # unblock start() if waiting
         
         finally:
             # clean up GL textures
@@ -689,10 +689,14 @@ class GLVolumeViewBackend:
     def _init_gl_resources(self):
         """Initialize shaders and set uniforms, create VAO, and set up camera."""
 
+        import os
+        from pathlib import Path
+        shader_dir = os.path.join(Path(__file__).parent, "shaders")
+
         # Compile shader
         self.shader = Shader(
-            vs="./shaders/simple_quad.vert", 
-            fs="./shaders/raymarch.frag", 
+            vs=os.path.join(shader_dir, "simple_quad.vert"), 
+            fs=os.path.join(shader_dir, "raymarch.frag"), 
             from_file=True
             )
 
@@ -869,4 +873,27 @@ class GLVolumeViewBackend:
             GL.GL_UNSIGNED_BYTE,
             rgba # shape: (4 lanes x 256 levels x 4 rgba)
         )               
-       
+
+def main():
+    # For testing the GLVolumeViewBackend independently
+    viewer = GLVolumeViewBackend()
+    viewer.start(window_dim=(800, 600))
+
+    # Simulate adding slices (replace with actual image data)
+    for z in range(10):
+        for ch in range(viewer.max_n_color_channels):
+            dummy_slice = np.random.randint(0, 65535, size=(256, 256), dtype=np.uint16)
+            viewer.add_slice(dummy_slice, z, ch)
+
+    # Keep running until window is closed
+    try:
+        while True:
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        viewer.stop()         
+
+if __name__ == "__main__":
+    main()
+     

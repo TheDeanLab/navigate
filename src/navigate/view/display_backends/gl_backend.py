@@ -114,7 +114,7 @@ class Camera:
     Orbit (yaw/pitch + radius), pixel-accurate pan, dolly,
     and auto-recenter pivot to AABB under the cursor on RMB release.
     """
-    def __init__(self, window, parent_viewer, position=glm.vec3(0,0,5), look_at=glm.vec3(0,0,0)):
+    def __init__(self, window, parent_viewer, position=glm.vec3(100), look_at=glm.vec3(0,0,0)):
         self.window = window
         self.parent_viewer = parent_viewer
 
@@ -439,6 +439,8 @@ class GLVolumeViewBackend:
         self.luts                 = None
         self.volume_shape         = None
         self.num_slices           = 1
+        self.min_max              = [0, 65535]
+        self.curr_chan            = 0
 
     def start(self, window_dim: tuple=(800, 600)):
         """Start the rendering thread and create the GLFW window."""
@@ -503,6 +505,23 @@ class GLVolumeViewBackend:
         """Set the expected number of color channels and slices in the volume."""
         self.max_n_color_channels = n_channels
         self.num_slices = n_slices
+
+    def set_min_max(self, min_max: list, ch: int=-1):
+        if ch < 0:
+            ch = self.curr_chan
+        
+        self.min_max = min_max
+        
+        def _do():
+            self._ensure_gl_ready()
+            
+            self.shader.use()
+            self.shader.set_vec2(
+                f"cMinMax[{ch}]", 
+                np.array(min_max, dtype=np.float32)/65535.
+                )
+
+        self.cmd_q.put(_do)
 
     def _set_glfw_window_visible(self, visible: bool=True):
         if self.window:
@@ -590,55 +609,45 @@ class GLVolumeViewBackend:
         render_needed = False
 
         while self.is_running.is_set() and not glfw.window_should_close(self.window):
-            
-            # Handle incoming commands
-            while True:
-                # Poll for new command
-                try:
-                    cmd = self.cmd_q.get_nowait()
-                except queue.Empty:
-                    break
+                
+            # Keep processing until both queues are empty
+            # This is important because add_slice() may queue texture creation commands
+            had_work = True
+            while had_work:
+                had_work = False
+                
+                # Process all pending commands
+                while True:
+                    try:
+                        cmd = self.cmd_q.get_nowait()
+                        try:
+                            cmd()
+                            had_work = True
+                        except Exception as e:
+                            print(f"[GL Thread] Error executing command: {e}")
+                            traceback.print_exc()
+                    except queue.Empty:
+                        break
+                
+                # Process all pending slice data
+                while True:
+                    try:
+                        image, z, ch = self.data_q.get_nowait()
+                        self.add_slice(image, z, ch)
+                        had_work = True
+                    except queue.Empty:
+                        break
 
-                # Try to execute command
-                try:
-                    cmd() # execute
-                except Exception as e:
-                    print(f"[GL Thread] Error Executing cmd={cmd}:", e)
-                    traceback.print_exc()
-                    break
+            # Always render (even if no textures yet, to show black screen)
+            self._gl_render_scene()
+            glfw.swap_buffers(self.window)
 
-                # If command executes successfully, mark that we need to render
-                render_needed = True
-
-            # Handle incoming image data
-            while True:
-                try:
-                    image, z, ch = self.data_q.get_nowait()
-                except queue.Empty:
-                    break
-
-                self.add_slice(image, z, ch)
-
-                # We need to render after getting new image data
-                render_needed = True
-            
-            # Render scene (if needed)
-            if render_needed:
-                self._gl_render_scene()
-
-                # Swap buffers to display the rendered frame
-                glfw.swap_buffers(self.window)
-
-                render_needed = False
-
-            # Get user input
-            glfw.poll_events()            
+            # Poll events to keep window responsive
+            glfw.poll_events()
+            time.sleep(0.001)            
 
     def _gl_render_scene(self):
         """Renders the full-screen quad with the raymarching shader."""
-        # Texture guard
-        if not (self.volume_textures and self.transfer_texture):
-            return
 
         # Update timer
         self.frame_timer.tick(verbose=True)
@@ -648,6 +657,10 @@ class GLVolumeViewBackend:
         
         # Clear screen
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+
+        # Texture guard
+        if not (self.volume_textures and self.transfer_texture):
+            return
 
         # Update camera
         self.camera.update(self.frame_timer.delta_time)
@@ -675,7 +688,7 @@ class GLVolumeViewBackend:
 
         # Draw full-screen quad (no VBO needed, vertices are generated in shader)
         GL.glBindVertexArray(self.vao)
-        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 6)
         GL.glBindVertexArray(0) # Unbind VAO
 
     def _init_gl_resources(self):
@@ -696,13 +709,13 @@ class GLVolumeViewBackend:
         self.vao = GL.glGenVertexArrays(1)
 
         # Set up camera
-        self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(100))
+        self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(200), look_at=glm.vec3(0, 0, 0))
 
         # Set initial shader uniforms
         self.shader.use()
         self._set_volume_texture_units()
         self.shader.set_float("stepWorld", 0.25)
-        self.shader.set_float("opacity", 0.15)
+        self.shader.set_float("opacity", 0.10)
 
     def _set_volume_texture_units(self):
         """Assign shader texture units for volume (n-color channels) and transfer function."""
@@ -723,7 +736,7 @@ class GLVolumeViewBackend:
 
         # Set on shader side
         self.shader.use()
-        self.shader.set_vec2("viewport", (vw, vh))
+        self.shader.set_vec2("viewportSize", (vw, vh))
 
     # --- Command Enqueuing Helpers ---
     
@@ -774,6 +787,8 @@ class GLVolumeViewBackend:
     def _gl_upload_slice_z(self, slice: np.ndarray, z: int=0, ch: int=0):
         """Upload a single slice (z) of a single color channel (ch) to the volume texture."""
         
+        print(f"Uploading slice z={z} for channel {ch}...")
+
         ny, nx = slice.shape
         tex = self.volume_textures[ch]
 
@@ -866,21 +881,72 @@ class GLVolumeViewBackend:
             rgba # shape: (4 lanes x 256 levels x 4 rgba)
         )               
 
+def try_to_add_slice(viewer: GLVolumeViewBackend, image: np.ndarray, z: int, ch: int):
+
+    data = (image, z, ch)
+
+    try:
+        viewer.data_q.put_nowait(data)
+    
+    except queue.Full:
+        print(f"Data queue is full. Dropping slice z={z}, ch={ch}.")
+
+        try:
+            # Drain oldest slice
+            viewer.data_q.get_nowait()
+
+            # Confirm done
+            viewer.data_q.task_done()
+        
+        except queue.Empty:
+            pass
+
+        # Try again to add slice
+        try:
+            viewer.data_q.put_nowait(data)
+        except queue.Full:
+            return
+
 def main():
+    vol_path_0 = r"d:\OPM\divya\20260324_a02_a375_488nm_egfp_561nm_mcherry\p3001\CH00_000000.tiff"
+    vol_path_1 = r"d:\OPM\divya\20260324_a02_a375_488nm_egfp_561nm_mcherry\p3001\CH01_000000.tiff"
+
+    stack = {}
+
+    import tifffile
+    with tifffile.TiffFile(vol_path_0) as tif:
+        stack['0'] = tif.asarray()
+    with tifffile.TiffFile(vol_path_1) as tif:
+        stack['1'] = tif.asarray()
+        print("Loaded volume shape:", stack['1'].shape, "dtype:", stack['1'].dtype)
+
     # For testing the GLVolumeViewBackend independently
     viewer = GLVolumeViewBackend()
     viewer.start(window_dim=(800, 600))
     # viewer.show_window()
 
-    n_slices = 100
+    n_slices = len(stack)
 
     viewer.set_num_channels_and_slices(n_channels=4, n_slices=n_slices)
+    viewer.set_min_max([500, 35000], ch=0) # Assuming 16-bit data; adjust as needed
+    viewer.set_min_max([500, 35000], ch=1) # Assuming 16-bit data; adjust as needed
 
     # Simulate adding slices (replace with actual image data)
     for z in range(n_slices):
-        for ch in range(viewer.max_n_color_channels):
-            dummy_slice = np.random.randint(0, 65535, size=(128, 256), dtype=np.uint16)
-            viewer.add_slice(dummy_slice, z, ch)      
+        try_to_add_slice(viewer, stack['0'][z], z, 0)
+
+    for z in range(n_slices):
+        try_to_add_slice(viewer, stack['1'][z], z, 1)
+
+    # Keep the main thread alive (render thread handles everything)
+    print("Rendering. Close window to exit.")
+    try:
+        viewer.thread.join()  # Wait for render thread to finish
+    except KeyboardInterrupt:
+        pass
+    
+    viewer.stop()
+    print("Viewer stopped.")
 
 if __name__ == "__main__":
     main()

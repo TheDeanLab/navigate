@@ -255,15 +255,8 @@ class Camera:
             # 3D Events
         if action == glfw.PRESS:
             if button == glfw.MOUSE_BUTTON_LEFT:
-                if viewer.mode == "frame":
-                    # right button = crosshair in 2d mode
-                    def _do():
-                        viewer.crosshair = not viewer.crosshair
-                    viewer.cmd_q.put_nowait(_do)
-                else:
-                    # do 3d rotation
-                    self.is_rotating = True
-                    self.first_mouse = True                                        
+                self.is_rotating = True
+                self.first_mouse = True                                        
             elif button == glfw.MOUSE_BUTTON_RIGHT:
                 self.is_translating = True
                 self._was_panning = True
@@ -318,34 +311,23 @@ class Camera:
             self._recompute_position()
 
         elif self.is_translating:
-            if viewer.mode == "volume":
-                # screen pixels → world units at current radius
-                vpp = (2.0 * self.radius * math.tan(math.radians(self.FOV)*0.5)) / max(1.0, float(self.win_h))
-                sx = vpp * self.aspect_ratio * self.PAN_SENS
-                sy = vpp * self.PAN_SENS
-                pan = (-dx) * sx * self.right + (dy) * sy * self.up
-                self.look_at  += pan
-                self.position += pan
-            elif viewer.mode == "frame":
-                self.pan_xy = [
-                    -(self.last_mouse_x - self.win_w/2),
-                      self.last_mouse_y - self.win_h/2
-                ]
+            # screen pixels → world units at current radius
+            vpp = (2.0 * self.radius * math.tan(math.radians(self.FOV)*0.5)) / max(1.0, float(self.win_h))
+            sx = vpp * self.aspect_ratio * self.PAN_SENS
+            sy = vpp * self.PAN_SENS
+            pan = (-dx) * sx * self.right + (dy) * sy * self.up
+            self.look_at  += pan
+            self.position += pan
+
 
     def _scroll_move(self, dt):
         if not self.scroll_offset or dt == 0.0:
             return
-        elif self.parent_viewer.mode == "volume":
-            # exponential dolly on radius
-            scale = math.exp(-self.scroll_offset * self.ZOOM_SENS * (dt if dt > 0 else 1.0))
-            self.radius = max(self.MIN_RADIUS, self.radius * scale)
-            self._recompute_position()
-        elif self.parent_viewer.mode == "frame":
-            self.zoom_xy = np.clip(
-                self.zoom_xy + self.scroll_offset * self.ZOOM_SENS/2.0,
-                a_min=1.0,
-                a_max=10.0
-            )
+        
+        # exponential dolly on radius
+        scale = math.exp(-self.scroll_offset * self.ZOOM_SENS * (dt if dt > 0 else 1.0))
+        self.radius = max(self.MIN_RADIUS, self.radius * scale)
+        self._recompute_position()
 
         self.scroll_offset = 0.0
         
@@ -473,6 +455,10 @@ class GLVolumeViewBackend:
         # Wait until the render thread signals it's ready
         self.is_ready.wait()
     
+    def show_window(self):
+        """Make the GLFW window visible (call after start())."""
+        glfw.set_window_attrib(self.window, glfw.VISIBLE, glfw.TRUE)
+
     def stop(self):
         """Stop the rendering thread and clean up resources."""
         if not self.thread or not self.thread.is_alive():
@@ -544,7 +530,7 @@ class GLVolumeViewBackend:
                 raise RuntimeError("Failed to initialize GLFW!")
             
             # Create window and GL context
-            glfw.window_hint(glfw.VISIBLE, glfw.FALSE)  # start hidden until ready
+            # glfw.window_hint(glfw.VISIBLE, glfw.FALSE)  # start hidden until ready
             glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
             glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
             glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
@@ -651,7 +637,7 @@ class GLVolumeViewBackend:
             return
 
         # Update timer
-        self.timer.tick(verbose=False)
+        self.frame_timer.tick(verbose=True)
 
         # Set viewport (handles window resizing and frame vs volume mode)
         self._config_gl_viewport()
@@ -660,7 +646,7 @@ class GLVolumeViewBackend:
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         # Update camera
-        self.camera.update(self.timer.delta_time)
+        self.camera.update(self.frame_timer.delta_time)
 
         # Camera view-projection matrix
         inverse_proj_view = glm.inverse(
@@ -679,7 +665,9 @@ class GLVolumeViewBackend:
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.transfer_texture)
 
         # Disable depth test, culling, and blending for volume rendering
-        GL.glDisable(GL.GL_DEPTH_TEST | GL.GL_CULL_FACE | GL.GL_BLEND)
+        GL.glDisable(GL.GL_DEPTH_TEST)
+        GL.glDisable(GL.GL_CULL_FACE)
+        GL.glDisable(GL.GL_BLEND)
 
         # Draw full-screen quad (no VBO needed, vertices are generated in shader)
         GL.glBindVertexArray(self.vao)
@@ -742,9 +730,9 @@ class GLVolumeViewBackend:
         self.volume_shape = shape
 
         # Object-space boundaries: centered on origin
-        nx, ny, nz = 0.5*np.float32(shape) - 0.5
+        nz, ny, nx = 0.5*np.float32(shape) - 0.5
         box_min = (-nx, -ny, -nz)
-        box_max = (nx, ny, nz)
+        box_max = ( nx,  ny,  nz)
 
         # Enqueue command to create new volume texture
         def _do():
@@ -779,7 +767,7 @@ class GLVolumeViewBackend:
 
     # --- GL Texture Creation and Updating ---
 
-    def _gl_upload_slice_z(self, slice: np.ndarray, z: int, ch: int):
+    def _gl_upload_slice_z(self, slice: np.ndarray, z: int=0, ch: int=0):
         """Upload a single slice (z) of a single color channel (ch) to the volume texture."""
         
         ny, nx = slice.shape
@@ -806,7 +794,7 @@ class GLVolumeViewBackend:
     def _gl_make_volume_texture(self, shape: tuple):
         """Allocate a GL 3D texture for a single color channel with the given shape."""
         
-        nx, ny, nz = shape
+        nz, ny, nx = shape
 
         # First create volume_textures
         self.volume_textures = list(GL.glGenTextures(self.max_n_color_channels))
@@ -854,7 +842,7 @@ class GLVolumeViewBackend:
 
         # Create transfer texture
         self.transfer_texture = GL.glGenTextures(1)
-        self.glBindTexture(GL.GL_TEXTURE_2D, self.transfer_texture)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.transfer_texture)
 
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
@@ -878,9 +866,14 @@ def main():
     # For testing the GLVolumeViewBackend independently
     viewer = GLVolumeViewBackend()
     viewer.start(window_dim=(800, 600))
+    # viewer.show_window()
+
+    n_slices = 2
+
+    viewer.set_num_channels_and_slices(n_channels=4, n_slices=n_slices)
 
     # Simulate adding slices (replace with actual image data)
-    for z in range(10):
+    for z in range(n_slices):
         for ch in range(viewer.max_n_color_channels):
             dummy_slice = np.random.randint(0, 65535, size=(256, 256), dtype=np.uint16)
             viewer.add_slice(dummy_slice, z, ch)

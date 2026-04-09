@@ -625,6 +625,10 @@ class GLVolumeViewBackend:
             # Render scene (if needed)
             if render_needed:
                 self._gl_render_scene()
+
+                # Swap buffers to display the rendered frame
+                glfw.swap_buffers(self.window)
+
                 render_needed = False
 
             # Get user input
@@ -868,24 +872,15 @@ def main():
     viewer.start(window_dim=(800, 600))
     # viewer.show_window()
 
-    n_slices = 2
+    n_slices = 100
 
     viewer.set_num_channels_and_slices(n_channels=4, n_slices=n_slices)
 
     # Simulate adding slices (replace with actual image data)
     for z in range(n_slices):
         for ch in range(viewer.max_n_color_channels):
-            dummy_slice = np.random.randint(0, 65535, size=(256, 256), dtype=np.uint16)
-            viewer.add_slice(dummy_slice, z, ch)
-
-    # Keep running until window is closed
-    try:
-        while True:
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        viewer.stop()         
+            dummy_slice = np.random.randint(0, 65535, size=(128, 256), dtype=np.uint16)
+            viewer.add_slice(dummy_slice, z, ch)      
 
 if __name__ == "__main__":
     main()

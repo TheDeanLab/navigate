@@ -2010,6 +2010,9 @@ class CameraViewController(BaseViewController):
             else:
                 super().try_to_display_image(image)
 
+            # Intercept image and upload to 3D volume
+            self._upload_volume_slice(image, slice_idx, channel_idx)
+
         elif self.display_state == "Slice":
             requested_slice = self.view.slider.get()
             if self._should_use_overlay_mode():
@@ -2026,6 +2029,12 @@ class CameraViewController(BaseViewController):
                     requested_channel = int(requested_channel[-1]) - 1
                 if slice_idx == requested_slice and channel_idx == requested_channel:
                     super().try_to_display_image(image)
+
+    def _upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0):
+            # OpenGL: Volume Viewer slice upload
+            if  self.gl_volume_view_backend and self.gl_volume_view_backend.thread_is_running():
+                # Send to data_q for upload
+                self.gl_volume_view_backend.data_q.put_nowait((image, z, ch))
 
     def initialize_non_live_display(
         self, microscope_state: dict, camera_parameters: dict
@@ -2051,19 +2060,30 @@ class CameraViewController(BaseViewController):
             size_x=self.original_image_width,
         )
 
-        # Attempt to initialize the GL volume view backend for 3D rendering.
-        try:
-            self.gl_volume_view_backend = GLVolumeViewBackend()
-        except ImportError:
-            logger.warning(
-                "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
-            )
-            self.gl_volume_view_backend = None
-            return
+        # Try to start volume rendering
+        self._initialize_opengl_volume_rendering_backend()
 
-        # If successful, display GLFW window and start the OpenGL rendering thread.
-        if not self.gl_volume_view_backend.thread_is_running():
-            self.gl_volume_view_backend.start(window_dim=(800, 600))
+    def _initialize_opengl_volume_rendering_backend(self):
+        """If installed, create the volume render window and initialize OpenGL render thread."""
+        
+        if self.gl_volume_view_backend is None:
+            try:
+                self.gl_volume_view_backend = GLVolumeViewBackend()
+            except ImportError:
+                logger.warning(
+                    "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
+                )
+                self.gl_volume_view_backend = None
+                return
+
+        # If successful, display GLFW window and start render thread
+        self.gl_volume_view_backend.start(window_dim=(800, 600))               
+
+        # Set number of channels and slices
+        self.gl_volume_view_backend.set_num_channels_and_slices(
+            n_channels=max((4, self.number_of_channels)),
+            n_slices=max((2, self.number_of_slices))            
+        )
 
     def update_snr(self) -> None:
         """Updates the signal-to-noise ratio."""

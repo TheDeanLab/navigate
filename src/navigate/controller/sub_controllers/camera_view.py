@@ -2011,7 +2011,7 @@ class CameraViewController(BaseViewController):
                 super().try_to_display_image(image)
 
             # Intercept image and upload to 3D volume
-            self._upload_volume_slice(image, slice_idx, channel_idx)
+            self._OpenGL_upload_volume_slice(image, slice_idx, channel_idx)
 
         elif self.display_state == "Slice":
             requested_slice = self.view.slider.get()
@@ -2030,9 +2030,10 @@ class CameraViewController(BaseViewController):
                 if slice_idx == requested_slice and channel_idx == requested_channel:
                     super().try_to_display_image(image)
 
-    def _upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0):
+    def _OpenGL_upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0):
             # OpenGL: Volume Viewer slice upload
             if  self.gl_volume_view_backend and self.gl_volume_view_backend.thread_is_running():
+                z *= int(self.image_mode == "z-stack")
                 # Send to data_q for upload
                 self.gl_volume_view_backend.data_q.put_nowait((image, z, ch))
 
@@ -2061,9 +2062,9 @@ class CameraViewController(BaseViewController):
         )
 
         # Try to start volume rendering
-        self._initialize_opengl_volume_rendering_backend()
+        self._OpenGL_initialize_volume_rendering_backend()
 
-    def _initialize_opengl_volume_rendering_backend(self):
+    def _OpenGL_initialize_volume_rendering_backend(self):
         """If installed, create the volume render window and initialize OpenGL render thread."""
         
         if self.gl_volume_view_backend is None:
@@ -2082,7 +2083,7 @@ class CameraViewController(BaseViewController):
         # Set number of channels and slices
         self.gl_volume_view_backend.set_num_channels_and_slices(
             n_channels=max((4, self.number_of_channels)),
-            n_slices=max((2, self.number_of_slices))            
+            n_slices=self.number_of_slices if self.image_mode == "z-stack" else 2            
         )
 
     def update_snr(self) -> None:

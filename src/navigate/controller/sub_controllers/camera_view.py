@@ -56,6 +56,7 @@ from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path, update_config_dict
 from navigate.tools.decorators import performance_monitor
 from navigate.view.theme import get_theme_color, get_theme_font
+from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -1804,6 +1805,9 @@ class CameraViewController(BaseViewController):
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
+        # GLVolumeViewBackend: The GL volume view backend for 3D rendering.
+        self.gl_volume_view_backend = None
+
     def render(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Process the image to be displayed.
 
@@ -2046,6 +2050,20 @@ class CameraViewController(BaseViewController):
             size_y=self.original_image_height,
             size_x=self.original_image_width,
         )
+
+        # Attempt to initialize the GL volume view backend for 3D rendering.
+        try:
+            self.gl_volume_view_backend = GLVolumeViewBackend()
+        except ImportError:
+            logger.warning(
+                "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
+            )
+            self.gl_volume_view_backend = None
+            return
+
+        # If successful, display GLFW window and start the OpenGL rendering thread.
+        if not self.gl_volume_view_backend.thread_is_running():
+            self.gl_volume_view_backend.start(window_dim=(800, 600))
 
     def update_snr(self) -> None:
         """Updates the signal-to-noise ratio."""

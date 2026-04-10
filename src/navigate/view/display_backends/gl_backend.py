@@ -442,18 +442,21 @@ class GLVolumeViewBackend:
         self.min_max              = [0, 65535]
         self.curr_chan            = 0
 
+    def thread_is_running(self):
+        return self.is_running.is_set()
+
     def start(self, window_dim: tuple=(800, 600)):
         """Start the rendering thread and create the GLFW window."""
         if self.thread and self.thread.is_alive():
             return  # already running
 
-        self.is_running.set()
         self.thread = threading.Thread(
             target=self._render_thread, 
             args=(window_dim,)
             )
         self.thread.start()
-
+        self.is_running.set()
+        
         # Wait until the render thread signals it's ready
         self.is_ready.wait()
     

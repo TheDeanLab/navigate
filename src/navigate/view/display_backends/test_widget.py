@@ -1,5 +1,3 @@
-from importlib.resources import path
-
 import tifffile
 import numpy as np
 import queue
@@ -17,32 +15,6 @@ class TestWidget(tk.Frame):
         
         self.pack()
 
-def try_to_add_slice(viewer: GLVolumeViewBackend, image: np.ndarray, z: int, ch: int):
-
-    data = (image, z, ch)
-
-    try:
-        viewer.data_q.put_nowait(data)
-    
-    except queue.Full:
-        print(f"Data queue is full. Dropping slice z={z}, ch={ch}.")
-
-        try:
-            # Drain oldest slice
-            viewer.data_q.get_nowait()
-
-            # Confirm done
-            viewer.data_q.task_done()
-        
-        except queue.Empty:
-            pass
-
-        # Try again to add slice
-        try:
-            viewer.data_q.put_nowait(data)
-        except queue.Full:
-            return
-
 if __name__ == "__main__":
 
     """Test data: cancer cell in vasculature."""
@@ -56,8 +28,8 @@ if __name__ == "__main__":
     gl_backend = GLVolumeViewBackend()
     gl_backend.start()
 
-    def load_stack(path: str) -> np.ndarray:
-        with tifffile.TiffFile(path) as tif:
+    def load_stack(stack_path: str) -> np.ndarray:
+        with tifffile.TiffFile(stack_path) as tif:
             return tif.asarray()
     
     stacks = {ch: load_stack(path) for ch, path in stack_path.items()}
@@ -77,6 +49,6 @@ if __name__ == "__main__":
         for z, image in enumerate(stack):
             gl_backend.data_q.put_nowait((image, z, ch))
         
-    app.after(100, lambda: upload_stack(stacks["CH0"], ch=0))
-    app.after(100, lambda: upload_stack(stacks["CH1"], ch=1))
+    app.after(100, lambda: upload_stack(stacks["CH0"], ch=1))
+    app.after(100, lambda: upload_stack(stacks["CH1"], ch=0))
     app.mainloop()

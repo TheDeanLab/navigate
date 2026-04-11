@@ -31,8 +31,15 @@ if __name__ == "__main__":
     def load_stack(stack_path: str) -> np.ndarray:
         with tifffile.TiffFile(stack_path) as tif:
             return tif.asarray()
-    
-    stacks = {ch: load_stack(path) for ch, path in stack_path.items()}
+
+    try:
+        stacks = {ch: load_stack(path) for ch, path in stack_path.items()}
+    except FileNotFoundError:
+        print("Couldn't find stacks! Using noise.")
+        stacks = {
+            ch: np.random.randint(0, 65535, (100, 64, 128), dtype=np.uint16)
+            for ch in stack_path.keys()
+            }    
 
     def upload_stack(stack: np.ndarray, ch: int=0, downsample_factor: int=2):
         if downsample_factor > 1:

@@ -1,6 +1,5 @@
 import tifffile
 import numpy as np
-import queue
 import tkinter as tk
 
 from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
@@ -17,7 +16,9 @@ class TestWidget(tk.Frame):
 
 if __name__ == "__main__":
 
-    """Test data: cancer cell in vasculature."""
+    """Run this __main__ to test the GLVolumeViewBackend!"""
+
+    # Test data: cancer cell in vasculature
     stack_path = {
         "CH0": r"d:\OPM\divya\20260324_a02_a375_488nm_egfp_561nm_mcherry\p3001\CH00_000000.tiff",
         "CH1": r"d:\OPM\divya\20260324_a02_a375_488nm_egfp_561nm_mcherry\p3001\CH01_000000.tiff"  

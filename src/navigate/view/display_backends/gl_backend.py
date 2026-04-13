@@ -13,7 +13,7 @@ import cv2
 
 # To be imported after GLVolumeViewer render thread is 
 # initialized, so that GL context is available.
-GL = None
+from OpenGL import GL
 
 #%%
 class Shader:
@@ -565,10 +565,6 @@ class GLVolumeViewBackend:
                 glfw.destroy_window(self.window)
                 glfw.terminate()
                 raise RuntimeError("Failed to create OpenGL context! Your system may not support the required OpenGL version.")
-
-            # Import GL after context creation
-            from OpenGL import GL as _GL
-            GL = _GL
 
             # Set up OpenGL state
             self._init_gl_resources()

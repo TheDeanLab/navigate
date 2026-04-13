@@ -24,10 +24,17 @@ if __name__ == "__main__":
         "CH1": r"d:\OPM\divya\20260324_a02_a375_488nm_egfp_561nm_mcherry\p3001\CH01_000000.tiff"  
     }
 
+    stack_path = {
+        "CH0": r"C:\Users\conor\Documents\Python\tkopengl\aliasing_decon\data_reto.tif"
+    }
+
     app = TestWidget()
     
     gl_backend = GLVolumeViewBackend()
     gl_backend.start()
+
+    test_button = tk.Button(app, text="Test")
+    test_button.pack()
 
     def load_stack(stack_path: str) -> np.ndarray:
         with tifffile.TiffFile(stack_path) as tif:

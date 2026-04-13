@@ -106,10 +106,7 @@ void main()
         vec3 pos = ro + rd * t;                           // position (um)
         vec3 uvw = (pos - boxMin_um) * invBoxSize;        // [0,1]^3
 
-        // sample scalar (all 4 channels in RGBA)
-        // vec4 s = texture(volume, uvw);            
-
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < nChannels; ++i)
         {
             if (i >= nChannels) break;
 
@@ -123,7 +120,7 @@ void main()
             sW = clamp(sW, 0.0, 1.0);
 
             // 2D transfer lookup: channels arranged by row
-            float row = (float(i) + 0.5) / 4.0; // normalized row position
+            float row = (float(i) + 0.5) / float(nChannels); // normalized row position
             vec4 tf = texture(transfer, vec2(sW, row));
 
             // don't composite zeros

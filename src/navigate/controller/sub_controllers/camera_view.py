@@ -1808,6 +1808,10 @@ class CameraViewController(BaseViewController):
         # GLVolumeViewBackend: The GL volume view backend for 3D rendering.
         self.gl_volume_view_backend = None
 
+        # dict: GL volume intensity bounds
+        self._gl_vol_min = {}
+        self._gl_vol_max = {}
+
     def render(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Process the image to be displayed.
 
@@ -2030,12 +2034,35 @@ class CameraViewController(BaseViewController):
                 if slice_idx == requested_slice and channel_idx == requested_channel:
                     super().try_to_display_image(image)
 
-    def _OpenGL_upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0):
-            # OpenGL: Volume Viewer slice upload
-            if  self.gl_volume_view_backend and self.gl_volume_view_backend.thread_is_running():
-                z *= int(self.image_mode == "z-stack")
-                # Send to data_q for upload
-                self.gl_volume_view_backend.data_q.put_nowait((image, z, ch))
+    def _OpenGL_scale_volume_intensity_with_bounds(self, image: np.ndarray, ch: int=0) -> Optional[np.ndarray]:
+        if self.autoscale:
+            min_value, max_value, _, _ = cv2.minMaxLoc(image)
+
+            try:
+                self._gl_vol_min[ch] = min(self._gl_vol_min[ch], min_value)
+                self._gl_vol_max[ch] = max(self._gl_vol_max[ch], max_value)
+            except KeyError:
+                self._gl_vol_min[ch] = min_value
+                self._gl_vol_max[ch] = max_value        
+        else:
+            self._gl_vol_min[ch] = self.min_counts
+            self._gl_vol_max[ch] = self.max_counts
+        
+        # Set min/max in shader
+        self.gl_volume_view_backend.set_min_max([self._gl_vol_min[ch], self._gl_vol_max[ch]], ch)
+
+    def _OpenGL_upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0 ) -> None:
+        # OpenGL: Volume Viewer slice upload
+        if self.gl_volume_view_backend and self.gl_volume_view_backend.thread_is_running():      
+            # Update the per-channel intensity bounds for volume rendering
+            self._OpenGL_scale_volume_intensity_with_bounds(image, ch)
+
+            # Send to data_q for upload
+            self.gl_volume_view_backend.data_q.put_nowait((
+                image, 
+                z * int(self.image_mode == "z-stack"), 
+                ch
+            ))
 
     def initialize_non_live_display(
         self, microscope_state: dict, camera_parameters: dict

@@ -1,3 +1,4 @@
+import os
 import tifffile
 import numpy as np
 import tkinter as tk
@@ -17,13 +18,6 @@ class TestWidget(tk.Frame):
 if __name__ == "__main__":
 
     """Run this __main__ to test the GLVolumeViewBackend!"""
-
-    # Test data: cancer cell in vasculature
-    stack_path = {
-        "CH0": r"d:\OPM\divya\20260324_a02_a375_488nm_egfp_561nm_mcherry\p3001\CH00_000000.tiff",
-        "CH1": r"d:\OPM\divya\20260324_a02_a375_488nm_egfp_561nm_mcherry\p3001\CH01_000000.tiff"  
-    }
-
     app = TestWidget()
     
     gl_backend = GLVolumeViewBackend()
@@ -33,15 +27,31 @@ if __name__ == "__main__":
         with tifffile.TiffFile(stack_path) as tif:
             return tif.asarray()
 
+    def load_from_directory():
+        import glob
+        from tkinter import filedialog
+
+        dir_path = filedialog.askdirectory(title="Directory containing stacks:")
+        if not dir_path:
+            raise FileNotFoundError
+
+        file_list = glob.glob(os.path.join(dir_path, "*.tif*"))
+
+        stacks = {}
+        for i, f in enumerate(file_list):
+            stacks[f"CH{i}"] = load_stack(f)
+
+        return stacks
+
     try:
-        stacks = {ch: load_stack(path) for ch, path in stack_path.items()}
+        stacks = load_from_directory()
     except FileNotFoundError:
         print("Couldn't find stacks! Using noise.")
         stacks = {
             ch: np.random.randint(0, 65535, (100, 64, 128), dtype=np.uint16)
-            for ch in stack_path.keys()
+            for ch in ["CH0", "CH1"]
             }    
-        
+
     def upload_stack(stack: np.ndarray, ch: int=0, downsample_factor: int=2):
         if downsample_factor > 1:
             stack = stack[::downsample_factor, ::downsample_factor, ::downsample_factor]
@@ -53,10 +63,9 @@ if __name__ == "__main__":
 
         for z, image in enumerate(stack):
             gl_backend.data_q.put_nowait((image, z, ch))
-        
+    
     app.after(100, lambda: upload_stack(stacks["CH0"], ch=0))
     app.after(100, lambda: upload_stack(stacks["CH1"], ch=1))
-    
     app.after(100, lambda: gl_backend.request_set_channel_color(0, [1., 0., 1., 0.5]))
     app.after(100, lambda: gl_backend.request_set_channel_color(1, [0., 1., 1., 0.5]))
     

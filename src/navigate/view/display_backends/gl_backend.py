@@ -411,6 +411,10 @@ class GLVolumeViewBackend:
     Designed for efficient rendering of large 3D volumes with dynamic updates.
     Communicates with parent controller via command queue for thread safety.
     """
+    
+    # class variables
+    MAX_N_COLOR_CHANNELS = 5
+
     def __init__(self):
         
         # concurrency
@@ -434,8 +438,7 @@ class GLVolumeViewBackend:
         self.volume_textures  = None
         self.transfer_texture = None
 
-        # image properties
-        self.max_n_color_channels = 5
+        # image properties       
         self.luts                 = None
         self.volume_shape         = None
         self.num_slices           = 1
@@ -507,10 +510,15 @@ class GLVolumeViewBackend:
             # Try to add the slice again (after texture is created)
             self.add_slice(image, z, ch)
 
-    def set_num_channels_and_slices(self, n_channels: int, n_slices: int):
-        """Set the expected number of color channels and slices in the volume."""
-        self.max_n_color_channels = n_channels
-        self.num_slices = n_slices
+    def set_num_slices(self, n_slices: int):
+        """Set the expected number of slices in the volume."""
+        
+        # Enqueue
+        def _do():
+            self.num_slices = n_slices
+
+        # Send to cmd
+        self.cmd_q.put(_do)
 
     def set_min_max(self, min_max: list, ch: int=-1):
         if ch < 0:
@@ -680,7 +688,7 @@ class GLVolumeViewBackend:
             GL.glBindTexture(GL.GL_TEXTURE_3D, tex)
 
         # Bind transfer function texture (last texture unit)
-        GL.glActiveTexture(GL.GL_TEXTURE0 + self.max_n_color_channels)
+        GL.glActiveTexture(GL.GL_TEXTURE0 + self.MAX_N_COLOR_CHANNELS)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.transfer_texture)
 
         # Disable depth test, culling, and blending for volume rendering
@@ -724,15 +732,15 @@ class GLVolumeViewBackend:
         """Assign shader texture units for volume (n-color channels) and transfer function."""
 
         self.shader.use()
-        for i in range(self.max_n_color_channels):
+        for i in range(self.MAX_N_COLOR_CHANNELS):
             self.shader.set_int(f"volume[{i}]", i) # volume[i] = GL_TEXTURE0, 1, ..., 4
         
-        # transfer = GL_TEXTURE[max_n_color_channels] (the last texture unit)
-        # self.shader.set_int("transfer", self.max_n_color_channels)
+        # transfer = GL_TEXTURE[self.max_n_color_channels] (the last texture unit)
+        # self.shader.set_int("transfer", self.MAX_N_COLOR_CHANNELS)
 
     def _set_transfer_texture_unit(self):
         self.shader.use()
-        self.shader.set_int("transfer", self.max_n_color_channels) # GL_TEXTURE5
+        self.shader.set_int("transfer", self.MAX_N_COLOR_CHANNELS) # GL_TEXTURE5
 
     def _config_gl_viewport(self):
         # if volume, just make viewport the full window
@@ -848,7 +856,7 @@ class GLVolumeViewBackend:
         nz, ny, nx = shape
 
         # First create volume_textures
-        self.volume_textures = list(GL.glGenTextures(self.max_n_color_channels))
+        self.volume_textures = list(GL.glGenTextures(self.MAX_N_COLOR_CHANNELS))
 
         for tex in self.volume_textures:
             # Bind tex to a texture unit and set parameters
@@ -924,7 +932,7 @@ class GLVolumeViewBackend:
             ]
 
         # RGBA 2D transfer textures with 5 lanes
-        # rgba = np.array(self.max_n_color_channels \
+        # rgba = np.array(self.MAX_N_COLOR_CHANNELS \
         #                 * [np.linspace(0, 255, 256)])[..., np.newaxis] \
         #                 * np.array(self.luts)[:, np.newaxis, :]
         # rgba = rgba.astype(np.uint8)

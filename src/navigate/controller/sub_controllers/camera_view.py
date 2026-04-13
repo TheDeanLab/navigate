@@ -2109,7 +2109,8 @@ class CameraViewController(BaseViewController):
 
         # Set number of channels and slices
         self.gl_volume_view_backend.set_num_channels_and_slices(
-            n_channels=max((4, self.number_of_channels)),
+            # n_channels=max((4, self.number_of_channels)),
+            n_channels=5,
             n_slices=self.number_of_slices if self.image_mode == "z-stack" else 2            
         )
 

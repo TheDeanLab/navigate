@@ -435,7 +435,7 @@ class GLVolumeViewBackend:
         self.transfer_texture = None
 
         # image properties
-        self.max_n_color_channels = 4
+        self.max_n_color_channels = 5
         self.luts                 = None
         self.volume_shape         = None
         self.num_slices           = 1
@@ -785,8 +785,6 @@ class GLVolumeViewBackend:
 
     def _gl_upload_slice_z(self, slice: np.ndarray, z: int=0, ch: int=0):
         """Upload a single slice (z) of a single color channel (ch) to the volume texture."""
-        
-        print(f"Uploading slice z={z} for channel {ch}...")
 
         ny, nx = slice.shape
         tex = self.volume_textures[ch]
@@ -837,8 +835,45 @@ class GLVolumeViewBackend:
                 0, 
                 GL.GL_RED, 
                 GL.GL_UNSIGNED_SHORT, 
-                None # input: [[[R0, G0, B0, A0], [R1, G1, B1, A1], ... ] ... ]
+                None
             )
+
+    def _gl_set_channel_lut(self, ch: int=0, rgba_color: list[float]=[1., 1., 1., 1.]):
+        
+        if not self.transfer_texture:
+            self._gl_make_transfer_texture()
+            self._gl_set_channel_lut(ch, rgba_color)
+
+        # Work with transfer texture
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.transfer_texture)
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+
+        # Set transfer channel strip for specific channel
+        GL.glTexSubImage2D(
+            GL.GL_TEXTURE_2D,
+            0,                   # level
+            0,                   # xoffset (none)
+            ch,                  # yoffset (none)
+            256,                 # width
+            1,                   # height
+            GL.GL_RGBA,          # format
+            GL.GL_UNSIGNED_BYTE, # uint8
+            self._create_u8_rgba_ramp(rgba_color)  
+        )
+
+    def _create_u8_rgba_ramp(self, x: list):
+        if np.ndim(x) == 2:
+            output = []
+            for color in x:
+                output.append(self._create_u8_rgba_ramp(color))
+        elif np.ndim(x) == 1:
+            output = np.linspace(0, 255, 256)[..., np.newaxis] \
+                   * np.array(x)[np.newaxis, :]
+        else:
+            print(f"Invalid color list dimensions! ndim={np.ndim(x)}")
+            raise ValueError
+        
+        return np.asarray(output).astype(np.uint8)
 
     def _gl_make_transfer_texture(self):
         """Create transfer function texture (2D)"""
@@ -849,14 +884,16 @@ class GLVolumeViewBackend:
                 [1., 1., 1., 1.], # ch0: white
                 [1., 0., 0., 1.], # ch1: red
                 [0., 1., 0., 1.], # ch2: green
-                [0., 0., 1., 1.]  # ch3: blue
+                [0., 0., 1., 1.], # ch3: blue
+                [1., 1., 0., 1.]  # ch4: yellow
             ]
 
-        # RGBA 2D transfer textures with 4 lanes
-        rgba = np.array(self.max_n_color_channels \
-                        * [np.linspace(0, 255, 256)])[..., np.newaxis] \
-                        * np.array(self.luts)[:, np.newaxis, :]
-        rgba = rgba.astype(np.uint8)
+        # RGBA 2D transfer textures with 5 lanes
+        # rgba = np.array(self.max_n_color_channels \
+        #                 * [np.linspace(0, 255, 256)])[..., np.newaxis] \
+        #                 * np.array(self.luts)[:, np.newaxis, :]
+        # rgba = rgba.astype(np.uint8)
+        rgba = self._create_u8_rgba_ramp(self.luts)
 
         # Create transfer texture
         self.transfer_texture = GL.glGenTextures(1)
@@ -873,7 +910,7 @@ class GLVolumeViewBackend:
             0,
             GL.GL_RGBA8,
             256, 
-            4, 
+            len(rgba), 
             0,
             GL.GL_RGBA, 
             GL.GL_UNSIGNED_BYTE,

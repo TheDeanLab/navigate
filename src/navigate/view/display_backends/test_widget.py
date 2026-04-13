@@ -42,6 +42,11 @@ if __name__ == "__main__":
             for ch in stack_path.keys()
             }    
 
+    colors = [
+        [1., 0., 1., 1.],
+        [1., 1., 0., 1.], 
+    ]
+
     def upload_stack(stack: np.ndarray, ch: int=0, downsample_factor: int=2):
         if downsample_factor > 1:
             stack = stack[::downsample_factor, ::downsample_factor, ::downsample_factor]
@@ -50,7 +55,7 @@ if __name__ == "__main__":
         gl_backend.set_min_max([min_pix, max_pix/4], ch=ch)
 
         gl_backend.set_num_channels_and_slices(
-            n_channels=4,
+            n_channels=5,
             n_slices=len(stack)
         )
 

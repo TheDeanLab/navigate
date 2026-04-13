@@ -2,8 +2,8 @@
 
 out vec4 FragColor;
 
-// volume texture array (4-channels)
-uniform sampler3D volume[4];
+// volume texture array (5-channels)
+uniform sampler3D volume[5];
 
 // transfer texture
 uniform sampler2D transfer;
@@ -18,11 +18,11 @@ uniform float stepWorld;       // step length in WORLD units
 
 // contrast params
 uniform float opacity = 0.15;  // global density/opacity
-uniform vec2 cMinMax[4];
+uniform vec2 cMinMax[5];
 uniform float gamma   = 1.0;
 
 // channels
-uniform int nChannels = 4;
+uniform int nChannels = 5; // hard-coded: navigate has 5 channels max
 
 // OPM parameters
 uniform float shear_angle = 50.0;   // degrees

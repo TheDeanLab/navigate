@@ -496,10 +496,13 @@ class GLVolumeViewBackend:
                 self.add_slice(image, z, ch)
 
             # If no mismatch, we can request the slice upload
-            self._request_slice_upload(image, z, ch)
+            self.request_slice_upload(image, z, ch)
         else:
             # Send a request to the queue to create a new volume texture with the new shape
-            self._request_new_volume_texture((self.num_slices,) + image.shape)
+            self.request_new_volume_texture((self.num_slices,) + image.shape)
+
+            # Request also a new transfer texture
+            self.request_new_transfer_texture()
 
             # Try to add the slice again (after texture is created)
             self.add_slice(image, z, ch)
@@ -713,17 +716,23 @@ class GLVolumeViewBackend:
         # Set initial shader uniforms
         self.shader.use()
         self._set_volume_texture_units()
+        self._set_transfer_texture_unit()
         self.shader.set_float("stepWorld", 0.25)
-        self.shader.set_float("opacity", 0.10)
+        self.shader.set_float("opacity", 0.15)
 
     def _set_volume_texture_units(self):
         """Assign shader texture units for volume (n-color channels) and transfer function."""
 
+        self.shader.use()
         for i in range(self.max_n_color_channels):
-            self.shader.set_int(f"volume[{i}]", i) # volume[i] = GL_TEXTUREi
+            self.shader.set_int(f"volume[{i}]", i) # volume[i] = GL_TEXTURE0, 1, ..., 4
         
         # transfer = GL_TEXTURE[max_n_color_channels] (the last texture unit)
-        self.shader.set_int("transfer", self.max_n_color_channels)
+        # self.shader.set_int("transfer", self.max_n_color_channels)
+
+    def _set_transfer_texture_unit(self):
+        self.shader.use()
+        self.shader.set_int("transfer", self.max_n_color_channels) # GL_TEXTURE5
 
     def _config_gl_viewport(self):
         # if volume, just make viewport the full window
@@ -739,7 +748,7 @@ class GLVolumeViewBackend:
 
     # --- Command Enqueuing Helpers ---
     
-    def _request_new_volume_texture(self, shape: tuple):
+    def request_new_volume_texture(self, shape: tuple):
         """Enqueue a command to create a new GL volume texture with the given shape."""
         
         # Define new volume shape
@@ -757,8 +766,8 @@ class GLVolumeViewBackend:
             # Create textures (if needed)
             if not self.volume_textures:
                 self._gl_make_volume_texture(shape)
-            if not self.transfer_texture:
-                self._gl_make_transfer_texture()
+            # if not self.transfer_texture:
+            #     self._gl_make_transfer_texture()
             
             # Set shader uniforms related to volume dimensions
             self.shader.use()
@@ -771,7 +780,22 @@ class GLVolumeViewBackend:
         # Submit to the command queue
         self.cmd_q.put(_do)
 
-    def _request_slice_upload(self, image: np.ndarray, z: int, ch: int):
+    def request_new_transfer_texture(self):
+        
+        # Enqueue command to create new transfer texture
+        def _do():
+            self._ensure_gl_ready()
+
+            if not self.transfer_texture:
+                self._gl_make_transfer_texture()
+
+            # Set the transfer texture unit to TEXTURE0
+            self._set_transfer_texture_unit()
+
+        # Submit to the command queue
+        self.cmd_q.put(_do)
+
+    def request_slice_upload(self, image: np.ndarray, z: int, ch: int):
         """Enqueue a command to upload a single slice (z, ch) of the volume texture."""
         
         def _do():
@@ -781,7 +805,18 @@ class GLVolumeViewBackend:
         # Submit to the command queue
         self.cmd_q.put(_do)
 
-    # --- GL Texture Creation and Updating ---
+    def request_set_channel_color(self, ch: int, color: list[float]):
+        """Enqueue an update to specific row in the transfer texture.
+           Corresponds to that channel's color."""
+        
+        def _do():
+            self._ensure_gl_ready()
+            self._gl_set_channel_lut(ch, color)
+
+        # Submit to the command queue
+        self.cmd_q.put(_do)
+
+    # --- (Private) GL-specific methods ---
 
     def _gl_upload_slice_z(self, slice: np.ndarray, z: int=0, ch: int=0):
         """Upload a single slice (z) of a single color channel (ch) to the volume texture."""

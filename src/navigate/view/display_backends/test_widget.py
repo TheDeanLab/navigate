@@ -41,12 +41,7 @@ if __name__ == "__main__":
             ch: np.random.randint(0, 65535, (100, 64, 128), dtype=np.uint16)
             for ch in stack_path.keys()
             }    
-
-    colors = [
-        [1., 0., 1., 1.],
-        [1., 1., 0., 1.], 
-    ]
-
+        
     def upload_stack(stack: np.ndarray, ch: int=0, downsample_factor: int=2):
         if downsample_factor > 1:
             stack = stack[::downsample_factor, ::downsample_factor, ::downsample_factor]
@@ -62,6 +57,10 @@ if __name__ == "__main__":
         for z, image in enumerate(stack):
             gl_backend.data_q.put_nowait((image, z, ch))
         
-    app.after(100, lambda: upload_stack(stacks["CH0"], ch=1))
-    app.after(100, lambda: upload_stack(stacks["CH1"], ch=0))
+    app.after(100, lambda: upload_stack(stacks["CH0"], ch=0))
+    app.after(100, lambda: upload_stack(stacks["CH1"], ch=1))
+    
+    app.after(100, lambda: gl_backend.request_set_channel_color(0, [1., 0., 1., 0.5]))
+    app.after(100, lambda: gl_backend.request_set_channel_color(1, [0., 1., 1., 0.5]))
+    
     app.mainloop()

@@ -19,7 +19,7 @@ uniform float stepWorld;       // step length in WORLD units
 // contrast params
 uniform float opacity = 0.15;  // global density/opacity
 uniform vec2 cMinMax[5];
-uniform float gamma   = 1.0;
+uniform float cGamma[5] = float[5](1.0, 1.0, 1.0, 1.0, 1.0);
 
 // channels
 uniform int nChannels = 5; // hard-coded: navigate has 5 channels max
@@ -128,7 +128,7 @@ void main()
 
             // optional gamma
             vec3 rgb = tf.rgb;
-            if (gamma != 1.0) rgb = pow(rgb, vec3(gamma));
+            if (cGamma[i] != 1.0) rgb = pow(rgb, vec3(cGamma[i]));
 
             // Beer-Lambert step-invariant opacity based on tf.alpha
             float a = 1.0 - exp(-opacity * tf.a * kStep);

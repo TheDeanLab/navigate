@@ -505,7 +505,8 @@ class GLVolumeViewBackend:
             self.request_new_volume_texture((self.num_slices,) + image.shape)
 
             # Request also a new transfer texture
-            self.request_new_transfer_texture()
+            if not self.transfer_texture:
+                self.request_new_transfer_texture()
 
             # Try to add the slice again (after texture is created)
             self.add_slice(image, z, ch)
@@ -533,6 +534,21 @@ class GLVolumeViewBackend:
             self.shader.set_vec2(
                 f"cMinMax[{ch}]", 
                 np.array(min_max, dtype=np.float32)/65535.
+                )
+
+        self.cmd_q.put(_do)
+
+    def set_gamma(self, gamma: float, ch: int=-1):
+        if ch < 0:
+            ch = self.curr_chan
+        
+        def _do():
+            self._ensure_gl_ready()
+            
+            self.shader.use()
+            self.shader.set_float(
+                f"cGamma[{ch}]", 
+                gamma
                 )
 
         self.cmd_q.put(_do)
@@ -660,7 +676,7 @@ class GLVolumeViewBackend:
         """Renders the full-screen quad with the raymarching shader."""
 
         # Update timer
-        self.frame_timer.tick(verbose=True)
+        self.frame_timer.tick(verbose=False)
 
         # Set viewport (handles window resizing and frame vs volume mode)
         self._config_gl_viewport()
@@ -817,6 +833,9 @@ class GLVolumeViewBackend:
         """Enqueue an update to specific row in the transfer texture.
            Corresponds to that channel's color."""
         
+        if not self.transfer_texture:
+            self.request_new_transfer_texture()
+
         def _do():
             self._ensure_gl_ready()
             self._gl_set_channel_lut(ch, color)

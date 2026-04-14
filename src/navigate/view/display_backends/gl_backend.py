@@ -443,7 +443,10 @@ class GLVolumeViewBackend:
         self.volume_shape         = None
         self.num_slices           = 1
         self.min_max              = [0, 65535]
-        self.curr_chan            = 0
+        
+        # state
+        self._ch = 0
+        self._z  = 0
 
     def thread_is_running(self):
         return self.is_running.is_set()
@@ -511,6 +514,15 @@ class GLVolumeViewBackend:
             # Try to add the slice again (after texture is created)
             self.add_slice(image, z, ch)
 
+    def set_channel_and_slice_idx(self, ch: int, z: int):
+        """Set the current channel and slice index for rendering."""
+        self._ch = ch
+        self._z  = z
+
+    def submit_slice_given_state(self, image: np.ndarray):
+        """Submit slice data to the GL thread for upload."""
+        self.data_q.put((image, self._z, self._ch))
+
     def set_num_slices(self, n_slices: int):
         """Set the expected number of slices in the volume."""
         
@@ -523,7 +535,7 @@ class GLVolumeViewBackend:
 
     def set_min_max(self, min_max: list, ch: int=-1):
         if ch < 0:
-            ch = self.curr_chan
+            ch = self._ch
         
         self.min_max = min_max
         
@@ -540,7 +552,7 @@ class GLVolumeViewBackend:
 
     def set_gamma(self, gamma: float, ch: int=-1):
         if ch < 0:
-            ch = self.curr_chan
+            ch = self._ch
         
         def _do():
             self._ensure_gl_ready()

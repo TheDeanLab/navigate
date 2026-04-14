@@ -63,10 +63,11 @@ if __name__ == "__main__":
 
         for z, image in enumerate(stack):
             gl_backend.data_q.put_nowait((image, z, ch))
-    
-    app.after(100, lambda: upload_stack(stacks["CH0"], ch=0))
-    app.after(100, lambda: upload_stack(stacks["CH1"], ch=1))
+            
     app.after(100, lambda: gl_backend.request_set_channel_color(0, [1., 0., 1., 0.5]))
-    app.after(100, lambda: gl_backend.request_set_channel_color(1, [0., 1., 1., 0.5]))
+    app.after(100, lambda: upload_stack(stacks["CH0"], ch=0))
+    # app.after(100, lambda: upload_stack(stacks["CH1"], ch=1))
+    
+    # app.after(100, lambda: gl_backend.request_set_channel_color(1, [0., 1., 1., 0.5]))
     
     app.mainloop()

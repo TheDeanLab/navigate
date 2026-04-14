@@ -132,6 +132,9 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         super().__init__(view, parent_controller)
 
+        # GLVolumeViewBackend: OpenGL backend (initialized in CameraViewController.initialize_non_live_display)
+        self.gl_volume_view_backend = None
+
         #: float: Max frames per second (0 or None disables throttling)
         self.max_fps: float = 20.0
 
@@ -637,6 +640,9 @@ class BaseViewController(GUIController, ABaseViewController):
         """Scale an image to uint8 using channel-specific or single-channel bounds."""
         min_value, max_value, _, _ = cv2.minMaxLoc(image)
 
+        # OpenGL hook: set min/max in shader
+        self.gl_volume_view_backend.set_min_max(min_value, max_value)
+
         if autoscale:
             if max_value > min_value:
                 scale = 255.0 / (max_value - min_value)
@@ -1047,7 +1053,7 @@ class BaseViewController(GUIController, ABaseViewController):
         Parameters
         ----------
         image : np.ndarray
-            8-bit image data (uint8), scaled to [0..255].
+            8-bit image data (uint8), scaled to [0..255]. 
 
         Returns
         -------
@@ -1805,12 +1811,12 @@ class CameraViewController(BaseViewController):
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
-        # GLVolumeViewBackend: The GL volume view backend for 3D rendering.
-        self.gl_volume_view_backend = None
+        # # GLVolumeViewBackend: The GL volume view backend for 3D rendering.
+        # self.gl_volume_view_backend = None
 
-        # dict: GL volume intensity bounds
-        self._gl_vol_min = {}
-        self._gl_vol_max = {}
+        # # dict: GL volume intensity bounds
+        # self._gl_vol_min = {}
+        # self._gl_vol_max = {}
 
     def render(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Process the image to be displayed.
@@ -1999,6 +2005,9 @@ class CameraViewController(BaseViewController):
             image=image, channel=channel_idx, slice_index=slice_idx
         )
 
+        # Tell GLVolumeViewBackend what the current slice and channel are
+        self.gl_volume_view_backend.set_current_slice_and_channel(slice_idx, channel_idx)
+
         # Update image according to the display state.
         self.display_state = self.view.live_frame.live.get()
         if self.display_state == "Live":
@@ -2013,12 +2022,12 @@ class CameraViewController(BaseViewController):
                     super().try_to_display_image(image)
 
                     # Update the channel color in the GL shader for volume rendering if active channel is being displayed
-                    self._OpenGL_update_active_channel_color(active_channel)
+                    # self._OpenGL_update_active_channel_color(active_channel)
             else:
                 super().try_to_display_image(image)
 
             # Intercept image and upload to 3D volume
-            self._OpenGL_upload_volume_slice(image, slice_idx, channel_idx)
+            # self._OpenGL_upload_volume_slice(image, slice_idx, channel_idx)
 
         elif self.display_state == "Slice":
             requested_slice = self.view.slider.get()
@@ -2037,55 +2046,58 @@ class CameraViewController(BaseViewController):
                 if slice_idx == requested_slice and channel_idx == requested_channel:
                     super().try_to_display_image(image)
 
-    def _OpenGL_update_active_channel_color(self, active_channel: str):
-        """Update the active channel color in the GL volume shader."""
-        channel_state = self._get_channel_overlay_state(active_channel)
-        lut_name = channel_state.get("lut_name", "Gray")
-        norm_channel_color_rgb = [float(c)/255. for c in IMAGEJ_CHANNEL_COLOR_BGR[lut_name]]
-        channel_idx = self.selected_channels.index(active_channel)
+    # def _OpenGL_update_active_channel_color(self, active_channel: str):
+    #     """Update the active channel color in the GL volume shader."""
+    #     channel_state = self._get_channel_overlay_state(active_channel)
+    #     lut_name = channel_state.get("lut_name", "Gray")
+    #     norm_channel_color_rgb = [float(c)/255. for c in IMAGEJ_CHANNEL_COLOR_BGR[lut_name]]
+    #     channel_idx = self.selected_channels.index(active_channel)
         
-        # Update channel color in GL shader for volume rendering
-        self.gl_volume_view_backend.request_set_channel_color(channel_idx, norm_channel_color_rgb)
+    #     print(f"Updating active channel {active_channel} color to {lut_name} = {norm_channel_color_rgb} in GL shader for volume rendering")
 
-    def _OpenGL_scale_volume_intensity_with_bounds(self, ch: int=0, min_max: tuple[float, float]=(0., 65535.)) -> None:
+    #     # Update channel color in GL shader for volume rendering
+    #     self.gl_volume_view_backend.request_set_channel_color(channel_idx, norm_channel_color_rgb + [1.])
 
-        # Already computed in BaseViewController._scale_image_intensity_with_bounds
-        min_value, max_value = min_max
+    # def _OpenGL_scale_volume_intensity_with_bounds(self, ch: int=0, min_max: tuple[float, float]=(0., 65535.)) -> None:
 
-        if self.autoscale:
-            try:
-                self._gl_vol_min[ch] = min(self._gl_vol_min[ch], min_value)
-                self._gl_vol_max[ch] = max(self._gl_vol_max[ch], max_value)
-            except KeyError:
-                self._gl_vol_min[ch] = min_value
-                self._gl_vol_max[ch] = max_value        
-        else:
-            self._gl_vol_min[ch] = min_value
-            self._gl_vol_max[ch] = max_value
+    #     # Already computed in BaseViewController._scale_image_intensity_with_bounds
+    #     min_value, max_value = min_max
 
-        print(f"Channel {ch} volume rendering bounds updated to: {self._gl_vol_min[ch]}, {self._gl_vol_max[ch]}")
+    #     if self.autoscale:
+    #         try:
+    #             self._gl_vol_min[ch] = min(self._gl_vol_min[ch], min_value)
+    #             self._gl_vol_max[ch] = max(self._gl_vol_max[ch], max_value)
+    #         except KeyError:
+    #             self._gl_vol_min[ch] = min_value
+    #             self._gl_vol_max[ch] = max_value        
+    #     else:
+    #         self._gl_vol_min[ch] = min_value
+    #         self._gl_vol_max[ch] = max_value
 
-        # Request min/max update enqueue for fragment shader
-        self.gl_volume_view_backend.set_min_max([self._gl_vol_min[ch], self._gl_vol_max[ch]], ch)
+    #     print(f"Channel {ch} volume rendering bounds updated to: {self._gl_vol_min[ch]}, {self._gl_vol_max[ch]}")
 
-    def _OpenGL_upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0 ) -> None:
-        # OpenGL: Volume Viewer slice upload
-        if self.gl_volume_view_backend and self.gl_volume_view_backend.thread_is_running():
-            # If new volume, reset intensity bounds
-            if z == 0:
-                self._gl_vol_max.pop(ch, None)
-                self._gl_vol_min.pop(ch, None)
+    #     # Request min/max update enqueue for fragment shader
+    #     self.gl_volume_view_backend.set_min_max([self._gl_vol_min[ch], self._gl_vol_max[ch]], ch)
+    #     # self.gl_volume_view_backend.set_min_max([0, 4000], ch)
 
-            # Update the per-channel intensity bounds for volume rendering
-            min_value, max_value, _, _ = cv2.minMaxLoc(image)
-            self._OpenGL_scale_volume_intensity_with_bounds(ch, (min_value, max_value))
+    # def _OpenGL_upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0 ) -> None:
+    #     # OpenGL: Volume Viewer slice upload
+    #     if self.gl_volume_view_backend and self.gl_volume_view_backend.thread_is_running():
+    #         # If new volume, reset intensity bounds
+    #         if z == 0:
+    #             self._gl_vol_max.pop(ch, None)
+    #             self._gl_vol_min.pop(ch, None)
 
-            # Send to data_q for upload
-            self.gl_volume_view_backend.data_q.put_nowait((
-                image, 
-                z * int(self.image_mode == "z-stack"), 
-                ch
-            ))
+    #         # Update the per-channel intensity bounds for volume rendering
+    #         min_value, max_value, _, _ = cv2.minMaxLoc(image)
+    #         self._OpenGL_scale_volume_intensity_with_bounds(ch, (min_value, max_value))
+
+    #         # Send to data_q for upload
+    #         self.gl_volume_view_backend.data_q.put_nowait((
+    #             image, 
+    #             z * int(self.image_mode == "z-stack"), 
+    #             ch
+    #         ))
 
     def initialize_non_live_display(
         self, microscope_state: dict, camera_parameters: dict

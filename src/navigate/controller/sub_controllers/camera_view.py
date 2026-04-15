@@ -2006,7 +2006,7 @@ class CameraViewController(BaseViewController):
         )
 
         # Tell GLVolumeViewBackend what the current slice and channel are
-        self.gl_volume_view_backend.set_current_slice_and_channel(slice_idx, channel_idx)
+        self.gl_volume_view_backend.set_channel_and_slice_idx(slice_idx, channel_idx)
 
         # Update image according to the display state.
         self.display_state = self.view.live_frame.live.get()

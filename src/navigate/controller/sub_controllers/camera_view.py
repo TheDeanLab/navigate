@@ -132,7 +132,9 @@ class BaseViewController(GUIController, ABaseViewController):
         """
         super().__init__(view, parent_controller)
 
-        # GLVolumeViewBackend: OpenGL backend (initialized in CameraViewController.initialize_non_live_display)
+        # GLVolumeViewBackend: OpenGL backend 
+        # Initialized once in CameraViewController.initialize_non_live_display
+        # Conditional on successful PyOpenGL import
         self.gl_volume_view_backend = None
 
         #: float: Max frames per second (0 or None disables throttling)
@@ -1561,9 +1563,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         """
 
-        # Most universal place for OpenGL shader setting update hook
-        self._OpenGL_update_channel_settings_hook()
-
         try:
             h, w = image.shape[:2]
 
@@ -1589,40 +1588,6 @@ class BaseViewController(GUIController, ABaseViewController):
 
         except tk.TclError:
             return
-
-    def _OpenGL_update_channel_settings_hook(self):
-        """Hook for OpenGL-based views to update channel settings."""
-
-        print("[DEBUG] OpenGL shader uniform update hook called.")
-
-        # TODO: Use self.overlay_channel_settings to set all shader uniforms every populate_image call
-        for channel in self.selected_channels:
-            channel_state = self._get_channel_overlay_state(channel)
-            
-            channel_idx = int(channel.replace("CH", "")) - 1
-
-            print(f"[DEBUG] Channel: {channel_idx}")
-            print(f"channel_state:   {channel_state}")
-
-            # OpenGL: scale min/max counts
-            min_counts = channel_state["min_counts"]
-            max_counts = channel_state["max_counts"]
-
-            print(f"Setting min/max counts to: {min_counts}, {max_counts}")
-            self.gl_volume_view_backend.set_min_max(
-                [min_counts, max_counts], 
-                channel_idx
-            )
-
-            # OpenGL: set channel color
-            lut_name = channel_state["lut_name"]
-            imj_color_bgr = [float(c)/255. for c in IMAGEJ_CHANNEL_COLOR_BGR[lut_name]]
-            color_rgba = imj_color_bgr[::-1] + [channel_state["alpha"]]
-            
-            print(f"Setting channel color to: {color_rgba}")
-            self.gl_volume_view_backend.request_set_channel_color(
-                channel_idx, color_rgba
-            )
 
     def render(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Process the image to be displayed.
@@ -1781,6 +1746,88 @@ class BaseViewController(GUIController, ABaseViewController):
             return
 
         self._redraw_current_view()
+
+    # --- OpenGL volume rendering methods ---
+
+    def _OpenGL_initialize_volume_rendering_backend(self):
+        """If installed, create the volume render window and initialize OpenGL render thread."""
+        
+        if self.gl_volume_view_backend is None:
+            try:
+                self.gl_volume_view_backend = GLVolumeViewBackend()
+            except ImportError:
+                logger.warning(
+                    "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
+                )
+                self.gl_volume_view_backend = None
+                return
+
+        # If successful, display GLFW window and start render thread
+        self.gl_volume_view_backend.start(window_dim=(800, 600))               
+
+        # Set number of channels and slices
+        self.gl_volume_view_backend.set_num_slices(
+            self.number_of_slices if self.image_mode == "z-stack" else 2            
+        )    
+
+    def _OpenGL_update_channel_settings_hook(self):
+        """Hook for OpenGL-based views to update channel settings."""
+
+        # Guard against backend non-init
+        if self.gl_volume_view_backend is None:
+            return
+
+        print("[DEBUG] OpenGL shader uniform update hook called.")
+
+        # TODO: Use self.overlay_channel_settings to set all shader uniforms every populate_image call
+        for channel in self.selected_channels:
+            channel_state = self._get_channel_overlay_state(channel)
+            
+            channel_idx = int(channel.replace("CH", "")) - 1
+
+            print(f"[DEBUG] Channel: {channel_idx}")
+            print(f"channel_state:   {channel_state}")
+
+            # OpenGL: scale min/max counts
+            min_counts = channel_state["min_counts"]
+            max_counts = channel_state["max_counts"]
+
+            print(f"Setting min/max counts to: {min_counts}, {max_counts}")
+            self.gl_volume_view_backend.set_min_max(
+                [min_counts, max_counts], 
+                channel_idx
+            )
+
+            # OpenGL: set channel color
+            lut_name = channel_state["lut_name"]
+            imj_color_bgr = [float(c)/255. for c in IMAGEJ_CHANNEL_COLOR_BGR[lut_name]]
+            color_rgba = imj_color_bgr[::-1] + [channel_state["alpha"]]
+            
+            print(f"Setting channel color to: {color_rgba}")
+            self.gl_volume_view_backend.request_set_channel_color(
+                channel_idx, color_rgba
+            )
+
+            # Set gamma
+            gamma = channel_state["gamma"]
+            print(f"Setting channel gamma to: {gamma}")
+            self.gl_volume_view_backend.set_gamma(gamma, channel_idx)
+
+    def _OpenGL_upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0 ) -> None:
+        """Upload a single slice of the volume to the OpenGL backend."""
+        
+        # Guard against backend non-init
+        if self.gl_volume_view_backend is None:
+            return
+        
+        # OpenGL: Volume Viewer slice upload
+        if self.gl_volume_view_backend.thread_is_running():
+            # Send to data_q for upload
+            self.gl_volume_view_backend.data_q.put_nowait((
+                image, 
+                z * int(self.image_mode == "z-stack"), 
+                ch
+            ))
 
 
 class CameraViewController(BaseViewController):
@@ -2043,9 +2090,6 @@ class CameraViewController(BaseViewController):
             image=image, channel=channel_idx, slice_index=slice_idx
         )
 
-        # Tell GLVolumeViewBackend what the current slice and channel are
-        # self.gl_volume_view_backend.set_channel_and_slice_idx(slice_idx, channel_idx)
-
         # Update image according to the display state.
         self.display_state = self.view.live_frame.live.get()
         if self.display_state == "Live":
@@ -2058,9 +2102,6 @@ class CameraViewController(BaseViewController):
                     and channel_idx == self.selected_channels.index(active_channel)
                 ):
                     super().try_to_display_image(image)
-
-                    # Update the channel color in the GL shader for volume rendering if active channel is being displayed
-                    # self._OpenGL_update_active_channel_color(active_channel)
             else:
                 super().try_to_display_image(image)
 
@@ -2084,18 +2125,6 @@ class CameraViewController(BaseViewController):
                 if slice_idx == requested_slice and channel_idx == requested_channel:
                     super().try_to_display_image(image)
 
-    # def _OpenGL_update_active_channel_color(self, active_channel: str):
-    #     """Update the active channel color in the GL volume shader."""
-    #     channel_state = self._get_channel_overlay_state(active_channel)
-    #     lut_name = channel_state.get("lut_name", "Gray")
-    #     norm_channel_color_rgb = [float(c)/255. for c in IMAGEJ_CHANNEL_COLOR_BGR[lut_name]]
-    #     channel_idx = self.selected_channels.index(active_channel)
-        
-    #     print(f"Updating active channel {active_channel} color to {lut_name} = {norm_channel_color_rgb} in GL shader for volume rendering")
-
-    #     # Update channel color in GL shader for volume rendering
-    #     self.gl_volume_view_backend.request_set_channel_color(channel_idx, norm_channel_color_rgb + [1.])
-
     # def _OpenGL_scale_volume_intensity_with_bounds(self, ch: int=0, min_max: tuple[float, float]=(0., 65535.)) -> None:
 
     #     # Already computed in BaseViewController._scale_image_intensity_with_bounds
@@ -2117,27 +2146,6 @@ class CameraViewController(BaseViewController):
     #     # Request min/max update enqueue for fragment shader
     #     self.gl_volume_view_backend.set_min_max([self._gl_vol_min[ch], self._gl_vol_max[ch]], ch)
     #     # self.gl_volume_view_backend.set_min_max([0, 4000], ch)
-
-    def _OpenGL_upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0 ) -> None:
-        if self.gl_volume_view_backend is None:
-            return
-        # OpenGL: Volume Viewer slice upload
-        if self.gl_volume_view_backend.thread_is_running():
-            # # If new volume, reset intensity bounds
-            # if z == 0:
-            #     self._gl_vol_max.pop(ch, None)
-            #     self._gl_vol_min.pop(ch, None)
-
-            # # Update the per-channel intensity bounds for volume rendering
-            # min_value, max_value, _, _ = cv2.minMaxLoc(image)
-            # self._OpenGL_scale_volume_intensity_with_bounds(ch, (min_value, max_value))
-
-            # Send to data_q for upload
-            self.gl_volume_view_backend.data_q.put_nowait((
-                image, 
-                z * int(self.image_mode == "z-stack"), 
-                ch
-            ))
 
     def initialize_non_live_display(
         self, microscope_state: dict, camera_parameters: dict
@@ -2165,27 +2173,6 @@ class CameraViewController(BaseViewController):
 
         # Try to start volume rendering
         self._OpenGL_initialize_volume_rendering_backend()
-
-    def _OpenGL_initialize_volume_rendering_backend(self):
-        """If installed, create the volume render window and initialize OpenGL render thread."""
-        
-        if self.gl_volume_view_backend is None:
-            try:
-                self.gl_volume_view_backend = GLVolumeViewBackend()
-            except ImportError:
-                logger.warning(
-                    "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
-                )
-                self.gl_volume_view_backend = None
-                return
-
-        # If successful, display GLFW window and start render thread
-        self.gl_volume_view_backend.start(window_dim=(800, 600))               
-
-        # Set number of channels and slices
-        self.gl_volume_view_backend.set_num_slices(
-            self.number_of_slices if self.image_mode == "z-stack" else 2            
-        )
 
     def update_snr(self) -> None:
         """Updates the signal-to-noise ratio."""
@@ -2396,6 +2383,11 @@ class CameraViewController(BaseViewController):
         image : np.ndarray
             Image data.
         """
+
+        # First, call the OpenGL display settings update hook
+        # Volume rendering currently works the same for both Single and Overlay modes
+        self._OpenGL_update_channel_settings_hook()
+
         if self._should_use_overlay_mode():
             self._sync_overlay_cache_from_controls()
             channel_images, channel_signatures, all_available = (
@@ -2483,26 +2475,6 @@ class CameraViewController(BaseViewController):
         """dict: Custom events for this controller"""
         return {"ilastik_mask": self.display_mask}
 
-
-class GLCameraViewController(CameraViewController):
-    """GL Camera View Controller Class."""
-
-    def __init__(self, view, parent_controller=None, gl_enable=False) -> None:
-        """Wrap CameraViewController with OpenGL rendering capabilities.
-
-        Parameters
-        ----------
-        view : GLCameraTab
-            The GL Camera tkinter frame that contains the widgets.
-        parent_controller : Controller
-            The parent controller of the camera view controller.
-        gl_enable : bool
-            Whether to enable OpenGL rendering.
-        """
-        super().__init__(view, parent_controller)
-
-        if gl_enable:
-            pass
 
 class MIPViewController(BaseViewController):
     """MIP View Controller Class."""

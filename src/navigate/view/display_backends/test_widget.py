@@ -59,7 +59,7 @@ if __name__ == "__main__":
         min_pix, max_pix = np.min(stack), np.max(stack)
         gl_backend.set_min_max([min_pix, max_pix/4], ch=ch)
 
-        gl_backend.set_num_slices(n_slices=len(stack))
+        gl_backend.set_num_slices_and_dz(n_slices=len(stack), dz=1.0)
 
         for z, image in enumerate(stack):
             gl_backend.data_q.put_nowait((image, z, ch))

@@ -1628,7 +1628,6 @@ class BaseViewController(GUIController, ABaseViewController):
     def process_image(self) -> None:
         """Processes the image to be displayed."""
         if self.image is None:
-            print("[DEBUG] No image to process.")
             return
 
         # Populating image took 0.0158 seconds
@@ -1774,8 +1773,6 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.gl_volume_view_backend is None:
             return
 
-        print(f"[DEBUG] Setting OpenGL volume view backend slice count to {n_slices} and dz to {dz}")
-
         # Set number of channels and slices
         self.gl_volume_view_backend.set_num_slices_and_dz(n_slices, dz)
 
@@ -1786,22 +1783,16 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.gl_volume_view_backend is None:
             return
 
-        print("[DEBUG] OpenGL shader uniform update hook called.")
-
         # Cycle through all selected channels and update the OpenGL shader uniforms for each channel's settings
         for channel in self.selected_channels:
             channel_state = self._get_channel_overlay_state(channel)
             
             channel_idx = int(channel.replace("CH", "")) - 1
 
-            print(f"[DEBUG] Channel: {channel_idx}")
-            print(f"channel_state:   {channel_state}")
-
             # OpenGL: scale min/max counts
             min_counts = channel_state["min_counts"]
             max_counts = channel_state["max_counts"]
 
-            print(f"Setting min/max counts to: {min_counts}, {max_counts}")
             self.gl_volume_view_backend.set_min_max(
                 [min_counts, max_counts], 
                 channel_idx
@@ -1812,14 +1803,13 @@ class BaseViewController(GUIController, ABaseViewController):
             imj_color_bgr = [float(c)/255. for c in IMAGEJ_CHANNEL_COLOR_BGR[lut_name]]
             color_rgba = imj_color_bgr[::-1] + [channel_state["alpha"]]
             
-            print(f"Setting channel color to: {color_rgba}")
             self.gl_volume_view_backend.request_set_channel_color(
                 channel_idx, color_rgba
             )
 
-            # Set gamma
+            # OpenGL: set gamma
             gamma = channel_state["gamma"]
-            print(f"Setting channel gamma to: {gamma}")
+            
             self.gl_volume_view_backend.set_gamma(gamma, channel_idx)
 
     def _OpenGL_upload_volume_slice(self, image: np.ndarray, z: int=0, ch: int=0 ) -> None:

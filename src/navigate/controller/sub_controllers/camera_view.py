@@ -1616,8 +1616,8 @@ class BaseViewController(GUIController, ABaseViewController):
 
             # OpenGL: set channel color
             lut_name = channel_state["lut_name"]
-            color_rgba = list(IMAGEJ_CHANNEL_COLOR_BGR[lut_name]) \
-                         + [channel_state["alpha"]]
+            imj_color_bgr = [float(c)/255. for c in IMAGEJ_CHANNEL_COLOR_BGR[lut_name]]
+            color_rgba = imj_color_bgr[::-1] + [channel_state["alpha"]]
             
             print(f"Setting channel color to: {color_rgba}")
             self.gl_volume_view_backend.request_set_channel_color(

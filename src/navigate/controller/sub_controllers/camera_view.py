@@ -1779,7 +1779,7 @@ class BaseViewController(GUIController, ABaseViewController):
         # Set number of channels and slices
         self.gl_volume_view_backend.set_num_slices_and_dz(n_slices, dz)
 
-    def _OpenGL_update_channel_settings_hook(self):
+    def _OpenGL_update_display_settings_hook(self):
         """Hook for OpenGL-based views to update channel settings."""
 
         # Guard against backend non-init
@@ -1788,7 +1788,7 @@ class BaseViewController(GUIController, ABaseViewController):
 
         print("[DEBUG] OpenGL shader uniform update hook called.")
 
-        # TODO: Use self.overlay_channel_settings to set all shader uniforms every populate_image call
+        # Cycle through all selected channels and update the OpenGL shader uniforms for each channel's settings
         for channel in self.selected_channels:
             channel_state = self._get_channel_overlay_state(channel)
             
@@ -2401,7 +2401,7 @@ class CameraViewController(BaseViewController):
 
         # First, call the OpenGL display settings update hook
         # Volume rendering currently works the same for both Single and Overlay modes
-        self._OpenGL_update_channel_settings_hook()
+        self._OpenGL_update_display_settings_hook()
 
         if self._should_use_overlay_mode():
             self._sync_overlay_cache_from_controls()

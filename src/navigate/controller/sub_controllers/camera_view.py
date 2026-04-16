@@ -1761,14 +1761,23 @@ class BaseViewController(GUIController, ABaseViewController):
                 )
                 self.gl_volume_view_backend = None
                 return
+        else:
+            return
 
         # If successful, display GLFW window and start render thread
         self.gl_volume_view_backend.start(window_dim=(800, 600))               
 
+    def _OpenGL_set_z_stack_dimensions(self, n_slices: int, dz: float):
+        """Set the number of slices and z-step size for the OpenGL volume rendering backend."""
+
+        # Guard against backend non-init
+        if self.gl_volume_view_backend is None:
+            return
+
+        print(f"[DEBUG] Setting OpenGL volume view backend slice count to {n_slices} and dz to {dz}")
+
         # Set number of channels and slices
-        self.gl_volume_view_backend.set_num_slices(
-            self.number_of_slices if self.image_mode == "z-stack" else 2            
-        )    
+        self.gl_volume_view_backend.set_num_slices_and_dz(n_slices, dz)
 
     def _OpenGL_update_channel_settings_hook(self):
         """Hook for OpenGL-based views to update channel settings."""
@@ -2173,6 +2182,12 @@ class CameraViewController(BaseViewController):
 
         # Try to start volume rendering
         self._OpenGL_initialize_volume_rendering_backend()
+
+        # Set z-stack dimensions for volume rendering
+        self._OpenGL_set_z_stack_dimensions(
+            n_slices=self.number_of_slices if self.image_mode == "z-stack" else 2,
+            dz=microscope_state.get("step_size", 1.0)
+        )
 
     def update_snr(self) -> None:
         """Updates the signal-to-noise ratio."""

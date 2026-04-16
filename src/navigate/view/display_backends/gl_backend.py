@@ -523,12 +523,18 @@ class GLVolumeViewBackend:
         """Submit slice data to the GL thread for upload."""
         self.data_q.put((image, self._z, self._ch))
 
-    def set_num_slices(self, n_slices: int):
+    def set_num_slices_and_dz(self, n_slices: int, dz: float=1.0):
         """Set the expected number of slices in the volume."""
         
         # Enqueue
         def _do():
             self.num_slices = n_slices
+
+            # Update dz in shader
+            self._ensure_gl_ready()
+
+            self.shader.use()
+            self.shader.set_float("dz", dz)
 
         # Send to cmd
         self.cmd_q.put(_do)

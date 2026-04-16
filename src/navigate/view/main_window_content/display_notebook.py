@@ -52,6 +52,7 @@ from navigate.view.custom_widgets.common import (
     configure_grid,
     themed_grid,
 )
+from navigate.view.custom_widgets.scrollbars import ScrolledFrame
 from navigate.view.theme import (
     get_theme_color,
     get_theme_font,
@@ -262,17 +263,17 @@ class CameraTab(tk.Frame):
             padx=("layout_panel_gap", "layout_section_gap"),
             pady="layout_panel_gap",
         )
-        self.display_setting = ttk.Frame(
-            self, padding=get_theme_padding("padding_panel_card")
-        )
+        display_setting_scrolledframe = ScrolledFrame(self, padding=get_theme_padding("padding_panel_card"))
+        self.display_setting = ttk.Frame(display_setting_scrolledframe.interior)
         themed_grid(
-            self.display_setting,
+            display_setting_scrolledframe,
             row=0,
             column=1,
             sticky=tk.NSEW,
             padx=("layout_section_gap", "layout_panel_gap"),
             pady="layout_panel_gap",
         )
+        self.display_setting.pack(fill=tk.BOTH, expand=True)
 
         #: bool: The docked flag.
         self.is_docked = True

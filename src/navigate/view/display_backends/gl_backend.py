@@ -310,6 +310,9 @@ class Camera:
             self.pitch = max(-self.MAX_PITCH, min(self.MAX_PITCH, self.pitch))
             self._recompute_position()
 
+            # Request render
+            self.parent_viewer.need_render = True
+
         elif self.is_translating:
             # screen pixels → world units at current radius
             vpp = (2.0 * self.radius * math.tan(math.radians(self.FOV)*0.5)) / max(1.0, float(self.win_h))
@@ -318,6 +321,9 @@ class Camera:
             pan = (-dx) * sx * self.right + (dy) * sy * self.up
             self.look_at  += pan
             self.position += pan
+
+            # Request render
+            self.parent_viewer.need_render = True
 
 
     def _scroll_move(self, dt):
@@ -330,6 +336,10 @@ class Camera:
         self._recompute_position()
 
         self.scroll_offset = 0.0
+
+        # Request render
+        self.parent_viewer.need_render = True
+
         
     # ---------- picking helpers ----------
     def _ray_from_screen(self, x, y):
@@ -418,11 +428,12 @@ class GLVolumeViewBackend:
     def __init__(self):
         
         # concurrency
-        self.cmd_q      = queue.Queue()
-        self.data_q     = queue.Queue()
-        self.is_running = threading.Event()
-        self.is_ready   = threading.Event()
-        self.thread     = None
+        self.cmd_q       = queue.Queue()
+        self.data_q      = queue.Queue()
+        self.is_running  = threading.Event()
+        self.is_ready    = threading.Event()
+        self.thread      = None
+        self.need_render = False
 
         # GLFW window
         self.window = None
@@ -648,43 +659,43 @@ class GLVolumeViewBackend:
 
     def _render_loop(self):
         """Main render loop: process commands/data, update camera, get data and draw."""
-        
-        # Flag to ensure GPU isn't wasted rendering when there are no changes to render.
-        render_needed = False
 
-        while self.is_running.is_set() and not glfw.window_should_close(self.window):
-                
-            # Keep processing until both queues are empty
-            # This is important because add_slice() may queue texture creation commands
-            had_work = True
-            while had_work:
-                had_work = False
-                
-                # Process all pending commands
-                while True:
-                    try:
-                        cmd = self.cmd_q.get_nowait()
-                        try:
-                            cmd()
-                            had_work = True
-                        except Exception as e:
-                            print(f"[GL Thread] Error executing command: {e}")
-                            traceback.print_exc()
-                    except queue.Empty:
-                        break
-                
-                # Process all pending slice data
-                while True:
-                    try:
-                        image, z, ch = self.data_q.get_nowait()
-                        self.add_slice(image, z, ch)
-                        had_work = True
-                    except queue.Empty:
-                        break
+        self.need_render = False
 
-            # Always render (even if no textures yet, to show black screen)
+        while self.is_running.is_set() and not glfw.window_should_close(self.window):                   
+            # Process all pending slice data
+            while True:
+                try:
+                    image, z, ch = self.data_q.get_nowait()
+                    self.add_slice(image, z, ch)
+                    self.need_render = True
+                except queue.Empty:
+                    break            
+            
+            # Process all pending commands
+            while True:
+                try:
+                    cmd = self.cmd_q.get_nowait()
+                    try:
+                        cmd()
+                        self.need_render = True
+                    except Exception as e:
+                        print(f"[GL Thread] Error executing command: {e}")
+                        traceback.print_exc()
+                except queue.Empty:
+                    break
+
+            # Update timer
+            self.frame_timer.tick(verbose=False)
+
+            # Update camera
+            self.camera.update(self.frame_timer.delta_time)
+
+            # Set viewport (handles window resizing and frame vs volume mode)
+            self._config_gl_viewport()
+
+            # Render scene
             self._gl_render_scene()
-            glfw.swap_buffers(self.window)
 
             # Poll events to keep window responsive
             glfw.poll_events()
@@ -692,22 +703,17 @@ class GLVolumeViewBackend:
 
     def _gl_render_scene(self):
         """Renders the full-screen quad with the raymarching shader."""
-
-        # Update timer
-        self.frame_timer.tick(verbose=False)
-
-        # Set viewport (handles window resizing and frame vs volume mode)
-        self._config_gl_viewport()
         
-        # Clear screen
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-
+        # Don't render unless necessary to spare GPU cycles
+        if not self.need_render:
+            return
+        
         # Texture guard
         if not (self.volume_textures and self.transfer_texture):
             return
 
-        # Update camera
-        self.camera.update(self.frame_timer.delta_time)
+        # Clear screen
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         # Camera view-projection matrix
         inverse_proj_view = glm.inverse(
@@ -734,6 +740,12 @@ class GLVolumeViewBackend:
         GL.glBindVertexArray(self.vao)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 6)
         GL.glBindVertexArray(0) # Unbind VAO
+
+        # Finally, draw the frame
+        glfw.swap_buffers(self.window)
+
+        # Reset flag
+        self.need_render = False
 
     def _init_gl_resources(self):
         """Initialize shaders and set uniforms, create VAO, and set up camera."""

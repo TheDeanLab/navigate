@@ -300,6 +300,10 @@ class BaseViewController(GUIController, ABaseViewController):
         self.display_mode_widgets = (
             view.display_mode.get_widgets() if hasattr(view, "display_mode") else {}
         )
+        # dict: Volume display widgets
+        self.volume_widgets = (
+            view.volume_frame.get_widgets() if hasattr(view, "volume_frame") else {}
+        )
 
         #: dict: Cached per-channel overlay display settings.
         self.overlay_channel_settings: Dict[str, Dict[str, Any]] = {}
@@ -344,6 +348,10 @@ class BaseViewController(GUIController, ABaseViewController):
                 "<<ComboboxSelected>>",
                 self._on_display_mode_changed,
             )
+
+        # Trace adds for volume display widgets
+        for widget in self.volume_widgets.values():
+            widget.get_variable().trace_add("write", self._OpenGL_on_volume_settings_changed)
 
         #: int: The x position of the mouse.
         self.move_to_x = None
@@ -641,9 +649,6 @@ class BaseViewController(GUIController, ABaseViewController):
     ) -> tuple[np.ndarray, float]:
         """Scale an image to uint8 using channel-specific or single-channel bounds."""
         min_value, max_value, _, _ = cv2.minMaxLoc(image)
-
-        # OpenGL hook: set min/max in shader
-        # self.gl_volume_view_backend.set_min_max(min_value, max_value)
 
         if autoscale:
             if max_value > min_value:
@@ -1828,6 +1833,22 @@ class BaseViewController(GUIController, ABaseViewController):
                 ch
             ))
 
+    def _OpenGL_on_volume_settings_changed(self, *args):
+        """Hook for OpenGL-based views to trigger a re-render when display settings are changed."""
+
+        # Guard against backend non-init
+        if self.gl_volume_view_backend is None:
+            return
+
+        for key, widget in self.volume_widgets.items():
+            try:
+                value = float(widget.get_variable().get())
+            except:
+                # Handle "" and other such invalid inputs
+                continue
+
+            # If valid: request the update to the appropriate shader uniform
+            exec(f"self.gl_volume_view_backend.set_{key}({value})")
 
 class CameraViewController(BaseViewController):
     """Camera View Controller Class."""

@@ -368,6 +368,16 @@ class CameraTab(tk.Frame):
             pady=("layout_section_gap", 0),
         )
 
+        #: VolumeFrame: The frame that will hold the 3D volume rendering settings.
+        self.volume_frame = VolumeFrame(self.display_setting)
+        themed_grid(
+            self.volume_frame,
+            row=4,
+            column=0,
+            sticky=tk.NSEW,
+            pady=("layout_section_gap", 0),
+        )
+
         configure_grid(
             self,
             columns={
@@ -517,6 +527,60 @@ class RenderFrame(ttk.Labelframe):
 
         configure_grid(self, columns={0: 1}, rows={0: 0, 1: 0})
 
+
+class VolumeFrame(ttk.Labelframe, CommonMethods):
+    """This class is the frame that holds the 3D volume rendering settings."""
+
+    def __init__(
+        self, camera_tab: CameraTab, *args: Iterable, **kwargs: Dict[str, Any]
+    ) -> None:
+        """Initialize the VolumeFrame class.
+
+        Parameters
+        ----------
+        camera_tab : CameraTab
+            The frame that will hold the 3D volume rendering settings.
+        *args : Iterable
+            Variable length argument list.
+        **kwargs : Dict[str, Any]
+            Arbitrary keyword arguments.
+        """
+        # Init Frame
+        text_label = "Volume Rendering"
+        kwargs.setdefault("padding", get_theme_padding("padding_panel_card"))
+        ttk.Labelframe.__init__(self, camera_tab, text=text_label, *args, **kwargs)
+
+        #: dict: The dictionary that holds the widgets.
+        self.inputs = {
+            "shear_angle": LabelInput(
+                parent=self,
+                label="Shear Angle",
+                input_class=ValidatedSpinbox,
+                input_var=tk.DoubleVar(value=45.0),
+                input_args={"from_": -90.0, "to": 90.0, "increment": 0.5, "width": 5},
+                label_pos="top",
+            ),
+            "opacity": LabelInput(
+                parent=self,
+                label="Opacity",
+                input_class=ValidatedSpinbox,
+                input_var=tk.DoubleVar(value=0.15),
+                input_args={"from_": 0.01, "to": 1.0, "increment": 0.01, "width": 5},
+                label_pos="top",
+            ),
+            "world_step": LabelInput(
+                parent=self,
+                label="World Step",
+                input_class=ValidatedSpinbox,
+                input_var=tk.DoubleVar(value=0.25),
+                input_args={"from_": 0.05, "to": 0.5, "increment": 0.01, "width": 5},
+                label_pos="top",
+            )                            
+        }
+        themed_grid(self.inputs["shear_angle"], row=0, column=0, sticky=tk.NSEW)
+        themed_grid(self.inputs["opacity"], row=1, column=0, sticky=tk.NSEW)
+        themed_grid(self.inputs["world_step"], row=2, column=0, sticky=tk.NSEW)
+        configure_grid(self, columns={0: 1}, rows={0: 1, 1: 1, 2: 1})
 
 class MipRenderFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the live display functionality."""

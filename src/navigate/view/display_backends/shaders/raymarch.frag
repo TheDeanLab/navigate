@@ -14,7 +14,7 @@ uniform vec2 viewportSize;
 uniform vec3 boxMin;
 uniform vec3 boxMax;
 
-uniform float stepWorld;       // step length in WORLD units
+uniform float stepWorld = 0.25;       // step length in WORLD units
 
 // contrast params
 uniform float opacity = 0.15;  // global density/opacity

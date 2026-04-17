@@ -582,6 +582,44 @@ class GLVolumeViewBackend:
 
         self.cmd_q.put(_do)
 
+    def set_world_step(self, world_step: float):
+        def _do():
+            self._ensure_gl_ready()
+            
+            self.shader.use()
+            self.shader.set_float(
+                "stepWorld", 
+                world_step
+                )
+
+        self.cmd_q.put(_do)
+
+    def set_shear_angle(self, shear_angle: float):
+
+        def _do():
+            self._ensure_gl_ready()
+            
+            self.shader.use()
+            self.shader.set_float(
+                "shear_angle", 
+                shear_angle
+                )
+
+        self.cmd_q.put(_do)
+
+    def set_opacity(self, opacity: float):
+
+        def _do():
+            self._ensure_gl_ready()
+            
+            self.shader.use()
+            self.shader.set_float(
+                "opacity", 
+                opacity
+                )
+
+        self.cmd_q.put(_do)
+
     def _set_glfw_window_visible(self, visible: bool=True):
         if self.window:
             glfw.set_window_attrib(

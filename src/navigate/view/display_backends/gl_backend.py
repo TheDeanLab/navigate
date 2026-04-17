@@ -700,16 +700,8 @@ class GLVolumeViewBackend:
 
         self.need_render = False
 
-        while self.is_running.is_set() and not glfw.window_should_close(self.window):                   
-            # Process all pending slice data
-            while True:
-                try:
-                    image, z, ch = self.data_q.get_nowait()
-                    self.add_slice(image, z, ch)
-                    self.need_render = True
-                except queue.Empty:
-                    break            
-            
+        while self.is_running.is_set() and not glfw.window_should_close(self.window):                               
+                        
             # Process all pending commands
             while True:
                 try:
@@ -720,6 +712,15 @@ class GLVolumeViewBackend:
                     except Exception as e:
                         print(f"[GL Thread] Error executing command: {e}")
                         traceback.print_exc()
+                except queue.Empty:
+                    break
+
+            # Process all pending slice data
+            while True:
+                try:
+                    image, z, ch = self.data_q.get_nowait()
+                    self.add_slice(image, z, ch)
+                    self.need_render = True
                 except queue.Empty:
                     break
 

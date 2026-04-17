@@ -1261,8 +1261,10 @@ class ZStackAcquisition:
 
         # restore z, f
         pos_dict = self.model.get_stage_position()
-        self.restore_z = pos_dict["z_pos"]
-        self.restore_f = pos_dict["f_pos"]
+        logger.debug(f"*** current stage position: {pos_dict}, primary z axis: "
+                     f"{self.primary_z_axis}")
+        self.restore_z = pos_dict[f"{self.primary_z_axis}_pos"]
+        self.restore_f = pos_dict[f"{self.primary_f_axis}_pos"]
 
         # position: x, y, z, theta, f
         # If multiposition, get the header to know which stage is which, and then
@@ -1270,12 +1272,14 @@ class ZStackAcquisition:
         if bool(microscope_state["is_multiposition"]) or self.force_multiposition:
             self.position_headers = self.model.configuration["multi_positions"][0]
             self.positions = self.model.configuration["multi_positions"][1:]
+            logger.debug("*** using multiple positions")
         else:
             # If not multiposition, use the current position
             self.position_headers = [axis.upper() for axis in self.stage_axes]
             self.positions = [
                 [float(pos_dict[f"{axis}_pos"]) for axis in self.stage_axes]
             ]
+            logger.debug(f"**** positions from stage: {self.positions}")
 
             # get origin for primary z and f
             if not self.get_origin:
@@ -1290,9 +1294,24 @@ class ZStackAcquisition:
                     )
                 )
 
+                self.restore_z = (
+                    microscope_state.get(
+                        "stack_z_origin", pos_dict[f"{self.primary_z_axis}_pos"]
+                    )
+                )
+                self.restore_f = (
+                    microscope_state.get(
+                        "stack_focus_origin", pos_dict[f"{self.primary_f_axis}_pos"]
+                    )
+                )
+
+                logger.debug(f"**** adjust z position: {self.positions}")
+
         self.axes_index = [
             self.position_headers.index(axis.upper()) for axis in self.stage_axes
         ]
+
+        logger.debug(f"**** stage axes mapping: {self.stage_axes}, {self.axes_index}")
 
         # Set up the next channel down here to ensure defocus isn't merged into
         # restore f_pos, positions
@@ -1356,6 +1375,8 @@ class ZStackAcquisition:
                     ],
                 )
             )
+
+            logger.debug(f"**** current position: {self.current_position}")
 
             # calculate first z, f position
             self.current_z_position = (

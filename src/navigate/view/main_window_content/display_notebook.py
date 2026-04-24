@@ -552,6 +552,12 @@ class VolumeFrame(ttk.Labelframe, CommonMethods):
 
         #: dict: The dictionary that holds the widgets.
         self.inputs = {
+            "enabled": LabelInput(
+                parent=self,
+                label="Enabled",
+                input_class=ttk.Checkbutton,
+                input_var=tk.BooleanVar(value=False),
+            ),
             "shear_angle": LabelInput(
                 parent=self,
                 label="Shear Angle",
@@ -577,10 +583,11 @@ class VolumeFrame(ttk.Labelframe, CommonMethods):
                 label_pos="top",
             )                            
         }
-        themed_grid(self.inputs["shear_angle"], row=0, column=0, sticky=tk.NSEW)
-        themed_grid(self.inputs["opacity"], row=1, column=0, sticky=tk.NSEW)
-        themed_grid(self.inputs["world_step"], row=2, column=0, sticky=tk.NSEW)
-        configure_grid(self, columns={0: 1}, rows={0: 1, 1: 1, 2: 1})
+        themed_grid(self.inputs["enabled"],     row=0, column=0, sticky=tk.NSEW)
+        themed_grid(self.inputs["shear_angle"], row=1, column=0, sticky=tk.NSEW)
+        themed_grid(self.inputs["opacity"],     row=2, column=0, sticky=tk.NSEW)
+        themed_grid(self.inputs["world_step"],  row=3, column=0, sticky=tk.NSEW)
+        configure_grid(self, columns={0: 1}, rows={0: 1, 1: 1, 2: 1, 3: 1})
 
 class MipRenderFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the live display functionality."""

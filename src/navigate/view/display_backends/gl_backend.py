@@ -436,7 +436,8 @@ class GLVolumeViewBackend:
         self.need_render = False
 
         # GLFW window
-        self.window = None
+        self.window         = None
+        self.window_visible = False
 
         # GL objects (to be created in render() thread
         #             after GL context is initialized)
@@ -620,13 +621,17 @@ class GLVolumeViewBackend:
 
         self.cmd_q.put(_do)
 
+    def set_enabled(self, enabled: bool):
+        # TODO: This should start or stop the thread and display the window, based on user input on the controller side.
+        print("GLVolumeViewBackend set_enabled:", enabled)
+
     def _set_glfw_window_visible(self, visible: bool=True):
         if self.window:
-            glfw.set_window_attrib(
-                self.window, 
-                glfw.VISIBLE, 
-                glfw.TRUE if visible else glfw.FALSE
-                )
+            if visible:
+                glfw.show_window(self.window)
+            else:
+                glfw.hide_window(self.window)
+            
             self.window_visible = visible
 
     def _ensure_gl_ready(self):

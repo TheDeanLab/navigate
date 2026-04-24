@@ -317,6 +317,8 @@ class BaseViewController(GUIController, ABaseViewController):
         self._overlay_bgr_buf: Optional[np.ndarray] = None
         #: bool: Guard for suppressing callback loops while syncing controls.
         self._syncing_overlay_controls = False
+        #: dict: Cached global min/max for z-stack per channel.
+        self._z_stack_min_max_cache: Dict[str, Dict[str, float]] = {}
 
         #: Optional[str]: after() id for debouncing min/max updates
         self._minmax_after_id = None
@@ -646,7 +648,7 @@ class BaseViewController(GUIController, ABaseViewController):
         autoscale: bool,
         min_counts: float,
         max_counts: float,
-    ) -> tuple[np.ndarray, float]:
+    ) -> tuple[np.ndarray, float, float]:
         """Scale an image to uint8 using channel-specific or single-channel bounds."""
         min_value, max_value, _, _ = cv2.minMaxLoc(image)
 
@@ -654,15 +656,15 @@ class BaseViewController(GUIController, ABaseViewController):
             if max_value > min_value:
                 scale = 255.0 / (max_value - min_value)
                 beta = -min_value * scale
-                return cv2.convertScaleAbs(image, alpha=scale, beta=beta), max_value
-            return np.ones_like(image, dtype=np.uint8) * 255, max_value
+                return cv2.convertScaleAbs(image, alpha=scale, beta=beta), min_value, max_value
+            return np.ones_like(image, dtype=np.uint8) * 255, min_value, max_value
 
         if max_counts > min_counts:
             scale = 255.0 / (max_counts - min_counts)
             beta = -min_counts * scale
-            return cv2.convertScaleAbs(image, alpha=scale, beta=beta), max_value
+            return cv2.convertScaleAbs(image, alpha=scale, beta=beta), min_value, max_value
 
-        return np.ones_like(image, dtype=np.uint8) * 255, max_value
+        return np.ones_like(image, dtype=np.uint8) * 255, min_value, max_value
 
     def _build_overlay_colormap(self, lut_name: str) -> np.ndarray:
         """Build an OpenCV BGR colormap table for an ImageJ-like channel color."""
@@ -766,12 +768,19 @@ class BaseViewController(GUIController, ABaseViewController):
 
         image = self._crop_image_with_zoom(image, y_slice, x_slice)
         image = self.down_sample_image(image)
-        scaled, channel_max = self._scale_image_intensity_with_bounds(
+        scaled, channel_min, channel_max = self._scale_image_intensity_with_bounds(
             image=image,
             autoscale=bool(channel_state["autoscale"]),
             min_counts=float(channel_state["min_counts"]),
             max_counts=float(channel_state["max_counts"]),
         )
+        
+        # store global volume min/max for volume autoscaling
+        self._z_stack_min_max_cache[channel] = {
+            "min": min(channel_min, self._z_stack_min_max_cache.get(channel, {}).get("min", channel_min)),
+            "max": max(channel_max, self._z_stack_min_max_cache.get(channel, {}).get("max", channel_max)),
+        }
+
         gamma = self._normalize_gamma(channel_state.get("gamma", 1.0))
         if not np.isclose(gamma, 1.0, atol=1e-6):
             scaled = cv2.LUT(scaled, self._get_gamma_lut(gamma))
@@ -1134,6 +1143,7 @@ class BaseViewController(GUIController, ABaseViewController):
         self.number_of_slices = int(microscope_state["number_z_steps"])
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
         self._colorized_channel_cache.clear()
+        self._z_stack_min_max_cache.clear()
         if self.transpose:
             self.original_image_width = int(camera_parameters["img_y_pixels"])
             self.original_image_height = int(camera_parameters["img_x_pixels"])
@@ -1433,7 +1443,7 @@ class BaseViewController(GUIController, ABaseViewController):
         image : np.ndarray
             Scaled image data (uint8).
         """
-        scaled, max_value = self._scale_image_intensity_with_bounds(
+        scaled, _, max_value = self._scale_image_intensity_with_bounds(
             image=image,
             autoscale=self.autoscale,
             min_counts=self.min_counts,
@@ -1590,6 +1600,9 @@ class BaseViewController(GUIController, ABaseViewController):
 
             # fast in-place update; no new PhotoImage objects, no new canvas items
             self._photo.paste(pil)
+
+            # Update OpenGL display settings
+            self._OpenGL_update_display_settings_hook()
 
         except tk.TclError:
             return
@@ -1798,6 +1811,15 @@ class BaseViewController(GUIController, ABaseViewController):
             min_counts = channel_state["min_counts"]
             max_counts = channel_state["max_counts"]
 
+            # Handle per-channel autoscaling over the whole volume min/max
+            if channel_state["autoscale"]:
+                stack_min_max = self._z_stack_min_max_cache.get(channel, {"min": min_counts, "max": max_counts})
+                min_counts = stack_min_max["min"]
+                max_counts = stack_min_max["max"]
+
+                # OPTIONAL: OpenGL rendering looks better with a reduced max count. Adjust factor to taste.
+                max_counts = int(max_counts / 2.5) 
+
             self.gl_volume_view_backend.set_min_max(
                 [min_counts, max_counts], 
                 channel_idx
@@ -1915,13 +1937,6 @@ class CameraViewController(BaseViewController):
 
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
-
-        # # GLVolumeViewBackend: The GL volume view backend for 3D rendering.
-        # self.gl_volume_view_backend = None
-
-        # # dict: GL volume intensity bounds
-        # self._gl_vol_min = {}
-        # self._gl_vol_max = {}
 
     def render(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Process the image to be displayed.
@@ -2144,28 +2159,6 @@ class CameraViewController(BaseViewController):
                     requested_channel = int(requested_channel[-1]) - 1
                 if slice_idx == requested_slice and channel_idx == requested_channel:
                     super().try_to_display_image(image)
-
-    # def _OpenGL_scale_volume_intensity_with_bounds(self, ch: int=0, min_max: tuple[float, float]=(0., 65535.)) -> None:
-
-    #     # Already computed in BaseViewController._scale_image_intensity_with_bounds
-    #     min_value, max_value = min_max
-
-    #     if self.autoscale:
-    #         try:
-    #             self._gl_vol_min[ch] = min(self._gl_vol_min[ch], min_value)
-    #             self._gl_vol_max[ch] = max(self._gl_vol_max[ch], max_value)
-    #         except KeyError:
-    #             self._gl_vol_min[ch] = min_value
-    #             self._gl_vol_max[ch] = max_value        
-    #     else:
-    #         self._gl_vol_min[ch] = min_value
-    #         self._gl_vol_max[ch] = max_value
-
-    #     print(f"Channel {ch} volume rendering bounds updated to: {self._gl_vol_min[ch]}, {self._gl_vol_max[ch]}")
-
-    #     # Request min/max update enqueue for fragment shader
-    #     self.gl_volume_view_backend.set_min_max([self._gl_vol_min[ch], self._gl_vol_max[ch]], ch)
-    #     # self.gl_volume_view_backend.set_min_max([0, 4000], ch)
 
     def initialize_non_live_display(
         self, microscope_state: dict, camera_parameters: dict
@@ -2409,10 +2402,6 @@ class CameraViewController(BaseViewController):
         image : np.ndarray
             Image data.
         """
-
-        # First, call the OpenGL display settings update hook
-        # Volume rendering currently works the same for both Single and Overlay modes
-        self._OpenGL_update_display_settings_hook()
 
         if self._should_use_overlay_mode():
             self._sync_overlay_cache_from_controls()

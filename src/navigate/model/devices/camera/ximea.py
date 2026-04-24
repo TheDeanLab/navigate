@@ -458,7 +458,7 @@ class XimeaBase(CameraBase):
         # self.cam.get_image(self._image, 10000)
         # get data from camera
         try:
-            self.cam.get_image(self._image, 110000)
+            self.cam.get_image(self._image, 10000)
             temp = self._image.get_image_data_numpy()
             self._data_buffer[self._frames_received][:, :] = temp[:, :]
         except xiapi.Xi_error as e:

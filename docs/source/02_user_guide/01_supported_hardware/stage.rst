@@ -301,6 +301,20 @@ These stages are controlled by `PI <https://www.pi-usa.us/en/>`_'s own
     `here <https://www.pi-usa.us/en/products/controllers-drivers-motion-control-software/motion-control-software>`_.
     Stage names (e.g. ``L-509.20DG10``) can also be found in PIMikroMove or on a label on the side of your stage.
 
+.. note::
+    PI stages require the ``stages`` entry in the ``hardware`` section of
+    ``configuration.yaml``. This entry specifies the stage motor name
+    assigned to each controller axis. Stage motor names (for example,
+    ``L-509.20DG10``) can be found in PI software.
+    The stage motor names must be listed in the same order as the axes
+    reported by PI software: the first stage motor name corresponds to axis
+    1, the second to axis 2, the third to axis 3, and so on.
+    For example, if PI software reports axis 1 = ``L-509.20DG10``, axis 2 =
+    ``L-509.40DG10``, and axis 3 = ``M-060.DG``, then the ``stages`` entry
+    should begin as:
+    ``L-509.20DG10 L-509.40DG10 M-060.DG``
+
+
 -----------------
 
 C-884

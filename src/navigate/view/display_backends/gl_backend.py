@@ -444,7 +444,7 @@ class GLVolumeViewBackend:
         self.shader      = None
         self.vao         = None
         self.camera      = None
-        self.frame_timer = FrameTimer(every=1.0)
+        self.frame_timer = None
 
         # textures
         self.volume_textures  = None
@@ -493,10 +493,27 @@ class GLVolumeViewBackend:
         self.cmd_q.put(lambda: None)
         self.data_q.put(lambda: None)
 
+        # No longer ready/need render
+        self.is_ready.clear()
+        self.need_render = False
+
         # Kill the thread
         if self.thread:
             self.thread.join()
             self.thread = None
+
+        # Drain cmd and data queues so they are fresh on restart
+        while not self.cmd_q.empty():
+            try:
+                self.cmd_q.get_nowait()
+            except queue.Empty:
+                break
+
+        while not self.data_q.empty():
+            try:
+                self.data_q.get_nowait()
+            except queue.Empty:
+                break
 
     def add_slice(self, image: np.ndarray, z: int, ch: int):
         """Submit a single slice (z, ch) of the volume for rendering."""
@@ -680,8 +697,8 @@ class GLVolumeViewBackend:
             self.is_ready.set()  # unblock start() if waiting
         
         finally:
-            # clean up GL textures
-            self._gl_clear_textures()
+            # clean up all GL resoureces
+            self._gl_free_resources()
 
             # try to terminate GLFW
             try:
@@ -690,6 +707,23 @@ class GLVolumeViewBackend:
                 glfw.terminate()
             except Exception:
                 pass
+
+    def _gl_free_resources(self):
+        # Free up shader (this will call Shader.__del__)
+        if self.shader:
+            self.shader = None
+        
+        # Free VAO
+        if self.vao:
+            GL.glDeleteVertexArrays(1, [self.vao])
+            self.vao = None
+        
+        # Free textures
+        self._gl_clear_textures()
+
+        # Free camera and timer
+        self.camera = None
+        self.frame_timer = None
 
     def _gl_clear_textures(self):
         """Delete existing GL textures and reset state."""
@@ -726,11 +760,11 @@ class GLVolumeViewBackend:
                     image, z, ch = self.data_q.get_nowait()
                     self.add_slice(image, z, ch)
                     self.need_render = True
-                except queue.Empty:
+                except:
                     break
 
             # Update timer
-            self.frame_timer.tick(verbose=False)
+            self.frame_timer.tick(verbose=True)
 
             # Update camera
             self.camera.update(self.frame_timer.delta_time)
@@ -807,6 +841,9 @@ class GLVolumeViewBackend:
 
         # Set up full-screen quad VAO
         self.vao = GL.glGenVertexArrays(1)
+
+        # create the frame timer
+        self.frame_timer = FrameTimer(every=1.0)
 
         # Set up camera
         self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(200), look_at=glm.vec3(0, 0, 0))

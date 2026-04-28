@@ -1775,12 +1775,15 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.gl_volume_view_backend is None:
             try:
                 self.gl_volume_view_backend = GLVolumeViewBackend()
-                print("PyOpenGL successfully imported. OpenGL-based volume rendering enabled.")
             except ImportError:
                 logger.warning(
                     "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
                 )
                 self.gl_volume_view_backend = None          
+                return
+        
+        # If we got here, we were successful
+        logger.info("PyOpenGL successfully imported. OpenGL-based volume rendering enabled.")
 
     def _OpenGL_set_z_stack_dimensions(self, n_slices: int, dz: float):
         """Set the number of slices and z-step size for the OpenGL volume rendering backend."""

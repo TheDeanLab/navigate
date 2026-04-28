@@ -56,7 +56,7 @@ from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path, update_config_dict
 from navigate.tools.decorators import performance_monitor
 from navigate.view.theme import get_theme_color, get_theme_font
-from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
+# from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -1774,14 +1774,20 @@ class BaseViewController(GUIController, ABaseViewController):
         
         if self.gl_volume_view_backend is None:
             try:
+                # Safe import of OpenGL backend
+                from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
                 self.gl_volume_view_backend = GLVolumeViewBackend()
-            except ImportError:
-                logger.warning(
+            except ModuleNotFoundError:
+                logger.info(
                     "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
                 )
                 self.gl_volume_view_backend = None          
+                
+                # We will hide the volume rendering controls if OpenGL failed to import
+                self.view.after(100, self.view.volume_frame.grid_forget)
+                
                 return
-        
+
         # If we got here, we were successful
         logger.info("PyOpenGL successfully imported. OpenGL-based volume rendering enabled.")
 

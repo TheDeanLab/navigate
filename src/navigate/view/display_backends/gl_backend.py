@@ -639,8 +639,11 @@ class GLVolumeViewBackend:
         self.cmd_q.put(_do)
 
     def set_enabled(self, enabled: bool):
-        # TODO: This should start or stop the thread and display the window, based on user input on the controller side.
-        print("GLVolumeViewBackend set_enabled:", enabled)
+        # Handles thread start/stop and window visibility on user request from controller
+        if enabled:
+            self.start()
+        else:
+            self.stop()
 
     def _set_glfw_window_visible(self, visible: bool=True):
         if self.window:
@@ -764,7 +767,7 @@ class GLVolumeViewBackend:
                     break
 
             # Update timer
-            self.frame_timer.tick(verbose=True)
+            self.frame_timer.tick(verbose=False)
 
             # Update camera
             self.camera.update(self.frame_timer.delta_time)

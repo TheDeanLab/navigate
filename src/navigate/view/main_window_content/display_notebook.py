@@ -589,6 +589,20 @@ class VolumeFrame(ttk.Labelframe, CommonMethods):
         themed_grid(self.inputs["world_step"],  row=3, column=0, sticky=tk.NSEW)
         configure_grid(self, columns={0: 1}, rows={0: 1, 1: 1, 2: 1, 3: 1})
 
+        # Initially disable the volume rendering settings until the user enables the volume rendering mode
+        self.set_inputs_enabled(False)
+
+    def set_inputs_enabled(self, enabled: bool) -> None:
+        """Enable or disable the volume rendering settings based on the state of the 'enabled' checkbox."""
+        for key, widget in self.inputs.items():
+            if key == "enabled":
+                continue
+            if enabled:
+                widget.widget.state(["!disabled"])
+            else:
+                widget.widget.state(["disabled"])
+
+
 class MipRenderFrame(ttk.Labelframe, CommonMethods):
     """This class is the frame that holds the live display functionality."""
 

@@ -352,8 +352,11 @@ class BaseViewController(GUIController, ABaseViewController):
             )
 
         # Trace adds for volume display widgets
-        for widget in self.volume_widgets.values():
-            widget.get_variable().trace_add("write", self._OpenGL_on_volume_settings_changed)
+        def volume_setting_callback(field):
+            return lambda *args: self._OpenGL_on_volume_settings_changed(field, *args)
+
+        for key, widget in self.volume_widgets.items():
+            widget.get_variable().trace_add("write", volume_setting_callback(key))
 
         #: int: The x position of the mouse.
         self.move_to_x = None
@@ -1784,16 +1787,18 @@ class BaseViewController(GUIController, ABaseViewController):
             return
 
         # If successful, display GLFW window and start render thread
-        self.gl_volume_view_backend.start(window_dim=(800, 600))
+        # self.gl_volume_view_backend.start(window_dim=(800, 600))
 
         # Initially set the GLFW to be invisible until it is needed
-        self.gl_volume_view_backend._set_glfw_window_visible(False)               
+        # self.gl_volume_view_backend._set_glfw_window_visible(False)               
 
     def _OpenGL_set_z_stack_dimensions(self, n_slices: int, dz: float):
         """Set the number of slices and z-step size for the OpenGL volume rendering backend."""
 
         # Guard against backend non-init
         if self.gl_volume_view_backend is None:
+            return
+        if not self.gl_volume_view_backend.thread_is_running():
             return
 
         # Set number of channels and slices
@@ -1804,6 +1809,8 @@ class BaseViewController(GUIController, ABaseViewController):
 
         # Guard against backend non-init
         if self.gl_volume_view_backend is None:
+            return
+        if not self.gl_volume_view_backend.thread_is_running():
             return
 
         # Cycle through all selected channels and update the OpenGL shader uniforms for each channel's settings
@@ -1850,7 +1857,9 @@ class BaseViewController(GUIController, ABaseViewController):
         # Guard against backend non-init
         if self.gl_volume_view_backend is None:
             return
-        
+        if not self.gl_volume_view_backend.thread_is_running():
+            return
+
         # OpenGL: Volume Viewer slice upload
         if self.gl_volume_view_backend.thread_is_running():
             # Send to data_q for upload
@@ -1860,22 +1869,31 @@ class BaseViewController(GUIController, ABaseViewController):
                 ch
             ))
 
-    def _OpenGL_on_volume_settings_changed(self, *args):
+    def _OpenGL_on_volume_settings_changed(self, field, *args):
         """Hook for OpenGL-based views to trigger a re-render when display settings are changed."""
 
         # Guard against backend non-init
         if self.gl_volume_view_backend is None:
             return
 
-        for key, widget in self.volume_widgets.items():
+        variable = self.volume_widgets[field].get_variable().get()
+
+        # Handle GL enable/disable as a special case
+        if field == "enabled":
+            if variable:
+                self.gl_volume_view_backend.start(window_dim=(800, 600))
+            else:
+                self.gl_volume_view_backend.stop()
+            
+            self.view.volume_frame.set_inputs_enabled(variable)
+        else:
             try:
-                value = float(widget.get_variable().get())
+                value = float(variable)
             except:
                 # Handle "" and other such invalid inputs
-                continue
-
-            # If valid: request the update to the appropriate shader uniform
-            exec(f"self.gl_volume_view_backend.set_{key}({value})")
+                return
+            
+            exec(f"self.gl_volume_view_backend.set_{field}({value})")
 
 class CameraViewController(BaseViewController):
     """Camera View Controller Class."""
@@ -1944,6 +1962,7 @@ class CameraViewController(BaseViewController):
         self.ilastik_seg_mask = None
 
         # Try to initialize the OpenGL volume rendering backend (if OpenGL is set up and GLVolumeViewBackend is available)
+        # Creates an GLVolumeViewBackend instance but doesn't start the thread until user enables volume rendering
         self._OpenGL_initialize_volume_rendering_backend()
 
     def render(self, image: np.ndarray) -> Optional[np.ndarray]:
@@ -2201,9 +2220,9 @@ class CameraViewController(BaseViewController):
             dz=microscope_state.get("step_size", 1.0)
         )
 
-        if not self.gl_volume_view_backend.window_visible:
-            print("Displaying GLFW window for OpenGL volume rendering.")
-            self.gl_volume_view_backend._set_glfw_window_visible(True)
+        # if not self.gl_volume_view_backend.window_visible:
+        #     print("Displaying GLFW window for OpenGL volume rendering.")
+        #     self.gl_volume_view_backend._set_glfw_window_visible(True)
 
     def update_snr(self) -> None:
         """Updates the signal-to-noise ratio."""

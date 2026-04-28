@@ -1780,17 +1780,7 @@ class BaseViewController(GUIController, ABaseViewController):
                 logger.warning(
                     "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
                 )
-                print("PyOpenGL failed to import. OpenGL-based volume rendering will be unavailable.")
-                self.gl_volume_view_backend = None
-                return
-        else:
-            return
-
-        # If successful, display GLFW window and start render thread
-        # self.gl_volume_view_backend.start(window_dim=(800, 600))
-
-        # Initially set the GLFW to be invisible until it is needed
-        # self.gl_volume_view_backend._set_glfw_window_visible(False)               
+                self.gl_volume_view_backend = None          
 
     def _OpenGL_set_z_stack_dimensions(self, n_slices: int, dz: float):
         """Set the number of slices and z-step size for the OpenGL volume rendering backend."""
@@ -2211,18 +2201,11 @@ class CameraViewController(BaseViewController):
             size_x=self.original_image_width,
         )
 
-        # Try to start volume rendering
-        # self._OpenGL_initialize_volume_rendering_backend()
-
-        # Set z-stack dimensions for volume rendering
+        # (Re)set z-stack dimensions for volume rendering
         self._OpenGL_set_z_stack_dimensions(
             n_slices=self.number_of_slices if self.image_mode == "z-stack" else 2,
             dz=microscope_state.get("step_size", 1.0)
         )
-
-        # if not self.gl_volume_view_backend.window_visible:
-        #     print("Displaying GLFW window for OpenGL volume rendering.")
-        #     self.gl_volume_view_backend._set_glfw_window_visible(True)
 
     def update_snr(self) -> None:
         """Updates the signal-to-noise ratio."""

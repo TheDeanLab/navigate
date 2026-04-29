@@ -116,7 +116,7 @@ class BigDataViewerMetadata(XMLMetadata):
     def _stage_translation_pixels(
         self, x: float, y: float, z: float, theta: float, f: Optional[float] = None
     ) -> npt.NDArray:
-        """Compute translation (in pixels) for BDV order [Y, X, Z]."""
+        """Compute translation (in pixels) for BDV order [X, Y, Z]."""
         xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
 
         # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
@@ -135,7 +135,10 @@ class BigDataViewerMetadata(XMLMetadata):
                     yp += float(locals()[f"{follower.lower()}"]) / self.dy
                 elif leader.lower() == "z":
                     zp += float(locals()[f"{follower.lower()}"]) / self.dz
-
+        xp *= self._stage_flip_flags.get("x", 1)
+        yp *= self._stage_flip_flags.get("y", 1)
+        zp *= self._stage_flip_flags.get("z", 1)
+        # return np.array([xp, yp, zp], dtype=float)
         return np.array([yp, xp, zp], dtype=float)
 
     def _derive_tile_angle_maps(self, views: list) -> tuple[list, list, list, int]:
@@ -525,6 +528,7 @@ class BigDataViewerMetadata(XMLMetadata):
                 [
                     (self.shape_y - 1) / 2.0,
                     (self.shape_x - 1) / 2.0,
+
                     (self.shape_z - 1) / 2.0,
                 ],
                 dtype=float,
@@ -550,7 +554,7 @@ class BigDataViewerMetadata(XMLMetadata):
         tuple
             A tuple of stage positions.
         """
-        y, x, z = mat[:, 3] * np.array([self.dy, self.dx, self.dz])
+        y, x, z = mat[:, 3] * np.array([self.dx, self.dy, self.dz])
         theta, f = None, None
 
         return x, y, z, theta, f

@@ -240,7 +240,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         return self.get_position_dict()
 
     def move_axis_absolute(
-        self, axis: str, abs_pos: float, wait_until_done: bool = False
+        self, axis: str, abs_pos: float, wait_until_done: bool = False, timeout=None
     ) -> bool:
         """Move stage along a single axis.
 
@@ -286,7 +286,10 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return False
 
         if wait_until_done:
-            self.asi_controller.wait_for_device()
+            if timeout:
+                self.asi_controller.wait_for_device(timeout)
+            else:
+                self.asi_controller.wait_for_device()
         return True
 
     def verify_move(self, move_dictionary: dict[str, float]) -> dict[str, float]:
@@ -315,7 +318,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         return res_dict
 
     def move_absolute(
-        self, move_dictionary: dict[str, float], wait_until_done: bool = False
+        self, move_dictionary: dict[str, float], wait_until_done: bool = False, timeout=None
     ) -> bool:
         """Move Absolute Method.
 
@@ -358,7 +361,10 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             logger.exception("ASI Stage Exception", e)
             return False
         if wait_until_done:
-            self.asi_controller.wait_for_device()
+            if timeout:
+                self.asi_controller.wait_for_device(timeout)
+            else:
+                self.asi_controller.wait_for_device()
 
         return True
 

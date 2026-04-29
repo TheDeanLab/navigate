@@ -896,7 +896,7 @@ class Microscope:
         logger.info(f"Stage position caching: {self.cache_stage_positions} ")
 
     def move_stage(
-        self, pos_dict: dict, wait_until_done: bool = False, update_focus: bool = True
+        self, pos_dict: dict, wait_until_done: bool = False, update_focus: bool = True, timeout=None
     ) -> bool:
         """Move stage to a position.
 
@@ -929,7 +929,7 @@ class Microscope:
             if update_focus and axis == "f":
                 self.central_focus = None
             return self.stages[axis].move_axis_absolute(
-                axis, pos_dict[axis_key], wait_until_done
+                axis, pos_dict[axis_key], wait_until_done, timeout=timeout
             )
 
         success = True
@@ -940,7 +940,7 @@ class Microscope:
                 if axis[: axis.index("_")] in axes
             }
             if pos:
-                success = stage.move_absolute(pos, wait_until_done) and success
+                success = stage.move_absolute(pos, wait_until_done, timeout=timeout) and success
 
         if update_focus and "f_abs" in pos_dict:
             self.central_focus = None

@@ -171,7 +171,7 @@ class Model:
         self.pre_exposure_time = 0  # milliseconds
 
         #: int: Number of timeouts before aborting acquisition.
-        self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
+        self.camera_wait_iterations = 30  # Thread waits this * 500 ms before it ends
 
         #: float: Time before acquisition.
         self.start_time = None
@@ -883,7 +883,7 @@ class Model:
 
         # print(self.configuration['experiment']['MirrorParameters']['modes'])
 
-    def move_stage(self, pos_dict: Dict[str, Any], wait_until_done=False) -> bool:
+    def move_stage(self, pos_dict: Dict[str, Any], wait_until_done=False, timeout=None) -> bool:
         """Moves the stages.
 
         Updates the stage dictionary, moves to the desired position, and reports
@@ -903,9 +903,9 @@ class Model:
         """
         self.logger.debug("****** moving stage to: %s", pos_dict)
         try:
-            r = self.active_microscope.move_stage(pos_dict, wait_until_done)
+            r = self.active_microscope.move_stage(pos_dict, wait_until_done, timeout=timeout)
             self.logger.info(
-                f"Stage moved to:, {pos_dict}, " f"Wait until done: {wait_until_done}"
+                f"Stage moved to:, {pos_dict}, " f"Wait until done: {wait_until_done}, timeout: {timeout}"
             )
         except Exception as e:
             self.logger.debug(f"Stage move failed: {e}")

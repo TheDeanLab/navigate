@@ -77,6 +77,7 @@ class Metadata:
         self._per_stack = True
         self._multiposition = False
         self._coupled_axes = None
+        self._stage_flip_flags = {}
 
         #: int: Shape of the data in x
         #: int: Shape of the data in y
@@ -234,6 +235,16 @@ class Metadata:
                         f"d{follower.lower()}",
                         state.get(f"{follower.lower()}_step_size", 1),
                     )
+
+        # stage flip flags
+        self._stage_flip_flags = {}
+        for k in scope["stage"].keys():
+            if k.startswith("flip_") and scope["stage"][k]:
+                axis = k[5:]
+                self._stage_flip_flags[axis] = -1
+                if axis == "y":
+                    self._stage_flip_flags["y"] *= -1
+        print("**** stage flip flags:", self._stage_flip_flags)
 
     def set_stack_order_from_configuration_experiment(self) -> None:
         """Set stack order from configuration experiment"""

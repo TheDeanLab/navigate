@@ -1416,6 +1416,11 @@ class ZStackAcquisition:
                 self.model.pause_data_thread()
                 data_thread_is_paused = True
 
+            # self.model.move_stage(pos_dict, wait_until_done=True, timeout=3.75)
+            self.model.move_stage({"x_abs": pos_dict["x_abs"]}, wait_until_done=True, timeout=2.75)
+            self.model.move_stage({"y_abs": pos_dict["y_abs"]}, wait_until_done=True, timeout=2.75)
+            time.sleep(1)
+            # send out move stage command again, in case ASI stage doesn't move
             self.model.move_stage(pos_dict, wait_until_done=True)
 
         # Potentially pause the data thread and move z, f position

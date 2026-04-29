@@ -49,6 +49,9 @@ from navigate.tools.decorators import log_initialization
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+THETA_RUN_SPEED_DEG_PER_SEC = 5.0
+THETA_MOVE_TIMEOUT_SECONDS = 120.0
+
 
 @log_initialization
 class ASIStage(StageBase, SerialDevice, IntegratedDevice):
@@ -153,6 +156,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)
+            self.set_theta_speed()
 
     def __del__(self) -> None:
         """Delete the ASI Stage connection."""
@@ -286,7 +290,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             return False
 
         if wait_until_done:
-            self.asi_controller.wait_for_device()
+            return self._wait_for_move([axis])
         return True
 
     def verify_move(self, move_dictionary: dict[str, float]) -> dict[str, float]:
@@ -358,7 +362,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             logger.exception("ASI Stage Exception", e)
             return False
         if wait_until_done:
-            self.asi_controller.wait_for_device()
+            return self._wait_for_move(list(abs_pos_dict.keys()))
 
         return True
 
@@ -402,6 +406,33 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             except KeyError as e:
                 logger.exception(f"ASI Stage - KeyError in set_speed: {e}")
                 return False
+        return True
+
+    def set_theta_speed(self) -> bool:
+        """Set a conservative run speed for theta axes only."""
+        theta_axes = [
+            axis for axis, stage_axis in self.asi_axes.items() if stage_axis == "theta"
+        ]
+        if not theta_axes:
+            return True
+
+        try:
+            self.asi_controller.set_speed(
+                {axis: THETA_RUN_SPEED_DEG_PER_SEC for axis in theta_axes}
+            )
+        except ASIException as e:
+            print(f"ASI Controller failed to set theta speed: {e}")
+            logger.exception("ASI Stage Exception", e)
+            return False
+        return True
+
+    def _wait_for_move(self, axes: list[str]) -> bool:
+        """Wait for a move, using a longer axis-specific wait for theta."""
+        self.asi_controller.wait_for_device()
+        if "theta" in axes and "theta" in self.axes_mapping:
+            return self.wait_until_complete(
+                self.axes_mapping["theta"], timeout=THETA_MOVE_TIMEOUT_SECONDS
+            )
         return True
 
     def get_speed(self, axis: str) -> float:
@@ -542,9 +573,17 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         except ASIException as e:
             logger.exception("ASI Stage Exception", e)
 
-    def wait_until_complete(self, axis: str) -> bool:
+    def wait_until_complete(self, axis: str, timeout: float = None) -> bool:
+        start_time = time.monotonic()
         try:
             while self.asi_controller.is_axis_busy(axis):
+                if timeout is not None and time.monotonic() - start_time >= timeout:
+                    logger.warning(
+                        "ASI Stage wait timed out for axis %s after %.1f seconds",
+                        axis,
+                        timeout,
+                    )
+                    return False
                 time.sleep(0.1)
         except ASIException as e:
             print(f"ASI Stage Exception {e}")

@@ -677,6 +677,14 @@ class GLVolumeViewBackend:
             glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
             self.window = glfw.create_window(window_dim[0], window_dim[1], "Volume Viewer", None, None)
 
+            # Disable user close option
+            # TODO: Ideally, user could close and this would set "enabled" to False on the GUI side, 
+            #       but difficult to do this in a thread-safe way.
+            def window_close_callback(window):
+                glfw.set_window_should_close(window, False)
+            
+            glfw.set_window_close_callback(self.window, window_close_callback)
+
             # Set GL context
             try:
                 glfw.make_context_current(self.window)

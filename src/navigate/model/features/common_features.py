@@ -50,6 +50,20 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+THETA_MOVE_EPSILON = 1e-9
+
+
+def stage_move_requires_pause(
+    delta_distances: list[float],
+    stage_distance_threshold: float,
+    theta_delta: float = 0.0,
+) -> bool:
+    """Return True when a stage move should pause camera frame reads."""
+    return any(distance > stage_distance_threshold for distance in delta_distances) or (
+        abs(theta_delta) > THETA_MOVE_EPSILON
+    )
+
+
 class Snap:
     """Snap class for capturing data frames using a microscope.
 
@@ -898,8 +912,13 @@ class MoveToNextPositionInMultiPositionTable:
         delta_distances = [
             abs(pos_dict[axis] - pre_stage_pos[axis]) for axis in self.stage_axes
         ]
-        should_pause_data_thread = any(
-            distance > self.stage_distance_threshold for distance in delta_distances
+        theta_delta = 0.0
+        if "theta" in pos_dict and "theta" in pre_stage_pos:
+            theta_delta = pos_dict["theta"] - pre_stage_pos["theta"]
+        should_pause_data_thread = stage_move_requires_pause(
+            delta_distances,
+            self.stage_distance_threshold,
+            theta_delta,
         )
         if should_pause_data_thread:
             self.model.pause_data_thread()
@@ -1263,6 +1282,9 @@ class ZStackAcquisition:
         pos_dict = self.model.get_stage_position()
         self.restore_z = pos_dict["z_pos"]
         self.restore_f = pos_dict["f_pos"]
+        self.pre_position = {
+            axis: float(pos_dict[f"{axis}_pos"]) for axis in self.stage_axes
+        }
 
         # position: x, y, z, theta, f
         # If multiposition, get the header to know which stage is which, and then
@@ -1346,7 +1368,8 @@ class ZStackAcquisition:
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
-            self.pre_position = self.current_position
+            if self.current_position_idx > 0:
+                self.pre_position = self.current_position
             self.current_position = dict(
                 zip(
                     self.stage_axes,
@@ -1409,8 +1432,15 @@ class ZStackAcquisition:
             # self.model.resume_data_thread() after the stage has completed the move
             # to the next position.
 
-            self.should_pause_data_thread = any(
-                distance > self.stage_distance_threshold for distance in delta_distances
+            theta_delta = 0.0
+            if "theta" in self.tiling_axes and self.pre_position is not None:
+                theta_delta = self.current_position["theta"] - self.pre_position.get(
+                    "theta", self.current_position["theta"]
+                )
+            self.should_pause_data_thread = stage_move_requires_pause(
+                delta_distances,
+                self.stage_distance_threshold,
+                theta_delta,
             )
             if self.should_pause_data_thread:
                 self.model.pause_data_thread()
@@ -1672,7 +1702,8 @@ class ASIZStackAcquisition(ZStackAcquisition):
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
-            self.pre_position = self.current_position
+            if self.current_position_idx > 0:
+                self.pre_position = self.current_position
             self.current_position = dict(
                 zip(
                     self.stage_axes,
@@ -1733,8 +1764,15 @@ class ASIZStackAcquisition(ZStackAcquisition):
         # if it is too far, then we can call self.model.pause_data_thread() and
         # self.model.resume_data_thread() after the stage has completed the move
         # to the next position.
-        self.should_pause_data_thread = any(
-            distance > self.stage_distance_threshold for distance in delta_distances
+        theta_delta = 0.0
+        if "theta" in self.tiling_axes and self.pre_position is not None:
+            theta_delta = self.current_position["theta"] - self.pre_position.get(
+                "theta", self.current_position["theta"]
+            )
+        self.should_pause_data_thread = stage_move_requires_pause(
+            delta_distances,
+            self.stage_distance_threshold,
+            theta_delta,
         )
         if self.should_pause_data_thread:
             self.model.pause_data_thread()

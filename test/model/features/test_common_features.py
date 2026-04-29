@@ -33,7 +33,39 @@
 
 import random
 import pytest
-from navigate.model.features.common_features import ZStackAcquisition
+from navigate.model.features.common_features import (
+    MoveToNextPositionInMultiPositionTable,
+    ZStackAcquisition,
+    stage_move_requires_pause,
+)
+
+
+def test_theta_move_requires_pause_below_linear_threshold():
+    assert stage_move_requires_pause([0, 0, 0], 1000, theta_delta=1)
+
+
+def test_no_stage_move_does_not_require_pause():
+    assert not stage_move_requires_pause([0, 0, 0], 1000, theta_delta=0)
+
+
+def test_multiposition_theta_move_pauses_data_thread(dummy_model_to_test_features):
+    model = dummy_model_to_test_features
+    model.signal_records = []
+    model.configuration["experiment"]["StageParameters"].update(
+        {"x": 0, "y": 0, "z": 0, "theta": 0, "f": 0}
+    )
+    model.configuration["multi_positions"] = [
+        ["X", "Y", "Z", "THETA", "F"],
+        [0, 0, 0, 45, 0],
+    ]
+    feature = MoveToNextPositionInMultiPositionTable(model)
+
+    feature.pre_signal_func()
+    feature.signal_func()
+
+    record_names = [record[0] for record in model.signal_records]
+    assert record_names.index("pause_data_thread") < record_names.index("move_stage")
+    assert record_names.index("move_stage") < record_names.index("resume_data_thread")
 
 
 class TestZStack:

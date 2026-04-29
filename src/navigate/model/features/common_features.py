@@ -59,7 +59,7 @@ def stage_move_requires_pause(
     theta_delta: float = 0.0,
 ) -> bool:
     """Return True when a stage move should pause camera frame reads."""
-    return any(distance > stage_distance_threshold for distance in delta_distances) or (
+    return any(abs(distance) > stage_distance_threshold for distance in delta_distances) or (
         abs(theta_delta) > THETA_MOVE_EPSILON
     )
 

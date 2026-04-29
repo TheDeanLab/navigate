@@ -32,7 +32,7 @@
 # Standard Imports
 import logging
 import time
-from typing import Any
+from typing import Any, Optional
 
 # Third Party Imports
 
@@ -422,7 +422,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             )
         except ASIException as e:
             print(f"ASI Controller failed to set theta speed: {e}")
-            logger.exception("ASI Stage Exception", e)
+            logger.exception(f"ASI Stage Exception: {e}")
             return False
         return True
 
@@ -573,7 +573,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         except ASIException as e:
             logger.exception("ASI Stage Exception", e)
 
-    def wait_until_complete(self, axis: str, timeout: float = None) -> bool:
+    def wait_until_complete(self, axis: str, timeout: Optional[float] = None) -> bool:
         start_time = time.monotonic()
         try:
             while self.asi_controller.is_axis_busy(axis):

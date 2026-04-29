@@ -1020,6 +1020,7 @@ class Model:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
+                wait_num = self.camera_wait_iterations
             start_time = time.perf_counter_ns()
             frame_ids = self.active_microscope.camera.get_new_frame()
 

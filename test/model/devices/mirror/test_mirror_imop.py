@@ -117,7 +117,7 @@ def test_imop_constructor_initializes_controller_and_flattens(
 ):
     module, fake_class = imop_module
 
-    mirror = module.ImagineOpticsMirror("scope-a", None, mirror_configuration)
+    mirror = module.ImagineOpticsMirror("scope-a", fake_class(), mirror_configuration)
     controller = fake_class.instances[0]
 
     assert mirror.mirror_controller is controller
@@ -141,7 +141,7 @@ def test_imop_constructor_raises_for_unknown_microscope(
 
 def test_imop_forwarders_dispatch_to_controller(imop_module, mirror_configuration):
     module, fake_class = imop_module
-    mirror = module.ImagineOpticsMirror("scope-a", None, mirror_configuration)
+    mirror = module.ImagineOpticsMirror("scope-a", fake_class(), mirror_configuration)
     controller = fake_class.instances[0]
 
     controller.calls.clear()
@@ -164,7 +164,7 @@ def test_imop_forwarders_dispatch_to_controller(imop_module, mirror_configuratio
 
 def test_imop_wcs_load_and_save_forwarders(imop_module, mirror_configuration):
     module, fake_class = imop_module
-    mirror = module.ImagineOpticsMirror("scope-a", None, mirror_configuration)
+    mirror = module.ImagineOpticsMirror("scope-a", fake_class(), mirror_configuration)
     controller = fake_class.instances[0]
 
     controller.calls.clear()
@@ -191,8 +191,8 @@ def test_imop_wcs_load_and_save_forwarders(imop_module, mirror_configuration):
 
 
 def test_imop_destructor_is_error_tolerant_noop(imop_module, mirror_configuration):
-    module, _ = imop_module
-    mirror = module.ImagineOpticsMirror("scope-a", None, mirror_configuration)
+    module, fake_class = imop_module
+    mirror = module.ImagineOpticsMirror("scope-a", fake_class(), mirror_configuration)
 
     class ExplodingController:
         def __getattribute__(self, _name):

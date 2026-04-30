@@ -76,7 +76,10 @@ This section defines Z-stack geometry and sequencing.
 1. :guilabel:`Start` / :guilabel:`End` are relative stack bounds.
 2. :guilabel:`Set Start Pos/Foc` and :guilabel:`Set End Pos/Foc` read current stage values.
 3. :guilabel:`Step Size` sets spacing in microns; :guilabel:`# slices` updates automatically.
-4. :guilabel:`Laser Cycling Settings` selects Per Stack or Per Z channel ordering.
+4. :guilabel:`Z-Stack Device` selects the primary Z-stack stage. When multiple stages can move along the Z direction, this is the stage that steps through the planes of the stack.
+5. :guilabel:`Focus Device` selects the focus stage that is ramped with the primary Z-stack stage when the start and end focus values differ.
+6. Additional stack-device offset controls, when present, move secondary stack stages at fixed offsets from the primary Z-stack stage.
+7. :guilabel:`Laser Cycling Settings` selects Per Stack or Per Z channel ordering.
 
 .. _ui_timepoint_settings:
 

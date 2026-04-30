@@ -68,6 +68,47 @@ def test_multiposition_theta_move_pauses_data_thread(dummy_model_to_test_feature
     assert record_names.index("move_stage") < record_names.index("resume_data_thread")
 
 
+def test_z_stack_preserves_primary_axis_restore_and_pre_position(
+    dummy_model_to_test_features,
+):
+    model = dummy_model_to_test_features
+    model.virtual_microscopes = {}
+    microscope_state = model.configuration["experiment"]["MicroscopeState"]
+    stage_parameters = model.configuration["experiment"]["StageParameters"]
+    previous_primary_z_axis = microscope_state.get("primary_z_axis")
+    previous_primary_f_axis = microscope_state.get("primary_f_axis")
+    previous_stage_parameters = dict(stage_parameters)
+
+    try:
+        microscope_state["is_multiposition"] = False
+        microscope_state["primary_z_axis"] = "theta"
+        microscope_state["primary_f_axis"] = "x"
+        stage_parameters.update({"x": 11, "y": 22, "z": 33, "theta": 44, "f": 55})
+
+        feature = ZStackAcquisition(model)
+        feature.pre_signal_func()
+
+        assert feature.restore_z == 44
+        assert feature.restore_f == 11
+        assert feature.pre_position == {
+            "x": 11.0,
+            "y": 22.0,
+            "z": 33.0,
+            "theta": 44.0,
+            "f": 55.0,
+        }
+    finally:
+        if previous_primary_z_axis is None:
+            microscope_state.pop("primary_z_axis", None)
+        else:
+            microscope_state["primary_z_axis"] = previous_primary_z_axis
+        if previous_primary_f_axis is None:
+            microscope_state.pop("primary_f_axis", None)
+        else:
+            microscope_state["primary_f_axis"] = previous_primary_f_axis
+        stage_parameters.update(previous_stage_parameters)
+
+
 class TestZStack:
     @pytest.fixture(autouse=True)
     def _prepare_test(self, dummy_model_to_test_features):

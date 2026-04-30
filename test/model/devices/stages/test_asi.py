@@ -146,6 +146,9 @@ class TestStageASI:
         }
         self.stage_configuration = stage_configuration
         self.stage_configuration["stage"]["hardware"]["type"] = "ASI"
+        self.stage_configuration.setdefault("zoom", {}).setdefault(
+            "pixel_size", {"5X": 1.3}
+        )
         self.asi_serial_device = asi_serial_device
         self.random_single_axis_test = random_single_axis_test
         self.random_multiple_axes_test = random_multiple_axes_test

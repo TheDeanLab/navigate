@@ -298,13 +298,16 @@ class ChannelsTabController(GUIController):
         # after initialization
         self.in_initialization = False
         self.channel_setting_controller.in_initialization = False
+        # get primary z and f axis
+        primary_z_axis = self.microscope_state_dict.get("primary_z_axis", "z")
+        primary_f_axis = self.microscope_state_dict.get("primary_f_axis", "f")
         # update z and f position
         self.z_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
-        ]["z"]
+        ][primary_z_axis]
         self.focus_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
-        ]["f"]
+        ][primary_f_axis]
         self.update_z_steps()
 
         self.show_verbose_info("Channels tab has been set new values")
@@ -516,9 +519,13 @@ class ChannelsTabController(GUIController):
         )
         self.stack_acq_vals["number_z_steps"].set(number_z_steps)
 
+        # get the primary z-stack and focus axis
+        primary_z_stage = self.stack_acq_vals["z_device"].get()
+        primary_z_axis = primary_z_stage.split(" - ")[1]
+
         # Shift the start/stop positions by the relative position
         flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
-        if flip_flags["z"]:
+        if flip_flags[primary_z_axis]:
             self.microscope_state_dict["abs_z_start"] = self.z_origin + end_position
             self.microscope_state_dict["abs_z_end"] = self.z_origin + start_position
             # self.stack_acq_vals["abs_z_start"].set(self.z_origin + end_position)
@@ -533,7 +540,7 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict["start_position"] = start_position
         self.microscope_state_dict["end_position"] = end_position
         self.microscope_state_dict["step_size"] = step_size * (
-            -1 if flip_flags["z"] else 1
+            -1 if flip_flags[primary_z_axis] else 1
         )
         self.microscope_state_dict["number_z_steps"] = number_z_steps
         self.stack_acq_vals["bottom"].set(self.microscope_state_dict["abs_z_start"])
@@ -568,17 +575,21 @@ class ChannelsTabController(GUIController):
         _ : tuple[str]
             Values is a tuple of strings. e.g., ('PY_VAR0', '', 'write')
         """
-
+        # get the primary z-stack and focus axis
+        primary_z_stage = self.stack_acq_vals["z_device"].get()
+        primary_z_axis = primary_z_stage.split(" - ")[1]
+        primary_f_stage = self.stack_acq_vals["f_device"].get()
+        primary_f_axis = primary_f_stage.split(" - ")[1]
         # We have a new origin
         self.z_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
-        ]["z"]
+        ][primary_z_axis]
         self.focus_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
-        ]["f"]
+        ][primary_f_axis]
 
         flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
-        if flip_flags["z"]:
+        if flip_flags[primary_z_axis]:
             self.stack_acq_vals["end_position"].set(0)
             self.stack_acq_vals["end_focus"].set(0)
         else:
@@ -597,13 +608,18 @@ class ChannelsTabController(GUIController):
             Values is a tuple of strings. e.g., ('PY_VAR0', '', 'write')
 
         """
+        # get the primary z-stack and focus axis
+        primary_z_stage = self.stack_acq_vals["z_device"].get()
+        primary_z_axis = primary_z_stage.split(" - ")[1]
+        primary_f_stage = self.stack_acq_vals["f_device"].get()
+        primary_f_axis = primary_f_stage.split(" - ")[1]
         # Grab current values
         z_end = self.parent_controller.configuration["experiment"]["StageParameters"][
-            "z"
+            primary_z_axis
         ]
         focus_end = self.parent_controller.configuration["experiment"][
             "StageParameters"
-        ]["f"]
+        ][primary_f_axis]
 
         z_start = self.z_origin
         focus_start = self.focus_origin
@@ -623,7 +639,7 @@ class ChannelsTabController(GUIController):
         end_pos = z_end - self.z_origin
         start_focus = focus_start - self.focus_origin
         end_focus = focus_end - self.focus_origin
-        if flip_flags["z"]:
+        if flip_flags[primary_z_axis]:
             start_pos, end_pos = end_pos, start_pos
             start_focus, end_focus = end_focus, start_focus
         self.stack_acq_vals["start_position"].set(start_pos)

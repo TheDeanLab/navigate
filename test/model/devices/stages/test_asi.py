@@ -47,6 +47,7 @@ class MockASIStage:
         self.is_open = False
         self.input_buffer = []
         self.output_buffer = []
+        self.commands = []
         self.ignore_obj = ignore_obj
 
         for axis in self.axes:
@@ -63,6 +64,7 @@ class MockASIStage:
 
     def write(self, command):
         command = command.decode(encoding="ascii")[:-1]
+        self.commands.append(command)
         temps = command.split()
         command = temps[0]
         if command == "WHERE":
@@ -92,6 +94,10 @@ class MockASIStage:
             self.output_buffer.append(":A")
         elif command == "SPEED":
             self.output_buffer.append(":A")
+        elif command == "S":
+            self.output_buffer.append(":A")
+        elif command == "RS":
+            self.output_buffer.append(":A N")
         elif command == "BU":
             axes = " ".join(self.axes)
             self.output_buffer.append(
@@ -140,6 +146,9 @@ class TestStageASI:
         }
         self.stage_configuration = stage_configuration
         self.stage_configuration["stage"]["hardware"]["type"] = "ASI"
+        self.stage_configuration.setdefault("zoom", {}).setdefault(
+            "pixel_size", {"5X": 1.3}
+        )
         self.asi_serial_device = asi_serial_device
         self.random_single_axis_test = random_single_axis_test
         self.random_multiple_axes_test = random_multiple_axes_test
@@ -335,3 +344,35 @@ class TestStageASI:
         self.random_multiple_axes_test(stage)
         stage.stage_limits = False
         self.random_multiple_axes_test(stage)
+
+    def test_theta_speed_override_only_sets_theta_axis(self):
+        self.stage_configuration["stage"]["hardware"]["axes"] = ["theta"]
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = ["N"]
+        asi_stage = self.build_device_connection()
+
+        ASIStage(self.microscope_name, asi_stage, self.configuration)
+
+        assert "S N=5.0" in self.asi_serial_device.commands
+        assert "S X=5.0" not in self.asi_serial_device.commands
+        assert "S Y=5.0" not in self.asi_serial_device.commands
+        assert "S Z=5.0" not in self.asi_serial_device.commands
+
+    def test_theta_move_waits_for_theta_axis(self):
+        self.stage_configuration["stage"]["hardware"]["axes"] = ["theta"]
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = ["N"]
+        asi_stage = self.build_device_connection()
+        stage = ASIStage(self.microscope_name, asi_stage, self.configuration)
+        stage.stage_limits = False
+
+        queried_axes = []
+        busy_responses = iter([True, True, False])
+        asi_stage.wait_for_device = lambda: None
+
+        def is_axis_busy(axis):
+            queried_axes.append(axis)
+            return next(busy_responses)
+
+        asi_stage.is_axis_busy = is_axis_busy
+
+        assert stage.move_axis_absolute("theta", 10, wait_until_done=True)
+        assert queried_axes == ["N", "N", "N"]

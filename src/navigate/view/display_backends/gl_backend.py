@@ -497,6 +497,9 @@ class GLVolumeViewBackend:
         self.is_ready.clear()
         self.need_render = False
 
+        # Clear the volume shape
+        self.volume_shape = None
+
         # Kill the thread
         if self.thread:
             self.thread.join()

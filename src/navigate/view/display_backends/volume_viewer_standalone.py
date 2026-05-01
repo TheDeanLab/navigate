@@ -134,9 +134,12 @@ class ChannelController:
         with tifffile.TiffFile(stack_path) as tif:
             
             # z-spacing
-            image_desc = dict(eval(tif.pages[0].tags['ImageDescription'].value))
-            self.resolution['dz'] = image_desc['spacing']
-            
+            try:
+                image_desc = dict(eval(tif.pages[0].tags['ImageDescription'].value))
+                self.resolution['dz'] = image_desc['spacing']
+            except:
+                self.resolution['dz'] = 1
+
             # xy-resolution
             pixels, microns = tif.pages[0].tags.get('XResolution').value
             self.resolution['px'] = microns / pixels

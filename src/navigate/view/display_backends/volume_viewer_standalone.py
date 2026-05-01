@@ -60,6 +60,12 @@ class ChannelWidgetBox(tk.Frame):
                 input_args={"from_": 0, "to": 65535, "increment": 255, "width": 8},
                 label_pos="top",
             ),
+            "autoscale": LabelInput(
+                parent=self,
+                label="AUTO",
+                label_pos="top",
+                input_class=tk.Button,
+            ),
         }
 
         for input_widget in self.inputs.values():
@@ -99,10 +105,22 @@ class ChannelController:
         # Widget command binds
         inputs = self.view.inputs
 
+        self.min = inputs["min"].variable
+        self.max = inputs["max"].variable
+
+        self.min.trace_add("write", self.safe_update_min_max)
+        self.max.trace_add("write", self.safe_update_min_max)
+
         inputs["color"].widget.configure(
             command=self.choose_color,
             bg=rgb_to_hex(self.color)
         )
+        inputs["autoscale"].widget.configure(
+            command=self.scale_volume_min_max
+        )
+
+    def safe_update_min_max(self, *args):
+        self._gl_update_min_max()
 
     def _gl_upload_stack_to_backend(self):
 
@@ -126,7 +144,7 @@ class ChannelController:
     def _gl_update_min_max(self):
 
         self.parent.backend.set_min_max(
-            [self.min, self.max],
+            [self.min.get(), self.max.get()],
             self.id
         )
 
@@ -156,6 +174,13 @@ class ChannelController:
 
         # Update on GL side
         self._gl_update_color()
+
+    def scale_volume_min_max(self):
+
+        self.min.set(int(self.stack_data.min()))
+        self.max.set(int(self.stack_data.max()))
+
+        self._gl_update_min_max()
 
 class VVStandaloneController:
     def __init__(self, view: TkinterDnD.Tk, backend: GLVolumeViewBackend):

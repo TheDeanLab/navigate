@@ -83,6 +83,43 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
+        volume_settings_frame = tk.Frame(self.main_frame, borderwidth=2, relief="sunken")
+
+        self.inputs = {
+            "shear_angle": LabelInput(
+                parent=volume_settings_frame,
+                label="Shear Angle",
+                input_class=ValidatedSpinbox,
+                input_var=tk.DoubleVar(value=45.0),
+                input_args={"from_": -90.0, "to": 90.0, "increment": 0.5, "width": 5},
+                label_pos="top",
+            ),
+            "opacity": LabelInput(
+                parent=volume_settings_frame,
+                label="Opacity",
+                input_class=ValidatedSpinbox,
+                input_var=tk.DoubleVar(value=0.15),
+                input_args={"from_": 0.01, "to": 1.0, "increment": 0.01, "width": 5},
+                label_pos="top",
+            ),
+            "world_step": LabelInput(
+                parent=volume_settings_frame,
+                label="World Step",
+                input_class=ValidatedSpinbox,
+                input_var=tk.DoubleVar(value=0.25),
+                input_args={"from_": 0.05, "to": 0.5, "increment": 0.01, "width": 5},
+                label_pos="top",
+            )
+        }
+
+        for input_widget in self.inputs.values():
+            input_widget.pack(side=tk.LEFT, expand=True)
+
+        volume_settings_frame.pack(fill=tk.X)
+
+        self.channels_frame = tk.Frame(self.main_frame, borderwidth=2, relief="sunken")
+        self.channels_frame.pack(fill=tk.BOTH)
+
 class ChannelController:
 
     def __init__(self, parent, channel_name: str, id: int=0):
@@ -92,7 +129,7 @@ class ChannelController:
         self.id = id
         self.channel_name = channel_name
 
-        self.view = ChannelWidgetBox(parent.view.main_frame, channel_name)
+        self.view = ChannelWidgetBox(parent.view.channels_frame, channel_name)
         self.view.pack(pady=5)
 
         # Variables
@@ -108,8 +145,8 @@ class ChannelController:
         self.min = inputs["min"].variable
         self.max = inputs["max"].variable
 
-        self.min.trace_add("write", self.safe_update_min_max)
-        self.max.trace_add("write", self.safe_update_min_max)
+        self.min.trace_add("write", self.update_min_max)
+        self.max.trace_add("write", self.update_min_max)
 
         inputs["color"].widget.configure(
             command=self.choose_color,
@@ -119,7 +156,7 @@ class ChannelController:
             command=self.scale_volume_min_max
         )
 
-    def safe_update_min_max(self, *args):
+    def update_min_max(self, *args):
         self._gl_update_min_max()
 
     def _gl_upload_stack_to_backend(self):
@@ -143,10 +180,13 @@ class ChannelController:
 
     def _gl_update_min_max(self):
 
-        self.parent.backend.set_min_max(
-            [self.min.get(), self.max.get()],
-            self.id
-        )
+        try:
+            _min = float(self.min.get())
+            _max = float(self.max.get())
+        except:
+            return
+
+        self.parent.backend.set_min_max([_min, _max], self.id)
 
     def load_stack(self, stack_path: str) -> np.ndarray:
         with tifffile.TiffFile(stack_path) as tif:
@@ -190,7 +230,29 @@ class VVStandaloneController:
         self.view.main_frame.drop_target_register(DND_FILES)
         self.view.main_frame.dnd_bind('<<Drop>>', self.on_drop)
 
+        # trace adds for inputs
+        # Trace adds for volume display widgets
+        def volume_setting_callback(field):
+            return lambda *args: self._gl_on_volume_settings_changed(field, *args)
+
+        for key, widget in self.view.inputs.items():
+            widget.get_variable().trace_add("write", volume_setting_callback(key))
+
         self.channels = {}
+
+
+    def _gl_on_volume_settings_changed(self, field, *args):
+        """Hook for OpenGL-based views to trigger a re-render when display settings are changed."""
+
+        variable = self.view.inputs[field].get_variable()
+
+        try:
+            value = float(variable.get())
+        except:
+            # Handle "" and other such invalid inputs
+            return
+        
+        exec(f"self.backend.set_{field}({value})")
 
     def on_drop(self, event):
         dropped_files = event.data.split()
@@ -206,7 +268,6 @@ class VVStandaloneController:
             path = pathlib.Path(file_path)
 
             if path.suffix.lower() in ['.tif', '.tiff']:
-
                 channel_name = path.name.split('.')[0]
 
                 # Create a channel for this stack

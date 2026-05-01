@@ -15,6 +15,7 @@ from navigate.view.custom_widgets.validation import ValidatedSpinbox
 WINDOW_DIMENSIONS = (400, 600)
 
 DEFAULT_COLORS = [
+    [255, 255, 255],
     [255,   0,   0],
     [  0, 255,   0],
     [  0,   0, 255],
@@ -90,7 +91,7 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
                 parent=volume_settings_frame,
                 label="Shear Angle",
                 input_class=ValidatedSpinbox,
-                input_var=tk.DoubleVar(value=45.0),
+                input_var=tk.DoubleVar(value=0.0),
                 input_args={"from_": -90.0, "to": 90.0, "increment": 0.5, "width": 5},
                 label_pos="top",
             ),
@@ -238,8 +239,8 @@ class VVStandaloneController:
         for key, widget in self.view.inputs.items():
             widget.get_variable().trace_add("write", volume_setting_callback(key))
 
+        # dict: holds Channels objects
         self.channels = {}
-
 
     def _gl_on_volume_settings_changed(self, field, *args):
         """Hook for OpenGL-based views to trigger a re-render when display settings are changed."""
@@ -278,6 +279,10 @@ class VVStandaloneController:
 
                 # Queue a stack upload for this channel
                 self.view.after(100, self.channels[channel_name]._gl_upload_stack_to_backend)
+        
+        # Reinitialize shader uniforms on-load
+        for key in self.view.inputs:
+            self._gl_on_volume_settings_changed(key)
 
 if __name__ == "__main__":
     app = VolumeViewerStandalone()

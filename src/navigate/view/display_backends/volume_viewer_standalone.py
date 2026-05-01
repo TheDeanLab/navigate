@@ -167,6 +167,10 @@ class VVStandaloneController:
     def on_drop(self, event):
         dropped_files = event.data.split()
 
+        # Reset if running
+        if self.backend.thread_is_running():
+            self.backend.stop()
+
         # Start GL backend
         self.backend.start()
 

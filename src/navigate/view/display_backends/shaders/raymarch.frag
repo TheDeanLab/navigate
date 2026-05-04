@@ -61,6 +61,21 @@ mat4 inverseShearYZ(float angleDeg)
     return m;
 }
 
+// model transform matricies
+mat4 shearMatrix(float angleDeg, float dz, float xyPixelSize)
+{
+    float theta = radians(angleDeg);
+
+    float dy = cos(theta)*dz/xyPixelSize;
+
+    return mat4(
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0,  dy, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    );
+}
+
 void main()
 {
     // voxel size (um): note that we assume px = py
@@ -78,9 +93,20 @@ void main()
     vec3 rdW = normalize(p1w.xyz / p1w.w - roW);
 
     // -------- transform ray to OBJECT space via inverse shear --------
-    mat4 invShear  = inverseShearYZ(shear_angle);
-    vec3 ro = (invShear * vec4(roW, 1.0)).xyz;
-    vec3 rd = normalize(mat3(invShear) * rdW);   // direction uses linear part only
+    // mat4 invShear  = inverseShearYZ(shear_angle);
+    // vec3 ro = (invShear * vec4(roW, 1.0)).xyz;
+    // vec3 rd = normalize(mat3(invShear) * rdW);   // direction uses linear part only
+
+    // Apply model transforms (shear, rotation, ...)
+    
+    // relevant matricies
+    mat4 S = shearMatrix(shear_angle, dz, px);
+    
+    mat4 model = S;
+
+    // apply
+    vec3 ro = (model * vec4(roW, 1.0)).xyz;
+    vec3 rd = normalize(mat3(model) * rdW);
 
     // -------- AABB in object space --------
     float tEnter, tExit;

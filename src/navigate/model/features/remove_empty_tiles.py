@@ -141,8 +141,8 @@ def detect_tissue3(image_data, threshold=150):
     -----------
     image_data : numpy.ndarray
         The input image data as a NumPy array.
-    threshold : int, optional
-        The intensity threshold for tissue detection. Default is 170.
+    threshold : float, optional
+        The intensity threshold for tissue detection. Default is 150.
 
     Returns:
     --------
@@ -168,7 +168,7 @@ class DetectTissueInStack:
         model : object
             The model object representing the microscope.
         threshold : float, optional
-            The intensity threshold for tissue detection. Default is 170.
+            The intensity threshold for tissue detection. Default is 150.
         planes : int, optional
             The number of Z planes to capture in the stack. Default is 1.
         percentage : float, optional
@@ -234,10 +234,10 @@ class DetectTissueInStack:
         self.starting_pos = pos
 
         #: float: The current Z position of the microscope stage.
-        self.current_z_pos = pos["z_pos"] + float(microscope_config["start_position"])
+        self.current_z_pos = pos[f"{self.primary_z_axis}_pos"] + float(microscope_config["start_position"])
 
         #: float: The current F position of the microscope stage.
-        self.current_f_pos = pos["f_pos"] + float(microscope_config["start_focus"])
+        self.current_f_pos = pos[f"{self.primary_f_axis}_pos"] + float(microscope_config["start_focus"])
 
         # calculate Z and F stage step sizes
         z_pos_range = float(microscope_config["end_position"]) - float(
@@ -297,7 +297,14 @@ class DetectTissueInStack:
         if self.scan_num >= self.planes:
             # move stage back to starting position
             self.model.move_stage(
-                {f"{self.primary_z_axis}_abs": self.starting_pos["z_pos"], f"{self.primary_f_axis}_abs": self.starting_pos["f_pos"]}, 
+                {
+                    f"{self.primary_z_axis}_abs": self.starting_pos[
+                        f"{self.primary_z_axis}_pos"
+                    ], 
+                    f"{self.primary_f_axis}_abs": self.starting_pos[
+                        f"{self.primary_f_axis}_pos"
+                    ]
+                }, 
                 wait_until_done=True
             )
             return True
@@ -383,7 +390,7 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
         planes : int, optional
             The number of Z planes to capture in the stack. Default is 1.
         threshold : float, optional
-            The intensity threshold for tissue detection. Default is 170.
+            The intensity threshold for tissue detection. Default is 150.
         percentage : float, optional
             The minimum percentage of tissue required to consider a frame as having
             tissue. Default is 0.75 (75%).
@@ -485,7 +492,7 @@ class DetectTissueInStackAndRecord(DetectTissueInStack):
         planes : int, optional
             The number of Z planes to capture in the stack. Default is 1.
         threshold : float, optional
-            The intensity threshold for tissue detection. Default is 170.
+            The intensity threshold for tissue detection. Default is 150.
         percentage : float, optional
             The minimum percentage of tissue required to consider a frame as having
             tissue. Default is 0.75 (75%).

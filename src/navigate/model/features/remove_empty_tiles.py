@@ -132,25 +132,30 @@ def detect_tissue2(image_data, percentage=0.0):
 
     return False
 
+
 def detect_tissue3(image_data, threshold=150):
-    """Detect Tissue in an Image.
-    
-    This function analyzes an image to determine if it contains tissue based on a specified otsu threshold.
-    
+    """Detect tissue in an image using the computed Otsu threshold.
+
+    This function computes the Otsu threshold value for an image and compares that
+    computed value against a minimum threshold.
+
     Parameters:
     -----------
     image_data : numpy.ndarray
         The input image data as a NumPy array.
     threshold : float, optional
-        The intensity threshold for tissue detection. Default is 150.
+        The minimum computed Otsu threshold required for tissue detection.
+        Default is 150.
 
     Returns:
     --------
     bool
-        True if the image contains tissue above the threshold; False otherwise.
+        True if the computed Otsu threshold is greater than or equal to
+        ``threshold``; False otherwise.
     """
     t = threshold_otsu(image_data)
     return t >= threshold
+
 
 class DetectTissueInStack:
     """Detect Tissue in a Stack of Images.
@@ -160,23 +165,26 @@ class DetectTissueInStack:
     presence.
     """
 
-    def __init__(self, model, planes=1, threshold=150, percentage=0.75, detect_func=None):
+    def __init__(
+        self, model, planes=1, percentage=0.75, detect_func=None, threshold=150
+    ):
         """Initialize the DetectTissueInStack class.
 
         Parameters:
         -----------
         model : object
             The model object representing the microscope.
-        threshold : float, optional
-            The intensity threshold for tissue detection. Default is 150.
         planes : int, optional
             The number of Z planes to capture in the stack. Default is 1.
         percentage : float, optional
-            The minimum percentage of tissue required to consider a frame as having
-            tissue. Default is 0.75 (75%).
+            The minimum fraction of tissue-positive frames required for the stack to
+            be considered as having tissue. Default is 0.75 (75%).
         detect_func : function, optional
             The custom tissue detection function to use. If not specified, the default
-            `detect_tissue` function will be used.
+            `detect_tissue3` function will be used. The function must accept
+            ``(image_data, threshold)`` and return whether the frame contains tissue.
+        threshold : float, optional
+            The intensity threshold passed to ``detect_func``. Default is 150.
         """
 
         #: navigate.model.Model: The model object representing the microscope.
@@ -234,10 +242,14 @@ class DetectTissueInStack:
         self.starting_pos = pos
 
         #: float: The current Z position of the microscope stage.
-        self.current_z_pos = pos[f"{self.primary_z_axis}_pos"] + float(microscope_config["start_position"])
+        self.current_z_pos = pos[f"{self.primary_z_axis}_pos"] + float(
+            microscope_config["start_position"]
+        )
 
         #: float: The current F position of the microscope stage.
-        self.current_f_pos = pos[f"{self.primary_f_axis}_pos"] + float(microscope_config["start_focus"])
+        self.current_f_pos = pos[f"{self.primary_f_axis}_pos"] + float(
+            microscope_config["start_focus"]
+        )
 
         # calculate Z and F stage step sizes
         z_pos_range = float(microscope_config["end_position"]) - float(
@@ -271,11 +283,15 @@ class DetectTissueInStack:
 
         # move to Z anf F position
         self.model.logger.debug(
-            f"move to position ({self.primary_z_axis}, {self.primary_f_axis}): ({self.current_z_pos}, {self.current_f_pos}), "
+            f"move to position ({self.primary_z_axis}, {self.primary_f_axis}): "
+            f"({self.current_z_pos}, {self.current_f_pos}), "
             f"{self.scan_num}, {self.model.frame_id}"
         )
         self.model.move_stage(
-            {f"{self.primary_z_axis}_abs": self.current_z_pos, f"{self.primary_f_axis}_abs": self.current_f_pos},
+            {
+                f"{self.primary_z_axis}_abs": self.current_z_pos,
+                f"{self.primary_f_axis}_abs": self.current_f_pos,
+            },
             wait_until_done=True,
         )
         self.scan_num += 1
@@ -292,7 +308,7 @@ class DetectTissueInStack:
             True if the signal phase should end, False otherwise.
         """
         self.model.logger.debug(
-            f"*** detect tissue signal end function: " f"{self.scan_num}"
+            f"*** detect tissue signal end function: {self.scan_num}"
         )
         if self.scan_num >= self.planes:
             # move stage back to starting position
@@ -300,12 +316,12 @@ class DetectTissueInStack:
                 {
                     f"{self.primary_z_axis}_abs": self.starting_pos[
                         f"{self.primary_z_axis}_pos"
-                    ], 
+                    ],
                     f"{self.primary_f_axis}_abs": self.starting_pos[
                         f"{self.primary_f_axis}_pos"
-                    ]
-                }, 
-                wait_until_done=True
+                    ],
+                },
+                wait_until_done=True,
             )
             return True
         self.current_z_pos += self.z_step
@@ -354,12 +370,12 @@ class DetectTissueInStack:
                 # check if the frame has tissue
                 r = self.detect_func(self.model.data_buffer[frame_id], self.threshold)
                 if r:
-                    self.model.logger.debug(
-                        f"*** this frame has tissue!{frame_id}"
-                    )
+                    self.model.logger.debug(f"*** this frame has tissue!{frame_id}")
                     self.tissue_frames += 1
                     # self.has_tissue_flag = True
-                    self.has_tissue_flag = (self.tissue_frames / self.planes) >= self.percentage
+                    self.has_tissue_flag = (
+                        self.tissue_frames / self.planes
+                    ) >= self.percentage
                     if self.has_tissue_flag:
                         break
         self.received_frames += len(frame_ids)
@@ -380,7 +396,9 @@ class DetectTissueInStack:
 
 
 class DetectTissueInStackAndReturn(DetectTissueInStack):
-    def __init__(self, model, planes=1, threshold=150, percentage=0.75, detect_func=None):
+    def __init__(
+        self, model, planes=1, percentage=0.75, detect_func=None, threshold=150
+    ):
         """Initialize the DetectTissueInStackAndReturn class.
 
         Parameters:
@@ -389,16 +407,17 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
             The model object representing the microscope.
         planes : int, optional
             The number of Z planes to capture in the stack. Default is 1.
-        threshold : float, optional
-            The intensity threshold for tissue detection. Default is 150.
         percentage : float, optional
-            The minimum percentage of tissue required to consider a frame as having
-            tissue. Default is 0.75 (75%).
+            The minimum fraction of tissue-positive frames required for the stack to
+            be considered as having tissue. Default is 0.75 (75%).
         detect_func : function, optional
             The custom tissue detection function to use. If not specified, the default
-            `detect_tissue` function will be used.
+            `detect_tissue3` function will be used. The function must accept
+            ``(image_data, threshold)`` and return whether the frame contains tissue.
+        threshold : float, optional
+            The intensity threshold passed to ``detect_func``. Default is 150.
         """
-        super().__init__(model, planes, threshold, percentage, detect_func)
+        super().__init__(model, planes, percentage, detect_func, threshold)
 
         self.detect_tissue_queue = Queue()
         self.result_sent_flag = False
@@ -481,7 +500,13 @@ class DetectTissueInStackAndRecord(DetectTissueInStack):
     """
 
     def __init__(
-        self, model, planes=1, threshold=150, percentage=0.75, position_records=[], detect_func=None
+        self,
+        model,
+        planes=1,
+        percentage=0.75,
+        position_records=None,
+        detect_func=None,
+        threshold=150,
     ):
         """Initialize the DetectTissueInStackAndRecord class.
 
@@ -491,21 +516,24 @@ class DetectTissueInStackAndRecord(DetectTissueInStack):
             The model object representing the microscope.
         planes : int, optional
             The number of Z planes to capture in the stack. Default is 1.
-        threshold : float, optional
-            The intensity threshold for tissue detection. Default is 150.
         percentage : float, optional
-            The minimum percentage of tissue required to consider a frame as having
-            tissue. Default is 0.75 (75%).
+            The minimum fraction of tissue-positive frames required for the stack to
+            be considered as having tissue. Default is 0.75 (75%).
         position_records : list, optional
-            A list to record positions where tissue was detected. Default is an empty
-            list.
+            A list to record positions where tissue was detected. A new list is
+            created when no list is provided.
         detect_func : function, optional
             The custom tissue detection function to use. If not specified, the default
-            `detect_tissue` function will be used.
+            `detect_tissue3` function will be used. The function must accept
+            ``(image_data, threshold)`` and return whether the frame contains tissue.
+        threshold : float, optional
+            The intensity threshold passed to ``detect_func``. Default is 150.
         """
-        super().__init__(model, planes, threshold, percentage, detect_func)
+        super().__init__(model, planes, percentage, detect_func, threshold)
 
         #: list: A list to record positions where tissue was detected.
+        if position_records is None:
+            position_records = []
         self.position_records = position_records
 
     def pre_func_data(self):

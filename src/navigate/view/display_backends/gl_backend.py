@@ -860,7 +860,7 @@ class GLVolumeViewBackend:
         self.frame_timer = FrameTimer(every=1.0)
 
         # Set up camera
-        self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(0, 0, -100), look_at=glm.vec3(0, 0, 0))
+        self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(-200, 0, 0), look_at=glm.vec3(0, 0, 0))
 
         # Set initial shader uniforms
         self.shader.use()

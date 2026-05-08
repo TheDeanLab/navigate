@@ -61,12 +61,12 @@ mat4 inverseShearYZ(float angleDeg)
     return m;
 }
 
-// model transform matricies
+// Shear Matrix: shifts X based on Z
 mat4 shearMatrix(float angleDeg, float dz, float xyPixelSize)
 {
-    float theta = radians(angleDeg);
+    float t = radians(angleDeg/2.0);
 
-    float dy = cos(theta)*dz/xyPixelSize;
+    float dy = sin(t)*dz/xyPixelSize;
 
     return mat4(
         1.0, 0.0, 0.0, 0.0,
@@ -74,6 +74,49 @@ mat4 shearMatrix(float angleDeg, float dz, float xyPixelSize)
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
+}
+
+// Rotation Matrix: rotate about Y
+mat4 rotationMatrix_Y(float angleDeg)
+{
+    float t = radians(angleDeg/2.0);
+
+    return mat4(
+        1.0,    0.0,    0.0,  0.0,
+        0.0, cos(t), -sin(t), 0.0,
+        0.0, sin(t),  cos(t), 0.0,
+        0.0,    0.0,    0.0,  1.0
+    );
+}
+
+// Translation Matrix
+mat4 translationMatrix(vec3 t)
+{
+    return mat4(
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        t.x, t.y, t.z, 1.0
+    );
+}
+
+// Combined DSR transformation (PetaKit5D)
+mat4 deskewRotateMatrix(float angleDeg, float dz, float xyPixelSize, vec3 volumeCenter)
+{
+    // 1: Translate to origin
+    mat4 T1 = translationMatrix(-volumeCenter);
+
+    // 2: Apply shear
+    mat4 S = shearMatrix(angleDeg, dz, xyPixelSize);
+
+    // 3: Rotate by theta
+    mat4 R = rotationMatrix_Y(angleDeg);
+
+    // 4: Translate back
+    mat4 T2 = translationMatrix(volumeCenter);
+
+    // Combined DSR:
+    return T2 * R * S * T1;
 }
 
 void main()
@@ -97,16 +140,14 @@ void main()
     // vec3 ro = (invShear * vec4(roW, 1.0)).xyz;
     // vec3 rd = normalize(mat3(invShear) * rdW);   // direction uses linear part only
 
-    // Apply model transforms (shear, rotation, ...)
-    
-    // relevant matricies
-    mat4 S = shearMatrix(shear_angle, dz, px);
-    
-    mat4 model = S;
+    // PetaKit5D style deskew-rotate (DSR)
+    vec3 volumeCenter = (boxMin_um + boxMax_um) * 0.5; // use _um ...?
+
+    mat4 DSR = deskewRotateMatrix(shear_angle, dz, px, volumeCenter);
 
     // apply
-    vec3 ro = (model * vec4(roW, 1.0)).xyz;
-    vec3 rd = normalize(mat3(model) * rdW);
+    vec3 ro = (DSR * vec4(roW, 1.0)).xyz;
+    vec3 rd = normalize(mat3(DSR) * rdW);
 
     // -------- AABB in object space --------
     float tEnter, tExit;

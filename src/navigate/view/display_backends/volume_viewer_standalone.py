@@ -57,7 +57,7 @@ class ChannelWidgetBox(tk.Frame):
                 parent=self,
                 label="Min:",
                 input_class=ValidatedSpinbox,
-                input_var=tk.IntVar(value=65535),
+                input_var=tk.IntVar(value=25000),
                 input_args={"from_": 0, "to": 65535, "increment": 255, "width": 8},
                 label_pos="top",
             ),

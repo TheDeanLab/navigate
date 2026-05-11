@@ -70,8 +70,8 @@ mat4 shearMatrix(float angleDeg, float dz, float xyPixelSize)
 
     return mat4(
         1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0,  dy, 0.0,
-        0.0, 0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0,  dy, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
 }
@@ -116,7 +116,7 @@ mat4 deskewRotateMatrix(float angleDeg, float dz, float xyPixelSize, vec3 volume
     mat4 T2 = translationMatrix(volumeCenter);
 
     // Combined DSR:
-    return T2 * R * S * T1;
+    return T2 * S * T1;
 }
 
 void main()

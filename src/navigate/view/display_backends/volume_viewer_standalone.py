@@ -15,8 +15,8 @@ from navigate.view.custom_widgets.validation import ValidatedSpinbox
 WINDOW_DIMENSIONS = (400, 600)
 
 DEFAULT_COLORS = [
-    [255, 255, 255],
     [255,   0,   0],
+    [255, 255, 255],
     [  0, 255,   0],
     [  0,   0, 255],
     [255, 255,   0],
@@ -107,8 +107,8 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
                 parent=volume_settings_frame,
                 label="World Step",
                 input_class=ValidatedSpinbox,
-                input_var=tk.DoubleVar(value=0.25),
-                input_args={"from_": 0.05, "to": 0.5, "increment": 0.01, "width": 5},
+                input_var=tk.DoubleVar(value=0.5),
+                input_args={"from_": 0.05, "to": 1.0, "increment": 0.01, "width": 5},
                 label_pos="top",
             )
         }
@@ -197,12 +197,17 @@ class ChannelController:
                 image_desc = dict(eval(tif.pages[0].tags['ImageDescription'].value))
                 self.resolution['dz'] = image_desc['spacing']
             except:
-                self.resolution['dz'] = 1
+                self.resolution['dz'] = 0.2
 
             # xy-resolution
-            pixels, microns = tif.pages[0].tags.get('XResolution').value
-            self.resolution['px'] = microns / pixels
-        
+            try:
+                pixels, microns = tif.pages[0].tags.get('XResolution').value
+                self.resolution['px'] = microns / pixels
+            except:
+                self.resolution['px'] = 1.0
+
+            print("Resolution:", self.resolution)
+
             # load the data
             self.stack_data = tif.asarray()
 
@@ -257,6 +262,7 @@ class VVStandaloneController:
 
     def on_drop(self, event):
         dropped_files = event.data.split()
+        dropped_files.sort()
 
         # Reset if running
         if self.backend.thread_is_running():

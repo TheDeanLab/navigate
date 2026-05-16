@@ -238,11 +238,15 @@ def test_adjust_unknown_waveform_sets_channel_to_none():
         waveforms = galvo.adjust(exposure_times, sweep_times)
 
     assert waveforms == {"channel_1": None}
-    mock_print.assert_called_with("Unknown Galvo waveform specified in configuration file.")
+    mock_print.assert_called_with(
+        "Unknown Galvo waveform specified in configuration file."
+    )
 
 
 def test_adjust_returns_none_on_invalid_waveform_constants():
-    config = build_base_configuration(amplitude="not-a-number", channel_2_selected=False)
+    config = build_base_configuration(
+        amplitude="not-a-number", channel_2_selected=False
+    )
     galvo = build_synthetic_galvo(config)
     exposure_times, sweep_times = default_timing()
 
@@ -272,7 +276,9 @@ def test_adjust_clips_waveform_to_voltage_limits():
 
 
 def test_adjust_resets_existing_waveforms_when_no_channels_selected():
-    config = build_base_configuration(channel_1_selected=False, channel_2_selected=False)
+    config = build_base_configuration(
+        channel_1_selected=False, channel_2_selected=False
+    )
     galvo = build_synthetic_galvo(config)
     galvo.waveform_dict = {"stale_channel": np.array([1.0], dtype=float)}
     exposure_times, sweep_times = default_timing()

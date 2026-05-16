@@ -62,9 +62,7 @@ class KinesisStage:
         try:
             from pylablib.devices import Thorlabs
         except ImportError as e:
-            raise ImportError(
-                "pylablib is required for KINESIS stage support."
-            ) from e
+            raise ImportError("pylablib is required for KINESIS stage support.") from e
         return Thorlabs
 
     def open(self) -> None:
@@ -82,8 +80,12 @@ class KinesisStage:
             return
         try:
             self.stage.stop()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(
+                "Failed to stop KINESIS stage cleanly during close: %s",
+                exc,
+                exc_info=True,
+            )
         self.stage.close()
 
     def move_to_position(
@@ -96,8 +98,8 @@ class KinesisStage:
         self.stage.move_by(delta_steps, channel=1, scale=False)
         if wait_till_done:
             self.stage.wait_move(channel=1)
-        if SLEEP_AFTER_WAIT:
-            sleep(SLEEP_AFTER_WAIT)
+            if SLEEP_AFTER_WAIT:
+                sleep(SLEEP_AFTER_WAIT)
 
     def get_current_position(self, steps_per_um: float) -> float:
         """Get current position in microns."""

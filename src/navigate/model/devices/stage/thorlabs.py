@@ -53,7 +53,7 @@ def _get_stage_device_entry(
     stage_hardware = configuration["configuration"]["microscopes"][microscope_name][
         "stage"
     ]["hardware"]
-    if type(stage_hardware) == ListProxy:
+    if isinstance(stage_hardware, ListProxy):
         return stage_hardware[device_id]
     return stage_hardware
 
@@ -118,7 +118,7 @@ class KIM001Stage(StageBase, IntegratedDevice):
         device_config = configuration["configuration"]["microscopes"][microscope_name][
             "stage"
         ]["hardware"]
-        if type(device_config) == ListProxy:
+        if isinstance(device_config, ListProxy):
             #: str: Serial number of the stage.
             self.serial_number = str(device_config[device_id]["serial_number"])
         else:
@@ -572,11 +572,27 @@ class KINESISStage(StageBase):
         self.kinesis_controller = device_connection
 
     def __del__(self) -> None:
+        kinesis = getattr(self, "kinesis_controller", None)
+        if kinesis is None:
+            return
+
         try:
             self.stop()
-            self.kinesis_controller.close()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(
+                "Error while stopping KINESISStage during __del__: %s",
+                exc,
+                exc_info=True,
+            )
+
+        try:
+            kinesis.close()
+        except Exception as exc:
+            logger.debug(
+                "Error while closing KINESISStage during __del__: %s",
+                exc,
+                exc_info=True,
+            )
 
     @classmethod
     def get_connect_params(cls) -> list[str]:
@@ -593,8 +609,12 @@ class KINESISStage(StageBase):
         try:
             pos = self.kinesis_controller.get_current_position(self.steps_per_um)
             setattr(self, f"{self.axes[0]}_pos", pos)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(
+                "Error while reporting KINESISStage position: %s",
+                exc,
+                exc_info=True,
+            )
         return self.get_position_dict()
 
     def move_axis_absolute(

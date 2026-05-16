@@ -32,6 +32,7 @@
 
 import random
 import copy
+from contextlib import contextmanager
 
 import pytest
 import numpy as np
@@ -47,6 +48,142 @@ def channels_tab_controller(dummy_controller):
     return ChannelsTabController(
         dummy_controller.view.settings.channels_tab, dummy_controller
     )
+
+
+@contextmanager
+def stage_limit_settings(channels_tab_controller, **limits):
+    configuration = channels_tab_controller.parent_controller.configuration
+    configuration_controller = (
+        channels_tab_controller.parent_controller.configuration_controller
+    )
+    microscope_name = configuration_controller.microscope_name
+    stage_config = configuration["configuration"]["microscopes"][microscope_name][
+        "stage"
+    ]
+    stage_parameters = configuration["experiment"]["StageParameters"]
+    original_limits = {key: stage_config.get(key) for key in limits}
+    original_limit_flag = stage_parameters.get("limits", True)
+    try:
+        for key, value in limits.items():
+            stage_config[key] = value
+        yield
+    finally:
+        for key, value in original_limits.items():
+            stage_config[key] = value
+        stage_parameters["limits"] = original_limit_flag
+
+
+def assert_spinbox_range(widget, from_value, to_value):
+    assert float(widget.cget("from")) == from_value
+    assert float(widget.cget("to")) == to_value
+
+
+@pytest.mark.parametrize(
+    "origin, expected_range",
+    [
+        (0, (0, 200)),
+        (100, (-100, 100)),
+    ],
+)
+def test_stack_position_limits_follow_stage_limits_for_z_axis(
+    channels_tab_controller, origin, expected_range
+):
+    with stage_limit_settings(
+        channels_tab_controller, z_min=0, z_max=200, f_min=-100000, f_max=100000
+    ):
+        channels_tab_controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["limits"] = True
+        channels_tab_controller.z_origin = origin
+        channels_tab_controller.focus_origin = 0
+
+        channels_tab_controller.set_spinbox_range_limits(
+            channels_tab_controller.parent_controller.configuration["gui"]
+        )
+
+        for widget_name in ["start_position", "end_position"]:
+            assert_spinbox_range(
+                channels_tab_controller.stack_acq_widgets[widget_name].widget,
+                expected_range[0],
+                expected_range[1],
+            )
+
+
+def test_stack_position_limits_follow_stage_limits_for_focus_axis(
+    channels_tab_controller,
+):
+    with stage_limit_settings(
+        channels_tab_controller, z_min=-100000, z_max=100000, f_min=10, f_max=50
+    ):
+        channels_tab_controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["limits"] = True
+        channels_tab_controller.z_origin = 0
+        channels_tab_controller.focus_origin = 20
+
+        channels_tab_controller.set_spinbox_range_limits(
+            channels_tab_controller.parent_controller.configuration["gui"]
+        )
+
+        for widget_name in ["start_focus", "end_focus"]:
+            assert_spinbox_range(
+                channels_tab_controller.stack_acq_widgets[widget_name].widget,
+                -10,
+                30,
+            )
+
+
+def test_stack_position_limits_fall_back_to_gui_config_when_stage_limits_disabled(
+    channels_tab_controller,
+):
+    with stage_limit_settings(channels_tab_controller, z_min=0, z_max=200):
+        configuration = channels_tab_controller.parent_controller.configuration
+        configuration["experiment"]["StageParameters"]["limits"] = False
+
+        channels_tab_controller.set_spinbox_range_limits(configuration["gui"])
+
+        stack_config = configuration["gui"]["stack_acquisition"]
+        assert_spinbox_range(
+            channels_tab_controller.stack_acq_widgets["start_position"].widget,
+            stack_config["z_start_pos"]["min"],
+            stack_config["z_start_pos"]["max"],
+        )
+        assert_spinbox_range(
+            channels_tab_controller.stack_acq_widgets["end_position"].widget,
+            stack_config["z_end_pos"]["min"],
+            stack_config["z_end_pos"]["max"],
+        )
+
+
+def test_verify_experiment_values_rejects_out_of_range_stack_position(
+    channels_tab_controller,
+):
+    with stage_limit_settings(
+        channels_tab_controller, z_min=0, z_max=200, f_min=-100000, f_max=100000
+    ):
+        configuration = channels_tab_controller.parent_controller.configuration
+        configuration["experiment"]["StageParameters"]["limits"] = True
+        channels_tab_controller.microscope_state_dict = configuration["experiment"][
+            "MicroscopeState"
+        ]
+        channels_tab_controller.channel_setting_controller.channel_setting_dict = (
+            channels_tab_controller.microscope_state_dict["channels"]
+        )
+        channels_tab_controller.z_origin = 100
+        channels_tab_controller.focus_origin = 0
+        channels_tab_controller.microscope_state_dict["image_mode"] = "z-stack"
+        channels_tab_controller.microscope_state_dict["number_z_steps"] = 1
+        channels_tab_controller.stack_acq_vals["number_z_steps"].set(1)
+        channels_tab_controller.microscope_state_dict["timepoints"] = 1
+        channels_tab_controller.microscope_state_dict["stack_pause"] = 0
+        channels_tab_controller.microscope_state_dict["start_position"] = -101
+        channels_tab_controller.microscope_state_dict["end_position"] = 0
+        channels_tab_controller.microscope_state_dict["start_focus"] = 0
+        channels_tab_controller.microscope_state_dict["end_focus"] = 0
+
+        warning = channels_tab_controller.verify_experiment_values()
+
+        assert "start_position is outside the z stage limits" in warning
 
 
 def test_update_z_steps(channels_tab_controller):

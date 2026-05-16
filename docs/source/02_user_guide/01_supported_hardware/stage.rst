@@ -540,10 +540,21 @@ KINESIS (Serial)
 This mode supports Thorlabs Kinesis stepper communication through
 ``pylablib`` using a serial device path (for example ``/dev/ttyUSB1`` on Linux).
 
+Install the optional KINESIS dependency extra before using this stage:
+
+.. code-block:: bash
+
+    pip install "navigate-micro[kinesis]"
+
 .. note::
 
     ``steps_per_um`` is the preferred scale parameter for KINESIS stages.
     If omitted, **navigate** falls back to ``device_units_per_mm``.
+
+.. note::
+
+    The current KINESIS implementation assumes a single Kinesis stage connected
+    through one serial device path.
 
 .. collapse:: Configuration File
 

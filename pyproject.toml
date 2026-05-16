@@ -51,6 +51,10 @@ photometrics = [
     "PyVCAM"
     ]
 
+kinesis = [
+    "pylablib"
+    ]
+
 dev = [
     "pytest",
     "pytest-xvfb",

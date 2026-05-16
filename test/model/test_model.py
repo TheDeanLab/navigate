@@ -33,6 +33,7 @@
 import random
 import pytest
 import os
+from types import SimpleNamespace
 from multiprocessing import Manager
 from unittest.mock import MagicMock
 import multiprocessing
@@ -155,6 +156,84 @@ def test_single_acquisition(model):
     model.release_pipe("show_img_pipe")
 
 
+def test_run_acquisition_marks_finite_signal_completion_for_data_thread():
+    from navigate.model.model import Model
+
+    model = SimpleNamespace(
+        signal_container=SimpleNamespace(end_flag=False, is_closed=False),
+        stop_send_signal=False,
+        stop_acquisition=False,
+        imaging_mode="single",
+        is_data_thread_on=True,
+        logger=MagicMock(),
+    )
+
+    def snap_image():
+        model.signal_container.end_flag = True
+
+    model.snap_image = snap_image
+
+    Model.run_acquisition(model)
+
+    assert model.stop_acquisition is True
+    assert model.signal_acquisition_complete is True
+
+
+def test_run_data_process_drains_pending_frames_after_signal_completion():
+    from navigate.model.model import Model
+
+    class FakeCamera:
+        def __init__(self):
+            self.frames = [[0, 1, 2]]
+
+        def get_new_frame(self):
+            return self.frames.pop(0)
+
+    class FakeDataContainer:
+        root = object()
+        is_closed = False
+
+        def __init__(self):
+            self.end_flag = False
+            self.received_frames = []
+
+        def run(self, frame_ids):
+            self.received_frames.extend(frame_ids)
+            self.end_flag = True
+
+    class FakePipe:
+        def __init__(self):
+            self.sent = []
+
+        def send(self, value):
+            self.sent.append(value)
+
+    data_container = FakeDataContainer()
+    show_img_pipe = FakePipe()
+    model = SimpleNamespace(
+        active_microscope=SimpleNamespace(camera=FakeCamera()),
+        ask_to_pause_data_thread=False,
+        camera_wait_iterations=1,
+        data_container=data_container,
+        event_queue=MagicMock(),
+        imaging_mode="single",
+        logger=MagicMock(),
+        pause_data_ready_lock=MagicMock(locked=MagicMock(return_value=False)),
+        show_img_pipe=show_img_pipe,
+        signal_acquisition_complete=True,
+        stop_acquisition=True,
+    )
+    model.end_acquisition = MagicMock()
+    model._should_drain_signal_completed_frames = (
+        Model._should_drain_signal_completed_frames.__get__(model, type(model))
+    )
+
+    Model.run_data_process(model)
+
+    assert data_container.received_frames == [0, 1, 2]
+    assert show_img_pipe.sent == [2, "stop"]
+
+
 def test_live_acquisition(model):
     state = model.configuration["experiment"]["MicroscopeState"]
     state["image_mode"] = "live"
@@ -195,7 +274,6 @@ def test_autofocus_live_acquisition(model):
 
     n_images = 0
     seen_channels = set()
-    autofocus = False
 
     show_img_pipe = model.create_pipe("show_img_pipe")
 
@@ -210,10 +288,7 @@ def test_autofocus_live_acquisition(model):
         n_images += 1
         if n_images >= 100:
             model.run_command("stop")
-        elif n_images >= 70:
-            autofocus = False
         elif n_images == 30:
-            autofocus = True
             model.run_command("autofocus")
 
     model.data_thread.join()

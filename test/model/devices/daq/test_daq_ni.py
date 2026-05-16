@@ -359,6 +359,9 @@ def test_initialize_daq_ni_loads_active_scope_trigger_reset_count(ni_module):
         ("", None),
         (None, None),
         (-1, None),
+        (True, None),
+        (1.9, None),
+        (float("inf"), None),
         ("invalid", None),
     ],
 )

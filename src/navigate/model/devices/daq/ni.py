@@ -30,6 +30,7 @@
 
 
 # Standard Imports
+import math
 import logging
 from threading import Lock
 import traceback
@@ -118,9 +119,21 @@ class NIDAQ(DAQBase):
     @staticmethod
     def _normalize_trigger_reset_count(value: Any) -> Optional[int]:
         """Return a positive DAQ reset count, or None when disabled."""
-        try:
+        if isinstance(value, bool):
+            return None
+
+        if isinstance(value, int):
+            trigger_reset_count = value
+        elif isinstance(value, float):
+            if not math.isfinite(value) or not value.is_integer():
+                return None
             trigger_reset_count = int(value)
-        except (TypeError, ValueError):
+        elif isinstance(value, str):
+            try:
+                trigger_reset_count = int(value.strip())
+            except ValueError:
+                return None
+        else:
             return None
 
         if trigger_reset_count <= 0:

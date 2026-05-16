@@ -117,6 +117,13 @@ daq_device_types = {
 daq_hardware_widgets = {
     "hardware/type": ["Device Type", "Combobox", "string", daq_device_types, None],
     "sample_rate": ["Sample Rate", "Input", "int", None, "Example: 100000"],
+    "trigger_reset_count": [
+        "Trigger Reset Count",
+        "Input",
+        "int",
+        None,
+        "Default: 0 (disabled). Use a positive value only for unstable systems.",
+    ],
     "master_trigger_out_line": [
         "Master Trigger Out",
         "Input",

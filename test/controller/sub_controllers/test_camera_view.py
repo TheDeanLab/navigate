@@ -96,7 +96,6 @@ class TestCameraViewController:
         }
 
     def test_init(self):
-
         assert isinstance(self.camera_view, CameraViewController)
 
     def test_update_display_state(self):
@@ -122,7 +121,6 @@ class TestCameraViewController:
         assert y == self.y
 
     def test_popup_menu(self, monkeypatch):
-
         # create a fake event object
         self.startx = int(random.random())
         self.starty = int(random.random())
@@ -166,7 +164,6 @@ class TestCameraViewController:
     @pytest.mark.parametrize("name", ["minmax", "image"])
     @pytest.mark.parametrize("data", [[random.randint(0, 49), random.randint(50, 100)]])
     def test_initialize(self, name, data):
-
         self.camera_view.initialize(name, data)
 
         # Checking values
@@ -177,7 +174,6 @@ class TestCameraViewController:
             assert self.camera_view.image_metrics["Frames"].get() == data[0]
 
     def test_set_mode(self):
-
         # Test default mode
         self.camera_view.set_mode()
         assert self.camera_view.mode == ""
@@ -200,7 +196,6 @@ class TestCameraViewController:
 
     @pytest.mark.parametrize("mode", ["stop", "live"])
     def test_move_stage(self, mode):
-
         # Setup to check formula inside func is correct
         microscope_name = self.camera_view.parent_controller.configuration[
             "experiment"
@@ -256,15 +251,18 @@ class TestCameraViewController:
         assert new_pos == self.camera_view.parent_controller.stage_pos
 
     def test_reset_display(self, monkeypatch):
+        # Mock redraw function
+        redraw_called = False
 
-        # Mock process image function
-        process_image_called = False
+        def mock_redraw_current_view():
+            nonlocal redraw_called
+            redraw_called = True
 
-        def mock_process_image():
-            nonlocal process_image_called
-            process_image_called = True
-
-        monkeypatch.setattr(self.camera_view, "process_image", mock_process_image)
+        monkeypatch.setattr(
+            self.camera_view,
+            "_redraw_current_view",
+            mock_redraw_current_view,
+        )
 
         # Reset and check
         self.camera_view.reset_display()
@@ -282,7 +280,7 @@ class TestCameraViewController:
         assert self.camera_view.zoom_scale == 1
         assert self.camera_view.zoom_width == self.camera_view.view.canvas_width
         assert self.camera_view.zoom_height == self.camera_view.view.canvas_height
-        assert process_image_called is True
+        assert redraw_called is True
 
     def test_process_image(self):
         self.camera_view.image = np.random.randint(0, 256, (600, 800))
@@ -306,42 +304,42 @@ class TestCameraViewController:
 
     @pytest.mark.parametrize("num,value", [(4, 0.95), (5, 1.05)])
     def test_mouse_wheel(self, num, value):
-
         # Test zoom in and out
         event = MagicMock()
         event.num = num
-        event.x = int(random.random())
-        event.y = int(random.random())
+        event.x = 10
+        event.y = 10
         event.delta = 120
+        self.camera_view.canvas_width = 100
+        self.camera_view.canvas_height = 80
+        self.camera_view.view.canvas_width = 100
+        self.camera_view.view.canvas_height = 80
         self.camera_view.zoom_value = 1
         self.camera_view.zoom_scale = 1
-        self.camera_view.zoom_width = self.camera_view.view.canvas_width
-        self.camera_view.zoom_height = self.camera_view.view.canvas_height
+        self.camera_view.zoom_width = self.camera_view.canvas_width
+        self.camera_view.zoom_height = self.camera_view.canvas_height
         self.camera_view.reset_display = MagicMock()
-        self.camera_view.process_image = MagicMock()
+        self.camera_view._redraw_current_view = MagicMock()
         self.camera_view.mouse_wheel(event)
 
         assert self.camera_view.zoom_value == value
         assert self.camera_view.zoom_scale == value
-        assert self.camera_view.zoom_width == self.camera_view.view.canvas_width / value
-        assert (
-            self.camera_view.zoom_height == self.camera_view.view.canvas_height / value
-        )
+        assert self.camera_view.zoom_width == self.camera_view.canvas_width / value
+        assert self.camera_view.zoom_height == self.camera_view.canvas_height / value
 
         if (
-            self.camera_view.zoom_width > self.camera_view.view.canvas_width
-            or self.camera_view.zoom_height > self.camera_view.view.canvas_height
+            self.camera_view.zoom_width > self.camera_view.canvas_width
+            or self.camera_view.zoom_height > self.camera_view.canvas_height
         ):
             assert self.camera_view.reset_display.called is True
-            self.camera_view.process_image.assert_called()
         else:
             assert self.camera_view.reset_display.called is False
-            not self.camera_view.process_image.assert_called()
+
+        self.camera_view._redraw_current_view.assert_called_once_with()
 
     @pytest.mark.skip("AssertionError: Expected 'mock' to have been called.")
     @pytest.mark.parametrize("transpose", [True, False])
     def test_digital_zoom(self, transpose):
-
         # Setup
         a, b, c, d, e, f = [random.randint(1, 100) for _ in range(6)]
         g, h = [random.randint(100, 400) for _ in range(2)]
@@ -381,20 +379,16 @@ class TestCameraViewController:
         # Calculate expected image based on transpose flag
         if transpose:
             new_image = self.camera_view.image[
-                x_start_index
-                * self.camera_view.canvas_width_scale : x_end_index
+                x_start_index * self.camera_view.canvas_width_scale : x_end_index
                 * self.camera_view.canvas_width_scale,
-                y_start_index
-                * self.camera_view.canvas_height_scale : y_end_index
+                y_start_index * self.camera_view.canvas_height_scale : y_end_index
                 * self.camera_view.canvas_height_scale,
             ]
         else:
             new_image = self.camera_view.image[
-                y_start_index
-                * self.camera_view.canvas_height_scale : y_end_index
+                y_start_index * self.camera_view.canvas_height_scale : y_end_index
                 * self.camera_view.canvas_height_scale,
-                x_start_index
-                * self.camera_view.canvas_width_scale : x_end_index
+                x_start_index * self.camera_view.canvas_width_scale : x_end_index
                 * self.camera_view.canvas_width_scale,
             ]
 
@@ -481,18 +475,9 @@ class TestCameraViewController:
         test_image = np.random.rand(100, 100)
         self.zoom_image = test_image
 
-        # set the widget size
-        widget = type("MyWidget", (object,), {"widget": self.camera_view.view})
-        event = type(
-            "MyEvent",
-            (object,),
-            {
-                "widget": widget,
-                "width": np.random.randint(5, 1000),
-                "height": np.random.randint(5, 1000),
-            },
-        )
-        self.camera_view.resize(event)
+        # set a deterministic target canvas size for down-sampling
+        self.camera_view.canvas_width = 100
+        self.camera_view.canvas_height = 80
 
         # monkeypatch cv2.resize
         def mocked_resize(src, dsize, interpolation=1):
@@ -505,8 +490,8 @@ class TestCameraViewController:
 
         # assert that the image has been resized correctly
         assert np.shape(down_sampled_image) == (
-            self.camera_view.view.canvas_width,
-            self.camera_view.view.canvas_height,
+            self.camera_view.canvas_width,
+            self.camera_view.canvas_height,
         )
 
         # assert that the image has not been modified
@@ -702,7 +687,6 @@ class TestCameraViewController:
         assert self.camera_view.image_count == count + 4
 
     def test_add_crosshair(self):
-
         # Arrange
         x = self.camera_view.canvas_width
         y = self.camera_view.canvas_height
@@ -726,7 +710,6 @@ class TestCameraViewController:
         pass
 
     def test_toggle_min_max_button(self):
-
         # Setup for true path
         self.camera_view.image_palette["Autoscale"].set(True)
 

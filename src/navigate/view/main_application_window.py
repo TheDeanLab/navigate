@@ -44,7 +44,7 @@ from navigate.view.main_window_content.display_notebook import CameraNotebook
 from navigate.view.main_window_content.acquire_notebook import AcquireBar
 from navigate.view.main_window_content.menus import Menubar
 from navigate.view.custom_widgets.scrollbars import ScrolledFrame
-from navigate.view.custom_widgets.common import uniform_grid
+from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -105,7 +105,7 @@ class MainApp(ttk.Frame):
 
         #: ScrolledFrame: The scrollable version of the main frame for the application
         self.scroll_frame = ScrolledFrame(root)
-        self.scroll_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        themed_grid(self.scroll_frame, row=0, column=0, sticky=tk.NSEW)
 
         ttk.Frame.__init__(self, self.scroll_frame.interior, *args, **kwargs)
 
@@ -143,12 +143,32 @@ class MainApp(ttk.Frame):
         self.right_frame = ttk.Frame(self)
 
         # Grid out foundational frames
-        self.grid(column=0, row=0, sticky=tk.NSEW)
-        self.top_frame.grid(
-            row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3
+        themed_grid(self, column=0, row=0, sticky=tk.NSEW)
+        themed_grid(
+            self.top_frame,
+            row=0,
+            column=0,
+            columnspan=2,
+            sticky=tk.NSEW,
+            padx="layout_window_gap",
+            pady=("layout_window_gap", "layout_panel_gap"),
         )
-        self.left_frame.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
-        self.right_frame.grid(row=1, column=1, sticky=tk.NW, padx=3, pady=3)
+        themed_grid(
+            self.left_frame,
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            padx=("layout_window_gap", "layout_section_gap"),
+            pady=("layout_panel_gap", "layout_window_gap"),
+        )
+        themed_grid(
+            self.right_frame,
+            row=1,
+            column=1,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_window_gap"),
+            pady=("layout_panel_gap", "layout_window_gap"),
+        )
 
         #: SettingsNotebook: The settings notebook for the application
         self.settings = SettingsNotebook(self.left_frame, self.root)
@@ -160,8 +180,5 @@ class MainApp(ttk.Frame):
         self.acquire_bar = AcquireBar(self.top_frame, self.root)
 
         uniform_grid(self.scroll_frame.interior)
-        self.grid_rowconfigure(0, weight=0)
-        self.grid_columnconfigure(0, weight=0)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+        configure_grid(self, columns={0: 0, 1: 1}, rows={0: 0, 1: 1})
         uniform_grid(self.right_frame)

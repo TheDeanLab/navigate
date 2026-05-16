@@ -29,117 +29,254 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import unittest
-from unittest.mock import MagicMock
-from navigate.model.devices.galvo.synthetic import SyntheticGalvo
-from navigate.config import (
-    load_configs,
-    get_configuration_paths,
-    verify_configuration,
-    verify_waveform_constants,
-)
-from multiprocessing import Manager
+from unittest.mock import patch
+
 import numpy as np
+import pytest
+
+import navigate.model.devices.galvo.base as galvo_base_module
+from navigate.model.devices.galvo.synthetic import SyntheticGalvo
 
 
-class TestGalvoBase(unittest.TestCase):
-    def setUp(self) -> None:
-        """Set up the configuration, experiment, etc."""
-        self.manager = Manager()
-        self.parent_dict = {}
+def build_base_configuration(
+    *,
+    waveform="sawtooth",
+    galvo_factor="none",
+    amplitude="1.0",
+    offset="0.0",
+    frequency="2.0",
+    rising_ramp="50",
+    phase=0.0,
+    max_voltage=5.0,
+    min_voltage=-5.0,
+    channel_1_selected=True,
+    channel_2_selected=True,
+    channel_overrides=None,
+    laser_overrides=None,
+):
+    galvo_parameters = {
+        "amplitude": amplitude,
+        "offset": offset,
+        "rising_ramp": rising_ramp,
+        "frequency": frequency,
+    }
+    if channel_overrides:
+        galvo_parameters.update(channel_overrides)
+    if laser_overrides:
+        galvo_parameters.update(laser_overrides)
 
-        (
-            configuration_path,
-            experiment_path,
-            waveform_constants_path,
-            rest_api_path,
-            waveform_templates_path,
-            gui_configuration_path,
-            multi_positions_path,
-        ) = get_configuration_paths()
+    return {
+        "configuration": {
+            "microscopes": {
+                "TestScope": {
+                    "galvo": [
+                        {
+                            "hardware": {
+                                "max": max_voltage,
+                                "min": min_voltage,
+                                "channel": "Dev1/ao0",
+                                "axis": "B",
+                            },
+                            "waveform": waveform,
+                            "phase": phase,
+                        }
+                    ],
+                    "daq": {
+                        "sample_rate": 100,
+                        "trigger_source": "/Dev1/PFI0",
+                    },
+                    "camera": {"delay": 0},
+                }
+            }
+        },
+        "experiment": {
+            "MicroscopeState": {
+                "microscope_name": "TestScope",
+                "zoom": "1x",
+                "channels": {
+                    "channel_1": {"is_selected": channel_1_selected, "laser": "488"},
+                    "channel_2": {"is_selected": channel_2_selected, "laser": "561"},
+                },
+            }
+        },
+        "waveform_constants": {
+            "other_constants": {"galvo_factor": galvo_factor},
+            "galvo_constants": {
+                "Galvo 0": {"TestScope": {"1x": galvo_parameters}},
+            },
+        },
+    }
 
-        self.configuration = load_configs(
-            self.manager,
-            configuration=configuration_path,
-            experiment=experiment_path,
-            waveform_constants=waveform_constants_path,
-            rest_api_config=rest_api_path,
-            waveform_templates=waveform_templates_path,
-            gui_configuration_path=gui_configuration_path,
-        )
 
-        verify_configuration(self.manager, self.configuration)
-        verify_waveform_constants(self.manager, self.configuration)
-        self.microscope_name = "Mesoscale"
-        self.device_connection = MagicMock()
-        galvo_id = 0
+def build_synthetic_galvo(configuration):
+    return SyntheticGalvo(
+        microscope_name="TestScope",
+        device_connection=None,
+        configuration=configuration,
+        device_id=0,
+    )
 
-        self.galvo = SyntheticGalvo(
-            microscope_name=self.microscope_name,
-            device_connection=self.device_connection,
-            configuration=self.configuration,
-            device_id=galvo_id,
-        )
 
-        self.exposure_times = {"channel_1": 0.11, "channel_2": 0.2, "channel_3": 0.3}
-        self.sweep_times = {"channel_1": 0.115, "channel_2": 0.2, "channel_3": 0.3}
+def default_timing():
+    exposure_times = {"channel_1": 0.2, "channel_2": 0.2}
+    sweep_times = {"channel_1": 0.2, "channel_2": 0.2}
+    return exposure_times, sweep_times
 
-    def tearDown(self):
-        """Tear down the multiprocessing manager."""
-        self.manager.shutdown()
 
-    def test_galvo_base_initialization(self):
-        # Parent Class Super Init
-        assert self.galvo.microscope_name == "Mesoscale"
-        assert self.galvo.galvo_name == "Galvo 0"
-        assert self.galvo.sample_rate == 100000
+def test_adjust_applies_channel_factor_override():
+    config = build_base_configuration(
+        galvo_factor="channel",
+        max_voltage=10,
+        min_voltage=-10,
+        channel_overrides={"Channel 1": {"amplitude": "3.0", "offset": "1.5"}},
+    )
+    galvo = build_synthetic_galvo(config)
+    exposure_times, sweep_times = default_timing()
 
-        assert (
-            self.galvo.camera_delay
-            == self.configuration["configuration"]["microscopes"][self.microscope_name][
-                "camera"
-            ]["delay"]
-            / 1000
-        )
-        assert self.galvo.galvo_max_voltage == 5
-        assert self.galvo.galvo_min_voltage == -5
-        assert self.galvo.galvo_waveform == "sawtooth" or "sine"
-        assert self.galvo.waveform_dict == {}
+    with patch(
+        "navigate.model.devices.galvo.base.sawtooth",
+        side_effect=lambda **kwargs: np.array(
+            [kwargs["amplitude"], kwargs["offset"]], dtype=float
+        ),
+    ) as mock_sawtooth:
+        waveforms = galvo.adjust(exposure_times, sweep_times)
 
-    def test_adjust_with_valid_input(self):
-        # Test the method with valid input data
-        for waveform in ["sawtooth", "sine", "quadratic", "centered_cubic"]:
-            self.galvo.galvo_waveform = waveform
-            result = self.galvo.adjust(self.exposure_times, self.sweep_times)
+    assert mock_sawtooth.call_args_list[0].kwargs["amplitude"] == pytest.approx(3.0)
+    assert mock_sawtooth.call_args_list[0].kwargs["offset"] == pytest.approx(1.5)
+    assert mock_sawtooth.call_args_list[1].kwargs["amplitude"] == pytest.approx(1.0)
+    assert mock_sawtooth.call_args_list[1].kwargs["offset"] == pytest.approx(0.0)
+    assert set(waveforms.keys()) == {"channel_1", "channel_2"}
 
-            # Assert that the result is a dictionary
-            self.assertIsInstance(result, dict)
 
-            # Assert that the keys in the result dictionary are the same as in the input
-            # dictionaries
-            self.assertSetEqual(set(result.keys()), set(self.exposure_times.keys()))
+@pytest.mark.parametrize(
+    "waveform, function_name",
+    [
+        ("quadratic", "quadratic"),
+        ("centered_cubic", "centered_cubic"),
+    ],
+)
+def test_adjust_dispatches_curved_waveforms(waveform, function_name):
+    config = build_base_configuration(
+        waveform=waveform,
+        max_voltage=10,
+        min_voltage=-10,
+        channel_2_selected=False,
+    )
+    galvo = build_synthetic_galvo(config)
+    exposure_times, sweep_times = default_timing()
 
-            # Assert that the values in the result dictionary are not None
-            for value in result.values():
-                self.assertIsNotNone(value)
+    with patch(
+        f"navigate.model.devices.galvo.base.{function_name}",
+        return_value=np.array([0.1, 0.2], dtype=float),
+    ) as mock_waveform:
+        waveforms = galvo.adjust(exposure_times, sweep_times)
 
-    def test_adjust_with_invalid_input(self):
-        # Test the method with invalid input data
-        invalid_exposure_times = {"channel_1": 0.1}  # Missing channel 2 and 3 keys
-        invalid_sweep_times = {"channel_1": 0.1}  # Missing channel 2 and 3 keys
+    mock_waveform.assert_called_once()
+    assert waveforms["channel_1"].tolist() == [0.1, 0.2]
 
-        # Test if the method raises an exception or returns None with invalid input
-        with self.assertRaises(KeyError):
-            _ = self.galvo.adjust(invalid_exposure_times, invalid_sweep_times)
 
-    def test_with_improper_waveform(self):
-        self.galvo.galvo_waveform = "banana"
-        result = self.galvo.adjust(self.exposure_times, self.sweep_times)
-        assert result == self.galvo.waveform_dict
+def test_adjust_applies_laser_factor_override_for_sine():
+    config = build_base_configuration(
+        waveform="sine",
+        galvo_factor="laser",
+        max_voltage=10,
+        min_voltage=-10,
+        phase=1.23,
+        laser_overrides={"488": {"amplitude": "2.5", "offset": "-0.4"}},
+    )
+    galvo = build_synthetic_galvo(config)
+    exposure_times, sweep_times = default_timing()
 
-    def test_waveform_clipping(self):
-        self.galvo.galvo_waveform = "sawtooth"
-        result = self.galvo.adjust(self.exposure_times, self.sweep_times)
-        for channel in "channel_1", "channel_2", "channel_3":
-            assert np.all(result[channel] <= self.galvo.galvo_max_voltage)
-            assert np.all(result[channel] >= self.galvo.galvo_min_voltage)
+    with patch(
+        "navigate.model.devices.galvo.base.sine_wave",
+        side_effect=lambda **kwargs: np.array(
+            [kwargs["amplitude"], kwargs["offset"], kwargs["phase"]], dtype=float
+        ),
+    ) as mock_sine_wave:
+        waveforms = galvo.adjust(exposure_times, sweep_times)
+
+    assert mock_sine_wave.call_args_list[0].kwargs["amplitude"] == pytest.approx(2.5)
+    assert mock_sine_wave.call_args_list[0].kwargs["offset"] == pytest.approx(-0.4)
+    assert mock_sine_wave.call_args_list[0].kwargs["phase"] == pytest.approx(1.23)
+    assert mock_sine_wave.call_args_list[1].kwargs["amplitude"] == pytest.approx(1.0)
+    assert mock_sine_wave.call_args_list[1].kwargs["offset"] == pytest.approx(0.0)
+    assert set(waveforms.keys()) == {"channel_1", "channel_2"}
+
+
+@pytest.mark.parametrize(
+    "amplitude, source_wave",
+    [
+        (1.0, np.array([0.25, 0.9, -0.1], dtype=float)),
+        (-1.0, np.array([0.25, -0.9, 0.4], dtype=float)),
+    ],
+)
+def test_adjust_halfsaw_uses_expected_extreme(amplitude, source_wave):
+    config = build_base_configuration(
+        waveform="halfsaw",
+        amplitude=str(amplitude),
+        offset="0.5",
+        max_voltage=10,
+        min_voltage=-10,
+        channel_2_selected=False,
+    )
+    galvo = build_synthetic_galvo(config)
+    exposure_times, sweep_times = default_timing()
+
+    with patch("navigate.model.devices.galvo.base.sawtooth", return_value=source_wave):
+        waveforms = galvo.adjust(exposure_times, sweep_times)
+
+    assert waveforms["channel_1"][0] == pytest.approx(-0.5)
+    assert waveforms["channel_1"][1] == pytest.approx(source_wave[1])
+
+
+def test_adjust_unknown_waveform_sets_channel_to_none():
+    config = build_base_configuration(waveform="banana", channel_2_selected=False)
+    galvo = build_synthetic_galvo(config)
+    exposure_times, sweep_times = default_timing()
+
+    with patch("builtins.print") as mock_print:
+        waveforms = galvo.adjust(exposure_times, sweep_times)
+
+    assert waveforms == {"channel_1": None}
+    mock_print.assert_called_with("Unknown Galvo waveform specified in configuration file.")
+
+
+def test_adjust_returns_none_on_invalid_waveform_constants():
+    config = build_base_configuration(amplitude="not-a-number", channel_2_selected=False)
+    galvo = build_synthetic_galvo(config)
+    exposure_times, sweep_times = default_timing()
+
+    with patch.object(galvo_base_module.logger, "debug") as mock_debug:
+        result = galvo.adjust(exposure_times, sweep_times)
+
+    assert result is None
+    mock_debug.assert_called_once()
+
+
+def test_adjust_clips_waveform_to_voltage_limits():
+    config = build_base_configuration(
+        max_voltage=0.25,
+        min_voltage=-0.25,
+        channel_2_selected=False,
+    )
+    galvo = build_synthetic_galvo(config)
+    exposure_times, sweep_times = default_timing()
+
+    with patch(
+        "navigate.model.devices.galvo.base.sawtooth",
+        return_value=np.array([1.0, -1.0, 0.1], dtype=float),
+    ):
+        waveforms = galvo.adjust(exposure_times, sweep_times)
+
+    assert np.allclose(waveforms["channel_1"], np.array([0.25, -0.25, 0.1]))
+
+
+def test_adjust_resets_existing_waveforms_when_no_channels_selected():
+    config = build_base_configuration(channel_1_selected=False, channel_2_selected=False)
+    galvo = build_synthetic_galvo(config)
+    galvo.waveform_dict = {"stale_channel": np.array([1.0], dtype=float)}
+    exposure_times, sweep_times = default_timing()
+
+    waveforms = galvo.adjust(exposure_times, sweep_times)
+
+    assert waveforms == {"stale_channel": None}

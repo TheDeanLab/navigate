@@ -4,20 +4,18 @@
 Feature Container
 =================
 
-**navigate** includes a **feature container** that enables reconfigurable acquisition and analysis workflows. The feature container runs a tree of **features**, where each feature may perform a *signal* operation, which modifies the state of the microscope's hardware, or a *data* operation, where it performs an analysis on acquired image data, or both.
+**navigate** includes a feature container that supports reconfigurable acquisition and analysis workflows. The feature container runs a tree of features, where each feature may perform a *signal* operation (hardware-side actions), a *data* operation (image-side analysis), or both.
 
-Once a feature is executed, any features dependent on this feature's execution will execute (for example, move the stage, then snap a picture). Following this, the next set of features in sequence will be executed.
+After one feature finishes, dependent features run next (for example, move the stage and then acquire an image), followed by sibling nodes in the feature tree.
 
-Examples of some existing features include ``navigate.model.features.common_features.ZStackAcquisition``, which acquires a z-stack, and ``navigate.model.features.autofocus.Autofocus``, which finds the ideal plane of focus of a sample using a discrete cosine transform.
-
------------------
+Examples include ``navigate.model.features.common_features.ZStackAcquisition`` for z-stack acquisition and ``navigate.model.features.autofocus.Autofocus`` for focus optimization using a discrete cosine transform.
 
 .. _feature_objects:
 
 Feature Objects
 ===============
 
-Each feature is an object that accepts a pointer to ``navigate.model.model`` in its ``__init__()`` arguments and contains a configuration dictionary that dictates feature behavior in its ``__init__()`` function. A complete configuration dictionary is shown below. As few or as many of these options can be specified as needed. Each function is considered a leaf or node of the feature tree.
+Each feature is a Python object that accepts a model reference in ``__init__()`` and defines a ``config_table`` dictionary that controls runtime behavior. A complete example is shown below. You can include only the entries you need.
 
 .. code-block:: python
 
@@ -34,25 +32,27 @@ Each feature is an object that accepts a pointer to ``navigate.model.model`` in 
                                   'need_response': True},
                         }
 
-Both ``signal`` and ``data`` configuration entries are themselves dictionaries that can contain ``init``, ``main``, ``end`` and/or ``cleanup`` entries.
+Both ``signal`` and ``data`` entries are dictionaries that can include ``init``, ``main``, ``end``, and ``cleanup`` keys.
 
-- ``init`` entries dictate pre-processing steps that must be run before the main function of the feature starts.
-- ``main`` entries dictate the primary operation of the feature, and are run once per acquisition step. They return ``True`` if the acquisition should proceed and ``False`` if the acquisition should be ended.
-- ``end`` entries are run once per main function returning ``True``. They check if the acquisition should end, if we are at any boundary points of the ``main`` function (e.g. if we need to change positions in a multi-position z-stack acquisition), and describe any closing operations that must be performed when exiting the feature.
-- ``cleanup`` entries dictate what happens if the node fails. This is for failsafe controls such as "turn off all lasers."
+- ``init`` runs before the feature's main function.
+- ``main`` performs the primary operation and usually runs once per acquisition step. It returns ``True`` to continue and ``False`` to stop.
+- ``end`` runs after a successful ``main`` step and can handle boundaries, transitions, and stop checks.
+- ``cleanup`` runs on failures and should perform fail-safe shutdown actions (for example, turning off lasers).
 
-The ``node`` configuration dictionary contains general properties of feature nodes. ``node_type`` can be ``one-step`` or ``multi-step``, the latter indicating we have an ``init``, a ``main`` and an ``end``. ``device_related`` is set to ``True`` if we have a ``multi-step`` signal container. ``need_response`` is set to true if the signal node waits on hardware (e.g. waits for a stage to confirm it has indeed moved) before proceeding.
+The ``node`` dictionary controls node-level behavior. ``node_type`` can be ``one-step`` or ``multi-step``. ``device_related`` is set to ``True`` when the signal path is hardware-dependent. ``need_response`` is set to ``True`` when the node must wait for hardware confirmation (for example, waiting for a stage move to complete).
 
-Each of the functions that are the value entries in ``self.config_table`` dictionaries are methods of the feature object.
+Each function assigned in ``self.config_table`` is a method on the feature object.
 
------------------
-
-Creating A Custom Feature Object
+Creating a Custom Feature Object
 --------------------------------
 
-Each feature object is defined as a class. Creating a new feature is the same as creating any Python class, but with a few requirements. The first parameter of the ``__init__`` function (after ``self``) must be ``model``, which gives the feature object full access to the **navigate** model. All the other parameters are keyword arguments and must have default values. The ``__init__`` function should always have a ``config_table`` attribute (see :ref:`above <feature_objects>` for a description of the ``config_table``).
+Each feature is defined as a class. Creating a new feature follows standard Python class design, with a few requirements:
 
-In the example below, we will create a custom feature that moves to a specified position in **navigate**'s multi-position table and calculates the sharpness of the image at this position using the Normalized DCT Shannon Entropy metric. An example ``__init__()`` function for our ``FeatureExample`` class is below.
+- The first ``__init__`` argument after ``self`` must be ``model``.
+- Additional arguments should be keyword arguments with defaults.
+- ``__init__`` should always create a ``config_table`` attribute (see :ref:`feature_objects`).
+
+In the example below, we create a feature that moves to a specified position in the multi-position table and computes image sharpness using the normalized DCT Shannon entropy metric.
 
 .. code-block:: python
 
@@ -79,7 +79,7 @@ In the example below, we will create a custom feature that moves to a specified 
 
 - Get multi-position table position from the GUI.
 
-   All the GUI parameters are stored in ``model.configuration["experiment"]`` during runtime. Below, we create a function to get all the position stored at ``position_id`` from the multi-position table in the GUI when we launch our feature.
+   GUI parameters are stored in ``model.configuration["experiment"]`` during runtime. The function below loads the requested table position (``position_id``) when the feature starts.
 
    .. code-block:: python
 
@@ -91,11 +91,11 @@ In the example below, we will create a custom feature that moves to a specified 
                current_position = self.model.get_stage_position()
                self.target_position = dict([(axis[:-4], value) for axis, value in current_position.items()])
 
-   More GUI parameters can be found in `experiment.yml <https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml>`_
+   More GUI parameters are defined in `experiment.yml <https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml>`_.
 
 - Use the stage to move to this position.
 
-   Now, we move stage to the ``target_position`` we grabbed from the multi-position table.
+   This step moves the stage to ``target_position``.
 
    .. code-block:: python
 
@@ -105,7 +105,7 @@ In the example below, we will create a custom feature that moves to a specified 
 
 - Take a picture and process the resulting image.
 
-  In parallel with our signal function call, the camera will acquire an image. The image captured by the camera will be stored in the ``model`` ``data_buffer``. The ``data`` functions run after an image is acquired. We add code to deal with this image in the ``"main"`` data function. Here, we calculate the Shannon entropy of the image.
+  In parallel with the signal call, the camera acquires images into ``model.data_buffer``. Data functions run after image acquisition. In this ``"main"`` data function, we compute image entropy.
 
   .. code-block:: python
 
@@ -115,23 +115,23 @@ In the example below, we will create a custom feature that moves to a specified 
                 entropy = fast_normalized_dct_shannon_entropy(image, psf_support_diameter_xy=3)
                 print("entropy of image:", id, entropy)
 
-Now, we've created a whole new feature and can use it as we wish.
+This completes a minimal custom feature object.
 
-How to interact with other devices
+How to Interact with Other Devices
 ----------------------------------
 
-We interact with all devices through ``self.model.active_microscope``. Here is an example to open shutter:
+Interact with devices through ``self.model.active_microscope``. For example, to open the shutter:
 
 .. code-block:: python
 
   self.model.active_microscope.shutter.open_shutter()
 
-How to pause and resume data threads in the model
+How to Pause and Resume Data Threads in the Model
 -------------------------------------------------
 
-The image data acquired from the camera are handled in an independent thread. As such, the *signal* and *data* operations by default run in parallel and do not block each other. Sometimes, we want to be sure a device is ready or has moved. For example, in ``FeatureExample``, we have no guarantee that the stage finished moving before the image was taken. The ``wait_until_done`` call only blocks the signal thread from progressing before the stage finishes its move. To ensure the data thread also waits, we need to pause the data thread until the stage is ready.
+Camera image handling runs in a separate thread. By default, *signal* and *data* operations run in parallel and do not block each other. In some workflows, you may need strict ordering. For example, ``wait_until_done`` blocks only the signal thread; it does not pause the data thread.
 
-Here is an example of how we can pause and resume the data thread:
+Use this pattern to pause and resume the data thread:
 
 .. code-block:: python
 
@@ -142,12 +142,12 @@ Here is an example of how we can pause and resume the data thread:
 
 We can of course replace ``self.model.move_stage(pos, wait_until_done=True)`` with whatever task we want to wait for before resuming image acquisition.
 
-Model functions can be found :doc:`in the API <../../05_reference/_autosummary/navigate.model.model.Model>`.
+Model functions are documented in :doc:`the API <../../05_reference/_autosummary/navigate.model.model.Model>`.
 
 Custom Feature Lists
 ====================
 
-The **navigate** software allows you to chain feature objects into lists to build acquisition workflows.
+You can chain feature objects into lists to build custom acquisition workflows.
 
 Creating a Custom Feature List in Python
 ----------------------------------------
@@ -161,7 +161,7 @@ To create a customized feature list, follow these steps:
     from navigate.tools.decorators import FeatureList
     from navigate.model.features.feature_related_functions import *
 
-  ``FeatureList`` is a decorator that registers the list of features. ``feature_related_functions`` contains convenience imports that allow us to call ``PrepareNextChannel`` instead of ``navigate.model.features.common_features.PrepareNextChannel``. These functions make for more readable code.
+  ``FeatureList`` registers the list. ``feature_related_functions`` provides convenience imports so you can use names such as ``PrepareNextChannel`` instead of full module paths.
 
 - Create the feature list.
 
@@ -185,9 +185,11 @@ To create a customized feature list, follow these steps:
 - Go to the :guilabel:`Features` menu.
 
    .. image:: images/step_1.png
+      :alt: Features menu showing Add Custom Feature List option
 
 - Import the customized feature. Select :guilabel:`Add Custom Feature List` from the :guilabel:`Features` menu. A dialog box will appear, allowing you to select the Python file containing your customized feature list function.
 
    .. image:: images/step_2.png
+      :alt: File dialog used to select a custom feature list file
 
 - Choose the Python file containing your customized feature list function. **navigate** will load the specified feature list, making it available for use in your experiments and analyses. It will appear at the bottom of the :guilabel:`Features` menu.

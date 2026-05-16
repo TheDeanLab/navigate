@@ -29,12 +29,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-from typing import Dict, Any
+from __future__ import annotations
+from typing import Dict, Any, Optional, Tuple, Union
+import tkinter as tk
 from tkinter import ttk
+
+# Local Imports
+from navigate.view.theme import get_theme_padding, get_theme_spacing
 
 # Third Party Imports
 
-# Local Imports
+
+GridAxisOptions = Dict[str, int]
+GridAxisSpec = Optional[Union[int, GridAxisOptions]]
+GridConfig = Optional[Union[int, Tuple[GridAxisSpec, ...], Dict[int, GridAxisSpec]]]
+SpacingArg = Optional[Union[int, str, Tuple[Union[int, str], ...]]]
 
 
 def uniform_grid(cls: Any) -> None:
@@ -51,6 +60,85 @@ def uniform_grid(cls: Any) -> None:
         cls.grid_columnconfigure(col, weight=1)
     for row in range(rows):
         cls.grid_rowconfigure(row, weight=1)
+
+
+def _resolve_spacing(value: SpacingArg) -> int | tuple[int, ...] | None:
+    """Resolve a spacing token or literal to a Tk-compatible padding value."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        if value.startswith("padding_"):
+            return get_theme_padding(value)
+        return get_theme_spacing(value)
+    if isinstance(value, tuple):
+        resolved: list[int] = []
+        for item in value:
+            if isinstance(item, str):
+                resolved.append(get_theme_spacing(item))
+            else:
+                resolved.append(int(item))
+        return tuple(resolved)
+    return int(value)
+
+
+def themed_grid(
+    widget: Any,
+    *,
+    sticky: str | None = tk.NSEW,
+    padx: SpacingArg = None,
+    pady: SpacingArg = None,
+    **kwargs: Any,
+) -> None:
+    """Grid a widget using theme token names for spacing."""
+    grid_kwargs = dict(kwargs)
+    if sticky is not None:
+        grid_kwargs["sticky"] = sticky
+
+    resolved_padx = _resolve_spacing(padx)
+    if resolved_padx is not None:
+        grid_kwargs["padx"] = resolved_padx
+
+    resolved_pady = _resolve_spacing(pady)
+    if resolved_pady is not None:
+        grid_kwargs["pady"] = resolved_pady
+
+    widget.grid(**grid_kwargs)
+
+
+def _iter_grid_specs(specs: GridConfig) -> list[tuple[int, dict[str, int]]]:
+    """Normalize grid configuration input into Tk configure calls."""
+    if specs is None:
+        return []
+    if isinstance(specs, int):
+        return [(index, {"weight": 1}) for index in range(specs)]
+
+    if isinstance(specs, dict):
+        items = specs.items()
+    else:
+        items = enumerate(specs)
+
+    normalized: list[tuple[int, dict[str, int]]] = []
+    for index, spec in items:
+        if spec is None:
+            continue
+        if isinstance(spec, int):
+            normalized.append((index, {"weight": spec}))
+        else:
+            normalized.append((index, dict(spec)))
+    return normalized
+
+
+def configure_grid(
+    widget: Any,
+    *,
+    columns: GridConfig = None,
+    rows: GridConfig = None,
+) -> None:
+    """Configure grid weights and minsizes with a compact declarative syntax."""
+    for index, options in _iter_grid_specs(columns):
+        widget.grid_columnconfigure(index, **options)
+    for index, options in _iter_grid_specs(rows):
+        widget.grid_rowconfigure(index, **options)
 
 
 class CommonMethods:

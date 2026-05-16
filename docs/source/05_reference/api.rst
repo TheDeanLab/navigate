@@ -1,5 +1,8 @@
+.. _software_api:
+
+============
 Software API
-=============
+============
 
 .. autosummary::
    :toctree: _autosummary
@@ -13,4 +16,3 @@ Software API
    navigate.model
    navigate.tools
    navigate.view
-

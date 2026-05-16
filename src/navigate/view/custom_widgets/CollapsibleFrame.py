@@ -33,7 +33,7 @@ import tkinter as tk
 # Third-party imports
 
 # Local imports
-from navigate.view.theme import get_theme_color
+from navigate.view.theme import get_theme_color, get_theme_space_px
 
 
 class CollapsibleFrame(tk.Frame):
@@ -72,7 +72,7 @@ class CollapsibleFrame(tk.Frame):
             bg=get_theme_color("surface_bg", "lightgrey"),
             fg=get_theme_color("text", "black"),
             relief="raised",
-            padx=5,
+            padx=get_theme_space_px(5),
         )
         self.label.grid(row=0, column=0, sticky=tk.NSEW)
 

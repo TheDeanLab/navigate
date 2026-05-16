@@ -383,7 +383,6 @@ def verify_experiment_config(manager, configuration):
         "readout_direction": "Top-to-Bottom",
         "number_of_pixels": 10,
         "binning": "1x1",
-        "frames_to_average": 1,
         "databuffer_size": 100,
         "is_centered": True,
         "center_x": 1024,
@@ -460,7 +459,7 @@ def verify_experiment_config(manager, configuration):
             camera_setting_dict["readout_direction"] = "Top-to-Bottom"
 
         # databuffer_size, number_of_pixels
-        for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:
+        for k in ["databuffer_size", "number_of_pixels"]:
             try:
                 camera_setting_dict[k] = int(camera_setting_dict[k])
             except ValueError:
@@ -611,13 +610,13 @@ def verify_experiment_config(manager, configuration):
         ]
     ]
     number_of_filter_wheels = len(
-        configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"]
+        configuration["configuration"]["microscopes"][microscope_name].get("filter_wheel", [])
     )
     filterwheel_list = [
         list(filter_wheel_config["available_filters"].keys())
         for filter_wheel_config in configuration["configuration"]["microscopes"][
             microscope_name
-        ]["filter_wheel"]
+        ].get("filter_wheel", [])
     ]
     prefix = "channel_"
     channel_nums = configuration["configuration"]["gui"]["channels"]["count"]
@@ -639,19 +638,16 @@ def verify_experiment_config(manager, configuration):
         channel_value["laser_index"] = laser_list.index(channel_value["laser"])
         # filter wheel
         for i in range(number_of_filter_wheels):
-            ref_name = f"filter_wheel_{i}"
+            ref_name = configuration["configuration"]["microscopes"][microscope_name][
+                "filter_wheel"
+            ][i].get("name", f"FilterWheel-{i}")
             if (
                 ref_name not in channel_value
                 or channel_value[ref_name] not in filterwheel_list[i]
             ):
                 channel_value[ref_name] = filterwheel_list[i][0]
-            channel_value[f"filter_position_{i}"] = filterwheel_list[i].index(
-                channel_value[ref_name]
-            )
         if "filter" in channel_value:
             channel_value.pop("filter")
-        if "filter_position" in channel_value:
-            channel_value.pop("filter_position")
         # is_selected
         if (
             "is_selected" not in channel_value.keys()
@@ -965,13 +961,11 @@ def verify_configuration(manager, configuration):
 
     channel_count = 5
     # generate hardware header section
-    hardware_dict = {}
     ref_list = {
         "filter_wheel": [],
     }
     required_devices = [
         "camera",
-        "filter_wheel",
         "shutter",
         "remote_focus",
         "galvo",
@@ -1028,7 +1022,10 @@ def verify_configuration(manager, configuration):
         elif "type" not in zoom_config["hardware"]:
             zoom_config["hardware"]["type"] = "Synthetic"
 
-        filter_wheel_config = device_config[microscope_name]["filter_wheel"]
+        filter_wheel_config = device_config[microscope_name].get("filter_wheel", None)
+        if filter_wheel_config is None:
+            continue
+
         if type(filter_wheel_config) == DictProxy:
             # support older version of configuration.yaml
             # filter_wheel_delay and available filters
@@ -1040,6 +1037,7 @@ def verify_configuration(manager, configuration):
             )
 
         temp_config = device_config[microscope_name]["filter_wheel"]
+        filter_wheel_names = set()
         for _, filter_wheel_config in enumerate(temp_config):
             filter_wheel_idx = build_ref_name(
                 "-",
@@ -1049,23 +1047,51 @@ def verify_configuration(manager, configuration):
             if filter_wheel_idx not in ref_list["filter_wheel"]:
                 ref_list["filter_wheel"].append(filter_wheel_idx)
                 filter_wheel_seq.append(filter_wheel_config)
+                if (
+                    filter_wheel_config.get("name", None) is None
+                    and filter_wheel_config.get("hardware", {}).get("name", None)
+                    is not None
+                ):
+                    filter_wheel_config["name"] = filter_wheel_config["hardware"][
+                        "name"
+                    ]
+            idx = ref_list["filter_wheel"].index(filter_wheel_idx)
+            if filter_wheel_seq[idx].get("name", None):
+                filter_wheel_config["name"] = filter_wheel_seq[idx]["name"]
+            elif filter_wheel_config.get("name", None):
+                filter_wheel_seq[idx]["name"] = filter_wheel_config["name"]
+            elif filter_wheel_config.get("hardware", {}).get("name", None):
+                filter_wheel_seq[idx]["name"] = filter_wheel_config["hardware"]["name"]
+            if filter_wheel_seq[idx].get("name", None):
+                if filter_wheel_seq[idx]["name"] not in filter_wheel_names:
+                    filter_wheel_names.add(filter_wheel_seq[idx]["name"])
+                else:
+                    filter_wheel_seq[idx]["name"] = None
+
+    # make sure all filter wheel entries have hardware name
+    for i, filter_wheel_config in enumerate(filter_wheel_seq):
+        if filter_wheel_config.get("name", None) is None:
+            for j in range(len(filter_wheel_seq)):
+                temp_name = f"FilterWheel-{j}"
+                if temp_name not in filter_wheel_names:
+                    filter_wheel_seq[i]["name"] = temp_name
+                    filter_wheel_names.add(temp_name)
+                    break
 
     # make sure all microscopes have the same filter wheel sequence
-    if len(device_config.keys()) > 1:
+    if len(filter_wheel_seq) > 0:
         for microscope_name in device_config.keys():
-            temp_config = device_config[microscope_name]["filter_wheel"]
-            filter_wheel_ids = list(range(len(ref_list["filter_wheel"])))
-            for _, filter_wheel_config in enumerate(temp_config):
+            temp_config = device_config[microscope_name].get("filter_wheel", None)
+            if temp_config is None:
+                continue
+            for i, filter_wheel_config in enumerate(temp_config):
                 filter_wheel_idx = build_ref_name(
                     "-",
                     filter_wheel_config["hardware"]["type"],
                     filter_wheel_config["hardware"]["wheel_number"],
                 )
-                filter_wheel_ids.remove(
-                    ref_list["filter_wheel"].index(filter_wheel_idx)
-                )
-            for i in filter_wheel_ids:
-                temp_config.insert(i, filter_wheel_seq[i])
+            idx = ref_list["filter_wheel"].index(filter_wheel_idx)
+            temp_config[i]["name"] = filter_wheel_seq[idx]["name"]
 
     update_config_dict(
         manager,

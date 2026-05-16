@@ -175,6 +175,8 @@ Acquiring a Z-Stack
        :align: center
        :alt: Adjusting the stage position in **navigate**.
 
+* If the microscope has more than one stage that can move in the Z direction, choose the stage that should perform the stack from :guilabel:`Z-Stack Device` before setting the start and end positions. This selected device is the primary Z-stack stage: :guilabel:`Start`, :guilabel:`End`, and :guilabel:`Step Size` are applied to this stage. Other stack-capable stages can be moved with fixed offsets from the primary Z-stack stage when their offset settings are enabled.
+
 * Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (μm)` press :guilabel:`Set Start Pos/Foc`.
 
     .. image:: ../images/press-start-pos.png

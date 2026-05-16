@@ -40,6 +40,7 @@ from typing import Optional, Callable
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.CollapsibleFrame import CollapsibleFrame
+from navigate.view.theme import get_theme_padding_px, get_theme_space_px
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -101,9 +102,20 @@ class ConfigurationAssistantWindow(ttk.Frame):
         self.microscope_frame = ttk.Frame(self.root)
 
         self.grid(column=0, row=0, sticky=tk.NSEW)
-        self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        self.top_frame.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         self.microscope_frame.grid(
-            row=1, column=0, columnspan=5, sticky=tk.NSEW, padx=3, pady=3
+            row=1,
+            column=0,
+            columnspan=5,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
         )
 
         #: ttk.Frame: The top frame of the application
@@ -144,24 +156,54 @@ class TopWindow(ttk.Frame):
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         self.new_button = ttk.Button(root, text="New Configuration")
-        self.new_button.grid(row=0, column=0, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.new_button.grid(
+            row=0,
+            column=0,
+            sticky=tk.NE,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((10, 1)),
+        )
         self.new_button.config(width=15)
 
         self.load_button = ttk.Button(root, text="Load Configuration")
-        self.load_button.grid(row=0, column=1, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.load_button.grid(
+            row=0,
+            column=1,
+            sticky=tk.NE,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((10, 1)),
+        )
         self.load_button.config(width=15)
 
         self.add_button = ttk.Button(root, text="Add A Microscope")
-        self.add_button.grid(row=0, column=2, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.add_button.grid(
+            row=0,
+            column=2,
+            sticky=tk.NE,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((10, 1)),
+        )
         self.add_button.config(width=15)
 
         self.save_button = ttk.Button(root, text="Save")
-        self.save_button.grid(row=0, column=3, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.save_button.grid(
+            row=0,
+            column=3,
+            sticky=tk.NE,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((10, 1)),
+        )
         self.save_button.config(width=15)
 
         #: ttk.Button: The button to cancel the application.
         self.cancel_button = ttk.Button(root, text="Cancel")
-        self.cancel_button.grid(row=0, column=4, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.cancel_button.grid(
+            row=0,
+            column=4,
+            sticky=tk.NE,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((10, 1)),
+        )
         self.cancel_button.config(width=15)
 
 
@@ -319,13 +361,19 @@ class HardwareTab(ttk.Frame):
 
         self.top_frame = ttk.Frame(content_frame)
 
-        self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10)
+        self.top_frame.grid(
+            row=0, column=0, sticky=tk.NSEW, padx=get_theme_space_px(10)
+        )
 
         self.hardware_frame = ttk.Frame(content_frame)
-        self.hardware_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=10)
+        self.hardware_frame.grid(
+            row=1, column=0, sticky=tk.NSEW, padx=get_theme_space_px(10)
+        )
 
         self.bottom_frame = ttk.Frame(content_frame)
-        self.bottom_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=10)
+        self.bottom_frame.grid(
+            row=2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(10)
+        )
         self.frame_row = 0
         self.row_offset = self.frame_row + 1
 
@@ -369,9 +417,19 @@ class HardwareTab(ttk.Frame):
                 continue
             if v[1] == "Label":
                 label = ttk.Label(content_frame, text=v[0])
-                label.grid(row=i, column=0, sticky=tk.NW, padx=3)
+                label.grid(
+                    row=i,
+                    column=0,
+                    sticky=tk.NW,
+                    padx=get_theme_space_px(3),
+                )
                 seperator = ttk.Separator(content_frame)
-                seperator.grid(row=i + 1, columnspan=2, sticky=tk.NSEW, padx=3)
+                seperator.grid(
+                    row=i + 1,
+                    columnspan=2,
+                    sticky=tk.NSEW,
+                    padx=get_theme_space_px(3),
+                )
                 i += 2
                 continue
             elif v[1] != "Button":
@@ -379,9 +437,21 @@ class HardwareTab(ttk.Frame):
                 label_text = v[0] + "  :" if v[0][-1] != ":" else v[0]
                 label = ttk.Label(content_frame, text=label_text)
                 if direction == "vertical":
-                    label.grid(row=i, column=0, sticky=tk.NW, padx=(3, 10), pady=3)
+                    label.grid(
+                        row=i,
+                        column=0,
+                        sticky=tk.NW,
+                        padx=get_theme_padding_px((3, 10)),
+                        pady=get_theme_space_px(3),
+                    )
                 else:
-                    label.grid(row=0, column=i, sticky=tk.NW, padx=(5, 3), pady=3)
+                    label.grid(
+                        row=0,
+                        column=i,
+                        sticky=tk.NW,
+                        padx=get_theme_padding_px((5, 3)),
+                        pady=get_theme_space_px(3),
+                    )
                     i += 1
                 if v[1] == "Checkbutton":
                     widget = widget_types[v[1]](
@@ -392,7 +462,7 @@ class HardwareTab(ttk.Frame):
                         content_frame, textvariable=self.variables[k], width=30
                     )
                 if v[1] == "Combobox":
-                    if type(v[3]) == list:
+                    if isinstance(v[3], list):
                         v[3] = dict([(t, t) for t in v[3]])
                     self.values_dict[k] = v[3]
                     temp = list(v[3].keys())
@@ -404,7 +474,7 @@ class HardwareTab(ttk.Frame):
                     else:
                         widget.set(temp[-1])
                 elif v[1] == "Spinbox":
-                    if type(v[3]) != dict:
+                    if not isinstance(v[3], dict):
                         v[3] = {}
                     widget.config(from_=v[3].get("from", 0))
                     widget.config(to=v[3].get("to", 100000))
@@ -423,17 +493,41 @@ class HardwareTab(ttk.Frame):
                     ),
                 )
             if direction == "vertical":
-                widget.grid(row=i, column=1, sticky=tk.NSEW, padx=5, pady=3)
+                widget.grid(
+                    row=i,
+                    column=1,
+                    sticky=tk.NSEW,
+                    padx=get_theme_space_px(5),
+                    pady=get_theme_space_px(3),
+                )
             else:
-                widget.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=(3, 0))
+                widget.grid(
+                    row=0,
+                    column=i,
+                    sticky=tk.NW,
+                    padx=get_theme_padding_px((10, 3)),
+                    pady=get_theme_padding_px((3, 0)),
+                )
 
             # display info label
             if len(v) >= 5 and v[4]:
                 label = ttk.Label(content_frame, text=v[4])
                 if direction == "vertical":
-                    label.grid(row=i, column=2, sticky=tk.NW, padx=(10, 10), pady=3)
+                    label.grid(
+                        row=i,
+                        column=2,
+                        sticky=tk.NW,
+                        padx=get_theme_padding_px((10, 10)),
+                        pady=get_theme_space_px(3),
+                    )
                 else:
-                    label.grid(row=1, column=i, sticky=tk.NW, padx=(10, 3), pady=0)
+                    label.grid(
+                        row=1,
+                        column=i,
+                        sticky=tk.NW,
+                        padx=get_theme_padding_px((10, 3)),
+                        pady=get_theme_space_px(0),
+                    )
             i += 1
 
     def build_widgets(self, widgets, *args, parent=None, widgets_value=None, **kwargs):
@@ -474,7 +568,12 @@ class HardwareTab(ttk.Frame):
             frame.label.bind("<Button-1>", self.create_toggle_function(frame))
         else:
             frame = ttk.Frame(parent)
-        frame.grid(row=self.frame_row, column=0, sticky=tk.NSEW, padx=20)
+        frame.grid(
+            row=self.frame_row,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(20),
+        )
         self.frame_row += 1
 
         ref = None

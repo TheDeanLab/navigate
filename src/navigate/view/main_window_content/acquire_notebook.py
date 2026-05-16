@@ -38,6 +38,7 @@ from typing import Iterable, Dict, Any
 # Third Party Imports
 
 # Local Imports
+from navigate.view.custom_widgets.common import configure_grid, themed_grid
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -76,11 +77,14 @@ class AcquireBar(ttk.Frame):
         ttk.Frame.__init__(self, top_frame, *args, **kwargs)
 
         # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
+        configure_grid(
+            self,
+            columns={0: 0, 1: 0, 2: 1, 3: 0, 4: 0, 5: 0},
+            rows={0: 1},
+        )
 
         # Putting bar into frame
-        self.grid(row=0, column=0)
+        themed_grid(self, row=0, column=0, sticky=tk.NSEW)
 
         # Acquire Button
         #: ttk.Button: Button to start acquisition
@@ -115,9 +119,10 @@ class AcquireBar(ttk.Frame):
             self, text=f"{0:02}" f":{0:02}" f":{0:02}"
         )
 
-        self.CurAcq.grid(row=0, column=0)
-        self.OvrAcq.grid(row=1, column=0)
-        self.total_acquisition_label.grid(row=0, column=3, sticky=tk.NSEW)
+        themed_grid(self.CurAcq, row=0, column=0, sticky=tk.EW)
+        themed_grid(self.OvrAcq, row=1, column=0, sticky=tk.EW)
+        themed_grid(self.total_acquisition_label, row=0, column=3, sticky=tk.NSEW)
+        configure_grid(self.progBar_frame, columns={0: 1}, rows={0: 1, 1: 1})
 
         #: ttk.Button: Button to exit the application
         self.exit_btn = ttk.Button(self, text="Exit")
@@ -125,10 +130,43 @@ class AcquireBar(ttk.Frame):
         #: ttk.Button: Button to stop the stage
         self.stop_stage = ttk.Button(self, text="Stop Stage")
 
-        self.acquire_btn.grid(row=0, column=0, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
-        self.pull_down.grid(row=0, column=1, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
-        self.progBar_frame.grid(
-            row=0, column=2, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2)
+        themed_grid(
+            self.acquire_btn,
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx="space_1",
+            pady="space_1",
         )
-        self.stop_stage.grid(row=0, column=4, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
-        self.exit_btn.grid(row=0, column=5, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
+        themed_grid(
+            self.pull_down,
+            row=0,
+            column=1,
+            sticky=tk.NSEW,
+            padx="space_1",
+            pady="space_1",
+        )
+        themed_grid(
+            self.progBar_frame,
+            row=0,
+            column=2,
+            sticky=tk.NSEW,
+            padx=("space_1", "layout_control_gap"),
+            pady="space_1",
+        )
+        themed_grid(
+            self.stop_stage,
+            row=0,
+            column=4,
+            sticky=tk.NSEW,
+            padx="space_1",
+            pady="space_1",
+        )
+        themed_grid(
+            self.exit_btn,
+            row=0,
+            column=5,
+            sticky=tk.NSEW,
+            padx="space_1",
+            pady="space_1",
+        )

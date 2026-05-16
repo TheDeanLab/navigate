@@ -266,6 +266,143 @@ class TestBuildNestedDict(unittest.TestCase):
         os.remove(test_entry)
 
 
+class TestVerifyConfiguration(unittest.TestCase):
+    def setUp(self):
+        self.manager = Manager()
+        current_path = os.path.abspath(os.path.dirname(__file__))
+        root_path = os.path.dirname(os.path.dirname(current_path))
+        self.config_path = os.path.join(root_path, "src", "navigate", "config")
+
+    def tearDown(self):
+        self.manager.shutdown()
+
+    def test_verify_configuration_with_valid_config(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+        )
+
+        configuration["configuration"]["microscopes"]["Mesoscale"]["filter_wheel"][
+            "hardware"
+        ]["wheel_number"] = 2
+        try:
+            config.verify_configuration(self.manager, configuration)
+        except Exception as e:
+            self.fail(f"verify_configuration raised an exception: {e}")
+
+        # assert same filter wheel name
+        microscope_names = list(configuration["configuration"]["microscopes"].keys())
+        filter_wheel_name = None
+        for microscope_name in microscope_names:
+            temp = configuration["configuration"]["microscopes"][microscope_name][
+                "filter_wheel"
+            ][0]["name"]
+            if filter_wheel_name is None:
+                filter_wheel_name = temp
+            else:
+                assert (
+                    filter_wheel_name == temp
+                ), "filter wheel names should be the same for all microscopes"
+
+    def test_verify_configuration_with_no_filterwheel(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+        )
+        for microscope_name in configuration["configuration"]["microscopes"].keys():
+            del configuration["configuration"]["microscopes"][microscope_name][
+                "filter_wheel"
+            ]
+
+        config.verify_configuration(self.manager, configuration)
+        # assert no filter wheel is added to configuration
+        for microscope_name in configuration["configuration"]["microscopes"].keys():
+            assert (
+                "filter_wheel"
+                not in configuration["configuration"]["microscopes"][
+                    microscope_name
+                ].keys()
+            )
+
+    def test_verify_configuration_with_one_microscope_has_filterwheel_and_another_microscope_has_no_filterwheel(
+        self,
+    ):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+        )
+        microscope_names = list(configuration["configuration"]["microscopes"].keys())
+        # delete filter wheel of the first microscope
+        del configuration["configuration"]["microscopes"][microscope_names[0]][
+            "filter_wheel"
+        ]
+
+        config.verify_configuration(self.manager, configuration)
+        # assert no filter wheel is added to configuration
+        assert (
+            "filter_wheel"
+            not in configuration["configuration"]["microscopes"][
+                microscope_names[0]
+            ].keys()
+        )
+
+        for i in range(1, len(microscope_names)):
+            assert (
+                "filter_wheel"
+                in configuration["configuration"]["microscopes"][
+                    microscope_names[i]
+                ].keys()
+            )
+
+    def test_verify_configuration_with_different_filterwheel_for_different_microscopes(
+        self,
+    ):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+        )
+        microscope_names = list(configuration["configuration"]["microscopes"].keys())
+        # change filter wheel of the first microscope to have different number of filter wheels and different filter wheel types
+        configuration["configuration"]["microscopes"][microscope_names[0]][
+            "filter_wheel"
+        ]["hardware"]["type"] = "ASI"
+
+        config.verify_configuration(self.manager, configuration)
+        # assert each microscope has only one filter wheel and the filter wheel type is correct
+        assert (
+            len(
+                configuration["configuration"]["microscopes"][microscope_names[0]][
+                    "filter_wheel"
+                ]
+            )
+            == 1
+        )
+        assert configuration["configuration"]["microscopes"][microscope_names[0]][
+            "filter_wheel"
+        ][0]["hardware"]["type"].startswith("ASI")
+        assert (
+            len(
+                configuration["configuration"]["microscopes"][microscope_names[1]][
+                    "filter_wheel"
+                ]
+            )
+            == 1
+        )
+        assert configuration["configuration"]["microscopes"][microscope_names[1]][
+            "filter_wheel"
+        ][0]["hardware"]["type"].startswith("Sutter")
+        # assert filter wheel name is unique
+        filter_wheel_names = []
+        for microscope_name in microscope_names:
+            filter_wheel_name = configuration["configuration"]["microscopes"][
+                microscope_name
+            ]["filter_wheel"][0]["name"]
+            assert (
+                filter_wheel_name not in filter_wheel_names
+            ), f"filter wheel name {filter_wheel_name} is not unique"
+            filter_wheel_names.append(filter_wheel_name)
+
+
 class TestVerifyExperimentConfig(unittest.TestCase):
     def setUp(self):
         self.manager = Manager()
@@ -301,7 +438,6 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "readout_direction": "Top-to-Bottom",
             "number_of_pixels": 10,
             "binning": "1x1",
-            "frames_to_average": 1,
             "databuffer_size": 100,
         }
 
@@ -588,7 +724,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         assert experiment["CameraParameters"]["readout_direction"] == "Bottom-to-Top"
 
         # other parameters should be int
-        for k in ["number_of_pixels", "databuffer_size", "frames_to_average"]:
+        for k in ["number_of_pixels", "databuffer_size"]:
             for v in ["abc", -10, 0]:
                 experiment["CameraParameters"][k] = v
                 config.verify_experiment_config(self.manager, configuration)
@@ -723,8 +859,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 "is_selected": 1,
                 "laser": "48nm",
                 "laser_index": -1,
-                "filter_wheel_0": "nonexsit_filter_***",
-                "filter_position_0": 1,
+                "FilterWheel-0": "nonexsit_filter_***",
                 "camera_exposure_time": -200.0,
                 "laser_power": "a",
                 "interval_time": -3,
@@ -735,8 +870,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "is_selected": False,
             "laser": lasers[0],
             "laser_index": 0,
-            "filter_wheel_0": filterwheels[0],
-            "filter_position_0": 0,
+            "FilterWheel-0": filterwheels[0],
             "camera_exposure_time": 200.0,
             "laser_power": 20.0,
             "interval_time": 0.0,
@@ -759,8 +893,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 "is_selected": 1,
                 "laser": lasers[1],
                 "laser_index": 3,
-                "filter_wheel_0": filterwheels[2],
-                "filter_position_0": 1,
+                "FilterWheel-0": filterwheels[2],
                 "camera_exposure_time": -200.0,
                 "laser_power": "a",
                 "interval_time": -3,
@@ -771,8 +904,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "is_selected": False,
             "laser": lasers[1],
             "laser_index": 1,
-            "filter_wheel_0": filterwheels[2],
-            "filter_position_0": 2,
+            "FilterWheel-0": filterwheels[2],
             "camera_exposure_time": 200.0,
             "laser_power": 20.0,
             "interval_time": 0.0,

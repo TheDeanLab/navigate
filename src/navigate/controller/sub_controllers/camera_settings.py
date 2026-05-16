@@ -526,15 +526,11 @@ class CameraSettingController(GUIController):
         # Binning settings
         self.roi_widgets["Binning"].set(self.camera_setting_dict["binning"])
 
-        # Camera Framerate Info - 'exposure_time', 'readout_time',
-        # 'framerate', 'frames_to_average'
+        # Camera Framerate Info - 'exposure_time', 'readout_time', 'framerate'
         # Exposure time is currently for just the first active channel
         channels = microscope_state_dict["channels"]
         exposure_time = channels[list(channels.keys())[0]]["camera_exposure_time"]
         self.framerate_widgets["exposure_time"].set(exposure_time)
-        self.framerate_widgets["frames_to_average"].set(
-            self.camera_setting_dict["frames_to_average"]
-        )
 
         # after initialization
         self.in_initialization = False
@@ -607,9 +603,6 @@ class CameraSettingController(GUIController):
             y_pixels = self.min_height
 
         self.camera_setting_dict["pixel_size"] = self.default_pixel_size
-        self.camera_setting_dict["frames_to_average"] = self.framerate_widgets[
-            "frames_to_average"
-        ].get()
 
         binning = [
             int(x) if x != "" else 1
@@ -816,7 +809,6 @@ class CameraSettingController(GUIController):
         else:
             self.mode_widgets["Readout"].widget["state"] = "disabled"
             self.mode_widgets["Pixels"].widget["state"] = "disabled"
-        self.framerate_widgets["frames_to_average"].widget["state"] = state
         if mode != "stop":
             self.roi_widgets["Width"].widget["state"] = "disabled"
             self.roi_widgets["Height"].widget["state"] = "disabled"

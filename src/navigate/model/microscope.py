@@ -170,7 +170,7 @@ class Microscope:
             "mirror": ["type"],
         }
 
-        device_name_dict = {"laser": "wavelength"}
+        device_name_dict = {"laser": "wavelength", "filter_wheel": "name"}
 
         laser_list = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -977,7 +977,7 @@ class Microscope:
                 self.ret_pos_dict[key] = round(value, 2)
             except (TypeError, ValueError, OverflowError) as e:
                 logger.error(f"Error rounding {key} position value: {e}")
-        return self.ret_pos_dict
+        return self.ret_pos_dict.copy()
 
     def move_remote_focus(self, offset: Optional[float] = None) -> None:
         """Move remote focus.

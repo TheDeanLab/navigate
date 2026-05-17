@@ -154,6 +154,10 @@ MFC2000
 MS2000
 ~~~~~~~
 
+.. note::
+
+    On Windows, **navigate** configures serial buffer sizes for MS2000
+    communication. On Linux/macOS this tuning step is skipped for compatibility.
 
 .. collapse:: Configuration File
 
@@ -439,7 +443,7 @@ positioning.
             stage:
               hardware:
                 -
-                  type: Thorlabs
+                  type: KIM001
                   serial_number: 74000375
                   axes: [f]
                   axes_mapping: [1]
@@ -505,6 +509,69 @@ KST101
                   port:
                   baudrate:
                   timeout:
+              joystick_axes: [f]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
+              theta_min: 0.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
+
+|
+
+-----------------
+
+KINESIS (Serial)
+~~~~~~~~~~~~~~~~
+
+This mode supports Thorlabs Kinesis stepper communication through
+``pylablib`` using a serial device path (for example ``/dev/ttyUSB1`` on Linux).
+
+Install the optional KINESIS dependency extra before using this stage:
+
+.. code-block:: bash
+
+    pip install "navigate-micro[kinesis]"
+
+.. note::
+
+    ``steps_per_um`` is the preferred scale parameter for KINESIS stages.
+    If omitted, **navigate** falls back to ``device_units_per_mm``.
+
+.. note::
+
+    The current KINESIS implementation assumes a single Kinesis stage connected
+    through one serial device path.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+            stage:
+              hardware:
+                -
+                  type: KINESIS
+                  serial_number: /dev/ttyUSB1
+                  axes: [f]
+                  axes_mapping: [1]
+                  steps_per_um: 2008.623
+                  min: 0
+                  max: 25
               joystick_axes: [f]
               x_min: -10000.0
               x_max: 10000.0

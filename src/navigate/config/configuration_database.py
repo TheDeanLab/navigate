@@ -182,6 +182,7 @@ stage_device_types = {
     "Sutter Instruments": ("MP285", "sutter"),
     "ThorLabs KCube Inertial Device KIM001": ("KIM001", "thorlabs"),
     "ThorLabs KCube Inertial Device KST101": ("KST101", "thorlabs"),
+    "ThorLabs Kinesis Stepper Motor (Serial)": ("KINESIS", "thorlabs"),
     "Virtual Device": ("Synthetic", "synthetic"),
 }
 

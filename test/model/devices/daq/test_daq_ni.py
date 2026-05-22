@@ -138,7 +138,9 @@ class _FakeTask:
         self.timing = _FakeTiming()
         self.triggers = _FakeTriggers()
         self.write_calls = []
-        self.read_sequence = list(read_sequence if read_sequence is not None else [True])
+        self.read_sequence = list(
+            read_sequence if read_sequence is not None else [True]
+        )
         self.wait_calls = []
         self.register_done_event_calls = []
         self.start_calls = 0
@@ -340,6 +342,57 @@ def test_initialize_daq_ni_defaults(ni_module):
     assert daq.trigger_count == 0
 
 
+def test_initialize_daq_ni_loads_active_scope_trigger_reset_count(ni_module):
+    module, _, _ = ni_module
+    daq = _build_ni_daq(module)
+
+    assert daq.trigger_reset_count == 2
+
+
+@pytest.mark.parametrize(
+    ("raw_value", "expected"),
+    [
+        (500, 500),
+        ("500", 500),
+        (0, None),
+        ("0", None),
+        ("", None),
+        (None, None),
+        (-1, None),
+        (True, None),
+        (1.9, None),
+        (float("inf"), None),
+        ("invalid", None),
+    ],
+)
+def test_enable_microscope_normalizes_trigger_reset_count(
+    ni_module, raw_value, expected
+):
+    module, _, _ = ni_module
+    configuration = _build_configuration()
+    configuration["configuration"]["microscopes"]["ScopeA"]["daq"][
+        "trigger_reset_count"
+    ] = raw_value
+    daq = module.NIDAQ(configuration)
+
+    daq.enable_microscope("ScopeA")
+
+    assert daq.trigger_reset_count == expected
+
+
+def test_enable_microscope_refreshes_active_scope_trigger_reset_count(ni_module):
+    module, _, _ = ni_module
+    configuration = _build_configuration()
+    daq = module.NIDAQ(configuration)
+    configuration["configuration"]["microscopes"]["ScopeA"]["daq"][
+        "trigger_reset_count"
+    ] = 10
+
+    daq.enable_microscope("ScopeA")
+
+    assert daq.trigger_reset_count == 10
+
+
 def test_wait_for_external_trigger_without_channel_returns_false(ni_module):
     module, _, _ = ni_module
     assert module.NIDAQ.wait_for_external_trigger("") is False
@@ -539,7 +592,9 @@ def test_prepare_acquisition_sets_up_tasks_and_releases_lock(ni_module):
     assert daq.waveform_expand_num == 1
     assert daq.trigger_mode == "self-trigger"
     assert not daq.wait_to_run_lock.locked()
-    assert daq.camera_trigger_task.triggers.start_trigger.cfg_calls[-1] == "/ScopeA/PFI0"
+    assert (
+        daq.camera_trigger_task.triggers.start_trigger.cfg_calls[-1] == "/ScopeA/PFI0"
+    )
     assert (
         daq.analog_output_tasks["Dev1"].triggers.start_trigger.cfg_calls[-1]
         == "/ScopeA/PFI0"
@@ -561,7 +616,9 @@ def test_set_external_trigger_self_trigger_handles_task_exceptions(ni_module):
 
     assert daq.trigger_mode == "self-trigger"
     assert daq.master_trigger_task is not None
-    assert daq.camera_trigger_task.triggers.start_trigger.cfg_calls[-1] == "/ScopeA/PFI0"
+    assert (
+        daq.camera_trigger_task.triggers.start_trigger.cfg_calls[-1] == "/ScopeA/PFI0"
+    )
     assert analog_task.triggers.start_trigger.cfg_calls[-1] == "/ScopeA/PFI0"
     assert analog_task.register_done_event_calls[0] is None
     daq.camera_trigger_task.stop_exception = None
@@ -584,7 +641,9 @@ def test_set_external_trigger_external_mode_reconfigures_tasks(ni_module):
     assert daq.trigger_mode == "external-trigger"
     assert daq.external_trigger == "/External/PFI7"
     assert daq.master_trigger_task is None
-    assert daq.camera_trigger_task.triggers.start_trigger.cfg_calls[-1] == "/External/PFI7"
+    assert (
+        daq.camera_trigger_task.triggers.start_trigger.cfg_calls[-1] == "/External/PFI7"
+    )
     assert daq.camera_trigger_task.triggers.start_trigger.retriggerable is False
     assert analog_task.triggers.start_trigger.cfg_calls[-1] == "/External/PFI7"
     assert analog_task.register_done_event_calls[0] is None
@@ -612,7 +671,13 @@ def test_run_acquisition_starts_tasks_and_writes_master_trigger(ni_module):
     assert fake_lock.release_calls == 1
     assert camera_task.start_calls == 1
     assert analog_task.start_calls == 1
-    assert master_task.write_calls[0]["data"].tolist() == [False, True, True, True, False]
+    assert master_task.write_calls[0]["data"].tolist() == [
+        False,
+        True,
+        True,
+        True,
+        False,
+    ]
     assert master_task.write_calls[0]["auto_start"] is True
     assert calls["wait"] == 1
     assert daq.trigger_count == 1

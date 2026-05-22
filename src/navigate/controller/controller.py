@@ -1044,6 +1044,7 @@ class Controller:
             microscope_name = args[0]
             if microscope_name == self.configuration_controller.microscope_name:
                 self.stage_controller.initialize()
+                self.channels_tab_controller.update_stack_position_limits()
             self.threads_pool.createThread(
                 resourceName="model",
                 target=self.update_stage_limits,
@@ -1166,6 +1167,7 @@ class Controller:
 
         elif command == "stage_limits":
             self.stage_controller.stage_limits = args[0]
+            self.channels_tab_controller.update_stack_position_limits()
             self.threads_pool.createThread(
                 resourceName="model",
                 target=lambda: self.model.run_command("stage_limits", *args),
@@ -1434,7 +1436,7 @@ class Controller:
         None
         """
         e = RuntimeError
-        while e == RuntimeError:
+        while e is RuntimeError:
             try:
                 self.model.run_command("stop")
                 e = None

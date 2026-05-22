@@ -130,6 +130,9 @@ class ChannelsTabController(GUIController):
         #: dict: The microscope state dictionary.
         self.microscope_state_dict = {}
 
+        #: dict: The GUI range settings used as non-stage fallbacks.
+        self._spinbox_range_limit_settings = {}
+
         # laser/stack cycling event binds
         self.stack_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
 
@@ -308,6 +311,7 @@ class ChannelsTabController(GUIController):
         self.focus_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
         ][primary_f_axis]
+        self.update_stack_position_limits()
         self.update_z_steps()
 
         self.show_verbose_info("Channels tab has been set new values")
@@ -325,6 +329,8 @@ class ChannelsTabController(GUIController):
             dictionary of settings from configuration file
         """
 
+        self._spinbox_range_limit_settings = settings
+
         # Z-Stack Step Size
         self.stack_acq_widgets["step_size"].widget.configure(
             from_=settings.get("stack_acquisition", {})
@@ -338,57 +344,7 @@ class ChannelsTabController(GUIController):
             .get("step", 0.01),
         )
 
-        # Z-Stack Z Start Position
-        self.stack_acq_widgets["start_position"].widget.configure(
-            from_=settings.get("stack_acquisition", {})
-            .get("z_start_pos", {})
-            .get("min", -1000),
-            to=settings.get("stack_acquisition", {})
-            .get("z_start_pos", {})
-            .get("max", 1000),
-            increment=settings.get("stack_acquisition", {})
-            .get("z_start_pos", {})
-            .get("step", 1),
-        )
-
-        # Z-Stack Z End Position
-        self.stack_acq_widgets["end_position"].widget.configure(
-            from_=settings.get("stack_acquisition", {})
-            .get("z_end_pos", {})
-            .get("min", -1000),
-            to=settings.get("stack_acquisition", {})
-            .get("z_end_pos", {})
-            .get("max", 1000),
-            increment=settings.get("stack_acquisition", {})
-            .get("z_end_pos", {})
-            .get("step", 1),
-        )
-
-        # Z-Stack F Start Position
-        self.stack_acq_widgets["start_focus"].widget.configure(
-            from_=settings.get("stack_acquisition", {})
-            .get("f_start_pos", {})
-            .get("min", -1000),
-            to=settings.get("stack_acquisition", {})
-            .get("f_start_pos", {})
-            .get("max", 1000),
-            increment=settings.get("stack_acquisition", {})
-            .get("f_start_pos", {})
-            .get("step", 1),
-        )
-
-        # Z-Stack F End Position
-        self.stack_acq_widgets["end_focus"].widget.configure(
-            from_=settings.get("stack_acquisition", {})
-            .get("f_end_pos", {})
-            .get("min", -1000),
-            to=settings.get("stack_acquisition", {})
-            .get("f_end_pos", {})
-            .get("max", 1000),
-            increment=settings.get("stack_acquisition", {})
-            .get("f_end_pos", {})
-            .get("step", 1),
-        )
+        self.update_stack_position_limits(settings)
 
         # Stack Pause Duration
         self.view.stack_timepoint_frame.stack_pause_spinbox.configure(
@@ -406,6 +362,122 @@ class ChannelsTabController(GUIController):
 
         # Channel settings
         self.channel_setting_controller.set_spinbox_range_limits(settings)
+
+    def _stage_limits_enabled(self) -> bool:
+        """Return whether stack widgets should honor configured stage limits."""
+
+        stage_controller = getattr(self.parent_controller, "stage_controller", None)
+        if stage_controller is not None:
+            return bool(stage_controller.stage_limits)
+
+        return bool(
+            self.parent_controller.configuration["experiment"]
+            .get("StageParameters", {})
+            .get("limits", True)
+        )
+
+    def _get_stack_axis(self, device_name: str, fallback_axis: str) -> str:
+        """Return the axis suffix from a stack device combobox value."""
+
+        device = self.stack_acq_vals.get(device_name)
+        if device is None:
+            return fallback_axis
+
+        value = device.get()
+        if not value:
+            return fallback_axis
+
+        try:
+            return value.split(" - ")[1]
+        except IndexError:
+            return fallback_axis
+
+    def _get_gui_stack_range(
+        self, settings: dict, setting_name: str
+    ) -> tuple[float, float]:
+        """Return stack range fallback limits from GUI configuration."""
+
+        stack_settings = settings.get("stack_acquisition", {})
+        setting = stack_settings.get(setting_name, {})
+        return (
+            float(setting.get("min", -1000)),
+            float(setting.get("max", 1000)),
+        )
+
+    def _get_gui_stack_step(self, settings: dict, setting_name: str) -> float:
+        """Return stack range increment from GUI configuration."""
+
+        return float(
+            settings.get("stack_acquisition", {}).get(setting_name, {}).get("step", 1)
+        )
+
+    def _get_relative_stage_limits(
+        self, axis: str, origin: float
+    ) -> Optional[tuple[float, float]]:
+        """Return stage limits relative to the current stack origin."""
+
+        config = self.parent_controller.configuration_controller
+        min_limits = config.get_stage_position_limits("_min")
+        max_limits = config.get_stage_position_limits("_max")
+        if axis not in min_limits or axis not in max_limits:
+            return None
+
+        try:
+            return float(min_limits[axis]) - origin, float(max_limits[axis]) - origin
+        except (TypeError, ValueError):
+            return None
+
+    def _get_stack_position_range(
+        self,
+        axis: str,
+        origin: float,
+        settings: dict,
+        setting_name: str,
+    ) -> tuple[float, float]:
+        """Return widget range, preferring relative stage limits when enabled."""
+
+        gui_range = self._get_gui_stack_range(settings, setting_name)
+        if not self._stage_limits_enabled():
+            return gui_range
+
+        stage_range = self._get_relative_stage_limits(axis, origin)
+        return gui_range if stage_range is None else stage_range
+
+    def update_stack_position_limits(
+        self, settings: Optional[Dict[str, Any]] = None
+    ) -> None:
+        """Update stack start/end widgets from stage limits or GUI fallback ranges."""
+
+        if settings is None:
+            settings = (
+                self._spinbox_range_limit_settings
+                or self.parent_controller.configuration["gui"]
+            )
+        else:
+            self._spinbox_range_limit_settings = settings
+
+        stack_positions = [
+            ("start_position", "z_device", "z", self.z_origin, "z_start_pos"),
+            ("end_position", "z_device", "z", self.z_origin, "z_end_pos"),
+            ("start_focus", "f_device", "f", self.focus_origin, "f_start_pos"),
+            ("end_focus", "f_device", "f", self.focus_origin, "f_end_pos"),
+        ]
+        for (
+            widget_name,
+            device_name,
+            fallback_axis,
+            origin,
+            setting_name,
+        ) in stack_positions:
+            axis = self._get_stack_axis(device_name, fallback_axis)
+            from_value, to_value = self._get_stack_position_range(
+                axis, float(origin), settings, setting_name
+            )
+            self.stack_acq_widgets[widget_name].widget.configure(
+                from_=from_value,
+                to=to_value,
+                increment=self._get_gui_stack_step(settings, setting_name),
+            )
 
     def set_mode(self, mode: str) -> None:
         """Change acquisition mode.
@@ -587,6 +659,7 @@ class ChannelsTabController(GUIController):
         self.focus_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
         ][primary_f_axis]
+        self.update_stack_position_limits()
 
         flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
         if flip_flags[primary_z_axis]:
@@ -632,6 +705,7 @@ class ChannelsTabController(GUIController):
         # set origin to be in the middle of start and end
         self.z_origin = (z_start + z_end) / 2
         self.focus_origin = (focus_start + focus_end) / 2
+        self.update_stack_position_limits()
 
         # Propagate parameter changes to the GUI
         flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
@@ -974,6 +1048,41 @@ class ChannelsTabController(GUIController):
                 return "Stack pause should be a valid number!"
             if self.microscope_state_dict["timepoints"] < 1:
                 return "Timepoints should be at least 1!"
+            warning = self._verify_stack_position_limits()
+            if warning:
+                return warning
+        return ""
+
+    def _verify_stack_position_limits(self) -> str:
+        """Return warning text if stack positions exceed relative stage limits."""
+
+        if not self._stage_limits_enabled():
+            return ""
+
+        stack_positions = [
+            ("start_position", "z_device", "z", self.z_origin),
+            ("end_position", "z_device", "z", self.z_origin),
+            ("start_focus", "f_device", "f", self.focus_origin),
+            ("end_focus", "f_device", "f", self.focus_origin),
+        ]
+        for setting_name, device_name, fallback_axis, origin in stack_positions:
+            axis = self._get_stack_axis(device_name, fallback_axis)
+            limits = self._get_relative_stage_limits(axis, float(origin))
+            if limits is None:
+                continue
+
+            try:
+                value = float(self.microscope_state_dict[setting_name])
+            except (KeyError, TypeError, ValueError):
+                return f"{setting_name} should be a valid number!"
+
+            min_value, max_value = limits
+            if value < min_value or value > max_value:
+                return (
+                    f"{setting_name} is outside the {axis} stage limits "
+                    f"({min_value:.3f} to {max_value:.3f} um relative to origin)."
+                )
+
         return ""
 
     def set_exposure_time(self, channel_exposure_time: tuple[str, float]) -> None:
@@ -1019,6 +1128,7 @@ class ChannelsTabController(GUIController):
             if variable_dict[f"stack_{f_axis}"].get():
                 variable_dict[f"stack_{f_axis}"].set(False)
                 self.view.stack_acq_frame.update_setting_widgets(f_axis)()
+        self.update_stack_position_limits()
 
     @property
     def custom_events(self) -> dict[str, callable]:

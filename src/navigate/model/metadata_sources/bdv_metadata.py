@@ -88,6 +88,10 @@ class BigDataViewerMetadata(XMLMetadata):
         #: npt.NDArray: Rotation transform matrix.
         self.rotate_transform = np.eye(3, 4)
 
+    def _setup_id(self, c: int, p: int) -> int:
+        """Get the setup id for a channel and position."""
+        return p * self.shape_c + c
+
     def get_affine_parameters(self, configuration):
         """Get the affine transform parameters from the configuration file.
 
@@ -309,18 +313,18 @@ class BigDataViewerMetadata(XMLMetadata):
             {"name": "angle", "Angle": []},
         ]
 
-        # The actual loop that populates ViewSetup
-        view_id = 0
         for c in range(self.shape_c):
-            # We also take care of the Channel attributes here
             ch = {"id": {"text": str(c)}, "name": {"text": str(c)}}
             bdv_dict["SequenceDescription"]["ViewSetups"]["Attributes"][1][
                 "Channel"
             ].append(ch)
 
-            for pos in range(self.positions):
-                tile_id = tile_ids[pos] if pos < len(tile_ids) else pos
-                angle_id = angle_ids[pos] if pos < len(angle_ids) else 0
+        # The actual loop that populates ViewSetup
+        for pos in range(self.positions):
+            tile_id = tile_ids[pos] if pos < len(tile_ids) else pos
+            angle_id = angle_ids[pos] if pos < len(angle_ids) else 0
+            for c in range(self.shape_c):
+                view_id = self._setup_id(c, pos)
                 d = {
                     "id": {"text": view_id},
                     "name": {"text": view_id},
@@ -340,7 +344,6 @@ class BigDataViewerMetadata(XMLMetadata):
                 }
 
                 bdv_dict["SequenceDescription"]["ViewSetups"]["ViewSetup"].append(d)
-                view_id += 1
 
         # Finish up the Tile Attributes outside the channels loop so we have
         # one per tile
@@ -372,7 +375,7 @@ class BigDataViewerMetadata(XMLMetadata):
         for t in range(self.shape_t):
             for p in range(self.positions):
                 for c in range(self.shape_c):
-                    view_id = c * self.positions + p
+                    view_id = self._setup_id(c, p)
                     mat = np.zeros((3, 4), dtype=float)
                     for z in range(self.shape_z):
                         matrix_id = (

@@ -64,14 +64,14 @@ mat4 inverseShearYZ(float angleDeg)
 // Shear Matrix: shifts X based on Z
 mat4 shearMatrix(float angleDeg, float dz, float xyPixelSize)
 {
-    float t = radians(angleDeg/2.0);
+    float t = radians(angleDeg);
 
     float dy = sin(t)*dz/xyPixelSize;
 
     return mat4(
         1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0,  dy, 1.0, 0.0,
+        0.0, 1.0,  dy, 0.0,
+        0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
 }
@@ -79,13 +79,23 @@ mat4 shearMatrix(float angleDeg, float dz, float xyPixelSize)
 // Rotation Matrix: rotate about Y
 mat4 rotationMatrix_Y(float angleDeg)
 {
-    float t = radians(angleDeg/2.0);
+    float t = radians(angleDeg);
 
     return mat4(
         1.0,    0.0,    0.0,  0.0,
         0.0, cos(t), -sin(t), 0.0,
         0.0, sin(t),  cos(t), 0.0,
         0.0,    0.0,    0.0,  1.0
+    );
+}
+
+mat4 scalingMatrix_Z(float zAniso)
+{
+    return mat4(
+        1.0, 0.0, 0.0,    0.0,
+        0.0, 1.0, 0.0,    0.0,
+        0.0, 0.0, zAniso, 0.0,
+        0.0, 0.0, 0.0,    1.0
     );
 }
 
@@ -103,20 +113,23 @@ mat4 translationMatrix(vec3 t)
 // Combined DSR transformation (PetaKit5D)
 mat4 deskewRotateMatrix(float angleDeg, float dz, float xyPixelSize, vec3 volumeCenter)
 {
-    // 1: Translate to origin
+    // 1: Translate to center matrix
     mat4 T1 = translationMatrix(-volumeCenter);
 
-    // 2: Apply shear
-    mat4 S = shearMatrix(angleDeg, dz, xyPixelSize);
+    // 2: Shear matrix
+    mat4 S_ds = shearMatrix(angleDeg, dz, xyPixelSize);
 
-    // 3: Rotate by theta
+    // 3: Isotropic scaling matrix
+    mat4 S = scalingMatrix_Z(dz / xyPixelSize);
+
+    // 3: Rotate by theta matrix
     mat4 R = rotationMatrix_Y(angleDeg);
 
-    // 4: Translate back
+    // 4: Translate back matrix
     mat4 T2 = translationMatrix(volumeCenter);
 
     // Combined DSR:
-    return T2 * S * T1;
+    return S_ds;
 }
 
 void main()

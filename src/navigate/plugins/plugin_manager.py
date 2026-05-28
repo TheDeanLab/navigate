@@ -38,7 +38,7 @@ import pkgutil
 import os
 import inspect
 import logging
-from typing import Optional, Any
+from typing import Callable, Optional, Any
 
 # Local application imports
 from navigate.tools.file_functions import load_yaml_file
@@ -50,12 +50,12 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def register_features(module) -> None:
+def register_features(module: Any) -> None:
     """Register features
 
     Parameters
     ----------
-    module : module
+    module : Any
         A python module contains features
     """
     for c in dir(module):
@@ -67,17 +67,17 @@ class PluginPackageManager:
     """Plugin package manager"""
 
     @staticmethod
-    def get_plugins() -> dict:
+    def get_plugins() -> dict[str, str]:
         """Get plugins
 
         Returns
         -------
-        plugins : dict
-            plugins dict
+        plugins : dict[str, str]
+            Plugin names mapped to plugin paths.
         """
-        plugins = {}
+        plugins: dict[str, str] = {}
         eps = entry_points()
-        if hasattr(eps, 'select'):
+        if hasattr(eps, "select"):
             navigate_eps = eps.select(group="navigate.plugins")
         else:
             navigate_eps = eps.get("navigate.plugins", [])
@@ -95,7 +95,7 @@ class PluginPackageManager:
         return plugins
 
     @staticmethod
-    def load_config(package_name: str) -> dict:
+    def load_config(package_name: str) -> Optional[dict[str, Any]]:
         """Load plugin_config.yml
 
         Parameters
@@ -105,10 +105,10 @@ class PluginPackageManager:
 
         Returns
         -------
-        plugin_config : dict
-            plugin configuration
+        plugin_config : Optional[dict[str, Any]]
+            Plugin configuration, or None if it cannot be loaded.
         """
-        package_path = importlib.resources.files(package_name)
+        package_path = str(importlib.resources.files(package_name))
         plugin_config = load_yaml_file(os.path.join(package_path, "plugin_config.yml"))
         return plugin_config
 
@@ -175,20 +175,24 @@ class PluginPackageManager:
             return None
 
     @staticmethod
-    def load_feature_lists(package_name, register_func) -> None:
+    def load_feature_lists(
+        package_name: str, register_func: Callable[[str, Any], None]
+    ) -> None:
         """Load feature lists
 
         Parameters
         ----------
         package_name : str
             package name
-        register_func : func
-            the function to handle feature lists
+        register_func : Callable[[str, Any], None]
+            The function to handle feature lists.
         """
         try:
             module = importlib.import_module(f"{package_name}.feature_list")
             register_func(
-                importlib.resources.files(package_name).joinpath("feature_list.py"),
+                str(
+                    importlib.resources.files(package_name).joinpath("feature_list.py")
+                ),
                 module,
             )
         except (ImportError, AttributeError):
@@ -196,7 +200,7 @@ class PluginPackageManager:
             pass
 
     @staticmethod
-    def load_features(package_name):
+    def load_features(package_name: str) -> None:
         """Load features
 
         Parameters
@@ -204,9 +208,10 @@ class PluginPackageManager:
         package_name : str
             package name
         """
-        for _, module_name, is_pkg in pkgutil.iter_modules(
-            [importlib.resources.files(package_name).joinpath("model/features")]
-        ):
+        features_path = str(
+            importlib.resources.files(package_name).joinpath("model/features")
+        )
+        for _, module_name, is_pkg in pkgutil.iter_modules([features_path]):
             if not is_pkg:
                 full_module_name = f"{package_name}.model.features.{module_name}"
                 try:
@@ -217,17 +222,21 @@ class PluginPackageManager:
                 register_features(module)
 
     @staticmethod
-    def load_acquisition_modes(package_name, acquisition_modes, register_func):
+    def load_acquisition_modes(
+        package_name: str,
+        acquisition_modes: list[dict[str, str]],
+        register_func: Callable[[str, Any], None],
+    ) -> None:
         """Load acquisition modes
 
         Parameters
         ----------
         package_name : str
             package name
-        acquisition_modes : []
-            list of acquisition mode configurations
-        register_func : func
-            the function to register acquisition modes
+        acquisition_modes : list[dict[str, str]]
+            List of acquisition mode configurations.
+        register_func : Callable[[str, Any], None]
+            The function to register acquisition modes.
         """
         for acquisition_mode_config in acquisition_modes:
             acquisition_file = acquisition_mode_config["file_name"][:-3]
@@ -240,19 +249,22 @@ class PluginPackageManager:
                 register_func(acquisition_mode_config["name"], module)
 
     @staticmethod
-    def load_devices(package_name, register_func):
+    def load_devices(
+        package_name: str, register_func: Callable[[str, Any], None]
+    ) -> None:
         """Load devices
 
         Parameters
         ----------
         package_name : str
             package name
-        register_func : func
-            the function to register devices
+        register_func : Callable[[str, Any], None]
+            The function to register devices.
         """
-        for _, module_name, is_pkg in pkgutil.iter_modules(
-            [importlib.resources.files(package_name).joinpath("model/devices")]
-        ):
+        devices_path = str(
+            importlib.resources.files(package_name).joinpath("model/devices")
+        )
+        for _, module_name, is_pkg in pkgutil.iter_modules([devices_path]):
             if is_pkg:
                 full_module_name = (
                     f"{package_name}.model."
@@ -281,12 +293,12 @@ class PluginFileManager:
         """
 
         #: str: plugins path
-        self.plugins_path = plugins_path
+        self.plugins_path: str = plugins_path
 
         #: str: plugins config path
-        self.plugins_config_path = plugins_config_path
+        self.plugins_config_path: str = plugins_config_path
 
-    def get_plugins(self):
+    def get_plugins(self) -> dict[str, str]:
         """Get plugins
 
         Returns
@@ -317,7 +329,7 @@ class PluginFileManager:
         return plugins
 
     @staticmethod
-    def load_config(plugin_path):
+    def load_config(plugin_path: str) -> Optional[dict[str, Any]]:
         """Load plugin_config.yml
 
         Parameters
@@ -334,7 +346,7 @@ class PluginFileManager:
         return plugin_config
 
     @staticmethod
-    def load_controller(plugin_path, controller_name):
+    def load_controller(plugin_path: str, controller_name: str) -> Optional[Any]:
         """Load controller
 
         Parameters
@@ -346,8 +358,9 @@ class PluginFileManager:
 
         Returns
         -------
-        controller_class : class
-            controller class
+        controller_class : Optional[Any]
+            Controller class, or None if the controller file, module, or class
+            cannot be loaded.
         """
         controller_file_name = (
             "_".join(controller_name.lower().split()) + "_controller.py"
@@ -362,11 +375,15 @@ class PluginFileManager:
             module = load_module_from_file(controller_class_name, controller_file_path)
             if module and hasattr(module, controller_class_name):
                 return getattr(module, controller_class_name)
-            print(f"Plugin {controller_name} failed to load. Please verify that the plugin files are valid and complete.")
+            message = (
+                f"Plugin {controller_name} failed to load. "
+                + "Please verify that the plugin files are valid and complete."
+            )
+            print(message)
         return None
 
     @staticmethod
-    def load_view(plugin_path, frame_name):
+    def load_view(plugin_path: str, frame_name: str) -> Optional[Any]:
         """Load view
 
         Parameters
@@ -378,8 +395,9 @@ class PluginFileManager:
 
         Returns
         -------
-        frame_class : class
-            tkinter frame class
+        frame_class : Optional[Any]
+            Tkinter frame class, or None if the view file, module, or class
+            cannot be loaded.
         """
         frame_file_name = "_".join(frame_name.lower().split()) + "_frame.py"
         frame_class_name = "".join(frame_name.title().split()) + "Frame"
@@ -391,7 +409,9 @@ class PluginFileManager:
         return None
 
     @staticmethod
-    def load_feature_lists(plugin_path, register_func):
+    def load_feature_lists(
+        plugin_path: str, register_func: Callable[[str, Any], None]
+    ) -> None:
         """Load feature lists
 
         Parameters
@@ -408,7 +428,7 @@ class PluginFileManager:
                 register_func(plugin_feature_list, module)
 
     @staticmethod
-    def load_features(plugin_path):
+    def load_features(plugin_path: str) -> None:
         """Load features
 
         Parameters
@@ -428,7 +448,11 @@ class PluginFileManager:
                     register_features(module)
 
     @staticmethod
-    def load_acquisition_modes(plugin_path, acquisition_modes, register_func):
+    def load_acquisition_modes(
+        plugin_path: str,
+        acquisition_modes: list[dict[str, str]],
+        register_func: Callable[[str, Any], None],
+    ) -> None:
         """Load acquisition modes
 
         Parameters
@@ -449,7 +473,9 @@ class PluginFileManager:
                     register_func(acquisition_mode_config["name"], module)
 
     @staticmethod
-    def load_devices(plugin_path, register_func):
+    def load_devices(
+        plugin_path: str, register_func: Callable[[str, Any], None]
+    ) -> None:
         """Load devices
 
         Parameters

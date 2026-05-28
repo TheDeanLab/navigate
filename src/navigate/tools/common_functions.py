@@ -160,7 +160,8 @@ def load_param_from_module(module_name: str, param_name: str) -> Optional[Any]:
     try:
         module = importlib.import_module(module_name)
         param = getattr(module, param_name)
-    except ModuleNotFoundError:
+    except ImportError as e:
+        print(f"Importing {param_name} from module {module_name} failed: {e}")
         return None
     return param
 

@@ -1,10 +1,14 @@
 from types import ModuleType, SimpleNamespace
 
+import pytest
+
 import navigate.tools.common_functions as common_functions
 
 
-def test_load_module_from_file_returns_none_on_module_not_found(monkeypatch):
-    def raise_module_not_found(module):
+def test_load_module_from_file_returns_none_on_module_not_found(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def raise_module_not_found(_module: ModuleType) -> None:
         raise ModuleNotFoundError("missing dependency")
 
     monkeypatch.setattr(
@@ -18,6 +22,52 @@ def test_load_module_from_file_returns_none_on_module_not_found(monkeypatch):
         common_functions.importlib.util,
         "module_from_spec",
         lambda spec: ModuleType("fake_module"),
+    )
+
+    assert common_functions.load_module_from_file("fake_module", "/tmp/fake.py") is None
+
+
+def test_load_module_from_file_returns_none_on_import_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def raise_import_error(_module: ModuleType) -> None:
+        raise ImportError("DLL load failed while importing cupy")
+
+    monkeypatch.setattr(
+        common_functions.importlib.util,
+        "spec_from_file_location",
+        lambda module_name, file_path: SimpleNamespace(
+            loader=SimpleNamespace(exec_module=raise_import_error)
+        ),
+    )
+    monkeypatch.setattr(
+        common_functions.importlib.util,
+        "module_from_spec",
+        lambda spec: ModuleType("fake_module"),
+    )
+
+    assert common_functions.load_module_from_file("fake_module", "/tmp/fake.py") is None
+
+
+def test_load_module_from_file_returns_none_without_module_spec(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        common_functions.importlib.util,
+        "spec_from_file_location",
+        lambda module_name, file_path: None,
+    )
+
+    assert common_functions.load_module_from_file("fake_module", "/tmp/fake.py") is None
+
+
+def test_load_module_from_file_returns_none_without_module_loader(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        common_functions.importlib.util,
+        "spec_from_file_location",
+        lambda module_name, file_path: SimpleNamespace(loader=None),
     )
 
     assert common_functions.load_module_from_file("fake_module", "/tmp/fake.py") is None

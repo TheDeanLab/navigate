@@ -131,7 +131,8 @@ def load_module_from_file(module_name: str, file_path: str) -> Optional[any]:
         spec = importlib.util.spec_from_file_location(module_name, file_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as e:
+        print(f"Module not found: {e}")
         return None
     return module
 

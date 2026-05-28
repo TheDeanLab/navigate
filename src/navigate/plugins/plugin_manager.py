@@ -360,7 +360,9 @@ class PluginFileManager:
             controller_file_path
         ):
             module = load_module_from_file(controller_class_name, controller_file_path)
-            return getattr(module, controller_class_name)
+            if module and hasattr(module, controller_class_name):
+                return getattr(module, controller_class_name)
+            print(f"Plugin {controller_name} failed to load. Please verify that the plugin files are valid and complete.")
         return None
 
     @staticmethod
@@ -384,7 +386,8 @@ class PluginFileManager:
         frame_file_path = os.path.join(plugin_path, "view", frame_file_name)
         if os.path.exists(frame_file_path) and os.path.isfile(frame_file_path):
             module = load_module_from_file(frame_class_name, frame_file_path)
-            return getattr(module, frame_class_name)
+            if module and hasattr(module, frame_class_name):
+                return getattr(module, frame_class_name)
         return None
 
     @staticmethod
@@ -401,7 +404,8 @@ class PluginFileManager:
         plugin_feature_list = os.path.join(plugin_path, "feature_list.py")
         if os.path.exists(plugin_feature_list):
             module = load_module_from_file("feature_list_temp", plugin_feature_list)
-            register_func(plugin_feature_list, module)
+            if module:
+                register_func(plugin_feature_list, module)
 
     @staticmethod
     def load_features(plugin_path):
@@ -420,7 +424,8 @@ class PluginFileManager:
             feature_file = os.path.join(features_dir, feature)
             if os.path.isfile(feature_file):
                 module = load_module_from_file(feature, feature_file)
-                register_features(module)
+                if module:
+                    register_features(module)
 
     @staticmethod
     def load_acquisition_modes(plugin_path, acquisition_modes, register_func):

@@ -775,7 +775,7 @@ class WavefrontCorrector(Pointer):
             basepath, "MirrorFiles", "FlouresceinOctober12.wcs"
         ),
         interaction_matrix_file_path=os.path.join(
-            basepath, "MirrorFiles", "OlympusApril22.aoc"
+            basepath, "MirrorFiles", "InfluenceMatrix-20260527_Pupil18mm.aoc"
         ),
         n_actuators=52,
     ):

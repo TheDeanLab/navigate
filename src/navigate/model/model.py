@@ -247,6 +247,9 @@ class Model:
         #: bool: Stop signal thread?
         self.stop_send_signal = False  # stop signal thread
 
+        #: bool: Signal side completed a finite acquisition.
+        self.signal_acquisition_complete = False
+
         #: event: Pause data event.
         self.pause_data_event = threading.Event()
 
@@ -787,7 +790,7 @@ class Model:
                 delattr(self, "signal_container")
                 delattr(self, "data_container")
 
-            if type(args[0]) == int:
+            if type(args[0]) is int:
                 self.addon_feature = None
                 if args[0] != 0:
                     if len(args) == 2:
@@ -803,7 +806,7 @@ class Model:
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
                     )
-            elif type(args[0]) == str:
+            elif type(args[0]) is str:
                 try:
                     if len(args) > 1:
                         self.addon_feature = [
@@ -1015,11 +1018,15 @@ class Model:
         accumulated_durations_ns = []
 
         # main data acquisition loop
-        while not self.stop_acquisition:
+        while (
+            not self.stop_acquisition
+            or self._should_drain_signal_completed_frames()
+        ):
             if self.ask_to_pause_data_thread:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
+                wait_num = self.camera_wait_iterations
             start_time = time.perf_counter_ns()
             frame_ids = self.active_microscope.camera.get_new_frame()
 
@@ -1118,6 +1125,18 @@ class Model:
 
         # Turn off the lasers/close the shutters
         self.end_acquisition()
+
+    def _should_drain_signal_completed_frames(self) -> bool:
+        """Return True when finite acquisition data should drain after signal stop."""
+
+        if not self.signal_acquisition_complete or self.imaging_mode == "live":
+            return False
+
+        data_container = getattr(self, "data_container", None)
+        if data_container is None or getattr(data_container, "root", None) is None:
+            return False
+
+        return not data_container.end_flag and not data_container.is_closed
 
     def pause_data_thread(self) -> None:
         """Pause the data thread.
@@ -1227,6 +1246,7 @@ class Model:
         if turn_off_flags:
             self.stop_acquisition = False
             self.stop_send_signal = False
+            self.signal_acquisition_complete = False
             self.injected_flag.value = False
             self.is_live = False
             self.available_image_count = 0
@@ -1440,6 +1460,8 @@ class Model:
                 self.grab_image(getattr(self.image_writer, "save_image", None))
             self.show_img_pipe.send("stop")
         if self.imaging_mode != "live":
+            if not self.stop_acquisition and not self.stop_send_signal:
+                self.signal_acquisition_complete = True
             self.stop_acquisition = True
 
         if not self.is_data_thread_on:
@@ -1990,6 +2012,8 @@ class ASIModel(Model):
                 self.stop_acquisition = True
                 return
         if self.imaging_mode != "live":
+            if not self.stop_acquisition and not self.stop_send_signal:
+                self.signal_acquisition_complete = True
             self.stop_acquisition = True
 
     def snap_zstack(self) -> None:

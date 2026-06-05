@@ -8,9 +8,6 @@ import logging
 import platform
 from logging.handlers import QueueHandler
 
-from navigate.log_files.log_functions import log_setup
-
-
 class _NullQueue:
     """Minimal queue-like sink for logging; avoids mp feeder threads on Windows."""
 
@@ -489,13 +486,30 @@ def test_execute_update_setting(controller):
 
 def test_execute_stage_limits(controller):
     controller.threads_pool.createThread = MagicMock()
+    controller.channels_tab_controller.update_stack_position_limits = MagicMock()
     for stage_limits in [True, False]:
         controller.threads_pool.createThread.reset_mock()
+        controller.channels_tab_controller.update_stack_position_limits.reset_mock()
         controller.execute("stage_limits", stage_limits)
         assert controller.stage_controller.stage_limits == stage_limits
+        controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
         assert controller.threads_pool.createThread.called is True
 
     assert True
+
+
+def test_execute_update_stage_limits_refreshes_stack_position_limits(controller):
+    controller.threads_pool.createThread = MagicMock()
+    controller.stage_controller.initialize = MagicMock()
+    controller.channels_tab_controller.update_stack_position_limits = MagicMock()
+
+    controller.execute(
+        "update_stage_limits", controller.configuration_controller.microscope_name
+    )
+
+    controller.stage_controller.initialize.assert_called_once()
+    controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
+    assert controller.threads_pool.createThread.called is True
 
 
 def test_execute_autofocus(controller):

@@ -30,11 +30,12 @@
 
 
 # Standard Imports
+import math
 import logging
 from threading import Lock
 import traceback
 import time
-from typing import Any
+from typing import Any, Optional
 import gc
 
 # Third Party Imports
@@ -109,11 +110,42 @@ class NIDAQ(DAQBase):
         self.trigger_count = 0
 
         #: int: trigger reset count
-        self.trigger_reset_count = None
+        self.trigger_reset_count = self._get_trigger_reset_count(self.microscope_name)
 
     def __str__(self) -> str:
         """String representation of the class."""
         return "NIDAQ"
+
+    @staticmethod
+    def _normalize_trigger_reset_count(value: Any) -> Optional[int]:
+        """Return a positive DAQ reset count, or None when disabled."""
+        if isinstance(value, bool):
+            return None
+
+        if isinstance(value, int):
+            trigger_reset_count = value
+        elif isinstance(value, float):
+            if not math.isfinite(value) or not value.is_integer():
+                return None
+            trigger_reset_count = int(value)
+        elif isinstance(value, str):
+            try:
+                trigger_reset_count = int(value.strip())
+            except ValueError:
+                return None
+        else:
+            return None
+
+        if trigger_reset_count <= 0:
+            return None
+        return trigger_reset_count
+
+    def _get_trigger_reset_count(self, microscope_name: str) -> Optional[int]:
+        """Return the DAQ reset count for the microscope."""
+        value = self.configuration["configuration"]["microscopes"][microscope_name][
+            "daq"
+        ].get("trigger_reset_count", None)
+        return self._normalize_trigger_reset_count(value)
 
     def __del__(self) -> None:
         """Destructor."""
@@ -178,8 +210,7 @@ class NIDAQ(DAQBase):
                     self.analog_output_tasks[board_name].stop()
                 except Exception:
                     logger.debug(
-                        f"Error stopping analog output tasks: "
-                        f"{traceback.format_exc()}"
+                        f"Error stopping analog output tasks: {traceback.format_exc()}"
                     )
                 self.analog_output_tasks[
                     board_name
@@ -198,8 +229,7 @@ class NIDAQ(DAQBase):
                     self.master_trigger_task.close()
                 except Exception:
                     logger.debug(
-                        f"Error stopping master trigger task: "
-                        f"{traceback.format_exc()}"
+                        f"Error stopping master trigger task: {traceback.format_exc()}"
                     )
             self.master_trigger_task = None
             # camera task trigger source
@@ -549,9 +579,8 @@ class NIDAQ(DAQBase):
             self.microscope_name = microscope_name
             self.analog_outputs = {}
             self.analog_output_tasks = {}
-            self.trigger_reset_count = self.configuration["configuration"][
-                "microscopes"
-            ][microscope_name]["daq"].get("trigger_reset_count", None)
+
+        self.trigger_reset_count = self._get_trigger_reset_count(microscope_name)
 
         self.camera_delay = (
             float(self.waveform_constants["other_constants"].get("camera_delay", 5))

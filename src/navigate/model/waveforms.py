@@ -462,6 +462,54 @@ def sine_wave(
     return waveform
 
 
+def quadratic(
+    sample_rate=100000,
+    sweep_time=0.4,
+    exposure=0.100,
+    amplitude=0.1,
+    offset=0,
+    delay=0,
+):
+    """Quadratic galvo waveform used for curved ASLM."""
+    samples = int(sample_rate * sweep_time)
+    exposure_samples = int(sample_rate * exposure)
+    waveform = np.full(samples, offset)
+    start_sample = int(delay * sample_rate) if delay else 0
+    stop_sample = min(start_sample + exposure_samples, samples)
+    if stop_sample <= start_sample:
+        return waveform
+
+    tn = np.linspace(-1, 1, stop_sample - start_sample)
+    quadratic_waveform = amplitude * tn**2 + offset
+    waveform[start_sample:stop_sample] = quadratic_waveform
+    return waveform
+
+
+def centered_cubic(
+    sample_rate=100000,
+    sweep_time=0.4,
+    exposure=0.100,
+    amplitude=0.0,
+    offset=0,
+    delay=0,
+):
+    """Centered cubic galvo waveform used for curved ASLM."""
+    samples = int(sample_rate * sweep_time)
+    exposure_samples = int(sample_rate * exposure)
+    waveform = np.full(samples, offset)
+    start_sample = int(delay * sample_rate) if delay else 0
+    stop_sample = min(start_sample + exposure_samples, samples)
+    if stop_sample <= start_sample:
+        return waveform
+
+    tn = np.linspace(-1, 1, stop_sample - start_sample)
+    b = (offset - amplitude) / 2
+    a = offset - b
+    cubic_waveform = a * tn**2 + b * tn**3
+    waveform[start_sample:stop_sample] = cubic_waveform
+    return waveform
+
+
 def smooth_waveform(waveform, percent_smoothing=10):
     """Smooths a numpy array via convolution
 

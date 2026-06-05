@@ -41,7 +41,10 @@ from datetime import datetime
 
 # Third Party Imports
 import numpy as np
-from tifffile import imsave
+try:
+    from tifffile import imsave
+except ImportError:
+    from tifffile import imwrite as imsave
 
 # Local imports
 import navigate

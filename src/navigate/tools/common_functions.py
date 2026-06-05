@@ -32,6 +32,7 @@
 
 # Standard library imports
 import importlib
+import importlib.util
 from threading import Lock
 from types import TracebackType
 from typing import Optional, Any, Type, Union
@@ -82,26 +83,27 @@ def build_ref_name(separator, *args) -> str:
     return separator.join(alist)
 
 
-def copy_proxy_object(content):
+def copy_proxy_object(content: Any) -> Any:
     """This function will serialize proxy dict and list
 
     Parameters
     ----------
-    content: dict/list
+    content : Any
         the proxy object
 
     Returns
     -------
-    result: dict/list
+    result
+        The serialized object.
     """
     from multiprocessing import managers
 
-    def func(content):
-        if type(content) == managers.DictProxy:
+    def func(content: Any) -> Any:
+        if type(content) is managers.DictProxy:
             result = {}
             for k in content.keys():
                 result[k] = func(content[k])
-        elif type(content) == managers.ListProxy:
+        elif type(content) is managers.ListProxy:
             result = []
             for v in content:
                 result.append(func(v))
@@ -112,49 +114,54 @@ def copy_proxy_object(content):
     return func(content)
 
 
-def load_module_from_file(module_name: str, file_path: str) -> Optional[any]:
+def load_module_from_file(module_name: str, file_path: str) -> Optional[Any]:
     """This function will load python file from file path as a module
 
     Parameters
     ----------
-    module_name: str
+    module_name : str
         the module name
-    file_path: os.path/str
+    file_path : str
         the python file path
 
     Returns
     -------
-    module: Optional[Any]
-        The module. None if the module is not found.
+    module : Optional[Any]
+        The module. None if the module cannot be imported.
     """
     try:
         spec = importlib.util.spec_from_file_location(module_name, file_path)
+        if spec is None or spec.loader is None:
+            print(f"Module import failed: no module spec found for {file_path}")
+            return None
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-    except ModuleNotFoundError:
+    except ImportError as e:
+        print(f"Module import failed: {e}")
         return None
     return module
 
 
-def load_param_from_module(module_name: str, param_name: str) -> Optional[any]:
+def load_param_from_module(module_name: str, param_name: str) -> Optional[Any]:
     """This function will load a parameter from a module
 
     Parameters
     ----------
-    module_name: str
+    module_name : str
         the module name
-    param_name: str
+    param_name : str
         the parameter name
 
     Returns
     -------
-    param: Optional[Any]
+    param : Optional[Any]
         The parameter. None if the parameter is not found.
     """
     try:
         module = importlib.import_module(module_name)
         param = getattr(module, param_name)
-    except ModuleNotFoundError:
+    except ImportError as e:
+        print(f"Importing {param_name} from module {module_name} failed: {e}")
         return None
     return param
 

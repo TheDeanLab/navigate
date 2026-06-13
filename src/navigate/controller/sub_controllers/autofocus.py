@@ -109,6 +109,20 @@ class AutofocusPopupController(GUIController):
         for k in self.view.setting_vars:
             self.view.setting_vars[k].trace_add("write", self.update_setting_dict(k))
 
+    @staticmethod
+    def _channel_key_to_label(channel_key: str) -> str:
+        """Convert an internal channel key to the GUI channel label."""
+        if channel_key.startswith("channel_"):
+            return f"CH{channel_key.removeprefix('channel_')}"
+        return channel_key
+
+    @staticmethod
+    def _channel_label_to_key(channel_label: str) -> str:
+        """Convert a GUI channel label to the internal channel key."""
+        if channel_label.startswith("CH") and channel_label[2:].isdigit():
+            return f"channel_{channel_label[2:]}"
+        return channel_label
+
     def close_popup(self, *_: tuple[str]) -> None:
         """Close the popup window
 
@@ -160,8 +174,10 @@ class AutofocusPopupController(GUIController):
             (channel for channel in channel_keys if channels[channel]["is_selected"]),
             channel_keys[0] if channel_keys else "",
         )
-        self.widgets["target_channel"].widget["values"] = channel_keys
-        self.widgets["target_channel"].set(selected_channel)
+        self.widgets["target_channel"].widget["values"] = tuple(
+            self._channel_key_to_label(channel) for channel in channel_keys
+        )
+        self.widgets["target_channel"].set(self._channel_key_to_label(selected_channel))
         self.widgets["calibration_action"].widget["values"] = tuple(
             self.CALIBRATION_ACTIONS.keys()
         )
@@ -205,7 +221,9 @@ class AutofocusPopupController(GUIController):
                 message=warning_message,
             )
             return
-        target_channel = self.widgets["target_channel"].widget.get()
+        target_channel = self._channel_label_to_key(
+            self.widgets["target_channel"].widget.get()
+        )
         action_label = self.widgets["calibration_action"].widget.get()
         calibration_action = self.CALIBRATION_ACTIONS.get(action_label)
         reference_channel = None
@@ -231,6 +249,7 @@ class AutofocusPopupController(GUIController):
                 "focus_position": float(payload["focus_position"]),
             }
             self._update_reference_status()
+            self._notify_defocus_reference(self.defocus_calibration_reference)
             return
 
         if action == "populate_defocus":
@@ -253,13 +272,22 @@ class AutofocusPopupController(GUIController):
         if handler is not None:
             handler((channel_key, defocus))
 
+    def _notify_defocus_reference(self, reference: dict) -> None:
+        handler = getattr(self.parent_controller, "event_listeners", {}).get(
+            "defocus_reference"
+        )
+        if handler is not None:
+            handler(reference)
+
     def _update_reference_status(self) -> None:
         if not hasattr(self.view, "reference_status_var"):
             return
         if self.defocus_calibration_reference is None:
             self.view.reference_status_var.set("Reference: none")
             return
-        channel = self.defocus_calibration_reference["channel"]
+        channel = self._channel_key_to_label(
+            self.defocus_calibration_reference["channel"]
+        )
         focus = self.defocus_calibration_reference["focus_position"]
         self.view.reference_status_var.set(f"Reference: {channel} @ {focus:.3f}")
 

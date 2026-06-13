@@ -32,6 +32,7 @@
 
 import pytest
 import random
+from unittest.mock import MagicMock
 
 
 @pytest.fixture(scope="module")
@@ -110,7 +111,7 @@ def test_move_stage(dummy_microscope):
                 not expected_device_flag[mode]
             )
 
-            if expected_device_flag[mode] == False:
+            if not expected_device_flag[mode]:
                 # assert position is cached
                 for axis in test_axes:
                     assert round(
@@ -243,8 +244,10 @@ def test_prepare_next_channel_infers_zero_defocus_focus_from_current_channel(
         for channel_key, channel in channels.items()
     }
     original_focus = dummy_microscope.get_stage_position()["f_pos"]
+    original_output_event_queue = dummy_microscope.output_event_queue
 
     try:
+        dummy_microscope.output_event_queue = MagicMock()
         for channel in channels.values():
             channel["is_selected"] = False
         channels["channel_2"]["is_selected"] = True
@@ -256,11 +259,36 @@ def test_prepare_next_channel_infers_zero_defocus_focus_from_current_channel(
 
         assert dummy_microscope.zero_defocus_focus == pytest.approx(100.0)
         assert dummy_microscope.get_stage_position()["f_pos"] == pytest.approx(103.0)
+        dummy_microscope.output_event_queue.put.assert_any_call(
+            (
+                "defocus_reference",
+                {"channel": "channel_2", "focus_position": 100.0},
+            )
+        )
     finally:
         for channel_key, channel_state in original_channels.items():
             channels[channel_key]["is_selected"] = channel_state["is_selected"]
             channels[channel_key]["defocus"] = channel_state["defocus"]
         dummy_microscope.move_stage({"f_abs": original_focus}, wait_until_done=True)
+        dummy_microscope.output_event_queue = original_output_event_queue
+
+
+def test_focus_stage_move_clears_defocus_reference(dummy_microscope):
+    original_output_event_queue = dummy_microscope.output_event_queue
+    original_focus = dummy_microscope.get_stage_position()["f_pos"]
+
+    try:
+        dummy_microscope.output_event_queue = MagicMock()
+        dummy_microscope.zero_defocus_focus = 100.0
+
+        dummy_microscope.move_stage({"f_abs": 103.0}, wait_until_done=True)
+
+        dummy_microscope.output_event_queue.put.assert_any_call(
+            ("defocus_reference", None)
+        )
+    finally:
+        dummy_microscope.move_stage({"f_abs": original_focus}, wait_until_done=True)
+        dummy_microscope.output_event_queue = original_output_event_queue
 
 
 def test_prepare_next_channel_moves_between_channel_offsets_from_zero_defocus(

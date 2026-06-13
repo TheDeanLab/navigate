@@ -192,7 +192,7 @@ class TestAutofocusPopupController:
 
     def test_start_autofocus_passes_channel_and_calibration_action(self):
         self.autofocus_controller.parent_controller.execute = MagicMock()
-        self.autofocus_controller.widgets["target_channel"].set("channel_2")
+        self.autofocus_controller.widgets["target_channel"].set("CH2")
         self.autofocus_controller.widgets["calibration_action"].set(
             "Capture Reference"
         )
@@ -210,7 +210,30 @@ class TestAutofocusPopupController:
             "channel_2",
         )
 
+    def test_target_channel_uses_channel_setting_labels(self):
+        channel_values = tuple(
+            self.autofocus_controller.widgets["target_channel"].widget["values"]
+        )
+        channel_keys = tuple(
+            self.autofocus_controller.parent_controller.configuration["experiment"][
+                "MicroscopeState"
+            ]["channels"].keys()
+        )
+        expected_values = tuple(
+            f"CH{channel_key.removeprefix('channel_')}"
+            for channel_key in channel_keys
+        )
+
+        assert channel_values == expected_values
+        assert self.autofocus_controller.widgets["target_channel"].get() == (
+            expected_values[0]
+        )
+
     def test_handle_autofocus_complete_captures_temporary_reference_focus(self):
+        defocus_reference_handler = MagicMock()
+        self.autofocus_controller.parent_controller.event_listeners[
+            "defocus_reference"
+        ] = defocus_reference_handler
         payload = {
             "channel": "channel_1",
             "focus_position": 100.0,
@@ -223,6 +246,9 @@ class TestAutofocusPopupController:
             "channel": "channel_1",
             "focus_position": 100.0,
         }
+        defocus_reference_handler.assert_called_with(
+            {"channel": "channel_1", "focus_position": 100.0}
+        )
 
     def test_handle_autofocus_complete_populates_target_defocus_from_reference(self):
         channel_defocus_handler = MagicMock()

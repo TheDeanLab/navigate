@@ -119,6 +119,37 @@ def test_set_channel_defocus(channels_tab_controller):
     )
 
 
+def test_defocus_reference_label_initially_not_set(channels_tab_controller):
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
+        == "Defocus Reference: Not Set"
+    )
+
+
+def test_set_defocus_reference_updates_main_channel_status(channels_tab_controller):
+    channels_tab_controller.set_defocus_reference(
+        {"channel": "channel_2", "focus_position": 250.0}
+    )
+
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
+        == "Defocus Reference: CH2 @ 250.00"
+    )
+
+
+def test_clear_defocus_reference_resets_main_channel_status(channels_tab_controller):
+    channels_tab_controller.set_defocus_reference(
+        {"channel": "channel_2", "focus_position": 250.0}
+    )
+
+    channels_tab_controller.set_defocus_reference(None)
+
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
+        == "Defocus Reference: Not Set"
+    )
+
+
 def test_update_start_position(channels_tab_controller):
     z, f = random.randint(0, 1000), random.randint(0, 1000)
     channels_tab_controller.parent_controller.configuration["experiment"][

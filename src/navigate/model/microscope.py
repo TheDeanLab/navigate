@@ -321,7 +321,7 @@ class Microscope:
         self.configuration["configuration"]["microscopes"][self.microscope_name][
             "stage"
         ]["has_ni_galvo_stage"] = False
-        if type(stage_devices) != ListProxy:
+        if not isinstance(stage_devices, ListProxy):
             stage_devices = [stage_devices]
 
         for i, device_config in enumerate(stage_devices):
@@ -810,7 +810,35 @@ class Microscope:
         channel_key = f"channel_{self.current_channel}"
         self.prepare_channel(channel_key, update_daq_task_flag)
 
-    def _ensure_zero_defocus_focus(self, channel: dict) -> None:
+    def _publish_defocus_reference(self, channel_key: str = None) -> None:
+        """Publish the active zero-defocus reference to the GUI."""
+        if self.output_event_queue is None:
+            return
+
+        if channel_key is None or self.zero_defocus_focus is None:
+            self.output_event_queue.put(("defocus_reference", None))
+            return
+
+        self.output_event_queue.put(
+            (
+                "defocus_reference",
+                {
+                    "channel": channel_key,
+                    "focus_position": self.zero_defocus_focus,
+                },
+            )
+        )
+
+    def _clear_zero_defocus_focus(self) -> None:
+        """Clear focus state derived from the active zero-defocus reference."""
+        had_reference = self.zero_defocus_focus is not None
+        self.central_focus = None
+        self.zero_defocus_focus = None
+        self.acquisition_focus_restore_position = None
+        if had_reference:
+            self._publish_defocus_reference()
+
+    def _ensure_zero_defocus_focus(self, channel_key: str, channel: dict) -> None:
         """Derive the zero-defocus focus position for this acquisition."""
         if self.zero_defocus_focus is not None:
             return
@@ -824,6 +852,7 @@ class Microscope:
         self.zero_defocus_focus = current_focus - channel_defocus
         # Compatibility alias for older call sites.
         self.central_focus = self.zero_defocus_focus
+        self._publish_defocus_reference(channel_key)
 
     def prepare_channel(
         self, channel_key: str, update_daq_task_flag: bool = True
@@ -865,7 +894,7 @@ class Microscope:
         if update_daq_task_flag:
             self.daq.prepare_acquisition(channel_key)
 
-        self._ensure_zero_defocus_focus(channel)
+        self._ensure_zero_defocus_focus(channel_key, channel)
         if self.zero_defocus_focus is not None:
             self.move_stage(
                 {"f_abs": self.zero_defocus_focus + float(channel["defocus"])},
@@ -958,9 +987,7 @@ class Microscope:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
             if update_focus and axis == "f":
-                self.central_focus = None
-                self.zero_defocus_focus = None
-                self.acquisition_focus_restore_position = None
+                self._clear_zero_defocus_focus()
             return self.stages[axis].move_axis_absolute(
                 axis, pos_dict[axis_key], wait_until_done
             )
@@ -976,9 +1003,7 @@ class Microscope:
                 success = stage.move_absolute(pos, wait_until_done) and success
 
         if update_focus and "f_abs" in pos_dict:
-            self.central_focus = None
-            self.zero_defocus_focus = None
-            self.acquisition_focus_restore_position = None
+            self._clear_zero_defocus_focus()
 
         return success
 
@@ -1071,7 +1096,7 @@ class Microscope:
             # if no such device
             return [], [], False
 
-        if type(devices) == ListProxy:
+        if isinstance(devices, ListProxy):
             i = 0
             for d in devices:
                 device_config_list.append(d)

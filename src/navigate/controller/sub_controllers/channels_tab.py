@@ -1003,6 +1003,21 @@ class ChannelsTabController(GUIController):
         self.channel_setting_controller.view.defocus_variables[idx].set(defocus)
         self.channel_setting_controller.in_initialization = False
 
+    def set_defocus_reference(self, reference) -> None:
+        """Set the active defocus reference status shown in Channel Settings."""
+        if not reference:
+            self.channel_setting_controller.view.defocus_reference.set(
+                "Defocus Reference: Not Set"
+            )
+            return
+
+        channel = reference["channel"]
+        channel_label = f"CH{channel[channel.index('_') + 1 :]}"
+        focus_position = float(reference["focus_position"])
+        self.channel_setting_controller.view.defocus_reference.set(
+            f"Defocus Reference: {channel_label} @ {focus_position:.2f}"
+        )
+
     def update_additional_stacking_axes(self, *args, **kwargs):
         if self.stack_acq_vals["z_device"].get():
             z_axis = self.stack_acq_vals["z_device"].get().split(" - ")[1]
@@ -1037,4 +1052,5 @@ class ChannelsTabController(GUIController):
         return {
             "exposure_time": self.set_exposure_time,
             "channel_defocus": self.set_channel_defocus,
+            "defocus_reference": self.set_defocus_reference,
         }

@@ -45,7 +45,7 @@ channel_settings:
     max: 10
   defocus:
     step: 1
-    min: 0
+    min: -100
     max: 100
 stack_acquisition:
   step_size:

@@ -32,6 +32,7 @@
 #
 
 # Standard library imports
+from unittest.mock import MagicMock, patch
 
 # Third party imports
 import pytest
@@ -119,7 +120,12 @@ class TestAutofocusPopupController:
         device = self.autofocus_controller.widgets["device"].get()
         device_ref = self.autofocus_controller.widgets["device_ref"].get()
         for k in self.autofocus_controller.widgets:
-            if k != "device" and k != "device_ref":
+            if k not in (
+                "device",
+                "device_ref",
+                "target_channel",
+                "calibration_action",
+            ):
                 assert self.autofocus_controller.widgets[k].get() == str(
                     self.autofocus_controller.setting_dict[microscope_name][device][
                         device_ref
@@ -149,7 +155,12 @@ class TestAutofocusPopupController:
 
         # Checking values match
         for k in self.autofocus_controller.widgets:
-            if k != "device" and k != "device_ref":
+            if k not in (
+                "device",
+                "device_ref",
+                "target_channel",
+                "calibration_action",
+            ):
                 assert self.autofocus_controller.widgets[k].get() == str(
                     self.autofocus_controller.setting_dict[microscope_name][device][
                         device_ref
@@ -178,6 +189,84 @@ class TestAutofocusPopupController:
         # Checking message sent
         res = self.autofocus_controller.parent_controller.pop()
         assert res == "autofocus"
+
+    def test_start_autofocus_passes_channel_and_calibration_action(self):
+        self.autofocus_controller.parent_controller.execute = MagicMock()
+        self.autofocus_controller.widgets["target_channel"].set("channel_2")
+        self.autofocus_controller.widgets["calibration_action"].set(
+            "Capture Reference"
+        )
+
+        self.autofocus_controller.start_autofocus()
+
+        device = self.autofocus_controller.widgets["device"].get()
+        device_ref = self.autofocus_controller.widgets["device_ref"].get()
+        self.autofocus_controller.parent_controller.execute.assert_called_with(
+            "autofocus",
+            device,
+            device_ref,
+            "channel_2",
+            "capture_reference",
+            "channel_2",
+        )
+
+    def test_handle_autofocus_complete_captures_temporary_reference_focus(self):
+        payload = {
+            "channel": "channel_1",
+            "focus_position": 100.0,
+            "calibration_action": "capture_reference",
+        }
+
+        self.autofocus_controller.handle_autofocus_complete(payload)
+
+        assert self.autofocus_controller.defocus_calibration_reference == {
+            "channel": "channel_1",
+            "focus_position": 100.0,
+        }
+
+    def test_handle_autofocus_complete_populates_target_defocus_from_reference(self):
+        channel_defocus_handler = MagicMock()
+        self.autofocus_controller.parent_controller.event_listeners[
+            "channel_defocus"
+        ] = channel_defocus_handler
+        self.autofocus_controller.defocus_calibration_reference = {
+            "channel": "channel_1",
+            "focus_position": 100.0,
+        }
+        channels = self.autofocus_controller.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["channels"]
+        channels["channel_2"]["defocus"] = 0.0
+
+        self.autofocus_controller.handle_autofocus_complete(
+            {
+                "channel": "channel_2",
+                "focus_position": 102.25,
+                "calibration_action": "populate_defocus",
+            }
+        )
+
+        assert channels["channel_2"]["defocus"] == pytest.approx(2.25)
+        channel_defocus_handler.assert_called_with(("channel_2", 2.25))
+
+    def test_handle_autofocus_complete_does_not_populate_without_reference(self):
+        channels = self.autofocus_controller.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["channels"]
+        channels["channel_2"]["defocus"] = 0.0
+
+        with patch(
+            "navigate.controller.sub_controllers.autofocus.messagebox.showwarning"
+        ):
+            self.autofocus_controller.handle_autofocus_complete(
+                {
+                    "channel": "channel_2",
+                    "focus_position": 102.25,
+                    "calibration_action": "populate_defocus",
+                }
+            )
+
+        assert channels["channel_2"]["defocus"] == 0.0
 
         self.autofocus_controller.parent_controller.clear()
 

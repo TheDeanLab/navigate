@@ -229,6 +229,77 @@ def test_prepare_next_channel(dummy_microscope):
     )
 
 
+def test_prepare_next_channel_infers_zero_defocus_focus_from_current_channel(
+    dummy_microscope,
+):
+    channels = dummy_microscope.configuration["experiment"]["MicroscopeState"][
+        "channels"
+    ]
+    original_channels = {
+        channel_key: {
+            "is_selected": channel["is_selected"],
+            "defocus": channel["defocus"],
+        }
+        for channel_key, channel in channels.items()
+    }
+    original_focus = dummy_microscope.get_stage_position()["f_pos"]
+
+    try:
+        for channel in channels.values():
+            channel["is_selected"] = False
+        channels["channel_2"]["is_selected"] = True
+        channels["channel_2"]["defocus"] = 3.0
+        dummy_microscope.move_stage({"f_abs": 103.0}, wait_until_done=True)
+
+        dummy_microscope.prepare_acquisition()
+        dummy_microscope.prepare_next_channel()
+
+        assert dummy_microscope.zero_defocus_focus == pytest.approx(100.0)
+        assert dummy_microscope.get_stage_position()["f_pos"] == pytest.approx(103.0)
+    finally:
+        for channel_key, channel_state in original_channels.items():
+            channels[channel_key]["is_selected"] = channel_state["is_selected"]
+            channels[channel_key]["defocus"] = channel_state["defocus"]
+        dummy_microscope.move_stage({"f_abs": original_focus}, wait_until_done=True)
+
+
+def test_prepare_next_channel_moves_between_channel_offsets_from_zero_defocus(
+    dummy_microscope,
+):
+    channels = dummy_microscope.configuration["experiment"]["MicroscopeState"][
+        "channels"
+    ]
+    original_channels = {
+        channel_key: {
+            "is_selected": channel["is_selected"],
+            "defocus": channel["defocus"],
+        }
+        for channel_key, channel in channels.items()
+    }
+    original_focus = dummy_microscope.get_stage_position()["f_pos"]
+
+    try:
+        for channel in channels.values():
+            channel["is_selected"] = False
+        channels["channel_2"]["is_selected"] = True
+        channels["channel_2"]["defocus"] = 3.0
+        channels["channel_3"]["is_selected"] = True
+        channels["channel_3"]["defocus"] = -1.5
+        dummy_microscope.move_stage({"f_abs": 103.0}, wait_until_done=True)
+
+        dummy_microscope.prepare_acquisition()
+        dummy_microscope.prepare_next_channel()
+        dummy_microscope.prepare_next_channel()
+
+        assert dummy_microscope.zero_defocus_focus == pytest.approx(100.0)
+        assert dummy_microscope.get_stage_position()["f_pos"] == pytest.approx(98.5)
+    finally:
+        for channel_key, channel_state in original_channels.items():
+            channels[channel_key]["is_selected"] = channel_state["is_selected"]
+            channels[channel_key]["defocus"] = channel_state["defocus"]
+        dummy_microscope.move_stage({"f_abs": original_focus}, wait_until_done=True)
+
+
 def test_calculate_all_waveform(dummy_microscope):
     # set waveform template to default
     dummy_microscope.configuration["experiment"]["MicroscopeState"][

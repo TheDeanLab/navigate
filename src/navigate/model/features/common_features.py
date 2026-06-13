@@ -1157,6 +1157,9 @@ class ZStackAcquisition:
         #: dict: A dictionary defining the defocus values between channels
         self.defocus = None
 
+        #: float: Defocus of the first selected channel in the stack.
+        self.first_channel_defocus = 0.0
+
         #: str: The stack cycling mode for z-stack acquisition.
         self.stack_cycling_mode = "per_stack"
 
@@ -1267,6 +1270,17 @@ class ZStackAcquisition:
         self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
         self.f_stack_distance = abs(end_focus - self.start_focus)
 
+    def _focus_target_for_channel(self, channel_index: int) -> float:
+        """Return the absolute focus target for a channel at the current stack step."""
+        defocus = self.defocus[channel_index] if self.defocus is not None else 0.0
+        zero_defocus_start_focus = self.start_focus - self.first_channel_defocus
+        return (
+            zero_defocus_start_focus
+            + self.current_position[self.primary_f_axis]
+            + self.z_position_moved_time * self.focus_step_size
+            + defocus
+        )
+
     def pre_signal_func(self) -> None:
         """Initialize z-stack acquisition parameters before the signal stage.
 
@@ -1342,10 +1356,11 @@ class ZStackAcquisition:
         self.should_pause_data_thread = False
 
         self.defocus = [
-            v["defocus"]
+            float(v["defocus"])
             for v in microscope_state["channels"].values()
             if v["is_selected"]
         ]
+        self.first_channel_defocus = self.defocus[0] if self.defocus else 0.0
 
     def signal_func(self):
         """Control z-stack acquisition, move positions, and manage data threads.
@@ -1384,13 +1399,9 @@ class ZStackAcquisition:
             self.current_z_position = (
                 self.start_z_position + self.current_position[self.primary_z_axis]
             )
-            self.current_focus_position = (
-                self.start_focus + self.current_position[self.primary_f_axis]
+            self.current_focus_position = self._focus_target_for_channel(
+                self.current_channel_in_list
             )
-            if self.defocus is not None:
-                self.current_focus_position += self.defocus[
-                    self.current_channel_in_list
-                ]
 
             pos_dict = dict(
                 map(
@@ -1502,22 +1513,26 @@ class ZStackAcquisition:
 
         if self.stack_cycling_mode != "per_stack":
             # update the channel for each z position in 'per_slice'
-            if self.defocus is not None:
-                self.current_focus_position -= self.defocus[
-                    self.current_channel_in_list
-                ]
             self.update_channel()
+            self.current_focus_position = self._focus_target_for_channel(
+                self.current_channel_in_list
+            )
             self.need_to_move_z_position = self.current_channel_in_list == 0
 
         # in 'per_slice', move to the next z position if all the channels have been
         # acquired
         if self.need_to_move_z_position:
             # next z, f position
-            self.current_z_position += self.z_step_size
-            self.current_focus_position += self.focus_step_size
-
             # update z position moved time
             self.z_position_moved_time += 1
+            self.current_z_position = (
+                self.start_z_position
+                + self.current_position[self.primary_z_axis]
+                + self.z_position_moved_time * self.z_step_size
+            )
+            self.current_focus_position = self._focus_target_for_channel(
+                self.current_channel_in_list
+            )
 
         # decide whether to move X, Y, Theta
         if self.z_position_moved_time >= self.number_z_steps:
@@ -1526,8 +1541,8 @@ class ZStackAcquisition:
             self.current_z_position = (
                 self.start_z_position + self.current_position[self.primary_z_axis]
             )
-            self.current_focus_position = (
-                self.start_focus + self.current_position[self.primary_f_axis]
+            self.current_focus_position = self._focus_target_for_channel(
+                self.current_channel_in_list
             )
             if (
                 self.z_stack_distance > self.stage_distance_threshold
@@ -1538,6 +1553,9 @@ class ZStackAcquisition:
             # after running through a z-stack, update channel
             if self.stack_cycling_mode == "per_stack":
                 self.update_channel()
+                self.current_focus_position = self._focus_target_for_channel(
+                    self.current_channel_in_list
+                )
                 # if run through all the channels, move to the next position
                 if self.current_channel_in_list == 0:
                     self.need_to_move_new_position = True
@@ -1581,8 +1599,6 @@ class ZStackAcquisition:
         ) % self.channels
         # not update DAQ tasks if there is a NI Galvo stage
         self.prepare_next_channel.signal_func()
-        if self.defocus is not None:
-            self.current_focus_position += self.defocus[self.current_channel_in_list]
 
     def pre_data_func(self) -> None:
         """Initialize data-related parameters before data acquisition.
@@ -1729,11 +1745,9 @@ class ASIZStackAcquisition(ZStackAcquisition):
         self.current_z_position = (
             self.start_z_position + self.current_position[self.primary_z_axis]
         )
-        self.current_focus_position = (
-            self.start_focus + self.current_position[self.primary_f_axis]
+        self.current_focus_position = self._focus_target_for_channel(
+            self.current_channel_in_list
         )
-        if self.defocus is not None:
-            self.current_focus_position += self.defocus[self.current_channel_in_list]
         logger.info("self.start_z_position: %.2f", self.start_z_position)
         logger.info("self.current_z_position: %.2f", self.current_z_position)
 
@@ -1781,9 +1795,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         pos_dict[f"{self.primary_z_axis}_abs"] = (
             self.current_position[self.primary_z_axis] + self.start_z_position
         )
-        pos_dict[f"{self.primary_f_axis}_abs"] = (
-            self.current_position[self.primary_f_axis] + self.start_focus
-        )
+        pos_dict[f"{self.primary_f_axis}_abs"] = self.current_focus_position
 
         logger.info(
             "Current position - Z: %.2f", self.current_position[self.primary_z_axis]

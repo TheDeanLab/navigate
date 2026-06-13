@@ -108,6 +108,17 @@ def test_update_z_steps(channels_tab_controller):
     stage_config["flip_z"] = False
 
 
+def test_set_channel_defocus(channels_tab_controller):
+    channels_tab_controller.set_channel_defocus("channel_2", 2.25)
+
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_variables[
+            1
+        ].get()
+        == pytest.approx(2.25)
+    )
+
+
 def test_update_start_position(channels_tab_controller):
     z, f = random.randint(0, 1000), random.randint(0, 1000)
     channels_tab_controller.parent_controller.configuration["experiment"][

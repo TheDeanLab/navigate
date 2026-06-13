@@ -992,6 +992,17 @@ class ChannelsTabController(GUIController):
         self.channel_setting_controller.view.exptime_variables[idx].set(exposure_time)
         self.channel_setting_controller.in_initialization = False
 
+    def set_channel_defocus(self, channel_defocus, defocus=None) -> None:
+        """Set defocus for a specified channel."""
+        if defocus is None:
+            channel, defocus = channel_defocus
+        else:
+            channel = channel_defocus
+        idx = int(channel[channel.index("_") + 1 :]) - 1
+        self.channel_setting_controller.in_initialization = True
+        self.channel_setting_controller.view.defocus_variables[idx].set(defocus)
+        self.channel_setting_controller.in_initialization = False
+
     def update_additional_stacking_axes(self, *args, **kwargs):
         if self.stack_acq_vals["z_device"].get():
             z_axis = self.stack_acq_vals["z_device"].get().split(" - ")[1]
@@ -1023,4 +1034,7 @@ class ChannelsTabController(GUIController):
     @property
     def custom_events(self) -> dict[str, callable]:
         """Custom events for the channels tab."""
-        return {"exposure_time": self.set_exposure_time}
+        return {
+            "exposure_time": self.set_exposure_time,
+            "channel_defocus": self.set_channel_defocus,
+        }

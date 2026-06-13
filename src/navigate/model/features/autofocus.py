@@ -84,7 +84,15 @@ class Autofocus:
     move to. If the autofocus_pos_queue is empty, the autofocus is finished.
     """
 
-    def __init__(self, model, device="stage", device_ref="f"):
+    def __init__(
+        self,
+        model,
+        device="stage",
+        device_ref="f",
+        target_channel=None,
+        calibration_action=None,
+        reference_channel=None,
+    ):
         """Initialize the Autofocus class.
 
         Parameters
@@ -150,8 +158,14 @@ class Autofocus:
         #: Queue: Autofocus position queue
         self.autofocus_pos_queue = Queue()
 
-        #: int: Target channel
-        self.target_channel = 1
+        #: str: Target channel key
+        self.target_channel = target_channel
+
+        #: str: Optional calibration action
+        self.calibration_action = calibration_action
+
+        #: str: Optional reference channel key
+        self.reference_channel = reference_channel
 
         #: dict: Configuration table
         self.config_table = {
@@ -188,7 +202,10 @@ class Autofocus:
 
         # Opens correct shutter and puts all signals to false
         self.model.prepare_acquisition()
-        self.model.active_microscope.prepare_next_channel()
+        if self.target_channel:
+            self.model.active_microscope.prepare_channel(self.target_channel)
+        else:
+            self.model.active_microscope.prepare_next_channel()
 
         # load Autofocus
         self.model.signal_container, self.model.data_container = load_features(
@@ -200,6 +217,9 @@ class Autofocus:
                         "args": (
                             self.device,
                             self.device_ref,
+                            self.target_channel,
+                            self.calibration_action,
+                            self.reference_channel,
                         ),
                     }
                 ]
@@ -537,6 +557,21 @@ class Autofocus:
                 remote_focus_constants[laser]["offset"] = (
                     float(remote_focus_constants[laser]["offset"]) + self.focus_pos
                 )
+
+        if self.target_channel:
+            self.model.event_queue.put(
+                (
+                    "autofocus_complete",
+                    {
+                        "channel": self.target_channel,
+                        "focus_position": self.focus_pos,
+                        "device": self.device,
+                        "device_ref": self.device_ref,
+                        "calibration_action": self.calibration_action,
+                        "reference_channel": self.reference_channel,
+                    },
+                )
+            )
 
         return self.get_frames_num > self.total_frame_num
 

@@ -52,6 +52,12 @@ region of highest contrast (best focus). Spline-fit and test-significance
 buttons are already present in preparation for additional intelligent autofocus
 functionality in future updates.
 
+For channel defocus calibration, select a channel and use :guilabel:`Capture Reference`
+to store that channel's best focus temporarily. Then select another channel and use
+:guilabel:`Populate Defocus` to write the measured focus difference into that channel's
+:guilabel:`Defocus` value. The reference focus is not saved to the experiment file;
+only the per-channel defocus value is stored.
+
 .. _ui_waveform_parameters:
 
 Waveform Parameters

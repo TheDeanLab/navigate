@@ -744,7 +744,7 @@ class Model:
                         self.data_container.cleanup()
                     self.signal_container, self.data_container = load_features(
                         self,
-                        [{"name": Autofocus}],
+                        [{"name": Autofocus, "args": args}],
                     )
                     injected_flag.value = True
 

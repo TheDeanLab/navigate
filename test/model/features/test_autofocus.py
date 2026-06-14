@@ -130,7 +130,7 @@ class TestAutofocusClass(unittest.TestCase):
         self.assertEqual(steps, 6)  # Expected number of steps
         self.assertEqual(pos_offset, 8.0)  # Expected position offset
 
-    def test_run_prepares_requested_channel(self):
+    def test_run_loads_autofocus_feature_without_preparing_channel(self):
         model = DummyModel()
         model.prepare_acquisition = MagicMock()
         model.active_microscope.prepare_channel = MagicMock()
@@ -150,9 +150,36 @@ class TestAutofocusClass(unittest.TestCase):
         ), patch("navigate.model.features.autofocus.threading.Thread") as thread:
             autofocus.run()
 
-        model.active_microscope.prepare_channel.assert_called_once_with("channel_2")
+        model.active_microscope.prepare_channel.assert_not_called()
         model.active_microscope.prepare_next_channel.assert_not_called()
         self.assertEqual(thread.return_value.start.call_count, 2)
+
+    def test_pre_func_signal_prepares_requested_channel(self):
+        model = DummyModel()
+        model.active_microscope.prepare_channel = MagicMock()
+        model.active_microscope.prepare_next_channel = MagicMock()
+        autofocus = Autofocus(
+            model=model,
+            device="stage",
+            device_ref="f",
+            target_channel="channel_2",
+        )
+
+        autofocus.pre_func_signal()
+
+        model.active_microscope.prepare_channel.assert_called_once_with("channel_2")
+        model.active_microscope.prepare_next_channel.assert_not_called()
+
+    def test_pre_func_signal_prepares_next_channel_without_target_channel(self):
+        model = DummyModel()
+        model.active_microscope.prepare_channel = MagicMock()
+        model.active_microscope.prepare_next_channel = MagicMock()
+        autofocus = Autofocus(model=model, device="stage", device_ref="f")
+
+        autofocus.pre_func_signal()
+
+        model.active_microscope.prepare_channel.assert_not_called()
+        model.active_microscope.prepare_next_channel.assert_called_once_with()
 
     def test_end_func_data_reports_best_focus_for_channel(self):
         model = DummyModel()

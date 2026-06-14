@@ -202,10 +202,6 @@ class Autofocus:
 
         # Opens correct shutter and puts all signals to false
         self.model.prepare_acquisition()
-        if self.target_channel:
-            self.model.active_microscope.prepare_channel(self.target_channel)
-        else:
-            self.model.active_microscope.prepare_next_channel()
 
         # load Autofocus
         self.model.signal_container, self.model.data_container = load_features(
@@ -285,8 +281,17 @@ class Autofocus:
         pos_offset = (steps // 2) * step_size + step_size
         return steps, pos_offset
 
+    def prepare_selected_channel(self):
+        """Prepare the requested autofocus channel or advance to the next channel."""
+        if self.target_channel:
+            self.model.active_microscope.prepare_channel(self.target_channel)
+        else:
+            self.model.active_microscope.prepare_next_channel()
+
     def pre_func_signal(self):
         """Prepare the autofocus routine."""
+        self.prepare_selected_channel()
+
         settings = self.model.configuration["experiment"]["AutoFocusParameters"][
             self.model.active_microscope_name
         ][self.device][self.device_ref]

@@ -191,24 +191,26 @@ class TestAutofocusPopupController:
         assert res == "autofocus"
 
     def test_start_autofocus_passes_channel_and_calibration_action(self):
-        self.autofocus_controller.parent_controller.execute = MagicMock()
         self.autofocus_controller.widgets["target_channel"].set("CH2")
         self.autofocus_controller.widgets["calibration_action"].set(
             "Capture Reference"
         )
 
-        self.autofocus_controller.start_autofocus()
+        with patch.object(
+            self.autofocus_controller.parent_controller, "execute"
+        ) as execute:
+            self.autofocus_controller.start_autofocus()
 
-        device = self.autofocus_controller.widgets["device"].get()
-        device_ref = self.autofocus_controller.widgets["device_ref"].get()
-        self.autofocus_controller.parent_controller.execute.assert_called_with(
-            "autofocus",
-            device,
-            device_ref,
-            "channel_2",
-            "capture_reference",
-            "channel_2",
-        )
+            device = self.autofocus_controller.widgets["device"].get()
+            device_ref = self.autofocus_controller.widgets["device_ref"].get()
+            execute.assert_called_with(
+                "autofocus",
+                device,
+                device_ref,
+                "channel_2",
+                "capture_reference",
+                "channel_2",
+            )
 
     def test_target_channel_uses_channel_setting_labels(self):
         channel_values = tuple(

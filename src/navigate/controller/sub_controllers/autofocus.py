@@ -261,6 +261,9 @@ class AutofocusPopupController(GUIController):
             reference_focus = self.defocus_calibration_reference["focus_position"]
             self._write_channel_defocus(target_channel, target_focus - reference_focus)
 
+        if self.defocus_calibration_reference is not None:
+            self._notify_defocus_reference(self.defocus_calibration_reference)
+
     def _write_channel_defocus(self, channel_key: str, defocus: float) -> None:
         channels = self.parent_controller.configuration["experiment"][
             "MicroscopeState"

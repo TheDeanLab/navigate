@@ -254,9 +254,13 @@ class TestAutofocusPopupController:
 
     def test_handle_autofocus_complete_populates_target_defocus_from_reference(self):
         channel_defocus_handler = MagicMock()
+        defocus_reference_handler = MagicMock()
         self.autofocus_controller.parent_controller.event_listeners[
             "channel_defocus"
         ] = channel_defocus_handler
+        self.autofocus_controller.parent_controller.event_listeners[
+            "defocus_reference"
+        ] = defocus_reference_handler
         self.autofocus_controller.defocus_calibration_reference = {
             "channel": "channel_1",
             "focus_position": 100.0,
@@ -276,6 +280,31 @@ class TestAutofocusPopupController:
 
         assert channels["channel_2"]["defocus"] == pytest.approx(2.25)
         channel_defocus_handler.assert_called_with(("channel_2", 2.25))
+        defocus_reference_handler.assert_called_with(
+            {"channel": "channel_1", "focus_position": 100.0}
+        )
+
+    def test_handle_regular_autofocus_complete_restores_defocus_reference(self):
+        defocus_reference_handler = MagicMock()
+        self.autofocus_controller.parent_controller.event_listeners[
+            "defocus_reference"
+        ] = defocus_reference_handler
+        self.autofocus_controller.defocus_calibration_reference = {
+            "channel": "channel_1",
+            "focus_position": 100.0,
+        }
+
+        self.autofocus_controller.handle_autofocus_complete(
+            {
+                "channel": "channel_2",
+                "focus_position": 102.25,
+                "calibration_action": None,
+            }
+        )
+
+        defocus_reference_handler.assert_called_with(
+            {"channel": "channel_1", "focus_position": 100.0}
+        )
 
     def test_handle_autofocus_complete_does_not_populate_without_reference(self):
         channels = self.autofocus_controller.parent_controller.configuration[

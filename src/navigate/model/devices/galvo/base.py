@@ -38,7 +38,7 @@ from abc import ABC, abstractmethod
 # Third Party Imports
 
 # Local Imports
-from navigate.model.waveforms import centered_cubic, quadratic, sawtooth, sine_wave
+from navigate.model.waveforms import centered_cubic, quadratic, sawtooth, sine_wave, single_pulse
 from navigate.tools.decorators import log_initialization
 
 # # Logger Setup
@@ -247,6 +247,17 @@ class GalvoBase(ABC):
                         offset=galvo_offset,
                         phase=self.device_config["phase"],
                     )
+                elif self.galvo_waveform == "pulse":
+                    pulse_delay = self.camera_delay / self.sweep_time   # percentage
+                    pulse_width = 99 - pulse_delay                      # full pulse minus delay
+                    self.waveform_dict[channel_key] = single_pulse(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        pulse_width=pulse_width,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                        delay=pulse_delay,
+                    )                    
                 elif self.galvo_waveform == "halfsaw":
                     new_wave = sawtooth(
                         sample_rate=self.sample_rate,

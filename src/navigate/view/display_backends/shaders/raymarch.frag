@@ -16,6 +16,8 @@ uniform vec3 boxMax;
 
 uniform float stepWorld = 0.25;       // step length in WORLD units
 
+uniform bool doBox = false;
+
 // contrast params
 uniform float opacity = 0.15;  // global density/opacity
 uniform vec2 cMinMax[5];
@@ -186,19 +188,22 @@ void main()
         vec3 pos = ro + rd * t;                           // position (um)
         vec3 uvw = (pos - boxMin_um) * invBoxSize;        // [0,1]^3
 
-        // -------- WIREFRAME BOX EDGES --------
-        vec3 distToBox = min(pos - boxMin_um, boxMax_um - pos);
-        float edgeThreshold = 0.005 * length(boxMax_um - boxMin_um) / 3.0; // adaptive threshold
-        
-        // Count how many dimensions are near a face
-        int nearCount = 0;
-        if (distToBox.x < edgeThreshold) nearCount++;
-        if (distToBox.y < edgeThreshold) nearCount++;
-        if (distToBox.z < edgeThreshold) nearCount++;
-        
-        // Only render if on an edge (2+ faces near) or corner (all 3 near)
-        if (nearCount >= 2) {
-            acc = mix(acc, vec4(0.6, 0.6, 0.6, 1.0), 0.4);  // soft gray edge, mixed
+        if (doBox)
+        {
+            // -------- WIREFRAME BOX EDGES --------
+            vec3 distToBox = min(pos - boxMin_um, boxMax_um - pos);
+            float edgeThreshold = 0.005 * length(boxMax_um - boxMin_um) / 3.0; // adaptive threshold
+            
+            // Count how many dimensions are near a face
+            int nearCount = 0;
+            if (distToBox.x < edgeThreshold) nearCount++;
+            if (distToBox.y < edgeThreshold) nearCount++;
+            if (distToBox.z < edgeThreshold) nearCount++;
+            
+            // Only render if on an edge (2+ faces near) or corner (all 3 near)
+            if (nearCount >= 2) {
+                acc = mix(acc, vec4(0.6, 0.6, 0.6, 1.0), 0.4);  // soft gray edge, mixed
+            }
         }
 
         for (int i = 0; i < nChannels; ++i)

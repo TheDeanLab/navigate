@@ -92,7 +92,7 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
                 parent=volume_settings_frame,
                 label="Shear Angle",
                 input_class=ValidatedSpinbox,
-                input_var=tk.DoubleVar(value=0.0),
+                input_var=tk.DoubleVar(value=-45.0),
                 input_args={"from_": -90.0, "to": 90.0, "increment": 0.5, "width": 5},
                 label_pos="top",
             ),

@@ -24,7 +24,7 @@ uniform float cGamma[5] = float[5](1.0, 1.0, 1.0, 1.0, 1.0);
 uniform int nChannels = 5; // hard-coded: navigate has 5 channels max
 
 // OPM parameters
-uniform float shear_angle = 50.0;   // degrees
+uniform float shear_angle = -45.0;  // degrees
 uniform float dz = 0.4;             // um    
 uniform float px = 0.1478;          // um
 
@@ -69,6 +69,21 @@ void getPhysicalBounds(vec3 S, float t, out vec3 bmin, out vec3 bmax)
     bmax = vec3(S.x, S.y + S.z * max(0.0, sin(t)), S.z * cos(t));
 }
 
+vec3 rotX(vec3 r, float theta)
+{
+    float c_t = cos(theta);
+    float s_t = sin(theta);
+
+    mat4 R = mat4(
+        1.,  0.,  0.,  0.,
+        0.,  c_t, s_t, 0.,
+        0., -s_t, c_t, 0.,
+        0.,  0.,  0.,  1.
+    );
+
+    return vec3(R * vec4(r, 1.0));
+}
+
 void main()
 {
     // Shear angle theta
@@ -76,7 +91,7 @@ void main()
 
     // Physical volume dimensions
     vec3 dim = vec3(textureSize(volume[0], 0));
-    vec3 S = vec3(px*dim.x, px*dim.y, dz*dim.z);
+    vec3 S   = vec3(px*dim.x, px*dim.y, dz*dim.z);
 
     // Compute physical bounding box given shear angle
     vec3 boxMin_um, boxMax_um;
@@ -88,11 +103,15 @@ void main()
     vec4 p1w = invProjView * vec4(ndc,  1.0, 1.0);
     
     // world-space ray position (ro) and direction (rd)
-    vec3 ro = p0w.xyz / p0w.w;
-    vec3 rd = normalize(p1w.xyz / p1w.w - ro);
+    vec3 roW = p0w.xyz / p0w.w;
+    vec3 rdW = normalize(p1w.xyz / p1w.w - roW);
 
     // ro center-shift
-    ro = ro + (boxMin_um + boxMax_um) * 0.5;
+    vec3 physicalCenter = (boxMin_um + boxMax_um) * 0.5;
+
+    // rotate world back -theta after shearing
+    vec3 ro = rotX(roW, -theta) + physicalCenter;
+    vec3 rd = normalize(rotX(rdW, -theta));
 
     // -------- AABB in object space --------
     float tEnter, tExit;
@@ -101,8 +120,8 @@ void main()
     tEnter = max(tEnter, 0.0);
 
     // “steps per voxel” along this ray (orientation aware)
-    float dVoxel  = max(dot(abs(rd), vec3(px, px, dz)), 1e-6);
-    float kStep   = stepWorld / dVoxel;
+    float dVoxel = max(dot(abs(rd), vec3(px, px, dz)), 1e-6);
+    float kStep  = stepWorld / dVoxel;
 
     // -------- march --------
     vec3 invBoxSize = 1.0 / (boxMax_um - boxMin_um); // um^-1

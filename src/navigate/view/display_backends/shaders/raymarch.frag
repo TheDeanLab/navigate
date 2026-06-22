@@ -11,12 +11,9 @@ uniform sampler2D transfer;
 uniform mat4 invProjView;
 uniform vec2 viewportSize;
 
-uniform vec3 boxMin;
-uniform vec3 boxMax;
-
 uniform float stepWorld = 0.25;       // step length in WORLD units
 
-uniform bool doBox = false;
+uniform bool doBox = true;
 
 // contrast params
 uniform float opacity = 0.15;  // global density/opacity
@@ -29,7 +26,7 @@ uniform int nChannels = 5; // hard-coded: navigate has 5 channels max
 // OPM parameters
 uniform float shear_angle = 50.0;   // degrees
 uniform float dz = 0.4;             // um    
-uniform float px = 0.1348;          // um
+uniform float px = 0.1478;          // um
 
 // ---------- utilities ----------
 
@@ -47,122 +44,55 @@ bool intersectAABB(vec3 ro, vec3 rd, vec3 bmin, vec3 bmax, out float t0, out flo
     return t1 > max(t0, 0.0);
 }
 
-// OPM shear transform
-// Build the inverse of the shear Y -= k*Z
-mat4 inverseShearYZ(float angleDeg)
+vec3 physicalToRawUVW(vec3 p, vec3 S, float t)
 {
-    float k = sin(radians(angleDeg));
-    mat4 m = mat4(1.0);
-    m[1][2] = k;
-    
-    // need to properly scale somehow: interpolation?
-    // m[1][2] = px * k / dz;
-    // m[0][0] = dz * k;
-    // m[2][2] = dz * cos(radians(angleDeg));
+    // Given a point in physical deskewed world-space (um)
+    // Return raw texture UVW coordinate.
+    // p [um]:  physical position
+    // S [um]:  physical volume dimensions
+    // t [rad]: shear angle
 
-    return m;
+    // convert from physical pos to tex coords, given shearing
+    float u = p.x / S.x;
+    float v = (p.y - p.z*tan(t)) / S.y;
+    float w = p.z / (S.z * cos(t));
+
+    return vec3(u, v, w);
 }
 
-// Shear Matrix: shifts X based on Z
-mat4 shearMatrix(float angleDeg, float dz, float xyPixelSize)
+void getPhysicalBounds(vec3 S, float t, out vec3 bmin, out vec3 bmax)
 {
-    float t = radians(angleDeg);
+    // Return boxMax_um: physical bounding box in um
+    // Considers extended bounds from shearing
 
-    float dy = sin(t)*dz/xyPixelSize;
-
-    return mat4(
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0,  dy, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        0.0, 0.0, 0.0, 1.0
-    );
-}
-
-// Rotation Matrix: rotate about Y
-mat4 rotationMatrix_Y(float angleDeg)
-{
-    float t = radians(angleDeg);
-
-    return mat4(
-        1.0,    0.0,    0.0,  0.0,
-        0.0, cos(t), -sin(t), 0.0,
-        0.0, sin(t),  cos(t), 0.0,
-        0.0,    0.0,    0.0,  1.0
-    );
-}
-
-mat4 scalingMatrix_Z(float zAniso)
-{
-    return mat4(
-        1.0, 0.0, 0.0,    0.0,
-        0.0, 1.0, 0.0,    0.0,
-        0.0, 0.0, zAniso, 0.0,
-        0.0, 0.0, 0.0,    1.0
-    );
-}
-
-// Translation Matrix
-mat4 translationMatrix(vec3 t)
-{
-    return mat4(
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        t.x, t.y, t.z, 1.0
-    );
-}
-
-// Combined DSR transformation (PetaKit5D)
-mat4 deskewRotateMatrix(float angleDeg, float dz, float xyPixelSize, vec3 volumeCenter)
-{
-    // 1: Translate to center matrix
-    mat4 T1 = translationMatrix(-volumeCenter);
-
-    // 2: Shear matrix
-    mat4 S_ds = shearMatrix(angleDeg, dz, xyPixelSize);
-
-    // 3: Isotropic scaling matrix
-    mat4 S = scalingMatrix_Z(dz / xyPixelSize);
-
-    // 3: Rotate by theta matrix
-    mat4 R = rotationMatrix_Y(angleDeg);
-
-    // 4: Translate back matrix
-    mat4 T2 = translationMatrix(volumeCenter);
-
-    // Combined DSR:
-    return S_ds;
+    bmin = vec3(0.0, S.z * min(0.0, sin(t)), 0.0);
+    bmax = vec3(S.x, S.y + S.z * max(0.0, sin(t)), S.z * cos(t));
 }
 
 void main()
 {
-    // voxel size (um): note that we assume px = py
-    vec3 spacing = vec3(px, px, dz);
+    // Shear angle theta
+    float theta = radians(shear_angle);
 
-    // scaled box min/max
-    vec3 boxMin_um = boxMin * spacing;
-    vec3 boxMax_um = boxMax * spacing;
+    // Physical volume dimensions
+    vec3 dim = vec3(textureSize(volume[0], 0));
+    vec3 S = vec3(px*dim.x, px*dim.y, dz*dim.z);
+
+    // Compute physical bounding box given shear angle
+    vec3 boxMin_um, boxMax_um;
+    getPhysicalBounds(S, theta, boxMin_um, boxMax_um);
 
     // -------- reconstruct world-space ray from pixel --------
     vec2 ndc = (gl_FragCoord.xy / viewportSize) * 2.0 - 1.0;
     vec4 p0w = invProjView * vec4(ndc, -1.0, 1.0);
     vec4 p1w = invProjView * vec4(ndc,  1.0, 1.0);
-    vec3 roW = p0w.xyz / p0w.w;
-    vec3 rdW = normalize(p1w.xyz / p1w.w - roW);
+    
+    // world-space ray position (ro) and direction (rd)
+    vec3 ro = p0w.xyz / p0w.w;
+    vec3 rd = normalize(p1w.xyz / p1w.w - ro);
 
-    // -------- transform ray to OBJECT space via inverse shear --------
-    // mat4 invShear  = inverseShearYZ(shear_angle);
-    // vec3 ro = (invShear * vec4(roW, 1.0)).xyz;
-    // vec3 rd = normalize(mat3(invShear) * rdW);   // direction uses linear part only
-
-    // PetaKit5D style deskew-rotate (DSR)
-    vec3 volumeCenter = (boxMin_um + boxMax_um) * 0.5; // use _um ...?
-
-    mat4 DSR = deskewRotateMatrix(shear_angle, dz, px, volumeCenter);
-
-    // apply
-    vec3 ro = (DSR * vec4(roW, 1.0)).xyz;
-    vec3 rd = normalize(mat3(DSR) * rdW);
+    // ro center-shift
+    ro = ro + (boxMin_um + boxMax_um) * 0.5;
 
     // -------- AABB in object space --------
     float tEnter, tExit;
@@ -170,15 +100,11 @@ void main()
         discard;
     tEnter = max(tEnter, 0.0);
 
-    // -------- step-size invariant opacity terms --------
-    vec3 dim = vec3(textureSize(volume[0], 0));       // voxel counts (X,Y,Z)
-
     // “steps per voxel” along this ray (orientation aware)
-    float dVoxel  = max(dot(abs(rd), spacing), 1e-6);
+    float dVoxel  = max(dot(abs(rd), vec3(px, px, dz)), 1e-6);
     float kStep   = stepWorld / dVoxel;
 
     // -------- march --------
-    
     vec3 invBoxSize = 1.0 / (boxMax_um - boxMin_um); // um^-1
     
     // accumulator
@@ -186,7 +112,11 @@ void main()
 
     for (float t = tEnter; t < tExit && acc.a < 0.98; t += stepWorld) {
         vec3 pos = ro + rd * t;                           // position (um)
-        vec3 uvw = (pos - boxMin_um) * invBoxSize;        // [0,1]^3
+        vec3 uvw = physicalToRawUVW(pos, S, theta);       // UVW map [0,1]^3
+        
+        // bounds check
+        if (any(lessThan(uvw, vec3(0.0))) || any(greaterThan(uvw, vec3(1.0))))
+            continue;
 
         if (doBox)
         {

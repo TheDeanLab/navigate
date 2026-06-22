@@ -860,7 +860,7 @@ class GLVolumeViewBackend:
         self.frame_timer = FrameTimer(every=1.0)
 
         # Set up camera
-        self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(-200, 0, 0), look_at=glm.vec3(0, 0, 0))
+        self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(-120, 0, 20), look_at=glm.vec3(0, 0, 0))
 
         # Set initial shader uniforms
         self.shader.use()
@@ -903,11 +903,6 @@ class GLVolumeViewBackend:
         # Define new volume shape
         self.volume_shape = shape
 
-        # Object-space boundaries: centered on origin
-        nz, ny, nx = 0.5*np.float32(shape) - 0.5
-        box_min = (-nx, -ny, -nz)
-        box_max = ( nx,  ny,  nz)
-
         # Enqueue command to create new volume texture
         def _do():
             self._ensure_gl_ready()
@@ -915,13 +910,6 @@ class GLVolumeViewBackend:
             # Create textures (if needed)
             if not self.volume_textures:
                 self._gl_make_volume_texture(shape)
-            # if not self.transfer_texture:
-            #     self._gl_make_transfer_texture()
-            
-            # Set shader uniforms related to volume dimensions
-            self.shader.use()
-            self.shader.set_vec3("boxMin", box_min)
-            self.shader.set_vec3("boxMax", box_max)
 
             # Reset volume texture unit assignments (unecessary..? if we always assign the same units, but safe to do here after creating new textures)
             self._set_volume_texture_units()

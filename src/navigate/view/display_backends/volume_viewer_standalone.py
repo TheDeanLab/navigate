@@ -10,15 +10,15 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 
 from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from navigate.view.custom_widgets.validation import ValidatedSpinbox
+from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedEntry
 
 WINDOW_DIMENSIONS = (400, 600)
 
 DEFAULT_COLORS = [
+    [255, 255, 255],
     [255,   0,   0],
     [  0, 255,   0],
     [  0,   0, 255],
-    [255, 255, 255],
     [255, 255,   0],
     [255,   0, 255],
     [  0, 255, 255],
@@ -49,7 +49,7 @@ class ChannelWidgetBox(tk.Frame):
                 parent=self,
                 label="Min:",
                 input_class=ValidatedSpinbox,
-                input_var=tk.IntVar(value=2500),
+                input_var=tk.IntVar(value=0),
                 input_args={"from_": 0, "to": 65535, "increment": 255, "width": 8},
                 label_pos="top",
             ),
@@ -57,7 +57,7 @@ class ChannelWidgetBox(tk.Frame):
                 parent=self,
                 label="Max:",
                 input_class=ValidatedSpinbox,
-                input_var=tk.IntVar(value=15000),
+                input_var=tk.IntVar(value=5000),
                 input_args={"from_": 0, "to": 65535, "increment": 255, "width": 8},
                 label_pos="top",
             ),
@@ -85,6 +85,7 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
         volume_settings_frame = tk.Frame(self.main_frame, borderwidth=2, relief="sunken")
+        render_settings_frame = tk.Frame(self.main_frame, borderwidth=2, relief="sunken")
 
         self.inputs = {
             "shear_angle": LabelInput(
@@ -95,8 +96,20 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
                 input_args={"from_": -90.0, "to": 90.0, "increment": 0.5, "width": 5},
                 label_pos="top",
             ),
+            # "z_step": LabelInput(
+            #     parent=volume_settings_frame,
+            #     label="Z-Step",
+            #     input_class=ValidatedEntry,
+            #     label_pos="top",
+            # ),
+            # "pixel_size": LabelInput(
+            #     parent=volume_settings_frame,
+            #     label="Pixel Size",
+            #     input_class=ValidatedEntry,
+            #     label_pos="top",
+            # ),
             "opacity": LabelInput(
-                parent=volume_settings_frame,
+                parent=render_settings_frame,
                 label="Opacity",
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(value=0.15),
@@ -104,10 +117,10 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
                 label_pos="top",
             ),
             "world_step": LabelInput(
-                parent=volume_settings_frame,
+                parent=render_settings_frame,
                 label="World Step",
                 input_class=ValidatedSpinbox,
-                input_var=tk.DoubleVar(value=1.0),
+                input_var=tk.DoubleVar(value=0.5),
                 input_args={"from_": 0.05, "to": 10.0, "increment": 0.05, "width": 5},
                 label_pos="top",
             )
@@ -117,6 +130,7 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
             input_widget.pack(side=tk.LEFT, expand=True)
 
         volume_settings_frame.pack(fill=tk.X)
+        render_settings_frame.pack(fill=tk.X)
 
         self.channels_frame = tk.Frame(self.main_frame, borderwidth=2, relief="sunken")
         self.channels_frame.pack(fill=tk.BOTH)
@@ -197,7 +211,7 @@ class ChannelController:
                 image_desc = dict(eval(tif.pages[0].tags['ImageDescription'].value))
                 self.resolution['dz'] = image_desc['spacing']
             except:
-                self.resolution['dz'] = 0.2
+                self.resolution['dz'] = 0.4
 
             # xy-resolution
             try:
@@ -292,7 +306,7 @@ class VVStandaloneController:
 
 if __name__ == "__main__":
     app = VolumeViewerStandalone()
-    gl_backend = GLVolumeViewBackend(camera_position=(0, 0, 300))
+    gl_backend = GLVolumeViewBackend()
 
     controller = VVStandaloneController(app, gl_backend)
 

@@ -578,8 +578,8 @@ class VolumeFrame(ttk.Labelframe, CommonMethods):
                 parent=self,
                 label="World Step",
                 input_class=ValidatedSpinbox,
-                input_var=tk.DoubleVar(value=0.25),
-                input_args={"from_": 0.05, "to": 0.5, "increment": 0.01, "width": 5},
+                input_var=tk.DoubleVar(value=1.5),
+                input_args={"from_": 0.05, "to": 5.0, "increment": 0.05, "width": 5},
                 label_pos="top",
             )                            
         }

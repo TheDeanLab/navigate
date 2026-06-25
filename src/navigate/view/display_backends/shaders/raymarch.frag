@@ -24,7 +24,7 @@ uniform float cGamma[5] = float[5](1.0, 1.0, 1.0, 1.0, 1.0);
 uniform int nChannels = 5; // hard-coded: navigate has 5 channels max
 
 // OPM parameters
-uniform float shear_angle = -45.0;  // degrees
+uniform float shear_angle = 45.0;  // degrees
 uniform float dz = 0.4;             // um    
 uniform float px = 0.1478;          // um
 
@@ -87,7 +87,8 @@ vec3 rotX(vec3 r, float theta)
 void main()
 {
     // Shear angle theta
-    float theta = radians(shear_angle);
+    // Sign based on OPM scan direction
+    float theta = -radians(shear_angle);
 
     // Physical volume dimensions
     vec3 dim = vec3(textureSize(volume[0], 0));

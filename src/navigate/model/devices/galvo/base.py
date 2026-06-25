@@ -255,7 +255,7 @@ class GalvoBase(ABC):
                 elif self.galvo_waveform == "pulse":
                     pulse_delay = 100 * self.camera_delay / self.sweep_time
                     pulse_width = 100 - pulse_delay
-                    self.waveform_dict[channel_key] = single_pulse(
+                    pulse_wave = single_pulse(
                         sample_rate=self.sample_rate,
                         sweep_time=self.sweep_time,
                         pulse_width=pulse_width,
@@ -263,6 +263,8 @@ class GalvoBase(ABC):
                         offset=galvo_offset,
                         delay=pulse_delay,
                     )
+                    pulse_wave[-1] = 0
+                    self.waveform_dict[channel_key] = pulse_wave
                 elif self.galvo_waveform == "halfsaw":
                     new_wave = sawtooth(
                         sample_rate=self.sample_rate,

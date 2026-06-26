@@ -229,7 +229,7 @@ def test_adjust_halfsaw_uses_expected_extreme(amplitude, source_wave):
     assert waveforms["channel_1"][1] == pytest.approx(source_wave[1])
 
 
-def test_adjust_pulse_waveform_respects_camera_delay():
+def test_adjust_pulse_waveform_respects_camera_delay_and_clears_final_sample():
     config = build_base_configuration(
         waveform="pulse",
         amplitude="1.0",
@@ -251,8 +251,9 @@ def test_adjust_pulse_waveform_respects_camera_delay():
     high_indices = np.flatnonzero(waveform > 0.5)
     assert waveform.shape == (100,)
     assert high_indices[0] == 10
-    assert high_indices[-1] == 99
-    assert len(high_indices) == 90
+    assert high_indices[-1] == 98
+    assert len(high_indices) == 89
+    assert waveform[-1] == 0
 
 
 def test_adjust_unknown_waveform_sets_channel_to_none():

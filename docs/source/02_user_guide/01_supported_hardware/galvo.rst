@@ -20,7 +20,8 @@ For NI and synthetic galvos, the software supports the following waveform option
 
 The ``pulse`` waveform is useful for resonant galvos and other devices that need
 a constant analog command during acquisition. It waits for the configured camera
-delay, then holds the configured galvo amplitude for the rest of the sweep.
+delay, holds the configured galvo amplitude through the acquisition window, and
+clears the final waveform sample to return the output low.
 
 .. collapse:: Configuration File
 

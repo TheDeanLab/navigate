@@ -492,6 +492,7 @@ waveform_types = {
     "Sine": "sine",
     "Sawtooth": "sawtooth",
     "Square": "square",
+    "Pulse": "pulse",
 }
 
 galvo_hardware_widgets = {

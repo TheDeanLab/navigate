@@ -861,19 +861,12 @@ class GLVolumeViewBackend:
         if self.volume_shape and self.bbox_shader:
             nz, ny, nx = self.volume_shape
             px, dz = self._px, self._dz
-            theta = -math.radians(self._shear_angle)
             S = glm.vec3(px * nx, px * ny, dz * nz)
-            bmin = glm.vec3(0.0, S.z * min(0.0, math.sin(theta)), 0.0)
-            bmax = glm.vec3(S.x, S.y + S.z * max(0.0, math.sin(theta)), S.z * math.cos(theta))
-            center = (bmin + bmax) * 0.5
-            model = (glm.rotate(glm.mat4(1.0), theta, glm.vec3(1, 0, 0))
-                     * glm.translate(glm.mat4(1.0), -center))
 
             self.bbox_shader.use()
             self.bbox_shader.set_mat4("proj_view", proj_view)
-            self.bbox_shader.set_mat4("model", model)
-            self.bbox_shader.set_vec3("bmin", bmin)
-            self.bbox_shader.set_vec3("bmax", bmax)
+            self.bbox_shader.set_float("shear_angle", self._shear_angle)
+            self.bbox_shader.set_vec3("phys_size", S)
 
             GL.glEnable(GL.GL_DEPTH_TEST)
             GL.glEnable(GL.GL_BLEND)

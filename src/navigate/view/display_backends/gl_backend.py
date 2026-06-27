@@ -847,11 +847,6 @@ class GLVolumeViewBackend:
         GL.glActiveTexture(GL.GL_TEXTURE0 + self.MAX_N_COLOR_CHANNELS)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.transfer_texture)
 
-        # Disable depth test, culling, and blending for volume rendering
-        GL.glDisable(GL.GL_DEPTH_TEST)
-        GL.glDisable(GL.GL_CULL_FACE)
-        GL.glDisable(GL.GL_BLEND)
-
         # Draw full-screen quad (no VBO needed, vertices are generated in shader)
         GL.glBindVertexArray(self.vao)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 6)
@@ -875,8 +870,11 @@ class GLVolumeViewBackend:
             GL.glBindVertexArray(self.vao)
             GL.glDrawArrays(GL.GL_LINES, 0, 24)
             GL.glBindVertexArray(0)
-            GL.glDisable(GL.GL_DEPTH_TEST)
-            GL.glDisable(GL.GL_BLEND)
+        
+        # Disable depth test, culling, and blending for next volume rendering
+        GL.glDisable(GL.GL_CULL_FACE)
+        GL.glDisable(GL.GL_DEPTH_TEST)
+        GL.glDisable(GL.GL_BLEND)
 
         # Finally, draw the frame
         glfw.swap_buffers(self.window)

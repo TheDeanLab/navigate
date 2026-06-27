@@ -127,7 +127,7 @@ class Camera:
         self.NEAR_FIELD = 0.1
         self.FAR_FIELD  = 10000.0
         self.world_up   = glm.vec3(0,1,0)
-        self.is_ortho_proj = True
+        self.is_ortho_proj = False
         
         # control gains
         self.ROT_SENS   = 0.25   # deg/pixel
@@ -448,6 +448,7 @@ class GLVolumeViewBackend:
         # GL objects (to be created in render() thread
         #             after GL context is initialized)
         self.shader      = None
+        self.bbox_shader = None
         self.vao         = None
         self.camera      = None
         self.frame_timer = None
@@ -465,6 +466,11 @@ class GLVolumeViewBackend:
         # state
         self._ch = 0
         self._z  = 0
+
+        # bbox physical params (tracked Python-side for bound computation)
+        self._px          = 0.1478   # µm/pixel (XY)
+        self._dz          = 1.0      # µm/slice (Z)
+        self._shear_angle = 45.0     # degrees
 
     def thread_is_running(self):
         return self.is_running.is_set()
@@ -563,7 +569,9 @@ class GLVolumeViewBackend:
 
     def set_num_slices_and_dz(self, n_slices: int, dz: float=1.0):
         """Set the expected number of slices in the volume."""
-        
+
+        self._dz = dz
+
         # Enqueue
         def _do():
             self.num_slices = n_slices
@@ -623,15 +631,25 @@ class GLVolumeViewBackend:
 
     def set_shear_angle(self, shear_angle: float):
 
+        self._shear_angle = shear_angle
+
         def _do():
             self._ensure_gl_ready()
-            
+
             self.shader.use()
             self.shader.set_float(
-                "shear_angle", 
+                "shear_angle",
                 shear_angle
                 )
 
+        self.cmd_q.put(_do)
+
+    def set_px(self, px: float):
+        self._px = px
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float("px", px)
         self.cmd_q.put(_do)
 
     def set_opacity(self, opacity: float):
@@ -814,11 +832,11 @@ class GLVolumeViewBackend:
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         # Camera view-projection matrix
-        inverse_proj_view = glm.inverse(
-            self.camera.projection * self.camera.view
-        )
+        proj_view = self.camera.projection * self.camera.view
+        
+        # Set invProjView in raymarch shader
         self.shader.use()
-        self.shader.set_mat4("invProjView", inverse_proj_view)
+        self.shader.set_mat4("invProjView", glm.inverse(proj_view))
 
         # Bind volume textures for all n-channels
         for i, tex in enumerate(self.volume_textures):
@@ -837,7 +855,35 @@ class GLVolumeViewBackend:
         # Draw full-screen quad (no VBO needed, vertices are generated in shader)
         GL.glBindVertexArray(self.vao)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 6)
-        GL.glBindVertexArray(0) # Unbind VAO
+        GL.glBindVertexArray(0)
+
+        # Draw bounding box via GL_LINES
+        if self.volume_shape and self.bbox_shader:
+            nz, ny, nx = self.volume_shape
+            px, dz = self._px, self._dz
+            theta = -math.radians(self._shear_angle)
+            S = glm.vec3(px * nx, px * ny, dz * nz)
+            bmin = glm.vec3(0.0, S.z * min(0.0, math.sin(theta)), 0.0)
+            bmax = glm.vec3(S.x, S.y + S.z * max(0.0, math.sin(theta)), S.z * math.cos(theta))
+            center = (bmin + bmax) * 0.5
+            model = (glm.rotate(glm.mat4(1.0), theta, glm.vec3(1, 0, 0))
+                     * glm.translate(glm.mat4(1.0), -center))
+
+            self.bbox_shader.use()
+            self.bbox_shader.set_mat4("proj_view", proj_view)
+            self.bbox_shader.set_mat4("model", model)
+            self.bbox_shader.set_vec3("bmin", bmin)
+            self.bbox_shader.set_vec3("bmax", bmax)
+
+            GL.glEnable(GL.GL_DEPTH_TEST)
+            GL.glEnable(GL.GL_BLEND)
+            GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+            GL.glLineWidth(1.5)
+            GL.glBindVertexArray(self.vao)
+            GL.glDrawArrays(GL.GL_LINES, 0, 24)
+            GL.glBindVertexArray(0)
+            GL.glDisable(GL.GL_DEPTH_TEST)
+            GL.glDisable(GL.GL_BLEND)
 
         # Finally, draw the frame
         glfw.swap_buffers(self.window)
@@ -852,10 +898,15 @@ class GLVolumeViewBackend:
         from pathlib import Path
         shader_dir = os.path.join(Path(__file__).parent, "shaders")
 
-        # Compile shader
+        # Compile shaders
         self.shader = Shader(
-            vs=os.path.join(shader_dir, "simple_quad.vert"), 
-            fs=os.path.join(shader_dir, "raymarch.frag"), 
+            vs=os.path.join(shader_dir, "simple_quad.vert"),
+            fs=os.path.join(shader_dir, "raymarch.frag"),
+            from_file=True
+            )
+        self.bbox_shader = Shader(
+            vs=os.path.join(shader_dir, "bbox.vert"),
+            fs=os.path.join(shader_dir, "bbox.frag"),
             from_file=True
             )
 
@@ -874,6 +925,7 @@ class GLVolumeViewBackend:
         self._set_transfer_texture_unit()
         self.shader.set_float("stepWorld", 0.25)
         self.shader.set_float("opacity", 0.15)
+        self.shader.set_int("doBox", 0)  # box now drawn via GL_LINES
 
     def _set_volume_texture_units(self):
         """Assign shader texture units for volume (n-color channels) and transfer function."""

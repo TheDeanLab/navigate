@@ -127,13 +127,15 @@ class Camera:
         self.NEAR_FIELD = 0.1
         self.FAR_FIELD  = 10000.0
         self.world_up   = glm.vec3(0,1,0)
-        self.is_ortho_proj = False
+        self.is_ortho_proj = True
         
         # control gains
         self.ROT_SENS   = 0.25   # deg/pixel
         self.PAN_SENS   = 1.0    # world-per-pixel multiplier
         self.ZOOM_SENS  = 2.0
         self.MIN_RADIUS = 0.01
+        self.ortho_size     = 25.0
+        self.MIN_ORTHO_SIZE = 0.01
         self.MAX_PITCH  = math.radians(89.0)
 
         # orbit state
@@ -180,10 +182,9 @@ class Camera:
 
     def get_projection_matrix(self):
         if self.is_ortho_proj:
-            # projection = glm.ortho(-self.win_h/8, self.win_w/8, -self.win_h/8, self.win_h/8, -1.0, 1.0)
-            nz, ny, nx = self.parent_viewer.vol_shape
-            opj_size = 25
-            projection = glm.ortho(-opj_size, opj_size, -opj_size, opj_size, 0.1, 100.0)
+            h = self.ortho_size
+            w = h * self.aspect_ratio
+            projection = glm.ortho(-w, w, -h, h, 0.1, 100.0)
         else:
             projection = glm.perspective(glm.radians(self.FOV), self.aspect_ratio, self.NEAR_FIELD, self.FAR_FIELD)
         
@@ -314,8 +315,11 @@ class Camera:
             self.parent_viewer.need_render = True
 
         elif self.is_translating:
-            # screen pixels → world units at current radius
-            vpp = (2.0 * self.radius * math.tan(math.radians(self.FOV)*0.5)) / max(1.0, float(self.win_h))
+            # screen pixels → world units
+            if self.is_ortho_proj:
+                vpp = 2.0 * self.ortho_size / max(1.0, float(self.win_h))
+            else:
+                vpp = (2.0 * self.radius * math.tan(math.radians(self.FOV)*0.5)) / max(1.0, float(self.win_h))
             sx = vpp * self.aspect_ratio * self.PAN_SENS
             sy = vpp * self.PAN_SENS
             pan = (-dx) * sx * self.right + (dy) * sy * self.up
@@ -330,10 +334,12 @@ class Camera:
         if not self.scroll_offset or dt == 0.0:
             return
         
-        # exponential dolly on radius
         scale = math.exp(-self.scroll_offset * self.ZOOM_SENS * (dt if dt > 0 else 1.0))
-        self.radius = max(self.MIN_RADIUS, self.radius * scale)
-        self._recompute_position()
+        if self.is_ortho_proj:
+            self.ortho_size = max(self.MIN_ORTHO_SIZE, self.ortho_size * scale)
+        else:
+            self.radius = max(self.MIN_RADIUS, self.radius * scale)
+            self._recompute_position()
 
         self.scroll_offset = 0.0
 

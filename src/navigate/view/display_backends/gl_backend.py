@@ -759,9 +759,11 @@ class GLVolumeViewBackend:
                 pass
 
     def _gl_free_resources(self):
-        # Free up shader (this will call Shader.__del__)
+        # Free up shaders (this will call Shader.__del__)
         if self.shader:
             self.shader = None
+        if self.bbox_shader:
+            self.bbox_shader = None
         
         # Free VAO
         if self.vao:

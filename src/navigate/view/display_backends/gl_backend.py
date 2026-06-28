@@ -165,6 +165,7 @@ class Camera:
         # callbacks
         glfw.set_scroll_callback(self.window, self._scroll_callback)
         glfw.set_mouse_button_callback(self.window, self._button_callback)
+        glfw.set_key_callback(self.window, self._key_callback)
 
         # build initial matrices
         self._recompute_position()
@@ -184,7 +185,7 @@ class Camera:
         if self.is_ortho_proj:
             h = self.ortho_size
             w = h * self.aspect_ratio
-            projection = glm.ortho(-w, w, -h, h, 0.1, 100.0)
+            projection = glm.ortho(-w, w, -h, h, self.NEAR_FIELD, self.FAR_FIELD)
         else:
             projection = glm.perspective(glm.radians(self.FOV), self.aspect_ratio, self.NEAR_FIELD, self.FAR_FIELD)
         
@@ -241,6 +242,17 @@ class Camera:
         self.zoom_xy = z
 
     # ---------- callbacks ----------
+    def _key_callback(self, window, key, scancode, action, mods):
+        if key == glfw.KEY_TAB and action == glfw.PRESS:
+            half_fov_tan = math.tan(math.radians(self.FOV * 0.5))
+            if self.is_ortho_proj:
+                self.radius = self.ortho_size / half_fov_tan
+                self._recompute_position()
+            else:
+                self.ortho_size = self.radius * half_fov_tan
+            self.is_ortho_proj = not self.is_ortho_proj
+            self.parent_viewer.need_render = True
+
     def _scroll_callback(self, window, dx, dy):
         self.scroll_offset = dy
 

@@ -2214,7 +2214,7 @@ class CameraViewController(BaseViewController):
         self._OpenGL_set_volume_dimensions(
             n_slices=self.number_of_slices if self.image_mode == "z-stack" else 2,
             dz=microscope_state.get("step_size", 1.0),
-            px=0.1478 # TODO: Either pull from expt.CameraParameters or create an input
+            px=camera_parameters.get("pixel_size", 1.0)
         )
 
     def update_snr(self) -> None:

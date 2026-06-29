@@ -229,6 +229,33 @@ def test_adjust_halfsaw_uses_expected_extreme(amplitude, source_wave):
     assert waveforms["channel_1"][1] == pytest.approx(source_wave[1])
 
 
+def test_adjust_pulse_waveform_respects_camera_delay_and_clears_final_sample():
+    config = build_base_configuration(
+        waveform="pulse",
+        amplitude="1.0",
+        offset="0.0",
+        max_voltage=10,
+        min_voltage=-10,
+        channel_2_selected=False,
+    )
+    config["configuration"]["microscopes"]["TestScope"]["camera"]["delay"] = 10
+    config["configuration"]["microscopes"]["TestScope"]["daq"]["sample_rate"] = 1000
+    galvo = build_synthetic_galvo(config)
+
+    waveforms = galvo.adjust(
+        exposure_times={"channel_1": 0.2},
+        sweep_times={"channel_1": 0.1},
+    )
+
+    waveform = waveforms["channel_1"]
+    high_indices = np.flatnonzero(waveform > 0.5)
+    assert waveform.shape == (100,)
+    assert high_indices[0] == 10
+    assert high_indices[-1] == 98
+    assert len(high_indices) == 89
+    assert waveform[-1] == 0
+
+
 def test_adjust_unknown_waveform_sets_channel_to_none():
     config = build_base_configuration(waveform="banana", channel_2_selected=False)
     galvo = build_synthetic_galvo(config)

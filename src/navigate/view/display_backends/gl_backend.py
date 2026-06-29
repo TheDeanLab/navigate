@@ -156,6 +156,7 @@ class Camera:
         self.scroll_offset = 0.0
         self.is_rotating = False
         self.is_translating = False
+        self.is_quantized = False
         self._was_panning = False
 
         # picking
@@ -244,6 +245,7 @@ class Camera:
     # ---------- callbacks ----------
     def _key_callback(self, window, key, scancode, action, mods):
         if key == glfw.KEY_TAB and action == glfw.PRESS:
+
             half_fov_tan = math.tan(math.radians(self.FOV * 0.5))
             if self.is_ortho_proj:
                 self.radius = self.ortho_size / half_fov_tan
@@ -252,6 +254,12 @@ class Camera:
                 self.ortho_size = self.radius * half_fov_tan
             self.is_ortho_proj = not self.is_ortho_proj
             self.parent_viewer.need_render = True
+
+        elif key == glfw.KEY_LEFT_SHIFT:
+            if action == glfw.PRESS:
+                self.is_quantized = True
+            elif action == glfw.RELEASE:
+                self.is_quantized = False
 
     def _scroll_callback(self, window, dx, dy):
         self.scroll_offset = dy
@@ -286,10 +294,17 @@ class Camera:
 
     # ---------- internals ----------
     def _recompute_position(self):
-        cp = math.cos(self.pitch)
-        sp = math.sin(self.pitch)
-        cy = math.cos(self.yaw)
-        sy = math.sin(self.yaw)
+        # quantize angle if SHIFT
+        def _quantize(t, step_deg=0):
+            step_rad = math.radians(step_deg)
+            return step_rad*round(t/step_rad) if step_deg > 0 else t
+
+        step_deg = 15 if self.is_quantized else 0
+
+        cp = math.cos(_quantize(self.pitch,  step_deg))
+        sp = math.sin(_quantize(self.pitch,  step_deg))
+        cy = math.cos(_quantize(self.yaw,    step_deg))
+        sy = math.sin(_quantize(self.yaw,    step_deg))
         dir_vec = glm.vec3(cp * sy, sp, cp * cy)  # Y-up, yaw=0 → +Z
         self.position = self.look_at + self.radius * dir_vec
 

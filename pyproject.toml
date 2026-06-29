@@ -89,7 +89,8 @@ opengl = [
     "PyOpenGL>=3.1",
     "PyOpenGL-accelerate>=3.1",
     "glfw>=2.1",
-    "PyGLM>=2.8"
+    "PyGLM>=2.8",
+    "tkinterdnd2>=0.4.3"
 ]
 
 [project.urls]

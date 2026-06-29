@@ -1875,23 +1875,32 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.gl_volume_view_backend is None:
             return
 
-        variable = self.volume_widgets[field].get_variable().get()
+        variable = self.volume_widgets[field].get_variable()
 
         # Handle GL enable/disable as a special case
         if field == "enabled":
-            if variable:
+            is_enabled = variable.get()
+            if is_enabled:
                 self.gl_volume_view_backend.start(window_dim=(800, 600))
             else:
                 self.gl_volume_view_backend.stop()
             
-            self.view.volume_frame.set_inputs_enabled(variable)
+            self.view.volume_frame.set_inputs_enabled(is_enabled)
         else:
+            # Handle all other volume widget inputs
             try:
-                value = float(variable)
+                value = float(variable.get())
             except:
                 # Handle "" and other such invalid inputs
                 return
-            
+
+            try:
+                min_val = float(self.volume_widgets[field].widget.cget("from"))
+                if value < min_val:
+                    return
+            except Exception:
+                pass
+
             exec(f"self.gl_volume_view_backend.set_{field}({value})")
 
 class CameraViewController(BaseViewController):

@@ -1,5 +1,9 @@
 #version 430 core
 
+// constants
+const float MIN_STEP_WORLD = 0.05;
+
+// output
 out vec4 FragColor;
 
 // volume texture array (5-channels)
@@ -120,7 +124,7 @@ void main()
 
     // “steps per voxel” along this ray (orientation aware)
     float dVoxel = max(dot(abs(rd), vec3(px, px, dz)), 1e-6);
-    float kStep  = stepWorld / dVoxel;
+    float kStep  = max(stepWorld, MIN_STEP_WORLD) / dVoxel;
 
     // -------- march --------
     vec3 invBoxSize = 1.0 / (boxMax_um - boxMin_um); // um^-1

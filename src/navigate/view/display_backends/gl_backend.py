@@ -642,12 +642,14 @@ class GLVolumeViewBackend:
         self.cmd_q.put(_do)
 
     def set_world_step(self, world_step: float):
+        if world_step < 0.05:
+            return
         def _do():
             self._ensure_gl_ready()
-            
+
             self.shader.use()
             self.shader.set_float(
-                "stepWorld", 
+                "stepWorld",
                 world_step
                 )
 

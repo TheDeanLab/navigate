@@ -579,22 +579,34 @@ class GLVolumeViewBackend:
         """Submit slice data to the GL thread for upload."""
         self.data_q.put((image, self._z, self._ch))
 
-    def set_num_slices_and_dz(self, n_slices: int, dz: float=1.0):
-        """Set the expected number of slices in the volume."""
+    def set_volume_dimensions(self, dz: float=1.0, px: float=1.0, n_slices: int=0):
+        """Wrapper func to set physical primitives."""
 
-        self._dz = dz
-
-        # Enqueue
-        def _do():
+        if n_slices > 0:
             self.num_slices = n_slices
+        
+        # Enqueue shader-side updates
+        self.set_dz(dz)
+        self.set_px(px)
 
-            # Update dz in shader
+    def set_dz(self, dz: float):
+        self._dz = dz
+        
+        def _do():
             self._ensure_gl_ready()
-
             self.shader.use()
             self.shader.set_float("dz", dz)
+        
+        self.cmd_q.put(_do)
 
-        # Send to cmd
+    def set_px(self, px: float):
+        self._px = px
+        
+        def _do():
+            self._ensure_gl_ready()
+            self.shader.use()
+            self.shader.set_float("px", px)
+        
         self.cmd_q.put(_do)
 
     def set_min_max(self, min_max: list, ch: int=-1):
@@ -654,14 +666,6 @@ class GLVolumeViewBackend:
                 shear_angle
                 )
 
-        self.cmd_q.put(_do)
-
-    def set_px(self, px: float):
-        self._px = px
-        def _do():
-            self._ensure_gl_ready()
-            self.shader.use()
-            self.shader.set_float("px", px)
         self.cmd_q.put(_do)
 
     def set_opacity(self, opacity: float):

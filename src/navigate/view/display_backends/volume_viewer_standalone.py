@@ -93,27 +93,31 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
                 label="Shear Angle",
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(value=45.0),
-                input_args={"from_": -90.0, "to": 90.0, "increment": 0.5, "width": 5},
+                input_args={"from_": -90.0, "to": 90.0, "increment": 0.5, "width": 8},
                 label_pos="top",
             ),
-            # "z_step": LabelInput(
-            #     parent=volume_settings_frame,
-            #     label="Z-Step",
-            #     input_class=ValidatedEntry,
-            #     label_pos="top",
-            # ),
-            # "pixel_size": LabelInput(
-            #     parent=volume_settings_frame,
-            #     label="Pixel Size",
-            #     input_class=ValidatedEntry,
-            #     label_pos="top",
-            # ),
+            "dz": LabelInput(
+                parent=volume_settings_frame,
+                label="Z-Step Size",
+                input_class=ValidatedSpinbox,
+                input_var=tk.DoubleVar(value=0.4),
+                input_args={"from_": 0.01, "to": np.Inf, "increment": 0.01, "width": 8},
+                label_pos="top",
+            ),
+            "px": LabelInput(
+                parent=volume_settings_frame,
+                label="Pixel Size",
+                input_class=ValidatedSpinbox,
+                input_var=tk.DoubleVar(value=0.1478),
+                input_args={"from_": 0.0001, "to": np.Inf, "increment": 0.0001, "width": 8},
+                label_pos="top",
+            ),                        
             "opacity": LabelInput(
                 parent=render_settings_frame,
                 label="Opacity",
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(value=0.15),
-                input_args={"from_": 0.01, "to": 1.0, "increment": 0.01, "width": 5},
+                input_args={"from_": 0.01, "to": 1.0, "increment": 0.01, "width": 8},
                 label_pos="top",
             ),
             "world_step": LabelInput(
@@ -121,7 +125,7 @@ class VolumeViewerStandalone(TkinterDnD.Tk):
                 label="World Step",
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(value=1.0),
-                input_args={"from_": 0.05, "to": 10.0, "increment": 0.05, "width": 5},
+                input_args={"from_": 0.05, "to": 10.0, "increment": 0.05, "width": 8},
                 label_pos="top",
             )
         }
@@ -176,8 +180,10 @@ class ChannelController:
 
     def _gl_upload_stack_to_backend(self):
 
-        self.parent.backend.set_num_slices_and_dz(
-            len(self.stack_data), self.resolution['dz']
+        self.parent.backend.set_volume_dimensions(
+            self.resolution['dz'],
+            self.resolution['px'],
+            len(self.stack_data)
             )
 
         self._gl_update_color()
@@ -210,17 +216,21 @@ class ChannelController:
             try:
                 image_desc = dict(eval(tif.pages[0].tags['ImageDescription'].value))
                 self.resolution['dz'] = image_desc['spacing']
+                print(f"Acquired dz = {self.resolution['dz']} from metadata...")
+                self.parent.view.inputs['dz'].set(self.resolution['dz'])
             except:
-                self.resolution['dz'] = 0.4
+                self.resolution['dz'] = float(self.parent.view.inputs['dz'].get())
 
             # xy-resolution
             try:
                 pixels, microns = tif.pages[0].tags.get('XResolution').value
                 self.resolution['px'] = microns / pixels
+                print(f"Acquired px = {self.resolution['px']} from metadata...")
+                self.parent.view.inputs['px'].set(self.resolution['px'])
             except:
-                self.resolution['px'] = 1.0
+                self.resolution['px'] = float(self.parent.view.inputs['px'].get())
 
-            print("Resolution:", self.resolution)
+            print("Using resolution:", self.resolution)
 
             # load the data
             self.stack_data = tif.asarray()

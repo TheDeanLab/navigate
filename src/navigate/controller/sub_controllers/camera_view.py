@@ -1791,7 +1791,7 @@ class BaseViewController(GUIController, ABaseViewController):
         # If we got here, we were successful
         logger.info("PyOpenGL successfully imported. OpenGL-based volume rendering enabled.")
 
-    def _OpenGL_set_z_stack_dimensions(self, n_slices: int, dz: float):
+    def _OpenGL_set_volume_dimensions(self, n_slices: int, dz: float, px: float):
         """Set the number of slices and z-step size for the OpenGL volume rendering backend."""
 
         # Guard against backend non-init
@@ -1801,7 +1801,7 @@ class BaseViewController(GUIController, ABaseViewController):
             return
 
         # Set number of channels and slices
-        self.gl_volume_view_backend.set_num_slices_and_dz(n_slices, dz)
+        self.gl_volume_view_backend.set_volume_dimensions(dz=dz, px=px, n_slices=n_slices)
 
     def _OpenGL_update_display_settings_hook(self):
         """Hook for OpenGL-based views to update channel settings."""
@@ -2211,9 +2211,10 @@ class CameraViewController(BaseViewController):
         )
 
         # (Re)set z-stack dimensions for volume rendering
-        self._OpenGL_set_z_stack_dimensions(
+        self._OpenGL_set_volume_dimensions(
             n_slices=self.number_of_slices if self.image_mode == "z-stack" else 2,
-            dz=microscope_state.get("step_size", 1.0)
+            dz=microscope_state.get("step_size", 1.0),
+            px=0.1478 # TODO: Either pull from expt.CameraParameters or create an input
         )
 
     def update_snr(self) -> None:

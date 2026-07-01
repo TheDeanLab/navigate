@@ -1,4 +1,4 @@
-import os
+import time
 import pathlib
 import tifffile
 import numpy as np
@@ -10,7 +10,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 
 from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedEntry
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
 WINDOW_DIMENSIONS = (400, 600)
 
@@ -27,6 +27,36 @@ DEFAULT_COLORS = [
 def rgb_to_hex(color: list):
     r, g, b = color
     return f'#{r:02x}{g:02x}{b:02x}'
+
+class VolumeViewer:
+    def __init__(self, root: tk.Tk=None, splash_screen: tk.Toplevel=None):
+        """
+        VolumeViewer wrapper class to be called from main.py. This class initializes
+        the VolumeViewerStandalone view and the VVStandaloneController, which handles
+        the OpenGL backend and the GUI interactions.
+
+        Parameters:
+            root (tk.Tk): Main root to be destroyed and replaced with VolumeViewerStandalone.
+            splash_screen (tk.Toplevel, optional): The splash screen to be destroyed after initialization.
+        """
+        if root is not None and splash_screen is not None:
+            time.sleep(1)  # Briefly let the splash screen show
+            splash_screen.destroy()
+            root.destroy()
+
+        self.root = VolumeViewerStandalone()  # Creates a new TkinterDnD.Tk root for the volume viewer
+        self.backend = GLVolumeViewBackend()  # Initializes the OpenGL backend for volume rendering
+        self.controller = VVStandaloneController(self.root, self.backend)
+
+    def mainloop(self):
+        """
+        Starts the main loop of the VolumeViewerStandalone application.
+        """
+        self.root.mainloop()
+
+        # Close behaviour
+        if self.backend.thread_is_running():
+            self.backend.stop()
 
 class ChannelWidgetBox(tk.Frame):
     def __init__(self, master, channel_name):
@@ -215,8 +245,7 @@ class ChannelController:
             # z-spacing
             try:
                 image_desc = dict(eval(tif.pages[0].tags['ImageDescription'].value))
-                self.resolution['dz'] = image_desc['spacing']
-                print(f"Acquired dz = {self.resolution['dz']} from metadata...")
+                self.resolution['dz'] = image_desc['spacing']                
                 self.parent.view.inputs['dz'].set(self.resolution['dz'])
             except:
                 self.resolution['dz'] = float(self.parent.view.inputs['dz'].get())
@@ -224,14 +253,18 @@ class ChannelController:
             # xy-resolution
             try:
                 pixels, microns = tif.pages[0].tags.get('XResolution').value
+                resolution_unit = tif.pages[0].tags.get('ResolutionUnit').value
+                
+                if resolution_unit == 3:  # 3 corresponds to centimeters
+                    microns *= 10000  # Convert cm to microns
+                elif resolution_unit == 2:  # 2 corresponds to inches
+                    microns *= 25400  # Convert inches to microns
+                
                 self.resolution['px'] = microns / pixels
-                print(f"Acquired px = {self.resolution['px']} from metadata...")
                 self.parent.view.inputs['px'].set(self.resolution['px'])
             except:
                 self.resolution['px'] = float(self.parent.view.inputs['px'].get())
-
-            print("Using resolution:", self.resolution)
-
+            
             # load the data
             self.stack_data = tif.asarray()
 
@@ -288,6 +321,11 @@ class VVStandaloneController:
         dropped_files = event.data.split()
         dropped_files.sort()
 
+        # Destroy existing channel widgets before building new ones
+        for cc in self.channels.values():
+            cc.view.destroy()
+        self.channels.clear()
+
         # Reset if running
         if self.backend.thread_is_running():
             self.backend.stop()
@@ -309,19 +347,14 @@ class VVStandaloneController:
 
                 # Queue a stack upload for this channel
                 self.view.after(100, self.channels[channel_name]._gl_upload_stack_to_backend)
-        
+
+                # Autoscale the min/max values for this channel
+                self.view.after(200, self.channels[channel_name].scale_volume_min_max)
+
         # Reinitialize shader uniforms on-load
         for key in self.view.inputs:
             self._gl_on_volume_settings_changed(key)
 
 if __name__ == "__main__":
-    app = VolumeViewerStandalone()
-    gl_backend = GLVolumeViewBackend()
-
-    controller = VVStandaloneController(app, gl_backend)
-
-    app.mainloop()
-
-    # Close behaviour
-    if gl_backend.thread_is_running():
-        gl_backend.stop()
+    volume_viewer = VolumeViewer()
+    volume_viewer.mainloop()

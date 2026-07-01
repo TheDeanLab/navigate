@@ -33,6 +33,7 @@
 # Standard Library Imports
 import tkinter as tk
 import platform
+import time
 import os
 
 # Third Party Imports
@@ -41,6 +42,7 @@ import os
 from navigate.controller.controller import Controller
 from navigate.controller.configurator import Configurator
 from navigate.log_files.log_functions import log_setup
+from navigate.view.display_backends.volume_viewer_standalone import VolumeViewer
 from navigate.view.splash_screen import SplashScreen
 from navigate.tools.main_functions import (
     evaluate_parser_input_arguments,
@@ -111,6 +113,22 @@ def main():
 
     if command_line_args.configurator:
         Configurator(root, splash_screen)
+    elif command_line_args.viewer:
+        # Guard against TkinterDND not being installed, which is required for VolumeViewerStandalone
+        try:
+            import OpenGL
+        except ImportError:
+            print(
+                "ERROR: OpenGL is required for VolumeViewerStandalone."
+                "Please install OpenGL optional dependencies to run volume viewer:"
+                "pip install -e .[opengl]"
+            )
+            return
+        
+        volume_viewer = VolumeViewer(root=root, splash_screen=splash_screen)
+
+        # Replace the root with volume viewer
+        root = volume_viewer
     else:
         Controller(
             root=root,

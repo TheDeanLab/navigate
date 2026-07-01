@@ -181,6 +181,15 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     input_args.add_argument(
+        "-v",
+        "--viewer",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Volume Viewer - Launch the standalone volume viewer (requires OpenGL).",
+    )
+
+    input_args.add_argument(
         "-sh",
         "--synthetic-hardware",
         required=False,

@@ -114,7 +114,7 @@ class Camera:
     Orbit (yaw/pitch + radius), pixel-accurate pan, dolly,
     and auto-recenter pivot to AABB under the cursor on RMB release.
     """
-    def __init__(self, window, parent_viewer, position=glm.vec3(100), look_at=glm.vec3(0,0,0)):
+    def __init__(self, window, parent_viewer, position=glm.vec3(250), look_at=glm.vec3(0,0,0)):
         self.window = window
         self.parent_viewer = parent_viewer
 
@@ -943,7 +943,7 @@ class GLVolumeViewBackend:
         self.frame_timer = FrameTimer(every=1.0)
 
         # Set up camera
-        self.camera = Camera(self.window, parent_viewer=self,  position=glm.vec3(-120, 0, 20), look_at=glm.vec3(0, 0, 0))
+        self.camera = Camera(self.window, parent_viewer=self)
 
         # Set initial shader uniforms
         self.shader.use()

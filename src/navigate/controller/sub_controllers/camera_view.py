@@ -56,7 +56,6 @@ from navigate.tools.file_functions import get_ram_info
 from navigate.config import get_navigate_path, update_config_dict
 from navigate.tools.decorators import performance_monitor
 from navigate.view.theme import get_theme_color, get_theme_font
-# from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
 
 # Logger Setup
 p = __name__.split(".")[1]

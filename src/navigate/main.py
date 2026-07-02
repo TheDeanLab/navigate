@@ -33,7 +33,6 @@
 # Standard Library Imports
 import tkinter as tk
 import platform
-import time
 import os
 
 # Third Party Imports

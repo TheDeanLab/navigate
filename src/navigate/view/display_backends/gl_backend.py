@@ -242,6 +242,30 @@ class Camera:
         self.pan_xy  = [px, py]
         self.zoom_xy = z
 
+    def fit_volume_to_view(self, volume_shape: tuple, px: float, dz: float):
+        """
+            Fit the volume to the current view, adjusting radius and ortho size.
+            volume_shape: (nz, ny, nx)
+            px: physical pixel size in XY
+            dz: physical slice spacing in Z
+        """
+        nz, ny, nx = volume_shape
+
+        # Have the sphere cover the larges bbox dimension
+        largest_dimension = max(px * nx, px * ny, dz * nz)
+        S = glm.vec3(largest_dimension)
+
+        # Set the radius = 1.5 x (bbox sphere diameter). Just fits nice.
+        diam = 1.5 * float(glm.length(S))
+        self.radius = max(self.MIN_RADIUS, diam)
+
+        # Compute ortho size based on FOV and radius
+        half_fov_tan = math.tan(math.radians(self.FOV * 0.5))
+        self.ortho_size = self.radius * half_fov_tan
+
+        # Recompute position based on new radius
+        self._recompute_position()
+
     # ---------- callbacks ----------
     def _key_callback(self, window, key, scancode, action, mods):
         if key == glfw.KEY_TAB and action == glfw.PRESS:
@@ -986,6 +1010,9 @@ class GLVolumeViewBackend:
         
         # Define new volume shape
         self.volume_shape = shape
+
+        # We have a new volume_shape, so move the camera to fit the volume in view
+        self.camera.fit_volume_to_view(volume_shape=shape, px=self._px, dz=self._dz)
 
         # Enqueue command to create new volume texture
         def _do():

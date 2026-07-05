@@ -7,6 +7,7 @@ from navigate.config.configuration_wizard import (
     BASIC_IMPORTANCE,
     DEFAULT_STEP,
     collect_step_warnings,
+    device_type_changed,
     field_applies_to_device,
     field_is_visible,
     get_field_metadata,
@@ -164,3 +165,17 @@ def test_merge_loaded_and_edited_values_drops_loaded_values_after_type_change():
     )
 
     assert result == edited
+
+
+def test_device_type_changed_reads_nested_device_type():
+    loaded = {"hardware": {"type": "Photometrics"}}
+    edited = {"hardware": {"type": "Synthetic"}}
+
+    assert device_type_changed(loaded, edited, "hardware/type")
+    assert not device_type_changed(loaded, loaded, "hardware/type")
+
+
+def test_device_type_changed_handles_missing_loaded_value():
+    edited = {"hardware": {"type": "Synthetic"}}
+
+    assert not device_type_changed(None, edited, "hardware/type")

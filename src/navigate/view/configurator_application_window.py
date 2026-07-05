@@ -365,6 +365,7 @@ class HardwareTab(ttk.Frame):
         ttk.Frame.__init__(self, *args, **kwargs)
 
         self.name = name
+        self.loaded_hardware_block = None
         self.wizard_metadata = wizard_metadata or {}
         self.wizard_steps = get_steps(hardware_widgets or {}, self.wizard_metadata)
         self.current_step = tk.StringVar(value=self.wizard_steps[0])

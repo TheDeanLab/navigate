@@ -49,6 +49,10 @@ from navigate.config.configuration_database import (
     hardwares_config_name_dict,
     hardware_wizard_metadata,
 )
+from navigate.config.configuration_wizard import (
+    device_type_changed,
+    merge_loaded_and_edited_values,
+)
 from navigate.tools.file_functions import load_yaml_file, write_to_yaml
 
 # Logger Setup
@@ -156,9 +160,6 @@ class Configurator:
                 hardware_name = microscope_tab.tab(hardware_tab_index, "text")
                 hardware_tab = microscope_tab.nametowidget(hardware_tab_index)
                 hardware_dict = {}
-                microscope_dict[
-                    hardwares_config_name_dict.get(hardware_name, hardware_name)
-                ] = hardware_dict
                 for variable_list in hardware_tab.variables_list:
                     if variable_list is None:
                         continue
@@ -219,6 +220,22 @@ class Configurator:
                             )
                             warning_info[hardware_name] = True
                         set_value(temp_dict, k.split("/"), v)
+                metadata = hardware_wizard_metadata.get(hardware_name, {})
+                changed_type = device_type_changed(
+                    getattr(hardware_tab, "loaded_hardware_block", None),
+                    hardware_dict,
+                    metadata.get("device_field"),
+                )
+                if changed_type:
+                    warning_info[hardware_name] = True
+                hardware_dict = merge_loaded_and_edited_values(
+                    loaded_block=getattr(hardware_tab, "loaded_hardware_block", None),
+                    edited_block=hardware_dict,
+                    device_type_changed=changed_type,
+                )
+                microscope_dict[
+                    hardwares_config_name_dict.get(hardware_name, hardware_name)
+                ] = hardware_dict
 
         write_to_yaml({"microscopes": config_dict}, filename)
         # display warning
@@ -401,14 +418,15 @@ class Configurator:
             for hardware_type, widgets in hardwares_dict.items():
                 hardware_ref_name = hardwares_config_name_dict[hardware_type]
                 wizard_metadata = hardware_wizard_metadata.get(hardware_type, {})
+                loaded_hardware_block = config_dict["microscopes"][microscope_name].get(
+                    hardware_ref_name, None
+                )
                 # build dictionary values for widgets
                 if isinstance(widgets, dict):
                     try:
                         widgets_value = build_widgets_value(
                             widgets,
-                            config_dict["microscopes"][microscope_name][
-                                hardware_ref_name
-                            ],
+                            loaded_hardware_block,
                         )
                     except Exception:
                         widgets_value = [None]
@@ -423,15 +441,11 @@ class Configurator:
                         widgets_value = [
                             build_widgets_value(
                                 widgets[1],
-                                config_dict["microscopes"][microscope_name][
-                                    hardware_ref_name
-                                ],
+                                loaded_hardware_block,
                             ),
                             build_widgets_value(
                                 widgets[2],
-                                config_dict["microscopes"][microscope_name][
-                                    hardware_ref_name
-                                ],
+                                loaded_hardware_block,
                             ),
                         ]
                     except Exception:
@@ -445,6 +459,8 @@ class Configurator:
                         constants_widgets_value=widgets_value[1],
                         wizard_metadata=wizard_metadata,
                     )
+                hardware_tab = microscope_tab.tab_list[-1]
+                hardware_tab.loaded_hardware_block = loaded_hardware_block
 
     def device_selected(self, event):
         """Handle the event when a device is selected from the dropdown."""

@@ -114,6 +114,35 @@ def _deep_merge(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]
     return result
 
 
+def nested_get(data: dict[str, Any] | None, path: str) -> Any:
+    """Return a nested value using slash-separated configurator paths."""
+    if not data:
+        return None
+    current: Any = data
+    for part in path.split("/"):
+        if not isinstance(current, dict):
+            return None
+        current = current.get(part)
+        if current is None:
+            return None
+    return current
+
+
+def device_type_changed(
+    loaded_block: dict[str, Any] | None,
+    edited_block: dict[str, Any],
+    device_field: str | None,
+) -> bool:
+    """Return whether a hardware block changed device type during editing."""
+    if not loaded_block or not device_field:
+        return False
+    loaded_value = nested_get(loaded_block, device_field)
+    edited_value = nested_get(edited_block, device_field)
+    if loaded_value is None or edited_value is None:
+        return False
+    return loaded_value != edited_value
+
+
 def merge_loaded_and_edited_values(
     *,
     loaded_block: dict[str, Any] | None,

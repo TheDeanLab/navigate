@@ -150,6 +150,7 @@ class Configurator:
             return
         # warning_info
         warning_info = {}
+        device_type_change_warnings = {}
         config_dict = {}
         for tab_index in self.view.microscope_window.tabs():
             microscope_name = self.view.microscope_window.tab(tab_index, "text")
@@ -227,7 +228,7 @@ class Configurator:
                     metadata.get("device_field"),
                 )
                 if changed_type:
-                    warning_info[hardware_name] = True
+                    device_type_change_warnings[hardware_name] = True
                 hardware_dict = merge_loaded_and_edited_values(
                     loaded_block=getattr(hardware_tab, "loaded_hardware_block", None),
                     edited_block=hardware_dict,
@@ -245,6 +246,13 @@ class Configurator:
                 message=f"There are empty value(s) with "
                 f"{', '.join(warning_info.keys())}"
                 f". Please double check!",
+            )
+        if device_type_change_warnings:
+            messagebox.showwarning(
+                title="Configuration",
+                message=f"Loaded values for previous device type were not preserved "
+                f"for: {', '.join(device_type_change_warnings.keys())}. "
+                f"Please double check.",
             )
 
     def create_config_window(self, id: int) -> None:

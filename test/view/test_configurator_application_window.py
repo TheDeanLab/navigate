@@ -163,3 +163,51 @@ def test_hardware_tab_builds_wizard_shell(tk_root):
     assert "Timing" in tab.step_buttons
 
     tab.destroy()
+
+
+def test_hardware_tab_filters_fields_by_step_and_advanced_mode(tk_root):
+    metadata = {
+        "device_field": "hardware/type",
+        "steps": ["Device Type", "Connection"],
+        "fields": {
+            "hardware/type": {"step": "Device Type", "importance": "required"},
+            "hardware/camera_connection": {
+                "step": "Connection",
+                "importance": "advanced",
+                "applies_to": ["Photometrics Iris 15B"],
+            },
+        },
+    }
+    widgets = {
+        "hardware/type": [
+            "Device Type",
+            "Combobox",
+            "string",
+            {"Photometrics Iris 15B": "Photometrics", "Virtual Device": "Synthetic"},
+            None,
+        ],
+        "hardware/camera_connection": [
+            "Camera Connection",
+            "Input",
+            "string",
+            None,
+            "Photometrics Iris 15B only",
+        ],
+    }
+
+    tab = HardwareTab("Camera", widgets, root=tk_root, wizard_metadata=metadata)
+    tk_root.update_idletasks()
+
+    assert tab.field_rows["hardware/type"].winfo_ismapped()
+    assert not tab.field_rows["hardware/camera_connection"].winfo_ismapped()
+
+    tab.select_wizard_step("Connection")
+    tk_root.update_idletasks()
+    assert not tab.field_rows["hardware/camera_connection"].winfo_ismapped()
+
+    tab.advanced_mode.set(True)
+    tab.refresh_wizard_visibility()
+    tk_root.update_idletasks()
+    assert tab.field_rows["hardware/camera_connection"].winfo_ismapped()
+
+    tab.destroy()

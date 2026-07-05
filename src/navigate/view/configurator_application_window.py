@@ -28,6 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from __future__ import annotations
+
 # Standard Library Imports
 import tkinter as tk
 from tkinter import ttk, simpledialog
@@ -38,7 +40,11 @@ from typing import Optional, Callable
 # Third Party Imports
 
 # Local Imports
-from navigate.config.configuration_wizard import get_steps
+from navigate.config.configuration_wizard import (
+    field_is_visible,
+    get_field_metadata,
+    get_steps,
+)
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.CollapsibleFrame import CollapsibleFrame
 from navigate.view.theme import get_theme_padding_px, get_theme_space_px
@@ -455,6 +461,12 @@ class HardwareTab(ttk.Frame):
         self.variables = {}
         self.values_dict = {}
         self.variables_list = []
+        self.field_rows = {}
+        self.field_widgets = {}
+        self.field_info_labels = {}
+        self.field_specs = {}
+        self.field_variables = {}
+        self.field_keys = {}
 
         self.build_widgets(top_widgets, parent=self.top_frame)
 
@@ -474,8 +486,50 @@ class HardwareTab(ttk.Frame):
         self.refresh_wizard_visibility()
 
     def refresh_wizard_visibility(self) -> None:
-        """Refresh wizard field visibility."""
-        return
+        """Refresh fields for the active step and mode."""
+        selected_step = self.current_step.get()
+        selected_device = self.get_selected_device()
+        advanced_mode = bool(self.advanced_mode.get())
+        for row_key, row in self.field_rows.items():
+            widget_spec = self.field_specs.get(row_key)
+            if widget_spec is None:
+                row.grid_remove()
+                continue
+            field_key = self.field_keys.get(row_key, row_key)
+            metadata = get_field_metadata(self.wizard_metadata, field_key)
+            if field_is_visible(
+                field_key=field_key,
+                widget_spec=widget_spec,
+                field_metadata=metadata,
+                selected_step=selected_step,
+                advanced_mode=advanced_mode,
+                selected_device=selected_device,
+            ):
+                row.grid()
+            else:
+                row.grid_remove()
+
+    def get_selected_device(self) -> str | None:
+        """Return the current selected device label for this tab."""
+        device_field = self.wizard_metadata.get("device_field")
+        if not device_field:
+            return None
+        variable = self.field_variables.get(device_field)
+        if variable is None:
+            return None
+        try:
+            return variable.get()
+        except tk._tkinter.TclError:
+            return None
+
+    def _field_row_key(self, field_key: str) -> str:
+        """Return a unique row key without overwriting repeated field rows."""
+        if field_key not in self.field_rows:
+            return field_key
+        index = 2
+        while f"{field_key}#{index}" in self.field_rows:
+            index += 1
+        return f"{field_key}#{index}"
 
     def create_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
         """create widgets
@@ -517,12 +571,17 @@ class HardwareTab(ttk.Frame):
                 i += 2
                 continue
             elif v[1] != "Button":
+                row_frame = ttk.Frame(content_frame)
+                if direction == "vertical":
+                    row_frame.grid(row=i, column=0, sticky=tk.NSEW)
+                else:
+                    row_frame.grid(row=0, column=i, sticky=tk.NW)
                 self.variables[k] = variable_types[v[2]]()
                 label_text = v[0] + "  :" if v[0][-1] != ":" else v[0]
-                label = ttk.Label(content_frame, text=label_text)
+                label = ttk.Label(row_frame, text=label_text)
                 if direction == "vertical":
                     label.grid(
-                        row=i,
+                        row=0,
                         column=0,
                         sticky=tk.NW,
                         padx=get_theme_padding_px((3, 10)),
@@ -531,19 +590,18 @@ class HardwareTab(ttk.Frame):
                 else:
                     label.grid(
                         row=0,
-                        column=i,
+                        column=0,
                         sticky=tk.NW,
                         padx=get_theme_padding_px((5, 3)),
                         pady=get_theme_space_px(3),
                     )
-                    i += 1
                 if v[1] == "Checkbutton":
                     widget = widget_types[v[1]](
-                        content_frame, text="", variable=self.variables[k]
+                        row_frame, text="", variable=self.variables[k]
                     )
                 else:
                     widget = widget_types[v[1]](
-                        content_frame, textvariable=self.variables[k], width=30
+                        row_frame, textvariable=self.variables[k], width=30
                     )
                 if v[1] == "Combobox":
                     if isinstance(v[3], list):
@@ -557,6 +615,11 @@ class HardwareTab(ttk.Frame):
                         widget.set(str(temp[-1]))
                     else:
                         widget.set(temp[-1])
+                    if k == self.wizard_metadata.get("device_field"):
+                        widget.bind(
+                            "<<ComboboxSelected>>",
+                            lambda event: self.refresh_wizard_visibility(),
+                        )
                 elif v[1] == "Spinbox":
                     if not isinstance(v[3], dict):
                         v[3] = {}
@@ -568,6 +631,14 @@ class HardwareTab(ttk.Frame):
                 # set default value
                 if len(v) >= 6 and v[5] is not None:
                     self.variables[k].set(str(v[5]))
+
+                row_key = self._field_row_key(k)
+                self.field_rows[row_key] = row_frame
+                self.field_specs[row_key] = v
+                self.field_widgets[row_key] = widget
+                self.field_variables[row_key] = self.variables[k]
+                self.field_variables.setdefault(k, self.variables[k])
+                self.field_keys[row_key] = k
             else:
                 widget = ttk.Button(
                     content_frame,
@@ -578,7 +649,7 @@ class HardwareTab(ttk.Frame):
                 )
             if direction == "vertical":
                 widget.grid(
-                    row=i,
+                    row=0 if v[1] != "Button" else i,
                     column=1,
                     sticky=tk.NSEW,
                     padx=get_theme_space_px(5),
@@ -587,7 +658,7 @@ class HardwareTab(ttk.Frame):
             else:
                 widget.grid(
                     row=0,
-                    column=i,
+                    column=1 if v[1] != "Button" else i,
                     sticky=tk.NW,
                     padx=get_theme_padding_px((10, 3)),
                     pady=get_theme_padding_px((3, 0)),
@@ -595,10 +666,11 @@ class HardwareTab(ttk.Frame):
 
             # display info label
             if len(v) >= 5 and v[4]:
-                label = ttk.Label(content_frame, text=v[4])
+                info_parent = row_frame if v[1] != "Button" else content_frame
+                label = ttk.Label(info_parent, text=v[4])
                 if direction == "vertical":
                     label.grid(
-                        row=i,
+                        row=0 if v[1] != "Button" else i,
                         column=2,
                         sticky=tk.NW,
                         padx=get_theme_padding_px((10, 10)),
@@ -607,11 +679,13 @@ class HardwareTab(ttk.Frame):
                 else:
                     label.grid(
                         row=1,
-                        column=i,
+                        column=2 if v[1] != "Button" else i,
                         sticky=tk.NW,
                         padx=get_theme_padding_px((10, 3)),
                         pady=get_theme_space_px(0),
                     )
+                if v[1] != "Button":
+                    self.field_info_labels[row_key] = label
             i += 1
 
     def build_widgets(self, widgets, *args, parent=None, widgets_value=None, **kwargs):
@@ -678,6 +752,7 @@ class HardwareTab(ttk.Frame):
                     pass
                 except tk._tkinter.TclError:
                     pass
+        self.refresh_wizard_visibility()
 
     def fold_all_frames(self, except_frame: Optional[tk.Frame] = None) -> None:
         """Fold all collapsible frames except one frame

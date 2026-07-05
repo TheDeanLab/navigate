@@ -167,6 +167,21 @@ def test_merge_loaded_and_edited_values_drops_loaded_values_after_type_change():
     assert result == edited
 
 
+def test_merge_loaded_and_edited_values_merges_list_items_index_wise():
+    loaded = {"hardware": [{"type": "NI", "volts_per_micron": "0.1*x"}]}
+    edited = {"hardware": [{"type": "NI", "axes": "[x]"}]}
+
+    result = merge_loaded_and_edited_values(
+        loaded_block=loaded,
+        edited_block=edited,
+        device_type_changed=False,
+    )
+
+    assert result == {
+        "hardware": [{"type": "NI", "volts_per_micron": "0.1*x", "axes": "[x]"}]
+    }
+
+
 def test_device_type_changed_reads_nested_device_type():
     loaded = {"hardware": {"type": "Photometrics"}}
     edited = {"hardware": {"type": "Synthetic"}}
@@ -179,3 +194,26 @@ def test_device_type_changed_handles_missing_loaded_value():
     edited = {"hardware": {"type": "Synthetic"}}
 
     assert not device_type_changed(None, edited, "hardware/type")
+
+
+def test_device_type_changed_reads_list_backed_device_type():
+    loaded = {"hardware": [{"type": "PI"}]}
+    edited = {"hardware": [{"type": "NI"}]}
+
+    assert device_type_changed(loaded, edited, "type")
+    assert not device_type_changed(loaded, loaded, "type")
+
+
+def test_device_type_changed_reads_later_list_backed_device_type():
+    loaded = {"hardware": [{"type": "NI"}, {"type": "PI"}]}
+    edited = {"hardware": [{"type": "NI"}, {"type": "Synthetic"}]}
+
+    assert device_type_changed(loaded, edited, "type")
+
+
+def test_device_type_changed_handles_missing_list_backed_device_type():
+    loaded = {"hardware": [{"serial_number": "123"}]}
+    edited = {"hardware": [{"type": "NI"}]}
+
+    assert not device_type_changed(loaded, edited, "type")
+    assert not device_type_changed({"hardware": [{"type": "PI"}]}, loaded, "type")

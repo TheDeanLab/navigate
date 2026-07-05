@@ -109,8 +109,21 @@ def _deep_merge(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]
     for key, value in overlay.items():
         if isinstance(value, dict) and isinstance(result.get(key), dict):
             result[key] = _deep_merge(result[key], value)
+        elif isinstance(value, list) and isinstance(result.get(key), list):
+            result[key] = _deep_merge_list(result[key], value)
         else:
             result[key] = deepcopy(value)
+    return result
+
+
+def _deep_merge_list(base: list[Any], overlay: list[Any]) -> list[Any]:
+    result = []
+    for index, value in enumerate(overlay):
+        base_value = base[index] if index < len(base) else None
+        if isinstance(value, dict) and isinstance(base_value, dict):
+            result.append(_deep_merge(base_value, value))
+        else:
+            result.append(deepcopy(value))
     return result
 
 
@@ -120,12 +133,55 @@ def nested_get(data: dict[str, Any] | None, path: str) -> Any:
         return None
     current: Any = data
     for part in path.split("/"):
-        if not isinstance(current, dict):
+        if isinstance(current, dict):
+            current = current.get(part)
+        elif isinstance(current, list):
+            if not current or not isinstance(current[0], dict):
+                return None
+            current = current[0].get(part)
+        else:
             return None
-        current = current.get(part)
         if current is None:
             return None
     return current
+
+
+def _list_backed_field_values(
+    block: dict[str, Any],
+    device_field: str,
+) -> list[Any] | None:
+    if "/" in device_field:
+        list_path, field_path = device_field.rsplit("/", 1)
+    else:
+        list_path = "hardware"
+        field_path = device_field
+
+    list_value = nested_get(block, list_path)
+    if not isinstance(list_value, list):
+        return None
+
+    values = []
+    for item in list_value:
+        if not isinstance(item, dict):
+            return None
+        value = nested_get(item, field_path)
+        if value is None:
+            return None
+        values.append(value)
+    return values
+
+
+def _device_field_values(block: dict[str, Any], device_field: str) -> list[Any] | None:
+    values = _list_backed_field_values(block, device_field)
+    if values is not None:
+        return values
+
+    value = nested_get(block, device_field)
+    if value is None and "/" not in device_field:
+        value = nested_get(block, f"hardware/{device_field}")
+    if value is None:
+        return None
+    return [value]
 
 
 def device_type_changed(
@@ -136,11 +192,14 @@ def device_type_changed(
     """Return whether a hardware block changed device type during editing."""
     if not loaded_block or not device_field:
         return False
-    loaded_value = nested_get(loaded_block, device_field)
-    edited_value = nested_get(edited_block, device_field)
-    if loaded_value is None or edited_value is None:
+    loaded_values = _device_field_values(loaded_block, device_field)
+    edited_values = _device_field_values(edited_block, device_field)
+    if loaded_values is None or edited_values is None:
         return False
-    return loaded_value != edited_value
+    return any(
+        loaded_value != edited_value
+        for loaded_value, edited_value in zip(loaded_values, edited_values)
+    )
 
 
 def merge_loaded_and_edited_values(

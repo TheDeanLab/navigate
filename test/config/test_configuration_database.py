@@ -29,7 +29,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from navigate.config.configuration_database import daq_hardware_widgets
+from navigate.config.configuration_database import (
+    camera_hardware_widgets,
+    daq_hardware_widgets,
+    hardware_wizard_metadata,
+    stage_hardware_widgets,
+)
 
 
 def test_daq_hardware_widgets_include_trigger_reset_count():
@@ -42,3 +47,59 @@ def test_daq_hardware_widgets_include_trigger_reset_count():
     assert "0" in widget[4]
     assert "disabled" in widget[4]
     assert "unstable" in widget[4]
+
+
+def test_hardware_wizard_metadata_has_shell_for_every_hardware_tab():
+    expected_tabs = {
+        "Camera",
+        "Data Acquisition Card",
+        "Filter Wheel",
+        "Galvo",
+        "Lasers",
+        "Remote Focus Devices",
+        "Adaptive Optics",
+        "Shutters",
+        "Stages",
+        "Zoom Device",
+    }
+    assert set(hardware_wizard_metadata) == expected_tabs
+
+
+def test_camera_wizard_metadata_covers_all_fields():
+    fields = hardware_wizard_metadata["Camera"]["fields"]
+    expected_field_keys = {
+        key
+        for key, value in camera_hardware_widgets.items()
+        if key != "frame_config" and value[1] not in {"Button", "Label"}
+    }
+    assert set(fields) == expected_field_keys
+    assert hardware_wizard_metadata["Camera"]["device_field"] == "hardware/type"
+    assert fields["hardware/type"]["importance"] == "required"
+    assert fields["hardware/camera_connection"]["applies_to"] == [
+        "Photometrics Iris 15B"
+    ]
+
+
+def test_daq_wizard_metadata_covers_all_fields():
+    fields = hardware_wizard_metadata["Data Acquisition Card"]["fields"]
+    expected_field_keys = {
+        key
+        for key, value in daq_hardware_widgets.items()
+        if key != "frame_config" and value[1] not in {"Button", "Label"}
+    }
+    assert set(fields) == expected_field_keys
+    assert fields["sample_rate"]["importance"] == "required"
+    assert fields["trigger_reset_count"]["importance"] == "advanced"
+
+
+def test_stage_wizard_metadata_covers_all_fields():
+    fields = hardware_wizard_metadata["Stages"]["fields"]
+    expected_field_keys = {
+        key
+        for key, value in stage_hardware_widgets.items()
+        if key != "frame_config" and value[1] not in {"Button", "Label"}
+    }
+    assert set(fields) == expected_field_keys
+    assert hardware_wizard_metadata["Stages"]["device_field"] == "type"
+    assert fields["volts_per_micron"]["applies_to"] == ["NI Analog/Digital Device"]
+    assert fields["controllername"]["applies_to"] == ["Physik Instrumente"]

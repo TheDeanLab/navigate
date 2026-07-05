@@ -383,21 +383,72 @@ class HardwareTab(ttk.Frame):
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        self.top_frame = ttk.Frame(content_frame)
-
-        self.top_frame.grid(
-            row=0, column=0, sticky=tk.NSEW, padx=get_theme_space_px(10)
+        self.wizard_header = ttk.Frame(content_frame)
+        self.wizard_header.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(10),
+            pady=get_theme_space_px(3),
         )
 
-        self.hardware_frame = ttk.Frame(content_frame)
-        self.hardware_frame.grid(
+        self.advanced_toggle = ttk.Checkbutton(
+            self.wizard_header,
+            text="Advanced",
+            variable=self.advanced_mode,
+            command=self.refresh_wizard_visibility,
+        )
+        self.advanced_toggle.grid(row=0, column=0, sticky=tk.W)
+
+        self.wizard_body = ttk.Frame(content_frame)
+        self.wizard_body.grid(
             row=1, column=0, sticky=tk.NSEW, padx=get_theme_space_px(10)
         )
 
-        self.bottom_frame = ttk.Frame(content_frame)
-        self.bottom_frame.grid(
-            row=2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(10)
+        self.step_frame = ttk.Frame(self.wizard_body)
+        self.step_frame.grid(
+            row=0, column=0, sticky=tk.NW, padx=get_theme_padding_px((0, 8))
         )
+
+        self.field_frame = ttk.Frame(self.wizard_body)
+        self.field_frame.grid(row=0, column=1, sticky=tk.NSEW)
+
+        self.help_frame = ttk.Frame(self.wizard_body)
+        self.help_frame.grid(
+            row=0, column=2, sticky=tk.NW, padx=get_theme_padding_px((8, 0))
+        )
+
+        self.top_frame = ttk.Frame(self.field_frame)
+
+        self.top_frame.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+        )
+
+        self.hardware_frame = ttk.Frame(self.field_frame)
+        self.hardware_frame.grid(
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+        )
+
+        self.bottom_frame = ttk.Frame(self.field_frame)
+        self.bottom_frame.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+        )
+        self.step_buttons = {}
+        for index, step in enumerate(self.wizard_steps):
+            button = ttk.Button(
+                self.step_frame,
+                text=step,
+                command=lambda step=step: self.select_wizard_step(step),
+            )
+            button.grid(row=index, column=0, sticky=tk.EW, pady=get_theme_space_px(1))
+            self.step_buttons[step] = button
+
         self.frame_row = 0
         self.row_offset = self.frame_row + 1
 
@@ -416,6 +467,15 @@ class HardwareTab(ttk.Frame):
 
         for widgets_value in constants_widgets_value:
             self.build_widgets(widgets, widgets_value=widgets_value)
+
+    def select_wizard_step(self, step: str) -> None:
+        """Select a wizard step and refresh visible fields."""
+        self.current_step.set(step)
+        self.refresh_wizard_visibility()
+
+    def refresh_wizard_visibility(self) -> None:
+        """Refresh wizard field visibility."""
+        return
 
     def create_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
         """create widgets

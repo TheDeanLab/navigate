@@ -131,3 +131,35 @@ def test_hardware_tab_stores_wizard_metadata(tk_root):
     assert tab.current_step.get() == "Device Type"
 
     tab.destroy()
+
+
+def test_hardware_tab_builds_wizard_shell(tk_root):
+    metadata = {
+        "steps": ["Device Type", "Timing"],
+        "fields": {
+            "hardware/type": {"step": "Device Type", "importance": "required"},
+            "delay": {"step": "Timing", "importance": "recommended"},
+        },
+    }
+    widgets = {
+        "hardware/type": [
+            "Device Type",
+            "Combobox",
+            "string",
+            {"Virtual": "Synthetic"},
+            None,
+        ],
+        "delay": ["Delay", "Spinbox", "float", {"from": 0, "to": 10}, None],
+    }
+
+    tab = HardwareTab("Camera", widgets, root=tk_root, wizard_metadata=metadata)
+    tk_root.update_idletasks()
+
+    assert isinstance(tab.step_frame, ttk.Frame)
+    assert isinstance(tab.field_frame, ttk.Frame)
+    assert isinstance(tab.help_frame, ttk.Frame)
+    assert len(tab.step_buttons) == 2
+    assert "Device Type" in tab.step_buttons
+    assert "Timing" in tab.step_buttons
+
+    tab.destroy()

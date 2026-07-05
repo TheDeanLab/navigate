@@ -488,7 +488,6 @@ class HardwareTab(ttk.Frame):
     def refresh_wizard_visibility(self) -> None:
         """Refresh fields for the active step and mode."""
         selected_step = self.current_step.get()
-        selected_device = self.get_selected_device()
         advanced_mode = bool(self.advanced_mode.get())
         for row_key, row in self.field_rows.items():
             widget_spec = self.field_specs.get(row_key)
@@ -503,7 +502,7 @@ class HardwareTab(ttk.Frame):
                 field_metadata=metadata,
                 selected_step=selected_step,
                 advanced_mode=advanced_mode,
-                selected_device=selected_device,
+                selected_device=self.get_selected_device_for_field(row_key),
             ):
                 row.grid()
             else:
@@ -511,16 +510,32 @@ class HardwareTab(ttk.Frame):
 
     def get_selected_device(self) -> str | None:
         """Return the current selected device label for this tab."""
+        return self.get_selected_device_for_field("")
+
+    def get_selected_device_for_field(self, row_key: str) -> str | None:
+        """Return the selected device label for a field row's repeated group."""
         device_field = self.wizard_metadata.get("device_field")
         if not device_field:
             return None
-        variable = self.field_variables.get(device_field)
+        suffix = self._field_row_suffix(row_key)
+        variable = self.field_variables.get(f"{device_field}{suffix}")
+        if variable is None:
+            variable = self.field_variables.get(device_field)
         if variable is None:
             return None
         try:
             return variable.get()
         except tk._tkinter.TclError:
             return None
+
+    def _field_row_suffix(self, row_key: str) -> str:
+        """Return a repeated-row suffix like '#2', or '' for the first group."""
+        if "#" not in row_key:
+            return ""
+        suffix = row_key.rsplit("#", 1)[-1]
+        if not suffix.isdigit():
+            return ""
+        return f"#{suffix}"
 
     def _field_row_key(self, field_key: str) -> str:
         """Return a unique row key without overwriting repeated field rows."""

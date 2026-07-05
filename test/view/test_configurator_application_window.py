@@ -211,3 +211,100 @@ def test_hardware_tab_filters_fields_by_step_and_advanced_mode(tk_root):
     assert tab.field_rows["hardware/camera_connection"].winfo_ismapped()
 
     tab.destroy()
+
+
+def test_hardware_tab_filters_basic_fields_by_selected_device(tk_root):
+    metadata = {
+        "device_field": "hardware/type",
+        "steps": ["Device Type", "Connection"],
+        "fields": {
+            "hardware/type": {"step": "Device Type", "importance": "required"},
+            "hardware/camera_connection": {
+                "step": "Connection",
+                "importance": "recommended",
+                "applies_to": ["Photometrics Iris 15B"],
+            },
+        },
+    }
+    widgets = {
+        "hardware/type": [
+            "Device Type",
+            "Combobox",
+            "string",
+            {"Photometrics Iris 15B": "Photometrics", "Virtual Device": "Synthetic"},
+            None,
+        ],
+        "hardware/camera_connection": [
+            "Camera Connection",
+            "Input",
+            "string",
+            None,
+            None,
+        ],
+    }
+
+    tab = HardwareTab("Camera", widgets, root=tk_root, wizard_metadata=metadata)
+    tab.select_wizard_step("Connection")
+    tk_root.update_idletasks()
+
+    assert not tab.field_rows["hardware/camera_connection"].winfo_ismapped()
+
+    tab.field_variables["hardware/type"].set("Photometrics Iris 15B")
+    tab.refresh_wizard_visibility()
+    tk_root.update_idletasks()
+
+    assert tab.field_rows["hardware/camera_connection"].winfo_ismapped()
+
+    tab.destroy()
+
+
+def test_hardware_tab_uses_repeated_group_device_for_visibility(tk_root):
+    metadata = {
+        "device_field": "type",
+        "steps": ["Device Type", "Calibration"],
+        "fields": {
+            "type": {"step": "Device Type", "importance": "required"},
+            "volts_per_micron": {
+                "step": "Calibration",
+                "importance": "recommended",
+                "applies_to": ["Applied Scientific Instrumentation MS-2000"],
+            },
+        },
+    }
+    widgets = {
+        "type": [
+            "Device Type",
+            "Combobox",
+            "string",
+            {
+                "Applied Scientific Instrumentation MS-2000": "ASI",
+                "Virtual Device": "Synthetic",
+            },
+            None,
+        ],
+        "volts_per_micron": [
+            "Volts Per Micron",
+            "Input",
+            "float",
+            None,
+            None,
+        ],
+    }
+
+    tab = HardwareTab(
+        "Stage",
+        widgets,
+        root=tk_root,
+        wizard_metadata=metadata,
+        hardware_widgets_value=[
+            {"type": "Virtual Device"},
+            {"type": "Applied Scientific Instrumentation MS-2000"},
+        ],
+    )
+    tab.select_wizard_step("Calibration")
+    tk_root.update_idletasks()
+
+    assert not tab.field_rows["volts_per_micron"].winfo_ismapped()
+    assert tab.field_rows["volts_per_micron#2"].winfo_ismapped()
+
+    tab.destroy()

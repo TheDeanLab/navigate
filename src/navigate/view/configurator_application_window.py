@@ -38,6 +38,7 @@ from typing import Optional, Callable
 # Third Party Imports
 
 # Local Imports
+from navigate.config.configuration_wizard import get_steps
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.CollapsibleFrame import CollapsibleFrame
 from navigate.view.theme import get_theme_padding_px, get_theme_space_px
@@ -275,7 +276,13 @@ class MicroscopeTab(DockableNotebook):
         tk.Grid.rowconfigure(self, "all", weight=1)
 
     def create_hardware_tab(
-        self, name, hardware_widgets, widgets=None, top_widgets=None, **kwargs
+        self,
+        name,
+        hardware_widgets,
+        widgets=None,
+        top_widgets=None,
+        wizard_metadata=None,
+        **kwargs,
     ):
         """Create hardware tab
 
@@ -289,13 +296,20 @@ class MicroscopeTab(DockableNotebook):
             constants widgets dict
         top_widgets : dict
             button widgets dict
+        wizard_metadata : dict
+            wizard metadata dict
         *args
             Variable length argument list.
         **kwargs
             Arbitrary keyword arguments
         """
         tab = HardwareTab(
-            name, hardware_widgets, widgets=widgets, top_widgets=top_widgets, **kwargs
+            name,
+            hardware_widgets,
+            widgets=widgets,
+            top_widgets=top_widgets,
+            wizard_metadata=wizard_metadata,
+            **kwargs,
         )
         self.tab_list.append(tab)
         self.add(tab, text=name, sticky=tk.NSEW)
@@ -311,6 +325,7 @@ class HardwareTab(ttk.Frame):
         top_widgets=None,
         hardware_widgets_value=[None],
         constants_widgets_value=[None],
+        wizard_metadata=None,
         **kwargs,
     ):
         """Initialize Microscope Tab.
@@ -329,15 +344,24 @@ class HardwareTab(ttk.Frame):
            list of values for hardware widgets
         constants_widgets_value : list[dict]
            list of values for constants widgets
+        wizard_metadata : dict
+            wizard metadata dict
         *args
             Variable length argument list.
         **kwargs
             Arbitrary keyword arguments
         """
         # Init Frame
+        root = kwargs.pop("root", None)
+        if root is not None and not args:
+            args = (root,)
         ttk.Frame.__init__(self, *args, **kwargs)
 
         self.name = name
+        self.wizard_metadata = wizard_metadata or {}
+        self.wizard_steps = get_steps(hardware_widgets or {}, self.wizard_metadata)
+        self.current_step = tk.StringVar(value=self.wizard_steps[0])
+        self.advanced_mode = tk.BooleanVar(value=False)
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)

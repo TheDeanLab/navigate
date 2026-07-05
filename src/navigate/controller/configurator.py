@@ -47,6 +47,7 @@ from navigate.view.theme import apply_theme
 from navigate.config.configuration_database import (
     hardwares_dict,
     hardwares_config_name_dict,
+    hardware_wizard_metadata,
 )
 from navigate.tools.file_functions import load_yaml_file, write_to_yaml
 
@@ -247,14 +248,20 @@ class Configurator:
         for hardware_type, widgets in hardwares_dict.items():
             if not widgets:
                 continue
-            if type(widgets) == dict:
-                microscope_tab.create_hardware_tab(hardware_type, widgets)
+            wizard_metadata = hardware_wizard_metadata.get(hardware_type, {})
+            if isinstance(widgets, dict):
+                microscope_tab.create_hardware_tab(
+                    hardware_type,
+                    widgets,
+                    wizard_metadata=wizard_metadata,
+                )
             else:
                 microscope_tab.create_hardware_tab(
                     hardware_type,
                     hardware_widgets=widgets[1],
                     widgets=widgets[2],
                     top_widgets=widgets[0],
+                    wizard_metadata=wizard_metadata,
                 )
 
         # Adding tabs to self notebook
@@ -305,7 +312,7 @@ class Configurator:
                 # widgets[key][3] is the value mapping dict
                 if widgets[key][1] != "Spinbox" and widgets[key][3]:
                     # if the value is not valid, return the last valid value
-                    if type(widgets[key][3]) == list:
+                    if isinstance(widgets[key][3], list):
                         reverse_value_dict = dict(
                             map(lambda v: (v, v), widgets[key][3])
                         )
@@ -393,8 +400,9 @@ class Configurator:
 
             for hardware_type, widgets in hardwares_dict.items():
                 hardware_ref_name = hardwares_config_name_dict[hardware_type]
+                wizard_metadata = hardware_wizard_metadata.get(hardware_type, {})
                 # build dictionary values for widgets
-                if type(widgets) == dict:
+                if isinstance(widgets, dict):
                     try:
                         widgets_value = build_widgets_value(
                             widgets,
@@ -405,7 +413,10 @@ class Configurator:
                     except Exception:
                         widgets_value = [None]
                     microscope_tab.create_hardware_tab(
-                        hardware_type, widgets, hardware_widgets_value=widgets_value
+                        hardware_type,
+                        widgets,
+                        hardware_widgets_value=widgets_value,
+                        wizard_metadata=wizard_metadata,
                     )
                 else:
                     try:
@@ -432,6 +443,7 @@ class Configurator:
                         top_widgets=widgets[0],
                         hardware_widgets_value=widgets_value[0],
                         constants_widgets_value=widgets_value[1],
+                        wizard_metadata=wizard_metadata,
                     )
 
     def device_selected(self, event):

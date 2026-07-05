@@ -165,6 +165,39 @@ def test_hardware_tab_builds_wizard_shell(tk_root):
     tab.destroy()
 
 
+def test_hardware_tab_updates_help_and_warning_text(tk_root):
+    metadata = {
+        "steps": ["Device Type"],
+        "fields": {
+            "hardware/type": {
+                "step": "Device Type",
+                "importance": "required",
+                "hint": "Select a camera.",
+                "help": "Virtual Device is suitable for synthetic hardware.",
+            },
+        },
+    }
+    widgets = {
+        "hardware/type": [
+            "Device Type",
+            "Combobox",
+            "string",
+            {"": "", "Virtual Device": "Synthetic"},
+            None,
+        ],
+    }
+
+    tab = HardwareTab("Camera", widgets, root=tk_root, wizard_metadata=metadata)
+    tab.variables["hardware/type"].set("")
+    tab.refresh_wizard_visibility()
+    tk_root.update_idletasks()
+
+    assert "Virtual Device is suitable" in tab.help_text.get("1.0", "end")
+    assert "Device Type is required." in tab.warning_text.get("1.0", "end")
+
+    tab.destroy()
+
+
 def test_hardware_tab_filters_fields_by_step_and_advanced_mode(tk_root):
     metadata = {
         "device_field": "hardware/type",

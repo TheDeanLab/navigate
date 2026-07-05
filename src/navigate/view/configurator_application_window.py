@@ -41,6 +41,7 @@ from typing import Optional, Callable
 
 # Local Imports
 from navigate.config.configuration_wizard import (
+    collect_step_warnings,
     field_is_visible,
     get_field_metadata,
     get_steps,
@@ -423,6 +424,27 @@ class HardwareTab(ttk.Frame):
         self.help_frame.grid(
             row=0, column=2, sticky=tk.NW, padx=get_theme_padding_px((8, 0))
         )
+        self.help_frame.rowconfigure(1, weight=1)
+        self.help_frame.rowconfigure(3, weight=1)
+        self.help_frame.columnconfigure(0, weight=1)
+
+        self.help_title = ttk.Label(self.help_frame, text="Help")
+        self.help_title.grid(
+            row=0, column=0, sticky=tk.W, pady=get_theme_padding_px((0, 3))
+        )
+
+        self.help_text = tk.Text(self.help_frame, width=32, height=8, wrap="word")
+        self.help_text.grid(row=1, column=0, sticky=tk.NSEW)
+        self.help_text.configure(state="disabled")
+
+        self.warning_title = ttk.Label(self.help_frame, text="Warnings")
+        self.warning_title.grid(
+            row=2, column=0, sticky=tk.W, pady=get_theme_padding_px((8, 3))
+        )
+
+        self.warning_text = tk.Text(self.help_frame, width=32, height=6, wrap="word")
+        self.warning_text.grid(row=3, column=0, sticky=tk.NSEW)
+        self.warning_text.configure(state="disabled")
 
         self.top_frame = ttk.Frame(self.field_frame)
 
@@ -507,6 +529,55 @@ class HardwareTab(ttk.Frame):
                 row.grid()
             else:
                 row.grid_remove()
+        self.update_wizard_help()
+        self.update_wizard_warnings()
+
+    def _current_values(self) -> dict[str, str]:
+        values = {}
+        for key, variable in self.field_variables.items():
+            try:
+                values[key] = variable.get()
+            except tk._tkinter.TclError:
+                values[key] = ""
+        return values
+
+    def _set_text_widget(self, widget: tk.Text, text: str) -> None:
+        widget.configure(state="normal")
+        widget.delete("1.0", "end")
+        widget.insert("1.0", text)
+        widget.configure(state="disabled")
+
+    def update_wizard_help(self) -> None:
+        selected_step = self.current_step.get()
+        help_lines = []
+        for row_key in self.field_rows:
+            field_key = self.field_keys.get(row_key, row_key)
+            metadata = get_field_metadata(self.wizard_metadata, field_key)
+            if metadata.get("step") != selected_step:
+                continue
+            help_text = metadata.get("help")
+            if help_text:
+                help_lines.append(help_text)
+        self._set_text_widget(self.help_text, "\n\n".join(help_lines))
+
+    def _wizard_warning_metadata(self) -> dict:
+        metadata = dict(self.wizard_metadata)
+        fields = dict(self.wizard_metadata.get("fields", {}))
+        for row_key in self.field_specs:
+            field_key = self.field_keys.get(row_key, row_key)
+            if row_key != field_key and field_key in fields:
+                fields[row_key] = fields[field_key]
+        metadata["fields"] = fields
+        return metadata
+
+    def update_wizard_warnings(self) -> None:
+        warnings = collect_step_warnings(
+            self.field_specs,
+            self._wizard_warning_metadata(),
+            self._current_values(),
+        )
+        current = warnings.get(self.current_step.get(), [])
+        self._set_text_widget(self.warning_text, "\n".join(current))
 
     def get_selected_device(self) -> str | None:
         """Return the current selected device label for this tab."""

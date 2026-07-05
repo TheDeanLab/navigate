@@ -32,6 +32,12 @@
 
 from tkinter import ttk
 
+from navigate.config.configuration_database import (
+    camera_hardware_widgets,
+    daq_hardware_widgets,
+    hardware_wizard_metadata,
+    stage_hardware_widgets,
+)
 from navigate.view.custom_widgets.CollapsibleFrame import CollapsibleFrame
 from navigate.view.configurator_application_window import ConfigurationAssistantWindow
 from navigate.view.configurator_application_window import HardwareTab
@@ -131,6 +137,28 @@ def test_hardware_tab_stores_wizard_metadata(tk_root):
     assert tab.current_step.get() == "Device Type"
 
     tab.destroy()
+
+
+def test_pilot_tabs_can_render_with_wizard_metadata(tk_root):
+    cases = [
+        ("Camera", camera_hardware_widgets),
+        ("Data Acquisition Card", daq_hardware_widgets),
+        ("Stages", stage_hardware_widgets),
+    ]
+    for name, widgets in cases:
+        tab = HardwareTab(
+            name,
+            widgets,
+            root=tk_root,
+            wizard_metadata=hardware_wizard_metadata[name],
+        )
+        tk_root.update_idletasks()
+
+        assert tab.wizard_steps == hardware_wizard_metadata[name]["steps"]
+        assert tab.step_buttons
+        assert tab.field_rows
+
+        tab.destroy()
 
 
 def test_hardware_tab_builds_wizard_shell(tk_root):

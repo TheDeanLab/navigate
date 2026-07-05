@@ -65,6 +65,20 @@ def test_hardware_wizard_metadata_has_shell_for_every_hardware_tab():
     assert set(hardware_wizard_metadata) == expected_tabs
 
 
+def test_non_pilot_wizard_metadata_uses_details_shell():
+    for name in [
+        "Filter Wheel",
+        "Galvo",
+        "Lasers",
+        "Remote Focus Devices",
+        "Adaptive Optics",
+        "Shutters",
+        "Zoom Device",
+    ]:
+        assert hardware_wizard_metadata[name]["steps"] == ["Details"]
+        assert hardware_wizard_metadata[name]["fields"] == {}
+
+
 def test_camera_wizard_metadata_covers_all_fields():
     fields = hardware_wizard_metadata["Camera"]["fields"]
     expected_field_keys = {

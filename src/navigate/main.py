@@ -32,8 +32,11 @@
 
 # Standard Library Imports
 import tkinter as tk
+import logging
 import platform
 import os
+import sys
+from typing import Optional
 
 # Third Party Imports
 
@@ -41,16 +44,81 @@ import os
 from navigate.controller.controller import Controller
 from navigate.controller.configurator import Configurator
 from navigate.log_files.log_functions import log_setup
-from navigate.view.display_backends.volume_viewer_standalone import VolumeViewer
 from navigate.view.splash_screen import SplashScreen
 from navigate.tools.main_functions import (
     evaluate_parser_input_arguments,
     create_parser,
 )
 
+logger = logging.getLogger(__name__)
+
+VIEWER_IMPORT_TO_DISTRIBUTION = {
+    "OpenGL": "PyOpenGL",
+    "glfw": "glfw",
+    "glm": "PyGLM",
+    "tkinterdnd2": "tkinterdnd2",
+}
+
 # Proxy Configuration
 os.environ["http_proxy"] = ""
 os.environ["https_proxy"] = ""
+
+
+def _missing_viewer_distribution(error: BaseException) -> Optional[str]:
+    """Return the installable package name associated with an import error."""
+    module_name = getattr(error, "name", None)
+    if not module_name:
+        return None
+    root_name = str(module_name).split(".", 1)[0]
+    return VIEWER_IMPORT_TO_DISTRIBUTION.get(root_name, str(module_name))
+
+
+def _build_volume_viewer_error_message(error: BaseException) -> str:
+    """Build beginner-oriented recovery instructions for viewer import failures."""
+    python_command = f'"{sys.executable}"'
+    distribution = _missing_viewer_distribution(error)
+    dependency_line = (
+        f"Missing or unavailable Python package: {distribution}."
+        if distribution
+        else "An optional viewer dependency could not be loaded."
+    )
+    return "\n".join(
+        [
+            "Unable to start the optional navigate Volume Viewer.",
+            "The standard navigate application is still available.",
+            "",
+            dependency_line,
+            "The Volume Viewer dependencies are not included in a standard installation.",
+            "If you use Conda or a virtual environment, activate the environment",
+            "that you normally use to run navigate before installing anything.",
+            "",
+            "From a navigate source checkout, run:",
+            f'  {python_command} -m pip install -e ".[opengl]"',
+            "",
+            "If navigate was installed as a package, run:",
+            f'  {python_command} -m pip install "navigate-micro[opengl]"',
+            "",
+            "Then retry:",
+            "  navigate --viewer",
+            "",
+            "If the viewer still does not start, check the navigate log and report",
+            "the technical error shown below:",
+            f"  {type(error).__name__}: {error}",
+        ]
+    )
+
+
+def _load_volume_viewer() -> Optional[type]:
+    """Load the optional volume viewer and report actionable import failures."""
+    try:
+        from navigate.view.display_backends.volume_viewer_standalone import (
+            VolumeViewer,
+        )
+    except (ImportError, OSError) as error:
+        logger.exception("Unable to import the optional Volume Viewer")
+        print(_build_volume_viewer_error_message(error), file=sys.stderr)
+        return None
+    return VolumeViewer
 
 
 def main():
@@ -113,18 +181,20 @@ def main():
     if command_line_args.configurator:
         Configurator(root, splash_screen)
     elif command_line_args.viewer:
-        # Guard against TkinterDND not being installed, which is required for VolumeViewerStandalone
-        try:
-            import OpenGL
-        except ImportError:
-            print(
-                "ERROR: OpenGL is required for VolumeViewerStandalone."
-                "Please install OpenGL optional dependencies to run volume viewer:"
-                "pip install -e .[opengl]"
-            )
+        volume_viewer_class = _load_volume_viewer()
+        if volume_viewer_class is None:
+            for startup_window in (splash_screen, root):
+                try:
+                    startup_window.destroy()
+                except Exception:
+                    logger.debug(
+                        "Unable to destroy viewer startup window",
+                        exc_info=True,
+                    )
+            log_listener.stop()
             return
-        
-        volume_viewer = VolumeViewer(root=root, splash_screen=splash_screen)
+
+        volume_viewer = volume_viewer_class(root=root, splash_screen=splash_screen)
 
         # Replace the root with volume viewer
         root = volume_viewer

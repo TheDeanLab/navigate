@@ -210,6 +210,7 @@ class TestAutofocusPopupController:
                 "channel_2",
                 "capture_reference",
                 "channel_2",
+                False,
             )
 
     def test_target_channel_uses_channel_setting_labels(self):

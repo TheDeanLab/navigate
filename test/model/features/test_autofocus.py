@@ -210,6 +210,7 @@ class TestAutofocusClass(unittest.TestCase):
                     "device_ref": "f",
                     "calibration_action": "populate_defocus",
                     "reference_channel": "channel_1",
+                    "set_defocus_for_all_flag": False,
                 },
             )
         )

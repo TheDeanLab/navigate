@@ -92,6 +92,7 @@ class Autofocus:
         target_channel=None,
         calibration_action=None,
         reference_channel=None,
+        set_defocus_for_all_flag=False,
     ):
         """Initialize the Autofocus class.
 
@@ -103,6 +104,8 @@ class Autofocus:
             Device name
         device_ref : str
             Device reference
+        set_defocus_for_all_flag : bool
+            Flag to set defocus for all channels
         """
         #: Model: Model object
         self.model = model
@@ -167,6 +170,9 @@ class Autofocus:
         #: str: Optional reference channel key
         self.reference_channel = reference_channel
 
+        #: bool: Flag to set defocus for all channels
+        self.set_defocus_for_all_flag = set_defocus_for_all_flag
+
         #: dict: Configuration table
         self.config_table = {
             "signal": {
@@ -204,22 +210,39 @@ class Autofocus:
         self.model.prepare_acquisition()
 
         # load Autofocus
+        autofocus_node = {
+            "name": Autofocus,
+            "args": (
+                self.device,
+                self.device_ref,
+                self.target_channel,
+                self.calibration_action,
+                self.reference_channel,
+            ),
+        }
+
+        feature_list = [autofocus_node]
+
+        if self.calibration_action == "capture_reference" and self.set_defocus_for_all_flag:
+            for channel_id in self.model.active_microscope.available_channels:
+                channel_key = f"channel_{channel_id}"
+                if channel_key != self.reference_channel:
+                    feature_list.append(
+                        {
+                            "name": Autofocus,
+                            "args": (
+                                self.device,
+                                self.device_ref,
+                                channel_key,
+                                "populate_defocus",
+                                self.reference_channel,
+                            ),
+                        }
+                    )
+
         self.model.signal_container, self.model.data_container = load_features(
             self.model,
-            [
-                [
-                    {
-                        "name": Autofocus,
-                        "args": (
-                            self.device,
-                            self.device_ref,
-                            self.target_channel,
-                            self.calibration_action,
-                            self.reference_channel,
-                        ),
-                    }
-                ]
-            ],
+            feature_list
         )
 
         self.model.signal_thread = threading.Thread(
@@ -229,7 +252,7 @@ class Autofocus:
 
         self.model.data_thread = threading.Thread(
             target=self.model.run_data_process,
-            args=(frame_num + 1,),
+            args=((frame_num + 1)*len(feature_list),),
             name="Autofocus Data",
         )
 
@@ -574,6 +597,7 @@ class Autofocus:
                         "device_ref": self.device_ref,
                         "calibration_action": self.calibration_action,
                         "reference_channel": self.reference_channel,
+                        "set_defocus_for_all_flag": self.set_defocus_for_all_flag,
                     },
                 )
             )

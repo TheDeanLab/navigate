@@ -227,8 +227,19 @@ def _build_controller_context() -> Dict[str, object]:
     root.withdraw()
     splash_screen = SplashScreen(root, _splash_image_path())
 
+    config_dir = SRC_DIR / "navigate" / "config"
     parser = create_parser()
-    args = parser.parse_args(["-sh"])
+    args = parser.parse_args(
+        [
+            "-sh",
+            "--config-file",
+            str(config_dir / "configuration.yaml"),
+            "--experiment-file",
+            str(config_dir / "experiment.yml"),
+            "--gui-config-file",
+            str(config_dir / "gui_configuration.yml"),
+        ]
+    )
 
     (
         configuration_path,
@@ -1590,10 +1601,22 @@ def _capture_popup_save_dialog_bdv_settings(
 def _capture_popup_autofocus(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
-    from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
+    controller = ctx["controller"]
+    out_path, should_skip = _popup_capture_target(cli_args, "autofocus_settings")
+    if should_skip:
+        return out_path
 
-    popup_obj = AutofocusPopup(ctx["controller"].view)
-    return _capture_popup_obj(ctx, cli_args, popup_obj, "autofocus_settings")
+    _cleanup_controller_popup_attr(controller, "af_popup_controller")
+    controller.menu_controller.popup_autofocus_setting()
+    popup_controller = controller.af_popup_controller
+    popup_controller.widgets["calibration_action"].set("Auto Defocus")
+    popup = popup_controller.view.popup
+
+    try:
+        _prepare_for_capture(popup, cli_args)
+        return _capture_widget(popup, out_path, pad=2)
+    finally:
+        _cleanup_controller_popup_attr(controller, "af_popup_controller")
 
 
 def _capture_popup_camera_map_settings(

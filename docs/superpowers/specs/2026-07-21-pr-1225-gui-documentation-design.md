@@ -26,9 +26,11 @@ out of scope.
 
 ## Capture Behavior
 
-`docs/capture_gui.py` will continue to use the existing focused capture IDs. The
-autofocus capture will populate deterministic representative values for the new
-controls before taking the screenshot. Channel Settings captures will show the
+`docs/capture_gui.py` will continue to use the existing focused capture IDs and
+will build its controller from the repository's canonical configuration files
+instead of the active user experiment. The autofocus capture will populate
+deterministic representative values for the new controls before taking the
+screenshot. Channel Settings captures will show the
 default `Defocus Reference: Not Set` state because that is the state users first
 encounter before acquisition establishes a runtime reference.
 
@@ -58,7 +60,7 @@ syntax, including no whitespace between role names and their backticks.
 - Inspect all three generated PNGs for complete controls, readable labels,
   consistent theme, and clean cropping.
 - Build the Sphinx HTML documentation with warnings treated as errors.
-- Run `ruff` against `docs/capture_gui.py` if that script changes.
+- Run `ruff` against `docs/capture_gui.py` if that script changes, excluding the
+  file's existing `E402` exceptions for checkout-path bootstrapping.
 - Run `git diff --check` and confirm the final diff contains only the intended
   design, capture, image, and documentation files.
-

@@ -859,9 +859,15 @@ class CameraSettingController(GUIController):
         if self.microscope_name:
             return
         microscope_name = microscope_state_dict["microscope_name"]
-        pixel_size = self.parent_controller.configuration["configuration"][
-            "microscopes"
-        ][microscope_name]["zoom"]["pixel_size"][zoom]
+        try:
+            pixel_size = self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][microscope_name]["zoom"]["pixel_size"][zoom]
+        except KeyError:
+            logger.warning(
+                f"Pixel size for microscope {microscope_name} and zoom {zoom} not found."
+            )
+            return
 
         physical_dimensions_x = x_pixel * pixel_size
         physical_dimensions_y = y_pixel * pixel_size

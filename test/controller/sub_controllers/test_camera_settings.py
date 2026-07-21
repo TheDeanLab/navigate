@@ -519,6 +519,34 @@ class TestCameraSettingController:
             int(dim_y)
         )
 
+    def test_calculate_physical_dimensions_missing_pixel_size(self, caplog):
+        self.camera_settings.populate_experiment_values()
+
+        microscope_state = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]
+        microscope_name = microscope_state["microscope_name"]
+        zoom = microscope_state["zoom"]
+        pixel_size_config = self.camera_settings.parent_controller.configuration[
+            "configuration"
+        ]["microscopes"][microscope_name]["zoom"]["pixel_size"]
+        original_fov_x = self.camera_settings.roi_widgets["FOV_X"].get()
+        original_fov_y = self.camera_settings.roi_widgets["FOV_Y"].get()
+        original_pixel_size = pixel_size_config.pop(zoom)
+
+        try:
+            with caplog.at_level("WARNING", logger="navigate"):
+                self.camera_settings.calculate_physical_dimensions()
+        finally:
+            pixel_size_config[zoom] = original_pixel_size
+
+        assert self.camera_settings.roi_widgets["FOV_X"].get() == original_fov_x
+        assert self.camera_settings.roi_widgets["FOV_Y"].get() == original_fov_y
+        assert (
+            f"Pixel size for microscope {microscope_name} and zoom {zoom} not found."
+            in caplog.text
+        )
+
         # Reset to zoom of 1
         self.camera_settings.parent_controller.configuration["experiment"][
             "MicroscopeState"

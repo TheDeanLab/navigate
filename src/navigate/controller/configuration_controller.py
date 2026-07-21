@@ -99,6 +99,12 @@ class ConfigurationController:
             microscope_name = self.configuration["experiment"]["MicroscopeState"][
                 "microscope_name"
             ]
+        if microscope_name not in self.configuration["configuration"]["microscopes"].keys():
+            logger.warning(
+                f"Microscope {microscope_name} not found in configuration. Available microscopes: "
+                f" {list(self.configuration['configuration']['microscopes'].keys())}"
+            )
+            return False
 
         assert (
             microscope_name in self.configuration["configuration"]["microscopes"].keys()

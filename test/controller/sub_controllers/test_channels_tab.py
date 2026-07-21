@@ -152,7 +152,7 @@ def test_set_defocus_reference_updates_main_channel_status(channels_tab_controll
     )
     assert (
         channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
-        == "Defocus Reference: CH2"
+        == "Defocus Reference: CH3 @ 200.00"
     )
 
     assert (channels_tab_controller.parent_controller.configuration["experiment"][

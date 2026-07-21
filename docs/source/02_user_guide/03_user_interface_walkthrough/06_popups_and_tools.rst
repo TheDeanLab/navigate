@@ -52,16 +52,25 @@ region of highest contrast (best focus). Spline-fit and test-significance
 buttons are already present in preparation for additional intelligent autofocus
 functionality in future updates.
 
-For channel defocus calibration, select one channel as the reference channel, then 
-use :guilabel: `Auto Defocus`. The system will measure the focus differences and 
-automatically set the defocus values for all channels.
+The :guilabel:`Channel` must be active in Channel Settings. Choose a
+:guilabel:`Calibration` action before pressing :guilabel:`Start Autofocus`:
 
-If you only want to update the defocus value for a single channel, or if you want 
-to adjust it manually: select a channel and use :guilabel:`Capture Reference`
-to store that channel's best focus temporarily. Then select another channel and use
-:guilabel:`Populate Defocus` to write the measured focus difference into that channel's
-:guilabel:`Defocus` value. The reference focus is not saved to the experiment file;
-only the per-channel defocus value is stored.
+* :guilabel:`Regular` focuses the selected channel without calculating a channel
+  offset.
+* :guilabel:`Capture Reference` focuses the selected channel, makes it the
+  zero-defocus calibration channel, and retains its best-focus position for the
+  current calibration sequence.
+* :guilabel:`Populate Defocus` focuses the selected channel and writes the
+  difference from the previously captured reference into that channel's
+  :guilabel:`Defocus` value. Capture a reference first.
+* :guilabel:`Auto Defocus` uses the selected channel as the reference, focuses
+  every other active channel, and populates all active channel offsets in one
+  sequence. Stop any acquisition before starting it.
+
+The popup's :guilabel:`Reference` status reports the calibration reference.
+:guilabel:`Populate Defocus` requires the captured focus retained by the current
+popup session. The resulting per-channel :guilabel:`Defocus` values are stored
+with the experiment settings and are used during acquisition.
 
 .. _ui_waveform_parameters:
 

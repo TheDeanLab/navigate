@@ -150,13 +150,13 @@ Expected: Ruff and whitespace validation exit 0 before the capture commit is cre
 - Consumes: the GUI labels and behavior implemented by PR #1225 and the screenshots from Task 1.
 - Produces: beginner instructions and reference text that distinguish the acquisition reference from the popup's calibration reference.
 
-- [ ] **Step 1: Replace the beginner Defocus bullet**
+- [x] **Step 1: Replace the beginner Defocus bullet**
 
 ```rst
     * Set :guilabel:`Defocus` to ``0`` unless the channel has a measured chromatic focus offset. Defocus is a per-channel offset from the zero-defocus focus position, not an absolute focus coordinate. At acquisition start, **navigate** derives that zero-defocus position from the current focus and the active channel's defocus, then applies each channel's offset. The status below the table reports the current reference; see :ref:`Autofocus Settings <ui_autofocus>` to measure channel offsets automatically.
 ```
 
-- [ ] **Step 2: Make the Channels reference concise and explain its status row**
+- [x] **Step 2: Make the Channels reference concise and explain its status row**
 
 ```rst
 6. :guilabel:`Defocus`: channel-specific offset from the zero-defocus focus position.
@@ -168,7 +168,7 @@ shows the reference channel and, when an acquisition reference is active, its
 focus position. Manual focus motion invalidates the active acquisition reference.
 ```
 
-- [ ] **Step 3: Replace the autofocus calibration paragraphs with action-specific guidance**
+- [x] **Step 3: Replace the autofocus calibration paragraphs with action-specific guidance**
 
 ```rst
 The :guilabel:`Channel` must be active in Channel Settings. Choose a
@@ -192,7 +192,7 @@ popup session. The resulting per-channel :guilabel:`Defocus` values are stored
 with the experiment settings and are used during acquisition.
 ```
 
-- [ ] **Step 4: Build the HTML documentation with strict warnings**
+- [x] **Step 4: Build the HTML documentation with strict warnings**
 
 ```bash
 PYTHONPATH=/Users/Dean/.config/superpowers/worktrees/navigate/pr-1225-docs/src \
@@ -202,7 +202,7 @@ PYTHONPATH=/Users/Dean/.config/superpowers/worktrees/navigate/pr-1225-docs/src \
 
 Expected: exit 0 with no malformed roles, missing image errors, or other warnings.
 
-- [ ] **Step 5: Run the focused PR tests against the worktree source**
+- [x] **Step 5: Run the focused PR tests against the worktree source**
 
 ```bash
 PYTHONPATH=/Users/Dean/.config/superpowers/worktrees/navigate/pr-1225-docs/src \
@@ -214,7 +214,7 @@ PYTHONPATH=/Users/Dean/.config/superpowers/worktrees/navigate/pr-1225-docs/src \
 
 Expected: `30 passed` and no failures.
 
-- [ ] **Step 6: Verify and commit the documentation**
+- [x] **Step 6: Verify and commit the documentation**
 
 ```bash
 git diff --check

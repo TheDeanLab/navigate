@@ -127,6 +127,11 @@ def test_defocus_reference_label_initially_not_set(channels_tab_controller):
 
 
 def test_set_defocus_reference_updates_main_channel_status(channels_tab_controller):
+    # no pre-existiting defocus reference channel
+    channels_tab_controller.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["reference_channel"] = None
+    
     channels_tab_controller.set_defocus_reference(
         {"channel": "channel_2", "focus_position": 250.0}
     )
@@ -136,8 +141,30 @@ def test_set_defocus_reference_updates_main_channel_status(channels_tab_controll
         == "Defocus Reference: CH2 @ 250.00"
     )
 
+    assert (channels_tab_controller.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["reference_channel"] == "CH2"
+    )
+
+    # with pre-existing defocus reference channel
+    channels_tab_controller.set_defocus_reference(
+        {"channel": "channel_3", "focus_position": 200.0}
+    )
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
+        == "Defocus Reference: CH2"
+    )
+
+    assert (channels_tab_controller.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["reference_channel"] == "CH2"
+    )
 
 def test_clear_defocus_reference_resets_main_channel_status(channels_tab_controller):
+    channels_tab_controller.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["reference_channel"] = None
+    
     channels_tab_controller.set_defocus_reference(
         {"channel": "channel_2", "focus_position": 250.0}
     )

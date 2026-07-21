@@ -426,6 +426,8 @@ class ChannelSettingController(GUIController):
 
             r = update_setting_dict(setting_dict, widget_name)
 
+            self.channel_setting_dict[channel_key] = setting_dict
+
             if self.mode == "live":
                 # call central controller
                 if self.event_id:

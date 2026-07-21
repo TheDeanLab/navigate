@@ -52,7 +52,12 @@ region of highest contrast (best focus). Spline-fit and test-significance
 buttons are already present in preparation for additional intelligent autofocus
 functionality in future updates.
 
-For channel defocus calibration, select a channel and use :guilabel:`Capture Reference`
+For channel defocus calibration, select one channel as the reference channel, then 
+use :guilabel: `Auto Defocus`. The system will measure the focus differences and 
+automatically set the defocus values for all channels.
+
+If you only want to update the defocus value for a single channel, or if you want 
+to adjust it manually: select a channel and use :guilabel:`Capture Reference`
 to store that channel's best focus temporarily. Then select another channel and use
 :guilabel:`Populate Defocus` to write the measured focus difference into that channel's
 :guilabel:`Defocus` value. The reference focus is not saved to the experiment file;

@@ -1005,9 +1005,13 @@ class ChannelsTabController(GUIController):
 
     def set_defocus_reference(self, reference) -> None:
         """Set the active defocus reference status shown in Channel Settings."""
+        # get reference channel info from experiment
+        reference_channel = self.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ].get("reference_channel", None)
         if not reference:
             self.channel_setting_controller.view.defocus_reference.set(
-                "Defocus Reference: Not Set"
+                f"Defocus Reference: {reference_channel or 'Not Set'}"
             )
             return
 
@@ -1017,6 +1021,10 @@ class ChannelsTabController(GUIController):
         self.channel_setting_controller.view.defocus_reference.set(
             f"Defocus Reference: {channel_label} @ {focus_position:.2f}"
         )
+        if reference_channel is None:
+            self.parent_controller.configuration["experiment"][
+                "AutoFocusParameters"
+            ]["reference_channel"] = channel_label
 
     def update_additional_stacking_axes(self, *args, **kwargs):
         if self.stack_acq_vals["z_device"].get():

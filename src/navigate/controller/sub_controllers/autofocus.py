@@ -248,13 +248,20 @@ class AutofocusPopupController(GUIController):
                     title = "Navigate",
                     message = "Please stop acquisition before start getting defocus values!"
                 )
+                return
             reference_channel = target_channel
             calibration_action = "capture_reference"
             set_defocus_for_all_flag = True
+            # set all the defocus value to 0
+            channels = self.parent_controller.configuration["experiment"]["MicroscopeState"]["channels"]
+            for channel_key in channels.keys():
+                self._write_channel_defocus(channel_key, 0)
         elif calibration_action == "capture_reference":
             reference_channel = target_channel
         elif self.defocus_calibration_reference is not None:
             reference_channel = self.defocus_calibration_reference["channel"]
+
+        self._write_channel_defocus(target_channel, 0)
         self.parent_controller.execute(
             "autofocus",
             device,
@@ -289,7 +296,10 @@ class AutofocusPopupController(GUIController):
             target_channel = payload["channel"]
             target_focus = float(payload["focus_position"])
             reference_focus = self.defocus_calibration_reference["focus_position"]
-            self._write_channel_defocus(target_channel, target_focus - reference_focus)
+            focus = target_focus - reference_focus
+            if target_channel == self.defocus_calibration_reference["channel"]:
+                focus = 0
+            self._write_channel_defocus(target_channel, focus)
 
         if self.defocus_calibration_reference is not None:
             self._notify_defocus_reference(self.defocus_calibration_reference)
@@ -316,13 +326,17 @@ class AutofocusPopupController(GUIController):
         if not hasattr(self.view, "reference_status_var"):
             return
         if self.defocus_calibration_reference is None:
-            self.view.reference_status_var.set("Reference: none")
+            reference_channel = self.setting_dict.get("reference_channel", None)
+            self.view.reference_status_var.set(f"Reference: {reference_channel or 'none'}")
             return
         channel = self._channel_key_to_label(
             self.defocus_calibration_reference["channel"]
         )
         focus = self.defocus_calibration_reference["focus_position"]
         self.view.reference_status_var.set(f"Reference: {channel} @ {focus:.3f}")
+        # update reference channel info in the experiment file
+        self.setting_dict["reference_channel"] = channel
+        self.setting_dict["reference_position"] = focus
 
     def _show_missing_reference_warning(self) -> None:
         messagebox.showwarning(

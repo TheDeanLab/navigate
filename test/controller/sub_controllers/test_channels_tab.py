@@ -146,7 +146,7 @@ def test_clear_defocus_reference_resets_main_channel_status(channels_tab_control
 
     assert (
         channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
-        == "Defocus Reference: Not Set"
+        == "Defocus Reference: CH2"
     )
 
 

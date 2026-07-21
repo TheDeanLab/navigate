@@ -227,7 +227,7 @@ git add docs/source/01_getting_started/06_acquiring_data.rst \
 git commit -m "docs: explain channel defocus calibration"
 ```
 
-- [ ] **Step 7: Push and verify PR #1225**
+- [x] **Step 7: Push and verify PR #1225**
 
 ```bash
 git push origin kdean/defocus

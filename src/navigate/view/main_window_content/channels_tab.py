@@ -228,6 +228,12 @@ class ChannelCreator(ttk.Labelframe):
         #: list: List of the defocus spin boxes
         self.defocus_spins = []
 
+        #: tk.StringVar: Text for the active defocus reference status
+        self.defocus_reference = tk.StringVar(value="Defocus Reference: Not Set")
+
+        #: ttk.Label: Label for the active defocus reference status
+        self.defocus_reference_label = None
+
         #: list: List of the labels for the columns
         self.label_text = [
             "Channel",
@@ -405,6 +411,20 @@ class ChannelCreator(ttk.Labelframe):
                 padx=self.pad_x,
                 pady=self.pad_y,
             )
+
+        self.defocus_reference_label = ttk.Label(
+            self,
+            textvariable=self.defocus_reference,
+            anchor=tk.E,
+        )
+        self.defocus_reference_label.grid(
+            row=channels + 1,
+            column=0,
+            columnspan=len(self.label_text),
+            sticky=tk.E,
+            padx=self.pad_x,
+            pady=(self.pad_y, 0),
+        )
 
     def create_labels(
         self,

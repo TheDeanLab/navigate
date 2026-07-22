@@ -668,7 +668,7 @@ def verify_experiment_config(manager, configuration):
                 channel_value[k] = float(channel_value[k])
             except ValueError:
                 channel_value[k] = temp[k]
-            if channel_value[k] < 0:
+            if k != "defocus" and channel_value[k] < 0:
                 channel_value[k] = temp[k]
 
 

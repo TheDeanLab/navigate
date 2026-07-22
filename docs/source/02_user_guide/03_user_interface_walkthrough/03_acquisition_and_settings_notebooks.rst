@@ -60,7 +60,13 @@ Use this section to define active imaging channels and per-channel acquisition v
 3. :guilabel:`Filter`: detection filter.
 4. :guilabel:`Exp. Time (ms)`: camera exposure time.
 5. :guilabel:`Interval`: channel cadence relative to other channels.
-6. :guilabel:`Defocus`: channel-specific focus offset.
+6. :guilabel:`Defocus`: channel-specific offset from the zero-defocus focus position.
+
+At acquisition start, **navigate** derives the zero-defocus position from the
+current focus and the active channel's defocus. It then moves each channel to
+that reference position plus the channel's offset. :guilabel:`Defocus Reference`
+shows the reference channel and, when an acquisition reference is active, its
+focus position. Manual focus motion invalidates the active acquisition reference.
 
 .. _ui_stack_settings:
 

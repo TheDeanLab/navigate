@@ -35,7 +35,7 @@ import pytest
 import os
 from types import SimpleNamespace
 from multiprocessing import Manager
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import multiprocessing
 
 # Third Party Imports
@@ -295,6 +295,46 @@ def test_autofocus_live_acquisition(model):
     model.release_pipe("show_img_pipe")
     if multi_channel:
         assert len(seen_channels) > 1
+
+
+def test_autofocus_live_injection_preserves_channel_args(model):
+    original_is_acquiring = model.is_acquiring
+    original_imaging_mode = model.imaging_mode
+    original_signal_container = getattr(model, "signal_container", None)
+    original_data_container = getattr(model, "data_container", None)
+    model.is_acquiring = True
+    model.imaging_mode = "live"
+    model.signal_container = MagicMock()
+    model.data_container = MagicMock()
+
+    try:
+        with patch(
+            "navigate.model.model.load_features",
+            return_value=(MagicMock(), MagicMock()),
+        ) as load_features:
+            model.run_command(
+                "autofocus",
+                "stage",
+                "f",
+                "channel_2",
+                "capture_reference",
+                "channel_2",
+            )
+
+        feature_spec = load_features.call_args.args[1]
+        assert feature_spec[0]["name"].__name__ == "Autofocus"
+        assert feature_spec[0]["args"] == (
+            "stage",
+            "f",
+            "channel_2",
+            "capture_reference",
+            "channel_2",
+        )
+    finally:
+        model.is_acquiring = original_is_acquiring
+        model.imaging_mode = original_imaging_mode
+        model.signal_container = original_signal_container
+        model.data_container = original_data_container
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")

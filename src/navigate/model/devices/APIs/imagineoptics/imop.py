@@ -1,16 +1,32 @@
 import os
-import ctypes as ct
-import numpy as np
-import pandas as pd
+import json
 import time
 
-from .enums import E_MODAL_T, E_PUPIL_DETECTION_T, E_ZERNIKE_NORM_T, E_PUPIL_COVERING_T
+import numpy as np
+import pandas as pd
 
-basepath = "D:\\WaveKitX64"
+try:
+    import wavekit_py as wk
+except ImportError as err:
+    raise ImportError(
+        "wavekit_py is not installed in this Python environment. "
+        "With this environment active, run the WaveKit installer: "
+        'python "C:\\Program Files\\Imagine Optic\\WaveSuite_4.5.1\\WaveKit'
+        '\\Python\\install_wavekit_python.py"'
+    ) from err
 
-imop_lib = ct.windll.LoadLibrary(
-    os.path.join(basepath, "C", "Lib", "c_interface_vc100_x64.dll")
+
+from .enums import (
+    E_MODAL_T,
+    E_PUPIL_DETECTION_T,
+    E_ZERNIKE_NORM_T,
+    E_PUPIL_COVERING_T,
+    E_ZERNIKE_INDEXING_T,
 )
+
+# Define the base path where the mirror files and wfc and wfs configuration files
+basepath = "C:/Users/Spectral/Desktop/muDM"
+
 
 mode_names = [
     "Vert. Tilt",
@@ -47,188 +63,190 @@ mode_names = [
     "Oblq. 9th Asm.",
 ]
 
-# ctypes utility functions:
-def char_p(s):
-    # return a C character pointer from python String
-    return ct.c_char_p(s.encode("utf-8"))
-
-
-def arr_p(ndarr):
-    # convert numpy.ndarray to C pointer array
-    return ct.c_void_p(ndarr.ctypes.data)
-
-
-def call_errmsg(func, *args):
-    message = ct.create_string_buffer(256)
-
-    flag = func(message, *args)
-
-    err_msg = f"{func.__name__}: {message.value.decode('utf-8')}"
-    del message
-
-    if flag:
-        raise Exception(err_msg)
-
-    return err_msg, flag
-
-
-# CTypes Structures:
-
-
-class uint2D(ct.Structure):
-
-    _fields_ = [("X", ct.c_uint), ("Y", ct.c_uint)]
-
-
-class int2D(ct.Structure):
-
-    _fields_ = [("X", ct.c_int), ("Y", ct.c_int)]
-
-
-class float2D(ct.Structure):
-
-    _fields_ = [("X", ct.c_float), ("Y", ct.c_float)]
-
-
-# Generic class which contains a pointer to object address
-# (used in C Imop functions)
-class Pointer:
-    def __init__(self):
-        self.pointer = ct.c_void_p()
-
-    def __call__(self):
-        return self.pointer
-
 
 class IMOP_Mirror:
+    """
+    High-level controller for the muDM deformable mirror.
+    """
+
     def __init__(
         self,
-        wfc_config_file_path=os.path.join(
-            basepath, "MirrorFiles", "WaveFrontCorrector_Mirao52-e_0259.dat"
-        ),
+        wfc_config_file_path=os.path.join(basepath, "MirrorFiles", "WFC_MuDM_0018.dat"),
         haso_config_file_path=os.path.join(
-            basepath, "MirrorFiles", "HASO4_first_7458.dat"
+            basepath, "MirrorFiles", "WFS_HASO4_first_7458.dat"
         ),
-        positions_file_path=os.path.join(
-            basepath, "MirrorFiles", "OPMv3_SysCorr_517nm_20230324.wcs"
-        ),
+        positions_file_path=os.path.join(basepath, "MirrorFiles", "Flat.wcs"),
         interaction_matrix_file_path=os.path.join(
-            basepath, "MirrorFiles", "VAST_Sept_2023_b.aoc"
+            basepath, "MirrorFiles", "InfluenceMatrix2.aoc"
         ),
         n_modes=32,
     ):
+        """
+        Connect to the mirror and HASO, build the command matrix, and fit
+        the Zernike pupil, all from the given config/calibration files.
 
-        mirror_set = WavefrontCorrectorSet()
-        mirror_set.new_from_config_file(wfc_config_file_path)
+        Args:
+            wfc_config_file_path: Path to the wavefront-corrector (.dat) config file.
+            haso_config_file_path: Path to the HASO sensor (.dat) config file.
+            positions_file_path: Path to the .wcs file defining the flat actuator
+                positions.
+            interaction_matrix_file_path: Path to the .aoc interaction matrix used
+                to build the command matrix.
+            n_modes: Number of Zernike modes to keep in the command matrix and
+                modal decomposition.
+        """
+
+        self.wfc_config_file_path = wfc_config_file_path
+        self.haso_config_file_path = haso_config_file_path
+        self.positions_file_path = positions_file_path
+        self.interaction_matrix_file_path = interaction_matrix_file_path
+        self.n_modes = n_modes
+
+        try:
+            n_actuators = wk.WavefrontCorrectorSet(
+                config_file_path=wfc_config_file_path
+            ).get_actuators_count()
+        except Exception as err:
+            raise RuntimeError(
+                f"Could not read wavefront-corrector config '{wfc_config_file_path}'. "
+                "Check the path exists and is a valid WaveKit .dat config file."
+            ) from err
 
         mirror = WavefrontCorrector(
             wfc_config_file_path=wfc_config_file_path,
             haso_config_file_path=haso_config_file_path,
             positions_file_path=positions_file_path,
             interaction_matrix_file_path=interaction_matrix_file_path,
-            n_actuators=mirror_set.get_actuators_count(),
+            n_actuators=n_actuators,
+            connect=True,
         )
 
         corrdata_manager = CorrDataManager()
         corrdata_manager.new_from_backup_file(
-            haso_config_file_path, interaction_matrix_file_path
+            haso_config_file_path=haso_config_file_path,
+            interaction_matrix_file_path=interaction_matrix_file_path,
         )
 
-        corrdata_manager.set_command_matrix_prefs(nb_kept_modes=32)
+        corrdata_manager.set_command_matrix_prefs(nb_kept_modes=n_modes)
         corrdata_manager.compute_command_matrix()
 
         mirror.set_temporization(20)
 
-        config = CoreEngine().get_config(haso_config_file_path)
+        config = CoreEngine().get_config(haso_config_file_path=haso_config_file_path)
 
         pupil = Pupil()
-        pupil.new_from_dimensions(config.nb_subpupils, config.ulens_step, 0)
+        pupil.new_from_dimensions(
+            dimensions=config.nb_subpupils, steps=config.ulens_step, value=0
+        )
 
-        pupil_zeros = np.zeros((config.nb_subpupils.Y, config.nb_subpupils.X))
-        pupil_buffer = corrdata_manager.get_greatest_common_pupil(pupil_zeros)
+        pupil_buffer = corrdata_manager.get_greatest_common_pupil()
 
         pupil.set_data(pupil_buffer)
 
-        self.pupil_center, self.pupil_radius = PupilCompute().fit_zernike_pupil(
-            pupil,
+        zernike_pupil = wk.ComputePupil.fit_zernike_pupil(
+            pupil.pointer,
             E_PUPIL_DETECTION_T.E_PUPIL_AUTOMATIC,
-            E_PUPIL_COVERING_T.E_PUPIL_CIRCUMSCRIBED,
-            0,
+            E_PUPIL_COVERING_T.E_PUPIL_INSCRIBED,
+            False,
+        )
+        self.pupil_center = zernike_pupil.center
+        self.pupil_radius = zernike_pupil.radius
+
+        self.position_flat = np.asarray(
+            mirror.get_positions_from_file(positions_file_path), dtype=np.float32
         )
 
-        self.position_flat = mirror.get_positions_from_file(positions_file_path)
-
-        modal_coef = ModalCoef()
-        modal_coef.new()  # default is Zernike
+        modal_coef = ModalCoef(modal_type=E_MODAL_T.E_MODALCOEF_ZERNIKE)
         modal_coef.set_zernike_prefs(
             n_modes,
-            0,
-            np.empty(0),
             self.pupil_center,
-            self.pupil_radius
-            # normalization=E_ZERNIKE_NORM_T.E_ZERNIKE_NORM_RMS
+            self.pupil_radius,
         )
 
-        self.n_modes = n_modes
         self.mirror = mirror
-        self.mirror_set = mirror_set
         self.corrdata_manager = corrdata_manager
         self.pupil = pupil
         self.modal_coef = modal_coef
         self.haso_slopes = HasoSlopes()
+        self.config = config
+
         self.last_delta_commands = np.zeros(self.mirror.n_actuators, dtype=np.float32)
 
     def flat(self):
+        """Command the mirror back to its flat shape (all Zernike coefficients zero)."""
         self.display_modes(np.zeros(self.n_modes, dtype=np.float32))
 
     def zero_flatness(self):
+        """Redefine flat as all-zero actuator positions, then move there."""
         self.set_flat(np.zeros(self.mirror.n_actuators, dtype=np.float32))
         self.flat()
 
     def set_flat(self, pos=None, pos_path=None):
+        """
+        Redefine the reference "flat" actuator positions used by display_modes(),
+        without moving the mirror.
+
+        Args:
+            pos: Actuator-length array of positions to use as the new flat reference.
+            pos_path: Alternatively, a .wcs file path to load the positions from.
+        """
         if pos_path:
             pos = self.mirror.get_positions_from_file(pos_path)
-        self.position_flat = pos
+
+        self.position_flat = np.asarray(pos, dtype=np.float32)
 
     def move_absolute_zero(self):
+        """Move all actuators directly to position zero."""
         self.mirror.move_absolute(np.zeros(self.mirror.n_actuators, dtype=np.float32))
 
     def display_modes(self, coefs, wait=False):
-        # make sure coefs is np.float32 array
+        """
+        Command the mirror to reproduce the given Zernike modal coefficients.
+
+        Converts the requested Zernike coefficients into HASO slopes, then
+        into per-actuator delta commands via the command matrix, and moves
+        the mirror to 'position_flat + delta_commands'.
+
+        Args:
+            coefs: Zernike coefficient vector, length 'n_modes'.
+            wait: If True, block (up to 1s) until the measured modal
+                coefficients match the request.
+        """
         if type(coefs) is not np.ndarray:
             coefs = np.array(coefs)
+
         if coefs.dtype is not np.float32:
             coefs = coefs.astype(np.float32)
 
         try:
-            self.modal_coef.set_data(
-                coefs,
-                np.arange(1, self.n_modes + 1).astype(np.uint32),
-                self.n_modes,
-                self.pupil,
-            )
+            self.modal_coef.set_data(coefs, self.pupil)
+
         except Exception as modal_coef_exception:
-            print("modal_coef.set_data failed...\n", modal_coef_exception)
+            print(f"modal_coef.set_data failed: {modal_coef_exception}")
+            return
 
         try:
             self.haso_slopes.new_from_modal_coef(
-                self.modal_coef, self.mirror.haso_config_file_path
+                self.modal_coef, self.haso_config_file_path
             )
+
         except Exception as haso_exception:
-            print("haso_slopes.new_from_modal_coef failed...\n", haso_exception)
+            print(f"haso_slopes.new_from_modal_coef failed: {haso_exception}")
+            return
 
         try:
             delta_commands = (
                 self.corrdata_manager.compute_delta_command_from_delta_slopes(
-                    self.haso_slopes,
-                    np.zeros(self.mirror.n_actuators).astype(np.float32),
+                    self.haso_slopes
                 )
             )
+
         except Exception as delta_commands_exception:
             print(
-                "corrdata_manager.compute_delta_command_from_delta_slopes failed...\n",
-                delta_commands_exception,
+                "corrdata_manager.compute_delta_command_from_delta_slopes "
+                f"failed: {delta_commands_exception}"
             )
+            return
 
         self.last_delta_commands = delta_commands
 
@@ -236,35 +254,53 @@ class IMOP_Mirror:
 
         try:
             self.mirror.move_absolute(new_positions)
+
         except Exception as move_exception:
-            print("mirror.move_absolute failed...\n", move_exception)
+            print(f"mirror.move_absolute failed: {move_exception}")
+            return
 
         if wait:
-            # TODO: doesn't work very well...
             timeout = 1000
             t = 0
             while (self.get_modal_coefs()[0] != coefs).any():
                 t += 1
                 if t == timeout:
-                    print("Ran out of time...")
+                    print("Ran out of time....")
                     break
                 time.sleep(0.001)
 
     def update_delta_commands(self):
-        self.last_delta_commands = (
-            self.mirror.get_current_positions() - self.position_flat
-        )
+        """Recompute 'last_delta_commands' from the mirror's actual current
+        positions minus flat."""
+        self.last_delta_commands = np.asarray(
+            self.mirror.get_current_positions(), dtype=np.float32
+        ) - np.asarray(self.position_flat, dtype=np.float32)
 
     def get_modal_coefs(self):
-        return self.modal_coef.get_data(n_modes=self.n_modes, pupil=self.pupil)
+        """Return the (coefficients, mode indices) last set via display_modes()."""
+        return self.modal_coef.get_data()
 
     def load_wcs(self, path=None, name=None, mode_file=False):
+        """
+        Load actuator positions from a .wcs file and move the mirror there.
+
+        Args:
+            path: Full path to the .wcs file to load.
+            name: Alternatively, a name to resolve to `<mirror_file_path>/<name>.wcs`.
+            mode_file: If True, also load the sibling `<name>.json` mode-coefficient
+                file and return it as a list of floats (empty list if not found).
+
+        Returns:
+            List of mode coefficients if 'mode_file' is True and the json file
+            exists, an empty list if it doesn't, or None otherwise.
+        """
         if path:
             wcs_load_path = path
         elif name:
             wcs_load_path = os.path.join(basepath, "MirrorFiles", name + ".wcs")
+
         else:
-            print("IMOP_Mirror:: Need to provide either name or path!")
+            print("IMOP_Mirror:: Need to provide either name or path")
             return
 
         new_positions = self.mirror.get_positions_from_file(wcs_load_path)
@@ -275,12 +311,10 @@ class IMOP_Mirror:
             mode_load_path = wcs_load_path.split(".")[0] + ".json"
 
             try:
-                import json
-
                 with open(mode_load_path, "r") as f:
                     coefs = json.load(f)
             except FileNotFoundError as err:
-                print(f"{err.strerror}::{mode_load_path} -> Modal coef not updated...")
+                print(f"{err.strerror}::{mode_load_path} > modal coef not updated...")
                 return []
 
             coefs = [float(c) for c in coefs.values()]
@@ -288,12 +322,16 @@ class IMOP_Mirror:
             return coefs
 
     def save_wcs(self, path=None, name=None, mode_file=False):
+        """
+        Save the mirror's current actuator positions to a .wcs file.
+        """
         if path:
             wcs_save_path = path
         elif name:
             wcs_save_path = os.path.join(basepath, "MirrorFiles", name + ".wcs")
+
         else:
-            print("IMOP_Mirror:: Need to provide either name or path!")
+            print("IMOP_Mirror:: Need to provide either name or path")
             return
 
         self.mirror.save_positions_to_file(file_path=wcs_save_path)
@@ -301,721 +339,473 @@ class IMOP_Mirror:
         if mode_file:
             mode_save_path = wcs_save_path.split(".")[0] + ".json"
             coefs, coef_inds = self.get_modal_coefs()
+
             mode_dict = {}
             for c in coef_inds:
                 mode_dict[mode_names[c - 1]] = f"{coefs[c-1]:.4f}"
 
-            import json
-
             with open(mode_save_path, "w") as f:
                 json.dump(mode_dict, f)
-            f.close()
 
     def get_wavefront_pix(self):
-        radius = 4
-        x, y = np.meshgrid(range(2 * radius), range(2 * radius))
+        """
+        Lay out 'last_delta_commands' on a square pixel grid for visualization.
+
+        Actuators are placed at the 'n_actuators' grid points nearest the
+        center (by Euclidean distance), matching the physical layout
+        assumption used elsewhere in this module; all other pixels are NaN.
+
+        Returns:
+            2D float32 array (side x side, side = ceil(sqrt(n_actuators)) + 2)
+            with actuator delta-command values at their grid positions and
+            NaN everywhere else.
+        """
+
+        n = self.mirror.n_actuators
+
+        side = int(np.ceil(np.sqrt(n))) + 2
+
+        x, y = np.meshgrid(np.arange(side), np.arange(side))
 
         x = x - x.mean()
         y = y - y.mean()
 
-        pupil = x**2 + y**2 <= radius**2
-        wavefront = np.zeros(pupil.shape)
+        r2 = x**2 + y**2
 
-        wavefront[pupil[:]] = self.last_delta_commands
+        nearest = np.argsort(r2.ravel(), kind="stable")[:n]
+        pupil = np.zeros(r2.shape, dtype=bool)
+        pupil.flat[nearest] = True
+
+        wavefront = np.full(pupil.shape, np.nan, dtype=np.float32)
+
+        wavefront[pupil] = self.last_delta_commands
 
         return wavefront
 
 
-# CoreEngine class (cHasoConfig.h)
 class CoreEngine:
+    """Reads static HASO sensor configuration/calibration metadata from a
+    config file."""
+
     def get_config(self, haso_config_file_path):
-        _, _, config = self.__Imop_CoreEngine_GetConfig(haso_config_file_path)
+        """
+        Get HASO config information from HASO config file path.
+        """
+        config_t, specs_t, wavelength_t = wk.HasoConfig.get_config(
+            haso_config_file_path
+        )
+
+        def _opt_list(value):
+            if isinstance(value, str):
+                return [item for item in value.split(";") if item]
+            else:
+                return value
+
+        config = {
+            "serial_number": getattr(config_t, "serial_number", None),
+            "revision": getattr(config_t, "revision", None),
+            "model": getattr(config_t, "model", None),
+            "nb_subpupils": specs_t.nb_subapertures,
+            "ulens_step": specs_t.ulens_step,
+            "alignment_position_pixels": getattr(specs_t, "align_pos", None),
+            "tolerence_radius": getattr(specs_t, "radius_tolerance", None),
+            "default_start_subpupil": getattr(specs_t, "start_subpup", None),
+            "lower_calibration_wavelen": getattr(wavelength_t, "lower_calib_wl", None),
+            "upper_calibration_wavelen": getattr(wavelength_t, "upper_calib_wl", None),
+            "black_pupil_position": getattr(specs_t, "black_subpup", None),
+            "tilt_limit_mrad": getattr(specs_t, "tilt_limit", None),
+            "radius": getattr(specs_t, "radius", None),
+            "microlens_focal": getattr(specs_t, "micro_lens_focal", None),
+            "internal_options_list": _opt_list(
+                getattr(specs_t, "internal_options", None)
+            ),
+            "software_info_list": _opt_list(getattr(specs_t, "software_info", None)),
+            "SdkInfoList": _opt_list(getattr(specs_t, "sdk_info", None)),
+        }
 
         return pd.Series(config)
 
-    def __Imop_CoreEngine_GetConfig(self, haso_config_file_path):
-        serial_number = ct.create_string_buffer(256)
-        revision = ct.c_uint()
-        model = ct.create_string_buffer(256)
-        nb_subpupils = uint2D()
-        ulens_step = float2D()
-        alignment_position_pixels = float2D()
-        tolerance_radius = ct.c_ushort()
-        default_start_subpupil = uint2D()
-        lower_calibration_wavelen = ct.c_double()
-        upper_calibration_wavelen = ct.c_double()
-        black_subpupil_position = uint2D()
-        tilt_limit_mrad = ct.c_double()
-        radius = ct.c_double()
-        microlens_focal = ct.c_double()
-        smearing_limit_wavelen = ct.c_double()
-        smearing_limit_exp_duration = ct.c_double()
-        internal_options_list = ct.create_string_buffer(256)
-        software_info_list = ct.create_string_buffer(256)
-        SdkInfoList = ct.create_string_buffer(256)
 
-        msg, result = call_errmsg(
-            imop_lib.Imop_CoreEngine_GetConfig,
-            char_p(haso_config_file_path),
-            serial_number,
-            ct.byref(revision),
-            model,
-            ct.byref(nb_subpupils),
-            ct.byref(ulens_step),
-            ct.byref(alignment_position_pixels),
-            ct.byref(tolerance_radius),
-            ct.byref(default_start_subpupil),
-            ct.byref(lower_calibration_wavelen),
-            ct.byref(upper_calibration_wavelen),
-            ct.byref(black_subpupil_position),
-            ct.byref(tilt_limit_mrad),
-            ct.byref(radius),
-            ct.byref(microlens_focal),
-            ct.byref(smearing_limit_wavelen),
-            ct.byref(smearing_limit_exp_duration),
-            internal_options_list,
-            software_info_list,
-            SdkInfoList,
-        )
+class HasoSlopes:
+    """Wraps a wavekit_py HasoSlopes object -- the wavefront slopes
+    synthesized from a set of Zernike modal coefficients."""
 
-        config = {
-            "serial_number": serial_number.value.decode("utf-8"),
-            "revision": revision.value,
-            "model": model.value.decode("utf-8"),
-            "nb_subpupils": nb_subpupils,
-            "ulens_step": ulens_step,
-            "alignment_position_pixels": alignment_position_pixels,
-            "tolerance_radius": tolerance_radius.value,
-            "default_start_subpupil": default_start_subpupil,
-            "lower_calibration_wavelen": lower_calibration_wavelen.value,
-            "upper_calibration_wavelen": upper_calibration_wavelen.value,
-            "black_subpupil_position": black_subpupil_position,
-            "tilt_limit_mrad": tilt_limit_mrad.value,
-            "radius": radius.value,
-            "microlens_focal": microlens_focal.value,
-            "smearing_limit_wavelen": smearing_limit_wavelen.value,
-            "smearing_limit_exp_duration": smearing_limit_exp_duration.value,
-            "internal_options_list": internal_options_list.value.decode("utf-8").split(
-                ";"
-            ),
-            "software_info_list": software_info_list.value.decode("utf-8").split(";"),
-            "SdkInfoList": SdkInfoList.value.decode("utf-8").split(";"),
-        }
-
-        return msg, result, config
-
-
-# HasoSlopes class (cHasoSlopes.h)
-class HasoSlopes(Pointer):
     def __init__(self):
-        super().__init__()
+        self._haso_slopes = None
 
-    # Public functions:
+    @property
+    def pointer(self):
+        return self._haso_slopes
 
     def new_from_modal_coef(self, modal_coef, haso_config_file_path):
-        self.__Imop_HasoSlopes_NewFromModalCoef(modal_coef, haso_config_file_path)
+        """
+        Synthesize HASO slopes corresponding to the given Zernike modal coefficients.
 
-    # Private functions translated directly from Imop C API:
-
-    def __Imop_HasoSlopes_NewFromModalCoef(self, modal_coef, config_file_path):
-        return call_errmsg(
-            imop_lib.Imop_HasoSlopes_NewFromModalCoef,
-            ct.byref(self.pointer),
-            modal_coef.pointer,
-            char_p(config_file_path),
+        Args:
+            modal_coef: A ModalCoef wrapper whose coefficients define the
+                target wavefront.
+            haso_config_file_path: Path to the HASO sensor config file used
+                for the synthesis.
+        """
+        self._haso_slopes = wk.HasoSlopes(
+            modalcoef=modal_coef.pointer, config_file_path=haso_config_file_path
         )
 
 
-# PupilCompute class (cComputePupil.h)
-class PupilCompute(Pointer):
+class Pupil:
+    """Wraps a wavekit_py Pupil object -- a binary mask over the subaperture
+    grid marking which subapertures are active."""
+
     def __init__(self):
-        super().__init__()
+        self._pupil = None
 
-    # Public functions:
-
-    def fit_zernike_pupil(
-        self,
-        pupil,
-        detection_mode=E_PUPIL_DETECTION_T.E_PUPIL_AUTOMATIC,
-        covering=E_PUPIL_COVERING_T.E_PUPIL_INSCRIBED,
-        has_central_occultation=False,
-    ):
-        _, _, center, radius = self.__Imop_PupilCompute_FitZernikePupil(
-            pupil, detection_mode, covering, has_central_occultation
-        )
-
-        return center, radius
-
-    # Private functions translated directly from Imop C API:
-
-    def __Imop_PupilCompute_FitZernikePupil(
-        self, pupil, detection_mode, covering, has_central_occultation
-    ):
-        center = float2D()
-        radius = ct.c_float()
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_PupilCompute_FitZernikePupil,
-            pupil.pointer,
-            detection_mode,
-            covering,
-            has_central_occultation,
-            ct.byref(center),
-            ct.byref(radius),
-        )
-
-        return msg, result, center, radius
-
-
-# Pupil class (cPupil.h)
-class Pupil(Pointer):
-    def __init__(self):
-        super().__init__()
-
-    def __del__(self):
-        # Destructor
-        self.__Imop_Pupil_Delete()
-
-    # Public functions:
+    @property
+    def pointer(self):
+        return self._pupil
 
     def new_from_dimensions(self, dimensions, steps, value):
-        self.__Imop_Pupil_NewFromDimensions(dimensions, steps, value)
+        """
+        Create a uniform pupil mask of the given size, filled with a constant value.
 
-    def new_from_zernike_pupil(self, dimensions, steps, center, radius):
-        self.__Imop_Pupil_NewFromZernikePupil(dimensions, steps, center, radius)
+        Args:
+            dimensions: Subaperture grid size (object with .X/.Y), e.g.
+                from CoreEngine's config.
+            steps: Subaperture step size (object with .X/.Y).
+            value: Boolean fill value for every mask element.
+        """
+        dim = wk.dimensions(size=dimensions, steps=steps)
+        self._pupil = wk.Pupil(dimensions=dim, value=bool(value))
 
-    def get_data(self, buffer):
-        _, _, data = self.__Imop_Pupil_GetData(buffer)
+    def new_from_zernike_pupil(self, dimensions, steps, radius, center):
+        """
+        Create a circular pupil mask from an explicit center and radius.
 
-        return data
+        Args:
+            dimensions: Subaperture grid size (object with .X/.Y).
+            steps: Subaperture step size (object with .X/.Y).
+            radius: Radius of the circular pupil, in subaperture units.
+            center: Center of the circular pupil.
+        """
+        dim = wk.dimensions(size=dimensions, steps=steps)
+        self._pupil = wk.Pupil(dimensions=dim, center=center, radius=radius)
+
+    def get_data(self):
+        """Return the pupil mask as a 2D boolean array."""
+        return self._pupil.get_data()
 
     def set_data(self, data):
-        self.__Imop_Pupil_SetData(data)
-
-    # Private functions translated directly from Imop C API:
-
-    def __Imop_Pupil_NewFromDimensions(self, dimensions, steps, value):
-        return call_errmsg(
-            imop_lib.Imop_Pupil_NewFromDimensions,
-            ct.byref(self.pointer),
-            ct.byref(dimensions),
-            ct.byref(steps),
-            value,
-        )
-
-    def __Imop_Pupil_NewFromZernikePupil(self, dimensions, steps, center, radius):
-        return call_errmsg(
-            imop_lib.Imop_Pupil_NewFromZernikePupil,
-            ct.byref(self.pointer),
-            ct.byref(steps),
-            ct.byref(dimensions),
-            ct.byref(center),
-            ct.c_float(radius),
-        )
-
-    def __Imop_Pupil_GetData(self, data):
-        data = data.astype(bool)
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_Pupil_GetData, self.pointer, arr_p(data)
-        )
-
-        return msg, result, data
-
-    def __Imop_Pupil_SetData(self, data):
-        return call_errmsg(imop_lib.Imop_Pupil_SetData, self.pointer, arr_p(data))
-
-    def __Imop_Pupil_Delete(self):
-        return call_errmsg(imop_lib.Imop_Pupil_Delete, self.pointer)
+        """Overwrite the pupil mask from a 2D array-like, coerced to boolean."""
+        self._pupil.set_data(np.asarray(data).astype(bool))
 
 
-# ModalCoef class (cModalCoef.h)
-class ModalCoef(Pointer):
-    def __init__(self):
-        super().__init__()
+class ModalCoef:
+    """Wraps a wavekit_py ModalCoef object -- a set of modal (Zernike or
+    Legendre) coefficients describing a wavefront."""
 
-    def __del__(self):
-        # Destructor
-        self.__Imop_ModalCoef_Delete()
+    def __init__(self, modal_type=E_MODAL_T.E_MODALCOEF_ZERNIKE):
+        self._modal_coef = wk.ModalCoef(modal_type=modal_type)
 
-    # Public functions:
-
-    def new(self, e_modal_t=E_MODAL_T.E_MODALCOEF_ZERNIKE):
-        self.__Imop_ModalCoef_New(e_modal_t)
+    @property
+    def pointer(self):
+        return self._modal_coef
 
     def set_zernike_prefs(
         self,
         nb_coefs_total,
-        nb_coefs_to_filter,
-        coefs_to_filter,
         projection_pupil_center,
         projection_pupil_radius,
         normalization=E_ZERNIKE_NORM_T.E_ZERNIKE_NORM_STD,
+        zernike_indexing=E_ZERNIKE_INDEXING_T.WYANT,
     ):
-        self.__Imop_ModalCoef_SetZernikePrefs(
-            normalization,
-            nb_coefs_total,
-            nb_coefs_to_filter,
-            coefs_to_filter,
-            projection_pupil_center,
-            projection_pupil_radius,
+        """
+        Configure how Zernike coefficients are interpreted: how many terms,
+        which normalization/indexing convention, and over which pupil
+        (center + radius) they're projected.
+
+        Args:
+            nb_coefs_total: Number of Zernike coefficients to track.
+            projection_pupil_center: Center of the projection pupil (e.g.
+                from wk.ComputePupil.fit_zernike_pupil).
+            projection_pupil_radius: Radius of the projection pupil.
+            normalization: Zernike normalization convention (standard or RMS).
+            zernike_indexing: Zernike term ordering convention (Wyant or Noll).
+        """
+
+        projection_pupil = wk.ZernikePupil_t(
+            center=projection_pupil_center,
+            radius=projection_pupil_radius,
         )
 
-    def set_data(self, coef, index, size, pupil):
-        self.__Imop_ModalCoef_SetData(coef, index, size, pupil)
+        self._modal_coef.set_zernike_prefs(
+            zernike_normalization=normalization,
+            nb_zernike_coefs_total=nb_coefs_total,
+            zernike_indexing=zernike_indexing,
+            projection_pupil=projection_pupil,
+        )
 
-    def get_data(self, n_modes, pupil):
-        _, _, coef, index = self.__Imop_ModalCoef_GetData(n_modes, pupil)
+    def set_data(self, coef, pupil=None):
+        """
+        Set polynomial coefficients information and values.
+        """
+        pupil_obj = pupil.pointer if pupil is not None else None
+        self._modal_coef.set_data(np.asarray(coef).astype(np.float32), pupil_obj)
 
+    def get_data(self):
+        """
+        Get polynomial coefficients information and values.
+        """
+        coef, index, _mask = self._modal_coef.get_data()
         return coef, index
 
-    # Private functions translated directly from Imop C API:
 
-    def __Imop_ModalCoef_New(self, e_modal_t):
-        return call_errmsg(
-            imop_lib.Imop_ModalCoef_New, ct.byref(self.pointer), e_modal_t
-        )
+class CorrDataManager:
+    """
+    Wraps a wavekit_py CorrDataManager object -- builds the command matrix
+    from an interaction matrix and HASO calibration, and uses it to convert
+    wavefront slope variations into actuator command deltas.
+    """
 
-    def __Imop_ModalCoef_SetZernikePrefs(
-        self,
-        normalization,
-        nb_coefs_total,
-        nb_coefs_to_filter,
-        coefs_to_filter,
-        projection_pupil_center,
-        projection_pupil_radius,
-    ):
-        return call_errmsg(
-            imop_lib.Imop_ModalCoef_SetZernikePrefs,
-            self.pointer,
-            normalization,
-            nb_coefs_total,
-            nb_coefs_to_filter,
-            arr_p(coefs_to_filter),
-            ct.byref(projection_pupil_center),
-            projection_pupil_radius,
-        )
-
-    def __Imop_ModalCoef_SetData(self, coef, index, size, pupil):
-        return call_errmsg(
-            imop_lib.Imop_ModalCoef_SetData,
-            self.pointer,
-            arr_p(coef),
-            arr_p(index),
-            size,
-            pupil.pointer,
-        )
-
-    def __Imop_ModalCoef_GetData(self, n_modes, pupil):
-        coef = np.zeros(n_modes, dtype=np.float32)
-        index = np.zeros(n_modes, dtype=np.uint32)
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_ModalCoef_GetData,
-            self.pointer,
-            arr_p(coef),
-            arr_p(index),
-            pupil.pointer,
-        )
-
-        return msg, result, coef, index
-
-    def __Imop_ModalCoef_Delete(self):
-        return call_errmsg(imop_lib.Imop_ModalCoef_Delete, self.pointer)
-
-
-# CorrDataManager class (cCorrDataManager.h)
-class CorrDataManager(Pointer):
     def __init__(self):
-        super().__init__()
+        self._corr_data = None
 
-    def __del__(self):
-        # Destructor
-        self.__Imop_CorrDataManager_Delete()
-
-    # Public functions:
+    @property
+    def pointer(self):
+        return self._corr_data
 
     def new_from_backup_file(self, haso_config_file_path, interaction_matrix_file_path):
-        self.__Imop_CorrDataManager_NewFromBackupFile(
-            haso_config_file_path, interaction_matrix_file_path
+        """
+        Load HASO calibration and interaction-matrix data to initialize
+        the correction-data pipeline.
+
+        Args:
+            haso_config_file_path: Path to the HASO sensor config file.
+            interaction_matrix_file_path: Path to the .aoc interaction matrix file.
+        """
+        self._corr_data = wk.CorrDataManager(
+            haso_config_file_path=haso_config_file_path,
+            interaction_matrix_file_path=interaction_matrix_file_path,
         )
 
     def set_command_matrix_prefs(self, nb_kept_modes, tilt_filtering=False):
-        self.__Imop_CorrDataManager_SetCommandMatrixPrefs(nb_kept_modes, tilt_filtering)
+        """
+        Configure the command matrix to be computed.
+
+        Args:
+            nb_kept_modes: Number of Zernike modes to keep when inverting
+                the interaction matrix.
+            tilt_filtering: Whether to filter out tip/tilt from the command matrix.
+        """
+        self._corr_data.set_command_matrix_prefs(nb_kept_modes, tilt_filtering)
 
     def compute_command_matrix(self):
-        self.__Imop_CorrDataManager_ComputeCommandMatrix()
+        """Compute the command matrix using the previously set preferences."""
+        self._corr_data.compute_command_matrix()
 
-    def get_greatest_common_pupil(self, pupil):
-        _, _, pupil = self.__Imop_CorrDataManager_GetGreatestCommonPupil(pupil)
+    def get_greatest_common_pupil(self):
+        """
+        Compute the greatest common pupil.
+        """
+        return self._corr_data.get_greatest_common_pupil()
 
-        return pupil
+    def compute_delta_command_from_delta_slopes(self, delta_slopes):
+        """
+        Compute the relative wavefront corrector commands corresponding
+        to a delta slopes variation
 
-    def compute_delta_command_from_delta_slopes(self, delta_slopes, delta_command):
-        (
-            _,
-            _,
-            delta_command,
-        ) = self.__Imop_CorrDataManager_ComputeDeltaCommandFromDeltaSlopes(
-            delta_slopes, delta_command
+        Returns:
+            Array of size actuators count, containing the relative commands deltas.
+        """
+        return self._corr_data.compute_delta_command_from_delta_slopes(
+            delta_slopes.pointer
         )
 
-        return delta_command
 
-    # Private functions translated directly from Imop C API:
+class WavefrontCorrector:
+    """
+    Wraps a wavekit_py WavefrontCorrector -- the live connection to the
+    deformable mirror hardware.
+    """
 
-    def __Imop_CorrDataManager_NewFromBackupFile(
-        self, haso_config_file_path, interaction_matrix_file_path
-    ):
-        return call_errmsg(
-            imop_lib.Imop_CorrDataManager_NewFromBackupFile,
-            ct.byref(self.pointer),
-            char_p(haso_config_file_path),
-            char_p(interaction_matrix_file_path),
-        )
-
-    def __Imop_CorrDataManager_Delete(self):
-        return call_errmsg(imop_lib.Imop_CorrDataManager_Delete, self.pointer)
-
-    def __Imop_CorrDataManager_SetCommandMatrixPrefs(
-        self, nb_kept_modes, tilt_filtering
-    ):
-        return call_errmsg(
-            imop_lib.Imop_CorrDataManager_SetCommandMatrixPrefs,
-            self.pointer,
-            nb_kept_modes,
-            tilt_filtering,
-        )
-
-    def __Imop_CorrDataManager_ComputeCommandMatrix(self):
-        return call_errmsg(
-            imop_lib.Imop_CorrDataManager_ComputeCommandMatrix, self.pointer
-        )
-
-    def __Imop_CorrDataManager_GetGreatestCommonPupil(self, pupil):
-        pupil = pupil.astype(bool)
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_CorrDataManager_GetGreatestCommonPupil,
-            self.pointer,
-            arr_p(pupil),
-        )
-
-        return msg, result, pupil
-
-    def __Imop_CorrDataManager_ComputeDeltaCommandFromDeltaSlopes(
-        self, delta_slopes, delta_command
-    ):
-        delta_command = delta_command.astype(np.float32)
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_CorrDataManager_ComputeDeltaCommandFromDeltaSlopes,
-            self.pointer,
-            delta_slopes.pointer,  # HasoSlopes object
-            arr_p(delta_command),
-        )
-
-        return msg, result, delta_command
-
-
-# WavefrontCorrectorSet class (cWavefrontCorrectorSet.h)
-class WavefrontCorrectorSet(Pointer):
-    def __init__(self):
-        super().__init__()
-
-    def __del__(self):
-        # Destructor
-        self.__Imop_WavefrontCorrectorSet_Delete()
-
-    # Public functions:
-
-    def new_from_config_file(self, wfc_config_file_path):
-        self.__Imop_WavefrontCorrectorSet_NewFromConfigFile(wfc_config_file_path)
-
-    def get_actuators_count(self):
-        _, _, n_actuators = self.__Imop_WavefrontCorrectorSet_GetActuatorsCount()
-
-        return n_actuators
-
-    # Private functions translated directly from Imop C API:
-
-    def __Imop_WavefrontCorrectorSet_NewFromConfigFile(self, wfc_config_file_path):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrectorSet_NewFromConfigFile,
-            ct.byref(self.pointer),
-            char_p(wfc_config_file_path),
-        )
-
-    def __Imop_WavefrontCorrectorSet_GetActuatorsCount(self):
-        n_actuators = ct.c_int()
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_WavefrontCorrectorSet_GetActuatorsCount,
-            self.pointer,
-            ct.byref(n_actuators),
-        )
-
-        return msg, result, n_actuators.value
-
-    def __Imop_WavefrontCorrectorSet_Delete(self):
-        return call_errmsg(imop_lib.Imop_WavefrontCorrectorSet_Delete, self.pointer)
-
-
-# WavefrontCorrector class (cWavefrontCorrector.h)
-class WavefrontCorrector(Pointer):
     def __init__(
         self,
-        wfc_config_file_path=os.path.join(
-            basepath, "MirrorFiles", "WaveFrontCorrector_Mirao52-e_0259.dat"
-        ),
+        wfc_config_file_path=os.path.join(basepath, "MirrorFiles", "WFC_MuDM_0018.dat"),
         haso_config_file_path=os.path.join(
-            basepath, "MirrorFiles", "HASO4_first_7458.dat"
+            basepath, "MirrorFiles", "WFS_HASO4_first_7458.dat"
         ),
-        positions_file_path=os.path.join(
-            basepath, "MirrorFiles", "FlouresceinOctober12.wcs"
-        ),
+        positions_file_path=os.path.join(basepath, "MirrorFiles", "Flat.wcs"),
         interaction_matrix_file_path=os.path.join(
-            basepath, "MirrorFiles", "OlympusApril22.aoc"
+            basepath, "MirrorFiles", "InfluenceMatrix2.aoc"
         ),
-        n_actuators=52,
+        n_actuators=91,
+        connect=True,
     ):
-        super().__init__()
+        """
+        Args:
+            wfc_config_file_path: Path to the wavefront-corrector (.dat) config file.
+            haso_config_file_path: Path to the HASO sensor (.dat) config file.
+            positions_file_path: Default .wcs positions file associated
+                with this corrector.
+            interaction_matrix_file_path: Default .aoc interaction matrix
+                associated with this corrector.
+            n_actuators: Number of actuators on the corrector.
+            connect: If True, open the hardware connection immediately.
+        """
 
         self.wfc_config_file_path = wfc_config_file_path
         self.haso_config_file_path = haso_config_file_path
         self.positions_file_path = positions_file_path
         self.interaction_matrix_file_path = interaction_matrix_file_path
-
         self.n_actuators = n_actuators
 
-        self.__Imop_WavefrontCorrector_NewFromConfigFile()
-        self.__Imop_WavefrontCorrector_Init()
+        try:
+            self._wfc = wk.WavefrontCorrector(config_file_path=wfc_config_file_path)
+        except Exception as err:
+            raise RuntimeError(
+                f"Could not load wavefront-corrector config '{wfc_config_file_path}'. "
+                "Check the path exists and is a valid WaveKit .dat config file."
+            ) from err
+
+        self._is_connected = False
+
+        if connect:
+            self.connect()
 
         self.get_preferences()
 
     def __del__(self):
-        # Destructor
-        self.__Imop_WavefrontCorrector_Delete()
+        try:
+            self.disconnect()
+        except Exception:
+            pass
 
-    # Public functions:
+    def connect(self):
+        """Open the hardware connection, if not already connected."""
+        if not self._is_connected:
+            try:
+                self._wfc.connect(True)
+            except Exception as err:
+                raise ConnectionError(
+                    f"Could not connect to the wavefront corrector (config: "
+                    f"'{self.wfc_config_file_path}'). Check that the mirror is "
+                    "powered on, connected via USB, its drivers are installed, "
+                    "and no other program is already connected to it."
+                ) from err
+            self._is_connected = True
+
+    def disconnect(self):
+        """Close the hardware connection, if currently connected. Safe to
+        call multiple times."""
+        if getattr(self, "_is_connected", False):
+            self._wfc.disconnect()
+            self._is_connected = False
 
     def get_preferences(self):
-        (
-            _,
-            _,
-            (sleep_after_movement, cmd_min, cmd_max, validity, fixed_values),
-        ) = self.__Imop_WavefrontCorrector_GetPreferences()
+        """
+        Fetch and cache the corrector's current command preferences from hardware.
+
+        Returns:
+            Dict with keys "sleep_after_movement", "cmd_min", "cmd_max",
+            "validity", and "fixed_values" (also stored on `self.preferences`).
+        """
+        sleep_after_movement, prefs = self._wfc.get_preferences()
 
         self.preferences = {
             "sleep_after_movement": sleep_after_movement,
-            "cmd_min": cmd_min,
-            "cmd_max": cmd_max,
-            "validity": validity,
-            "fixed_values": fixed_values,
+            "cmd_min": prefs.min_array,
+            "cmd_max": prefs.max_array,
+            "validity": prefs.validity_array,
+            "fixed_values": prefs.fixed_value_array,
         }
 
         return self.preferences
 
     def set_preferences(self, **kwargs):
-        for k in kwargs.keys():
-            if k in self.preferences.keys():
-                self.preferences[k] = kwargs[k]
+        """
+        Update one or more cached preferences and push them to hardware.
+
+        Args:
+            **kwargs: Any subset of the keys returned by `get_preferences()`
+                (e.g. cmd_min=..., cmd_max=...). Unknown keys raise ValueError.
+
+        Raises:
+            ValueError: If a kwarg key is not one of the valid preference keys.
+        """
+        for key in kwargs.keys():
+            if key in self.preferences.keys():
+                self.preferences[key] = kwargs[key]
+
             else:
                 raise ValueError(
-                    k
-                    + " is not a valid preference! Choose from: "
-                    + str([k for k in self.preferences.keys()])
+                    f"{key} is not a valid preference. Choose from: "
+                    f"{str([key for key in self.preferences.keys()])}"
                 )
-                return
 
-        self.__Imop_WavefrontCorrector_SetPreferences(
-            self.preferences["sleep_after_movement"],
-            self.preferences["cmd_min"],
-            self.preferences["cmd_max"],
-            self.preferences["validity"],
-            self.preferences["fixed_values"],
+        prefs = wk.CorrectorPrefs_t(
+            min_array=self.preferences["cmd_min"],
+            max_array=self.preferences["cmd_max"],
+            validity_array=self.preferences["validity"],
+            fixed_value_array=self.preferences["fixed_values"],
         )
+
+        self._wfc.set_preferences(self.preferences["sleep_after_movement"], prefs)
 
     def get_temporization(self):
-        _, _, sleep_after_movement = self.__Imop_WavefrontCorrector_GetTemporization()
+        """Get current WavefrontCorrector preference"""
 
-        return sleep_after_movement
+        return self._wfc.get_temporization()
 
     def set_temporization(self, sleep_after_movement):
-        self.preferences["sleep_after_movement"] = sleep_after_movement
+        """Set current Wavefront preference."""
 
-        self.__Imop_WavefrontCorrector_SetTemporization(sleep_after_movement)
+        self.preferences["sleep_after_movement"] = sleep_after_movement
+        self._wfc.set_temporization(sleep_after_movement)
 
     def get_current_positions(self):
-        _, _, positions = self.__Imop_WavefrontCorrector_GetCurrentPositions()
+        """
+        Get current actuators positions
 
-        return positions
+        Returns:
+            Array containing the actuators positions
+        """
+        return np.asarray(self._wfc.get_current_positions(), dtype=np.float32)
 
-    def get_positions_from_file(self, path):
-        _, _, positions = self.__Imop_WavefrontCorrector_GetPositionsFromFile(path)
-
-        return positions
+    def get_positions_from_file(self, positions_file_path):
+        """
+        Get Wavefront corrector positions from positions file
+        """
+        return np.asarray(
+            self._wfc.get_positions_from_file(positions_file_path), dtype=np.float32
+        )
 
     def save_positions_to_file(self, file_path):
-        self.__Imop_WavefrontCorrector_SaveCurrentPositionsToFile(file_path)
+        """
+        Save current wavefroont corrector positions to file
+        """
+        self._wfc.save_current_positions_to_file(file_path)
 
     def move_relative(self, positions):
-        self.__Imop_WavefrontCorrector_MoveToRelativePositions(
-            positions.astype(np.float32)
-        )
+        """
+        Move to requested relative positions, clipping according to current preferences.
+        """
+        self._wfc.move_to_relative_positions(np.asarray(positions).astype(np.float32))
 
     def move_absolute(self, positions):
-        self.__Imop_WavefrontCorrector_MoveToAbsolutePositions(
-            positions.astype(np.float32)
-        )
+        """
+        Move to requested absolute positions, clipping according to current preferences.
+        """
+        self._wfc.move_to_absolute_positions(np.asarray(positions).astype(np.float32))
 
-    # TODO: doesn't really work... always returns zero.
     def check_absolute_positions(self, positions):
-        _, flag = self.__Imop_WavefrontCorrector_CheckAbsolutePositions(
-            positions.astype(np.float32)
+        """
+        Check if requested absolute positions are valid according to
+        current preferences.
+        """
+        return self._wfc.check_absolute_positions(
+            np.asarray(positions).astype(np.float32)
         )
-        return flag
 
     def clear(self):
-        self.move_absolute(np.zeros(self.n_actuators))
-
-    # Private functions translated directly from Imop C API:
-
-    def __Imop_WavefrontCorrector_Delete(self):
-        return call_errmsg(imop_lib.Imop_WavefrontCorrector_Delete, self.pointer)
-
-    def __Imop_WavefrontCorrector_NewFromConfigFile(self):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_NewFromConfigFile,
-            ct.byref(self.pointer),
-            char_p(self.wfc_config_file_path),
-        )
-
-    def __Imop_WavefrontCorrector_Init(self, set_init_state_from_config_file=True):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_Init,
-            self.pointer,
-            ct.c_bool(set_init_state_from_config_file),
-        )
-
-    def __Imop_WavefrontCorrector_CallSpecificFeature(self, feature_name):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_CallSpecificFeature,
-            self.pointer,
-            char_p(feature_name),
-        )
-
-    def __Imop_WavefrontCorrector_GetPreferences(self):
-        sleep_after_movement = ct.c_int()
-        cmd_min = np.zeros(self.n_actuators).astype(np.float32)
-        cmd_max = np.zeros(self.n_actuators).astype(np.float32)
-        validity = np.zeros(self.n_actuators).astype(np.int32)
-        fixed_values = np.zeros(self.n_actuators).astype(np.float32)
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_GetPreferences,
-            self.pointer,
-            ct.byref(sleep_after_movement),
-            arr_p(cmd_min),
-            arr_p(cmd_max),
-            arr_p(validity),
-            arr_p(fixed_values),
-        )
-
-        return (
-            msg,
-            result,
-            (sleep_after_movement.value, cmd_min, cmd_max, validity, fixed_values),
-        )
-
-    # TODO: Imop_WavefrontCorrector_AssertEqualPreferences
-
-    # TODO: Imop_WavefrontCorrector_CheckUserPreferences
-
-    def __Imop_WavefrontCorrector_SetPreferences(
-        self, sleep_after_movement, cmd_min, cmd_max, validity, fixed_values
-    ):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_SetPreferences,
-            self.pointer,
-            sleep_after_movement,
-            arr_p(cmd_min),
-            arr_p(cmd_max),
-            arr_p(validity),
-            arr_p(fixed_values),
-        )
-
-    def __Imop_WavefrontCorrector_GetTemporization(self):
-        sleep_after_movement = ct.c_int()
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_GetTemporization,
-            self.pointer,
-            ct.byref(sleep_after_movement),
-        )
-
-        return msg, result, sleep_after_movement.value
-
-    def __Imop_WavefrontCorrector_SetTemporization(self, sleep_after_movement):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_SetTemporization,
-            self.pointer,
-            sleep_after_movement,
-        )
-
-    def __Imop_WavefrontCorrector_GetCurrentPositions(self):
-        positions = np.zeros(self.n_actuators).astype(np.float32)
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_GetCurrentPositions,
-            self.pointer,
-            arr_p(positions),
-        )
-
-        return msg, result, positions
-
-    # TODO: Imop_WavefrontCorrector_CheckRelativePositions
-
-    def __Imop_WavefrontCorrector_MoveToRelativePositions(self, positions):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_MoveToRelativePositions,
-            self.pointer,
-            arr_p(positions),
-        )
-
-    # TODO: Imop_WavefrontCorrector_CheckAbsolutePositions
-    def __Imop_WavefrontCorrector_CheckAbsolutePositions(self, positions):
-        msg, result = call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_CheckAbsolutePositions,
-            self.pointer,
-            arr_p(positions),
-        )
-
-        return msg, result
-
-    def __Imop_WavefrontCorrector_MoveToAbsolutePositions(self, positions):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_MoveToAbsolutePositions,
-            self.pointer,
-            arr_p(positions),
-        )
-
-    def __Imop_WavefrontCorrector_GetPositionsFromFile(self, pmc_file_path):
-        positions = np.zeros(self.n_actuators).astype(np.float32)
-
-        msg, result = call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_GetPositionsFromFile,
-            char_p(pmc_file_path),
-            arr_p(positions),
-        )
-
-        return msg, result, positions
-
-    def __Imop_WavefrontCorrector_SaveCurrentPositionsToFile(self, pmc_file_path):
-        return call_errmsg(
-            imop_lib.Imop_WavefrontCorrector_SaveCurrentPositionsToFile,
-            self.pointer,
-            char_p(pmc_file_path),
-        )
-
-    # TODO: Rest of file... but maybe good enough for now.
+        """
+        Clear the Wavefront corrector positions to zero.
+        """
+        self.move_absolute(np.zeros(self.n_actuators, dtype=np.float32))

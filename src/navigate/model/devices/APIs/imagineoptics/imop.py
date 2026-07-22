@@ -24,7 +24,10 @@ from .enums import (
     E_ZERNIKE_INDEXING_T,
 )
 
-# Define the base path where the mirror files and wfc and wfs configuration files
+# Base directory used only to resolve short `name=` references in load_wcs()/
+# save_wcs() into `<basepath>/MirrorFiles/<name>.wcs`. All hardware-specific
+# config/calibration file paths are supplied explicitly by the caller (see
+# navigate.model.devices.mirror.imop.ImagineOpticsMirror.get_connect_params).
 basepath = "C:/Users/Spectral/Desktop/muDM"
 
 
@@ -71,14 +74,10 @@ class IMOP_Mirror:
 
     def __init__(
         self,
-        wfc_config_file_path=os.path.join(basepath, "MirrorFiles", "WFC_MuDM_0018.dat"),
-        haso_config_file_path=os.path.join(
-            basepath, "MirrorFiles", "WFS_HASO4_first_7458.dat"
-        ),
-        positions_file_path=os.path.join(basepath, "MirrorFiles", "Flat.wcs"),
-        interaction_matrix_file_path=os.path.join(
-            basepath, "MirrorFiles", "InfluenceMatrix2.aoc"
-        ),
+        wfc_config_file_path,
+        haso_config_file_path,
+        positions_file_path,
+        interaction_matrix_file_path,
         n_modes=32,
     ):
         """
@@ -146,7 +145,7 @@ class IMOP_Mirror:
         zernike_pupil = wk.ComputePupil.fit_zernike_pupil(
             pupil.pointer,
             E_PUPIL_DETECTION_T.E_PUPIL_AUTOMATIC,
-            E_PUPIL_COVERING_T.E_PUPIL_INSCRIBED,
+            E_PUPIL_COVERING_T.E_PUPIL_CIRCUMSCRIBED,
             False,
         )
         self.pupil_center = zernike_pupil.center
@@ -628,14 +627,10 @@ class WavefrontCorrector:
 
     def __init__(
         self,
-        wfc_config_file_path=os.path.join(basepath, "MirrorFiles", "WFC_MuDM_0018.dat"),
-        haso_config_file_path=os.path.join(
-            basepath, "MirrorFiles", "WFS_HASO4_first_7458.dat"
-        ),
-        positions_file_path=os.path.join(basepath, "MirrorFiles", "Flat.wcs"),
-        interaction_matrix_file_path=os.path.join(
-            basepath, "MirrorFiles", "InfluenceMatrix2.aoc"
-        ),
+        wfc_config_file_path,
+        haso_config_file_path,
+        positions_file_path,
+        interaction_matrix_file_path,
         n_actuators=91,
         connect=True,
     ):

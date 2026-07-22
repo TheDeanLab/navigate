@@ -594,6 +594,34 @@ mirror_hardware_widgets = {
         None,
         r"Example: D:\WaveKitX64\MirrorFiles\Beads.wcs",
     ],
+    "hardware/wfc_config_file_path": [
+        "Wavefront Corrector Config Path",
+        "Input",
+        "string",
+        None,
+        r"Example: D:\WaveKitX64\MirrorFiles\WaveFrontCorrector_Mirao52-e_0259.dat",
+    ],
+    "hardware/haso_config_file_path": [
+        "HASO Sensor Config Path",
+        "Input",
+        "string",
+        None,
+        r"Example: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat",
+    ],
+    "hardware/positions_file_path": [
+        "Default Positions Path",
+        "Input",
+        "string",
+        None,
+        r"Example: D:\WaveKitX64\MirrorFiles\OPMv3_SysCorr_517nm_20230324.wcs",
+    ],
+    "hardware/interaction_matrix_file_path": [
+        "Interaction Matrix Path",
+        "Input",
+        "string",
+        None,
+        r"Example: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc",
+    ],
     "n_modes": ["Number of Modes", "Input", "int", None, "Example: 32", 32],
 }
 

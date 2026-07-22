@@ -27,7 +27,7 @@
 - Consumes: pipe objects exposing `recv()` and messages containing integer frame identifiers followed by the `"stop"` sentinel.
 - Produces: `_receive_last_frame_id(show_img_pipe: Any, max_messages: int = 20) -> Optional[int]`.
 
-- [ ] **Step 1: Write the failing split-batch regression**
+- [x] **Step 1: Write the failing split-batch regression**
 
 Add a fake readable pipe and a focused test before defining the helper:
 
@@ -46,7 +46,7 @@ def test_receive_last_frame_id_handles_coalesced_batches():
     assert _receive_last_frame_id(show_img_pipe) == 2
 ```
 
-- [ ] **Step 2: Run the regression to verify RED**
+- [x] **Step 2: Run the regression to verify RED**
 
 Run:
 
@@ -56,7 +56,7 @@ conda run -n navigate python -m pytest test/model/test_model.py::test_receive_la
 
 Expected: FAIL with `NameError: name '_receive_last_frame_id' is not defined`.
 
-- [ ] **Step 3: Implement the minimal pipe reader**
+- [x] **Step 3: Implement the minimal pipe reader**
 
 Add `Any` and `Optional` to the imports and define:
 
@@ -74,7 +74,7 @@ def _receive_last_frame_id(
     return last_frame_id
 ```
 
-- [ ] **Step 4: Verify the focused regression is GREEN**
+- [x] **Step 4: Verify the focused regression is GREEN**
 
 Run:
 
@@ -84,7 +84,7 @@ conda run -n navigate python -m pytest test/model/test_model.py::test_receive_la
 
 Expected: `1 passed`.
 
-- [ ] **Step 5: Replace notification counting and guarantee cleanup**
+- [x] **Step 5: Replace notification counting and guarantee cleanup**
 
 Update `test_single_acquisition` to compare the final frame identifier and always clean up:
 
@@ -100,7 +100,7 @@ finally:
     model.release_pipe("show_img_pipe")
 ```
 
-- [ ] **Step 6: Run focused acquisition verification**
+- [x] **Step 6: Run focused acquisition verification**
 
 Run:
 
@@ -114,7 +114,7 @@ conda run -n navigate python -m pytest \
 
 Expected: `3 passed`.
 
-- [ ] **Step 7: Format, lint, and inspect**
+- [x] **Step 7: Format, lint, and inspect**
 
 Run:
 
@@ -127,7 +127,7 @@ git status --short --branch
 
 Expected: Black and Ruff exit successfully, `git diff --check` emits no output, and only the planned files are modified.
 
-- [ ] **Step 8: Commit the implementation**
+- [x] **Step 8: Commit the implementation**
 
 ```bash
 git add test/model/test_model.py docs/superpowers/plans/2026-07-21-single-acquisition-test-reliability.md

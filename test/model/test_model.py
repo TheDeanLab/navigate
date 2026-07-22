@@ -34,6 +34,7 @@ import random
 import pytest
 import os
 from types import SimpleNamespace
+from typing import Any, Iterable, Iterator, Optional
 from multiprocessing import Manager
 from unittest.mock import MagicMock, patch
 import multiprocessing
@@ -43,6 +44,31 @@ import multiprocessing
 # Local Imports
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
+
+
+def _receive_last_frame_id(show_img_pipe: Any, max_messages: int = 20) -> Optional[int]:
+    last_frame_id = None
+    for _ in range(max_messages):
+        message = show_img_pipe.recv()
+        if message == "stop":
+            break
+        if isinstance(message, int):
+            last_frame_id = message
+    return last_frame_id
+
+
+class FakeReadablePipe:
+    def __init__(self, messages: Iterable[Any]) -> None:
+        self.messages: Iterator[Any] = iter(messages)
+
+    def recv(self) -> Any:
+        return next(self.messages)
+
+
+def test_receive_last_frame_id_handles_coalesced_batches() -> None:
+    show_img_pipe = FakeReadablePipe([0, 2, "stop"])
+
+    assert _receive_last_frame_id(show_img_pipe) == 2
 
 
 @pytest.fixture(scope="module")
@@ -124,36 +150,14 @@ def test_single_acquisition(model):
     )
 
     show_img_pipe = model.create_pipe("show_img_pipe")
-
-    model.run_command("acquire")
-
-    # If three channel acquisitions happen quickly, the synthetic camera may return
-    # something like [0, 1, 2] in a single call, and only one pipe message is sent
-    # for that batch.
-    image_id = show_img_pipe.recv()
-    if isinstance(image_id, list):
-        n_framed_received = len(image_id)
-    else:
-        n_framed_received = image_id + 1
-
-    # maximum of 20 iterations to avoid infinite loop in case of failure
-    max_iters = 20
-    while image_id != "stop" and max_iters > 0:
-
-        image_id = show_img_pipe.recv()
-        if image_id == "stop":
-            break
-        if isinstance(image_id, list):
-            n_framed_received += len(image_id)
-        else:
-            n_framed_received += 1
-
-        # decrement iteration counter
-        max_iters -= 1
-
-    assert n_framed_received == n_frames_expected
-    model.data_thread.join()
-    model.release_pipe("show_img_pipe")
+    try:
+        model.run_command("acquire")
+        last_frame_id = _receive_last_frame_id(show_img_pipe)
+        assert last_frame_id == n_frames_expected - 1
+    finally:
+        if model.data_thread is not None:
+            model.data_thread.join()
+        model.release_pipe("show_img_pipe")
 
 
 def test_run_acquisition_marks_finite_signal_completion_for_data_thread():

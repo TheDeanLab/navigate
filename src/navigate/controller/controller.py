@@ -679,7 +679,7 @@ class Controller:
         )
         self.set_mode_of_sub("stop")
 
-    def change_microscope(self, microscope_name: str, zoom: str | None = None) -> None:
+    def change_microscope(self, microscope_name: str, zoom: str | None = None) -> bool:
         """Change the microscope configuration.
 
         Parameters
@@ -691,28 +691,95 @@ class Controller:
 
         Returns
         -------
-        None
+        bool
+            ``True`` when the microscope or zoom is updated successfully,
+            otherwise ``False``.
         """
-        self.configuration["experiment"]["MicroscopeState"][
-            "microscope_name"
-        ] = microscope_name
-        if zoom:
+        if self.configuration_controller.change_microscope(microscope_name):
+            supported_zoom = list(
+                self.configuration_controller.get_zoom_value_list(microscope_name)
+            )
+            if not supported_zoom:
+                messagebox.showwarning(
+                    title="Navigate",
+                    message=(
+                        f"No zoom values are configured for microscope "
+                        f"'{microscope_name}'. Please update the configuration YAML."
+                    ),
+                )
+                return False
+            if zoom not in supported_zoom:
+                fallback_zoom = supported_zoom[0]
+                messagebox.showwarning(
+                    title="Navigate",
+                    message=(
+                        f"Zoom '{zoom}' is not available for microscope "
+                        f"'{microscope_name}'. Using '{fallback_zoom}' instead."
+                    ),
+                )
+                zoom = fallback_zoom
+
+            # update microscope name
+            self.configuration["experiment"]["MicroscopeState"][
+                "microscope_name"
+            ] = microscope_name
+            # set zoom value
             self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
-        if self.configuration_controller.change_microscope():
             # update widgets
             self.stage_controller.initialize()
             self.channels_tab_controller.initialize()
             self.channels_tab_controller.populate_experiment_values()
             self.camera_setting_controller.update_camera_device_related_setting()
             self.camera_setting_controller.populate_experiment_values()
-            self.camera_setting_controller.calculate_physical_dimensions()
+            r = self.camera_setting_controller.calculate_physical_dimensions()
+            if not r:
+                messagebox.showwarning(
+                    title="Navigate",
+                    message=(
+                        f"Please make sure a valid pixel size is configured for zoom "
+                        f"'{zoom}' on microscope '{microscope_name}' in the "
+                        "configuration YAML."
+                    ),
+                )
             self.camera_view_controller.update_snr()
-
+            result = True
+        elif self.configuration_controller.microscope_name == microscope_name:
+            # update zoom only if it's valid
+            if zoom != self.configuration["experiment"]["MicroscopeState"][
+                "zoom"
+            ] and zoom in self.configuration_controller.get_zoom_value_list(
+                microscope_name
+            ):
+                self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
+                r = self.camera_setting_controller.calculate_physical_dimensions()
+                if not r:
+                    messagebox.showwarning(
+                        title="Navigate",
+                        message=(
+                            f"Please make sure a valid pixel size is configured for "
+                            f"zoom '{zoom}' on microscope '{microscope_name}' in the "
+                            "configuration YAML."
+                        ),
+                    )
+                result = True
+            else:
+                result = False
+        else:
+            messagebox.showwarning(
+                title="Navigate",
+                message=(
+                    f"Microscope '{microscope_name}' is not configured."
+                    if not zoom
+                    else f"Microscope '{microscope_name}' with zoom '{zoom}' is not configured."
+                ),
+            )
+            return False
         if (
             hasattr(self, "waveform_popup_controller")
             and self.waveform_popup_controller
         ):
             self.waveform_popup_controller.populate_experiment_values()
+        return result
 
     def initialize_cam_view(self) -> None:
         """Populate view and maximum intensity projection tabs.
@@ -767,6 +834,7 @@ class Controller:
             "microscope_name"
         ]
         self.configuration_controller.change_microscope()
+        self.camera_setting_controller.populate_experiment_values()
         self.menu_controller.resolution_value.set(
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
@@ -785,7 +853,6 @@ class Controller:
             self.configuration["multi_positions"]
         )
         self.channels_tab_controller.populate_experiment_values()
-        self.camera_setting_controller.populate_experiment_values()
         self.waveform_tab_controller.set_waveform_template(
             self.configuration["experiment"]["MicroscopeState"]["waveform_template"]
         )
@@ -1127,6 +1194,7 @@ class Controller:
             if resolution_value != self.menu_controller.resolution_value.get():
                 self.menu_controller.resolution_value.set(resolution_value)
                 return
+
             self.change_microscope(temp[0], temp[1])
             work_thread = self.threads_pool.createThread(
                 resourceName="model",
@@ -1255,10 +1323,6 @@ class Controller:
                 filename="multi_positions.yml",
             )
 
-            self.camera_setting_controller.solvent = self.configuration["experiment"][
-                "Saving"
-            ]["solvent"]
-            self.camera_setting_controller.calculate_physical_dimensions()
             self.execute("acquire")
 
         elif command == "acquire":

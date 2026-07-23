@@ -158,7 +158,6 @@ class TestCameraSettingController:
             "in_initialization",
             "resolution_value",
             "mode",
-            "solvent",
             "mode_widgets",
             "framerate_widgets",
             "roi_widgets",
@@ -485,39 +484,40 @@ class TestCameraSettingController:
         for btn_name in self.camera_settings.roi_btns:
             assert str(self.camera_settings.roi_btns[btn_name]["state"]) == state
 
-    @pytest.mark.parametrize("zoom", ["0.63x", "1x", "2x", "3x", "4x", "5x", "6x"])
-    def test_calculate_physical_dimensions(self, zoom):
-        self.camera_settings.parent_controller.configuration["experiment"][
-            "MicroscopeState"
-        ]["zoom"] = zoom
-
-        self.camera_settings.populate_experiment_values()
-
-        # Calling
-        self.camera_settings.calculate_physical_dimensions()
-
-        pixel_size = self.camera_settings.default_pixel_size
-        x_pixel = float(self.camera_settings.roi_widgets["Width"].get())
-        y_pixel = float(self.camera_settings.roi_widgets["Height"].get())
-
+    def test_calculate_physical_dimensions(self):
         microscope_state_dict = self.camera_settings.parent_controller.configuration[
             "experiment"
         ]["MicroscopeState"]
-        zoom = microscope_state_dict["zoom"]
         microscope_name = microscope_state_dict["microscope_name"]
-        pixel_size = self.camera_settings.parent_controller.configuration[
-            "configuration"
-        ]["microscopes"][microscope_name]["zoom"]["pixel_size"][zoom]
-
-        dim_x = x_pixel * pixel_size
-        dim_y = y_pixel * pixel_size
-
-        assert float(self.camera_settings.roi_widgets["FOV_X"].get()) == float(
-            int(dim_x)
+        zoom_values = list(
+            self.camera_settings.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][microscope_name]["zoom"]["pixel_size"].keys()
         )
-        assert float(self.camera_settings.roi_widgets["FOV_Y"].get()) == float(
-            int(dim_y)
-        )
+
+        for zoom in zoom_values:
+            microscope_state_dict["zoom"] = zoom
+            self.camera_settings.populate_experiment_values()
+
+            assert self.camera_settings.calculate_physical_dimensions() is True
+
+            x_pixel = float(self.camera_settings.roi_widgets["Width"].get())
+            y_pixel = float(self.camera_settings.roi_widgets["Height"].get())
+            pixel_size = float(
+                self.camera_settings.parent_controller.configuration["configuration"][
+                    "microscopes"
+                ][microscope_name]["zoom"]["pixel_size"][zoom]
+            )
+
+            dim_x = x_pixel * pixel_size
+            dim_y = y_pixel * pixel_size
+
+            assert float(self.camera_settings.roi_widgets["FOV_X"].get()) == float(
+                int(dim_x)
+            )
+            assert float(self.camera_settings.roi_widgets["FOV_Y"].get()) == float(
+                int(dim_y)
+            )
 
     def test_calculate_physical_dimensions_missing_pixel_size(self, caplog):
         self.camera_settings.populate_experiment_values()
@@ -536,15 +536,16 @@ class TestCameraSettingController:
 
         try:
             with caplog.at_level("WARNING", logger="navigate"):
-                self.camera_settings.calculate_physical_dimensions()
+                result = self.camera_settings.calculate_physical_dimensions()
         finally:
             pixel_size_config[zoom] = original_pixel_size
 
+        assert result is False
         assert self.camera_settings.roi_widgets["FOV_X"].get() == original_fov_x
         assert self.camera_settings.roi_widgets["FOV_Y"].get() == original_fov_y
         assert (
-            f"Pixel size for microscope {microscope_name} and zoom {zoom} not found."
-            in caplog.text
+            f"No pixel size is configured for microscope '{microscope_name}' "
+            f"at zoom '{zoom}' in the configuration YAML." in caplog.text
         )
 
         # Reset to zoom of 1
@@ -556,6 +557,22 @@ class TestCameraSettingController:
                 "MicroscopeState"
             ]["zoom"]
             == "1x"
+        )
+
+    def test_update_experiment_values_returns_warning_when_physical_dimensions_fail(
+        self,
+    ):
+        self.camera_settings.populate_experiment_values()
+        self.camera_settings.calculate_physical_dimensions = lambda: False
+
+        warning = self.camera_settings.update_experiment_values()
+
+        assert (
+            warning
+            == "Image physical dimensions could not be calculated from the current "
+            "microscope configuration.\n\n"
+            "Please verify that the zoom value and pixel size are configured "
+            "correctly in the configuration YAML."
         )
 
     def test_calculate_readout_time(self):

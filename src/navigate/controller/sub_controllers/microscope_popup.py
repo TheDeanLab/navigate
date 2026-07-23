@@ -100,6 +100,37 @@ class MicroscopePopupController(GUIController):
                 "<<ComboboxSelected>>", self.update_microscope_mode(microscope_name)
             )
 
+            # zoom value
+            zoom_values = list(
+                self.parent_controller.configuration_controller.get_zoom_pixel_sizes(
+                    microscope_name
+                ).keys()
+            )
+            self.widgets[f"{microscope_name}_zoom_value"].widget.config(
+                values=zoom_values
+            )
+
+        # primary microscope
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        self.variables[microscope_name].set("Primary Microscope")
+        self.primary_microscope = microscope_name
+
+        # additional microscopes
+        additional_microscopes = (
+            self.parent_controller.configuration["experiment"]["MicroscopeState"]
+            .get("additional_microscopes", "")
+            .split(",")
+        )
+        for microscope_name in additional_microscopes:
+            if microscope_name:
+                self.variables[microscope_name].set("Additional Microscope")
+                zoom = self.parent_controller.configuration["experiment"][
+                    "CameraParameters"
+                ][microscope_name].get("zoom", "")
+                if zoom:
+                    self.variables[f"{microscope_name}_zoom_value"].set(zoom)
         # button events
         self.buttons["confirm"].configure(command=self.confirm_microscope_setting)
         self.buttons["cancel"].configure(command=self.exit_func)
@@ -205,6 +236,7 @@ class MicroscopePopupController(GUIController):
             )
 
         has_multi_cameras = False
+        additional_microscopes = []
         for microscope_name in self.microscope_info.keys():
             if self.variables[microscope_name].get() == "Additional Microscope":
                 config = {}
@@ -214,12 +246,37 @@ class MicroscopePopupController(GUIController):
                     microscope_name
                 ] = config
                 has_multi_cameras = True
+                # update the zoom value setting
+                pixel_sizes = self.parent_controller.configuration_controller.get_zoom_pixel_sizes(
+                    microscope_name
+                )
+                zoom = self.variables[f"{microscope_name}_zoom_value"].get()
+                if not zoom or zoom.strip() == "":
+                    tkinter.messagebox.showerror(
+                        title="Warning",
+                        message=f"Please set the zoom value for the microscope {microscope_name}.",
+                    )
+                    self.showup()
+                    return False
+                self.parent_controller.configuration["experiment"]["CameraParameters"][
+                    microscope_name
+                ]["pixel_size"] = pixel_sizes[zoom]
+                self.parent_controller.configuration["experiment"]["CameraParameters"][
+                    microscope_name
+                ]["zoom"] = zoom
+                additional_microscopes.append(microscope_name)
+
             elif (
                 microscope_name in self.parent_controller.additional_microscopes_configs
             ):
                 del self.parent_controller.additional_microscopes_configs[
                     microscope_name
                 ]
+
+        # save additional microscope info
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "additional_microscopes"
+        ] = ",".join(additional_microscopes)
 
         # enable/disable change 'resolution'(microscope) menu if there are multiple
         # cameras running

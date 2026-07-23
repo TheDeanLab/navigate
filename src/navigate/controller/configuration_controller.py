@@ -99,7 +99,10 @@ class ConfigurationController:
             microscope_name = self.configuration["experiment"]["MicroscopeState"][
                 "microscope_name"
             ]
-        if microscope_name not in self.configuration["configuration"]["microscopes"].keys():
+        if (
+            microscope_name
+            not in self.configuration["configuration"]["microscopes"].keys()
+        ):
             logger.warning(
                 f"Microscope {microscope_name} not found in configuration. Available microscopes: "
                 f" {list(self.configuration['configuration']['microscopes'].keys())}"
@@ -148,7 +151,9 @@ class ConfigurationController:
         setting = {
             "laser": self.lasers_info,
         }
-        for i, filter_wheel_config in enumerate(self.microscope_config.get("filter_wheel", [])):
+        for i, filter_wheel_config in enumerate(
+            self.microscope_config.get("filter_wheel", [])
+        ):
             filter_wheel_name = filter_wheel_config.get("name", f"FilterWheel-{i}")
             setting[filter_wheel_name] = list(
                 filter_wheel_config["available_filters"].keys()
@@ -624,6 +629,25 @@ class ConfigurationController:
         return self.configuration["waveform_constants"]["remote_focus_constants"][
             microscope_name
         ].keys()
+
+    def get_zoom_pixel_sizes(self, microscope_name: str) -> dict:
+        """Return a dictionary of pixel sizes
+
+        Returns
+        -------
+        pixel_size_dict : dict
+            A dictionary of pixel sizes: {zoom_value : pixel_size}
+        """
+        if (
+            microscope_name is None
+            or microscope_name
+            not in self.configuration["configuration"]["microscopes"].keys()
+        ):
+            microscope_name = self.microscope_name
+
+        return self.configuration["configuration"]["microscopes"][microscope_name][
+            "zoom"
+        ]["pixel_size"].copy()
 
     @property
     def gui_setting(self) -> dict:

@@ -1860,12 +1860,11 @@ class BaseViewController(GUIController, ABaseViewController):
 
         # OpenGL: Volume Viewer slice upload
         if self.gl_volume_view_backend.thread_is_running():
-            # Send to data_q for upload
-            self.gl_volume_view_backend.data_q.put_nowait((
-                image, 
-                z * int(self.image_mode == "z-stack"), 
-                ch
-            ))
+            self.gl_volume_view_backend.submit_slice(
+                image,
+                z * int(self.image_mode == "z-stack"),
+                ch,
+            )
 
     def _OpenGL_on_volume_settings_changed(self, field, *args):
         """Hook for OpenGL-based views to trigger a re-render when display settings are changed."""
@@ -1880,10 +1879,18 @@ class BaseViewController(GUIController, ABaseViewController):
         if field == "enabled":
             is_enabled = variable.get()
             if is_enabled:
-                self.gl_volume_view_backend.start(window_dim=(800, 600))
+                try:
+                    self.gl_volume_view_backend.start(window_dim=(800, 600))
+                except RuntimeError:
+                    logger.exception(
+                        "Failed to start GLVolumeViewBackend render thread. "
+                        "3D rendering will be unavailable."
+                    )
+                    variable.set(False)
+                    is_enabled = False
             else:
                 self.gl_volume_view_backend.stop()
-            
+
             self.view.volume_frame.set_inputs_enabled(is_enabled)
         else:
             # Handle all other volume widget inputs

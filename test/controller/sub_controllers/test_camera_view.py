@@ -32,6 +32,7 @@
 #
 
 from navigate.controller.sub_controllers.camera_view import CameraViewController
+import builtins
 import pytest
 import random
 from unittest.mock import MagicMock
@@ -97,6 +98,35 @@ class TestCameraViewController:
 
     def test_init(self):
         assert isinstance(self.camera_view, CameraViewController)
+
+    def test_OpenGL_initialize_volume_rendering_backend_missing_oblisq(
+        self, monkeypatch
+    ):
+        """Volume rendering should degrade gracefully when Oblisq is not installed."""
+        original_import = builtins.__import__
+
+        def block_oblisq_import(name, *args, **kwargs):
+            if name.split(".", 1)[0] == "oblisq":
+                raise ModuleNotFoundError("No module named 'oblisq'", name="oblisq")
+            return original_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", block_oblisq_import)
+
+        grid_forget_calls = []
+        monkeypatch.setattr(
+            self.camera_view.view, "after", lambda delay, func: func()
+        )
+        monkeypatch.setattr(
+            self.camera_view.view.volume_frame,
+            "grid_forget",
+            lambda: grid_forget_calls.append(True),
+        )
+
+        self.camera_view.gl_volume_view_backend = None
+        self.camera_view._OpenGL_initialize_volume_rendering_backend()
+
+        assert self.camera_view.gl_volume_view_backend is None
+        assert grid_forget_calls == [True]
 
     def test_update_display_state(self):
         pass

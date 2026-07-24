@@ -1,12 +1,8 @@
-import builtins
-import logging
 import os
 from pathlib import Path
 import subprocess
 import sys
 import textwrap
-
-import navigate.main as main_module
 
 
 def test_main_import_does_not_require_opengl_dependencies():
@@ -17,7 +13,7 @@ def test_main_import_does_not_require_opengl_dependencies():
         import builtins
 
         original_import = builtins.__import__
-        blocked = {"OpenGL", "glfw", "glm", "tkinterdnd2"}
+        blocked = {"oblisq", "OpenGL", "glfw", "glm", "tkinterdnd2"}
 
         def block_optional_imports(name, *args, **kwargs):
             root_name = name.split(".", 1)[0]
@@ -46,35 +42,3 @@ def test_main_import_does_not_require_opengl_dependencies():
     )
 
     assert result.returncode == 0, result.stderr
-
-
-def test_load_volume_viewer_reports_actionable_dependency_guidance(
-    monkeypatch, capsys, caplog
-):
-    original_import = builtins.__import__
-
-    def fail_viewer_import(name, *args, **kwargs):
-        if name == "navigate.view.display_backends.volume_viewer_standalone":
-            raise ModuleNotFoundError(
-                "No module named 'tkinterdnd2'", name="tkinterdnd2"
-            )
-        return original_import(name, *args, **kwargs)
-
-    monkeypatch.setattr(builtins, "__import__", fail_viewer_import)
-
-    with caplog.at_level(logging.ERROR, logger="navigate.main"):
-        viewer_class = main_module._load_volume_viewer()
-
-    terminal_message = capsys.readouterr().err
-    quoted_python = f'"{sys.executable}"'
-    assert viewer_class is None
-    assert "Unable to start the optional navigate Volume Viewer" in terminal_message
-    assert "tkinterdnd2" in terminal_message
-    assert "activate" in terminal_message.lower()
-    assert f'{quoted_python} -m pip install -e ".[opengl]"' in terminal_message
-    assert (
-        f'{quoted_python} -m pip install "navigate-micro[opengl]"' in terminal_message
-    )
-    assert "navigate --viewer" in terminal_message
-    assert "ModuleNotFoundError: No module named 'tkinterdnd2'" in terminal_message
-    assert "Unable to import the optional Volume Viewer" in caplog.text

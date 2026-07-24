@@ -47,7 +47,6 @@ from navigate.main import main
 def get_args():
     args = MagicMock()
     args.configurator = False
-    args.viewer = False
     args.config_file = False
     args.experiment_file = False
     args.waveform_constants_file = False

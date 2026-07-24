@@ -1773,22 +1773,22 @@ class BaseViewController(GUIController, ABaseViewController):
         
         if self.gl_volume_view_backend is None:
             try:
-                # Safe import of OpenGL backend
-                from navigate.view.display_backends.gl_backend import GLVolumeViewBackend
+                # Safe import of the Oblisq OpenGL rendering backend
+                from oblisq.gl_backend import GLVolumeViewBackend
                 self.gl_volume_view_backend = GLVolumeViewBackend()
             except ModuleNotFoundError:
                 logger.info(
-                    "Failed to initialize GLVolumeViewBackend. Likely OpenGL is not set up. 3D rendering will be unavailable."
+                    "Failed to initialize GLVolumeViewBackend. Likely Oblisq is not installed. 3D rendering will be unavailable."
                 )
-                self.gl_volume_view_backend = None          
-                
-                # We will hide the volume rendering controls if OpenGL failed to import
+                self.gl_volume_view_backend = None
+
+                # We will hide the volume rendering controls if Oblisq failed to import
                 self.view.after(100, self.view.volume_frame.grid_forget)
-                
+
                 return
 
         # If we got here, we were successful
-        logger.info("PyOpenGL successfully imported. OpenGL-based volume rendering enabled.")
+        logger.info("Oblisq successfully imported. OpenGL-based volume rendering enabled.")
 
     def _OpenGL_set_volume_dimensions(self, n_slices: int, dz: float, px: float):
         """Set the number of slices and z-step size for the OpenGL volume rendering backend."""

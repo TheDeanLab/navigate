@@ -85,12 +85,8 @@ robot = [
     "mecademicpy",
 ]
 
-opengl = [
-    "PyOpenGL>=3.1",
-    "PyOpenGL-accelerate>=3.1",
-    "glfw>=2.1",
-    "PyGLM>=2.8",
-    "tkinterdnd2>=0.4.3"
+oblisq = [
+    "oblisq>=0.1,<0.2"
 ]
 
 [project.urls]

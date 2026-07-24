@@ -117,9 +117,11 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         # Values are pulled from the CameraParameters section of the configuration.yml
         # file. Exposure time converted here from milliseconds to seconds.
 
+        self.trigger_source = "Internal"
+
         self.set_trigger_mode()
 
-        self.camera_parameters["supported_trigger_sources"] = ["External", "Internal"]
+        self.camera_parameters["supported_trigger_sources"] = ["External", "Internal", "Software"]
         self.camera_parameters["cooling"] = True
 
         cooling_state = self.camera_controller.get_property_value("cooling")
@@ -214,14 +216,16 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         trigger_source : str
             Trigger source: "External" or "Internal". Default is "External".
         """
-        if trigger_source == "Internal":
+        if trigger_source == "Software":
+            self.trigger_source = "Software"
             # Standard trigger mode
             self.camera_controller.set_property_value("trigger_mode", 1)
             # Internal trigger.
-            self.camera_controller.set_property_value("trigger_source", 1)
-            logger.debug("Set camera trigger mode: Free running mode.")
+            self.camera_controller.set_property_value("trigger_source", 3)
+            logger.debug("Set camera trigger mode: Software Trigger.")
 
-        else:
+        elif trigger_source == "External":
+            self.trigger_source = "External"
             self.camera_controller.set_property_value(
                 "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
             )
@@ -232,6 +236,13 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 "trigger_source", 2  # External trigger.
             )
             logger.debug("Set camera trigger mode: External Edge Trigger.")
+        else:
+            self.trigger_source = "Internal"
+            # Standard trigger mode
+            self.camera_controller.set_property_value("trigger_mode", 1)
+            # Internal trigger.
+            self.camera_controller.set_property_value("trigger_source", 1)
+            logger.debug("Set camera trigger mode: Free running mode.")
 
     def set_sensor_mode(self, mode: str) -> None:
         """Set HamamatsuOrca sensor mode.
@@ -500,6 +511,10 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             Frame ids from HamamatsuOrca camera.
         """
         return self.camera_controller.get_frames()
+    
+    def generate_new_frame(self) -> None:
+        if self.trigger_source == "Software":
+            self.camera_controller.fire_software_trigger()
 
     def set_cooling(self, cooling: str) -> None:
         """Set camera cooling mode and temperature.

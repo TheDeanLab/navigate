@@ -1896,7 +1896,7 @@ class BaseViewController(GUIController, ABaseViewController):
             # Handle all other volume widget inputs
             try:
                 value = float(variable.get())
-            except:
+            except Exception:
                 # Handle "" and other such invalid inputs
                 return
 
@@ -1907,7 +1907,10 @@ class BaseViewController(GUIController, ABaseViewController):
             except Exception:
                 pass
 
-            exec(f"self.gl_volume_view_backend.set_{field}({value})")
+            setter = getattr(self.gl_volume_view_backend, f"set_{field}", None)
+            if setter is not None:
+                setter(value)
+
 
 class CameraViewController(BaseViewController):
     """Camera View Controller Class."""

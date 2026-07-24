@@ -8,7 +8,6 @@ class _FakeRoot:
     def __init__(self):
         self.withdraw = MagicMock()
         self.mainloop = MagicMock()
-        self.destroy = MagicMock()
 
 
 def _evaluation_result():

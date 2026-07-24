@@ -32,7 +32,6 @@
 
 # Standard Library Imports
 import tkinter as tk
-import logging
 import platform
 import os
 
@@ -47,8 +46,6 @@ from navigate.tools.main_functions import (
     evaluate_parser_input_arguments,
     create_parser,
 )
-
-logger = logging.getLogger(__name__)
 
 # Proxy Configuration
 os.environ["http_proxy"] = ""

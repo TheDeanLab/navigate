@@ -31,22 +31,95 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Third Party Imports
+import pytest
+
 # Local Imports
 from navigate.view.popups.microscope_setting_popup_window import (
     MicroscopeSettingPopupWindow,
 )
 
 
-def test_zoom_and_setting_controls_align_with_labels(tk_root):
-    microscope_name = "Mesoscale"
-    popup = MicroscopeSettingPopupWindow(
+@pytest.fixture
+def microscope_info():
+    return {
+        "Mesoscale": {
+            "camera": "Hamamatsu ORCA-Lightning",
+            "remote_focus": "NI",
+        },
+        "Nanoscale": {
+            "camera": "Photometrics Iris 15",
+            "galvo": "NI",
+        },
+    }
+
+
+@pytest.fixture
+def popup(tk_root, microscope_info):
+    return MicroscopeSettingPopupWindow(
         tk_root,
-        {microscope_name: {"camera": "Hamamatsu ORCA-Lightning"}},
+        microscope_info,
     )
 
-    assert popup.inputs[f"{microscope_name}_zoom_value"].grid_info()[
-        "row"
-    ] == popup.labels.index("Zoom Value")
-    assert popup.inputs[microscope_name].grid_info()["row"] == popup.labels.index(
-        "Setting"
+
+def test_labels_include_each_device_once(popup):
+    assert popup.labels == [
+        "Microscope Name",
+        "Camera",
+        "Remote Focus",
+        "Galvo",
+        "Zoom Value",
+        "Setting",
+    ]
+
+
+def test_device_widgets_show_configuration_values(popup):
+    assert popup.inputs["Mesoscale camera"].get() == "Hamamatsu ORCA-Lightning"
+    assert popup.inputs["Mesoscale remote_focus"].get() == "NI"
+    assert popup.inputs["Mesoscale galvo"].get() == ""
+    assert popup.inputs["Nanoscale camera"].get() == "Photometrics Iris 15"
+    assert popup.inputs["Nanoscale remote_focus"].get() == ""
+    assert popup.inputs["Nanoscale galvo"].get() == "NI"
+
+    for microscope_name in ("Mesoscale", "Nanoscale"):
+        for device_name in ("camera", "remote_focus", "galvo"):
+            assert (
+                str(popup.inputs[f"{microscope_name} {device_name}"].widget["state"])
+                == "disabled"
+            )
+
+
+def test_zoom_and_setting_controls_align_with_labels(popup):
+    for microscope_name in ("Mesoscale", "Nanoscale"):
+        assert popup.inputs[f"{microscope_name}_zoom_value"].grid_info()[
+            "row"
+        ] == popup.labels.index("Zoom Value")
+        assert popup.inputs[microscope_name].grid_info()["row"] == popup.labels.index(
+            "Setting"
+        )
+        assert (
+            str(popup.inputs[f"{microscope_name}_zoom_value"].widget["state"])
+            == "readonly"
+        )
+
+
+def test_microscopes_are_displayed_in_separate_columns(popup):
+    microscope_frames = popup.microscopes_frame.winfo_children()
+
+    assert [frame.grid_info()["column"] for frame in microscope_frames] == [0, 1]
+    assert [frame.winfo_children()[0]["text"] for frame in microscope_frames] == [
+        "Mesoscale",
+        "Nanoscale",
+    ]
+
+
+def test_getters_expose_widgets_variables_and_buttons(popup):
+    assert popup.get_widgets() is popup.inputs
+    assert popup.get_buttons() is popup.buttons
+    assert set(popup.get_variables()) == set(popup.inputs)
+    assert all(
+        variable is popup.inputs[name].get_variable()
+        for name, variable in popup.get_variables().items()
     )
+    assert popup.buttons["confirm"]["text"] == "Confirm"
+    assert popup.buttons["cancel"]["text"] == "Cancel"

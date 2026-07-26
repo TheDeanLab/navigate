@@ -34,6 +34,7 @@
 import logging
 import datetime
 from typing import Optional, Dict, Any
+from tkinter import messagebox
 
 # Third Party Imports
 import numpy as np
@@ -46,7 +47,10 @@ from navigate.controller.sub_controllers.gui import GUIController
 from navigate.controller.sub_controllers.channels_settings import (
     ChannelSettingController,
 )
-from navigate.controller.sub_controllers.tiling import TilingWizardController
+from navigate.controller.sub_controllers.tiling import (
+    INVALID_CAMERA_FOV_MESSAGE,
+    TilingWizardController,
+)
 from navigate.view.main_window_content.channels_tab import ChannelsTab
 from navigate.view.popups.tiling_wizard_popup import TilingWizardPopup
 
@@ -935,6 +939,19 @@ class ChannelsTabController(GUIController):
         Will only launch when button in GUI is pressed, and will not duplicate.
         Pressing button again brings popup to top
         """
+
+        camera_setting_controller = getattr(
+            self.parent_controller, "camera_setting_controller", None
+        )
+        if (
+            camera_setting_controller is not None
+            and camera_setting_controller.calculate_physical_dimensions() is False
+        ):
+            messagebox.showwarning(
+                title="Navigate",
+                message=INVALID_CAMERA_FOV_MESSAGE,
+            )
+            return
 
         if hasattr(self, "tiling_wizard_controller"):
             self.tiling_wizard_controller.showup()

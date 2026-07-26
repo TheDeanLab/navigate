@@ -1,4 +1,6 @@
 import random
+from unittest.mock import patch
+
 import pytest
 
 
@@ -167,6 +169,100 @@ def test_update_fov(tiling_wizard_controller, axis):
     assert float(tiling_wizard_controller.variables[f"{axis}_fov"].get()) == abs(var)
 
 
+@pytest.mark.parametrize(
+    "camera_fov_name, axis",
+    [("FOV_Y", "x"), ("FOV_X", "y")],
+)
+def test_update_fov_invalidates_stale_camera_fov(
+    tiling_wizard_controller,
+    camera_fov_name,
+    axis,
+):
+    camera_fov = tiling_wizard_controller.cam_settings_widgets[camera_fov_name]
+    original_camera_fov = camera_fov.get()
+    tiling_wizard_controller.variables[f"{axis}_fov"].set(123)
+    tiling_wizard_controller.is_validated[axis] = True
+
+    try:
+        camera_fov.set("")
+        tiling_wizard_controller.update_fov(axis)
+
+        assert tiling_wizard_controller.variables[f"{axis}_fov"].get() == ""
+        assert tiling_wizard_controller.is_validated[axis] is False
+    finally:
+        camera_fov.set(original_camera_fov)
+
+
+def test_set_table_rejects_invalid_camera_fov(tiling_wizard_controller):
+    main_controller = tiling_wizard_controller.parent_controller.parent_controller
+    original_fov = {
+        axis: tiling_wizard_controller.variables[f"{axis}_fov"].get()
+        for axis in tiling_wizard_controller._axes
+    }
+    original_validation = tiling_wizard_controller.is_validated.copy()
+    tiling_wizard_controller.is_validated = {
+        axis: True for axis in tiling_wizard_controller._axes
+    }
+
+    try:
+        with (
+            patch.object(
+                main_controller,
+                "camera_setting_controller",
+                create=True,
+            ) as camera_setting_controller,
+            patch.object(
+                camera_setting_controller,
+                "calculate_physical_dimensions",
+                return_value=False,
+            ) as calculate_physical_dimensions,
+            patch(
+                "navigate.controller.sub_controllers.tiling.messagebox.showwarning"
+            ) as showwarning,
+            patch(
+                "navigate.controller.sub_controllers.tiling.compute_tiles_from_bounding_box",
+                return_value=([], []),
+            ) as compute_tiles,
+            patch("navigate.controller.sub_controllers.tiling.update_table"),
+        ):
+            tiling_wizard_controller.set_table()
+
+        calculate_physical_dimensions.assert_called_once_with()
+        showwarning.assert_called_once()
+        compute_tiles.assert_not_called()
+    finally:
+        for axis, fov in original_fov.items():
+            tiling_wizard_controller.variables[f"{axis}_fov"].set(fov)
+        tiling_wizard_controller.is_validated = original_validation
+
+
+def test_set_table_invalid_fov_uses_pixel_size_warning(tiling_wizard_controller):
+    original_validation = tiling_wizard_controller.is_validated.copy()
+    tiling_wizard_controller.is_validated["x"] = False
+
+    try:
+        with (
+            patch(
+                "navigate.controller.sub_controllers.tiling.messagebox.showwarning"
+            ) as showwarning,
+            patch(
+                "navigate.controller.sub_controllers.tiling.compute_tiles_from_bounding_box"
+            ) as compute_tiles,
+        ):
+            tiling_wizard_controller.set_table()
+
+        showwarning.assert_called_once_with(
+            title="Navigate",
+            message=(
+                "Can't calculate positions, please make sure the camera pixel size "
+                "is correct."
+            ),
+        )
+        compute_tiles.assert_not_called()
+    finally:
+        tiling_wizard_controller.is_validated = original_validation
+
+
 def test_set_table(tiling_wizard_controller):
     # from navigate.tools.multipos_table_tools import compute_tiles_from_bounding_box
     tiling_wizard_controller.set_table()
@@ -186,12 +282,8 @@ def test_set_table(tiling_wizard_controller):
     )
 
     # Default to fixed theta. Empty widget values are treated as 0.0.
-    r_start = float(
-        tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0
-    )
-    r_stop = float(
-        tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0
-    )
+    r_start = float(tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0)
+    r_stop = float(tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0)
 
     f_start = float(tiling_wizard_controller.variables["f_start"].get()) - float(
         tiling_wizard_controller.stack_acq_widgets["start_focus"].get()

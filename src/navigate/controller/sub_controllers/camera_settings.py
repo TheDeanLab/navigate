@@ -838,6 +838,12 @@ class CameraSettingController(GUIController):
         self.roi_widgets["Width"].widget["state"] = size_state
         self.roi_widgets["Height"].widget["state"] = size_state
 
+    def _invalidate_physical_dimensions(self):
+        """Clear physical dimensions that are no longer valid."""
+        self.roi_widgets["FOV_X"].set("")
+        self.roi_widgets["FOV_Y"].set("")
+        return False
+
     def calculate_physical_dimensions(self):
         """Calculate size of the FOV in microns.
 
@@ -854,7 +860,7 @@ class CameraSettingController(GUIController):
             x_pixel = float(self.roi_widgets["Width"].get())
             y_pixel = float(self.roi_widgets["Height"].get())
         except ValueError:
-            return False
+            return self._invalidate_physical_dimensions()
 
         microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -870,7 +876,7 @@ class CameraSettingController(GUIController):
                     f"'{self.microscope_name}' at zoom '{zoom}' in the "
                     "configuration YAML."
                 )
-                return False
+                return self._invalidate_physical_dimensions()
 
         else:
             microscope_name = microscope_state_dict["microscope_name"]
@@ -885,14 +891,14 @@ class CameraSettingController(GUIController):
                     f"No pixel size is configured for microscope "
                     f"'{microscope_name}' at zoom '{zoom}' in the configuration YAML."
                 )
-                return False
+                return self._invalidate_physical_dimensions()
             except (TypeError, ValueError):
                 logger.warning(
                     f"Invalid pixel size configured for microscope "
                     f"'{microscope_name}' at zoom '{zoom}' in the "
                     "configuration YAML."
                 )
-                return False
+                return self._invalidate_physical_dimensions()
 
         physical_dimensions_x = x_pixel * pixel_size
         physical_dimensions_y = y_pixel * pixel_size

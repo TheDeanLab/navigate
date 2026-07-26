@@ -78,6 +78,70 @@ def assert_spinbox_range(widget, from_value, to_value):
     assert float(widget.cget("to")) == to_value
 
 
+def test_launch_tiling_wizard_rejects_invalid_camera_fov(channels_tab_controller):
+    from tkinter import messagebox
+
+    main_controller = channels_tab_controller.parent_controller
+
+    with (
+        patch.object(
+            main_controller,
+            "camera_setting_controller",
+            create=True,
+        ) as camera_setting_controller,
+        patch.object(
+            camera_setting_controller,
+            "calculate_physical_dimensions",
+            return_value=False,
+        ) as calculate_physical_dimensions,
+        patch.object(messagebox, "showwarning") as showwarning,
+        patch(
+            "navigate.controller.sub_controllers.channels_tab.TilingWizardPopup"
+        ) as tiling_wizard_popup,
+        patch(
+            "navigate.controller.sub_controllers.channels_tab.TilingWizardController"
+        ),
+    ):
+        channels_tab_controller.launch_tiling_wizard()
+
+    calculate_physical_dimensions.assert_called_once_with()
+    showwarning.assert_called_once()
+    tiling_wizard_popup.assert_not_called()
+    assert not hasattr(channels_tab_controller, "tiling_wizard_controller")
+
+
+def test_launch_tiling_wizard_accepts_valid_camera_fov(channels_tab_controller):
+    main_controller = channels_tab_controller.parent_controller
+
+    with (
+        patch.object(
+            main_controller,
+            "camera_setting_controller",
+            create=True,
+        ) as camera_setting_controller,
+        patch.object(
+            camera_setting_controller,
+            "calculate_physical_dimensions",
+            return_value=True,
+        ) as calculate_physical_dimensions,
+        patch(
+            "navigate.controller.sub_controllers.channels_tab.TilingWizardPopup"
+        ) as tiling_wizard_popup,
+        patch(
+            "navigate.controller.sub_controllers.channels_tab.TilingWizardController"
+        ) as tiling_wizard_controller,
+    ):
+        channels_tab_controller.launch_tiling_wizard()
+
+    calculate_physical_dimensions.assert_called_once_with()
+    tiling_wizard_popup.assert_called_once()
+    tiling_wizard_controller.assert_called_once()
+    assert (
+        channels_tab_controller.tiling_wizard_controller
+        is tiling_wizard_controller.return_value
+    )
+
+
 @pytest.mark.parametrize(
     "origin, expected_range",
     [

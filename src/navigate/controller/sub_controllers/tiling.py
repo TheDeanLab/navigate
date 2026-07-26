@@ -54,6 +54,13 @@ from navigate.config.config import get_navigate_path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+INVALID_CAMERA_FOV_MESSAGE = (
+    "Image physical dimensions could not be calculated from the current "
+    "microscope configuration.\n\n"
+    "Please verify that the zoom value and pixel size are configured correctly "
+    "in the configuration YAML."
+)
+
 
 class TilingWizardController(GUIController):
     """Tiling Wizard Controller
@@ -229,6 +236,13 @@ class TilingWizardController(GUIController):
 
         self.view.popup.bind("<Escape>", self.close_window)
 
+    def _invalidate_axis_fov(self, axis):
+        """Clear a tiling FOV that is no longer valid."""
+        if axis not in self._axes:
+            return
+        self.variables[f"{axis}_fov"].set("")
+        self.is_validated[axis] = False
+
     def load_settings(self):
         """Load positions from yaml file"""
 
@@ -308,11 +322,27 @@ class TilingWizardController(GUIController):
                 return b, a
             return a, b
 
+        main_controller = self.parent_controller.parent_controller
+        camera_setting_controller = getattr(
+            main_controller, "camera_setting_controller", None
+        )
+        if (
+            camera_setting_controller is not None
+            and camera_setting_controller.calculate_physical_dimensions() is False
+        ):
+            self._invalidate_axis_fov("x")
+            self._invalidate_axis_fov("y")
+            messagebox.showwarning(
+                title="Navigate",
+                message=INVALID_CAMERA_FOV_MESSAGE,
+            )
+            return
+
         if False in self.is_validated.values():
             messagebox.showwarning(
                 title="Navigate",
-                message="Can't calculate positions, "
-                "please make sure all FOV Dists are correct!",
+                message="Can't calculate positions, please make sure the camera "
+                "pixel size is correct.",
             )
             return
 
@@ -579,11 +609,16 @@ class TilingWizardController(GUIController):
 
                 self.calculate_tiles(axis)
             except (TypeError, ValueError) as e:
+                invalid_axis = ax
+                if ax == "z":
+                    invalid_axis = self.primary_z_axis
+                elif ax == "f":
+                    invalid_axis = self.primary_f_axis
+                self._invalidate_axis_fov(invalid_axis)
                 logger.debug(
                     f"Controller - Tiling Wizard - Caught ValueError: {e}. "
-                    f"Declining to update {ax} FOV."
+                    f"Invalidating {invalid_axis} FOV."
                 )
-                pass
 
     def showup(self):
         """Show the tiling wizard

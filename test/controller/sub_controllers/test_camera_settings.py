@@ -564,8 +564,6 @@ class TestCameraSettingController:
         pixel_size_config = self.camera_settings.parent_controller.configuration[
             "configuration"
         ]["microscopes"][microscope_name]["zoom"]["pixel_size"]
-        original_fov_x = self.camera_settings.roi_widgets["FOV_X"].get()
-        original_fov_y = self.camera_settings.roi_widgets["FOV_Y"].get()
         original_pixel_size = pixel_size_config.pop(zoom)
 
         try:
@@ -575,8 +573,8 @@ class TestCameraSettingController:
             pixel_size_config[zoom] = original_pixel_size
 
         assert result is False
-        assert self.camera_settings.roi_widgets["FOV_X"].get() == original_fov_x
-        assert self.camera_settings.roi_widgets["FOV_Y"].get() == original_fov_y
+        assert self.camera_settings.roi_widgets["FOV_X"].get() == ""
+        assert self.camera_settings.roi_widgets["FOV_Y"].get() == ""
         assert (
             f"No pixel size is configured for microscope '{microscope_name}' "
             f"at zoom '{zoom}' in the configuration YAML." in caplog.text
@@ -604,8 +602,6 @@ class TestCameraSettingController:
         pixel_size_config = self.camera_settings.parent_controller.configuration[
             "configuration"
         ]["microscopes"][microscope_name]["zoom"]["pixel_size"]
-        original_fov_x = self.camera_settings.roi_widgets["FOV_X"].get()
-        original_fov_y = self.camera_settings.roi_widgets["FOV_Y"].get()
         original_pixel_size = pixel_size_config[zoom]
         pixel_size_config[zoom] = None
 
@@ -616,8 +612,8 @@ class TestCameraSettingController:
             pixel_size_config[zoom] = original_pixel_size
 
         assert result is False
-        assert self.camera_settings.roi_widgets["FOV_X"].get() == original_fov_x
-        assert self.camera_settings.roi_widgets["FOV_Y"].get() == original_fov_y
+        assert self.camera_settings.roi_widgets["FOV_X"].get() == ""
+        assert self.camera_settings.roi_widgets["FOV_Y"].get() == ""
         assert (
             f"Invalid pixel size configured for microscope '{microscope_name}' "
             f"at zoom '{zoom}' in the configuration YAML." in caplog.text

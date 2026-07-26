@@ -599,7 +599,9 @@ class CameraSettingController(GUIController):
         if y_pixels < self.min_height:
             y_pixels = self.min_height
 
-        self.camera_setting_dict["pixel_size"] = self.default_pixel_size
+        # Additional controllers retain the calibrated pixel size for their zoom.
+        if self.microscope_name is None:
+            self.camera_setting_dict["pixel_size"] = self.default_pixel_size
 
         binning = [
             int(x) if x != "" else 1

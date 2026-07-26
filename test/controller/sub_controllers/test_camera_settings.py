@@ -325,6 +325,40 @@ class TestCameraSettingController:
             == self.camera_settings.default_pixel_size
         )
 
+    def test_update_experiment_values_preserves_additional_microscope_calibration(
+        self,
+    ):
+        microscope_name = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["microscope_name"]
+        calibrated_pixel_size = 9.7
+
+        assert calibrated_pixel_size != self.camera_settings.default_pixel_size
+
+        self.camera_settings.camera_setting_dict["pixel_size"] = calibrated_pixel_size
+        self.camera_settings.microscope_name = microscope_name
+        self.camera_settings.populate_experiment_values()
+
+        warning = self.camera_settings.update_experiment_values()
+
+        assert warning == ""
+        assert (
+            self.camera_settings.camera_setting_dict["pixel_size"]
+            == calibrated_pixel_size
+        )
+        assert float(self.camera_settings.roi_widgets["FOV_X"].get()) == float(
+            int(
+                self.camera_settings.camera_setting_dict["x_pixels"]
+                * calibrated_pixel_size
+            )
+        )
+        assert float(self.camera_settings.roi_widgets["FOV_Y"].get()) == float(
+            int(
+                self.camera_settings.camera_setting_dict["y_pixels"]
+                * calibrated_pixel_size
+            )
+        )
+
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
     def test_update_sensor_mode(self, mode):
         self.camera_settings.populate_experiment_values()

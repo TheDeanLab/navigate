@@ -862,7 +862,7 @@ class CameraSettingController(GUIController):
             # Set the zoom value and save the pixel size to the camera settings when enabling the additional microscope for acquisition.
             try:
                 pixel_size = float(self.camera_setting_dict["pixel_size"])
-            except (KeyError, ValueError):
+            except (KeyError, TypeError, ValueError):
                 logger.warning(
                     f"Invalid pixel size configured for microscope "
                     f"'{self.microscope_name}' at zoom '{zoom}' in the "
@@ -884,7 +884,7 @@ class CameraSettingController(GUIController):
                     f"'{microscope_name}' at zoom '{zoom}' in the configuration YAML."
                 )
                 return False
-            except ValueError:
+            except (TypeError, ValueError):
                 logger.warning(
                     f"Invalid pixel size configured for microscope "
                     f"'{microscope_name}' at zoom '{zoom}' in the "

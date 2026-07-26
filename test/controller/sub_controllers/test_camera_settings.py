@@ -559,6 +559,36 @@ class TestCameraSettingController:
             == "1x"
         )
 
+    def test_calculate_physical_dimensions_null_pixel_size(self, caplog):
+        self.camera_settings.populate_experiment_values()
+
+        microscope_state = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]
+        microscope_name = microscope_state["microscope_name"]
+        zoom = microscope_state["zoom"]
+        pixel_size_config = self.camera_settings.parent_controller.configuration[
+            "configuration"
+        ]["microscopes"][microscope_name]["zoom"]["pixel_size"]
+        original_fov_x = self.camera_settings.roi_widgets["FOV_X"].get()
+        original_fov_y = self.camera_settings.roi_widgets["FOV_Y"].get()
+        original_pixel_size = pixel_size_config[zoom]
+        pixel_size_config[zoom] = None
+
+        try:
+            with caplog.at_level("WARNING", logger="navigate"):
+                result = self.camera_settings.calculate_physical_dimensions()
+        finally:
+            pixel_size_config[zoom] = original_pixel_size
+
+        assert result is False
+        assert self.camera_settings.roi_widgets["FOV_X"].get() == original_fov_x
+        assert self.camera_settings.roi_widgets["FOV_Y"].get() == original_fov_y
+        assert (
+            f"Invalid pixel size configured for microscope '{microscope_name}' "
+            f"at zoom '{zoom}' in the configuration YAML." in caplog.text
+        )
+
     def test_update_experiment_values_returns_warning_when_physical_dimensions_fail(
         self,
     ):

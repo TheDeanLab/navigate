@@ -30,8 +30,49 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Standard Library Imports
+import sys
+import types
+from unittest.mock import MagicMock
+
 # Third Party Imports
 import pytest
+
+
+@pytest.fixture
+def hamamatsu_camera_class(monkeypatch):
+    """Load the Hamamatsu camera class without requiring the Windows DCAM API."""
+    api_module_name = "navigate.model.devices.APIs.hamamatsu.HamamatsuAPI"
+    camera_module_name = "navigate.model.devices.camera.hamamatsu"
+    api_module = types.ModuleType(api_module_name)
+    api_module.DCAM = object
+    monkeypatch.setitem(sys.modules, api_module_name, api_module)
+    sys.modules.pop(camera_module_name, None)
+
+    from navigate.model.devices.camera.hamamatsu import HamamatsuOrcaCamera
+
+    yield HamamatsuOrcaCamera
+    sys.modules.pop(camera_module_name, None)
+
+
+@pytest.mark.parametrize(
+    ("is_acquiring", "expected_trigger_count"),
+    [(False, 0), (True, 1)],
+)
+def test_generate_new_frame_only_triggers_active_camera(
+    hamamatsu_camera_class, is_acquiring, expected_trigger_count
+):
+    camera = object.__new__(hamamatsu_camera_class)
+    camera.camera_controller = MagicMock()
+    camera.trigger_source = "Software"
+    camera.is_acquiring = is_acquiring
+
+    camera.generate_new_frame()
+
+    assert (
+        camera.camera_controller.fire_software_trigger.call_count
+        == expected_trigger_count
+    )
 
 
 @pytest.mark.hardware

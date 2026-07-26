@@ -513,6 +513,8 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         return self.camera_controller.get_frames()
     
     def generate_new_frame(self) -> None:
+        if not self.is_acquiring:
+            return
         if self.trigger_source == "Software":
             self.camera_controller.fire_software_trigger()
 

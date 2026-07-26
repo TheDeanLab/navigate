@@ -7,7 +7,9 @@ from navigate.controller.sub_controllers.stages_advanced import (
 )
 
 
-def test_save_stage_parameters_writes_to_parent_configuration_path(dummy_controller):
+def test_save_stage_parameters_writes_to_parent_configuration_path(
+    dummy_controller, monkeypatch
+):
     controller = AdvancedStageParametersController.__new__(
         AdvancedStageParametersController
     )
@@ -17,10 +19,19 @@ def test_save_stage_parameters_writes_to_parent_configuration_path(dummy_control
     legacy_configuration_path = os.path.join(
         get_navigate_path(), "config", "configuration.yaml"
     )
-    dummy_controller.configuration_path = "/tmp/custom-configuration.yml"
+    configuration_path = "/tmp/custom-configuration.yml"
+    update_configuration = MagicMock()
+    execute = MagicMock()
+    monkeypatch.setattr(
+        dummy_controller, "configuration_path", configuration_path, raising=False
+    )
+    monkeypatch.setattr(
+        dummy_controller.configuration_controller,
+        "update_configuration",
+        update_configuration,
+    )
+    monkeypatch.setattr(dummy_controller, "execute", execute)
     assert dummy_controller.configuration_path != legacy_configuration_path
-    dummy_controller.configuration_controller.update_configuration = MagicMock()
-    dummy_controller.execute = MagicMock()
 
     controller.parent_controller = dummy_controller
     controller.current_microscope = microscope_name
@@ -42,7 +53,5 @@ def test_save_stage_parameters_writes_to_parent_configuration_path(dummy_control
         == dummy_controller.configuration_path
     )
     assert mock_write_to_yaml.call_args.kwargs["filename"] != legacy_configuration_path
-    dummy_controller.configuration_controller.update_configuration.assert_called_once()
-    dummy_controller.execute.assert_called_once_with(
-        "update_stage_limits", microscope_name
-    )
+    update_configuration.assert_called_once()
+    execute.assert_called_once_with("update_stage_limits", microscope_name)

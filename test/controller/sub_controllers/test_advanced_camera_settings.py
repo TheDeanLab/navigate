@@ -7,7 +7,9 @@ from navigate.controller.sub_controllers.camera_settings import (
 )
 
 
-def test_save_camera_settings_writes_to_parent_configuration_path(dummy_controller):
+def test_save_camera_settings_writes_to_parent_configuration_path(
+    dummy_controller, monkeypatch
+):
     controller = AdvancedCameraSettingController.__new__(
         AdvancedCameraSettingController
     )
@@ -17,9 +19,17 @@ def test_save_camera_settings_writes_to_parent_configuration_path(dummy_controll
     legacy_configuration_path = os.path.join(
         get_navigate_path(), "config", "configuration.yaml"
     )
-    dummy_controller.configuration_path = "/tmp/custom-configuration.yml"
+    configuration_path = "/tmp/custom-configuration.yml"
+    update_configuration = MagicMock()
+    monkeypatch.setattr(
+        dummy_controller, "configuration_path", configuration_path, raising=False
+    )
+    monkeypatch.setattr(
+        dummy_controller.configuration_controller,
+        "update_configuration",
+        update_configuration,
+    )
     assert dummy_controller.configuration_path != legacy_configuration_path
-    dummy_controller.configuration_controller.update_configuration = MagicMock()
 
     controller.parent_controller = dummy_controller
     controller.current_microscope = microscope_name
@@ -31,6 +41,13 @@ def test_save_camera_settings_writes_to_parent_configuration_path(dummy_controll
         "trigger_source": MagicMock(get=MagicMock(return_value="External")),
         "cooling": MagicMock(get=MagicMock(return_value="Off")),
     }
+    camera_parameters = dummy_controller.configuration["experiment"][
+        "CameraParameters"
+    ][microscope_name]
+    monkeypatch.setitem(
+        camera_parameters, "trigger_source", camera_parameters.get("trigger_source")
+    )
+    monkeypatch.setitem(camera_parameters, "cooling", camera_parameters.get("cooling"))
 
     with patch(
         "navigate.controller.sub_controllers.camera_settings.update_config_dict"
@@ -46,9 +63,6 @@ def test_save_camera_settings_writes_to_parent_configuration_path(dummy_controll
         == dummy_controller.configuration_path
     )
     assert mock_write_to_yaml.call_args.kwargs["filename"] != legacy_configuration_path
-    dummy_controller.configuration_controller.update_configuration.assert_called_once()
-    camera_parameters = dummy_controller.configuration["experiment"][
-        "CameraParameters"
-    ][microscope_name]
+    update_configuration.assert_called_once()
     assert camera_parameters["trigger_source"] == "External"
     assert camera_parameters["cooling"] == "Off"

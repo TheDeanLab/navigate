@@ -211,7 +211,7 @@ class MicroscopeSettingPopupWindow:
                 label_args={"padding": (0, 0, 5, 20)},
             )
             combo.grid(
-                row=len(self.labels) - 1,
+                row=len(self.labels) - 2,
                 column=0,
                 sticky=tk.SE,
                 padx=get_theme_padding_px((2, 5)),
@@ -227,7 +227,7 @@ class MicroscopeSettingPopupWindow:
                 label_args={"padding": (0, 0, 5, 20)},
             )
             combo.grid(
-                row=len(self.labels),
+                row=len(self.labels) - 1,
                 column=0,
                 sticky=tk.SE,
                 padx=get_theme_padding_px((2, 5)),

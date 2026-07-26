@@ -23,11 +23,9 @@ def test_save_camera_settings_writes_to_parent_configuration_path(dummy_controll
 
     controller.parent_controller = dummy_controller
     controller.current_microscope = microscope_name
-    controller.camera_dict = (
-        dummy_controller.configuration["configuration"]["microscopes"][microscope_name][
-            "camera"
-        ].copy()
-    )
+    controller.camera_dict = dummy_controller.configuration["configuration"][
+        "microscopes"
+    ][microscope_name]["camera"].copy()
     controller.view = MagicMock()
     controller.view.inputs = {
         "trigger_source": MagicMock(get=MagicMock(return_value="External")),
@@ -47,12 +45,10 @@ def test_save_camera_settings_writes_to_parent_configuration_path(dummy_controll
         mock_write_to_yaml.call_args.kwargs["filename"]
         == dummy_controller.configuration_path
     )
-    assert (
-        mock_write_to_yaml.call_args.kwargs["filename"] != legacy_configuration_path
-    )
+    assert mock_write_to_yaml.call_args.kwargs["filename"] != legacy_configuration_path
     dummy_controller.configuration_controller.update_configuration.assert_called_once()
-    camera_parameters = dummy_controller.configuration["experiment"]["CameraParameters"][
-        microscope_name
-    ]
+    camera_parameters = dummy_controller.configuration["experiment"][
+        "CameraParameters"
+    ][microscope_name]
     assert camera_parameters["trigger_source"] == "External"
     assert camera_parameters["cooling"] == "Off"

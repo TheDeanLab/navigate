@@ -32,7 +32,6 @@
 
 # Standard Library Imports
 import logging
-import os
 from typing import Optional
 
 # Third Party Imports
@@ -670,9 +669,9 @@ class CameraSettingController(GUIController):
                 self.camera_setting_dict["readout_direction"]
                 not in self.camera_readout_directions
             ):
-                self.camera_setting_dict["readout_direction"] = (
-                    self.camera_readout_directions[0]
-                )
+                self.camera_setting_dict[
+                    "readout_direction"
+                ] = self.camera_readout_directions[0]
             self.mode_widgets["Readout"].widget.set(
                 self.camera_setting_dict["readout_direction"]
             )

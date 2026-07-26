@@ -24,11 +24,9 @@ def test_save_stage_parameters_writes_to_parent_configuration_path(dummy_control
 
     controller.parent_controller = dummy_controller
     controller.current_microscope = microscope_name
-    controller.stage_dict = (
-        dummy_controller.configuration["configuration"]["microscopes"][microscope_name][
-            "stage"
-        ].copy()
-    )
+    controller.stage_dict = dummy_controller.configuration["configuration"][
+        "microscopes"
+    ][microscope_name]["stage"].copy()
 
     with patch(
         "navigate.controller.sub_controllers.stages_advanced.update_config_dict"
@@ -43,9 +41,7 @@ def test_save_stage_parameters_writes_to_parent_configuration_path(dummy_control
         mock_write_to_yaml.call_args.kwargs["filename"]
         == dummy_controller.configuration_path
     )
-    assert (
-        mock_write_to_yaml.call_args.kwargs["filename"] != legacy_configuration_path
-    )
+    assert mock_write_to_yaml.call_args.kwargs["filename"] != legacy_configuration_path
     dummy_controller.configuration_controller.update_configuration.assert_called_once()
     dummy_controller.execute.assert_called_once_with(
         "update_stage_limits", microscope_name

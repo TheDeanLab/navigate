@@ -1,14 +1,30 @@
 import os
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from navigate.config.config import get_navigate_path
 from navigate.controller.sub_controllers.camera_settings import (
     AdvancedCameraSettingController,
 )
 
 
+@pytest.fixture
+def camera_parameters(dummy_controller):
+    microscope_name = dummy_controller.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
+    parameters = dummy_controller.configuration["experiment"]["CameraParameters"][
+        microscope_name
+    ]
+    original_parameters = dict(parameters)
+    yield parameters
+    parameters.clear()
+    parameters.update(original_parameters)
+
+
 def test_save_camera_settings_writes_to_parent_configuration_path(
-    dummy_controller, monkeypatch
+    dummy_controller, monkeypatch, camera_parameters
 ):
     controller = AdvancedCameraSettingController.__new__(
         AdvancedCameraSettingController
@@ -41,13 +57,6 @@ def test_save_camera_settings_writes_to_parent_configuration_path(
         "trigger_source": MagicMock(get=MagicMock(return_value="External")),
         "cooling": MagicMock(get=MagicMock(return_value="Off")),
     }
-    camera_parameters = dummy_controller.configuration["experiment"][
-        "CameraParameters"
-    ][microscope_name]
-    monkeypatch.setitem(
-        camera_parameters, "trigger_source", camera_parameters.get("trigger_source")
-    )
-    monkeypatch.setitem(camera_parameters, "cooling", camera_parameters.get("cooling"))
 
     with patch(
         "navigate.controller.sub_controllers.camera_settings.update_config_dict"

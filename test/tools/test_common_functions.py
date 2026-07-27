@@ -121,10 +121,11 @@ class CopyProxyObjectTestCase(unittest.TestCase):
         assert copied_list[1] == {"key": "value"}
 
     def test_copy_proxy_object_with_non_proxy_object(self):
-        non_proxy_object = {"key": "value"}
+        non_proxy_object = {"key": ["value"]}
         copied_object = common_functions.copy_proxy_object(non_proxy_object)
-        self.assertIs(non_proxy_object, copied_object)
-        assert copied_object["key"] == "value"
+        self.assertIsNot(non_proxy_object, copied_object)
+        self.assertIsNot(non_proxy_object["key"], copied_object["key"])
+        assert copied_object["key"] == ["value"]
         assert isinstance(copied_object, dict)
 
 

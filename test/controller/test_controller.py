@@ -1,12 +1,13 @@
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock, ANY
+from unittest.mock import MagicMock, ANY, patch
 import pytest
 import numpy
 import multiprocessing as mp
 import logging
 import platform
 from logging.handlers import QueueHandler
+
 
 class _NullQueue:
     """Minimal queue-like sink for logging; avoids mp feeder threads on Windows."""
@@ -24,6 +25,17 @@ class _NullQueue:
 class DummySplashScreen:
     def destroy(self):
         pass
+
+
+@pytest.fixture(autouse=True)
+def suppress_controller_messageboxes():
+    with (
+        patch(
+            "navigate.controller.controller.messagebox.showwarning", return_value=None
+        ),
+        patch("navigate.controller.controller.messagebox.showerror", return_value=None),
+    ):
+        yield
 
 
 def _normalize_log_setup(start_listener):
@@ -329,6 +341,119 @@ def test_change_microscope(controller):
         )
 
         assert True
+
+
+def test_change_microscope_invalid_zoom_falls_back(controller):
+    microscope_name = controller.configuration_controller.microscope_list[0]
+    supported_zoom = list(
+        controller.configuration_controller.get_zoom_value_list(microscope_name)
+    )
+    fallback_zoom = supported_zoom[0]
+
+    with (
+        patch.object(
+            controller.configuration_controller, "change_microscope", return_value=True
+        ),
+        patch.object(controller.stage_controller, "initialize"),
+        patch.object(controller.channels_tab_controller, "initialize"),
+        patch.object(controller.channels_tab_controller, "populate_experiment_values"),
+        patch.object(
+            controller.camera_setting_controller, "update_camera_device_related_setting"
+        ),
+        patch.object(
+            controller.camera_setting_controller, "populate_experiment_values"
+        ),
+        patch.object(
+            controller.camera_setting_controller,
+            "calculate_physical_dimensions",
+            return_value=True,
+        ) as mock_physical_dimensions,
+        patch.object(controller.camera_view_controller, "update_snr"),
+        patch("navigate.controller.controller.messagebox.showwarning") as mock_warning,
+    ):
+        result = controller.change_microscope(microscope_name, "invalid_zoom")
+
+    assert result is True
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        == microscope_name
+    )
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["zoom"]
+        == fallback_zoom
+    )
+    mock_physical_dimensions.assert_called_once()
+    mock_warning.assert_called_once()
+    assert "Using" in mock_warning.call_args.kwargs["message"]
+
+
+def test_change_microscope_updates_zoom_on_same_microscope(controller):
+    microscope_name = controller.configuration_controller.microscope_list[0]
+    supported_zoom = list(
+        controller.configuration_controller.get_zoom_value_list(microscope_name)
+    )
+    if len(supported_zoom) < 2:
+        pytest.skip("Active test microscope does not have multiple zoom values.")
+
+    original_zoom = supported_zoom[0]
+    new_zoom = supported_zoom[-1]
+    controller.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ] = microscope_name
+    controller.configuration["experiment"]["MicroscopeState"]["zoom"] = original_zoom
+
+    with (
+        patch.object(
+            controller.configuration_controller, "change_microscope", return_value=False
+        ),
+        patch.object(
+            controller.configuration_controller, "microscope_name", microscope_name
+        ),
+        patch.object(
+            controller.camera_setting_controller,
+            "calculate_physical_dimensions",
+            return_value=True,
+        ) as mock_physical_dimensions,
+    ):
+        result = controller.change_microscope(microscope_name, new_zoom)
+
+    assert result is True
+    assert controller.configuration["experiment"]["MicroscopeState"]["zoom"] == new_zoom
+    mock_physical_dimensions.assert_called_once()
+
+
+def test_change_microscope_invalid_microscope_returns_false(controller):
+    previous_microscope_name = controller.configuration["experiment"][
+        "MicroscopeState"
+    ]["microscope_name"]
+    previous_zoom = controller.configuration["experiment"]["MicroscopeState"]["zoom"]
+
+    with (
+        patch.object(
+            controller.configuration_controller, "change_microscope", return_value=False
+        ),
+        patch.object(
+            controller.configuration_controller, "microscope_name", "different_scope"
+        ),
+        patch.object(
+            controller.camera_setting_controller, "calculate_physical_dimensions"
+        ) as mock_physical_dimensions,
+        patch("navigate.controller.controller.messagebox.showwarning") as mock_warning,
+    ):
+        result = controller.change_microscope("missing_scope", previous_zoom)
+
+    assert result is False
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        == previous_microscope_name
+    )
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["zoom"]
+        == previous_zoom
+    )
+    mock_physical_dimensions.assert_not_called()
+    mock_warning.assert_called_once()
+    assert "not configured" in mock_warning.call_args.kwargs["message"]
 
 
 def test_initialize_cam_view(controller):

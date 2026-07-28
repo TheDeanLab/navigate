@@ -608,19 +608,21 @@ mirror_hardware_widgets = {
         None,
         r"Example: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat",
     ],
-    "hardware/positions_file_path": [
-        "Default Positions Path",
-        "Input",
-        "string",
-        None,
-        r"Example: D:\WaveKitX64\MirrorFiles\OPMv3_SysCorr_517nm_20230324.wcs",
-    ],
     "hardware/interaction_matrix_file_path": [
         "Interaction Matrix Path",
         "Input",
         "string",
         None,
         r"Example: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc",
+    ],
+    "hardware/mirror_files_path": [
+        "Mirror Files Directory",
+        "Input",
+        "string",
+        None,
+        "Optional. Directory used to resolve named (rather than full-path) "
+        r"WCS saves/loads. Defaults to the directory containing "
+        "flat_path. Example: D:\\WaveKitX64\\MirrorFiles",
     ],
     "n_modes": ["Number of Modes", "Input", "int", None, "Example: 32", 32],
 }

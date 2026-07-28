@@ -210,7 +210,7 @@ def test_imop_get_connect_params_lists_all_required_config_file_paths(imop_modul
     assert module.ImagineOpticsMirror.get_connect_params() == [
         "wfc_config_file_path",
         "haso_config_file_path",
-        "positions_file_path",
+        "flat_path",
         "interaction_matrix_file_path",
     ]
 
@@ -221,7 +221,7 @@ def test_imop_connect_forwards_config_file_paths_to_sdk_wrapper(imop_module):
     connection = module.ImagineOpticsMirror.connect(
         wfc_config_file_path="/tmp/wfc.dat",
         haso_config_file_path="/tmp/haso.dat",
-        positions_file_path="/tmp/flat.wcs",
+        flat_path="/tmp/flat.wcs",
         interaction_matrix_file_path="/tmp/matrix.aoc",
     )
 

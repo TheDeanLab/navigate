@@ -21,7 +21,6 @@ microscopes:
         flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
         wfc_config_file_path: D:\WaveKitX64\MirrorFiles\WaveFrontCorrector_Mirao52-e_0259.dat
         haso_config_file_path: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat
-        positions_file_path: D:\WaveKitX64\MirrorFiles\OPMv3_SysCorr_517nm_20230324.wcs
         interaction_matrix_file_path: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc
       n_modes: 32
 
@@ -178,7 +177,6 @@ microscopes:
         flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
         wfc_config_file_path: D:\WaveKitX64\MirrorFiles\WaveFrontCorrector_Mirao52-e_0259.dat
         haso_config_file_path: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat
-        positions_file_path: D:\WaveKitX64\MirrorFiles\OPMv3_SysCorr_517nm_20230324.wcs
         interaction_matrix_file_path: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc
       n_modes: 32
 

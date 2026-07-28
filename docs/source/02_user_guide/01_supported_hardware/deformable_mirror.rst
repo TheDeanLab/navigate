@@ -28,12 +28,17 @@ WaveSuite software), and are specific to each physical mirror/HASO pair:
 
 * ``wfc_config_file_path``: the wavefront-corrector ``.dat`` config file.
 * ``haso_config_file_path``: the HASO sensor ``.dat`` config file.
-* ``positions_file_path``: a default ``.wcs`` actuator-positions file.
 * ``interaction_matrix_file_path``: the ``.aoc`` interaction matrix used to
   build the command matrix.
 
-All four paths must be supplied explicitly in the microscope configuration --
-there are no built-in defaults, since these files are specific to each mirror.
+All four paths (including ``flat_path``) must be supplied explicitly in the
+microscope configuration -- there are no built-in defaults, since these files
+are specific to each mirror. ``flat_path`` also serves as the mirror's default
+actuator-positions file at connect time.
+
+An optional ``mirror_files_path`` may also be set -- it is the directory used
+to resolve saved/loaded WCS files that are referenced by name rather than by
+full path. If omitted, it defaults to the directory containing ``flat_path``.
 
 .. collapse:: Configuration File
 
@@ -47,7 +52,6 @@ there are no built-in defaults, since these files are specific to each mirror.
                 flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
                 wfc_config_file_path: D:\WaveKitX64\MirrorFiles\WaveFrontCorrector_Mirao52-e_0259.dat
                 haso_config_file_path: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat
-                positions_file_path: D:\WaveKitX64\MirrorFiles\OPMv3_SysCorr_517nm_20230324.wcs
                 interaction_matrix_file_path: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc
               n_modes: 32
 

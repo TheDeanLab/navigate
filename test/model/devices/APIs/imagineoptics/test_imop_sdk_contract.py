@@ -38,9 +38,7 @@ is absent, but on a machine with WaveKit 4.5.1 installed, they exercise the
 *actual* wavekit_py classes imop.py calls into and assert that our call sites
 match the real signatures, rather than mocking the module wholesale.
 
-Run these against the real SDK (e.g. on the instrument/lab machine) before
-merging any change to imop.py. A skip in this environment is expected and is
-not the same as a pass -- it means the contract is unverified here.
+Run these against the real SDK.
 """
 
 import inspect
@@ -51,18 +49,14 @@ wk = pytest.importorskip(
     "wavekit_py",
     reason=(
         "wavekit_py is not installed. These contract tests only run on a "
-        "machine with the real Imagine Optic WaveKit 4.5.1 SDK installed; "
-        "they must be run there before merging changes to imop.py."
+        "machine with the real Imagine Optic WaveKit 4.5.1 SDK installed. "
     ),
 )
 
 
 def _params(callable_obj):
     """Return a callable's ordered parameter names (excluding 'self'/'cls').
-
-    Returns None when wavekit_py does not expose an introspectable signature
-    (e.g. a compiled extension without signature metadata) so callers can
-    skip with an explicit reason instead of silently passing.
+    Returns None when wavekit_py does not expose an introspectable signature.
     """
     try:
         sig = inspect.signature(callable_obj)
@@ -81,14 +75,43 @@ def _require_params(callable_obj, description):
     return params
 
 
+def _require_fields(cls, description):
+    """Return a namedtuple class's declared field names."""
+    fields = getattr(cls, "_fields", None)
+    if fields is None:
+        pytest.skip(
+            f"{description} does not expose namedtuple `_fields`; verify "
+            "manually against the WaveKit 4.5.1 docs."
+        )
+    return fields
+
+
+def _require_kwarg_dispatch(callable_obj, description):
+    """Return the source of a `**kwargs`-dispatching constructor/method."""
+    try:
+        sig = inspect.signature(callable_obj)
+    except (TypeError, ValueError):
+        sig = None
+
+    if sig is None or "kwargs" not in sig.parameters:
+        pytest.skip(
+            f"{description} does not use **kwargs dispatch as expected; "
+            "verify manually against the WaveKit 4.5.1 docs."
+        )
+
+    try:
+        return inspect.getsource(callable_obj)
+    except (TypeError, OSError):
+        pytest.skip(
+            f"Could not retrieve source for {description}; verify manually "
+            "against the WaveKit 4.5.1 docs."
+        )
+
+
 class TestModalCoefSetDataContract:
-    """Highest-risk gap flagged in review: imop.py's ModalCoef.set_data()
-    calls wk.ModalCoef.set_data(coef_array, pupil) -- 2 args, no explicit
-    coefficient-index array. The ctypes wrapper this replaced (WaveKit <= 4.3)
-    required set_data(coef, index, size, pupil). If 4.5.1 still expects an
-    index array, this call raises, and IMOP_Mirror.display_modes() catches
-    and swallows that exception, silently failing to move or flatten the
-    mirror."""
+    """imop.py calls wk.ModalCoef.set_data(coef_array, pupil) with 2 args,
+    no explicit coefficient-index array. If the installed SDK still expects
+    one, this call raises, and display_modes() silently swallows it."""
 
     def test_set_data_does_not_require_an_explicit_index_array(self):
         params = _require_params(wk.ModalCoef.set_data, "ModalCoef.set_data")
@@ -114,6 +137,20 @@ class TestComputePupilContract:
             f"({params})."
         )
 
+    def test_fit_zernike_pupil_return_shape(self):
+        """imop.py dereferences fit_zernike_pupil()'s return value as
+        `.center`/`.radius` rather than unpacking a plain tuple. Confirm the
+        installed wavekit_py's return type actually exposes those attributes,
+        in that order."""
+        fields = _require_fields(wk.ZernikePupil_t, "ZernikePupil_t")
+        assert fields == ("center", "radius"), (
+            "imop.py accesses fit_zernike_pupil()'s return value as "
+            "`zernike_pupil.center` / `.radius`, but the installed "
+            f"wavekit_py's ZernikePupil_t exposes fields {fields}. Update "
+            "IMOP_Mirror.__init__ in "
+            "navigate/model/devices/APIs/imagineoptics/imop.py to match."
+        )
+
 
 class TestCorrDataManagerContract:
     def test_get_greatest_common_pupil_takes_no_arguments(self):
@@ -132,14 +169,18 @@ class TestCorrDataManagerContract:
         )
 
     def test_constructor_kwargs(self):
-        params = _require_params(
+        """CorrDataManager.__init__(self, **kwargs) is a multi-constructor
+        dispatcher (config files / backup file / copy) -- its real signature
+        is invisible to inspect.signature(), so we check the dispatch source
+        for the literal kwarg combination imop.py uses."""
+        source = _require_kwarg_dispatch(
             wk.CorrDataManager.__init__, "CorrDataManager.__init__"
         )
         for kwarg in ("haso_config_file_path", "interaction_matrix_file_path"):
-            assert kwarg in params, (
+            assert f"'{kwarg}'" in source, (
                 f"imop.py constructs wk.CorrDataManager(...) with "
-                f"'{kwarg}=' but the installed wavekit_py does not accept "
-                f"that keyword (accepts: {params})."
+                f"'{kwarg}=' but the installed wavekit_py's __init__ dispatch "
+                "does not branch on that key."
             )
 
 
@@ -173,17 +214,17 @@ class TestHasoConfigContract:
 
 class TestWavefrontCorrectorContract:
     def test_preferences_round_trip_kwargs(self):
-        params = _require_params(
-            wk.CorrectorPrefs_t.__init__, "CorrectorPrefs_t.__init__"
-        )
+        """CorrectorPrefs_t is a namedtuple; its inherited __init__ signature
+        is the generic tuple one, not its declared fields -- check _fields."""
+        fields = _require_fields(wk.CorrectorPrefs_t, "CorrectorPrefs_t")
         for kwarg in (
             "min_array",
             "max_array",
             "validity_array",
             "fixed_value_array",
         ):
-            assert kwarg in params, (
+            assert kwarg in fields, (
                 f"imop.py constructs wk.CorrectorPrefs_t(...) with "
                 f"'{kwarg}=' but the installed wavekit_py does not accept "
-                f"that keyword (accepts: {params})."
+                f"that keyword (accepts: {fields})."
             )

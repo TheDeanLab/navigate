@@ -24,13 +24,6 @@ from .enums import (
     E_ZERNIKE_INDEXING_T,
 )
 
-# Base directory used only to resolve short `name=` references in load_wcs()/
-# save_wcs() into `<basepath>/MirrorFiles/<name>.wcs`. All hardware-specific
-# config/calibration file paths are supplied explicitly by the caller (see
-# navigate.model.devices.mirror.imop.ImagineOpticsMirror.get_connect_params).
-basepath = "C:/Users/Spectral/Desktop/muDM"
-
-
 mode_names = [
     "Vert. Tilt",
     "Horz. Tilt",
@@ -79,6 +72,7 @@ class IMOP_Mirror:
         positions_file_path,
         interaction_matrix_file_path,
         n_modes=32,
+        mirror_files_path=None,
     ):
         """
         Connect to the mirror and HASO, build the command matrix, and fit
@@ -93,6 +87,10 @@ class IMOP_Mirror:
                 to build the command matrix.
             n_modes: Number of Zernike modes to keep in the command matrix and
                 modal decomposition.
+            mirror_files_path: Directory used to resolve short `name=`
+                references in load_wcs()/save_wcs() into
+                `<mirror_files_path>/<name>.wcs`. Defaults to the directory
+                containing `positions_file_path`.
         """
 
         self.wfc_config_file_path = wfc_config_file_path
@@ -100,6 +98,9 @@ class IMOP_Mirror:
         self.positions_file_path = positions_file_path
         self.interaction_matrix_file_path = interaction_matrix_file_path
         self.n_modes = n_modes
+        self.mirror_files_path = mirror_files_path or os.path.dirname(
+            positions_file_path
+        )
 
         try:
             n_actuators = wk.WavefrontCorrectorSet(
@@ -285,7 +286,8 @@ class IMOP_Mirror:
 
         Args:
             path: Full path to the .wcs file to load.
-            name: Alternatively, a name to resolve to `<mirror_file_path>/<name>.wcs`.
+            name: Alternatively, a name to resolve to
+                `<mirror_files_path>/<name>.wcs`.
             mode_file: If True, also load the sibling `<name>.json` mode-coefficient
                 file and return it as a list of floats (empty list if not found).
 
@@ -296,7 +298,7 @@ class IMOP_Mirror:
         if path:
             wcs_load_path = path
         elif name:
-            wcs_load_path = os.path.join(basepath, "MirrorFiles", name + ".wcs")
+            wcs_load_path = os.path.join(self.mirror_files_path, name + ".wcs")
 
         else:
             print("IMOP_Mirror:: Need to provide either name or path")
@@ -327,7 +329,7 @@ class IMOP_Mirror:
         if path:
             wcs_save_path = path
         elif name:
-            wcs_save_path = os.path.join(basepath, "MirrorFiles", name + ".wcs")
+            wcs_save_path = os.path.join(self.mirror_files_path, name + ".wcs")
 
         else:
             print("IMOP_Mirror:: Need to provide either name or path")
@@ -407,7 +409,7 @@ class CoreEngine:
             "nb_subpupils": specs_t.nb_subapertures,
             "ulens_step": specs_t.ulens_step,
             "alignment_position_pixels": getattr(specs_t, "align_pos", None),
-            "tolerence_radius": getattr(specs_t, "radius_tolerance", None),
+            "tolerance_radius": getattr(specs_t, "radius_tolerance", None),
             "default_start_subpupil": getattr(specs_t, "start_subpup", None),
             "lower_calibration_wavelen": getattr(wavelength_t, "lower_calib_wl", None),
             "upper_calibration_wavelen": getattr(wavelength_t, "upper_calib_wl", None),
@@ -774,7 +776,7 @@ class WavefrontCorrector:
 
     def save_positions_to_file(self, file_path):
         """
-        Save current wavefroont corrector positions to file
+        Save current wavefront corrector positions to file
         """
         self._wfc.save_current_positions_to_file(file_path)
 

@@ -141,6 +141,12 @@ class Microscope:
         #: float: Central focus position.
         self.central_focus = None
 
+        #: float: Runtime zero-defocus focus position.
+        self.zero_defocus_focus = None
+
+        #: float: Focus position at the start of acquisition.
+        self.acquisition_focus_restore_position = None
+
         #: Bool: Is a synthetic microscope.
         self.is_synthetic = is_synthetic
 
@@ -315,7 +321,7 @@ class Microscope:
         self.configuration["configuration"]["microscopes"][self.microscope_name][
             "stage"
         ]["has_ni_galvo_stage"] = False
-        if type(stage_devices) != ListProxy:
+        if not isinstance(stage_devices, ListProxy):
             stage_devices = [stage_devices]
 
         for i, device_config in enumerate(stage_devices):
@@ -438,6 +444,8 @@ class Microscope:
         """
         self.current_channel = 0
         self.central_focus = None
+        self.zero_defocus_focus = None
+        self.acquisition_focus_restore_position = None
         self.get_available_channels()
 
         if self.camera.is_acquiring:
@@ -577,8 +585,11 @@ class Microscope:
                 self.galvo[k].turn_off()
 
         self.stop_stage()
-        if self.central_focus is not None:
-            self.move_stage({"f_abs": self.central_focus})
+        if self.acquisition_focus_restore_position is not None:
+            self.move_stage(
+                {"f_abs": self.acquisition_focus_restore_position},
+                wait_until_done=True,
+            )
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.shutter.close_shutter()
@@ -586,6 +597,8 @@ class Microscope:
             self.laser[k].turn_off()
         self.current_channel = 0
         self.central_focus = None
+        self.zero_defocus_focus = None
+        self.acquisition_focus_restore_position = None
         logger.info("Acquisition Ended")
 
     def turn_on_laser(self) -> None:
@@ -794,11 +807,62 @@ class Microscope:
         if curr_channel == self.current_channel:
             return
 
-        prefix = "channel_"
-        channel_key = prefix + str(self.current_channel)
-        channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
-            channel_key
-        ]
+        channel_key = f"channel_{self.current_channel}"
+        self.prepare_channel(channel_key, update_daq_task_flag)
+
+    def _publish_defocus_reference(self, channel_key: str = None) -> None:
+        """Publish the active zero-defocus reference to the GUI."""
+        if self.output_event_queue is None:
+            return
+
+        if channel_key is None or self.zero_defocus_focus is None:
+            self.output_event_queue.put(("defocus_reference", None))
+            return
+
+        self.output_event_queue.put(
+            (
+                "defocus_reference",
+                {
+                    "channel": channel_key,
+                    "focus_position": self.zero_defocus_focus,
+                },
+            )
+        )
+
+    def _clear_zero_defocus_focus(self) -> None:
+        """Clear focus state derived from the active zero-defocus reference."""
+        had_reference = self.zero_defocus_focus is not None
+        self.central_focus = None
+        self.zero_defocus_focus = None
+        self.acquisition_focus_restore_position = None
+        if had_reference:
+            self._publish_defocus_reference()
+
+    def _ensure_zero_defocus_focus(self, channel_key: str, channel: dict) -> None:
+        """Derive the zero-defocus focus position for this acquisition."""
+        if self.zero_defocus_focus is not None:
+            return
+
+        current_focus = self.get_stage_position().get("f_pos")
+        if current_focus is None:
+            return
+
+        channel_defocus = float(channel.get("defocus", 0.0))
+        self.acquisition_focus_restore_position = current_focus
+        self.zero_defocus_focus = current_focus - channel_defocus
+        # Compatibility alias for older call sites.
+        self.central_focus = self.zero_defocus_focus
+        self._publish_defocus_reference(channel_key)
+
+    def prepare_channel(
+        self, channel_key: str, update_daq_task_flag: bool = True
+    ) -> None:
+        """Prepare a specific channel independent of selected-channel order."""
+        if self.channels is None:
+            self.get_available_channels()
+        self.current_channel = int(channel_key[len("channel_") :])
+        channel = self.channels[channel_key]
+
         # stop daq task first, give daq some rest time for new tasks
         if update_daq_task_flag:
             self.daq.stop_acquisition()
@@ -830,14 +894,10 @@ class Microscope:
         if update_daq_task_flag:
             self.daq.prepare_acquisition(channel_key)
 
-        # Add Defocus term
-        # Assume wherever we start is the central focus
-        # TODO: is this the correct assumption?
-        if self.central_focus is None:
-            self.central_focus = self.get_stage_position().get("f_pos")
-        if self.central_focus is not None:
+        self._ensure_zero_defocus_focus(channel_key, channel)
+        if self.zero_defocus_focus is not None:
             self.move_stage(
-                {"f_abs": self.central_focus + float(channel["defocus"])},
+                {"f_abs": self.zero_defocus_focus + float(channel["defocus"])},
                 wait_until_done=True,
                 update_focus=False,
             )
@@ -927,7 +987,7 @@ class Microscope:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
             if update_focus and axis == "f":
-                self.central_focus = None
+                self._clear_zero_defocus_focus()
             return self.stages[axis].move_axis_absolute(
                 axis, pos_dict[axis_key], wait_until_done
             )
@@ -943,7 +1003,7 @@ class Microscope:
                 success = stage.move_absolute(pos, wait_until_done) and success
 
         if update_focus and "f_abs" in pos_dict:
-            self.central_focus = None
+            self._clear_zero_defocus_focus()
 
         return success
 
@@ -1036,7 +1096,7 @@ class Microscope:
             # if no such device
             return [], [], False
 
-        if type(devices) == ListProxy:
+        if isinstance(devices, ListProxy):
             i = 0
             for d in devices:
                 device_config_list.append(d)

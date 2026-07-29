@@ -1328,6 +1328,13 @@ class BaseViewController(GUIController, ABaseViewController):
             self.canvas_width = r_canvas_width
             self.canvas_height = int(r_canvas_width / img_ratio)
 
+        # minimum canvas height and width is 1
+        if self.canvas_width < 1:
+            self.canvas_width = 1
+
+        if self.canvas_height < 1:
+            self.canvas_height = 1
+
         self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
         self.canvas_height_scale = float(
             self.original_image_height / self.canvas_height

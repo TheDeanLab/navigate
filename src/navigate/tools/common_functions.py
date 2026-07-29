@@ -96,22 +96,12 @@ def copy_proxy_object(content: Any) -> Any:
     result
         The serialized object.
     """
-    from multiprocessing import managers
-
-    def func(content: Any) -> Any:
-        if type(content) is managers.DictProxy:
-            result = {}
-            for k in content.keys():
-                result[k] = func(content[k])
-        elif type(content) is managers.ListProxy:
-            result = []
-            for v in content:
-                result.append(func(v))
-        else:
-            result = content
-        return result
-
-    return func(content)
+    if hasattr(content, "items"):
+        return {k: copy_proxy_object(v) for k, v in content.items()}
+    elif hasattr(content, "append") or isinstance(content, list):
+        return [copy_proxy_object(v) for v in content]
+    else:
+        return content
 
 
 def load_module_from_file(module_name: str, file_path: str) -> Optional[Any]:

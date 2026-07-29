@@ -114,6 +114,8 @@ class MicroscopeSettingPopupWindow:
                 device = " ".join(map(lambda v: v.capitalize(), k.split("_")))
                 if device not in self.labels:
                     self.labels.append(device)
+
+        self.labels.append("Zoom Value")
         self.labels.append("Setting")
 
         for i, name in enumerate(self.labels):
@@ -180,7 +182,7 @@ class MicroscopeSettingPopupWindow:
                 padx=get_theme_padding_px((0, 5)),
                 pady=get_theme_padding_px((5, 16)),
             )
-            for i in range(1, len(self.labels) - 1):
+            for i in range(1, len(self.labels) - 2):
                 device_ref_name = build_ref_name(
                     "_", *self.labels[i].lower().split(" ")
                 )
@@ -200,6 +202,23 @@ class MicroscopeSettingPopupWindow:
                     pady=get_theme_padding_px((2, 0)),
                 )
                 self.inputs[f"{microscope_name} {device_ref_name}"] = entry
+
+            # add zoom value
+            combo = LabelInput(
+                parent=frame,
+                input_class=ttk.Combobox,
+                input_var=tk.StringVar(),
+                label_args={"padding": (0, 0, 5, 20)},
+            )
+            combo.grid(
+                row=len(self.labels) - 1,
+                column=0,
+                sticky=tk.SE,
+                padx=get_theme_padding_px((2, 5)),
+                pady=get_theme_padding_px((2, 0)),
+            )
+            combo.widget.config(state="readonly")
+            self.inputs[f"{microscope_name}_zoom_value"] = combo
             # usage
             combo = LabelInput(
                 parent=frame,

@@ -31,6 +31,7 @@
 
 # Standard library imports
 import unittest
+from unittest.mock import MagicMock, patch
 
 # Third party imports
 import numpy as np
@@ -128,6 +129,91 @@ class TestAutofocusClass(unittest.TestCase):
         steps, pos_offset = self.autofocus.get_steps(10.0, 2.0)
         self.assertEqual(steps, 6)  # Expected number of steps
         self.assertEqual(pos_offset, 8.0)  # Expected position offset
+
+    def test_run_loads_autofocus_feature_without_preparing_channel(self):
+        model = DummyModel()
+        model.prepare_acquisition = MagicMock()
+        model.active_microscope.prepare_channel = MagicMock()
+        model.active_microscope.prepare_next_channel = MagicMock()
+        model.run_acquisition = MagicMock()
+        model.run_data_process = MagicMock()
+        autofocus = Autofocus(
+            model=model,
+            device="stage",
+            device_ref="f",
+            target_channel="channel_2",
+        )
+
+        with patch(
+            "navigate.model.features.autofocus.load_features",
+            return_value=(MagicMock(), MagicMock()),
+        ), patch("navigate.model.features.autofocus.threading.Thread") as thread:
+            autofocus.run()
+
+        model.active_microscope.prepare_channel.assert_not_called()
+        model.active_microscope.prepare_next_channel.assert_not_called()
+        self.assertEqual(thread.return_value.start.call_count, 2)
+
+    def test_pre_func_signal_prepares_requested_channel(self):
+        model = DummyModel()
+        model.active_microscope.prepare_channel = MagicMock()
+        model.active_microscope.prepare_next_channel = MagicMock()
+        autofocus = Autofocus(
+            model=model,
+            device="stage",
+            device_ref="f",
+            target_channel="channel_2",
+        )
+
+        autofocus.pre_func_signal()
+
+        model.active_microscope.prepare_channel.assert_called_once_with("channel_2")
+        model.active_microscope.prepare_next_channel.assert_not_called()
+
+    def test_pre_func_signal_prepares_next_channel_without_target_channel(self):
+        model = DummyModel()
+        model.active_microscope.prepare_channel = MagicMock()
+        model.active_microscope.prepare_next_channel = MagicMock()
+        autofocus = Autofocus(model=model, device="stage", device_ref="f")
+
+        autofocus.pre_func_signal()
+
+        model.active_microscope.prepare_channel.assert_not_called()
+        model.active_microscope.prepare_next_channel.assert_called_once_with()
+
+    def test_end_func_data_reports_best_focus_for_channel(self):
+        model = DummyModel()
+        model.event_queue = MagicMock()
+        model.logger = MagicMock()
+        autofocus = Autofocus(
+            model=model,
+            device="stage",
+            device_ref="f",
+            target_channel="channel_2",
+            calibration_action="populate_defocus",
+            reference_channel="channel_1",
+        )
+        autofocus.get_frames_num = 2
+        autofocus.total_frame_num = 1
+        autofocus.plot_data = []
+        autofocus.focus_pos = 123.4
+
+        autofocus.end_func_data()
+
+        model.event_queue.put.assert_any_call(
+            (
+                "autofocus_complete",
+                {
+                    "channel": "channel_2",
+                    "focus_position": 123.4,
+                    "device": "stage",
+                    "device_ref": "f",
+                    "calibration_action": "populate_defocus",
+                    "reference_channel": "channel_1",
+                    "set_defocus_for_all_flag": False,
+                },
+            )
+        )
 
 
 if __name__ == "__main__":

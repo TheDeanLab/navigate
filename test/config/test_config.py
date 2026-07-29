@@ -919,6 +919,36 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 == expected_value[k]
             )
 
+    def test_verify_experiment_config_preserves_negative_channel_defocus(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+        )
+        config.verify_configuration(self.manager, configuration)
+
+        experiment = configuration["experiment"]
+        config.update_config_dict(
+            self.manager,
+            experiment["MicroscopeState"]["channels"],
+            "channel_2",
+            {
+                "is_selected": True,
+                "laser": "488nm",
+                "FilterWheel-0": "Empty-Alignment",
+                "camera_exposure_time": 200.0,
+                "laser_power": 20.0,
+                "interval_time": 0.0,
+                "defocus": -2.5,
+            },
+        )
+
+        config.verify_experiment_config(self.manager, configuration)
+
+        assert (
+            experiment["MicroscopeState"]["channels"]["channel_2"]["defocus"] == -2.5
+        )
+
     def select_random_entries_from_list(self, parameter_list):
         n = random.randint(1, len(parameter_list))
         return random.choices(parameter_list, k=n)

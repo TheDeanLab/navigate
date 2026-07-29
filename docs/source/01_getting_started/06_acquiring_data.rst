@@ -54,7 +54,7 @@ Configure the Channel Settings
 
     * Specify the camera :guilabel:`Exp. Time (ms)`. A good default value is ``100`` or ``200`` ms.  
     * Specify the :guilabel:`Interval` to be ``1.0``. While this feature is not currently implemented, future releases will allow users to image different channels at different time intervals.  
-    * Specify the :guilabel:`Defocus` to be ``0``. This feature allows you to adjust for chromatic aberrations that result in focal shifts between each imaging channel.
+    * Set :guilabel:`Defocus` to ``0`` unless the channel has a measured chromatic focus offset. Defocus is a per-channel offset from the zero-defocus focus position, not an absolute focus coordinate. At acquisition start, **navigate** derives that zero-defocus position from the current focus and the active channel's defocus, then applies each channel's offset. The status below the table reports the current reference; see :ref:`Autofocus Settings <ui_autofocus>` to measure channel offsets automatically.
 
 ---------------------------------------
 

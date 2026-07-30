@@ -92,20 +92,36 @@ We strongly recommend using a virtual environment for development. This can be a
     # On Linux/Mac
     source navigate-env/bin/activate
 
-    # Then install Navigate
-    pip install -e .[dev]
+    # On Windows with Python 3.9
+    pip install -c constraints/windows-py39.txt -e ".[dev]"
 
-The same thing can be achieved using conda:
+    # On Windows with Python 3.10
+    pip install -c constraints/windows-py310.txt -e ".[dev]"
+
+    # On Linux/Mac
+    pip install -e ".[dev]"
+
+The same thing can be achieved using conda. Create a separate environment for
+the Python version you intend to use:
 
 .. code-block:: console
 
-    # Using conda
-    conda create -n navigate python=3.9.7
-    conda activate navigate
-    (navigate) C:\Users\Username\Code> cd navigate
+    # Python 3.9
+    conda create -n navigate-py39 python=3.9.7
+    conda activate navigate-py39
+    (navigate-py39) C:\Users\Username\Code> cd navigate
+    (navigate-py39) C:\Users\Username\Code\navigate> pip install -c constraints/windows-py39.txt -e ".[dev]"
 
-    # On Windows
-    (navigate) C:\Users\Username\Code\navigate> pip install -e .[dev]
+    # Or Python 3.10
+    conda create -n navigate-py310 python=3.10
+    conda activate navigate-py310
+    (navigate-py310) C:\Users\Username\Code> cd navigate
+    (navigate-py310) C:\Users\Username\Code\navigate> pip install -c constraints/windows-py310.txt -e ".[dev]"
 
-    # On Linux/Mac
-    (navigate) pip install -e '.[dev]'
+    # On Linux/Mac, after activating the Python environment
+    pip install -e ".[dev]"
+
+The Windows constraint files reproduce complete environments that passed the
+test suite. They control dependency versions during installation without
+adding every transitive dependency to :file:`pyproject.toml`. Always select the
+constraint file that matches the environment's Python version.

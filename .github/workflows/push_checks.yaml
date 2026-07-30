@@ -6,6 +6,8 @@ on:
     branches:
       - develop
   pull_request:
+  schedule:
+    - cron: "17 9 * * 1"
   workflow_dispatch:
     inputs:
       diagnostic_no_cov:
@@ -16,6 +18,7 @@ on:
 
 jobs:
   test:
+    if: github.event_name != 'schedule'
     runs-on: ${{ matrix.operating-system }}
     timeout-minutes: 45
     strategy:
@@ -31,15 +34,17 @@ jobs:
     env:
       MPLBACKEND: Agg  # https://github.com/microsoft/azure-pipelines-tasks/issues/16426
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: constraints/windows-${{ matrix.python-tag }}.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e '.[dev]'
+          pip install -c constraints/windows-${{ matrix.python-tag }}.txt -e ".[dev]"
       - name: Test with pytest
         timeout-minutes: 35
         env:
@@ -69,7 +74,7 @@ jobs:
             Format-List
       - name: Codecov
         if: ${{ !(github.event_name == 'workflow_dispatch' && github.event.inputs.diagnostic_no_cov == 'true') }}
-        uses: codecov/codecov-action@v3.1.0
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/reports/
@@ -79,3 +84,27 @@ jobs:
           flags: unittests-${{ matrix.python-tag }}
           name: codecov-${{ matrix.operating-system }}-${{ matrix.python-tag }}
           verbose: true
+
+  latest-dependencies:
+    name: Latest dependencies (scheduled advisory)
+    if: github.event_name == 'schedule'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      MPLBACKEND: Agg
+      NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install latest dependencies without constraints
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Test with pytest
+        timeout-minutes: 35
+        run: python -m pytest

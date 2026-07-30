@@ -42,6 +42,7 @@ from pyvcam.camera import Camera as PyvcamCamera
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices.device_types import IntegratedDevice
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -50,7 +51,7 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class PhotometricsCamera(CameraBase):
+class PhotometricsCamera(CameraBase, IntegratedDevice):
     """Photometrics Base camera class.
 
     This class is the interface between the rest of the microscope code and the

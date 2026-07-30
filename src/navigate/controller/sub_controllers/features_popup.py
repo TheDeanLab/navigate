@@ -52,6 +52,7 @@ from navigate.model.features.feature_related_functions import (
     convert_feature_list_to_str,
 )
 from navigate.model.features import feature_related_functions
+from navigate.model.features.common_features import PrepareNextChannel
 from navigate.config.config import get_navigate_path
 
 
@@ -91,6 +92,7 @@ class FeaturePopupController(GUIController):
             self.view.buttons["add"].configure(command=self.add_feature_list)
             self.view.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
             self.view.buttons["cancel"].configure(command=self.exit_func)
+            self.feature_list_graph_controller.update([{"name": PrepareNextChannel}])
         elif "confirm" in self.view.buttons:
             self.view.buttons["confirm"].configure(command=self.update_feature_list)
             self.view.popup.protocol("WM_DELETE_WINDOW", self.cancel_acquisition)

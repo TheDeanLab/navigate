@@ -100,7 +100,16 @@ _SPACING_PRESETS: dict[str, dict[str, SpacingSpec]] = {
         "space_7": 16,
         "space_8": 20,
         "space_9": 24,
+        "layout_window_gap": 12,
+        "layout_panel_gap": 10,
+        "layout_section_gap": 8,
+        "layout_control_gap": 6,
+        "layout_sidebar_min_width": 224,
+        "layout_canvas_min_size": 512,
+        "layout_histogram_min_height": 180,
         "padding_button": (8, 4),
+        "padding_panel_card": (12, 10),
+        "padding_canvas_surface": (10, 10, 10, 10),
         "padding_stage_stop_button": (8, 16),
         "padding_stage_home_button": (8, 6),
         "padding_notebook_tab": (10, 4),
@@ -661,9 +670,9 @@ def _apply_rounded_notebook_tabs(
     notebook_bg : str
         Notebook background color for corner blending.
     panel_bg : str
-        Panel background color for selected and disabled tabs.
+        Panel background color for unselected and disabled tabs.
     surface_bg : str
-        Surface background color for unselected tabs.
+        Surface background color for selected tabs.
     border : str
         Border color for tab outlines.
     accent_hover : str
@@ -690,7 +699,7 @@ def _apply_rounded_notebook_tabs(
     normal = _rounded_photo(
         root,
         "rounded_tab_normal",
-        surface_bg,
+        panel_bg,
         border,
         width=tab_w,
         height=tab_h,
@@ -701,7 +710,7 @@ def _apply_rounded_notebook_tabs(
     selected = _rounded_photo(
         root,
         "rounded_tab_selected",
-        panel_bg,
+        surface_bg,
         border,
         width=tab_w,
         height=tab_h,
@@ -1102,6 +1111,13 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     stage_stop_button_padding = get_theme_padding("padding_stage_stop_button")
     stage_home_button_padding = get_theme_padding("padding_stage_home_button")
     notebook_tab_padding = get_theme_padding("padding_notebook_tab")
+    if len(notebook_tab_padding) == 2:
+        selected_notebook_tab_padding = (
+            notebook_tab_padding[0] + 1,
+            notebook_tab_padding[1] + 2,
+        )
+    else:
+        selected_notebook_tab_padding = notebook_tab_padding
 
     root.configure(bg=window_bg)
 
@@ -1363,7 +1379,7 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     _safe_style_configure(
         style,
         "TNotebook.Tab",
-        background=surface_bg,
+        background=panel_bg,
         foreground=text,
         padding=notebook_tab_padding,
         font=font_body_bold,
@@ -1371,8 +1387,10 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     _safe_style_map(
         style,
         "TNotebook.Tab",
-        background=[("selected", panel_bg), ("active", accent_hover)],
+        background=[("selected", surface_bg), ("active", accent_hover)],
         foreground=[("disabled", muted_text), ("selected", text)],
+        padding=[("selected", selected_notebook_tab_padding)],
+        expand=[("selected", (1, 1, 1, 0))],
     )
     _apply_rounded_notebook_tabs(
         root,

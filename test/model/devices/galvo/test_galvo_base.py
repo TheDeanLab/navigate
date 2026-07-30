@@ -148,6 +148,33 @@ def test_adjust_applies_channel_factor_override():
     assert set(waveforms.keys()) == {"channel_1", "channel_2"}
 
 
+@pytest.mark.parametrize(
+    "waveform, function_name",
+    [
+        ("quadratic", "quadratic"),
+        ("centered_cubic", "centered_cubic"),
+    ],
+)
+def test_adjust_dispatches_curved_waveforms(waveform, function_name):
+    config = build_base_configuration(
+        waveform=waveform,
+        max_voltage=10,
+        min_voltage=-10,
+        channel_2_selected=False,
+    )
+    galvo = build_synthetic_galvo(config)
+    exposure_times, sweep_times = default_timing()
+
+    with patch(
+        f"navigate.model.devices.galvo.base.{function_name}",
+        return_value=np.array([0.1, 0.2], dtype=float),
+    ) as mock_waveform:
+        waveforms = galvo.adjust(exposure_times, sweep_times)
+
+    mock_waveform.assert_called_once()
+    assert waveforms["channel_1"].tolist() == [0.1, 0.2]
+
+
 def test_adjust_applies_laser_factor_override_for_sine():
     config = build_base_configuration(
         waveform="sine",
@@ -202,6 +229,33 @@ def test_adjust_halfsaw_uses_expected_extreme(amplitude, source_wave):
     assert waveforms["channel_1"][1] == pytest.approx(source_wave[1])
 
 
+def test_adjust_pulse_waveform_respects_camera_delay_and_clears_final_sample():
+    config = build_base_configuration(
+        waveform="pulse",
+        amplitude="1.0",
+        offset="0.0",
+        max_voltage=10,
+        min_voltage=-10,
+        channel_2_selected=False,
+    )
+    config["configuration"]["microscopes"]["TestScope"]["camera"]["delay"] = 10
+    config["configuration"]["microscopes"]["TestScope"]["daq"]["sample_rate"] = 1000
+    galvo = build_synthetic_galvo(config)
+
+    waveforms = galvo.adjust(
+        exposure_times={"channel_1": 0.2},
+        sweep_times={"channel_1": 0.1},
+    )
+
+    waveform = waveforms["channel_1"]
+    high_indices = np.flatnonzero(waveform > 0.5)
+    assert waveform.shape == (100,)
+    assert high_indices[0] == 10
+    assert high_indices[-1] == 98
+    assert len(high_indices) == 89
+    assert waveform[-1] == 0
+
+
 def test_adjust_unknown_waveform_sets_channel_to_none():
     config = build_base_configuration(waveform="banana", channel_2_selected=False)
     galvo = build_synthetic_galvo(config)
@@ -211,11 +265,15 @@ def test_adjust_unknown_waveform_sets_channel_to_none():
         waveforms = galvo.adjust(exposure_times, sweep_times)
 
     assert waveforms == {"channel_1": None}
-    mock_print.assert_called_with("Unknown Galvo waveform specified in configuration file.")
+    mock_print.assert_called_with(
+        "Unknown Galvo waveform specified in configuration file."
+    )
 
 
 def test_adjust_returns_none_on_invalid_waveform_constants():
-    config = build_base_configuration(amplitude="not-a-number", channel_2_selected=False)
+    config = build_base_configuration(
+        amplitude="not-a-number", channel_2_selected=False
+    )
     galvo = build_synthetic_galvo(config)
     exposure_times, sweep_times = default_timing()
 
@@ -245,7 +303,9 @@ def test_adjust_clips_waveform_to_voltage_limits():
 
 
 def test_adjust_resets_existing_waveforms_when_no_channels_selected():
-    config = build_base_configuration(channel_1_selected=False, channel_2_selected=False)
+    config = build_base_configuration(
+        channel_1_selected=False, channel_2_selected=False
+    )
     galvo = build_synthetic_galvo(config)
     galvo.waveform_dict = {"stale_channel": np.array([1.0], dtype=float)}
     exposure_times, sweep_times = default_timing()

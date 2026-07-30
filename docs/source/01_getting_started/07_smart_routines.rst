@@ -92,8 +92,9 @@ Step 3: Add Tissue Detection
 3. Configure the ``DetectTissueInStackAndReturn`` node with the following parameters:
 
     1. :guilabel:`planes`: number of z-planes checked for tissue.
-    2. :guilabel:`percentage`: required image fraction containing tissue to return ``true``.
-    3. :guilabel:`detect_func`: tissue detection function from :doc:`remove_empty_tiles </05_reference/_autosummary/navigate.model.features.remove_empty_tiles>`. If set to ``None``, **navigate** uses ``detect_tissue()``.
+    2. :guilabel:`percentage`: required fraction of tissue-positive frames in the stack to return ``true``.
+    3. :guilabel:`detect_func`: tissue detection function from :doc:`remove_empty_tiles </05_reference/_autosummary/navigate.model.features.remove_empty_tiles>`. If set to ``None``, **navigate** uses ``detect_tissue3()``.
+    4. :guilabel:`threshold`: intensity threshold passed to the tissue detection function.
 
 .. tip::
 

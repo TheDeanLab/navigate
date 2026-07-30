@@ -36,7 +36,7 @@ It is implemented as a :ref:`feature list <user_guide_features>`, shown in its :
       )
     ]
 
-The sequence begins with the `PrepareNextChannel` feature and loops over `experiment.MicroscopeState.selected_channels`. As such, continuous mode will display a live preview of all :ref:`selected color channels <ui_channel_settings>` in sequence, then return the first color channel and start again.
+The sequence begins with the `PrepareNextChannel` feature and loops over `experiment.MicroscopeState.selected_channels`. As such, continuous mode will display a live preview of all :ref:`selected color channels <ui_channel_settings>` in sequence, then return the first color channel and start again. In the display notebook, users can choose :guilabel:`Single` view (one channel at a time) or :guilabel:`Overlay` view (multichannel composite) without changing acquisition order.
 
 ----------------
 
@@ -51,6 +51,8 @@ Z-Stack Acquisition
 -------------------
 
 This takes an image stack over the range and at the step size defined by the :ref:`stack acquisition settings <ui_stack_settings>` and optionally saves the stack to a file. The color channels will appear as in "Continuous Scan" and "Single Acquisition" if :guilabel:`Laser Cycling Settings` is set to "Per Z" in the stack acquisition settings. A single z-stack will be taken for each color channel, one channel at a time, if :guilabel:`Laser Cycling Settings` is set to "Per Stack".
+
+If the microscope exposes multiple stages that can move along the Z direction, :guilabel:`Z-Stack Device` in the stack acquisition settings selects the primary Z-stack stage. This primary stage is the one that receives the Z-stack start, end, and step-size moves. The selected :guilabel:`Focus Device` can be ramped with it to maintain focus, and any secondary stack stages with enabled offsets follow the primary Z-stack position plus their configured offsets.
 
 Z-Stack acquisition is implemented as the feature list below.
 

@@ -183,6 +183,7 @@ class TestConfiguration(unittest.TestCase):
             "hardware",
             "sample_rate",
             "sweep_time",
+            "trigger_reset_count",
             "master_trigger_out_line",
             "camera_trigger_out_line",
             "trigger_source",

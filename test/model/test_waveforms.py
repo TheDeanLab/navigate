@@ -232,3 +232,24 @@ class TestWaveforms(unittest.TestCase):
             sample_rate=sr, sweep_time=st, exposure=ex, camera_delay=cd
         )
         assert np.sum(v > 0) == int(sr * (ex - cd))
+
+    def test_quadratic_waveform_edges(self):
+        sr, st, ex = 10000, 0.1, 0.04
+        amp, off = 2.0, 0.5
+        v = waveforms.quadratic(
+            sample_rate=sr, sweep_time=st, exposure=ex, amplitude=amp, offset=off
+        )
+        assert len(v) == int(sr * st)
+        assert np.isclose(np.max(v), amp + off)
+        assert np.isclose(np.min(v), off)
+
+    def test_centered_cubic_start_end(self):
+        sr, st, ex = 10000, 0.1, 0.04
+        amp, off = 1.2, -0.3
+        v = waveforms.centered_cubic(
+            sample_rate=sr, sweep_time=st, exposure=ex, amplitude=amp, offset=off
+        )
+        exposure_samples = int(sr * ex)
+        active = v[:exposure_samples]
+        assert np.isclose(active[0], amp)
+        assert np.isclose(active[-1], off)

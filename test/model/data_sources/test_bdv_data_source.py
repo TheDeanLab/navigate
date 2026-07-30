@@ -1,4 +1,5 @@
 import os
+import xml.etree.ElementTree as ET
 
 import pytest
 import numpy as np
@@ -23,7 +24,16 @@ def recurse_dtype(group):
             print("Unknown how to handle:", key, subgroup_type)
 
 
-def bdv_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
+def bdv_ds(
+    fn,
+    multiposition,
+    per_stack,
+    z_stack,
+    stop_early,
+    size,
+    z_steps=2,
+    timepoints=2,
+):
     from test.model.dummy import DummyModel
     from navigate.model.data_sources.bdv_data_source import BigDataViewerDataSource
 
@@ -32,10 +42,10 @@ def bdv_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
         f"z_stack: {z_stack} stop_early: {stop_early}"
     )
 
-    # Set up model with a random number of z-steps to modulate the shape
+    # Set up model with explicit dimensions so test outcomes do not depend on
+    # random shape choices.
     model = DummyModel()
-    z_steps = np.random.randint(1, 3)
-    timepoints = np.random.randint(1, 3)
+    rng = np.random.default_rng(0)
 
     x_size, y_size = size
     model.configuration["experiment"]["CameraParameters"]["x_pixels"] = x_size
@@ -88,12 +98,12 @@ def bdv_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
         f"x: {ds.shape_x} y: {ds.shape_y} z: {ds.shape_z} c: {ds.shape_c} "
         f"t: {ds.shape_t} positions: {ds.positions} per_stack: {ds.metadata.per_stack}"
     )
-    data = (np.random.rand(n_images, ds.shape_y, ds.shape_x) * 2**16).astype("uint16")
+    data = (rng.random((n_images, ds.shape_y, ds.shape_x)) * 2**16).astype("uint16")
     dbytes = np.sum(
         ds.shapes.prod(1) * ds.shape_t * ds.shape_c * ds.positions * 2
     )  # 2 bytes per pixel (16-bit)
     assert dbytes == ds.nbytes
-    data_positions = (np.random.rand(n_images, 5) * 50e3).astype(float)
+    data_positions = (rng.random((n_images, 5)) * 50e3).astype(float)
     for i in range(n_images):
         ds.write(
             data[i, ...].squeeze(),
@@ -103,7 +113,7 @@ def bdv_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
             theta=data_positions[i, 3],
             f=data_positions[i, 4],
         )
-        if stop_early and np.random.rand() > 0.5:
+        if stop_early and i >= max(0, n_images // 2 - 1):
             break
 
     return ds
@@ -127,6 +137,66 @@ def close_bdv_ds(ds, file_name=None):
     except PermissionError:
         # Windows seems to think these files are still open
         pass
+
+
+def dynamic_setup_values(file_name, ext):
+    with h5py.File(file_name, "r") as image:
+        return [
+            int(image[f"t00000/s{setup_id:02}/0/cells"][0, 0, 0])
+            for setup_id in range(4)
+        ]
+
+
+@pytest.mark.parametrize("ext", ["h5", "n5"])
+def test_bdv_dynamic_position_growth_preserves_setup_mapping(tmp_path, ext):
+    from navigate.model.data_sources.bdv_data_source import BigDataViewerDataSource
+
+    file_name = tmp_path / f"dynamic.{ext}"
+    ds = BigDataViewerDataSource(str(file_name))
+    ds.set_metadata({"c": 2, "z": 1, "t": 1, "p": 1, "is_dynamic": True})
+
+    for value, x_position in [(10, 0), (20, 0), (30, 100), (40, 100)]:
+        ds.write(
+            np.array([[value]], dtype="uint16"),
+            x=x_position,
+            y=0,
+            z=0,
+            theta=0,
+            f=0,
+        )
+    ds.close()
+
+    if ext == "h5":
+        assert dynamic_setup_values(str(file_name), ext) == [10, 20, 30, 40]
+    else:
+        assert all(
+            (
+                file_name
+                / f"setup{setup_id}"
+                / "timepoint0"
+                / "s0"
+                / "0"
+                / "0"
+                / "0"
+            ).is_file()
+            for setup_id in range(4)
+        )
+
+    root = ET.parse(file_name.with_suffix(".xml")).getroot()
+    view_setups = {
+        int(setup.findtext("id")): (
+            int(setup.findtext("attributes/channel")),
+            int(setup.findtext("attributes/tile")),
+        )
+        for setup in root.findall("./SequenceDescription/ViewSetups/ViewSetup")
+    }
+    assert view_setups == {0: (0, 0), 1: (1, 0), 2: (0, 1), 3: (1, 1)}
+
+    registrations = {
+        int(registration.attrib["setup"])
+        for registration in root.findall("./ViewRegistrations/ViewRegistration")
+    }
+    assert registrations == {0, 1, 2, 3}
 
 
 @pytest.mark.parametrize("multiposition", [True, False])

@@ -32,14 +32,13 @@
 
 # Standard Library Imports
 import logging
-import os
 from typing import Optional
 
 # Third Party Imports
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
-from navigate.config.config import update_config_dict, get_navigate_path
+from navigate.config.config import update_config_dict
 from navigate.tools.file_functions import write_to_yaml
 from navigate.controller.configuration_controller import ConfigurationController
 
@@ -134,7 +133,7 @@ class AdvancedCameraSettingController:
         # Save the updated configuration to a YAML file.
         write_to_yaml(
             content_dict=self.parent_controller.configuration["configuration"],
-            filename=os.path.join(get_navigate_path(), "config", "configuration.yaml"),
+            filename=self.parent_controller.configuration_path,
         )
 
         # Update the configuration controller with the new configuration.
@@ -360,9 +359,6 @@ class CameraSettingController(GUIController):
 
         #: str: Mode value
         self.mode = "stop"
-
-        #: str: Solvent type
-        self.solvent = "BABB"
 
         # Getting Widgets/Buttons
 
@@ -625,6 +621,13 @@ class CameraSettingController(GUIController):
 
         self.roi_widgets["Width"].set(x_pixels)
         self.roi_widgets["Height"].set(y_pixels)
+        if self.calculate_physical_dimensions() is False:
+            return (
+                "Image physical dimensions could not be calculated from the "
+                "current microscope configuration.\n\n"
+                "Please verify that the zoom value and pixel size are "
+                "configured correctly in the configuration YAML."
+            )
         self.camera_setting_dict["fov_x"] = self.roi_widgets["FOV_X"].get()
         self.camera_setting_dict["fov_y"] = self.roi_widgets["FOV_Y"].get()
 
@@ -670,9 +673,9 @@ class CameraSettingController(GUIController):
                 self.camera_setting_dict["readout_direction"]
                 not in self.camera_readout_directions
             ):
-                self.camera_setting_dict["readout_direction"] = (
-                    self.camera_readout_directions[0]
-                )
+                self.camera_setting_dict[
+                    "readout_direction"
+                ] = self.camera_readout_directions[0]
             self.mode_widgets["Readout"].widget.set(
                 self.camera_setting_dict["readout_direction"]
             )
@@ -839,35 +842,63 @@ class CameraSettingController(GUIController):
         system, the physical size of the pixel, and the number of pixels.
         update FOV_X and FOV_Y
 
-        TODO: Should make sure that this is updated before we run the tiling wizard.
-        Also can probably be done more elegantly in a configuration file and
-        dictionary structure.
+        Returns
+        -------
+        bool
+            True if the calculation is successful.
         """
-
-        # pixel_size = self.default_pixel_size
         try:
             x_pixel = float(self.roi_widgets["Width"].get())
             y_pixel = float(self.roi_widgets["Height"].get())
         except ValueError:
-            return
+            return False
 
         microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
         ]
         zoom = microscope_state_dict["zoom"]
-        # TODO: calculate fov_x and fov_y for additional microscopes
         if self.microscope_name:
-            return
-        microscope_name = microscope_state_dict["microscope_name"]
-        pixel_size = self.parent_controller.configuration["configuration"][
-            "microscopes"
-        ][microscope_name]["zoom"]["pixel_size"][zoom]
+            # Set the zoom value and save the pixel size to the camera settings when enabling the additional microscope for acquisition.
+            try:
+                pixel_size = float(self.camera_setting_dict["pixel_size"])
+            except (KeyError, ValueError):
+                logger.warning(
+                    f"Invalid pixel size configured for microscope "
+                    f"'{self.microscope_name}' at zoom '{zoom}' in the "
+                    "configuration YAML."
+                )
+                return False
+
+        else:
+            microscope_name = microscope_state_dict["microscope_name"]
+            try:
+                pixel_size = float(
+                    self.parent_controller.configuration["configuration"][
+                        "microscopes"
+                    ][microscope_name]["zoom"]["pixel_size"][zoom]
+                )
+            except KeyError:
+                logger.warning(
+                    f"No pixel size is configured for microscope "
+                    f"'{microscope_name}' at zoom '{zoom}' in the configuration YAML."
+                )
+                return False
+            except ValueError:
+                logger.warning(
+                    f"Invalid pixel size configured for microscope "
+                    f"'{microscope_name}' at zoom '{zoom}' in the "
+                    "configuration YAML."
+                )
+                return False
 
         physical_dimensions_x = x_pixel * pixel_size
         physical_dimensions_y = y_pixel * pixel_size
 
+        # Updating these widget values automatically syncs them with the Tiling Wizard.
         self.roi_widgets["FOV_X"].set(physical_dimensions_x)
         self.roi_widgets["FOV_Y"].set(physical_dimensions_y)
+
+        return True
 
     def update_readout_time(self):
         """Update camera readout time.

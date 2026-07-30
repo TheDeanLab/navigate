@@ -38,6 +38,7 @@ from tkinter import ttk
 # Third Party Imports
 
 # Local Imports
+from navigate.view.theme import get_theme_space_px
 from navigate.view.theme import get_theme_color, get_theme_font
 
 # Logger Setup
@@ -230,7 +231,7 @@ class Hover(object):
             borderwidth=1,
             font=font,
         )
-        label.pack(ipadx=1)
+        label.pack(ipadx=get_theme_space_px(1))
 
     def seterror(self, text):
         """Setter for the error message

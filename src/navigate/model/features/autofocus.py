@@ -84,7 +84,16 @@ class Autofocus:
     move to. If the autofocus_pos_queue is empty, the autofocus is finished.
     """
 
-    def __init__(self, model, device="stage", device_ref="f"):
+    def __init__(
+        self,
+        model,
+        device="stage",
+        device_ref="f",
+        target_channel=None,
+        calibration_action=None,
+        reference_channel=None,
+        set_defocus_for_all_flag=False,
+    ):
         """Initialize the Autofocus class.
 
         Parameters
@@ -95,6 +104,8 @@ class Autofocus:
             Device name
         device_ref : str
             Device reference
+        set_defocus_for_all_flag : bool
+            Flag to set defocus for all channels
         """
         #: Model: Model object
         self.model = model
@@ -150,8 +161,17 @@ class Autofocus:
         #: Queue: Autofocus position queue
         self.autofocus_pos_queue = Queue()
 
-        #: int: Target channel
-        self.target_channel = 1
+        #: str: Target channel key
+        self.target_channel = target_channel
+
+        #: str: Optional calibration action
+        self.calibration_action = calibration_action
+
+        #: str: Optional reference channel key
+        self.reference_channel = reference_channel
+
+        #: bool: Flag to set defocus for all channels
+        self.set_defocus_for_all_flag = set_defocus_for_all_flag
 
         #: dict: Configuration table
         self.config_table = {
@@ -188,22 +208,41 @@ class Autofocus:
 
         # Opens correct shutter and puts all signals to false
         self.model.prepare_acquisition()
-        self.model.active_microscope.prepare_next_channel()
 
         # load Autofocus
+        autofocus_node = {
+            "name": Autofocus,
+            "args": (
+                self.device,
+                self.device_ref,
+                self.target_channel,
+                self.calibration_action,
+                self.reference_channel,
+            ),
+        }
+
+        feature_list = [autofocus_node]
+
+        if self.calibration_action == "capture_reference" and self.set_defocus_for_all_flag:
+            for channel_id in self.model.active_microscope.available_channels:
+                channel_key = f"channel_{channel_id}"
+                if channel_key != self.reference_channel:
+                    feature_list.append(
+                        {
+                            "name": Autofocus,
+                            "args": (
+                                self.device,
+                                self.device_ref,
+                                channel_key,
+                                "populate_defocus",
+                                self.reference_channel,
+                            ),
+                        }
+                    )
+
         self.model.signal_container, self.model.data_container = load_features(
             self.model,
-            [
-                [
-                    {
-                        "name": Autofocus,
-                        "args": (
-                            self.device,
-                            self.device_ref,
-                        ),
-                    }
-                ]
-            ],
+            feature_list
         )
 
         self.model.signal_thread = threading.Thread(
@@ -213,7 +252,7 @@ class Autofocus:
 
         self.model.data_thread = threading.Thread(
             target=self.model.run_data_process,
-            args=(frame_num + 1,),
+            args=((frame_num + 1)*len(feature_list),),
             name="Autofocus Data",
         )
 
@@ -265,8 +304,17 @@ class Autofocus:
         pos_offset = (steps // 2) * step_size + step_size
         return steps, pos_offset
 
+    def prepare_selected_channel(self):
+        """Prepare the requested autofocus channel or advance to the next channel."""
+        if self.target_channel:
+            self.model.active_microscope.prepare_channel(self.target_channel)
+        else:
+            self.model.active_microscope.prepare_next_channel()
+
     def pre_func_signal(self):
         """Prepare the autofocus routine."""
+        self.prepare_selected_channel()
+
         settings = self.model.configuration["experiment"]["AutoFocusParameters"][
             self.model.active_microscope_name
         ][self.device][self.device_ref]
@@ -537,6 +585,22 @@ class Autofocus:
                 remote_focus_constants[laser]["offset"] = (
                     float(remote_focus_constants[laser]["offset"]) + self.focus_pos
                 )
+
+        if self.target_channel:
+            self.model.event_queue.put(
+                (
+                    "autofocus_complete",
+                    {
+                        "channel": self.target_channel,
+                        "focus_position": self.focus_pos,
+                        "device": self.device,
+                        "device_ref": self.device_ref,
+                        "calibration_action": self.calibration_action,
+                        "reference_channel": self.reference_channel,
+                        "set_defocus_for_all_flag": self.set_defocus_for_all_flag,
+                    },
+                )
+            )
 
         return self.get_frames_num > self.total_frame_num
 

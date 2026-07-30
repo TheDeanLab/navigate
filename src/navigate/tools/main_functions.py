@@ -99,18 +99,18 @@ def evaluate_parser_input_arguments(args):
         configuration_path = args.config_file
 
     if args.experiment_file:
-        assert (
-            args.experiment_file.exists()
-        ), "experiment_file file Path {} not valid".format(args.experiment_file)
+        assert args.experiment_file.exists(), (
+            "experiment_file file Path {} not valid".format(args.experiment_file)
+        )
         experiment_path = args.experiment_file
 
     if args.waveform_constants_file:
-        assert (
-            args.waveform_constants_path.exists()
-        ), "waveform_constants_path Path {} not valid".format(
-            args.waveform_constants_path
+        assert args.waveform_constants_file.exists(), (
+            "waveform_constants_file Path {} not valid".format(
+                args.waveform_constants_file
+            )
         )
-        waveform_constants_path = args.waveform_constants_path
+        waveform_constants_path = args.waveform_constants_file
 
     if args.rest_api_file:
         assert args.rest_api_file.exists(), "rest_api_file Path {} not valid".format(
@@ -119,21 +119,21 @@ def evaluate_parser_input_arguments(args):
         rest_api_path = args.rest_api_file
 
     if args.waveform_templates_file:
-        assert (
-            args.waveform_templates_file.exists()
-        ), "waveform_templates Path {} not valid".format(args.waveform_templates_file)
+        assert args.waveform_templates_file.exists(), (
+            "waveform_templates Path {} not valid".format(args.waveform_templates_file)
+        )
         waveform_templates_path = args.waveform_templates_file
 
     if args.gui_config_file:
-        assert (
-            args.gui_config_file.exists()
-        ), "gui_configuration Path {} not valid".format(args.gui_config_file)
+        assert args.gui_config_file.exists(), (
+            "gui_configuration Path {} not valid".format(args.gui_config_file)
+        )
         gui_configuration_path = args.gui_config_file
 
     if args.multi_positions_file:
-        assert (
-            args.multi_positions_file.exists()
-        ), "multi_positions Path {} not valid".format(args.multi_positions_file)
+        assert args.multi_positions_file.exists(), (
+            "multi_positions Path {} not valid".format(args.multi_positions_file)
+        )
         multi_positions_path = args.multi_positions_file
 
     # Creating Loggers etc., they exist globally so no need to pass
@@ -177,7 +177,7 @@ def create_parser() -> argparse.ArgumentParser:
         required=False,
         default=False,
         action="store_true",
-        help="Configurator - " "GUI for preparing a configuration.yaml file..",
+        help="Configurator - GUI for preparing a configuration.yaml file..",
     )
 
     input_args.add_argument(

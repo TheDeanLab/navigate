@@ -176,7 +176,7 @@ def test_bdv_xml_dict(dummy_model, stack_cycling_mode):
                         # assert view id
                         view_id = view_registrations[i]["setup"]
                         if ch > 1:
-                            assert view_id == ((i % ch) * pos + (i // ch))
+                            assert view_id == i % (pos * ch)
                         # assert affine position consistency between channels
                         if i % ch == 0:
                             affine = view_registrations[i]["ViewTransform"][0]["affine"]["text"]

@@ -154,6 +154,10 @@ MFC2000
 MS2000
 ~~~~~~~
 
+.. note::
+
+    On Windows, **navigate** configures serial buffer sizes for MS2000
+    communication. On Linux/macOS this tuning step is skipped for compatibility.
 
 .. collapse:: Configuration File
 
@@ -301,6 +305,20 @@ These stages are controlled by `PI <https://www.pi-usa.us/en/>`_'s own
     `here <https://www.pi-usa.us/en/products/controllers-drivers-motion-control-software/motion-control-software>`_.
     Stage names (e.g. ``L-509.20DG10``) can also be found in PIMikroMove or on a label on the side of your stage.
 
+.. note::
+    PI stages require the ``stages`` entry in the ``hardware`` section of
+    ``configuration.yaml``. This entry specifies the stage motor name
+    assigned to each controller axis. Stage motor names (for example,
+    ``L-509.20DG10``) can be found in PI software.
+    The stage motor names must be listed in the same order as the axes
+    reported by PI software: the first stage motor name corresponds to axis
+    1, the second to axis 2, the third to axis 3, and so on.
+    For example, if PI software reports axis 1 = ``L-509.20DG10``, axis 2 =
+    ``L-509.40DG10``, and axis 3 = ``M-060.DG``, then the ``stages`` entry
+    should begin as:
+    ``L-509.20DG10 L-509.40DG10 M-060.DG``
+
+
 -----------------
 
 C-884
@@ -425,7 +443,7 @@ positioning.
             stage:
               hardware:
                 -
-                  type: Thorlabs
+                  type: KIM001
                   serial_number: 74000375
                   axes: [f]
                   axes_mapping: [1]
@@ -491,6 +509,69 @@ KST101
                   port:
                   baudrate:
                   timeout:
+              joystick_axes: [f]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
+              theta_min: 0.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
+
+|
+
+-----------------
+
+KINESIS (Serial)
+~~~~~~~~~~~~~~~~
+
+This mode supports Thorlabs Kinesis stepper communication through
+``pylablib`` using a serial device path (for example ``/dev/ttyUSB1`` on Linux).
+
+Install the optional KINESIS dependency extra before using this stage:
+
+.. code-block:: bash
+
+    pip install "navigate-micro[kinesis]"
+
+.. note::
+
+    ``steps_per_um`` is the preferred scale parameter for KINESIS stages.
+    If omitted, **navigate** falls back to ``device_units_per_mm``.
+
+.. note::
+
+    The current KINESIS implementation assumes a single Kinesis stage connected
+    through one serial device path.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+            stage:
+              hardware:
+                -
+                  type: KINESIS
+                  serial_number: /dev/ttyUSB1
+                  axes: [f]
+                  axes_mapping: [1]
+                  steps_per_um: 2008.623
+                  min: 0
+                  max: 25
               joystick_axes: [f]
               x_min: -10000.0
               x_max: 10000.0

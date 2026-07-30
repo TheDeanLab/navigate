@@ -53,7 +53,7 @@ but also the software implementation within **navigate**.
 
 Information on setting up one particular ASI setup can be found in the
 `Altair getting started guide <https://thedeanlab.github.io/altair/getting_started/getting_started.html>`_.
-This is the recommended setup for `Altair <https://thedeanlab.github.io/altair/index.html>`_, a microscope designed by the Dean Lab for dissemination purposes.
+This is the recommended setup for `Altair <https://thedeanlab.github.io/altair/index.html>`_, a microscope designed by the Dean Lab for dissemination purposes. A diagram and discussion on how the logic is implemented in **navigate** can be found :ref:`here <asi_logic>`.
 
 
 ------------------
@@ -112,6 +112,11 @@ Manager as a **NI Data Acquisition Device**.
 - Connect the ``camera_trigger_out_line`` to the ``Ext. Trigger`` on the camera using
   the ``CTR0Out`` pin.
 
+- DAQ self-reset is disabled by default. Leave ``trigger_reset_count`` unset,
+  or set it to ``0``, unless the system has DAQ instability during long
+  acquisitions. For affected systems, set a positive trigger count and adjust
+  the value for the microscope computer.
+
 - These values must precisely match those in the configuration file. An example is provided below:
 
 
@@ -125,6 +130,7 @@ Manager as a **NI Data Acquisition Device**.
               hardware:
                 type: NI
               sample_rate: 10000
+              trigger_reset_count: 0
               master_trigger_out_line: PXI6259/port0/line1
               camera_trigger_out_line: /PXI6259/ctr0
               trigger_source: /PXI6259/PFIO

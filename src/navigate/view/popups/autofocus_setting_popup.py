@@ -138,6 +138,51 @@ class AutofocusPopup:
             sticky=tk.W,
         )
 
+        self.inputs["target_channel"] = LabelInput(
+            parent=device_frame,
+            label="Channel:",
+            input_class=ttk.Combobox,
+            input_var=tk.StringVar(),
+            input_args={"width": 20, "state": "readonly"},
+            label_args={"padding": (0, 0, 10, 0)},
+        )
+        self.inputs["target_channel"].grid(
+            row=1,
+            column=0,
+            pady=get_theme_space_px(6),
+            padx=get_theme_space_px(10),
+            sticky=tk.W,
+        )
+
+        self.inputs["calibration_action"] = LabelInput(
+            parent=device_frame,
+            label="Calibration:",
+            input_class=ttk.Combobox,
+            input_var=tk.StringVar(),
+            input_args={
+                "width": 20,
+                "state": "readonly",
+                "values": ("Regular", "Capture Reference", "Populate Defocus"),
+            },
+            label_args={"padding": (0, 0, 10, 0)},
+        )
+        self.inputs["calibration_action"].grid(
+            row=1,
+            column=1,
+            pady=get_theme_space_px(6),
+            padx=get_theme_space_px(10),
+            sticky=tk.W,
+        )
+
+        self.reference_status_var = tk.StringVar(value="Reference: none")
+        ttk.Label(device_frame, textvariable=self.reference_status_var).grid(
+            row=1,
+            column=2,
+            pady=get_theme_space_px(6),
+            padx=get_theme_space_px(10),
+            sticky=tk.W,
+        )
+
         # Section 2.
         scan_frame = ttk.Labelframe(
             content_frame,

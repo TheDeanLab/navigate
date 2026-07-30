@@ -50,6 +50,20 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+THETA_MOVE_EPSILON = 1e-9
+
+
+def stage_move_requires_pause(
+    delta_distances: list[float],
+    stage_distance_threshold: float,
+    theta_delta: float = 0.0,
+) -> bool:
+    """Return True when a stage move should pause camera frame reads."""
+    return any(abs(distance) > stage_distance_threshold for distance in delta_distances) or (
+        abs(theta_delta) > THETA_MOVE_EPSILON
+    )
+
+
 class Snap:
     """Snap class for capturing data frames using a microscope.
 
@@ -898,8 +912,13 @@ class MoveToNextPositionInMultiPositionTable:
         delta_distances = [
             abs(pos_dict[axis] - pre_stage_pos[axis]) for axis in self.stage_axes
         ]
-        should_pause_data_thread = any(
-            distance > self.stage_distance_threshold for distance in delta_distances
+        theta_delta = 0.0
+        if "theta" in pos_dict and "theta" in pre_stage_pos:
+            theta_delta = pos_dict["theta"] - pre_stage_pos["theta"]
+        should_pause_data_thread = stage_move_requires_pause(
+            delta_distances,
+            self.stage_distance_threshold,
+            theta_delta,
         )
         if should_pause_data_thread:
             self.model.pause_data_thread()
@@ -1138,6 +1157,9 @@ class ZStackAcquisition:
         #: dict: A dictionary defining the defocus values between channels
         self.defocus = None
 
+        #: float: Defocus of the first selected channel in the stack.
+        self.first_channel_defocus = 0.0
+
         #: str: The stack cycling mode for z-stack acquisition.
         self.stack_cycling_mode = "per_stack"
 
@@ -1248,6 +1270,17 @@ class ZStackAcquisition:
         self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
         self.f_stack_distance = abs(end_focus - self.start_focus)
 
+    def _focus_target_for_channel(self, channel_index: int) -> float:
+        """Return the absolute focus target for a channel at the current stack step."""
+        defocus = self.defocus[channel_index] if self.defocus is not None else 0.0
+        zero_defocus_start_focus = self.start_focus - self.first_channel_defocus
+        return (
+            zero_defocus_start_focus
+            + self.current_position[self.primary_f_axis]
+            + self.z_position_moved_time * self.focus_step_size
+            + defocus
+        )
+
     def pre_signal_func(self) -> None:
         """Initialize z-stack acquisition parameters before the signal stage.
 
@@ -1261,8 +1294,11 @@ class ZStackAcquisition:
 
         # restore z, f
         pos_dict = self.model.get_stage_position()
-        self.restore_z = pos_dict["z_pos"]
-        self.restore_f = pos_dict["f_pos"]
+        self.restore_z = pos_dict[f"{self.primary_z_axis}_pos"]
+        self.restore_f = pos_dict[f"{self.primary_f_axis}_pos"]
+        self.pre_position = {
+            axis: float(pos_dict[f"{axis}_pos"]) for axis in self.stage_axes
+        }
 
         # position: x, y, z, theta, f
         # If multiposition, get the header to know which stage is which, and then
@@ -1320,10 +1356,11 @@ class ZStackAcquisition:
         self.should_pause_data_thread = False
 
         self.defocus = [
-            v["defocus"]
+            float(v["defocus"])
             for v in microscope_state["channels"].values()
             if v["is_selected"]
         ]
+        self.first_channel_defocus = self.defocus[0] if self.defocus else 0.0
 
     def signal_func(self):
         """Control z-stack acquisition, move positions, and manage data threads.
@@ -1346,7 +1383,8 @@ class ZStackAcquisition:
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
-            self.pre_position = self.current_position
+            if self.current_position_idx > 0:
+                self.pre_position = self.current_position
             self.current_position = dict(
                 zip(
                     self.stage_axes,
@@ -1361,13 +1399,9 @@ class ZStackAcquisition:
             self.current_z_position = (
                 self.start_z_position + self.current_position[self.primary_z_axis]
             )
-            self.current_focus_position = (
-                self.start_focus + self.current_position[self.primary_f_axis]
+            self.current_focus_position = self._focus_target_for_channel(
+                self.current_channel_in_list
             )
-            if self.defocus is not None:
-                self.current_focus_position += self.defocus[
-                    self.current_channel_in_list
-                ]
 
             pos_dict = dict(
                 map(
@@ -1409,8 +1443,15 @@ class ZStackAcquisition:
             # self.model.resume_data_thread() after the stage has completed the move
             # to the next position.
 
-            self.should_pause_data_thread = any(
-                distance > self.stage_distance_threshold for distance in delta_distances
+            theta_delta = 0.0
+            if "theta" in self.tiling_axes and self.pre_position is not None:
+                theta_delta = self.current_position["theta"] - self.pre_position.get(
+                    "theta", self.current_position["theta"]
+                )
+            self.should_pause_data_thread = stage_move_requires_pause(
+                delta_distances,
+                self.stage_distance_threshold,
+                theta_delta,
             )
             if self.should_pause_data_thread:
                 self.model.pause_data_thread()
@@ -1472,22 +1513,26 @@ class ZStackAcquisition:
 
         if self.stack_cycling_mode != "per_stack":
             # update the channel for each z position in 'per_slice'
-            if self.defocus is not None:
-                self.current_focus_position -= self.defocus[
-                    self.current_channel_in_list
-                ]
             self.update_channel()
+            self.current_focus_position = self._focus_target_for_channel(
+                self.current_channel_in_list
+            )
             self.need_to_move_z_position = self.current_channel_in_list == 0
 
         # in 'per_slice', move to the next z position if all the channels have been
         # acquired
         if self.need_to_move_z_position:
             # next z, f position
-            self.current_z_position += self.z_step_size
-            self.current_focus_position += self.focus_step_size
-
             # update z position moved time
             self.z_position_moved_time += 1
+            self.current_z_position = (
+                self.start_z_position
+                + self.current_position[self.primary_z_axis]
+                + self.z_position_moved_time * self.z_step_size
+            )
+            self.current_focus_position = self._focus_target_for_channel(
+                self.current_channel_in_list
+            )
 
         # decide whether to move X, Y, Theta
         if self.z_position_moved_time >= self.number_z_steps:
@@ -1496,8 +1541,8 @@ class ZStackAcquisition:
             self.current_z_position = (
                 self.start_z_position + self.current_position[self.primary_z_axis]
             )
-            self.current_focus_position = (
-                self.start_focus + self.current_position[self.primary_f_axis]
+            self.current_focus_position = self._focus_target_for_channel(
+                self.current_channel_in_list
             )
             if (
                 self.z_stack_distance > self.stage_distance_threshold
@@ -1508,6 +1553,9 @@ class ZStackAcquisition:
             # after running through a z-stack, update channel
             if self.stack_cycling_mode == "per_stack":
                 self.update_channel()
+                self.current_focus_position = self._focus_target_for_channel(
+                    self.current_channel_in_list
+                )
                 # if run through all the channels, move to the next position
                 if self.current_channel_in_list == 0:
                     self.need_to_move_new_position = True
@@ -1551,8 +1599,6 @@ class ZStackAcquisition:
         ) % self.channels
         # not update DAQ tasks if there is a NI Galvo stage
         self.prepare_next_channel.signal_func()
-        if self.defocus is not None:
-            self.current_focus_position += self.defocus[self.current_channel_in_list]
 
     def pre_data_func(self) -> None:
         """Initialize data-related parameters before data acquisition.
@@ -1672,7 +1718,8 @@ class ASIZStackAcquisition(ZStackAcquisition):
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
-            self.pre_position = self.current_position
+            if self.current_position_idx > 0:
+                self.pre_position = self.current_position
             self.current_position = dict(
                 zip(
                     self.stage_axes,
@@ -1698,11 +1745,9 @@ class ASIZStackAcquisition(ZStackAcquisition):
         self.current_z_position = (
             self.start_z_position + self.current_position[self.primary_z_axis]
         )
-        self.current_focus_position = (
-            self.start_focus + self.current_position[self.primary_f_axis]
+        self.current_focus_position = self._focus_target_for_channel(
+            self.current_channel_in_list
         )
-        if self.defocus is not None:
-            self.current_focus_position += self.defocus[self.current_channel_in_list]
         logger.info("self.start_z_position: %.2f", self.start_z_position)
         logger.info("self.current_z_position: %.2f", self.current_z_position)
 
@@ -1733,8 +1778,15 @@ class ASIZStackAcquisition(ZStackAcquisition):
         # if it is too far, then we can call self.model.pause_data_thread() and
         # self.model.resume_data_thread() after the stage has completed the move
         # to the next position.
-        self.should_pause_data_thread = any(
-            distance > self.stage_distance_threshold for distance in delta_distances
+        theta_delta = 0.0
+        if "theta" in self.tiling_axes and self.pre_position is not None:
+            theta_delta = self.current_position["theta"] - self.pre_position.get(
+                "theta", self.current_position["theta"]
+            )
+        self.should_pause_data_thread = stage_move_requires_pause(
+            delta_distances,
+            self.stage_distance_threshold,
+            theta_delta,
         )
         if self.should_pause_data_thread:
             self.model.pause_data_thread()
@@ -1743,9 +1795,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         pos_dict[f"{self.primary_z_axis}_abs"] = (
             self.current_position[self.primary_z_axis] + self.start_z_position
         )
-        pos_dict[f"{self.primary_f_axis}_abs"] = (
-            self.current_position[self.primary_f_axis] + self.start_focus
-        )
+        pos_dict[f"{self.primary_f_axis}_abs"] = self.current_focus_position
 
         logger.info(
             "Current position - Z: %.2f", self.current_position[self.primary_z_axis]

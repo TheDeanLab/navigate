@@ -38,7 +38,13 @@ from abc import ABC, abstractmethod
 # Third Party Imports
 
 # Local Imports
-from navigate.model.waveforms import sawtooth, sine_wave
+from navigate.model.waveforms import (
+    centered_cubic,
+    quadratic,
+    sawtooth,
+    sine_wave,
+    single_pulse,
+)
 from navigate.tools.decorators import log_initialization
 
 # # Logger Setup
@@ -173,7 +179,6 @@ class GalvoBase(ABC):
 
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
-
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.
                 # Should Assert.
                 exposure_time = exposure_times[channel_key]
@@ -190,7 +195,7 @@ class GalvoBase(ABC):
                     factor_name = None
                     if galvo_factor == "channel":
                         factor_name = (
-                            f"Channel {channel_key[channel_key.index('_')+1:]}"
+                            f"Channel {channel_key[channel_key.index('_') + 1 :]}"
                         )
                     elif galvo_factor == "laser":
                         factor_name = channel["laser"]
@@ -220,6 +225,24 @@ class GalvoBase(ABC):
                         duty_cycle=galvo_rising_ramp,
                         phase=self.camera_delay,
                     )
+                elif self.galvo_waveform == "centered_cubic":
+                    self.waveform_dict[channel_key] = centered_cubic(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        exposure=exposure_time,
+                        delay=self.camera_delay,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                    )
+                elif self.galvo_waveform == "quadratic":
+                    self.waveform_dict[channel_key] = quadratic(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        exposure=exposure_time,
+                        delay=self.camera_delay,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                    )
                 elif self.galvo_waveform == "sine":
                     self.waveform_dict[channel_key] = sine_wave(
                         sample_rate=self.sample_rate,
@@ -229,6 +252,19 @@ class GalvoBase(ABC):
                         offset=galvo_offset,
                         phase=self.device_config["phase"],
                     )
+                elif self.galvo_waveform == "pulse":
+                    pulse_delay = 100 * self.camera_delay / self.sweep_time
+                    pulse_width = 100 - pulse_delay
+                    pulse_wave = single_pulse(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        pulse_width=pulse_width,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                        delay=pulse_delay,
+                    )
+                    pulse_wave[-1] = 0
+                    self.waveform_dict[channel_key] = pulse_wave
                 elif self.galvo_waveform == "halfsaw":
                     new_wave = sawtooth(
                         sample_rate=self.sample_rate,

@@ -22,7 +22,7 @@ classifiers = [
 requires-python = ">=3.9.7"
 dependencies = [
     'matplotlib-inline==0.1.3',
-    'PyYAML==6.0',
+    'PyYAML>=6.0',
     'pyserial==3.5',
     'PIPython==2.6.0.1',
     'nidaqmx',
@@ -49,6 +49,10 @@ navigate = "navigate.main:main"
 [project.optional-dependencies]
 photometrics = [
     "PyVCAM"
+    ]
+
+kinesis = [
+    "pylablib"
     ]
 
 dev = [
@@ -86,3 +90,6 @@ Source = "https://github.com/TheDeanLab/navigate"
 
 [tool.setuptools.dynamic]
 version = {file = "src/navigate/VERSION"}
+
+[tool.coverage.run]
+relative_files = true

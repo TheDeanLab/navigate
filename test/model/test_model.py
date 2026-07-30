@@ -33,8 +33,10 @@
 import random
 import pytest
 import os
+from types import SimpleNamespace
+from typing import Any, Iterable, Iterator, Optional
 from multiprocessing import Manager
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import multiprocessing
 
 # Third Party Imports
@@ -44,8 +46,35 @@ import multiprocessing
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
+def _receive_last_frame_id(show_img_pipe: Any, max_messages: int = 20) -> Optional[int]:
+    last_frame_id = None
+    for _ in range(max_messages):
+        message = show_img_pipe.recv()
+        if message == "stop":
+            break
+        if isinstance(message, int):
+            last_frame_id = message
+    return last_frame_id
+
+
+class FakeReadablePipe:
+    def __init__(self, messages: Iterable[Any]) -> None:
+        self.messages: Iterator[Any] = iter(messages)
+
+    def recv(self) -> Any:
+        return next(self.messages)
+
+
+def test_receive_last_frame_id_handles_coalesced_batches() -> None:
+    show_img_pipe = FakeReadablePipe([0, 2, "stop"])
+
+    assert _receive_last_frame_id(show_img_pipe) == 2
+
+
 @pytest.fixture(scope="module")
 def model():
+    from logging import NullHandler
+    from logging.handlers import QueueListener
     from types import SimpleNamespace
     from pathlib import Path
 
@@ -57,13 +86,17 @@ def model():
         verify_configuration,
         verify_positions_config,
     )
+    from navigate.log_files.log_functions import log_setup
     from navigate.tools.file_functions import load_yaml_file
 
     with Manager() as manager:
 
         # Use configuration files that ship with the code base
         configuration_directory = Path.joinpath(
-            Path(__file__).resolve().parent.parent.parent, "src", "navigate", "config"
+            Path(__file__).resolve().parent.parent.parent,
+            "src",
+            "navigate",
+            "config",
         )
         configuration_path = Path.joinpath(
             configuration_directory, "configuration.yaml"
@@ -94,22 +127,25 @@ def model():
         positions = verify_positions_config(positions)
         configuration["multi_positions"] = positions
 
-        queue = multiprocessing.Queue()
+        log_queue = multiprocessing.Queue()
+        log_listener = QueueListener(log_queue, NullHandler())
+        log_listener.start()
 
         model = Model(
             args=SimpleNamespace(synthetic_hardware=True),
             configuration=configuration,
             event_queue=event_queue,
-            log_queue=queue,
+            log_queue=log_queue,
         )
 
         model.__test_manager = manager
 
         yield model
-        while not queue.empty():
-            queue.get()
-        queue.close()
-        queue.join_thread()
+        # Restore file handlers before closing the queue-backed handlers.
+        log_setup("logging.yml")
+        log_listener.stop()
+        log_queue.close()
+        log_queue.join_thread()
 
 
 @pytest.mark.flaky(reruns=3, reruns_delay=2)
@@ -123,36 +159,92 @@ def test_single_acquisition(model):
     )
 
     show_img_pipe = model.create_pipe("show_img_pipe")
+    try:
+        model.run_command("acquire")
+        last_frame_id = _receive_last_frame_id(show_img_pipe)
+        assert last_frame_id == n_frames_expected - 1
+    finally:
+        if model.data_thread is not None:
+            model.data_thread.join()
+        model.release_pipe("show_img_pipe")
 
-    model.run_command("acquire")
 
-    # If three channel acquisitions happen quickly, the synthetic camera may return
-    # something like [0, 1, 2] in a single call, and only one pipe message is sent
-    # for that batch.
-    image_id = show_img_pipe.recv()
-    if isinstance(image_id, list):
-        n_framed_received = len(image_id)
-    else:
-        n_framed_received = image_id + 1
+def test_run_acquisition_marks_finite_signal_completion_for_data_thread():
+    from navigate.model.model import Model
 
-    # maximum of 20 iterations to avoid infinite loop in case of failure
-    max_iters = 20
-    while image_id != "stop" and max_iters > 0:
+    model = SimpleNamespace(
+        signal_container=SimpleNamespace(end_flag=False, is_closed=False),
+        stop_send_signal=False,
+        stop_acquisition=False,
+        imaging_mode="single",
+        is_data_thread_on=True,
+        logger=MagicMock(),
+    )
 
-        image_id = show_img_pipe.recv()
-        if image_id == "stop":
-            break
-        if isinstance(image_id, list):
-            n_framed_received += len(image_id)
-        else:
-            n_framed_received += 1
+    def snap_image():
+        model.signal_container.end_flag = True
 
-        # decrement iteration counter
-        max_iters -= 1
+    model.snap_image = snap_image
 
-    assert n_framed_received == n_frames_expected
-    model.data_thread.join()
-    model.release_pipe("show_img_pipe")
+    Model.run_acquisition(model)
+
+    assert model.stop_acquisition is True
+    assert model.signal_acquisition_complete is True
+
+
+def test_run_data_process_drains_pending_frames_after_signal_completion():
+    from navigate.model.model import Model
+
+    class FakeCamera:
+        def __init__(self):
+            self.frames = [[0, 1, 2]]
+
+        def get_new_frame(self):
+            return self.frames.pop(0)
+
+    class FakeDataContainer:
+        root = object()
+        is_closed = False
+
+        def __init__(self):
+            self.end_flag = False
+            self.received_frames = []
+
+        def run(self, frame_ids):
+            self.received_frames.extend(frame_ids)
+            self.end_flag = True
+
+    class FakePipe:
+        def __init__(self):
+            self.sent = []
+
+        def send(self, value):
+            self.sent.append(value)
+
+    data_container = FakeDataContainer()
+    show_img_pipe = FakePipe()
+    model = SimpleNamespace(
+        active_microscope=SimpleNamespace(camera=FakeCamera()),
+        ask_to_pause_data_thread=False,
+        camera_wait_iterations=1,
+        data_container=data_container,
+        event_queue=MagicMock(),
+        imaging_mode="single",
+        logger=MagicMock(),
+        pause_data_ready_lock=MagicMock(locked=MagicMock(return_value=False)),
+        show_img_pipe=show_img_pipe,
+        signal_acquisition_complete=True,
+        stop_acquisition=True,
+    )
+    model.end_acquisition = MagicMock()
+    model._should_drain_signal_completed_frames = (
+        Model._should_drain_signal_completed_frames.__get__(model, type(model))
+    )
+
+    Model.run_data_process(model)
+
+    assert data_container.received_frames == [0, 1, 2]
+    assert show_img_pipe.sent == [2, "stop"]
 
 
 def test_live_acquisition(model):
@@ -195,7 +287,6 @@ def test_autofocus_live_acquisition(model):
 
     n_images = 0
     seen_channels = set()
-    autofocus = False
 
     show_img_pipe = model.create_pipe("show_img_pipe")
 
@@ -210,16 +301,53 @@ def test_autofocus_live_acquisition(model):
         n_images += 1
         if n_images >= 100:
             model.run_command("stop")
-        elif n_images >= 70:
-            autofocus = False
         elif n_images == 30:
-            autofocus = True
             model.run_command("autofocus")
 
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
     if multi_channel:
         assert len(seen_channels) > 1
+
+
+def test_autofocus_live_injection_preserves_channel_args(model):
+    original_is_acquiring = model.is_acquiring
+    original_imaging_mode = model.imaging_mode
+    original_signal_container = getattr(model, "signal_container", None)
+    original_data_container = getattr(model, "data_container", None)
+    model.is_acquiring = True
+    model.imaging_mode = "live"
+    model.signal_container = MagicMock()
+    model.data_container = MagicMock()
+
+    try:
+        with patch(
+            "navigate.model.model.load_features",
+            return_value=(MagicMock(), MagicMock()),
+        ) as load_features:
+            model.run_command(
+                "autofocus",
+                "stage",
+                "f",
+                "channel_2",
+                "capture_reference",
+                "channel_2",
+            )
+
+        feature_spec = load_features.call_args.args[1]
+        assert feature_spec[0]["name"].__name__ == "Autofocus"
+        assert feature_spec[0]["args"] == (
+            "stage",
+            "f",
+            "channel_2",
+            "capture_reference",
+            "channel_2",
+        )
+    finally:
+        model.is_acquiring = original_is_acquiring
+        model.imaging_mode = original_imaging_mode
+        model.signal_container = original_signal_container
+        model.data_container = original_data_container
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")
@@ -422,27 +550,31 @@ def test_load_feature_list_from_str(model):
     del feature_lists[-1]
 
 
-def test_load_feature_records(model):
+def test_load_feature_records(model, tmp_path, monkeypatch):
     feature_lists = model.feature_list
     l = len(feature_lists)  # noqa
 
-    from navigate.config.config import get_navigate_path
     from navigate.tools.file_functions import save_yaml_file, load_yaml_file
     from navigate.model.features.feature_related_functions import (
         convert_feature_list_to_str,
     )
 
-    feature_lists_path = get_navigate_path() + "/feature_lists"
+    navigate_home = tmp_path / "navigate_home"
+    monkeypatch.setattr(
+        "navigate.model.model.get_navigate_path",
+        lambda: str(navigate_home),
+    )
+    feature_lists_path = navigate_home / "feature_lists"
 
     if not os.path.exists(feature_lists_path):
         os.makedirs(feature_lists_path)
 
-    feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+    feature_records = load_yaml_file(feature_lists_path / "__sequence.yml")
     if not feature_records:
         feature_records = []
 
     save_yaml_file(
-        feature_lists_path,
+        str(feature_lists_path),
         {
             "module_name": None,
             "feature_list_name": "Test Feature List 5",
@@ -460,10 +592,10 @@ def test_load_feature_records(model):
     )
 
     del feature_lists[-1]
-    os.remove(f"{feature_lists_path}/__test_1.yml")
+    os.remove(feature_lists_path / "__test_1.yml")
 
     model.load_feature_records()
     assert len(feature_lists) == l + len(feature_records) * 2
-    feature_records_2 = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+    feature_records_2 = load_yaml_file(feature_lists_path / "__sequence.yml")
     assert feature_records == feature_records_2
-    os.remove(f"{feature_lists_path}/__sequence.yml")
+    os.remove(feature_lists_path / "__sequence.yml")

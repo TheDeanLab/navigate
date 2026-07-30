@@ -117,6 +117,13 @@ daq_device_types = {
 daq_hardware_widgets = {
     "hardware/type": ["Device Type", "Combobox", "string", daq_device_types, None],
     "sample_rate": ["Sample Rate", "Input", "int", None, "Example: 100000"],
+    "trigger_reset_count": [
+        "Trigger Reset Count",
+        "Input",
+        "int",
+        None,
+        "Default: 0 (disabled). Use a positive value only for unstable systems.",
+    ],
     "master_trigger_out_line": [
         "Master Trigger Out",
         "Input",
@@ -182,6 +189,7 @@ stage_device_types = {
     "Sutter Instruments": ("MP285", "sutter"),
     "ThorLabs KCube Inertial Device KIM001": ("KIM001", "thorlabs"),
     "ThorLabs KCube Inertial Device KST101": ("KST101", "thorlabs"),
+    "ThorLabs Kinesis Stepper Motor (Serial)": ("KINESIS", "thorlabs"),
     "Virtual Device": ("Synthetic", "synthetic"),
 }
 
@@ -484,6 +492,7 @@ waveform_types = {
     "Sine": "sine",
     "Sawtooth": "sawtooth",
     "Square": "square",
+    "Pulse": "pulse",
 }
 
 galvo_hardware_widgets = {

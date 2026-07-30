@@ -14,6 +14,15 @@ National Instruments
 
 Multiple types of galvanometers have been used, including Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX. Each of these devices are externally controlled via analog signals delivered from an NI-based data acquisition card.
 
+For NI and synthetic galvos, the software supports the following waveform options:
+``sawtooth``, ``sine``, ``halfsaw``, ``quadratic``, ``centered_cubic``, and
+``pulse``.
+
+The ``pulse`` waveform is useful for resonant galvos and other devices that need
+a constant analog command during acquisition. It waits for the configured camera
+delay, holds the configured galvo amplitude through the acquisition window, and
+clears the final waveform sample to return the output low.
+
 .. collapse:: Configuration File
 
     .. code-block:: yaml
@@ -35,7 +44,7 @@ Multiple types of galvanometers have been used, including Cambridge Technologies
                   channel: PXI6259/ao1
                   min: -1.0
                   max: 1.0
-                waveform: square
+                waveform: pulse
                 phase: 0
 
 |
@@ -115,7 +124,7 @@ galvo.
                   channel: PXI6259/ao1
                   min: -1.0
                   max: 1.0
-                waveform: square
+                waveform: pulse
                 phase: 0
 
 |

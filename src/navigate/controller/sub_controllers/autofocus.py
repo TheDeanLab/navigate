@@ -51,6 +51,13 @@ logger = logging.getLogger(p)
 class AutofocusPopupController(GUIController):
     """Class creates the popup to configure autofocus parameters."""
 
+    CALIBRATION_ACTIONS = {
+        "Regular": None,
+        "Auto Defocus": "auto_defocus",
+        "Capture Reference": "capture_reference",
+        "Populate Defocus": "populate_defocus",
+    }
+
     def __init__(
         self,
         view: AutofocusPopup,
@@ -80,6 +87,10 @@ class AutofocusPopupController(GUIController):
 
         #: object: The autofocus coarse plot.
         self.autofocus_coarse = self.view.coarse
+
+        #: dict: Temporary reference focus for defocus calibration.
+        self.defocus_calibration_reference = None
+
         self.populate_experiment_values()
 
         #: object: The autofocus coarse plot.
@@ -98,6 +109,20 @@ class AutofocusPopupController(GUIController):
         )
         for k in self.view.setting_vars:
             self.view.setting_vars[k].trace_add("write", self.update_setting_dict(k))
+
+    @staticmethod
+    def _channel_key_to_label(channel_key: str) -> str:
+        """Convert an internal channel key to the GUI channel label."""
+        if channel_key.startswith("channel_"):
+            return f"CH{channel_key.removeprefix('channel_')}"
+        return channel_key
+
+    @staticmethod
+    def _channel_label_to_key(channel_label: str) -> str:
+        """Convert a GUI channel label to the internal channel key."""
+        if channel_label.startswith("CH") and channel_label[2:].isdigit():
+            return f"channel_{channel_label[2:]}"
+        return channel_label
 
     def close_popup(self, *_: tuple[str]) -> None:
         """Close the popup window
@@ -142,6 +167,24 @@ class AutofocusPopupController(GUIController):
         self.widgets["device_ref"].widget["values"] = setting_dict[device].keys()
         self.widgets["device_ref"].set(device_ref)
 
+        channels = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["channels"]
+        channel_keys = list(channels.keys())
+        selected_channel = next(
+            (channel for channel in channel_keys if channels[channel]["is_selected"]),
+            channel_keys[0] if channel_keys else "",
+        )
+        self.widgets["target_channel"].widget["values"] = tuple(
+            self._channel_key_to_label(channel) for channel in channel_keys
+        )
+        self.widgets["target_channel"].set(self._channel_key_to_label(selected_channel))
+        self.widgets["calibration_action"].widget["values"] = tuple(
+            self.CALIBRATION_ACTIONS.keys()
+        )
+        self.widgets["calibration_action"].set("Regular")
+        self._update_reference_status()
+
         for k in self.view.setting_vars:
             self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
 
@@ -179,7 +222,127 @@ class AutofocusPopupController(GUIController):
                 message=warning_message,
             )
             return
-        self.parent_controller.execute("autofocus", device, device_ref)
+        target_channel = self._channel_label_to_key(
+            self.widgets["target_channel"].widget.get()
+        )
+        # check if the target cahnnel is activated in channel settings
+        channels = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["channels"]
+        for channel_key, channel_settings in channels.items():
+            if channel_key == target_channel and not channel_settings["is_selected"]:
+                channel_name = f"CH{channel_key.removeprefix('channel_')}"
+                messagebox.showerror(
+                    title="Navigate",
+                    message=f"Please activate {channel_name} in channel settings before proceeding!",
+                )
+                return
+
+        action_label = self.widgets["calibration_action"].widget.get()
+        calibration_action = self.CALIBRATION_ACTIONS.get(action_label)
+        reference_channel = None
+        set_defocus_for_all_flag = False
+        if calibration_action == "auto_defocus":
+            if self.parent_controller.acquire_bar_controller.is_acquiring:
+                messagebox.showwarning(
+                    title = "Navigate",
+                    message = "Please stop acquisition before start getting defocus values!"
+                )
+                return
+            reference_channel = target_channel
+            calibration_action = "capture_reference"
+            set_defocus_for_all_flag = True
+            # set all the defocus value to 0
+            channels = self.parent_controller.configuration["experiment"]["MicroscopeState"]["channels"]
+            for channel_key in channels.keys():
+                self._write_channel_defocus(channel_key, 0)
+        elif calibration_action == "capture_reference":
+            reference_channel = target_channel
+        elif self.defocus_calibration_reference is not None:
+            reference_channel = self.defocus_calibration_reference["channel"]
+
+        self._write_channel_defocus(target_channel, 0)
+        self.parent_controller.execute(
+            "autofocus",
+            device,
+            device_ref,
+            target_channel,
+            calibration_action,
+            reference_channel,
+            set_defocus_for_all_flag
+        )
+
+    def handle_autofocus_complete(self, payload: dict) -> None:
+        """Handle autofocus completion metadata for defocus calibration."""
+        action = payload.get("calibration_action")
+        if action == "capture_reference":
+            self.defocus_calibration_reference = {
+                "channel": payload["channel"],
+                "focus_position": float(payload["focus_position"]),
+            }
+            self._update_reference_status()
+            self._notify_defocus_reference(self.defocus_calibration_reference)
+            # update defocus value
+            channels = self.parent_controller.configuration["experiment"]["MicroscopeState"]["channels"]
+            defocus = channels[payload["channel"]]["defocus"]
+            for channel_key in channels.keys():
+                self._write_channel_defocus(channel_key, channels[channel_key]["defocus"] - defocus)
+            return
+
+        if action == "populate_defocus":
+            if self.defocus_calibration_reference is None:
+                self._show_missing_reference_warning()
+                return
+            target_channel = payload["channel"]
+            target_focus = float(payload["focus_position"])
+            reference_focus = self.defocus_calibration_reference["focus_position"]
+            focus = target_focus - reference_focus
+            if target_channel == self.defocus_calibration_reference["channel"]:
+                focus = 0
+            self._write_channel_defocus(target_channel, focus)
+
+        if self.defocus_calibration_reference is not None:
+            self._notify_defocus_reference(self.defocus_calibration_reference)
+
+    def _write_channel_defocus(self, channel_key: str, defocus: float) -> None:
+        channels = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["channels"]
+        channels[channel_key]["defocus"] = defocus
+        handler = getattr(self.parent_controller, "event_listeners", {}).get(
+            "channel_defocus"
+        )
+        if handler is not None:
+            handler((channel_key, defocus))
+
+    def _notify_defocus_reference(self, reference: dict) -> None:
+        handler = getattr(self.parent_controller, "event_listeners", {}).get(
+            "defocus_reference"
+        )
+        if handler is not None:
+            handler(reference)
+
+    def _update_reference_status(self) -> None:
+        if not hasattr(self.view, "reference_status_var"):
+            return
+        if self.defocus_calibration_reference is None:
+            reference_channel = self.setting_dict.get("reference_channel", None)
+            self.view.reference_status_var.set(f"Reference: {reference_channel or 'none'}")
+            return
+        channel = self._channel_key_to_label(
+            self.defocus_calibration_reference["channel"]
+        )
+        focus = self.defocus_calibration_reference["focus_position"]
+        self.view.reference_status_var.set(f"Reference: {channel} @ {focus:.3f}")
+        # update reference channel info in the experiment file
+        self.setting_dict["reference_channel"] = channel
+        self.setting_dict["reference_position"] = focus
+
+    def _show_missing_reference_warning(self) -> None:
+        messagebox.showwarning(
+            title="Navigate",
+            message="Capture a reference focus before populating defocus.",
+        )
 
     def update_device_ref(self, *_: tuple[str]) -> None:
         """Update device reference name
@@ -358,4 +521,7 @@ class AutofocusPopupController(GUIController):
         dict[str, callable]
             The custom events for this controller.
         """
-        return {"autofocus": self.display_plot}
+        return {
+            "autofocus": self.display_plot,
+            "autofocus_complete": self.handle_autofocus_complete,
+        }

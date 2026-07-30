@@ -39,6 +39,7 @@ from tkinter import ttk
 
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
+from navigate.view.custom_widgets.common import configure_grid, themed_grid
 
 # Import Sub-Frames
 from navigate.view.main_window_content.camera_tab import CameraSettingsTab
@@ -82,7 +83,7 @@ class SettingsNotebook(DockableNotebook):
         super().__init__(frame_left, root, *args, **kwargs)
 
         # Putting notebook 1 into left frame
-        self.grid(row=0, column=0)
+        themed_grid(self, row=0, column=0, sticky=tk.NSEW)
 
         #: ChannelsTab: Channels tab
         self.channels_tab = ChannelsTab(self)
@@ -110,3 +111,5 @@ class SettingsNotebook(DockableNotebook):
         self.add(self.camera_settings_tab, text="Camera Settings", sticky=tk.NSEW)
         self.add(self.stage_control_tab, text="Stage Control", sticky=tk.NSEW)
         self.add(self.multiposition_tab, text="Multiposition", sticky=tk.NSEW)
+
+        configure_grid(self, columns={0: 1}, rows={0: 1})

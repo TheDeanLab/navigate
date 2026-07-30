@@ -54,7 +54,7 @@ Configure the Channel Settings
 
     * Specify the camera :guilabel:`Exp. Time (ms)`. A good default value is ``100`` or ``200`` ms.  
     * Specify the :guilabel:`Interval` to be ``1.0``. While this feature is not currently implemented, future releases will allow users to image different channels at different time intervals.  
-    * Specify the :guilabel:`Defocus` to be ``0``. This feature allows you to adjust for chromatic aberrations that result in focal shifts between each imaging channel.
+    * Set :guilabel:`Defocus` to ``0`` unless the channel has a measured chromatic focus offset. Defocus is a per-channel offset from the zero-defocus focus position, not an absolute focus coordinate. At acquisition start, **navigate** derives that zero-defocus position from the current focus and the active channel's defocus, then applies each channel's offset. The status below the table reports the current reference; see :ref:`Autofocus Settings <ui_autofocus>` to measure channel offsets automatically.
 
 ---------------------------------------
 
@@ -174,6 +174,8 @@ Acquiring a Z-Stack
     .. image:: ../images/stage-control-start-pos-zstack.png
        :align: center
        :alt: Adjusting the stage position in **navigate**.
+
+* If the microscope has more than one stage that can move in the Z direction, choose the stage that should perform the stack from :guilabel:`Z-Stack Device` before setting the start and end positions. This selected device is the primary Z-stack stage: :guilabel:`Start`, :guilabel:`End`, and :guilabel:`Step Size` are applied to this stage. Other stack-capable stages can be moved with fixed offsets from the primary Z-stack stage when their offset settings are enabled.
 
 * Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (μm)` press :guilabel:`Set Start Pos/Foc`.
 

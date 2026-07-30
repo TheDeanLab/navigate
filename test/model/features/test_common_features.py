@@ -33,7 +33,129 @@
 
 import random
 import pytest
-from navigate.model.features.common_features import ZStackAcquisition
+from navigate.model.features.common_features import (
+    ASIZStackAcquisition,
+    MoveToNextPositionInMultiPositionTable,
+    ZStackAcquisition,
+    stage_move_requires_pause,
+)
+
+
+def test_theta_move_requires_pause_below_linear_threshold():
+    assert stage_move_requires_pause([0, 0, 0], 1000, theta_delta=1)
+
+
+def test_no_stage_move_does_not_require_pause():
+    assert not stage_move_requires_pause([0, 0, 0], 1000, theta_delta=0)
+
+
+def test_multiposition_theta_move_pauses_data_thread(dummy_model_to_test_features):
+    model = dummy_model_to_test_features
+    model.signal_records = []
+    model.configuration["experiment"]["StageParameters"].update(
+        {"x": 0, "y": 0, "z": 0, "theta": 0, "f": 0}
+    )
+    model.configuration["multi_positions"] = [
+        ["X", "Y", "Z", "THETA", "F"],
+        [0, 0, 0, 45, 0],
+    ]
+    feature = MoveToNextPositionInMultiPositionTable(model)
+
+    feature.pre_signal_func()
+    feature.signal_func()
+
+    record_names = [record[0] for record in model.signal_records]
+    assert record_names.index("pause_data_thread") < record_names.index("move_stage")
+    assert record_names.index("move_stage") < record_names.index("resume_data_thread")
+
+
+def test_z_stack_preserves_primary_axis_restore_and_pre_position(
+    dummy_model_to_test_features,
+):
+    model = dummy_model_to_test_features
+    model.virtual_microscopes = {}
+    microscope_state = model.configuration["experiment"]["MicroscopeState"]
+    stage_parameters = model.configuration["experiment"]["StageParameters"]
+    previous_primary_z_axis = microscope_state.get("primary_z_axis")
+    previous_primary_f_axis = microscope_state.get("primary_f_axis")
+    previous_stage_parameters = dict(stage_parameters)
+
+    try:
+        microscope_state["is_multiposition"] = False
+        microscope_state["primary_z_axis"] = "theta"
+        microscope_state["primary_f_axis"] = "x"
+        stage_parameters.update({"x": 11, "y": 22, "z": 33, "theta": 44, "f": 55})
+
+        feature = ZStackAcquisition(model)
+        feature.pre_signal_func()
+
+        assert feature.restore_z == 44
+        assert feature.restore_f == 11
+        assert feature.pre_position == {
+            "x": 11.0,
+            "y": 22.0,
+            "z": 33.0,
+            "theta": 44.0,
+            "f": 55.0,
+        }
+    finally:
+        if previous_primary_z_axis is None:
+            microscope_state.pop("primary_z_axis", None)
+        else:
+            microscope_state["primary_z_axis"] = previous_primary_z_axis
+        if previous_primary_f_axis is None:
+            microscope_state.pop("primary_f_axis", None)
+        else:
+            microscope_state["primary_f_axis"] = previous_primary_f_axis
+        stage_parameters.update(previous_stage_parameters)
+
+
+def test_z_stack_channel_defocus_is_relative_to_zero_defocus_reference(
+    dummy_model_to_test_features,
+):
+    feature = ZStackAcquisition(dummy_model_to_test_features, saving_flag=False)
+    feature.defocus = [3.0, -1.5]
+    feature.first_channel_defocus = 3.0
+    feature.start_focus = 103.0
+    feature.current_position = {"f": 0.0}
+    feature.primary_f_axis = "f"
+
+    assert feature._focus_target_for_channel(0) == pytest.approx(103.0)
+    assert feature._focus_target_for_channel(1) == pytest.approx(98.5)
+
+
+def test_asi_z_stack_uses_channel_defocus_in_stage_move(
+    dummy_model_to_test_features,
+):
+    model = dummy_model_to_test_features
+    model.signal_records = []
+    feature = ASIZStackAcquisition(model, saving_flag=False)
+    feature.stage_axes = ["x", "y", "z", "theta", "f"]
+    feature.axes_index = [0, 1, 2, 3, 4]
+    feature.tiling_axes = ["x", "y", "theta"]
+    feature.primary_z_axis = "z"
+    feature.primary_f_axis = "f"
+    feature.secondary_stack_settings = {}
+    feature.positions = [[0.0, 0.0, 0.0, 0.0, 0.0]]
+    feature.current_position_idx = 0
+    feature.current_position = {"x": 0.0, "y": 0.0, "z": 0.0, "theta": 0.0, "f": 0.0}
+    feature.pre_position = feature.current_position
+    feature.need_to_move_new_position = True
+    feature.start_z_position = 0.0
+    feature.start_focus = 103.0
+    feature.z_stack_distance = 0.0
+    feature.f_stack_distance = 0.0
+    feature.stage_distance_threshold = 1000
+    feature.defocus = [3.0, -1.5]
+    feature.first_channel_defocus = 3.0
+    feature.current_channel_in_list = 1
+
+    feature.signal_func()
+
+    move_stage_records = [
+        record for record in model.signal_records if record[0] == "move_stage"
+    ]
+    assert move_stage_records[-1][1][0]["f_abs"] == pytest.approx(98.5)
 
 
 class TestZStack:
@@ -154,10 +276,15 @@ class TestZStack:
 
             # (x, y, z, theta, f)
             z_pos = pos[2] + self.config["start_position"]
-            f_pos = pos[4] + self.config["start_focus"]
+            first_channel_defocus = (
+                selected_channels[0]["defocus"] if selected_channels else 0.0
+            )
+            zero_defocus_f_pos = (
+                pos[4] + self.config["start_focus"] - first_channel_defocus
+            )
 
             if mode == "per_z":
-                f_pos += selected_channels[0]["defocus"]
+                f_pos = zero_defocus_f_pos + selected_channels[0]["defocus"]
                 for j in range(self.config["number_z_steps"]):
                     idx = self.get_next_record("move_stage", idx)
 
@@ -229,7 +356,7 @@ class TestZStack:
             else:  # per_stack
                 for k in range(len(selected_channels)):
                     # z
-                    f_pos += selected_channels[k]["defocus"]
+                    f_pos = zero_defocus_f_pos + selected_channels[k]["defocus"]
                     for j in range(self.config["number_z_steps"]):
                         idx = self.get_next_record("move_stage", idx)
 
@@ -245,7 +372,6 @@ class TestZStack:
                         )
                         z_moved_times += 1
                         frame_id += 1
-                    f_pos -= selected_channels[k]["defocus"]
                     idx = self.get_next_record(change_channel_func_str, idx)
                     prepared_next_channel = True
                     assert (

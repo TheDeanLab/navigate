@@ -44,8 +44,8 @@ from navigate.view.custom_widgets.hover import HoverTkButton, HoverButton
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.validation import ValidatedEntry
-from navigate.view.custom_widgets.common import uniform_grid
-from navigate.view.theme import get_theme_color
+from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
+from navigate.view.theme import get_theme_color, get_theme_space_px
 import navigate
 
 # Logger Setup
@@ -159,39 +159,93 @@ class StageControlTab(tk.Frame):
 
         #: PositionFrame: Position frame.
         self.position_frame = PositionFrame(self)
-        self.position_frame.grid(
-            row=0, column=0, rowspan=1, sticky=tk.NSEW, padx=3, pady=3
+        themed_grid(
+            self.position_frame,
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady=("layout_panel_gap", "layout_section_gap"),
         )
 
         #: StackShortcuts: Stack shortcuts.
         self.stack_shortcuts = StackShortcuts(self)
-        self.stack_shortcuts.grid(row=1, column=0, rowspan=1, sticky=tk.NSEW)
+        themed_grid(
+            self.stack_shortcuts,
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady=("layout_section_gap", "layout_panel_gap"),
+        )
 
         #: XYFrame: XY frame.
         self.xy_frame = XYFrame(self)
-        self.xy_frame.grid(row=0, column=1, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        themed_grid(
+            self.xy_frame,
+            row=0,
+            column=1,
+            rowspan=2,
+            sticky=tk.NSEW,
+            padx="layout_section_gap",
+            pady="layout_panel_gap",
+        )
 
         #: OtherAxisFrame: Z frame.
         self.z_frame = OtherAxisFrame(stage_control_tab=self, name="Z")
-        self.z_frame.grid(row=0, column=2, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        themed_grid(
+            self.z_frame,
+            row=0,
+            column=2,
+            rowspan=2,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady="layout_panel_gap",
+        )
 
         #: OtherAxisFrame: Theta frame.
         self.theta_frame = OtherAxisFrame(stage_control_tab=self, name="Theta")
-        self.theta_frame.grid(
-            row=2, column=2, rowspan=2, sticky=tk.NSEW, padx=3, pady=3
+        themed_grid(
+            self.theta_frame,
+            row=2,
+            column=2,
+            rowspan=2,
+            sticky=tk.NSEW,
+            padx=("layout_section_gap", "layout_panel_gap"),
+            pady=("layout_section_gap", "layout_panel_gap"),
         )
 
         # OtherAxisFrame: Focus frame.
         self.f_frame = OtherAxisFrame(stage_control_tab=self, name="Focus")
-        self.f_frame.grid(row=2, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        themed_grid(
+            self.f_frame,
+            row=2,
+            column=0,
+            rowspan=2,
+            sticky=tk.NSEW,
+            padx=("layout_panel_gap", "layout_section_gap"),
+            pady=("layout_section_gap", "layout_panel_gap"),
+        )
 
         #: StopFrame: Stop frame.
         self.stop_frame = StopFrame(
             stage_control_tab=self, name="Stage Movement Interrupt"
         )
-        self.stop_frame.grid(row=2, column=1, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        themed_grid(
+            self.stop_frame,
+            row=2,
+            column=1,
+            rowspan=2,
+            sticky=tk.NSEW,
+            padx="layout_section_gap",
+            pady=("layout_section_gap", "layout_panel_gap"),
+        )
 
-        uniform_grid(self)
+        configure_grid(
+            self,
+            columns={0: 1, 1: 1, 2: 1},
+            rows={0: 1, 1: 1, 2: 1, 3: 1},
+        )
 
         self.default_axes = ["x", "y", "z", "theta", "f"]
 
@@ -319,19 +373,22 @@ class StageControlTab(tk.Frame):
         """
         self.default_axes.append(stage_name)
         additional_stage = OtherAxisFrame(self, stage_name.upper())
-        additional_stage.grid(
-            row=(len(self.default_axes) % 2) * 2,
-            column=len(self.default_axes) // 2 + 1,
+        row = (len(self.default_axes) % 2) * 2
+        column = len(self.default_axes) // 2 + 1
+        themed_grid(
+            additional_stage,
+            row=row,
+            column=column,
             sticky=tk.NSEW,
             rowspan=2,
-            padx=3,
-            pady=3,
+            padx="layout_panel_gap",
+            pady="layout_panel_gap",
         )
         setattr(self, f"{stage_name}_frame", additional_stage)
 
         self.position_frame.add_position_entry(stage_name, stage_name.upper())
 
-        uniform_grid(self)
+        configure_grid(self, columns={column: 1}, rows={row: 1, row + 1: 1})
 
 
 class OtherAxisFrame(ttk.Labelframe):
@@ -417,26 +474,66 @@ class OtherAxisFrame(ttk.Labelframe):
         space_2 = ttk.Label(self, borderwidth=0)
 
         # Griding out buttons
-        self.large_up_btn.grid(
-            row=(row := 0), column=1, rowspan=1, columnspan=1, padx=2, pady=2
+        themed_grid(
+            self.large_up_btn,
+            row=(row := 0),
+            column=1,
+            rowspan=1,
+            columnspan=1,
+            padx="space_1",
+            pady="space_1",
         )
-        self.up_btn.grid(
-            row=(row := row + 1), column=1, rowspan=1, columnspan=1, pady=(2, 0)
+        themed_grid(
+            self.up_btn,
+            row=(row := row + 1),
+            column=1,
+            rowspan=1,
+            columnspan=1,
+            pady=("space_1", 0),
         )
-        space_1.grid(
-            row=(row := row + 1), column=1, rowspan=1, columnspan=1, padx=2, pady=0
+        themed_grid(
+            space_1,
+            row=(row := row + 1),
+            column=1,
+            rowspan=1,
+            columnspan=1,
+            padx="space_1",
+            pady=get_theme_space_px(0),
         )
-        self.increment_box.grid(
-            row=(row := row + 1), column=1, rowspan=1, columnspan=1, padx=2, pady=0
+        themed_grid(
+            self.increment_box,
+            row=(row := row + 1),
+            column=1,
+            rowspan=1,
+            columnspan=1,
+            padx="space_1",
+            pady=get_theme_space_px(0),
         )
-        space_2.grid(
-            row=(row := row + 1), column=1, rowspan=1, columnspan=1, padx=2, pady=0
+        themed_grid(
+            space_2,
+            row=(row := row + 1),
+            column=1,
+            rowspan=1,
+            columnspan=1,
+            padx="space_1",
+            pady=get_theme_space_px(0),
         )
-        self.down_btn.grid(
-            row=(row := row + 1), column=1, rowspan=1, columnspan=1, pady=(0, 2)
+        themed_grid(
+            self.down_btn,
+            row=(row := row + 1),
+            column=1,
+            rowspan=1,
+            columnspan=1,
+            pady=(0, "space_1"),
         )
-        self.large_down_btn.grid(
-            row=(row + 1), column=1, rowspan=1, columnspan=1, padx=2, pady=2
+        themed_grid(
+            self.large_down_btn,
+            row=(row + 1),
+            column=1,
+            rowspan=1,
+            columnspan=1,
+            padx="space_1",
+            pady="space_1",
         )
 
         uniform_grid(self)
@@ -788,42 +885,97 @@ class XYFrame(ttk.Labelframe):
         }
 
         # Up
-        self.large_up_y_btn.grid(
-            row=0, column=4, rowspan=2, columnspan=2, padx=2, pady=2
+        themed_grid(
+            self.large_up_y_btn,
+            row=0,
+            column=4,
+            rowspan=2,
+            columnspan=2,
+            padx="space_1",
+            pady="space_1",
         )
 
-        self.up_y_btn.grid(row=2, column=4, rowspan=2, columnspan=2, padx=2, pady=2)
+        themed_grid(
+            self.up_y_btn,
+            row=2,
+            column=4,
+            rowspan=2,
+            columnspan=2,
+            padx="space_1",
+            pady="space_1",
+        )
 
         # Increment box.
-        self.increment_box.grid(
-            row=4, column=4, rowspan=3, columnspan=2, padx=2, pady=2
+        themed_grid(
+            self.increment_box,
+            row=4,
+            column=4,
+            rowspan=3,
+            columnspan=2,
+            padx="space_1",
+            pady="space_1",
         )
 
         # Down
-        self.down_y_btn.grid(row=7, column=4, rowspan=2, columnspan=2, padx=2, pady=2)
+        themed_grid(
+            self.down_y_btn,
+            row=7,
+            column=4,
+            rowspan=2,
+            columnspan=2,
+            padx="space_1",
+            pady="space_1",
+        )
 
-        self.large_down_y_btn.grid(
-            row=9, column=4, rowspan=2, columnspan=2, padx=2, pady=2
+        themed_grid(
+            self.large_down_y_btn,
+            row=9,
+            column=4,
+            rowspan=2,
+            columnspan=2,
+            padx="space_1",
+            pady="space_1",
         )
 
         # Left
-        self.large_down_x_btn.grid(
-            row=5, column=0, rowspan=2, columnspan=2, padx=2, pady=2
+        themed_grid(
+            self.large_down_x_btn,
+            row=5,
+            column=0,
+            rowspan=2,
+            columnspan=2,
+            padx="space_1",
+            pady="space_1",
         )
 
-        self.down_x_btn.grid(
+        themed_grid(
+            self.down_x_btn,
             row=5,
             column=2,
             rowspan=2,
             columnspan=2,
-            padx=2,
-            pady=2,
+            padx="space_1",
+            pady="space_1",
         )
 
         # Right
-        self.up_x_btn.grid(row=5, column=6, rowspan=2, columnspan=2, padx=2, pady=2)
-        self.large_up_x_btn.grid(
-            row=5, column=8, rowspan=2, columnspan=2, padx=2, pady=2
+        themed_grid(
+            self.up_x_btn,
+            row=5,
+            column=6,
+            rowspan=2,
+            columnspan=2,
+            padx="space_1",
+            pady="space_1",
+        )
+        themed_grid(
+            self.large_up_x_btn,
+            row=5,
+            column=8,
+            rowspan=2,
+            columnspan=2,
+            padx="space_1",
+            pady="space_1",
         )
 
         uniform_grid(self)
@@ -971,9 +1123,9 @@ class StopFrame(ttk.Labelframe):
         )
 
         # Griding out buttons
-        self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
-        self.home_btn.grid(row=1, column=0, rowspan=2, pady=2)
-        self.joystick_btn.grid(row=2, column=0, rowspan=2, pady=2)
+        themed_grid(self.stop_btn, row=0, column=0, rowspan=2, pady="space_1")
+        themed_grid(self.home_btn, row=1, column=0, rowspan=2, pady="space_1")
+        themed_grid(self.joystick_btn, row=2, column=0, rowspan=2, pady="space_1")
 
         uniform_grid(self)
 

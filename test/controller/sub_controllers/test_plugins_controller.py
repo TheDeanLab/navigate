@@ -1,3 +1,4 @@
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 
@@ -26,14 +27,19 @@ def test_load_plugins_uses_file_and_package_managers(monkeypatch, plugins_contro
     file_manager = MagicMock()
     file_manager_ctor = Mock(return_value=file_manager)
     monkeypatch.setattr(plugins_module, "PluginFileManager", file_manager_ctor)
-    monkeypatch.setattr(plugins_module, "get_navigate_path", lambda: "/tmp/navigate-home")
+    monkeypatch.setattr(
+        plugins_module, "get_navigate_path", lambda: "/tmp/navigate-home"
+    )
 
     plugins_controller.load_plugins_through_manager = MagicMock()
 
     plugins_controller.load_plugins()
 
     file_manager_ctor.assert_called_once()
-    assert plugins_controller.load_plugins_through_manager.call_args_list[0].args[0] is file_manager
+    assert (
+        plugins_controller.load_plugins_through_manager.call_args_list[0].args[0]
+        is file_manager
+    )
     assert (
         plugins_controller.load_plugins_through_manager.call_args_list[1].args[0]
         is plugins_module.PluginPackageManager
@@ -68,7 +74,9 @@ def test_load_plugins_through_manager_registers_popup_plugins(plugins_controller
 
     plugins_controller.load_plugins_through_manager(plugin_manager)
 
-    add_command = plugins_controller.parent_controller.view.menubar.menu_plugins.add_command
+    add_command = (
+        plugins_controller.parent_controller.view.menubar.menu_plugins.add_command
+    )
     add_command.assert_called_once()
     call_kwargs = add_command.call_args.kwargs
     assert call_kwargs["label"] == "Plugin A"
@@ -96,6 +104,48 @@ def test_load_plugins_through_manager_registers_tab_plugins(plugins_controller):
     plugins_controller.build_tab_window.assert_called_once_with(
         "Plugin A", frame_cls, controller_cls
     )
+
+
+def test_load_plugins_through_manager_skips_file_plugin_with_import_error(
+    tmp_path: Path, plugins_controller: plugins_module.PluginsController
+) -> None:
+    plugins_path = tmp_path / "plugins"
+    plugin_path = tmp_path / "broken_plugin"
+    controller_path = plugin_path / "controller" / "broken_plugin_controller.py"
+    view_path = plugin_path / "view" / "broken_plugin_frame.py"
+    plugin_config_path = tmp_path / "plugins_config.yml"
+
+    plugins_path.mkdir()
+    controller_path.parent.mkdir(parents=True)
+    view_path.parent.mkdir()
+    controller_path.write_text(
+        "raise ImportError('DLL load failed while importing cupy')\n"
+        "class BrokenPluginController:\n"
+        "    pass\n",
+        encoding="utf-8",
+    )
+    view_path.write_text(
+        "class BrokenPluginFrame:\n    pass\n",
+        encoding="utf-8",
+    )
+    (plugin_path / "plugin_config.yml").write_text(
+        "name: Broken Plugin\nview: Popup\n",
+        encoding="utf-8",
+    )
+    plugin_config_path.write_text(
+        f"Broken Plugin: {plugin_path}\n",
+        encoding="utf-8",
+    )
+    plugin_manager = plugins_module.PluginFileManager(
+        str(plugins_path), str(plugin_config_path)
+    )
+
+    plugins_controller.load_plugins_through_manager(plugin_manager)
+
+    add_command = (
+        plugins_controller.parent_controller.view.menubar.menu_plugins.add_command
+    )
+    add_command.assert_not_called()
 
 
 def test_build_tab_window_registers_controller_and_events(plugins_controller):
@@ -170,7 +220,9 @@ def test_build_popup_window_creates_popup_and_unregisters_on_close(
     plugin_controller = SimpleNamespace(custom_events={"evt": "handler"})
     controller_cls = Mock(return_value=plugin_controller)
 
-    show_popup = plugins_controller.build_popup_window("My Plugin", frame_cls, controller_cls)
+    show_popup = plugins_controller.build_popup_window(
+        "My Plugin", frame_cls, controller_cls
+    )
     show_popup()
 
     controller_name = "__pluginmy_plugin_controller"

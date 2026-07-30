@@ -32,6 +32,7 @@
 
 import random
 import copy
+from contextlib import contextmanager
 
 import pytest
 import numpy as np
@@ -47,6 +48,142 @@ def channels_tab_controller(dummy_controller):
     return ChannelsTabController(
         dummy_controller.view.settings.channels_tab, dummy_controller
     )
+
+
+@contextmanager
+def stage_limit_settings(channels_tab_controller, **limits):
+    configuration = channels_tab_controller.parent_controller.configuration
+    configuration_controller = (
+        channels_tab_controller.parent_controller.configuration_controller
+    )
+    microscope_name = configuration_controller.microscope_name
+    stage_config = configuration["configuration"]["microscopes"][microscope_name][
+        "stage"
+    ]
+    stage_parameters = configuration["experiment"]["StageParameters"]
+    original_limits = {key: stage_config.get(key) for key in limits}
+    original_limit_flag = stage_parameters.get("limits", True)
+    try:
+        for key, value in limits.items():
+            stage_config[key] = value
+        yield
+    finally:
+        for key, value in original_limits.items():
+            stage_config[key] = value
+        stage_parameters["limits"] = original_limit_flag
+
+
+def assert_spinbox_range(widget, from_value, to_value):
+    assert float(widget.cget("from")) == from_value
+    assert float(widget.cget("to")) == to_value
+
+
+@pytest.mark.parametrize(
+    "origin, expected_range",
+    [
+        (0, (0, 200)),
+        (100, (-100, 100)),
+    ],
+)
+def test_stack_position_limits_follow_stage_limits_for_z_axis(
+    channels_tab_controller, origin, expected_range
+):
+    with stage_limit_settings(
+        channels_tab_controller, z_min=0, z_max=200, f_min=-100000, f_max=100000
+    ):
+        channels_tab_controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["limits"] = True
+        channels_tab_controller.z_origin = origin
+        channels_tab_controller.focus_origin = 0
+
+        channels_tab_controller.set_spinbox_range_limits(
+            channels_tab_controller.parent_controller.configuration["gui"]
+        )
+
+        for widget_name in ["start_position", "end_position"]:
+            assert_spinbox_range(
+                channels_tab_controller.stack_acq_widgets[widget_name].widget,
+                expected_range[0],
+                expected_range[1],
+            )
+
+
+def test_stack_position_limits_follow_stage_limits_for_focus_axis(
+    channels_tab_controller,
+):
+    with stage_limit_settings(
+        channels_tab_controller, z_min=-100000, z_max=100000, f_min=10, f_max=50
+    ):
+        channels_tab_controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["limits"] = True
+        channels_tab_controller.z_origin = 0
+        channels_tab_controller.focus_origin = 20
+
+        channels_tab_controller.set_spinbox_range_limits(
+            channels_tab_controller.parent_controller.configuration["gui"]
+        )
+
+        for widget_name in ["start_focus", "end_focus"]:
+            assert_spinbox_range(
+                channels_tab_controller.stack_acq_widgets[widget_name].widget,
+                -10,
+                30,
+            )
+
+
+def test_stack_position_limits_fall_back_to_gui_config_when_stage_limits_disabled(
+    channels_tab_controller,
+):
+    with stage_limit_settings(channels_tab_controller, z_min=0, z_max=200):
+        configuration = channels_tab_controller.parent_controller.configuration
+        configuration["experiment"]["StageParameters"]["limits"] = False
+
+        channels_tab_controller.set_spinbox_range_limits(configuration["gui"])
+
+        stack_config = configuration["gui"]["stack_acquisition"]
+        assert_spinbox_range(
+            channels_tab_controller.stack_acq_widgets["start_position"].widget,
+            stack_config["z_start_pos"]["min"],
+            stack_config["z_start_pos"]["max"],
+        )
+        assert_spinbox_range(
+            channels_tab_controller.stack_acq_widgets["end_position"].widget,
+            stack_config["z_end_pos"]["min"],
+            stack_config["z_end_pos"]["max"],
+        )
+
+
+def test_verify_experiment_values_rejects_out_of_range_stack_position(
+    channels_tab_controller,
+):
+    with stage_limit_settings(
+        channels_tab_controller, z_min=0, z_max=200, f_min=-100000, f_max=100000
+    ):
+        configuration = channels_tab_controller.parent_controller.configuration
+        configuration["experiment"]["StageParameters"]["limits"] = True
+        channels_tab_controller.microscope_state_dict = configuration["experiment"][
+            "MicroscopeState"
+        ]
+        channels_tab_controller.channel_setting_controller.channel_setting_dict = (
+            channels_tab_controller.microscope_state_dict["channels"]
+        )
+        channels_tab_controller.z_origin = 100
+        channels_tab_controller.focus_origin = 0
+        channels_tab_controller.microscope_state_dict["image_mode"] = "z-stack"
+        channels_tab_controller.microscope_state_dict["number_z_steps"] = 1
+        channels_tab_controller.stack_acq_vals["number_z_steps"].set(1)
+        channels_tab_controller.microscope_state_dict["timepoints"] = 1
+        channels_tab_controller.microscope_state_dict["stack_pause"] = 0
+        channels_tab_controller.microscope_state_dict["start_position"] = -101
+        channels_tab_controller.microscope_state_dict["end_position"] = 0
+        channels_tab_controller.microscope_state_dict["start_focus"] = 0
+        channels_tab_controller.microscope_state_dict["end_focus"] = 0
+
+        warning = channels_tab_controller.verify_experiment_values()
+
+        assert "start_position is outside the z stage limits" in warning
 
 
 def test_update_z_steps(channels_tab_controller):
@@ -106,6 +243,75 @@ def test_update_z_steps(channels_tab_controller):
         channels_tab_controller.stack_acq_vals["number_z_steps"].get() == number_z_steps
     )
     stage_config["flip_z"] = False
+
+
+def test_set_channel_defocus(channels_tab_controller):
+    channels_tab_controller.set_channel_defocus("channel_2", 2.25)
+
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_variables[
+            1
+        ].get()
+        == pytest.approx(2.25)
+    )
+
+
+def test_defocus_reference_label_initially_not_set(channels_tab_controller):
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
+        == "Defocus Reference: Not Set"
+    )
+
+
+def test_set_defocus_reference_updates_main_channel_status(channels_tab_controller):
+    # no pre-existiting defocus reference channel
+    channels_tab_controller.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["reference_channel"] = None
+
+    channels_tab_controller.set_defocus_reference(
+        {"channel": "channel_2", "focus_position": 250.0}
+    )
+
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
+        == "Defocus Reference: CH2 @ 250.00"
+    )
+
+    assert (channels_tab_controller.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["reference_channel"] == "CH2"
+    )
+
+    # with pre-existing defocus reference channel
+    channels_tab_controller.set_defocus_reference(
+        {"channel": "channel_3", "focus_position": 200.0}
+    )
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
+        == "Defocus Reference: CH3 @ 200.00"
+    )
+
+    assert (channels_tab_controller.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["reference_channel"] == "CH2"
+    )
+
+def test_clear_defocus_reference_resets_main_channel_status(channels_tab_controller):
+    channels_tab_controller.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["reference_channel"] = None
+
+    channels_tab_controller.set_defocus_reference(
+        {"channel": "channel_2", "focus_position": 250.0}
+    )
+
+    channels_tab_controller.set_defocus_reference(None)
+
+    assert (
+        channels_tab_controller.channel_setting_controller.view.defocus_reference.get()
+        == "Defocus Reference: CH2"
+    )
 
 
 def test_update_start_position(channels_tab_controller):

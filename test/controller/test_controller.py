@@ -32,6 +32,17 @@ class DummySplashScreen:
         pass
 
 
+@pytest.fixture(autouse=True)
+def suppress_controller_messageboxes():
+    with (
+        patch(
+            "navigate.controller.controller.messagebox.showwarning", return_value=None
+        ),
+        patch("navigate.controller.controller.messagebox.showerror", return_value=None),
+    ):
+        yield
+
+
 def _normalize_log_setup(start_listener):
     """Call log_setup and normalize its return to (log_queue, log_listener)."""
     from navigate.log_files.log_functions import log_setup
@@ -86,17 +97,25 @@ def _remove_queue_handlers(target_queue=None):
 @pytest.fixture(scope="module")
 def controller_root():
     """Isolated Tk root for this module to avoid shared session root side effects."""
+    previous_default_root = tk._default_root
     root = tk.Tk()
-    yield root
     try:
-        root.update_idletasks()
-        root.update()
-    except Exception:
-        pass
-    try:
-        root.destroy()
-    except Exception:
-        pass
+        # Several view classes still construct Tk variables without an explicit
+        # master. Make this isolated interpreter their default for the lifetime
+        # of the controller tests.
+        tk._default_root = root
+        yield root
+    finally:
+        try:
+            root.update_idletasks()
+            root.update()
+        except Exception:
+            pass
+        try:
+            root.destroy()
+        except Exception:
+            pass
+        tk._default_root = previous_default_root
 
 
 @pytest.fixture(scope="module")
@@ -353,6 +372,119 @@ def test_change_microscope(controller):
         assert True
 
 
+def test_change_microscope_invalid_zoom_falls_back(controller):
+    microscope_name = controller.configuration_controller.microscope_list[0]
+    supported_zoom = list(
+        controller.configuration_controller.get_zoom_value_list(microscope_name)
+    )
+    fallback_zoom = supported_zoom[0]
+
+    with (
+        patch.object(
+            controller.configuration_controller, "change_microscope", return_value=True
+        ),
+        patch.object(controller.stage_controller, "initialize"),
+        patch.object(controller.channels_tab_controller, "initialize"),
+        patch.object(controller.channels_tab_controller, "populate_experiment_values"),
+        patch.object(
+            controller.camera_setting_controller, "update_camera_device_related_setting"
+        ),
+        patch.object(
+            controller.camera_setting_controller, "populate_experiment_values"
+        ),
+        patch.object(
+            controller.camera_setting_controller,
+            "calculate_physical_dimensions",
+            return_value=True,
+        ) as mock_physical_dimensions,
+        patch.object(controller.camera_view_controller, "update_snr"),
+        patch("navigate.controller.controller.messagebox.showwarning") as mock_warning,
+    ):
+        result = controller.change_microscope(microscope_name, "invalid_zoom")
+
+    assert result is True
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        == microscope_name
+    )
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["zoom"]
+        == fallback_zoom
+    )
+    mock_physical_dimensions.assert_called_once()
+    mock_warning.assert_called_once()
+    assert "Using" in mock_warning.call_args.kwargs["message"]
+
+
+def test_change_microscope_updates_zoom_on_same_microscope(controller):
+    microscope_name = controller.configuration_controller.microscope_list[0]
+    supported_zoom = list(
+        controller.configuration_controller.get_zoom_value_list(microscope_name)
+    )
+    if len(supported_zoom) < 2:
+        pytest.skip("Active test microscope does not have multiple zoom values.")
+
+    original_zoom = supported_zoom[0]
+    new_zoom = supported_zoom[-1]
+    controller.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ] = microscope_name
+    controller.configuration["experiment"]["MicroscopeState"]["zoom"] = original_zoom
+
+    with (
+        patch.object(
+            controller.configuration_controller, "change_microscope", return_value=False
+        ),
+        patch.object(
+            controller.configuration_controller, "microscope_name", microscope_name
+        ),
+        patch.object(
+            controller.camera_setting_controller,
+            "calculate_physical_dimensions",
+            return_value=True,
+        ) as mock_physical_dimensions,
+    ):
+        result = controller.change_microscope(microscope_name, new_zoom)
+
+    assert result is True
+    assert controller.configuration["experiment"]["MicroscopeState"]["zoom"] == new_zoom
+    mock_physical_dimensions.assert_called_once()
+
+
+def test_change_microscope_invalid_microscope_returns_false(controller):
+    previous_microscope_name = controller.configuration["experiment"][
+        "MicroscopeState"
+    ]["microscope_name"]
+    previous_zoom = controller.configuration["experiment"]["MicroscopeState"]["zoom"]
+
+    with (
+        patch.object(
+            controller.configuration_controller, "change_microscope", return_value=False
+        ),
+        patch.object(
+            controller.configuration_controller, "microscope_name", "different_scope"
+        ),
+        patch.object(
+            controller.camera_setting_controller, "calculate_physical_dimensions"
+        ) as mock_physical_dimensions,
+        patch("navigate.controller.controller.messagebox.showwarning") as mock_warning,
+    ):
+        result = controller.change_microscope("missing_scope", previous_zoom)
+
+    assert result is False
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        == previous_microscope_name
+    )
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["zoom"]
+        == previous_zoom
+    )
+    mock_physical_dimensions.assert_not_called()
+    mock_warning.assert_called_once()
+    assert "not configured" in mock_warning.call_args.kwargs["message"]
+
+
 def test_initialize_cam_view(controller):
     minmax_values = [0, 2**16 - 1]
     image_metrics = [1, 0, 0]
@@ -508,13 +640,30 @@ def test_execute_update_setting(controller):
 
 def test_execute_stage_limits(controller):
     controller.threads_pool.createThread = MagicMock()
+    controller.channels_tab_controller.update_stack_position_limits = MagicMock()
     for stage_limits in [True, False]:
         controller.threads_pool.createThread.reset_mock()
+        controller.channels_tab_controller.update_stack_position_limits.reset_mock()
         controller.execute("stage_limits", stage_limits)
         assert controller.stage_controller.stage_limits == stage_limits
+        controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
         assert controller.threads_pool.createThread.called is True
 
     assert True
+
+
+def test_execute_update_stage_limits_refreshes_stack_position_limits(controller):
+    controller.threads_pool.createThread = MagicMock()
+    controller.stage_controller.initialize = MagicMock()
+    controller.channels_tab_controller.update_stack_position_limits = MagicMock()
+
+    controller.execute(
+        "update_stage_limits", controller.configuration_controller.microscope_name
+    )
+
+    controller.stage_controller.initialize.assert_called_once()
+    controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
+    assert controller.threads_pool.createThread.called is True
 
 
 def test_execute_autofocus(controller):
@@ -622,7 +771,9 @@ def test_execute_acquire_and_acquire_and_save(controller):
     pass
 
 
-def test_execute_acquire_handles_missing_feature_popup_controller_after_wait(controller):
+def test_execute_acquire_handles_missing_feature_popup_controller_after_wait(
+    controller,
+):
     controller.acquire_bar_controller.mode = "customized"
     controller.menu_controller.feature_id_val.set(1)
     controller.prepare_acquire_data = MagicMock(return_value=True)
@@ -641,7 +792,9 @@ def test_execute_acquire_handles_missing_feature_popup_controller_after_wait(con
         if hasattr(controller, "features_popup_controller"):
             delattr(controller, "features_popup_controller")
 
-    controller.view.wait_window = MagicMock(side_effect=close_popup_and_remove_controller)
+    controller.view.wait_window = MagicMock(
+        side_effect=close_popup_and_remove_controller
+    )
 
     with patch(
         "navigate.controller.controller.FeatureListPopup",
@@ -909,7 +1062,9 @@ def test_run_on_main_thread_wait_raises_if_dispatcher_stops(controller, monkeypa
         controller._run_on_main_thread(lambda: "ignored", wait=True)
 
 
-def test_drain_main_thread_dispatch_queue_sets_result_and_error(controller, monkeypatch):
+def test_drain_main_thread_dispatch_queue_sets_result_and_error(
+    controller, monkeypatch
+):
     dispatch_queue = queue.Queue()
     monkeypatch.setattr(controller, "_main_thread_dispatch_queue", dispatch_queue)
 
@@ -951,7 +1106,9 @@ def test_schedule_event_pump_respects_running_state(controller, monkeypatch):
     controller._schedule_event_pump()
     drain_mock.assert_called_once()
     update_mock.assert_called_once()
-    controller.view.root.after.assert_called_once_with(20, controller._schedule_event_pump)
+    controller.view.root.after.assert_called_once_with(
+        20, controller._schedule_event_pump
+    )
     assert controller._event_pump_after_id == "after-id"
 
 
@@ -961,7 +1118,9 @@ def test_stop_event_pump_handles_after_cancel_error(controller, monkeypatch):
     monkeypatch.setattr(controller, "_event_pump_running", True)
     monkeypatch.setattr(controller, "_event_pump_after_id", "after-id")
 
-    controller.view.root.after_cancel = MagicMock(side_effect=RuntimeError("cancel error"))
+    controller.view.root.after_cancel = MagicMock(
+        side_effect=RuntimeError("cancel error")
+    )
 
     controller._stop_event_pump()
 
@@ -997,7 +1156,9 @@ def test_update_event_handles_warning_multiposition_frame_rate_and_listener(
 
     warning_mock.assert_called_once_with(title="Navigate", message="careful")
     update_table_mock.assert_called_once()
-    controller.channels_tab_controller.is_multiposition_val.set.assert_called_once_with(True)
+    controller.channels_tab_controller.is_multiposition_val.set.assert_called_once_with(
+        True
+    )
     controller.update_frame_rate.assert_called_once_with(12.345)
     listener_mock.assert_called_once_with({"k": "v"})
 

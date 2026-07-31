@@ -65,13 +65,14 @@ def append_dataframe_rows(
     pd.DataFrame
         Concatenated dataframe with aligned columns.
     """
-    if right_df.empty:
-        return left_df.copy()
-    if left_df.empty:
-        return right_df.reset_index(drop=True) if ignore_index else right_df.copy()
-
     ordered_columns = list(left_df.columns)
     ordered_columns.extend([col for col in right_df.columns if col not in left_df])
+
+    if right_df.empty:
+        return left_df.reindex(columns=ordered_columns).copy()
+    if left_df.empty:
+        result = right_df.reindex(columns=ordered_columns)
+        return result.reset_index(drop=True) if ignore_index else result.copy()
 
     return pd.concat(
         [

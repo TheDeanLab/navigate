@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
+import inspect
 import os
 import uuid
 from pathlib import Path
@@ -50,6 +51,11 @@ from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+_TIFF_WRITE_SUPPORTS_RESOLUTIONUNIT = (
+    "resolutionunit" in inspect.signature(tifffile.TiffWriter.write).parameters
+)
 
 
 class TiffDataSource(DataSource):
@@ -259,12 +265,17 @@ class TiffDataSource(DataSource):
                 "timepoint": self._current_time,
                 "notes": self.metadata.misc,
             }
+            resolution = (1e4 / dx, 1e4 / dy)
+            resolution_unit_kw = {"resolutionunit": "CENTIMETER"}
+            if not _TIFF_WRITE_SUPPORTS_RESOLUTIONUNIT:
+                resolution = (*resolution, "CENTIMETER")
+                resolution_unit_kw = {}
             self.image[c].write(
                 data,
-                resolution=(1e4 / dx, 1e4 / dy),
-                resolutionunit="CENTIMETER",
+                resolution=resolution,
                 metadata=md,
                 contiguous=True,
+                **resolution_unit_kw,
             )
 
         self._current_frame += 1

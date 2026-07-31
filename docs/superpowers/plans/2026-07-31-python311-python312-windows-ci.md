@@ -70,7 +70,7 @@ Git/GitHub CLI.
   constraint_tmp=$(mktemp -d)
   uv pip compile pyproject.toml --extra dev --python-platform windows --python-version 3.11 --no-annotate --no-header --output-file "$constraint_tmp/windows-py311.raw"
   uv pip compile pyproject.toml --extra dev --python-platform windows --python-version 3.12 --no-annotate --no-header --output-file "$constraint_tmp/windows-py312.raw"
-  rg -n '^(pipython|nidaqmx|nitypes|hightime|pyserial|pyusb|numpy|scipy|opencv-python-headless|tifffile)==' "$constraint_tmp"/*.raw
+  rg -n '^(pipython|nidaqmx|nitypes|hightime|pyserial|pyusb|numpy|scipy|opencv-python|tifffile)==' "$constraint_tmp"/*.raw
   ```
 
   Expected: both compiles succeed, and both raw resolutions contain every

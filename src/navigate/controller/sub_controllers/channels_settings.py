@@ -130,7 +130,7 @@ class ChannelSettingController(GUIController):
         self.mode = mode
         state = "normal" if mode == "stop" else "disabled"
         laser_state = "readonly" if mode == "stop" else "disabled"
-        filterwheel_state = "readonly"
+        filterwheel_state = "readonly" if mode == "stop" else "disabled"
         for i in range(self.num):
             # State set regardless of operating mode.
             self.view.channel_checks[i].config(state=state)

@@ -322,6 +322,54 @@ def test_insert_row_func_updates_rowcolors(
     controller.table.tableChanged.assert_called()
 
 
+@patch("navigate.controller.sub_controllers.multiposition.update_rowcolors")
+@patch("navigate.controller.sub_controllers.multiposition.filedialog.asksaveasfilename")
+def test_insert_middle_row_preserves_hidden_coordinates_on_export(
+    mock_asksaveasfilename,
+    _mock_update_rowcolors,
+    multiposition_controller,
+    tmp_path,
+):
+    controller = multiposition_controller
+    controller._set_dataframe(
+        pd.DataFrame(
+            {
+                "X": [1.0, 2.0, 3.0],
+                "Y": [4.0, 5.0, 6.0],
+                "X_PIXEL": [101.0, 202.0, 303.0],
+                "Y_PIXEL": [404.0, 505.0, 606.0],
+            }
+        )
+    )
+    controller.table.currentrow = 1
+    output_path = tmp_path / "positions.csv"
+    mock_asksaveasfilename.return_value = str(output_path)
+
+    controller.insert_row_func()
+    controller.export_positions()
+
+    exported = pd.read_csv(output_path)
+    assert exported.loc[0, ["X", "Y", "X_PIXEL", "Y_PIXEL"]].tolist() == [
+        1.0,
+        4.0,
+        101.0,
+        404.0,
+    ]
+    assert exported.loc[1, ["X", "Y", "X_PIXEL", "Y_PIXEL"]].isna().all()
+    assert exported.loc[2, ["X", "Y", "X_PIXEL", "Y_PIXEL"]].tolist() == [
+        2.0,
+        5.0,
+        202.0,
+        505.0,
+    ]
+    assert exported.loc[3, ["X", "Y", "X_PIXEL", "Y_PIXEL"]].tolist() == [
+        3.0,
+        6.0,
+        303.0,
+        606.0,
+    ]
+
+
 def test_add_stage_position_uses_parent_stage_position(multiposition_controller):
     controller = multiposition_controller
     stage_pos = {"x": 1, "y": 2, "z": 3, "theta": 4, "f": 5}

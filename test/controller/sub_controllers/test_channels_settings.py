@@ -96,11 +96,12 @@ class TestChannelSettingController:
                     str(self.channel_setting.view.laserpower_pulldowns[i]["state"])
                     == state
                 )
+                expected_filterwheel_state = (
+                    state_readonly if mode == "stop" else "disabled"
+                )
                 assert (
                     str(self.channel_setting.view.filterwheel_pulldowns[i]["state"])
-                    == state_readonly
-                    if mode == "stop"
-                    else "disabled"
+                    == expected_filterwheel_state
                 )
                 assert str(self.channel_setting.view.defocus_spins[i]["state"]) == state
 

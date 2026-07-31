@@ -400,9 +400,10 @@ class MultiPositionController(GUIController):
 
     def insert_row_func(self) -> None:
         """Insert a row in the Multi-Position Acquisition Interface."""
-        self.table.model.df = insert_blank_row(
-            self.table.model.df, self.table.currentrow
-        )
+        row_index = self.table.currentrow
+        self._sync_hidden_position_df()
+        self.table.model.df = insert_blank_row(self.table.model.df, row_index)
+        self._hidden_position_df = insert_blank_row(self._hidden_position_df, row_index)
         if self.table.model.df.shape[0] == 0:
             self.table.currentrow = 0
         elif self.table.currentrow is None:

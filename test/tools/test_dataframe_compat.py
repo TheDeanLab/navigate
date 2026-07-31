@@ -20,13 +20,26 @@ def test_append_dataframe_rows_aligns_columns_and_order():
     assert result.iloc[1].tolist() == [10, 20, 30]
 
 
-def test_append_dataframe_rows_handles_empty_inputs():
+def test_append_dataframe_rows_preserves_schema_union_with_empty_left():
     left = pd.DataFrame(columns=["X", "Y"])
-    right = pd.DataFrame({"X": [1], "Y": [2]})
+    right = pd.DataFrame({"Y": [2], "Z": [3]})
 
     result = append_dataframe_rows(left, right)
 
-    pd.testing.assert_frame_equal(result, right.reset_index(drop=True))
+    assert list(result.columns) == ["X", "Y", "Z"]
+    assert pd.isna(result.loc[0, "X"])
+    assert result.loc[0, ["Y", "Z"]].tolist() == [2, 3]
+
+
+def test_append_dataframe_rows_preserves_schema_union_with_empty_right():
+    left = pd.DataFrame({"X": [1], "Y": [2]})
+    right = pd.DataFrame(columns=["Y", "Z"])
+
+    result = append_dataframe_rows(left, right)
+
+    assert list(result.columns) == ["X", "Y", "Z"]
+    assert result.loc[0, ["X", "Y"]].tolist() == [1, 2]
+    assert pd.isna(result.loc[0, "Z"])
 
 
 def test_insert_blank_row_clamps_index_and_preserves_columns():

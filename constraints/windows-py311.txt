@@ -3,6 +3,7 @@
 # Refresh on Windows with Python 3.11, then run the complete test suite before
 # replacing this snapshot.
 # The editable navigate-micro package and pip are intentionally excluded.
+# setuptools 65.5.0 was already present in the green job and is included.
 annotated-types==0.8.0
 anyio==4.14.2
 argon2-cffi-bindings==25.1.0
@@ -139,13 +140,13 @@ rpds-py==2026.6.3
 scikit-image==0.26.0
 scipy==1.17.1
 send2trash==2.1.0
+setuptools==65.5.0
 six==1.17.0
 soupsieve==2.9.1
 stack-data==0.6.3
 terminado==0.18.1
 tifffile==2026.3.3
 tinycss2==1.5.1
-tomli==2.4.1
 tornado==6.5.7
 traitlets==5.15.1
 typing-extensions==4.16.0

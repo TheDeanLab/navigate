@@ -67,6 +67,9 @@ pip install -c constraints/windows-py39.txt -e ".[dev]"
 # Windows with Python 3.10
 pip install -c constraints/windows-py310.txt -e ".[dev]"
 
+# Windows with Python 3.11
+pip install -c constraints/windows-py311.txt -e ".[dev]"
+
 # Linux/macOS
 pip install -e ".[dev]"
 ```

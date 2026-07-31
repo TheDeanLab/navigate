@@ -98,6 +98,9 @@ We strongly recommend using a virtual environment for development. This can be a
     # On Windows with Python 3.10
     pip install -c constraints/windows-py310.txt -e ".[dev]"
 
+    # On Windows with Python 3.11
+    pip install -c constraints/windows-py311.txt -e ".[dev]"
+
     # On Linux/Mac
     pip install -e ".[dev]"
 
@@ -117,6 +120,12 @@ the Python version you intend to use:
     conda activate navigate-py310
     (navigate-py310) C:\Users\Username\Code> cd navigate
     (navigate-py310) C:\Users\Username\Code\navigate> pip install -c constraints/windows-py310.txt -e ".[dev]"
+
+    # Or Python 3.11
+    conda create -n navigate-py311 python=3.11
+    conda activate navigate-py311
+    (navigate-py311) C:\Users\Username\Code> cd navigate
+    (navigate-py311) C:\Users\Username\Code\navigate> pip install -c constraints/windows-py311.txt -e ".[dev]"
 
     # On Linux/Mac, after activating the Python environment
     pip install -e ".[dev]"

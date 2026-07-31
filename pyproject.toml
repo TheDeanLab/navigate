@@ -30,7 +30,7 @@ dependencies = [
     'scipy',
     'pyusb==1.2.1',
     'pandas',
-    'pandastable==0.12.2.post1',
+    'pandastable==0.14.0',
     'opencv-python',
     'numpy; sys_platform != "darwin"',
     'numpy; sys_platform == "darwin"',

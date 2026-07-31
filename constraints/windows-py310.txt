@@ -1,5 +1,5 @@
 # Fully resolved Windows CPython 3.10 development environment.
-# Source: https://github.com/TheDeanLab/navigate/actions/runs/30544828353/job/90878228725
+# Source: https://github.com/TheDeanLab/navigate/actions/runs/30628823687/job/91150215072
 # Refresh on Windows with Python 3.10, then run the complete test suite before
 # replacing this snapshot. The editable navigate-micro package and pip are
 # intentionally excluded.

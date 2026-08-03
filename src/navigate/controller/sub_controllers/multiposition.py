@@ -312,6 +312,22 @@ class MultiPositionController(GUIController):
         """
         return self.table.model.df.shape[0]
 
+    def highlight_position(self, row_id: int) -> None:
+        """Highlight the position at a zero-based table row index.
+
+        Parameters
+        ----------
+        row_id : int
+            Zero-based index of the position row to highlight.
+        """
+        if not isinstance(row_id, (int, np.integer)) or not 0 <= row_id < (
+            self.get_position_num()
+        ):
+            return
+
+        self.table.movetoSelection(row=row_id)
+        self._refresh_table_view()
+
     def load_positions(self) -> None:
         """Load a yml or csv file.
 
@@ -482,4 +498,7 @@ class MultiPositionController(GUIController):
         dict[str, Callable]
             Dictionary of custom events with their corresponding functions.
         """
-        return {"remove_positions": self.remove_positions}
+        return {
+            "remove_positions": self.remove_positions,
+            "highlight_position": self.highlight_position,
+        }

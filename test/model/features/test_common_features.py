@@ -32,6 +32,8 @@
 
 
 import random
+from unittest.mock import MagicMock
+
 import pytest
 from navigate.model.features.common_features import (
     ASIZStackAcquisition,
@@ -156,6 +158,48 @@ def test_asi_z_stack_uses_channel_defocus_in_stage_move(
         record for record in model.signal_records if record[0] == "move_stage"
     ]
     assert move_stage_records[-1][1][0]["f_abs"] == pytest.approx(98.5)
+
+
+def test_z_stack_emits_highlight_event_for_active_position(
+    dummy_model_to_test_features, monkeypatch
+):
+    model = dummy_model_to_test_features
+    event_queue = MagicMock()
+    monkeypatch.setattr(model, "event_queue", event_queue, raising=False)
+    feature = ZStackAcquisition(model, saving_flag=False)
+    feature.stage_axes = ["x", "y", "z", "theta", "f"]
+    feature.axes_index = [0, 1, 2, 3, 4]
+    feature.tiling_axes = ["x", "y", "theta"]
+    feature.primary_z_axis = "z"
+    feature.primary_f_axis = "f"
+    feature.secondary_stack_settings = {}
+    feature.positions = [
+        [0.0, 0.0, 0.0, 0.0, 0.0],
+        [1.0, 2.0, 3.0, 4.0, 5.0],
+    ]
+    feature.current_position_idx = 1
+    feature.current_position = {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "theta": 0.0,
+        "f": 0.0,
+    }
+    feature.pre_position = feature.current_position
+    feature.need_to_move_new_position = True
+    feature.need_to_move_z_position = False
+    feature.start_z_position = 0.0
+    feature.start_focus = 0.0
+    feature.z_stack_distance = 0.0
+    feature.f_stack_distance = 0.0
+    feature.stage_distance_threshold = 1000
+    feature.defocus = [0.0]
+    feature.first_channel_defocus = 0.0
+    feature.current_channel_in_list = 0
+
+    feature.signal_func()
+
+    event_queue.put.assert_called_once_with(("highlight_position", 1))
 
 
 class TestZStack:

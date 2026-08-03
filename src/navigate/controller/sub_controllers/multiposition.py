@@ -325,8 +325,7 @@ class MultiPositionController(GUIController):
         ):
             return
 
-        self.table.currentrow = row_id
-        self.table.setSelectedRow(row_id)
+        self.table.movetoSelection(row=row_id)
         self._refresh_table_view()
 
     def load_positions(self) -> None:
@@ -501,5 +500,5 @@ class MultiPositionController(GUIController):
         """
         return {
             "remove_positions": self.remove_positions,
-            "hightlight_position": self.highlight_position,
+            "highlight_position": self.highlight_position,
         }

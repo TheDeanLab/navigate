@@ -166,15 +166,14 @@ def test_export_positions_csv(mock_asksave, multiposition_controller):
     export_df.to_csv.assert_called_once_with("/tmp/output.csv", index=False)
 
 
-def test_highlight_position_selects_valid_row(multiposition_controller):
-    """A valid position row becomes the table's selected row."""
+def test_highlight_position_moves_valid_row_into_view(multiposition_controller):
+    """A valid position row becomes selected and visible."""
     controller = multiposition_controller
     controller.table.model.df = pd.DataFrame({"X": [1, 2]})
 
     controller.highlight_position(1)
 
-    assert controller.table.currentrow == 1
-    controller.table.setSelectedRow.assert_called_once_with(1)
+    controller.table.movetoSelection.assert_called_once_with(row=1)
     controller.table.redraw.assert_called_once()
     controller.table.tableChanged.assert_called_once()
 
@@ -188,4 +187,13 @@ def test_highlight_position_ignores_invalid_row(multiposition_controller):
     controller.highlight_position(1)
 
     assert controller.table.currentrow == 0
-    controller.table.setSelectedRow.assert_not_called()
+    controller.table.movetoSelection.assert_not_called()
+
+
+def test_highlight_position_event_is_registered(multiposition_controller):
+    """The controller exposes the correctly spelled highlight event."""
+    controller = multiposition_controller
+
+    assert (
+        controller.custom_events["highlight_position"] == controller.highlight_position
+    )

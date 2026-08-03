@@ -164,3 +164,28 @@ def test_export_positions_csv(mock_asksave, multiposition_controller):
 
     controller.export_positions()
     export_df.to_csv.assert_called_once_with("/tmp/output.csv", index=False)
+
+
+def test_highlight_position_selects_valid_row(multiposition_controller):
+    """A valid position row becomes the table's selected row."""
+    controller = multiposition_controller
+    controller.table.model.df = pd.DataFrame({"X": [1, 2]})
+
+    controller.highlight_position(1)
+
+    assert controller.table.currentrow == 1
+    controller.table.setSelectedRow.assert_called_once_with(1)
+    controller.table.redraw.assert_called_once()
+    controller.table.tableChanged.assert_called_once()
+
+
+def test_highlight_position_ignores_invalid_row(multiposition_controller):
+    """Out-of-range rows leave the current selection unchanged."""
+    controller = multiposition_controller
+    controller.table.model.df = pd.DataFrame({"X": [1]})
+    controller.table.currentrow = 0
+
+    controller.highlight_position(1)
+
+    assert controller.table.currentrow == 0
+    controller.table.setSelectedRow.assert_not_called()

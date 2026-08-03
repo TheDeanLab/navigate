@@ -1382,6 +1382,8 @@ class ZStackAcquisition:
 
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
+            if len(self.positions) > 1:
+                self.model.event_queue.put(("hightlight_position", self.current_position_idx))
             self.need_to_move_new_position = False
             if self.current_position_idx > 0:
                 self.pre_position = self.current_position

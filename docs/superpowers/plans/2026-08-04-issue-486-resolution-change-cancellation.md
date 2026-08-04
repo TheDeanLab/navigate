@@ -216,7 +216,7 @@ git commit -m "fix: make resolution stage moves cancellable" -m \
 - Consumes: Task 2 cancellation-aware movement and best-effort stop methods.
 - Produces: private `_ResolutionChangeTask`; `Model._begin_resolution_change(resolution_value)`, `_perform_resolution_change(task)`, `_finish_resolution_change(task, succeeded)`, `_start_resolution_setting_update()`, cancellation-aware `Model.stop_stage(cancel_resolution_change=True)`, and `Model.move_stage(..., cancel_event=None) -> bool`; `Model.change_resolution(resolution_value) -> bool` remains the synchronous public entry point.
 
-- [ ] **Step 1: Write failing task and stop-order tests**
+- [x] **Step 1: Write failing task and stop-order tests**
 
 ```python
 def test_stop_stage_records_cancellation_before_hardware_stop():
@@ -256,7 +256,7 @@ def test_terminate_cancels_and_joins_resolution_worker():
     assert worker.is_alive() is False
 ```
 
-- [ ] **Step 2: Run the task tests and verify RED**
+- [x] **Step 2: Run the task tests and verify RED**
 
 Run:
 
@@ -268,7 +268,7 @@ PYTHONPATH=src /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -
 
 Expected: the private lifecycle is absent and current Stop Stage cannot cancel the worker.
 
-- [ ] **Step 3: Add the private task record and model initialization**
+- [x] **Step 3: Add the private task record and model initialization**
 
 ```python
 @dataclass
@@ -287,7 +287,7 @@ class _ResolutionChangeTask:
 
 Initialize a lock, counter, and optional current task in `Model.__init__`. `_begin_resolution_change` rejects an existing active task with a model warning event.
 
-- [ ] **Step 4: Refactor successful resolution movement behind the task**
+- [x] **Step 4: Refactor successful resolution movement behind the task**
 
 Move the physical body of `change_resolution` into `_perform_resolution_change(task)`. Capture the target stage position immediately before the first resolution-induced stage move, pass `task.cancel_event` through Task 2 methods, and check cancellation before zoom, offset, final stage update, waveform work, and acquisition restart. Extend `Model.move_stage` with an optional `cancel_event` that forwards to `Microscope.move_stage`. The public `change_resolution` creates and finishes a synchronous task and returns success.
 
@@ -311,7 +311,7 @@ def _perform_resolution_change(self, task: _ResolutionChangeTask) -> bool:
     # Existing zoom-offset logic continues here and passes task.cancel_event.
 ```
 
-- [ ] **Step 5: Make manual setting updates model-owned and asynchronous**
+- [x] **Step 5: Make manual setting updates model-owned and asynchronous**
 
 Extract the existing `run_command("update_setting")` body to `_update_setting(command, resolution_task=None)`. For `"resolution"`, create the task before starting a `ThreadWithWarning` worker and return immediately. For other settings such as `"galvo"`, retain synchronous behavior. On cancellation set acquisition stop flags, release a paused data thread, avoid waveform publication/restart, and complete the task as cancelled.
 
@@ -323,7 +323,7 @@ elif command == "update_setting":
     self._update_setting(args[0])
 ```
 
-- [ ] **Step 6: Implement ordered best-effort Stop Stage**
+- [x] **Step 6: Implement ordered best-effort Stop Stage**
 
 Set the active task's cancellation event and state under its lock before calling any device. Stop former, target, and active microscopes with one shared set of attempted stage IDs. Record errors, read the actual active position, update configuration, and publish `update_stage`. Do not wait for the worker before issuing stops. The worker publishes `resolution_change_cancelled` only after reaching terminal state. Extend `Model.terminate` to set cancellation, issue the same stage stop, and join the active worker before microscope teardown.
 
@@ -346,7 +346,7 @@ def stop_stage(self, *, cancel_resolution_change: bool = True) -> None:
     self.event_queue.put(("update_stage", stopped_position))
 ```
 
-- [ ] **Step 7: Run focused and existing resolution tests**
+- [x] **Step 7: Run focused and existing resolution tests**
 
 Run:
 
@@ -359,7 +359,7 @@ PYTHONPATH=src /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -
 
 Expected: all pass and no worker remains alive after test cleanup.
 
-- [ ] **Step 8: Commit the model lifecycle**
+- [x] **Step 8: Commit the model lifecycle**
 
 ```bash
 git add src/navigate/model/model.py src/navigate/model/resolution_change.py \
@@ -380,7 +380,7 @@ git commit -m "fix: cancel active resolution changes before stopping stages" -m 
 - Consumes: Task 3 `_begin_resolution_change`, `_perform_resolution_change`, and `_finish_resolution_change` lifecycle.
 - Produces: `ChangeResolution.signal_func() -> bool` returns `False` after cancellation and never prepares/resumes the acquisition path; successful behavior remains unchanged.
 
-- [ ] **Step 1: Write a failing feature cancellation test**
+- [x] **Step 1: Write a failing feature cancellation test**
 
 ```python
 def test_change_resolution_feature_does_not_prepare_after_cancellation():
@@ -399,7 +399,7 @@ def test_change_resolution_feature_does_not_prepare_after_cancellation():
     assert model.stop_acquisition is True
 ```
 
-- [ ] **Step 2: Run the feature test and verify RED**
+- [x] **Step 2: Run the feature test and verify RED**
 
 Run:
 
@@ -410,7 +410,7 @@ PYTHONPATH=src /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -
 
 Expected: current feature ignores the resolution result and prepares the new acquisition.
 
-- [ ] **Step 3: Keep the whole feature operation inside the task lifecycle**
+- [x] **Step 3: Keep the whole feature operation inside the task lifecycle**
 
 Begin the task before pausing data or changing configuration. Use `try/finally` to finish it. If cancelled, set acquisition stop flags, release the paused data thread so it can terminate, skip microscope preparation, waveform event, next-channel preparation, and normal resume, then return `False`.
 
@@ -436,11 +436,11 @@ finally:
     self.model._finish_resolution_change(task, succeeded)
 ```
 
-- [ ] **Step 4: Synchronize API documentation and run focused tests**
+- [x] **Step 4: Synchronize API documentation and run focused tests**
 
 Document the Boolean result and cancellation side effects for `Model.change_resolution` and the keyword-only cancellation behavior of `Model.stop_stage`. Keep the autosummary reference to the existing symbols; do not add the private task class. Run Task 3 tests plus the feature test and existing feature-container tests touching `ChangeResolution`.
 
-- [ ] **Step 5: Commit the feature integration**
+- [x] **Step 5: Commit the feature integration**
 
 ```bash
 git add src/navigate/model/features/update_setting.py \

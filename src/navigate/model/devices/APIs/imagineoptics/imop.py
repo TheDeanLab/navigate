@@ -167,7 +167,6 @@ class IMOP_Mirror:
         self.corrdata_manager = corrdata_manager
         self.pupil = pupil
         self.modal_coef = modal_coef
-        self.haso_slopes = HasoSlopes()
         self.config = config
 
         self.last_delta_commands = np.zeros(self.mirror.n_actuators, dtype=np.float32)
@@ -203,9 +202,9 @@ class IMOP_Mirror:
         """
         Command the mirror to reproduce the given Zernike modal coefficients.
 
-        Converts the requested Zernike coefficients into HASO slopes, then
-        into per-actuator delta commands via the command matrix, and moves
-        the mirror to 'position_flat + delta_commands'.
+        Converts the requested Zernike coefficients into per-actuator delta
+        commands via the command matrix, and moves the mirror to
+        'position_flat + delta_commands'.
 
         Args:
             coefs: Zernike coefficient vector, length 'n_modes'.
@@ -226,24 +225,13 @@ class IMOP_Mirror:
             return
 
         try:
-            self.haso_slopes.new_from_modal_coef(
-                self.modal_coef, self.haso_config_file_path
-            )
-
-        except Exception as haso_exception:
-            print(f"haso_slopes.new_from_modal_coef failed: {haso_exception}")
-            return
-
-        try:
-            delta_commands = (
-                self.corrdata_manager.compute_delta_command_from_delta_slopes(
-                    self.haso_slopes
-                )
+            delta_commands = self.corrdata_manager.compute_command_from_modalcoef(
+                self.modal_coef
             )
 
         except Exception as delta_commands_exception:
             print(
-                "corrdata_manager.compute_delta_command_from_delta_slopes "
+                "corrdata_manager.compute_command_from_modalcoef "
                 f"failed: {delta_commands_exception}"
             )
             return
@@ -427,32 +415,6 @@ class CoreEngine:
         return pd.Series(config)
 
 
-class HasoSlopes:
-    """Wraps a wavekit_py HasoSlopes object -- the wavefront slopes
-    synthesized from a set of Zernike modal coefficients."""
-
-    def __init__(self):
-        self._haso_slopes = None
-
-    @property
-    def pointer(self):
-        return self._haso_slopes
-
-    def new_from_modal_coef(self, modal_coef, haso_config_file_path):
-        """
-        Synthesize HASO slopes corresponding to the given Zernike modal coefficients.
-
-        Args:
-            modal_coef: A ModalCoef wrapper whose coefficients define the
-                target wavefront.
-            haso_config_file_path: Path to the HASO sensor config file used
-                for the synthesis.
-        """
-        self._haso_slopes = wk.HasoSlopes(
-            modalcoef=modal_coef.pointer, config_file_path=haso_config_file_path
-        )
-
-
 class Pupil:
     """Wraps a wavekit_py Pupil object -- a binary mask over the subaperture
     grid marking which subapertures are active."""
@@ -608,17 +570,16 @@ class CorrDataManager:
         """
         return self._corr_data.get_greatest_common_pupil()
 
-    def compute_delta_command_from_delta_slopes(self, delta_slopes):
+    def compute_command_from_modalcoef(self, modal_coef):
         """
         Compute the relative wavefront corrector commands corresponding
-        to a delta slopes variation
+        to a set of Zernike modal coefficients, in a single call (bypassing
+        an intermediate HasoSlopes synthesis step).
 
         Returns:
             Array of size actuators count, containing the relative commands deltas.
         """
-        return self._corr_data.compute_delta_command_from_delta_slopes(
-            delta_slopes.pointer
-        )
+        return self._corr_data.compute_command_from_modalcoef(modal_coef.pointer)
 
 
 class WavefrontCorrector:

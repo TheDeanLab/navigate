@@ -183,6 +183,25 @@ class TestCorrDataManagerContract:
                 "does not branch on that key."
             )
 
+    def test_compute_command_from_modalcoef_takes_one_argument(self):
+        """imop.py's display_modes() calls
+        wk.CorrDataManager.compute_command_from_modalcoef(modalcoef) with a
+        single positional ModalCoef argument -- deliberately chosen over
+        HasoSlopes.new_from_modal_coef() + compute_delta_command_from_delta_slopes()
+        because it does not take a haso_config_file_path, avoiding a
+        per-call re-parse of that (license-bearing) config file on every
+        display_modes() call in tight AO-optimization loops."""
+        params = _require_params(
+            wk.CorrDataManager.compute_command_from_modalcoef,
+            "CorrDataManager.compute_command_from_modalcoef",
+        )
+        assert len(params) == 1, (
+            "imop.py calls "
+            "corrdata_manager.compute_command_from_modalcoef(modal_coef) with "
+            f"1 positional argument, but the installed wavekit_py expects "
+            f"{len(params)} parameters ({params})."
+        )
+
 
 class TestModalCoefPrefsContract:
     def test_set_zernike_prefs_kwargs(self):

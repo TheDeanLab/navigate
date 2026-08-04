@@ -141,7 +141,7 @@ git commit -m "fix: dispatch stage stops without GUI delay"
 - Consumes: `threading.Event`, existing stage `move_absolute`, `move_axis_absolute`, `stop`, and `verify_abs_position` contracts.
 - Produces: `Microscope.move_stage_offset(former_microscope=None, cancel_event=None) -> bool`; `Microscope.move_stage(..., cancel_event=None) -> bool`; `Microscope.stop_stage(stopped_stage_ids=None) -> list[str]`.
 
-- [ ] **Step 1: Write failing movement tests with literal expected order**
+- [x] **Step 1: Write failing movement tests with literal expected order**
 
 ```python
 def test_move_stage_stops_before_second_device_after_cancellation():
@@ -173,7 +173,7 @@ def test_stop_stage_attempts_each_unique_device_after_error():
 
 The test helpers implement only stage-driver behavior and live in the test module.
 
-- [ ] **Step 2: Run the movement tests and verify RED**
+- [x] **Step 2: Run the movement tests and verify RED**
 
 Run:
 
@@ -184,7 +184,7 @@ PYTHONPATH=src /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -
 
 Expected: current signatures reject `cancel_event` and stopping aborts on the first error or repeats a shared stage.
 
-- [ ] **Step 3: Extend the existing microscope methods**
+- [x] **Step 3: Extend the existing microscope methods**
 
 ```python
 def _movement_cancelled(cancel_event: Optional[threading.Event]) -> bool:
@@ -193,11 +193,11 @@ def _movement_cancelled(cancel_event: Optional[threading.Event]) -> bool:
 
 Check this helper before and after each blocking move. Return `False` on cancellation. Extend `stop_stage` with a caller-provided set of attempted stage object IDs, add IDs before invoking `stop()`, catch and log each exception, and return error strings after attempting all devices.
 
-- [ ] **Step 4: Complete Numpydoc and run focused tests**
+- [x] **Step 4: Complete Numpydoc and run focused tests**
 
 Document the cancellation-event ownership, blocking behavior, Boolean return, deduplication set, best-effort stop semantics, and returned errors. Run the Step 2 command and the existing microscope/model resolution test; expected: pass.
 
-- [ ] **Step 5: Commit the movement primitive**
+- [x] **Step 5: Commit the movement primitive**
 
 ```bash
 git add src/navigate/model/microscope.py test/model/test_resolution_change.py

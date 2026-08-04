@@ -50,6 +50,13 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+def _is_movement_cancelled(
+    cancel_event: Optional[threading.Event],
+) -> bool:
+    """Return whether cooperative stage cancellation was requested."""
+    return cancel_event is not None and cancel_event.is_set()
+
+
 class Microscope:
     """Microscope Class - Used to control the microscope."""
 
@@ -392,13 +399,32 @@ class Microscope:
         self.data_buffer = data_buffer
         self.number_of_frames = number_of_frames
 
-    def move_stage_offset(self, former_microscope: Optional[str] = None) -> None:
+    def move_stage_offset(
+        self,
+        former_microscope: Optional[str] = None,
+        cancel_event: Optional[threading.Event] = None,
+    ) -> bool:
         """Move the stage to the offset position.
 
         Parameters
         ----------
         former_microscope : Optional[str], optional
             Name of the former microscope.
+        cancel_event : Optional[threading.Event], optional
+            Cooperative cancellation signal owned by the calling operation. When set,
+            no later stage device is commanded.
+
+        Returns
+        -------
+        bool
+            ``True`` when every requested stage move completes. ``False`` when
+            cancellation is requested or a stage reports failure.
+
+        Notes
+        -----
+        A blocking device call cannot be interrupted by the event alone. Callers must
+        also issue the hardware stage stop, after which this method observes the event
+        before another device can move.
         """
 
         if former_microscope:
@@ -412,7 +438,10 @@ class Microscope:
         ]["stage"]
         self.ask_stage_for_position = True
         pos_dict = self.get_stage_position()
+        success = True
         for stage, axes in self.stages_list:
+            if _is_movement_cancelled(cancel_event):
+                return False
 
             # x_abs: current x_pos + current_x_offset - former_x_offset
             pos = {
@@ -424,8 +453,11 @@ class Microscope:
                 )
                 for axis in axes
             }
-            stage.move_absolute(pos, wait_until_done=True)
+            success = stage.move_absolute(pos, wait_until_done=True) and success
+            if _is_movement_cancelled(cancel_event):
+                return False
         self.ask_stage_for_position = True
+        return success
 
     def prepare_acquisition(self) -> dict:
         """Prepare the acquisition.
@@ -956,7 +988,11 @@ class Microscope:
         logger.info(f"Stage position caching: {self.cache_stage_positions} ")
 
     def move_stage(
-        self, pos_dict: dict, wait_until_done: bool = False, update_focus: bool = True
+        self,
+        pos_dict: dict,
+        wait_until_done: bool = False,
+        update_focus: bool = True,
+        cancel_event: Optional[threading.Event] = None,
     ) -> bool:
         """Move stage to a position.
 
@@ -968,12 +1004,25 @@ class Microscope:
             Wait until stage is done moving, by default False
         update_focus : bool, optional
             Update the central focus
+        cancel_event : Optional[threading.Event], optional
+            Cooperative cancellation signal owned by the calling operation. When set,
+            no later stage device is commanded.
 
         Returns
         -------
         success : bool
-            True if stage is successfully moved, False otherwise.
+            ``True`` if the stage is successfully moved. ``False`` on cancellation or
+            device-reported failure.
+
+        Notes
+        -----
+        A blocking device call cannot be interrupted by the event alone. Callers must
+        also issue the hardware stage stop, after which this method observes the event
+        before another device can move.
         """
+
+        if _is_movement_cancelled(cancel_event):
+            return False
 
         if self.cache_stage_positions:
             # cache stage positions in z-stack and customized modes.
@@ -988,12 +1037,15 @@ class Microscope:
             axis = axis_key[: axis_key.index("_")]
             if update_focus and axis == "f":
                 self._clear_zero_defocus_focus()
-            return self.stages[axis].move_axis_absolute(
+            success = self.stages[axis].move_axis_absolute(
                 axis, pos_dict[axis_key], wait_until_done
             )
+            return success and not _is_movement_cancelled(cancel_event)
 
         success = True
         for stage, axes in self.stages_list:
+            if _is_movement_cancelled(cancel_event):
+                return False
             pos = {
                 axis: pos_dict[axis]
                 for axis in pos_dict
@@ -1001,21 +1053,54 @@ class Microscope:
             }
             if pos:
                 success = stage.move_absolute(pos, wait_until_done) and success
+                if _is_movement_cancelled(cancel_event):
+                    return False
 
         if update_focus and "f_abs" in pos_dict:
             self._clear_zero_defocus_focus()
 
         return success
 
-    def stop_stage(self) -> None:
-        """Stop stage."""
+    def stop_stage(self, stopped_stage_ids: Optional[set[int]] = None) -> List[str]:
+        """Stop every unique stage device on this microscope.
+
+        Parameters
+        ----------
+        stopped_stage_ids : Optional[set[int]], optional
+            Object IDs of stage devices whose stop has already been attempted. The set
+            is updated in place so callers can deduplicate shared devices across
+            microscope configurations.
+
+        Returns
+        -------
+        list[str]
+            Error descriptions from failed stop attempts. All remaining unique stages
+            are attempted after an error.
+
+        Notes
+        -----
+        Device IDs are recorded before calling ``stop`` so a failing shared device is
+        not repeatedly invoked through another axis or microscope configuration.
+        """
 
         self.ask_stage_for_position = True
+        if stopped_stage_ids is None:
+            stopped_stage_ids = set()
+        errors = []
 
         for stage, axes in self.stages_list:
-            stage.stop()
+            stage_id = id(stage)
+            if stage_id in stopped_stage_ids:
+                continue
+            stopped_stage_ids.add(stage_id)
+            try:
+                stage.stop()
+            except Exception as e:
+                logger.exception("Failed to stop stage device")
+                errors.append(f"{type(e).__name__}: {e}")
 
         self.central_focus = self.get_stage_position().get("f_pos", self.central_focus)
+        return errors
 
     def get_stage_position(self) -> dict:
         """Get stage position.

@@ -666,7 +666,7 @@ def _return_resolution_position(self, task_id: int) -> None:
 
 Run the Step 3 tests. Expected: pass without creating `tk.Tk()` locally.
 
-- [ ] **Step 7: Commit the recovery UI**
+- [x] **Step 7: Commit the recovery UI**
 
 ```bash
 git add src/navigate/view/popups/resolution_change_popup.py \
@@ -685,11 +685,11 @@ git commit -m "feat: offer safe resolution-change recovery choices"
 - Consumes: Tasks 6-7 and the core PR branch.
 - Produces: a focused stacked recovery PR whose base is the core branch until the core merges.
 
-- [ ] **Step 1: Run formatting, lint, and focused tests**
+- [x] **Step 1: Run formatting, lint, and focused tests**
 
 Run Ruff and Black on all recovery-modified files. Run the full model resolution test file, feature test, controller tests, and popup callback tests.
 
-- [ ] **Step 2: Run a native GUI smoke check outside Aqua**
+- [x] **Step 2: Run a native GUI smoke check outside Aqua**
 
 Use Windows CI or a Linux X11 Tk environment:
 
@@ -700,7 +700,7 @@ xvfb-run -a /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -q \
 
 If the available environment is macOS Aqua Tk, skip window construction and explicitly report that Xvfb cannot isolate it.
 
-- [ ] **Step 3: Review the stacked diff**
+- [x] **Step 3: Review the stacked diff**
 
 ```bash
 git diff kdean/issue-486-stop-resolution-change --check

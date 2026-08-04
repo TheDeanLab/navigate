@@ -404,6 +404,30 @@ class ValidatingStage:
         return {key.removesuffix("_abs"): value for key, value in position.items()}
 
 
+def test_resolution_return_is_disabled_when_limit_validation_fails():
+    from unittest.mock import MagicMock
+
+    from navigate.model.model import Model
+    from navigate.model.resolution_change import _ResolutionChangeTask
+
+    stage = ValidatingStage()
+    stage.verify_abs_position = MagicMock(side_effect=RuntimeError("validation failed"))
+    model = Model.__new__(Model)
+    model.active_microscope = SimpleNamespace(stages_list=[(stage, ["x"])])
+    model.logger = MagicMock()
+    task = _ResolutionChangeTask(
+        task_id=7,
+        resolution_value="target",
+        former_microscope_name="former",
+        target_microscope_name="target",
+        previous_position={"x_abs": 12.0},
+        stopped_position={"x_pos": 15.0},
+    )
+
+    assert model._is_resolution_return_position_valid(task) is False
+    model.logger.exception.assert_called_once()
+
+
 def test_cancelled_resolution_stores_validated_recovery_snapshot():
     from unittest.mock import MagicMock
 
@@ -479,6 +503,56 @@ def test_keep_resolution_position_discards_snapshot_without_motion():
 
     assert model._resolution_recovery is None
     model.active_microscope.move_stage.assert_not_called()
+
+
+def test_rejected_resolution_return_emits_terminal_event():
+    model = make_model_with_recovery()
+    model.active_microscope_name = "different-scope"
+
+    assert model._start_resolution_return(7) is False
+
+    events = []
+    while not model.event_queue.empty():
+        events.append(model.event_queue.get_nowait())
+    assert events == [
+        ("warning", "The saved resolution-change position is unavailable."),
+        (
+            "resolution_return_complete",
+            {"task_id": 7, "succeeded": False, "cancelled": False},
+        ),
+    ]
+    model.active_microscope.move_stage.assert_not_called()
+
+
+def test_successful_resolution_return_stops_and_reports_completion():
+    from unittest.mock import MagicMock
+
+    model = make_model_with_recovery()
+    move_started = threading.Event()
+    release_move = threading.Event()
+
+    def blocking_move(_position, wait_until_done=False, cancel_event=None):
+        assert wait_until_done is True
+        assert cancel_event is not None
+        move_started.set()
+        release_move.wait(1.0)
+        return True
+
+    model.move_stage = blocking_move
+    model.stop_stage = MagicMock()
+
+    assert model._start_resolution_return(7) is True
+    assert move_started.wait(1.0)
+    worker = model._resolution_change_task.worker
+    release_move.set()
+    worker.join(1.0)
+
+    model.stop_stage.assert_called_once_with(cancel_resolution_change=False)
+    assert model._resolution_change_task is None
+    assert model.event_queue.get_nowait() == (
+        "resolution_return_complete",
+        {"task_id": 7, "succeeded": True, "cancelled": False},
+    )
 
 
 def test_return_moves_to_literal_snapshot_and_stop_cancels_it():

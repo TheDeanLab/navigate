@@ -1627,7 +1627,13 @@ class Model:
             }
             if not position or not hasattr(stage, "verify_abs_position"):
                 continue
-            verified = stage.verify_abs_position(position, is_strict=True)
+            try:
+                verified = stage.verify_abs_position(position, is_strict=True)
+            except Exception:
+                self.logger.exception(
+                    "Failed to validate the saved resolution-change position"
+                )
+                return False
             if len(verified) != len(position):
                 return False
             validated_axes.update(verified.keys())
@@ -1653,6 +1659,16 @@ class Model:
             ):
                 self.event_queue.put(
                     ("warning", "The saved resolution-change position is unavailable.")
+                )
+                self.event_queue.put(
+                    (
+                        "resolution_return_complete",
+                        {
+                            "task_id": task_id,
+                            "succeeded": False,
+                            "cancelled": False,
+                        },
+                    )
                 )
                 return False
 

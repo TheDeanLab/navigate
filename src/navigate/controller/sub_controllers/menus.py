@@ -736,6 +736,9 @@ class MenuController(GUIController):
             label="Add Customized Feature List", command=self.popup_feature_list_setting
         )
         self.view.menubar.menu_features.add_command(
+            label="Edit Selected Feature List", command=self.edit_feature_list
+        )
+        self.view.menubar.menu_features.add_command(
             label="Delete Selected Feature List", command=self.delete_feature_list
         )
         self.view.menubar.menu_features.add_command(
@@ -1229,6 +1232,29 @@ class MenuController(GUIController):
         self.parent_controller.features_popup_controller = FeaturePopupController(
             feature_list_popup, self.parent_controller
         )
+
+    @log_function_call
+    def edit_feature_list(self) -> None:
+        """Edit a selected customized feature list"""
+        feature_id = self.feature_id_val.get()
+        if feature_id < self.system_feature_list_count:
+            messagebox.showerror(
+                title="Feature List Error",
+                message="Can't edit system feature list or you haven't select any "
+                "feature list",
+            )
+            return
+
+        if hasattr(self.parent_controller, "features_popup_controller"):
+            self.parent_controller.features_popup_controller.exit_func()
+
+        feature_list_popup = FeatureListPopup(
+            self.view, title="Feature List Configuration"
+        )
+        self.parent_controller.features_popup_controller = FeaturePopupController(
+            feature_list_popup, self.parent_controller
+        )
+        self.parent_controller.features_popup_controller.populate_feature_list(feature_id)
 
     @log_function_call
     def load_feature_list(self) -> None:

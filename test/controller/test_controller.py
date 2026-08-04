@@ -1,4 +1,5 @@
 from pathlib import Path
+from queue import Queue
 from types import SimpleNamespace
 from unittest.mock import MagicMock, ANY, patch
 import pytest
@@ -644,6 +645,10 @@ def test_execute_autofocus(controller):
     # Test non-acquiring case
     controller.acquire_bar_controller.is_acquiring = False
     controller.execute("autofocus")
+    assert controller.acquire_bar_controller.is_acquiring is True
+    assert (
+        str(controller.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+    )
     controller.threads_pool.createThread.assert_called_with(
         resourceName="camera",
         target=controller.capture_image,
@@ -666,6 +671,82 @@ def test_execute_autofocus(controller):
     assert callable(kwargs["target"])
 
     assert True
+
+
+def test_capture_lifecycle_updates_autofocus_stop_button(controller):
+    """Capture startup and completion synchronize the open autofocus popup."""
+    controller.acquire_bar_controller.stop_acquire()
+    controller._set_autofocus_acquisition_state("idle")
+    controller._set_autofocus_state(False)
+    controller.threads_pool.createThread = MagicMock()
+    controller.menu_controller.popup_autofocus_setting()
+    start_button = controller.af_popup_controller.view.autofocus_btn
+    stop_button = controller.af_popup_controller.view.stop_acquisition_btn
+    microscope_name = controller.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
+
+    try:
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "disabled"
+
+        controller.execute("autofocus")
+        assert str(start_button["state"]) == "disabled"
+        assert str(stop_button["state"]) == "disabled"
+
+        controller._on_capture_started(microscope_name)
+        assert str(start_button["state"]) == "disabled"
+        assert str(stop_button["state"]) == "normal"
+
+        controller._finish_capture_ui("live", 0)
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "disabled"
+
+        controller._set_autofocus_acquisition_state("starting")
+        assert str(start_button["state"]) == "disabled"
+        assert str(stop_button["state"]) == "disabled"
+
+        controller._handle_capture_start_error(RuntimeError("startup failed"))
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "disabled"
+    finally:
+        if hasattr(controller, "af_popup_controller"):
+            controller.af_popup_controller.close_popup()
+
+
+def test_live_autofocus_completion_reenables_start_button(controller):
+    """Completing injected autofocus preserves the live acquisition controls."""
+    original_event_queue = controller.event_queue
+    original_event_pump_running = controller._event_pump_running
+    controller.threads_pool.createThread = MagicMock()
+    controller.acquire_bar_controller.is_acquiring = True
+    controller.acquire_bar_controller.mode = "live"
+    controller._set_autofocus_acquisition_state("running")
+    controller._set_autofocus_state(False)
+    controller.menu_controller.popup_autofocus_setting()
+    start_button = controller.af_popup_controller.view.autofocus_btn
+    stop_button = controller.af_popup_controller.view.stop_acquisition_btn
+
+    try:
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "normal"
+
+        controller.execute("autofocus")
+        assert str(start_button["state"]) == "disabled"
+        assert str(stop_button["state"]) == "normal"
+
+        controller.event_queue = Queue()
+        controller._event_pump_running = True
+        controller.event_queue.put(("autofocus_sequence_complete", None))
+        controller.update_event()
+
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "normal"
+    finally:
+        controller.event_queue = original_event_queue
+        controller._event_pump_running = original_event_pump_running
+        if hasattr(controller, "af_popup_controller"):
+            controller.af_popup_controller.close_popup()
 
 
 def test_execute_eliminate_tiles(controller):

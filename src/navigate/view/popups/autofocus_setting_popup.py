@@ -388,8 +388,28 @@ class AutofocusPopup:
         self.autofocus_btn = ttk.Button(
             button_bar, text="▶ Start Autofocus", style="Accent.TButton", width=18
         )
-        self.autofocus_btn.pack(pady=get_theme_padding_px((4, 6)), anchor="center")
-        button_bar.grid_columnconfigure(0, weight=1)
+        self.autofocus_btn.grid(
+            row=0,
+            column=0,
+            padx=get_theme_padding_px((0, 4)),
+            pady=get_theme_padding_px((4, 6)),
+            sticky=tk.E,
+        )
+        self.stop_acquisition_btn = ttk.Button(
+            button_bar,
+            text="■ Stop Acquisition",
+            style="Accent.TButton",
+            width=18,
+            state="disabled",
+        )
+        self.stop_acquisition_btn.grid(
+            row=0,
+            column=1,
+            padx=get_theme_padding_px((4, 0)),
+            pady=get_theme_padding_px((4, 6)),
+            sticky=tk.W,
+        )
+        button_bar.grid_columnconfigure((0, 1), weight=1)
 
         # Plot
         plot_label_size = int(get_theme_font("body")[1])

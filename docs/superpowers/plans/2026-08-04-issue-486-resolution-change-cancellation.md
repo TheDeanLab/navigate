@@ -601,7 +601,7 @@ git commit -m "feat: add cancellable resolution position recovery" -m \
 - Consumes: `resolution_change_cancelled` and `resolution_return_complete` events; Task 6 recovery command.
 - Produces: `ResolutionChangeCancelledPopup(root, keep_command, return_command, return_enabled)`; controller handlers `_show_resolution_change_cancelled(payload)` and `_finish_resolution_return(payload)`.
 
-- [ ] **Step 1: Write failing popup callback tests without Tk construction**
+- [x] **Step 1: Write failing popup callback tests without Tk construction**
 
 ```python
 def test_popup_close_keeps_current_position():
@@ -622,15 +622,15 @@ def test_popup_return_dismisses_before_starting_motion():
     assert order == ["dismiss", "return"]
 ```
 
-- [ ] **Step 2: Write failing controller event tests**
+- [x] **Step 2: Write failing controller event tests**
 
 Patch the popup class with a complete fake exposing `showup`/`dismiss`. Assert that two events with the same task ID create one popup; Keep dispatches `("resolution_recovery", task_id, "keep")`; Return dispatches `"return"`; and `resolution_return_complete` clears the tracked popup/task state.
 
-- [ ] **Step 3: Run popup/controller tests and verify RED**
+- [x] **Step 3: Run popup/controller tests and verify RED**
 
 Run only the new popup tests and named controller tests. Expected: imports and event handlers are absent.
 
-- [ ] **Step 4: Implement the view**
+- [x] **Step 4: Implement the view**
 
 Build a `PopUp` titled `Resolution Change Cancelled` with the approved explanatory text and buttons `Keep Current Position` and `Return to Previous Position`. Focus Keep, bind Escape and `WM_DELETE_WINDOW` to `_keep`, disable Return when `return_enabled` is false, and dismiss before either callback. Do not start model work from the view itself.
 
@@ -645,7 +645,7 @@ def _return(self) -> None:
     self._return_command()
 ```
 
-- [ ] **Step 5: Implement controller event handling**
+- [x] **Step 5: Implement controller event handling**
 
 Register the two event handlers through the existing event-listener dictionary. Track the displayed task ID to deduplicate and dispatch choices through the existing model thread pool. Before Return, call `stage_controller.view.toggle_button_states(True, stage_controller.stage_axes)` after the modal closes; the separate Stop Stage frame remains enabled. On `resolution_return_complete`, call `stage_controller.force_enable_all_axes()` and clear the tracked task ID.
 
@@ -662,7 +662,7 @@ def _return_resolution_position(self, task_id: int) -> None:
     )
 ```
 
-- [ ] **Step 6: Run popup/controller tests and verify GREEN**
+- [x] **Step 6: Run popup/controller tests and verify GREEN**
 
 Run the Step 3 tests. Expected: pass without creating `tk.Tk()` locally.
 

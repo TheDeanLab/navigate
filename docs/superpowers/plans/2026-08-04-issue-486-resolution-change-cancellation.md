@@ -459,7 +459,7 @@ git commit -m "fix: terminate cancelled resolution features safely" -m \
 - Consumes: Tasks 1-4.
 - Produces: a mergeable core branch that independently prevents collision-causing continuation.
 
-- [ ] **Step 1: Run core formatting and lint**
+- [x] **Step 1: Run core formatting and lint**
 
 ```bash
 ruff check src/navigate/model/model.py src/navigate/model/microscope.py \
@@ -482,7 +482,7 @@ black --check src/navigate/model/model.py src/navigate/model/microscope.py \
   test/controller/sub_controllers/test_stages.py
 ```
 
-- [ ] **Step 2: Run the relevant broader test set**
+- [x] **Step 2: Run the relevant broader test set**
 
 ```bash
 PYTHONPATH=src /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -q \
@@ -494,7 +494,7 @@ PYTHONPATH=src /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -
 
 Do not run the Tk-backed `stage_controller` package fixture locally; its direct-handler test has no fixture dependency.
 
-- [ ] **Step 3: Inspect the core diff and commit plan progress**
+- [x] **Step 3: Inspect the core diff and commit plan progress**
 
 ```bash
 git diff origin/develop --check

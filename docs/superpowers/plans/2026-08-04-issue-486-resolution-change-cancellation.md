@@ -504,7 +504,7 @@ git log --oneline origin/develop..HEAD
 
 Verify comments are brief and limited to the four non-obvious constraints in Global Constraints. Commit checkbox progress with `docs: record issue 486 core implementation`.
 
-- [ ] **Step 4: Push and open the core PR**
+- [x] **Step 4: Push and open the core PR**
 
 Push `kdean/issue-486-stop-resolution-change` and open a draft PR targeting `develop`. The body links the design and plan, summarizes focused and broader test evidence, records Xvfb/Aqua limitations, requests the designated reviewer if discoverable, and includes `Closes #486`.
 

@@ -136,6 +136,7 @@ def make_model_for_stop():
     )
     calls = []
     model = Model.__new__(Model)
+    model.logger = SimpleNamespace(exception=lambda *_args: None)
     model._resolution_change_task = task
     model._resolution_change_lock = threading.Lock()
     model.microscopes = {
@@ -168,6 +169,39 @@ def test_model_stop_publishes_actual_stopped_position():
         "update_stage",
         {"x_pos": 7.0, "f_pos": 1.0},
     )
+
+
+def test_model_stop_attempts_target_after_former_microscope_error():
+    model, task, calls = make_model_for_stop()
+
+    def fail_after_stop(_stopped_stage_ids=None):
+        calls.append(("former", task.cancel_event.is_set()))
+        raise RuntimeError("former position read failed")
+
+    model.microscopes["former"].stop_stage = fail_after_stop
+
+    model.stop_stage()
+
+    assert calls == [("former", True), ("target", True)]
+    assert any("former position read failed" in error for error in task.stop_errors)
+
+
+def test_model_stop_reports_position_readback_error_after_stop_attempts():
+    model, task, calls = make_model_for_stop()
+
+    def fail_readback():
+        raise RuntimeError("position readback failed")
+
+    model.get_stage_position = fail_readback
+
+    model.stop_stage()
+
+    assert calls == [("former", True), ("target", True)]
+    assert task.stopped_position is None
+    assert any("position readback failed" in error for error in task.stop_errors)
+    event, message = model.event_queue.get_nowait()
+    assert event == "warning"
+    assert "position readback failed" in message
 
 
 def test_model_move_stage_forwards_cancellation_event():
@@ -322,3 +356,36 @@ def test_terminate_stops_and_joins_active_resolution_worker():
     finally:
         task.cancel_event.set()
         worker.join(1.0)
+
+
+def test_failed_resolution_move_does_not_calculate_waveforms():
+    from unittest.mock import MagicMock
+
+    from navigate.model.model import Model
+    from navigate.model.resolution_change import _ResolutionChangeTask
+
+    model = Model.__new__(Model)
+    model.configuration = {
+        "experiment": {"MicroscopeState": {"microscope_name": "target", "zoom": "1x"}}
+    }
+    model.active_microscope_name = "former"
+    model.active_microscope = MagicMock()
+    model.is_acquiring = False
+    model.stop_acquisition = False
+    model.stop_send_signal = False
+    model.event_queue = SimpleQueue()
+    model._perform_resolution_change = MagicMock(return_value=False)
+    model._finish_resolution_change = MagicMock()
+    task = _ResolutionChangeTask(
+        task_id=1,
+        resolution_value="target",
+        former_microscope_name="former",
+        target_microscope_name="target",
+    )
+
+    model._update_setting("resolution", task)
+
+    model.active_microscope.calculate_all_waveform.assert_not_called()
+    assert model.stop_acquisition is True
+    assert model.stop_send_signal is True
+    model._finish_resolution_change.assert_called_once_with(task, False)

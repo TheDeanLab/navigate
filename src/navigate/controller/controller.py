@@ -1846,7 +1846,9 @@ class Controller:
             try:
                 self.model.stop_stage()
                 return
-            except RuntimeError:
+            except RuntimeError as e:
+                if "ObjectInSubprocess at the same time" not in str(e):
+                    raise
                 # ObjectInSubprocess rejects concurrent proxy calls. A safety stop
                 # must be retried instead of disappearing in the thread pool.
                 time.sleep(0.001)

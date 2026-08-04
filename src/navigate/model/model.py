@@ -955,16 +955,34 @@ class Model:
         stopped_stage_ids = set()
         stop_errors = []
         for microscope_name in dict.fromkeys(microscope_names):
-            stop_errors.extend(
-                self.microscopes[microscope_name].stop_stage(stopped_stage_ids)
-            )
+            try:
+                stop_errors.extend(
+                    self.microscopes[microscope_name].stop_stage(stopped_stage_ids)
+                )
+            except Exception as e:
+                self.logger.exception(
+                    "Failed while stopping stages for %s", microscope_name
+                )
+                stop_errors.append(f"{type(e).__name__}: {e}")
 
-        ret_pos_dict = self.get_stage_position()
+        if cancel_resolution_change and task is not None:
+            task.stop_errors.extend(stop_errors)
+
+        try:
+            ret_pos_dict = self.get_stage_position()
+        except Exception as e:
+            self.logger.exception("Failed to read stage position after stopping")
+            error = f"{type(e).__name__}: {e}"
+            if cancel_resolution_change and task is not None:
+                task.stop_errors.append(error)
+            self.event_queue.put(
+                ("warning", f"Stages were stopped, but position readback failed: {e}")
+            )
+            return
         update_stage_dict(self, ret_pos_dict)
         self.event_queue.put(("update_stage", ret_pos_dict))
         if cancel_resolution_change and task is not None:
             task.stopped_position = ret_pos_dict
-            task.stop_errors.extend(stop_errors)
 
     def end_acquisition(self) -> None:
         """End the acquisition.
@@ -1614,10 +1632,7 @@ class Model:
                     succeeded = self.change_resolution(microscope_name) is not False
                 else:
                     succeeded = self._perform_resolution_change(resolution_task)
-                if (
-                    resolution_task is not None
-                    and resolution_task.cancel_event.is_set()
-                ):
+                if not succeeded:
                     self.stop_acquisition = True
                     self.stop_send_signal = True
                     if reboot:

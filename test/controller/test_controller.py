@@ -997,7 +997,10 @@ def test_stop_stage_retries_proxy_contention():
     def stop_stage():
         attempts.append("stop")
         if len(attempts) == 1:
-            raise RuntimeError("model pipe is busy")
+            raise RuntimeError(
+                "Two different threads tried to use the same "
+                "ObjectInSubprocess at the same time!"
+            )
 
     controller = Controller.__new__(Controller)
     controller.model = SimpleNamespace(stop_stage=stop_stage)
@@ -1005,6 +1008,30 @@ def test_stop_stage_retries_proxy_contention():
     controller.stop_stage()
 
     assert attempts == ["stop", "stop"]
+
+
+def test_stop_stage_does_not_retry_hardware_runtime_error():
+    from types import SimpleNamespace
+
+    import pytest
+
+    from navigate.controller.controller import Controller
+
+    attempts = []
+
+    def stop_stage():
+        attempts.append("stop")
+        if len(attempts) == 1:
+            raise RuntimeError("hardware stop failed")
+        raise AssertionError("hardware failure was incorrectly retried")
+
+    controller = Controller.__new__(Controller)
+    controller.model = SimpleNamespace(stop_stage=stop_stage)
+
+    with pytest.raises(RuntimeError, match="hardware stop failed"):
+        controller.stop_stage()
+
+    assert attempts == ["stop"]
 
 
 def test_update_stage_controller_silent(controller):

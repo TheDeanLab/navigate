@@ -22,3 +22,13 @@ class _ResolutionChangeTask:
     previous_position: Optional[Dict[str, Any]] = None
     stopped_position: Optional[Dict[str, Any]] = None
     stop_errors: List[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class _ResolutionRecovery:
+    """Store the validated position offered after one cancelled change."""
+
+    task_id: int
+    microscope_name: str
+    previous_position: Dict[str, Any]
+    return_allowed: bool

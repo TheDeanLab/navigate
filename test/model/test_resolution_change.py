@@ -389,3 +389,135 @@ def test_failed_resolution_move_does_not_calculate_waveforms():
     assert model.stop_acquisition is True
     assert model.stop_send_signal is True
     model._finish_resolution_change.assert_called_once_with(task, False)
+
+
+class ValidatingStage:
+    """Stage double that applies strict literal limit validation."""
+
+    def __init__(self, valid=True):
+        self.valid = valid
+
+    def verify_abs_position(self, position, is_strict=False):
+        assert is_strict is True
+        if not self.valid:
+            return {}
+        return {key.removesuffix("_abs"): value for key, value in position.items()}
+
+
+def test_cancelled_resolution_stores_validated_recovery_snapshot():
+    from unittest.mock import MagicMock
+
+    from navigate.model.model import Model
+    from navigate.model.resolution_change import _ResolutionChangeTask
+
+    model = Model.__new__(Model)
+    model._resolution_change_lock = threading.Lock()
+    model._resolution_change_task = None
+    model._resolution_recovery = None
+    model.active_microscope_name = "target"
+    model.active_microscope = SimpleNamespace(
+        stages_list=[(ValidatingStage(), ["x", "f"])]
+    )
+    model.configuration = {"experiment": {"MicroscopeState": {"zoom": "2x"}}}
+    model.event_queue = SimpleQueue()
+    model.logger = MagicMock()
+    task = _ResolutionChangeTask(
+        task_id=7,
+        resolution_value="target",
+        former_microscope_name="former",
+        target_microscope_name="target",
+        previous_position={"x_abs": 12.0, "f_abs": 3.0},
+        stopped_position={"x_pos": 15.0, "f_pos": 4.0},
+    )
+    task.cancel_event.set()
+    model._resolution_change_task = task
+
+    model._finish_resolution_change(task, False)
+
+    assert model._resolution_recovery.task_id == 7
+    assert model._resolution_recovery.previous_position == {
+        "x_abs": 12.0,
+        "f_abs": 3.0,
+    }
+    event, payload = model.event_queue.get_nowait()
+    assert event == "resolution_change_cancelled"
+    assert payload["return_allowed"] is True
+
+
+def make_model_with_recovery(*, return_allowed=True):
+    """Build a real Model with one pending recovery decision."""
+    from unittest.mock import MagicMock
+
+    from navigate.model.model import Model
+    from navigate.model.resolution_change import _ResolutionRecovery
+
+    model = Model.__new__(Model)
+    model.data_buffer = [object()]
+    model.logger = MagicMock()
+    model.event_queue = SimpleQueue()
+    model._resolution_change_lock = threading.Lock()
+    model._resolution_change_counter = 7
+    model._resolution_change_task = None
+    model._resolution_recovery = _ResolutionRecovery(
+        task_id=7,
+        microscope_name="target",
+        previous_position={"x_abs": 12.0, "f_abs": 3.0},
+        return_allowed=return_allowed,
+    )
+    model.active_microscope_name = "target"
+    model.active_microscope = MagicMock()
+    model.configuration = {
+        "experiment": {"MicroscopeState": {"microscope_name": "target", "zoom": "2x"}}
+    }
+    return model
+
+
+def test_keep_resolution_position_discards_snapshot_without_motion():
+    model = make_model_with_recovery()
+
+    model.run_command("resolution_recovery", 7, "keep")
+
+    assert model._resolution_recovery is None
+    model.active_microscope.move_stage.assert_not_called()
+
+
+def test_return_moves_to_literal_snapshot_and_stop_cancels_it():
+    model = make_model_with_recovery()
+    move_started = threading.Event()
+    release_move = threading.Event()
+    move_arguments = []
+
+    def blocking_move(position, wait_until_done=False, cancel_event=None):
+        move_arguments.append((position, wait_until_done, cancel_event))
+        move_started.set()
+        release_move.wait(1.0)
+        return cancel_event is None or not cancel_event.is_set()
+
+    model.move_stage = blocking_move
+    model.microscopes = {"target": model.active_microscope}
+    model.active_microscope.stop_stage.return_value = []
+    model.get_stage_position = lambda: {"x_pos": 14.0, "f_pos": 4.0}
+    model.configuration["experiment"]["StageParameters"] = {"x": 0.0, "f": 0.0}
+
+    model.run_command("resolution_recovery", 7, "return")
+    assert move_started.wait(1.0)
+    worker = model._resolution_change_task.worker
+    try:
+        model.stop_stage()
+    finally:
+        release_move.set()
+        worker.join(1.0)
+
+    assert move_arguments[0][:2] == (
+        {"x_abs": 12.0, "f_abs": 3.0},
+        True,
+    )
+    assert move_arguments[0][2].is_set()
+    assert model._resolution_change_task is None
+    events = []
+    while not model.event_queue.empty():
+        events.append(model.event_queue.get_nowait())
+    return_event = next(
+        payload for event, payload in events if event == "resolution_return_complete"
+    )
+    assert return_event == {"task_id": 7, "succeeded": False, "cancelled": True}

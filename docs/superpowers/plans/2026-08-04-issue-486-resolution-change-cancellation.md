@@ -519,7 +519,7 @@ Push `kdean/issue-486-stop-resolution-change` and open a draft PR targeting `dev
 - Consumes: core terminal `resolution_change_cancelled` event and Task 2 cancellation-aware `move_stage`.
 - Produces: `Model.run_command("resolution_recovery", task_id, choice)` accepting literal choices `"keep"` and `"return"`; terminal `resolution_return_complete` event.
 
-- [ ] **Step 1: Write failing recovery tests**
+- [x] **Step 1: Write failing recovery tests**
 
 ```python
 def test_keep_resolution_position_discards_snapshot_without_motion():
@@ -542,11 +542,11 @@ def test_return_moves_to_literal_snapshot_and_can_be_cancelled():
     assert model.return_stage.stop_called.is_set()
 ```
 
-- [ ] **Step 2: Run recovery tests and verify RED**
+- [x] **Step 2: Run recovery tests and verify RED**
 
 Run the two named tests. Expected: the recovery command and snapshot store are absent.
 
-- [ ] **Step 3: Add recovery ownership and validation**
+- [x] **Step 3: Add recovery ownership and validation**
 
 On terminal cancellation, retain an immutable copy of the pre-movement coordinates in a separate private recovery record after clearing the active task. Mark Return eligible only when every requested axis passes the affected stage's existing strict absolute-position validation. A newer resolution task invalidates an older recovery record.
 
@@ -559,7 +559,7 @@ class _ResolutionRecovery:
     return_allowed: bool
 ```
 
-- [ ] **Step 4: Implement keep and return commands**
+- [x] **Step 4: Implement keep and return commands**
 
 Keep atomically clears the matching snapshot and emits no movement. Return validates task ID and eligibility, creates a `returning` task before starting its worker, clears the popup snapshot exactly once, calls the existing cancellation-aware `Model.move_stage(..., wait_until_done=True)`, updates actual positions, and emits `resolution_return_complete` with success or cancellation.
 
@@ -574,11 +574,11 @@ elif command == "resolution_recovery":
         self.event_queue.put(("warning", f"Unknown resolution recovery: {choice}"))
 ```
 
-- [ ] **Step 5: Run all model recovery and core tests**
+- [x] **Step 5: Run all model recovery and core tests**
 
 Run `test/model/test_resolution_change.py`, the existing `test_change_resolution`, and the concurrency guard. Expected: pass.
 
-- [ ] **Step 6: Commit recovery movement**
+- [x] **Step 6: Commit recovery movement**
 
 Create branch `kdean/issue-486-resolution-recovery` from the core branch before this commit, then:
 

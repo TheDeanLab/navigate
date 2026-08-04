@@ -710,7 +710,7 @@ git log --oneline kdean/issue-486-stop-resolution-change..HEAD
 
 Confirm that the recovery PR contains no duplicate stage executor, stop path, or acquisition restart.
 
-- [ ] **Step 4: Push and open the recovery PR**
+- [x] **Step 4: Push and open the recovery PR**
 
 Push `kdean/issue-486-resolution-recovery` and open a draft PR based on `kdean/issue-486-stop-resolution-change`. Link the design, plan, and core PR; list test evidence and Xvfb limitation; request the designated reviewer if known; and reference #486 without a second closing directive.
 

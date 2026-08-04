@@ -59,7 +59,7 @@
 - Consumes: existing `StageController.parent_controller.execute(command)` and `SynchronizedThreadPool.createThread(resourceName, target)`.
 - Produces: `StageController.stop_button_handler()` dispatches `"stop_stage"` synchronously; `Controller.execute("resolution")` submits without joining; `Controller._stop_stage_safely() -> None` retries transient proxy contention.
 
-- [ ] **Step 1: Write failing controller tests**
+- [x] **Step 1: Write failing controller tests**
 
 ```python
 def test_stop_button_handler_dispatches_immediately():
@@ -83,7 +83,7 @@ def test_stop_stage_retries_proxy_contention(controller):
     assert controller.model.stop_stage.call_count == 2
 ```
 
-- [ ] **Step 2: Run the focused tests and verify RED**
+- [x] **Step 2: Run the focused tests and verify RED**
 
 Run:
 
@@ -96,7 +96,7 @@ PYTHONPATH=src /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -
 
 Expected: failures show the Tk debounce, worker `join()`, and missing retry helper.
 
-- [ ] **Step 3: Implement the minimal controller fixes**
+- [x] **Step 3: Implement the minimal controller fixes**
 
 ```python
 def stop_button_handler(self, *args: Iterable) -> None:
@@ -117,11 +117,11 @@ def _stop_stage_safely(self) -> None:
 
 Use `_stop_stage_safely` as the `"stop_stage"` thread target and remove the resolution worker assignment and `join()`.
 
-- [ ] **Step 4: Run the focused tests and verify GREEN**
+- [x] **Step 4: Run the focused tests and verify GREEN**
 
 Run the Step 2 command. Expected: all three pass without constructing Tk.
 
-- [ ] **Step 5: Commit the direct-dispatch slice**
+- [x] **Step 5: Commit the direct-dispatch slice**
 
 ```bash
 git add src/navigate/controller/controller.py \

@@ -1226,11 +1226,10 @@ class Controller:
                 return
 
             self.change_microscope(temp[0], temp[1])
-            work_thread = self.threads_pool.createThread(
+            self.threads_pool.createThread(
                 resourceName="model",
                 target=lambda: self.model.run_command("update_setting", "resolution"),
             )
-            work_thread.join()
 
         elif command == "set_save":
             """Set whether the image will be saved.
@@ -1843,7 +1842,14 @@ class Controller:
         -------
         None
         """
-        self.model.stop_stage()
+        while True:
+            try:
+                self.model.stop_stage()
+                return
+            except RuntimeError:
+                # ObjectInSubprocess rejects concurrent proxy calls. A safety stop
+                # must be retried instead of disappearing in the thread pool.
+                time.sleep(0.001)
 
     def update_stage_limits(self, microscope_name: str) -> None:
         """Update stage limits on the device side

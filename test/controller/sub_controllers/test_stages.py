@@ -31,6 +31,7 @@
 #
 
 import pytest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, call
 import numpy as np
 
@@ -330,13 +331,15 @@ def test_down_btn_handler(stage_controller, flip_x, flip_y, flip_z):
     stage_config["flip_z"] = False
 
 
-def test_stop_button_handler(stage_controller):
+def test_stop_button_handler_dispatches_immediately():
+    from navigate.controller.sub_controllers.stages import StageController
 
-    stage_controller.view.after = MagicMock()
+    parent_controller = MagicMock()
+    stage_controller = SimpleNamespace(parent_controller=parent_controller)
 
-    stage_controller.stop_button_handler()
+    StageController.stop_button_handler(stage_controller)
 
-    stage_controller.view.after.assert_called_once()
+    parent_controller.execute.assert_called_once_with("stop_stage")
 
 
 def test_position_callback(stage_controller):

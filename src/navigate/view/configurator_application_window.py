@@ -31,7 +31,7 @@
 # Standard Library Imports
 import ast
 import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox, ttk
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -108,9 +108,13 @@ class ConfigurationAssistantWindow(ttk.Frame):
         self.devices_frame.grid(row=0, column=0, sticky=tk.NSEW)
         self.devices_frame.add_button.config(command=self.show_add_device_dialog)
         self.devices_frame.edit_button.config(command=self.show_edit_device_dialog)
+        self.devices_frame.delete_button.config(command=self.delete_selected_device)
 
         self.device_info_frame = DeviceInfoFrame(self.configuration_frame)
         self.device_info_frame.grid(row=0, column=1, sticky=tk.NSEW)
+        self.devices_frame.device_list.bind(
+            "<<TreeviewSelect>>", self.show_device_info
+        )
 
     def add_microscope(self, name: str) -> None:
         """Add a microscope radio button to the microscope list."""
@@ -207,6 +211,21 @@ class ConfigurationAssistantWindow(ttk.Frame):
             initial_device=device,
         )
 
+    def delete_selected_device(self) -> None:
+        """Confirm and remove the device selected in the Devices panel."""
+        selected_device = self.devices_frame.get_selected_device()
+        if selected_device is None:
+            return
+        item_id, _ = selected_device
+        device_name = self.devices_frame.device_list.item(item_id, "text")
+        if messagebox.askyesno(
+            "Delete Device",
+            f"Delete '{device_name}'?",
+            parent=self.root,
+        ):
+            self.devices_frame.delete_device(item_id)
+            self.device_info_frame.set_device_info({})
+
     def add_device(self, category: str, manufacturer: str, model: str) -> None:
         """Add a selected device to the Devices panel."""
         device_name = (
@@ -232,6 +251,29 @@ class ConfigurationAssistantWindow(ttk.Frame):
         self.devices_frame.update_device(
             item_id, device_name, category, manufacturer, model
         )
+        self.show_device_info()
+
+    def show_device_info(self, _event: Optional[tk.Event] = None) -> None:
+        """Populate settings for the device selected in the Devices panel."""
+        selected_device = self.devices_frame.get_selected_device()
+        if selected_device is None:
+            self.device_info_frame.set_device_info({})
+            return
+        _, (category, manufacturer, model) = selected_device
+        properties = {}
+        if AddDeviceDialog.class_inherits(
+            category, manufacturer, model, "SerialDevice"
+        ):
+            properties = {"port": "", "baudrate": "", "timeout": ""}
+        if AddDeviceDialog.class_inherits(
+            category, manufacturer, model, "SequenceDevice"
+        ):
+            properties.setdefault("serial_number", "")
+        for property_name in AddDeviceDialog.get_connect_params(
+            category, manufacturer, model
+        ):
+            properties.setdefault(property_name, "")
+        self.device_info_frame.set_device_info(properties)
 
 
 class AddDeviceDialog(tk.Toplevel):
@@ -441,6 +483,113 @@ class AddDeviceDialog(tk.Toplevel):
                 and not class_name.endswith("Base")
             )
         ]
+
+    @staticmethod
+    def class_inherits(
+        category: str, manufacturer: str, class_name: str, parent_class: str
+    ) -> bool:
+        """Return whether a class directly or locally indirectly inherits a parent."""
+        module_path = (
+            Path(__file__).resolve().parents[1]
+            / "model"
+            / "devices"
+            / category
+            / f"{manufacturer}.py"
+        )
+        module = ast.parse(module_path.read_text(encoding="utf-8"))
+        class_bases = {
+            node.name: [
+                base.id
+                if isinstance(base, ast.Name)
+                else base.attr
+                if isinstance(base, ast.Attribute)
+                else ""
+                for base in node.bases
+            ]
+            for node in module.body
+            if isinstance(node, ast.ClassDef)
+        }
+
+        def inherits(name: str, visited: set[str]) -> bool:
+            """Follow local inheritance chains until the parent class is found."""
+            if name in visited or name not in class_bases:
+                return False
+            visited.add(name)
+            for base_name in class_bases[name]:
+                if base_name == parent_class:
+                    return True
+                if inherits(base_name, visited):
+                    return True
+            return False
+
+        return inherits(class_name, set())
+
+    @staticmethod
+    def get_connect_params(
+        category: str, manufacturer: str, class_name: str
+    ) -> list[str]:
+        """Return literal parameters from a class's ``get_connect_params`` method."""
+        module_path = (
+            Path(__file__).resolve().parents[1]
+            / "model"
+            / "devices"
+            / category
+            / f"{manufacturer}.py"
+        )
+        module = ast.parse(module_path.read_text(encoding="utf-8"))
+        class_nodes = {
+            node.name: node
+            for node in module.body
+            if isinstance(node, ast.ClassDef)
+        }
+
+        def method_params(class_node: ast.ClassDef) -> Optional[list[str]]:
+            """Read a literal list returned by a get_connect_params classmethod."""
+            for node in class_node.body:
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
+                if node.name != "get_connect_params" or not any(
+                    isinstance(decorator, ast.Name)
+                    and decorator.id == "classmethod"
+                    for decorator in node.decorator_list
+                ):
+                    continue
+                for statement in node.body:
+                    if not isinstance(statement, ast.Return):
+                        continue
+                    if not isinstance(statement.value, (ast.List, ast.Tuple)):
+                        return []
+                    return [
+                        value.value
+                        for value in statement.value.elts
+                        if isinstance(value, ast.Constant)
+                        and isinstance(value.value, str)
+                    ]
+            return None
+
+        def inherited_params(name: str, visited: set[str]) -> list[str]:
+            """Find parameters on a local class or one of its local ancestors."""
+            if name in visited or name not in class_nodes:
+                return []
+            visited.add(name)
+            class_node = class_nodes[name]
+            params = method_params(class_node)
+            if params is not None:
+                return params
+            for base in class_node.bases:
+                base_name = (
+                    base.id
+                    if isinstance(base, ast.Name)
+                    else base.attr
+                    if isinstance(base, ast.Attribute)
+                    else ""
+                )
+                params = inherited_params(base_name, visited)
+                if params:
+                    return params
+            return []
+
+        return inherited_params(class_name, set())
 
     @staticmethod
     def format_model_name(model: str, category: str) -> str:
@@ -672,6 +821,20 @@ class DevicesFrame(ttk.LabelFrame):
             pady=get_theme_space_px(3),
         )
 
+        self.delete_button = ttk.Button(
+            self,
+            text="×",
+            width=3,
+            style="Danger.TButton",
+        )
+        self.delete_button.grid(
+            row=0,
+            column=2,
+            sticky=tk.E,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
+
         self.device_list = ttk.Treeview(
             self,
             show="tree",
@@ -681,7 +844,7 @@ class DevicesFrame(ttk.LabelFrame):
         self.device_list.grid(
             row=1,
             column=0,
-            columnspan=2,
+            columnspan=3,
             sticky=tk.NSEW,
             padx=get_theme_space_px(3),
             pady=get_theme_padding_px((0, 3)),
@@ -746,16 +909,21 @@ class DevicesFrame(ttk.LabelFrame):
         self.device_list.item(item_id, text=device_name)
         self.device_data[item_id] = (category, manufacturer, model)
 
+    def delete_device(self, item_id: str) -> None:
+        """Remove a device from the panel list and its stored selection data."""
+        self.device_list.delete(item_id)
+        del self.device_data[item_id]
+
 
 class DeviceInfoFrame(ttk.LabelFrame):
-    """Right-hand third-row panel for displaying device information."""
+    """Right-hand third-row panel for editing device settings."""
 
     def __init__(self, parent: ttk.Frame, *args, **kwargs) -> None:
-        """Create an empty property/value list for the selected device."""
+        """Create an empty, horizontally scrollable property/value form."""
         super().__init__(parent, text="", *args, **kwargs)
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self._configure_list_style()
+        self.rowconfigure(2, weight=1)
+        self._configure_entry_style()
 
         self.device_info_label = ttk.Label(self, text="Device Info")
         self.device_info_label.grid(
@@ -766,84 +934,114 @@ class DeviceInfoFrame(ttk.LabelFrame):
             pady=get_theme_space_px(3),
         )
 
-        self.device_info_list = ttk.Treeview(
+        self.settings_canvas = tk.Canvas(
             self,
-            columns=("property", "value"),
-            show="headings",
-            height=8,
-            style="DeviceInfo.Treeview",
+            background=get_theme_color("input_bg"),
+            highlightthickness=0,
         )
-        self.device_info_list.heading("property", text="Property")
-        self.device_info_list.heading("value", text="Value")
-        self.device_info_list.column(
-            "property", anchor=tk.W, width=130, stretch=False
-        )
-        self.device_info_list.column("value", anchor=tk.W, width=160, stretch=False)
-        self.device_info_list.grid(
-            row=1,
+        self.settings_canvas.grid(
+            row=2,
             column=0,
             sticky=tk.NSEW,
             padx=get_theme_space_px(3),
             pady=get_theme_padding_px((0, 3)),
         )
+        self.settings_frame = ttk.Frame(self.settings_canvas)
+        self.settings_frame.columnconfigure(0, minsize=170)
+        self.settings_frame.columnconfigure(1, weight=1, minsize=160)
+        self.settings_window = self.settings_canvas.create_window(
+            (0, 0),
+            anchor=tk.NW,
+            window=self.settings_frame,
+        )
+        self.settings_frame.bind("<Configure>", self._update_scrollregion)
+        self.settings_canvas.bind("<Configure>", self._resize_settings_form)
+
         self.horizontal_scrollbar = ttk.Scrollbar(
             self,
             orient=tk.HORIZONTAL,
-            command=self.device_info_list.xview,
+            command=self.settings_canvas.xview,
         )
         self.horizontal_scrollbar.grid(
-            row=2,
+            row=3,
             column=0,
             sticky=tk.EW,
             padx=get_theme_space_px(3),
             pady=get_theme_padding_px((0, 3)),
         )
-        self.device_info_list.configure(
+        self.settings_canvas.configure(
             xscrollcommand=self.horizontal_scrollbar.set,
         )
-        self.device_info_list.bind("<Configure>", self._resize_columns)
+        self.value_variables: dict[str, tk.StringVar] = {}
 
     @staticmethod
-    def _configure_list_style() -> None:
-        """Apply Navigate's dark theme colors to the device information list."""
+    def _configure_entry_style() -> None:
+        """Apply Navigate's dark theme colors to setting value entries."""
         style = ttk.Style()
         input_background = get_theme_color("input_bg")
-        surface_background = get_theme_color("surface_bg")
         text_color = get_theme_color("text")
-        accent_color = get_theme_color("accent")
         style.configure(
-            "DeviceInfo.Treeview",
-            background=input_background,
+            "DeviceInfo.TEntry",
             fieldbackground=input_background,
             foreground=text_color,
-        )
-        style.map(
-            "DeviceInfo.Treeview",
-            background=[("selected", accent_color)],
-            foreground=[("selected", text_color)],
-        )
-        style.configure(
-            "DeviceInfo.Treeview.Heading",
-            background=surface_background,
-            foreground=text_color,
+            insertcolor=text_color,
+            bordercolor=input_background,
+            lightcolor=input_background,
+            darkcolor=input_background,
         )
 
     def set_device_info(self, device_info: dict[str, str]) -> None:
-        """Replace the displayed device information with ``device_info``."""
-        for item in self.device_info_list.get_children():
-            self.device_info_list.delete(item)
-        for property_name, value in device_info.items():
-            self.device_info_list.insert("", tk.END, values=(property_name, value))
+        """Replace settings with labels and editable value entries."""
+        for child in self.settings_frame.winfo_children():
+            child.destroy()
+        self.value_variables = {}
 
-    def _resize_columns(self, event: tk.Event) -> None:
-        """Expand both columns while preserving horizontal scrolling when narrow."""
-        property_width = 130
-        value_width = 160
-        extra_width = max(0, event.width - property_width - value_width)
-        property_width += extra_width // 2
-        value_width += extra_width - extra_width // 2
-        self.device_info_list.column("property", width=property_width)
-        self.device_info_list.column("value", width=value_width)
+        ttk.Label(self.settings_frame, text="Property").grid(
+            row=0,
+            column=0,
+            sticky=tk.W,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((1, 1)),
+        )
+        ttk.Label(self.settings_frame, text="Value").grid(
+            row=0,
+            column=1,
+            sticky=tk.W,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((1, 1)),
+        )
+        for row, (property_name, value) in enumerate(device_info.items(), start=1):
+            ttk.Label(self.settings_frame, text=property_name).grid(
+                row=row,
+                column=0,
+                sticky=tk.W,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
+            value_variable = tk.StringVar(master=self, value=str(value))
+            self.value_variables[property_name] = value_variable
+            ttk.Entry(
+                self.settings_frame,
+                textvariable=value_variable,
+                style="DeviceInfo.TEntry",
+            ).grid(
+                row=row,
+                column=1,
+                sticky=tk.EW,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
+
+    def _update_scrollregion(self, _event: tk.Event) -> None:
+        """Keep the scrollbar aligned with the full settings form width."""
+        self.settings_canvas.configure(scrollregion=self.settings_canvas.bbox(tk.ALL))
+
+    def _resize_settings_form(self, event: tk.Event) -> None:
+        """Expand values with the panel while preserving a narrow-scroll minimum."""
+        self.settings_canvas.itemconfigure(
+            self.settings_window,
+            width=max(330, event.width),
+        )
 
 
 class TopWindow(ttk.Frame):

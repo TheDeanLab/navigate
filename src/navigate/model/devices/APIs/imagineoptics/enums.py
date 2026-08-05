@@ -1,7 +1,5 @@
 from enum import IntEnum
 
-# Enumerated type defs (cEnum.h):
-
 
 class E_MODAL_T(IntEnum):
 
@@ -26,3 +24,8 @@ class E_PUPIL_COVERING_T(IntEnum):
 
     E_PUPIL_INSCRIBED = 0
     E_PUPIL_CIRCUMSCRIBED = 1
+
+
+class E_ZERNIKE_INDEXING_T(IntEnum):
+    WYANT = 0
+    NOLL = 1

@@ -300,6 +300,27 @@ class TestAutofocusPopupController:
                 False,
             )
 
+    def test_auto_defocus_warning_uses_clear_acquisition_instruction(self, monkeypatch):
+        """Auto Defocus clearly instructs users to stop acquisition first."""
+        parent_controller = self.autofocus_controller.parent_controller
+        monkeypatch.setattr(
+            parent_controller,
+            "acquire_bar_controller",
+            SimpleNamespace(is_acquiring=True),
+            raising=False,
+        )
+        self.autofocus_controller.widgets["calibration_action"].set("Auto Defocus")
+
+        with patch(
+            "navigate.controller.sub_controllers.autofocus.messagebox.showwarning"
+        ) as showwarning:
+            self.autofocus_controller.start_autofocus()
+
+        showwarning.assert_called_once_with(
+            title="Navigate",
+            message=("Please stop the acquisition before calculating defocus values."),
+        )
+
     def test_target_channel_uses_channel_setting_labels(self):
         channel_values = tuple(
             self.autofocus_controller.widgets["target_channel"].widget["values"]

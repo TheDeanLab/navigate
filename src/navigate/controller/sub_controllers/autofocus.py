@@ -306,8 +306,7 @@ class AutofocusPopupController(GUIController):
                 messagebox.showwarning(
                     title="Navigate",
                     message=(
-                        "Please stop acquisition before start getting defocus "
-                        "values!"
+                        "Please stop the acquisition before calculating defocus values."
                     ),
                 )
                 return

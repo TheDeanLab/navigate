@@ -713,3 +713,57 @@ Confirm that the recovery PR contains no duplicate stage executor, stop path, or
 - [ ] **Step 4: Push and open the recovery PR**
 
 Push `kdean/issue-486-resolution-recovery` and open a draft PR based on `kdean/issue-486-stop-resolution-change`. Link the design, plan, and core PR; list test evidence and Xvfb limitation; request the designated reviewer if known; and reference #486 without a second closing directive.
+
+### Task 9: Cover both Stop Stage GUI bindings headlessly
+
+**Files:**
+- Create: `test/controller/test_stop_stage_button_bindings.py`
+- Modify: `docs/superpowers/specs/2026-08-04-issue-486-resolution-change-cancellation-design.md`
+- Modify: `docs/superpowers/plans/2026-08-04-issue-486-resolution-change-cancellation.md`
+
+**Interfaces:**
+- Consumes: `StageController.__init__`, `StageController.stop_button_handler`, and `Controller.update_acquire_control`.
+- Produces: regression coverage proving each visible Stop Stage button independently dispatches the literal `"stop_stage"` command.
+
+- [x] **Step 1: Add a headless button double and controller fixture**
+
+Create a test-only `_InvokableButton` whose `configure`/`config` methods retain
+the command and whose `invoke()` method executes it. Construct the real
+`StageController` with no configured axes and suppress only unrelated
+initialization callbacks; do not construct `tk.Tk()` or production widgets.
+
+- [x] **Step 2: Add independent click tests**
+
+```python
+def test_stage_control_stop_button_click_dispatches_stop_stage():
+    _, stage_button, _, executed_commands = _build_headless_controller()
+    stage_button.invoke()
+    assert executed_commands == ["stop_stage"]
+
+
+def test_acquisition_bar_stop_button_click_dispatches_stop_stage():
+    _, _, acquisition_button, executed_commands = _build_headless_controller()
+    acquisition_button.invoke()
+    assert executed_commands == ["stop_stage"]
+```
+
+- [x] **Step 3: Verify binding-specific RED states**
+
+Temporarily remove the Stage Control binding and run its named test; expect a
+failure because the button has no command. Restore it, temporarily remove the
+acquisition-bar binding, and run its named test; expect the corresponding
+failure. Restore both production files exactly.
+
+- [x] **Step 4: Verify GREEN and surrounding safety coverage**
+
+Run the two new tests, the existing direct-handler test, controller Stop Stage
+tests, and the resolution-change safety tests with the repository's configured
+Navigate Python. Run Ruff, Black check, and `git diff --check` on the final
+changes.
+
+- [x] **Step 5: Commit and update PR #1236**
+
+Commit only the new test and the design/plan updates, then push the commit as a
+fast-forward update to `kdean/issue-486-stop-resolution-change`. Confirm the
+live PR head and report fresh CI status without treating absent or pending jobs
+as success.

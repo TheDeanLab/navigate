@@ -208,6 +208,21 @@ widget tests run under native Windows CI and, if a Linux Tk test lane is added,
 under `xvfb-run -a`. The Homebrew Xvfb server cannot isolate this environment's
 Aqua/AppKit Tk build because it is not an X11 client.
 
+### Headless coverage for both Stop Stage buttons
+
+The Stage Control tab and acquisition bar expose separate Stop Stage buttons,
+but both must invoke the same immediate `StageController.stop_button_handler`
+path. Two independent regression tests will construct the real controller
+bindings around lightweight button doubles that store a configured command and
+execute it through `invoke()`. One test clicks the Stage Control tab button and
+the other clicks the acquisition bar button; each asserts the resulting
+`"stop_stage"` command recorded at the parent-controller boundary.
+
+These tests will not construct Tk widgets or open windows. Their mutation check
+is binding-specific: deleting either production binding must fail its own test
+without relying on the direct handler unit test. No production refactor or new
+public API is required for this coverage.
+
 ## Rollout and Review Boundaries
 
 The work will be prepared as two stacked, independently reviewable pull

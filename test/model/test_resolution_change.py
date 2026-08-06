@@ -125,14 +125,13 @@ class RecordingMicroscope:
 def make_model_for_stop():
     """Build a real Model instance around deterministic microscope doubles."""
     from navigate.model.model import Model
+    from navigate.model.resolution_change import _ResolutionChangeTask
 
-    task = SimpleNamespace(
-        cancel_event=threading.Event(),
-        state="changing",
+    task = _ResolutionChangeTask(
+        task_id=1,
+        resolution_value="target",
         former_microscope_name="former",
         target_microscope_name="target",
-        stopped_position=None,
-        stop_errors=[],
     )
     calls = []
     model = Model.__new__(Model)
@@ -465,6 +464,74 @@ def test_cancelled_resolution_stores_validated_recovery_snapshot():
     }
     event, payload = model.event_queue.get_nowait()
     assert event == "resolution_change_cancelled"
+    assert payload["return_allowed"] is True
+
+
+def test_cancelled_resolution_waits_for_stop_readback_before_offering_return():
+    from navigate.model.model import Model
+    from navigate.model.resolution_change import _ResolutionChangeTask
+
+    stop_started = threading.Event()
+    release_stop = threading.Event()
+    cancellation_emitted = threading.Event()
+    events = []
+
+    class BlockingStopMicroscope:
+        stages_list = [(ValidatingStage(), ["x"])]
+
+        def stop_stage(self, _stopped_stage_ids=None):
+            stop_started.set()
+            release_stop.wait(1.0)
+            return []
+
+    def record_event(event):
+        events.append(event)
+        if event[0] == "resolution_change_cancelled":
+            cancellation_emitted.set()
+
+    model = Model.__new__(Model)
+    model._resolution_change_lock = threading.Lock()
+    model._resolution_recovery = None
+    model.active_microscope_name = "target"
+    model.active_microscope = BlockingStopMicroscope()
+    model.microscopes = {"target": model.active_microscope}
+    model.get_stage_position = lambda: {"x_pos": 15.0}
+    model.configuration = {
+        "experiment": {
+            "MicroscopeState": {"zoom": "2x"},
+            "StageParameters": {"x": 15.0},
+        }
+    }
+    model.event_queue = SimpleNamespace(put=record_event)
+    model.logger = SimpleNamespace(exception=lambda *_args, **_kwargs: None)
+    task = _ResolutionChangeTask(
+        task_id=7,
+        resolution_value="target",
+        former_microscope_name="target",
+        target_microscope_name="target",
+        previous_position={"x_abs": 12.0},
+    )
+    model._resolution_change_task = task
+
+    stop_thread = threading.Thread(target=model.stop_stage)
+    finish_thread = threading.Thread(
+        target=lambda: model._finish_resolution_change(task, False)
+    )
+    stop_thread.start()
+    try:
+        assert stop_started.wait(1.0)
+        finish_thread.start()
+        assert cancellation_emitted.wait(0.1) is False
+    finally:
+        release_stop.set()
+        stop_thread.join(1.0)
+        finish_thread.join(1.0)
+
+    assert cancellation_emitted.is_set()
+    _, payload = next(
+        event for event in events if event[0] == "resolution_change_cancelled"
+    )
+    assert payload["stopped_position"] == {"x_pos": 15.0}
     assert payload["return_allowed"] is True
 
 

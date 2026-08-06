@@ -767,3 +767,48 @@ Commit only the new test and the design/plan updates, then push the commit as a
 fast-forward update to `kdean/issue-486-stop-resolution-change`. Confirm the
 live PR head and report fresh CI status without treating absent or pending jobs
 as success.
+
+### Task 10: Wait for Stop Stage readback before offering Return
+
+**Files:**
+- Modify: `src/navigate/model/resolution_change.py`
+- Modify: `src/navigate/model/model.py`
+- Modify: `test/model/test_resolution_change.py`
+- Modify: `docs/superpowers/specs/2026-08-04-issue-486-resolution-change-cancellation-design.md`
+- Modify: `docs/superpowers/plans/2026-08-04-issue-486-resolution-change-cancellation.md`
+
+**Interfaces:**
+- Consumes: `_ResolutionChangeTask.cancel_event`, `Model.stop_stage`, and `Model._finish_resolution_change`.
+- Produces: task-owned stop-completion synchronization that preserves immediate cancellation but defers recovery validation and notification until stopped-position readback completes.
+
+- [x] **Step 1: Reproduce the hardware ordering failure**
+
+Block the real `Model.stop_stage` path inside a microscope double while a second
+thread finalizes the cancelled resolution task. Assert that no cancellation
+event is emitted until the stop is released, then require the emitted payload to
+contain the stopped position and enable Return.
+
+- [x] **Step 2: Verify RED**
+
+Run the named concurrency test against the current PR #1237 implementation.
+Expected: failure because `resolution_change_cancelled` is emitted while the
+hardware stop double is still blocked.
+
+- [x] **Step 3: Synchronize cancellation finalization**
+
+Add a task-owned `stop_complete_event` that is initially set, clear it before
+publishing cancellation, and set it in a `finally` block after every stop and
+readback outcome. In cancelled resolution finalization, wait for that signal
+before validating the recovery snapshot or emitting the popup event.
+
+- [x] **Step 4: Verify GREEN and surrounding safety behavior**
+
+Run the named regression, the complete resolution-change test module, the
+controller and popup recovery tests, both Stop Stage click tests, Ruff, Black
+checks scoped against the stacked diff, and `git diff --check`.
+
+- [x] **Step 5: Commit and update PR #1237**
+
+Commit only the synchronization fix, its regression coverage, and the design
+records. Push the existing recovery branch and verify the live head, stacked
+base, mergeability, and CI state before asking for another hardware test.

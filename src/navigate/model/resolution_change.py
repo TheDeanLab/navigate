@@ -17,11 +17,16 @@ class _ResolutionChangeTask:
     former_microscope_name: str
     target_microscope_name: str
     cancel_event: threading.Event = field(default_factory=threading.Event)
+    stop_complete_event: threading.Event = field(default_factory=threading.Event)
     state: str = "changing"
     worker: Optional[threading.Thread] = None
     previous_position: Optional[Dict[str, Any]] = None
     stopped_position: Optional[Dict[str, Any]] = None
     stop_errors: List[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        """Mark hardware stop complete until cancellation starts one."""
+        self.stop_complete_event.set()
 
 
 @dataclass(frozen=True)

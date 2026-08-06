@@ -952,10 +952,12 @@ class Model:
         if cancel_resolution_change and task is not None:
             lock = getattr(self, "_resolution_change_lock", None)
             if lock is None:
+                task.stop_complete_event.clear()
                 task.cancel_event.set()
                 task.state = "cancel_requested"
             else:
                 with lock:
+                    task.stop_complete_event.clear()
                     task.cancel_event.set()
                     task.state = "cancel_requested"
 
@@ -984,20 +986,27 @@ class Model:
             task.stop_errors.extend(stop_errors)
 
         try:
-            ret_pos_dict = self.get_stage_position()
-        except Exception as e:
-            self.logger.exception("Failed to read stage position after stopping")
-            error = f"{type(e).__name__}: {e}"
+            try:
+                ret_pos_dict = self.get_stage_position()
+            except Exception as e:
+                self.logger.exception("Failed to read stage position after stopping")
+                error = f"{type(e).__name__}: {e}"
+                if cancel_resolution_change and task is not None:
+                    task.stop_errors.append(error)
+                self.event_queue.put(
+                    (
+                        "warning",
+                        f"Stages were stopped, but position readback failed: {e}",
+                    )
+                )
+                return
+            update_stage_dict(self, ret_pos_dict)
+            self.event_queue.put(("update_stage", ret_pos_dict))
             if cancel_resolution_change and task is not None:
-                task.stop_errors.append(error)
-            self.event_queue.put(
-                ("warning", f"Stages were stopped, but position readback failed: {e}")
-            )
-            return
-        update_stage_dict(self, ret_pos_dict)
-        self.event_queue.put(("update_stage", ret_pos_dict))
-        if cancel_resolution_change and task is not None:
-            task.stopped_position = ret_pos_dict
+                task.stopped_position = ret_pos_dict
+        finally:
+            if cancel_resolution_change and task is not None:
+                task.stop_complete_event.set()
 
     def end_acquisition(self) -> None:
         """End the acquisition.
@@ -1576,6 +1585,8 @@ class Model:
         cancelled = task.cancel_event.is_set()
         task.state = "cancelled" if cancelled else "completed"
         if cancelled:
+            # Recovery is safe only after every stop attempt and readback finishes.
+            task.stop_complete_event.wait()
             return_allowed = self._is_resolution_return_position_valid(task)
             if task.previous_position is not None:
                 self._resolution_recovery = _ResolutionRecovery(

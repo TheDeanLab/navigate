@@ -33,6 +33,7 @@
 import random
 import pytest
 import os
+from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Iterable, Iterator, Optional
 from multiprocessing import Manager
@@ -346,6 +347,35 @@ def test_autofocus_live_injection_preserves_channel_args(model):
     finally:
         model.is_acquiring = original_is_acquiring
         model.imaging_mode = original_imaging_mode
+        model.signal_container = original_signal_container
+        model.data_container = original_data_container
+
+
+def test_reset_feature_list_reports_injected_autofocus_completion(model):
+    """Restoring live features reports completion of the injected sequence."""
+    original_event_queue = model.event_queue
+    original_signal_container = getattr(model, "signal_container", None)
+    original_data_container = getattr(model, "data_container", None)
+    model.event_queue = Queue()
+    model.signal_container = MagicMock()
+    model.data_container = MagicMock()
+    model.data_container.end_flag = True
+    model.injected_flag.value = True
+
+    try:
+        with patch(
+            "navigate.model.model.load_features",
+            return_value=(MagicMock(), MagicMock()),
+        ):
+            model.reset_feature_list()
+
+        assert model.event_queue.get_nowait() == (
+            "autofocus_sequence_complete",
+            None,
+        )
+        assert model.injected_flag.value is False
+    finally:
+        model.event_queue = original_event_queue
         model.signal_container = original_signal_container
         model.data_container = original_data_container
 

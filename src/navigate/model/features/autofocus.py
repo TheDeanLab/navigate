@@ -31,7 +31,7 @@
 
 
 # Standard Library Imports
-from queue import Queue
+from queue import Empty, Queue
 import threading
 
 # Third Party Imports
@@ -223,7 +223,10 @@ class Autofocus:
 
         feature_list = [autofocus_node]
 
-        if self.calibration_action == "capture_reference" and self.set_defocus_for_all_flag:
+        if (
+            self.calibration_action == "capture_reference"
+            and self.set_defocus_for_all_flag
+        ):
             for channel_id in self.model.active_microscope.available_channels:
                 channel_key = f"channel_{channel_id}"
                 if channel_key != self.reference_channel:
@@ -241,8 +244,7 @@ class Autofocus:
                     )
 
         self.model.signal_container, self.model.data_container = load_features(
-            self.model,
-            feature_list
+            self.model, feature_list
         )
 
         self.model.signal_thread = threading.Thread(
@@ -252,7 +254,7 @@ class Autofocus:
 
         self.model.data_thread = threading.Thread(
             target=self.model.run_data_process,
-            args=((frame_num + 1)*len(feature_list),),
+            args=((frame_num + 1) * len(feature_list),),
             name="Autofocus Data",
         )
 
@@ -342,6 +344,21 @@ class Autofocus:
             self.init_pos = self.focus_pos - coarse_pos_offset
         self.signal_id = 0
 
+    def _wait_for_focus_position(self):
+        """Wait for a calculated focus position until acquisition is stopped.
+
+        Returns
+        -------
+        float or None
+            Calculated focus position, or ``None`` after a stop request.
+        """
+        while not self.model.stop_acquisition:
+            try:
+                return self.autofocus_pos_queue.get(timeout=0.1)
+            except Empty:
+                pass
+        return None
+
     def in_func_signal(self):
         """Run the autofocus routine."""
 
@@ -365,9 +382,10 @@ class Autofocus:
 
         elif self.signal_id < self.total_frame_num:
             if self.signal_id and self.signal_id == self.coarse_steps:
-                self.init_pos = self.autofocus_pos_queue.get(
-                    timeout=self.coarse_steps * 10
-                )
+                focus_position = self._wait_for_focus_position()
+                if focus_position is None:
+                    return None
+                self.init_pos = focus_position
                 self.init_pos -= self.fine_pos_offset
             self.init_pos += self.fine_step_size
             if self.device == "stage":
@@ -391,7 +409,10 @@ class Autofocus:
             )
 
         else:
-            self.init_pos = self.autofocus_pos_queue.get(timeout=self.coarse_steps * 10)
+            focus_position = self._wait_for_focus_position()
+            if focus_position is None:
+                return None
+            self.init_pos = focus_position
             if self.device == "stage":
                 self.model.move_stage(
                     {f"{self.device_ref}_abs": self.init_pos}, wait_until_done=True
@@ -553,7 +574,8 @@ class Autofocus:
             peak = float(vals.max())
             if peak <= mu + 2 * sigma:
                 self.model.logger.warning(
-                    f"Autofocus significance test failed: peak {peak:.3f} <= mean+2σ {mu+2*sigma:.3f}"
+                    f"Autofocus significance test failed: peak {peak:.3f} <= "
+                    f"mean+2σ {mu+2*sigma:.3f}"
                 )
                 return True
 

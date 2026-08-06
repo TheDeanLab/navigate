@@ -31,6 +31,7 @@
 
 # Standard library imports
 import unittest
+from queue import Empty
 from unittest.mock import MagicMock, patch
 
 # Third party imports
@@ -129,6 +130,68 @@ class TestAutofocusClass(unittest.TestCase):
         steps, pos_offset = self.autofocus.get_steps(10.0, 2.0)
         self.assertEqual(steps, 6)  # Expected number of steps
         self.assertEqual(pos_offset, 8.0)  # Expected position offset
+
+    def test_wait_for_focus_position_stops_after_cancellation(self):
+        """A stop request releases an autofocus focus-position handoff."""
+        self.autofocus.model.stop_acquisition = False
+
+        def stop_while_waiting(timeout):
+            self.assertEqual(timeout, 0.1)
+            self.autofocus.model.stop_acquisition = True
+            raise Empty
+
+        with patch.object(
+            self.autofocus.autofocus_pos_queue,
+            "get",
+            side_effect=stop_while_waiting,
+        ):
+            focus_position = self.autofocus._wait_for_focus_position()
+
+        self.assertIsNone(focus_position)
+
+    def test_wait_for_focus_position_returns_available_position(self):
+        """An available data-thread focus position passes to the signal thread."""
+        self.autofocus.model.stop_acquisition = False
+        self.autofocus.autofocus_pos_queue.put(123.4)
+
+        focus_position = self.autofocus._wait_for_focus_position()
+
+        self.assertEqual(focus_position, 123.4)
+
+    def test_in_func_signal_skips_fine_move_when_cancelled(self):
+        """Cancellation during the coarse-to-fine handoff performs no further move."""
+        self.autofocus.coarse_steps = 5
+        self.autofocus.signal_id = 5
+        self.autofocus.total_frame_num = 10
+        self.autofocus.init_pos = 0.0
+        self.autofocus.fine_pos_offset = 1.0
+        self.autofocus.fine_step_size = 0.1
+        self.autofocus.model.move_stage = MagicMock()
+
+        with patch.object(
+            self.autofocus,
+            "_wait_for_focus_position",
+            return_value=None,
+        ):
+            result = self.autofocus.in_func_signal()
+
+        self.assertIsNone(result)
+        self.autofocus.model.move_stage.assert_not_called()
+
+    def test_in_func_signal_skips_final_move_when_cancelled(self):
+        """Cancellation at the final handoff leaves the focus stage untouched."""
+        self.autofocus.coarse_steps = 5
+        self.autofocus.signal_id = 11
+        self.autofocus.total_frame_num = 10
+        self.autofocus.model.stop_acquisition = True
+        self.autofocus.model.logger = MagicMock()
+        self.autofocus.model.move_stage = MagicMock()
+        self.autofocus.autofocus_pos_queue.put(123.4)
+
+        result = self.autofocus.in_func_signal()
+
+        self.assertIsNone(result)
+        self.autofocus.model.move_stage.assert_not_called()
 
     def test_run_loads_autofocus_feature_without_preparing_channel(self):
         model = DummyModel()

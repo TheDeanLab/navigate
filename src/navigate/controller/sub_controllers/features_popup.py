@@ -59,7 +59,13 @@ from navigate.config.config import get_navigate_path
 class FeaturePopupController(GUIController):
     """Controller for feature list popup"""
 
-    def __init__(self, view, parent_controller, feature_list_id=0):
+    def __init__(
+        self,
+        view,
+        parent_controller,
+        feature_list_id=0,
+        persist_feature_list_edits=False,
+    ):
         """Initialize the controller
 
         Parameters
@@ -70,11 +76,17 @@ class FeaturePopupController(GUIController):
             The parent controller
         feature_list_id : int, optional
             The id of the feature list, by default 0
+        persist_feature_list_edits : bool, optional
+            Persist confirmed edits to an internal feature-list record. Acquisition
+            configuration remains runtime-only by default.
         """
         super().__init__(view, parent_controller)
 
         #: int: The id of the feature in the feature list.
         self.feature_list_id = feature_list_id
+
+        #: bool: Whether confirmed edits should be persisted to the feature-list YAML.
+        self.persist_feature_list_edits = persist_feature_list_edits
 
         #: list: The list of feature names.
         self.features = []
@@ -153,27 +165,50 @@ class FeaturePopupController(GUIController):
             return
         content = self.view.inputs["content"].get("1.0", "end-1c")
         feature_list_content = "".join(content.split("\n"))
-        self.parent_controller.execute(
-            "load_feature", self.feature_list_id, feature_list_content
-        )
-        # save to yaml file
-        feature_lists_path = get_navigate_path() + "/feature_lists"
-        feature_list_name = self.view.inputs["feature_list_name"].get()
-        feature_list_config = load_yaml_file(
-            os.path.join(
-                feature_lists_path, f"{'_'.join(feature_list_name.split(' '))}.yml"
+
+        if self.persist_feature_list_edits:
+            (
+                feature_list_config,
+                yaml_file_name,
+            ) = self.parent_controller.menu_controller._get_custom_feature_list_record(
+                self.feature_list_id
             )
-        )
-        if feature_list_config and feature_list_config["module_name"] is None:
-            save_yaml_file(
+            if feature_list_config is None or yaml_file_name is None:
+                messagebox.showerror(
+                    title="Feature List Error",
+                    message="The selected feature-list record is missing or invalid.",
+                )
+                return
+            if feature_list_config["module_name"] is not None:
+                messagebox.showerror(
+                    title="Feature List Error",
+                    message=(
+                        "This feature list is provided by Python code or a plugin "
+                        "and cannot be edited in the visual editor."
+                    ),
+                )
+                return
+
+            feature_lists_path = get_navigate_path() + "/feature_lists"
+            feature_list_name = feature_list_config["feature_list_name"]
+            if not save_yaml_file(
                 feature_lists_path,
                 {
                     "module_name": None,
                     "feature_list_name": feature_list_name,
                     "feature_list": feature_list_content,
                 },
-                f"{'_'.join(feature_list_name.split(' '))}.yml",
-            )
+                yaml_file_name,
+            ):
+                messagebox.showerror(
+                    title="Feature List Error",
+                    message="The feature list could not be saved. No changes applied.",
+                )
+                return
+
+        self.parent_controller.execute(
+            "load_feature", self.feature_list_id, feature_list_content
+        )
         #: bool: Whether the acquisition should start.
         self.start_acquisiton_flag = True
         self.close_child_popups()
@@ -1371,28 +1406,32 @@ class FeatureListGraphController:
 
     def move_feature(self, old_index, new_index):
         """Move a feature and its structure entry to the drop position."""
-        if new_index > old_index:
-            new_index -= 1
-        if old_index == new_index:
+        destination = new_index - 1 if new_index > old_index else new_index
+        if old_index == destination:
             return
-        old_structure_index = self.feature_structure.index(old_index)
-        token = self.feature_structure.pop(old_structure_index)
-        target_structure_index = (
-            self.feature_structure.index(new_index)
-            if new_index < len(self.features) - 1
-            else len(self.feature_structure)
+
+        old_order = list(range(len(self.features)))
+        moved_identity = old_order.pop(old_index)
+        old_order.insert(destination, moved_identity)
+
+        new_structure = list(self.feature_structure)
+        new_structure.remove(moved_identity)
+        successor = (
+            old_order[destination + 1] if destination + 1 < len(old_order) else None
         )
-        self.feature_structure.insert(target_structure_index, token)
-        feature = self.features.pop(old_index)
-        self.features.insert(new_index, feature)
-        for structure_pos, value in enumerate(self.feature_structure):
-            if type(value) is int:
-                if value == old_index:
-                    self.feature_structure[structure_pos] = new_index
-                elif old_index < new_index and old_index < value <= new_index:
-                    self.feature_structure[structure_pos] -= 1
-                elif new_index < old_index and new_index <= value < old_index:
-                    self.feature_structure[structure_pos] += 1
+        if successor is None:
+            new_structure.append(moved_identity)
+        else:
+            new_structure.insert(new_structure.index(successor), moved_identity)
+
+        new_index_by_identity = {
+            identity: index for index, identity in enumerate(old_order)
+        }
+        self.features = [self.features[identity] for identity in old_order]
+        self.feature_structure = [
+            new_index_by_identity[token] if type(token) is int else token
+            for token in new_structure
+        ]
 
 
 def verify_feature_list(content):

@@ -180,7 +180,6 @@ class FeatureAdvancedSettingController:
         unloaded_functions = []
         feature_parameter_config = {}
         for arg_name in self.popup.inputs.keys():
-            add_default_function_flag = True
             for row in self.popup.inputs[arg_name]:
                 if row and row[0].get().strip():
                     if self.is_valid_function(row[0].get(), row[1].get()):
@@ -188,7 +187,6 @@ class FeatureAdvancedSettingController:
                             feature_parameter_config[arg_name] = {}
                         if row[1].get() == "None":
                             feature_parameter_config[arg_name][row[0].get()] = None
-                            add_default_function_flag = False
                         else:
                             feature_parameter_config[arg_name][row[0].get()] = row[
                                 1
@@ -196,7 +194,7 @@ class FeatureAdvancedSettingController:
                     else:
                         unloaded_functions.append(row[0].get())
 
-            if add_default_function_flag and feature_parameter_config.get(arg_name, None):
+            if feature_parameter_config.get(arg_name, None):
                 feature_parameter_config[arg_name]["None"] = None
 
         # save to yaml file

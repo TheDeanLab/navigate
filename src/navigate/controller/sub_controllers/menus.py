@@ -1249,6 +1249,42 @@ class MenuController(GUIController):
             feature_list_popup, self.parent_controller
         )
 
+    def _get_custom_feature_list_record(self, feature_id):
+        """Return a custom feature-list record and its authoritative YAML filename."""
+        feature_lists_path = os.path.join(get_navigate_path(), "feature_lists")
+        feature_records = load_yaml_file(
+            os.path.join(feature_lists_path, "__sequence.yml")
+        )
+        record_index = feature_id - self.system_feature_list_count
+        if (
+            not isinstance(feature_records, list)
+            or record_index < 0
+            or record_index >= len(feature_records)
+        ):
+            return None, None
+
+        sequence_record = feature_records[record_index]
+        if not isinstance(sequence_record, dict):
+            return None, None
+        yaml_file_name = sequence_record.get("yaml_file_name")
+        if not yaml_file_name:
+            return None, None
+
+        feature_list_config = load_yaml_file(
+            os.path.join(feature_lists_path, yaml_file_name)
+        )
+        if (
+            not isinstance(feature_list_config, dict)
+            or "module_name" not in feature_list_config
+            or "feature_list_name" not in feature_list_config
+            or (
+                feature_list_config["module_name"] is None
+                and "feature_list" not in feature_list_config
+            )
+        ):
+            return None, None
+        return feature_list_config, yaml_file_name
+
     @log_function_call
     def edit_feature_list(self) -> None:
         """Edit a selected customized feature list"""
@@ -1261,6 +1297,23 @@ class MenuController(GUIController):
             )
             return
 
+        feature_list_config, _ = self._get_custom_feature_list_record(feature_id)
+        if feature_list_config is None:
+            messagebox.showerror(
+                title="Feature List Error",
+                message="The selected feature-list record is missing or invalid.",
+            )
+            return
+        if feature_list_config["module_name"] is not None:
+            messagebox.showerror(
+                title="Feature List Error",
+                message=(
+                    "This feature list is provided by Python code or a plugin and "
+                    "cannot be edited in the visual editor."
+                ),
+            )
+            return
+
         if hasattr(self.parent_controller, "features_popup_controller"):
             self.parent_controller.features_popup_controller.exit_func()
 
@@ -1268,7 +1321,9 @@ class MenuController(GUIController):
             self.view, title="Feature List Configuration"
         )
         self.parent_controller.features_popup_controller = FeaturePopupController(
-            feature_list_popup, self.parent_controller
+            feature_list_popup,
+            self.parent_controller,
+            persist_feature_list_edits=True,
         )
         self.parent_controller.features_popup_controller.populate_feature_list(feature_id)
 

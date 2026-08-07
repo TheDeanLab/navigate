@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+import threading
 
 # Third Party Imports
 import numpy as np
@@ -98,6 +99,42 @@ class AutofocusPopupController(GUIController):
         #: object: The autofocus coarse plot.
         self.coarse_plot = None
 
+        #: int: Thread identifier used to keep plot mutations on the Tk thread.
+        self._main_thread_ident = threading.get_ident()
+
+        #: np.ndarray: Latest autofocus progress snapshot waiting to be rendered.
+        self._pending_autofocus_data = None
+
+        #: str: Tk after-id for the coalesced autofocus progress callback.
+        self._autofocus_after_id = None
+
+        canvas = self.autofocus_fig.canvas
+
+        #: bool: Whether the active Matplotlib canvas supports artist blitting.
+        self._blit_supported = all(
+            hasattr(canvas, method)
+            for method in ("copy_from_bbox", "restore_region", "blit")
+        )
+
+        #: object: Cached static axes background for autofocus blitting.
+        self._autofocus_background = None
+
+        #: object: Persistent artist containing measured autofocus points.
+        self._autofocus_artist = None
+
+        #: bool: Whether the next update requires a full canvas draw.
+        self._force_full_redraw = True
+
+        #: bool: Whether the most recent progress render used blitting.
+        self._last_render_used_blit = False
+
+        #: tuple: Last live x/y axis bounds.
+        self._last_xlim = None
+        self._last_ylim = None
+
+        canvas.mpl_connect("draw_event", self._on_autofocus_draw)
+        canvas.mpl_connect("resize_event", self._invalidate_autofocus_blit_cache)
+
         # Dismiss popup.
         self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
         self.view.popup.bind("<Escape>", self.close_popup)
@@ -152,6 +189,7 @@ class AutofocusPopupController(GUIController):
         """
         # We should add saving function to the function closing the window
 
+        self._cancel_pending_autofocus_update()
         self.view.popup.dismiss()
         delattr(self.parent_controller, "af_popup_controller")
 
@@ -335,6 +373,7 @@ class AutofocusPopupController(GUIController):
             reference_channel = self.defocus_calibration_reference["channel"]
 
         self._write_channel_defocus(target_channel, 0)
+        self._initialize_progress_plot()
         self.parent_controller.execute(
             "autofocus",
             device,
@@ -540,6 +579,194 @@ class AutofocusPopupController(GUIController):
         self.view.bounds_warning_var.set("\n".join(errors))
         return errors
 
+    def display_autofocus_progress(self, data) -> None:
+        """Queue the latest autofocus measurements for a Tk-thread update."""
+        if threading.get_ident() != self._main_thread_ident:
+            run_on_main = getattr(self.parent_controller, "_run_on_main_thread", None)
+            if callable(run_on_main):
+                run_on_main(self.display_autofocus_progress, data, wait=False)
+            return
+
+        progress_data = np.asarray(data, dtype=float)
+        self._pending_autofocus_data = progress_data.copy()
+        if self._autofocus_after_id is not None:
+            return
+
+        widget = self.autofocus_fig.canvas.get_tk_widget()
+        self._autofocus_after_id = widget.after_idle(
+            self._flush_pending_autofocus_update
+        )
+
+    def _flush_pending_autofocus_update(self) -> None:
+        """Render only the newest pending autofocus progress snapshot."""
+        self._autofocus_after_id = None
+        data = self._pending_autofocus_data
+        self._pending_autofocus_data = None
+        if data is None:
+            return
+        try:
+            self._update_progress_plot(data)
+        except Exception as exc:
+            logger.exception("Autofocus plot update failed: %s", exc)
+
+    def _cancel_pending_autofocus_update(self) -> None:
+        """Cancel a scheduled progress update without changing plotted data."""
+        if self._autofocus_after_id is not None:
+            try:
+                self.autofocus_fig.canvas.get_tk_widget().after_cancel(
+                    self._autofocus_after_id
+                )
+            except Exception:
+                pass
+        self._autofocus_after_id = None
+        self._pending_autofocus_data = None
+
+    def _initialize_progress_plot(self) -> None:
+        """Prepare static axes and one persistent measured-points artist."""
+        self._cancel_pending_autofocus_update()
+        self.autofocus_coarse.clear()
+        self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
+        self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)
+        self.autofocus_coarse.ticklabel_format(
+            style="sci", axis="y", scilimits=(0, 0)
+        )
+        self.autofocus_coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.autofocus_coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
+        self._autofocus_artist = self.autofocus_coarse.plot(
+            [], [], "k.", animated=self._blit_supported
+        )[0]
+        self._last_xlim = self._get_initial_progress_xlim()
+        if self._last_xlim is not None:
+            self.autofocus_coarse.set_xlim(*self._last_xlim)
+        self._last_ylim = None
+        self._invalidate_autofocus_blit_cache()
+        self.autofocus_fig.tight_layout()
+        self._render_autofocus(force_full_redraw=True)
+
+    def _get_initial_progress_xlim(self):
+        """Return padded x limits for the exact immediately knowable scan."""
+        try:
+            device = self.widgets["device"].widget.get()
+            device_ref = self.widgets["device_ref"].widget.get()
+            settings = self.setting_dict[self.microscope_name][device][device_ref]
+            if settings["coarse_selected"]:
+                scan_name = "coarse"
+            elif settings["fine_selected"]:
+                scan_name = "fine"
+            else:
+                return None
+            center = 0.0
+            if device == "stage":
+                center = float(
+                    self.parent_controller.configuration["experiment"][
+                        "StageParameters"
+                    ][device_ref]
+                )
+            positions = plan_autofocus_positions(
+                center,
+                float(settings[f"{scan_name}_range"]),
+                float(settings[f"{scan_name}_step_size"]),
+            )
+            limits, _ = self._expanded_limits(None, positions)
+            return limits
+        except (KeyError, TypeError, ValueError, ZeroDivisionError):
+            return None
+
+    @staticmethod
+    def _expanded_limits(current, values):
+        """Return live axis limits that expand, but never shrink, as data arrive."""
+        finite_values = np.asarray(values, dtype=float)
+        finite_values = finite_values[np.isfinite(finite_values)]
+        if finite_values.size == 0:
+            return current, False
+
+        data_minimum = float(np.min(finite_values))
+        data_maximum = float(np.max(finite_values))
+        span = data_maximum - data_minimum
+        if span > 0:
+            padding = span * 0.1
+        else:
+            padding = max(abs(data_minimum) * 0.1, 1e-9)
+        target = (data_minimum - padding, data_maximum + padding)
+        if current is None:
+            return target, True
+        if data_minimum >= current[0] and data_maximum <= current[1]:
+            return current, False
+        return (min(current[0], target[0]), max(current[1], target[1])), True
+
+    def _update_progress_plot(self, data: np.ndarray) -> None:
+        """Update the persistent measured-points artist from one snapshot."""
+        data = np.asarray(data, dtype=float)
+        if data.size == 0:
+            return
+        if data.ndim != 2 or data.shape[1] < 2:
+            raise ValueError("Autofocus progress data must have two columns.")
+        if self._autofocus_artist is None:
+            self._initialize_progress_plot()
+
+        self._autofocus_artist.set_data(data[:, 0], data[:, 1])
+        force_full_redraw = self._force_full_redraw
+
+        x_limits, x_changed = self._expanded_limits(self._last_xlim, data[:, 0])
+        if x_changed:
+            self.autofocus_coarse.set_xlim(*x_limits)
+            self._last_xlim = x_limits
+            force_full_redraw = True
+
+        y_limits, y_changed = self._expanded_limits(self._last_ylim, data[:, 1])
+        if y_changed:
+            self.autofocus_coarse.set_ylim(*y_limits)
+            self._last_ylim = y_limits
+            force_full_redraw = True
+
+        self._render_autofocus(force_full_redraw=force_full_redraw)
+
+    def _render_autofocus(self, force_full_redraw: bool = False) -> None:
+        """Render live autofocus points with blitting or a full-draw fallback."""
+        canvas = self.autofocus_fig.canvas
+        can_blit = self._blit_supported and self._autofocus_artist is not None
+        if (
+            not can_blit
+            or force_full_redraw
+            or self._autofocus_background is None
+            or self._force_full_redraw
+        ):
+            canvas.draw()
+            self._last_render_used_blit = False
+            self._force_full_redraw = False
+            if can_blit:
+                self._autofocus_background = canvas.copy_from_bbox(
+                    self.autofocus_coarse.bbox
+                )
+                canvas.restore_region(self._autofocus_background)
+                self.autofocus_coarse.draw_artist(self._autofocus_artist)
+                canvas.blit(self.autofocus_coarse.bbox)
+            return
+
+        canvas.restore_region(self._autofocus_background)
+        self.autofocus_coarse.draw_artist(self._autofocus_artist)
+        canvas.blit(self.autofocus_coarse.bbox)
+        self._last_render_used_blit = True
+
+    def _invalidate_autofocus_blit_cache(self, *_args) -> None:
+        """Clear the background cache so the next update performs a full draw."""
+        self._autofocus_background = None
+        self._force_full_redraw = True
+
+    def _on_autofocus_draw(self, event) -> None:
+        """Refresh the static background cache after a full canvas draw."""
+        if not self._blit_supported:
+            return
+        if event is None or getattr(event, "canvas", None) is self.autofocus_fig.canvas:
+            try:
+                self._autofocus_background = (
+                    self.autofocus_fig.canvas.copy_from_bbox(
+                        self.autofocus_coarse.bbox
+                    )
+                )
+            except Exception:
+                self._autofocus_background = None
+
     def display_plot(self, data_and_flags: tuple[np.ndarray, bool, bool]) -> None:
         """
         Display autofocus data, handling segmentation, plot mode, and redraw.
@@ -579,6 +806,11 @@ class AutofocusPopupController(GUIController):
         coarse_steps = int(coarse_range) // int(coarse_step) + 1
 
         if clear_data:
+            self._cancel_pending_autofocus_update()
+            self._autofocus_artist = None
+            self._invalidate_autofocus_blit_cache()
+            self._last_xlim = None
+            self._last_ylim = None
             self.autofocus_coarse.clear()
             if data.shape[0] > 0:
                 self.autofocus_coarse.plot(
@@ -664,5 +896,6 @@ class AutofocusPopupController(GUIController):
         """
         return {
             "autofocus": self.display_plot,
+            "autofocus_progress": self.display_autofocus_progress,
             "autofocus_complete": self.handle_autofocus_complete,
         }

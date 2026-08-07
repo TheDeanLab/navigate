@@ -281,7 +281,7 @@ ruff check \
 
 Expected: PASS.
 
-- [ ] **Step 12: Commit the independently verified safety phase**
+- [x] **Step 12: Commit the independently verified safety phase**
 
 ```bash
 git add src/navigate/model/features/autofocus.py \
@@ -304,11 +304,11 @@ Commit body must mention reuse of the existing planner lifecycle, validation wid
 - Modify: `src/navigate/model/features/autofocus.py`
 - Test: `test/model/features/test_autofocus.py`
 
-- [ ] **Step 1: Write failing progress-event tests**
+- [x] **Step 1: Write failing progress-event tests**
 
 For each successfully processed image, assert one progress event is published after entropy calculation. Assert that successive payload snapshots contain all measurements so far and are copied snapshots rather than aliases of mutable `plot_data`.
 
-- [ ] **Step 2: Run the progress tests and confirm failure**
+- [x] **Step 2: Run the progress tests and confirm failure**
 
 Run:
 
@@ -319,13 +319,13 @@ Run:
 
 Expected: FAIL because only final autofocus results are currently emitted.
 
-- [ ] **Step 3: Emit explicit progress payloads**
+- [x] **Step 3: Emit explicit progress payloads**
 
 After appending each `[position, entropy]` measurement, publish an `autofocus` event whose payload explicitly identifies it as progress and contains a defensive snapshot of accumulated points. Do not include image arrays and do not wait for the GUI.
 
 Preserve the current final event's measured points, fitted curves, and peak information, with an explicit final marker so the controller does not confuse it with progress.
 
-- [ ] **Step 4: Run the model tests**
+- [x] **Step 4: Run the model tests**
 
 Run:
 
@@ -343,7 +343,7 @@ Expected: PASS.
 - Modify: `src/navigate/controller/sub_controllers/autofocus.py`
 - Test: `test/controller/sub_controllers/test_autofocus.py`
 
-- [ ] **Step 1: Write failing coalescing and persistent-artist tests**
+- [x] **Step 1: Write failing coalescing and persistent-artist tests**
 
 Cover:
 
@@ -353,7 +353,7 @@ Cover:
 - one persistent measured-point artist is updated with `set_data`; and
 - repeated progress updates do not accumulate Line2D artists.
 
-- [ ] **Step 2: Run the new controller tests and confirm failure**
+- [x] **Step 2: Run the new controller tests and confirm failure**
 
 Run:
 
@@ -364,7 +364,7 @@ Run:
 
 Expected: FAIL on missing pending-update state and persistent artist.
 
-- [ ] **Step 3: Implement latest-value-wins scheduling**
+- [x] **Step 3: Implement latest-value-wins scheduling**
 
 Mirror `CameraViewController`/`HistogramController`:
 
@@ -374,11 +374,11 @@ Mirror `CameraViewController`/`HistogramController`:
 - replace stale pending snapshots; and
 - catch/log rendering exceptions without affecting acquisition.
 
-- [ ] **Step 4: Initialize and update one measured-point artist**
+- [x] **Step 4: Initialize and update one measured-point artist**
 
 Create the points artist once when preparing the plot. Ordinary progress updates call `set_data` and do not clear axes, recreate the artist, or call `tight_layout`.
 
-- [ ] **Step 5: Run the coalescing/controller tests**
+- [x] **Step 5: Run the coalescing/controller tests**
 
 Run:
 
@@ -396,7 +396,7 @@ Expected: PASS.
 - Modify: `src/navigate/controller/sub_controllers/autofocus.py`
 - Test: `test/controller/sub_controllers/test_autofocus.py`
 
-- [ ] **Step 1: Write failing rendering-path tests**
+- [x] **Step 1: Write failing rendering-path tests**
 
 Test:
 
@@ -408,7 +408,7 @@ Test:
 - final render retaining every measured point and adding fit/peak overlays; and
 - cancellation leaving partial measured data visible.
 
-- [ ] **Step 2: Run the rendering tests and confirm failure**
+- [x] **Step 2: Run the rendering tests and confirm failure**
 
 Run:
 
@@ -419,7 +419,7 @@ Run:
 
 Expected: FAIL on missing blit state and cache lifecycle.
 
-- [ ] **Step 3: Implement blit capability and cache lifecycle**
+- [x] **Step 3: Implement blit capability and cache lifecycle**
 
 Mirror `HistogramController` names and behavior where practical:
 
@@ -430,15 +430,15 @@ Mirror `HistogramController` names and behavior where practical:
 - a draw-event callback that refreshes the cache; and
 - full-draw fallback when the backend lacks required methods.
 
-- [ ] **Step 4: Implement controlled axis expansion**
+- [x] **Step 4: Implement controlled axis expansion**
 
 Expand x/y limits only when a new point falls outside the current visible interval. Axis changes invalidate the cache and perform one full draw. Subsequent in-range points resume blitting.
 
-- [ ] **Step 5: Preserve final overlays and cancellation state**
+- [x] **Step 5: Preserve final overlays and cancellation state**
 
 On a final result, perform one full render containing the complete measured series plus fit curves and peak indicators. On cancellation, cancel any scheduled idle callback safely but leave the most recent measured data/artist visible.
 
-- [ ] **Step 6: Run all real-time plotting tests**
+- [x] **Step 6: Run all real-time plotting tests**
 
 Run:
 
@@ -450,7 +450,7 @@ Run:
 
 Expected: PASS.
 
-- [ ] **Step 7: Lint phase-2 changes**
+- [x] **Step 7: Lint phase-2 changes**
 
 Run:
 

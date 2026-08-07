@@ -465,6 +465,39 @@ class TestAutofocusClass(unittest.TestCase):
             )
         )
 
+    def test_in_func_data_publishes_defensive_progress_snapshots(self):
+        model = self.autofocus.model
+        model.event_queue = MagicMock()
+        model.logger = MagicMock()
+        self.autofocus.pre_func_data()
+        self.autofocus.total_frame_num = 2
+        self.autofocus.autofocus_frame_queue.put((0, 2, 10.0))
+        self.autofocus.autofocus_frame_queue.put((1, 1, 20.0))
+
+        with patch(
+            "navigate.model.features.autofocus.fast_normalized_dct_shannon_entropy",
+            side_effect=(np.array([1.0]), np.array([2.0])),
+        ):
+            self.autofocus.in_func_data([0, 1])
+
+        progress_calls = [
+            call
+            for call in model.event_queue.put.call_args_list
+            if call.args[0][0] == "autofocus_progress"
+        ]
+        self.assertEqual(
+            progress_calls,
+            [
+                unittest.mock.call(("autofocus_progress", [[10.0, 1.0]])),
+                unittest.mock.call(
+                    ("autofocus_progress", [[10.0, 1.0], [20.0, 2.0]])
+                ),
+            ],
+        )
+
+        self.autofocus.plot_data[0][1] = 999.0
+        self.assertEqual(progress_calls[0].args[0][1], [[10.0, 1.0]])
+
 
 if __name__ == "__main__":
     unittest.main()

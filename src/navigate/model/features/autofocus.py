@@ -651,6 +651,11 @@ class Autofocus:
                 f"entropy: {entropy[0]}"
             )
             self.plot_data.append([self.f_pos, entropy[0]])
+            progress_snapshot = [
+                [float(position), float(metric)]
+                for position, metric in self.plot_data
+            ]
+            self.model.event_queue.put(("autofocus_progress", progress_snapshot))
             # Need to initialize entropy above for the first iteration of the autofocus
             # routine. Need to initialize entropy_vector above for the first iteration
             # of the autofocus routine. Then need to append each measurement to the

@@ -32,7 +32,7 @@
 #
 
 # Standard library imports
-from unittest.mock import MagicMock, patch
+from unittest.mock import call, MagicMock, patch
 from types import SimpleNamespace
 
 # Third party imports
@@ -591,3 +591,218 @@ class TestAutofocusPopupController:
         data = [x_data, y_data]
         self.autofocus_controller.display_plot([data, False, True])
         pass
+
+    def test_progress_updates_are_coalesced_to_latest_snapshot(self):
+        widget = self.autofocus_controller.autofocus_fig.canvas.get_tk_widget()
+        first = [[1.0, 10.0]]
+        latest = [[1.0, 10.0], [2.0, 20.0]]
+
+        with patch.object(widget, "after_idle", return_value="after-id") as after_idle:
+            self.autofocus_controller.display_autofocus_progress(first)
+            self.autofocus_controller.display_autofocus_progress(latest)
+
+        after_idle.assert_called_once_with(
+            self.autofocus_controller._flush_pending_autofocus_update
+        )
+        assert np.array_equal(
+            self.autofocus_controller._pending_autofocus_data,
+            np.asarray(latest),
+        )
+
+        with patch.object(
+            self.autofocus_controller, "_update_progress_plot"
+        ) as update_plot:
+            self.autofocus_controller._flush_pending_autofocus_update()
+
+        update_plot.assert_called_once()
+        assert np.array_equal(update_plot.call_args.args[0], np.asarray(latest))
+        assert self.autofocus_controller._pending_autofocus_data is None
+        assert self.autofocus_controller._autofocus_after_id is None
+
+    def test_progress_received_off_main_thread_is_redispatched(self, monkeypatch):
+        run_on_main = MagicMock()
+        monkeypatch.setattr(
+            self.autofocus_controller.parent_controller,
+            "_run_on_main_thread",
+            run_on_main,
+            raising=False,
+        )
+        self.autofocus_controller._main_thread_ident = 0
+        data = [[1.0, 10.0]]
+
+        self.autofocus_controller.display_autofocus_progress(data)
+
+        run_on_main.assert_called_once_with(
+            self.autofocus_controller.display_autofocus_progress,
+            data,
+            wait=False,
+        )
+
+    def test_custom_events_include_autofocus_progress(self):
+        assert (
+            self.autofocus_controller.custom_events["autofocus_progress"]
+            == self.autofocus_controller.display_autofocus_progress
+        )
+
+    def test_progress_plot_reuses_one_measured_data_artist(self):
+        self.autofocus_controller._initialize_progress_plot()
+        artist = self.autofocus_controller._autofocus_artist
+        line_count = len(self.autofocus_controller.autofocus_coarse.lines)
+
+        with patch.object(self.autofocus_controller, "_render_autofocus"):
+            self.autofocus_controller._update_progress_plot(
+                np.asarray([[1.0, 10.0], [2.0, 20.0]])
+            )
+            self.autofocus_controller._update_progress_plot(
+                np.asarray([[1.0, 10.0], [2.0, 20.0], [3.0, 15.0]])
+            )
+
+        assert self.autofocus_controller._autofocus_artist is artist
+        assert len(self.autofocus_controller.autofocus_coarse.lines) == line_count
+        assert np.array_equal(artist.get_xdata(), np.asarray([1.0, 2.0, 3.0]))
+        assert np.array_equal(artist.get_ydata(), np.asarray([10.0, 20.0, 15.0]))
+
+    def test_progress_plot_presizes_x_axis_from_initial_scan_plan(self):
+        settings = self.autofocus_controller.setting_dict[
+            self.autofocus_controller.microscope_name
+        ]["stage"]["f"]
+        settings.update(
+            {
+                "coarse_selected": True,
+                "coarse_range": 500,
+                "coarse_step_size": 50,
+                "fine_selected": True,
+            }
+        )
+        self.autofocus_controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["f"] = 1000
+
+        self.autofocus_controller._initialize_progress_plot()
+
+        assert self.autofocus_controller._last_xlim[0] < 750
+        assert self.autofocus_controller._last_xlim[1] > 1250
+
+    def test_axis_expansion_forces_one_full_redraw_then_resumes_blitting(self):
+        self.autofocus_controller._initialize_progress_plot()
+        self.autofocus_controller._last_xlim = (0.0, 2.0)
+        self.autofocus_controller._last_ylim = (0.0, 20.0)
+        self.autofocus_controller._force_full_redraw = False
+
+        with patch.object(
+            self.autofocus_controller, "_render_autofocus"
+        ) as render:
+            self.autofocus_controller._update_progress_plot(
+                np.asarray([[1.0, 10.0], [3.0, 15.0]])
+            )
+            self.autofocus_controller._update_progress_plot(
+                np.asarray([[1.0, 10.0], [2.5, 15.0]])
+            )
+
+        assert render.call_args_list == [
+            call(force_full_redraw=True),
+            call(force_full_redraw=False),
+        ]
+
+    def test_final_plot_retains_measurements_and_adds_fit_overlay(self):
+        self.autofocus_controller._initialize_progress_plot()
+        measured = [[0.0, 1.0], [1.0, 3.0], [2.0, 2.0]]
+        fit = [[0.0, 1.0], [1.0, 3.0], [2.0, 1.0]]
+
+        self.autofocus_controller.display_plot([measured, False, True])
+        measured_line_count = len(self.autofocus_controller.autofocus_coarse.lines)
+        self.autofocus_controller.display_plot([fit, True, False])
+
+        assert measured_line_count == 3
+        assert len(self.autofocus_controller.autofocus_coarse.lines) == 4
+        assert self.autofocus_controller._autofocus_artist is None
+        assert np.array_equal(
+            self.autofocus_controller.autofocus_coarse.lines[0].get_xdata(),
+            np.asarray([0.0, 1.0, 2.0]),
+        )
+
+    def test_stop_acquisition_leaves_partial_progress_visible(self, monkeypatch):
+        parent = self.autofocus_controller.parent_controller
+        acquire_button = parent.view.acquire_bar.acquire_btn
+        monkeypatch.setattr(
+            parent,
+            "acquire_bar_controller",
+            SimpleNamespace(
+                is_acquiring=True,
+                mode="live",
+                view=SimpleNamespace(acquire_btn=acquire_button),
+            ),
+            raising=False,
+        )
+        monkeypatch.setattr(parent, "execute", MagicMock())
+        self.autofocus_controller._initialize_progress_plot()
+        with patch.object(self.autofocus_controller, "_render_autofocus"):
+            self.autofocus_controller._update_progress_plot(
+                np.asarray([[1.0, 10.0], [2.0, 20.0]])
+            )
+        artist = self.autofocus_controller._autofocus_artist
+
+        self.autofocus_controller.stop_acquisition()
+
+        assert self.autofocus_controller._autofocus_artist is artist
+        assert np.array_equal(artist.get_xdata(), np.asarray([1.0, 2.0]))
+        assert np.array_equal(artist.get_ydata(), np.asarray([10.0, 20.0]))
+
+
+def build_render_controller(blit_supported=True):
+    controller = AutofocusPopupController.__new__(AutofocusPopupController)
+    controller.autofocus_coarse = MagicMock()
+    controller.autofocus_coarse.bbox = object()
+    controller._autofocus_artist = MagicMock()
+    controller._autofocus_background = object()
+    controller._blit_supported = blit_supported
+    controller._force_full_redraw = False
+    controller._last_render_used_blit = False
+    controller.autofocus_fig = SimpleNamespace(canvas=MagicMock())
+    return controller
+
+
+def test_render_autofocus_uses_cached_background_blit():
+    controller = build_render_controller()
+
+    controller._render_autofocus(force_full_redraw=False)
+
+    canvas = controller.autofocus_fig.canvas
+    canvas.draw.assert_not_called()
+    canvas.restore_region.assert_called_once_with(controller._autofocus_background)
+    controller.autofocus_coarse.draw_artist.assert_called_once_with(
+        controller._autofocus_artist
+    )
+    canvas.blit.assert_called_once_with(controller.autofocus_coarse.bbox)
+    assert controller._last_render_used_blit is True
+
+
+def test_render_autofocus_falls_back_to_full_draw_without_blit():
+    controller = build_render_controller(blit_supported=False)
+
+    controller._render_autofocus(force_full_redraw=False)
+
+    controller.autofocus_fig.canvas.draw.assert_called_once_with()
+    controller.autofocus_fig.canvas.blit.assert_not_called()
+    assert controller._last_render_used_blit is False
+
+
+def test_invalidate_autofocus_blit_cache_forces_full_redraw():
+    controller = build_render_controller()
+
+    controller._invalidate_autofocus_blit_cache()
+
+    assert controller._autofocus_background is None
+    assert controller._force_full_redraw is True
+
+
+def test_autofocus_draw_event_refreshes_background_cache():
+    controller = build_render_controller()
+    refreshed_background = object()
+    controller.autofocus_fig.canvas.copy_from_bbox.return_value = refreshed_background
+
+    controller._on_autofocus_draw(
+        SimpleNamespace(canvas=controller.autofocus_fig.canvas)
+    )
+
+    assert controller._autofocus_background is refreshed_background

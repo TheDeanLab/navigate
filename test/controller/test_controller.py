@@ -781,6 +781,41 @@ def test_live_autofocus_completion_reenables_start_button(controller):
             controller.af_popup_controller.close_popup()
 
 
+def test_progress_transport_cannot_starve_reliable_autofocus_events(controller):
+    original_event_queue = controller.event_queue
+    original_progress_queue = controller.autofocus_progress_queue
+    original_event_pump_running = controller._event_pump_running
+    progress_handler = MagicMock()
+    final_handler = MagicMock()
+    controller.event_listeners["autofocus_progress"] = progress_handler
+    controller.event_listeners["autofocus"] = final_handler
+
+    try:
+        controller.autofocus_progress_queue = Queue(maxsize=1)
+        controller.autofocus_progress_queue.put([[1.0, 2.0]])
+        controller.event_queue = Queue()
+        controller.event_queue.put(("autofocus", [[[1.0, 2.0]], False, True]))
+        controller.event_queue.put(("warning", "Autofocus bounds warning"))
+        controller._event_pump_running = True
+
+        with patch(
+            "navigate.controller.controller.messagebox.showwarning"
+        ) as showwarning:
+            controller.update_event()
+
+        progress_handler.assert_called_once_with([[1.0, 2.0]])
+        final_handler.assert_called_once_with([[[1.0, 2.0]], False, True])
+        showwarning.assert_called_once_with(
+            title="Navigate", message="Autofocus bounds warning"
+        )
+    finally:
+        controller.event_queue = original_event_queue
+        controller.autofocus_progress_queue = original_progress_queue
+        controller._event_pump_running = original_event_pump_running
+        controller.event_listeners.pop("autofocus_progress", None)
+        controller.event_listeners.pop("autofocus", None)
+
+
 def test_execute_eliminate_tiles(controller):
     controller.threads_pool.createThread = MagicMock()
 

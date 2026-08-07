@@ -527,7 +527,7 @@ class TestAutofocusClass(unittest.TestCase):
 
     def test_in_func_data_publishes_defensive_progress_snapshots(self):
         model = self.autofocus.model
-        model.event_queue = MagicMock()
+        model.autofocus_progress_queue = MagicMock()
         model.logger = MagicMock()
         self.autofocus.pre_func_data()
         self.autofocus.total_frame_num = 2
@@ -542,26 +542,25 @@ class TestAutofocusClass(unittest.TestCase):
 
         progress_calls = [
             call
-            for call in model.event_queue.put_nowait.call_args_list
-            if call.args[0][0] == "autofocus_progress"
+            for call in model.autofocus_progress_queue.put_nowait.call_args_list
         ]
         self.assertEqual(
             progress_calls,
             [
-                unittest.mock.call(("autofocus_progress", [[10.0, 1.0]])),
-                unittest.mock.call(
-                    ("autofocus_progress", [[10.0, 1.0], [20.0, 2.0]])
-                ),
+                unittest.mock.call([[10.0, 1.0]]),
+                unittest.mock.call([[10.0, 1.0], [20.0, 2.0]]),
             ],
         )
 
         self.autofocus.plot_data[0][1] = 999.0
-        self.assertEqual(progress_calls[0].args[0][1], [[10.0, 1.0]])
+        self.assertEqual(progress_calls[0].args[0], [[10.0, 1.0]])
 
-    def test_full_progress_queue_does_not_interrupt_metric_processing(self):
+    def test_full_progress_queue_replaces_stale_snapshot_without_blocking_events(self):
         model = self.autofocus.model
         model.event_queue = MagicMock()
-        model.event_queue.put_nowait.side_effect = Full
+        model.autofocus_progress_queue = MagicMock()
+        model.autofocus_progress_queue.put_nowait.side_effect = [Full, None]
+        model.autofocus_progress_queue.get_nowait.return_value = [[0.0, 0.0]]
         model.logger = MagicMock()
         self.autofocus.pre_func_data()
         self.autofocus.total_frame_num = 2
@@ -574,9 +573,15 @@ class TestAutofocusClass(unittest.TestCase):
             self.autofocus.in_func_data([0])
 
         self.assertEqual(self.autofocus.plot_data, [[10.0, 1.0]])
-        model.event_queue.put_nowait.assert_called_once_with(
-            ("autofocus_progress", [[10.0, 1.0]])
+        model.autofocus_progress_queue.get_nowait.assert_called_once_with()
+        self.assertEqual(
+            model.autofocus_progress_queue.put_nowait.call_args_list,
+            [
+                unittest.mock.call([[10.0, 1.0]]),
+                unittest.mock.call([[10.0, 1.0]]),
+            ],
         )
+        model.event_queue.put_nowait.assert_not_called()
 
 
 if __name__ == "__main__":

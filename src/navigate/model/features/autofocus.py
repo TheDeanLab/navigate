@@ -687,15 +687,22 @@ class Autofocus:
                 [float(position), float(metric)]
                 for position, metric in self.plot_data
             ]
-            try:
-                self.model.event_queue.put_nowait(
-                    ("autofocus_progress", progress_snapshot)
-                )
-            except Full:
-                self.model.logger.debug(
-                    "Dropping autofocus progress snapshot because the event queue "
-                    "is full."
-                )
+            progress_queue = getattr(self.model, "autofocus_progress_queue", None)
+            if progress_queue is not None:
+                try:
+                    progress_queue.put_nowait(progress_snapshot)
+                except Full:
+                    try:
+                        progress_queue.get_nowait()
+                    except Empty:
+                        pass
+                    try:
+                        progress_queue.put_nowait(progress_snapshot)
+                    except Full:
+                        self.model.logger.debug(
+                            "Dropping an autofocus progress snapshot after a "
+                            "concurrent queue update."
+                        )
             # Need to initialize entropy above for the first iteration of the autofocus
             # routine. Need to initialize entropy_vector above for the first iteration
             # of the autofocus routine. Then need to append each measurement to the

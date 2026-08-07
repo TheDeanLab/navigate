@@ -74,6 +74,8 @@ class TestAutofocusPopupController:
             Dummy controller for testing
 
         """
+        if hasattr(dummy_controller, "autofocus_calibration_controller"):
+            dummy_controller.autofocus_calibration_controller.reference = None
         autofocus_popup = AutofocusPopup(dummy_controller.view)
         self.autofocus_controller = AutofocusPopupController(
             autofocus_popup, dummy_controller
@@ -652,7 +654,31 @@ class TestAutofocusPopupController:
 
         for event_name in self.autofocus_controller.custom_events:
             assert event_name not in parent.event_listeners
+        assert "autofocus_complete" in parent.event_listeners
         assert not hasattr(parent, "af_popup_controller")
+
+    def test_close_mid_defocus_keeps_completion_processing_alive(self):
+        parent = self.autofocus_controller.parent_controller
+        parent.af_popup_controller = self.autofocus_controller
+        channels = parent.configuration["experiment"]["MicroscopeState"]["channels"]
+        channels["channel_1"]["defocus"] = 1.5
+        channels["channel_2"]["defocus"] = 4.0
+
+        self.autofocus_controller.close_popup()
+        parent.event_listeners["autofocus_complete"](
+            {
+                "channel": "channel_1",
+                "focus_position": 100.0,
+                "calibration_action": "capture_reference",
+            }
+        )
+
+        assert parent.autofocus_calibration_controller.reference == {
+            "channel": "channel_1",
+            "focus_position": 100.0,
+        }
+        assert channels["channel_1"]["defocus"] == pytest.approx(0.0)
+        assert channels["channel_2"]["defocus"] == pytest.approx(2.5)
 
     def test_progress_plot_reuses_one_measured_data_artist(self):
         self.autofocus_controller._initialize_progress_plot()

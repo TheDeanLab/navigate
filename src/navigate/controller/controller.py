@@ -50,6 +50,7 @@ from navigate.view.theme import apply_theme
 
 # Local Sub-Controller Imports
 from navigate.controller.configuration_controller import ConfigurationController
+from navigate.controller.autofocus_calibration import AutofocusCalibrationController
 from navigate.controller.sub_controllers import (
     KeystrokeController,
     WaveformTabController,
@@ -199,6 +200,9 @@ class Controller:
         #: mp.Queue: Queue for retrieving events ('event_name', value) from model
         self.event_queue = mp.Queue(100)
 
+        #: mp.Queue: Single-slot, latest-value transport for autofocus plotting.
+        self.autofocus_progress_queue = mp.Queue(1)
+
         #: Manager: A shared memory manager
         self.manager = Manager()
 
@@ -235,6 +239,7 @@ class Controller:
                 args,
                 self.configuration,
                 event_queue=self.event_queue,
+                autofocus_progress_queue=self.autofocus_progress_queue,
                 log_queue=log_queue,
             )
         else:
@@ -243,6 +248,7 @@ class Controller:
                 args,
                 self.configuration,
                 event_queue=self.event_queue,
+                autofocus_progress_queue=self.autofocus_progress_queue,
                 log_queue=log_queue,
             )
 
@@ -267,8 +273,13 @@ class Controller:
         #: View: View object in MVC architecture.
         self.view = view(self.root)
 
+        #: AutofocusCalibrationController: Popup-independent calibration state.
+        self.autofocus_calibration_controller = AutofocusCalibrationController(self)
+
         #: dict: Event listeners for the controller.
-        self.event_listeners = {}
+        self.event_listeners = {
+            "autofocus_complete": self.autofocus_calibration_controller.handle_autofocus_complete
+        }
 
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acquire_bar, self)
@@ -1924,6 +1935,23 @@ class Controller:
         -------
         None
         """
+        latest_progress = None
+        while self._event_pump_running:
+            try:
+                latest_progress = self.autofocus_progress_queue.get_nowait()
+            except queue.Empty:
+                break
+        if latest_progress is not None:
+            handler = self.event_listeners.get("autofocus_progress")
+            if handler is not None:
+                try:
+                    handler(latest_progress)
+                except Exception:
+                    print(
+                        "*** unhandled event: autofocus_progress, "
+                        f"{latest_progress}"
+                    )
+
         while self._event_pump_running:
             try:
                 event, value = self.event_queue.get_nowait()

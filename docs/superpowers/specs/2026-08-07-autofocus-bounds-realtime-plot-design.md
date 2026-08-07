@@ -102,6 +102,12 @@ autofocus-progress event containing the accumulated position/metric data. It
 will not publish image pixels for plotting. Acquisition and metric calculation
 must not wait for the GUI.
 
+Progress uses a dedicated, single-slot multiprocessing queue. When the slot is
+occupied, the model replaces the stale snapshot with the newest cumulative
+snapshot. Replaceable progress therefore cannot consume capacity in the
+reliable event queue used for final plots, warnings, stage updates, and
+completion metadata.
+
 The popup controller will follow the image-display and histogram "latest value
 wins" pattern:
 
@@ -135,11 +141,16 @@ data.
 ## Event and Thread Boundaries
 
 The model data thread owns focus-metric calculation and progress publication.
-The main controller's existing event pump transfers progress to the popup
-controller. All Tk and Matplotlib artist mutation occurs on the Tk main thread.
-Progress events are snapshots and may be coalesced for display; the model's
-authoritative `plot_data` retains every measurement for fitting and final
-reporting.
+The main controller's existing event pump drains the latest progress snapshot
+and transfers it to the popup controller. All Tk and Matplotlib artist mutation
+occurs on the Tk main thread. Progress events are snapshots and may be
+coalesced for display; the model's authoritative `plot_data` retains every
+measurement for fitting and final reporting.
+
+Autofocus completion metadata is handled by a persistent calibration
+controller owned by the main controller. The popup only owns view-specific
+plot handlers, so closing and destroying it cannot suppress capture-reference
+or populate-defocus configuration updates.
 
 ## Error Handling
 
@@ -171,13 +182,15 @@ Phase 1 tests will cover:
 Phase 2 tests will cover:
 
 - one progress publication per processed autofocus measurement;
+- stale progress replacement without occupying the reliable event queue;
 - snapshots retaining every calculated point;
 - coalescing multiple pending updates into the newest dataset;
 - persistent artist updates without artist accumulation;
 - the blit path, cache invalidation, and non-blit fallback;
 - axis expansion causing a full redraw before blitting resumes;
-- final fit and peak overlays; and
-- cancellation preserving the partial plot.
+- final fit and peak overlays;
+- cancellation preserving the partial plot; and
+- completion bookkeeping after the popup is closed mid-calibration.
 
 Focused model and controller tests will run after each phase. No native Tk
 windows will be opened on the active macOS desktop; GUI behavior will be
@@ -188,14 +201,14 @@ covered by the repository's headless controller/view tests.
 This design extends existing mechanisms rather than adding parallel lifecycle
 or rendering abstractions:
 
-- retain the existing Autofocus feature and event queue;
+- retain the existing Autofocus feature and reliable event queue;
 - centralize and reuse its current step/range calculation instead of adding a
   second scan algorithm;
 - use `ConfigurationController.get_stage_position_limits` and existing stage
   limit state as the controller authority;
 - use `ValidatedSpinbox` error coloring and the active theme's danger color;
 - refresh from the existing stage-position and stage-limit update paths;
-- reuse the controller event pump for progress delivery; and
+- reuse the controller event pump with a dedicated latest-progress slot; and
 - mirror `HistogramController`'s `after_idle` coalescing, persistent artist,
   background invalidation, blitting, and fallback behavior.
 

@@ -4,7 +4,7 @@
 
 **Goal:** Reject unsafe autofocus trajectories with immediate, continuously refreshed popup feedback, then render autofocus measurements in real time without blocking acquisition.
 
-**Architecture:** A single internal scan-position planner will define frame counts, popup preflight, and model execution. The popup will perform advisory validation from current configuration while the model performs authoritative validation immediately before each knowable scan and treats failed moves as fatal. Real-time plotting will publish accumulated metric snapshots and use Tk-thread coalescing plus a persistent Matplotlib artist, with histogram-style blitting and a full-draw fallback.
+**Architecture:** A single internal scan-position planner will define frame counts, popup preflight, and model execution. The popup will perform advisory validation from current configuration while the model performs authoritative validation immediately before each knowable scan and treats failed moves as fatal. Real-time plotting will publish accumulated metric snapshots through a dedicated one-slot queue and use Tk-thread coalescing plus a persistent Matplotlib artist, with histogram-style blitting and a full-draw fallback. Popup-independent calibration processing preserves completion bookkeeping if the window is closed mid-run.
 
 **Tech Stack:** Python, Tkinter/ttk, Matplotlib, NumPy/SciPy, pytest, Navigate's feature/event architecture.
 
@@ -20,7 +20,7 @@
 
 ## Reuse Analysis
 
-No new user-callable API is needed. Extend the existing `Autofocus` feature, `ValidatedSpinbox` error state, controller stage-update paths, event queue, and `HistogramController` rendering pattern. The internal scan planner replaces the duplicated arithmetic already present in `get_autofocus_frame_num`, `get_steps`, and signal execution; it does not introduce a parallel autofocus abstraction. Real-time updates extend the existing `autofocus` event payload contract with an explicit progress marker while preserving final fit/result delivery.
+No new user-callable API is needed. Extend the existing `Autofocus` feature, `ValidatedSpinbox` error state, controller stage-update paths, event pump, and `HistogramController` rendering pattern. The internal scan planner replaces the duplicated arithmetic already present in `get_autofocus_frame_num`, `get_steps`, and signal execution; it does not introduce a parallel autofocus abstraction. Replaceable real-time updates use a dedicated one-slot transport so final fit/results, warnings, and completion metadata retain reliable queue capacity.
 
 ---
 
@@ -529,3 +529,27 @@ Confirm from tests and code that:
 - [x] **Step 5: Commit any final test/document-only adjustments**
 
 Use an intentional commit message describing only the remaining scope. Do not squash or publish unless requested.
+
+## Task 9: Review Hardening for Event Reliability and Popup Lifetime
+
+- [x] **Step 1: Reproduce reliable-event starvation and close-mid-calibration**
+
+Add failing tests for a saturated progress transport followed by final delivery,
+and for reference capture after the autofocus popup has been destroyed.
+
+- [x] **Step 2: Isolate replaceable progress**
+
+Pass a dedicated one-slot multiprocessing queue to the model. Replace a stale
+snapshot without blocking, and have the existing Tk event pump drain only the
+newest snapshot before reliable events.
+
+- [x] **Step 3: Separate completion processing from popup lifetime**
+
+Keep defocus-calibration reference and configuration updates in a persistent
+main-controller-owned object. Limit popup event registration to view-specific
+plot events.
+
+- [x] **Step 4: Run focused regressions and lint**
+
+Verify model autofocus, popup controller, main controller, the complete focused
+suite, Ruff, and `git diff --check` before requesting final review.

@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 import threading
+from typing import Optional
 
 # Third Party Imports
 import numpy as np
@@ -42,6 +43,7 @@ from tkinter import messagebox
 # Local Imports
 import navigate
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.controller.autofocus_calibration import AutofocusCalibrationController
 from navigate.model.features.autofocus import autofocus_bounds_error
 from navigate.model.features.autofocus import plan_autofocus_positions
 from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
@@ -74,6 +76,17 @@ class AutofocusPopupController(GUIController):
         parent_controller : navigate.controller.controller.Controller
             The parent controller of the autofocus popup.
         """
+        calibration_controller = getattr(
+            parent_controller, "autofocus_calibration_controller", None
+        )
+        if calibration_controller is None:
+            calibration_controller = AutofocusCalibrationController(parent_controller)
+            parent_controller.autofocus_calibration_controller = calibration_controller
+        parent_controller.event_listeners[
+            "autofocus_complete"
+        ] = calibration_controller.handle_autofocus_complete
+        self.calibration_controller = calibration_controller
+
         super().__init__(view, parent_controller)
 
         #: dict: The autofocus setting dictionary.
@@ -90,9 +103,6 @@ class AutofocusPopupController(GUIController):
 
         #: object: The autofocus coarse plot.
         self.autofocus_coarse = self.view.coarse
-
-        #: dict: Temporary reference focus for defocus calibration.
-        self.defocus_calibration_reference = None
 
         self.populate_experiment_values()
 
@@ -391,57 +401,21 @@ class AutofocusPopupController(GUIController):
 
     def handle_autofocus_complete(self, payload: dict) -> None:
         """Handle autofocus completion metadata for defocus calibration."""
-        action = payload.get("calibration_action")
-        if action == "capture_reference":
-            self.defocus_calibration_reference = {
-                "channel": payload["channel"],
-                "focus_position": float(payload["focus_position"]),
-            }
-            self._update_reference_status()
-            self._notify_defocus_reference(self.defocus_calibration_reference)
-            # update defocus value
-            channels = self.parent_controller.configuration["experiment"][
-                "MicroscopeState"
-            ]["channels"]
-            defocus = channels[payload["channel"]]["defocus"]
-            for channel_key in channels.keys():
-                self._write_channel_defocus(
-                    channel_key, channels[channel_key]["defocus"] - defocus
-                )
-            return
-
-        if action == "populate_defocus":
-            if self.defocus_calibration_reference is None:
-                self._show_missing_reference_warning()
-                return
-            target_channel = payload["channel"]
-            target_focus = float(payload["focus_position"])
-            reference_focus = self.defocus_calibration_reference["focus_position"]
-            focus = target_focus - reference_focus
-            if target_channel == self.defocus_calibration_reference["channel"]:
-                focus = 0
-            self._write_channel_defocus(target_channel, focus)
-
-        if self.defocus_calibration_reference is not None:
-            self._notify_defocus_reference(self.defocus_calibration_reference)
+        self.calibration_controller.handle_autofocus_complete(payload)
 
     def _write_channel_defocus(self, channel_key: str, defocus: float) -> None:
-        channels = self.parent_controller.configuration["experiment"][
-            "MicroscopeState"
-        ]["channels"]
-        channels[channel_key]["defocus"] = defocus
-        handler = getattr(self.parent_controller, "event_listeners", {}).get(
-            "channel_defocus"
-        )
-        if handler is not None:
-            handler((channel_key, defocus))
+        """Write a defocus value through the persistent calibration state."""
+        self.calibration_controller.write_channel_defocus(channel_key, defocus)
 
-    def _notify_defocus_reference(self, reference: dict) -> None:
-        handler = getattr(self.parent_controller, "event_listeners", {}).get(
-            "defocus_reference"
-        )
-        if handler is not None:
-            handler(reference)
+    @property
+    def defocus_calibration_reference(self) -> Optional[dict]:
+        """Return popup-independent defocus calibration reference state."""
+        return self.calibration_controller.reference
+
+    @defocus_calibration_reference.setter
+    def defocus_calibration_reference(self, reference: Optional[dict]) -> None:
+        """Set popup-independent defocus calibration reference state."""
+        self.calibration_controller.reference = reference
 
     def _update_reference_status(self) -> None:
         if not hasattr(self.view, "reference_status_var"):
@@ -460,12 +434,6 @@ class AutofocusPopupController(GUIController):
         # update reference channel info in the experiment file
         self.setting_dict["reference_channel"] = channel
         self.setting_dict["reference_position"] = focus
-
-    def _show_missing_reference_warning(self) -> None:
-        messagebox.showwarning(
-            title="Navigate",
-            message="Capture a reference focus before populating defocus.",
-        )
 
     def update_device_ref(self, *_: tuple[str]) -> None:
         """Update device reference name
@@ -902,5 +870,4 @@ class AutofocusPopupController(GUIController):
         return {
             "autofocus": self.display_plot,
             "autofocus_progress": self.display_autofocus_progress,
-            "autofocus_complete": self.handle_autofocus_complete,
         }

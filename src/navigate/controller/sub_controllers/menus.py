@@ -584,6 +584,14 @@ class MenuController(GUIController):
         )
 
         # Zoom menu
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        self.view.menubar.menu_resolution.add_command(
+            label=f"Current microscope: {microscope_name}",
+            state="disabled",
+        )
+        self.view.menubar.menu_resolution.add_separator()
         for microscope_name in self.parent_controller.configuration["configuration"][
             "microscopes"
         ].keys():
@@ -607,12 +615,7 @@ class MenuController(GUIController):
                     variable=self.resolution_value,
                     value=f"{microscope_name} {zoom_positions.keys()[0]}",
                 )
-        self.resolution_value.trace_add(
-            "write",
-            lambda *args: self.parent_controller.execute(
-                "resolution", self.resolution_value.get()
-            ),
-        )
+        self.resolution_value.trace_add("write", self._on_resolution_value_changed)
 
         configuration_dict = {
             self.view.menubar.menu_resolution: {
@@ -764,6 +767,16 @@ class MenuController(GUIController):
 
         # Note: Any menu items added below this return statement will not
         # be populated if feature_records does not exist.
+
+    def _on_resolution_value_changed(self, *args) -> None:
+        """Synchronize the microscope menu label and dispatch a resolution change."""
+        resolution_value = self.resolution_value.get()
+        if resolution_value:
+            microscope_name = resolution_value.rsplit(" ", 1)[0]
+            self.view.menubar.menu_resolution.entryconfigure(
+                0, label=f"Current microscope: {microscope_name}"
+            )
+        self.parent_controller.execute("resolution", resolution_value)
 
     @log_function_call
     def toggle_histogram(self) -> None:

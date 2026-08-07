@@ -464,7 +464,7 @@ ruff check \
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit the independently verified plotting phase**
+- [x] **Step 8: Commit the independently verified plotting phase**
 
 ```bash
 git add src/navigate/model/features/autofocus.py \
@@ -484,7 +484,7 @@ Commit body must mention reuse of the existing event pump and histogram blitting
 - Verify: `docs/superpowers/plans/2026-08-07-autofocus-bounds-realtime-plot.md`
 - Verify: all files changed by Tasks 2–7
 
-- [ ] **Step 1: Run the complete focused regression set**
+- [x] **Step 1: Run the complete focused regression set**
 
 Run:
 
@@ -499,11 +499,11 @@ Run:
 
 Expected: PASS.
 
-- [ ] **Step 2: Run repository-configured lint on all changed Python files**
+- [x] **Step 2: Run repository-configured lint on all changed Python files**
 
 Run `ruff check` on every changed Python source and test file. If the repository requires formatting, run `ruff format --check` on that same explicit list.
 
-- [ ] **Step 3: Inspect the final diff for scope and safety**
+- [x] **Step 3: Inspect the final diff for scope and safety**
 
 Run:
 
@@ -515,7 +515,7 @@ git status --short
 
 Confirm that no generated artifacts, unrelated user changes, or speculative public APIs were introduced.
 
-- [ ] **Step 4: Re-read the issue acceptance path**
+- [x] **Step 4: Re-read the issue acceptance path**
 
 Confirm from tests and code that:
 
@@ -526,6 +526,6 @@ Confirm from tests and code that:
 - every processed metric can be displayed during acquisition; and
 - plotting failures cannot stop autofocus.
 
-- [ ] **Step 5: Commit any final test/document-only adjustments**
+- [x] **Step 5: Commit any final test/document-only adjustments**
 
 Use an intentional commit message describing only the remaining scope. Do not squash or publish unless requested.

@@ -53,25 +53,53 @@ class ImagineOpticsMirror(MirrorBase, IntegratedDevice):
 
     @classmethod
     def get_connect_params(cls) -> list[str]:
-        """No connection parameters needed - uses hardcoded file paths.
-        
+        """Connection parameters read from the mirror's `hardware` config block.
+
         Returns
         -------
         list
-            Empty list since no config parameters are needed.
+            Names of the WaveKit config/calibration file paths required to
+            connect to the mirror.
         """
-        return []
+        return [
+            "wfc_config_file_path",
+            "haso_config_file_path",
+            "flat_path",
+            "interaction_matrix_file_path",
+        ]
 
     @classmethod
-    def connect(cls) -> IMOP_Mirror:
+    def connect(
+        cls,
+        wfc_config_file_path,
+        haso_config_file_path,
+        flat_path,
+        interaction_matrix_file_path,
+    ) -> IMOP_Mirror:
         """Create and return IMOP_Mirror connection.
-        
+
+        Parameters
+        ----------
+        wfc_config_file_path : str
+            Path to the wavefront-corrector (.dat) config file.
+        haso_config_file_path : str
+            Path to the HASO sensor (.dat) config file.
+        flat_path : str
+            Path to the .wcs file defining the flat actuator positions.
+        interaction_matrix_file_path : str
+            Path to the .aoc interaction matrix used to build the command matrix.
+
         Returns
         -------
         IMOP_Mirror
             The mirror controller instance.
         """
-        return IMOP_Mirror()
+        return IMOP_Mirror(
+            wfc_config_file_path=wfc_config_file_path,
+            haso_config_file_path=haso_config_file_path,
+            positions_file_path=flat_path,
+            interaction_matrix_file_path=interaction_matrix_file_path,
+        )
 
     def __init__(
         self, microscope_name, device_connection, configuration, *args, **kwargs
@@ -92,10 +120,16 @@ class ImagineOpticsMirror(MirrorBase, IntegratedDevice):
         # obj: mirror controller (IMOP_Mirror)
         self.mirror_controller = device_connection
 
-        flat_path = configuration["configuration"]["microscopes"][microscope_name][
-            "mirror"
-        ]["hardware"]["flat_path"]
+        hardware_config = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["mirror"]["hardware"]
+
+        flat_path = hardware_config["flat_path"]
         self.mirror_controller.set_flat(pos_path=flat_path)
+
+        mirror_files_path = hardware_config.get("mirror_files_path")
+        if mirror_files_path:
+            self.mirror_controller.mirror_files_path = mirror_files_path
 
         logger.info("ImagineOpticsMirror Initialized")
 

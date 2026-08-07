@@ -33,6 +33,7 @@
 
 # Standard library imports
 from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
 
 # Third party imports
 import pytest
@@ -87,6 +88,94 @@ class TestAutofocusPopupController:
         """
         assert isinstance(self.autofocus_controller, AutofocusPopupController)
         assert self.autofocus_controller.view.popup.winfo_exists() == 1
+
+    def test_stop_acquisition_button_matches_start_button(self):
+        """The popup exposes an equally emphasized acquisition stop control."""
+        start_button = self.autofocus_controller.view.autofocus_btn
+        stop_button = self.autofocus_controller.view.stop_acquisition_btn
+
+        assert start_button["text"] == "▶ Start Autofocus"
+        assert stop_button["text"] == "■ Stop Acquisition"
+        assert start_button["style"] == "Accent.TButton"
+        assert stop_button["style"] == "Accent.TButton"
+        assert int(start_button["width"]) == int(stop_button["width"])
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "disabled"
+
+    @pytest.mark.parametrize(
+        ("state", "autofocus_active", "mode", "start_state", "stop_state"),
+        [
+            ("idle", False, "live", "normal", "disabled"),
+            ("starting", True, "live", "disabled", "disabled"),
+            ("running", False, "live", "normal", "normal"),
+            ("running", True, "live", "disabled", "normal"),
+            ("running", False, "z-stack", "disabled", "normal"),
+            ("stopping", True, "live", "disabled", "disabled"),
+        ],
+    )
+    def test_acquisition_state_controls_buttons(
+        self,
+        monkeypatch,
+        state,
+        autofocus_active,
+        mode,
+        start_state,
+        stop_state,
+    ):
+        """Acquisition and autofocus state expose only valid popup actions."""
+        parent_controller = self.autofocus_controller.parent_controller
+        monkeypatch.setattr(
+            parent_controller,
+            "acquire_bar_controller",
+            SimpleNamespace(
+                is_acquiring=state != "idle",
+                mode=mode,
+            ),
+            raising=False,
+        )
+        start_button = self.autofocus_controller.view.autofocus_btn
+        stop_button = self.autofocus_controller.view.stop_acquisition_btn
+
+        self.autofocus_controller.set_acquisition_state(state)
+        self.autofocus_controller.set_autofocus_state(autofocus_active)
+
+        assert str(start_button["state"]) == start_state
+        assert str(stop_button["state"]) == stop_state
+
+    def test_stop_acquisition_uses_global_stop_route(self, monkeypatch):
+        """Popup cancellation follows the same route as the main Stop button."""
+        parent_controller = self.autofocus_controller.parent_controller
+        parent_controller.clear()
+        acquire_button = parent_controller.view.acquire_bar.acquire_btn
+        original_state = str(acquire_button["state"])
+        monkeypatch.setattr(
+            parent_controller,
+            "acquire_bar_controller",
+            SimpleNamespace(
+                is_acquiring=True,
+                mode="live",
+                view=SimpleNamespace(acquire_btn=acquire_button),
+            ),
+            raising=False,
+        )
+
+        try:
+            self.autofocus_controller.set_acquisition_state("running")
+            self.autofocus_controller.set_autofocus_state(True)
+            self.autofocus_controller.view.stop_acquisition_btn.invoke()
+
+            assert parent_controller.pop() == "stop_acquire"
+            assert (
+                str(self.autofocus_controller.view.autofocus_btn["state"]) == "disabled"
+            )
+            assert (
+                str(self.autofocus_controller.view.stop_acquisition_btn["state"])
+                == "disabled"
+            )
+            assert str(acquire_button["state"]) == "disabled"
+        finally:
+            acquire_button.configure(state=original_state)
+            parent_controller.clear()
 
     def test_attr(self):
         """Tests that the attributes are initialized correctly
@@ -192,9 +281,7 @@ class TestAutofocusPopupController:
 
     def test_start_autofocus_passes_channel_and_calibration_action(self):
         self.autofocus_controller.widgets["target_channel"].set("CH2")
-        self.autofocus_controller.widgets["calibration_action"].set(
-            "Capture Reference"
-        )
+        self.autofocus_controller.widgets["calibration_action"].set("Capture Reference")
 
         with patch.object(
             self.autofocus_controller.parent_controller, "execute"
@@ -213,6 +300,27 @@ class TestAutofocusPopupController:
                 False,
             )
 
+    def test_auto_defocus_warning_uses_clear_acquisition_instruction(self, monkeypatch):
+        """Auto Defocus clearly instructs users to stop acquisition first."""
+        parent_controller = self.autofocus_controller.parent_controller
+        monkeypatch.setattr(
+            parent_controller,
+            "acquire_bar_controller",
+            SimpleNamespace(is_acquiring=True),
+            raising=False,
+        )
+        self.autofocus_controller.widgets["calibration_action"].set("Auto Defocus")
+
+        with patch(
+            "navigate.controller.sub_controllers.autofocus.messagebox.showwarning"
+        ) as showwarning:
+            self.autofocus_controller.start_autofocus()
+
+        showwarning.assert_called_once_with(
+            title="Navigate",
+            message=("Please stop the acquisition before calculating defocus values."),
+        )
+
     def test_target_channel_uses_channel_setting_labels(self):
         channel_values = tuple(
             self.autofocus_controller.widgets["target_channel"].widget["values"]
@@ -223,8 +331,7 @@ class TestAutofocusPopupController:
             ]["channels"].keys()
         )
         expected_values = tuple(
-            f"CH{channel_key.removeprefix('channel_')}"
-            for channel_key in channel_keys
+            f"CH{channel_key.removeprefix('channel_')}" for channel_key in channel_keys
         )
 
         assert channel_values == expected_values

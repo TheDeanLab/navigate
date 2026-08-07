@@ -19,6 +19,9 @@ microscopes:
         name: mirror
         type: ImagineOpticsMirror
         flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+        wfc_config_file_path: D:\WaveKitX64\MirrorFiles\WaveFrontCorrector_Mirao52-e_0259.dat
+        haso_config_file_path: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat
+        interaction_matrix_file_path: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc
       n_modes: 32
 
     zoom:
@@ -172,6 +175,9 @@ microscopes:
         name: mirror
         type: ImagineOpticsMirror
         flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+        wfc_config_file_path: D:\WaveKitX64\MirrorFiles\WaveFrontCorrector_Mirao52-e_0259.dat
+        haso_config_file_path: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat
+        interaction_matrix_file_path: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc
       n_modes: 32
 
     zoom:

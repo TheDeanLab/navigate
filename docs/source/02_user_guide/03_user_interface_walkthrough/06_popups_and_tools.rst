@@ -52,6 +52,16 @@ region of highest contrast (best focus). Spline-fit and test-significance
 buttons are already present in preparation for additional intelligent autofocus
 functionality in future updates.
 
+While an acquisition is active, press :guilabel:`Stop Acquisition` to cancel
+autofocus or the acquisition in which it is running. This uses **navigate**'s
+standard acquisition shutdown to stop acquisition threads and hardware before
+returning the controls to their idle state.
+
+:guilabel:`Start Autofocus` is disabled while an autofocus routine is starting
+or running and is restored when autofocus completes. During a Continuous Scan,
+it remains available between autofocus routines so autofocus can be injected
+without stopping the live acquisition.
+
 The :guilabel:`Channel` must be active in Channel Settings. Choose a
 :guilabel:`Calibration` action before pressing :guilabel:`Start Autofocus`:
 

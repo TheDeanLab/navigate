@@ -1,6 +1,7 @@
 import os
+from fnmatch import fnmatchcase
 from types import SimpleNamespace
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, call
 
 import pytest
 
@@ -17,9 +18,25 @@ class DummyVar:
 
     def set(self, value):
         self.value = value
+        for _, callback in self.trace_calls:
+            callback(self, None, "write")
 
     def trace_add(self, *args):
         self.trace_calls.append(args)
+
+
+class DummyResolutionMenu:
+    def __init__(self, labels):
+        self.labels = list(labels)
+
+    def entryconfigure(self, index, *, label):
+        if isinstance(index, str):
+            index = next(
+                i
+                for i, existing_label in enumerate(self.labels)
+                if fnmatchcase(existing_label, index)
+            )
+        self.labels[index] = label
 
 
 @pytest.fixture
@@ -60,10 +77,13 @@ def menu_controller(monkeypatch):
                 }
             }
         },
+        "gui": {"histogram": {"enabled": True}},
         "rest_api_config": {"Ilastik": {"url": "http://ilastik.invalid"}},
         "waveform_constants": {"constants": "value"},
     }
     parent_controller.model = MagicMock()
+    parent_controller.channels_tab_controller = MagicMock()
+    parent_controller.multiposition_tab_controller = MagicMock()
     parent_controller.execute = MagicMock()
     parent_controller.default_experiment_file = "/tmp/default.yml"
     parent_controller.update_experiment_setting = MagicMock(return_value=None)
@@ -163,6 +183,65 @@ def test_edit_feature_list_opens_selected_custom_feature_list(
         popup, parent_controller
     )
     feature_popup_controller.populate_feature_list.assert_called_once_with(7)
+
+def test_initialize_menus_starts_with_current_microscope_status(menu_controller):
+    controller, _ = menu_controller
+
+    controller.initialize_menus()
+
+    menu = controller.view.menubar.menu_resolution
+    assert menu.add_command.call_args_list[0] == call(
+        label="Current microscope: ScopeA", state="disabled"
+    )
+    assert menu.add_separator.call_args_list[0] == call()
+
+
+def test_resolution_change_refreshes_current_microscope_status(menu_controller):
+    controller, parent_controller = menu_controller
+    controller.initialize_menus()
+    menu = controller.view.menubar.menu_resolution
+    menu.reset_mock()
+
+    controller.resolution_value.set("ScopeB 20x")
+
+    menu.entryconfigure.assert_called_once_with(
+        "Current microscope:*", label="Current microscope: ScopeB"
+    )
+    parent_controller.execute.assert_called_with("resolution", "ScopeB 20x")
+
+
+def test_resolution_change_finds_status_row_when_it_is_not_first(menu_controller):
+    controller, parent_controller = menu_controller
+    menu = DummyResolutionMenu(
+        ["Future menu entry", "Current microscope: ScopeA", "ScopeA"]
+    )
+    controller.view.menubar.menu_resolution = menu
+    controller.resolution_value.value = "ScopeB 20x"
+
+    controller._on_resolution_value_changed()
+
+    assert menu.labels == [
+        "Future menu entry",
+        "Current microscope: ScopeB",
+        "ScopeA",
+    ]
+    parent_controller.execute.assert_called_once_with("resolution", "ScopeB 20x")
+
+
+def test_empty_resolution_retains_current_microscope_status(menu_controller):
+    controller, parent_controller = menu_controller
+    controller.initialize_menus()
+    menu = controller.view.menubar.menu_resolution
+    assert (
+        call(label="Current microscope: ScopeA", state="disabled")
+        in menu.add_command.call_args_list
+    )
+    menu.reset_mock()
+
+    controller.resolution_value.set("")
+
+    menu.entryconfigure.assert_not_called()
+    parent_controller.execute.assert_called_with("resolution", "")
 
 
 def test_toggle_stage_limits_updates_configuration_and_popup(menu_controller):

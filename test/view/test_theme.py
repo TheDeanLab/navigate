@@ -179,8 +179,11 @@ def test_apply_theme_sets_legible_menu_state_colors(monkeypatch):
 
     _, palette = theme.apply_theme(root)
 
-    assert call("*Menu.SelectColor", palette["text"]) in root.option_add.call_args_list
-    assert (
-        call("*Menu.DisabledForeground", palette["muted_text"])
-        in root.option_add.call_args_list
-    )
+    expected_menu_options = [
+        call("*Menu.disabledForeground", palette["muted_text"]),
+        call("*Menu.selectColor", palette["text"]),
+        call("*Menu.activeBackground", palette["accent"]),
+        call("*Menu.activeForeground", palette["text"]),
+    ]
+    for expected_call in expected_menu_options:
+        assert expected_call in root.option_add.call_args_list

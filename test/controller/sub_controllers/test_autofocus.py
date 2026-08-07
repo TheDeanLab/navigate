@@ -74,12 +74,82 @@ class TestAutofocusPopupController:
             Dummy controller for testing
 
         """
-        if hasattr(dummy_controller, "autofocus_calibration_controller"):
-            dummy_controller.autofocus_calibration_controller.reference = None
+        stage_parameters = dummy_controller.configuration["experiment"][
+            "StageParameters"
+        ]
+        original_stage_parameters = dict(stage_parameters)
+        microscope_state = dummy_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]
+        autofocus_settings = dummy_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ][microscope_state["microscope_name"]]["stage"]["f"]
+        original_autofocus_settings = dict(autofocus_settings)
+        channels = microscope_state["channels"]
+        original_defocus = {
+            channel_key: channel["defocus"]
+            for channel_key, channel in channels.items()
+        }
+        original_get_stage_position_limits = (
+            dummy_controller.configuration_controller.get_stage_position_limits
+        )
+        autofocus_state_keys = ("autofocus_device", "autofocus_device_ref")
+        missing = object()
+        original_autofocus_state = {
+            key: microscope_state.get(key, missing) for key in autofocus_state_keys
+        }
+        calibration_controller = getattr(
+            dummy_controller, "autofocus_calibration_controller", None
+        )
+        original_reference = (
+            calibration_controller.reference
+            if calibration_controller is not None
+            else None
+        )
+
+        stage_parameters["f"] = 0
+        stage_parameters["limits"] = False
+        autofocus_settings.update(
+            {
+                "coarse_selected": True,
+                "coarse_range": 500,
+                "coarse_step_size": 50,
+                "fine_selected": True,
+                "fine_range": 50,
+                "fine_step_size": 5,
+            }
+        )
+        if calibration_controller is not None:
+            calibration_controller.reference = None
         autofocus_popup = AutofocusPopup(dummy_controller.view)
         self.autofocus_controller = AutofocusPopupController(
             autofocus_popup, dummy_controller
         )
+        try:
+            yield
+        finally:
+            popup = self.autofocus_controller.view.popup
+            if popup.winfo_exists():
+                self.autofocus_controller.close_popup()
+            dummy_controller.configuration_controller.get_stage_position_limits = (
+                original_get_stage_position_limits
+            )
+            stage_parameters.clear()
+            stage_parameters.update(original_stage_parameters)
+            autofocus_settings.clear()
+            autofocus_settings.update(original_autofocus_settings)
+            for channel_key, defocus in original_defocus.items():
+                channels[channel_key]["defocus"] = defocus
+            for key, value in original_autofocus_state.items():
+                if value is missing:
+                    microscope_state.pop(key, None)
+                else:
+                    microscope_state[key] = value
+            calibration_controller = getattr(
+                dummy_controller, "autofocus_calibration_controller", None
+            )
+            if calibration_controller is not None:
+                calibration_controller.reference = original_reference
 
     def test_init(self):
         """Tests that the controller is initialized correctly

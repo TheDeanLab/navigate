@@ -8,7 +8,9 @@ from navigate.controller.sub_controllers.stages_advanced import (
 )
 
 
-def test_limit_edit_immediately_refreshes_open_autofocus_popup(dummy_controller):
+def test_limit_edit_immediately_refreshes_open_autofocus_popup(
+    dummy_controller, monkeypatch
+):
     controller = AdvancedStageParametersController.__new__(
         AdvancedStageParametersController
     )
@@ -16,7 +18,18 @@ def test_limit_edit_immediately_refreshes_open_autofocus_popup(dummy_controller)
         "microscope_name"
     ]
     refresh_bounds = MagicMock()
-    dummy_controller._refresh_autofocus_bounds = refresh_bounds
+    monkeypatch.setattr(
+        dummy_controller,
+        "_refresh_autofocus_bounds",
+        refresh_bounds,
+        raising=False,
+    )
+    stage_configuration = dummy_controller.configuration["configuration"][
+        "microscopes"
+    ][microscope_name]["stage"]
+    monkeypatch.setitem(
+        stage_configuration, "f_max", stage_configuration["f_max"]
+    )
     controller.parent_controller = dummy_controller
     controller.current_microscope = microscope_name
     controller.stage_dict = {}
@@ -28,10 +41,7 @@ def test_limit_edit_immediately_refreshes_open_autofocus_popup(dummy_controller)
 
     assert controller.stage_dict["f_max"] == 1234
     assert (
-        dummy_controller.configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["stage"]["f_max"]
-        == 1234
+        stage_configuration["f_max"] == 1234
     )
     refresh_bounds.assert_called_once_with()
 

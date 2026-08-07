@@ -1,4 +1,5 @@
 import os
+from fnmatch import fnmatchcase
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, call
 
@@ -22,6 +23,20 @@ class DummyVar:
 
     def trace_add(self, *args):
         self.trace_calls.append(args)
+
+
+class DummyResolutionMenu:
+    def __init__(self, labels):
+        self.labels = list(labels)
+
+    def entryconfigure(self, index, *, label):
+        if isinstance(index, str):
+            index = next(
+                i
+                for i, existing_label in enumerate(self.labels)
+                if fnmatchcase(existing_label, index)
+            )
+        self.labels[index] = label
 
 
 @pytest.fixture
@@ -138,8 +153,28 @@ def test_resolution_change_refreshes_current_microscope_status(menu_controller):
 
     controller.resolution_value.set("ScopeB 20x")
 
-    menu.entryconfigure.assert_called_once_with(0, label="Current microscope: ScopeB")
+    menu.entryconfigure.assert_called_once_with(
+        "Current microscope:*", label="Current microscope: ScopeB"
+    )
     parent_controller.execute.assert_called_with("resolution", "ScopeB 20x")
+
+
+def test_resolution_change_finds_status_row_when_it_is_not_first(menu_controller):
+    controller, parent_controller = menu_controller
+    menu = DummyResolutionMenu(
+        ["Future menu entry", "Current microscope: ScopeA", "ScopeA"]
+    )
+    controller.view.menubar.menu_resolution = menu
+    controller.resolution_value.value = "ScopeB 20x"
+
+    controller._on_resolution_value_changed()
+
+    assert menu.labels == [
+        "Future menu entry",
+        "Current microscope: ScopeB",
+        "ScopeA",
+    ]
+    parent_controller.execute.assert_called_once_with("resolution", "ScopeB 20x")
 
 
 def test_empty_resolution_retains_current_microscope_status(menu_controller):

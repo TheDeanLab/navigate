@@ -96,6 +96,8 @@ from navigate.config.config import (
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+_CURRENT_MICROSCOPE_MENU_PREFIX = "Current microscope:"
+
 
 def log_function_call(func):
     """Decorator that logs the name of the function being called."""
@@ -588,7 +590,7 @@ class MenuController(GUIController):
             "MicroscopeState"
         ]["microscope_name"]
         self.view.menubar.menu_resolution.add_command(
-            label=f"Current microscope: {microscope_name}",
+            label=f"{_CURRENT_MICROSCOPE_MENU_PREFIX} {microscope_name}",
             state="disabled",
         )
         self.view.menubar.menu_resolution.add_separator()
@@ -774,7 +776,8 @@ class MenuController(GUIController):
         if resolution_value:
             microscope_name = resolution_value.rsplit(" ", 1)[0]
             self.view.menubar.menu_resolution.entryconfigure(
-                0, label=f"Current microscope: {microscope_name}"
+                f"{_CURRENT_MICROSCOPE_MENU_PREFIX}*",
+                label=f"{_CURRENT_MICROSCOPE_MENU_PREFIX} {microscope_name}",
             )
         self.parent_controller.execute("resolution", resolution_value)
 

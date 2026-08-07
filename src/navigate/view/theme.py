@@ -1137,6 +1137,8 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     root.option_add("*Menu.Font", font_body)
     root.option_add("*Menu.Background", panel_bg)
     root.option_add("*Menu.Foreground", text)
+    root.option_add("*Menu.DisabledForeground", muted_text)
+    root.option_add("*Menu.SelectColor", text)
     root.option_add("*Menu.ActiveBackground", accent)
     root.option_add("*Menu.ActiveForeground", text)
     root.option_add("*Button.Font", font_button)

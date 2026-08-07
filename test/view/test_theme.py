@@ -30,6 +30,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from unittest.mock import MagicMock, call
+
 from navigate.view import theme
 
 
@@ -164,3 +166,21 @@ def test_get_theme_matplotlib_font_uses_sans_serif_for_private_tk_family(monkeyp
 
     assert fontdict["family"] == "sans-serif"
     assert fontdict["size"] == 10
+
+
+def test_apply_theme_sets_legible_menu_state_colors(monkeypatch):
+    root = MagicMock()
+    style = MagicMock()
+    style.theme_names.return_value = ("clam",)
+    monkeypatch.setattr(theme.ttk, "Style", lambda _root: style)
+    monkeypatch.setattr(
+        theme, "_apply_rounded_notebook_tabs", lambda *args, **kwargs: None
+    )
+
+    _, palette = theme.apply_theme(root)
+
+    assert call("*Menu.SelectColor", palette["text"]) in root.option_add.call_args_list
+    assert (
+        call("*Menu.DisabledForeground", palette["muted_text"])
+        in root.option_add.call_args_list
+    )

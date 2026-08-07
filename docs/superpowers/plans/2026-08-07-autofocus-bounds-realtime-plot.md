@@ -64,7 +64,7 @@ Expected: PASS. These tests establish that the blitting pattern being reused is 
 - Modify: `src/navigate/model/features/autofocus.py`
 - Test: `test/model/features/test_autofocus.py`
 
-- [ ] **Step 1: Write failing tests for exact planned positions**
+- [x] **Step 1: Write failing tests for exact planned positions**
 
 Add literal expected-position tests for the internal planner, including:
 
@@ -75,7 +75,7 @@ assert plan_autofocus_positions(0, 10, 2) == (-6, -4, -2, 0, 2, 4)
 
 Also cover a non-zero center and a range that is not an exact multiple of the step size. Expected positions must be written independently rather than calculated with production helpers.
 
-- [ ] **Step 2: Run the planner tests and confirm the expected failure**
+- [x] **Step 2: Run the planner tests and confirm the expected failure**
 
 Run:
 
@@ -86,13 +86,13 @@ Run:
 
 Expected: FAIL because the shared planner does not exist.
 
-- [ ] **Step 3: Implement one internal pure planner**
+- [x] **Step 3: Implement one internal pure planner**
 
 Add `plan_autofocus_positions(center, scan_range, step_size)` in `autofocus.py`. Preserve the current acquisition sequence exactly: compute `int(scan_range // step_size) + 1` frames, center the existing even/odd sequence on `center`, and return an immutable tuple.
 
 Update `get_autofocus_frame_num`, `get_steps`, and signal-position selection to derive their counts/targets from this planner instead of repeating arithmetic. Do not change scan ordering or fitting behavior.
 
-- [ ] **Step 4: Run the planner and existing model tests**
+- [x] **Step 4: Run the planner and existing model tests**
 
 Run:
 
@@ -110,7 +110,7 @@ Expected: PASS.
 - Modify: `src/navigate/model/features/autofocus.py`
 - Test: `test/model/features/test_autofocus.py`
 
-- [ ] **Step 1: Write failing bounds-policy tests**
+- [x] **Step 1: Write failing bounds-policy tests**
 
 Cover these cases with literal limits and expected error text:
 
@@ -123,7 +123,7 @@ Cover these cases with literal limits and expected error text:
 - a valid move queues the achieved requested position; and
 - a `False` stage-move result raises a user-visible error and does not append to `autofocus_pos_queue`.
 
-- [ ] **Step 2: Run the new model safety tests and confirm the failures**
+- [x] **Step 2: Run the new model safety tests and confirm the failures**
 
 Run:
 
@@ -134,7 +134,7 @@ Run:
 
 Expected: FAIL on missing bounds validation and ignored move results.
 
-- [ ] **Step 3: Implement shared bounds diagnostics**
+- [x] **Step 3: Implement shared bounds diagnostics**
 
 Add internal helpers that:
 
@@ -145,21 +145,21 @@ Add internal helpers that:
 
 Use `focus-stage` for the focus axis and an axis-specific stage label for other supported stage autofocus axes.
 
-- [ ] **Step 4: Preflight immediately knowable model paths**
+- [x] **Step 4: Preflight immediately knowable model paths**
 
 Before acquisition preparation, read the selected stage-axis current position and reject an invalid coarse path, or an invalid fine-only path. For combined scans, validate only coarse at this point because the fine center is not yet known.
 
 Remote-focus autofocus retains its current non-stage behavior.
 
-- [ ] **Step 5: Validate the combined fine path at the transition**
+- [x] **Step 5: Validate the combined fine path at the transition**
 
 After coarse analysis determines the fine center, construct and validate the exact fine trajectory before its first stage move. Raise `UserVisibleException` with the shared diagnostic on failure.
 
-- [ ] **Step 6: Make failed moves fatal before queueing**
+- [x] **Step 6: Make failed moves fatal before queueing**
 
 Check the boolean return from each autofocus stage move, including restoration/final positioning. On `False`, raise `UserVisibleException` and do not put that target on `autofocus_pos_queue`.
 
-- [ ] **Step 7: Run all focused model tests**
+- [x] **Step 7: Run all focused model tests**
 
 Run:
 
@@ -181,11 +181,11 @@ Expected: PASS.
 - Test: `test/controller/sub_controllers/test_autofocus.py`
 - Test: `test/controller/test_controller.py`
 
-- [ ] **Step 1: Write failing popup-structure tests**
+- [x] **Step 1: Write failing popup-structure tests**
 
 Assert that the Scan Parameters frame exposes a blank warning variable/label on the row below Fine, spans the scan columns, and uses the active theme danger color when populated.
 
-- [ ] **Step 2: Write failing controller-validation tests**
+- [x] **Step 2: Write failing controller-validation tests**
 
 Test `refresh_bounds_validation()` with mocked stage state for:
 
@@ -200,11 +200,11 @@ Test `refresh_bounds_validation()` with mocked stage state for:
 
 Assert that only the offending Range spinbox uses `_toggle_error(True)`.
 
-- [ ] **Step 3: Write failing final-preflight tests**
+- [x] **Step 3: Write failing final-preflight tests**
 
 When Start Autofocus is clicked with an invalid path, assert that the controller shows an error dialog containing the inline diagnostic and does not call the parent controller's autofocus dispatch. A valid path must retain the current dispatch behavior.
 
-- [ ] **Step 4: Write failing stage-refresh-hook tests**
+- [x] **Step 4: Write failing stage-refresh-hook tests**
 
 Assert that an open autofocus controller refreshes after:
 
@@ -214,7 +214,7 @@ Assert that an open autofocus controller refreshes after:
 
 The hook must be safe when the popup is closed or not initialized.
 
-- [ ] **Step 5: Run the new GUI/controller tests and confirm failure**
+- [x] **Step 5: Run the new GUI/controller tests and confirm failure**
 
 Run:
 
@@ -227,11 +227,11 @@ Run:
 
 Expected: FAIL on missing warning widgets, validation, and refresh hooks.
 
-- [ ] **Step 6: Implement the reserved warning row**
+- [x] **Step 6: Implement the reserved warning row**
 
 Add a `StringVar`-backed warning label at row 3 of the scan-parameter frame, spanning all scan columns. It is blank by default and uses the theme's danger foreground.
 
-- [ ] **Step 7: Implement advisory controller validation**
+- [x] **Step 7: Implement advisory controller validation**
 
 Use the model's shared planner/diagnostic helpers with:
 
@@ -241,15 +241,15 @@ Use the model's shared planner/diagnostic helpers with:
 
 Keep separate bounds-error bookkeeping so clearing a bounds violation cannot erase an unrelated numeric validation error. Call refresh from existing setting-variable traces and when the selected device/ref changes.
 
-- [ ] **Step 8: Add final controller preflight**
+- [x] **Step 8: Add final controller preflight**
 
 At the start of `start_autofocus`, refresh bounds validation. If any immediately knowable path is invalid, show the shared message via `messagebox.showerror` and return before dispatch.
 
-- [ ] **Step 9: Add stage position/limit refresh hooks**
+- [x] **Step 9: Add stage position/limit refresh hooks**
 
 Add one guarded helper in the main controller to refresh an existing autofocus popup controller. Invoke it after silent position updates, stage limit-value updates, and limit-enabled toggles. Keep the configuration's limits-enabled value synchronized before refreshing.
 
-- [ ] **Step 10: Run the full phase-1 focused suite**
+- [x] **Step 10: Run the full phase-1 focused suite**
 
 Run:
 
@@ -263,7 +263,7 @@ Run:
 
 Expected: PASS.
 
-- [ ] **Step 11: Lint phase-1 changes**
+- [x] **Step 11: Lint phase-1 changes**
 
 Run:
 

@@ -42,6 +42,7 @@ import numpy as np
 # Local application imports
 from navigate.controller.sub_controllers import AutofocusPopupController
 from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
+from navigate.view.theme import get_theme_color
 
 
 class TestAutofocusPopupController:
@@ -88,6 +89,142 @@ class TestAutofocusPopupController:
         """
         assert isinstance(self.autofocus_controller, AutofocusPopupController)
         assert self.autofocus_controller.view.popup.winfo_exists() == 1
+
+    def test_scan_parameters_reserve_inline_bounds_warning_row(self):
+        warning_label = self.autofocus_controller.view.bounds_warning_label
+
+        assert self.autofocus_controller.view.bounds_warning_var.get() == ""
+        assert int(warning_label.grid_info()["row"]) == 3
+        assert int(warning_label.grid_info()["columnspan"]) == 3
+        assert str(warning_label.cget("foreground")) == get_theme_color(
+            "danger", "red"
+        )
+
+    def configure_focus_bounds(self, minimum=0, maximum=1000, enabled=True):
+        parent = self.autofocus_controller.parent_controller
+        parent.configuration["experiment"]["StageParameters"]["f"] = 0
+        parent.configuration["experiment"]["StageParameters"]["limits"] = enabled
+        parent.configuration_controller.get_stage_position_limits = MagicMock(
+            side_effect=lambda suffix: {
+                "f": minimum if suffix == "_min" else maximum
+            }
+        )
+        settings = self.autofocus_controller.setting_dict[
+            self.autofocus_controller.microscope_name
+        ]["stage"]["f"]
+        settings.update(
+            {
+                "coarse_selected": True,
+                "coarse_range": 500,
+                "coarse_step_size": 50,
+                "fine_selected": False,
+                "fine_range": 50,
+                "fine_step_size": 5,
+            }
+        )
+        for key, value in settings.items():
+            if key in self.autofocus_controller.view.setting_vars:
+                self.autofocus_controller.view.setting_vars[key].set(value)
+        return settings
+
+    def test_refresh_bounds_validation_marks_and_clears_coarse_range(self):
+        self.configure_focus_bounds()
+
+        errors = self.autofocus_controller.refresh_bounds_validation()
+
+        expected = (
+            "The requested coarse scan (-250 to 250 µm) exceeds the focus-stage "
+            "limits (0 to 1000 µm)."
+        )
+        assert errors == [expected]
+        assert self.autofocus_controller.view.bounds_warning_var.get() == expected
+        coarse_range = self.autofocus_controller.widgets["coarse_range"].widget
+        fine_range = self.autofocus_controller.widgets["fine_range"].widget
+        assert str(coarse_range.cget("foreground")) == get_theme_color(
+            "danger", "red"
+        )
+        assert str(fine_range.cget("foreground")) == get_theme_color(
+            "text", "black"
+        )
+
+        self.autofocus_controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["f"] = 500
+        assert self.autofocus_controller.refresh_bounds_validation() == []
+        assert self.autofocus_controller.view.bounds_warning_var.get() == ""
+        assert str(coarse_range.cget("foreground")) == get_theme_color(
+            "text", "black"
+        )
+
+    def test_refresh_bounds_validation_checks_fine_only(self):
+        settings = self.configure_focus_bounds()
+        settings.update(
+            {
+                "coarse_selected": False,
+                "fine_selected": True,
+                "fine_range": 50,
+                "fine_step_size": 5,
+            }
+        )
+        self.autofocus_controller.view.setting_vars["coarse_selected"].set(False)
+        self.autofocus_controller.view.setting_vars["fine_selected"].set(True)
+
+        errors = self.autofocus_controller.refresh_bounds_validation()
+
+        assert errors == [
+            "The requested fine scan (-25 to 25 µm) exceeds the focus-stage "
+            "limits (0 to 1000 µm)."
+        ]
+
+    def test_refresh_bounds_validation_does_not_guess_combined_fine_center(self):
+        settings = self.configure_focus_bounds()
+        self.autofocus_controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["f"] = 500
+        settings.update(
+            {
+                "coarse_selected": True,
+                "coarse_range": 100,
+                "coarse_step_size": 10,
+                "fine_selected": True,
+                "fine_range": 5000,
+                "fine_step_size": 50,
+            }
+        )
+        for key in (
+            "coarse_selected",
+            "coarse_range",
+            "coarse_step_size",
+            "fine_selected",
+            "fine_range",
+            "fine_step_size",
+        ):
+            self.autofocus_controller.view.setting_vars[key].set(settings[key])
+
+        assert self.autofocus_controller.refresh_bounds_validation() == []
+
+    def test_refresh_bounds_validation_ignores_disabled_limits(self):
+        self.configure_focus_bounds(enabled=False)
+
+        assert self.autofocus_controller.refresh_bounds_validation() == []
+
+    def test_start_autofocus_blocks_invalid_bounds_with_final_dialog(self):
+        self.configure_focus_bounds()
+        parent = self.autofocus_controller.parent_controller
+
+        with patch.object(parent, "execute") as execute, patch(
+            "navigate.controller.sub_controllers.autofocus.messagebox.showerror"
+        ) as showerror:
+            self.autofocus_controller.start_autofocus()
+
+        execute.assert_not_called()
+        showerror.assert_called_once_with(
+            title="Navigate",
+            message=(
+                "The requested coarse scan (-250 to 250 µm) exceeds the "
+                "focus-stage limits (0 to 1000 µm)."
+            ),
+        )
 
     def test_stop_acquisition_button_matches_start_button(self):
         """The popup exposes an equally emphasized acquisition stop control."""

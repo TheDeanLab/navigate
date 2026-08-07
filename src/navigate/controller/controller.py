@@ -1142,6 +1142,7 @@ class Controller:
             if microscope_name == self.configuration_controller.microscope_name:
                 self.stage_controller.initialize()
                 self.channels_tab_controller.update_stack_position_limits()
+                self._refresh_autofocus_bounds()
             self.threads_pool.createThread(
                 resourceName="model",
                 target=self.update_stage_limits,
@@ -1265,7 +1266,9 @@ class Controller:
 
         elif command == "stage_limits":
             self.stage_controller.stage_limits = args[0]
+            self.configuration["experiment"]["StageParameters"]["limits"] = args[0]
             self.channels_tab_controller.update_stack_position_limits()
+            self._refresh_autofocus_bounds()
             self.threads_pool.createThread(
                 resourceName="model",
                 target=lambda: self.model.run_command("stage_limits", *args),
@@ -1876,6 +1879,13 @@ class Controller:
             ax = axis.split("_")[0]
             stage_gui_dict[ax] = val
         self.stage_controller.set_position_silent(stage_gui_dict)
+        self._refresh_autofocus_bounds()
+
+    def _refresh_autofocus_bounds(self) -> None:
+        """Refresh an open autofocus popup after stage state changes."""
+        autofocus_controller = getattr(self, "af_popup_controller", None)
+        if autofocus_controller is not None:
+            autofocus_controller.refresh_bounds_validation()
 
     def update_frame_rate(self, frame_rate: float) -> None:
         """Update the frame rate display in the GUI.

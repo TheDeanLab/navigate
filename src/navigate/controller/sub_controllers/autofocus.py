@@ -41,6 +41,8 @@ from tkinter import messagebox
 # Local Imports
 import navigate
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.model.features.autofocus import autofocus_bounds_error
+from navigate.model.features.autofocus import plan_autofocus_positions
 from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
 
 # Logger Setup
@@ -124,6 +126,7 @@ class AutofocusPopupController(GUIController):
         )
         for k in self.view.setting_vars:
             self.view.setting_vars[k].trace_add("write", self.update_setting_dict(k))
+        self.refresh_bounds_validation()
 
     @staticmethod
     def _channel_key_to_label(channel_key: str) -> str:
@@ -276,6 +279,13 @@ class AutofocusPopupController(GUIController):
             messagebox.showerror(
                 title="Navigate",
                 message=warning_message,
+            )
+            return
+        bounds_errors = self.refresh_bounds_validation()
+        if bounds_errors:
+            messagebox.showerror(
+                title="Navigate",
+                message="\n".join(bounds_errors),
             )
             return
         target_channel = self._channel_label_to_key(
@@ -439,6 +449,7 @@ class AutofocusPopupController(GUIController):
         setting_dict = self.setting_dict[self.microscope_name]
         for k in self.view.setting_vars:
             self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
+        self.refresh_bounds_validation()
 
     def update_setting_dict(self, parameter: str) -> callable:
         """Show Autofocus Parameters
@@ -460,8 +471,74 @@ class AutofocusPopupController(GUIController):
             self.setting_dict[self.microscope_name][device][device_ref][
                 parameter
             ] = self.view.setting_vars[parameter].get()
+            self.refresh_bounds_validation()
 
         return func
+
+    def refresh_bounds_validation(self) -> list[str]:
+        """Refresh advisory scan bounds feedback from current stage state.
+
+        Returns
+        -------
+        list[str]
+            Immediately knowable bounds diagnostics.
+        """
+        errors = []
+        scan_errors = {"coarse": False, "fine": False}
+        device = self.widgets["device"].widget.get()
+        device_ref = self.widgets["device_ref"].widget.get()
+
+        if device == "stage":
+            stage_parameters = self.parent_controller.configuration["experiment"][
+                "StageParameters"
+            ]
+            if stage_parameters.get("limits", True):
+                try:
+                    center = float(stage_parameters[device_ref])
+                    minimum = self.parent_controller.configuration_controller.get_stage_position_limits(
+                        "_min"
+                    )[device_ref]
+                    maximum = self.parent_controller.configuration_controller.get_stage_position_limits(
+                        "_max"
+                    )[device_ref]
+                    settings = self.setting_dict[self.microscope_name][device][
+                        device_ref
+                    ]
+
+                    scans_to_validate = []
+                    if settings["coarse_selected"]:
+                        scans_to_validate.append("coarse")
+                    elif settings["fine_selected"]:
+                        scans_to_validate.append("fine")
+
+                    for scan_name in scans_to_validate:
+                        scan_range = float(settings[f"{scan_name}_range"])
+                        step_size = float(settings[f"{scan_name}_step_size"])
+                        if step_size <= 0 or scan_range < step_size:
+                            continue
+                        positions = plan_autofocus_positions(
+                            center, scan_range, step_size
+                        )
+                        error = autofocus_bounds_error(
+                            scan_name,
+                            positions,
+                            minimum,
+                            maximum,
+                            device_ref,
+                        )
+                        if error:
+                            errors.append(error)
+                            scan_errors[scan_name] = True
+                except (KeyError, TypeError, ValueError):
+                    pass
+
+        for scan_name in ("coarse", "fine"):
+            range_widget = self.widgets[f"{scan_name}_range"].widget
+            range_widget._toggle_error(
+                scan_errors[scan_name] or bool(range_widget.error.get())
+            )
+        self.view.bounds_warning_var.set("\n".join(errors))
+        return errors
 
     def display_plot(self, data_and_flags: tuple[np.ndarray, bool, bool]) -> None:
         """

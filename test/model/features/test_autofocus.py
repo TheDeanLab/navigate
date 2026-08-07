@@ -40,6 +40,9 @@ import numpy as np
 # Local imports
 from navigate.model.features.autofocus import power_tent
 from navigate.model.features.autofocus import Autofocus
+from navigate.model.features.autofocus import autofocus_bounds_error
+from navigate.model.features.autofocus import plan_autofocus_positions
+from navigate.model.utils.exceptions import UserVisibleException
 from test.model.dummy import DummyModel
 
 
@@ -77,6 +80,52 @@ class TestPowerTentFunction(unittest.TestCase):
         # Test at x = x_offset + 1, should be y_offset
         result = power_tent(x_offset + 1, x_offset, y_offset, amplitude, sigma, alpha)
         self.assertAlmostEqual(result, y_offset, places=6)
+
+
+class TestAutofocusScanPlanning(unittest.TestCase):
+    def test_plan_autofocus_positions_with_odd_frame_count(self):
+        self.assertEqual(
+            plan_autofocus_positions(0, 500, 50),
+            tuple(range(-250, 251, 50)),
+        )
+
+    def test_plan_autofocus_positions_with_even_frame_count(self):
+        self.assertEqual(
+            plan_autofocus_positions(0, 10, 2),
+            (-6, -4, -2, 0, 2, 4),
+        )
+
+    def test_plan_autofocus_positions_preserves_center_and_partial_range(self):
+        self.assertEqual(
+            plan_autofocus_positions(12.5, 5, 2),
+            (10.5, 12.5, 14.5),
+        )
+
+    def test_autofocus_bounds_error_reports_each_violation(self):
+        lower = autofocus_bounds_error("coarse", (-10, 0, 10), 0, 100, "f")
+        upper = autofocus_bounds_error("fine", (90, 100, 110), 0, 100, "f")
+        both = autofocus_bounds_error("coarse", (-10, 50, 110), 0, 100, "f")
+
+        self.assertEqual(
+            lower,
+            "The requested coarse scan (-10 to 10 µm) exceeds the focus-stage "
+            "limits (0 to 100 µm).",
+        )
+        self.assertEqual(
+            upper,
+            "The requested fine scan (90 to 110 µm) exceeds the focus-stage "
+            "limits (0 to 100 µm).",
+        )
+        self.assertEqual(
+            both,
+            "The requested coarse scan (-10 to 110 µm) exceeds the focus-stage "
+            "limits (0 to 100 µm).",
+        )
+
+    def test_autofocus_bounds_error_accepts_positions_at_limits(self):
+        self.assertIsNone(
+            autofocus_bounds_error("coarse", (0, 50, 100), 0, 100, "f")
+        )
 
 
 class TestAutofocusClass(unittest.TestCase):
@@ -130,6 +179,144 @@ class TestAutofocusClass(unittest.TestCase):
         steps, pos_offset = self.autofocus.get_steps(10.0, 2.0)
         self.assertEqual(steps, 6)  # Expected number of steps
         self.assertEqual(pos_offset, 8.0)  # Expected position offset
+
+    def configure_stage_bounds(self, minimum=0, maximum=1000, enabled=True):
+        stage = MagicMock()
+        stage.stage_limits = enabled
+        stage.f_min = minimum
+        stage.f_max = maximum
+        self.autofocus.model.active_microscope.stages = {"f": stage}
+        return stage
+
+    def set_scan_settings(
+        self,
+        *,
+        coarse_selected=True,
+        coarse_range=500,
+        coarse_step_size=50,
+        fine_selected=False,
+        fine_range=50,
+        fine_step_size=5,
+        focus_position=0,
+    ):
+        settings = self.autofocus.model.configuration["experiment"][
+            "AutoFocusParameters"
+        ]["Mesoscale"]["stage"]["f"]
+        settings.update(
+            {
+                "coarse_selected": coarse_selected,
+                "coarse_range": coarse_range,
+                "coarse_step_size": coarse_step_size,
+                "fine_selected": fine_selected,
+                "fine_range": fine_range,
+                "fine_step_size": fine_step_size,
+            }
+        )
+        self.autofocus.model.configuration["experiment"]["StageParameters"][
+            "f"
+        ] = focus_position
+
+    def test_run_rejects_invalid_coarse_scan_before_preparing_acquisition(self):
+        self.configure_stage_bounds()
+        self.set_scan_settings()
+        model = self.autofocus.model
+        model.prepare_acquisition = MagicMock()
+        model.event_queue = MagicMock()
+        model.show_img_pipe = MagicMock()
+        model.is_acquiring = True
+
+        self.autofocus.run()
+
+        model.prepare_acquisition.assert_not_called()
+        model.event_queue.put.assert_called_once_with(
+            (
+                "warning",
+                "The requested coarse scan (-250 to 250 µm) exceeds the "
+                "focus-stage limits (0 to 1000 µm).",
+            )
+        )
+        model.show_img_pipe.send.assert_called_once_with("stop")
+        self.assertFalse(model.is_acquiring)
+
+    def test_initial_scan_bounds_ignore_disabled_soft_limits(self):
+        self.configure_stage_bounds(enabled=False)
+        self.set_scan_settings()
+
+        self.assertIsNone(self.autofocus.get_initial_scan_bounds_error())
+
+    def test_fine_only_scan_is_validated_at_current_position(self):
+        self.configure_stage_bounds()
+        self.set_scan_settings(
+            coarse_selected=False,
+            fine_selected=True,
+            fine_range=50,
+            fine_step_size=5,
+            focus_position=995,
+        )
+
+        self.assertEqual(
+            self.autofocus.get_initial_scan_bounds_error(),
+            "The requested fine scan (970 to 1020 µm) exceeds the focus-stage "
+            "limits (0 to 1000 µm).",
+        )
+
+    def test_combined_fine_scan_is_validated_after_coarse_result(self):
+        self.configure_stage_bounds()
+        self.set_scan_settings(
+            coarse_selected=True,
+            coarse_range=0,
+            coarse_step_size=5,
+            fine_selected=True,
+            fine_range=50,
+            fine_step_size=5,
+            focus_position=500,
+        )
+        self.autofocus.model.active_microscope.prepare_next_channel = MagicMock()
+        self.autofocus.pre_func_signal()
+        self.autofocus.signal_id = self.autofocus.coarse_steps
+        self.autofocus.model.stop_acquisition = False
+        self.autofocus.autofocus_pos_queue.put(995)
+        self.autofocus.model.move_stage = MagicMock(return_value=True)
+
+        with self.assertRaisesRegex(
+            UserVisibleException,
+            r"requested fine scan \(970 to 1020 µm\)",
+        ):
+            self.autofocus.in_func_signal()
+
+        self.autofocus.model.move_stage.assert_not_called()
+        self.assertTrue(self.autofocus.autofocus_frame_queue.empty())
+
+    def test_failed_stage_move_does_not_queue_measurement(self):
+        self.autofocus.model.logger = MagicMock()
+        self.autofocus.model.move_stage = MagicMock(return_value=False)
+        self.autofocus.coarse_positions = (10,)
+        self.autofocus.coarse_steps = 1
+        self.autofocus.signal_id = 0
+        self.autofocus.total_frame_num = 1
+
+        with self.assertRaisesRegex(
+            UserVisibleException,
+            r"could not move the focus stage to 10 µm",
+        ):
+            self.autofocus.in_func_signal()
+
+        self.assertTrue(self.autofocus.autofocus_frame_queue.empty())
+
+    def test_successful_stage_move_queues_measurement(self):
+        self.autofocus.model.logger = MagicMock()
+        self.autofocus.model.move_stage = MagicMock(return_value=True)
+        self.autofocus.coarse_positions = (10,)
+        self.autofocus.coarse_steps = 1
+        self.autofocus.signal_id = 0
+        self.autofocus.total_frame_num = 1
+
+        self.autofocus.in_func_signal()
+
+        self.assertEqual(
+            self.autofocus.autofocus_frame_queue.get_nowait(),
+            (self.autofocus.model.frame_id, 1, 10),
+        )
 
     def test_wait_for_focus_position_stops_after_cancellation(self):
         """A stop request releases an autofocus focus-position handoff."""

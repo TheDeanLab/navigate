@@ -30,7 +30,7 @@
 
 # Standard Library Imports
 import logging
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 # Third Party Imports
 
@@ -39,6 +39,9 @@ from navigate.config.config import update_config_dict
 from navigate.tools.file_functions import write_to_yaml
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 from navigate.controller.configuration_controller import ConfigurationController
+
+if TYPE_CHECKING:
+    from navigate.controller.controller import Controller
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -302,6 +305,20 @@ class AdvancedStageParametersController:
 
         # Update our local stage dictionary with the new value.
         self.stage_dict[axis] = value
+        shared_stage_dict = self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ][self.current_microscope]["stage"]
+        shared_stage_dict[axis] = value
+        if (
+            axis.endswith(("_min", "_max"))
+            and self.current_microscope
+            == self.parent_controller.configuration_controller.microscope_name
+        ):
+            refresh_bounds = getattr(
+                self.parent_controller, "_refresh_autofocus_bounds", None
+            )
+            if callable(refresh_bounds):
+                refresh_bounds()
         logger.debug(
             f"Updating {axis} limit to {value} for {self.current_microscope}..."
         )

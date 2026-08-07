@@ -1,10 +1,39 @@
 import os
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from navigate.config.config import get_navigate_path
 from navigate.controller.sub_controllers.stages_advanced import (
     AdvancedStageParametersController,
 )
+
+
+def test_limit_edit_immediately_refreshes_open_autofocus_popup(dummy_controller):
+    controller = AdvancedStageParametersController.__new__(
+        AdvancedStageParametersController
+    )
+    microscope_name = dummy_controller.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
+    refresh_bounds = MagicMock()
+    dummy_controller._refresh_autofocus_bounds = refresh_bounds
+    controller.parent_controller = dummy_controller
+    controller.current_microscope = microscope_name
+    controller.stage_dict = {}
+    controller.view = SimpleNamespace(
+        spinboxes={"f_max": MagicMock(get=MagicMock(return_value="1234.5"))}
+    )
+
+    controller.update_spinboxes("f_max")
+
+    assert controller.stage_dict["f_max"] == 1234
+    assert (
+        dummy_controller.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["stage"]["f_max"]
+        == 1234
+    )
+    refresh_bounds.assert_called_once_with()
 
 
 def test_save_stage_parameters_writes_to_parent_configuration_path(

@@ -190,8 +190,13 @@ class AutofocusPopupController(GUIController):
         # We should add saving function to the function closing the window
 
         self._cancel_pending_autofocus_update()
+        event_listeners = getattr(self.parent_controller, "event_listeners", {})
+        for event_name, event_handler in self.custom_events.items():
+            if event_listeners.get(event_name) == event_handler:
+                event_listeners.pop(event_name)
         self.view.popup.dismiss()
-        delattr(self.parent_controller, "af_popup_controller")
+        if getattr(self.parent_controller, "af_popup_controller", None) is self:
+            delattr(self.parent_controller, "af_popup_controller")
 
     def populate_experiment_values(self) -> None:
         """Populate Experiment Values

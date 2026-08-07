@@ -644,6 +644,16 @@ class TestAutofocusPopupController:
             == self.autofocus_controller.display_autofocus_progress
         )
 
+    def test_close_popup_unregisters_autofocus_event_handlers(self):
+        parent = self.autofocus_controller.parent_controller
+        parent.af_popup_controller = self.autofocus_controller
+
+        self.autofocus_controller.close_popup()
+
+        for event_name in self.autofocus_controller.custom_events:
+            assert event_name not in parent.event_listeners
+        assert not hasattr(parent, "af_popup_controller")
+
     def test_progress_plot_reuses_one_measured_data_artist(self):
         self.autofocus_controller._initialize_progress_plot()
         artist = self.autofocus_controller._autofocus_artist

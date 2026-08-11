@@ -89,11 +89,21 @@ def menu_controller(monkeypatch):
     parent_controller.update_experiment_setting = MagicMock(return_value=None)
     parent_controller.configuration_controller = MagicMock()
     parent_controller.waveform_constants_path = "/tmp/waveform.yml"
+    parent_controller.channels_tab_controller = SimpleNamespace(
+        launch_tiling_wizard=MagicMock()
+    )
+    parent_controller.multiposition_tab_controller = SimpleNamespace(
+        load_positions=MagicMock(),
+        export_positions=MagicMock(),
+        add_stage_position=MagicMock(),
+    )
     parent_controller.acquire_bar_controller = SimpleNamespace(
         is_acquiring=False,
         mode="z-stack",
         launch_popup_window=MagicMock(),
+        exit_program=MagicMock(),
     )
+    parent_controller.configuration["gui"] = {"histogram": {"enabled": True}}
 
     controller = menus_module.MenuController(view, parent_controller)
     return controller, parent_controller
@@ -131,6 +141,138 @@ def test_populate_menu_handles_bindings_separator_and_state(menu_controller, mon
     )
     menu.bind_all.assert_called_with("<Command-r>", action)
     menu.entryconfig.assert_called_once_with("Run Action", state="disabled")
+
+
+def test_initialize_menus_adds_edit_selected_feature_list_command(
+    menu_controller, monkeypatch
+):
+    controller, _ = menu_controller
+    monkeypatch.setattr(menus_module.tk, "Menu", MagicMock())
+    monkeypatch.setattr(menus_module, "get_navigate_path", lambda: "/tmp/navigate")
+    monkeypatch.setattr(menus_module.os.path, "exists", lambda path: True)
+    monkeypatch.setattr(menus_module, "load_yaml_file", lambda path: None)
+
+    controller.initialize_menus()
+
+    controller.view.menubar.menu_features.add_command.assert_any_call(
+        label="Edit Selected Feature List", command=controller.edit_feature_list
+    )
+
+
+def test_edit_feature_list_opens_selected_custom_feature_list(
+    menu_controller, monkeypatch
+):
+    controller, parent_controller = menu_controller
+    controller.feature_id_val.set(7)
+    controller.system_feature_list_count = 7
+    popup = MagicMock()
+    popup_constructor = Mock(return_value=popup)
+    feature_popup_controller = MagicMock()
+    feature_popup_controller_constructor = Mock(return_value=feature_popup_controller)
+    monkeypatch.setattr(
+        controller,
+        "_get_custom_feature_list_record",
+        MagicMock(return_value=({"module_name": None}, "custom-feature.yml")),
+        raising=False,
+    )
+    monkeypatch.setattr(menus_module, "FeatureListPopup", popup_constructor)
+    monkeypatch.setattr(
+        menus_module, "FeaturePopupController", feature_popup_controller_constructor
+    )
+
+    controller.edit_feature_list()
+
+    popup_constructor.assert_called_once_with(
+        controller.view, title="Feature List Configuration"
+    )
+    feature_popup_controller_constructor.assert_called_once_with(
+        popup, parent_controller, persist_feature_list_edits=True
+    )
+    feature_popup_controller.populate_feature_list.assert_called_once_with(7)
+
+
+def test_edit_feature_list_rejects_imported_feature_list(menu_controller, monkeypatch):
+    """Python-backed feature lists must not open in the visual editor."""
+    controller, _ = menu_controller
+    controller.feature_id_val.set(7)
+    controller.system_feature_list_count = 7
+    popup_constructor = Mock()
+    feature_popup_controller_constructor = Mock()
+    showerror = Mock()
+
+    def load_feature_record(path):
+        if path.endswith("__sequence.yml"):
+            return [
+                {
+                    "feature_list_name": "Imported Feature",
+                    "yaml_file_name": "imported-feature.yml",
+                }
+            ]
+        if path.endswith("imported-feature.yml"):
+            return {
+                "module_name": "ImportedFeature",
+                "feature_list_name": "Imported Feature",
+                "filename": "/tmp/imported_feature.py",
+            }
+        raise AssertionError(f"Unexpected feature-list path: {path}")
+
+    monkeypatch.setattr(menus_module, "get_navigate_path", lambda: "/tmp/navigate")
+    monkeypatch.setattr(menus_module, "load_yaml_file", load_feature_record)
+    monkeypatch.setattr(menus_module, "FeatureListPopup", popup_constructor)
+    monkeypatch.setattr(
+        menus_module,
+        "FeaturePopupController",
+        feature_popup_controller_constructor,
+    )
+    monkeypatch.setattr(menus_module.messagebox, "showerror", showerror)
+
+    controller.edit_feature_list()
+
+    popup_constructor.assert_not_called()
+    feature_popup_controller_constructor.assert_not_called()
+    showerror.assert_called_once()
+    assert "Python code or a plugin" in showerror.call_args.kwargs["message"]
+
+
+def test_custom_feature_list_record_uses_sequence_filename(
+    menu_controller, monkeypatch
+):
+    """Record lookup must honor the filename stored in the sequence file."""
+    controller, _ = menu_controller
+    controller.system_feature_list_count = 7
+    loaded_paths = []
+    expected_record = {
+        "module_name": None,
+        "feature_list_name": "Display Name",
+        "feature_list": '[{"name": Snap,}]',
+    }
+
+    def load_feature_record(path):
+        loaded_paths.append(path)
+        if path.endswith("__sequence.yml"):
+            return [
+                {
+                    "feature_list_name": "Display Name",
+                    "yaml_file_name": "authoritative-record.yml",
+                }
+            ]
+        if path.endswith("authoritative-record.yml"):
+            return expected_record
+        raise AssertionError(f"Unexpected feature-list path: {path}")
+
+    monkeypatch.setattr(menus_module, "get_navigate_path", lambda: "/tmp/navigate")
+    monkeypatch.setattr(menus_module, "load_yaml_file", load_feature_record)
+
+    record, yaml_file_name = controller._get_custom_feature_list_record(7)
+
+    assert record == expected_record
+    assert yaml_file_name == "authoritative-record.yml"
+    assert loaded_paths == [
+        os.path.join("/tmp/navigate", "feature_lists", "__sequence.yml"),
+        os.path.join(
+            "/tmp/navigate", "feature_lists", "authoritative-record.yml"
+        ),
+    ]
 
 
 def test_initialize_menus_starts_with_current_microscope_status(menu_controller):

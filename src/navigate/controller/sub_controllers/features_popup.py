@@ -486,6 +486,9 @@ class FeatureListGraphController:
                 stack.append("(")
             elif c == ")":
                 # assert there is already at least one '('
+                if len(stack) < 2:
+                    stack.pop()
+                    continue
                 p, loops, start_pos, arrow_height = stack[-2]
                 pre = stack[-1]
                 if loops - 1 == 0:
@@ -1423,6 +1426,32 @@ class FeatureListGraphController:
             new_structure.append(moved_identity)
         else:
             new_structure.insert(new_structure.index(successor), moved_identity)
+
+        # A group must contain at least two direct elements.  Moving an item out
+        # of a group can leave a one-item loop behind and cause errors; remove all one-item group.
+        grouped_structure = [[]]
+        for token in new_structure:
+            if token == "(":
+                grouped_structure.append([])
+            elif token == ")" and len(grouped_structure) > 1:
+                group = grouped_structure.pop()
+                if len(group) == 1:
+                    grouped_structure[-1].extend(group)
+                else:
+                    grouped_structure[-1].append(group)
+            else:
+                grouped_structure[-1].append(token)
+
+        def flatten_structure(group):
+            flattened = []
+            for token in group:
+                if type(token) is list:
+                    flattened.extend(["(", *flatten_structure(token), ")"])
+                else:
+                    flattened.append(token)
+            return flattened
+
+        new_structure = flatten_structure(grouped_structure[0])
 
         new_index_by_identity = {
             identity: index for index, identity in enumerate(old_order)

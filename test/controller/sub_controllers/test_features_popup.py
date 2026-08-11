@@ -139,8 +139,8 @@ def test_move_feature_into_group_joins_group(graph_controller):
     assert graph_controller.feature_structure == ["(", 0, 1, 2, ")"]
 
 
-def test_move_feature_out_of_group_preserves_other_membership(graph_controller):
-    """Moving a grouped node to the end must not pull another node into its group."""
+def test_move_feature_out_of_group_removes_single_member_group(graph_controller):
+    """Moving a grouped node away must remove the resulting one-member group."""
     graph_controller.features = make_three_features()
     graph_controller.feature_structure = ["(", 0, 1, ")", 2]
 
@@ -151,7 +151,19 @@ def test_move_feature_out_of_group_preserves_other_membership(graph_controller):
         "WaitToContinue",
         "StackPause",
     ]
-    assert graph_controller.feature_structure == ["(", 0, ")", 1, 2]
+    assert graph_controller.feature_structure == [0, 1, 2]
+
+
+def test_move_feature_removes_redundant_outer_group(graph_controller):
+    """Collapsing an inner group also removes a parent with one child group."""
+    graph_controller.features = make_three_features() + [
+        {"name": feature_related_functions.Snap}
+    ]
+    graph_controller.feature_structure = ["(", "(", 0, 1, ")", 2, ")", 3]
+
+    graph_controller.move_feature(2, 4)
+
+    assert graph_controller.feature_structure == ["(", 0, 1, ")", 2, 3]
 
 
 def test_update_feature_list_rejects_imported_record(monkeypatch):

@@ -268,8 +268,10 @@ def test_custom_feature_list_record_uses_sequence_filename(
     assert record == expected_record
     assert yaml_file_name == "authoritative-record.yml"
     assert loaded_paths == [
-        "/tmp/navigate/feature_lists/__sequence.yml",
-        "/tmp/navigate/feature_lists/authoritative-record.yml",
+        os.path.join("/tmp/navigate", "feature_lists", "__sequence.yml"),
+        os.path.join(
+            "/tmp/navigate", "feature_lists", "authoritative-record.yml"
+        ),
     ]
 
 

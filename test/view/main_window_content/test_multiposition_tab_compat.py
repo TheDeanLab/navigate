@@ -1,4 +1,4 @@
-from types import SimpleNamespace
+from types import MethodType, SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -63,3 +63,32 @@ def test_bind_pandastable_image_master_injects_master():
                 file="icon.gif", master=explicit_master
             )
             assert recorded_kwargs["master"] is explicit_master
+
+
+def test_shift_click_seeds_selection_anchor_when_table_startrow_is_none():
+    table = object.__new__(MultiPositionTable)
+    table.startrow = None
+    table.endrow = None
+    table.startcol = None
+    table.endcol = None
+    table.currentrow = 1
+    table.currentcol = 0
+    table.rows = 4
+    table.cols = 3
+    table.multiplerowlist = []
+    table.multiplecollist = []
+    table.rowheader = SimpleNamespace(drawSelectedRows=MagicMock())
+    table.get_row_clicked = MethodType(lambda self, event: 2, table)
+    table.get_col_clicked = MethodType(lambda self, event: 1, table)
+    table.drawMultipleRows = MagicMock()
+    table.drawMultipleCells = MagicMock()
+    table.delete = MagicMock()
+
+    MultiPositionTable.handle_left_shift_click(table, SimpleNamespace())
+
+    assert table.startrow == 1
+    assert table.startcol == 0
+    assert table.endrow == 2
+    assert table.endcol == 1
+    assert table.multiplerowlist == [1, 2]
+    assert table.multiplecollist == [0, 1]

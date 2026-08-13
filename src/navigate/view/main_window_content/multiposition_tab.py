@@ -547,6 +547,26 @@ class MultiPositionTable(Table):
         self.redraw()
         self.tableChanged()
 
+    def _ensure_selection_anchor(self) -> bool:
+        """Ensure pandastable has a valid anchor before extending selection."""
+        if self.startrow is None:
+            self.startrow = self.currentrow
+        if self.startcol is None:
+            self.startcol = self.currentcol
+        return self.startrow is not None and self.startcol is not None
+
+    def handle_left_shift_click(self, event):
+        """Handle shift-click when pandastable has not seeded an anchor row."""
+        if not self._ensure_selection_anchor():
+            return
+        return super().handle_left_shift_click(event)
+
+    def handle_mouse_drag(self, event):
+        """Handle drag selection when pandastable has not seeded an anchor row."""
+        if not self._ensure_selection_anchor():
+            return
+        return super().handle_mouse_drag(event)
+
     def apply_theme(self, redraw=True):
         """Apply active Navigate theme tokens to pandastable surfaces."""
         panel_bg = get_theme_color("panel_bg", "#1a212b")

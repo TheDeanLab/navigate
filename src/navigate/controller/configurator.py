@@ -756,7 +756,7 @@ class Configurator:
 
     def get_configuration_schema(
         self, category: str, manufacturer: str, model: str
-    ) -> dict[str, SettingSpec]:
+    ) -> dict[str, object]:
         """Resolve the currently available configuration schema for a device.
 
         Base-class schemas are authoritative. ``get_connect_params`` remains a
@@ -813,7 +813,71 @@ class Configurator:
             if isinstance(node, ast.ClassDef)
         }
 
-        def class_schema(node: ast.ClassDef) -> dict[str, SettingSpec]:
+        def setting_spec(call: ast.Call) -> Optional[SettingSpec]:
+            """Convert a literal ``SettingSpec`` call to a setting specification."""
+            if not (
+                isinstance(call.func, ast.Name)
+                and call.func.id == "SettingSpec"
+                and call.args
+                and isinstance(call.args[0], ast.Name)
+            ):
+                return None
+            value_type = {
+                "str": str,
+                "int": int,
+                "float": float,
+                "bool": bool,
+            }.get(call.args[0].id)
+            if value_type is None:
+                return None
+            kwargs = {}
+            for keyword in call.keywords:
+                if keyword.arg is None:
+                    continue
+                try:
+                    kwargs[keyword.arg] = ast.literal_eval(keyword.value)
+                except ValueError:
+                    continue
+            return SettingSpec(value_type, **kwargs)
+
+        def collection_spec(call: ast.Call) -> Optional[CollectionSpec]:
+            """Convert a literal ``CollectionSpec`` call to a collection spec."""
+            if not (
+                isinstance(call.func, ast.Name)
+                and call.func.id == "CollectionSpec"
+            ):
+                return None
+            keywords = {
+                keyword.arg: keyword.value for keyword in call.keywords if keyword.arg
+            }
+            item_schema_node = keywords.pop("item_schema", None)
+            if not isinstance(item_schema_node, ast.Dict):
+                return None
+            item_schema = {}
+            for key, value in zip(item_schema_node.keys, item_schema_node.values):
+                if not (
+                    isinstance(key, ast.Constant)
+                    and isinstance(key.value, str)
+                    and isinstance(value, ast.Call)
+                ):
+                    continue
+                spec = setting_spec(value)
+                if spec is not None:
+                    item_schema[key.value] = spec
+            if not item_schema:
+                return None
+            kwargs = {"item_schema": item_schema}
+            for name, value in keywords.items():
+                try:
+                    kwargs[name] = ast.literal_eval(value)
+                except ValueError:
+                    continue
+            try:
+                return CollectionSpec(**kwargs)
+            except (TypeError, ValueError):
+                return None
+
+        def class_schema(node: ast.ClassDef) -> dict[str, object]:
             """Convert a literal ``configuration_schema`` assignment to specs."""
             for statement in node.body:
                 if not (
@@ -826,39 +890,21 @@ class Configurator:
                     and isinstance(statement.value, ast.Dict)
                 ):
                     continue
-                schema = {}
+                schema: dict[str, object] = {}
                 for key, value in zip(statement.value.keys, statement.value.values):
                     if not (
                         isinstance(key, ast.Constant)
                         and isinstance(key.value, str)
                         and isinstance(value, ast.Call)
-                        and isinstance(value.func, ast.Name)
-                        and value.func.id == "SettingSpec"
-                        and value.args
-                        and isinstance(value.args[0], ast.Name)
                     ):
                         continue
-                    value_type = {
-                        "str": str,
-                        "int": int,
-                        "float": float,
-                        "bool": bool,
-                    }.get(value.args[0].id)
-                    if value_type is None:
-                        continue
-                    kwargs = {}
-                    for keyword in value.keywords:
-                        if keyword.arg is None:
-                            continue
-                        try:
-                            kwargs[keyword.arg] = ast.literal_eval(keyword.value)
-                        except ValueError:
-                            continue
-                    schema[key.value] = SettingSpec(value_type, **kwargs)
+                    spec = setting_spec(value) or collection_spec(value)
+                    if spec is not None:
+                        schema[key.value] = spec
                 return schema
             return {}
 
-        def inherited_schema(name: str, visited: set[str]) -> dict[str, SettingSpec]:
+        def inherited_schema(name: str, visited: set[str]) -> dict[str, object]:
             """Merge schemas from local parents before the selected class."""
             if name in visited or name not in nodes:
                 return {}

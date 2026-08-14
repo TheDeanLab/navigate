@@ -31,6 +31,7 @@
 # Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
+from typing import Optional
 
 # Local Imports
 from navigate.view.theme import get_theme_color, get_theme_padding_px, get_theme_space_px
@@ -193,6 +194,57 @@ class RenameMicroscopeDialog(tk.Toplevel):
         self.ok_button.grid(row=0, column=0, padx=get_theme_padding_px((0, 1)))
         self.cancel_button = ttk.Button(actions, text="Cancel", width=8)
         self.cancel_button.grid(row=0, column=1)
+
+
+class ConfiguratorTooltip:
+    """Small themed tooltip for configurator setting labels."""
+
+    def __init__(self, widget: tk.Widget, text: str) -> None:
+        self.widget = widget
+        self.text = text
+        self.window: Optional[tk.Toplevel] = None
+        self.after_id: Optional[str] = None
+        widget.bind("<Enter>", self.schedule)
+        widget.bind("<Leave>", self.hide)
+        widget.bind("<ButtonPress>", self.hide)
+
+    def schedule(self, _event: tk.Event) -> None:
+        """Show the tooltip after a brief hover delay."""
+        self.after_id = self.widget.after(500, self.show)
+
+    def show(self) -> None:
+        """Create the tooltip beside the label."""
+        self.after_id = None
+        if self.window is not None or not self.widget.winfo_exists():
+            return
+        self.window = tk.Toplevel(self.widget)
+        self.window.wm_overrideredirect(True)
+        self.window.wm_geometry(
+            "+{}+{}".format(
+                self.widget.winfo_rootx(),
+                self.widget.winfo_rooty() + self.widget.winfo_height() + 6,
+            )
+        )
+        self.window.configure(background=get_theme_color("tooltip_description_bg"))
+        tk.Label(
+            self.window,
+            text=self.text,
+            justify=tk.LEFT,
+            background=get_theme_color("tooltip_description_bg"),
+            foreground=get_theme_color("tooltip_text"),
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(2),
+            wraplength=320,
+        ).pack()
+
+    def hide(self, _event: Optional[tk.Event] = None) -> None:
+        """Cancel a scheduled tooltip and close a visible tooltip."""
+        if self.after_id is not None:
+            self.widget.after_cancel(self.after_id)
+            self.after_id = None
+        if self.window is not None:
+            self.window.destroy()
+            self.window = None
 
 
 def _configure_treeview_style(style_name: str) -> None:

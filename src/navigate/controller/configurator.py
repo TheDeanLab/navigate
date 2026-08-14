@@ -31,15 +31,27 @@
 
 # Standard Library Imports
 import ast
+import importlib
+import re
 import tkinter as tk
 from pathlib import Path
-from tkinter import messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
 from typing import Optional
 
+import yaml
+
+from navigate.model.devices.configuration_schema import (
+    CollectionSpec,
+    SettingSpec,
+    merge_configuration_schemas,
+)
+from navigate.model.devices.device_types import SerialDevice, SequenceDevice
+from navigate.config.configuration_database import deceased_device_type_names
 # Local Imports
 from navigate.view.configurator_application_window import (
     AddDeviceDialog,
     ConfigurationAssistantWindow,
+    ConfiguratorTooltip,
     RenameMicroscopeDialog,
 )
 from navigate.view.theme import apply_theme, get_theme_padding_px, get_theme_space_px
@@ -49,6 +61,26 @@ import logging
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+class InlineYamlList(list):
+    """A list that is written with YAML flow style (``[item, ...]``)."""
+
+
+class ConfiguratorYamlDumper(yaml.SafeDumper):
+    """YAML dumper with compact formatting for stage axes lists."""
+
+
+def _represent_inline_yaml_list(
+    dumper: yaml.SafeDumper, value: InlineYamlList
+) -> yaml.nodes.SequenceNode:
+    """Represent stage axes lists as inline YAML sequences."""
+    return dumper.represent_sequence(
+        yaml.resolver.BaseResolver.DEFAULT_SEQUENCE_TAG, value, flow_style=True
+    )
+
+
+ConfiguratorYamlDumper.add_representer(InlineYamlList, _represent_inline_yaml_list)
 
 
 class Configurator:
@@ -68,7 +100,16 @@ class Configurator:
         self.selected_microscope = tk.StringVar(master=root)
         self.context_microscope_name: Optional[str] = None
         self.device_data: dict[str, tuple[str, str, str]] = {}
-        self.value_variables: dict[str, tk.StringVar] = {}
+        self.device_settings: dict[str, dict[str, object]] = {}
+        self.microscope_devices: dict[
+            str, list[tuple[str, str, str, dict[str, object]]]
+        ] = {}
+        self.displayed_microscope_name: Optional[str] = None
+        self.active_device_item_id: Optional[str] = None
+        self.value_variables: dict[str, tk.Variable] = {}
+        self.collection_rows: dict[str, list[dict[str, tk.Variable]]] = {}
+        self.stage_axis_range_frame: Optional[ttk.Frame] = None
+        self.stage_axis_setting_names: set[str] = set()
         self.device_dialog: Optional[AddDeviceDialog] = None
         self.rename_dialog: Optional[RenameMicroscopeDialog] = None
         self.editing_item_id: Optional[str] = None
@@ -82,6 +123,9 @@ class Configurator:
     def _bind_events(self) -> None:
         """Connect all static view controls to controller handlers."""
         self.view.top_window.cancel_button.config(command=self.on_cancel)
+        self.view.top_window.new_button.config(command=self.new_configuration)
+        self.view.top_window.load_button.config(command=self.load_configuration)
+        self.view.top_window.save_button.config(command=self.save_configuration)
         self.view.top_window.add_button.config(command=self.add_next_microscope)
         self.view.devices_frame.add_button.config(command=self.show_add_device_dialog)
         self.view.devices_frame.edit_button.config(command=self.show_edit_device_dialog)
@@ -100,10 +144,266 @@ class Configurator:
         """Close the configurator application."""
         self.root.destroy()
 
+    def new_configuration(self) -> None:
+        """Confirm and reset the configurator to a clean configuration."""
+        confirmed = messagebox.askyesno(
+            "New Configuration",
+            "Create a clean new configuration?\n\nAll current microscopes, "
+            "devices, and entered settings will be removed.",
+            parent=self.root,
+        )
+        if not confirmed:
+            return
+        for button in self.microscope_buttons.values():
+            button.destroy()
+        self.clear_tree(self.view.devices_frame.device_list)
+        self.microscope_buttons.clear()
+        self.device_data.clear()
+        self.device_settings.clear()
+        self.microscope_devices.clear()
+        self.value_variables.clear()
+        self.collection_rows.clear()
+        self.stage_axis_setting_names.clear()
+        self.stage_axis_range_frame = None
+        self.active_device_item_id = None
+        self.displayed_microscope_name = None
+        self.context_microscope_name = None
+        self.selected_microscope.set("")
+        self.microscope_id = 1
+        self.render_device_info({})
+        self.add_microscope("Microscope-0")
+
+    def load_configuration(self) -> None:
+        """Choose a YAML file and populate the configurator from its devices."""
+        filename = filedialog.askopenfilename(
+            parent=self.root,
+            title="Load Configuration",
+            initialdir=str(Path(__file__).resolve().parents[1] / "config"),
+            filetypes=(("YAML files", "*.yaml *.yml"), ("All files", "*")),
+        )
+        if not filename:
+            return
+        try:
+            with open(filename, encoding="utf-8") as configuration_file:
+                configuration = yaml.safe_load(configuration_file)
+            microscopes = configuration.get("microscopes") if isinstance(configuration, dict) else None
+            if not isinstance(microscopes, dict):
+                raise yaml.YAMLError("The configuration must contain a microscopes mapping.")
+        except (OSError, yaml.YAMLError) as error:
+            messagebox.showerror("Load Configuration", f"Could not load configuration:\n{error}", parent=self.root)
+            return
+        if self.device_data and not messagebox.askyesno(
+            "Load Configuration",
+            "Loading a configuration will replace all current inputs. Continue?",
+            parent=self.root,
+        ):
+            return
+        self.clear_loaded_configuration()
+        for microscope_name, microscope_config in microscopes.items():
+            self.add_microscope(str(microscope_name))
+            if isinstance(microscope_config, dict):
+                self.load_microscope_devices(str(microscope_name), microscope_config)
+        if not self.microscope_buttons:
+            self.add_microscope("Microscope-0")
+        else:
+            first_microscope = next(iter(self.microscope_buttons))
+            self.selected_microscope.set(first_microscope)
+            self.show_selected_microscope_devices()
+
+    def clear_loaded_configuration(self) -> None:
+        """Clear configuration widgets and controller state before loading a file."""
+        for button in self.microscope_buttons.values():
+            button.destroy()
+        self.clear_tree(self.view.devices_frame.device_list)
+        self.microscope_buttons.clear()
+        self.device_data.clear()
+        self.device_settings.clear()
+        self.microscope_devices.clear()
+        self.value_variables.clear()
+        self.collection_rows.clear()
+        self.stage_axis_setting_names.clear()
+        self.stage_axis_range_frame = None
+        self.active_device_item_id = None
+        self.displayed_microscope_name = None
+        self.selected_microscope.set("")
+        self.microscope_id = 1
+        self.render_device_info({})
+
+    def load_microscope_devices(self, microscope_name: str, configuration: dict) -> None:
+        """Add every recognizable device from one microscope configuration."""
+        for category, category_config in configuration.items():
+            print("**** loading device category for microscope:", category, microscope_name)
+            if category == "stage" and isinstance(category_config, dict):
+                for hardware in category_config.get("hardware", []):
+                    if isinstance(hardware, dict):
+                        self.load_device_from_configuration(
+                            microscope_name, category, {**category_config, "hardware": hardware}
+                        )
+            elif isinstance(category_config, list):
+                for device in category_config:
+                    if isinstance(device, dict):
+                        self.load_device_from_configuration(microscope_name, category, device)
+            elif isinstance(category_config, dict):
+                self.load_device_from_configuration(microscope_name, category, category_config)
+
+    def load_device_from_configuration(
+        self, microscope_name: str, category: str, configuration: dict
+    ) -> None:
+        """Insert one YAML device and retain its matching schema values."""
+        hardware = configuration.get("hardware", {})
+        device_type = (
+            self.laser_device_type(configuration)
+            if category == "laser"
+            else hardware.get("type")
+        )
+        if not isinstance(device_type, str):
+            return
+        print("**** resolve device:", category, device_type)
+        resolved = self.resolve_device_type(category, device_type)
+        if resolved is None:
+            logger.warning("Could not resolve %s device type %s.", category, device_type)
+            return
+        manufacturer, model = resolved
+        self.microscope_devices.setdefault(microscope_name, []).append(
+            (
+                category,
+                manufacturer,
+                model,
+                self.settings_from_configuration(
+                    category, manufacturer, model, configuration
+                ),
+            )
+        )
+
+    @staticmethod
+    def laser_device_type(configuration: dict) -> str:
+        """Resolve a laser type from its on/off and power hardware types."""
+        power_type = Configurator.configuration_path_value(
+            configuration, "power/hardware/type"
+        )
+        onoff_type = Configurator.configuration_path_value(
+            configuration, "onoff/hardware/type"
+        )
+        if isinstance(onoff_type, str) and not onoff_type.lower().startswith("synthetic"):
+            return onoff_type
+        if isinstance(power_type, str) and not power_type.lower().startswith("synthetic"):
+            return power_type
+        return "Synthetic"
+
+    def store_visible_microscope_devices(self) -> None:
+        """Persist the current device panel before changing microscopes."""
+        if self.displayed_microscope_name is None:
+            return
+        self.store_active_device_settings()
+        self.microscope_devices[self.displayed_microscope_name] = [
+            (*self.device_data[item_id], self.device_settings.get(item_id, {}))
+            for item_id in self.view.devices_frame.device_list.get_children()
+        ]
+
+    def show_selected_microscope_devices(self) -> None:
+        """Display only the devices belonging to the selected microscope."""
+        self.store_visible_microscope_devices()
+        self.clear_tree(self.view.devices_frame.device_list)
+        self.device_data.clear()
+        self.device_settings.clear()
+        self.active_device_item_id = None
+        self.render_device_info({})
+        microscope_name = self.selected_microscope.get()
+        self.displayed_microscope_name = microscope_name
+        for category, manufacturer, model, settings in self.microscope_devices.get(
+            microscope_name, []
+        ):
+            item_id = self.view.devices_frame.device_list.insert(
+                "",
+                tk.END,
+                text=(
+                    f"{self.format_category_name(category)}: "
+                    f"{self.format_manufacturer_name(manufacturer)} - "
+                    f"{self.format_model_name(model, category)}"
+                ),
+            )
+            self.device_data[item_id] = (category, manufacturer, model)
+            self.device_settings[item_id] = settings.copy()
+
+    @classmethod
+    def resolve_device_type(cls, category: str, device_type: str) -> Optional[tuple[str, str]]:
+        """Match a YAML type to an optional manufacturer and required model name.
+
+        YAML may name a model directly (``NI``), use its full class-style name
+        (``NIDAQ``), or qualify either form with ``manufacturer.``.
+        """
+        manufacturer_name: Optional[str] = None
+        model_name = device_type
+        if "." in device_type:
+            manufacturer_name, model_name = device_type.split(".", maxsplit=1)
+        legacy_names = {
+            old_name.lower(): new_name
+            for old_name, new_name in deceased_device_type_names.items()
+        }
+        model_name = legacy_names.get(model_name.lower(), model_name)
+
+        manufacturers = cls.get_device_manufacturers(category)
+        if manufacturer_name is not None:
+            manufacturers = [
+                manufacturer
+                for manufacturer in manufacturers
+                if manufacturer.lower() == manufacturer_name.lower()
+            ]
+
+        category_suffix = cls.category_base_class_name(category)[: -len("Base")]
+        for manufacturer in manufacturers:
+            for model in cls.get_device_models(category, manufacturer):
+                short_model_name = (
+                    model[: -len(category_suffix)]
+                    if model.endswith(category_suffix)
+                    else model
+                )
+                if model_name.lower() in {model.lower(), short_model_name.lower()}:
+                    return manufacturer, model
+        return None
+
+    @staticmethod
+    def configuration_path_value(configuration: dict, path: str) -> object:
+        """Return a nested configuration value, or ``None`` when it is absent."""
+        value: object = configuration
+        for part in path.split("/"):
+            if not isinstance(value, dict) or part not in value:
+                return None
+            value = value[part]
+        return value
+
+    def settings_from_configuration(
+        self, category: str, manufacturer: str, model: str, configuration: dict
+    ) -> dict[str, object]:
+        """Extract known schema values from one YAML device configuration."""
+        schema = self.get_configuration_schema(category, manufacturer, model)
+        connection_names = set(self.get_connect_params(category, manufacturer, model))
+        connection_names.update({"port", "baudrate", "timeout", "serial_number"})
+        settings = {}
+        for name in schema:
+            path = name
+            if category == "stage" and name in {"axes", "axes_mapping", "feedback_alignment"}:
+                path = f"hardware/{name}"
+            elif "/" not in name and name in connection_names:
+                path = f"hardware/{name}"
+            value = self.configuration_path_value(configuration, path)
+            if value is not None:
+                settings[name] = value
+        if category == "stage":
+            for axis in self.configuration_path_value(configuration, "hardware/axes") or []:
+                for suffix in ("min", "max"):
+                    name = f"{axis}_{suffix}"
+                    if name in configuration:
+                        settings[name] = configuration[name]
+        return settings
+
     def add_next_microscope(self) -> None:
-        """Add the next default-named microscope."""
-        self.add_microscope("Microscope-{}".format(self.microscope_id))
+        """Add and select the next default-named microscope."""
+        name = "Microscope-{}".format(self.microscope_id)
+        self.add_microscope(name)
         self.microscope_id += 1
+        self.selected_microscope.set(name)
+        self.show_selected_microscope_devices()
 
     def add_microscope(self, name: str) -> None:
         """Create and display one microscope selection button."""
@@ -113,26 +413,31 @@ class Configurator:
             value=name,
             variable=self.selected_microscope,
             style="Configurator.TRadiobutton",
+            command=self.show_selected_microscope_devices,
         )
         button.grid(row=0, column=len(self.microscope_buttons), sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_padding_px((1, 1)))
-        button.bind("<Button-3>", self.show_microscope_menu)
-        button.bind("<Control-Button-1>", self.show_microscope_menu)
+        # Button-3 is the usual right click; Button-2 and Control-click cover
+        # the equivalent gestures used by macOS Tk.
+        for sequence in ("<Button-3>", "<Button-2>", "<Control-Button-1>"):
+            button.bind(sequence, self.show_microscope_menu, add="+")
         self.microscope_buttons[name] = button
+        self.microscope_devices.setdefault(name, [])
         if not self.selected_microscope.get():
             self.selected_microscope.set(name)
 
-    def show_microscope_menu(self, event: tk.Event) -> None:
+    def show_microscope_menu(self, event: tk.Event) -> str:
         """Show the Rename/Delete menu for the microscope button clicked."""
         try:
             self.context_microscope_name = event.widget.cget("text")
             self.microscope_menu.tk_popup(event.x_root, event.y_root)
         except tk.TclError:
-            return
+            return "break"
         finally:
             try:
                 self.microscope_menu.grab_release()
             except tk.TclError:
                 pass
+        return "break"
 
     def rename_microscope(self) -> None:
         """Open a controller-driven rename dialog for the context microscope."""
@@ -159,6 +464,9 @@ class Configurator:
             button = self.microscope_buttons.pop(old_name)
             button.config(text=new_name, value=new_name)
             self.microscope_buttons[new_name] = button
+            self.microscope_devices[new_name] = self.microscope_devices.pop(old_name, [])
+            if self.displayed_microscope_name == old_name:
+                self.displayed_microscope_name = new_name
             if self.selected_microscope.get() == old_name:
                 self.selected_microscope.set(new_name)
         self.rename_dialog.destroy()
@@ -170,8 +478,11 @@ class Configurator:
         if name is None or name not in self.microscope_buttons:
             return
         self.microscope_buttons.pop(name).destroy()
+        self.microscope_devices.pop(name, None)
         if self.selected_microscope.get() == name:
             self.selected_microscope.set(next(iter(self.microscope_buttons), ""))
+            self.displayed_microscope_name = None
+            self.show_selected_microscope_devices()
         for column, button in enumerate(self.microscope_buttons.values()):
             button.grid_configure(row=0, column=column)
         self.context_microscope_name = None
@@ -251,16 +562,24 @@ class Configurator:
         if not categories or not manufacturers or not models:
             return
         category, manufacturer, model = categories[0], manufacturers[0], models[0]
+        if self.displayed_microscope_name is None:
+            self.displayed_microscope_name = self.selected_microscope.get()
         name = "{}: {} - {}".format(self.format_category_name(category), self.format_manufacturer_name(manufacturer), self.format_model_name(model, category))
         if self.editing_item_id is None:
             item_id = self.view.devices_frame.device_list.insert("", tk.END, text=name)
+            self.device_settings[item_id] = {}
         else:
             item_id = self.editing_item_id
             self.view.devices_frame.device_list.item(item_id, text=name)
+            self.device_settings.setdefault(item_id, {})
         self.device_data[item_id] = (category, manufacturer, model)
+        self.view.devices_frame.device_list.selection_set(item_id)
+        self.view.devices_frame.device_list.focus(item_id)
         self.device_dialog.destroy()
         self.device_dialog = None
         self.editing_item_id = None
+        self.show_device_info()
+        self.store_visible_microscope_devices()
 
     def selected_device(self) -> Optional[tuple[str, tuple[str, str, str]]]:
         """Return the selected device item and its controller-owned data."""
@@ -279,37 +598,570 @@ class Configurator:
         if messagebox.askyesno("Delete Device", "Delete '{}' ?".format(name), parent=self.root):
             self.view.devices_frame.device_list.delete(item_id)
             del self.device_data[item_id]
+            self.device_settings.pop(item_id, None)
+            self.active_device_item_id = None
             self.render_device_info({})
+            self.store_visible_microscope_devices()
 
     def show_device_info(self, _event: Optional[tk.Event] = None) -> None:
         """Render editable settings for the selected device."""
+        self.store_active_device_settings()
         selected = self.selected_device()
         if selected is None:
+            self.active_device_item_id = None
             self.render_device_info({})
             return
-        _, (category, manufacturer, model) = selected
-        properties: dict[str, str] = {}
-        if self.class_inherits(category, manufacturer, model, "SerialDevice"):
-            properties.update({"port": "", "baudrate": "", "timeout": ""})
-        if self.class_inherits(category, manufacturer, model, "SequenceDevice"):
-            properties.setdefault("serial_number", "")
-        for property_name in self.get_connect_params(category, manufacturer, model):
-            properties.setdefault(property_name, "")
-        self.render_device_info(properties)
+        item_id, (category, manufacturer, model) = selected
+        schema = self.get_configuration_schema(category, manufacturer, model)
+        self.active_device_item_id = item_id
+        self.render_device_info(schema, self.device_settings.get(item_id, {}))
 
-    def render_device_info(self, properties: dict[str, str]) -> None:
+    def store_active_device_settings(self) -> None:
+        """Copy the currently visible editors into controller-owned device data."""
+        if self.active_device_item_id is None:
+            return
+        values = {name: variable.get() for name, variable in self.value_variables.items()}
+        category, manufacturer, model = self.device_data[self.active_device_item_id]
+        schema = self.get_configuration_schema(category, manufacturer, model)
+        for name, rows in self.collection_rows.items():
+            spec = schema.get(name)
+            if not isinstance(spec, CollectionSpec):
+                continue
+            key_field, value_field = spec.key_field, spec.value_field
+            values[name] = {
+                row[key_field].get(): row[value_field].get()
+                for row in rows
+                if (
+                    key_field in row
+                    and value_field in row
+                    and row[key_field].get()
+                )
+            }
+        self.device_settings[self.active_device_item_id] = values
+
+    @staticmethod
+    def set_configuration_value(configuration: dict, path: str, value: object) -> None:
+        """Set a slash-separated configuration path in a nested dictionary."""
+        target = configuration
+        parts = path.split("/")
+        for part in parts[:-1]:
+            target = target.setdefault(part, {})
+        target[parts[-1]] = value
+
+    def device_configuration(
+        self, category: str, manufacturer: str, model: str, settings: dict[str, object]
+    ) -> dict:
+        """Convert one configured device into its configuration.yaml section."""
+        schema = self.get_configuration_schema(category, manufacturer, model)
+        values = {
+            name: spec.default
+            for name, spec in schema.items()
+            if isinstance(spec, SettingSpec) and spec.default is not None
+        }
+        values.update(settings)
+        device = {"type": model} if category == "laser" else {"hardware": {"type": model}}
+
+        connection_names = set(self.get_connect_params(category, manufacturer, model))
+        # those connection names are from SerialDevice and SequenceDevice
+        connection_names.update({"port", "baudrate", "timeout", "serial_number"})
+        for name, value in values.items():
+            if name in {"position", "pixel_size", "available_filters"}:
+                device[name] = value
+            elif "/" in name:
+                self.set_configuration_value(device, name, value)
+            elif category == "stage" and name in {"axes", "axes_mapping"}:
+                device["hardware"][name] = InlineYamlList(
+                    self.parse_stage_axes(value)
+                )
+            elif category == "stage" and name.endswith(("_min", "_max")):
+                device[name] = value
+            elif category == "stage":
+                device["hardware"][name] = value
+            elif name in connection_names:
+                device["hardware"][name] = value
+            else:
+                device[name] = value
+        if category == "laser":
+            device["type"] = self.laser_device_type(device)
+        return device
+
+    def build_configuration(self) -> dict:
+        """Build a configuration.yaml-compatible dictionary from added devices."""
+        self.store_visible_microscope_devices()
+        microscopes = {}
+        for microscope_name in self.microscope_buttons:
+            devices = self.microscope_devices.get(microscope_name, [])
+            microscope = {}
+            for category, manufacturer, model, settings in devices:
+                device = self.device_configuration(category, manufacturer, model, settings)
+                self.add_device_to_microscope(microscope, category, device)
+            microscopes[microscope_name] = microscope
+        return {"microscopes": microscopes}
+
+    @staticmethod
+    def add_device_to_microscope(
+        microscope: dict, category: str, device: dict
+    ) -> None:
+        """Add one serialized device using its category's YAML structure."""
+        if category == "stage":
+            stage = microscope.setdefault("stage", {"hardware": []})
+            stage["hardware"].append(device["hardware"])
+            stage.update(
+                {name: value for name, value in device.items() if name != "hardware"}
+            )
+        elif category not in microscope:
+            microscope[category] = device
+        elif isinstance(microscope[category], list):
+            microscope[category].append(device)
+        else:
+            microscope[category] = [microscope[category], device]
+
+    def save_configuration(self) -> None:
+        """Ask for a YAML path and write the configurator's device configuration."""
+        self.store_active_device_settings()
+        filename = filedialog.asksaveasfilename(
+            parent=self.root,
+            title="Save Configuration",
+            initialdir=str(Path(__file__).resolve().parents[1] / "config"),
+            initialfile="new-config.yaml",
+            defaultextension=".yaml",
+            filetypes=(("YAML files", "*.yaml *.yml"), ("All files", "*")),
+        )
+        if not filename:
+            return
+        try:
+            with open(filename, "w", encoding="utf-8") as configuration_file:
+                yaml.dump(
+                    self.build_configuration(),
+                    configuration_file,
+                    Dumper=ConfiguratorYamlDumper,
+                    sort_keys=False,
+                    default_flow_style=False,
+                )
+        except (OSError, yaml.YAMLError) as error:
+            messagebox.showerror("Save Configuration", f"Could not save configuration:\n{error}", parent=self.root)
+            return
+        messagebox.showinfo("Save Configuration", f"Configuration saved to:\n{filename}", parent=self.root)
+
+    def get_configuration_schema(
+        self, category: str, manufacturer: str, model: str
+    ) -> dict[str, SettingSpec]:
+        """Resolve the currently available configuration schema for a device.
+
+        Base-class schemas are authoritative. ``get_connect_params`` remains a
+        compatibility fallback until concrete device classes declare their own
+        ``configuration_schema`` values.
+        """
+        connection_schema = {
+            property_name: SettingSpec(str, default="")
+            for property_name in self.get_connect_params(
+                category, manufacturer, model
+            )
+        }
+        schemas = [connection_schema]
+        if self.class_inherits(category, manufacturer, model, "SerialDevice"):
+            schemas.append(SerialDevice.configuration_schema)
+        if self.class_inherits(category, manufacturer, model, "SequenceDevice"):
+            schemas.append(SequenceDevice.configuration_schema)
+        base_class_name = self.category_base_class_name(category)
+        if self.class_inherits(category, manufacturer, model, base_class_name):
+            try:
+                base_module = importlib.import_module(
+                    f"navigate.model.devices.{category}.base"
+                )
+                base_class = getattr(base_module, base_class_name)
+                schemas.append(getattr(base_class, "configuration_schema", {}))
+            except (ImportError, AttributeError):
+                logger.exception("Could not load the configuration schema for %s.", base_class_name)
+        schemas.append(
+            self.get_class_configuration_schema(category, manufacturer, model)
+        )
+        return merge_configuration_schemas(*schemas)
+
+    @classmethod
+    def get_class_configuration_schema(
+        cls, category: str, manufacturer: str, class_name: str
+    ) -> dict[str, SettingSpec]:
+        """Read class-level schemas without importing device hardware APIs.
+
+        Device modules can import vendor SDKs that are unavailable to the
+        configurator. The schema is intentionally declarative, so AST parsing
+        provides the required metadata safely. Local parent schemas are merged
+        before their child schemas.
+        """
+        module = ast.parse(
+            (
+                cls.device_directory()
+                / category
+                / (manufacturer + ".py")
+            ).read_text(encoding="utf-8")
+        )
+        nodes = {
+            node.name: node
+            for node in module.body
+            if isinstance(node, ast.ClassDef)
+        }
+
+        def class_schema(node: ast.ClassDef) -> dict[str, SettingSpec]:
+            """Convert a literal ``configuration_schema`` assignment to specs."""
+            for statement in node.body:
+                if not (
+                    isinstance(statement, ast.Assign)
+                    and any(
+                        isinstance(target, ast.Name)
+                        and target.id == "configuration_schema"
+                        for target in statement.targets
+                    )
+                    and isinstance(statement.value, ast.Dict)
+                ):
+                    continue
+                schema = {}
+                for key, value in zip(statement.value.keys, statement.value.values):
+                    if not (
+                        isinstance(key, ast.Constant)
+                        and isinstance(key.value, str)
+                        and isinstance(value, ast.Call)
+                        and isinstance(value.func, ast.Name)
+                        and value.func.id == "SettingSpec"
+                        and value.args
+                        and isinstance(value.args[0], ast.Name)
+                    ):
+                        continue
+                    value_type = {
+                        "str": str,
+                        "int": int,
+                        "float": float,
+                        "bool": bool,
+                    }.get(value.args[0].id)
+                    if value_type is None:
+                        continue
+                    kwargs = {}
+                    for keyword in value.keywords:
+                        if keyword.arg is None:
+                            continue
+                        try:
+                            kwargs[keyword.arg] = ast.literal_eval(keyword.value)
+                        except ValueError:
+                            continue
+                    schema[key.value] = SettingSpec(value_type, **kwargs)
+                return schema
+            return {}
+
+        def inherited_schema(name: str, visited: set[str]) -> dict[str, SettingSpec]:
+            """Merge schemas from local parents before the selected class."""
+            if name in visited or name not in nodes:
+                return {}
+            visited.add(name)
+            node = nodes[name]
+            schemas = []
+            for base in node.bases:
+                base_name = (
+                    base.id
+                    if isinstance(base, ast.Name)
+                    else base.attr
+                    if isinstance(base, ast.Attribute)
+                    else ""
+                )
+                schemas.append(inherited_schema(base_name, visited))
+            schemas.append(class_schema(node))
+            return merge_configuration_schemas(*schemas)
+
+        return inherited_schema(class_name, set())
+
+    def render_device_info(
+        self, schema: dict[str, object], values: Optional[dict[str, object]] = None
+    ) -> None:
         """Create Property/Value widgets inside the passive Device Info panel."""
+        values = values or {}
         frame = self.view.device_info_frame.settings_frame
         for child in frame.winfo_children():
             child.destroy()
         self.value_variables = {}
+        self.collection_rows = {}
+        self.stage_axis_range_frame = None
+        self.stage_axis_setting_names = set()
         for column, heading in enumerate(("Property", "Value")):
             ttk.Label(frame, text=heading, font="TkDefaultFont").grid(row=0, column=column, sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_padding_px((1, 1)))
-        for row, (name, value) in enumerate(properties.items(), start=1):
-            ttk.Label(frame, text=name, font="TkDefaultFont").grid(row=row, column=0, sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_padding_px((1, 1)))
-            variable = tk.StringVar(master=self.root, value=str(value))
+        row = 1
+        for name, spec in schema.items():
+            if isinstance(spec, CollectionSpec):
+                self.render_collection_setting(frame, row, name, spec, values.get(name))
+                row += 1
+                continue
+            label = spec.label or name.replace("_", " ").title()
+            property_label = ttk.Label(frame, text=label, font="TkDefaultFont")
+            property_label.grid(row=row, column=0, sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_padding_px((1, 1)))
+            if spec.help_text:
+                ConfiguratorTooltip(property_label, spec.help_text)
+            variable = self.create_value_variable(spec, values.get(name))
             self.value_variables[name] = variable
-            ttk.Entry(frame, textvariable=variable, style="DeviceInfo.TEntry").grid(row=row, column=1, sticky=tk.EW, padx=get_theme_space_px(3), pady=get_theme_padding_px((1, 1)))
+            self.create_setting_widget(frame, row, spec, variable)
+            row += 1
+        if self.active_device_is_stage() and "axes" in self.value_variables:
+            self.stage_axis_range_frame = ttk.Frame(frame)
+            self.stage_axis_range_frame.grid(
+                row=row,
+                column=0,
+                columnspan=2,
+                sticky=tk.EW,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
+            self.stage_axis_range_frame.columnconfigure(1, weight=1)
+            self.value_variables["axes"].trace_add(
+                "write", self.update_stage_axis_range_fields
+            )
+            self.update_stage_axis_range_fields()
+
+    def active_device_is_stage(self) -> bool:
+        """Return whether the visible settings belong to a stage device."""
+        return (
+            self.active_device_item_id is not None
+            and self.device_data[self.active_device_item_id][0] == "stage"
+        )
+
+    @staticmethod
+    def parse_stage_axes(value: str) -> list[str]:
+        """Convert an axes entry into a YAML list, even for one axis."""
+        if isinstance(value, (list, tuple)):
+            return [str(axis) for axis in value]
+        return [
+            axis.strip("'\"")
+            for axis in re.split(r"[\s,]+", str(value).strip().strip("[]"))
+            if axis.strip("'\"")
+        ]
+
+    def update_stage_axis_range_fields(self, *_args) -> None:
+        """Show editable minimum and maximum values for the entered stage axes."""
+        if self.stage_axis_range_frame is None or self.active_device_item_id is None:
+            return
+        saved_values = self.device_settings.setdefault(self.active_device_item_id, {})
+        previous_names = self.stage_axis_setting_names.copy()
+        saved_values.update(
+            {
+                name: self.value_variables[name].get()
+                for name in previous_names
+                if name in self.value_variables
+            }
+        )
+        for name in previous_names:
+            self.value_variables.pop(name, None)
+        self.stage_axis_setting_names = set()
+        for child in self.stage_axis_range_frame.winfo_children():
+            child.destroy()
+
+        axes = self.parse_stage_axes(self.value_variables["axes"].get())
+        row = 0
+        for axis in axes:
+            for suffix, label, default in (
+                ("min", "Minimum", -100000.0),
+                ("max", "Maximum", 100000.0),
+            ):
+                name = f"{axis}_{suffix}"
+                spec = SettingSpec(float, default=default, label=f"{axis} {label}")
+                ttk.Label(
+                    self.stage_axis_range_frame,
+                    text=spec.label,
+                    font="TkDefaultFont",
+                ).grid(
+                    row=row,
+                    column=0,
+                    sticky=tk.W,
+                    padx=get_theme_space_px(3),
+                    pady=get_theme_padding_px((1, 1)),
+                )
+                variable = self.create_value_variable(spec, saved_values.get(name))
+                self.value_variables[name] = variable
+                self.stage_axis_setting_names.add(name)
+                self.create_setting_widget(
+                    self.stage_axis_range_frame, row, spec, variable
+                )
+                row += 1
+        for name in previous_names - self.stage_axis_setting_names:
+            saved_values.pop(name, None)
+
+    def render_collection_setting(
+        self,
+        parent: ttk.Frame,
+        row: int,
+        name: str,
+        spec: CollectionSpec,
+        values: Optional[object] = None,
+    ) -> None:
+        """Render a repeatable configuration collection as an editable table."""
+        collection_frame = ttk.LabelFrame(
+            parent,
+            text=spec.label or name.replace("_", " ").title(),
+        )
+        collection_frame.grid(
+            row=row,
+            column=0,
+            columnspan=2,
+            sticky=tk.EW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((2, 2)),
+        )
+        self.collection_rows[name] = []
+        if isinstance(values, dict):
+            for key, value in values.items():
+                row_data = {
+                    field_name: self.create_value_variable(
+                        field_spec,
+                        key if field_name == spec.key_field else value if field_name == spec.value_field else None,
+                    )
+                    for field_name, field_spec in spec.item_schema.items()
+                }
+                self.collection_rows[name].append(row_data)
+        for column, field_name in enumerate(spec.item_schema):
+            label = spec.item_schema[field_name].label or field_name.title()
+            ttk.Label(collection_frame, text=label, font="TkDefaultFont").grid(
+                row=0,
+                column=column,
+                sticky=tk.W,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
+        add_button = ttk.Button(
+            collection_frame,
+            text=(
+                "Add Filter"
+                if name == "available_filters"
+                else f"Add {(spec.label or name).rstrip('s')}"
+            ),
+            command=lambda: self.add_collection_row(name, spec, collection_frame),
+        )
+        add_button.grid(
+            row=0,
+            column=len(spec.item_schema),
+            sticky=tk.E,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((1, 1)),
+        )
+        self.refresh_collection_rows(name, spec, collection_frame)
+
+    def add_collection_row(
+        self,
+        name: str,
+        spec: CollectionSpec,
+        parent: ttk.LabelFrame,
+    ) -> None:
+        """Append a row of editable collection values."""
+        row_data = {
+            field_name: self.create_value_variable(field_spec)
+            for field_name, field_spec in spec.item_schema.items()
+        }
+        self.collection_rows[name].append(row_data)
+        self.refresh_collection_rows(name, spec, parent)
+
+    def refresh_collection_rows(
+        self,
+        name: str,
+        spec: CollectionSpec,
+        parent: ttk.LabelFrame,
+    ) -> None:
+        """Rebuild only the dynamic rows of a collection table."""
+        for widget in parent.grid_slaves():
+            if int(widget.grid_info()["row"]) >= 2:
+                widget.destroy()
+        for row_index, row_data in enumerate(self.collection_rows[name], start=2):
+            for column, (field_name, field_spec) in enumerate(spec.item_schema.items()):
+                self.create_setting_widget(
+                    parent,
+                    row_index,
+                    field_spec,
+                    row_data[field_name],
+                    column=column,
+                )
+            ttk.Button(
+                parent,
+                text="×",
+                width=3,
+                style="Danger.TButton",
+                command=lambda index=row_index - 2: self.delete_collection_row(
+                    name, spec, parent, index
+                ),
+            ).grid(
+                row=row_index,
+                column=len(spec.item_schema),
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
+
+    def delete_collection_row(
+        self,
+        name: str,
+        spec: CollectionSpec,
+        parent: ttk.LabelFrame,
+        index: int,
+    ) -> None:
+        """Remove one collection row and redraw its table."""
+        del self.collection_rows[name][index]
+        self.refresh_collection_rows(name, spec, parent)
+
+    def create_value_variable(
+        self, spec: SettingSpec, value: Optional[object] = None
+    ) -> tk.Variable:
+        """Create a Tk value variable matching the schema's declared type."""
+        value = spec.default if value is None else value
+        if spec.value_type is bool:
+            return tk.BooleanVar(master=self.root, value=bool(value))
+        if spec.value_type is int:
+            return tk.IntVar(master=self.root, value=0 if value is None else value)
+        if spec.value_type is float:
+            return tk.DoubleVar(master=self.root, value=0.0 if value is None else value)
+        return tk.StringVar(
+            master=self.root,
+            value="" if value is None else str(value),
+        )
+
+    def create_setting_widget(
+        self,
+        parent: ttk.Frame,
+        row: int,
+        spec: SettingSpec,
+        variable: tk.Variable,
+        column: int = 1,
+    ) -> None:
+        """Render the editor appropriate for a setting schema definition."""
+        grid_options = {
+            "row": row,
+            "column": column,
+            "sticky": tk.EW,
+            "padx": get_theme_space_px(3),
+            "pady": get_theme_padding_px((1, 1)),
+        }
+        if spec.value_type is bool:
+            ttk.Checkbutton(parent, variable=variable).grid(**grid_options)
+            return
+        if spec.choices is not None:
+            ttk.Combobox(
+                parent,
+                textvariable=variable,
+                values=spec.choices,
+                state="readonly",
+            ).grid(**grid_options)
+            return
+        if spec.value_type is float:
+            ttk.Spinbox(
+                parent,
+                textvariable=variable,
+                from_=-1000000 if spec.minimum is None else spec.minimum,
+                to=1000000 if spec.maximum is None else spec.maximum,
+                increment=0.1 if spec.step is None else spec.step,
+            ).grid(**grid_options)
+            return
+        if spec.minimum is not None and spec.maximum is not None:
+            ttk.Spinbox(
+                parent,
+                textvariable=variable,
+                from_=spec.minimum,
+                to=spec.maximum,
+                increment=spec.step or 1,
+            ).grid(**grid_options)
+            return
+        ttk.Entry(parent, textvariable=variable, style="DeviceInfo.TEntry").grid(
+            **grid_options
+        )
 
     def update_scrollregion(self, _event: tk.Event) -> None:
         """Update horizontal scrolling for dynamically created setting widgets."""
@@ -360,8 +1212,17 @@ class Configurator:
     @classmethod
     def get_device_models(cls, category: str, manufacturer: str) -> list[str]:
         """Return non-base device classes inheriting from the category base class."""
-        parent = "".join(word.title() for word in category.split("_")) + "Base"
+        parent = cls.category_base_class_name(category)
         return [name for name in cls.module_classes(category, manufacturer) if not name.endswith("Base") and cls.class_inherits(category, manufacturer, name, parent)]
+
+    @staticmethod
+    def category_base_class_name(category: str) -> str:
+        """Return a category's base class name, including acronym exceptions."""
+        base_names = {"daq": "DAQBase"}
+        return base_names.get(
+            category,
+            "".join(word.title() for word in category.split("_")) + "Base",
+        )
 
     @classmethod
     def get_connect_params(cls, category: str, manufacturer: str, class_name: str) -> list[str]:

@@ -43,6 +43,15 @@ class ConfigurationAssistantWindow(ttk.Frame):
     def __init__(self, root: tk.Tk, *args, **kwargs) -> None:
         self.root = root
         self.root.title("New Configuration Assistant")
+        window_width, window_height = 1100, 720
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        position_x = max(0, (screen_width - window_width) // 2)
+        position_y = max(0, (screen_height - window_height) // 2)
+        self.root.geometry(
+            f"{window_width}x{window_height}+{position_x}+{position_y}"
+        )
+        self.root.minsize(800, 500)
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
         super().__init__(root, *args, **kwargs)
@@ -57,7 +66,13 @@ class ConfigurationAssistantWindow(ttk.Frame):
         self.top_window.grid(row=0, column=0, sticky=tk.EW)
 
         self.microscope_frame = ttk.Frame(self)
-        self.microscope_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_padding_px((3, 0)))
+        self.microscope_frame.grid(
+            row=1,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         ttk.Style().configure("Configurator.TRadiobutton", font="TkDefaultFont")
 
         self.configuration_frame = ttk.Frame(self)
@@ -159,6 +174,7 @@ class AddDeviceDialog(tk.Toplevel):
         actions.grid(row=1, column=0, sticky=tk.E, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
         self.action_button = ttk.Button(actions, text=action_text, width=8)
         self.action_button.grid(row=0, column=0)
+        _center_popup(self, parent)
 
     @staticmethod
     def _create_list_column(parent: ttk.Frame, column: int, title: str) -> ttk.Treeview:
@@ -194,6 +210,18 @@ class RenameMicroscopeDialog(tk.Toplevel):
         self.ok_button.grid(row=0, column=0, padx=get_theme_padding_px((0, 1)))
         self.cancel_button = ttk.Button(actions, text="Cancel", width=8)
         self.cancel_button.grid(row=0, column=1)
+        _center_popup(self, parent)
+
+
+def _center_popup(window: tk.Toplevel, parent: tk.Misc) -> None:
+    """Place a custom dialog at the center of its parent window."""
+    window.update_idletasks()
+    parent.update_idletasks()
+    parent_width = max(parent.winfo_width(), parent.winfo_reqwidth())
+    parent_height = max(parent.winfo_height(), parent.winfo_reqheight())
+    position_x = parent.winfo_rootx() + (parent_width - window.winfo_width()) // 2
+    position_y = parent.winfo_rooty() + (parent_height - window.winfo_height()) // 2
+    window.geometry(f"+{max(0, position_x)}+{max(0, position_y)}")
 
 
 class ConfiguratorTooltip:

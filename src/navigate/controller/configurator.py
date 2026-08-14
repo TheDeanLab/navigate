@@ -113,6 +113,7 @@ class Configurator:
         self.device_dialog: Optional[AddDeviceDialog] = None
         self.rename_dialog: Optional[RenameMicroscopeDialog] = None
         self.editing_item_id: Optional[str] = None
+        self.last_configuration_path: Optional[Path] = None
 
         self.microscope_menu = tk.Menu(root, tearoff=False)
         self.microscope_menu.add_command(label="Rename", command=self.rename_microscope)
@@ -199,6 +200,7 @@ class Configurator:
         ):
             return
         self.clear_loaded_configuration()
+        self.last_configuration_path = Path(filename)
         for microscope_name, microscope_config in microscopes.items():
             self.add_microscope(str(microscope_name))
             if isinstance(microscope_config, dict):
@@ -568,8 +570,16 @@ class Configurator:
             self.device_settings[item_id] = {}
         else:
             item_id = self.editing_item_id
+            previous_device = self.device_data[item_id]
+            self.store_active_device_settings()
             self.view.devices_frame.device_list.item(item_id, text=name)
-            self.device_settings.setdefault(item_id, {})
+            if previous_device != (category, manufacturer, model):
+                # Settings belong to a device type. Do not carry an old form
+                # into a different category, manufacturer, or model.
+                self.device_settings[item_id] = {}
+                self.active_device_item_id = None
+            else:
+                self.device_settings.setdefault(item_id, {})
         self.device_data[item_id] = (category, manufacturer, model)
         self.view.devices_frame.device_list.selection_set(item_id)
         self.view.devices_frame.device_list.focus(item_id)
@@ -717,14 +727,16 @@ class Configurator:
     def save_configuration(self) -> None:
         """Ask for a YAML path and write the configurator's device configuration."""
         self.store_active_device_settings()
-        filename = filedialog.asksaveasfilename(
-            parent=self.root,
-            title="Save Configuration",
-            initialdir=str(Path(__file__).resolve().parents[1] / "config"),
-            initialfile="new-config.yaml",
-            defaultextension=".yaml",
-            filetypes=(("YAML files", "*.yaml *.yml"), ("All files", "*")),
-        )
+        dialog_options = {
+            "parent": self.root,
+            "title": "Save Configuration",
+            "defaultextension": ".yaml",
+            "filetypes": (("YAML files", "*.yaml *.yml"), ("All files", "*")),
+        }
+        if self.last_configuration_path is not None:
+            dialog_options["initialdir"] = str(self.last_configuration_path.parent)
+            dialog_options["initialfile"] = self.last_configuration_path.name
+        filename = filedialog.asksaveasfilename(**dialog_options)
         if not filename:
             return
         try:
@@ -739,6 +751,7 @@ class Configurator:
         except (OSError, yaml.YAMLError) as error:
             messagebox.showerror("Save Configuration", f"Could not save configuration:\n{error}", parent=self.root)
             return
+        self.last_configuration_path = Path(filename)
         messagebox.showinfo("Save Configuration", f"Configuration saved to:\n{filename}", parent=self.root)
 
     def get_configuration_schema(

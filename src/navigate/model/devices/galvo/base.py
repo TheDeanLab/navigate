@@ -67,12 +67,6 @@ class GalvoBase(ABC):
     """
 
     configuration_schema = {
-        "name": SettingSpec(
-            str,
-            default="",
-            label="Name",
-            help_text="Optional display name for this galvo.",
-        ),
         "waveform": SettingSpec(
             str,
             default="sawtooth",

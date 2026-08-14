@@ -39,6 +39,7 @@ from typing import Any
 # Local Imports
 from navigate.model.devices.stage.base import StageBase
 from navigate.model.devices.device_types import IntegratedDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -293,6 +294,15 @@ class KIM001Stage(StageBase, IntegratedDevice):
 class KST101Stage(StageBase):
     """Thorlabs KST Stage"""
 
+    configuration_schema = {
+        "device_units_per_mm": SettingSpec(
+            float,
+            default=1000.0,
+            label="Device Units per mm",
+            help_text="Number of KST controller units in one millimetre.",
+        ),
+    }
+
     def __init__(
         self,
         microscope_name: str,
@@ -541,6 +551,15 @@ class KST101Stage(StageBase):
 @log_initialization
 class KINESISStage(StageBase):
     """Thorlabs Kinesis stage via pylablib (serial backend)."""
+
+    configuration_schema = {
+        "steps_per_um": SettingSpec(
+            float,
+            default=1.0,
+            label="Steps per µm",
+            help_text="Number of Kinesis controller steps in one micrometre.",
+        ),
+    }
 
     def __init__(
         self,

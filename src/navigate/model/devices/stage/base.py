@@ -53,7 +53,6 @@ class StageBase(ABC):
     configuration_schema = {
         "axes": SettingSpec(str, default="", label="Axes"),
         "axes_mapping": SettingSpec(str, default="", label="Axes Mapping"),
-        "feedback_alignment": SettingSpec(str, default="", label="Feedback Alignment"),
     }
 
     def __init__(

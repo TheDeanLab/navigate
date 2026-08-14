@@ -51,13 +51,29 @@ class ZoomBase(ABC):
     """ZoomBase parent class."""
 
     configuration_schema = {
-        "position": CollectionSpec(
-            label="Positions",
-            item_schema={"name": SettingSpec(str, label="Zoom"), "value": SettingSpec(float, label="Position")},
+        "zoom_values": CollectionSpec(
+            label="Zoom Values",
+            storage="parallel_mappings",
+            key_field="zoom",
+            value_field="position",
+            storage_fields=("position", "pixel_size"),
+            item_schema={
+                "zoom": SettingSpec(str, label="Zoom"),
+                "position": SettingSpec(float, label="Position"),
+                "pixel_size": SettingSpec(float, label="Pixel Size (um)"),
+            },
         ),
-        "pixel_size": CollectionSpec(
-            label="Pixel Sizes",
-            item_schema={"name": SettingSpec(str, label="Zoom"), "value": SettingSpec(float, label="Pixel Size (um)")},
+        "stage_positions": CollectionSpec(
+            label="Stage Position Calibration",
+            storage="nested_mapping",
+            key_field="solvent",
+            value_field="position",
+            item_schema={
+                "solvent": SettingSpec(str, label="Solvent"),
+                "axis": SettingSpec(str, label="Stage Axis"),
+                "zoom": SettingSpec(str, label="Zoom"),
+                "position": SettingSpec(float, label="Position"),
+            },
         ),
     }
 

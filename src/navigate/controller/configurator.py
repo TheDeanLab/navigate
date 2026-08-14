@@ -232,7 +232,6 @@ class Configurator:
     def load_microscope_devices(self, microscope_name: str, configuration: dict) -> None:
         """Add every recognizable device from one microscope configuration."""
         for category, category_config in configuration.items():
-            print("**** loading device category for microscope:", category, microscope_name)
             if category == "stage" and isinstance(category_config, dict):
                 for hardware in category_config.get("hardware", []):
                     if isinstance(hardware, dict):
@@ -258,7 +257,6 @@ class Configurator:
         )
         if not isinstance(device_type, str):
             return
-        print("**** resolve device:", category, device_type)
         resolved = self.resolve_device_type(category, device_type)
         if resolved is None:
             logger.warning("Could not resolve %s device type %s.", category, device_type)

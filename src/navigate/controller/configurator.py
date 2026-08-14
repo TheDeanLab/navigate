@@ -714,6 +714,15 @@ class Configurator:
         for name, value in values.items():
             spec = schema.get(name)
             if isinstance(spec, CollectionSpec) and spec.storage == "parallel_mappings":
+                if (
+                    category == "zoom"
+                    and name == "zoom_values"
+                    and not any(value.values() for value in value.values())
+                ):
+                    value = {
+                        "position": {"N/A": 0},
+                        "pixel_size": {"N/A": 1},
+                    }
                 device.update(value)
             elif name in {"position", "pixel_size", "available_filters"}:
                 device[name] = value
@@ -778,6 +787,8 @@ class Configurator:
         if self.last_configuration_path is not None:
             dialog_options["initialdir"] = str(self.last_configuration_path.parent)
             dialog_options["initialfile"] = self.last_configuration_path.name
+        else:
+            dialog_options["initialfile"] = "new-config.yaml"
         filename = filedialog.asksaveasfilename(**dialog_options)
         if not filename:
             return

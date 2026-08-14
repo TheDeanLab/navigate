@@ -39,6 +39,7 @@ from abc import ABC, abstractmethod
 
 # Local Imports
 from navigate.tools.decorators import log_initialization
+from navigate.model.devices.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,6 +49,12 @@ logger = logging.getLogger(p)
 @log_initialization
 class StageBase(ABC):
     """Stage Parent Class"""
+
+    configuration_schema = {
+        "axes": SettingSpec(str, default="", label="Axes"),
+        "axes_mapping": SettingSpec(str, default="", label="Axes Mapping"),
+        "feedback_alignment": SettingSpec(str, default="", label="Feedback Alignment"),
+    }
 
     def __init__(
         self,

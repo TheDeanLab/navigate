@@ -43,6 +43,7 @@ from nidaqmx.constants import LineGrouping
 # Local Imports
 from navigate.model.devices.laser.base import LaserBase
 from navigate.model.devices.device_types import NIDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -52,6 +53,10 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class NILaser(LaserBase, NIDevice):
+    configuration_schema = {
+        "power/hardware/channel": SettingSpec(str, default="", label="Power Channel"),
+        "onoff/hardware/channel": SettingSpec(str, default="", label="On/Off Channel"),
+    }
     """LaserNI Class
 
     This class is used to control a laser connected to a National Instruments DAQ.

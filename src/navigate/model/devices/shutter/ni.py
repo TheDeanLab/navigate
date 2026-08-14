@@ -41,6 +41,7 @@ from nidaqmx.constants import LineGrouping
 
 # Local Imports
 from navigate.model.devices.shutter.base import ShutterBase
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -50,6 +51,7 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class NIShutter(ShutterBase):
+    configuration_schema = {"hardware/channel": SettingSpec(str, default="", label="Channel")}
     """ShutterTTL Class
 
     Triggering for shutters delivered from DAQ using digital outputs.

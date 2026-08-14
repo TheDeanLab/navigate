@@ -39,6 +39,7 @@ from typing import Any
 # Local Imports
 from navigate.model.devices.laser.base import LaserBase
 from navigate.model.devices.device_types import SerialDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 from navigate.tools.decorators import log_initialization
 
@@ -49,6 +50,10 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class ASILaser(LaserBase, SerialDevice):
+    configuration_schema = {
+        "power/hardware/axis": SettingSpec(str, default="B", label="Power Axis"),
+        "onoff/hardware/axis": SettingSpec(str, default="", label="On/Off Axis"),
+    }
     """ASILaser - Class for controlling ASI Lasers
 
     This class is used to control a laser connected to a ASI Device.

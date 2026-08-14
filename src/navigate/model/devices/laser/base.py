@@ -39,6 +39,7 @@ from abc import ABC, abstractmethod
 
 # Local Imports
 from navigate.tools.decorators import log_initialization
+from navigate.model.devices.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,6 +49,34 @@ logger = logging.getLogger(p)
 @log_initialization
 class LaserBase(ABC):
     """Laser Base Class"""
+
+    configuration_schema = {
+        "wavelength": SettingSpec(int, default=488, label="Wavelength (nm)"),
+        "power/hardware/type": SettingSpec(
+            str,
+            default="Synthetic",
+            label="Power Type",
+            choices=("NI", "ASI", "Synthetic"),
+        ),
+        "power/hardware/min": SettingSpec(
+            float, default=0.0, label="Power Minimum"
+        ),
+        "power/hardware/max": SettingSpec(
+            float, default=5.0, label="Power Maximum"
+        ),
+        "onoff/hardware/type": SettingSpec(
+            str,
+            default="Synthetic",
+            label="On/Off Type",
+            choices=("NI", "ASI", "Synthetic"),
+        ),
+        "onoff/hardware/min": SettingSpec(
+            float, default=0.0, label="On/Off Minimum"
+        ),
+        "onoff/hardware/max": SettingSpec(
+            float, default=5.0, label="On/Off Maximum"
+        ),
+    }
 
     def __init__(
         self,

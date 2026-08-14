@@ -47,6 +47,7 @@ import numpy as np
 
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
 from navigate.tools.decorators import log_initialization
 
@@ -58,6 +59,48 @@ logger = logging.getLogger(p)
 @log_initialization
 class NIDAQ(DAQBase):
     """NIDAQ class for Control of NI Data Acquisition Cards."""
+
+    configuration_schema = {
+        "trigger_source": SettingSpec(
+            str,
+            default="/PXI6259/PFI0",
+            label="Trigger Source",
+            help_text="DAQ input line used as the external trigger source.",
+        ),
+        "master_trigger_out_line": SettingSpec(
+            str,
+            default="PXI6259/port0/line1",
+            label="Master Trigger Out",
+            help_text="Digital output line used for the master trigger.",
+        ),
+        "camera_trigger_out_line": SettingSpec(
+            str,
+            default="/PXI6259/ctr0",
+            label="Camera Trigger Out",
+            help_text="Counter or digital output line used to trigger the camera.",
+        ),
+        "laser_port_switcher": SettingSpec(
+            str,
+            default="PXI6733/port0/line0",
+            label="Laser Port Switcher",
+            help_text="Digital output line used to switch laser ports.",
+        ),
+        "laser_switch_state": SettingSpec(
+            bool,
+            default=False,
+            label="Laser Switch State",
+            help_text="Default state of the digital laser switch output.",
+        ),
+        "sample_rate": SettingSpec(
+            int,
+            default=100000,
+            label="Sample Rate (Hz)",
+            help_text="DAQ waveform sampling rate in hertz.",
+            minimum=1,
+            maximum=10000000,
+            step=1000,
+        ),
+    }
 
     def __init__(self, configuration: dict[str, Any]) -> None:
         """Initialize NIDAQ class.

@@ -39,6 +39,7 @@ from typing import Any, Optional
 # Local Imports
 from navigate.model.devices.remote_focus.base import RemoteFocusBase
 from navigate.model.devices.device_types import SerialDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 from navigate.tools.decorators import log_initialization
 
@@ -49,6 +50,7 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
+    configuration_schema = {"hardware/axis": SettingSpec(str, default="B", label="Axis")}
     """ASIRemoteFocus Class - Analog control of the remote focus device."""
 
     def __init__(

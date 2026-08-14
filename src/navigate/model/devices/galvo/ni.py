@@ -40,6 +40,7 @@ import nidaqmx
 
 # Local Imports
 from navigate.model.devices.galvo.base import GalvoBase
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.model.devices.device_types import NIDevice
 from navigate.tools.decorators import log_initialization
 
@@ -51,6 +52,15 @@ logger = logging.getLogger(p)
 @log_initialization
 class NIGalvo(GalvoBase, NIDevice):
     """GalvoNI Class - NI DAQ Control of Galvanometers"""
+
+    configuration_schema = {
+        "hardware/channel": SettingSpec(
+            str,
+            default="PXI6259/ao0",
+            label="Channel",
+            help_text="NI analog-output channel connected to this galvo.",
+        ),
+    }
 
     def __init__(
         self,

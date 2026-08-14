@@ -38,6 +38,7 @@ from typing import Any, Optional
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.model.devices.device_types import SequenceDevice
 from navigate.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM
 from navigate.tools.decorators import log_initialization
@@ -54,6 +55,16 @@ class HamamatsuBase(CameraBase, SequenceDevice):
     This is the default parent class for Hamamatsu Cameras.
     This includes the ORCA Flash 4.0, Fusion, Lightning, and Fire.
     """
+
+    configuration_schema = {
+        "defect_correct_mode": SettingSpec(
+            float,
+            default=1.0,
+            label="Defect Correct Mode",
+            choices=(1.0, 2.0),
+            help_text="Camera defect correction: 1.0 is Off; 2.0 is On.",
+        ),
+    }
 
     def __init__(
         self,

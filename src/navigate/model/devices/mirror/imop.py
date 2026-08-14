@@ -39,6 +39,7 @@ import logging
 # Local Imports
 from navigate.model.devices.mirror.base import MirrorBase
 from navigate.model.devices.device_types import IntegratedDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.model.devices.APIs.imagineoptics.imop import IMOP_Mirror
 from navigate.tools.decorators import log_initialization
 
@@ -50,6 +51,8 @@ logger = logging.getLogger(p)
 @log_initialization
 class ImagineOpticsMirror(MirrorBase, IntegratedDevice):
     """ImageineOpticsMirror mirror class."""
+
+    configuration_schema = {"hardware/flat_path": SettingSpec(str, default="", label="Flat Mirror Path")}
 
     @classmethod
     def get_connect_params(cls) -> list[str]:

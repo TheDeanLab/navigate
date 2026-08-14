@@ -44,6 +44,7 @@ import nidaqmx
 # Local Imports
 from navigate.model.devices.stage.base import StageBase
 from navigate.model.devices.device_types import NIDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -53,6 +54,13 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class NIStage(StageBase, NIDevice):
+    configuration_schema = {
+        "volts_per_micron": SettingSpec(str, default="", label="Volts per Micron"),
+        "min": SettingSpec(float, default=0.0, label="Minimum Voltage"),
+        "max": SettingSpec(float, default=5.0, label="Maximum Voltage"),
+        "distance_threshold": SettingSpec(float, default=5.0, label="Distance Threshold"),
+        "settle_duration_ms": SettingSpec(float, default=20.0, label="Settle Duration (ms)"),
+    }
     """Galvo Stage Class (only supports one axis)
 
     Generic analog controlled stage. Could be used to control piezoelectric devices,

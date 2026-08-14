@@ -39,6 +39,7 @@ from typing import Any, Optional
 
 # Local Imports
 from navigate.tools.decorators import log_initialization
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,6 +49,17 @@ logger = logging.getLogger(p)
 @log_initialization
 class ZoomBase(ABC):
     """ZoomBase parent class."""
+
+    configuration_schema = {
+        "position": CollectionSpec(
+            label="Positions",
+            item_schema={"name": SettingSpec(str, label="Zoom"), "value": SettingSpec(float, label="Position")},
+        ),
+        "pixel_size": CollectionSpec(
+            label="Pixel Sizes",
+            item_schema={"name": SettingSpec(str, label="Zoom"), "value": SettingSpec(float, label="Pixel Size (um)")},
+        ),
+    }
 
     def __init__(
         self,

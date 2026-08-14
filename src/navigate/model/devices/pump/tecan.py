@@ -37,17 +37,47 @@ from typing import Any, Dict
 from serial import Serial
 
 # Local imports
+from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.devices.device_types import SerialDevice
+from navigate.model.devices.pump.base import PumpBase
 from navigate.model.utils.exceptions import UserVisibleException
 
 # Initialize logger
 logger = logging.getLogger(__name__)
 
 
-class XCaliburPump:
+class XCaliburPump(PumpBase, SerialDevice):
     """
     Driver for the Tecan Cavro XCalibur syringe pump.
     Uses ASCII DT protocol over RS-232 via USB-Serial adapter.
     """
+
+    configuration_schema = {
+        "min_speed_code": SettingSpec(
+            int,
+            default=0,
+            label="Minimum Speed Code",
+            help_text="Lowest allowed pump speed code (0 is the fastest).",
+            minimum=0,
+            maximum=40,
+            step=1,
+        ),
+        "max_speed_code": SettingSpec(
+            int,
+            default=40,
+            label="Maximum Speed Code",
+            help_text="Highest allowed pump speed code (40 is the slowest).",
+            minimum=0,
+            maximum=40,
+            step=1,
+        ),
+        "fine_positioning": SettingSpec(
+            bool,
+            default=False,
+            label="Fine Positioning",
+            help_text="Enable the pump's fine-positioning mode.",
+        ),
+    }
 
     ERROR_CODES = {
         "0": "No error",

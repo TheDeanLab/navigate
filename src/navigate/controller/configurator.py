@@ -380,7 +380,13 @@ class Configurator:
         connection_names = set(self.get_connect_params(category, manufacturer, model))
         connection_names.update({"port", "baudrate", "timeout", "serial_number"})
         settings = {}
-        for name in schema:
+        for name, spec in schema.items():
+            if isinstance(spec, CollectionSpec) and spec.storage == "parallel_mappings":
+                settings[name] = {
+                    field: self.configuration_path_value(configuration, field) or {}
+                    for field in spec.storage_fields or ()
+                }
+                continue
             path = name
             if category == "stage" and name in {"axes", "axes_mapping", "feedback_alignment"}:
                 path = f"hardware/{name}"
@@ -628,23 +634,56 @@ class Configurator:
         """Copy the currently visible editors into controller-owned device data."""
         if self.active_device_item_id is None:
             return
-        values = {name: variable.get() for name, variable in self.value_variables.items()}
         category, manufacturer, model = self.device_data[self.active_device_item_id]
         schema = self.get_configuration_schema(category, manufacturer, model)
+        saved_values = self.device_settings.get(self.active_device_item_id, {})
+        values = {}
+        for name, variable in self.value_variables.items():
+            value = variable.get()
+            spec = schema.get(name)
+            if (
+                isinstance(spec, SettingSpec)
+                and spec.default is None
+                and name not in saved_values
+                and value in ("", 0, 0.0)
+            ):
+                continue
+            values[name] = value
         for name, rows in self.collection_rows.items():
             spec = schema.get(name)
             if not isinstance(spec, CollectionSpec):
                 continue
             key_field, value_field = spec.key_field, spec.value_field
-            values[name] = {
-                row[key_field].get(): row[value_field].get()
-                for row in rows
-                if (
-                    key_field in row
-                    and value_field in row
-                    and row[key_field].get()
-                )
-            }
+            if spec.storage == "parallel_mappings":
+                values[name] = {
+                    field: {
+                        row[key_field].get(): row[field].get()
+                        for row in rows
+                        if row[key_field].get()
+                    }
+                    for field in spec.storage_fields or ()
+                }
+            elif spec.storage == "nested_mapping":
+                nested_values = {}
+                for row in rows:
+                    solvent = row["solvent"].get()
+                    axis = row["axis"].get()
+                    zoom = row["zoom"].get()
+                    if solvent and axis and zoom:
+                        nested_values.setdefault(solvent, {}).setdefault(axis, {})[
+                            zoom
+                        ] = row["position"].get()
+                values[name] = nested_values
+            else:
+                values[name] = {
+                    row[key_field].get(): row[value_field].get()
+                    for row in rows
+                    if (
+                        key_field in row
+                        and value_field in row
+                        and row[key_field].get()
+                    )
+                }
         self.device_settings[self.active_device_item_id] = values
 
     @staticmethod
@@ -673,7 +712,10 @@ class Configurator:
         # those connection names are from SerialDevice and SequenceDevice
         connection_names.update({"port", "baudrate", "timeout", "serial_number"})
         for name, value in values.items():
-            if name in {"position", "pixel_size", "available_filters"}:
+            spec = schema.get(name)
+            if isinstance(spec, CollectionSpec) and spec.storage == "parallel_mappings":
+                device.update(value)
+            elif name in {"position", "pixel_size", "available_filters"}:
                 device[name] = value
             elif "/" in name:
                 self.set_configuration_value(device, name, value)
@@ -1060,15 +1102,61 @@ class Configurator:
         )
         self.collection_rows[name] = []
         if isinstance(values, dict):
-            for key, value in values.items():
-                row_data = {
-                    field_name: self.create_value_variable(
-                        field_spec,
-                        key if field_name == spec.key_field else value if field_name == spec.value_field else None,
+            if spec.storage == "parallel_mappings":
+                zoom_names = set().union(
+                    *(mapping.keys() for mapping in values.values() if isinstance(mapping, dict))
+                )
+                for zoom in sorted(zoom_names):
+                    row_values = {"zoom": zoom}
+                    row_values.update(
+                        {
+                            field: mapping.get(zoom)
+                            for field, mapping in values.items()
+                            if isinstance(mapping, dict)
+                        }
                     )
-                    for field_name, field_spec in spec.item_schema.items()
-                }
-                self.collection_rows[name].append(row_data)
+                    self.collection_rows[name].append(
+                        {
+                            field_name: self.create_value_variable(
+                                field_spec, row_values.get(field_name)
+                            )
+                            for field_name, field_spec in spec.item_schema.items()
+                        }
+                    )
+            elif spec.storage == "nested_mapping":
+                for solvent, axes in values.items():
+                    if not isinstance(axes, dict):
+                        continue
+                    for axis, zooms in axes.items():
+                        if not isinstance(zooms, dict):
+                            continue
+                        for zoom, position in zooms.items():
+                            row_values = {
+                                "solvent": solvent,
+                                "axis": axis,
+                                "zoom": zoom,
+                                "position": position,
+                            }
+                            self.collection_rows[name].append(
+                                {
+                                    field_name: self.create_value_variable(
+                                        field_spec, row_values.get(field_name)
+                                    )
+                                    for field_name, field_spec in spec.item_schema.items()
+                                }
+                            )
+            else:
+                for key, value in values.items():
+                    row_data = {
+                        field_name: self.create_value_variable(
+                            field_spec,
+                            key
+                            if field_name == spec.key_field
+                            else value if field_name == spec.value_field else None,
+                        )
+                        for field_name, field_spec in spec.item_schema.items()
+                    }
+                    self.collection_rows[name].append(row_data)
         for column, field_name in enumerate(spec.item_schema):
             label = spec.item_schema[field_name].label or field_name.title()
             ttk.Label(collection_frame, text=label, font="TkDefaultFont").grid(
@@ -1257,14 +1345,73 @@ class Configurator:
 
     @classmethod
     def class_inherits(cls, category: str, manufacturer: str, class_name: str, parent: str) -> bool:
-        """Check direct or local indirect inheritance without importing hardware APIs."""
-        classes = cls.module_classes(category, manufacturer)
-        def inherits(name: str, visited: set[str]) -> bool:
-            if name in visited or name not in classes:
+        """Check inheritance without importing device hardware APIs.
+
+        In addition to classes in the selected module, follow imports from other
+        modules in the same device category. This keeps model discovery safe when
+        a device implementation inherits from a category-specific class defined
+        by another manufacturer module.
+        """
+
+        def module_details(module_name: str) -> tuple[dict[str, list[str]], dict[str, str]]:
+            """Return declared classes and same-category imported classes."""
+            module = ast.parse(
+                (
+                    cls.device_directory() / category / (module_name + ".py")
+                ).read_text(encoding="utf-8")
+            )
+            classes = {
+                node.name: [
+                    base.id
+                    if isinstance(base, ast.Name)
+                    else base.attr
+                    if isinstance(base, ast.Attribute)
+                    else ""
+                    for base in node.bases
+                ]
+                for node in module.body
+                if isinstance(node, ast.ClassDef)
+            }
+            imports = {}
+            module_prefix = f"navigate.model.devices.{category}."
+            for node in module.body:
+                if not (
+                    isinstance(node, ast.ImportFrom)
+                    and node.module
+                    and node.module.startswith(module_prefix)
+                ):
+                    continue
+                imported_module = node.module.removeprefix(module_prefix)
+                if "." in imported_module:
+                    continue
+                for alias in node.names:
+                    imports[alias.asname or alias.name] = imported_module
+            return classes, imports
+
+        def inherits(
+            module_name: str, name: str, visited: set[tuple[str, str]]
+        ) -> bool:
+            key = (module_name, name)
+            if key in visited:
                 return False
-            visited.add(name)
-            return any(base == parent or inherits(base, visited) for base in classes[name])
-        return inherits(class_name, set())
+            visited.add(key)
+            try:
+                classes, imports = module_details(module_name)
+            except FileNotFoundError:
+                return False
+            if name not in classes:
+                return False
+            for base in classes[name]:
+                if base == parent:
+                    return True
+                if inherits(module_name, base, visited):
+                    return True
+                imported_module = imports.get(base)
+                if imported_module and inherits(imported_module, base, visited):
+                    return True
+            return False
+
+        return inherits(manufacturer, class_name, set())
 
     @classmethod
     def get_device_models(cls, category: str, manufacturer: str) -> list[str]:

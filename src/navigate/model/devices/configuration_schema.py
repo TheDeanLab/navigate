@@ -76,26 +76,45 @@ class CollectionSpec:
     """Description of a repeatable group of persisted configuration values.
 
     ``storage='mapping'`` stores rows as a YAML mapping, using ``key_field`` as
-    the mapping key and ``value_field`` as its value. This is used by filter
-    wheels for their ``available_filters`` configuration.
+    the mapping key and ``value_field`` as its value. ``storage='parallel_mappings'``
+    stores selected row fields as separate YAML mappings keyed by ``key_field``.
+    ``storage='nested_mapping'`` stores calibration rows as
+    ``solvent -> axis -> zoom -> position``.
     """
 
     item_schema: Mapping[str, SettingSpec]
     storage: str = "mapping"
     key_field: str = "name"
     value_field: str = "value"
+    storage_fields: Optional[Tuple[str, ...]] = None
     label: Optional[str] = None
     help_text: Optional[str] = None
     minimum_items: int = 0
 
     def __post_init__(self) -> None:
         """Validate collection metadata at class-definition time."""
-        if self.storage != "mapping":
-            raise ValueError("CollectionSpec currently supports mapping storage only.")
+        if self.storage not in {"mapping", "parallel_mappings", "nested_mapping"}:
+            raise ValueError("CollectionSpec has an unsupported storage type.")
         if self.key_field not in self.item_schema:
             raise ValueError("CollectionSpec key_field must be in item_schema.")
         if self.value_field not in self.item_schema:
             raise ValueError("CollectionSpec value_field must be in item_schema.")
+        if self.storage == "parallel_mappings":
+            if not self.storage_fields or any(
+                field not in self.item_schema for field in self.storage_fields
+            ):
+                raise ValueError(
+                    "Parallel mapping collections require valid storage fields."
+                )
+        if self.storage == "nested_mapping" and set(self.item_schema) != {
+            "solvent",
+            "axis",
+            "zoom",
+            "position",
+        }:
+            raise ValueError(
+                "Nested mapping collections require solvent, axis, zoom, and position fields."
+            )
         if self.minimum_items < 0:
             raise ValueError("CollectionSpec minimum_items cannot be negative.")
 

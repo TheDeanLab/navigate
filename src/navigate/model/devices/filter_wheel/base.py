@@ -63,12 +63,24 @@ class FilterWheelBase(ABC):
         ),
         "hardware/wheel_number": SettingSpec(
             int,
-            default=1,
+            default=0,
             label="Wheel Number",
-            help_text="One-based index of this filter wheel on its controller.",
-            minimum=1,
+            help_text=(
+                "Filter wheel identifier used by its controller. Some controllers "
+                "use zero-based wheel numbers."
+            ),
+            minimum=0,
             maximum=16,
             step=1,
+        ),
+        "filter_wheel_delay": SettingSpec(
+            float,
+            default=0.03,
+            label="Filter Wheel Delay (s)",
+            help_text="Estimated delay in seconds while the filter wheel changes position.",
+            minimum=0,
+            maximum=60,
+            step=0.001,
         ),
         "available_filters": CollectionSpec(
             label="Available Filters",

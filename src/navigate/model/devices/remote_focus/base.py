@@ -58,6 +58,24 @@ class RemoteFocusBase(ABC):
     configuration_schema = {
         "hardware/min": SettingSpec(float, default=-5.0, label="Minimum Voltage"),
         "hardware/max": SettingSpec(float, default=5.0, label="Maximum Voltage"),
+        "hardware/precision": SettingSpec(
+            int,
+            default=0,
+            label="Precision",
+            help_text=(
+                "Decimal places for remote-focus waveform controls. "
+                "Set to 0 to choose automatically from the voltage range."
+            ),
+        ),
+        "hardware/step": SettingSpec(
+            float,
+            default=0.0,
+            label="Step",
+            help_text=(
+                "Increment for remote-focus waveform controls. "
+                "Set to 0 to choose automatically from the voltage range."
+            ),
+        ),
     }
 
     def __init__(

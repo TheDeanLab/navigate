@@ -39,6 +39,7 @@ from abc import ABC, abstractmethod
 
 # Local Imports
 from navigate.model.waveforms import camera_exposure
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -55,6 +56,18 @@ class DAQBase(ABC):
     configuration parameters, exposure times, and sweep times for different imaging
     channels.
     """
+
+    configuration_schema = {
+        "sample_rate": SettingSpec(
+            int,
+            default=100000,
+            label="Sample Rate (Hz)",
+            help_text="DAQ waveform sampling rate in hertz.",
+            minimum=1,
+            maximum=10000000,
+            step=1000,
+        ),
+    }
 
     def __init__(self, configuration: dict[str, Any]) -> None:
         """Initializes the DAQBase class.

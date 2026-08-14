@@ -91,14 +91,17 @@ class NIDAQ(DAQBase):
             label="Laser Switch State",
             help_text="Default state of the digital laser switch output.",
         ),
-        "sample_rate": SettingSpec(
+        "trigger_reset_count": SettingSpec(
             int,
-            default=100000,
-            label="Sample Rate (Hz)",
-            help_text="DAQ waveform sampling rate in hertz.",
-            minimum=1,
-            maximum=10000000,
-            step=1000,
+            default=0,
+            label="Trigger Reset Count",
+            help_text=(
+                "Number of triggers before resetting an unstable DAQ system. "
+                "Set to 0 to disable automatic resets."
+            ),
+            minimum=0,
+            maximum=1000000,
+            step=1,
         ),
     }
 

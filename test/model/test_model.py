@@ -106,6 +106,9 @@ def model():
         waveform_constants_path = Path.joinpath(
             configuration_directory, "waveform_constants.yml"
         )
+        gui_configuration_path = Path.joinpath(
+            configuration_directory, "gui_configuration.yml"
+        )
         rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
         multi_positions_path = Path.joinpath(
             configuration_directory, "multi_positions.yml"
@@ -119,6 +122,7 @@ def model():
             experiment=experiment_path,
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
+            gui=gui_configuration_path,
         )
         verify_configuration(manager, configuration)
         verify_experiment_config(manager, configuration)

@@ -54,6 +54,7 @@ from navigate.view.configurator_application_window import (
     ConfiguratorTooltip,
     RenameMicroscopeDialog,
 )
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.theme import apply_theme, get_theme_padding_px, get_theme_space_px
 
 # Logger Setup
@@ -401,6 +402,9 @@ class Configurator:
                     name = f"{axis}_{suffix}"
                     if name in configuration:
                         settings[name] = configuration[name]
+                name = f"flip_{axis}"
+                if name in configuration:
+                    settings[name] = configuration[name]
         return settings
 
     def add_next_microscope(self) -> None:
@@ -732,7 +736,9 @@ class Configurator:
                 device["hardware"][name] = InlineYamlList(
                     self.parse_stage_axes(value)
                 )
-            elif category == "stage" and name.endswith(("_min", "_max")):
+            elif category == "stage" and (
+                name.endswith(("_min", "_max")) or name.startswith("flip_")
+            ):
                 device[name] = value
             elif category == "stage":
                 device["hardware"][name] = value
@@ -1042,7 +1048,7 @@ class Configurator:
         ]
 
     def update_stage_axis_range_fields(self, *_args) -> None:
-        """Show editable minimum and maximum values for the entered stage axes."""
+        """Show editable limits and flip flags for the entered stage axes."""
         if self.stage_axis_range_frame is None or self.active_device_item_id is None:
             return
         saved_values = self.device_settings.setdefault(self.active_device_item_id, {})
@@ -1063,12 +1069,20 @@ class Configurator:
         axes = self.parse_stage_axes(self.value_variables["axes"].get())
         row = 0
         for axis in axes:
-            for suffix, label, default in (
-                ("min", "Minimum", -100000.0),
-                ("max", "Maximum", 100000.0),
+            for name, spec in (
+                (
+                    f"{axis}_min",
+                    SettingSpec(float, default=-100000.0, label=f"{axis} Minimum"),
+                ),
+                (
+                    f"{axis}_max",
+                    SettingSpec(float, default=100000.0, label=f"{axis} Maximum"),
+                ),
+                (
+                    f"flip_{axis}",
+                    SettingSpec(bool, default=False, label=f"Flip {axis}"),
+                ),
             ):
-                name = f"{axis}_{suffix}"
-                spec = SettingSpec(float, default=default, label=f"{axis} {label}")
                 ttk.Label(
                     self.stage_axis_range_frame,
                     text=spec.label,
@@ -1297,22 +1311,17 @@ class Configurator:
                 state="readonly",
             ).grid(**grid_options)
             return
-        if spec.value_type is float:
-            ttk.Spinbox(
+        if spec.value_type in (int, float):
+            ValidatedSpinbox(
                 parent,
                 textvariable=variable,
                 from_=-1000000 if spec.minimum is None else spec.minimum,
                 to=1000000 if spec.maximum is None else spec.maximum,
-                increment=0.1 if spec.step is None else spec.step,
-            ).grid(**grid_options)
-            return
-        if spec.minimum is not None and spec.maximum is not None:
-            ttk.Spinbox(
-                parent,
-                textvariable=variable,
-                from_=spec.minimum,
-                to=spec.maximum,
-                increment=spec.step or 1,
+                increment=(0.1 if spec.value_type is float else 1)
+                if spec.step is None
+                else spec.step,
+                required=spec.required,
+                value_type=spec.value_type,
             ).grid(**grid_options)
             return
         ttk.Entry(parent, textvariable=variable, style="DeviceInfo.TEntry").grid(

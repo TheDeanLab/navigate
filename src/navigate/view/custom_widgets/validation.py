@@ -914,6 +914,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         max_var=None,
         focus_update_var=None,
         required=True,
+        value_type=float,
         **kwargs,
     ):
         """Initialize the spinbox
@@ -941,6 +942,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             If True, the spinbox will not allow decimal values
         required : bool
             If True, the spinbox will require a value
+        value_type : type
+            Numeric type accepted by the spinbox: ``int`` or ``float``.
         precision : int
             The number of decimal places allowed in the spinbox
 
@@ -958,6 +961,9 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         #: bool: Whether the spinbox requires a value
         self.required = required
+
+        #: type: Numeric type accepted by the spinbox
+        self.value_type = value_type
 
         # Dynamic range checker
         if min_var:
@@ -1064,6 +1070,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             proposed = Decimal(proposed)
         except InvalidOperation:
             return False
+        if self.value_type is int and proposed != proposed.to_integral_value():
+            return False
         proposed_precision = proposed.as_tuple().exponent
 
         if any([(proposed > max_val), (proposed_precision < self.precision)]):
@@ -1117,6 +1125,9 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             value = Decimal(str(value))
         except InvalidOperation:
             self.error.set("Invalid Number Provided: {}".format(value))
+            return False
+        if self.value_type is int and value != value.to_integral_value():
+            self.error.set("A whole number is required")
             return False
 
         # Checking if greater than minimum

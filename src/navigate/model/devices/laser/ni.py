@@ -54,8 +54,20 @@ logger = logging.getLogger(p)
 @log_initialization
 class NILaser(LaserBase, NIDevice):
     configuration_schema = {
-        "power/hardware/channel": SettingSpec(str, default="", label="Power Channel"),
-        "onoff/hardware/channel": SettingSpec(str, default="", label="On/Off Channel"),
+        "power/hardware/channel": SettingSpec(
+            str,
+            default="",
+            label="Power Channel",
+            help_text="NI analog-output channel used for laser-power control.",
+            required=False,
+        ),
+        "onoff/hardware/channel": SettingSpec(
+            str,
+            default="",
+            label="On/Off Channel",
+            help_text="NI digital or analog channel used to switch the laser.",
+            required=False,
+        ),
     }
     """LaserNI Class
 

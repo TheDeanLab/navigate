@@ -52,7 +52,15 @@ logger = logging.getLogger(p)
 class ImagineOpticsMirror(MirrorBase, IntegratedDevice):
     """ImageineOpticsMirror mirror class."""
 
-    configuration_schema = {"hardware/flat_path": SettingSpec(str, default="", label="Flat Mirror Path")}
+    configuration_schema = {
+        "hardware/flat_path": SettingSpec(
+            str,
+            default="",
+            label="Flat Mirror Path",
+            help_text="Path to the flat-mirror calibration file used at initialization.",
+            required=True,
+        )
+    }
 
     @classmethod
     def get_connect_params(cls) -> list[str]:

@@ -57,6 +57,7 @@ class ASIGalvo(GalvoBase, SerialDevice):
             default="B",
             label="Axis",
             help_text="ASI controller axis assigned to this galvo.",
+            required=True,
         ),
     }
 

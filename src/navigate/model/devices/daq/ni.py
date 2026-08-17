@@ -66,30 +66,35 @@ class NIDAQ(DAQBase):
             default="/PXI6259/PFI0",
             label="Trigger Source",
             help_text="DAQ input line used as the external trigger source.",
+            required=True,
         ),
         "master_trigger_out_line": SettingSpec(
             str,
             default="PXI6259/port0/line1",
             label="Master Trigger Out",
             help_text="Digital output line used for the master trigger.",
+            required=True,
         ),
         "camera_trigger_out_line": SettingSpec(
             str,
             default="/PXI6259/ctr0",
             label="Camera Trigger Out",
             help_text="Counter or digital output line used to trigger the camera.",
+            required=True,
         ),
         "laser_port_switcher": SettingSpec(
             str,
             default="PXI6733/port0/line0",
             label="Laser Port Switcher",
             help_text="Digital output line used to switch laser ports.",
+            required=False,
         ),
         "laser_switch_state": SettingSpec(
             bool,
             default=False,
             label="Laser Switch State",
             help_text="Default state of the digital laser switch output.",
+            required=False,
         ),
         "trigger_reset_count": SettingSpec(
             int,
@@ -102,6 +107,7 @@ class NIDAQ(DAQBase):
             minimum=0,
             maximum=1000000,
             step=1,
+            required=False,
         ),
     }
 

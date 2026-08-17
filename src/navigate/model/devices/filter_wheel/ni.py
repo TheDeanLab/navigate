@@ -63,15 +63,22 @@ class NIFilterWheel(FilterWheelBase, NIDevice):
                 "Filter names and the NI DAQ digital output line used for each."
             ),
             item_schema={
-                "name": SettingSpec(str, label="Filter Name", required=True),
+                "name": SettingSpec(
+                    str,
+                    label="Filter Name",
+                    help_text="Display name for this filter selection.",
+                    required=True,
+                ),
                 "channel": SettingSpec(
                     str,
                     label="NI DAQ DO Channel Name",
+                    help_text="NI digital-output line that selects this filter.",
                     required=True,
                 ),
             },
             key_field="name",
             value_field="channel",
+            minimum_items=0,
         ),
     }
 

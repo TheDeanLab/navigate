@@ -60,6 +60,7 @@ class FilterWheelBase(ABC):
             default="",
             label="Name",
             help_text="Display name for this filter wheel in the main application.",
+            required=False,
         ),
         "hardware/wheel_number": SettingSpec(
             int,
@@ -72,6 +73,7 @@ class FilterWheelBase(ABC):
             minimum=0,
             maximum=16,
             step=1,
+            required=True,
         ),
         "filter_wheel_delay": SettingSpec(
             float,
@@ -81,15 +83,22 @@ class FilterWheelBase(ABC):
             minimum=0,
             maximum=60,
             step=0.001,
+            required=True,
         ),
         "available_filters": CollectionSpec(
             label="Available Filters",
             help_text="Filter names and their corresponding wheel positions.",
             item_schema={
-                "name": SettingSpec(str, label="Filter Name", required=True),
+                "name": SettingSpec(
+                    str,
+                    label="Filter Name",
+                    help_text="Display name for this filter position.",
+                    required=True,
+                ),
                 "position": SettingSpec(
                     int,
                     label="Position",
+                    help_text="Numeric position used by the filter-wheel controller.",
                     required=True,
                     minimum=0,
                     maximum=99,
@@ -98,6 +107,7 @@ class FilterWheelBase(ABC):
             },
             key_field="name",
             value_field="position",
+            minimum_items=0,
         ),
     }
 

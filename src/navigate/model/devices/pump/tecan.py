@@ -61,6 +61,7 @@ class XCaliburPump(PumpBase, SerialDevice):
             minimum=0,
             maximum=40,
             step=1,
+            required=False,
         ),
         "max_speed_code": SettingSpec(
             int,
@@ -70,12 +71,14 @@ class XCaliburPump(PumpBase, SerialDevice):
             minimum=0,
             maximum=40,
             step=1,
+            required=False,
         ),
         "fine_positioning": SettingSpec(
             bool,
             default=False,
             label="Fine Positioning",
             help_text="Enable the pump's fine-positioning mode.",
+            required=False,
         ),
     }
 

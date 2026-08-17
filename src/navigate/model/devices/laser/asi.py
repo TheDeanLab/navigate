@@ -51,8 +51,20 @@ logger = logging.getLogger(p)
 @log_initialization
 class ASILaser(LaserBase, SerialDevice):
     configuration_schema = {
-        "power/hardware/axis": SettingSpec(str, default="B", label="Power Axis"),
-        "onoff/hardware/axis": SettingSpec(str, default="", label="On/Off Axis"),
+        "power/hardware/axis": SettingSpec(
+            str,
+            default="B",
+            label="Power Axis",
+            help_text="ASI controller axis used for laser-power control.",
+            required=False,
+        ),
+        "onoff/hardware/axis": SettingSpec(
+            str,
+            default="",
+            label="On/Off Axis",
+            help_text="ASI controller axis used to switch the laser.",
+            required=False,
+        ),
     }
     """ASILaser - Class for controlling ASI Lasers
 

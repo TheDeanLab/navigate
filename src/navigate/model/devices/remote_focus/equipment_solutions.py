@@ -65,7 +65,13 @@ class EquipmentSolutionsRemoteFocus(NIRemoteFocus, SerialDevice):
     """
 
     configuration_schema = {
-        "hardware/channel": SettingSpec(str, default="", label="Channel"),
+        "hardware/channel": SettingSpec(
+            str,
+            default="",
+            label="Channel",
+            help_text="NI analog-output channel connected to the Equipment Solutions device.",
+            required=True,
+        ),
     }
 
     def __init__(
@@ -263,7 +269,13 @@ class EquipmentSolutionsASIRemoteFocus(ASIRemoteFocus, SerialDevice, ASIDevice):
     """
 
     configuration_schema = {
-        "hardware/axis": SettingSpec(str, default="B", label="Axis"),
+        "hardware/axis": SettingSpec(
+            str,
+            default="B",
+            label="Axis",
+            help_text="ASI controller axis assigned to the Equipment Solutions device.",
+            required=True,
+        ),
     }
 
     def __init__(

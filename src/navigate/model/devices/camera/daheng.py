@@ -63,6 +63,7 @@ import numpy as np
 # Local Imports
 from navigate.model.utils.exceptions import UserVisibleException
 from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 
@@ -79,6 +80,16 @@ class DahengCamera(CameraBase):
     This class provides initialization, streaming, and configuration
     methods for this specific model using the gxipy SDK.
     """
+
+    configuration_schema = {
+        "serial_number": SettingSpec(
+            str,
+            default="",
+            label="Serial Number",
+            help_text="Optional Daheng camera serial number; leave blank to use the default camera.",
+            required=False,
+        ),
+    }
 
     def __init__(self, microscope_name, device_connection, configuration):
         """

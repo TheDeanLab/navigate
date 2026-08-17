@@ -57,10 +57,26 @@ class ZoomBase(ABC):
             key_field="zoom",
             value_field="position",
             storage_fields=("position", "pixel_size"),
+            minimum_items=0,
             item_schema={
-                "zoom": SettingSpec(str, label="Zoom"),
-                "position": SettingSpec(float, label="Position"),
-                "pixel_size": SettingSpec(float, label="Pixel Size (um)"),
+                "zoom": SettingSpec(
+                    str,
+                    label="Zoom",
+                    help_text="Zoom label used by the application.",
+                    required=True,
+                ),
+                "position": SettingSpec(
+                    float,
+                    label="Position",
+                    help_text="Device position for this zoom label.",
+                    required=True,
+                ),
+                "pixel_size": SettingSpec(
+                    float,
+                    label="Pixel Size (um)",
+                    help_text="Object-space pixel size at this zoom, in micrometres.",
+                    required=True,
+                ),
             },
         ),
         "stage_positions": CollectionSpec(
@@ -68,11 +84,32 @@ class ZoomBase(ABC):
             storage="nested_mapping",
             key_field="solvent",
             value_field="position",
+            minimum_items=0,
             item_schema={
-                "solvent": SettingSpec(str, label="Solvent"),
-                "axis": SettingSpec(str, label="Stage Axis"),
-                "zoom": SettingSpec(str, label="Zoom"),
-                "position": SettingSpec(float, label="Position"),
+                "solvent": SettingSpec(
+                    str,
+                    label="Solvent",
+                    help_text="Immersion solvent for this calibration.",
+                    required=True,
+                ),
+                "axis": SettingSpec(
+                    str,
+                    label="Stage Axis",
+                    help_text="Stage axis adjusted for this calibration.",
+                    required=True,
+                ),
+                "zoom": SettingSpec(
+                    str,
+                    label="Zoom",
+                    help_text="Zoom label for this calibration point.",
+                    required=True,
+                ),
+                "position": SettingSpec(
+                    float,
+                    label="Position",
+                    help_text="Stage position offset for this calibration point.",
+                    required=True,
+                ),
             },
         ),
     }

@@ -59,6 +59,7 @@ class NIGalvo(GalvoBase, NIDevice):
             default="PXI6259/ao0",
             label="Channel",
             help_text="NI analog-output channel connected to this galvo.",
+            required=True,
         ),
     }
 

@@ -49,7 +49,15 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class NIRemoteFocus(RemoteFocusBase, NIDevice):
-    configuration_schema = {"hardware/channel": SettingSpec(str, default="", label="Channel")}
+    configuration_schema = {
+        "hardware/channel": SettingSpec(
+            str,
+            default="",
+            label="Channel",
+            help_text="NI analog-output channel connected to the remote-focus device.",
+            required=True,
+        )
+    }
     """RemoteFocusNI Class - Analog control of the remote focus device."""
 
     def __init__(

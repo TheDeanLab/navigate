@@ -485,6 +485,7 @@ class MU196XRCamera(XimeaBase):
             minimum=1,
             maximum=12,
             step=1,
+            required=False,
         ),
     }
 

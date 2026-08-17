@@ -50,7 +50,15 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class ASIRemoteFocus(RemoteFocusBase, SerialDevice):
-    configuration_schema = {"hardware/axis": SettingSpec(str, default="B", label="Axis")}
+    configuration_schema = {
+        "hardware/axis": SettingSpec(
+            str,
+            default="B",
+            label="Axis",
+            help_text="ASI controller axis assigned to the remote-focus device.",
+            required=True,
+        )
+    }
     """ASIRemoteFocus Class - Analog control of the remote focus device."""
 
     def __init__(

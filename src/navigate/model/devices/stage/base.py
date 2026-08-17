@@ -51,8 +51,27 @@ class StageBase(ABC):
     """Stage Parent Class"""
 
     configuration_schema = {
-        "axes": SettingSpec(str, default="", label="Axes"),
-        "axes_mapping": SettingSpec(str, default="", label="Axes Mapping"),
+        "axes": SettingSpec(
+            str,
+            default="",
+            label="Axes",
+            help_text="Comma-separated software axes provided by this stage.",
+            required=True,
+        ),
+        "axes_mapping": SettingSpec(
+            str,
+            default="",
+            label="Axes Mapping",
+            help_text="Controller-axis mapping corresponding to the configured axes.",
+            required=False,
+        ),
+        "joystick_axes": SettingSpec(
+            str,
+            default="",
+            label="Joystick Axes",
+            help_text="Stage axes controlled by the joystick, saved as a list.",
+            required=False,
+        ),
     }
 
     def __init__(

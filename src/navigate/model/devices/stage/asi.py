@@ -79,6 +79,7 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             default="",
             label="Feedback Alignment",
             help_text="Per-axis ASI feedback-alignment values.",
+            required=False,
         ),
     }
 
@@ -624,6 +625,7 @@ class MS2000Stage(ASIStage):
             minimum=1,
             maximum=100,
             step=1,
+            required=False,
         ),
     }
 

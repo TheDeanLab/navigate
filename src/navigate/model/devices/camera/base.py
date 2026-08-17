@@ -63,12 +63,14 @@ class CameraBase(ABC):
             bool,
             default=False,
             label="Flip X",
+            required=False,
             help_text="Mirror acquired images horizontally before displaying or saving them.",
         ),
         "flip_y": SettingSpec(
             bool,
             default=False,
             label="Flip Y",
+            required=False,
             help_text="Mirror acquired images vertically before displaying or saving them.",
         ),
         "pixel_size_in_microns": SettingSpec(
@@ -81,6 +83,7 @@ class CameraBase(ABC):
             ),
             minimum=0.0,
             step=0.1,
+            required=False,
         ),
     }
 

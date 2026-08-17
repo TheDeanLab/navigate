@@ -79,9 +79,27 @@ class SerialDevice:
     """SerialDevice - Parent serial device class."""
 
     configuration_schema = {
-        "port": SettingSpec(str, default="", label="Port"),
-        "baudrate": SettingSpec(int, default=115200, label="Baud Rate"),
-        "timeout": SettingSpec(float, default=0.25, label="Timeout"),
+        "port": SettingSpec(
+            str,
+            default="",
+            label="Port",
+            help_text="Serial port used to communicate with this device.",
+            required=True,
+        ),
+        "baudrate": SettingSpec(
+            int,
+            default=115200,
+            label="Baud Rate",
+            help_text="Serial communication speed in bits per second.",
+            required=False,
+        ),
+        "timeout": SettingSpec(
+            float,
+            default=0.25,
+            label="Timeout",
+            help_text="Maximum time in seconds to wait for a serial response.",
+            required=False,
+        ),
     }
 
     def __init__(
@@ -171,5 +189,11 @@ class SequenceDevice:
     """
 
     configuration_schema = {
-        "serial_number": SettingSpec(str, default="", label="Serial Number"),
+        "serial_number": SettingSpec(
+            str,
+            default="",
+            label="Serial Number",
+            help_text="Hardware serial number used to select the device.",
+            required=True,
+        ),
     }

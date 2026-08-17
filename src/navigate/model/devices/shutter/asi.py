@@ -49,7 +49,15 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class ASIShutter(ShutterBase, SerialDevice):
-    configuration_schema = {"hardware/axis": SettingSpec(str, default="", label="Axis")}
+    configuration_schema = {
+        "hardware/axis": SettingSpec(
+            str,
+            default="",
+            label="Axis",
+            help_text="ASI controller axis used to switch the shutter.",
+            required=True,
+        )
+    }
     """ShutterTTL Class
 
     Triggering for shutters delivered from the TigerController.

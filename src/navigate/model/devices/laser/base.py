@@ -51,30 +51,56 @@ class LaserBase(ABC):
     """Laser Base Class"""
 
     configuration_schema = {
-        "wavelength": SettingSpec(int, default=488, label="Wavelength (nm)"),
+        "wavelength": SettingSpec(
+            int,
+            default=488,
+            label="Wavelength (nm)",
+            help_text="Laser emission wavelength in nanometres.",
+            required=True,
+        ),
         "power/hardware/type": SettingSpec(
             str,
             default="Synthetic",
             label="Power Type",
             choices=("NI", "ASI", "Synthetic"),
+            help_text="Hardware used to control laser power.",
+            required=True,
         ),
         "power/hardware/min": SettingSpec(
-            float, default=0.0, label="Power Minimum"
+            float,
+            default=0.0,
+            label="Power Minimum",
+            help_text="Lowest voltage used for analog laser-power control.",
+            required=False,
         ),
         "power/hardware/max": SettingSpec(
-            float, default=5.0, label="Power Maximum"
+            float,
+            default=5.0,
+            label="Power Maximum",
+            help_text="Highest voltage used for analog laser-power control.",
+            required=False,
         ),
         "onoff/hardware/type": SettingSpec(
             str,
             default="Synthetic",
             label="On/Off Type",
             choices=("NI", "ASI", "Synthetic"),
+            help_text="Hardware used to switch the laser on and off.",
+            required=True,
         ),
         "onoff/hardware/min": SettingSpec(
-            float, default=0.0, label="On/Off Minimum"
+            float,
+            default=0.0,
+            label="On/Off Minimum",
+            help_text="Lowest signal value used for laser on/off control.",
+            required=False,
         ),
         "onoff/hardware/max": SettingSpec(
-            float, default=5.0, label="On/Off Maximum"
+            float,
+            default=5.0,
+            label="On/Off Maximum",
+            help_text="Highest signal value used for laser on/off control.",
+            required=False,
         ),
     }
 

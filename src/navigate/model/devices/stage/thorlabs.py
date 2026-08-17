@@ -300,6 +300,7 @@ class KST101Stage(StageBase):
             default=1000.0,
             label="Device Units per mm",
             help_text="Number of KST controller units in one millimetre.",
+            required=False,
         ),
     }
 
@@ -558,6 +559,7 @@ class KINESISStage(StageBase):
             default=1.0,
             label="Steps per µm",
             help_text="Number of Kinesis controller steps in one micrometre.",
+            required=False,
         ),
     }
 

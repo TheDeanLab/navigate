@@ -51,7 +51,15 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class NIShutter(ShutterBase):
-    configuration_schema = {"hardware/channel": SettingSpec(str, default="", label="Channel")}
+    configuration_schema = {
+        "hardware/channel": SettingSpec(
+            str,
+            default="",
+            label="Channel",
+            help_text="NI digital-output channel connected to the shutter.",
+            required=True,
+        )
+    }
     """ShutterTTL Class
 
     Triggering for shutters delivered from DAQ using digital outputs.

@@ -80,24 +80,28 @@ class GalvoBase(ABC):
                 "pulse",
                 "halfsaw",
             ),
+            required=False,
         ),
         "phase": SettingSpec(
             float,
             default=1.57079,
             label="Phase",
             help_text="Phase offset used by sine waveforms, in radians.",
+            required=True,
         ),
         "hardware/min": SettingSpec(
             float,
             default=-5.0,
             label="Minimum Voltage",
             help_text="Minimum galvo output voltage.",
+            required=True,
         ),
         "hardware/max": SettingSpec(
             float,
             default=5.0,
             label="Maximum Voltage",
             help_text="Maximum galvo output voltage.",
+            required=True,
         ),
     }
 

@@ -52,7 +52,15 @@ logger = logging.getLogger(p)
 class DynamixelZoom(ZoomBase, SerialDevice):
     """DynamixelZoom Class - Controls the Dynamixel Servo."""
 
-    configuration_schema = {"hardware/servo_id": SettingSpec(int, default=1, label="Servo ID")}
+    configuration_schema = {
+        "hardware/servo_id": SettingSpec(
+            int,
+            default=1,
+            label="Servo ID",
+            help_text="Dynamixel bus ID assigned to the zoom servo.",
+            required=True,
+        )
+    }
 
     def __init__(
         self,

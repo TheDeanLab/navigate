@@ -66,6 +66,7 @@ class DAQBase(ABC):
             minimum=1,
             maximum=10000000,
             step=1000,
+            required=True,
         ),
     }
 

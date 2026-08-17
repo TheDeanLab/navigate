@@ -389,7 +389,11 @@ class Configurator:
                 }
                 continue
             path = name
-            if category == "stage" and name in {"axes", "axes_mapping", "feedback_alignment"}:
+            if category == "stage" and name in {
+                "axes",
+                "axes_mapping",
+                "feedback_alignment",
+            }:
                 path = f"hardware/{name}"
             elif "/" not in name and name in connection_names:
                 path = f"hardware/{name}"
@@ -732,10 +736,15 @@ class Configurator:
                 device[name] = value
             elif "/" in name:
                 self.set_configuration_value(device, name, value)
-            elif category == "stage" and name in {"axes", "axes_mapping"}:
+            elif category == "stage" and name in {
+                "axes",
+                "axes_mapping",
+            }:
                 device["hardware"][name] = InlineYamlList(
                     self.parse_stage_axes(value)
                 )
+            elif category == "stage" and name == "joystick_axes":
+                device[name] = InlineYamlList(self.parse_stage_axes(value))
             elif category == "stage" and (
                 name.endswith(("_min", "_max")) or name.startswith("flip_")
             ):
@@ -783,7 +792,15 @@ class Configurator:
 
     def save_configuration(self) -> None:
         """Ask for a YAML path and write the configurator's device configuration."""
-        self.store_active_device_settings()
+        missing_settings = self.required_settings_missing_values()
+        if missing_settings:
+            messagebox.showwarning(
+                "Save Configuration",
+                "Provide values for the following required settings before saving:\n\n"
+                + "\n".join(missing_settings),
+                parent=self.root,
+            )
+            return
         dialog_options = {
             "parent": self.root,
             "title": "Save Configuration",
@@ -813,6 +830,38 @@ class Configurator:
         self.last_configuration_path = Path(filename)
         messagebox.showinfo("Save Configuration", f"Configuration saved to:\n{filename}", parent=self.root)
 
+    @staticmethod
+    def setting_value_is_present(value: object) -> bool:
+        """Return whether a value satisfies a required configuration setting."""
+        if value is None:
+            return False
+        if isinstance(value, str):
+            return bool(value.strip())
+        if isinstance(value, (list, tuple, dict, set)):
+            return bool(value)
+        return True
+
+    def required_settings_missing_values(self) -> list[str]:
+        """Return user-facing descriptions of required settings without values."""
+        self.store_visible_microscope_devices()
+        missing = []
+        for microscope_name, devices in self.microscope_devices.items():
+            for category, manufacturer, model, settings in devices:
+                schema = self.get_configuration_schema(category, manufacturer, model)
+                device_name = (
+                    f"{microscope_name} / "
+                    f"{self.format_category_name(category)}: "
+                    f"{self.format_model_name(model, category)}"
+                )
+                for name, spec in schema.items():
+                    if not isinstance(spec, SettingSpec) or not spec.required:
+                        continue
+                    value = settings.get(name, spec.default)
+                    if not self.setting_value_is_present(value):
+                        label = spec.label or name.replace("_", " ").title()
+                        missing.append(f"{device_name} — {label}")
+        return missing
+
     def get_configuration_schema(
         self, category: str, manufacturer: str, model: str
     ) -> dict[str, object]:
@@ -823,7 +872,13 @@ class Configurator:
         ``configuration_schema`` values.
         """
         connection_schema = {
-            property_name: SettingSpec(str, default="")
+            property_name: SettingSpec(
+                str,
+                default="",
+                label=property_name.replace("_", " ").title(),
+                help_text="Connection value required to initialize this device.",
+                required=True,
+            )
             for property_name in self.get_connect_params(
                 category, manufacturer, model
             )
@@ -1072,15 +1127,33 @@ class Configurator:
             for name, spec in (
                 (
                     f"{axis}_min",
-                    SettingSpec(float, default=-100000.0, label=f"{axis} Minimum"),
+                    SettingSpec(
+                        float,
+                        default=-100000.0,
+                        label=f"{axis} Minimum",
+                        help_text=f"Minimum travel position for the {axis} stage axis.",
+                        required=True,
+                    ),
                 ),
                 (
                     f"{axis}_max",
-                    SettingSpec(float, default=100000.0, label=f"{axis} Maximum"),
+                    SettingSpec(
+                        float,
+                        default=100000.0,
+                        label=f"{axis} Maximum",
+                        help_text=f"Maximum travel position for the {axis} stage axis.",
+                        required=True,
+                    ),
                 ),
                 (
                     f"flip_{axis}",
-                    SettingSpec(bool, default=False, label=f"Flip {axis}"),
+                    SettingSpec(
+                        bool,
+                        default=False,
+                        label=f"Flip {axis}",
+                        help_text=f"Reverse movement direction for the {axis} stage axis.",
+                        required=False,
+                    ),
                 ),
             ):
                 ttk.Label(

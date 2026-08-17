@@ -52,6 +52,17 @@ from navigate.tools.file_functions import save_yaml_file
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+GUI_SETTING_DEFAULTS = {
+    "remote_focus_waveform": {
+        "amplitude_step_size": 0.0001,
+        "offset_step_size": 0.0001,
+    },
+    "galvo_waveform": {
+        "amplitude_step_size": 0.0001,
+        "offset_step_size": 0.0001,
+    },
+}
+
 
 def get_navigate_path():
     """Establish a program home directory in AppData/Local/.navigate for Windows
@@ -619,7 +630,7 @@ def verify_experiment_config(manager, configuration):
         ].get("filter_wheel", [])
     ]
     prefix = "channel_"
-    channel_nums = configuration["configuration"]["gui"]["channels"]["count"]
+    channel_nums = configuration["gui"].get("channel_settings", {}).get("count", 5)
     channel_setting_dict = microscope_setting_dict["channels"]
     selected_channel_num = 0
     for channel in channel_setting_dict.keys():
@@ -1093,12 +1104,17 @@ def verify_configuration(manager, configuration):
             idx = ref_list["filter_wheel"].index(filter_wheel_idx)
             temp_config[i]["name"] = filter_wheel_seq[idx]["name"]
 
-    update_config_dict(
-        manager,
-        configuration["configuration"],
-        "gui",
-        {"channels": {"count": channel_count}},
-    )
+    gui_settings = configuration["gui"]
+    if "channel_settings" not in gui_settings:
+        update_config_dict(manager, gui_settings, "channel_settings", {})
+    gui_settings["channel_settings"]["count"] = channel_count
+    for group_name, defaults in GUI_SETTING_DEFAULTS.items():
+        if group_name not in gui_settings:
+            update_config_dict(manager, gui_settings, group_name, defaults)
+            continue
+        for setting_name, value in defaults.items():
+            if setting_name not in gui_settings[group_name]:
+                gui_settings[group_name][setting_name] = value
 
 
 def verify_positions_config(positions):

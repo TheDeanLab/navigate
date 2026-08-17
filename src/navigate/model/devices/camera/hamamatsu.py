@@ -62,7 +62,10 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             default=1.0,
             label="Defect Correct Mode",
             choices=(1.0, 2.0),
-            help_text="Camera defect correction: 1.0 is Off; 2.0 is On.",
+            help_text=(
+                "Enable the camera's pixel-defect correction. "
+                "Use 1.0 for Off or 2.0 for On."
+            ),
         ),
     }
 

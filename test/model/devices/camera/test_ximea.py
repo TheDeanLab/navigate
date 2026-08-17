@@ -244,10 +244,16 @@ def test_serial_number_property_current_behavior(ximea_camera):
     assert "device_sn" in cam.get_param_calls
 
 
-def test_mu196xr_overrides_trigger_port(ximea_module):
+def test_mu196xr_uses_the_configured_trigger_port(ximea_module):
     cam = FakeXiCam(ximea_module.xiapi.Xi_error)
     camera = ximea_module.MU196XRCamera("test_scope", cam, build_configuration())
 
     assert str(camera) == "Ximea MU196XR Camera"
-    assert cam.set_calls[-2] == ("gpi_selector", "XI_GPI_PORT2")
-    assert cam.set_calls[-1] == ("gpi_mode", "XI_GPI_TRIGGER")
+    assert cam.set_calls[0] == ("gpi_selector", "XI_GPI_PORT1")
+
+
+def test_mu196xr_defaults_to_trigger_port_two(ximea_module):
+    cam = FakeXiCam(ximea_module.xiapi.Xi_error)
+    ximea_module.MU196XRCamera("test_scope", cam, build_configuration(None))
+
+    assert cam.set_calls[0] == ("gpi_selector", "XI_GPI_PORT2")

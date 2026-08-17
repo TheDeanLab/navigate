@@ -39,6 +39,7 @@ from ximea import xiapi
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -94,12 +95,12 @@ class XimeaBase(CameraBase):
         self.minimum_exposure_time = self.cam.get_param("exposure:min")
 
         # set external rising edge trigger: XI_TRG_EDGE_RISING
-        input_trigger_port = int(self.camera_parameters.get("input_trigger_port", 1))
+        input_trigger_port = int(self.camera_parameters.get("input_trigger_port", 2))
         if input_trigger_port >= 1 and input_trigger_port <= 12:
-            input_trigger_port = f"XI_GPI_PORT{input_trigger_port}"
+            ximea_trigger_port = f"XI_GPI_PORT{input_trigger_port}"
         else:
-            input_trigger_port = "XI_GPI_PORT1"
-        self.cam.set_param("gpi_selector", input_trigger_port)
+            ximea_trigger_port = "XI_GPI_PORT1"
+        self.cam.set_param("gpi_selector", ximea_trigger_port)
         self.cam.set_param("gpi_mode", "XI_GPI_TRIGGER")
         self.cam.set_param("trigger_source", "XI_TRG_EDGE_RISING")
 
@@ -472,6 +473,21 @@ class MU196XRCamera(XimeaBase):
     This camear class supports ximea camera models: MU196MR/MU196CR.
     """
 
+    configuration_schema = {
+        "input_trigger_port": SettingSpec(
+            int,
+            default=2,
+            label="Input Trigger Port",
+            help_text=(
+                "Ximea GPI input port number. The driver maps this value to "
+                "XI_GPI_PORT<i>; MU196XR cameras normally use port 2."
+            ),
+            minimum=1,
+            maximum=12,
+            step=1,
+        ),
+    }
+
     def __init__(
         self,
         microscope_name: str,
@@ -492,11 +508,6 @@ class MU196XRCamera(XimeaBase):
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)
-
-        # on MU196 series, the trigger input is on GPI port 3, gpi index is 2
-        self.cam.set_param("gpi_selector", "XI_GPI_PORT2")
-        # need to reset the trigger mode to XI_GPI_TRIGGER, otherwise the trigger mode is XI_GPI_OFF
-        self.cam.set_param("gpi_mode", "XI_GPI_TRIGGER")
 
     def __str__(str) -> str:
         """Return string representation of Ximea MU196XR class

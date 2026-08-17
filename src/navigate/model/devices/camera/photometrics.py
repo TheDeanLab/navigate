@@ -67,17 +67,32 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
     """
 
     configuration_schema = {
-        "readout_port": SettingSpec(int, default=0, label="Readout Port"),
+        "readout_port": SettingSpec(
+            int,
+            default=0,
+            label="Readout Port",
+            help_text="Photometrics readout port index used for image acquisition.",
+        ),
         "speed_table_index": SettingSpec(
             int,
             default=1,
             label="Speed Table Index",
+            help_text="Photometrics readout-speed table entry to use.",
         ),
-        "gain": SettingSpec(int, default=1, label="Gain"),
+        "gain": SettingSpec(
+            int,
+            default=1,
+            label="Gain",
+            help_text="Photometrics camera gain setting.",
+        ),
         "unitforlinedelay": SettingSpec(
             float,
             default=1,
             label="Unit for Line Delay",
+            help_text=(
+                "Line-delay scale in milliseconds used for light-sheet exposure "
+                "timing."
+            ),
         ),
     }
 

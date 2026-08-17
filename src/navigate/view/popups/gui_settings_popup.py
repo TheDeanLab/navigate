@@ -71,6 +71,7 @@ class GuiSettingsPopup:
             pady=get_theme_space_px(4),
             sticky="ew",
         )
+        footer.grid_anchor("e")
         buttons = ttk.Frame(footer, style="Popup.TFrame")
         buttons.grid(row=0, column=0, sticky="e")
         self.buttons = {

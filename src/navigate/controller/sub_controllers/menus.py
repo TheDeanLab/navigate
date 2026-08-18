@@ -573,8 +573,12 @@ class MenuController(GUIController):
         mip_menu = tk.Menu(self.view.menubar.menu_window)
         self.view.menubar.menu_window.add_cascade(label="MIP Display", menu=mip_menu)
 
-        # Create a variable to track histogram state
-        self.mip_enabled = tk.BooleanVar()
+        # Create a variable to track MIP display state.
+        self.mip_enabled = tk.BooleanVar(
+            value=self.parent_controller.configuration["gui"]["mip_display"].get(
+                "enabled", True
+            )
+        )
 
         # Add radiobuttons to the histogram submenu
         mip_menu.add_radiobutton(

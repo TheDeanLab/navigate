@@ -18,9 +18,17 @@ def _controller_for_apply(entries):
             "gui": {
                 "remote_focus_waveform": {"amplitude_step_size": 0.0001},
                 "channel_settings": {"laser_power": {"max": 100}},
+                "histogram": {"enabled": True},
+                "mip_display": {"enabled": True},
             }
         },
-        menu_controller=SimpleNamespace(popup_waveform_setting=MagicMock()),
+        menu_controller=SimpleNamespace(
+            popup_waveform_setting=MagicMock(),
+            histogram_enabled=MagicMock(),
+            mip_enabled=MagicMock(),
+            toggle_histogram=MagicMock(),
+            toggle_mip=MagicMock(),
+        ),
     )
     controller = GuiSettingsPopupController.__new__(GuiSettingsPopupController)
     controller.view = view
@@ -81,3 +89,26 @@ def test_apply_combines_waveform_and_restart_information():
         "Setting changes were saved. Restart Navigate for the changes to take "
         "effect.",
     )
+
+
+def test_apply_updates_histogram_and_mip_displays_immediately():
+    controller = _controller_for_apply({})
+    controller.view.boolean_variables = {
+        ("histogram", "enabled"): SimpleNamespace(get=lambda: False),
+        ("mip_display", "enabled"): SimpleNamespace(get=lambda: False),
+    }
+
+    assert controller.apply_settings()
+
+    assert controller.parent_controller.configuration["gui"]["histogram"][
+        "enabled"
+    ] is False
+    assert controller.parent_controller.configuration["gui"]["mip_display"][
+        "enabled"
+    ] is False
+    menu_controller = controller.parent_controller.menu_controller
+    menu_controller.histogram_enabled.set.assert_called_once_with(False)
+    menu_controller.toggle_histogram.assert_called_once()
+    menu_controller.mip_enabled.set.assert_called_once_with(False)
+    menu_controller.toggle_mip.assert_called_once()
+    controller.view.show_info.assert_not_called()

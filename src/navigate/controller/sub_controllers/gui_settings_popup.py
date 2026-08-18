@@ -153,6 +153,7 @@ class GuiSettingsPopupController:
 
         waveform_settings_changed = False
         other_settings_changed = False
+        display_setting_updates: list[tuple[tuple[str, ...], bool]] = []
         for path, value in updates:
             parent = self.parent_controller.configuration["gui"]
             for key in path[:-1]:
@@ -160,9 +161,13 @@ class GuiSettingsPopupController:
             if parent[path[-1]] != value:
                 if is_waveform_gui_setting(path):
                     waveform_settings_changed = True
+                elif is_boolean_gui_setting(path):
+                    display_setting_updates.append((path, value))
                 else:
                     other_settings_changed = True
             parent[path[-1]] = value
+
+        self._apply_display_setting_updates(display_setting_updates)
         messages = []
         if waveform_settings_changed:
             waveform_popup = getattr(
@@ -182,6 +187,19 @@ class GuiSettingsPopupController:
         if messages:
             self.view.show_info("Settings Saved", "\n\n".join(messages))
         return True
+
+    def _apply_display_setting_updates(
+        self, updates: list[tuple[tuple[str, ...], bool]]
+    ) -> None:
+        """Apply display toggles through the existing menu-controller workflow."""
+        menu_controller = self.parent_controller.menu_controller
+        for path, value in updates:
+            if path == ("histogram", "enabled"):
+                menu_controller.histogram_enabled.set(value)
+                menu_controller.toggle_histogram()
+            elif path == ("mip_display", "enabled"):
+                menu_controller.mip_enabled.set(value)
+                menu_controller.toggle_mip()
 
     def _refresh_waveform_popup(self, waveform_popup=None) -> None:
         """Reopen an existing waveform popup so it uses the updated increments."""

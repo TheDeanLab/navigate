@@ -86,6 +86,12 @@ def test_get_theme_font_uses_active_tokens_with_fallback(monkeypatch):
     assert theme.get_theme_font("missing", ("Fira Sans", 12)) == ("Fira Sans", 12)
 
 
+def test_get_theme_preset_returns_active_preset(monkeypatch):
+    monkeypatch.setattr(theme, "_ACTIVE_THEME_PRESET", "classic_night")
+
+    assert theme.get_theme_preset() == "classic_night"
+
+
 def test_get_theme_spacing_and_padding_use_active_tokens(monkeypatch):
     monkeypatch.setattr(
         theme,

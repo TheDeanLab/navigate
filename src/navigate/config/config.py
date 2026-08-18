@@ -880,9 +880,9 @@ def verify_waveform_constants(manager, configuration):
         "remote_focus_delay": "0",
         "remote_focus_ramp_falling": "5",
         "camera_settle_duration": "0",
-        "camera_delay": configuration["configuration"]["microscopes"][microscope_name][
-            "camera"
-        ]["delay"],
+        "camera_delay": configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"].get("delay", "1.0"),
     }
     if (
         "other_constants" not in waveform_dict.keys()
@@ -974,8 +974,6 @@ def verify_configuration(manager, configuration):
     ]
     filter_wheel_seq = []
     for microscope_name in device_config.keys():
-        # camera
-        # delay_percent -> delay
         for device_name in required_devices:
             if device_name not in device_config[microscope_name]:
                 print(
@@ -991,9 +989,6 @@ def verify_configuration(manager, configuration):
                     f"No {device_name} defined for microscope {microscope_name}"
                 )
         camera_config = device_config[microscope_name]["camera"]
-        if "delay" not in camera_config.keys():
-            camera_config["delay"] = camera_config.get("delay_percent", 2)
-
         try:
             channel_count = max(channel_count, camera_config.get("count", 5))
         except TypeError:

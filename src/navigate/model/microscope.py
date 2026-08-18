@@ -670,10 +670,7 @@ class Microscope:
         logger.info(f"Waveform constants: {repr(dict(waveform_constants))}")
 
         camera_delay = (
-            self.configuration["configuration"]["microscopes"][self.microscope_name][
-                "camera"
-            ]["delay"]
-            / 1000
+            float(waveform_constants["other_constants"]["camera_delay"]) / 1000
         )
         camera_settle_duration = (
             self.configuration["configuration"]["microscopes"][self.microscope_name][

@@ -52,7 +52,6 @@ def ni_config():
                 "TestScope": {
                     "remote_focus": {"hardware": {"channel": "Dev7/ao3"}},
                     "daq": {"sample_rate": 10, "trigger_source": "PFI1"},
-                    "camera": {"delay": 5},
                 }
             }
         }

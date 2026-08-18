@@ -550,7 +550,7 @@ class MenuController(GUIController):
 
         # Create a variable to track histogram state
         self.histogram_enabled = tk.BooleanVar(
-            value=self.parent_controller.configuration["gui"]["histogram"].get(
+            value=self.parent_controller.configuration["gui"].get("histogram", {}).get(
                 "enabled", True
             )
         )
@@ -575,7 +575,7 @@ class MenuController(GUIController):
 
         # Create a variable to track MIP display state.
         self.mip_enabled = tk.BooleanVar(
-            value=self.parent_controller.configuration["gui"]["mip_display"].get(
+            value=self.parent_controller.configuration["gui"].get("mip_display", {}).get(
                 "enabled", True
             )
         )

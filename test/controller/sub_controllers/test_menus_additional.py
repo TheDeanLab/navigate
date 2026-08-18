@@ -77,7 +77,10 @@ def menu_controller(monkeypatch):
                 }
             }
         },
-        "gui": {"histogram": {"enabled": True}},
+        "gui": {
+            "histogram": {"enabled": True},
+            "mip_display": {"enabled": True},
+        },
         "rest_api_config": {"Ilastik": {"url": "http://ilastik.invalid"}},
         "waveform_constants": {"constants": "value"},
     }
@@ -103,8 +106,6 @@ def menu_controller(monkeypatch):
         launch_popup_window=MagicMock(),
         exit_program=MagicMock(),
     )
-    parent_controller.configuration["gui"] = {"histogram": {"enabled": True}}
-
     controller = menus_module.MenuController(view, parent_controller)
     return controller, parent_controller
 
@@ -285,6 +286,15 @@ def test_initialize_menus_starts_with_current_microscope_status(menu_controller)
         label="Current microscope: ScopeA", state="disabled"
     )
     assert menu.add_separator.call_args_list[0] == call()
+
+
+def test_initialize_menus_uses_saved_mip_display_state(menu_controller):
+    controller, parent_controller = menu_controller
+    parent_controller.configuration["gui"]["mip_display"]["enabled"] = False
+
+    controller.initialize_menus()
+
+    assert controller.mip_enabled.get() is False
 
 
 def test_resolution_change_refreshes_current_microscope_status(menu_controller):

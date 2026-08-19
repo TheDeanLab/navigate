@@ -975,6 +975,26 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         self.bind("<FocusOut>", self._set_focus_update_var)
 
+    def configure(self, cnf=None, **kwargs):
+        """Configure the spinbox and synchronize validation precision.
+
+        The Tk ``increment`` option controls the arrow-button step, while this
+        widget's ``precision`` controls which values pass validation. Keep them
+        in sync whenever the increment changes; callers can still use
+        :meth:`set_precision` afterwards for an intentional override.
+        """
+        increment = kwargs.get("increment")
+        if increment is None and isinstance(cnf, dict):
+            increment = cnf.get("increment")
+
+        result = super().configure(cnf, **kwargs)
+        if increment is not None:
+            self.resolution = str(increment)
+            self.precision = self._get_precision()
+        return result
+
+    config = configure
+
     def set_precision(self, prec):
         """Set the precision of the spinbox in decimal places.
 
@@ -1005,8 +1025,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         >>> spinbox._get_precision()
         """
 
-        nums_after = self.resolution.find(".")
-        return (-1) * len(self.resolution[nums_after + 1 :])
+        precision = Decimal(self.resolution).normalize().as_tuple().exponent
+        return min(precision, 0)
 
     def _key_validate(self, char, index, current, proposed, action, **kwargs):
         """Validate the key pressed in the spinbox.

@@ -43,7 +43,11 @@ from pathlib import Path
 from navigate.view.custom_widgets.hover import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
+from navigate.view.custom_widgets.common import (
+    configure_grid,
+    themed_grid,
+    uniform_grid,
+)
 from navigate.view.theme import (
     get_theme_padding_px,
     get_theme_preset,

@@ -799,13 +799,7 @@ def _apply_rounded_notebook_tabs(
 
 def _build_palette(
     gui_settings: Any,
-) -> tuple[
-    str,
-    dict[str, str],
-    str,
-    dict[str, FontSpec],
-    dict[str, SpacingSpec],
-]:
+) -> tuple[str, dict[str, str], str, dict[str, FontSpec], dict[str, SpacingSpec],]:
     """Resolve theme preset and overrides from GUI configuration.
 
     Parameters

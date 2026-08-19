@@ -121,6 +121,7 @@ _ACTIVE_TYPOGRAPHY: dict[str, FontSpec] = dict(
     _TYPOGRAPHY_PRESETS[_DEFAULT_THEME_PRESET]
 )
 _ACTIVE_SPACING: dict[str, SpacingSpec] = dict(_SPACING_PRESETS[_DEFAULT_THEME_PRESET])
+_ACTIVE_THEME_PRESET = _DEFAULT_THEME_PRESET
 _THEME_IMAGES: dict[str, tk.PhotoImage] = {}
 
 
@@ -798,13 +799,7 @@ def _apply_rounded_notebook_tabs(
 
 def _build_palette(
     gui_settings: Any,
-) -> tuple[
-    str,
-    dict[str, str],
-    str,
-    dict[str, FontSpec],
-    dict[str, SpacingSpec],
-]:
+) -> tuple[str, dict[str, str], str, dict[str, FontSpec], dict[str, SpacingSpec],]:
     """Resolve theme preset and overrides from GUI configuration.
 
     Parameters
@@ -870,6 +865,11 @@ def get_theme_color(name: str, fallback: str | None = None) -> str:
     if fallback is not None:
         return fallback
     return _THEME_PRESETS[_DEFAULT_THEME_PRESET].get(name, "#000000")
+
+
+def get_theme_preset() -> str:
+    """Return the name of the currently active theme preset."""
+    return _ACTIVE_THEME_PRESET
 
 
 def get_theme_font(name: str, fallback: FontSpec | None = None) -> FontSpec:
@@ -1073,13 +1073,14 @@ def apply_theme(root: tk.Tk, gui_settings: Any = None) -> tuple[str, dict[str, s
     tuple[str, dict[str, str]]
         ``(preset_name, palette)`` describing the applied theme.
     """
-    global _ACTIVE_PALETTE, _ACTIVE_TYPOGRAPHY, _ACTIVE_SPACING
+    global _ACTIVE_PALETTE, _ACTIVE_TYPOGRAPHY, _ACTIVE_SPACING, _ACTIVE_THEME_PRESET
     preset_name, palette, preferred_theme, typography, spacing = _build_palette(
         gui_settings
     )
     _ACTIVE_PALETTE = dict(palette)
     _ACTIVE_TYPOGRAPHY = dict(typography)
     _ACTIVE_SPACING = dict(spacing)
+    _ACTIVE_THEME_PRESET = preset_name
 
     style = ttk.Style(root)
     available = style.theme_names()

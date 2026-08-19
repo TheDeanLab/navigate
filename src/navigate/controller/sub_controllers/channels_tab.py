@@ -568,7 +568,8 @@ class ChannelsTabController(GUIController):
             start_position = float(self.stack_acq_vals["start_position"].get())
             end_position = float(self.stack_acq_vals["end_position"].get())
             step_size = float(self.stack_acq_vals["step_size"].get())
-            if step_size < 0.001:
+            # if the step size is less than the minimum allowed value
+            if step_size < self.stack_acq_widgets["step_size"].widget.cget("from"):
                 self.stack_acq_vals["number_z_steps"].set(0)
                 self.microscope_state_dict["abs_z_start"] = 0
                 self.microscope_state_dict["abs_z_end"] = 0

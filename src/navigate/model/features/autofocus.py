@@ -282,10 +282,7 @@ class Autofocus:
         dict
             Autofocus parameters.
         """
-        frame_num = self.get_autofocus_frame_num()
-        if frame_num < 1:
-            return
-
+        self._freeze_scan_settings()
         bounds_error = self.get_initial_scan_bounds_error()
         if bounds_error:
             if hasattr(self.model, "logger"):
@@ -296,6 +293,10 @@ class Autofocus:
                 self.model.show_img_pipe.send("stop")
             if hasattr(self.model, "is_acquiring"):
                 self.model.is_acquiring = False
+            return
+
+        frame_num = self.get_autofocus_frame_num()
+        if frame_num < 1:
             return
 
         # Opens correct shutter and puts all signals to false
@@ -405,6 +406,30 @@ class Autofocus:
         self.fine_step_size = float(settings["fine_step_size"])
         self._scan_settings_frozen = True
 
+        if self.coarse_step_size == 0 or self.coarse_range == 0:
+            self.coarse_selected = False
+        else:
+            self.coarse_range = (
+                -1 * self.coarse_range if self.coarse_range < 0 else self.coarse_range
+            )
+            self.coarse_step_size = (
+                -1 * self.coarse_step_size
+                if self.coarse_step_size < 0
+                else self.coarse_step_size
+            )
+
+        if self.fine_step_size == 0 or self.fine_range == 0:
+            self.fine_selected = False
+        else:
+            self.fine_range = (
+                -1 * self.fine_range if self.fine_range < 0 else self.fine_range
+            )
+            self.fine_step_size = (
+                -1 * self.fine_step_size
+                if self.fine_step_size < 0
+                else self.fine_step_size
+            )
+
     def _get_frozen_scan_settings(self):
         """Return a serializable copy of the frozen motion settings."""
         self._freeze_scan_settings()
@@ -438,9 +463,7 @@ class Autofocus:
             return None
         self._freeze_scan_settings()
         center = float(
-            self.model.configuration["experiment"]["StageParameters"][
-                self.device_ref
-            ]
+            self.model.configuration["experiment"]["StageParameters"][self.device_ref]
         )
         if self.coarse_selected:
             positions = plan_autofocus_positions(
@@ -456,6 +479,12 @@ class Autofocus:
                 self.fine_step_size,
             )
             return self._stage_scan_bounds_error("fine", positions)
+        if not self.coarse_selected and not self.fine_selected:
+            return (
+                f"Coarse/Fine settings error!\n\n"
+                "Select at least one mode: Coarse or Fine.\n"
+                "Please ensure the range and step size are greater than zero."
+            )
         return None
 
     @staticmethod
@@ -684,8 +713,7 @@ class Autofocus:
             )
             self.plot_data.append([self.f_pos, entropy[0]])
             progress_snapshot = [
-                [float(position), float(metric)]
-                for position, metric in self.plot_data
+                [float(position), float(metric)] for position, metric in self.plot_data
             ]
             progress_queue = getattr(self.model, "autofocus_progress_queue", None)
             if progress_queue is not None:

@@ -82,9 +82,9 @@ class AutofocusPopupController(GUIController):
         if calibration_controller is None:
             calibration_controller = AutofocusCalibrationController(parent_controller)
             parent_controller.autofocus_calibration_controller = calibration_controller
-        parent_controller.event_listeners[
-            "autofocus_complete"
-        ] = calibration_controller.handle_autofocus_complete
+        parent_controller.event_listeners["autofocus_complete"] = (
+            calibration_controller.handle_autofocus_complete
+        )
         self.calibration_controller = calibration_controller
 
         super().__init__(view, parent_controller)
@@ -157,9 +157,11 @@ class AutofocusPopupController(GUIController):
         self.acquisition_state = getattr(
             self.parent_controller,
             "autofocus_acquisition_state",
-            "running"
-            if acquire_bar_controller and acquire_bar_controller.is_acquiring
-            else "idle",
+            (
+                "running"
+                if acquire_bar_controller and acquire_bar_controller.is_acquiring
+                else "idle"
+            ),
         )
         self.autofocus_active = bool(
             getattr(self.parent_controller, "is_autofocusing", False)
@@ -318,8 +320,10 @@ class AutofocusPopupController(GUIController):
         # verify autofocus parameters
         setting_dict = self.setting_dict[self.microscope_name][device][device_ref]
         warning_message = ""
+        is_selected = False
         for k in ["coarse", "fine"]:
             if setting_dict[f"{k}_selected"]:
+                is_selected = True
                 try:
                     step = float(setting_dict[f"{k}_step_size"])
                     value = float(setting_dict[f"{k}_range"])
@@ -328,6 +332,8 @@ class AutofocusPopupController(GUIController):
                 except Exception as e:
                     logger.exception(e)
                     warning_message += f"{k} settings are not correct!\n"
+        if not is_selected:
+            warning_message = "Please select at least one mode: Coarse or Fine."
         if warning_message:
             messagebox.showerror(
                 title="Navigate",
@@ -480,9 +486,9 @@ class AutofocusPopupController(GUIController):
         def func(*_: tuple[str]) -> None:
             device = self.widgets["device"].widget.get()
             device_ref = self.widgets["device_ref"].widget.get()
-            self.setting_dict[self.microscope_name][device][device_ref][
-                parameter
-            ] = self.view.setting_vars[parameter].get()
+            self.setting_dict[self.microscope_name][device][device_ref][parameter] = (
+                self.view.setting_vars[parameter].get()
+            )
             self.refresh_bounds_validation()
 
         return func
@@ -509,10 +515,14 @@ class AutofocusPopupController(GUIController):
                     center = float(stage_parameters[device_ref])
                     minimum = self.parent_controller.configuration_controller.get_stage_position_limits(
                         "_min"
-                    )[device_ref]
+                    )[
+                        device_ref
+                    ]
                     maximum = self.parent_controller.configuration_controller.get_stage_position_limits(
                         "_max"
-                    )[device_ref]
+                    )[
+                        device_ref
+                    ]
                     settings = self.setting_dict[self.microscope_name][device][
                         device_ref
                     ]
@@ -600,9 +610,7 @@ class AutofocusPopupController(GUIController):
         self.autofocus_coarse.clear()
         self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
         self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)
-        self.autofocus_coarse.ticklabel_format(
-            style="sci", axis="y", scilimits=(0, 0)
-        )
+        self.autofocus_coarse.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
         self.autofocus_coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
         self.autofocus_coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
         self._autofocus_artist = self.autofocus_coarse.plot(
@@ -732,10 +740,8 @@ class AutofocusPopupController(GUIController):
             return
         if event is None or getattr(event, "canvas", None) is self.autofocus_fig.canvas:
             try:
-                self._autofocus_background = (
-                    self.autofocus_fig.canvas.copy_from_bbox(
-                        self.autofocus_coarse.bbox
-                    )
+                self._autofocus_background = self.autofocus_fig.canvas.copy_from_bbox(
+                    self.autofocus_coarse.bbox
                 )
             except Exception:
                 self._autofocus_background = None

@@ -123,14 +123,10 @@ class TestAutofocusScanPlanning(unittest.TestCase):
         )
 
     def test_autofocus_bounds_error_accepts_positions_at_limits(self):
-        self.assertIsNone(
-            autofocus_bounds_error("coarse", (0, 50, 100), 0, 100, "f")
-        )
+        self.assertIsNone(autofocus_bounds_error("coarse", (0, 50, 100), 0, 100, "f"))
 
     def test_autofocus_bounds_error_preserves_near_boundary_violation(self):
-        error = autofocus_bounds_error(
-            "fine", (999.9, 1000.0001), 0, 1000, "f"
-        )
+        error = autofocus_bounds_error("fine", (999.9, 1000.0001), 0, 1000, "f")
 
         self.assertEqual(
             error,
@@ -261,6 +257,45 @@ class TestAutofocusClass(unittest.TestCase):
 
         self.assertIsNone(self.autofocus.get_initial_scan_bounds_error())
 
+    def test_run_rejects_when_no_valid_scan_mode_is_selected(self):
+        self.set_scan_settings(
+            coarse_selected=True,
+            coarse_range=0,
+            fine_selected=True,
+            fine_range=0,
+        )
+        model = self.autofocus.model
+        model.prepare_acquisition = MagicMock()
+        model.event_queue = MagicMock()
+        model.show_img_pipe = MagicMock()
+        model.is_acquiring = True
+
+        self.autofocus.run()
+
+        model.prepare_acquisition.assert_not_called()
+        model.event_queue.put.assert_called_once_with(
+            (
+                "warning",
+                "Coarse/Fine settings error!\n\n"
+                "Select at least one mode: Coarse or Fine.\n"
+                "Please ensure the range and step size are greater than zero.",
+            )
+        )
+        model.show_img_pipe.send.assert_called_once_with("stop")
+        self.assertFalse(model.is_acquiring)
+
+    def test_negative_scan_settings_are_normalized_before_frame_counting(self):
+        self.set_scan_settings(
+            coarse_selected=True,
+            coarse_range=-10,
+            coarse_step_size=-2,
+            fine_selected=False,
+        )
+
+        self.assertEqual(self.autofocus.get_autofocus_frame_num(), 6)
+        self.assertEqual(self.autofocus.coarse_range, 10)
+        self.assertEqual(self.autofocus.coarse_step_size, 2)
+
     def test_fine_only_scan_is_validated_at_current_position(self):
         self.configure_stage_bounds()
         self.set_scan_settings(
@@ -281,7 +316,7 @@ class TestAutofocusClass(unittest.TestCase):
         self.configure_stage_bounds()
         self.set_scan_settings(
             coarse_selected=True,
-            coarse_range=0,
+            coarse_range=5,
             coarse_step_size=5,
             fine_selected=True,
             fine_range=50,
@@ -308,7 +343,7 @@ class TestAutofocusClass(unittest.TestCase):
         self.configure_stage_bounds(minimum=-1000, maximum=1000)
         self.set_scan_settings(
             coarse_selected=True,
-            coarse_range=0,
+            coarse_range=5,
             coarse_step_size=5,
             fine_selected=True,
             fine_range=20,
@@ -323,15 +358,13 @@ class TestAutofocusClass(unittest.TestCase):
         self.autofocus.pre_func_signal()
         self.autofocus.signal_id = self.autofocus.coarse_steps
         self.autofocus.autofocus_pos_queue.put(100)
-        model.configuration["experiment"]["AutoFocusParameters"]["Mesoscale"][
-            "stage"
-        ]["f"]["fine_range"] = 0
+        model.configuration["experiment"]["AutoFocusParameters"]["Mesoscale"]["stage"][
+            "f"
+        ]["fine_range"] = 0
 
         self.autofocus.in_func_signal()
 
-        model.move_stage.assert_called_once_with(
-            {"f_abs": 90}, wait_until_done=True
-        )
+        model.move_stage.assert_called_once_with({"f_abs": 90}, wait_until_done=True)
 
     def test_failed_stage_move_does_not_queue_measurement(self):
         self.autofocus.model.logger = MagicMock()
@@ -440,12 +473,13 @@ class TestAutofocusClass(unittest.TestCase):
             target_channel="channel_2",
         )
 
-        with patch(
-            "navigate.model.features.autofocus.load_features",
-            return_value=(MagicMock(), MagicMock()),
-        ) as load_features_mock, patch(
-            "navigate.model.features.autofocus.threading.Thread"
-        ) as thread:
+        with (
+            patch(
+                "navigate.model.features.autofocus.load_features",
+                return_value=(MagicMock(), MagicMock()),
+            ) as load_features_mock,
+            patch("navigate.model.features.autofocus.threading.Thread") as thread,
+        ):
             autofocus.run()
 
         model.active_microscope.prepare_channel.assert_not_called()
@@ -541,8 +575,7 @@ class TestAutofocusClass(unittest.TestCase):
             self.autofocus.in_func_data([0, 1])
 
         progress_calls = [
-            call
-            for call in model.autofocus_progress_queue.put_nowait.call_args_list
+            call for call in model.autofocus_progress_queue.put_nowait.call_args_list
         ]
         self.assertEqual(
             progress_calls,

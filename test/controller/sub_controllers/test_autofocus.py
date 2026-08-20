@@ -87,8 +87,7 @@ class TestAutofocusPopupController:
         original_autofocus_settings = dict(autofocus_settings)
         channels = microscope_state["channels"]
         original_defocus = {
-            channel_key: channel["defocus"]
-            for channel_key, channel in channels.items()
+            channel_key: channel["defocus"] for channel_key, channel in channels.items()
         }
         original_get_stage_position_limits = (
             dummy_controller.configuration_controller.get_stage_position_limits
@@ -168,18 +167,14 @@ class TestAutofocusPopupController:
         assert self.autofocus_controller.view.bounds_warning_var.get() == ""
         assert int(warning_label.grid_info()["row"]) == 3
         assert int(warning_label.grid_info()["columnspan"]) == 3
-        assert str(warning_label.cget("foreground")) == get_theme_color(
-            "danger", "red"
-        )
+        assert str(warning_label.cget("foreground")) == get_theme_color("danger", "red")
 
     def configure_focus_bounds(self, minimum=0, maximum=1000, enabled=True):
         parent = self.autofocus_controller.parent_controller
         parent.configuration["experiment"]["StageParameters"]["f"] = 0
         parent.configuration["experiment"]["StageParameters"]["limits"] = enabled
         parent.configuration_controller.get_stage_position_limits = MagicMock(
-            side_effect=lambda suffix: {
-                "f": minimum if suffix == "_min" else maximum
-            }
+            side_effect=lambda suffix: {"f": minimum if suffix == "_min" else maximum}
         )
         settings = self.autofocus_controller.setting_dict[
             self.autofocus_controller.microscope_name
@@ -212,21 +207,15 @@ class TestAutofocusPopupController:
         assert self.autofocus_controller.view.bounds_warning_var.get() == expected
         coarse_range = self.autofocus_controller.widgets["coarse_range"].widget
         fine_range = self.autofocus_controller.widgets["fine_range"].widget
-        assert str(coarse_range.cget("foreground")) == get_theme_color(
-            "danger", "red"
-        )
-        assert str(fine_range.cget("foreground")) == get_theme_color(
-            "text", "black"
-        )
+        assert str(coarse_range.cget("foreground")) == get_theme_color("danger", "red")
+        assert str(fine_range.cget("foreground")) == get_theme_color("text", "black")
 
         self.autofocus_controller.parent_controller.configuration["experiment"][
             "StageParameters"
         ]["f"] = 500
         assert self.autofocus_controller.refresh_bounds_validation() == []
         assert self.autofocus_controller.view.bounds_warning_var.get() == ""
-        assert str(coarse_range.cget("foreground")) == get_theme_color(
-            "text", "black"
-        )
+        assert str(coarse_range.cget("foreground")) == get_theme_color("text", "black")
 
     def test_refresh_bounds_validation_checks_fine_only(self):
         settings = self.configure_focus_bounds()
@@ -284,9 +273,12 @@ class TestAutofocusPopupController:
         self.configure_focus_bounds()
         parent = self.autofocus_controller.parent_controller
 
-        with patch.object(parent, "execute") as execute, patch(
-            "navigate.controller.sub_controllers.autofocus.messagebox.showerror"
-        ) as showerror:
+        with (
+            patch.object(parent, "execute") as execute,
+            patch(
+                "navigate.controller.sub_controllers.autofocus.messagebox.showerror"
+            ) as showerror,
+        ):
             self.autofocus_controller.start_autofocus()
 
         execute.assert_not_called()
@@ -296,6 +288,28 @@ class TestAutofocusPopupController:
                 "The requested coarse scan (-250 to 250 µm) exceeds the "
                 "focus-stage limits (0 to 1000 µm)."
             ),
+        )
+
+    def test_start_autofocus_requires_a_selected_scan_mode(self):
+        settings = self.configure_focus_bounds(enabled=False)
+        settings["coarse_selected"] = False
+        settings["fine_selected"] = False
+        self.autofocus_controller.view.setting_vars["coarse_selected"].set(False)
+        self.autofocus_controller.view.setting_vars["fine_selected"].set(False)
+        parent = self.autofocus_controller.parent_controller
+
+        with (
+            patch.object(parent, "execute") as execute,
+            patch(
+                "navigate.controller.sub_controllers.autofocus.messagebox.showerror"
+            ) as showerror,
+        ):
+            self.autofocus_controller.start_autofocus()
+
+        execute.assert_not_called()
+        showerror.assert_called_once_with(
+            title="Navigate",
+            message="Please select at least one mode: Coarse or Fine.",
         )
 
     def test_stop_acquisition_button_matches_start_button(self):
@@ -795,9 +809,7 @@ class TestAutofocusPopupController:
         self.autofocus_controller._last_ylim = (0.0, 20.0)
         self.autofocus_controller._force_full_redraw = False
 
-        with patch.object(
-            self.autofocus_controller, "_render_autofocus"
-        ) as render:
+        with patch.object(self.autofocus_controller, "_render_autofocus") as render:
             self.autofocus_controller._update_progress_plot(
                 np.asarray([[1.0, 10.0], [3.0, 15.0]])
             )

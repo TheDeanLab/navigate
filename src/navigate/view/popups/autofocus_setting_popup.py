@@ -283,6 +283,23 @@ class AutofocusPopup:
             self.inputs[setting_names[i] + "_step_size"] = widget
             self.setting_vars[setting_names[i] + "_step_size"] = widget.get_variable()
 
+        self.bounds_warning_var = tk.StringVar(value="")
+        self.bounds_warning_label = ttk.Label(
+            scan_frame,
+            textvariable=self.bounds_warning_var,
+            foreground=get_theme_color("danger", "red"),
+            justify=tk.LEFT,
+            wraplength=650,
+        )
+        self.bounds_warning_label.grid(
+            row=3,
+            column=0,
+            columnspan=3,
+            sticky=tk.EW,
+            padx=get_theme_space_px(5),
+            pady=get_theme_padding_px((2, 6)),
+        )
+
         # Section 3.
         options_frame = ttk.Labelframe(
             content_frame,

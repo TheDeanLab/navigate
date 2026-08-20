@@ -31,7 +31,7 @@
 
 
 # Standard Library Imports
-from queue import Empty, Queue
+from queue import Empty, Full, Queue
 import threading
 
 # Third Party Imports
@@ -43,6 +43,74 @@ from scipy.interpolate import UnivariateSpline
 # Local imports
 from navigate.model.features.feature_container import load_features
 from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
+from navigate.model.utils.exceptions import UserVisibleException
+
+
+def plan_autofocus_positions(center, scan_range, step_size):
+    """Return the exact autofocus positions for one scan.
+
+    Parameters
+    ----------
+    center : float
+        Position around which the scan is constructed.
+    scan_range : float
+        Requested scan range.
+    step_size : float
+        Distance between measurements.
+
+    Returns
+    -------
+    tuple[float, ...]
+        Ordered positions used by autofocus.
+    """
+    frame_count = int(scan_range // step_size) + 1
+    first_position = center - (frame_count // 2) * step_size
+    return tuple(first_position + index * step_size for index in range(frame_count))
+
+
+def _format_position(position):
+    """Format a stage position without obscuring a bounds violation."""
+    value = repr(float(position))
+    if "e" not in value.lower() and value.endswith(".0"):
+        return value[:-2]
+    return value
+
+
+def autofocus_bounds_error(scan_name, positions, minimum, maximum, device_ref):
+    """Describe an autofocus trajectory that exceeds enabled stage limits.
+
+    Parameters
+    ----------
+    scan_name : str
+        User-facing scan name, such as ``"coarse"`` or ``"fine"``.
+    positions : Sequence[float]
+        Exact ordered stage targets.
+    minimum : float
+        Configured lower stage limit.
+    maximum : float
+        Configured upper stage limit.
+    device_ref : str
+        Selected stage-axis reference.
+
+    Returns
+    -------
+    str or None
+        An actionable diagnostic, or ``None`` when every position is allowed.
+    """
+    if not positions:
+        return None
+    requested_minimum = min(positions)
+    requested_maximum = max(positions)
+    if requested_minimum >= minimum and requested_maximum <= maximum:
+        return None
+
+    stage_name = "focus-stage" if device_ref == "f" else f"{device_ref}-stage"
+    return (
+        f"The requested {scan_name} scan "
+        f"({_format_position(requested_minimum)} to "
+        f"{_format_position(requested_maximum)} µm) exceeds the {stage_name} "
+        f"limits ({_format_position(minimum)} to {_format_position(maximum)} µm)."
+    )
 
 
 def power_tent(x, x_offset, y_offset, amplitude, sigma, alpha):
@@ -93,6 +161,7 @@ class Autofocus:
         calibration_action=None,
         reference_channel=None,
         set_defocus_for_all_flag=False,
+        scan_settings=None,
     ):
         """Initialize the Autofocus class.
 
@@ -152,6 +221,12 @@ class Autofocus:
         #: int: Coarse steps
         self.coarse_steps = None
 
+        #: tuple: Ordered coarse scan positions
+        self.coarse_positions = ()
+
+        #: tuple: Ordered fine scan positions
+        self.fine_positions = ()
+
         #: int: Signal id
         self.signal_id = None
 
@@ -194,6 +269,11 @@ class Autofocus:
         #: str: Device reference
         self.device_ref = device_ref
 
+        #: bool: Whether scan settings have been frozen for this acquisition.
+        self._scan_settings_frozen = False
+        if scan_settings is not None:
+            self._apply_scan_settings(scan_settings)
+
     def run(self):
         """Run the Autofocusing Routine
 
@@ -202,6 +282,19 @@ class Autofocus:
         dict
             Autofocus parameters.
         """
+        self._freeze_scan_settings()
+        bounds_error = self.get_initial_scan_bounds_error()
+        if bounds_error:
+            if hasattr(self.model, "logger"):
+                self.model.logger.warning(bounds_error)
+            if hasattr(self.model, "event_queue"):
+                self.model.event_queue.put(("warning", bounds_error))
+            if hasattr(self.model, "show_img_pipe"):
+                self.model.show_img_pipe.send("stop")
+            if hasattr(self.model, "is_acquiring"):
+                self.model.is_acquiring = False
+            return
+
         frame_num = self.get_autofocus_frame_num()
         if frame_num < 1:
             return
@@ -218,6 +311,8 @@ class Autofocus:
                 self.target_channel,
                 self.calibration_action,
                 self.reference_channel,
+                self.set_defocus_for_all_flag,
+                self._get_frozen_scan_settings(),
             ),
         }
 
@@ -239,6 +334,8 @@ class Autofocus:
                                 channel_key,
                                 "populate_defocus",
                                 self.reference_channel,
+                                False,
+                                self._get_frozen_scan_settings(),
                             ),
                         }
                     )
@@ -270,19 +367,125 @@ class Autofocus:
         int
             Number of frames to be processed.
         """
+        self._freeze_scan_settings()
+        frames = 0
+        if self.coarse_selected:
+            frames = len(
+                plan_autofocus_positions(
+                    0,
+                    self.coarse_range,
+                    self.coarse_step_size,
+                )
+            )
+        if self.fine_selected:
+            frames += len(
+                plan_autofocus_positions(
+                    0,
+                    self.fine_range,
+                    self.fine_step_size,
+                )
+            )
+        return frames
+
+    def _freeze_scan_settings(self):
+        """Snapshot motion-defining settings for one autofocus acquisition."""
+        if self._scan_settings_frozen:
+            return
         settings = self.model.configuration["experiment"]["AutoFocusParameters"][
             self.model.active_microscope_name
         ][self.device][self.device_ref]
-        frames = 0
-        if settings["coarse_selected"]:
-            coarse_range = float(settings["coarse_range"])
-            coarse_step_size = float(settings["coarse_step_size"])
-            frames = int(coarse_range // coarse_step_size) + 1
-        if settings["fine_selected"]:
-            fine_range = float(settings["fine_range"])
-            fine_step_size = float(settings["fine_step_size"])
-            frames += int(fine_range // fine_step_size) + 1
-        return frames
+        self._apply_scan_settings(settings)
+
+    def _apply_scan_settings(self, settings):
+        """Apply a motion-settings snapshot to this autofocus instance."""
+        self.coarse_selected = bool(settings["coarse_selected"])
+        self.coarse_range = float(settings["coarse_range"])
+        self.coarse_step_size = float(settings["coarse_step_size"])
+        self.fine_selected = bool(settings["fine_selected"])
+        self.fine_range = float(settings["fine_range"])
+        self.fine_step_size = float(settings["fine_step_size"])
+        self._scan_settings_frozen = True
+
+        if self.coarse_step_size == 0 or self.coarse_range == 0:
+            self.coarse_selected = False
+        else:
+            self.coarse_range = (
+                -1 * self.coarse_range if self.coarse_range < 0 else self.coarse_range
+            )
+            self.coarse_step_size = (
+                -1 * self.coarse_step_size
+                if self.coarse_step_size < 0
+                else self.coarse_step_size
+            )
+
+        if self.fine_step_size == 0 or self.fine_range == 0:
+            self.fine_selected = False
+        else:
+            self.fine_range = (
+                -1 * self.fine_range if self.fine_range < 0 else self.fine_range
+            )
+            self.fine_step_size = (
+                -1 * self.fine_step_size
+                if self.fine_step_size < 0
+                else self.fine_step_size
+            )
+
+    def _get_frozen_scan_settings(self):
+        """Return a serializable copy of the frozen motion settings."""
+        self._freeze_scan_settings()
+        return {
+            "coarse_selected": self.coarse_selected,
+            "coarse_range": self.coarse_range,
+            "coarse_step_size": self.coarse_step_size,
+            "fine_selected": self.fine_selected,
+            "fine_range": self.fine_range,
+            "fine_step_size": self.fine_step_size,
+        }
+
+    def _stage_scan_bounds_error(self, scan_name, positions):
+        """Return a stage-bounds diagnostic for an exact scan trajectory."""
+        if self.device != "stage":
+            return None
+        stage = self.model.active_microscope.stages.get(self.device_ref)
+        if stage is None or not stage.stage_limits:
+            return None
+        return autofocus_bounds_error(
+            scan_name,
+            positions,
+            getattr(stage, f"{self.device_ref}_min"),
+            getattr(stage, f"{self.device_ref}_max"),
+            self.device_ref,
+        )
+
+    def get_initial_scan_bounds_error(self):
+        """Validate the scan whose center is knowable before acquisition."""
+        if self.device != "stage":
+            return None
+        self._freeze_scan_settings()
+        center = float(
+            self.model.configuration["experiment"]["StageParameters"][self.device_ref]
+        )
+        if self.coarse_selected:
+            positions = plan_autofocus_positions(
+                center,
+                self.coarse_range,
+                self.coarse_step_size,
+            )
+            return self._stage_scan_bounds_error("coarse", positions)
+        if self.fine_selected:
+            positions = plan_autofocus_positions(
+                center,
+                self.fine_range,
+                self.fine_step_size,
+            )
+            return self._stage_scan_bounds_error("fine", positions)
+        if not self.coarse_selected and not self.fine_selected:
+            return (
+                f"Coarse/Fine settings error!\n\n"
+                "Select at least one mode: Coarse or Fine.\n"
+                "Please ensure the range and step size are greater than zero."
+            )
+        return None
 
     @staticmethod
     def get_steps(ranges, step_size):
@@ -302,7 +505,7 @@ class Autofocus:
         pos_offset : float
             Need to figure out.
         """
-        steps = ranges // step_size + 1
+        steps = len(plan_autofocus_positions(0, ranges, step_size))
         pos_offset = (steps // 2) * step_size + step_size
         return steps, pos_offset
 
@@ -313,13 +516,27 @@ class Autofocus:
         else:
             self.model.active_microscope.prepare_next_channel()
 
+    def _move_stage_or_raise(self, position):
+        """Move the selected autofocus stage or fail before frame queueing."""
+        moved = self.model.move_stage(
+            {f"{self.device_ref}_abs": position}, wait_until_done=True
+        )
+        if not moved:
+            stage_name = (
+                "focus stage" if self.device_ref == "f" else f"{self.device_ref} stage"
+            )
+            raise UserVisibleException(
+                f"Autofocus could not move the {stage_name} to "
+                f"{_format_position(position)} µm. The scan was stopped."
+            )
+        self.model.logger.debug(
+            f"*** Autofocus move stage: ({self.device_ref}, {position})"
+        )
+
     def pre_func_signal(self):
         """Prepare the autofocus routine."""
         self.prepare_selected_channel()
-
-        settings = self.model.configuration["experiment"]["AutoFocusParameters"][
-            self.model.active_microscope_name
-        ][self.device][self.device_ref]
+        self._freeze_scan_settings()
         if self.device == "stage":
             self.focus_pos = self.model.configuration["experiment"]["StageParameters"][
                 self.device_ref
@@ -328,20 +545,32 @@ class Autofocus:
             self.focus_pos = 0
         self.total_frame_num = self.get_autofocus_frame_num()  # Total frame num
         self.coarse_steps, self.init_pos = 0, 0
+        self.coarse_positions = ()
+        self.fine_positions = ()
 
-        if settings["fine_selected"]:
-            self.fine_step_size = float(settings["fine_step_size"])
-            fine_steps, self.fine_pos_offset = self.get_steps(
-                float(settings["fine_range"]), self.fine_step_size
+        if self.fine_selected:
+            self.fine_positions = plan_autofocus_positions(
+                self.focus_pos,
+                self.fine_range,
+                self.fine_step_size,
             )
-            self.init_pos = self.focus_pos - self.fine_pos_offset
+            self.init_pos = self.fine_positions[0] - self.fine_step_size
 
-        if settings["coarse_selected"]:
-            self.coarse_step_size = float(settings["coarse_step_size"])
-            self.coarse_steps, coarse_pos_offset = self.get_steps(
-                float(settings["coarse_range"]), self.coarse_step_size
+        if self.coarse_selected:
+            self.coarse_positions = plan_autofocus_positions(
+                self.focus_pos,
+                self.coarse_range,
+                self.coarse_step_size,
             )
-            self.init_pos = self.focus_pos - coarse_pos_offset
+            self.coarse_steps = len(self.coarse_positions)
+            self.init_pos = self.coarse_positions[0] - self.coarse_step_size
+            bounds_error = self._stage_scan_bounds_error(
+                "coarse", self.coarse_positions
+            )
+        else:
+            bounds_error = self._stage_scan_bounds_error("fine", self.fine_positions)
+        if bounds_error:
+            raise UserVisibleException(bounds_error)
         self.signal_id = 0
 
     def _wait_for_focus_position(self):
@@ -363,14 +592,9 @@ class Autofocus:
         """Run the autofocus routine."""
 
         if self.signal_id < self.coarse_steps:
-            self.init_pos += self.coarse_step_size
+            self.init_pos = self.coarse_positions[self.signal_id]
             if self.device == "stage":
-                self.model.move_stage(
-                    {f"{self.device_ref}_abs": self.init_pos}, wait_until_done=True
-                )
-                self.model.logger.debug(
-                    f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
-                )
+                self._move_stage_or_raise(self.init_pos)
             elif self.device == "remote_focus":
                 self.model.active_microscope.move_remote_focus(self.init_pos)
                 self.model.logger.debug(
@@ -385,16 +609,20 @@ class Autofocus:
                 focus_position = self._wait_for_focus_position()
                 if focus_position is None:
                     return None
-                self.init_pos = focus_position
-                self.init_pos -= self.fine_pos_offset
-            self.init_pos += self.fine_step_size
+                self.fine_positions = plan_autofocus_positions(
+                    focus_position,
+                    self.fine_range,
+                    self.fine_step_size,
+                )
+                bounds_error = self._stage_scan_bounds_error(
+                    "fine", self.fine_positions
+                )
+                if bounds_error:
+                    raise UserVisibleException(bounds_error)
+            fine_index = self.signal_id - self.coarse_steps
+            self.init_pos = self.fine_positions[fine_index]
             if self.device == "stage":
-                self.model.move_stage(
-                    {f"{self.device_ref}_abs": self.init_pos}, wait_until_done=True
-                )
-                self.model.logger.debug(
-                    f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
-                )
+                self._move_stage_or_raise(self.init_pos)
             elif self.device == "remote_focus":
                 self.model.active_microscope.move_remote_focus(self.init_pos)
                 self.model.logger.debug(
@@ -414,12 +642,7 @@ class Autofocus:
                 return None
             self.init_pos = focus_position
             if self.device == "stage":
-                self.model.move_stage(
-                    {f"{self.device_ref}_abs": self.init_pos}, wait_until_done=True
-                )
-                self.model.logger.debug(
-                    f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
-                )
+                self._move_stage_or_raise(self.init_pos)
             elif self.device == "remote_focus":
                 self.model.active_microscope.move_remote_focus(self.init_pos)
                 self.model.logger.debug(
@@ -489,6 +712,25 @@ class Autofocus:
                 f"entropy: {entropy[0]}"
             )
             self.plot_data.append([self.f_pos, entropy[0]])
+            progress_snapshot = [
+                [float(position), float(metric)] for position, metric in self.plot_data
+            ]
+            progress_queue = getattr(self.model, "autofocus_progress_queue", None)
+            if progress_queue is not None:
+                try:
+                    progress_queue.put_nowait(progress_snapshot)
+                except Full:
+                    try:
+                        progress_queue.get_nowait()
+                    except Empty:
+                        pass
+                    try:
+                        progress_queue.put_nowait(progress_snapshot)
+                    except Full:
+                        self.model.logger.debug(
+                            "Dropping an autofocus progress snapshot after a "
+                            "concurrent queue update."
+                        )
             # Need to initialize entropy above for the first iteration of the autofocus
             # routine. Need to initialize entropy_vector above for the first iteration
             # of the autofocus routine. Then need to append each measurement to the

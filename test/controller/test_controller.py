@@ -613,13 +613,23 @@ def test_execute_update_setting(controller):
 def test_execute_stage_limits(controller):
     controller.threads_pool.createThread = MagicMock()
     controller.channels_tab_controller.update_stack_position_limits = MagicMock()
-    for stage_limits in [True, False]:
-        controller.threads_pool.createThread.reset_mock()
-        controller.channels_tab_controller.update_stack_position_limits.reset_mock()
-        controller.execute("stage_limits", stage_limits)
-        assert controller.stage_controller.stage_limits == stage_limits
-        controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
-        assert controller.threads_pool.createThread.called is True
+    controller.af_popup_controller = MagicMock()
+    try:
+        for stage_limits in [True, False]:
+            controller.threads_pool.createThread.reset_mock()
+            controller.channels_tab_controller.update_stack_position_limits.reset_mock()
+            controller.af_popup_controller.refresh_bounds_validation.reset_mock()
+            controller.execute("stage_limits", stage_limits)
+            assert controller.stage_controller.stage_limits == stage_limits
+            assert (
+                controller.configuration["experiment"]["StageParameters"]["limits"]
+                == stage_limits
+            )
+            controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
+            controller.af_popup_controller.refresh_bounds_validation.assert_called_once()
+            assert controller.threads_pool.createThread.called is True
+    finally:
+        del controller.af_popup_controller
 
     assert True
 
@@ -628,14 +638,36 @@ def test_execute_update_stage_limits_refreshes_stack_position_limits(controller)
     controller.threads_pool.createThread = MagicMock()
     controller.stage_controller.initialize = MagicMock()
     controller.channels_tab_controller.update_stack_position_limits = MagicMock()
+    controller.af_popup_controller = MagicMock()
 
-    controller.execute(
-        "update_stage_limits", controller.configuration_controller.microscope_name
-    )
+    try:
+        controller.execute(
+            "update_stage_limits", controller.configuration_controller.microscope_name
+        )
 
-    controller.stage_controller.initialize.assert_called_once()
-    controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
-    assert controller.threads_pool.createThread.called is True
+        controller.stage_controller.initialize.assert_called_once()
+        controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
+        controller.af_popup_controller.refresh_bounds_validation.assert_called_once()
+        assert controller.threads_pool.createThread.called is True
+    finally:
+        del controller.af_popup_controller
+
+
+def test_update_stage_controller_silent_refreshes_autofocus_bounds(controller):
+    original_set_position_silent = controller.stage_controller.set_position_silent
+    controller.stage_controller.set_position_silent = MagicMock()
+    controller.af_popup_controller = MagicMock()
+
+    try:
+        controller.update_stage_controller_silent({"f_pos": 123.4})
+
+        controller.stage_controller.set_position_silent.assert_called_once_with(
+            {"f": 123.4}
+        )
+        controller.af_popup_controller.refresh_bounds_validation.assert_called_once()
+    finally:
+        controller.stage_controller.set_position_silent = original_set_position_silent
+        del controller.af_popup_controller
 
 
 def test_execute_autofocus(controller):
@@ -747,6 +779,41 @@ def test_live_autofocus_completion_reenables_start_button(controller):
         controller._event_pump_running = original_event_pump_running
         if hasattr(controller, "af_popup_controller"):
             controller.af_popup_controller.close_popup()
+
+
+def test_progress_transport_cannot_starve_reliable_autofocus_events(controller):
+    original_event_queue = controller.event_queue
+    original_progress_queue = controller.autofocus_progress_queue
+    original_event_pump_running = controller._event_pump_running
+    progress_handler = MagicMock()
+    final_handler = MagicMock()
+    controller.event_listeners["autofocus_progress"] = progress_handler
+    controller.event_listeners["autofocus"] = final_handler
+
+    try:
+        controller.autofocus_progress_queue = Queue(maxsize=1)
+        controller.autofocus_progress_queue.put([[1.0, 2.0]])
+        controller.event_queue = Queue()
+        controller.event_queue.put(("autofocus", [[[1.0, 2.0]], False, True]))
+        controller.event_queue.put(("warning", "Autofocus bounds warning"))
+        controller._event_pump_running = True
+
+        with patch(
+            "navigate.controller.controller.messagebox.showwarning"
+        ) as showwarning:
+            controller.update_event()
+
+        progress_handler.assert_called_once_with([[1.0, 2.0]])
+        final_handler.assert_called_once_with([[[1.0, 2.0]], False, True])
+        showwarning.assert_called_once_with(
+            title="Navigate", message="Autofocus bounds warning"
+        )
+    finally:
+        controller.event_queue = original_event_queue
+        controller.autofocus_progress_queue = original_progress_queue
+        controller._event_pump_running = original_event_pump_running
+        controller.event_listeners.pop("autofocus_progress", None)
+        controller.event_listeners.pop("autofocus", None)
 
 
 def test_execute_eliminate_tiles(controller):

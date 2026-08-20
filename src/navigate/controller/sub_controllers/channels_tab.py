@@ -319,9 +319,9 @@ class ChannelsTabController(GUIController):
     def set_spinbox_range_limits(self, settings: Dict[str, Any]) -> None:
         """Sets range limits for various spinbox widgets based on the provided settings.
 
-        This method configures the minimum, maximum, and increment values for the spinbox
-        widgets in the stack acquisition settings frame and the time point settings
-        frame based on the provided configuration settings.
+        This method configures the minimum, maximum, and increment values for the
+        spinbox widgets in the stack acquisition settings frame and the time point
+        settings frame based on the provided configuration settings.
 
         Parameters
         ----------
@@ -568,8 +568,10 @@ class ChannelsTabController(GUIController):
             start_position = float(self.stack_acq_vals["start_position"].get())
             end_position = float(self.stack_acq_vals["end_position"].get())
             step_size = float(self.stack_acq_vals["step_size"].get())
-            # if the step size is less than the minimum allowed value
-            if step_size < self.stack_acq_widgets["step_size"].widget.cget("from"):
+            # Reject non-positive values independently of the configured minimum.
+            if step_size <= 0 or step_size < self.stack_acq_widgets[
+                "step_size"
+            ].widget.cget("from"):
                 self.stack_acq_vals["number_z_steps"].set(0)
                 self.microscope_state_dict["abs_z_start"] = 0
                 self.microscope_state_dict["abs_z_end"] = 0
@@ -1019,9 +1021,9 @@ class ChannelsTabController(GUIController):
                 offset = variable_dict[f"{axis}_offset"].get()
                 secondary_stack_settings[axis] = offset
 
-        self.microscope_state_dict["secondary_stack_settings"] = (
-            secondary_stack_settings
-        )
+        self.microscope_state_dict[
+            "secondary_stack_settings"
+        ] = secondary_stack_settings
 
     def verify_experiment_values(self) -> str:
         """Verify channel tab settings and return warning info
@@ -1132,9 +1134,9 @@ class ChannelsTabController(GUIController):
             f"Defocus Reference: {channel_label} @ {focus_position:.2f}"
         )
         if reference_channel is None:
-            self.parent_controller.configuration["experiment"][
-                "AutoFocusParameters"
-            ]["reference_channel"] = channel_label
+            self.parent_controller.configuration["experiment"]["AutoFocusParameters"][
+                "reference_channel"
+            ] = channel_label
 
     def update_additional_stacking_axes(self, *args, **kwargs):
         if self.stack_acq_vals["z_device"].get():

@@ -7,6 +7,7 @@ from navigate.controller.sub_controllers.gui_settings_popup import (
     is_boolean_gui_setting,
     is_integer_gui_setting,
     is_nonnegative_gui_setting,
+    is_positive_gui_setting,
     is_step_size_gui_setting,
     gui_setting_group,
 )
@@ -51,11 +52,19 @@ def test_gui_setting_lower_bound_rules():
     assert is_step_size_gui_setting(("galvo_waveform", "amplitude_step_size"))
     assert gui_setting_minimum(("channel_settings", "count")) == "1"
     assert gui_setting_minimum(("time", "stack_pause", "min")) == "0"
-    assert gui_setting_minimum(("galvo_waveform", "offset_step_size")) == "0"
+    assert (
+        gui_setting_minimum(("galvo_waveform", "offset_step_size"))
+        == "0.000000001"
+    )
+    assert (
+        gui_setting_minimum(("stack_acquisition", "step_size", "min"))
+        == "0.000000001"
+    )
     assert is_nonnegative_gui_setting(("channel_settings", "laser_power", "min"))
     assert is_nonnegative_gui_setting(("channel_settings", "exposure_time", "max"))
     assert is_nonnegative_gui_setting(("channel_settings", "interval", "step"))
-    assert is_nonnegative_gui_setting(("stack_acquisition", "step_size", "max"))
+    assert is_positive_gui_setting(("stack_acquisition", "step_size", "min"))
+    assert is_positive_gui_setting(("stack_acquisition", "step_size", "max"))
 
 
 @pytest.mark.parametrize(
@@ -64,6 +73,9 @@ def test_gui_setting_lower_bound_rules():
         ("0", ("channel_settings", "count"), "greater than 0"),
         ("0", ("stack_acquisition", "step_size", "step"), "greater than 0"),
         ("0", ("galvo_waveform", "amplitude_step_size"), "greater than 0"),
+        ("nan", ("galvo_waveform", "amplitude_step_size"), "finite"),
+        ("inf", ("galvo_waveform", "amplitude_step_size"), "finite"),
+        ("-inf", ("galvo_waveform", "amplitude_step_size"), "finite"),
         ("-1", ("time", "stack_pause", "min"), "greater than or equal to 0"),
         (
             "-1",
@@ -81,9 +93,14 @@ def test_gui_setting_lower_bound_rules():
             "greater than 0",
         ),
         (
-            "-1",
+            "0",
             ("stack_acquisition", "step_size", "min"),
-            "greater than or equal to 0",
+            "greater than 0",
+        ),
+        (
+            "0",
+            ("stack_acquisition", "step_size", "max"),
+            "greater than 0",
         ),
     ],
 )

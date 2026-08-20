@@ -4,6 +4,7 @@
 """Controller for the GUI settings popup."""
 
 from collections.abc import Mapping, Sequence
+from math import isfinite
 from typing import Any
 
 from navigate.view.popups.gui_settings_popup import GuiSettingsPopup
@@ -54,6 +55,14 @@ def is_step_size_gui_setting(path: tuple[str, ...]) -> bool:
     return path[-1] == "step" or path[-1].endswith("_step_size")
 
 
+def is_positive_gui_setting(path: tuple[str, ...]) -> bool:
+    """Return whether a GUI setting must be strictly greater than zero."""
+    return is_step_size_gui_setting(path) or path[:2] == (
+        "stack_acquisition",
+        "step_size",
+    )
+
+
 def is_nonnegative_gui_setting(path: tuple[str, ...]) -> bool:
     """Return whether a GUI setting is constrained to non-negative values."""
     return (
@@ -62,7 +71,6 @@ def is_nonnegative_gui_setting(path: tuple[str, ...]) -> bool:
             ("channel_settings", "laser_power"),
             ("channel_settings", "exposure_time"),
             ("channel_settings", "interval"),
-            ("stack_acquisition", "step_size"),
         }
     )
 
@@ -71,11 +79,9 @@ def gui_setting_minimum(path: tuple[str, ...]) -> str:
     """Return the entry minimum for GUI settings with lower-bound constraints."""
     if path == ("channel_settings", "count"):
         return "1"
-    if (
-        is_step_size_gui_setting(path)
-        or is_nonnegative_gui_setting(path)
-        or path[0] == "time"
-    ):
+    if is_positive_gui_setting(path):
+        return "0.000000001"
+    if is_nonnegative_gui_setting(path) or path[0] == "time":
         return "0"
     return "-Infinity"
 
@@ -92,9 +98,11 @@ def gui_setting_group(path: tuple[str, ...]) -> str:
 def coerce_gui_value(value: str, path: tuple[str, ...]) -> Any:
     """Convert text entered in the popup to the value type for a GUI setting."""
     parsed_value = int(value) if is_integer_gui_setting(path) else float(value)
+    if not is_integer_gui_setting(path) and not isfinite(parsed_value):
+        raise ValueError("Value must be finite")
     if path == ("channel_settings", "count") and parsed_value <= 0:
         raise ValueError("Value must be greater than 0")
-    if is_step_size_gui_setting(path) and parsed_value <= 0:
+    if is_positive_gui_setting(path) and parsed_value <= 0:
         raise ValueError("Value must be greater than 0")
     if (path[0] == "time" or is_nonnegative_gui_setting(path)) and parsed_value < 0:
         raise ValueError("Value must be greater than or equal to 0")
@@ -137,15 +145,19 @@ class GuiSettingsPopupController:
     def apply_settings(self) -> bool:
         """Validate and write user edits to the shared GUI configuration."""
         updates: list[tuple[tuple[str, ...], Any]] = []
+        validation_errors: list[tuple[tuple[str, ...], Any, ValueError]] = []
         for path, (value_var, entry) in self.view.entries.items():
             try:
                 updates.append((path, coerce_gui_value(value_var.get(), path)))
                 entry._toggle_error(False)
             except ValueError as error:
                 entry._toggle_error(True)
-                self.view.set_status(f"{'.'.join(path)}: {error}")
-                entry.focus_set()
-                return False
+                validation_errors.append((path, entry, error))
+        if validation_errors:
+            path, entry, error = validation_errors[0]
+            self.view.set_status(f"{'.'.join(path)}: {error}")
+            entry.focus_set()
+            return False
         updates.extend(
             (path, value_var.get())
             for path, value_var in self.view.boolean_variables.items()

@@ -18,6 +18,7 @@ def _controller_for_apply(entries):
             "gui": {
                 "remote_focus_waveform": {"amplitude_step_size": 0.0001},
                 "channel_settings": {"laser_power": {"max": 100}},
+                "stack_acquisition": {"step_size": {"min": 0.01, "step": 0.01}},
                 "histogram": {"enabled": True},
                 "mip_display": {"enabled": True},
             }
@@ -38,6 +39,12 @@ def _controller_for_apply(entries):
 
 def _entry(value):
     return (SimpleNamespace(get=lambda: value), MagicMock())
+
+
+def _mutable_entry(value):
+    """Return a test entry whose value can change between Apply attempts."""
+    state = {"value": value}
+    return state, (SimpleNamespace(get=lambda: state["value"]), MagicMock())
 
 
 def test_apply_shows_restart_information_for_laser_power_changes():
@@ -112,3 +119,72 @@ def test_apply_updates_histogram_and_mip_displays_immediately():
     menu_controller.mip_enabled.set.assert_called_once_with(False)
     menu_controller.toggle_mip.assert_called_once()
     controller.view.show_info.assert_not_called()
+
+
+def test_apply_rejects_zero_for_any_stack_step_size_field():
+    controller = _controller_for_apply(
+        {
+            ("stack_acquisition", "step_size", "min"): _entry("0"),
+            ("stack_acquisition", "step_size", "step"): _entry("0.01"),
+        }
+    )
+
+    assert controller.apply_settings() is False
+    assert controller.parent_controller.configuration["gui"]["stack_acquisition"][
+        "step_size"
+    ]["min"] == 0.01
+
+
+def test_apply_rejects_all_invalid_values_without_saving_valid_updates():
+    minimum_entry = _entry("0")
+    step_entry = _entry("0")
+    controller = _controller_for_apply(
+        {
+            ("channel_settings", "laser_power", "max"): _entry("101"),
+            ("stack_acquisition", "step_size", "min"): minimum_entry,
+            ("stack_acquisition", "step_size", "step"): step_entry,
+        }
+    )
+
+    assert controller.apply_settings() is False
+
+    assert controller.parent_controller.configuration["gui"]["channel_settings"][
+        "laser_power"
+    ]["max"] == 100
+    assert controller.parent_controller.configuration["gui"]["stack_acquisition"][
+        "step_size"
+    ] == {"min": 0.01, "step": 0.01}
+    minimum_entry[1]._toggle_error.assert_called_once_with(True)
+    step_entry[1]._toggle_error.assert_called_once_with(True)
+
+
+def test_apply_requires_every_invalid_value_to_be_corrected():
+    minimum, minimum_entry = _mutable_entry("0")
+    step, step_entry = _mutable_entry("0")
+    controller = _controller_for_apply(
+        {
+            ("channel_settings", "laser_power", "max"): _entry("101"),
+            ("stack_acquisition", "step_size", "min"): minimum_entry,
+            ("stack_acquisition", "step_size", "step"): step_entry,
+        }
+    )
+
+    assert controller.apply_settings() is False
+    minimum["value"] = "0.01"
+
+    # Correcting only one invalid value must not apply any update.
+    assert controller.apply_settings() is False
+    assert controller.parent_controller.configuration["gui"]["channel_settings"][
+        "laser_power"
+    ]["max"] == 100
+
+    step["value"] = "0.02"
+
+    # Once every value is valid, all edits are applied in one transaction.
+    assert controller.apply_settings() is True
+    assert controller.parent_controller.configuration["gui"]["channel_settings"][
+        "laser_power"
+    ]["max"] == 101.0
+    assert controller.parent_controller.configuration["gui"]["stack_acquisition"][
+        "step_size"
+    ] == {"min": 0.01, "step": 0.02}

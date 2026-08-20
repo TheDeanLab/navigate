@@ -58,6 +58,10 @@ from navigate.view.popups.camera_setting_popup import (
 )
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
+from navigate.view.popups.gui_settings_popup import GuiSettingsPopup
+from navigate.controller.sub_controllers.gui_settings_popup import (
+    GuiSettingsPopupController,
+)
 
 # Local Controller Imports
 from navigate.controller.sub_controllers.gui import GUIController
@@ -432,6 +436,7 @@ class MenuController(GUIController):
         windows_menu = {
             self.view.menubar.menu_window: {
                 "Online Documentation": ["standard", self.popup_help, None, None, None],
+                "Setting": ["standard", self.popup_gui_settings, None, None, None],
                 "add_separator_0": ["standard", None, None, None, None],
                 "Select Channel Settings": [
                     "standard",
@@ -545,7 +550,7 @@ class MenuController(GUIController):
 
         # Create a variable to track histogram state
         self.histogram_enabled = tk.BooleanVar(
-            value=self.parent_controller.configuration["gui"]["histogram"].get(
+            value=self.parent_controller.configuration["gui"].get("histogram", {}).get(
                 "enabled", True
             )
         )
@@ -568,8 +573,12 @@ class MenuController(GUIController):
         mip_menu = tk.Menu(self.view.menubar.menu_window)
         self.view.menubar.menu_window.add_cascade(label="MIP Display", menu=mip_menu)
 
-        # Create a variable to track histogram state
-        self.mip_enabled = tk.BooleanVar()
+        # Create a variable to track MIP display state.
+        self.mip_enabled = tk.BooleanVar(
+            value=self.parent_controller.configuration["gui"].get("mip_display", {}).get(
+                "enabled", True
+            )
+        )
 
         # Add radiobuttons to the histogram submenu
         mip_menu.add_radiobutton(
@@ -1063,6 +1072,21 @@ class MenuController(GUIController):
     def popup_help(self) -> None:
         """Open a web browser to the Navigate documentation."""
         webbrowser.open_new_tab("https://thedeanlab.github.io/navigate/")
+
+    @log_function_call
+    def popup_gui_settings(self) -> None:
+        """Display the complete current GUI configuration."""
+        popup_controller = getattr(
+            self.parent_controller, "gui_settings_popup_controller", None
+        )
+        if popup_controller is not None:
+            popup_controller.showup()
+            return
+
+        popup = GuiSettingsPopup(self.view)
+        self.parent_controller.gui_settings_popup_controller = GuiSettingsPopupController(
+            popup, self.parent_controller
+        )
 
     @log_function_call
     def toggle_stage_limits(self, *args) -> None:

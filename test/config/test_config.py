@@ -53,6 +53,7 @@ def test_config_methods():
     methods = dir(config)
     desired_methods = [
         "DictProxy",
+        "GUI_SETTING_DEFAULTS",
         "ListProxy",
         "Path",
         "__builtins__",
@@ -280,6 +281,7 @@ class TestVerifyConfiguration(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
 
         configuration["configuration"]["microscopes"]["Mesoscale"]["filter_wheel"][
@@ -308,6 +310,7 @@ class TestVerifyConfiguration(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         for microscope_name in configuration["configuration"]["microscopes"].keys():
             del configuration["configuration"]["microscopes"][microscope_name][
@@ -330,6 +333,7 @@ class TestVerifyConfiguration(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         microscope_names = list(configuration["configuration"]["microscopes"].keys())
         # delete filter wheel of the first microscope
@@ -360,6 +364,7 @@ class TestVerifyConfiguration(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         microscope_names = list(configuration["configuration"]["microscopes"].keys())
         # change filter wheel of the first microscope to have different number of filter wheels and different filter wheel types
@@ -415,6 +420,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
         saving_dict_sample = {
@@ -525,6 +531,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
             experiment=experiment_file_path,
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
         config.verify_experiment_config(self.manager, configuration)
@@ -611,6 +618,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             experiment=os.path.join(
                 self.test_root, "experiment_missing_parameters.yml"
             ),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
         config.verify_experiment_config(self.manager, configuration)
@@ -647,6 +655,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
             experiment=os.path.join(self.config_path, "experiment.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
         experiment = configuration["experiment"]
@@ -924,6 +933,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
             experiment=os.path.join(self.config_path, "experiment.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
 

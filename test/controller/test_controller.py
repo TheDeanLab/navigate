@@ -849,6 +849,46 @@ def test_execute_exit(controller):
     pass
 
 
+def test_execute_exit_saves_gui_configuration_to_loaded_path(tmp_path):
+    """GUI settings are persisted to the file from which they were loaded."""
+    from navigate.controller.controller import Controller
+
+    controller = Controller.__new__(Controller)
+    controller.gui_configuration_path = tmp_path / "profiles" / "custom_gui.yml"
+    controller.configuration = {
+        name: {"name": name}
+        for name in [
+            "experiment",
+            "multi_positions",
+            "gui",
+            "waveform_constants",
+            "rest_api_config",
+            "waveform_templates",
+        ]
+    }
+    controller.sloppy_stop = MagicMock()
+    controller.update_experiment_setting = MagicMock()
+    controller.model = MagicMock()
+    controller.event_queue = MagicMock()
+    controller._stop_event_pump = MagicMock()
+    controller.threads_pool = MagicMock()
+
+    with (
+        patch(
+            "navigate.controller.controller.get_navigate_path", return_value="/system"
+        ),
+        patch("navigate.controller.controller.save_yaml_file") as save_yaml,
+        pytest.raises(SystemExit),
+    ):
+        controller.execute("exit")
+
+    save_yaml.assert_any_call(
+        file_directory=str(controller.gui_configuration_path.parent),
+        content_dict=controller.configuration["gui"],
+        filename=controller.gui_configuration_path.name,
+    )
+
+
 def test_execute_adaptive_optics(controller):
     controller.threads_pool.createThread = MagicMock()
     for command in [

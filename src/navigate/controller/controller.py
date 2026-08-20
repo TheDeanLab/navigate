@@ -1462,8 +1462,13 @@ class Controller:
                 ("rest_api_config", "rest_api_config.yml"),
                 ("waveform_templates", "waveform_templates.yml"),
             ]:
+                config_directory = file_directory
+                if config_name == "gui":
+                    gui_configuration_path = os.fspath(self.gui_configuration_path)
+                    config_directory = os.path.dirname(gui_configuration_path)
+                    filename = os.path.basename(gui_configuration_path)
                 save_yaml_file(
-                    file_directory=file_directory,
+                    file_directory=config_directory,
                     content_dict=self.configuration[config_name],
                     filename=filename,
                 )

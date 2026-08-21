@@ -183,7 +183,10 @@ def verify_gui_configuration(manager, gui_settings):
                 is_valid = _is_finite_number(setting) and setting > 0
 
             if not is_valid:
-                update_config_dict(manager, group, setting_name, default)
+                if isinstance(default, dict):
+                    update_config_dict(manager, group, setting_name, default)
+                else:
+                    group[setting_name] = default
 
 
 def get_navigate_path():

@@ -112,7 +112,7 @@ def main():
     if command_line_args.configurator:
         Configurator(root, splash_screen)
     else:
-        Controller(
+        controller = Controller(
             root=root,
             splash_screen=splash_screen,
             configuration_path=configuration_path,
@@ -125,6 +125,11 @@ def main():
             log_queue=log_queue,
             args=command_line_args,
         )
+        if controller.startup_cancelled:
+            splash_screen.destroy()
+            root.destroy()
+            log_listener.stop()
+            return
 
     root.mainloop()
     log_listener.stop()

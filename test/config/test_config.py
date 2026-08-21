@@ -548,6 +548,28 @@ class TestVerifyConfiguration(unittest.TestCase):
             for issue in result.warnings
         )
 
+    def test_preloader_preserves_device_type_for_synthetic_runtime(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        microscope["camera"]["hardware"]["type"] = "HamamatsuOrcaLightningCamera"
+        microscope["camera"]["hardware"].pop("serial_number")
+
+        config.preload_configuration(
+            self.manager,
+            configuration,
+            preserve_device_types=True,
+        )
+
+        camera_hardware = microscope["camera"]["hardware"]
+        assert camera_hardware["type"] == "HamamatsuOrcaLightningCamera"
+        assert camera_hardware["serial_number"] == "SYNTHETIC-CAMERA-0"
+
     def test_preloader_adds_synthetic_stage_for_missing_axes(self):
         configuration = config.load_configs(
             self.manager,

@@ -131,7 +131,7 @@ def _is_finite_number(value):
 
 
 def _first_valid_numeric_value(*values):
-    """Return the first finite numeric value, or Navigate's zero-delay default."""
+    """Return the first finite numeric value, or Navigate's one-delay default."""
     for value in values:
         try:
             if isfinite(float(value)):
@@ -1615,9 +1615,11 @@ class ConfigurationPreloader:
         self,
         manager: multiprocessing.Manager,
         policy: Union[PreloadPolicy, str] = PreloadPolicy.SYNTHETIC_FALLBACK,
+        preserve_device_types: bool = False,
     ) -> None:
         self.manager = manager
         self.policy = PreloadPolicy(policy)
+        self.preserve_device_types = preserve_device_types
         self.issues: list[ValidationIssue] = []
         self.schemas = DeviceSchemaResolver()
 
@@ -1862,8 +1864,13 @@ class ConfigurationPreloader:
         path = f"microscopes.{microscope_name}.{category}"
         if index is not None:
             path = f"{path}[{index}]"
+        action_taken = "replaced with synthetic device"
+        if self.preserve_device_types:
+            action_taken = "repaired for synthetic runtime while retaining device type"
         self._issue(
-            path, f"{category} has {details}.", "replaced with synthetic device"
+            path,
+            f"{category} has {details}.",
+            action_taken,
         )
         if self.policy == PreloadPolicy.SYNTHETIC_FALLBACK:
             self._replace_with_synthetic(microscope, category, index)
@@ -1873,21 +1880,73 @@ class ConfigurationPreloader:
     def _replace_with_synthetic(
         self, microscope: dict, category: str, index: Optional[int]
     ) -> None:
+        original_types = {}
+        if self.preserve_device_types:
+            original_types = self._configured_device_types(microscope, category, index)
+
         synthetic_device = REQUIRED_DEVICE_DEFAULTS[category]
         if index is None:
             update_config_dict(self.manager, microscope, category, synthetic_device)
-            return
-        if category == "stage":
+        elif category == "stage":
             build_nested_dict(
                 self.manager,
                 microscope[category]["hardware"],
                 index,
                 synthetic_device["hardware"][0],
             )
-            return
-        build_nested_dict(
-            self.manager, microscope[category], index, synthetic_device[0]
+        else:
+            build_nested_dict(
+                self.manager, microscope[category], index, synthetic_device[0]
+            )
+
+        for path, device_type in original_types.items():
+            self._set_nested_value(
+                self._replacement_device(microscope, category, index), path, device_type
+            )
+
+    @staticmethod
+    def _replacement_device(microscope: dict, category: str, index: Optional[int]):
+        """Return the device entry that was just replaced with synthetic defaults."""
+        if category == "stage":
+            return microscope[category]["hardware"][index]
+        if index is not None:
+            return microscope[category][index]
+        return microscope[category]
+
+    @classmethod
+    def _configured_device_types(
+        cls, microscope: dict, category: str, index: Optional[int]
+    ) -> dict[Tuple[str, ...], Any]:
+        """Capture configured hardware types before replacing invalid settings."""
+        device = cls._replacement_device(microscope, category, index)
+        type_paths = (
+            (("onoff", "hardware", "type"), ("power", "hardware", "type"))
+            if category == "laser"
+            else (("type",) if category == "stage" else (("hardware", "type"),))
         )
+        types = {}
+        for path in type_paths:
+            value = cls._nested_value(device, path)
+            if value is not None:
+                types[path] = value
+        return types
+
+    @staticmethod
+    def _nested_value(device: Any, path: Tuple[str, ...]) -> Any:
+        """Return a nested value when every path segment exists."""
+        value = device
+        for key in path:
+            if not hasattr(value, "keys") or key not in value:
+                return None
+            value = value[key]
+        return value
+
+    @staticmethod
+    def _set_nested_value(device: Any, path: Tuple[str, ...], value: Any) -> None:
+        """Set a nested value in a replacement device configuration."""
+        for key in path[:-1]:
+            device = device[key]
+        device[path[-1]] = value
 
     @staticmethod
     def _schema_value(category: str, device: dict, name: str) -> Any:
@@ -1947,10 +2006,15 @@ def preload_configuration(
     manager: multiprocessing.Manager,
     configuration: dict,
     policy: Union[PreloadPolicy, str] = PreloadPolicy.SYNTHETIC_FALLBACK,
+    preserve_device_types: bool = False,
 ) -> PreloadResult:
     """Run Navigate's configuration preloading pipeline on shared dictionaries.
 
     ``configuration`` remains the original nested ``Manager`` proxy structure;
-    no plain-dictionary conversion is performed.
+    no plain-dictionary conversion is performed. Set ``preserve_device_types``
+    for synthetic runtime mode to retain configured device types while repairing
+    invalid parameters with synthetic defaults.
     """
-    return ConfigurationPreloader(manager, policy).preload(configuration)
+    return ConfigurationPreloader(
+        manager, policy, preserve_device_types=preserve_device_types
+    ).preload(configuration)

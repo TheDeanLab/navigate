@@ -195,6 +195,8 @@ class Controller:
         self.args = args
         #: bool: Whether Navigate is running with synthetic hardware enabled.
         self.is_synthetic_hardware = bool(getattr(args, "synthetic_hardware", False))
+        #: bool: Whether startup was cancelled after synthetic-device confirmation.
+        self.startup_cancelled = False
         logger.info(f"Variable Input Arguments: {self.args}")
 
         #: Object: Thread pool for the controller.
@@ -220,7 +222,11 @@ class Controller:
             gui=self.gui_configuration_path,
         )
 
-        self.preload_result = preload_configuration(self.manager, self.configuration)
+        self.preload_result = preload_configuration(
+            self.manager,
+            self.configuration,
+            preserve_device_types=self.is_synthetic_hardware,
+        )
         for issue in self.preload_result.warnings:
             logger.warning(
                 "Configuration preloading warning at %s: %s (%s)",
@@ -228,6 +234,18 @@ class Controller:
                 issue.message,
                 issue.action_taken,
             )
+        synthetic_replacement_issues = [
+            issue
+            for issue in self.preload_result.warnings
+            if "synthetic" in issue.action_taken
+        ]
+        if (
+            synthetic_replacement_issues
+            and not self.is_synthetic_hardware
+            and not self._confirm_synthetic_device_startup(synthetic_replacement_issues)
+        ):
+            self._cancel_synthetic_device_startup(synthetic_replacement_issues)
+            return
 
         positions = load_yaml_file(multi_positions_path)
         positions = verify_positions_config(positions)
@@ -409,6 +427,38 @@ class Controller:
         self.window_height = 0
         self.view.root.after(5000, self.enable_resize)
         self.view.root.bind("<Configure>", self.resize)
+
+    def _cancel_synthetic_device_startup(self, issues: list[Any]) -> None:
+        """Report rejected synthetic replacements and stop before model startup."""
+        details = "\n".join(
+            f"- {issue.path}: {issue.message} ({issue.action_taken})"
+            for issue in issues
+        )
+        message = (
+            "Navigate startup cancelled because synthetic device replacements were "
+            f"not accepted:\n{details}"
+        )
+        logger.error(message)
+        print(message, file=sys.stderr)
+        self.startup_cancelled = True
+        self.manager.shutdown()
+
+    def _confirm_synthetic_device_startup(self, issues: list[Any]) -> bool:
+        """Ask whether to continue with the synthetic device replacements."""
+        details = "\n\n".join(
+            f"{issue.path}: {issue.message}\nAction: {issue.action_taken}"
+            for issue in issues
+        )
+        message = (
+            "Some configured devices cannot be loaded. Navigate will use "
+            "synthetic replacements:\n\n"
+            f"{details}\n\nContinue with synthetic devices?"
+        )
+        return messagebox.askyesno(
+            title="Synthetic Devices Required",
+            message=message,
+            parent=self.splash_screen,
+        )
 
     def use_asi_model(self) -> bool:
         """Check if the model uses ASI hardware.

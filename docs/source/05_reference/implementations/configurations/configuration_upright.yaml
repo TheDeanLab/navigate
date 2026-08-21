@@ -23,7 +23,6 @@ microscopes:
         type: HamamatsuOrcaLightning #SyntheticCamera
         serial_number: 000035
       defect_correct_mode: 2.0
-      delay: 10 #ms
       settle_down: 0.0 #ms
     remote_focus_device:
       hardware:
@@ -207,7 +206,6 @@ microscopes:
       y_pixels: 2960.0
       pixel_size_in_microns: 4.25
       defect_correct_mode: 2.0
-      delay: 25 #8 #5.0
       settle_down: 0.0 #ms
     remote_focus_device:
       hardware:

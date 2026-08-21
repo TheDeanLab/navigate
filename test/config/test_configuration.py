@@ -51,6 +51,12 @@ class TestConfiguration(unittest.TestCase):
         with open(yaml_path) as file:
             self.data = yaml.safe_load(file)
 
+        synthetic_yaml_path = os.path.join(
+            root_path, "src", "navigate", "config", "synthetic_configuration.yaml"
+        )
+        with open(synthetic_yaml_path) as file:
+            self.synthetic_data = yaml.safe_load(file)
+
         waveform_constants_path = os.path.join(
             root_path, "src", "navigate", "config", "waveform_constants.yml"
         )
@@ -188,6 +194,14 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(
             self.waveform_constants["other_constants"]["camera_delay"], "1.0"
         )
+
+    def test_synthetic_camera_timing_uses_waveform_constants(self):
+        for microscope in self.synthetic_data["microscopes"].values():
+            camera = microscope.get("camera")
+            if camera is None:
+                continue
+            self.assertNotIn("delay", camera)
+            self.assertNotIn("delay_percent", camera)
 
     def daq_section(self, microscope, hardware_type):
         expected_daq_keys = [

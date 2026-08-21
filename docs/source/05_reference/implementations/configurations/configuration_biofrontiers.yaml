@@ -15,7 +15,6 @@ microscopes:
         type: HamamatsuOrca
         serial_number: 000646
       defect_correct_mode: 2.0
-      delay: 10.0 #ms
       settle_down: 0.0 #ms
       flip_x: False
       flip_y: False

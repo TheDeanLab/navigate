@@ -299,6 +299,5 @@ test.xml
 /docs/source/05_reference/_autosummary
 /docs/source/05_reference/_autosummary
 codex.md
-AGENTS.md
 uv.lock
 .worktrees/

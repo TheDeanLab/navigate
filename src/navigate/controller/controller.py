@@ -83,6 +83,7 @@ from navigate.config.config import (
     verify_positions_config,
     verify_configuration,
     get_navigate_path,
+    preload_configuration,
 )
 from navigate.tools.file_functions import (
     load_yaml_file,
@@ -192,6 +193,8 @@ class Controller:
 
         #: iterable: Non-default command line input arguments for
         self.args = args
+        #: bool: Whether Navigate is running with synthetic hardware enabled.
+        self.is_synthetic_hardware = bool(getattr(args, "synthetic_hardware", False))
         logger.info(f"Variable Input Arguments: {self.args}")
 
         #: Object: Thread pool for the controller.
@@ -217,9 +220,14 @@ class Controller:
             gui=self.gui_configuration_path,
         )
 
-        verify_configuration(self.manager, self.configuration)
-        verify_experiment_config(self.manager, self.configuration)
-        verify_waveform_constants(self.manager, self.configuration)
+        self.preload_result = preload_configuration(self.manager, self.configuration)
+        for issue in self.preload_result.warnings:
+            logger.warning(
+                "Configuration preloading warning at %s: %s (%s)",
+                issue.path,
+                issue.message,
+                issue.action_taken,
+            )
 
         positions = load_yaml_file(multi_positions_path)
         positions = verify_positions_config(positions)
@@ -1953,8 +1961,7 @@ class Controller:
                     handler(latest_progress)
                 except Exception:
                     print(
-                        "*** unhandled event: autofocus_progress, "
-                        f"{latest_progress}"
+                        "*** unhandled event: autofocus_progress, " f"{latest_progress}"
                     )
 
         while self._event_pump_running:

@@ -86,6 +86,31 @@ def test_set_position(stage_controller):
     )
 
 
+def test_synthetic_stage_controls_follow_runtime_mode(stage_controller):
+    config = MagicMock()
+    config.get_microscope_configuration_dict.return_value = {
+        "stage": {"hardware": [{"type": "Synthetic", "axes": ["x"]}]}
+    }
+    xy_frame = stage_controller.view.xy_frame
+    xy_frame.toggle_button_states = MagicMock()
+    xy_frame.increment_box.widget.config = MagicMock()
+    stage_controller.view.position_frame.inputs["x"].widget.config = MagicMock()
+
+    stage_controller.parent_controller.is_synthetic_hardware = True
+    stage_controller.disable_synthetic_stages(config)
+
+    xy_frame.toggle_button_states.assert_called_once_with(False, ["x"])
+    xy_frame.increment_box.widget.config.assert_called_once_with(state="normal")
+
+    xy_frame.toggle_button_states.reset_mock()
+    xy_frame.increment_box.widget.config.reset_mock()
+    stage_controller.parent_controller.is_synthetic_hardware = False
+    stage_controller.disable_synthetic_stages(config)
+
+    xy_frame.toggle_button_states.assert_called_once_with(True, ["x"])
+    xy_frame.increment_box.widget.config.assert_called_once_with(state="disabled")
+
+
 def test_set_position_silent(stage_controller):
 
     widgets = stage_controller.view.get_widgets()

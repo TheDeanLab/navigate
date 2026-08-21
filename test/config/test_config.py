@@ -90,8 +90,8 @@ def test_config_methods():
         "Union",
         "multiprocessing",
     ]
-    for method in methods:
-        assert method in desired_methods
+    for method in desired_methods:
+        assert method in methods
 
 
 def test_get_navigate_path():
@@ -306,6 +306,256 @@ class TestVerifyConfiguration(unittest.TestCase):
                     filter_wheel_name == temp
                 ), "filter wheel names should be the same for all microscopes"
 
+    def test_verify_configuration_uses_gui_channel_settings_count(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        configuration["gui"]["channel_settings"]["count"] = 6
+        config.update_config_dict(
+            self.manager,
+            configuration["configuration"],
+            "gui",
+            {"channels": {"count": 7}},
+        )
+        for microscope in configuration["configuration"]["microscopes"].values():
+            microscope["camera"]["count"] = 8
+
+        config.verify_configuration(self.manager, configuration)
+
+        assert configuration["gui"]["channel_settings"]["count"] == 6
+
+    def test_verify_configuration_uses_configuration_yaml_gui_channel_count(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        configuration["gui"]["channel_settings"].pop("count")
+        config.update_config_dict(
+            self.manager,
+            configuration["configuration"],
+            "gui",
+            {"channels": {"count": 7}},
+        )
+        for microscope in configuration["configuration"]["microscopes"].values():
+            microscope["camera"]["count"] = 8
+
+        config.verify_configuration(self.manager, configuration)
+
+        assert configuration["gui"]["channel_settings"]["count"] == 7
+
+    def test_verify_configuration_uses_camera_channel_count_when_gui_is_missing(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        configuration["gui"]["channel_settings"].pop("count")
+        configuration["configuration"].pop("gui")
+        microscopes = list(configuration["configuration"]["microscopes"].values())
+        microscopes[0]["camera"]["count"] = 3
+        microscopes[1]["camera"]["count"] = 7
+
+        config.verify_configuration(self.manager, configuration)
+
+        assert configuration["gui"]["channel_settings"]["count"] == 7
+
+    def test_verify_configuration_defaults_channel_count_to_five(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        configuration["gui"]["channel_settings"].pop("count")
+        configuration["configuration"].pop("gui")
+        for microscope in configuration["configuration"]["microscopes"].values():
+            microscope["camera"].pop("count", None)
+
+        config.verify_configuration(self.manager, configuration)
+
+        assert configuration["gui"]["channel_settings"]["count"] == 5
+
+    def test_preloader_adds_missing_required_device_to_shared_configuration(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        microscope.pop("shutter")
+
+        result = config.preload_configuration(self.manager, configuration)
+
+        assert isinstance(result.configuration, DictProxy)
+        assert microscope["shutter"]["hardware"]["type"] == "Synthetic"
+        assert any(
+            "Required shutter is missing" in issue.message for issue in result.warnings
+        )
+
+    def test_preloader_generated_synthetic_devices_meet_required_schemas(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        microscope.clear()
+
+        config.preload_configuration(self.manager, configuration)
+
+        assert microscope["daq"]["sample_rate"] == 100000
+        assert microscope["camera"]["hardware"]["type"] == "Synthetic"
+        assert microscope["camera"]["hardware"]["serial_number"] == "SYNTHETIC-CAMERA-0"
+        assert microscope["remote_focus"]["hardware"]["min"] == -5.0
+        assert microscope["remote_focus"]["hardware"]["max"] == 5.0
+        assert microscope["galvo"][0]["phase"] == 1.57079
+        assert list(microscope["stage"]["hardware"][0]["axes"]) == [
+            "x",
+            "y",
+            "z",
+            "theta",
+            "f",
+        ]
+        assert microscope["zoom"]["position"]["1x"] == 0
+        assert microscope["laser"][0]["wavelength"] == 488
+
+    def test_preloader_normalizes_legacy_remote_focus_key(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        microscope["remote_focus_device"] = microscope.pop("remote_focus")
+
+        config.preload_configuration(self.manager, configuration)
+
+        assert "remote_focus" in microscope
+        assert "remote_focus_device" not in microscope
+
+    def test_preloader_replaces_invalid_required_device_with_synthetic(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        remote_focus = configuration["configuration"]["microscopes"]["Mesoscale"][
+            "remote_focus"
+        ]
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        remote_focus["hardware"]["channel"] = ""
+
+        result = config.preload_configuration(self.manager, configuration)
+
+        assert microscope["remote_focus"]["hardware"]["type"] == "Synthetic"
+        assert any(
+            "invalid required setting hardware/channel" in issue.message
+            for issue in result.warnings
+        )
+
+    def test_preloader_replaces_camera_with_missing_serial_number(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        microscope["camera"]["hardware"]["type"] = "HamamatsuOrcaLightningCamera"
+        microscope["camera"]["hardware"].pop("serial_number")
+
+        result = config.preload_configuration(self.manager, configuration)
+
+        camera_hardware = microscope["camera"]["hardware"]
+        assert camera_hardware["type"] == "Synthetic"
+        assert camera_hardware["serial_number"] == "SYNTHETIC-CAMERA-0"
+        assert any(
+            "invalid required setting serial_number" in issue.message
+            for issue in result.warnings
+        )
+
+    def test_preloader_adds_synthetic_stage_for_missing_axes(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        config.update_config_dict(
+            self.manager,
+            microscope,
+            "stage",
+            {
+                "hardware": [
+                    {
+                        "type": "Synthetic",
+                        "serial_number": "REAL-STAGE-0",
+                        "axes": ["x", "y"],
+                        "axes_mapping": [1, 2],
+                    },
+                    {
+                        "type": "Synthetic",
+                        "axes": ["z"],
+                        "axes_mapping": [1],
+                    },
+                ]
+            },
+        )
+
+        result = config.preload_configuration(self.manager, configuration)
+
+        stages = microscope["stage"]["hardware"]
+        assert len(stages) == 3
+        assert stages[2]["type"] == "Synthetic"
+        assert stages[2]["serial_number"] == "SYNTHETIC-STAGE-2"
+        assert list(stages[2]["axes"]) == ["theta", "f"]
+        assert stages[1]["serial_number"] == "MISSING-STAGE-Mesoscale-1"
+        assert any(
+            "Stage configuration is missing axes: theta, f." in issue.message
+            for issue in result.warnings
+        )
+        assert any(
+            "Stage serial number is missing." in issue.message
+            for issue in result.warnings
+        )
+
+    def test_preloader_adds_synthetic_stage_for_missing_axes(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        stage_hardware = microscope["stage"]["hardware"]
+        stage_hardware[0]["axes"] = ["x", "y"]
+        stage_hardware[0]["axes_mapping"] = [1, 2]
+
+        result = config.preload_configuration(self.manager, configuration)
+
+        synthetic_stage = microscope["stage"]["hardware"][1]
+        assert synthetic_stage["type"] == "Synthetic"
+        assert synthetic_stage["serial_number"] == "SYNTHETIC-STAGE-1"
+        assert list(synthetic_stage["axes"]) == ["z", "theta", "f"]
+        assert any(
+            "Stage configuration is missing axes: z, theta, f." in issue.message
+            for issue in result.warnings
+        )
+
     def test_verify_waveform_constants_uses_legacy_camera_delay_as_default(self):
         configuration = config.load_configs(
             self.manager,
@@ -449,6 +699,50 @@ class TestVerifyConfiguration(unittest.TestCase):
                 filter_wheel_name not in filter_wheel_names
             ), f"filter wheel name {filter_wheel_name} is not unique"
             filter_wheel_names.append(filter_wheel_name)
+
+    def test_verify_configuration_assigns_names_to_blank_filter_wheels(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+        config.update_config_dict(
+            self.manager,
+            microscope,
+            "filter_wheel",
+            [
+                {
+                    "hardware": {
+                        "type": "ASIFilterWheel",
+                        "port": "COM12",
+                        "baudrate": 115200,
+                        "timeout": 0.25,
+                        "wheel_number": 0,
+                    },
+                    "name": "",
+                    "filter_wheel_delay": 0.03,
+                    "available_filters": {"Empty": 0, "Green": 1},
+                },
+                {
+                    "hardware": {
+                        "type": "SutterFilterWheel",
+                        "port": "COM15",
+                        "baudrate": 115200,
+                        "timeout": 0.25,
+                        "wheel_number": 2,
+                    },
+                    "name": "",
+                    "filter_wheel_delay": 0.03,
+                    "available_filters": {"Block": 0, "Red": 1},
+                },
+            ],
+        )
+
+        config.verify_configuration(self.manager, configuration)
+
+        names = [wheel["name"] for wheel in microscope["filter_wheel"]]
+        assert names == ["FilterWheel-0", "FilterWheel-1"]
 
 
 class TestVerifyExperimentConfig(unittest.TestCase):

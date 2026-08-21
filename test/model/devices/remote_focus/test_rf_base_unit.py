@@ -46,7 +46,6 @@ def _build_config(
                         }
                     },
                     "daq": {"sample_rate": 10, "trigger_source": "PFI1"},
-                    "camera": {"delay": 5},
                 }
             }
         },
@@ -68,6 +67,7 @@ def _build_config(
         },
         "waveform_constants": {
             "other_constants": {
+                "camera_delay": "5",
                 "remote_focus_ramp_falling": "20",
                 "remote_focus_delay": "10",
                 "percent_smoothing": str(percent_smoothing),
@@ -100,7 +100,9 @@ def test_adjust_ramp_branch_with_smoothing_and_clipping(base_module, monkeypatch
     laser_constants["amplitude"] = "-"
     laser_constants["offset"] = "."
 
+    waveform_constants = config.pop("waveform_constants")
     rf = _make_remote_focus(base_module, config)
+    rf.configuration["waveform_constants"] = waveform_constants
     rf.waveform_dict = {"stale_key": np.array([0.0])}
 
     ramp_kwargs = {}

@@ -82,9 +82,6 @@ class DAQBase(ABC):
         #: dict: Dictionary of configuration parameters
         self.configuration = configuration
 
-        #: dict: Dictionary of waveform constants
-        self.waveform_constants = self.configuration["waveform_constants"]
-
         #: str: Name of the active microscope
         self.microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
@@ -127,6 +124,11 @@ class DAQBase(ABC):
     def __str__(self) -> str:
         """Returns the string representation of the DAQBase class"""
         return "DAQBase"
+
+    @property
+    def waveform_constants(self) -> dict[str, Any]:
+        """Return the currently loaded waveform constants."""
+        return self.configuration["waveform_constants"]
 
     @abstractmethod
     def stop_acquisition(self) -> None:

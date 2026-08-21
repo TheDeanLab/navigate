@@ -69,6 +69,7 @@ class FeatureConfigPopup:
         root,
         *args,
         features=[],
+        palette_features=None,
         feature_name="",
         args_name=[],
         args_value=[],
@@ -84,6 +85,8 @@ class FeatureConfigPopup:
             List of arguments
         features : list
             List of features
+        palette_features : list, optional
+            Feature names displayed in the left-side palette
         feature_name : str
             Name of the feature
         args_name : list
@@ -91,15 +94,73 @@ class FeatureConfigPopup:
         args_value : list
             List of arguments value
         """
+        # Support the legacy positional ``features`` argument as well as the
+        # keyword form used by the controller.
+        if not features and args:
+            features = args[0]
+        if palette_features is None:
+            palette_features = features
+
         # Creating popup window with this name and size/placement,
 
         #: PopUp: Popup window
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
+        self.popup.resizable(tk.TRUE, tk.TRUE)
 
-        # Creating content frame
+        # Creating content frame and feature node palette
         content_frame = self.popup.get_frame()
+        content_frame.grid_columnconfigure(0, weight=1)
+        content_frame.grid_rowconfigure(0, weight=1)
+
+        outer_frame = ttk.Frame(content_frame)
+        outer_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        outer_frame.columnconfigure(1, weight=1)
+        outer_frame.rowconfigure(0, weight=1)
+
+        palette = ttk.LabelFrame(outer_frame, text="Feature Nodes", padding=10)
+        palette.grid(row=0, column=0, sticky=tk.NS, padx=(0, 12))
+        palette.rowconfigure(0, weight=1)
+        palette.columnconfigure(0, weight=1)
+
+        palette_canvas = tk.Canvas(
+            palette, width=150, height=380, highlightthickness=0, borderwidth=0
+        )
+        palette_scrollbar = ttk.Scrollbar(
+            palette, orient="vertical", command=palette_canvas.yview
+        )
+        palette_canvas.configure(yscrollcommand=palette_scrollbar.set)
+        palette_canvas.grid(row=0, column=0, sticky=tk.NS)
+        palette_scrollbar.grid(row=0, column=1, sticky=tk.NS, padx=(6, 0))
+
+        #: ttk.Frame: Container for the feature node palette buttons.
+        self.palette_items = ttk.Frame(palette_canvas)
+        palette_window = palette_canvas.create_window(
+            (0, 0), window=self.palette_items, anchor="nw"
+        )
+        palette_canvas.bind(
+            "<Configure>",
+            lambda event: palette_canvas.itemconfigure(
+                palette_window, width=event.width
+            ),
+        )
+        self.palette_items.bind(
+            "<Configure>",
+            lambda _event: palette_canvas.configure(
+                scrollregion=palette_canvas.bbox("all")
+            ),
+        )
+        self.palette_buttons = {}
+        for feature in palette_features:
+            button = ttk.Button(self.palette_items, text=feature)
+            button.pack(fill="x", padx=5, pady=3)
+            self.palette_buttons[feature] = button
+
+        # Creating configuration content frame
+        content_frame = ttk.Frame(outer_frame)
+        content_frame.grid(row=0, column=1, sticky=tk.NSEW)
+        content_frame.columnconfigure(0, weight=1)
 
         #: list: List of input widgets
         self.inputs = []
@@ -249,7 +310,7 @@ class FeatureListPopup:
         # PopUp is a Toplevel window
         #: PopUp: Popup window
         self.popup = PopUp(
-            root, kwargs["title"], "+320+180", top=False, transient=False
+            root, kwargs["title"], "+500+360", top=False, transient=False
         )
         self.popup.resizable(tk.TRUE, tk.TRUE)
         self.popup.grid_columnconfigure(0, weight=1)
@@ -293,26 +354,57 @@ class FeatureListPopup:
             pady=get_theme_space_px(3),
         )
 
-        scroll_frame = ttk.Frame(content_frame)
-        scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
-        canvas = tk.Canvas(scroll_frame, width=800, height=350)
-        scrollbar = ttk.Scrollbar(
-            scroll_frame, orient="horizontal", command=canvas.xview
-        )
-        self.feature_view_frame = ttk.Frame(canvas)
+        outer_frame = ttk.Frame(content_frame)
+        content_frame.grid_rowconfigure(3, weight=1)
+        outer_frame.grid(row=3, column=0, sticky=tk.NSEW)
+        outer_frame.columnconfigure(1, weight=1)
+        outer_frame.rowconfigure(0, weight=1)
 
-        self.feature_view_frame.bind(
-            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
+        # feature nodes palette
+        palette = ttk.LabelFrame(outer_frame, text="Feature Nodes", padding=10)
+        palette.grid(row=0, column=0, sticky="nsw", padx=(0, 12))
+        palette.rowconfigure(0, weight=1)
+        palette.columnconfigure(1, weight=1)
 
-        canvas.create_window((0, 0), window=self.feature_view_frame, anchor="nw")
+        palette_canvas = tk.Canvas(palette, width=150, height=380,
+                                   highlightthickness=0, borderwidth=0)
+        scrollbar = ttk.Scrollbar(palette, orient="vertical", command=palette_canvas.yview)
+        palette_canvas.configure(yscrollcommand=scrollbar.set)
+        palette_canvas.grid(row=0, column=0, sticky="ns")
+        scrollbar.grid(row=0, column=1, sticky="ns", padx=(6, 0))
 
-        canvas.configure(xscrollcommand=scrollbar.set)
+        self.palette_items = ttk.Frame(palette_canvas)
+        palette_window = palette_canvas.create_window((0, 0), window=self.palette_items, anchor="nw")
+        palette_canvas.bind("<Configure>", lambda e: palette_canvas.itemconfig(palette_window, width=e.width))
+        self.palette_items.bind("<Configure>", lambda e: palette_canvas.configure(scrollregion=palette_canvas.bbox("all")))
 
-        canvas.pack(side="top", fill="both", expand=True)
-        scrollbar.pack(side="bottom", fill="x")
 
-        separator = ttk.Separator(content_frame)
+
+        board_content_frame = ttk.Frame(outer_frame)
+        board_content_frame.grid(row=0, column=1, sticky="nsew")
+        board_content_frame.columnconfigure(0, weight=1)
+        board_content_frame.rowconfigure(0, weight=1)
+
+        board_box = ttk.LabelFrame(board_content_frame, text="Feature List", padding=10)
+        board_box.grid(row=0, column=0, sticky="nsew")
+        board_box.columnconfigure(0, weight=1)
+        board_box.rowconfigure(1, weight=1)
+        label = ttk.Label(board_box, text="Drag feature nodes from the left panel to this board to create a feature list.")
+        label.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+
+        self.board_canvas = tk.Canvas(board_box,highlightthickness=0, borderwidth=0)
+        self.board_canvas.configure(takefocus=True)
+        self.board_canvas.grid(row=1, column=0, sticky="nsew")
+        board_scrollbar = ttk.Scrollbar(board_box, orient="horizontal", command=self.board_canvas.xview)
+        board_scrollbar.grid(row=2, column=0, sticky="ew", pady=(6, 0))
+        self.board_canvas.configure(xscrollcommand=board_scrollbar.set)
+
+        self.feature_view_frame = ttk.Frame(self.board_canvas)
+        self.board_window = self.board_canvas.create_window((0, 0), window=self.feature_view_frame, anchor="nw")
+
+        self.marker = tk.Frame(self.feature_view_frame, background="#2878d4", width=3, height=30)
+
+        separator = ttk.Separator(board_content_frame)
         separator.grid(
             row=4,
             column=0,
@@ -320,7 +412,7 @@ class FeatureListPopup:
             padx=get_theme_space_px(3),
             pady=get_theme_space_px(3),
         )
-        self.inputs["content"] = tk.Text(content_frame, width=100, height=10)
+        self.inputs["content"] = tk.Text(board_content_frame, width=100, height=10)
         self.inputs["content"].grid(
             row=5,
             column=0,
@@ -362,23 +454,27 @@ class FeatureListFrame(ttk.Frame):
 
     def __init__(self, root, *args, width=800, height=200, **kwargs):
         super().__init__(root)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
-        scroll_frame = ttk.Frame(self)
-        scroll_frame.grid(row=0, column=0, sticky=tk.NSEW)
-        canvas = tk.Canvas(scroll_frame, width=width, height=height)
-        scrollbar = ttk.Scrollbar(scroll_frame, orient="horizon", command=canvas.xview)
-        self.feature_view_frame = ttk.Frame(canvas)
-
-        self.feature_view_frame.bind(
-            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        self.board_canvas = tk.Canvas(
+            self, width=width, height=height, highlightthickness=0, borderwidth=0
         )
+        self.board_canvas.configure(takefocus=True)
+        self.board_canvas.grid(row=0, column=0, sticky=tk.NSEW)
+        scrollbar = ttk.Scrollbar(
+            self, orient="horizontal", command=self.board_canvas.xview
+        )
+        scrollbar.grid(row=1, column=0, sticky=tk.EW, pady=(6, 0))
+        self.board_canvas.configure(xscrollcommand=scrollbar.set)
 
-        canvas.create_window((0, 0), window=self.feature_view_frame, anchor="nw")
-
-        canvas.configure(xscrollcommand=scrollbar.set)
-
-        canvas.pack(side="top", fill="both", expand=True)
-        scrollbar.pack(side="bottom", fill="x")
+        self.feature_view_frame = ttk.Frame(self.board_canvas)
+        self.board_window = self.board_canvas.create_window(
+            (0, 0), window=self.feature_view_frame, anchor="nw"
+        )
+        self.marker = tk.Frame(
+            self.feature_view_frame, background="#2878d4", width=3, height=30
+        )
 
         self.content = tk.Text(self, width=100, height=5)
         self.content.grid(

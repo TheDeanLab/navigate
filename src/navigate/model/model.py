@@ -97,6 +97,7 @@ class Model:
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
         log_queue: Optional[multiprocessing.Queue] = None,
+        autofocus_progress_queue: multiprocessing.Queue = None,
     ) -> None:
         """Initialize the Model.
 
@@ -110,6 +111,8 @@ class Model:
             Event queue. Receives events from the controller.
         log_queue : Optional[multiprocessing.Queue]
             Log queue. Receives log messages from the controller.
+        autofocus_progress_queue : multiprocessing.Queue
+            Single-slot queue for replaceable autofocus progress snapshots.
         """
         # Set up logging
         log_setup("logging.yml", queue=log_queue)
@@ -227,6 +230,9 @@ class Model:
         # waveform queue
         #: multiprocessing.Queue: Waveform queue.
         self.event_queue = event_queue
+
+        #: multiprocessing.Queue: Replaceable autofocus plotting snapshots.
+        self.autofocus_progress_queue = autofocus_progress_queue
 
         # frame signal id
         #: int: Frame ID.
@@ -401,9 +407,9 @@ class Model:
         }
         # append plugin acquisition mode
         for mode in self.plugin_acquisition_modes:
-            self.acquisition_modes_feature_setting[mode] = (
-                self.plugin_acquisition_modes[mode].feature_list
-            )
+            self.acquisition_modes_feature_setting[
+                mode
+            ] = self.plugin_acquisition_modes[mode].feature_list
 
         self.load_feature_records()
 
@@ -601,7 +607,7 @@ class Model:
                 self.data_buffer_saving_flags = [False] * self.number_of_frames
             else:
 
-                # Retrieve dictionary of features and then initialize the signal and data containers.
+                # Retrieve the features, then initialize signal and data containers.
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
@@ -1018,10 +1024,7 @@ class Model:
         accumulated_durations_ns = []
 
         # main data acquisition loop
-        while (
-            not self.stop_acquisition
-            or self._should_drain_signal_completed_frames()
-        ):
+        while not self.stop_acquisition or self._should_drain_signal_completed_frames():
             if self.ask_to_pause_data_thread:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
@@ -1033,7 +1036,8 @@ class Model:
             # if there is at least one frame available, proceed. Else, wait and retry
             if not frame_ids:
                 self.logger.debug(
-                    f"Frame acquisition delayed. Attempt {self.camera_wait_iterations - wait_num + 1}/"
+                    "Frame acquisition delayed. Attempt "
+                    f"{self.camera_wait_iterations - wait_num + 1}/"
                     f"{self.camera_wait_iterations}. Remaining: {wait_num}. "
                     f"Expected cause: External trigger not received."
                 )
@@ -1043,7 +1047,8 @@ class Model:
                 if wait_num <= 0:
                     error_statement = (
                         "CAMERA TIMEOUT ERROR: Acquisition aborted.\n\n"
-                        "The camera failed to deliver a frame within the expected time window. "
+                        "The camera failed to deliver a frame within the expected "
+                        "time window. "
                         "This typically indicates:\n"
                         "  • Missing or misconfigured external trigger signal\n"
                         "  • Data acquisition card (DAQ) not properly configured\n"
@@ -1498,6 +1503,7 @@ class Model:
                 ],
             )
             injected_flag.value = False
+            self.event_queue.put(("autofocus_sequence_complete", None))
 
     def change_resolution(self, resolution_value: str) -> None:
         """Switch resolution mode of the microscope.
@@ -1901,6 +1907,7 @@ class ASIModel(Model):
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
         log_queue: Optional[multiprocessing.Queue] = None,
+        autofocus_progress_queue: multiprocessing.Queue = None,
     ) -> None:
         """Initialize the ASI Model.
 
@@ -1914,8 +1921,16 @@ class ASIModel(Model):
             Event queue for communication with the controller. Default is None.
         log_queue : multiprocessing.Queue
             Log queue for logging messages. Default is None.
+        autofocus_progress_queue : multiprocessing.Queue
+            Single-slot queue for replaceable autofocus progress snapshots.
         """
-        super().__init__(args, configuration, event_queue, log_queue)
+        super().__init__(
+            args,
+            configuration,
+            event_queue,
+            log_queue,
+            autofocus_progress_queue,
+        )
 
         self.acquisition_modes_feature_setting["z-stack"] = [
             (

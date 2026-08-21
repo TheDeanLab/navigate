@@ -377,6 +377,69 @@ class TestVerifyConfiguration(unittest.TestCase):
 
         assert configuration["gui"]["channel_settings"]["count"] == 5
 
+    def test_verify_configuration_repairs_invalid_gui_settings(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
+        )
+        gui_settings = configuration["gui"]
+        gui_settings["channel_settings"]["laser_power"] = {
+            "min": 100,
+            "max": 0,
+            "step": 0,
+        }
+        gui_settings["channel_settings"]["interval"] = {
+            "min": 2,
+            "max": 8,
+            "step": 2,
+        }
+        gui_settings["stack_acquisition"]["step_size"] = "invalid"
+        gui_settings["time"]["stack_pause"] = {
+            "min": -1,
+            "max": 1000,
+            "step": 0.1,
+        }
+        gui_settings["time"]["timepoints"] = {"min": 1, "max": 5000, "step": -1}
+        gui_settings["remote_focus_waveform"]["amplitude_step_size"] = 0
+        gui_settings["galvo_waveform"]["offset_step_size"] = "invalid"
+        config.update_config_dict(
+            self.manager, gui_settings, "histogram", {"enabled": "yes"}
+        )
+        config.update_config_dict(self.manager, gui_settings, "mip_display", False)
+
+        config.verify_configuration(self.manager, configuration)
+
+        assert dict(gui_settings["channel_settings"]["laser_power"]) == {
+            "min": 0,
+            "max": 100,
+            "step": 1,
+        }
+        assert dict(gui_settings["channel_settings"]["interval"]) == {
+            "min": 2,
+            "max": 8,
+            "step": 2,
+        }
+        assert dict(gui_settings["stack_acquisition"]["step_size"]) == {
+            "min": 0.01,
+            "max": 1000,
+            "step": 0.01,
+        }
+        assert dict(gui_settings["time"]["timepoints"]) == {
+            "min": 0,
+            "max": 5000,
+            "step": 1,
+        }
+        assert dict(gui_settings["time"]["stack_pause"]) == {
+            "min": 0,
+            "max": 1000,
+            "step": 0.1,
+        }
+        assert gui_settings["remote_focus_waveform"]["amplitude_step_size"] == 0.0001
+        assert gui_settings["galvo_waveform"]["offset_step_size"] == 0.0001
+        assert gui_settings["histogram"]["enabled"] is True
+        assert gui_settings["mip_display"]["enabled"] is True
+
     def test_preloader_adds_missing_required_device_to_shared_configuration(self):
         configuration = config.load_configs(
             self.manager,
@@ -597,6 +660,27 @@ class TestVerifyConfiguration(unittest.TestCase):
         assert (
             configuration["waveform_constants"]["other_constants"]["camera_delay"]
             == "10"
+        )
+
+    def test_verify_waveform_constants_defaults_camera_delay_to_zero(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+        )
+        microscope_name = list(configuration["configuration"]["microscopes"].keys())[0]
+        camera_config = configuration["configuration"]["microscopes"][microscope_name][
+            "camera"
+        ]
+        camera_config["delay"] = "not-a-number"
+        camera_config["delay_percent"] = None
+        del configuration["waveform_constants"]["other_constants"]["camera_delay"]
+
+        config.verify_waveform_constants(self.manager, configuration)
+
+        assert (
+            configuration["waveform_constants"]["other_constants"]["camera_delay"]
+            == "0"
         )
 
     def test_verify_configuration_with_no_filterwheel(self):

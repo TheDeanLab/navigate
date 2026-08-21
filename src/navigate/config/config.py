@@ -35,6 +35,7 @@ import sys
 import time
 import shutil
 import platform
+from math import isfinite
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -56,6 +57,24 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 GUI_SETTING_DEFAULTS = {
+    "channel_settings": {
+        "count": 5,
+        "laser_power": {"min": 0, "max": 1000, "step": 1},
+        "exposure_time": {"min": 1, "max": 1000, "step": 1},
+        "interval": {"min": 0, "max": 1000, "step": 1},
+        "defocus": {"min": -1000, "max": 1000, "step": 1},
+    },
+    "stack_acquisition": {
+        "step_size": {"min": 0.000001, "max": 10000, "step": 0.01},
+        "z_start_pos": {"min": -1000000, "max": 1000000, "step": 1.0},
+        "z_end_pos": {"min": -1000000, "max": 1000000, "step": 1.0},
+        "f_start_pos": {"min": -1000000, "max": 1000000, "step": 0.01},
+        "f_end_pos": {"min": -1000000, "max": 1000000, "step": 0.01},
+    },
+    "time": {
+        "stack_pause": {"min": 0, "max": 10000, "step": 0.1},
+        "timepoints": {"min": 1, "max": 5000, "step": 1},
+    },
     "remote_focus_waveform": {
         "amplitude_step_size": 0.0001,
         "offset_step_size": 0.0001,
@@ -64,6 +83,8 @@ GUI_SETTING_DEFAULTS = {
         "amplitude_step_size": 0.0001,
         "offset_step_size": 0.0001,
     },
+    "histogram": {"enabled": True},
+    "mip_display": {"enabled": True},
 }
 
 
@@ -98,6 +119,71 @@ def _configuration_gui_channel_count(configuration):
     # configuration.yaml files and remains supported during normalization.
     channels = legacy_gui.get("channels", {})
     return _channel_count(channels.get("count")) if hasattr(channels, "get") else None
+
+
+def _is_finite_number(value):
+    """Return whether ``value`` is a finite numeric GUI setting."""
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and isfinite(value)
+    )
+
+
+def _first_valid_numeric_value(*values):
+    """Return the first finite numeric value, or Navigate's zero-delay default."""
+    for value in values:
+        try:
+            if isfinite(float(value)):
+                return value
+        except (TypeError, ValueError):
+            continue
+    return "1.0"
+
+
+def _valid_gui_range(setting, allowed_range):
+    """Return whether a GUI range fits its documented bounds and has a positive step."""
+    if not hasattr(setting, "get"):
+        return False
+    minimum = setting.get("min")
+    maximum = setting.get("max")
+    step = setting.get("step")
+    return (
+        _is_finite_number(minimum)
+        and _is_finite_number(maximum)
+        and _is_finite_number(step)
+        and allowed_range["min"] <= minimum <= maximum <= allowed_range["max"]
+        and step > 0
+    )
+
+
+def verify_gui_configuration(manager, gui_settings):
+    """Fill and validate the GUI configuration without replacing valid ranges.
+
+    Each configured range may be narrowed, but it must retain finite ordered
+    bounds within the documented limits and a positive step. Invalid or
+    malformed settings are restored to documented defaults while valid extra
+    GUI settings are left untouched.
+    """
+    for group_name, group_defaults in GUI_SETTING_DEFAULTS.items():
+        group = gui_settings.get(group_name)
+        if not hasattr(group, "get"):
+            update_config_dict(manager, gui_settings, group_name, group_defaults)
+            continue
+
+        for setting_name, default in group_defaults.items():
+            setting = group.get(setting_name)
+            if isinstance(default, dict):
+                is_valid = _valid_gui_range(setting, default)
+            elif isinstance(default, bool):
+                is_valid = isinstance(setting, bool)
+            elif setting_name == "count":
+                is_valid = _channel_count(setting) is not None
+            else:
+                is_valid = _is_finite_number(setting) and setting > 0
+
+            if not is_valid:
+                update_config_dict(manager, group, setting_name, default)
 
 
 def get_navigate_path():
@@ -932,8 +1018,9 @@ def verify_waveform_constants(manager, configuration):
         "remote_focus_delay": "0",
         "remote_focus_ramp_falling": "5",
         "camera_settle_duration": "0",
-        "camera_delay": camera_config.get(
-            "delay", camera_config.get("delay_percent", "1.0")
+        "camera_delay": _first_valid_numeric_value(
+            camera_config.get("delay"),
+            camera_config.get("delay_percent"),
         ),
     }
     if (
@@ -948,8 +1035,9 @@ def verify_waveform_constants(manager, configuration):
         )
     for k in other_constants_dict.keys():
         try:
-            float(waveform_dict["other_constants"][k])
-        except (ValueError, KeyError):
+            if not isfinite(float(waveform_dict["other_constants"][k])):
+                raise ValueError
+        except (TypeError, ValueError, KeyError):
             waveform_dict["other_constants"][k] = other_constants_dict[k]
 
 
@@ -1153,13 +1241,7 @@ def verify_configuration(manager, configuration):
     if channel_count is None:
         channel_count = 5
     channel_settings["count"] = channel_count
-    for group_name, defaults in GUI_SETTING_DEFAULTS.items():
-        if group_name not in gui_settings:
-            update_config_dict(manager, gui_settings, group_name, defaults)
-            continue
-        for setting_name, value in defaults.items():
-            if setting_name not in gui_settings[group_name]:
-                gui_settings[group_name][setting_name] = value
+    verify_gui_configuration(manager, gui_settings)
 
 
 def verify_positions_config(positions):

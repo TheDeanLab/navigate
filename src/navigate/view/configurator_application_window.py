@@ -34,7 +34,11 @@ from tkinter import ttk
 from typing import Optional
 
 # Local Imports
-from navigate.view.theme import get_theme_color, get_theme_padding_px, get_theme_space_px
+from navigate.view.theme import (
+    get_theme_color,
+    get_theme_padding_px,
+    get_theme_space_px,
+)
 
 
 class ConfigurationAssistantWindow(ttk.Frame):
@@ -48,9 +52,7 @@ class ConfigurationAssistantWindow(ttk.Frame):
         screen_height = self.root.winfo_screenheight()
         position_x = max(0, (screen_width - window_width) // 2)
         position_y = max(0, (screen_height - window_height) // 2)
-        self.root.geometry(
-            f"{window_width}x{window_height}+{position_x}+{position_y}"
-        )
+        self.root.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
         self.root.minsize(800, 500)
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
@@ -60,7 +62,13 @@ class ConfigurationAssistantWindow(ttk.Frame):
         self.rowconfigure(2, weight=1)
 
         self.top_frame = ttk.Frame(self)
-        self.top_frame.grid(row=0, column=0, sticky=tk.EW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        self.top_frame.grid(
+            row=0,
+            column=0,
+            sticky=tk.EW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         self.top_frame.columnconfigure(0, weight=1)
         self.top_window = TopWindow(self.top_frame)
         self.top_window.grid(row=0, column=0, sticky=tk.EW)
@@ -76,7 +84,13 @@ class ConfigurationAssistantWindow(ttk.Frame):
         ttk.Style().configure("Configurator.TRadiobutton", font="TkDefaultFont")
 
         self.configuration_frame = ttk.Frame(self)
-        self.configuration_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_padding_px((0, 3)))
+        self.configuration_frame.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((0, 3)),
+        )
         self.configuration_frame.columnconfigure(0, weight=0, minsize=300)
         self.configuration_frame.columnconfigure(1, weight=1)
         self.configuration_frame.rowconfigure(0, weight=1)
@@ -93,8 +107,14 @@ class TopWindow(ttk.Frame):
     def __init__(self, parent: ttk.Frame, *args, **kwargs) -> None:
         super().__init__(parent, *args, **kwargs)
         self.columnconfigure(0, weight=1)
-        options = {"sticky": tk.NE, "padx": get_theme_space_px(3), "pady": get_theme_padding_px((10, 1))}
-        self.microscopes_label = ttk.Label(self, text="Microscopes", font=("TkDefaultFont", 16, "bold"))
+        options = {
+            "sticky": tk.NE,
+            "padx": get_theme_space_px(3),
+            "pady": get_theme_padding_px((10, 1)),
+        }
+        self.microscopes_label = ttk.Label(
+            self, text="Microscopes", font=("TkDefaultFont", 16, "bold")
+        )
         self.microscopes_label.grid(row=0, column=0, sticky=tk.W)
         self.new_button = ttk.Button(self, text="New Configuration", width=12)
         self.new_button.grid(row=0, column=1, **options)
@@ -118,15 +138,48 @@ class DevicesFrame(ttk.LabelFrame):
         self.rowconfigure(1, weight=1)
         _configure_treeview_style("Devices.Treeview")
         self.devices_label = ttk.Label(self, text="Devices", font="TkDefaultFont")
-        self.devices_label.grid(row=0, column=0, sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        self.devices_label.grid(
+            row=0,
+            column=0,
+            sticky=tk.W,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         self.edit_button = ttk.Button(self, text="Edit", width=5)
-        self.edit_button.grid(row=0, column=1, sticky=tk.E, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        self.edit_button.grid(
+            row=0,
+            column=1,
+            sticky=tk.E,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         self.delete_button = ttk.Button(self, text="×", width=3, style="Danger.TButton")
-        self.delete_button.grid(row=0, column=2, sticky=tk.E, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
-        self.device_list = ttk.Treeview(self, show="tree", selectmode="browse", style="Devices.Treeview")
-        self.device_list.grid(row=1, column=0, columnspan=3, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_padding_px((0, 3)))
+        self.delete_button.grid(
+            row=0,
+            column=2,
+            sticky=tk.E,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
+        self.device_list = ttk.Treeview(
+            self, show="tree", selectmode="browse", style="Devices.Treeview"
+        )
+        self.device_list.grid(
+            row=1,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((0, 3)),
+        )
         self.add_button = ttk.Button(self, text="Add", width=5)
-        self.add_button.grid(row=2, column=0, sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        self.add_button.grid(
+            row=2,
+            column=0,
+            sticky=tk.W,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
 
 
 class DeviceInfoFrame(ttk.LabelFrame):
@@ -137,16 +190,40 @@ class DeviceInfoFrame(ttk.LabelFrame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
         _configure_entry_style("DeviceInfo.TEntry")
-        self.device_info_label = ttk.Label(self, text="Device Info", font="TkDefaultFont")
-        self.device_info_label.grid(row=0, column=0, sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
-        self.settings_canvas = tk.Canvas(self, background=get_theme_color("input_bg"), highlightthickness=0)
-        self.settings_canvas.grid(row=2, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_padding_px((0, 3)))
+        self.device_info_label = ttk.Label(
+            self, text="Device Info", font="TkDefaultFont"
+        )
+        self.device_info_label.grid(
+            row=0,
+            column=0,
+            sticky=tk.W,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
+        self.settings_canvas = tk.Canvas(
+            self, background=get_theme_color("input_bg"), highlightthickness=0
+        )
+        self.settings_canvas.grid(
+            row=2,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((0, 3)),
+        )
         self.settings_frame = ttk.Frame(self.settings_canvas)
         self.settings_frame.columnconfigure(0, minsize=170)
         self.settings_frame.columnconfigure(1, weight=1, minsize=160)
-        self.settings_window = self.settings_canvas.create_window((0, 0), anchor=tk.NW, window=self.settings_frame)
+        self.settings_window = self.settings_canvas.create_window(
+            (0, 0), anchor=tk.NW, window=self.settings_frame
+        )
         self.horizontal_scrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
-        self.horizontal_scrollbar.grid(row=3, column=0, sticky=tk.EW, padx=get_theme_space_px(3), pady=get_theme_padding_px((0, 3)))
+        self.horizontal_scrollbar.grid(
+            row=3,
+            column=0,
+            sticky=tk.EW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((0, 3)),
+        )
 
 
 class AddDeviceDialog(tk.Toplevel):
@@ -171,7 +248,13 @@ class AddDeviceDialog(tk.Toplevel):
         self.manufacturers_list = self._create_list_column(content, 1, "Manufacturer")
         self.models_list = self._create_list_column(content, 2, "Model")
         actions = ttk.Frame(self)
-        actions.grid(row=1, column=0, sticky=tk.E, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        actions.grid(
+            row=1,
+            column=0,
+            sticky=tk.E,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         self.action_button = ttk.Button(actions, text=action_text, width=8)
         self.action_button.grid(row=0, column=0)
         _center_popup(self, parent)
@@ -179,11 +262,24 @@ class AddDeviceDialog(tk.Toplevel):
     @staticmethod
     def _create_list_column(parent: ttk.Frame, column: int, title: str) -> ttk.Treeview:
         frame = ttk.LabelFrame(parent, text=title)
-        frame.grid(row=0, column=column, sticky=tk.NSEW, padx=get_theme_padding_px((1 if column else 0, 1 if column < 2 else 0)))
+        frame.grid(
+            row=0,
+            column=column,
+            sticky=tk.NSEW,
+            padx=get_theme_padding_px((1 if column else 0, 1 if column < 2 else 0)),
+        )
         frame.columnconfigure(0, weight=1)
         frame.rowconfigure(0, weight=1)
-        tree = ttk.Treeview(frame, show="tree", selectmode="browse", style="AddDevice.Treeview")
-        tree.grid(row=0, column=0, sticky=tk.NSEW, padx=get_theme_space_px(3), pady=get_theme_space_px(3))
+        tree = ttk.Treeview(
+            frame, show="tree", selectmode="browse", style="AddDevice.Treeview"
+        )
+        tree.grid(
+            row=0,
+            column=0,
+            sticky=tk.NSEW,
+            padx=get_theme_space_px(3),
+            pady=get_theme_space_px(3),
+        )
         return tree
 
 
@@ -200,9 +296,16 @@ class RenameMicroscopeDialog(tk.Toplevel):
         content = ttk.Frame(self, padding=get_theme_padding_px((3, 3)))
         content.grid(row=0, column=0, sticky=tk.NSEW)
         content.columnconfigure(0, weight=1)
-        ttk.Label(content, text="Microscope name:").grid(row=0, column=0, sticky=tk.W, pady=get_theme_padding_px((0, 1)))
+        ttk.Label(content, text="Microscope name:").grid(
+            row=0, column=0, sticky=tk.W, pady=get_theme_padding_px((0, 1))
+        )
         self.name_var = tk.StringVar(master=self, value=current_name)
-        self.name_entry = ttk.Entry(content, textvariable=self.name_var, style="RenameMicroscope.TEntry", width=30)
+        self.name_entry = ttk.Entry(
+            content,
+            textvariable=self.name_var,
+            style="RenameMicroscope.TEntry",
+            width=30,
+        )
         self.name_entry.grid(row=1, column=0, sticky=tk.EW)
         actions = ttk.Frame(content)
         actions.grid(row=2, column=0, sticky=tk.E, pady=get_theme_padding_px((3, 0)))
@@ -279,12 +382,31 @@ def _configure_treeview_style(style_name: str) -> None:
     """Apply Navigate's dark colors to a Treeview style."""
     style = ttk.Style()
     text = get_theme_color("text")
-    style.configure(style_name, background=get_theme_color("input_bg"), fieldbackground=get_theme_color("input_bg"), foreground=text, font="TkDefaultFont")
-    style.map(style_name, background=[("selected", get_theme_color("accent"))], foreground=[("selected", text)])
+    style.configure(
+        style_name,
+        background=get_theme_color("input_bg"),
+        fieldbackground=get_theme_color("input_bg"),
+        foreground=text,
+        font="TkDefaultFont",
+    )
+    style.map(
+        style_name,
+        background=[("selected", get_theme_color("accent"))],
+        foreground=[("selected", text)],
+    )
 
 
 def _configure_entry_style(style_name: str) -> None:
     """Apply Navigate's flat dark style to entries."""
     background = get_theme_color("input_bg")
     text = get_theme_color("text")
-    ttk.Style().configure(style_name, fieldbackground=background, foreground=text, insertcolor=text, bordercolor=background, lightcolor=background, darkcolor=background, font="TkDefaultFont")
+    ttk.Style().configure(
+        style_name,
+        fieldbackground=background,
+        foreground=text,
+        insertcolor=text,
+        bordercolor=background,
+        lightcolor=background,
+        darkcolor=background,
+        font="TkDefaultFont",
+    )

@@ -55,12 +55,20 @@ class SettingSpec:
 
     def __post_init__(self) -> None:
         """Validate a schema definition when its class is imported."""
-        has_range = any(value is not None for value in (self.minimum, self.maximum, self.step))
+        has_range = any(
+            value is not None for value in (self.minimum, self.maximum, self.step)
+        )
         if self.choices is not None and has_range:
-            raise ValueError("SettingSpec choices and numeric ranges are mutually exclusive.")
+            raise ValueError(
+                "SettingSpec choices and numeric ranges are mutually exclusive."
+            )
         if has_range and self.value_type not in (int, float):
             raise ValueError("Numeric ranges require an int or float SettingSpec.")
-        if self.minimum is not None and self.maximum is not None and self.minimum > self.maximum:
+        if (
+            self.minimum is not None
+            and self.maximum is not None
+            and self.minimum > self.maximum
+        ):
             raise ValueError("SettingSpec minimum cannot exceed maximum.")
         if self.step is not None and self.step <= 0:
             raise ValueError("SettingSpec step must be greater than zero.")

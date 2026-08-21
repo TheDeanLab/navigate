@@ -116,7 +116,9 @@ def ximea_module(monkeypatch):
     sys.modules.pop("navigate.model.devices.camera.ximea", None)
 
     module = importlib.import_module("navigate.model.devices.camera.ximea")
-    monkeypatch.setattr(module.CameraBase, "get_offset_variance_maps", disable_camera_maps)
+    monkeypatch.setattr(
+        module.CameraBase, "get_offset_variance_maps", disable_camera_maps
+    )
     return module
 
 
@@ -188,14 +190,20 @@ def test_sensor_mode_exposure_line_interval_and_binning_branches(ximea_camera):
 def test_set_roi_rejects_invalid_geometry(ximea_camera):
     camera, _ = ximea_camera
 
-    assert camera.set_ROI(roi_width=3000, roi_height=3000, center_x=200, center_y=200) is False
+    assert (
+        camera.set_ROI(roi_width=3000, roi_height=3000, center_x=200, center_y=200)
+        is False
+    )
 
 
 def test_set_roi_returns_false_on_sdk_error(ximea_camera):
     camera, cam = ximea_camera
     cam.fail_on_set.add("width")
 
-    assert camera.set_ROI(roi_width=400, roi_height=200, center_x=1024, center_y=1024) is False
+    assert (
+        camera.set_ROI(roi_width=400, roi_height=200, center_x=1024, center_y=1024)
+        is False
+    )
 
 
 def test_set_roi_success_updates_dimensions(ximea_camera):

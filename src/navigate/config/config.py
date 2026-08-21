@@ -29,17 +29,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+import ast
 import os
 import sys
 import time
 import shutil
 import platform
+from math import isfinite
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from os.path import isfile
 import multiprocessing
 from multiprocessing.managers import ListProxy, DictProxy
 import logging
-from typing import Union
+from typing import Any, Optional, Tuple, Union
 
 # Third Party Imports
 import yaml
@@ -53,6 +57,24 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 GUI_SETTING_DEFAULTS = {
+    "channel_settings": {
+        "count": 5,
+        "laser_power": {"min": 0, "max": 1000, "step": 1},
+        "exposure_time": {"min": 1, "max": 1000, "step": 1},
+        "interval": {"min": 0, "max": 1000, "step": 1},
+        "defocus": {"min": -1000, "max": 1000, "step": 1},
+    },
+    "stack_acquisition": {
+        "step_size": {"min": 0.000001, "max": 10000, "step": 0.01},
+        "z_start_pos": {"min": -1000000, "max": 1000000, "step": 1.0},
+        "z_end_pos": {"min": -1000000, "max": 1000000, "step": 1.0},
+        "f_start_pos": {"min": -1000000, "max": 1000000, "step": 0.01},
+        "f_end_pos": {"min": -1000000, "max": 1000000, "step": 0.01},
+    },
+    "time": {
+        "stack_pause": {"min": 0, "max": 10000, "step": 0.1},
+        "timepoints": {"min": 1, "max": 5000, "step": 1},
+    },
     "remote_focus_waveform": {
         "amplitude_step_size": 0.0001,
         "offset_step_size": 0.0001,
@@ -61,7 +83,110 @@ GUI_SETTING_DEFAULTS = {
         "amplitude_step_size": 0.0001,
         "offset_step_size": 0.0001,
     },
+    "histogram": {"enabled": True},
+    "mip_display": {"enabled": True},
 }
+
+
+def _channel_count(value):
+    """Return a valid positive channel count, or ``None``.
+
+    Channel counts in older configuration files may be written as strings.  A
+    non-positive or otherwise invalid value must not suppress the configured
+    fallback values.
+    """
+    try:
+        count = int(value)
+    except (TypeError, ValueError):
+        return None
+    return count if count > 0 else None
+
+
+def _configuration_gui_channel_count(configuration):
+    """Read the channel count from configuration.yaml's legacy GUI section."""
+    configuration_yaml = configuration.get("configuration", {})
+    legacy_gui = configuration_yaml.get("gui", {})
+    if not hasattr(legacy_gui, "get"):
+        return None
+
+    channel_settings = legacy_gui.get("channel_settings", {})
+    if hasattr(channel_settings, "get"):
+        count = _channel_count(channel_settings.get("count"))
+        if count is not None:
+            return count
+
+    # ``gui.channels.count`` is the layout used by historical
+    # configuration.yaml files and remains supported during normalization.
+    channels = legacy_gui.get("channels", {})
+    return _channel_count(channels.get("count")) if hasattr(channels, "get") else None
+
+
+def _is_finite_number(value):
+    """Return whether ``value`` is a finite numeric GUI setting."""
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and isfinite(value)
+    )
+
+
+def _first_valid_numeric_value(*values):
+    """Return the first finite numeric value, or Navigate's one-delay default."""
+    for value in values:
+        try:
+            if isfinite(float(value)):
+                return value
+        except (TypeError, ValueError):
+            continue
+    return "1.0"
+
+
+def _valid_gui_range(setting, allowed_range):
+    """Return whether a GUI range fits its documented bounds and has a positive step."""
+    if not hasattr(setting, "get"):
+        return False
+    minimum = setting.get("min")
+    maximum = setting.get("max")
+    step = setting.get("step")
+    return (
+        _is_finite_number(minimum)
+        and _is_finite_number(maximum)
+        and _is_finite_number(step)
+        and allowed_range["min"] <= minimum <= maximum <= allowed_range["max"]
+        and step > 0
+    )
+
+
+def verify_gui_configuration(manager, gui_settings):
+    """Fill and validate the GUI configuration without replacing valid ranges.
+
+    Each configured range may be narrowed, but it must retain finite ordered
+    bounds within the documented limits and a positive step. Invalid or
+    malformed settings are restored to documented defaults while valid extra
+    GUI settings are left untouched.
+    """
+    for group_name, group_defaults in GUI_SETTING_DEFAULTS.items():
+        group = gui_settings.get(group_name)
+        if not hasattr(group, "get"):
+            update_config_dict(manager, gui_settings, group_name, group_defaults)
+            continue
+
+        for setting_name, default in group_defaults.items():
+            setting = group.get(setting_name)
+            if isinstance(default, dict):
+                is_valid = _valid_gui_range(setting, default)
+            elif isinstance(default, bool):
+                is_valid = isinstance(setting, bool)
+            elif setting_name == "count":
+                is_valid = _channel_count(setting) is not None
+            else:
+                is_valid = _is_finite_number(setting) and setting > 0
+
+            if not is_valid:
+                if isinstance(default, dict):
+                    update_config_dict(manager, group, setting_name, default)
+                else:
+                    group[setting_name] = default
 
 
 def get_navigate_path():
@@ -621,7 +746,9 @@ def verify_experiment_config(manager, configuration):
         ]
     ]
     number_of_filter_wheels = len(
-        configuration["configuration"]["microscopes"][microscope_name].get("filter_wheel", [])
+        configuration["configuration"]["microscopes"][microscope_name].get(
+            "filter_wheel", []
+        )
     )
     filterwheel_list = [
         list(filter_wheel_config["available_filters"].keys())
@@ -894,8 +1021,9 @@ def verify_waveform_constants(manager, configuration):
         "remote_focus_delay": "0",
         "remote_focus_ramp_falling": "5",
         "camera_settle_duration": "0",
-        "camera_delay": camera_config.get(
-            "delay", camera_config.get("delay_percent", "1.0")
+        "camera_delay": _first_valid_numeric_value(
+            camera_config.get("delay"),
+            camera_config.get("delay_percent"),
         ),
     }
     if (
@@ -910,8 +1038,9 @@ def verify_waveform_constants(manager, configuration):
         )
     for k in other_constants_dict.keys():
         try:
-            float(waveform_dict["other_constants"][k])
-        except (ValueError, KeyError):
+            if not isfinite(float(waveform_dict["other_constants"][k])):
+                raise ValueError
+        except (TypeError, ValueError, KeyError):
             waveform_dict["other_constants"][k] = other_constants_dict[k]
 
 
@@ -973,7 +1102,7 @@ def verify_configuration(manager, configuration):
                     parent_microscope_name
                 ][device_name]
 
-    channel_count = 5
+    camera_channel_counts = []
     # generate hardware header section
     ref_list = {
         "filter_wheel": [],
@@ -1003,10 +1132,9 @@ def verify_configuration(manager, configuration):
                     f"No {device_name} defined for microscope {microscope_name}"
                 )
         camera_config = device_config[microscope_name]["camera"]
-        try:
-            channel_count = max(channel_count, camera_config.get("count", 5))
-        except TypeError:
-            channel_count = 5
+        camera_channel_count = _channel_count(camera_config.get("count"))
+        if camera_channel_count is not None:
+            camera_channel_counts.append(camera_channel_count)
 
         # laser
         for i, laser_config in enumerate(device_config[microscope_name]["laser"]):
@@ -1048,6 +1176,12 @@ def verify_configuration(manager, configuration):
         temp_config = device_config[microscope_name]["filter_wheel"]
         filter_wheel_names = set()
         for _, filter_wheel_config in enumerate(temp_config):
+            name = filter_wheel_config.get("name")
+            hardware_name = filter_wheel_config.get("hardware", {}).get("name")
+            if not isinstance(name, str) or not name.strip():
+                filter_wheel_config["name"] = None
+            if not isinstance(hardware_name, str) or not hardware_name.strip():
+                hardware_name = None
             filter_wheel_idx = build_ref_name(
                 "-",
                 filter_wheel_config["hardware"]["type"],
@@ -1056,21 +1190,15 @@ def verify_configuration(manager, configuration):
             if filter_wheel_idx not in ref_list["filter_wheel"]:
                 ref_list["filter_wheel"].append(filter_wheel_idx)
                 filter_wheel_seq.append(filter_wheel_config)
-                if (
-                    filter_wheel_config.get("name", None) is None
-                    and filter_wheel_config.get("hardware", {}).get("name", None)
-                    is not None
-                ):
-                    filter_wheel_config["name"] = filter_wheel_config["hardware"][
-                        "name"
-                    ]
+                if filter_wheel_config.get("name", None) is None and hardware_name:
+                    filter_wheel_config["name"] = hardware_name
             idx = ref_list["filter_wheel"].index(filter_wheel_idx)
             if filter_wheel_seq[idx].get("name", None):
                 filter_wheel_config["name"] = filter_wheel_seq[idx]["name"]
             elif filter_wheel_config.get("name", None):
                 filter_wheel_seq[idx]["name"] = filter_wheel_config["name"]
-            elif filter_wheel_config.get("hardware", {}).get("name", None):
-                filter_wheel_seq[idx]["name"] = filter_wheel_config["hardware"]["name"]
+            elif hardware_name:
+                filter_wheel_seq[idx]["name"] = hardware_name
             if filter_wheel_seq[idx].get("name", None):
                 if filter_wheel_seq[idx]["name"] not in filter_wheel_names:
                     filter_wheel_names.add(filter_wheel_seq[idx]["name"])
@@ -1079,7 +1207,7 @@ def verify_configuration(manager, configuration):
 
     # make sure all filter wheel entries have hardware name
     for i, filter_wheel_config in enumerate(filter_wheel_seq):
-        if filter_wheel_config.get("name", None) is None:
+        if not filter_wheel_config.get("name"):
             for j in range(len(filter_wheel_seq)):
                 temp_name = f"FilterWheel-{j}"
                 if temp_name not in filter_wheel_names:
@@ -1099,20 +1227,24 @@ def verify_configuration(manager, configuration):
                     filter_wheel_config["hardware"]["type"],
                     filter_wheel_config["hardware"]["wheel_number"],
                 )
-            idx = ref_list["filter_wheel"].index(filter_wheel_idx)
-            temp_config[i]["name"] = filter_wheel_seq[idx]["name"]
+                idx = ref_list["filter_wheel"].index(filter_wheel_idx)
+                temp_config[i]["name"] = filter_wheel_seq[idx]["name"]
 
     gui_settings = configuration["gui"]
-    if "channel_settings" not in gui_settings:
+    channel_settings = gui_settings.get("channel_settings")
+    if not hasattr(channel_settings, "get"):
         update_config_dict(manager, gui_settings, "channel_settings", {})
-    gui_settings["channel_settings"]["count"] = channel_count
-    for group_name, defaults in GUI_SETTING_DEFAULTS.items():
-        if group_name not in gui_settings:
-            update_config_dict(manager, gui_settings, group_name, defaults)
-            continue
-        for setting_name, value in defaults.items():
-            if setting_name not in gui_settings[group_name]:
-                gui_settings[group_name][setting_name] = value
+        channel_settings = gui_settings["channel_settings"]
+
+    channel_count = _channel_count(channel_settings.get("count"))
+    if channel_count is None:
+        channel_count = _configuration_gui_channel_count(configuration)
+    if channel_count is None and camera_channel_counts:
+        channel_count = max(camera_channel_counts)
+    if channel_count is None:
+        channel_count = 5
+    channel_settings["count"] = channel_count
+    verify_gui_configuration(manager, gui_settings)
 
 
 def verify_positions_config(positions):
@@ -1176,10 +1308,713 @@ def support_deceased_configuration(configuration):
             deceased_device_type_names = load_param_from_module(
                 "navigate.config.configuration_database", "deceased_device_type_names"
             )
+            if "hardware" not in microscope_config["stage"]:
+                continue
             stage_config = microscope_config["stage"]["hardware"]
             if type(stage_config) is not ListProxy:
                 stage_config = [stage_config]
             for stage in stage_config:
-                if stage["type"] in deceased_device_type_names:
+                if (
+                    hasattr(stage, "keys")
+                    and "type" in stage
+                    and stage["type"] in deceased_device_type_names
+                ):
                     stage["type"] = deceased_device_type_names[stage["type"]]
                     is_updated = True
+
+
+class PreloadPolicy(str, Enum):
+    """Specify how the configuration preloader handles invalid hardware."""
+
+    STRICT = "strict"
+    WARN = "warn"
+    SYNTHETIC_FALLBACK = "synthetic_fallback"
+
+
+@dataclass(frozen=True)
+class ValidationIssue:
+    """One issue found while preparing configuration for application startup."""
+
+    severity: str
+    path: str
+    message: str
+    action_taken: str = "none"
+
+
+@dataclass
+class PreloadResult:
+    """Shared configuration and diagnostics returned by :func:`preload_configuration`."""
+
+    configuration: dict
+    issues: list[ValidationIssue]
+
+    @property
+    def warnings(self) -> list[ValidationIssue]:
+        """Return non-blocking diagnostics suitable for a startup dialog."""
+        return [issue for issue in self.issues if issue.severity == "warning"]
+
+
+class ConfigurationValidationError(RuntimeError):
+    """Raised when strict preloading finds invalid configuration."""
+
+    def __init__(self, issues: list[ValidationIssue]) -> None:
+        self.issues = issues
+        super().__init__(
+            "Configuration validation failed: "
+            + "; ".join(issue.message for issue in issues)
+        )
+
+
+@dataclass(frozen=True)
+class SchemaSettingSpec:
+    """Local, import-safe representation of a device ``SettingSpec`` literal."""
+
+    value_type: type
+    default: Any = None
+    label: Optional[str] = None
+    help_text: Optional[str] = None
+    choices: Optional[Tuple[Any, ...]] = None
+    minimum: Optional[float] = None
+    maximum: Optional[float] = None
+    step: Optional[float] = None
+    required: bool = False
+
+
+class DeviceSchemaResolver:
+    """Read inherited device schemas without importing device SDK modules.
+
+    Device modules can import optional vendor libraries.  The schemas are
+    declarative literals, therefore reading their AST keeps startup validation
+    independent of those libraries and matches the configurator's behavior.
+    """
+
+    _category_suffixes = {
+        "camera": "Camera",
+        "daq": "DAQ",
+        "filter_wheel": "FilterWheel",
+        "galvo": "Galvo",
+        "laser": "Laser",
+        "remote_focus": "RemoteFocus",
+        "shutter": "Shutter",
+        "stage": "Stage",
+        "zoom": "Zoom",
+    }
+
+    def __init__(self) -> None:
+        self._cache: dict[tuple[str, str], dict[str, object]] = {}
+        self._devices_directory = (
+            Path(__file__).resolve().parents[1] / "model" / "devices"
+        )
+
+    def get_schema(self, category: str, device_type: str) -> dict[str, object]:
+        """Return all schema entries declared by a device and its parents."""
+        cache_key = (category, device_type)
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+        class_path, class_name = self._find_device_class(category, device_type)
+        if class_path is None or class_name is None:
+            self._cache[cache_key] = {}
+            return {}
+        schema = self._schema_from_file(class_path, class_name, set())
+        self._cache[cache_key] = schema
+        return schema
+
+    def _find_device_class(
+        self, category: str, device_type: str
+    ) -> Tuple[Optional[Path], Optional[str]]:
+        directory = self._devices_directory / category
+        if not directory.exists():
+            return None, None
+        suffix = self._category_suffixes[category]
+        short_device_type = (
+            device_type[: -len(suffix)]
+            if device_type.lower().endswith(suffix.lower())
+            else device_type
+        )
+        candidates = {
+            device_type.lower(),
+            f"{device_type}{suffix}".lower(),
+            short_device_type.lower(),
+            f"{short_device_type}{suffix}".lower(),
+        }
+        for path in directory.glob("*.py"):
+            if path.name in {"__init__.py", "base.py"}:
+                continue
+            module = ast.parse(path.read_text(encoding="utf-8"))
+            for node in module.body:
+                if isinstance(node, ast.ClassDef) and node.name.lower() in candidates:
+                    return path, node.name
+        return None, None
+
+    def _schema_from_file(
+        self, path: Path, class_name: str, visited: set[tuple[Path, str]]
+    ) -> dict[str, object]:
+        key = (path, class_name)
+        if key in visited:
+            return {}
+        visited.add(key)
+        module = ast.parse(path.read_text(encoding="utf-8"))
+        nodes = {
+            node.name: node for node in module.body if isinstance(node, ast.ClassDef)
+        }
+        node = nodes.get(class_name)
+        if node is None:
+            return {}
+        schemas = []
+        for base in node.bases:
+            base_name = base.id if isinstance(base, ast.Name) else ""
+            if base_name in nodes:
+                schemas.append(self._schema_from_file(path, base_name, visited))
+            elif base_name in {"SerialDevice", "SequenceDevice"}:
+                schemas.append(
+                    self._schema_from_file(
+                        self._devices_directory / "device_types.py",
+                        base_name,
+                        visited,
+                    )
+                )
+            elif base_name.endswith("Base"):
+                schemas.append(
+                    self._schema_from_file(path.parent / "base.py", base_name, visited)
+                )
+        schemas.append(self._class_schema(node))
+        merged = {}
+        for schema in schemas:
+            merged.update(schema)
+        return merged
+
+    @staticmethod
+    def _class_schema(node: ast.ClassDef) -> dict[str, object]:
+        for statement in node.body:
+            if not (
+                isinstance(statement, ast.Assign)
+                and any(
+                    isinstance(target, ast.Name) and target.id == "configuration_schema"
+                    for target in statement.targets
+                )
+                and isinstance(statement.value, ast.Dict)
+            ):
+                continue
+            schema = {}
+            for key, value in zip(statement.value.keys, statement.value.values):
+                if not (
+                    isinstance(key, ast.Constant)
+                    and isinstance(key.value, str)
+                    and isinstance(value, ast.Call)
+                ):
+                    continue
+                spec = DeviceSchemaResolver._setting_spec(value)
+                if spec is not None:
+                    schema[key.value] = spec
+            return schema
+        return {}
+
+    @staticmethod
+    def _setting_spec(call: ast.Call) -> Optional[SchemaSettingSpec]:
+        if not (
+            isinstance(call.func, ast.Name)
+            and call.func.id == "SettingSpec"
+            and call.args
+            and isinstance(call.args[0], ast.Name)
+        ):
+            return None
+        value_type = {
+            "str": str,
+            "int": int,
+            "float": float,
+            "bool": bool,
+        }.get(call.args[0].id)
+        if value_type is None:
+            return None
+        kwargs = {}
+        for keyword in call.keywords:
+            if keyword.arg is None:
+                continue
+            try:
+                kwargs[keyword.arg] = ast.literal_eval(keyword.value)
+            except ValueError:
+                continue
+        return SchemaSettingSpec(value_type, **kwargs)
+
+
+REQUIRED_DEVICE_DEFAULTS = {
+    "daq": {
+        "hardware": {"type": "Synthetic"},
+        "sample_rate": 100000,
+    },
+    "camera": {
+        "hardware": {
+            "type": "Synthetic",
+            "serial_number": "SYNTHETIC-CAMERA-0",
+        },
+    },
+    "remote_focus": {
+        "hardware": {
+            "type": "Synthetic",
+            "channel": "Synthetic/ao0",
+            "min": -5.0,
+            "max": 5.0,
+        },
+    },
+    "galvo": [
+        {
+            "hardware": {
+                "type": "Synthetic",
+                "channel": "Synthetic/ao0",
+                "min": -5.0,
+                "max": 5.0,
+            },
+            "phase": 1.57079,
+        }
+    ],
+    "stage": {
+        "hardware": [
+            {
+                "type": "Synthetic",
+                "serial_number": "SYNTHETIC-STAGE-0",
+                "axes": ["x", "y", "z", "theta", "f"],
+            }
+        ],
+        "x_min": -100000,
+        "x_max": 100000,
+        "y_min": -100000,
+        "y_max": 100000,
+        "z_min": -100000,
+        "z_max": 100000,
+        "theta_min": 0,
+        "theta_max": 360,
+        "f_min": -100000,
+        "f_max": 100000,
+    },
+    "zoom": {
+        "hardware": {"type": "Synthetic", "servo_id": 0},
+        "position": {"1x": 0},
+        "pixel_size": {"1x": 1.0},
+    },
+    "shutter": {
+        "hardware": {
+            "type": "Synthetic",
+            "channel": "Synthetic/port0/line0",
+        }
+    },
+    "laser": [
+        {
+            "wavelength": 488,
+            "onoff": {"hardware": {"type": "Synthetic"}},
+            "power": {"hardware": {"type": "Synthetic"}},
+        }
+    ],
+}
+REQUIRED_STAGE_AXES = ("x", "y", "z", "theta", "f")
+
+
+class ConfigurationPreloader:
+    """Normalize, validate, and safely repair the shared Navigate configuration."""
+
+    def __init__(
+        self,
+        manager: multiprocessing.Manager,
+        policy: Union[PreloadPolicy, str] = PreloadPolicy.SYNTHETIC_FALLBACK,
+        preserve_device_types: bool = False,
+    ) -> None:
+        self.manager = manager
+        self.policy = PreloadPolicy(policy)
+        self.preserve_device_types = preserve_device_types
+        self.issues: list[ValidationIssue] = []
+        self.schemas = DeviceSchemaResolver()
+
+    def preload(self, configuration: dict) -> PreloadResult:
+        """Prepare ``configuration`` in place while preserving Manager proxies."""
+        self._ensure_top_level_structure(configuration)
+        self._raise_if_strict_errors()
+        self.normalize_legacy_configuration(configuration)
+        self._ensure_required_devices(configuration)
+        self._raise_if_strict_errors()
+        verify_configuration(self.manager, configuration)
+        self._validate_hardware(configuration)
+        self._raise_if_strict_errors()
+        verify_configuration(self.manager, configuration)
+        verify_experiment_config(self.manager, configuration)
+        verify_waveform_constants(self.manager, configuration)
+        return PreloadResult(configuration=configuration, issues=self.issues)
+
+    def _raise_if_strict_errors(self) -> None:
+        errors = [issue for issue in self.issues if issue.severity == "error"]
+        if errors and self.policy == PreloadPolicy.STRICT:
+            raise ConfigurationValidationError(errors)
+
+    def _ensure_top_level_structure(self, configuration: dict) -> None:
+        required_sections = {
+            "configuration": {"microscopes": {"Synthetic Microscope": {}}},
+            "experiment": {},
+            "waveform_constants": {},
+            "gui": {},
+        }
+        for name, default in required_sections.items():
+            if name in configuration and hasattr(configuration[name], "keys"):
+                continue
+            self._issue(
+                name,
+                f"Top-level {name} section is missing or has an invalid format.",
+                "inserted an empty section",
+            )
+            if self.policy == PreloadPolicy.SYNTHETIC_FALLBACK:
+                update_config_dict(self.manager, configuration, name, default)
+            elif self.policy == PreloadPolicy.STRICT:
+                self.issues[-1] = ValidationIssue(
+                    "error", name, self.issues[-1].message
+                )
+        configuration_section = configuration.get("configuration")
+        if (
+            not hasattr(configuration_section, "keys")
+            or "microscopes" not in configuration_section
+            or not hasattr(configuration_section["microscopes"], "keys")
+            or not configuration_section["microscopes"]
+        ):
+            self._issue(
+                "configuration.microscopes",
+                "No valid microscopes are configured.",
+                "inserted a synthetic microscope",
+            )
+            if self.policy == PreloadPolicy.SYNTHETIC_FALLBACK:
+                update_config_dict(
+                    self.manager,
+                    configuration["configuration"],
+                    "microscopes",
+                    {"Synthetic Microscope": {}},
+                )
+            elif self.policy == PreloadPolicy.STRICT:
+                self.issues[-1] = ValidationIssue(
+                    "error", "configuration.microscopes", self.issues[-1].message
+                )
+
+    def normalize_legacy_configuration(self, configuration: dict) -> None:
+        """Apply supported historical key and device-type migrations in place."""
+        support_deceased_configuration(configuration)
+
+    def _ensure_required_devices(self, configuration: dict) -> None:
+        microscopes = configuration["configuration"]["microscopes"]
+        for microscope_name, microscope in microscopes.items():
+            for device_name, synthetic_device in REQUIRED_DEVICE_DEFAULTS.items():
+                if device_name in microscope and self._has_expected_shape(
+                    device_name, microscope[device_name]
+                ):
+                    continue
+                path = f"microscopes.{microscope_name}.{device_name}"
+                problem = (
+                    "is missing"
+                    if device_name not in microscope
+                    else "has an invalid format"
+                )
+                self._issue(
+                    path,
+                    f"Required {device_name} {problem}.",
+                    "added synthetic device",
+                )
+                if self.policy == PreloadPolicy.SYNTHETIC_FALLBACK:
+                    update_config_dict(
+                        self.manager, microscope, device_name, synthetic_device
+                    )
+                elif self.policy == PreloadPolicy.STRICT:
+                    self.issues[-1] = ValidationIssue(
+                        "error", path, self.issues[-1].message
+                    )
+            if self._has_expected_shape("stage", microscope.get("stage")):
+                self._add_missing_stage_serial_numbers(microscope_name, microscope)
+                self._add_missing_stage_axes(microscope_name, microscope)
+
+    def _add_missing_stage_serial_numbers(
+        self, microscope_name: str, microscope: dict
+    ) -> None:
+        stage_hardware = microscope["stage"]["hardware"]
+        for index, stage in enumerate(stage_hardware):
+            serial_number = stage.get("serial_number")
+            if serial_number is not None and str(serial_number).strip():
+                continue
+            generated_serial_number = f"MISSING-STAGE-{microscope_name}-{index}"
+            path = f"microscopes.{microscope_name}.stage.hardware[{index}]"
+            self._issue(
+                path,
+                "Stage serial number is missing.",
+                f"added serial number {generated_serial_number}",
+            )
+            if self.policy == PreloadPolicy.SYNTHETIC_FALLBACK:
+                stage["serial_number"] = generated_serial_number
+            elif self.policy == PreloadPolicy.STRICT:
+                self.issues[-1] = ValidationIssue(
+                    "error", path, self.issues[-1].message
+                )
+
+    def _add_missing_stage_axes(self, microscope_name: str, microscope: dict) -> None:
+        stage_configuration = microscope["stage"]
+        stage_hardware = stage_configuration["hardware"]
+        configured_axes = set()
+        for stage in stage_hardware:
+            axes = stage.get("axes", [])
+            if isinstance(axes, str):
+                axes = [axis.strip() for axis in axes.split(",")]
+            configured_axes.update(axis for axis in axes if axis)
+        missing_axes = [
+            axis for axis in REQUIRED_STAGE_AXES if axis not in configured_axes
+        ]
+        if not missing_axes:
+            return
+        path = f"microscopes.{microscope_name}.stage"
+        self._issue(
+            path,
+            "Stage configuration is missing axes: " + ", ".join(missing_axes) + ".",
+            "added synthetic stage for missing axes",
+        )
+        if self.policy == PreloadPolicy.STRICT:
+            self.issues[-1] = ValidationIssue("error", path, self.issues[-1].message)
+            return
+        if self.policy != PreloadPolicy.SYNTHETIC_FALLBACK:
+            return
+        synthetic_stage = {
+            "type": "Synthetic",
+            "serial_number": f"SYNTHETIC-STAGE-{len(stage_hardware)}",
+            "axes": missing_axes,
+        }
+        stage_hardware.append(None)
+        build_nested_dict(
+            self.manager,
+            stage_hardware,
+            len(stage_hardware) - 1,
+            synthetic_stage,
+        )
+        defaults = REQUIRED_DEVICE_DEFAULTS["stage"]
+        for axis in missing_axes:
+            for suffix in ("min", "max"):
+                key = f"{axis}_{suffix}"
+                if key not in stage_configuration:
+                    stage_configuration[key] = defaults[key]
+
+    @staticmethod
+    def _has_expected_shape(device_name: str, device: Any) -> bool:
+        if device_name in {"galvo", "laser"}:
+            return isinstance(device, (list, ListProxy)) and bool(device)
+        if device_name == "stage":
+            return (
+                hasattr(device, "keys")
+                and "hardware" in device
+                and isinstance(device["hardware"], (list, ListProxy))
+                and bool(device["hardware"])
+            )
+        return hasattr(device, "keys")
+
+    def _validate_hardware(self, configuration: dict) -> None:
+        microscopes = configuration["configuration"]["microscopes"]
+        for microscope_name, microscope in microscopes.items():
+            for category in REQUIRED_DEVICE_DEFAULTS:
+                if category not in microscope:
+                    continue
+                devices = microscope[category]
+                if category in {"galvo", "laser"}:
+                    for index, device in enumerate(devices):
+                        self._validate_device(
+                            microscope,
+                            microscope_name,
+                            category,
+                            device,
+                            index,
+                        )
+                elif category == "stage":
+                    for index, hardware in enumerate(devices["hardware"]):
+                        self._validate_device(
+                            microscope,
+                            microscope_name,
+                            category,
+                            devices,
+                            index,
+                            hardware,
+                        )
+                else:
+                    self._validate_device(
+                        microscope, microscope_name, category, devices, None
+                    )
+
+    def _validate_device(
+        self,
+        microscope: dict,
+        microscope_name: str,
+        category: str,
+        device: dict,
+        index: Optional[int],
+        hardware: Optional[dict] = None,
+    ) -> None:
+        hardware = hardware or device.get("hardware", {})
+        validation_device = device
+        if category == "stage":
+            validation_device = dict(device)
+            validation_device["hardware"] = hardware
+        device_type = hardware.get("type", "")
+        schema = self.schemas.get_schema(category, str(device_type))
+        invalid = not schema and device_type.lower() != "synthetic"
+        details = "unknown device type" if invalid else ""
+        for name, spec in schema.items():
+            if not isinstance(spec, SchemaSettingSpec):
+                continue
+            value = self._schema_value(category, validation_device, name)
+            if not self._value_is_valid(category, name, value, spec):
+                invalid = True
+                details = f"invalid required setting {name}"
+                break
+        if not invalid:
+            return
+        path = f"microscopes.{microscope_name}.{category}"
+        if index is not None:
+            path = f"{path}[{index}]"
+        action_taken = "replaced with synthetic device"
+        if self.preserve_device_types:
+            action_taken = "repaired for synthetic runtime while retaining device type"
+        self._issue(
+            path,
+            f"{category} has {details}.",
+            action_taken,
+        )
+        if self.policy == PreloadPolicy.SYNTHETIC_FALLBACK:
+            self._replace_with_synthetic(microscope, category, index)
+        elif self.policy == PreloadPolicy.STRICT:
+            self.issues[-1] = ValidationIssue("error", path, self.issues[-1].message)
+
+    def _replace_with_synthetic(
+        self, microscope: dict, category: str, index: Optional[int]
+    ) -> None:
+        original_types = {}
+        if self.preserve_device_types:
+            original_types = self._configured_device_types(microscope, category, index)
+
+        synthetic_device = REQUIRED_DEVICE_DEFAULTS[category]
+        if index is None:
+            update_config_dict(self.manager, microscope, category, synthetic_device)
+        elif category == "stage":
+            build_nested_dict(
+                self.manager,
+                microscope[category]["hardware"],
+                index,
+                synthetic_device["hardware"][0],
+            )
+        else:
+            build_nested_dict(
+                self.manager, microscope[category], index, synthetic_device[0]
+            )
+
+        for path, device_type in original_types.items():
+            self._set_nested_value(
+                self._replacement_device(microscope, category, index), path, device_type
+            )
+
+    @staticmethod
+    def _replacement_device(microscope: dict, category: str, index: Optional[int]):
+        """Return the device entry that was just replaced with synthetic defaults."""
+        if category == "stage":
+            return microscope[category]["hardware"][index]
+        if index is not None:
+            return microscope[category][index]
+        return microscope[category]
+
+    @classmethod
+    def _configured_device_types(
+        cls, microscope: dict, category: str, index: Optional[int]
+    ) -> dict[Tuple[str, ...], Any]:
+        """Capture configured hardware types before replacing invalid settings."""
+        device = cls._replacement_device(microscope, category, index)
+        type_paths = (
+            (("onoff", "hardware", "type"), ("power", "hardware", "type"))
+            if category == "laser"
+            else (("type",) if category == "stage" else (("hardware", "type"),))
+        )
+        types = {}
+        for path in type_paths:
+            value = cls._nested_value(device, path)
+            if value is not None:
+                types[path] = value
+        return types
+
+    @staticmethod
+    def _nested_value(device: Any, path: Tuple[str, ...]) -> Any:
+        """Return a nested value when every path segment exists."""
+        value = device
+        for key in path:
+            if not hasattr(value, "keys") or key not in value:
+                return None
+            value = value[key]
+        return value
+
+    @staticmethod
+    def _set_nested_value(device: Any, path: Tuple[str, ...], value: Any) -> None:
+        """Set a nested value in a replacement device configuration."""
+        for key in path[:-1]:
+            device = device[key]
+        device[path[-1]] = value
+
+    @staticmethod
+    def _schema_value(category: str, device: dict, name: str) -> Any:
+        path = name
+        if category == "stage" and name in {
+            "axes",
+            "axes_mapping",
+            "feedback_alignment",
+        }:
+            path = f"hardware/{name}"
+        elif "/" not in name and name in {
+            "port",
+            "baudrate",
+            "timeout",
+            "serial_number",
+        }:
+            path = f"hardware/{name}"
+        value: Any = device
+        for part in path.split("/"):
+            if not hasattr(value, "keys") or part not in value:
+                return None
+            value = value[part]
+        return value
+
+    @staticmethod
+    def _value_is_valid(
+        category: str, name: str, value: Any, spec: SchemaSettingSpec
+    ) -> bool:
+        if value is None:
+            return not spec.required
+        if isinstance(value, str) and not value.strip():
+            return not spec.required
+        if category == "stage" and name in {"axes", "axes_mapping", "joystick_axes"}:
+            return bool(value)
+        if name == "serial_number":
+            return isinstance(value, (int, str)) and bool(str(value).strip())
+        if spec.value_type is float and isinstance(value, (int, float)):
+            value_is_type = not isinstance(value, bool)
+        else:
+            value_is_type = isinstance(value, spec.value_type)
+        if not value_is_type:
+            return False
+        if spec.choices is not None and value not in spec.choices:
+            return False
+        if spec.minimum is not None and value < spec.minimum:
+            return False
+        if spec.maximum is not None and value > spec.maximum:
+            return False
+        return True
+
+    def _issue(self, path: str, message: str, action_taken: str) -> None:
+        self.issues.append(ValidationIssue("warning", path, message, action_taken))
+        logger.warning("Configuration preloader: %s (%s)", message, path)
+
+
+def preload_configuration(
+    manager: multiprocessing.Manager,
+    configuration: dict,
+    policy: Union[PreloadPolicy, str] = PreloadPolicy.SYNTHETIC_FALLBACK,
+    preserve_device_types: bool = False,
+) -> PreloadResult:
+    """Run Navigate's configuration preloading pipeline on shared dictionaries.
+
+    ``configuration`` remains the original nested ``Manager`` proxy structure;
+    no plain-dictionary conversion is performed. Set ``preserve_device_types``
+    for synthetic runtime mode to retain configured device types while repairing
+    invalid parameters with synthetic defaults.
+    """
+    return ConfigurationPreloader(
+        manager, policy, preserve_device_types=preserve_device_types
+    ).preload(configuration)

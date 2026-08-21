@@ -412,7 +412,7 @@ class TestVerifyConfiguration(unittest.TestCase):
 
         assert dict(gui_settings["channel_settings"]["laser_power"]) == {
             "min": 0,
-            "max": 100,
+            "max": 1000,
             "step": 1,
         }
         assert dict(gui_settings["channel_settings"]["interval"]) == {
@@ -421,18 +421,18 @@ class TestVerifyConfiguration(unittest.TestCase):
             "step": 2,
         }
         assert dict(gui_settings["stack_acquisition"]["step_size"]) == {
-            "min": 0.01,
-            "max": 1000,
+            "min": 0.000001,
+            "max": 10000,
             "step": 0.01,
         }
         assert dict(gui_settings["time"]["timepoints"]) == {
-            "min": 0,
+            "min": 1,
             "max": 5000,
             "step": 1,
         }
         assert dict(gui_settings["time"]["stack_pause"]) == {
             "min": 0,
-            "max": 1000,
+            "max": 10000,
             "step": 0.1,
         }
         assert gui_settings["remote_focus_waveform"]["amplitude_step_size"] == 0.0001
@@ -662,7 +662,7 @@ class TestVerifyConfiguration(unittest.TestCase):
             == "10"
         )
 
-    def test_verify_waveform_constants_defaults_camera_delay_to_zero(self):
+    def test_verify_waveform_constants_defaults_camera_delay_to_one(self):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
@@ -680,7 +680,7 @@ class TestVerifyConfiguration(unittest.TestCase):
 
         assert (
             configuration["waveform_constants"]["other_constants"]["camera_delay"]
-            == "0"
+            == "1.0"
         )
 
     def test_verify_configuration_with_no_filterwheel(self):

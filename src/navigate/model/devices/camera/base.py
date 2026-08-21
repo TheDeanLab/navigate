@@ -59,13 +59,6 @@ class CameraBase(ABC):
     """
 
     configuration_schema = {
-        "serial_number": SettingSpec(
-            str,
-            default="",
-            label="Serial Number",
-            help_text="Hardware serial number used to identify the camera.",
-            required=True,
-        ),
         "flip_x": SettingSpec(
             bool,
             default=False,

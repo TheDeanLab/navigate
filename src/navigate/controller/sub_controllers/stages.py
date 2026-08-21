@@ -274,12 +274,7 @@ class StageController(GUIController):
             self.view.stop_frame.home_btn.configure(command=self.home_button_handler)
 
     def disable_synthetic_stages(self, config: ConfigurationController) -> None:
-        """Apply the synthetic-stage control policy.
-
-        Synthetic mode is an interactive simulation mode, so all stage controls
-        remain enabled. In normal hardware mode, controls for configured
-        synthetic stages are disabled to prevent users from treating fallback
-        stages as physical hardware.
+        """Disable synthetic stages.
 
         Parameters
         ----------
@@ -294,9 +289,6 @@ class StageController(GUIController):
         elif type(stages) is DictProxy:
             stages = [dict(stages)]
 
-        is_synthetic_mode = (
-            getattr(self.parent_controller, "is_synthetic_hardware", False) is True
-        )
         for stage in stages:
             if type(stage) is DictProxy:
                 stage_dict = dict(stage)
@@ -304,7 +296,7 @@ class StageController(GUIController):
                 stage_dict = stage
 
             for axis in stage_dict["axes"]:
-                if not is_synthetic_mode and "synthetic" in stage_dict["type"].lower():
+                if "synthetic" in stage_dict["type"].lower():
                     state = "disabled"
                     flag = True
                 else:

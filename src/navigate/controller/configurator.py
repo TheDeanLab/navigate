@@ -47,6 +47,7 @@ from navigate.model.devices.configuration_schema import (
 )
 from navigate.model.devices.device_types import SerialDevice, SequenceDevice
 from navigate.config.configuration_database import deceased_device_type_names
+
 # Local Imports
 from navigate.view.configurator_application_window import (
     AddDeviceDialog,
@@ -86,6 +87,16 @@ ConfiguratorYamlDumper.add_representer(InlineYamlList, _represent_inline_yaml_li
 
 class Configurator:
     """Coordinate configurator state, events, and dynamic widgets."""
+
+    singleton_device_categories = {
+        "camera",
+        "daq",
+        "remote_focus",
+        "mirror",
+        "pump",
+        "shutter",
+        "zoom",
+    }
 
     def __init__(self, root: tk.Tk, splash_screen) -> None:
         self.root = root
@@ -131,10 +142,18 @@ class Configurator:
         self.view.top_window.add_button.config(command=self.add_next_microscope)
         self.view.devices_frame.add_button.config(command=self.show_add_device_dialog)
         self.view.devices_frame.edit_button.config(command=self.show_edit_device_dialog)
-        self.view.devices_frame.delete_button.config(command=self.delete_selected_device)
-        self.view.devices_frame.device_list.bind("<<TreeviewSelect>>", self.show_device_info)
-        self.view.device_info_frame.settings_frame.bind("<Configure>", self.update_scrollregion)
-        self.view.device_info_frame.settings_canvas.bind("<Configure>", self.resize_settings_form)
+        self.view.devices_frame.delete_button.config(
+            command=self.delete_selected_device
+        )
+        self.view.devices_frame.device_list.bind(
+            "<<TreeviewSelect>>", self.show_device_info
+        )
+        self.view.device_info_frame.settings_frame.bind(
+            "<Configure>", self.update_scrollregion
+        )
+        self.view.device_info_frame.settings_canvas.bind(
+            "<Configure>", self.resize_settings_form
+        )
         self.view.device_info_frame.horizontal_scrollbar.config(
             command=self.view.device_info_frame.settings_canvas.xview
         )
@@ -188,11 +207,21 @@ class Configurator:
         try:
             with open(filename, encoding="utf-8") as configuration_file:
                 configuration = yaml.safe_load(configuration_file)
-            microscopes = configuration.get("microscopes") if isinstance(configuration, dict) else None
+            microscopes = (
+                configuration.get("microscopes")
+                if isinstance(configuration, dict)
+                else None
+            )
             if not isinstance(microscopes, dict):
-                raise yaml.YAMLError("The configuration must contain a microscopes mapping.")
+                raise yaml.YAMLError(
+                    "The configuration must contain a microscopes mapping."
+                )
         except (OSError, yaml.YAMLError) as error:
-            messagebox.showerror("Load Configuration", f"Could not load configuration:\n{error}", parent=self.root)
+            messagebox.showerror(
+                "Load Configuration",
+                f"Could not load configuration:\n{error}",
+                parent=self.root,
+            )
             return
         if self.device_data and not messagebox.askyesno(
             "Load Configuration",
@@ -232,21 +261,29 @@ class Configurator:
         self.microscope_id = 1
         self.render_device_info({})
 
-    def load_microscope_devices(self, microscope_name: str, configuration: dict) -> None:
+    def load_microscope_devices(
+        self, microscope_name: str, configuration: dict
+    ) -> None:
         """Add every recognizable device from one microscope configuration."""
         for category, category_config in configuration.items():
             if category == "stage" and isinstance(category_config, dict):
                 for hardware in category_config.get("hardware", []):
                     if isinstance(hardware, dict):
                         self.load_device_from_configuration(
-                            microscope_name, category, {**category_config, "hardware": hardware}
+                            microscope_name,
+                            category,
+                            {**category_config, "hardware": hardware},
                         )
             elif isinstance(category_config, list):
                 for device in category_config:
                     if isinstance(device, dict):
-                        self.load_device_from_configuration(microscope_name, category, device)
+                        self.load_device_from_configuration(
+                            microscope_name, category, device
+                        )
             elif isinstance(category_config, dict):
-                self.load_device_from_configuration(microscope_name, category, category_config)
+                self.load_device_from_configuration(
+                    microscope_name, category, category_config
+                )
 
     def load_device_from_configuration(
         self, microscope_name: str, category: str, configuration: dict
@@ -262,10 +299,22 @@ class Configurator:
             return
         resolved = self.resolve_device_type(category, device_type)
         if resolved is None:
-            logger.warning("Could not resolve %s device type %s.", category, device_type)
+            logger.warning(
+                "Could not resolve %s device type %s.", category, device_type
+            )
             return
         manufacturer, model = resolved
-        self.microscope_devices.setdefault(microscope_name, []).append(
+        existing_devices = self.microscope_devices.setdefault(microscope_name, [])
+        if category in self.singleton_device_categories and any(
+            device[0] == category for device in existing_devices
+        ):
+            logger.warning(
+                "Skipping an additional %s device for microscope %s.",
+                category,
+                microscope_name,
+            )
+            return
+        existing_devices.append(
             (
                 category,
                 manufacturer,
@@ -285,9 +334,13 @@ class Configurator:
         onoff_type = Configurator.configuration_path_value(
             configuration, "onoff/hardware/type"
         )
-        if isinstance(onoff_type, str) and not onoff_type.lower().startswith("synthetic"):
+        if isinstance(onoff_type, str) and not onoff_type.lower().startswith(
+            "synthetic"
+        ):
             return onoff_type
-        if isinstance(power_type, str) and not power_type.lower().startswith("synthetic"):
+        if isinstance(power_type, str) and not power_type.lower().startswith(
+            "synthetic"
+        ):
             return power_type
         return "Synthetic"
 
@@ -327,7 +380,9 @@ class Configurator:
             self.device_settings[item_id] = settings.copy()
 
     @classmethod
-    def resolve_device_type(cls, category: str, device_type: str) -> Optional[tuple[str, str]]:
+    def resolve_device_type(
+        cls, category: str, device_type: str
+    ) -> Optional[tuple[str, str]]:
         """Match a YAML type to an optional manufacturer and required model name.
 
         YAML may name a model directly (``NI``), use its full class-style name
@@ -401,7 +456,9 @@ class Configurator:
             if value is not None:
                 settings[name] = value
         if category == "stage":
-            for axis in self.configuration_path_value(configuration, "hardware/axes") or []:
+            for axis in (
+                self.configuration_path_value(configuration, "hardware/axes") or []
+            ):
                 for suffix in ("min", "max"):
                     name = f"{axis}_{suffix}"
                     if name in configuration:
@@ -429,7 +486,13 @@ class Configurator:
             style="Configurator.TRadiobutton",
             command=self.show_selected_microscope_devices,
         )
-        button.grid(row=0, column=len(self.microscope_buttons), sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_padding_px((1, 1)))
+        button.grid(
+            row=0,
+            column=len(self.microscope_buttons),
+            sticky=tk.W,
+            padx=get_theme_space_px(3),
+            pady=get_theme_padding_px((1, 1)),
+        )
         # Button-3 is the usual right click; Button-2 and Control-click cover
         # the equivalent gestures used by macOS Tk.
         for sequence in ("<Button-3>", "<Button-2>", "<Control-Button-1>"):
@@ -474,11 +537,17 @@ class Configurator:
             return
         new_name = self.rename_dialog.name_var.get().strip()
         old_name = self.context_microscope_name
-        if new_name and new_name != old_name and new_name not in self.microscope_buttons:
+        if (
+            new_name
+            and new_name != old_name
+            and new_name not in self.microscope_buttons
+        ):
             button = self.microscope_buttons.pop(old_name)
             button.config(text=new_name, value=new_name)
             self.microscope_buttons[new_name] = button
-            self.microscope_devices[new_name] = self.microscope_devices.pop(old_name, [])
+            self.microscope_devices[new_name] = self.microscope_devices.pop(
+                old_name, []
+            )
             if self.displayed_microscope_name == old_name:
                 self.displayed_microscope_name = new_name
             if self.selected_microscope.get() == old_name:
@@ -524,7 +593,9 @@ class Configurator:
         dialog = AddDeviceDialog(self.root, title, action_text)
         self.device_dialog = dialog
         for category in self.get_device_categories():
-            dialog.categories_list.insert("", tk.END, iid=category, text=self.format_category_name(category))
+            dialog.categories_list.insert(
+                "", tk.END, iid=category, text=self.format_category_name(category)
+            )
         dialog.action_button.config(command=self.confirm_device_dialog)
         if initial is not None:
             category, manufacturer, model = initial
@@ -547,7 +618,12 @@ class Configurator:
         self.clear_tree(self.device_dialog.manufacturers_list)
         self.clear_tree(self.device_dialog.models_list)
         for manufacturer in self.get_device_manufacturers(selection[0]):
-            self.device_dialog.manufacturers_list.insert("", tk.END, iid=manufacturer, text=self.format_manufacturer_name(manufacturer))
+            self.device_dialog.manufacturers_list.insert(
+                "",
+                tk.END,
+                iid=manufacturer,
+                text=self.format_manufacturer_name(manufacturer),
+            )
 
     def populate_models(self, _event: Optional[tk.Event] = None) -> None:
         """Fill models for the selected category and manufacturer."""
@@ -561,10 +637,17 @@ class Configurator:
         self.clear_tree(self.device_dialog.models_list)
         models = self.get_device_models(category, manufacturer)
         if not models:
-            self.device_dialog.models_list.insert("", tk.END, iid=manufacturer, text=self.format_manufacturer_name(manufacturer))
+            self.device_dialog.models_list.insert(
+                "",
+                tk.END,
+                iid=manufacturer,
+                text=self.format_manufacturer_name(manufacturer),
+            )
             return
         for model in models:
-            self.device_dialog.models_list.insert("", tk.END, iid=model, text=self.format_model_name(model, category))
+            self.device_dialog.models_list.insert(
+                "", tk.END, iid=model, text=self.format_model_name(model, category)
+            )
 
     def confirm_device_dialog(self) -> None:
         """Add or update a device from the selections in the active dialog."""
@@ -578,7 +661,19 @@ class Configurator:
         category, manufacturer, model = categories[0], manufacturers[0], models[0]
         if self.displayed_microscope_name is None:
             self.displayed_microscope_name = self.selected_microscope.get()
-        name = "{}: {} - {}".format(self.format_category_name(category), self.format_manufacturer_name(manufacturer), self.format_model_name(model, category))
+        if self.category_is_already_configured(category):
+            messagebox.showwarning(
+                "One Device Per Microscope",
+                f"{self.format_category_name(category)} is already configured for "
+                "this microscope. Remove it before adding another one.",
+                parent=self.device_dialog,
+            )
+            return
+        name = "{}: {} - {}".format(
+            self.format_category_name(category),
+            self.format_manufacturer_name(manufacturer),
+            self.format_model_name(model, category),
+        )
         if self.editing_item_id is None:
             item_id = self.view.devices_frame.device_list.insert("", tk.END, text=name)
             self.device_settings[item_id] = {}
@@ -603,6 +698,15 @@ class Configurator:
         self.show_device_info()
         self.store_visible_microscope_devices()
 
+    def category_is_already_configured(self, category: str) -> bool:
+        """Return whether adding or changing would duplicate a singleton category."""
+        if category not in self.singleton_device_categories:
+            return False
+        return any(
+            item_id != self.editing_item_id and device[0] == category
+            for item_id, device in self.device_data.items()
+        )
+
     def selected_device(self) -> Optional[tuple[str, tuple[str, str, str]]]:
         """Return the selected device item and its controller-owned data."""
         selection = self.view.devices_frame.device_list.selection()
@@ -617,7 +721,9 @@ class Configurator:
             return
         item_id, _ = selected
         name = self.view.devices_frame.device_list.item(item_id, "text")
-        if messagebox.askyesno("Delete Device", "Delete '{}' ?".format(name), parent=self.root):
+        if messagebox.askyesno(
+            "Delete Device", "Delete '{}' ?".format(name), parent=self.root
+        ):
             self.view.devices_frame.device_list.delete(item_id)
             del self.device_data[item_id]
             self.device_settings.pop(item_id, None)
@@ -687,9 +793,7 @@ class Configurator:
                     row[key_field].get(): row[value_field].get()
                     for row in rows
                     if (
-                        key_field in row
-                        and value_field in row
-                        and row[key_field].get()
+                        key_field in row and value_field in row and row[key_field].get()
                     )
                 }
         self.device_settings[self.active_device_item_id] = values
@@ -714,7 +818,9 @@ class Configurator:
             if isinstance(spec, SettingSpec) and spec.default is not None
         }
         values.update(settings)
-        device = {"type": model} if category == "laser" else {"hardware": {"type": model}}
+        device = (
+            {"type": model} if category == "laser" else {"hardware": {"type": model}}
+        )
 
         connection_names = set(self.get_connect_params(category, manufacturer, model))
         # those connection names are from SerialDevice and SequenceDevice
@@ -740,9 +846,7 @@ class Configurator:
                 "axes",
                 "axes_mapping",
             }:
-                device["hardware"][name] = InlineYamlList(
-                    self.parse_stage_axes(value)
-                )
+                device["hardware"][name] = InlineYamlList(self.parse_stage_axes(value))
             elif category == "stage" and name == "joystick_axes":
                 device[name] = InlineYamlList(self.parse_stage_axes(value))
             elif category == "stage" and (
@@ -767,15 +871,15 @@ class Configurator:
             devices = self.microscope_devices.get(microscope_name, [])
             microscope = {}
             for category, manufacturer, model, settings in devices:
-                device = self.device_configuration(category, manufacturer, model, settings)
+                device = self.device_configuration(
+                    category, manufacturer, model, settings
+                )
                 self.add_device_to_microscope(microscope, category, device)
             microscopes[microscope_name] = microscope
         return {"microscopes": microscopes}
 
     @staticmethod
-    def add_device_to_microscope(
-        microscope: dict, category: str, device: dict
-    ) -> None:
+    def add_device_to_microscope(microscope: dict, category: str, device: dict) -> None:
         """Add one serialized device using its category's YAML structure."""
         if category == "stage":
             stage = microscope.setdefault("stage", {"hardware": []})
@@ -825,10 +929,18 @@ class Configurator:
                     default_flow_style=False,
                 )
         except (OSError, yaml.YAMLError) as error:
-            messagebox.showerror("Save Configuration", f"Could not save configuration:\n{error}", parent=self.root)
+            messagebox.showerror(
+                "Save Configuration",
+                f"Could not save configuration:\n{error}",
+                parent=self.root,
+            )
             return
         self.last_configuration_path = Path(filename)
-        messagebox.showinfo("Save Configuration", f"Configuration saved to:\n{filename}", parent=self.root)
+        messagebox.showinfo(
+            "Save Configuration",
+            f"Configuration saved to:\n{filename}",
+            parent=self.root,
+        )
 
     @staticmethod
     def setting_value_is_present(value: object) -> bool:
@@ -879,9 +991,7 @@ class Configurator:
                 help_text="Connection value required to initialize this device.",
                 required=True,
             )
-            for property_name in self.get_connect_params(
-                category, manufacturer, model
-            )
+            for property_name in self.get_connect_params(category, manufacturer, model)
         }
         schemas = [connection_schema]
         if self.class_inherits(category, manufacturer, model, "SerialDevice"):
@@ -897,7 +1007,9 @@ class Configurator:
                 base_class = getattr(base_module, base_class_name)
                 schemas.append(getattr(base_class, "configuration_schema", {}))
             except (ImportError, AttributeError):
-                logger.exception("Could not load the configuration schema for %s.", base_class_name)
+                logger.exception(
+                    "Could not load the configuration schema for %s.", base_class_name
+                )
         schemas.append(
             self.get_class_configuration_schema(category, manufacturer, model)
         )
@@ -915,16 +1027,12 @@ class Configurator:
         before their child schemas.
         """
         module = ast.parse(
-            (
-                cls.device_directory()
-                / category
-                / (manufacturer + ".py")
-            ).read_text(encoding="utf-8")
+            (cls.device_directory() / category / (manufacturer + ".py")).read_text(
+                encoding="utf-8"
+            )
         )
         nodes = {
-            node.name: node
-            for node in module.body
-            if isinstance(node, ast.ClassDef)
+            node.name: node for node in module.body if isinstance(node, ast.ClassDef)
         }
 
         def setting_spec(call: ast.Call) -> Optional[SettingSpec]:
@@ -957,8 +1065,7 @@ class Configurator:
         def collection_spec(call: ast.Call) -> Optional[CollectionSpec]:
             """Convert a literal ``CollectionSpec`` call to a collection spec."""
             if not (
-                isinstance(call.func, ast.Name)
-                and call.func.id == "CollectionSpec"
+                isinstance(call.func, ast.Name) and call.func.id == "CollectionSpec"
             ):
                 return None
             keywords = {
@@ -1029,9 +1136,7 @@ class Configurator:
                 base_name = (
                     base.id
                     if isinstance(base, ast.Name)
-                    else base.attr
-                    if isinstance(base, ast.Attribute)
-                    else ""
+                    else base.attr if isinstance(base, ast.Attribute) else ""
                 )
                 schemas.append(inherited_schema(base_name, visited))
             schemas.append(class_schema(node))
@@ -1052,7 +1157,13 @@ class Configurator:
         self.stage_axis_range_frame = None
         self.stage_axis_setting_names = set()
         for column, heading in enumerate(("Property", "Value")):
-            ttk.Label(frame, text=heading, font="TkDefaultFont").grid(row=0, column=column, sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_padding_px((1, 1)))
+            ttk.Label(frame, text=heading, font="TkDefaultFont").grid(
+                row=0,
+                column=column,
+                sticky=tk.W,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
         row = 1
         for name, spec in schema.items():
             if isinstance(spec, CollectionSpec):
@@ -1061,7 +1172,13 @@ class Configurator:
                 continue
             label = spec.label or name.replace("_", " ").title()
             property_label = ttk.Label(frame, text=label, font="TkDefaultFont")
-            property_label.grid(row=row, column=0, sticky=tk.W, padx=get_theme_space_px(3), pady=get_theme_padding_px((1, 1)))
+            property_label.grid(
+                row=row,
+                column=0,
+                sticky=tk.W,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
             if spec.help_text:
                 ConfiguratorTooltip(property_label, spec.help_text)
             variable = self.create_value_variable(spec, values.get(name))
@@ -1202,7 +1319,11 @@ class Configurator:
         if isinstance(values, dict):
             if spec.storage == "parallel_mappings":
                 zoom_names = set().union(
-                    *(mapping.keys() for mapping in values.values() if isinstance(mapping, dict))
+                    *(
+                        mapping.keys()
+                        for mapping in values.values()
+                        if isinstance(mapping, dict)
+                    )
                 )
                 for zoom in sorted(zoom_names):
                     row_values = {"zoom": zoom}
@@ -1248,9 +1369,11 @@ class Configurator:
                     row_data = {
                         field_name: self.create_value_variable(
                             field_spec,
-                            key
-                            if field_name == spec.key_field
-                            else value if field_name == spec.value_field else None,
+                            (
+                                key
+                                if field_name == spec.key_field
+                                else value if field_name == spec.value_field else None
+                            ),
                         )
                         for field_name, field_spec in spec.item_schema.items()
                     }
@@ -1390,9 +1513,11 @@ class Configurator:
                 textvariable=variable,
                 from_=-1000000 if spec.minimum is None else spec.minimum,
                 to=1000000 if spec.maximum is None else spec.maximum,
-                increment=(0.1 if spec.value_type is float else 1)
-                if spec.step is None
-                else spec.step,
+                increment=(
+                    (0.1 if spec.value_type is float else 1)
+                    if spec.step is None
+                    else spec.step
+                ),
                 required=spec.required,
                 value_type=spec.value_type,
             ).grid(**grid_options)
@@ -1408,7 +1533,9 @@ class Configurator:
 
     def resize_settings_form(self, event: tk.Event) -> None:
         """Expand settings values with the panel while retaining a minimum width."""
-        self.view.device_info_frame.settings_canvas.itemconfigure(self.view.device_info_frame.settings_window, width=max(330, event.width))
+        self.view.device_info_frame.settings_canvas.itemconfigure(
+            self.view.device_info_frame.settings_window, width=max(330, event.width)
+        )
 
     @staticmethod
     def clear_tree(tree: ttk.Treeview) -> None:
@@ -1423,21 +1550,46 @@ class Configurator:
     @classmethod
     def get_device_categories(cls) -> list[str]:
         """Return device category package names, excluding APIs and caches."""
-        return sorted(path.name for path in cls.device_directory().iterdir() if path.is_dir() and path.name != "APIs" and not path.name.startswith("__"))
+        return sorted(
+            path.name
+            for path in cls.device_directory().iterdir()
+            if path.is_dir() and path.name != "APIs" and not path.name.startswith("__")
+        )
 
     @classmethod
     def get_device_manufacturers(cls, category: str) -> list[str]:
         """Return Python manufacturer modules for a category."""
-        return sorted(path.stem for path in (cls.device_directory() / category).glob("*.py") if path.stem not in {"__init__", "base"})
+        return sorted(
+            path.stem
+            for path in (cls.device_directory() / category).glob("*.py")
+            if path.stem not in {"__init__", "base"}
+        )
 
     @classmethod
     def module_classes(cls, category: str, manufacturer: str) -> dict[str, list[str]]:
         """Return class names mapped to directly declared base-class names."""
-        module = ast.parse((cls.device_directory() / category / (manufacturer + ".py")).read_text(encoding="utf-8"))
-        return {node.name: [base.id if isinstance(base, ast.Name) else base.attr if isinstance(base, ast.Attribute) else "" for base in node.bases] for node in module.body if isinstance(node, ast.ClassDef)}
+        module = ast.parse(
+            (cls.device_directory() / category / (manufacturer + ".py")).read_text(
+                encoding="utf-8"
+            )
+        )
+        return {
+            node.name: [
+                (
+                    base.id
+                    if isinstance(base, ast.Name)
+                    else base.attr if isinstance(base, ast.Attribute) else ""
+                )
+                for base in node.bases
+            ]
+            for node in module.body
+            if isinstance(node, ast.ClassDef)
+        }
 
     @classmethod
-    def class_inherits(cls, category: str, manufacturer: str, class_name: str, parent: str) -> bool:
+    def class_inherits(
+        cls, category: str, manufacturer: str, class_name: str, parent: str
+    ) -> bool:
         """Check inheritance without importing device hardware APIs.
 
         In addition to classes in the selected module, follow imports from other
@@ -1446,20 +1598,22 @@ class Configurator:
         by another manufacturer module.
         """
 
-        def module_details(module_name: str) -> tuple[dict[str, list[str]], dict[str, str]]:
+        def module_details(
+            module_name: str,
+        ) -> tuple[dict[str, list[str]], dict[str, str]]:
             """Return declared classes and same-category imported classes."""
             module = ast.parse(
-                (
-                    cls.device_directory() / category / (module_name + ".py")
-                ).read_text(encoding="utf-8")
+                (cls.device_directory() / category / (module_name + ".py")).read_text(
+                    encoding="utf-8"
+                )
             )
             classes = {
                 node.name: [
-                    base.id
-                    if isinstance(base, ast.Name)
-                    else base.attr
-                    if isinstance(base, ast.Attribute)
-                    else ""
+                    (
+                        base.id
+                        if isinstance(base, ast.Name)
+                        else base.attr if isinstance(base, ast.Attribute) else ""
+                    )
                     for base in node.bases
                 ]
                 for node in module.body
@@ -1510,7 +1664,12 @@ class Configurator:
     def get_device_models(cls, category: str, manufacturer: str) -> list[str]:
         """Return non-base device classes inheriting from the category base class."""
         parent = cls.category_base_class_name(category)
-        return [name for name in cls.module_classes(category, manufacturer) if not name.endswith("Base") and cls.class_inherits(category, manufacturer, name, parent)]
+        return [
+            name
+            for name in cls.module_classes(category, manufacturer)
+            if not name.endswith("Base")
+            and cls.class_inherits(category, manufacturer, name, parent)
+        ]
 
     @staticmethod
     def category_base_class_name(category: str) -> str:
@@ -1522,26 +1681,50 @@ class Configurator:
         )
 
     @classmethod
-    def get_connect_params(cls, category: str, manufacturer: str, class_name: str) -> list[str]:
+    def get_connect_params(
+        cls, category: str, manufacturer: str, class_name: str
+    ) -> list[str]:
         """Read literal ``get_connect_params`` values from a class or local ancestor."""
-        module = ast.parse((cls.device_directory() / category / (manufacturer + ".py")).read_text(encoding="utf-8"))
-        nodes = {node.name: node for node in module.body if isinstance(node, ast.ClassDef)}
+        module = ast.parse(
+            (cls.device_directory() / category / (manufacturer + ".py")).read_text(
+                encoding="utf-8"
+            )
+        )
+        nodes = {
+            node.name: node for node in module.body if isinstance(node, ast.ClassDef)
+        }
+
         def inspect(name: str, visited: set[str]) -> list[str]:
             if name in visited or name not in nodes:
                 return []
             visited.add(name)
             node = nodes[name]
             for function in node.body:
-                if isinstance(function, ast.FunctionDef) and function.name == "get_connect_params":
+                if (
+                    isinstance(function, ast.FunctionDef)
+                    and function.name == "get_connect_params"
+                ):
                     for statement in function.body:
-                        if isinstance(statement, ast.Return) and isinstance(statement.value, (ast.List, ast.Tuple)):
-                            return [value.value for value in statement.value.elts if isinstance(value, ast.Constant) and isinstance(value.value, str)]
+                        if isinstance(statement, ast.Return) and isinstance(
+                            statement.value, (ast.List, ast.Tuple)
+                        ):
+                            return [
+                                value.value
+                                for value in statement.value.elts
+                                if isinstance(value, ast.Constant)
+                                and isinstance(value.value, str)
+                            ]
             for base in node.bases:
-                base_name = base.id if isinstance(base, ast.Name) else base.attr if isinstance(base, ast.Attribute) else ""
+                base_name = (
+                    base.id
+                    if isinstance(base, ast.Name)
+                    else base.attr if isinstance(base, ast.Attribute) else ""
+                )
                 params = inspect(base_name, visited)
                 if params:
                     return params
             return []
+
         return inspect(class_name, set())
 
     @staticmethod
@@ -1550,7 +1733,9 @@ class Configurator:
 
     @staticmethod
     def format_manufacturer_name(name: str) -> str:
-        return "Virtual Device" if name == "synthetic" else name.replace("_", " ").title()
+        return (
+            "Virtual Device" if name == "synthetic" else name.replace("_", " ").title()
+        )
 
     @staticmethod
     def format_model_name(name: str, category: str) -> str:

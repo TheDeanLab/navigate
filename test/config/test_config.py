@@ -306,6 +306,49 @@ class TestVerifyConfiguration(unittest.TestCase):
                     filter_wheel_name == temp
                 ), "filter wheel names should be the same for all microscopes"
 
+    def test_verify_waveform_constants_uses_legacy_camera_delay_as_default(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+        )
+        microscope_name = list(configuration["configuration"]["microscopes"].keys())[0]
+        configuration["configuration"]["microscopes"][microscope_name]["camera"][
+            "delay"
+        ] = "7.5"
+        configuration["configuration"]["microscopes"][microscope_name]["camera"][
+            "delay_percent"
+        ] = "12.5"
+        del configuration["waveform_constants"]["other_constants"]["camera_delay"]
+
+        config.verify_waveform_constants(self.manager, configuration)
+
+        assert (
+            configuration["waveform_constants"]["other_constants"]["camera_delay"]
+            == "7.5"
+        )
+
+    def test_verify_waveform_constants_uses_legacy_delay_percent_as_default(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+        )
+        microscope_name = list(configuration["configuration"]["microscopes"].keys())[0]
+        camera_config = configuration["configuration"]["microscopes"][microscope_name][
+            "camera"
+        ]
+        camera_config.pop("delay", None)
+        camera_config["delay_percent"] = "10"
+        del configuration["waveform_constants"]["other_constants"]["camera_delay"]
+
+        config.verify_waveform_constants(self.manager, configuration)
+
+        assert (
+            configuration["waveform_constants"]["other_constants"]["camera_delay"]
+            == "10"
+        )
+
     def test_verify_configuration_with_no_filterwheel(self):
         configuration = config.load_configs(
             self.manager,
@@ -955,9 +998,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
 
         config.verify_experiment_config(self.manager, configuration)
 
-        assert (
-            experiment["MicroscopeState"]["channels"]["channel_2"]["defocus"] == -2.5
-        )
+        assert experiment["MicroscopeState"]["channels"]["channel_2"]["defocus"] == -2.5
 
     def select_random_entries_from_list(self, parameter_list):
         n = random.randint(1, len(parameter_list))

@@ -51,6 +51,18 @@ class TestConfiguration(unittest.TestCase):
         with open(yaml_path) as file:
             self.data = yaml.safe_load(file)
 
+        synthetic_yaml_path = os.path.join(
+            root_path, "src", "navigate", "config", "synthetic_configuration.yaml"
+        )
+        with open(synthetic_yaml_path) as file:
+            self.synthetic_data = yaml.safe_load(file)
+
+        waveform_constants_path = os.path.join(
+            root_path, "src", "navigate", "config", "waveform_constants.yml"
+        )
+        with open(waveform_constants_path) as file:
+            self.waveform_constants = yaml.safe_load(file)
+
     def tearDown(self):
         pass
 
@@ -178,6 +190,19 @@ class TestConfiguration(unittest.TestCase):
                 else:
                     raise ValueError("Unexpected hardware type")
 
+    def test_waveform_constants_camera_delay(self):
+        self.assertEqual(
+            self.waveform_constants["other_constants"]["camera_delay"], "1.0"
+        )
+
+    def test_synthetic_camera_timing_uses_waveform_constants(self):
+        for microscope in self.synthetic_data["microscopes"].values():
+            camera = microscope.get("camera")
+            if camera is None:
+                continue
+            self.assertNotIn("delay", camera)
+            self.assertNotIn("delay_percent", camera)
+
     def daq_section(self, microscope, hardware_type):
         expected_daq_keys = [
             "hardware",
@@ -207,7 +232,6 @@ class TestConfiguration(unittest.TestCase):
         expected_keys = [
             "hardware",
             "defect_correct_mode",
-            "delay",
             "settle_down",
             "flip_x",
             "flip_y",

@@ -110,14 +110,6 @@ class GalvoBase(ABC):
         #: float: Sweep time.
         self.sweep_time = 0
 
-        #: float: Camera delay
-        self.camera_delay = (
-            configuration["configuration"]["microscopes"][microscope_name]["camera"][
-                "delay"
-            ]
-            / 1000
-        )
-
         #: float: Galvo max voltage.
         self.galvo_max_voltage = self.device_config["hardware"]["max"]
 
@@ -138,6 +130,18 @@ class GalvoBase(ABC):
     def __del__(self):
         """Destructor"""
         pass
+
+    @property
+    def camera_delay(self) -> float:
+        """Return the current camera delay from waveform constants, in seconds."""
+        return (
+            float(
+                self.configuration["waveform_constants"]["other_constants"][
+                    "camera_delay"
+                ]
+            )
+            / 1000
+        )
 
     @abstractmethod
     def adjust(

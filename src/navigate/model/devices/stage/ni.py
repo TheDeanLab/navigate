@@ -138,14 +138,6 @@ class NIStage(StageBase, NIDevice):
             microscope_name
         ]["daq"]["trigger_source"]
 
-        #: float: Percent of the camera delay.
-        self.camera_delay = (
-            configuration["configuration"]["microscopes"][microscope_name]["camera"][
-                "delay"
-            ]
-            / 1000
-        )
-
         #: float: Sample rate of the DAQ.
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -164,6 +156,18 @@ class NIStage(StageBase, NIDevice):
         self.ao_task = None
 
         self.switch_mode("normal")
+
+    @property
+    def camera_delay(self) -> float:
+        """Return the current camera delay from waveform constants, in seconds."""
+        return (
+            float(
+                self.configuration["waveform_constants"]["other_constants"][
+                    "camera_delay"
+                ]
+            )
+            / 1000
+        )
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self) -> dict[str, float]:

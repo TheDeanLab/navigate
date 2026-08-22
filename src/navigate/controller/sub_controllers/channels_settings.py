@@ -194,7 +194,8 @@ class ChannelSettingController(GUIController):
             channel_value = setting_dict[channel]
             for name in channel_vals:
                 if channel_value.get(name, None):
-                    # don't set the value if the filter wheel value not in the dropdown options
+                    # Do not set a filter wheel value that is absent from the
+                    # dropdown options.
                     if name in filter_wheel_names and channel_value[
                         name
                     ] not in self._get_dropdown_values(

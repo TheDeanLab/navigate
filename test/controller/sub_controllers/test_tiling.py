@@ -190,12 +190,8 @@ def test_set_table(tiling_wizard_controller):
     )
 
     # Default to fixed theta. Empty widget values are treated as 0.0.
-    r_start = float(
-        tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0
-    )
-    r_stop = float(
-        tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0
-    )
+    r_start = float(tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0)
+    r_stop = float(tiling_wizard_controller.stage_position_vars["theta"].get() or 0.0)
 
     f_start = float(tiling_wizard_controller.variables["f_start"].get()) - float(
         tiling_wizard_controller.stack_acq_widgets["start_focus"].get()
@@ -252,10 +248,16 @@ def test_load_settings_uses_defaults_when_missing_file():
         controller.variables[f"{axis}_fov"] = Var()
         controller.variables[f"{axis}_tiles"] = Var()
 
-    with patch(
-        "navigate.controller.sub_controllers.tiling.get_navigate_path",
-        return_value="/tmp/navigate",
-    ), patch("navigate.controller.sub_controllers.tiling.os.path.exists", return_value=False):
+    with (
+        patch(
+            "navigate.controller.sub_controllers.tiling.get_navigate_path",
+            return_value="/tmp/navigate",
+        ),
+        patch(
+            "navigate.controller.sub_controllers.tiling.os.path.exists",
+            return_value=False,
+        ),
+    ):
         controller.load_settings()
 
     assert controller.variables["percent_overlap"].get() == 13.0
@@ -302,12 +304,19 @@ def test_load_settings_reads_existing_yaml_values():
         "x_tiles": Var(),
     }
 
-    with patch(
-        "navigate.controller.sub_controllers.tiling.get_navigate_path",
-        return_value="/tmp/navigate",
-    ), patch("navigate.controller.sub_controllers.tiling.os.path.exists", return_value=True), patch(
-        "navigate.controller.sub_controllers.tiling.load_yaml_file",
-        return_value=positions,
+    with (
+        patch(
+            "navigate.controller.sub_controllers.tiling.get_navigate_path",
+            return_value="/tmp/navigate",
+        ),
+        patch(
+            "navigate.controller.sub_controllers.tiling.os.path.exists",
+            return_value=True,
+        ),
+        patch(
+            "navigate.controller.sub_controllers.tiling.load_yaml_file",
+            return_value=positions,
+        ),
     ):
         controller.load_settings()
 
@@ -331,7 +340,9 @@ def test_close_window_saves_state_and_removes_controller_attr():
     controller.view = SimpleNamespace(popup=SimpleNamespace(dismiss=MagicMock()))
     controller.parent_controller = parent
 
-    with patch("navigate.controller.sub_controllers.tiling.save_yaml_file") as mock_save:
+    with patch(
+        "navigate.controller.sub_controllers.tiling.save_yaml_file"
+    ) as mock_save:
         controller.close_window()
 
     mock_save.assert_called_once()
@@ -340,7 +351,9 @@ def test_close_window_saves_state_and_removes_controller_attr():
 
 
 def test_calculate_tiles_unknown_axis_logs_warning(tiling_wizard_controller):
-    with patch("navigate.controller.sub_controllers.tiling.logger.warning") as mock_warning:
+    with patch(
+        "navigate.controller.sub_controllers.tiling.logger.warning"
+    ) as mock_warning:
         tiling_wizard_controller.calculate_tiles("unknown_axis")
 
     mock_warning.assert_called_once()
@@ -361,7 +374,9 @@ def test_calculate_tiles_handles_value_error(tiling_wizard_controller):
     tiling_wizard_controller.variables["x_dist"].set("not_a_number")
     tiling_wizard_controller.is_validated["x"] = True
 
-    with patch("navigate.controller.sub_controllers.tiling.logger.warning") as mock_warning:
+    with patch(
+        "navigate.controller.sub_controllers.tiling.logger.warning"
+    ) as mock_warning:
         tiling_wizard_controller.calculate_tiles("x")
 
     assert tiling_wizard_controller.is_validated["x"] is False
@@ -373,11 +388,14 @@ def test_set_table_warns_when_input_is_invalid(tiling_wizard_controller):
     original = dict(tiling_wizard_controller.is_validated)
     tiling_wizard_controller.is_validated["x"] = False
 
-    with patch(
-        "navigate.controller.sub_controllers.tiling.messagebox.showwarning"
-    ) as mock_warning, patch(
-        "navigate.controller.sub_controllers.tiling.compute_tiles_from_bounding_box"
-    ) as mock_compute:
+    with (
+        patch(
+            "navigate.controller.sub_controllers.tiling.messagebox.showwarning"
+        ) as mock_warning,
+        patch(
+            "navigate.controller.sub_controllers.tiling.compute_tiles_from_bounding_box"
+        ) as mock_compute,
+    ):
         tiling_wizard_controller.set_table()
 
     mock_warning.assert_called_once()
@@ -397,10 +415,13 @@ def test_set_table_updates_coupled_axis_step_size(tiling_wizard_controller):
     tiling_wizard_controller.variables["f_fov"].set(42.5)
     tiling_wizard_controller.stage_position_vars["theta"].set(0)
 
-    with patch(
-        "navigate.controller.sub_controllers.tiling.compute_tiles_from_bounding_box",
-        return_value=(["X"], [[0.0]]),
-    ), patch("navigate.controller.sub_controllers.tiling.update_table"):
+    with (
+        patch(
+            "navigate.controller.sub_controllers.tiling.compute_tiles_from_bounding_box",
+            return_value=(["X"], [[0.0]]),
+        ),
+        patch("navigate.controller.sub_controllers.tiling.update_table"),
+    ):
         tiling_wizard_controller.set_table()
 
     assert config["experiment"]["MicroscopeState"]["f_step_size"] == "42.5"
@@ -440,7 +461,10 @@ def test_update_fov_switches_primary_axes(tiling_wizard_controller):
     tiling_wizard_controller.update_fov("z_device")
     assert tiling_wizard_controller.primary_z_axis == new_z
     assert float(tiling_wizard_controller.variables[f"{new_z}_fov"].get()) == 11.0
-    assert float(tiling_wizard_controller.variables[f"{original_primary_z}_fov"].get()) == 0
+    assert (
+        float(tiling_wizard_controller.variables[f"{original_primary_z}_fov"].get())
+        == 0
+    )
 
     tiling_wizard_controller.variables[f"{original_primary_f}_fov"].set(22.0)
     tiling_wizard_controller.variables[f"{new_f}_fov"].set(2.0)
@@ -448,7 +472,10 @@ def test_update_fov_switches_primary_axes(tiling_wizard_controller):
     tiling_wizard_controller.update_fov("f_device")
     assert tiling_wizard_controller.primary_f_axis == new_f
     assert float(tiling_wizard_controller.variables[f"{new_f}_fov"].get()) == 22.0
-    assert float(tiling_wizard_controller.variables[f"{original_primary_f}_fov"].get()) == 0
+    assert (
+        float(tiling_wizard_controller.variables[f"{original_primary_f}_fov"].get())
+        == 0
+    )
 
     tiling_wizard_controller.stack_acq_widgets["z_device"].set(original_z_device)
     tiling_wizard_controller.stack_acq_widgets["f_device"].set(original_f_device)
@@ -485,4 +512,6 @@ def test_showup_brings_popup_to_front(tiling_wizard_controller):
     tiling_wizard_controller.showup()
 
     tiling_wizard_controller.view.popup.deiconify.assert_called_once()
-    tiling_wizard_controller.view.popup.attributes.assert_called_once_with("-topmost", 1)
+    tiling_wizard_controller.view.popup.attributes.assert_called_once_with(
+        "-topmost", 1
+    )

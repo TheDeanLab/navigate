@@ -65,8 +65,8 @@ def time_it(
                 f"Timed out on {name}\n"
                 f"   args:{args}\n"
                 f"   kwargs: {kwargs}\n"
-                f" Each loop took {time_per_loop_us:.2f} \u03BCs"
-                f" (Allowed: {timeout_us:.2f} \u03BCs)"
+                f" Each loop took {time_per_loop_us:.2f} \u03bcs"
+                f" (Allowed: {timeout_us:.2f} \u03bcs)"
             )
     return time_per_loop_us
 
@@ -144,6 +144,7 @@ def test_custody_thread_target_args():
         return 1
 
     CustodyThread(target=custody_f, first_resource=None).start()
+
     # CustodyThread accepts a target with a positional arg 'custody'
     def custody_f(custody):
         return 1
@@ -377,6 +378,7 @@ def test_accessing_unlinked_memory_in_subprocess():
             # loses all references to the array.
             raise AssertionError("Did not get the error we expected")
 
+
 @pytest.mark.flaky(reruns=3, reruns_delay=2)
 def test_serializing_and_deserializing():
     """Test serializing/deserializing arrays with random shapes, dtypes, and
@@ -583,20 +585,20 @@ def test_object_in_subprocess_overhead():
     n_loops = 10000
     p = ObjectInSubprocess(DummyClass, x=4)
     t = time_it(n_loops, lambda: p.x, timeout_us=200, name="Attribute access")  # noqa
-    print(f" {t:.2f} \u03BCs per get-attribute.")
+    print(f" {t:.2f} \u03bcs per get-attribute.")
     t = time_it(
         n_loops,
         lambda: setattr(p, "x", 5),  # noqa
         timeout_us=200,
         name="Attribute setting",
     )
-    print(f" {t:.2f} \u03BCs per set-attribute.")
+    print(f" {t:.2f} \u03bcs per set-attribute.")
     t = time_it(
         n_loops, lambda: p.z, fail=False, timeout_us=400, name="Attribute error"  # noqa
     )
-    print(f" {t:.2f} \u03BCs per parent-handled exception.")
+    print(f" {t:.2f} \u03bcs per parent-handled exception.")
     t = time_it(n_loops, p.mirror, timeout_us=200, name="Trivial method call")
-    print(f" {t:.2f} \u03BCs per trivial method call.")
+    print(f" {t:.2f} \u03bcs per trivial method call.")
     _test_passing_array_performance()
 
     del p
@@ -628,7 +630,7 @@ def _test_array_passing(shape, pass_by, method_name, dtype, n_loops):
         timeout_us = 1e6
     func = getattr(shm_obj, method_name)
     t_per_loop = time_it(n_loops, func, (a,), timeout_us=timeout_us, name=name)
-    print(f" {t_per_loop:.2f} \u03BCs per {name}")
+    print(f" {t_per_loop:.2f} \u03bcs per {name}")
 
 
 def test_lock_with_waitlist():

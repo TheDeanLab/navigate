@@ -96,9 +96,8 @@ def test_add_feature_list_requires_name(mock_error, feature_popup_controller):
 def test_add_feature_list_duplicate_name(mock_error, feature_popup_controller):
     feature_popup_controller.verify_feature_list = MagicMock(return_value=True)
     feature_popup_controller.view.inputs["feature_list_name"].set("Repeated")
-    feature_popup_controller.parent_controller.menu_controller.add_feature_list.return_value = (
-        False
-    )
+    menu_controller = feature_popup_controller.parent_controller.menu_controller
+    menu_controller.add_feature_list.return_value = False
 
     feature_popup_controller.add_feature_list()
 

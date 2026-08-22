@@ -69,7 +69,7 @@ class ChannelsTab(tk.Frame):
 
     def __init__(
         self,
-        settings_notebook: "navigate.view.main_window_content.settings_notebook.SettingsNotebook",
+        settings_notebook: "navigate.view.main_window_content.settings_notebook.SettingsNotebook",  # noqa: E501
         *args: list,
         **kwargs: dict,
     ):
@@ -166,7 +166,7 @@ class ChannelCreator(ttk.Labelframe):
 
     def __init__(
         self,
-        channels_tab: "navigate.view.main_window_content.settings_notebook.SettingsNotebook",
+        channels_tab: "navigate.view.main_window_content.settings_notebook.SettingsNotebook",  # noqa: E501
         *args: list,
         **kwargs: dict,
     ) -> None:

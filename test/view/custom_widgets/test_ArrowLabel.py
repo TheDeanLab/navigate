@@ -6,20 +6,26 @@ from navigate.view.custom_widgets.ArrowLabel import ArrowLabel
 def test_arrow_label_uses_theme_panel_bg_and_rgba_image():
     arrow_image = object()
 
-    with patch(
-        "navigate.view.custom_widgets.ArrowLabel.tk.Label.__init__",
-        return_value=None,
-    ) as label_init, patch(
-        "navigate.view.custom_widgets.ArrowLabel.create_arrow_image",
-        return_value=arrow_image,
-    ) as create_mock, patch(
-        "navigate.view.custom_widgets.ArrowLabel.ImageTk.PhotoImage",
-        return_value="arrow_photo",
-    ) as photo_mock, patch(
-        "navigate.view.custom_widgets.ArrowLabel.ArrowLabel.configure",
-    ) as configure_mock, patch(
-        "navigate.view.custom_widgets.ArrowLabel.get_theme_color",
-        return_value="#1a212b",
+    with (
+        patch(
+            "navigate.view.custom_widgets.ArrowLabel.tk.Label.__init__",
+            return_value=None,
+        ) as label_init,
+        patch(
+            "navigate.view.custom_widgets.ArrowLabel.create_arrow_image",
+            return_value=arrow_image,
+        ) as create_mock,
+        patch(
+            "navigate.view.custom_widgets.ArrowLabel.ImageTk.PhotoImage",
+            return_value="arrow_photo",
+        ) as photo_mock,
+        patch(
+            "navigate.view.custom_widgets.ArrowLabel.ArrowLabel.configure",
+        ) as configure_mock,
+        patch(
+            "navigate.view.custom_widgets.ArrowLabel.get_theme_color",
+            return_value="#1a212b",
+        ),
     ):
         label = ArrowLabel(
             MagicMock(),

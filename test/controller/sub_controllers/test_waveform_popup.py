@@ -134,18 +134,20 @@ def test_configure_widget_range(waveform_popup_controller):
             gui_settings["remote_focus_waveform"]["amplitude_step_size"]
         )
         assert widgets[laser + " Amp"].widget.precision == min(
-            Decimal(
-                str(gui_settings["remote_focus_waveform"]["amplitude_step_size"])
-            ).normalize().as_tuple().exponent,
+            Decimal(str(gui_settings["remote_focus_waveform"]["amplitude_step_size"]))
+            .normalize()
+            .as_tuple()
+            .exponent,
             0,
         )
         assert float(widgets[laser + " Off"].widget.cget("increment")) == float(
             gui_settings["remote_focus_waveform"]["offset_step_size"]
         )
         assert widgets[laser + " Off"].widget.precision == min(
-            Decimal(
-                str(gui_settings["remote_focus_waveform"]["offset_step_size"])
-            ).normalize().as_tuple().exponent,
+            Decimal(str(gui_settings["remote_focus_waveform"]["offset_step_size"]))
+            .normalize()
+            .as_tuple()
+            .exponent,
             0,
         )
     for galvo in waveform_popup_controller.galvos:
@@ -153,18 +155,20 @@ def test_configure_widget_range(waveform_popup_controller):
             gui_settings["galvo_waveform"]["amplitude_step_size"]
         )
         assert widgets[galvo + " Amp"].widget.precision == min(
-            Decimal(
-                str(gui_settings["galvo_waveform"]["amplitude_step_size"])
-            ).normalize().as_tuple().exponent,
+            Decimal(str(gui_settings["galvo_waveform"]["amplitude_step_size"]))
+            .normalize()
+            .as_tuple()
+            .exponent,
             0,
         )
         assert float(widgets[galvo + " Off"].widget.cget("increment")) == float(
             gui_settings["galvo_waveform"]["offset_step_size"]
         )
         assert widgets[galvo + " Off"].widget.precision == min(
-            Decimal(
-                str(gui_settings["galvo_waveform"]["offset_step_size"])
-            ).normalize().as_tuple().exponent,
+            Decimal(str(gui_settings["galvo_waveform"]["offset_step_size"]))
+            .normalize()
+            .as_tuple()
+            .exponent,
             0,
         )
 

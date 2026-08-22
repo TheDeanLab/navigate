@@ -67,7 +67,10 @@ def multiposition_controller(dummy_controller):
     isolated_controller.view.settings.multiposition_tab.master.tiling_buttons = (
         MagicMock()
     )
-    isolated_controller.view.settings.multiposition_tab.master.tiling_buttons.buttons = {
+    tiling_buttons = (
+        isolated_controller.view.settings.multiposition_tab.master.tiling_buttons
+    )
+    tiling_buttons.buttons = {
         "tiling": MagicMock(),
         "save_data": MagicMock(),
         "load_data": MagicMock(),

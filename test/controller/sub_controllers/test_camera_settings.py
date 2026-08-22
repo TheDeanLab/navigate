@@ -383,9 +383,9 @@ class TestCameraSettingController:
         self.camera_settings.mode_widgets["Sensor"].widget.set("")
         self.camera_settings.update_readout_time()
 
-        assert self.camera_settings.framerate_widgets["readout_time"].get() == pytest.approx(
-            default_readout_time
-        )
+        assert self.camera_settings.framerate_widgets[
+            "readout_time"
+        ].get() == pytest.approx(default_readout_time)
 
     def test_update_exposure_time(self):
 

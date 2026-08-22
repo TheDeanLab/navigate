@@ -430,16 +430,20 @@ class TestCameraViewController:
         # Calculate expected image based on transpose flag
         if transpose:
             new_image = self.camera_view.image[
-                x_start_index * self.camera_view.canvas_width_scale : x_end_index
+                x_start_index
+                * self.camera_view.canvas_width_scale : x_end_index
                 * self.camera_view.canvas_width_scale,
-                y_start_index * self.camera_view.canvas_height_scale : y_end_index
+                y_start_index
+                * self.camera_view.canvas_height_scale : y_end_index
                 * self.camera_view.canvas_height_scale,
             ]
         else:
             new_image = self.camera_view.image[
-                y_start_index * self.camera_view.canvas_height_scale : y_end_index
+                y_start_index
+                * self.camera_view.canvas_height_scale : y_end_index
                 * self.camera_view.canvas_height_scale,
-                x_start_index * self.camera_view.canvas_width_scale : x_end_index
+                x_start_index
+                * self.camera_view.canvas_width_scale : x_end_index
                 * self.camera_view.canvas_width_scale,
             ]
 

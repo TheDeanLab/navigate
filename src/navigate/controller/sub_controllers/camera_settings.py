@@ -52,8 +52,8 @@ class AdvancedCameraSettingController:
 
     def __init__(
         self,
-        popup: "AdvancedCameraSettingPopup",
-        parent_controller: "Controller",
+        popup: "AdvancedCameraSettingPopup",  # noqa: F821
+        parent_controller: "Controller",  # noqa: F821
         *args,
         **kwargs,
     ) -> None:
@@ -858,7 +858,8 @@ class CameraSettingController(GUIController):
         ]
         zoom = microscope_state_dict["zoom"]
         if self.microscope_name:
-            # Set the zoom value and save the pixel size to the camera settings when enabling the additional microscope for acquisition.
+            # Save the zoom pixel size when enabling an additional microscope
+            # for acquisition.
             try:
                 pixel_size = float(self.camera_setting_dict["pixel_size"])
             except (KeyError, ValueError):

@@ -553,7 +553,8 @@ class TestAcquireBarController:
                     widgets["celltype"].set("34T")
 
                     # Set dynamic label entries for each selected channel
-                    # The popup creates entries like label_488nm, label_562nm, label_642nm
+                    # The popup creates entries such as label_488nm and
+                    # label_562nm.
                     for key in widgets.keys():
                         if key.startswith("label_"):
                             widgets[key].set("BCB")

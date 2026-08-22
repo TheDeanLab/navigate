@@ -127,7 +127,9 @@ def test_build_tab_window_failure_shows_warning(mock_warning, plugins_controller
     frame_factory = MagicMock(side_effect=RuntimeError("tab failure"))
     controller_factory = MagicMock()
 
-    plugins_controller.build_tab_window("Broken Plugin", frame_factory, controller_factory)
+    plugins_controller.build_tab_window(
+        "Broken Plugin", frame_factory, controller_factory
+    )
 
     mock_warning.assert_called_once()
 
@@ -137,7 +139,9 @@ def test_build_popup_window_existing_controller(plugins_controller):
     controller_name = "__pluginpopup_plugin_controller"
     plugins_controller.plugins_dict[controller_name] = existing
 
-    func = plugins_controller.build_popup_window("Popup Plugin", MagicMock(), MagicMock())
+    func = plugins_controller.build_popup_window(
+        "Popup Plugin", MagicMock(), MagicMock()
+    )
     func()
 
     existing.popup.deiconify.assert_called_once()
@@ -153,7 +157,9 @@ def test_build_popup_window_wrapper_handles_error(
     mock_popup.return_value = popup
     frame_factory = MagicMock(side_effect=RuntimeError("popup failure"))
 
-    func = plugins_controller.build_popup_window("Popup Plugin", frame_factory, MagicMock())
+    func = plugins_controller.build_popup_window(
+        "Popup Plugin", frame_factory, MagicMock()
+    )
     func()
 
     mock_warning.assert_called_once()
@@ -167,7 +173,9 @@ def test_register_acquisition_mode(plugins_controller):
     class DummyAcquisition:
         pass
 
-    module = SimpleNamespace(MyMode=AcquisitionMode(DummyAcquisition), not_mode=object())
+    module = SimpleNamespace(
+        MyMode=AcquisitionMode(DummyAcquisition), not_mode=object()
+    )
     plugins_controller.register_acquisition_mode("my_mode", module)
     plugins_controller.parent_controller.add_acquisition_mode.assert_called_once_with(
         "my_mode", module.MyMode

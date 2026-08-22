@@ -623,14 +623,11 @@ class VolumeSearch3D:
                         )
                     except (ValueError, KeyError):
                         self.model.logger.info(
-                            f"*** Offsets from {self.target_zoom} to {current_zoom_value} are "
-                            f"not implemented! There is not enough information in the "
-                            f"configuration.yaml file!"
+                            f"*** Offsets from {self.target_zoom} to "
+                            f"{current_zoom_value} are not implemented! "
+                            "There is not enough information in configuration.yaml!"
                         )
 
-        current_pixel_size = self.model.configuration["configuration"]["microscopes"][
-            current_microscope_name
-        ]["zoom"]["pixel_size"][current_zoom_value]
         current_image_width = self.model.configuration["experiment"][
             "CameraParameters"
         ][current_microscope_name]["img_x_pixels"]

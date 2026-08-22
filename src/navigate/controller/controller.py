@@ -277,9 +277,10 @@ class Controller:
         self.autofocus_calibration_controller = AutofocusCalibrationController(self)
 
         #: dict: Event listeners for the controller.
-        self.event_listeners = {
-            "autofocus_complete": self.autofocus_calibration_controller.handle_autofocus_complete
-        }
+        handle_autofocus_complete = (
+            self.autofocus_calibration_controller.handle_autofocus_complete
+        )
+        self.event_listeners = {"autofocus_complete": handle_autofocus_complete}
 
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acquire_bar, self)
@@ -1958,8 +1959,7 @@ class Controller:
                     handler(latest_progress)
                 except Exception:
                     print(
-                        "*** unhandled event: autofocus_progress, "
-                        f"{latest_progress}"
+                        "*** unhandled event: autofocus_progress, " f"{latest_progress}"
                     )
 
         while self._event_pump_running:

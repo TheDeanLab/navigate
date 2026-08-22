@@ -353,13 +353,17 @@ def test_save_experiment_branches(
 ):
     controller = menu_controller_for_branches
 
-    controller.parent_controller.update_experiment_setting = MagicMock(return_value="bad")
+    controller.parent_controller.update_experiment_setting = MagicMock(
+        return_value="bad"
+    )
     controller.save_experiment()
     mock_showerror.assert_called_once()
     mock_save_yaml.assert_not_called()
 
     mock_showerror.reset_mock()
-    controller.parent_controller.update_experiment_setting = MagicMock(return_value=None)
+    controller.parent_controller.update_experiment_setting = MagicMock(
+        return_value=None
+    )
     mock_asksave.return_value = ""
     controller.save_experiment()
     mock_showerror.assert_not_called()
@@ -502,4 +506,6 @@ def test_popup_microscope_setting_branches(
     controller.popup_microscope_setting()
 
     controller.parent_controller.model.get_microscope_info.assert_called_once()
-    assert controller.parent_controller.microscope_popup_controller is created_controller
+    assert (
+        controller.parent_controller.microscope_popup_controller is created_controller
+    )

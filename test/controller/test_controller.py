@@ -944,12 +944,15 @@ def test_execute_acquire_handles_missing_feature_popup_controller_after_wait(
         side_effect=close_popup_and_remove_controller
     )
 
-    with patch(
-        "navigate.controller.controller.FeatureListPopup",
-        return_value=feature_popup,
-    ), patch(
-        "navigate.controller.controller.FeaturePopupController",
-        return_value=popup_controller,
+    with (
+        patch(
+            "navigate.controller.controller.FeatureListPopup",
+            return_value=feature_popup,
+        ),
+        patch(
+            "navigate.controller.controller.FeaturePopupController",
+            return_value=popup_controller,
+        ),
     ):
         controller.execute("acquire")
 

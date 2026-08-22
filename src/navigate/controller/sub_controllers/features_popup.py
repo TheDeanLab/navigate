@@ -246,6 +246,7 @@ class FeaturePopupController(GUIController):
 
 class FeatureListGraphController:
     CHIP_GAP = 10
+
     def __init__(
         self,
         feature_list_view,
@@ -540,9 +541,7 @@ class FeatureListGraphController:
                 end_pos = c * (feature_icon_width + al_width) + feature_icon_width // 2
         if arrow_image:
             #: ImageTk.PhotoImage: The image of the feature list graph.
-            self.image = ImageTk.PhotoImage(
-                arrow_image, master=self.feature_list_view
-            )
+            self.image = ImageTk.PhotoImage(arrow_image, master=self.feature_list_view)
             al = tk.Label(
                 self.feature_list_view,
                 image=self.image,
@@ -620,31 +619,31 @@ class FeatureListGraphController:
             )
 
             if "true" in feature:
-                self.feature_list_graph_controllers_true[idx] = (
-                    FeatureListGraphController(
-                        popup.feature_list_true_frame.feature_view_frame,
-                        popup.feature_list_true_frame.content,
-                        popup.preview_btn_true,
-                        None,
-                        popup.feature_list_true_frame.board_canvas,
-                        popup.feature_list_true_frame.board_window,
-                        popup.feature_list_true_frame.marker,
-                        self.child_popups,
-                    )
+                self.feature_list_graph_controllers_true[
+                    idx
+                ] = FeatureListGraphController(
+                    popup.feature_list_true_frame.feature_view_frame,
+                    popup.feature_list_true_frame.content,
+                    popup.preview_btn_true,
+                    None,
+                    popup.feature_list_true_frame.board_canvas,
+                    popup.feature_list_true_frame.board_window,
+                    popup.feature_list_true_frame.marker,
+                    self.child_popups,
                 )
                 self.feature_list_graph_controllers_true[idx].update(feature["true"])
             if "false" in feature:
-                self.feature_list_graph_controllers_false[idx] = (
-                    FeatureListGraphController(
-                        popup.feature_list_false_frame.feature_view_frame,
-                        popup.feature_list_false_frame.content,
-                        popup.preview_btn_false,
-                        None,
-                        popup.feature_list_false_frame.board_canvas,
-                        popup.feature_list_false_frame.board_window,
-                        popup.feature_list_false_frame.marker,
-                        self.child_popups,
-                    )
+                self.feature_list_graph_controllers_false[
+                    idx
+                ] = FeatureListGraphController(
+                    popup.feature_list_false_frame.feature_view_frame,
+                    popup.feature_list_false_frame.content,
+                    popup.preview_btn_false,
+                    None,
+                    popup.feature_list_false_frame.board_canvas,
+                    popup.feature_list_false_frame.board_window,
+                    popup.feature_list_false_frame.marker,
+                    self.child_popups,
                 )
                 self.feature_list_graph_controllers_false[idx].update(feature["false"])
 
@@ -739,10 +738,13 @@ class FeatureListGraphController:
                         except (SyntaxError, ValueError):
                             spec = inspect.getfullargspec(feature["name"])
                             arg_name = spec.args[i + 2]
+                            error_message = (
+                                f"The argument {arg_name} has something wrong!\n"
+                                "Please make sure you input a correct value!"
+                            )
                             messagebox.showerror(
                                 title="Upate Feature Parameter Error",
-                                message=f"The argument {arg_name} has something wrong!\n"
-                                "Please make sure you input a correct value!",
+                                message=error_message,
                             )
                             return
                     elif a == "None":
@@ -935,7 +937,9 @@ class FeatureListGraphController:
             """
             feature = self.features[idx]
             if type(feature) == str:
-                self.features[idx] = {"name": getattr(feature_related_functions, feature)}
+                self.features[idx] = {
+                    "name": getattr(feature_related_functions, feature)
+                }
             if "true" not in self.features[idx]:
                 self.features[idx]["true"] = []
             if "false" not in self.features[idx]:
@@ -1118,7 +1122,9 @@ class FeatureListGraphController:
         self.branch_drag_window = tk.Toplevel(self.feature_list_view)
         self.branch_drag_window.overrideredirect(True)
         self.branch_drag_window.attributes("-topmost", True)
-        ttk.Label(self.branch_drag_window, text=name, padding=(12, 7), relief="solid").pack()
+        ttk.Label(
+            self.branch_drag_window, text=name, padding=(12, 7), relief="solid"
+        ).pack()
         self.move_branch_drag_window(event.x_root, event.y_root)
 
     def move_branch_drag_window(self, root_x, root_y):
@@ -1139,7 +1145,10 @@ class FeatureListGraphController:
             ),
             None,
         )
-        if target is not self.branch_drag_target and self.branch_drag_target is not None:
+        if (
+            target is not self.branch_drag_target
+            and self.branch_drag_target is not None
+        ):
             self.branch_drag_target.marker.place_forget()
         self.branch_drag_target = target
         if target is not None:
@@ -1207,9 +1216,13 @@ class FeatureListGraphController:
             self.drag_window.destroy()
         self.drag_window = None
         point = self.board_point(event)
-        was_click = self.drag_chip is not None and self.drag_start is not None and (
-            abs(event.x_root - self.drag_start[0]) < 5
-            and abs(event.y_root - self.drag_start[1]) < 5
+        was_click = (
+            self.drag_chip is not None
+            and self.drag_start is not None
+            and (
+                abs(event.x_root - self.drag_start[0]) < 5
+                and abs(event.y_root - self.drag_start[1]) < 5
+            )
         )
         if was_click:
             self.show_config_popup(self.chips.index(self.drag_chip))(event)
@@ -1296,6 +1309,7 @@ class FeatureListGraphController:
 
     def is_valid_grouping(self, start_index, end_index):
         """Return whether a new group can be inserted without overlap."""
+
         def nesting_depth_before(position):
             depth = 0
             for value in self.feature_structure[:position]:
@@ -1313,7 +1327,6 @@ class FeatureListGraphController:
             and self.feature_structure[end_index + 1] == ")"
         )
         return group_boundaries_match and not last_node_already_ends_group
-
 
     def layout_chips(self):
         if self.board_canvas is None or self.board_canvas.winfo_width() <= 1:
@@ -1403,7 +1416,10 @@ class FeatureListGraphController:
         if index >= 1:
             pre_structure_index = self.feature_structure.index(index - 1)
             if pre_structure_index + 1 < structure_index:
-                while pre_structure_index + 1 < len(self.feature_structure) and self.feature_structure[pre_structure_index + 1] == ")":
+                while (
+                    pre_structure_index + 1 < len(self.feature_structure)
+                    and self.feature_structure[pre_structure_index + 1] == ")"
+                ):
                     pre_structure_index += 1
                 structure_index = pre_structure_index + 1
 
@@ -1412,7 +1428,6 @@ class FeatureListGraphController:
                 self.feature_structure[structure_pos] += 1
         self.features.insert(index, feature)
         self.feature_structure.insert(structure_index, index)
-
 
     def move_feature(self, old_index, new_index):
         """Move a feature and its structure entry to the drop position."""
@@ -1434,8 +1449,8 @@ class FeatureListGraphController:
         else:
             new_structure.insert(new_structure.index(successor), moved_identity)
 
-        # A group must contain at least two direct elements.  Moving an item out
-        # of a group can leave a one-item loop behind and cause errors; remove all one-item group.
+        # A group must contain at least two direct elements. Moving an item out
+        # can leave one-item loops behind, so remove each invalid group.
         grouped_structure = [[]]
         for token in new_structure:
             if token == "(":

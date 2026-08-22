@@ -481,7 +481,7 @@ class Autofocus:
             return self._stage_scan_bounds_error("fine", positions)
         if not self.coarse_selected and not self.fine_selected:
             return (
-                f"Coarse/Fine settings error!\n\n"
+                "Coarse/Fine settings error!\n\n"
                 "Select at least one mode: Coarse or Fine.\n"
                 "Please ensure the range and step size are greater than zero."
             )

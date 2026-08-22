@@ -32,6 +32,8 @@ The central class is `Controller` in `controller.py`. It coordinates:
   - Event pump and Tk thread dispatcher
 - `configuration_controller.py`
   - Configuration mutation and validation helpers
+- `autofocus_calibration.py`
+  - Popup-independent autofocus calibration state and completion handling
 - `sub_controllers/`
   - Feature-specific UI controllers (camera, stage, channels, multiposition, etc.)
 - `thread_pool.py`
@@ -41,13 +43,17 @@ The central class is `Controller` in `controller.py`. It coordinates:
 
 When `Controller(...)` is constructed, it performs this sequence:
 
-1. Load and validate config files
-2. Start the model subprocess and communication channels
-3. Construct the main view and sub-controllers
-4. Install Tk thread guard (`install_tk_thread_guard`)
-5. Start the event pump (`_schedule_event_pump`)
-6. Populate experiment settings and initialize camera/mip display
-7. Show main window
+1. Store the Tk root and install the thread guard (`install_tk_thread_guard`).
+2. Create controller queues and the worker-thread pool, then load and validate the
+   configuration files.
+3. Start the model subprocess and create its image pipe.
+4. Apply the GUI theme and construct the main view, autofocus calibration state,
+   and UI sub-controllers.
+5. Create the main-thread dispatch queue and start the event pump
+   (`_schedule_event_pump`).
+6. Initialize menus and plugins, then populate experiment settings and camera/MIP
+   display state.
+7. Dismiss the splash screen, show the main window, and bind resize handling.
 
 ## Threading Model (Important)
 
@@ -71,6 +77,7 @@ This codebase enforces that with:
 - Do not update Tk widgets from worker threads.
 - Do not read/write Tk variables from worker threads.
 - Do route UI work through `_run_on_main_thread(...)`.
+- Use `wait=True` only when the worker depends on completion or ordering.
 - Do keep non-UI heavy work in worker threads.
 
 ## Event Flow: Model -> GUI
@@ -135,7 +142,9 @@ When adding new controller behavior:
 2. Keep model calls off the Tk thread when they can block.
 3. Keep all Tk widget and Tk variable access on Tk thread.
 4. If called from a worker, wrap UI calls with `_run_on_main_thread(...)`.
-5. Add tests for command routing and thread-safe UI behavior where possible.
+5. Use the existing named thread-pool resources instead of adding ad hoc worker
+   or polling threads.
+6. Add tests for command routing and thread-safe UI behavior where possible.
 
 ## Common Pitfalls
 

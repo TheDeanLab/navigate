@@ -131,6 +131,19 @@ class TestStageMovement(unittest.TestCase):
             self.mc.fake_event
         )
 
+    @patch("navigate.controller.sub_controllers.menus.GuiSettingsPopupController")
+    @patch("navigate.controller.sub_controllers.menus.GuiSettingsPopup")
+    def test_popup_gui_settings_uses_gui_configuration(
+        self, popup_class, popup_controller_class
+    ):
+        self.parent_controller.gui_settings_popup_controller = None
+        self.mc.popup_gui_settings()
+
+        popup_class.assert_called_once_with(self.view)
+        popup_controller_class.assert_called_once_with(
+            popup_class.return_value, self.parent_controller
+        )
+
 
 class TestMenuController(unittest.TestCase):
     @pytest.fixture(autouse=True)

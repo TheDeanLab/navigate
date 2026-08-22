@@ -60,9 +60,10 @@ def imop_module(monkeypatch):
     class FakeIMOPMirror:
         instances = []
 
-        def __init__(self):
+        def __init__(self, **kwargs):
             self.calls = []
             self.modal_coefs = [0.1, 0.2, 0.3]
+            self.init_kwargs = kwargs
             self.__class__.instances.append(self)
 
         def set_flat(self, pos=None, pos_path=None):
@@ -201,3 +202,33 @@ def test_imop_destructor_is_error_tolerant_noop(imop_module, mirror_configuratio
     mirror.mirror_controller = ExplodingController()
 
     assert mirror.__del__() is None
+
+
+def test_imop_get_connect_params_lists_all_required_config_file_paths(imop_module):
+    module, _fake_class = imop_module
+
+    assert module.ImagineOpticsMirror.get_connect_params() == [
+        "wfc_config_file_path",
+        "haso_config_file_path",
+        "flat_path",
+        "interaction_matrix_file_path",
+    ]
+
+
+def test_imop_connect_forwards_config_file_paths_to_sdk_wrapper(imop_module):
+    module, fake_class = imop_module
+
+    connection = module.ImagineOpticsMirror.connect(
+        wfc_config_file_path="/tmp/wfc.dat",
+        haso_config_file_path="/tmp/haso.dat",
+        flat_path="/tmp/flat.wcs",
+        interaction_matrix_file_path="/tmp/matrix.aoc",
+    )
+
+    assert isinstance(connection, fake_class)
+    assert connection.init_kwargs == {
+        "wfc_config_file_path": "/tmp/wfc.dat",
+        "haso_config_file_path": "/tmp/haso.dat",
+        "positions_file_path": "/tmp/flat.wcs",
+        "interaction_matrix_file_path": "/tmp/matrix.aoc",
+    }

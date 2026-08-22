@@ -415,3 +415,36 @@ def test_custom_events_maps_remove_positions(multiposition_controller):
 
     assert "remove_positions" in events
     assert events["remove_positions"] == controller.remove_positions
+
+
+def test_highlight_position_moves_valid_row_into_view(multiposition_controller):
+    """A valid position row becomes selected and visible."""
+    controller = multiposition_controller
+    controller.table.model.df = pd.DataFrame({"X": [1, 2]})
+
+    controller.highlight_position(1)
+
+    controller.table.movetoSelection.assert_called_once_with(row=1)
+    controller.table.redraw.assert_called_once()
+    controller.table.tableChanged.assert_called_once()
+
+
+def test_highlight_position_ignores_invalid_row(multiposition_controller):
+    """Out-of-range rows leave the current selection unchanged."""
+    controller = multiposition_controller
+    controller.table.model.df = pd.DataFrame({"X": [1]})
+    controller.table.currentrow = 0
+
+    controller.highlight_position(1)
+
+    assert controller.table.currentrow == 0
+    controller.table.movetoSelection.assert_not_called()
+
+
+def test_highlight_position_event_is_registered(multiposition_controller):
+    """The controller exposes the correctly spelled highlight event."""
+    controller = multiposition_controller
+
+    assert (
+        controller.custom_events["highlight_position"] == controller.highlight_position
+    )

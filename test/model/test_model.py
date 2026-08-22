@@ -33,6 +33,7 @@
 import random
 import pytest
 import os
+from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Iterable, Iterator, Optional
 from multiprocessing import Manager
@@ -105,6 +106,9 @@ def model():
         waveform_constants_path = Path.joinpath(
             configuration_directory, "waveform_constants.yml"
         )
+        gui_configuration_path = Path.joinpath(
+            configuration_directory, "gui_configuration.yml"
+        )
         rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
         multi_positions_path = Path.joinpath(
             configuration_directory, "multi_positions.yml"
@@ -118,6 +122,7 @@ def model():
             experiment=experiment_path,
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
+            gui=gui_configuration_path,
         )
         verify_configuration(manager, configuration)
         verify_experiment_config(manager, configuration)
@@ -346,6 +351,35 @@ def test_autofocus_live_injection_preserves_channel_args(model):
     finally:
         model.is_acquiring = original_is_acquiring
         model.imaging_mode = original_imaging_mode
+        model.signal_container = original_signal_container
+        model.data_container = original_data_container
+
+
+def test_reset_feature_list_reports_injected_autofocus_completion(model):
+    """Restoring live features reports completion of the injected sequence."""
+    original_event_queue = model.event_queue
+    original_signal_container = getattr(model, "signal_container", None)
+    original_data_container = getattr(model, "data_container", None)
+    model.event_queue = Queue()
+    model.signal_container = MagicMock()
+    model.data_container = MagicMock()
+    model.data_container.end_flag = True
+    model.injected_flag.value = True
+
+    try:
+        with patch(
+            "navigate.model.model.load_features",
+            return_value=(MagicMock(), MagicMock()),
+        ):
+            model.reset_feature_list()
+
+        assert model.event_queue.get_nowait() == (
+            "autofocus_sequence_complete",
+            None,
+        )
+        assert model.injected_flag.value is False
+    finally:
+        model.event_queue = original_event_queue
         model.signal_container = original_signal_container
         model.data_container = original_data_container
 

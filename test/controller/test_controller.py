@@ -1,4 +1,5 @@
 from pathlib import Path
+from queue import Queue
 from types import SimpleNamespace
 from unittest.mock import MagicMock, ANY, patch
 import queue
@@ -641,13 +642,23 @@ def test_execute_update_setting(controller):
 def test_execute_stage_limits(controller):
     controller.threads_pool.createThread = MagicMock()
     controller.channels_tab_controller.update_stack_position_limits = MagicMock()
-    for stage_limits in [True, False]:
-        controller.threads_pool.createThread.reset_mock()
-        controller.channels_tab_controller.update_stack_position_limits.reset_mock()
-        controller.execute("stage_limits", stage_limits)
-        assert controller.stage_controller.stage_limits == stage_limits
-        controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
-        assert controller.threads_pool.createThread.called is True
+    controller.af_popup_controller = MagicMock()
+    try:
+        for stage_limits in [True, False]:
+            controller.threads_pool.createThread.reset_mock()
+            controller.channels_tab_controller.update_stack_position_limits.reset_mock()
+            controller.af_popup_controller.refresh_bounds_validation.reset_mock()
+            controller.execute("stage_limits", stage_limits)
+            assert controller.stage_controller.stage_limits == stage_limits
+            assert (
+                controller.configuration["experiment"]["StageParameters"]["limits"]
+                == stage_limits
+            )
+            controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
+            controller.af_popup_controller.refresh_bounds_validation.assert_called_once()
+            assert controller.threads_pool.createThread.called is True
+    finally:
+        del controller.af_popup_controller
 
     assert True
 
@@ -656,14 +667,36 @@ def test_execute_update_stage_limits_refreshes_stack_position_limits(controller)
     controller.threads_pool.createThread = MagicMock()
     controller.stage_controller.initialize = MagicMock()
     controller.channels_tab_controller.update_stack_position_limits = MagicMock()
+    controller.af_popup_controller = MagicMock()
 
-    controller.execute(
-        "update_stage_limits", controller.configuration_controller.microscope_name
-    )
+    try:
+        controller.execute(
+            "update_stage_limits", controller.configuration_controller.microscope_name
+        )
 
-    controller.stage_controller.initialize.assert_called_once()
-    controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
-    assert controller.threads_pool.createThread.called is True
+        controller.stage_controller.initialize.assert_called_once()
+        controller.channels_tab_controller.update_stack_position_limits.assert_called_once()
+        controller.af_popup_controller.refresh_bounds_validation.assert_called_once()
+        assert controller.threads_pool.createThread.called is True
+    finally:
+        del controller.af_popup_controller
+
+
+def test_update_stage_controller_silent_refreshes_autofocus_bounds(controller):
+    original_set_position_silent = controller.stage_controller.set_position_silent
+    controller.stage_controller.set_position_silent = MagicMock()
+    controller.af_popup_controller = MagicMock()
+
+    try:
+        controller.update_stage_controller_silent({"f_pos": 123.4})
+
+        controller.stage_controller.set_position_silent.assert_called_once_with(
+            {"f": 123.4}
+        )
+        controller.af_popup_controller.refresh_bounds_validation.assert_called_once()
+    finally:
+        controller.stage_controller.set_position_silent = original_set_position_silent
+        del controller.af_popup_controller
 
 
 def test_execute_autofocus(controller):
@@ -673,6 +706,10 @@ def test_execute_autofocus(controller):
     # Test non-acquiring case
     controller.acquire_bar_controller.is_acquiring = False
     controller.execute("autofocus")
+    assert controller.acquire_bar_controller.is_acquiring is True
+    assert (
+        str(controller.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+    )
     controller.threads_pool.createThread.assert_called_with(
         resourceName="camera",
         target=controller.capture_image,
@@ -695,6 +732,117 @@ def test_execute_autofocus(controller):
     assert callable(kwargs["target"])
 
     assert True
+
+
+def test_capture_lifecycle_updates_autofocus_stop_button(controller):
+    """Capture startup and completion synchronize the open autofocus popup."""
+    controller.acquire_bar_controller.stop_acquire()
+    controller._set_autofocus_acquisition_state("idle")
+    controller._set_autofocus_state(False)
+    controller.threads_pool.createThread = MagicMock()
+    controller.menu_controller.popup_autofocus_setting()
+    start_button = controller.af_popup_controller.view.autofocus_btn
+    stop_button = controller.af_popup_controller.view.stop_acquisition_btn
+    microscope_name = controller.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
+
+    try:
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "disabled"
+
+        controller.execute("autofocus")
+        assert str(start_button["state"]) == "disabled"
+        assert str(stop_button["state"]) == "disabled"
+
+        controller._on_capture_started(microscope_name)
+        assert str(start_button["state"]) == "disabled"
+        assert str(stop_button["state"]) == "normal"
+
+        controller._finish_capture_ui("live", 0)
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "disabled"
+
+        controller._set_autofocus_acquisition_state("starting")
+        assert str(start_button["state"]) == "disabled"
+        assert str(stop_button["state"]) == "disabled"
+
+        controller._handle_capture_start_error(RuntimeError("startup failed"))
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "disabled"
+    finally:
+        if hasattr(controller, "af_popup_controller"):
+            controller.af_popup_controller.close_popup()
+
+
+def test_live_autofocus_completion_reenables_start_button(controller):
+    """Completing injected autofocus preserves the live acquisition controls."""
+    original_event_queue = controller.event_queue
+    original_event_pump_running = controller._event_pump_running
+    controller.threads_pool.createThread = MagicMock()
+    controller.acquire_bar_controller.is_acquiring = True
+    controller.acquire_bar_controller.mode = "live"
+    controller._set_autofocus_acquisition_state("running")
+    controller._set_autofocus_state(False)
+    controller.menu_controller.popup_autofocus_setting()
+    start_button = controller.af_popup_controller.view.autofocus_btn
+    stop_button = controller.af_popup_controller.view.stop_acquisition_btn
+
+    try:
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "normal"
+
+        controller.execute("autofocus")
+        assert str(start_button["state"]) == "disabled"
+        assert str(stop_button["state"]) == "normal"
+
+        controller.event_queue = Queue()
+        controller._event_pump_running = True
+        controller.event_queue.put(("autofocus_sequence_complete", None))
+        controller.update_event()
+
+        assert str(start_button["state"]) == "normal"
+        assert str(stop_button["state"]) == "normal"
+    finally:
+        controller.event_queue = original_event_queue
+        controller._event_pump_running = original_event_pump_running
+        if hasattr(controller, "af_popup_controller"):
+            controller.af_popup_controller.close_popup()
+
+
+def test_progress_transport_cannot_starve_reliable_autofocus_events(controller):
+    original_event_queue = controller.event_queue
+    original_progress_queue = controller.autofocus_progress_queue
+    original_event_pump_running = controller._event_pump_running
+    progress_handler = MagicMock()
+    final_handler = MagicMock()
+    controller.event_listeners["autofocus_progress"] = progress_handler
+    controller.event_listeners["autofocus"] = final_handler
+
+    try:
+        controller.autofocus_progress_queue = Queue(maxsize=1)
+        controller.autofocus_progress_queue.put([[1.0, 2.0]])
+        controller.event_queue = Queue()
+        controller.event_queue.put(("autofocus", [[[1.0, 2.0]], False, True]))
+        controller.event_queue.put(("warning", "Autofocus bounds warning"))
+        controller._event_pump_running = True
+
+        with patch(
+            "navigate.controller.controller.messagebox.showwarning"
+        ) as showwarning:
+            controller.update_event()
+
+        progress_handler.assert_called_once_with([[1.0, 2.0]])
+        final_handler.assert_called_once_with([[[1.0, 2.0]], False, True])
+        showwarning.assert_called_once_with(
+            title="Navigate", message="Autofocus bounds warning"
+        )
+    finally:
+        controller.event_queue = original_event_queue
+        controller.autofocus_progress_queue = original_progress_queue
+        controller._event_pump_running = original_event_pump_running
+        controller.event_listeners.pop("autofocus_progress", None)
+        controller.event_listeners.pop("autofocus", None)
 
 
 def test_execute_eliminate_tiles(controller):
@@ -830,6 +978,46 @@ def test_execute_stop_acquire(controller):
 def test_execute_exit(controller):
     # Essentially already tested by teardown of controller fixture.
     pass
+
+
+def test_execute_exit_saves_gui_configuration_to_loaded_path(tmp_path):
+    """GUI settings are persisted to the file from which they were loaded."""
+    from navigate.controller.controller import Controller
+
+    controller = Controller.__new__(Controller)
+    controller.gui_configuration_path = tmp_path / "profiles" / "custom_gui.yml"
+    controller.configuration = {
+        name: {"name": name}
+        for name in [
+            "experiment",
+            "multi_positions",
+            "gui",
+            "waveform_constants",
+            "rest_api_config",
+            "waveform_templates",
+        ]
+    }
+    controller.sloppy_stop = MagicMock()
+    controller.update_experiment_setting = MagicMock()
+    controller.model = MagicMock()
+    controller.event_queue = MagicMock()
+    controller._stop_event_pump = MagicMock()
+    controller.threads_pool = MagicMock()
+
+    with (
+        patch(
+            "navigate.controller.controller.get_navigate_path", return_value="/system"
+        ),
+        patch("navigate.controller.controller.save_yaml_file") as save_yaml,
+        pytest.raises(SystemExit),
+    ):
+        controller.execute("exit")
+
+    save_yaml.assert_any_call(
+        file_directory=str(controller.gui_configuration_path.parent),
+        content_dict=controller.configuration["gui"],
+        filename=controller.gui_configuration_path.name,
+    )
 
 
 def test_execute_adaptive_optics(controller):

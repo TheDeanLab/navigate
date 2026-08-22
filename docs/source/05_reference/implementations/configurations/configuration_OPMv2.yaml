@@ -32,7 +32,6 @@ microscopes:
         type: HamamatsuOrca
         serial_number: 304064
       defect_correct_mode: 2.0
-      delay: 7.5 #ms
       settle_down: 0.0 #ms
     remote_focus_device:
       hardware:

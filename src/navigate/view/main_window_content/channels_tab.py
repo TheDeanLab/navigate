@@ -50,6 +50,7 @@ from navigate.view.custom_widgets.common import (
 )
 from navigate.view.theme import (
     get_theme_padding_px,
+    get_theme_preset,
     get_theme_spacing,
     get_theme_space_px,
 )
@@ -761,7 +762,10 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
 
         image_directory = Path(__file__).resolve().parent
-        image_path = image_directory.joinpath("images", "cubic_bottom_to_top.png")
+        cubic_image = "cubic_bottom_to_top.png"
+        if get_theme_preset() == "classic_night":
+            cubic_image = "cubic_bottom_to_top_dark-theme.png"
+        image_path = image_directory.joinpath("images", cubic_image)
 
         self.image = None
         try:

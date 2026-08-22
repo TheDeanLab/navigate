@@ -1,13 +1,17 @@
+"""Unit tests for feature-list popup behavior."""
+
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
+import navigate.controller.sub_controllers.features_popup as features_popup_module
 from navigate.controller.sub_controllers.features_popup import (
     FeatureListGraphController,
     FeaturePopupController,
     verify_feature_list,
 )
+from navigate.model.features import feature_related_functions
 
 
 class TextBuffer:
@@ -115,55 +119,6 @@ def test_add_feature_list_success_closes_popup(feature_popup_controller):
     feature_popup_controller.exit_func.assert_called_once()
 
 
-@patch("navigate.controller.sub_controllers.features_popup.save_yaml_file")
-@patch("navigate.controller.sub_controllers.features_popup.load_yaml_file")
-@patch("navigate.controller.sub_controllers.features_popup.get_navigate_path")
-def test_update_feature_list_executes_and_saves_yaml_when_module_none(
-    mock_get_path,
-    mock_load_yaml,
-    mock_save_yaml,
-    feature_popup_controller,
-):
-    mock_get_path.return_value = "/tmp/navigate"
-    mock_load_yaml.return_value = {"module_name": None}
-    popup = SimpleNamespace(popup=SimpleNamespace(dismiss=MagicMock()))
-    feature_popup_controller.feature_list_graph_controller.child_popups = [popup]
-    feature_popup_controller.view.inputs["feature_list_name"].set("Test Name")
-    feature_popup_controller.view.inputs["content"] = TextBuffer("[\nvalid\n]")
-    feature_popup_controller.feature_list_id = 7
-    feature_popup_controller.verify_feature_list = MagicMock(return_value=[{"ok": True}])
-
-    feature_popup_controller.update_feature_list()
-
-    feature_popup_controller.parent_controller.execute.assert_called_once_with(
-        "load_feature",
-        7,
-        "[valid]",
-    )
-    mock_save_yaml.assert_called_once()
-    assert feature_popup_controller.start_acquisiton_flag is True
-    popup.popup.dismiss.assert_called_once()
-    feature_popup_controller.view.popup.dismiss.assert_called_once()
-
-
-@patch("navigate.controller.sub_controllers.features_popup.save_yaml_file")
-@patch("navigate.controller.sub_controllers.features_popup.load_yaml_file")
-@patch("navigate.controller.sub_controllers.features_popup.get_navigate_path")
-def test_update_feature_list_skips_save_when_module_present(
-    mock_get_path,
-    mock_load_yaml,
-    mock_save_yaml,
-    feature_popup_controller,
-):
-    mock_get_path.return_value = "/tmp/navigate"
-    mock_load_yaml.return_value = {"module_name": "external.module"}
-    feature_popup_controller.verify_feature_list = MagicMock(return_value=[{"ok": True}])
-
-    feature_popup_controller.update_feature_list()
-
-    mock_save_yaml.assert_not_called()
-
-
 def test_verify_feature_list_method_delegates(feature_popup_controller):
     with patch(
         "navigate.controller.sub_controllers.features_popup.verify_feature_list",
@@ -184,7 +139,9 @@ def test_exit_func_closes_and_removes_parent_attr(feature_popup_controller):
 
     popup.popup.dismiss.assert_called_once()
     feature_popup_controller.view.popup.dismiss.assert_called_once()
-    assert not hasattr(feature_popup_controller.parent_controller, "features_popup_controller")
+    assert not hasattr(
+        feature_popup_controller.parent_controller, "features_popup_controller"
+    )
 
 
 def test_cancel_acquisition_marks_flag_and_dismisses(feature_popup_controller):
@@ -318,6 +275,8 @@ def test_draw_feature_list_graph_uses_theme_background_for_loop_arrows():
     controller = FeatureListGraphController.__new__(FeatureListGraphController)
     controller.feature_list_view = MagicMock()
     controller.feature_list_view.winfo_children.return_value = []
+    controller.board_canvas = None
+    controller.marker = None
     controller.features = [
         {"name": lambda *_args: None},
         {"name": lambda *_args: None},
@@ -328,24 +287,31 @@ def test_draw_feature_list_graph_uses_theme_background_for_loop_arrows():
     loop_arrow_image = object()
     loop_arrow_label = MagicMock()
 
-    with patch(
-        "navigate.controller.sub_controllers.features_popup.FeatureIcon",
-        side_effect=lambda *_args, **_kwargs: _DummyGraphWidget(width=228),
-    ), patch(
-        "navigate.controller.sub_controllers.features_popup.ArrowLabel",
-        side_effect=lambda *_args, **_kwargs: _DummyGraphWidget(width=104),
-    ), patch(
-        "navigate.controller.sub_controllers.features_popup.create_arrow_image",
-        return_value=loop_arrow_image,
-    ), patch(
-        "navigate.controller.sub_controllers.features_popup.ImageTk.PhotoImage",
-        return_value="loop_photo",
-    ) as photo_mock, patch(
-        "navigate.controller.sub_controllers.features_popup.tk.Label",
-        return_value=loop_arrow_label,
-    ) as label_mock, patch(
-        "navigate.controller.sub_controllers.features_popup.get_theme_color",
-        return_value="#1a212b",
+    with (
+        patch(
+            "navigate.controller.sub_controllers.features_popup.FeatureIcon",
+            side_effect=lambda *_args, **_kwargs: _DummyGraphWidget(width=228),
+        ),
+        patch(
+            "navigate.controller.sub_controllers.features_popup.ArrowLabel",
+            side_effect=lambda *_args, **_kwargs: _DummyGraphWidget(width=104),
+        ),
+        patch(
+            "navigate.controller.sub_controllers.features_popup.create_arrow_image",
+            return_value=loop_arrow_image,
+        ),
+        patch(
+            "navigate.controller.sub_controllers.features_popup.ImageTk.PhotoImage",
+            return_value="loop_photo",
+        ) as photo_mock,
+        patch(
+            "navigate.controller.sub_controllers.features_popup.tk.Label",
+            return_value=loop_arrow_label,
+        ) as label_mock,
+        patch(
+            "navigate.controller.sub_controllers.features_popup.get_theme_color",
+            return_value="#1a212b",
+        ),
     ):
         controller.draw_feature_list_graph(new_list_flag=False)
 
@@ -387,8 +353,11 @@ def test_show_menu_delete_feature_updates_graph():
     controller.feature_list_view = MagicMock()
     controller.features = [{"name": feature_a}, {"name": feature_b}]
     controller.feature_structure = [0, 1]
+    controller.chips = [MagicMock(), MagicMock()]
+    controller.selected_chips = []
     controller.update_feature_content = MagicMock()
     controller.draw_feature_list_graph = MagicMock()
+    controller.clear_selection = MagicMock()
 
     menu = FakeMenu()
     with patch(
@@ -416,8 +385,11 @@ def test_show_menu_insert_before_and_after():
     controller.feature_list_view = MagicMock()
     controller.features = [{"name": feature_a}]
     controller.feature_structure = [0]
+    controller.chips = [MagicMock()]
+    controller.selected_chips = []
     controller.update_feature_content = MagicMock()
     controller.draw_feature_list_graph = MagicMock()
+    controller.clear_selection = MagicMock()
 
     menu = FakeMenu()
     with patch(
@@ -464,3 +436,296 @@ def test_verify_feature_list_returns_converted_value(mock_convert):
     result = verify_feature_list("[{'name': 'ok'}]")
 
     assert result == [{"name": "ok"}]
+
+
+def feature_names(controller):
+    """Return feature names in displayed order."""
+    return [feature["name"].__name__ for feature in controller.features]
+
+
+def make_three_features():
+    """Return three distinct feature payloads for reorder tests."""
+    return [
+        {"name": feature_related_functions.Snap},
+        {"name": feature_related_functions.StackPause},
+        {"name": feature_related_functions.WaitToContinue},
+    ]
+
+
+def make_feature_popup_controller(feature_record, yaml_file_name):
+    """Create an edit controller with filesystem and model boundaries mocked."""
+    controller = object.__new__(FeaturePopupController)
+    controller.feature_list_id = 7
+    controller.persist_feature_list_edits = True
+    controller.view = SimpleNamespace(
+        inputs={
+            "content": MagicMock(get=MagicMock(return_value='[{"name": Snap,}]')),
+            "feature_list_name": MagicMock(get=MagicMock(return_value="Display Name")),
+        },
+        popup=MagicMock(),
+    )
+    controller.parent_controller = SimpleNamespace(
+        execute=MagicMock(),
+        menu_controller=SimpleNamespace(
+            _get_custom_feature_list_record=MagicMock(
+                return_value=(feature_record, yaml_file_name)
+            )
+        ),
+    )
+    controller.verify_feature_list = MagicMock(return_value=[{"name": object()}])
+    controller.close_child_popups = MagicMock()
+    return controller
+
+
+@pytest.fixture
+def graph_controller():
+    """Create a graph controller without Tk widgets for model-only tests."""
+    controller = object.__new__(FeatureListGraphController)
+    controller.features = []
+    controller.feature_structure = []
+    return controller
+
+
+def test_terminal_feature_replaces_existing_branch(graph_controller):
+    """Break and continue replace all existing branch nodes."""
+    graph_controller.features = [{"name": object()}, {"name": object()}]
+    graph_controller.feature_structure = [0, 1]
+
+    graph_controller.insert_feature(1, "Break")
+
+    assert graph_controller.features == ["break"]
+    assert graph_controller.feature_structure == [0]
+    assert graph_controller.build_feature_list_text() == "break"
+
+
+def test_normal_feature_replaces_terminal_branch(graph_controller, monkeypatch):
+    """A normal feature replaces a previous break or continue node."""
+
+    class TestFeature:
+        pass
+
+    monkeypatch.setattr(
+        feature_related_functions, "TestFeature", TestFeature, raising=False
+    )
+    graph_controller.features = ["continue"]
+    graph_controller.feature_structure = [0]
+
+    graph_controller.insert_feature(1, "TestFeature")
+
+    assert graph_controller.feature_structure == [0]
+    assert graph_controller.features == [{"name": TestFeature}]
+
+
+def test_move_feature_right_to_interior_slot_changes_order(graph_controller):
+    """Moving right to an interior slot must change displayed and saved order."""
+    graph_controller.features = make_three_features()
+    graph_controller.feature_structure = [0, 1, 2]
+
+    graph_controller.move_feature(0, 2)
+
+    assert feature_names(graph_controller) == [
+        "StackPause",
+        "Snap",
+        "WaitToContinue",
+    ]
+    assert graph_controller.feature_structure == [0, 1, 2]
+    assert graph_controller.build_feature_list_text() == (
+        '[{"name": StackPause, },{"name": Snap, },' '{"name": WaitToContinue, },]'
+    )
+
+
+def test_move_feature_left_changes_order(graph_controller):
+    """Moving left must keep feature payloads and structure indexes synchronized."""
+    graph_controller.features = make_three_features()
+    graph_controller.feature_structure = [0, 1, 2]
+
+    graph_controller.move_feature(2, 0)
+
+    assert feature_names(graph_controller) == [
+        "WaitToContinue",
+        "Snap",
+        "StackPause",
+    ]
+    assert graph_controller.feature_structure == [0, 1, 2]
+
+
+def test_move_feature_into_group_joins_group(graph_controller):
+    """Dropping before a grouped feature must move the node into that group."""
+    graph_controller.features = make_three_features()
+    graph_controller.feature_structure = ["(", 0, 1, ")", 2]
+
+    graph_controller.move_feature(2, 1)
+
+    assert feature_names(graph_controller) == [
+        "Snap",
+        "WaitToContinue",
+        "StackPause",
+    ]
+    assert graph_controller.feature_structure == ["(", 0, 1, 2, ")"]
+
+
+def test_move_feature_out_of_group_removes_single_member_group(graph_controller):
+    """Moving a grouped node away must remove the resulting one-member group."""
+    graph_controller.features = make_three_features()
+    graph_controller.feature_structure = ["(", 0, 1, ")", 2]
+
+    graph_controller.move_feature(1, 3)
+
+    assert feature_names(graph_controller) == [
+        "Snap",
+        "WaitToContinue",
+        "StackPause",
+    ]
+    assert graph_controller.feature_structure == [0, 1, 2]
+
+
+def test_move_feature_removes_redundant_outer_group(graph_controller):
+    """Collapsing an inner group also removes a parent with one child group."""
+    graph_controller.features = make_three_features() + [
+        {"name": feature_related_functions.Snap}
+    ]
+    graph_controller.feature_structure = ["(", "(", 0, 1, ")", 2, ")", 3]
+
+    graph_controller.move_feature(2, 4)
+
+    assert graph_controller.feature_structure == ["(", 0, 1, ")", 2, 3]
+
+
+def test_update_feature_list_rejects_imported_record(monkeypatch):
+    """Confirm must not mutate runtime state for a source-owned feature list."""
+    record = {
+        "module_name": "ImportedFeature",
+        "feature_list_name": "Display Name",
+        "filename": "/tmp/imported_feature.py",
+    }
+    controller = make_feature_popup_controller(record, "imported-feature.yml")
+    save_yaml_file = MagicMock()
+    showerror = MagicMock()
+    monkeypatch.setattr(features_popup_module, "get_navigate_path", lambda: "/tmp")
+    monkeypatch.setattr(features_popup_module, "load_yaml_file", lambda path: record)
+    monkeypatch.setattr(features_popup_module, "save_yaml_file", save_yaml_file)
+    monkeypatch.setattr(features_popup_module.messagebox, "showerror", showerror)
+
+    controller.update_feature_list()
+
+    save_yaml_file.assert_not_called()
+    controller.parent_controller.execute.assert_not_called()
+    controller.view.popup.dismiss.assert_not_called()
+    showerror.assert_called_once()
+
+
+def test_update_feature_list_rejects_missing_record(monkeypatch):
+    """Confirm must fail closed if the selected sequence record disappears."""
+    controller = make_feature_popup_controller(None, None)
+    save_yaml_file = MagicMock()
+    showerror = MagicMock()
+    monkeypatch.setattr(features_popup_module, "save_yaml_file", save_yaml_file)
+    monkeypatch.setattr(features_popup_module.messagebox, "showerror", showerror)
+
+    controller.update_feature_list()
+
+    save_yaml_file.assert_not_called()
+    controller.parent_controller.execute.assert_not_called()
+    controller.view.popup.dismiss.assert_not_called()
+    showerror.assert_called_once()
+    assert "missing or invalid" in showerror.call_args.kwargs["message"]
+
+
+def test_update_feature_list_saves_sequence_filename_before_runtime_update(
+    monkeypatch,
+):
+    """Confirm persists the authoritative record before updating runtime state."""
+    record = {
+        "module_name": None,
+        "feature_list_name": "Display Name",
+        "feature_list": '[{"name": StackPause,}]',
+    }
+    controller = make_feature_popup_controller(record, "authoritative-record.yml")
+    calls = MagicMock()
+    save_yaml_file = MagicMock(return_value=True)
+    calls.attach_mock(save_yaml_file, "save")
+    calls.attach_mock(controller.parent_controller.execute, "execute")
+    monkeypatch.setattr(features_popup_module, "get_navigate_path", lambda: "/tmp")
+    monkeypatch.setattr(features_popup_module, "load_yaml_file", lambda path: record)
+    monkeypatch.setattr(features_popup_module, "save_yaml_file", save_yaml_file)
+
+    controller.update_feature_list()
+
+    assert calls.mock_calls == [
+        call.save(
+            "/tmp/feature_lists",
+            {
+                "module_name": None,
+                "feature_list_name": "Display Name",
+                "feature_list": '[{"name": Snap,}]',
+            },
+            "authoritative-record.yml",
+        ),
+        call.execute("load_feature", 7, '[{"name": Snap,}]'),
+    ]
+    controller.view.popup.dismiss.assert_called_once()
+
+
+def test_update_feature_list_stays_open_when_persistence_fails(monkeypatch):
+    """A failed YAML write must not look like a successful editor update."""
+    record = {
+        "module_name": None,
+        "feature_list_name": "Display Name",
+        "feature_list": '[{"name": StackPause,}]',
+    }
+    controller = make_feature_popup_controller(record, "authoritative-record.yml")
+    save_yaml_file = MagicMock(return_value=False)
+    showerror = MagicMock()
+    monkeypatch.setattr(features_popup_module, "get_navigate_path", lambda: "/tmp")
+    monkeypatch.setattr(features_popup_module, "save_yaml_file", save_yaml_file)
+    monkeypatch.setattr(features_popup_module.messagebox, "showerror", showerror)
+
+    controller.update_feature_list()
+
+    save_yaml_file.assert_called_once()
+    controller.parent_controller.execute.assert_not_called()
+    controller.view.popup.dismiss.assert_not_called()
+    showerror.assert_called_once()
+    assert "could not be saved" in showerror.call_args.kwargs["message"]
+
+
+def test_update_feature_list_keeps_acquisition_configuration_runtime_only(
+    monkeypatch,
+):
+    """Pre-acquisition configuration must not require or rewrite custom YAML."""
+    controller = make_feature_popup_controller(None, None)
+    controller.persist_feature_list_edits = False
+    save_yaml_file = MagicMock()
+    monkeypatch.setattr(features_popup_module, "save_yaml_file", save_yaml_file)
+
+    controller.update_feature_list()
+
+    save_yaml_file.assert_not_called()
+    (
+        controller.parent_controller.menu_controller._get_custom_feature_list_record
+    ).assert_not_called()
+    controller.parent_controller.execute.assert_called_once_with(
+        "load_feature", 7, '[{"name": Snap,}]'
+    )
+    controller.view.popup.dismiss.assert_called_once()
+
+
+def test_grouping_rejects_shared_last_node(graph_controller):
+    """A node already ending a group cannot end another new group."""
+    graph_controller.feature_structure = ["(", 0, 1, ")", 2]
+
+    assert not graph_controller.is_valid_grouping(1, 2)
+
+
+def test_grouping_accepts_matching_boundaries(graph_controller):
+    """Features at one nesting level may be grouped."""
+    graph_controller.feature_structure = [0, 1, 2]
+
+    assert graph_controller.is_valid_grouping(0, 1)
+
+
+def test_grouping_rejects_crossing_group_boundaries(graph_controller):
+    """A proposed group cannot cross the boundary of an existing group."""
+    graph_controller.feature_structure = ["(", 0, ")", 1]
+
+    assert not graph_controller.is_valid_grouping(1, 3)

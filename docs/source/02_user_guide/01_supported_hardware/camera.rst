@@ -7,6 +7,11 @@ Cameras
 The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.
 
+Set the camera trigger delay in
+:menuselection:`Microscope Configuration --> Waveform Parameters`. The camera
+configuration examples below describe camera hardware and acquisition settings;
+they do not set waveform timing.
+
 Driver Installation
 -------------------
 
@@ -46,7 +51,6 @@ More information on the Daheng MER2-1220-32U3C camera can be found on the
                 type: daheng.Daheng
                 serial_number: "123456"
               defect_correct_mode: 2.0
-              delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
@@ -87,7 +91,6 @@ ORCA-Flash4.0 V3
                 serial_number: 111
                 camera_connection:
               defect_correct_mode: 2.0
-              delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
@@ -117,7 +120,6 @@ ORCA-Fusion
                 serial_number: 111
                 camera_connection:
               defect_correct_mode: 2.0
-              delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
@@ -147,7 +149,6 @@ ORCA-Lightning
                 serial_number: 111
                 camera_connection:
               defect_correct_mode: 2.0
-              delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
@@ -178,7 +179,6 @@ ORCA-Fire
                 serial_number: 111
                 camera_connection:
               defect_correct_mode: 2.0
-              delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
@@ -215,10 +215,10 @@ Iris 15
                 serial_number: 111
                 camera_connection: PMPCIECam00
               defect_correct_mode: 2.0
-              delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
+
 |
 
 -----------------
@@ -241,7 +241,6 @@ MU196MR-ON
                 type: ximea.MU196XR
                 serial_number: 111
               defect_correct_mode: 2.0
-              delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
@@ -264,6 +263,7 @@ MU196MR-ON
               y_pixels: 3840
               y_pixels_min: 2
               y_pixels_step: 2
+
 |
 
 ------------------
@@ -288,7 +288,6 @@ the synthetic camera class must be used.
                 serial_number: 111
                 camera_connection:
               defect_correct_mode: 2.0
-              delay: 1.0  #ms
               settle_down: 0.1 #ms
               flip_x: False
               flip_y: False

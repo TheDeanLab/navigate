@@ -214,6 +214,7 @@
         }
     },
     "other_constants": {
-        "remote_focus_settle_duration": "10"
+        "remote_focus_settle_duration": "10",
+        "camera_delay": "1.0"
     }
 }

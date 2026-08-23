@@ -38,6 +38,7 @@ from typing import Any
 # Local Imports
 from navigate.model.devices.shutter.base import ShutterBase
 from navigate.model.devices.device_types import SerialDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 
@@ -48,6 +49,15 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class ASIShutter(ShutterBase, SerialDevice):
+    configuration_schema = {
+        "hardware/axis": SettingSpec(
+            str,
+            default="",
+            label="Axis",
+            help_text="ASI controller axis used to switch the shutter.",
+            required=True,
+        )
+    }
     """ShutterTTL Class
 
     Triggering for shutters delivered from the TigerController.

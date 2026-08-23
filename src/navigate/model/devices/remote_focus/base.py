@@ -44,6 +44,7 @@ from navigate.model.waveforms import (
     remote_focus_ramp_triangular,
 )
 from navigate.tools.decorators import log_initialization
+from navigate.model.devices.configuration_schema import SettingSpec
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -53,6 +54,23 @@ logger = logging.getLogger(p)
 @log_initialization
 class RemoteFocusBase(ABC):
     """RemoteFocusBase Class - Parent class for Remote Focusing Device."""
+
+    configuration_schema = {
+        "hardware/min": SettingSpec(
+            float,
+            default=-5.0,
+            label="Minimum Voltage",
+            help_text="Lowest control voltage supported by the remote-focus device.",
+            required=True,
+        ),
+        "hardware/max": SettingSpec(
+            float,
+            default=5.0,
+            label="Maximum Voltage",
+            help_text="Highest control voltage supported by the remote-focus device.",
+            required=True,
+        ),
+    }
 
     def __init__(
         self,

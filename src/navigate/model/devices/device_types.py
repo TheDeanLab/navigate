@@ -37,6 +37,7 @@ import logging
 import serial
 
 # Local Imports
+from navigate.model.devices.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -76,6 +77,30 @@ class DeviceBase(ABC):
 
 class SerialDevice:
     """SerialDevice - Parent serial device class."""
+
+    configuration_schema = {
+        "port": SettingSpec(
+            str,
+            default="",
+            label="Port",
+            help_text="Serial port used to communicate with this device.",
+            required=True,
+        ),
+        "baudrate": SettingSpec(
+            int,
+            default=115200,
+            label="Baud Rate",
+            help_text="Serial communication speed in bits per second.",
+            required=False,
+        ),
+        "timeout": SettingSpec(
+            float,
+            default=0.25,
+            label="Timeout",
+            help_text="Maximum time in seconds to wait for a serial response.",
+            required=False,
+        ),
+    }
 
     def __init__(
         self,
@@ -162,3 +187,13 @@ class SequenceDevice:
     """SequenceDevice - The device loaded according to its sequence id, not serial number.
     Always need to check if the serial number is match.
     """
+
+    configuration_schema = {
+        "serial_number": SettingSpec(
+            str,
+            default="",
+            label="Serial Number",
+            help_text="Hardware serial number used to select the device.",
+            required=True,
+        ),
+    }

@@ -43,6 +43,7 @@ from navigate.tools.decorators import log_initialization
 from navigate.model.devices.remote_focus.ni import NIRemoteFocus
 from navigate.model.devices.remote_focus.asi import ASIRemoteFocus
 from navigate.model.devices.device_types import ASIDevice, SerialDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -62,6 +63,16 @@ class EquipmentSolutionsRemoteFocus(NIRemoteFocus, SerialDevice):
         verify that the character received from the controller is the same character
         sent. Once the character is received the next character can be processed.
     """
+
+    configuration_schema = {
+        "hardware/channel": SettingSpec(
+            str,
+            default="",
+            label="Channel",
+            help_text="NI analog-output channel connected to the Equipment Solutions device.",
+            required=True,
+        ),
+    }
 
     def __init__(
         self,
@@ -256,6 +267,16 @@ class EquipmentSolutionsASIRemoteFocus(ASIRemoteFocus, SerialDevice, ASIDevice):
         verify that the character received from the controller is the same character
         sent. Once the character is received the next character can be processed.
     """
+
+    configuration_schema = {
+        "hardware/axis": SettingSpec(
+            str,
+            default="B",
+            label="Axis",
+            help_text="ASI controller axis assigned to the Equipment Solutions device.",
+            required=True,
+        ),
+    }
 
     def __init__(
         self,

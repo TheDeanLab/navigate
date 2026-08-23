@@ -45,6 +45,7 @@ from navigate.model.waveforms import (
     sine_wave,
     single_pulse,
 )
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # # Logger Setup
@@ -64,6 +65,45 @@ class GalvoBase(ABC):
     according to camera exposure times and configuration parameters. Child classes
     must implement the turn_off method to control hardware-specific behaviors.
     """
+
+    configuration_schema = {
+        "waveform": SettingSpec(
+            str,
+            default="sawtooth",
+            label="Waveform",
+            help_text="Waveform shape generated for this galvo.",
+            choices=(
+                "sawtooth",
+                "centered_cubic",
+                "quadratic",
+                "sine",
+                "pulse",
+                "halfsaw",
+            ),
+            required=False,
+        ),
+        "phase": SettingSpec(
+            float,
+            default=1.57079,
+            label="Phase",
+            help_text="Phase offset used by sine waveforms, in radians.",
+            required=True,
+        ),
+        "hardware/min": SettingSpec(
+            float,
+            default=-5.0,
+            label="Minimum Voltage",
+            help_text="Minimum galvo output voltage.",
+            required=True,
+        ),
+        "hardware/max": SettingSpec(
+            float,
+            default=5.0,
+            label="Maximum Voltage",
+            help_text="Maximum galvo output voltage.",
+            required=True,
+        ),
+    }
 
     def __init__(
         self,

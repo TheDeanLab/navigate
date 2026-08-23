@@ -39,6 +39,7 @@ from typing import Any, Optional
 # Local Imports
 from navigate.model.devices.stage.base import StageBase
 from navigate.model.devices.device_types import SerialDevice, IntegratedDevice
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.model.devices.APIs.asi.asi_tiger_controller import (
     TigerController,
     ASIException,
@@ -71,6 +72,16 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
         FTP stilt, adding strain to the system. Only move the Z axis, which will
         change both stilt positions simultaneously.
     """
+
+    configuration_schema = {
+        "feedback_alignment": SettingSpec(
+            str,
+            default="",
+            label="Feedback Alignment",
+            help_text="Per-axis ASI feedback-alignment values.",
+            required=False,
+        ),
+    }
 
     def __init__(
         self,
@@ -604,6 +615,19 @@ class MS2000Stage(ASIStage):
     ----
         ASI firmware requires all distances to be in a 10th of a micron.
     """
+
+    configuration_schema = {
+        "jsspd": SettingSpec(
+            int,
+            default=None,
+            label="Jog Speed",
+            help_text="Optional ASI wheel jog speed (1–100).",
+            minimum=1,
+            maximum=100,
+            step=1,
+            required=False,
+        ),
+    }
 
     def __init__(
         self,

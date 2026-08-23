@@ -39,6 +39,7 @@ from abc import ABC, abstractmethod
 
 # Local Imports
 from navigate.tools.decorators import log_initialization
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -52,6 +53,63 @@ class FilterWheelBase(ABC):
     This class defines the interface for filter wheel devices used in the Navigate software.
     Implementations should handle the specifics of communication with particular hardware.
     """
+
+    configuration_schema = {
+        "name": SettingSpec(
+            str,
+            default="",
+            label="Name",
+            help_text="Display name for this filter wheel in the main application.",
+            required=False,
+        ),
+        "hardware/wheel_number": SettingSpec(
+            int,
+            default=0,
+            label="Wheel Number",
+            help_text=(
+                "Filter wheel identifier used by its controller. Some controllers "
+                "use zero-based wheel numbers."
+            ),
+            minimum=0,
+            maximum=16,
+            step=1,
+            required=True,
+        ),
+        "filter_wheel_delay": SettingSpec(
+            float,
+            default=0.03,
+            label="Filter Wheel Delay (s)",
+            help_text="Estimated delay in seconds while the filter wheel changes position.",
+            minimum=0,
+            maximum=60,
+            step=0.001,
+            required=True,
+        ),
+        "available_filters": CollectionSpec(
+            label="Available Filters",
+            help_text="Filter names and their corresponding wheel positions.",
+            item_schema={
+                "name": SettingSpec(
+                    str,
+                    label="Filter Name",
+                    help_text="Display name for this filter position.",
+                    required=True,
+                ),
+                "position": SettingSpec(
+                    int,
+                    label="Position",
+                    help_text="Numeric position used by the filter-wheel controller.",
+                    required=True,
+                    minimum=0,
+                    maximum=99,
+                    step=1,
+                ),
+            },
+            key_field="name",
+            value_field="position",
+            minimum_items=1,
+        ),
+    }
 
     def __init__(
         self,

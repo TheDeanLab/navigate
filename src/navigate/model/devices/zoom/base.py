@@ -39,6 +39,7 @@ from typing import Any, Optional
 
 # Local Imports
 from navigate.tools.decorators import log_initialization
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,6 +49,75 @@ logger = logging.getLogger(p)
 @log_initialization
 class ZoomBase(ABC):
     """ZoomBase parent class."""
+
+    configuration_schema = {
+        "zoom_values": CollectionSpec(
+            label="Zoom Values",
+            storage="parallel_mappings",
+            key_field="zoom",
+            value_field="position",
+            storage_fields=("position", "pixel_size"),
+            minimum_items=0,
+            item_schema={
+                "zoom": SettingSpec(
+                    str,
+                    label="Zoom",
+                    help_text="Zoom label used by the application.",
+                    required=True,
+                ),
+                "position": SettingSpec(
+                    float,
+                    label="Position",
+                    help_text="Device position for this zoom label.",
+                    required=True,
+                ),
+                "pixel_size": SettingSpec(
+                    float,
+                    label="Pixel Size (um)",
+                    help_text=(
+                        "Positive object-space pixel size at this zoom, in "
+                        "micrometres."
+                    ),
+                    minimum=0.000001,
+                    step=0.001,
+                    required=True,
+                ),
+            },
+        ),
+        "stage_positions": CollectionSpec(
+            label="Stage Position Calibration",
+            storage="nested_mapping",
+            key_field="solvent",
+            value_field="position",
+            minimum_items=0,
+            item_schema={
+                "solvent": SettingSpec(
+                    str,
+                    label="Solvent",
+                    help_text="Immersion solvent for this calibration.",
+                    required=True,
+                ),
+                "axis": SettingSpec(
+                    str,
+                    label="Stage Axis",
+                    help_text="Stage axis adjusted for this calibration.",
+                    required=True,
+                ),
+                "zoom": SettingSpec(
+                    str,
+                    label="Zoom",
+                    help_text="Zoom label for this calibration point.",
+                    required=True,
+                ),
+                "position": SettingSpec(
+                    float,
+                    label="Position",
+                    help_text="Stage position offset for this calibration point.",
+                    required=True,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,

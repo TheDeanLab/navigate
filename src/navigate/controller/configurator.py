@@ -199,7 +199,6 @@ class Configurator:
         filename = filedialog.askopenfilename(
             parent=self.root,
             title="Load Configuration",
-            initialdir=str(Path(__file__).resolve().parents[1] / "config"),
             filetypes=(("YAML files", "*.yaml *.yml"), ("All files", "*")),
         )
         if not filename:
@@ -334,15 +333,38 @@ class Configurator:
         onoff_type = Configurator.configuration_path_value(
             configuration, "onoff/hardware/type"
         )
-        if isinstance(onoff_type, str) and not onoff_type.lower().startswith(
-            "synthetic"
-        ):
+        if not Configurator.is_synthetic_laser_type(onoff_type):
             return onoff_type
-        if isinstance(power_type, str) and not power_type.lower().startswith(
-            "synthetic"
-        ):
+        if not Configurator.is_synthetic_laser_type(power_type):
             return power_type
         return "Synthetic"
+
+    @staticmethod
+    def is_synthetic_laser_type(device_type: object) -> bool:
+        """Return whether a simple or qualified laser type is synthetic."""
+        return not isinstance(device_type, str) or any(
+            part.lower().startswith("synthetic") for part in device_type.split(".")
+        )
+
+    @staticmethod
+    def laser_control_hardware_path(configuration: dict) -> Optional[str]:
+        """Return the laser control branch selected by its hardware-type rule."""
+        onoff_type = configuration.get("onoff/hardware/type")
+        if onoff_type is None:
+            onoff_type = Configurator.configuration_path_value(
+                configuration, "onoff/hardware/type"
+            )
+        if not Configurator.is_synthetic_laser_type(onoff_type):
+            return "onoff/hardware"
+
+        power_type = configuration.get("power/hardware/type")
+        if power_type is None:
+            power_type = Configurator.configuration_path_value(
+                configuration, "power/hardware/type"
+            )
+        if not Configurator.is_synthetic_laser_type(power_type):
+            return "power/hardware"
+        return None
 
     def store_visible_microscope_devices(self) -> None:
         """Persist the current device panel before changing microscopes."""
@@ -450,9 +472,22 @@ class Configurator:
                 "feedback_alignment",
             }:
                 path = f"hardware/{name}"
+            elif category == "laser" and "/" not in name and name in connection_names:
+                hardware_path = self.laser_control_hardware_path(configuration)
+                if hardware_path is None:
+                    continue
+                path = f"{hardware_path}/{name}"
             elif "/" not in name and name in connection_names:
                 path = f"hardware/{name}"
             value = self.configuration_path_value(configuration, path)
+            if (
+                category == "laser"
+                and name in {"power/hardware/type", "onoff/hardware/type"}
+                and isinstance(value, str)
+            ):
+                resolved_type = self.resolve_device_type(category, value)
+                if resolved_type is not None:
+                    value = self.format_model_name(resolved_type[1], category)
             if value is not None:
                 settings[name] = value
         if category == "stage":
@@ -676,7 +711,9 @@ class Configurator:
         )
         if self.editing_item_id is None:
             item_id = self.view.devices_frame.device_list.insert("", tk.END, text=name)
-            self.device_settings[item_id] = {}
+            self.device_settings[item_id] = self.initial_device_settings(
+                category, model
+            )
         else:
             item_id = self.editing_item_id
             previous_device = self.device_data[item_id]
@@ -685,7 +722,9 @@ class Configurator:
             if previous_device != (category, manufacturer, model):
                 # Settings belong to a device type. Do not carry an old form
                 # into a different category, manufacturer, or model.
-                self.device_settings[item_id] = {}
+                self.device_settings[item_id] = self.initial_device_settings(
+                    category, model
+                )
                 self.active_device_item_id = None
             else:
                 self.device_settings.setdefault(item_id, {})
@@ -697,6 +736,19 @@ class Configurator:
         self.editing_item_id = None
         self.show_device_info()
         self.store_visible_microscope_devices()
+
+    @staticmethod
+    def initial_device_settings(category: str, model: str) -> dict[str, object]:
+        """Return initial values that depend on the selected device model."""
+        if category != "laser":
+            return {}
+        laser_type = Configurator.format_model_name(model, category)
+        if laser_type not in {"NI", "ASI", "Synthetic"}:
+            return {}
+        return {
+            "power/hardware/type": laser_type,
+            "onoff/hardware/type": laser_type,
+        }
 
     def category_is_already_configured(self, category: str) -> bool:
         """Return whether adding or changing would duplicate a singleton category."""
@@ -807,6 +859,27 @@ class Configurator:
             target = target.setdefault(part, {})
         target[parts[-1]] = value
 
+    @classmethod
+    def saved_device_type(cls, category: str, manufacturer: str, model: str) -> str:
+        """Return a YAML device type as ``manufacturer.Model``."""
+        category_suffix = cls.category_base_class_name(category)[: -len("Base")]
+        model_name = (
+            model[: -len(category_suffix)] if model.endswith(category_suffix) else model
+        )
+        if category == "daq":
+            return model_name
+        return f"{manufacturer}.{model_name}"
+
+    @classmethod
+    def saved_laser_control_type(cls, device_type: object) -> object:
+        """Return a laser control type in the YAML ``manufacturer.Model`` form."""
+        if not isinstance(device_type, str):
+            return device_type
+        resolved_type = cls.resolve_device_type("laser", device_type)
+        if resolved_type is None:
+            return device_type
+        return cls.saved_device_type("laser", *resolved_type)
+
     def device_configuration(
         self, category: str, manufacturer: str, model: str, settings: dict[str, object]
     ) -> dict:
@@ -818,8 +891,11 @@ class Configurator:
             if isinstance(spec, SettingSpec) and spec.default is not None
         }
         values.update(settings)
+        device_type = self.saved_device_type(category, manufacturer, model)
         device = (
-            {"type": model} if category == "laser" else {"hardware": {"type": model}}
+            {"type": device_type}
+            if category == "laser"
+            else {"hardware": {"type": device_type}}
         )
 
         connection_names = set(self.get_connect_params(category, manufacturer, model))
@@ -841,6 +917,11 @@ class Configurator:
             elif name in {"position", "pixel_size", "available_filters"}:
                 device[name] = value
             elif "/" in name:
+                if category == "laser" and name in {
+                    "power/hardware/type",
+                    "onoff/hardware/type",
+                }:
+                    value = self.saved_laser_control_type(value)
                 self.set_configuration_value(device, name, value)
             elif category == "stage" and name in {
                 "axes",
@@ -856,11 +937,23 @@ class Configurator:
             elif category == "stage":
                 device["hardware"][name] = value
             elif name in connection_names:
-                device["hardware"][name] = value
+                if category == "laser":
+                    hardware_path = self.laser_control_hardware_path(values)
+                    if hardware_path is not None:
+                        self.set_configuration_value(
+                            device, f"{hardware_path}/{name}", value
+                        )
+                else:
+                    device["hardware"][name] = value
             else:
                 device[name] = value
         if category == "laser":
-            device["type"] = self.laser_device_type(device)
+            selected_type = self.laser_device_type(device)
+            resolved_type = self.resolve_device_type(category, selected_type)
+            if resolved_type is not None:
+                device["type"] = self.saved_device_type(category, *resolved_type)
+            else:
+                device["type"] = selected_type
         return device
 
     def build_configuration(self) -> dict:
@@ -887,6 +980,8 @@ class Configurator:
             stage.update(
                 {name: value for name, value in device.items() if name != "hardware"}
             )
+        elif category in {"filter_wheel", "galvo", "laser"}:
+            microscope.setdefault(category, []).append(device)
         elif category not in microscope:
             microscope[category] = device
         elif isinstance(microscope[category], list):
@@ -902,6 +997,24 @@ class Configurator:
                 "Save Configuration",
                 "Provide values for the following required settings before saving:\n\n"
                 + "\n".join(missing_settings),
+                parent=self.root,
+            )
+            return
+        duplicate_wavelengths = self.duplicate_laser_wavelengths()
+        if duplicate_wavelengths:
+            messagebox.showwarning(
+                "Save Configuration",
+                "Each laser wavelength must be unique within a microscope:\n\n"
+                + "\n".join(duplicate_wavelengths),
+                parent=self.root,
+            )
+            return
+        duplicate_wheel_numbers = self.duplicate_filter_wheel_numbers()
+        if duplicate_wheel_numbers:
+            messagebox.showwarning(
+                "Save Configuration",
+                "Filter wheels of the same type must use different wheel numbers "
+                "within a microscope:\n\n" + "\n".join(duplicate_wheel_numbers),
                 parent=self.root,
             )
             return
@@ -966,13 +1079,73 @@ class Configurator:
                     f"{self.format_model_name(model, category)}"
                 )
                 for name, spec in schema.items():
-                    if not isinstance(spec, SettingSpec) or not spec.required:
-                        continue
-                    value = settings.get(name, spec.default)
-                    if not self.setting_value_is_present(value):
-                        label = spec.label or name.replace("_", " ").title()
-                        missing.append(f"{device_name} — {label}")
+                    if isinstance(spec, SettingSpec) and spec.required:
+                        value = settings.get(name, spec.default)
+                        if not self.setting_value_is_present(value):
+                            label = spec.label or name.replace("_", " ").title()
+                            missing.append(f"{device_name} — {label}")
+                    elif isinstance(spec, CollectionSpec) and spec.minimum_items:
+                        value = settings.get(name, {})
+                        item_count = len(value) if hasattr(value, "__len__") else 0
+                        if item_count < spec.minimum_items:
+                            label = spec.label or name.replace("_", " ").title()
+                            missing.append(
+                                f"{device_name} — {label} "
+                                f"(at least {spec.minimum_items} required)"
+                            )
         return missing
+
+    def duplicate_laser_wavelengths(self) -> list[str]:
+        """Return duplicate laser wavelengths grouped by microscope."""
+        self.store_visible_microscope_devices()
+        duplicates = []
+        for microscope_name, devices in self.microscope_devices.items():
+            wavelengths = {}
+            for category, manufacturer, model, settings in devices:
+                if category != "laser":
+                    continue
+                schema = self.get_configuration_schema(category, manufacturer, model)
+                spec = schema.get("wavelength")
+                default = spec.default if isinstance(spec, SettingSpec) else None
+                wavelength = settings.get("wavelength", default)
+                if not self.setting_value_is_present(wavelength):
+                    continue
+                try:
+                    wavelength_key = float(str(wavelength).strip())
+                except (TypeError, ValueError):
+                    wavelength_key = str(wavelength).strip()
+                if wavelength_key in wavelengths:
+                    duplicates.append(f"{microscope_name} — {wavelength} nm")
+                else:
+                    wavelengths[wavelength_key] = wavelength
+        return duplicates
+
+    def duplicate_filter_wheel_numbers(self) -> list[str]:
+        """Return duplicate wheel numbers for matching filter-wheel types."""
+        self.store_visible_microscope_devices()
+        duplicates = []
+        for microscope_name, devices in self.microscope_devices.items():
+            wheel_numbers = {}
+            for category, manufacturer, model, settings in devices:
+                if category != "filter_wheel":
+                    continue
+                schema = self.get_configuration_schema(category, manufacturer, model)
+                spec = schema.get("hardware/wheel_number")
+                default = spec.default if isinstance(spec, SettingSpec) else None
+                wheel_number = settings.get("hardware/wheel_number", default)
+                if not self.setting_value_is_present(wheel_number):
+                    continue
+                wheel_type = model.casefold()
+                key = (wheel_type, str(wheel_number).strip())
+                if key in wheel_numbers:
+                    duplicates.append(
+                        f"{microscope_name} — "
+                        f"{self.format_model_name(model, category)} "
+                        f"wheel {wheel_number}"
+                    )
+                else:
+                    wheel_numbers[key] = wheel_number
+        return duplicates
 
     def get_configuration_schema(
         self, category: str, manufacturer: str, model: str

@@ -107,7 +107,7 @@ class FilterWheelBase(ABC):
             },
             key_field="name",
             value_field="position",
-            minimum_items=0,
+            minimum_items=1,
         ),
     }
 

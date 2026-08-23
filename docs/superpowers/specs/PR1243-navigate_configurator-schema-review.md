@@ -68,12 +68,12 @@ or subcomponent identified in the note.
   - `hardware/wheel_number` — **Required**
   - `filter_wheel_delay` — **Required**
   - `available_filters` (a repeatable collection with `name` and `position`
-    per filter) — **Optional** collection; each added `name` and `position` is
-    **Required**
+    per filter) — **At least one required**; each added `name` and `position`
+    is **Required**
 - `NIFilterWheel`
   - Overrides `available_filters` so each filter has a `name` and its
-    `channel` (NI DAQ channel name), instead of a numeric position. The
-    collection is **Optional**; each added `name` and `channel` is **Required**.
+    `channel` (NI DAQ channel name), instead of a numeric position. **At least
+    one filter is required**; each added `name` and `channel` is **Required**.
 
 ## Galvos
 

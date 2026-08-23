@@ -78,7 +78,7 @@ class NIFilterWheel(FilterWheelBase, NIDevice):
             },
             key_field="name",
             value_field="channel",
-            minimum_items=0,
+            minimum_items=1,
         ),
     }
 

@@ -74,7 +74,12 @@ class ZoomBase(ABC):
                 "pixel_size": SettingSpec(
                     float,
                     label="Pixel Size (um)",
-                    help_text="Object-space pixel size at this zoom, in micrometres.",
+                    help_text=(
+                        "Positive object-space pixel size at this zoom, in "
+                        "micrometres."
+                    ),
+                    minimum=0.000001,
+                    step=0.001,
                     required=True,
                 ),
             },

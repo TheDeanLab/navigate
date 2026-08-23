@@ -821,17 +821,17 @@ class Configurator:
             return
         category, manufacturer, model = self.device_data[self.active_device_item_id]
         schema = self.get_configuration_schema(category, manufacturer, model)
-        saved_values = self.device_settings.get(self.active_device_item_id, {})
         values = {}
         for name, variable in self.value_variables.items():
             value = variable.get()
             spec = schema.get(name)
             if (
                 isinstance(spec, SettingSpec)
-                and spec.default is None
-                and name not in saved_values
-                and value in ("", 0, 0.0)
+                and not spec.required
+                and not self.setting_value_is_present(value)
             ):
+                if spec.default is not None:
+                    values[name] = None
                 continue
             values[name] = value
         for name, rows in self.collection_rows.items():
@@ -922,6 +922,12 @@ class Configurator:
         connection_names.update({"port", "baudrate", "timeout", "serial_number"})
         for name, value in values.items():
             spec = schema.get(name)
+            if (
+                isinstance(spec, SettingSpec)
+                and not spec.required
+                and not self.setting_value_is_present(value)
+            ):
+                continue
             if isinstance(spec, CollectionSpec) and spec.storage == "parallel_mappings":
                 if (
                     category == "zoom"
@@ -1039,12 +1045,30 @@ class Configurator:
 
     def save_configuration(self) -> None:
         """Ask for a YAML path and write the configurator's device configuration."""
+        invalid_calibrations = self.invalid_stage_position_calibrations()
+        if invalid_calibrations:
+            messagebox.showwarning(
+                "Save Configuration",
+                "Complete or remove each partially entered stage position "
+                "calibration before saving:\n\n" + "\n".join(invalid_calibrations),
+                parent=self.root,
+            )
+            return
         missing_settings = self.required_settings_missing_values()
         if missing_settings:
             messagebox.showwarning(
                 "Save Configuration",
                 "Provide values for the following required settings before saving:\n\n"
                 + "\n".join(missing_settings),
+                parent=self.root,
+            )
+            return
+        invalid_pixel_sizes = self.invalid_zoom_pixel_sizes()
+        if invalid_pixel_sizes:
+            messagebox.showwarning(
+                "Save Configuration",
+                "Zoom pixel sizes must be positive values:\n\n"
+                + "\n".join(invalid_pixel_sizes),
                 parent=self.root,
             )
             return
@@ -1113,6 +1137,77 @@ class Configurator:
         if isinstance(value, (list, tuple, dict, set)):
             return bool(value)
         return True
+
+    def invalid_stage_position_calibrations(self) -> list[str]:
+        """Return partially entered Zoom stage-position calibration rows.
+
+        ``stage_positions`` is stored as a nested mapping, so every row needs a
+        solvent, axis, zoom, and position before it can be represented in YAML.
+        Empty rows are ignored and may be completed later.
+        """
+        if self.active_device_item_id is None:
+            return []
+        category, _, model = self.device_data[self.active_device_item_id]
+        if category != "zoom":
+            return []
+
+        invalid_rows = []
+        field_labels = {
+            "solvent": "Solvent",
+            "axis": "Stage Axis",
+            "zoom": "Zoom",
+            "position": "Position",
+        }
+        for row_index, row in enumerate(
+            self.collection_rows.get("stage_positions", []), start=1
+        ):
+            values = {}
+            for name in field_labels:
+                try:
+                    values[name] = row[name].get()
+                except tk.TclError:
+                    values[name] = ""
+            populated = [
+                name
+                for name, value in values.items()
+                if self.setting_value_is_present(value)
+            ]
+            if not populated or len(populated) == len(field_labels):
+                continue
+            missing = [
+                label for name, label in field_labels.items() if name not in populated
+            ]
+            invalid_rows.append(
+                f"{self.format_model_name(model, category)}, row {row_index}: "
+                + ", ".join(missing)
+            )
+        return invalid_rows
+
+    def invalid_zoom_pixel_sizes(self) -> list[str]:
+        """Return Zoom value rows whose pixel size is not a positive float."""
+        invalid_sizes = []
+        for microscope_name, devices in self.microscope_devices.items():
+            for category, _, model, settings in devices:
+                if category != "zoom":
+                    continue
+                zoom_values = settings.get("zoom_values", {})
+                pixel_sizes = (
+                    zoom_values.get("pixel_size", {})
+                    if isinstance(zoom_values, dict)
+                    else {}
+                )
+                for zoom, pixel_size in pixel_sizes.items():
+                    try:
+                        is_positive = float(pixel_size) > 0
+                    except (TypeError, ValueError):
+                        is_positive = False
+                    if not is_positive:
+                        invalid_sizes.append(
+                            f"{microscope_name} / "
+                            f"{self.format_model_name(model, category)} "
+                            f"({zoom})"
+                        )
+        return invalid_sizes
 
     def required_settings_missing_values(self) -> list[str]:
         """Return user-facing descriptions of required settings without values."""
@@ -1736,14 +1831,14 @@ class Configurator:
         if spec.value_type is bool:
             return tk.BooleanVar(master=self.root, value=bool(value))
         if spec.value_type is int:
-            if spec.default is None:
+            if not spec.required:
                 return tk.StringVar(
                     master=self.root,
                     value="" if value is None else str(value),
                 )
             return tk.IntVar(master=self.root, value=0 if value is None else value)
         if spec.value_type is float:
-            if spec.default is None:
+            if not spec.required:
                 return tk.StringVar(
                     master=self.root,
                     value="" if value is None else str(value),

@@ -6,6 +6,7 @@
 from navigate.controller import configurator as configurator_module
 from navigate.controller.configurator import Configurator, InlineYamlList
 from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.devices.zoom.base import ZoomBase
 
 
 def test_saved_device_type_uses_manufacturer_and_short_model_name():
@@ -135,13 +136,120 @@ def test_optional_numeric_setting_can_be_cleared(monkeypatch):
     configurator = Configurator.__new__(Configurator)
     configurator.root = object()
 
-    variable = configurator.create_value_variable(
-        SettingSpec(float, default=None),
-        1.0,
-    )
+    variable = configurator.create_value_variable(SettingSpec(float, default=1), 1.0)
     variable.set("")
 
     assert variable.get() == ""
+
+
+def test_cleared_optional_setting_is_not_saved():
+    """A cleared optional setting is omitted from the device configuration."""
+
+    class Variable:
+        def get(self):
+            return ""
+
+    configurator = Configurator.__new__(Configurator)
+    configurator.active_device_item_id = "camera-1"
+    configurator.device_data = {
+        "camera-1": ("camera", "photometrics", "PhotometricsCamera"),
+    }
+    configurator.device_settings = {"camera-1": {"unitforlinedelay": 1}}
+    configurator.value_variables = {"unitforlinedelay": Variable()}
+    configurator.collection_rows = {}
+    configurator.get_configuration_schema = lambda *_: {
+        "unitforlinedelay": SettingSpec(float, default=1),
+    }
+    configurator.get_connect_params = lambda *_: []
+
+    configurator.store_active_device_settings()
+
+    assert configurator.device_settings["camera-1"] == {"unitforlinedelay": None}
+    assert "unitforlinedelay" not in configurator.device_configuration(
+        "camera",
+        "photometrics",
+        "PhotometricsCamera",
+        configurator.device_settings["camera-1"],
+    )
+
+
+def test_cleared_optional_ni_daq_laser_port_switcher_is_not_saved():
+    """A cleared NI DAQ laser port switcher is absent from saved YAML."""
+    configurator = Configurator.__new__(Configurator)
+    configurator.get_connect_params = lambda *_: []
+    configurator.get_configuration_schema = lambda *_: {
+        "laser_port_switcher": SettingSpec(
+            str,
+            default="PXI6733/port0/line0",
+            required=False,
+        ),
+    }
+
+    device = configurator.device_configuration(
+        "daq",
+        "ni",
+        "NIDAQ",
+        {"laser_port_switcher": None},
+    )
+
+    assert "laser_port_switcher" not in device
+
+
+def test_partial_zoom_stage_position_calibration_is_reported():
+    """Partially entered calibration rows cannot be silently discarded on save."""
+
+    class Variable:
+        def __init__(self, value):
+            self.value = value
+
+        def get(self):
+            return self.value
+
+    configurator = Configurator.__new__(Configurator)
+    configurator.active_device_item_id = "zoom-1"
+    configurator.device_data = {"zoom-1": ("zoom", "synthetic", "SyntheticZoom")}
+    configurator.collection_rows = {
+        "stage_positions": [
+            {
+                "solvent": Variable("BABB"),
+                "axis": Variable("f"),
+                "zoom": Variable(""),
+                "position": Variable(100),
+            }
+        ]
+    }
+
+    assert configurator.invalid_stage_position_calibrations() == [
+        "Synthetic, row 1: Zoom",
+    ]
+
+
+def test_zoom_pixel_size_is_positive_float():
+    """Pixel size is a positive floating-point Zoom Values setting."""
+    pixel_size = ZoomBase.configuration_schema["zoom_values"].item_schema["pixel_size"]
+
+    assert pixel_size.value_type is float
+    assert pixel_size.minimum is not None
+    assert pixel_size.minimum > 0
+
+
+def test_invalid_zoom_pixel_size_is_reported():
+    """Zero and negative Zoom pixel sizes block configuration saving."""
+    configurator = Configurator.__new__(Configurator)
+    configurator.microscope_devices = {
+        "Microscope-0": [
+            (
+                "zoom",
+                "synthetic",
+                "SyntheticZoom",
+                {"zoom_values": {"pixel_size": {"1x": 0}}},
+            )
+        ]
+    }
+
+    assert configurator.invalid_zoom_pixel_sizes() == [
+        "Microscope-0 / Synthetic (1x)",
+    ]
 
 
 def test_stage_joystick_axes_are_combined_across_stages():

@@ -72,6 +72,16 @@ class StageBase(ABC):
             help_text="Stage axes controlled by the joystick, saved as a list.",
             required=False,
         ),
+        "coupled_axes": SettingSpec(
+            str,
+            default="",
+            label="Coupled Axes",
+            help_text=(
+                "Enter comma-separated leader:follower pairs for axes that move "
+                "together, for example: x:x1, y:y1."
+            ),
+            required=False,
+        ),
     }
 
     def __init__(

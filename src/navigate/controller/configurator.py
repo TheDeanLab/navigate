@@ -465,6 +465,25 @@ class Configurator:
                     for field in spec.storage_fields or ()
                 }
                 continue
+            if category == "stage" and name == "joystick_axes":
+                joystick_axes = configuration.get("joystick_axes", [])
+                if isinstance(joystick_axes, (list, tuple)):
+                    settings[name] = ", ".join(str(axis) for axis in joystick_axes)
+                elif isinstance(joystick_axes, str):
+                    settings[name] = joystick_axes
+                continue
+            if category == "stage" and name == "coupled_axes":
+                coupled_axes = configuration.get("coupled_axes", {})
+                axes = self.configuration_path_value(configuration, "hardware/axes")
+                if isinstance(coupled_axes, dict) and isinstance(axes, list):
+                    pairs = [
+                        f"{axis}:{coupled_axes[axis]}"
+                        for axis in axes
+                        if coupled_axes.get(axis) is not None
+                    ]
+                    if pairs:
+                        settings[name] = ", ".join(pairs)
+                continue
             path = name
             if category == "stage" and name in {
                 "axes",
@@ -494,7 +513,7 @@ class Configurator:
             for axis in (
                 self.configuration_path_value(configuration, "hardware/axes") or []
             ):
-                for suffix in ("min", "max"):
+                for suffix in ("min", "max", "home", "offset"):
                     name = f"{axis}_{suffix}"
                     if name in configuration:
                         settings[name] = configuration[name]
@@ -930,6 +949,13 @@ class Configurator:
                 device["hardware"][name] = InlineYamlList(self.parse_stage_axes(value))
             elif category == "stage" and name == "joystick_axes":
                 device[name] = InlineYamlList(self.parse_stage_axes(value))
+            elif category == "stage" and name == "coupled_axes":
+                coupled_axes = self.parse_coupled_axes(value)
+                if coupled_axes:
+                    device[name] = coupled_axes
+            elif category == "stage" and name.endswith(("_home", "_offset")):
+                if self.setting_value_is_present(value):
+                    device[name] = value
             elif category == "stage" and (
                 name.endswith(("_min", "_max")) or name.startswith("flip_")
             ):
@@ -977,8 +1003,30 @@ class Configurator:
         if category == "stage":
             stage = microscope.setdefault("stage", {"hardware": []})
             stage["hardware"].append(device["hardware"])
+            joystick_axes = device.get("joystick_axes", [])
+            if joystick_axes:
+                combined_axes = list(stage.get("joystick_axes", []))
+                for axis in joystick_axes:
+                    if axis not in combined_axes:
+                        combined_axes.append(axis)
+                stage["joystick_axes"] = InlineYamlList(combined_axes)
+            coupled_axes = device.get("coupled_axes", {})
+            if coupled_axes:
+                combined_coupled_axes = dict(stage.get("coupled_axes", {}))
+                used_axes = set(combined_coupled_axes) | set(
+                    combined_coupled_axes.values()
+                )
+                for leader, follower in coupled_axes.items():
+                    if leader not in used_axes and follower not in used_axes:
+                        combined_coupled_axes[leader] = follower
+                        used_axes.update({leader, follower})
+                stage["coupled_axes"] = combined_coupled_axes
             stage.update(
-                {name: value for name, value in device.items() if name != "hardware"}
+                {
+                    name: value
+                    for name, value in device.items()
+                    if name not in {"hardware", "joystick_axes", "coupled_axes"}
+                }
             )
         elif category in {"filter_wheel", "galvo", "laser"}:
             microscope.setdefault(category, []).append(device)
@@ -1392,6 +1440,29 @@ class Configurator:
             if axis.strip("'\"")
         ]
 
+    @staticmethod
+    def parse_coupled_axes(value: str) -> dict[str, str]:
+        """Convert comma-separated ``leader:follower`` pairs into a mapping."""
+        if not isinstance(value, str):
+            return {}
+        coupled_axes = {}
+        used_axes = set()
+        for pair in value.split(","):
+            leader, separator, follower = pair.partition(":")
+            leader, follower = leader.strip(), follower.strip()
+            if (
+                not separator
+                or not leader
+                or not follower
+                or leader == follower
+                or leader in used_axes
+                or follower in used_axes
+            ):
+                continue
+            coupled_axes[leader] = follower
+            used_axes.update({leader, follower})
+        return coupled_axes
+
     def update_stage_axis_range_fields(self, *_args) -> None:
         """Show editable limits and flip flags for the entered stage axes."""
         if self.stage_axis_range_frame is None or self.active_device_item_id is None:
@@ -1433,6 +1504,26 @@ class Configurator:
                         label=f"{axis} Maximum",
                         help_text=f"Maximum travel position for the {axis} stage axis.",
                         required=True,
+                    ),
+                ),
+                (
+                    f"{axis}_home",
+                    SettingSpec(
+                        float,
+                        default=None,
+                        label=f"{axis} Home",
+                        help_text=f"Home position for the {axis} stage axis.",
+                        required=False,
+                    ),
+                ),
+                (
+                    f"{axis}_offset",
+                    SettingSpec(
+                        float,
+                        default=None,
+                        label=f"{axis} Offset",
+                        help_text=f"Position offset for the {axis} stage axis.",
+                        required=False,
                     ),
                 ),
                 (
@@ -1645,8 +1736,18 @@ class Configurator:
         if spec.value_type is bool:
             return tk.BooleanVar(master=self.root, value=bool(value))
         if spec.value_type is int:
+            if spec.default is None:
+                return tk.StringVar(
+                    master=self.root,
+                    value="" if value is None else str(value),
+                )
             return tk.IntVar(master=self.root, value=0 if value is None else value)
         if spec.value_type is float:
+            if spec.default is None:
+                return tk.StringVar(
+                    master=self.root,
+                    value="" if value is None else str(value),
+                )
             return tk.DoubleVar(master=self.root, value=0.0 if value is None else value)
         return tk.StringVar(
             master=self.root,

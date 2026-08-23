@@ -191,11 +191,14 @@ or subcomponent identified in the note.
   - `axes` — **Required**
   - `axes_mapping` — **Optional** (the device uses its default mapping when absent)
   - `joystick_axes` — **Optional** (saved as a list of axes)
+  - `coupled_axes` — **Optional** (comma-separated `leader:follower` pairs
+    per stage entry; valid pairs merge into one microscope-level mapping)
   - For every axis entered in `axes`, the configurator adds `<axis>_min`,
-    `<axis>_max`, and `flip_<axis>` (for example, `x_min`, `x_max`, and
-    `flip_x`). `<axis>_min` and `<axis>_max` are **Required**; `flip_<axis>`
-    is **Optional** (defaults to `False`). These are written alongside the
-    stage `hardware` list.
+    `<axis>_max`, `<axis>_home`, `<axis>_offset`, and `flip_<axis>` (for
+    example, `x_min`, `x_max`, `x_home`, `x_offset`, and `flip_x`).
+    `<axis>_min` and `<axis>_max` are **Required**; `<axis>_home`,
+    `<axis>_offset`, and `flip_<axis>` are **Optional**. Blank Home and Offset
+    values are omitted. These are written alongside the stage `hardware` list.
 - `NIStage`
   - `volts_per_micron` — **Required**
   - `min` — **Required**
@@ -232,10 +235,10 @@ or subcomponent identified in the note.
 - The following are microscope-level stage behavior, rather than settings of an
   individual stage hardware entry, so the current device Property/Value editor
   does not attach them to a selected stage: `position` (`x_pos`, `y_pos`,
-  `z_pos`, `theta_pos`, and `f_pos`), `coupled_axes`, `has_ni_galvo_stage`,
-  and per-axis `<axis>_step`, `<axis>_offset`, and
-  `<axis>_home`. Per-axis `<axis>_min`, `<axis>_max`, and `flip_<axis>` are
-  handled specially by the configurator and saved alongside `stage.hardware`.
+  `z_pos`, `theta_pos`, and `f_pos`), `has_ni_galvo_stage`, and per-axis
+  `<axis>_step`. Per-axis `<axis>_min`, `<axis>_max`,
+  `<axis>_home`, `<axis>_offset`, and `flip_<axis>` are handled specially by
+  the configurator and saved alongside `stage.hardware`.
 
 ## Zoom devices
 

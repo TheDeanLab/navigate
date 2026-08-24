@@ -31,7 +31,6 @@
 
 # Standard Library Imports
 import ast
-import importlib
 import re
 import tkinter as tk
 from pathlib import Path
@@ -43,9 +42,8 @@ import yaml
 from navigate.model.devices.configuration_schema import (
     CollectionSpec,
     SettingSpec,
-    merge_configuration_schemas,
 )
-from navigate.model.devices.device_types import SerialDevice, SequenceDevice
+from navigate.config.device_schema import get_configuration_schema
 from navigate.config.configuration_database import deceased_device_type_names
 
 # Local Imports
@@ -1299,37 +1297,7 @@ class Configurator:
         compatibility fallback until concrete device classes declare their own
         ``configuration_schema`` values.
         """
-        connection_schema = {
-            property_name: SettingSpec(
-                str,
-                default="",
-                label=property_name.replace("_", " ").title(),
-                help_text="Connection value required to initialize this device.",
-                required=True,
-            )
-            for property_name in self.get_connect_params(category, manufacturer, model)
-        }
-        schemas = [connection_schema]
-        if self.class_inherits(category, manufacturer, model, "SerialDevice"):
-            schemas.append(SerialDevice.configuration_schema)
-        if self.class_inherits(category, manufacturer, model, "SequenceDevice"):
-            schemas.append(SequenceDevice.configuration_schema)
-        base_class_name = self.category_base_class_name(category)
-        if self.class_inherits(category, manufacturer, model, base_class_name):
-            try:
-                base_module = importlib.import_module(
-                    f"navigate.model.devices.{category}.base"
-                )
-                base_class = getattr(base_module, base_class_name)
-                schemas.append(getattr(base_class, "configuration_schema", {}))
-            except (ImportError, AttributeError):
-                logger.exception(
-                    "Could not load the configuration schema for %s.", base_class_name
-                )
-        schemas.append(
-            self.get_class_configuration_schema(category, manufacturer, model)
-        )
-        return merge_configuration_schemas(*schemas)
+        return get_configuration_schema(category, manufacturer, model)
 
     @classmethod
     def get_class_configuration_schema(

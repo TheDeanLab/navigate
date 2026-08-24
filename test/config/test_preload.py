@@ -162,7 +162,7 @@ def test_preload_adds_required_schema_default(loaded_configuration, monkeypatch)
     camera.pop("required_default", None)
 
     monkeypatch.setattr(
-        "navigate.config.preload.get_configuration_schema",
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
         lambda category, manufacturer, model: (
             {"required_default": SettingSpec(str, default="present", required=True)}
             if category == "camera"
@@ -182,7 +182,7 @@ def test_preload_raises_for_required_schema_value_without_default(
     manager, configuration = loaded_configuration
 
     monkeypatch.setattr(
-        "navigate.config.preload.get_configuration_schema",
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
         lambda category, manufacturer, model: (
             {"missing_required": SettingSpec(str, required=True)}
             if category == "camera"

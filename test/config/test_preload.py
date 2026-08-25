@@ -264,6 +264,175 @@ def test_preload_repairs_gui_channel_count_and_defaults(loaded_configuration):
     )
 
 
+def test_preload_adds_gui_popup_defaults_and_display_toggles(loaded_configuration):
+    manager, configuration = loaded_configuration
+    configuration["gui"].pop("stack_acquisition", None)
+    configuration["gui"].pop("time", None)
+    configuration["gui"].pop("histogram", None)
+    configuration["gui"].pop("mip_display", None)
+
+    report = preload_configuration(manager, configuration)
+
+    assert configuration["gui"]["stack_acquisition"]["step_size"]["step"] == 0.01
+    assert configuration["gui"]["time"]["timepoints"]["step"] == 1
+    assert configuration["gui"]["histogram"]["enabled"] is True
+    assert configuration["gui"]["mip_display"]["enabled"] is True
+    assert any(change.rule == "gui-default" for change in report.changes)
+
+
+def test_preload_normalizes_valid_gui_setting_types(loaded_configuration):
+    manager, configuration = loaded_configuration
+    configuration["gui"]["channel_settings"]["laser_power"]["max"] = "75"
+    configuration["gui"]["time"]["timepoints"]["step"] = "2"
+    update_config_dict(manager, configuration["gui"], "histogram", {"enabled": "false"})
+
+    report = preload_configuration(manager, configuration)
+
+    assert configuration["gui"]["channel_settings"]["laser_power"]["max"] == 75.0
+    assert configuration["gui"]["time"]["timepoints"]["step"] == 2
+    assert configuration["gui"]["histogram"]["enabled"] is False
+    assert any(change.rule == "gui-type-normalized" for change in report.changes)
+
+
+def test_preload_replaces_invalid_gui_setting_with_default(loaded_configuration):
+    manager, configuration = loaded_configuration
+    configuration["gui"]["remote_focus_waveform"]["amplitude_step_size"] = 0
+    configuration["gui"]["channel_settings"]["laser_power"]["min"] = -1
+    update_config_dict(manager, configuration["gui"], "mip_display", {"enabled": "bad"})
+
+    report = preload_configuration(manager, configuration)
+
+    assert (
+        configuration["gui"]["remote_focus_waveform"]["amplitude_step_size"] == 0.0001
+    )
+    assert configuration["gui"]["channel_settings"]["laser_power"]["min"] == 0
+    assert configuration["gui"]["mip_display"]["enabled"] is True
+    assert any(issue.rule == "gui-invalid-default" for issue in report.issues)
+
+
+def test_preload_removes_invalid_unknown_gui_setting(loaded_configuration):
+    manager, configuration = loaded_configuration
+    update_config_dict(manager, configuration["gui"], "custom", {"setting": "bad"})
+
+    report = preload_configuration(manager, configuration)
+
+    assert "setting" not in configuration["gui"]["custom"]
+    assert any(
+        issue.rule == "gui-invalid-removed" and issue.path == "gui.custom.setting"
+        for issue in report.issues
+    )
+
+
+def test_preload_preserves_gui_theme_values(loaded_configuration):
+    manager, configuration = loaded_configuration
+    configuration["gui"]["theme"]["palette"]["accent"] = "not-a-number"
+
+    preload_configuration(manager, configuration)
+
+    assert configuration["gui"]["theme"]["palette"]["accent"] == "not-a-number"
+
+
+def test_preload_detects_canonical_ni_remote_focus_for_autofocus(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+    microscope["remote_focus"]["hardware"]["type"] = "NIRemoteFocus"
+    microscope["remote_focus"]["hardware"]["channel"] = "PXI6259/ao9"
+    configuration["experiment"].pop("AutoFocusParameters", None)
+
+    preload_configuration(manager, configuration)
+
+    autofocus = configuration["experiment"]["AutoFocusParameters"]
+    assert "PXI6259/ao9" in autofocus["Mesoscale"]["remote_focus"]
+
+
+def test_preload_adds_synthetic_stage_axes_to_autofocus(loaded_configuration):
+    manager, configuration = loaded_configuration
+    microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+    microscope["stage"]["hardware"][0]["type"] = "Synthetic"
+    microscope["stage"]["hardware"][0]["axes"] = ["x", "y", "z", "theta", "f"]
+    configuration["experiment"].pop("AutoFocusParameters", None)
+
+    preload_configuration(manager, configuration)
+
+    autofocus_stage = configuration["experiment"]["AutoFocusParameters"]["Mesoscale"][
+        "stage"
+    ]
+    assert set(autofocus_stage.keys()) == {"x", "y", "z", "theta", "f"}
+
+
+def test_preload_removes_stale_autofocus_entries(loaded_configuration):
+    manager, configuration = loaded_configuration
+    update_config_dict(
+        manager,
+        configuration["experiment"],
+        "AutoFocusParameters",
+        {
+            "Mesoscale": {
+                "stage": {"x": {}, "stale_axis": {}},
+                "stale_device": {"ref": {}},
+            },
+            "StaleMicroscope": {"stage": {"x": {}}},
+        },
+    )
+
+    preload_configuration(manager, configuration)
+
+    autofocus = configuration["experiment"]["AutoFocusParameters"]
+    assert "StaleMicroscope" not in autofocus
+    assert "stale_device" not in autofocus["Mesoscale"]
+    assert "stale_axis" not in autofocus["Mesoscale"]["stage"]
+
+
+def test_preload_saving_defaults_do_not_add_label(loaded_configuration):
+    manager, configuration = loaded_configuration
+    configuration["experiment"].pop("Saving", None)
+
+    preload_configuration(manager, configuration)
+
+    assert "label" not in configuration["experiment"]["Saving"]
+
+
+def test_preload_camera_parameters_remove_stale_microscope_and_sync_root(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    update_config_dict(
+        manager,
+        configuration["experiment"],
+        "CameraParameters",
+        {
+            "x_pixels": 1,
+            "y_pixels": 1,
+            "Mesoscale": {
+                "x_pixels": 1000,
+                "y_pixels": 500,
+                "sensor_mode": "Light-Sheet",
+                "readout_direction": "Bidirectional",
+                "number_of_pixels": 20,
+                "binning": "2x2",
+                "databuffer_size": 50,
+                "is_centered": True,
+                "readout_time": 0,
+            },
+            "StaleMicroscope": {"x_pixels": 10, "y_pixels": 10},
+        },
+    )
+    configuration["experiment"]["MicroscopeState"]["microscope_name"] = "Mesoscale"
+
+    preload_configuration(manager, configuration)
+
+    camera_parameters = configuration["experiment"]["CameraParameters"]
+    assert "StaleMicroscope" not in camera_parameters
+    assert camera_parameters["x_pixels"] == 1000
+    assert camera_parameters["y_pixels"] == 500
+    assert camera_parameters["img_x_pixels"] == 500
+    assert camera_parameters["img_y_pixels"] == 250
+    assert camera_parameters["center_x"] == 500
+    assert camera_parameters["center_y"] == 250
+
+
 def test_preload_preserves_stage_axes_as_lists(loaded_configuration):
     manager, configuration = loaded_configuration
     microscope = configuration["configuration"]["microscopes"]["Mesoscale"]

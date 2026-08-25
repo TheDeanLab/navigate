@@ -34,7 +34,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import inspect
-import ast
 import os
 import platform
 
@@ -53,6 +52,11 @@ from navigate.model.features.feature_related_functions import (
 )
 from navigate.model.features import feature_related_functions
 from navigate.model.features.common_features import PrepareNextChannel
+from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.features.parameter_tools import (
+    coerce_feature_parameter,
+    infer_feature_parameter_spec,
+)
 from navigate.config.config import get_navigate_path
 
 
@@ -245,6 +249,7 @@ class FeaturePopupController(GUIController):
 
 class FeatureListGraphController:
     CHIP_GAP = 10
+
     def __init__(
         self,
         feature_list_view,
@@ -329,6 +334,47 @@ class FeatureListGraphController:
 
         # popups
         self.child_popups = [] if child_popups is None else child_popups
+
+    @staticmethod
+    def get_feature_parameter_schema(feature_class):
+        """Return schema metadata for a feature constructor."""
+        return getattr(feature_class, "parameter_schema", {}) or {}
+
+    @staticmethod
+    def get_feature_parameter_values(feature_class, feature=None):
+        """Return constructor parameter names, values, and merged specs."""
+        spec = inspect.getfullargspec(feature_class)
+        args_name = spec.args[2:]
+        defaults = list(spec.defaults or ())
+        required_count = len(args_name) - len(defaults)
+        if len(defaults) < len(args_name):
+            defaults = [None] * (len(args_name) - len(defaults)) + defaults
+        schema = FeatureListGraphController.get_feature_parameter_schema(feature_class)
+        parameter_specs = {}
+        for index, arg_name in enumerate(args_name):
+            default = defaults[index] if index < len(defaults) else None
+            parameter_specs[arg_name] = schema.get(
+                arg_name,
+                (
+                    SettingSpec(str, default=None, required=True)
+                    if index < required_count
+                    else infer_feature_parameter_spec(default)
+                ),
+            )
+        args_value = [
+            (
+                parameter_specs[arg_name].default
+                if isinstance(parameter_specs[arg_name], SettingSpec)
+                else defaults[index]
+            )
+            for index, arg_name in enumerate(args_name)
+        ]
+        if feature is not None and "args" in feature:
+            for index, value in enumerate(feature["args"]):
+                if index >= len(args_value):
+                    break
+                args_value[index] = value
+        return args_name, args_value, parameter_specs
 
     def update(self, feature_list_content):
         """Update feature list window
@@ -573,17 +619,10 @@ class FeatureListGraphController:
             feature_parameter_config = None
             if os.path.exists(feature_config_path):
                 feature_parameter_config = load_yaml_file(feature_config_path)
-            spec = inspect.getfullargspec(feature["name"])
-            if spec.defaults:
-                args_value = list(spec.defaults)
-            else:
-                args_value = spec.defaults
-            # if there is any parameters
-            if args_value is not None and "args" in feature:
-                for i, a in enumerate(feature["args"]):
-                    if i >= len(args_value):
-                        break
-                    args_value[i] = a
+            args_name, args_value, parameter_schema = self.get_feature_parameter_values(
+                feature["name"],
+                feature,
+            )
             kwargs = {}
             if "true" in feature:
                 kwargs["true"] = True
@@ -598,10 +637,11 @@ class FeatureListGraphController:
                     else self.feature_names
                 ),
                 feature_name=feature["name"].__name__,
-                args_name=spec.args[2:],
+                args_name=args_name,
                 args_value=args_value,
                 title="Feature Parameters",
                 parameter_config=feature_parameter_config,
+                parameter_schema=parameter_schema,
                 **kwargs,
             )
             popup.feature_name_widget.widget.bind(
@@ -690,8 +730,15 @@ class FeatureListGraphController:
             feature_parameter_config = None
             if os.path.exists(feature_config_path):
                 feature_parameter_config = load_yaml_file(feature_config_path)
-            spec = inspect.getfullargspec(new_feature)
-            popup.build_widgets(spec.args[2:], spec.defaults, feature_parameter_config)
+            args_name, args_value, parameter_schema = self.get_feature_parameter_values(
+                new_feature
+            )
+            popup.build_widgets(
+                args_name,
+                args_value,
+                feature_parameter_config,
+                parameter_schema,
+            )
 
         def select_palette_feature(popup, feature_name):
             """Select a feature from the popup's feature node palette."""
@@ -715,31 +762,24 @@ class FeatureListGraphController:
             if "args" in feature and len(widgets) == 0:
                 del feature["args"]
             if len(widgets) > 0:
-                feature["args"] = [w.get() for w in widgets]
-                for i, a in enumerate(feature["args"]):
-                    if a == "True":
-                        feature["args"][i] = True
-                    elif a == "False":
-                        feature["args"][i] = False
-                    elif popup.inputs_type[i] is float:
-                        try:
-                            feature["args"][i] = float(a)
-                        except ValueError:
-                            feature["args"][i] = a
-                    elif popup.inputs_type[i] is dict:
-                        try:
-                            feature["args"][i] = ast.literal_eval(a.replace("'", '"'))
-                        except (SyntaxError, ValueError):
-                            spec = inspect.getfullargspec(feature["name"])
-                            arg_name = spec.args[i + 2]
-                            messagebox.showerror(
-                                title="Upate Feature Parameter Error",
-                                message=f"The argument {arg_name} has something wrong!\n"
-                                "Please make sure you input a correct value!",
+                feature["args"] = []
+                for i, widget in enumerate(widgets):
+                    arg_name = inspect.getfullargspec(feature["name"]).args[i + 2]
+                    parameter_spec = popup.parameter_specs[i]
+                    try:
+                        feature["args"].append(
+                            coerce_feature_parameter(
+                                arg_name,
+                                widget.get(),
+                                parameter_spec,
                             )
-                            return
-                    elif a == "None":
-                        feature["args"][i] = None
+                        )
+                    except ValueError as error:
+                        messagebox.showerror(
+                            title="Update Feature Parameter Error",
+                            message=str(error),
+                        )
+                        return
             if "true" in feature:
                 feature["true"] = convert_str_to_feature_list(
                     self.feature_list_graph_controllers_true[idx].get_feature_content()
@@ -928,7 +968,9 @@ class FeatureListGraphController:
             """
             feature = self.features[idx]
             if type(feature) == str:
-                self.features[idx] = {"name": getattr(feature_related_functions, feature)}
+                self.features[idx] = {
+                    "name": getattr(feature_related_functions, feature)
+                }
             if "true" not in self.features[idx]:
                 self.features[idx]["true"] = []
             if "false" not in self.features[idx]:
@@ -1111,7 +1153,9 @@ class FeatureListGraphController:
         self.branch_drag_window = tk.Toplevel(self.feature_list_view)
         self.branch_drag_window.overrideredirect(True)
         self.branch_drag_window.attributes("-topmost", True)
-        ttk.Label(self.branch_drag_window, text=name, padding=(12, 7), relief="solid").pack()
+        ttk.Label(
+            self.branch_drag_window, text=name, padding=(12, 7), relief="solid"
+        ).pack()
         self.move_branch_drag_window(event.x_root, event.y_root)
 
     def move_branch_drag_window(self, root_x, root_y):
@@ -1132,7 +1176,10 @@ class FeatureListGraphController:
             ),
             None,
         )
-        if target is not self.branch_drag_target and self.branch_drag_target is not None:
+        if (
+            target is not self.branch_drag_target
+            and self.branch_drag_target is not None
+        ):
             self.branch_drag_target.marker.place_forget()
         self.branch_drag_target = target
         if target is not None:
@@ -1200,9 +1247,13 @@ class FeatureListGraphController:
             self.drag_window.destroy()
         self.drag_window = None
         point = self.board_point(event)
-        was_click = self.drag_chip is not None and self.drag_start is not None and (
-            abs(event.x_root - self.drag_start[0]) < 5
-            and abs(event.y_root - self.drag_start[1]) < 5
+        was_click = (
+            self.drag_chip is not None
+            and self.drag_start is not None
+            and (
+                abs(event.x_root - self.drag_start[0]) < 5
+                and abs(event.y_root - self.drag_start[1]) < 5
+            )
         )
         if was_click:
             self.show_config_popup(self.chips.index(self.drag_chip))(event)
@@ -1289,6 +1340,7 @@ class FeatureListGraphController:
 
     def is_valid_grouping(self, start_index, end_index):
         """Return whether a new group can be inserted without overlap."""
+
         def nesting_depth_before(position):
             depth = 0
             for value in self.feature_structure[:position]:
@@ -1306,7 +1358,6 @@ class FeatureListGraphController:
             and self.feature_structure[end_index + 1] == ")"
         )
         return group_boundaries_match and not last_node_already_ends_group
-
 
     def layout_chips(self):
         if self.board_canvas is None or self.board_canvas.winfo_width() <= 1:
@@ -1396,7 +1447,10 @@ class FeatureListGraphController:
         if index >= 1:
             pre_structure_index = self.feature_structure.index(index - 1)
             if pre_structure_index + 1 < structure_index:
-                while pre_structure_index + 1 < len(self.feature_structure) and self.feature_structure[pre_structure_index + 1] == ")":
+                while (
+                    pre_structure_index + 1 < len(self.feature_structure)
+                    and self.feature_structure[pre_structure_index + 1] == ")"
+                ):
                     pre_structure_index += 1
                 structure_index = pre_structure_index + 1
 
@@ -1405,7 +1459,6 @@ class FeatureListGraphController:
                 self.feature_structure[structure_pos] += 1
         self.features.insert(index, feature)
         self.feature_structure.insert(structure_index, index)
-
 
     def move_feature(self, old_index, new_index):
         """Move a feature and its structure entry to the drop position."""

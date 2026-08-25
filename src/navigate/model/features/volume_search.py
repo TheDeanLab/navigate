@@ -42,6 +42,7 @@ from navigate.model.analysis.boundary_detect import (
     find_cell_boundary_3d,
     map_labels,
 )
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.multipos_table_tools import write_to_csv_file
 
 
@@ -87,6 +88,51 @@ class VolumeSearch:
     self.model.configuration["experiment"]["MicroscopeState"]["zoom"].
 
     """
+
+    parameter_schema = {
+        "target_resolution": SettingSpec(
+            str,
+            default="Nanoscale",
+            label="Target Resolution",
+            help_text="Microscope/resolution used for tiled follow-up imaging.",
+            required=True,
+        ),
+        "target_zoom": SettingSpec(
+            str,
+            default="N/A",
+            label="Target Zoom",
+            help_text="Zoom value used for tiled follow-up imaging.",
+            required=True,
+        ),
+        "flipx": SettingSpec(
+            bool,
+            default=False,
+            label="Flip X",
+            help_text="Reverse the x direction when adding tiles.",
+        ),
+        "flipy": SettingSpec(
+            bool,
+            default=False,
+            label="Flip Y",
+            help_text="Reverse the y direction when adding tiles.",
+        ),
+        "overlap": SettingSpec(
+            float,
+            default=0.1,
+            label="Overlap",
+            help_text="Tile overlap fraction from 0 to 1.",
+            minimum=0,
+            maximum=1,
+            step=0.01,
+            required=True,
+        ),
+        "debug": SettingSpec(
+            bool,
+            default=False,
+            label="Debug",
+            help_text="Save debug images while calculating the tissue boundary.",
+        ),
+    }
 
     def __init__(
         self,
@@ -470,6 +516,89 @@ class VolumeSearch:
 
 
 class VolumeSearch3D:
+    parameter_schema = {
+        "target_resolution": SettingSpec(
+            str,
+            default="Nanoscale",
+            label="Target Resolution",
+            help_text="Microscope/resolution used for tiled follow-up imaging.",
+            required=True,
+        ),
+        "target_zoom": SettingSpec(
+            str,
+            default="N/A",
+            label="Target Zoom",
+            help_text="Zoom value used for tiled follow-up imaging.",
+            required=True,
+        ),
+        "position_id": SettingSpec(
+            int,
+            default=0,
+            label="Position ID",
+            help_text="Index of the multi-position row used as the search seed.",
+            minimum=0,
+            step=1,
+            required=True,
+        ),
+        "z_step_size": SettingSpec(
+            float,
+            default=0.1,
+            label="Z Step Size",
+            help_text="Target z-step size for the 3D search.",
+            minimum=0,
+            step=0.1,
+            required=True,
+        ),
+        "x_direction": SettingSpec(
+            str,
+            default="x",
+            label="X Direction",
+            help_text="Stage axis used as the search x direction.",
+            required=True,
+        ),
+        "y_direction": SettingSpec(
+            str,
+            default="y",
+            label="Y Direction",
+            help_text="Stage axis used as the search y direction.",
+            required=True,
+        ),
+        "overlap": SettingSpec(
+            float,
+            default=0.05,
+            label="Overlap",
+            help_text="Tile overlap fraction from 0 to 1.",
+            minimum=0,
+            maximum=1,
+            step=0.01,
+            required=True,
+        ),
+        "analysis_function": SettingSpec(
+            str,
+            default=None,
+            label="Analysis Function",
+            help_text="Optional analysis callable. Leave empty for the default analysis.",
+        ),
+        "current_pixel_size": SettingSpec(
+            float,
+            default=1.0,
+            label="Current Pixel Size",
+            help_text="Pixel size for the current microscope.",
+            minimum=0,
+            step=0.1,
+            required=True,
+        ),
+        "filter_pixel_number": SettingSpec(
+            int,
+            default=10,
+            label="Filter Pixel Number",
+            help_text="Minimum labeled-object pixel count kept by the filter.",
+            minimum=0,
+            step=1,
+            required=True,
+        ),
+    }
+
     def __init__(
         self,
         model,

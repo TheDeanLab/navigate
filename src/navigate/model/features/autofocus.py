@@ -42,6 +42,7 @@ from scipy.interpolate import UnivariateSpline
 
 # Local imports
 from navigate.model.features.feature_container import load_features
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 from navigate.model.utils.exceptions import UserVisibleException
 
@@ -151,6 +152,53 @@ class Autofocus:
     higher. The autofocus_pos_queue is then filled with the next position to
     move to. If the autofocus_pos_queue is empty, the autofocus is finished.
     """
+
+    parameter_schema = {
+        "device": SettingSpec(
+            str,
+            default="stage",
+            label="Device",
+            help_text="Device group used for autofocus movement.",
+            required=True,
+        ),
+        "device_ref": SettingSpec(
+            str,
+            default="f",
+            label="Device Reference",
+            help_text="Stage/device axis used for autofocus movement.",
+            required=True,
+        ),
+        "target_channel": SettingSpec(
+            str,
+            default=None,
+            label="Target Channel",
+            help_text="Optional channel selected for autofocus.",
+        ),
+        "calibration_action": SettingSpec(
+            str,
+            default=None,
+            label="Calibration Action",
+            help_text="Optional autofocus calibration action.",
+        ),
+        "reference_channel": SettingSpec(
+            str,
+            default=None,
+            label="Reference Channel",
+            help_text="Optional reference channel for calibration-aware autofocus.",
+        ),
+        "set_defocus_for_all_flag": SettingSpec(
+            bool,
+            default=False,
+            label="Set Defocus For All",
+            help_text="Apply computed defocus values to all channels.",
+        ),
+        "scan_settings": SettingSpec(
+            dict,
+            default=None,
+            label="Scan Settings",
+            help_text="Optional autofocus scan settings mapping.",
+        ),
+    }
 
     def __init__(
         self,

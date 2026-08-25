@@ -39,6 +39,7 @@ from skimage.filters import threshold_otsu
 
 # Local Imports
 from navigate.model.analysis.boundary_detect import find_tissue_boundary_2d
+from navigate.model.devices.configuration_schema import SettingSpec
 
 
 def detect_tissue(image_data, percentage=0.0):
@@ -164,6 +165,43 @@ class DetectTissueInStack:
     stage through different Z and F positions and analyzing each frame for tissue
     presence.
     """
+
+    parameter_schema = {
+        "planes": SettingSpec(
+            int,
+            default=1,
+            label="Planes",
+            help_text="Number of z/f planes to capture for tissue detection.",
+            minimum=1,
+            step=1,
+            required=True,
+        ),
+        "percentage": SettingSpec(
+            float,
+            default=0.75,
+            label="Positive Fraction",
+            help_text="Minimum fraction of tissue-positive frames required.",
+            minimum=0,
+            maximum=1,
+            step=0.01,
+            required=True,
+        ),
+        "detect_func": SettingSpec(
+            str,
+            default=None,
+            label="Detection Function",
+            help_text="Optional detection callable. Leave empty for the default detector.",
+        ),
+        "threshold": SettingSpec(
+            float,
+            default=150,
+            label="Threshold",
+            help_text="Intensity threshold passed to the detection function.",
+            minimum=0,
+            step=1,
+            required=True,
+        ),
+    }
 
     def __init__(
         self, model, planes=1, percentage=0.75, detect_func=None, threshold=150
@@ -571,6 +609,15 @@ class RemoveEmptyPositions:
     This class is used to remove empty positions from the model based on the specified
     position flags.
     """
+
+    parameter_schema = {
+        "position_flags": SettingSpec(
+            list,
+            default=[],
+            label="Position Flags",
+            help_text="Boolean flags identifying which multi-position rows contain tissue.",
+        ),
+    }
 
     def __init__(self, model, position_flags=[]):
         """Initialize the RemoveEmptyPositions class.

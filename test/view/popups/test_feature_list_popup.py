@@ -41,6 +41,7 @@ from navigate.view.popups.feature_list_popup import (
     FeatureConfigPopup,
     FeatureListPopup,
 )
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
 
 # @pytest.fixture
@@ -94,6 +95,8 @@ def test_feature_config_popup(feature_name, args_name, args_value, tk_root):
         if type(args_value[i]) is bool:
             assert isinstance(w.widget, ttk.Combobox)
             assert w.widget["values"] == ("True", "False")
+        elif type(args_value[i]) in (int, float):
+            assert isinstance(w.widget, ValidatedSpinbox)
         else:
             assert isinstance(w.widget, ttk.Entry)
 

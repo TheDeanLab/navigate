@@ -37,6 +37,9 @@ from tkinter import ttk
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.configurator_application_window import ConfiguratorTooltip
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
+from navigate.model.features.parameter_tools import infer_feature_parameter_spec
 from navigate.view.theme import get_theme_padding_px, get_theme_space_px
 
 
@@ -225,9 +228,20 @@ class FeatureConfigPopup:
             self.feature_list_false_frame = FeatureListFrame(content_frame)
             self.feature_list_false_frame.grid(row=row + 2, column=0, sticky=tk.NSEW)
 
-        self.build_widgets(args_name, args_value, kwargs.get("parameter_config", {}))
+        self.build_widgets(
+            args_name,
+            args_value,
+            kwargs.get("parameter_config", {}),
+            kwargs.get("parameter_schema", {}),
+        )
 
-    def build_widgets(self, args_name, args_value, parameter_config=None):
+    def build_widgets(
+        self,
+        args_name,
+        args_value,
+        parameter_config=None,
+        parameter_schema=None,
+    ):
         """Build widgets for the popup
 
         Parameters
@@ -238,36 +252,67 @@ class FeatureConfigPopup:
             List of arguments value
         parameter_config : dict
             Dictionary of parameter configuration
+        parameter_schema : dict
+            Dictionary of feature parameter schema definitions
         """
         #: list: List of input widgets
         self.inputs = []
         #: list: List of input widgets type
         self.inputs_type = []
+        #: list: List of parameter schema definitions
+        self.parameter_specs = []
 
         for child in self.parameter_frame.winfo_children():
             child.destroy()
 
+        args_value = [] if args_value is None else list(args_value)
+        parameter_schema = parameter_schema or {}
+
         for i, arg_name in enumerate(args_name):
+            arg_value = args_value[i] if i < len(args_value) else None
+            arg_spec = parameter_schema.get(arg_name) or infer_feature_parameter_spec(
+                arg_value
+            )
             arg_input_class = ttk.Entry
             arg_input_var = tk.StringVar
-            if type(args_value[i]) is bool:
+            input_args = {"width": 30}
+            values = None
+            if arg_spec.value_type is bool:
                 arg_input_class = ttk.Combobox
                 values = ["True", "False"]
+            elif arg_spec.choices is not None:
+                arg_input_class = ttk.Combobox
+                values = list(arg_spec.choices)
             elif parameter_config is not None and arg_name in parameter_config:
                 arg_input_class = ttk.Combobox
                 values = list(parameter_config[arg_name].keys())
+            elif arg_spec.value_type in (int, float):
+                arg_input_class = ValidatedSpinbox
+                input_args = {
+                    "width": 30,
+                    "from_": -1000000 if arg_spec.minimum is None else arg_spec.minimum,
+                    "to": 1000000 if arg_spec.maximum is None else arg_spec.maximum,
+                    "increment": (
+                        (0.1 if arg_spec.value_type is float else 1)
+                        if arg_spec.step is None
+                        else arg_spec.step
+                    ),
+                    "required": arg_spec.required,
+                    "value_type": arg_spec.value_type,
+                }
 
             temp = LabelInput(
                 parent=self.parameter_frame,
-                label=arg_name + ":",
+                label=(arg_spec.label or arg_name) + ":",
                 label_args={"padding": (2, 5, 5, 0), "width": 20},
                 input_class=arg_input_class,
                 input_var=arg_input_var(),
-                input_args={"width": 30},
+                input_args=input_args,
             )
 
             self.inputs.append(temp)
-            self.inputs_type.append(type(args_value[i]))
+            self.inputs_type.append(arg_spec.value_type)
+            self.parameter_specs.append(arg_spec)
             temp.grid(
                 row=i + 2,
                 column=0,
@@ -275,10 +320,15 @@ class FeatureConfigPopup:
                 padx=get_theme_space_px(30),
                 pady=get_theme_space_px(10),
             )
+            if arg_spec.help_text:
+                ConfiguratorTooltip(temp.label, arg_spec.help_text)
             if arg_input_class is ttk.Combobox:
                 temp.set_values(values)
                 temp.widget.config(state="readonly")
-            temp.set(str(args_value[i]))
+            display_value = (
+                "" if arg_value is None and not arg_spec.required else arg_value
+            )
+            temp.set(str(display_value))
 
     def get_widgets(self):
         """Get widgets
@@ -366,19 +416,28 @@ class FeatureListPopup:
         palette.rowconfigure(0, weight=1)
         palette.columnconfigure(1, weight=1)
 
-        palette_canvas = tk.Canvas(palette, width=150, height=380,
-                                   highlightthickness=0, borderwidth=0)
-        scrollbar = ttk.Scrollbar(palette, orient="vertical", command=palette_canvas.yview)
+        palette_canvas = tk.Canvas(
+            palette, width=150, height=380, highlightthickness=0, borderwidth=0
+        )
+        scrollbar = ttk.Scrollbar(
+            palette, orient="vertical", command=palette_canvas.yview
+        )
         palette_canvas.configure(yscrollcommand=scrollbar.set)
         palette_canvas.grid(row=0, column=0, sticky="ns")
         scrollbar.grid(row=0, column=1, sticky="ns", padx=(6, 0))
 
         self.palette_items = ttk.Frame(palette_canvas)
-        palette_window = palette_canvas.create_window((0, 0), window=self.palette_items, anchor="nw")
-        palette_canvas.bind("<Configure>", lambda e: palette_canvas.itemconfig(palette_window, width=e.width))
-        self.palette_items.bind("<Configure>", lambda e: palette_canvas.configure(scrollregion=palette_canvas.bbox("all")))
-
-
+        palette_window = palette_canvas.create_window(
+            (0, 0), window=self.palette_items, anchor="nw"
+        )
+        palette_canvas.bind(
+            "<Configure>",
+            lambda e: palette_canvas.itemconfig(palette_window, width=e.width),
+        )
+        self.palette_items.bind(
+            "<Configure>",
+            lambda e: palette_canvas.configure(scrollregion=palette_canvas.bbox("all")),
+        )
 
         board_content_frame = ttk.Frame(outer_frame)
         board_content_frame.grid(row=0, column=1, sticky="nsew")
@@ -389,20 +448,29 @@ class FeatureListPopup:
         board_box.grid(row=0, column=0, sticky="nsew")
         board_box.columnconfigure(0, weight=1)
         board_box.rowconfigure(1, weight=1)
-        label = ttk.Label(board_box, text="Drag feature nodes from the left panel to this board to create a feature list.")
+        label = ttk.Label(
+            board_box,
+            text="Drag feature nodes from the left panel to this board to create a feature list.",
+        )
         label.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
-        self.board_canvas = tk.Canvas(board_box,highlightthickness=0, borderwidth=0)
+        self.board_canvas = tk.Canvas(board_box, highlightthickness=0, borderwidth=0)
         self.board_canvas.configure(takefocus=True)
         self.board_canvas.grid(row=1, column=0, sticky="nsew")
-        board_scrollbar = ttk.Scrollbar(board_box, orient="horizontal", command=self.board_canvas.xview)
+        board_scrollbar = ttk.Scrollbar(
+            board_box, orient="horizontal", command=self.board_canvas.xview
+        )
         board_scrollbar.grid(row=2, column=0, sticky="ew", pady=(6, 0))
         self.board_canvas.configure(xscrollcommand=board_scrollbar.set)
 
         self.feature_view_frame = ttk.Frame(self.board_canvas)
-        self.board_window = self.board_canvas.create_window((0, 0), window=self.feature_view_frame, anchor="nw")
+        self.board_window = self.board_canvas.create_window(
+            (0, 0), window=self.feature_view_frame, anchor="nw"
+        )
 
-        self.marker = tk.Frame(self.feature_view_frame, background="#2878d4", width=3, height=30)
+        self.marker = tk.Frame(
+            self.feature_view_frame, background="#2878d4", width=3, height=30
+        )
 
         separator = ttk.Separator(board_content_frame)
         separator.grid(

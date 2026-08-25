@@ -10,7 +10,9 @@ from navigate.controller.sub_controllers.features_popup import (
     FeaturePopupController,
     FeatureListGraphController,
 )
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.model.features import feature_related_functions
+from navigate.model.features.parameter_tools import coerce_feature_parameter
 
 
 def feature_names(controller):
@@ -262,6 +264,63 @@ def test_update_feature_list_stays_open_when_persistence_fails(monkeypatch):
     controller.view.popup.dismiss.assert_not_called()
     showerror.assert_called_once()
     assert "could not be saved" in showerror.call_args.kwargs["message"]
+
+
+def test_feature_parameter_values_use_declared_schema_defaults(graph_controller):
+    """Declared schemas provide editor defaults and type metadata."""
+
+    class TestFeature:
+        parameter_schema = {
+            "count": SettingSpec(
+                int,
+                default=3,
+                label="Count",
+                minimum=1,
+                required=True,
+            )
+        }
+
+        def __init__(self, model, count=1):
+            pass
+
+    args_name, args_value, schema = graph_controller.get_feature_parameter_values(
+        TestFeature
+    )
+
+    assert args_name == ["count"]
+    assert args_value == [3]
+    assert schema["count"].value_type is int
+    assert schema["count"].minimum == 1
+
+
+def test_feature_parameter_values_preserve_existing_feature_args(graph_controller):
+    """Saved feature-list arguments override schema defaults in the editor."""
+
+    class TestFeature:
+        parameter_schema = {"count": SettingSpec(int, default=3)}
+
+        def __init__(self, model, count=1):
+            pass
+
+    _, args_value, _ = graph_controller.get_feature_parameter_values(
+        TestFeature,
+        {"name": TestFeature, "args": (9,)},
+    )
+
+    assert args_value == [9]
+
+
+def test_coerce_feature_parameter_rejects_invalid_numeric_input():
+    """Validation reports malformed user input before the feature list mutates."""
+    spec = SettingSpec(int, minimum=1, maximum=5, required=True)
+
+    with pytest.raises(ValueError, match="count"):
+        coerce_feature_parameter("count", "ten", spec)
+
+    with pytest.raises(ValueError, match="no more than 5"):
+        coerce_feature_parameter("count", "6", spec)
+
+    assert coerce_feature_parameter("count", "4", spec) == 4
 
 
 def test_update_feature_list_keeps_acquisition_configuration_runtime_only(

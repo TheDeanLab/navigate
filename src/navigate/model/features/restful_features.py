@@ -43,6 +43,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
+from navigate.model.devices.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -79,6 +80,23 @@ class IlastikSegmentation:
 
     Uses Ilastik REST API to perform segmentation in a separate process.
     """
+
+    parameter_schema = {
+        "microscope_name": SettingSpec(
+            str,
+            default="Nanoscale",
+            label="Microscope",
+            help_text="High-resolution microscope used after segmentation.",
+            required=True,
+        ),
+        "zoom_value": SettingSpec(
+            str,
+            default="N/A",
+            label="Zoom",
+            help_text="Zoom value for high-resolution follow-up imaging.",
+            required=True,
+        ),
+    }
 
     def __init__(self, model, microscope_name="Nanoscale", zoom_value="N/A"):
         """Initialize Ilastik segmentation class.

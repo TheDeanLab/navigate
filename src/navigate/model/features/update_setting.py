@@ -38,6 +38,7 @@ import time
 # Third party imports
 
 # Local application imports
+from navigate.model.devices.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -69,6 +70,23 @@ class ChangeResolution:
     - The `config_table` attribute is used to define the configuration for the
     resolution change process, including signal acquisition and cleanup steps.
     """
+
+    parameter_schema = {
+        "resolution_mode": SettingSpec(
+            str,
+            default="high",
+            label="Resolution",
+            help_text="Microscope/resolution name to switch to.",
+            required=True,
+        ),
+        "zoom_value": SettingSpec(
+            str,
+            default="N/A",
+            label="Zoom",
+            help_text="Zoom value to use after changing resolution.",
+            required=True,
+        ),
+    }
 
     def __init__(self, model, resolution_mode="high", zoom_value="N/A"):
         """Initialize the ChangeResolution class.
@@ -191,6 +209,43 @@ class SetCameraParameters:
 
     - If the value of a parameter is None it doesn't update the parameter value.
     """
+
+    parameter_schema = {
+        "microscope_name": SettingSpec(
+            str,
+            default=None,
+            label="Microscope",
+            help_text="Microscope name to update. Leave empty for the active microscope.",
+        ),
+        "sensor_mode": SettingSpec(
+            str,
+            default="Normal",
+            label="Sensor Mode",
+            help_text="Camera sensor mode.",
+            choices=("Normal", "Light-Sheet"),
+            required=True,
+        ),
+        "readout_direction": SettingSpec(
+            str,
+            default=None,
+            label="Readout Direction",
+            help_text="Readout direction for light-sheet sensor mode.",
+            choices=(
+                "Top-to-Bottom",
+                "Bottom-to-Top",
+                "Bidirectional",
+                "Rev. Bidirectional",
+            ),
+        ),
+        "rolling_shutter_width": SettingSpec(
+            int,
+            default=None,
+            label="Rolling Shutter Width",
+            help_text="Number of pixels used for rolling-shutter acquisition.",
+            minimum=1,
+            step=1,
+        ),
+    }
 
     def __init__(
         self,
@@ -315,6 +370,15 @@ class SetCameraParameters:
 
 
 class UpdateExperimentSetting:
+    parameter_schema = {
+        "experiment_parameters": SettingSpec(
+            dict,
+            default={},
+            label="Experiment Parameters",
+            help_text="Mapping of experiment configuration paths to replacement values.",
+        ),
+    }
+
     def __init__(self, model, experiment_parameters={}):
         self.model = model
 

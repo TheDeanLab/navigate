@@ -42,6 +42,7 @@ import json
 
 # Local application imports
 from .image_writer import ImageWriter
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.tools.common_functions import VariableWithLock
 from navigate.model.waveforms import remote_focus_ramp
 
@@ -59,9 +60,9 @@ def stage_move_requires_pause(
     theta_delta: float = 0.0,
 ) -> bool:
     """Return True when a stage move should pause camera frame reads."""
-    return any(abs(distance) > stage_distance_threshold for distance in delta_distances) or (
-        abs(theta_delta) > THETA_MOVE_EPSILON
-    )
+    return any(
+        abs(distance) > stage_distance_threshold for distance in delta_distances
+    ) or (abs(theta_delta) > THETA_MOVE_EPSILON)
 
 
 class Snap:
@@ -84,6 +85,15 @@ class Snap:
     - The `config_table` attribute is used to define the configuration for the
     data capture process, specifically the main data capture function.
     """
+
+    parameter_schema = {
+        "saving_flag": SettingSpec(
+            bool,
+            default=False,
+            label="Save Frames",
+            help_text="Mark snapped frames to be written by the active image writer.",
+        ),
+    }
 
     def __init__(self, model, saving_flag=False):
         """Initialize the Snap class.
@@ -146,6 +156,24 @@ class WaitForExternalTrigger:
     - Only digital triggers are handeled at this time: use the PFI inputs on the DAQ.
     """
 
+    parameter_schema = {
+        "trigger_channel": SettingSpec(
+            str,
+            default="/PCIe-6738/PFI4",
+            label="Trigger Channel",
+            help_text="DAQ digital input channel that will receive the external trigger.",
+            required=True,
+        ),
+        "timeout": SettingSpec(
+            float,
+            default=-1,
+            label="Timeout",
+            help_text="Maximum wait time in seconds. Negative values wait forever.",
+            step=0.1,
+            required=True,
+        ),
+    }
+
     def __init__(self, model, trigger_channel="/PCIe-6738/PFI4", timeout=-1):
         """Initialize the WaitForExternalTrigger class.
 
@@ -189,6 +217,46 @@ class WaitForExternalTrigger:
 
 
 class ProjectionMode:
+
+    parameter_schema = {
+        "axis": SettingSpec(
+            str,
+            default="z",
+            label="Stage Axis",
+            help_text="Stage axis used for projection-mode scanning.",
+            required=True,
+        ),
+        "galvo_num": SettingSpec(
+            int,
+            default=0,
+            label="Galvo Number",
+            help_text="Index of the galvo used for shear control.",
+            minimum=0,
+            step=1,
+            required=True,
+        ),
+        "enable": SettingSpec(
+            bool,
+            default=True,
+            label="Enable",
+            help_text="Turn projection mode on or off.",
+        ),
+        "z_range": SettingSpec(
+            float,
+            default=None,
+            label="Z Range",
+            help_text="Optional scan range override. Leave empty to use current settings.",
+            minimum=0,
+            step=0.1,
+        ),
+        "shear_amp": SettingSpec(
+            float,
+            default=None,
+            label="Shear Amplitude",
+            help_text="Optional shear amplitude override. Leave empty to use current settings.",
+            step=0.1,
+        ),
+    }
 
     def __init__(
         self, model, axis="z", galvo_num=0, enable=True, z_range=None, shear_amp=None
@@ -481,6 +549,31 @@ class LoopByCount:
     dynamically determining it from configuration references.
     """
 
+    parameter_schema = {
+        "steps": SettingSpec(
+            str,
+            default=1,
+            label="Steps",
+            help_text=(
+                "Loop count, or a configuration reference such as channels, "
+                "positions, or experiment.MicroscopeState.timepoints."
+            ),
+            required=True,
+        ),
+        "step_by_frame": SettingSpec(
+            bool,
+            default=False,
+            label="Step By Frame",
+            help_text="Count received frames instead of feature-node executions.",
+        ),
+        "is_nested": SettingSpec(
+            bool,
+            default=False,
+            label="Nested Loop",
+            help_text="Synchronize signal and data threads for nested loop usage.",
+        ),
+    }
+
     def __init__(self, model, steps=1, step_by_frame=False, is_nested=False):
         """Initialize the LoopByCount class.
 
@@ -727,6 +820,27 @@ class MoveToNextPositionInMultiPositionTable:
     process, including signal acquisition and cleanup steps.
     """
 
+    parameter_schema = {
+        "resolution_value": SettingSpec(
+            str,
+            default=None,
+            label="Resolution",
+            help_text="Microscope/resolution name for the source multi-position table.",
+        ),
+        "zoom_value": SettingSpec(
+            str,
+            default=None,
+            label="Zoom",
+            help_text="Zoom value for the source multi-position table.",
+        ),
+        "offset": SettingSpec(
+            list,
+            default=None,
+            label="Offset",
+            help_text="Optional [x, y, z, theta, f] stage offset list.",
+        ),
+    }
+
     def __init__(self, model, resolution_value=None, zoom_value=None, offset=None):
         """Initialize the MoveToNextPositionInMultiPositionTable class.
 
@@ -972,6 +1086,16 @@ class StackPause:
     process, specifically the main pause function.
     """
 
+    parameter_schema = {
+        "pause_num": SettingSpec(
+            str,
+            default="experiment.MicroscopeState.timepoints",
+            label="Pause Count",
+            help_text="Number of stack pauses, or a configuration reference to the count.",
+            required=True,
+        ),
+    }
+
     def __init__(self, model, pause_num="experiment.MicroscopeState.timepoints"):
         """Initialize the StackPause class.
 
@@ -1053,6 +1177,34 @@ class ZStackAcquisition:
     - The `config_table` attribute defines the configuration for the z-stack acquisition
     process, including signal acquisition, data handling, and node type.
     """
+
+    parameter_schema = {
+        "get_origin": SettingSpec(
+            bool,
+            default=False,
+            label="Get Origin",
+            help_text="Record the current z/f positions as the stack origin.",
+        ),
+        "saving_flag": SettingSpec(
+            bool,
+            default=False,
+            label="Save Stack",
+            help_text="Write stack frames while this feature runs.",
+        ),
+        "saving_dir": SettingSpec(
+            str,
+            default="z-stack",
+            label="Saving Directory",
+            help_text="Subdirectory name used for saved z-stack images.",
+            required=True,
+        ),
+        "force_multiposition": SettingSpec(
+            bool,
+            default=False,
+            label="Force Multiposition",
+            help_text="Use multiposition-stack behavior even for a single position.",
+        ),
+    }
 
     def __init__(
         self,

@@ -33,6 +33,11 @@ from multiprocessing.managers import DictProxy, ListProxy
 
 from navigate.config.config import get_navigate_path, update_config_dict
 from navigate.config.preload import PreloadContext, PreloadRule
+from navigate.config.device_schema import (
+    category_base_class_name,
+    canonical_device_type,
+    get_configuration_schema,
+)
 
 
 def ensure_experiment_root(context: PreloadContext) -> None:
@@ -52,7 +57,10 @@ def repair_autofocus_parameters(context: PreloadContext) -> None:
         device_dict[microscope_name] = {}
         if (
             "remote_focus" in microscope_config.keys()
-            and microscope_config["remote_focus"]["hardware"]["type"] == "NI"
+            and canonical_device_type(
+                "remote_focus", microscope_config["remote_focus"]["hardware"]["type"]
+            )
+            == "ni.NI"
         ):
             device_dict[microscope_name]["remote_focus"] = {}
             device_ref = microscope_config["remote_focus"]["hardware"]["channel"]
@@ -60,12 +68,11 @@ def repair_autofocus_parameters(context: PreloadContext) -> None:
         if "stage" in microscope_config.keys():
             stages = microscope_config["stage"]["hardware"]
             device_dict[microscope_name]["stage"] = {}
-            if type(stages) != ListProxy:
+            if type(stages) not in (list, ListProxy):
                 stages = [stages]
             for stage in stages:
-                if not stage["type"].lower().startswith("synthetic"):
-                    for axis in stage["axes"]:
-                        device_dict[microscope_name]["stage"][axis] = True
+                for axis in stage["axes"]:
+                    device_dict[microscope_name]["stage"][axis] = True
 
     autofocus_sample_setting = {
         "coarse_range": 500,
@@ -119,7 +126,7 @@ def repair_autofocus_parameters(context: PreloadContext) -> None:
                             autofocus_setting_dict[microscope_name][device][device_ref][
                                 k
                             ] = autofocus_sample_setting[k]
-
+    # cleanup
     for microscope_name in list(autofocus_setting_dict.keys()):
         if microscope_name not in device_dict:
             autofocus_setting_dict.pop(microscope_name)
@@ -131,10 +138,7 @@ def repair_autofocus_parameters(context: PreloadContext) -> None:
                     for device_ref in list(
                         autofocus_setting_dict[microscope_name][device].keys()
                     ):
-                        if (
-                            device_ref
-                            not in autofocus_setting_dict[microscope_name][device]
-                        ):
+                        if device_ref not in device_dict[microscope_name][device]:
                             autofocus_setting_dict[microscope_name][device].pop(
                                 device_ref
                             )
@@ -150,7 +154,6 @@ def repair_saving_settings(context: PreloadContext) -> None:
         "user": "Kevin",
         "tissue": "Lung",
         "celltype": "MV3",
-        "label": "GFP",
         "file_type": "TIFF",
         "prefix": "Cell_",
         "date": time.strftime("%Y-%m-%d"),
@@ -267,6 +270,20 @@ def repair_camera_parameters(context: PreloadContext) -> None:
                 camera_setting_dict[k] = camera_parameters_dict_sample[k]
             if camera_setting_dict[k] < 1:
                 camera_setting_dict[k] = camera_parameters_dict_sample[k]
+
+    # cleanup
+    for k in configuration["experiment"]["CameraParameters"].keys():
+        if k in camera_parameters_dict_sample.keys():
+            continue
+        if k not in microscope_names:
+            configuration["experiment"]["CameraParameters"].pop(k)
+
+    # update image_pixel size
+    microscope_name = configuration["experiment"]["MicroscopeState"]["microscope_name"]
+    camera_setting_dict = configuration["experiment"]["CameraParameters"]
+    selected_camera_setting_dict = camera_setting_dict[microscope_name]
+    for k in camera_parameters_dict_sample.keys():
+        camera_setting_dict[k] = selected_camera_setting_dict[k]
 
 
 def repair_stage_parameters(context: PreloadContext) -> None:
@@ -487,8 +504,8 @@ EXPERIMENT_RULES = [
     PreloadRule("experiment", "root", ensure_experiment_root),
     PreloadRule("experiment", "autofocus_parameters", repair_autofocus_parameters),
     PreloadRule("experiment", "saving_settings", repair_saving_settings),
-    PreloadRule("experiment", "camera_parameters", repair_camera_parameters),
     PreloadRule("experiment", "stage_parameters", repair_stage_parameters),
     PreloadRule("experiment", "microscope_state", repair_microscope_state),
+    PreloadRule("experiment", "camera_parameters", repair_camera_parameters),
     PreloadRule("experiment", "channel_settings", repair_channel_settings),
 ]

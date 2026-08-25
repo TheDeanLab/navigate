@@ -26,17 +26,62 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from multiprocessing.managers import ListProxy
 
-from navigate.config.config import verify_positions_config
 from navigate.config.preload import PreloadContext, PreloadRule
 
 
 def validate_multi_positions(context: PreloadContext) -> None:
     """Validate optional multi-position data."""
-    if context.multi_positions is not None:
-        context.configuration["multi_positions"] = verify_positions_config(
-            context.multi_positions
-        )
+    context.configuration["multi_positions"] = validate_positions(
+        context.multi_positions
+    )
+
+
+def validate_positions(positions) -> list:
+    """Return multi-position rows with invalid rows removed.
+
+    A full header row containing both ``X`` and ``Y`` is preserved. A partial header
+    row containing only one of those fields is discarded before value validation.
+    """
+    if positions is None or type(positions) not in (list, ListProxy):
+        return []
+
+    positions = list(positions)
+    start_index = _position_data_start_index(positions)
+    if start_index == len(positions):
+        return []
+
+    valid_positions = positions[:start_index]
+    for position in positions[start_index:]:
+        if _is_valid_position_row(position):
+            valid_positions.append(position)
+    return valid_positions
+
+
+def _position_data_start_index(positions) -> int:
+    """Return the first index that should contain numeric position values."""
+    if len(positions) == 0:
+        return 0
+    try:
+        cmp_header = [axis in positions[0] for axis in ["X", "Y"]]
+    except TypeError:
+        return 0
+    if all(cmp_header):
+        return 1
+    if any(cmp_header):
+        del positions[0]
+    return 0
+
+
+def _is_valid_position_row(position) -> bool:
+    """Return whether every value in one multi-position row can be parsed as float."""
+    try:
+        for value in position:
+            float(value)
+    except (TypeError, ValueError, KeyError, IndexError):
+        return False
+    return True
 
 
 POSITIONS_RULES = [

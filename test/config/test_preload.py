@@ -17,8 +17,8 @@ from navigate.config.preload import (
     preload_configuration,
 )
 from navigate.config.preload_rules.configuration import _default_reference_value
+from navigate.config.preload_rules.positions import validate_positions
 from navigate.model.devices.configuration_schema import SettingSpec
-
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "src" / "navigate" / "config"
 
@@ -1004,3 +1004,33 @@ def test_preload_validates_multi_positions(loaded_configuration):
     preload_configuration(manager, configuration, multi_positions=positions)
 
     assert configuration["multi_positions"] == [["X", "Y", "Z"], [1, 2, 3]]
+
+
+def test_preload_sets_empty_multi_positions_when_not_provided(loaded_configuration):
+    manager, configuration = loaded_configuration
+    configuration.pop("multi_positions", None)
+
+    preload_configuration(manager, configuration)
+
+    assert configuration["multi_positions"] == []
+
+
+def test_positions_rule_discards_partial_header_before_validation():
+    positions = [
+        ["X", "bad", "header"],
+        [1, 2, 3],
+        ["bad", 2, 3],
+        [4, 5, 6],
+    ]
+
+    assert validate_positions(positions) == [[1, 2, 3], [4, 5, 6]]
+
+
+def test_positions_rule_returns_empty_list_for_missing_or_invalid_positions():
+    assert validate_positions(None) == []
+    assert validate_positions({}) == []
+    assert validate_positions([["X", "Y", "Z"]]) == []
+
+
+def test_positions_rule_removes_scalar_rows_without_crashing():
+    assert validate_positions([1, [2, 3], "bad"]) == [[2, 3]]

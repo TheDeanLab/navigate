@@ -398,6 +398,10 @@ class Controller:
         ValueError
             If the DAQ type is unknown.
         """
+        # run in synthetic mode
+        if self.args.synthetic_hardware:
+            return False
+
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]

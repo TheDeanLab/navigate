@@ -32,6 +32,7 @@ import logging
 from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__.split(".")[1])
+ISSUE_LOG_SEPARATOR = "-" * 30
 
 
 @dataclass(frozen=True)
@@ -175,4 +176,10 @@ def _log_report(report: PreloadReport) -> None:
         logger.debug("Preload compatibility repair %s: %s", change.path, change.message)
     for issue in report.issues:
         log = logger.error if issue.fatal else logger.warning
-        log("Preload issue %s: %s", issue.path, issue.message)
+        log(
+            "%s\nPreload issue %s: %s\n%s",
+            ISSUE_LOG_SEPARATOR,
+            issue.path,
+            issue.message,
+            ISSUE_LOG_SEPARATOR,
+        )

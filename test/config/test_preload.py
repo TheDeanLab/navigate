@@ -10,7 +10,12 @@ import yaml
 
 from navigate.config.config import load_configs, update_config_dict
 from navigate.config.device_schema import canonical_device_type
-from navigate.config.preload import PreloadError, preload_configuration
+from navigate.config.preload import (
+    PreloadError,
+    PreloadReport,
+    _log_report,
+    preload_configuration,
+)
 from navigate.config.preload_rules.configuration import _default_reference_value
 from navigate.model.devices.configuration_schema import SettingSpec
 
@@ -31,6 +36,25 @@ def loaded_configuration():
             gui=CONFIG_DIR / "gui_configuration.yml",
         )
         yield manager, configuration
+
+
+def test_preload_warning_and_fatal_logs_are_wrapped_with_separators(caplog):
+    report = PreloadReport()
+    report.add_issue("warning.path", "warning-rule", "warning message")
+    report.add_issue("fatal.path", "fatal-rule", "fatal message", fatal=True)
+
+    with caplog.at_level("WARNING", logger="config"):
+        _log_report(report)
+
+    separator = "-" * 30
+    assert (
+        f"{separator}\nPreload issue warning.path: warning message\n{separator}"
+        in caplog.text
+    )
+    assert (
+        f"{separator}\nPreload issue fatal.path: fatal message\n{separator}"
+        in caplog.text
+    )
 
 
 def test_preload_keeps_loaded_sections_as_shared_dicts(loaded_configuration):

@@ -46,7 +46,7 @@ from navigate.config.device_schema import (
 )
 from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
 from navigate.config.preload import PreloadContext, PreloadRule, PreloadReport
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.tools.common_functions import build_ref_name, load_param_from_module
 
 logger = logging.getLogger(__name__.split(".")[1])

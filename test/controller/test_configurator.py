@@ -5,7 +5,7 @@
 
 from navigate.controller import configurator as configurator_module
 from navigate.controller.configurator import Configurator, InlineYamlList
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.devices.zoom.base import ZoomBase
 
 

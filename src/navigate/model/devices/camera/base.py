@@ -42,7 +42,7 @@ import numpy as np
 
 # Local Imports
 from navigate.config import get_navigate_path
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup

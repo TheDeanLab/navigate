@@ -39,7 +39,7 @@ from typing import Any, Optional
 # Local Imports
 from navigate.model.devices.remote_focus.base import RemoteFocusBase
 from navigate.model.devices.device_types import NIDevice
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # # Logger Setup

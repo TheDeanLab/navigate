@@ -18,7 +18,7 @@ from navigate.config.preload import (
 )
 from navigate.config.preload_rules.configuration import _default_reference_value
 from navigate.config.preload_rules.positions import validate_positions
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "src" / "navigate" / "config"
 

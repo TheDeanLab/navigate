@@ -44,7 +44,7 @@ from tifffile import TiffFile, TiffFileError
 from navigate.model.analysis import camera
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.model.devices.camera.base import CameraBase
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup

@@ -37,7 +37,7 @@ import logging
 import serial
 
 # Local Imports
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]

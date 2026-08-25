@@ -45,7 +45,7 @@ from navigate.model.waveforms import (
     sine_wave,
     single_pulse,
 )
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # # Logger Setup

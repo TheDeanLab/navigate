@@ -39,7 +39,7 @@ from typing import Any
 # Local Imports
 from navigate.model.devices.stage.base import StageBase
 from navigate.model.devices.device_types import IntegratedDevice
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup

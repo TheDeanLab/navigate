@@ -41,7 +41,7 @@ from nidaqmx.constants import LineGrouping
 
 # Local Imports
 from navigate.model.devices.shutter.base import ShutterBase
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup

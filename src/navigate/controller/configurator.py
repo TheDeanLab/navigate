@@ -38,7 +38,7 @@ from typing import Optional
 
 import yaml
 
-from navigate.model.devices.configuration_schema import (
+from navigate.config.configuration_schema import (
     CollectionSpec,
     SettingSpec,
 )

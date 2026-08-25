@@ -37,7 +37,7 @@ from typing import Any, Dict
 from serial import Serial
 
 # Local imports
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.devices.device_types import SerialDevice
 from navigate.model.devices.pump.base import PumpBase
 from navigate.model.utils.exceptions import UserVisibleException

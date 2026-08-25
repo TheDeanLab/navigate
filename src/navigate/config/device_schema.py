@@ -40,6 +40,7 @@ from navigate.model.devices.configuration_schema import (
     merge_configuration_schemas,
 )
 from navigate.model.devices.device_types import SerialDevice, SequenceDevice
+from navigate.tools.common_functions import load_param_from_module
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -58,6 +59,132 @@ def category_base_class_name(category: str) -> str:
         category,
         "".join(word.title() for word in category.split("_")) + "Base",
     )
+
+
+def category_model_suffix(category: str) -> str:
+    """Return the class-name suffix for a device category."""
+    return category_base_class_name(category).removesuffix("Base")
+
+
+def strip_category_model_suffix(category: str, model: str) -> str:
+    """Strip a category class suffix from a model name if present."""
+    suffix = category_model_suffix(category)
+    if model.casefold().endswith(suffix.casefold()):
+        return model[: -len(suffix)]
+    return model
+
+
+def canonical_device_type(category: str, device_type: object) -> Optional[str]:
+    """Normalize a device type token to ``manufacturer.model``.
+
+    Supported inputs include ``manufacturer.model``,
+    ``manufacturer.model<DeviceCategory>``, ``model<DeviceCategory>``, and
+    ``model``.
+    """
+    if not isinstance(device_type, str) or not device_type.strip():
+        return None
+    raw_type = device_type.strip()
+
+    if "." in raw_type:
+        manufacturer, model = raw_type.split(".")[:2]
+        model = _legacy_device_model(model)
+        return ".".join(
+            (
+                _canonical_manufacturer(category, manufacturer),
+                strip_category_model_suffix(category, model),
+            )
+        )
+
+    raw_type = _legacy_device_model(raw_type)
+    model = strip_category_model_suffix(category, raw_type)
+    database_match = _canonical_device_type_from_database(category, raw_type, model)
+    if database_match is not None:
+        return database_match
+
+    class_match = _canonical_device_type_from_classes(category, model)
+    if class_match is not None:
+        return class_match
+
+    return None
+
+
+def _canonical_manufacturer(category: str, manufacturer: str) -> str:
+    """Return the package manufacturer name for a possibly cased token."""
+    manufacturer_casefold = manufacturer.casefold()
+    category_path = device_directory() / category
+    if category_path.exists():
+        for path in category_path.glob("*.py"):
+            if path.stem.casefold() == manufacturer_casefold:
+                return path.stem
+    return manufacturer.casefold()
+
+
+def _legacy_device_model(model: str) -> str:
+    """Return the current model name for a deceased model token."""
+    try:
+        legacy_names = load_param_from_module(
+            "navigate.config.configuration_database", "deceased_device_type_names"
+        )
+    except (ImportError, AttributeError, ModuleNotFoundError):
+        return model
+    return {
+        str(old_name).casefold(): str(new_name)
+        for old_name, new_name in legacy_names.items()
+    }.get(model.casefold(), model)
+
+
+def _canonical_device_type_from_database(
+    category: str, raw_type: str, model: str
+) -> Optional[str]:
+    """Resolve a type through configuration_database mappings."""
+    try:
+        device_types = load_param_from_module(
+            "navigate.config.configuration_database", category + "_device_types"
+        )
+    except (ImportError, AttributeError, ModuleNotFoundError):
+        return None
+
+    suffix = category_model_suffix(category)
+    raw_type_casefold = raw_type.casefold()
+    model_casefold = model.casefold()
+    for display_name, value in device_types.items():
+        if isinstance(value, tuple):
+            database_model, manufacturer = value
+        else:
+            database_model = value
+            manufacturer = str(value).casefold()
+
+        database_model = str(database_model)
+        candidates = {
+            str(display_name),
+            database_model,
+            f"{database_model}{suffix}",
+        }
+        if (
+            raw_type_casefold in {candidate.casefold() for candidate in candidates}
+            or model_casefold == database_model.casefold()
+        ):
+            manufacturer = _canonical_manufacturer(category, str(manufacturer))
+            return f"{manufacturer}.{database_model}"
+    return None
+
+
+def _canonical_device_type_from_classes(category: str, model: str) -> Optional[str]:
+    """Resolve a type by scanning device classes when no database entry exists."""
+    class_name = model + category_model_suffix(category)
+    category_path = device_directory() / category
+    if not category_path.exists():
+        return None
+    for path in sorted(category_path.glob("*.py")):
+        if path.stem in {"__init__", "base"}:
+            continue
+        try:
+            classes = module_classes(category, path.stem)
+        except (FileNotFoundError, SyntaxError):
+            continue
+        if class_name.casefold() in {name.casefold() for name in classes}:
+            return f"{path.stem}.{model}"
+    return None
 
 
 def module_classes(category: str, manufacturer: str) -> dict[str, list[str]]:

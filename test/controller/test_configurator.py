@@ -19,6 +19,46 @@ def test_saved_device_type_uses_manufacturer_and_short_model_name():
     )
     assert Configurator.saved_device_type("stage", "asi", "ASIStage") == "asi.ASI"
     assert Configurator.saved_device_type("daq", "ni", "NIDAQ") == "NI"
+    assert Configurator.saved_device_type("daq", "asi", "ASIDaq") == "ASI"
+
+
+def test_resolve_device_type_uses_shared_canonical_hardware_type_rule():
+    """Configurator accepts all YAML hardware.type forms handled by preload."""
+    assert Configurator.resolve_device_type("camera", "HamamatsuOrca") == (
+        "hamamatsu",
+        "HamamatsuOrcaCamera",
+    )
+    assert Configurator.resolve_device_type("camera", "HamamatsuOrcaCamera") == (
+        "hamamatsu",
+        "HamamatsuOrcaCamera",
+    )
+    assert Configurator.resolve_device_type("camera", "hamamatsu.HamamatsuOrca") == (
+        "hamamatsu",
+        "HamamatsuOrcaCamera",
+    )
+    assert Configurator.resolve_device_type(
+        "camera", "hamamatsu.HamamatsuOrcaCamera"
+    ) == ("hamamatsu", "HamamatsuOrcaCamera")
+
+
+def test_resolve_device_type_preserves_deceased_type_repair():
+    """Legacy deceased model names still resolve through the shared helper."""
+    assert Configurator.resolve_device_type("stage", "Thorlabs") == (
+        "thorlabs",
+        "KIM001Stage",
+    )
+
+
+def test_resolve_daq_type_uses_database_name_not_class_suffix():
+    """DAQ class names resolve but save as configuration_database model names."""
+    assert Configurator.resolve_device_type("daq", "asi.ASIDaq") == (
+        "asi",
+        "ASIDaq",
+    )
+    assert Configurator.resolve_device_type("daq", "ASIDaq") == (
+        "asi",
+        "ASIDaq",
+    )
 
 
 def test_laser_control_types_are_qualified_using_onoff_priority():

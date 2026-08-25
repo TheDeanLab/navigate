@@ -31,9 +31,14 @@
 
 from navigate.config.preload_rules.configuration import CONFIGURATION_RULES
 from navigate.config.preload_rules.experiment import EXPERIMENT_RULES
+from navigate.config.preload_rules.gui import GUI_RULES
 from navigate.config.preload_rules.positions import POSITIONS_RULES
 from navigate.config.preload_rules.waveform import WAVEFORM_CONSTANTS_RULES
 
 PRELOAD_RULES = (
-    CONFIGURATION_RULES + EXPERIMENT_RULES + WAVEFORM_CONSTANTS_RULES + POSITIONS_RULES
+    CONFIGURATION_RULES
+    + GUI_RULES
+    + EXPERIMENT_RULES
+    + WAVEFORM_CONSTANTS_RULES
+    + POSITIONS_RULES
 )

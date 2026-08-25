@@ -43,8 +43,12 @@ from navigate.model.devices.configuration_schema import (
     CollectionSpec,
     SettingSpec,
 )
-from navigate.config.device_schema import get_configuration_schema
-from navigate.config.configuration_database import deceased_device_type_names
+from navigate.config.device_schema import (
+    canonical_device_type,
+    category_model_suffix,
+    get_configuration_schema,
+    strip_category_model_suffix,
+)
 
 # Local Imports
 from navigate.view.configurator_application_window import (
@@ -408,34 +412,15 @@ class Configurator:
         YAML may name a model directly (``NI``), use its full class-style name
         (``NIDAQ``), or qualify either form with ``manufacturer.``.
         """
-        manufacturer_name: Optional[str] = None
-        model_name = device_type
-        if "." in device_type:
-            manufacturer_name, model_name = device_type.split(".", maxsplit=1)
-        legacy_names = {
-            old_name.lower(): new_name
-            for old_name, new_name in deceased_device_type_names.items()
-        }
-        model_name = legacy_names.get(model_name.lower(), model_name)
-
-        manufacturers = cls.get_device_manufacturers(category)
-        if manufacturer_name is not None:
-            manufacturers = [
-                manufacturer
-                for manufacturer in manufacturers
-                if manufacturer.lower() == manufacturer_name.lower()
-            ]
-
-        category_suffix = cls.category_base_class_name(category)[: -len("Base")]
-        for manufacturer in manufacturers:
-            for model in cls.get_device_models(category, manufacturer):
-                short_model_name = (
-                    model[: -len(category_suffix)]
-                    if model.endswith(category_suffix)
-                    else model
-                )
-                if model_name.lower() in {model.lower(), short_model_name.lower()}:
-                    return manufacturer, model
+        canonical_type = canonical_device_type(category, device_type)
+        if canonical_type is None or "." not in canonical_type:
+            return None
+        manufacturer, model = canonical_type.split(".", maxsplit=1)
+        suffix = category_model_suffix(category)
+        class_name = model if model.endswith(suffix) else model + suffix
+        for available_model in cls.get_device_models(category, manufacturer):
+            if available_model.casefold() == class_name.casefold():
+                return manufacturer, available_model
         return None
 
     @staticmethod
@@ -879,10 +864,7 @@ class Configurator:
     @classmethod
     def saved_device_type(cls, category: str, manufacturer: str, model: str) -> str:
         """Return a YAML device type as ``manufacturer.Model``."""
-        category_suffix = cls.category_base_class_name(category)[: -len("Base")]
-        model_name = (
-            model[: -len(category_suffix)] if model.endswith(category_suffix) else model
-        )
+        model_name = strip_category_model_suffix(category, model)
         if category == "daq":
             return model_name
         return f"{manufacturer}.{model_name}"
@@ -892,10 +874,10 @@ class Configurator:
         """Return a laser control type in the YAML ``manufacturer.Model`` form."""
         if not isinstance(device_type, str):
             return device_type
-        resolved_type = cls.resolve_device_type("laser", device_type)
-        if resolved_type is None:
+        canonical_type = canonical_device_type("laser", device_type)
+        if canonical_type is None:
             return device_type
-        return cls.saved_device_type("laser", *resolved_type)
+        return canonical_type
 
     def device_configuration(
         self, category: str, manufacturer: str, model: str, settings: dict[str, object]

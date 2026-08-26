@@ -826,12 +826,15 @@ class MoveToNextPositionInMultiPositionTable:
             default=None,
             label="Resolution",
             help_text="Microscope/resolution name for the source multi-position table.",
+            dynamic_source="microscopes",
         ),
         "zoom_value": SettingSpec(
             str,
             default=None,
             label="Zoom",
             help_text="Zoom value for the source multi-position table.",
+            dynamic_source="zoom_values",
+            depends_on="resolution_value",
         ),
         "offset": SettingSpec(
             list,
@@ -2017,6 +2020,35 @@ class FindTissueSimple2D:
     space for 2D imaging. It processes acquired frames to determine regions of
     interest (tissue), calculates offsets, and generates grid positions for imaging.
     """
+
+    parameter_schema = {
+        "overlap": SettingSpec(
+            float,
+            default=0.1,
+            label="Overlap",
+            help_text="Fractional overlap between adjacent grid tiles.",
+            minimum=0.0,
+            maximum=1.0,
+            step=0.01,
+        ),
+        "target_resolution": SettingSpec(
+            str,
+            default="Nanoscale",
+            label="Target Resolution",
+            help_text="Microscope/resolution name to use for generated tissue positions.",
+            required=True,
+            dynamic_source="microscopes",
+        ),
+        "target_zoom": SettingSpec(
+            str,
+            default="N/A",
+            label="Target Zoom",
+            help_text="Zoom value for the target resolution.",
+            required=True,
+            dynamic_source="zoom_values",
+            depends_on="target_resolution",
+        ),
+    }
 
     def __init__(
         self,

@@ -96,6 +96,7 @@ class VolumeSearch:
             label="Target Resolution",
             help_text="Microscope/resolution used for tiled follow-up imaging.",
             required=True,
+            dynamic_source="microscopes",
         ),
         "target_zoom": SettingSpec(
             str,
@@ -103,6 +104,8 @@ class VolumeSearch:
             label="Target Zoom",
             help_text="Zoom value used for tiled follow-up imaging.",
             required=True,
+            dynamic_source="zoom_values",
+            depends_on="target_resolution",
         ),
         "flipx": SettingSpec(
             bool,
@@ -523,6 +526,7 @@ class VolumeSearch3D:
             label="Target Resolution",
             help_text="Microscope/resolution used for tiled follow-up imaging.",
             required=True,
+            dynamic_source="microscopes",
         ),
         "target_zoom": SettingSpec(
             str,
@@ -530,6 +534,8 @@ class VolumeSearch3D:
             label="Target Zoom",
             help_text="Zoom value used for tiled follow-up imaging.",
             required=True,
+            dynamic_source="zoom_values",
+            depends_on="target_resolution",
         ),
         "position_id": SettingSpec(
             int,

@@ -67,6 +67,7 @@ class ImageWriter:
             default=None,
             label="Microscope",
             help_text="Microscope name to save. Leave empty for the active microscope.",
+            dynamic_source="microscopes",
         ),
         "data_buffer": SettingSpec(
             list,

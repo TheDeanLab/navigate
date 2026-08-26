@@ -261,6 +261,12 @@ class FeatureConfigPopup:
         self.inputs_type = []
         #: list: List of parameter schema definitions
         self.parameter_specs = []
+        #: list: Parameter names in the same order as the input widgets
+        self.parameter_names = []
+        #: dict: Parameter inputs keyed by constructor argument name
+        self.inputs_by_name = {}
+        #: dict: Parameter positions keyed by constructor argument name
+        self.parameter_index_by_name = {}
 
         for child in self.parameter_frame.winfo_children():
             child.destroy()
@@ -280,12 +286,12 @@ class FeatureConfigPopup:
             if arg_spec.value_type is bool:
                 arg_input_class = ttk.Combobox
                 values = ["True", "False"]
-            elif arg_spec.choices is not None:
-                arg_input_class = ttk.Combobox
-                values = list(arg_spec.choices)
             elif parameter_config is not None and arg_name in parameter_config:
                 arg_input_class = ttk.Combobox
                 values = list(parameter_config[arg_name].keys())
+            elif arg_spec.choices is not None:
+                arg_input_class = ttk.Combobox
+                values = list(arg_spec.choices)
             elif arg_spec.value_type in (int, float):
                 arg_input_class = ValidatedSpinbox
                 input_args = {
@@ -313,6 +319,9 @@ class FeatureConfigPopup:
             self.inputs.append(temp)
             self.inputs_type.append(arg_spec.value_type)
             self.parameter_specs.append(arg_spec)
+            self.parameter_names.append(arg_name)
+            self.inputs_by_name[arg_name] = temp
+            self.parameter_index_by_name[arg_name] = i
             temp.grid(
                 row=i + 2,
                 column=0,

@@ -88,6 +88,7 @@ class IlastikSegmentation:
             label="Microscope",
             help_text="High-resolution microscope used after segmentation.",
             required=True,
+            dynamic_source="microscopes",
         ),
         "zoom_value": SettingSpec(
             str,
@@ -95,6 +96,8 @@ class IlastikSegmentation:
             label="Zoom",
             help_text="Zoom value for high-resolution follow-up imaging.",
             required=True,
+            dynamic_source="zoom_values",
+            depends_on="microscope_name",
         ),
     }
 

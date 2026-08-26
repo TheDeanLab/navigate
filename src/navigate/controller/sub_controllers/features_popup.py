@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard library imports
+from dataclasses import replace
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -106,6 +107,11 @@ class FeaturePopupController(GUIController):
             self.view.board_canvas,
             self.view.board_window,
             self.view.marker,
+            configuration_controller=getattr(
+                self.parent_controller,
+                "configuration_controller",
+                None,
+            ),
         )
 
         if "add" in self.view.buttons:
@@ -249,6 +255,8 @@ class FeaturePopupController(GUIController):
 
 class FeatureListGraphController:
     CHIP_GAP = 10
+    MICROSCOPE_DYNAMIC_SOURCE = "microscopes"
+    ZOOM_DYNAMIC_SOURCE = "zoom_values"
 
     def __init__(
         self,
@@ -260,6 +268,7 @@ class FeatureListGraphController:
         board_window=None,
         marker=None,
         child_popups=None,
+        configuration_controller=None,
     ):
         """Initialize feature list window
 
@@ -281,6 +290,7 @@ class FeatureListGraphController:
         self.board_canvas = board_canvas
         self.board_window = board_window
         self.marker = marker
+        self.configuration_controller = configuration_controller
 
         self.feature_list = None
         self.features = []
@@ -340,8 +350,88 @@ class FeatureListGraphController:
         """Return schema metadata for a feature constructor."""
         return getattr(feature_class, "parameter_schema", {}) or {}
 
-    @staticmethod
-    def get_feature_parameter_values(feature_class, feature=None):
+    def microscope_choices(self):
+        """Return microscope names from the loaded configuration."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        if configuration_controller is None:
+            return ()
+        try:
+            return tuple(configuration_controller.microscope_list)
+        except (AttributeError, KeyError, TypeError):
+            return ()
+
+    def default_microscope_choice(self, choices):
+        """Return the active microscope or first configured microscope."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        active = getattr(configuration_controller, "microscope_name", None)
+        if active in choices:
+            return active
+        return choices[0] if choices else None
+
+    def zoom_choices(self, microscope_name):
+        """Return zoom names for one configured microscope."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        if configuration_controller is None or not microscope_name:
+            return ()
+        try:
+            return tuple(configuration_controller.get_zoom_value_list(microscope_name))
+        except (AttributeError, KeyError, TypeError):
+            pass
+
+        try:
+            microscope = configuration_controller.configuration["configuration"][
+                "microscopes"
+            ][microscope_name]
+            zoom_config = microscope.get("zoom", {})
+            for key in ("position", "pixel_size"):
+                if isinstance(zoom_config.get(key), dict):
+                    return tuple(zoom_config[key].keys())
+        except (AttributeError, KeyError, TypeError):
+            pass
+        return ()
+
+    def apply_dynamic_parameter_choices(
+        self,
+        args_name,
+        args_value,
+        parameter_specs,
+        feature=None,
+    ):
+        """Add runtime microscope and zoom choices to feature parameter specs."""
+        microscope_choices = self.microscope_choices()
+        if not microscope_choices:
+            return args_value, parameter_specs
+
+        args_value = list(args_value)
+        parameter_specs = dict(parameter_specs)
+
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if spec.dynamic_source != self.MICROSCOPE_DYNAMIC_SOURCE:
+                continue
+            parameter_specs[arg_name] = replace(spec, choices=microscope_choices)
+            if args_value[index] not in microscope_choices:
+                args_value[index] = self.default_microscope_choice(microscope_choices)
+
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if spec.dynamic_source != self.ZOOM_DYNAMIC_SOURCE:
+                continue
+            microscope_parameter = spec.depends_on
+            if microscope_parameter is None or microscope_parameter not in args_name:
+                continue
+            microscope_index = args_name.index(microscope_parameter)
+            microscope_name = args_value[microscope_index]
+            choices = self.zoom_choices(microscope_name)
+            parameter_specs[arg_name] = replace(spec, choices=choices)
+            if choices and args_value[index] not in choices:
+                args_value[index] = choices[0]
+            elif not choices:
+                args_value[index] = ""
+
+        return args_value, parameter_specs
+
+    def get_feature_parameter_values(self, feature_class, feature=None):
         """Return constructor parameter names, values, and merged specs."""
         spec = inspect.getfullargspec(feature_class)
         args_name = spec.args[2:]
@@ -374,7 +464,75 @@ class FeatureListGraphController:
                 if index >= len(args_value):
                     break
                 args_value[index] = value
+        args_value, parameter_specs = self.apply_dynamic_parameter_choices(
+            args_name,
+            args_value,
+            parameter_specs,
+            feature,
+        )
         return args_name, args_value, parameter_specs
+
+    def refresh_linked_zoom_choices(
+        self,
+        popup,
+        zoom_parameter_name,
+        microscope_parameter_name,
+        reset_invalid=True,
+    ):
+        """Refresh a zoom combobox after its microscope selection changes."""
+        microscope_widget = popup.inputs_by_name.get(microscope_parameter_name)
+        zoom_widget = popup.inputs_by_name.get(zoom_parameter_name)
+        if microscope_widget is None or zoom_widget is None:
+            return
+
+        choices = self.zoom_choices(microscope_widget.get())
+        zoom_widget.set_values(choices)
+        current_value = zoom_widget.get()
+        if reset_invalid and current_value not in choices:
+            zoom_widget.set(choices[0] if choices else "")
+
+        zoom_index = popup.parameter_index_by_name[zoom_parameter_name]
+        popup.parameter_specs[zoom_index] = replace(
+            popup.parameter_specs[zoom_index],
+            choices=choices,
+        )
+
+    def bind_dynamic_parameter_choices(self, popup):
+        """Link runtime microscope comboboxes to their dependent zoom comboboxes."""
+
+        def refresh_zoom(zoom_parameter_name, microscope_parameter_name):
+            self.refresh_linked_zoom_choices(
+                popup,
+                zoom_parameter_name,
+                microscope_parameter_name,
+                reset_invalid=True,
+            )
+
+        for zoom_parameter_name in popup.parameter_names:
+            zoom_index = popup.parameter_index_by_name[zoom_parameter_name]
+            zoom_spec = popup.parameter_specs[zoom_index]
+            if zoom_spec.dynamic_source != self.ZOOM_DYNAMIC_SOURCE:
+                continue
+            microscope_parameter_name = zoom_spec.depends_on
+            if microscope_parameter_name is None:
+                continue
+            microscope_widget = popup.inputs_by_name.get(microscope_parameter_name)
+            if microscope_widget is None or not isinstance(
+                microscope_widget.widget, ttk.Combobox
+            ):
+                continue
+            microscope_widget.widget.bind(
+                "<<ComboboxSelected>>",
+                lambda _event, z=zoom_parameter_name, m=microscope_parameter_name: refresh_zoom(
+                    z, m
+                ),
+                add="+",
+            )
+            self.refresh_linked_zoom_choices(
+                popup,
+                zoom_parameter_name,
+                microscope_parameter_name,
+            )
 
     def update(self, feature_list_content):
         """Update feature list window
@@ -644,6 +802,7 @@ class FeatureListGraphController:
                 parameter_schema=parameter_schema,
                 **kwargs,
             )
+            self.bind_dynamic_parameter_choices(popup)
             popup.feature_name_widget.widget.bind(
                 "<<ComboboxSelected>>", lambda event: refresh_parameters(popup)
             )
@@ -663,6 +822,7 @@ class FeatureListGraphController:
                         popup.feature_list_true_frame.board_window,
                         popup.feature_list_true_frame.marker,
                         self.child_popups,
+                        self.configuration_controller,
                     )
                 )
                 self.feature_list_graph_controllers_true[idx].update(feature["true"])
@@ -677,6 +837,7 @@ class FeatureListGraphController:
                         popup.feature_list_false_frame.board_window,
                         popup.feature_list_false_frame.marker,
                         self.child_popups,
+                        self.configuration_controller,
                     )
                 )
                 self.feature_list_graph_controllers_false[idx].update(feature["false"])
@@ -739,6 +900,7 @@ class FeatureListGraphController:
                 feature_parameter_config,
                 parameter_schema,
             )
+            self.bind_dynamic_parameter_choices(popup)
 
         def select_palette_feature(popup, feature_name):
             """Select a feature from the popup's feature node palette."""

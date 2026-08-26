@@ -36,11 +36,13 @@ from typing import Any, Mapping, Optional, Tuple
 
 @dataclass(frozen=True)
 class SettingSpec:
-    """Description of one persisted, user-editable device setting.
+    """Description of one user-editable setting or feature parameter.
 
-    ``choices`` defines a closed set of values. ``minimum``, ``maximum``, and
-    ``step`` define a numeric range; they are intentionally mutually exclusive
-    with ``choices``.
+    ``choices`` defines a closed set of values. ``dynamic_source`` identifies
+    choices that should be resolved at render time, and ``depends_on`` names the
+    parameter that provides context for dependent choices. ``minimum``,
+    ``maximum``, and ``step`` define a numeric range; they are intentionally
+    mutually exclusive with ``choices``.
     """
 
     value_type: type
@@ -52,6 +54,8 @@ class SettingSpec:
     maximum: Optional[float] = None
     step: Optional[float] = None
     required: bool = False
+    dynamic_source: Optional[str] = None
+    depends_on: Optional[str] = None
 
     def __post_init__(self) -> None:
         """Validate a schema definition when its class is imported."""

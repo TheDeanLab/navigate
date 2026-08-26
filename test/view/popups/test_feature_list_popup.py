@@ -41,6 +41,7 @@ from navigate.view.popups.feature_list_popup import (
     FeatureConfigPopup,
     FeatureListPopup,
 )
+from navigate.model.devices.configuration_schema import SettingSpec
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
 
@@ -101,6 +102,35 @@ def test_feature_config_popup(feature_name, args_name, args_value, tk_root):
             assert isinstance(w.widget, ttk.Entry)
 
         assert w.get() == str(args_value[i])
+
+
+def test_feature_config_popup_renders_dynamic_zoom_choices_as_readonly_combobox(
+    tk_root,
+):
+    """Runtime zoom choices render as a non-editable combobox."""
+    config_popup = FeatureConfigPopup(
+        tk_root,
+        ["ChangeResolution"],
+        feature_name="ChangeResolution",
+        args_name=["zoom_value"],
+        args_value=["4x"],
+        parameter_schema={
+            "zoom_value": SettingSpec(
+                str,
+                default="4x",
+                choices=("1x", "4x", "10x"),
+            )
+        },
+        title="Test",
+    )
+    tk_root.update()
+
+    zoom_widget = config_popup.inputs_by_name["zoom_value"].widget
+
+    assert isinstance(zoom_widget, ttk.Combobox)
+    assert str(zoom_widget["state"]) == "readonly"
+    assert zoom_widget["values"] == ("1x", "4x", "10x")
+    assert config_popup.inputs_by_name["zoom_value"].get() == "4x"
 
 
 @pytest.mark.parametrize("title", ["Add Feature List", "Edit Feature Parameters"])

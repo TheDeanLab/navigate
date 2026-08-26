@@ -310,6 +310,294 @@ def test_feature_parameter_values_preserve_existing_feature_args(graph_controlle
     assert args_value == [9]
 
 
+def test_feature_parameter_values_add_loaded_microscope_and_zoom_choices(
+    graph_controller,
+):
+    """Microscope and zoom parameters receive choices from loaded configuration."""
+
+    class TestFeature:
+        parameter_schema = {
+            "resolution_mode": SettingSpec(
+                str,
+                default="high",
+                dynamic_source="microscopes",
+            ),
+            "zoom_value": SettingSpec(
+                str,
+                default="N/A",
+                dynamic_source="zoom_values",
+                depends_on="resolution_mode",
+            ),
+        }
+
+        def __init__(self, model, resolution_mode="high", zoom_value="N/A"):
+            pass
+
+    graph_controller.configuration_controller = SimpleNamespace(
+        microscope_list=["ScopeA", "ScopeB"],
+        microscope_name="ScopeB",
+        get_zoom_value_list=lambda microscope_name: {
+            "ScopeA": ["1x"],
+            "ScopeB": ["4x", "10x"],
+        }[microscope_name],
+    )
+
+    args_name, args_value, schema = graph_controller.get_feature_parameter_values(
+        TestFeature
+    )
+
+    assert args_name == ["resolution_mode", "zoom_value"]
+    assert args_value == ["ScopeB", "4x"]
+    assert schema["resolution_mode"].choices == ("ScopeA", "ScopeB")
+    assert schema["zoom_value"].choices == ("4x", "10x")
+
+
+def test_feature_parameter_values_use_saved_microscope_for_zoom_choices(
+    graph_controller,
+):
+    """Saved microscope args determine the initial linked zoom options."""
+
+    class TestFeature:
+        parameter_schema = {
+            "target_resolution": SettingSpec(
+                str,
+                default="ScopeB",
+                dynamic_source="microscopes",
+            ),
+            "target_zoom": SettingSpec(
+                str,
+                default="4x",
+                dynamic_source="zoom_values",
+                depends_on="target_resolution",
+            ),
+        }
+
+        def __init__(self, model, target_resolution="ScopeB", target_zoom="4x"):
+            pass
+
+    graph_controller.configuration_controller = SimpleNamespace(
+        microscope_list=["ScopeA", "ScopeB"],
+        microscope_name="ScopeB",
+        get_zoom_value_list=lambda microscope_name: {
+            "ScopeA": ["1x", "2x"],
+            "ScopeB": ["4x"],
+        }[microscope_name],
+    )
+
+    _, args_value, schema = graph_controller.get_feature_parameter_values(
+        TestFeature,
+        {"name": TestFeature, "args": ("ScopeA", "2x")},
+    )
+
+    assert args_value == ["ScopeA", "2x"]
+    assert schema["target_resolution"].choices == ("ScopeA", "ScopeB")
+    assert schema["target_zoom"].choices == ("1x", "2x")
+
+
+def test_feature_parameter_values_reset_stale_saved_zoom_to_available_choice(
+    graph_controller,
+):
+    """Linked zoom values are constrained to available zoom choices."""
+
+    class TestFeature:
+        parameter_schema = {
+            "target_resolution": SettingSpec(
+                str,
+                default="ScopeB",
+                dynamic_source="microscopes",
+            ),
+            "target_zoom": SettingSpec(
+                str,
+                default="4x",
+                dynamic_source="zoom_values",
+                depends_on="target_resolution",
+            ),
+        }
+
+        def __init__(self, model, target_resolution="ScopeB", target_zoom="4x"):
+            pass
+
+    graph_controller.configuration_controller = SimpleNamespace(
+        microscope_list=["ScopeA", "ScopeB"],
+        microscope_name="ScopeB",
+        get_zoom_value_list=lambda microscope_name: {
+            "ScopeA": ["1x", "2x"],
+            "ScopeB": ["4x"],
+        }[microscope_name],
+    )
+
+    _, args_value, schema = graph_controller.get_feature_parameter_values(
+        TestFeature,
+        {"name": TestFeature, "args": ("ScopeA", "not-a-zoom")},
+    )
+
+    assert args_value == ["ScopeA", "1x"]
+    assert schema["target_zoom"].choices == ("1x", "2x")
+
+
+def test_feature_parameter_values_do_not_infer_dynamic_choices_from_names(
+    graph_controller,
+):
+    """Dynamic choices require explicit SettingSpec metadata."""
+
+    class TestFeature:
+        parameter_schema = {
+            "resolution_mode": SettingSpec(str, default="high"),
+            "zoom_value": SettingSpec(str, default="N/A"),
+        }
+
+        def __init__(self, model, resolution_mode="high", zoom_value="N/A"):
+            pass
+
+    graph_controller.configuration_controller = SimpleNamespace(
+        microscope_list=["ScopeA"],
+        microscope_name="ScopeA",
+        get_zoom_value_list=lambda microscope_name: ["1x"],
+    )
+
+    _, args_value, schema = graph_controller.get_feature_parameter_values(TestFeature)
+
+    assert args_value == ["high", "N/A"]
+    assert schema["resolution_mode"].choices is None
+    assert schema["zoom_value"].choices is None
+
+
+def test_feature_parameter_values_use_explicit_dynamic_metadata(graph_controller):
+    """Dynamic source metadata supports non-standard parameter names."""
+
+    class TestFeature:
+        parameter_schema = {
+            "scope": SettingSpec(
+                str,
+                default="ScopeB",
+                dynamic_source="microscopes",
+            ),
+            "magnification": SettingSpec(
+                str,
+                default="4x",
+                dynamic_source="zoom_values",
+                depends_on="scope",
+            ),
+        }
+
+        def __init__(self, model, scope="ScopeB", magnification="4x"):
+            pass
+
+    graph_controller.configuration_controller = SimpleNamespace(
+        microscope_list=["ScopeA", "ScopeB"],
+        microscope_name="ScopeA",
+        get_zoom_value_list=lambda microscope_name: {
+            "ScopeA": ["1x", "2x"],
+            "ScopeB": ["4x", "10x"],
+        }[microscope_name],
+    )
+
+    args_name, args_value, schema = graph_controller.get_feature_parameter_values(
+        TestFeature
+    )
+
+    assert args_name == ["scope", "magnification"]
+    assert args_value == ["ScopeB", "4x"]
+    assert schema["scope"].choices == ("ScopeA", "ScopeB")
+    assert schema["magnification"].choices == ("4x", "10x")
+
+
+def test_refresh_linked_zoom_choices_updates_widget_and_schema(graph_controller):
+    """Changing the selected microscope updates the linked zoom choices."""
+
+    class FakeInput:
+        def __init__(self, value):
+            self.value = value
+            self.values = []
+
+        def get(self):
+            return self.value
+
+        def set(self, value):
+            self.value = value
+
+        def set_values(self, values):
+            self.values = tuple(values)
+
+    microscope_input = FakeInput("ScopeA")
+    zoom_input = FakeInput("stale")
+    popup = SimpleNamespace(
+        inputs_by_name={
+            "target_resolution": microscope_input,
+            "target_zoom": zoom_input,
+        },
+        parameter_index_by_name={"target_zoom": 1},
+        parameter_specs=[
+            SettingSpec(str, dynamic_source="microscopes"),
+            SettingSpec(
+                str,
+                dynamic_source="zoom_values",
+                depends_on="target_resolution",
+            ),
+        ],
+    )
+    graph_controller.configuration_controller = SimpleNamespace(
+        get_zoom_value_list=lambda microscope_name: {
+            "ScopeA": ["1x", "2x"],
+        }[microscope_name],
+    )
+
+    graph_controller.refresh_linked_zoom_choices(
+        popup,
+        "target_zoom",
+        "target_resolution",
+    )
+
+    assert zoom_input.values == ("1x", "2x")
+    assert zoom_input.get() == "1x"
+    assert popup.parameter_specs[1].choices == ("1x", "2x")
+
+
+def test_refresh_linked_zoom_choices_clears_zoom_when_no_choices(graph_controller):
+    """A microscope with no zoom values clears stale linked zoom state."""
+
+    class FakeInput:
+        def __init__(self, value):
+            self.value = value
+            self.values = ["old"]
+
+        def get(self):
+            return self.value
+
+        def set(self, value):
+            self.value = value
+
+        def set_values(self, values):
+            self.values = tuple(values)
+
+    microscope_input = FakeInput("ScopeA")
+    zoom_input = FakeInput("stale")
+    popup = SimpleNamespace(
+        inputs_by_name={
+            "scope": microscope_input,
+            "magnification": zoom_input,
+        },
+        parameter_index_by_name={"magnification": 1},
+        parameter_specs=[
+            SettingSpec(str, dynamic_source="microscopes"),
+            SettingSpec(str, dynamic_source="zoom_values", depends_on="scope"),
+        ],
+    )
+    graph_controller.configuration_controller = SimpleNamespace(
+        get_zoom_value_list=lambda microscope_name: []
+    )
+
+    graph_controller.refresh_linked_zoom_choices(
+        popup,
+        "magnification",
+        "scope",
+    )
+
+    assert zoom_input.values == ()
+    assert zoom_input.get() == ""
+    assert popup.parameter_specs[1].choices == ()
+
+
 def test_coerce_feature_parameter_rejects_invalid_numeric_input():
     """Validation reports malformed user input before the feature list mutates."""
     spec = SettingSpec(int, minimum=1, maximum=5, required=True)

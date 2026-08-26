@@ -78,6 +78,7 @@ class ChangeResolution:
             label="Resolution",
             help_text="Microscope/resolution name to switch to.",
             required=True,
+            dynamic_source="microscopes",
         ),
         "zoom_value": SettingSpec(
             str,
@@ -85,6 +86,8 @@ class ChangeResolution:
             label="Zoom",
             help_text="Zoom value to use after changing resolution.",
             required=True,
+            dynamic_source="zoom_values",
+            depends_on="resolution_mode",
         ),
     }
 
@@ -216,6 +219,7 @@ class SetCameraParameters:
             default=None,
             label="Microscope",
             help_text="Microscope name to update. Leave empty for the active microscope.",
+            dynamic_source="microscopes",
         ),
         "sensor_mode": SettingSpec(
             str,

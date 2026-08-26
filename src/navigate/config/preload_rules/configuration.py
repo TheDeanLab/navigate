@@ -43,6 +43,7 @@ from navigate.config.device_schema import (
     category_base_class_name,
     canonical_device_type,
     get_configuration_schema,
+    get_connect_params,
 )
 from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
 from navigate.config.preload import PreloadContext, PreloadRule, PreloadReport
@@ -291,6 +292,20 @@ def ensure_required_stage_axes(context: PreloadContext) -> None:
             if isinstance(stage_hardware, (list, ListProxy))
             else [stage_hardware]
         )
+        # makesure names of axes are str, not int/float/bool
+        for stage in stage_entries:
+            axes = _stage_axes(stage.get("axes") if hasattr(stage, "get") else [])
+            for axis in axes:
+                if type(axis) in (float, int, bool):
+                    context.report.add_issue(
+                        f"configuration.microscopes.{microscope_name}.stage",
+                        "axes",
+                        "Stage axes must be a valid str, not integer, float, or boolean value",
+                        fatal=True,
+                    )
+                    return
+            stage["axes"] = axes
+
         configured_axes = {
             axis.casefold()
             for stage in stage_entries
@@ -579,7 +594,7 @@ def _combined_stage_axes(stage_config) -> set[str]:
     else:
         stages = []
     return {
-        axis.casefold()
+        str(axis).casefold()
         for stage in stages
         for axis in _stage_axes(stage.get("axes") if hasattr(stage, "get") else [])
     }
@@ -588,7 +603,7 @@ def _combined_stage_axes(stage_config) -> set[str]:
 def _stage_axes(value: Any) -> list[str]:
     """Return stage axes from list-shaped or simple string configuration values."""
     if isinstance(value, (list, ListProxy, tuple)):
-        return [str(axis) for axis in value]
+        return value
     if isinstance(value, str):
         return [
             axis.strip().strip("'\"")
@@ -623,6 +638,10 @@ def validate_device_schemas(context: PreloadContext) -> None:
                     context.report,
                     device,
                     schema,
+                    category=category,
+                    connection_names=_schema_connection_names(
+                        category, manufacturer, model
+                    ),
                     path_prefix=(
                         f"configuration.microscopes.{microscope_name}.{category}"
                     ),
@@ -911,17 +930,21 @@ def _repair_required_schema_settings(
     device,
     schema: dict[str, object],
     *,
+    category: str,
+    connection_names: set[str],
     path_prefix: str,
     report_defaults: bool = True,
 ) -> None:
     """Repair or report schema settings that can prevent successful startup."""
     for name, spec in schema.items():
+        config_path = _schema_config_path(category, name, connection_names)
+        report_path = f"{path_prefix}.{config_path.replace('/', '.')}"
         if isinstance(spec, CollectionSpec):
-            if spec.minimum_items and _collection_size(_get_path(device, name)) < (
-                spec.minimum_items
-            ):
+            if spec.minimum_items and _collection_size(
+                _get_path(device, config_path)
+            ) < (spec.minimum_items):
                 report.add_issue(
-                    f"{path_prefix}.{name.replace('/', '.')}",
+                    report_path,
                     "schema-required-collection",
                     f"Required collection {name} has fewer than "
                     f"{spec.minimum_items} items.",
@@ -931,21 +954,21 @@ def _repair_required_schema_settings(
         if not isinstance(spec, SettingSpec):
             continue
 
-        found, value = _get_path(device, name, with_found=True)
+        found, value = _get_path(device, config_path, with_found=True)
         if not found or not _value_is_present(value):
             if not spec.required:
                 continue
             elif spec.default is not None:
-                _set_path(manager, device, name, spec.default)
+                _set_path(manager, device, config_path, spec.default)
                 if report_defaults:
                     report.add_change(
-                        f"{path_prefix}.{name.replace('/', '.')}",
+                        report_path,
                         "schema-required-default",
                         f"Added missing required setting {name} from schema default.",
                     )
             else:
                 report.add_issue(
-                    f"{path_prefix}.{name.replace('/', '.')}",
+                    report_path,
                     "schema-required-missing",
                     f"Required setting {name} is missing and has no default.",
                     fatal=True,
@@ -954,41 +977,44 @@ def _repair_required_schema_settings(
 
         if name.endswith("hardware/type"):
             continue
-        if not spec.required and (not report_defaults or spec.choices is None):
+        if not _should_validate_present_setting(spec, report_defaults=report_defaults):
             continue
 
-        normalized = _normalize_setting_value(value, spec)
+        normalized = _normalize_setting_value(value, spec, name=name)
         if normalized is _INVALID_VALUE:
             if spec.default is not None:
-                _set_path(manager, device, name, spec.default)
+                _set_path(manager, device, config_path, spec.default)
+                report.add_issue(
+                    report_path,
+                    (
+                        "schema-invalid-default"
+                        if spec.required
+                        else "schema-optional-invalid-default"
+                    ),
+                    (
+                        f"Setting {name} was invalid and was replaced with "
+                        "the schema default."
+                    ),
+                    fatal=False,
+                )
                 if spec.required:
                     report.add_change(
-                        f"{path_prefix}.{name.replace('/', '.')}",
+                        report_path,
                         "schema-invalid-default",
                         f"Replaced invalid setting {name} with schema default.",
-                    )
-                else:
-                    report.add_issue(
-                        f"{path_prefix}.{name.replace('/', '.')}",
-                        "schema-optional-invalid-default",
-                        (
-                            f"Optional setting {name} was invalid and was replaced "
-                            "with the schema default."
-                        ),
-                        fatal=False,
                     )
             else:
                 if spec.required:
                     report.add_issue(
-                        f"{path_prefix}.{name.replace('/', '.')}",
+                        report_path,
                         "schema-invalid-value",
                         f"Required setting {name} is invalid and has no default.",
                         fatal=True,
                     )
                 else:
-                    _delete_path(device, name)
+                    _delete_path(device, config_path)
                     report.add_issue(
-                        f"{path_prefix}.{name.replace('/', '.')}",
+                        report_path,
                         "schema-optional-invalid-removed",
                         (
                             f"Optional setting {name} was invalid and had no schema "
@@ -997,12 +1023,44 @@ def _repair_required_schema_settings(
                         fatal=False,
                     )
         elif normalized != value:
-            _set_path(manager, device, name, normalized)
+            _set_path(manager, device, config_path, normalized)
             report.add_change(
-                f"{path_prefix}.{name.replace('/', '.')}",
+                report_path,
                 "schema-type-normalized",
                 f"Normalized setting {name} to {spec.value_type.__name__}.",
             )
+
+
+def _schema_connection_names(category: str, manufacturer: str, model: str) -> set[str]:
+    """Return schema names that are stored in a device hardware block."""
+    connection_names = {"port", "baudrate", "timeout", "serial_number"}
+    try:
+        connection_names.update(get_connect_params(category, manufacturer, model))
+    except (FileNotFoundError, SyntaxError, AttributeError, ImportError):
+        pass
+    return connection_names
+
+
+def _schema_config_path(
+    category: str, schema_name: str, connection_names: set[str]
+) -> str:
+    """Map schema field names to their configuration.yaml storage paths."""
+    if "/" in schema_name or category in {"stage", "laser"}:
+        return schema_name
+    if schema_name in connection_names:
+        return f"hardware/{schema_name}"
+    return schema_name
+
+
+def _should_validate_present_setting(
+    spec: SettingSpec, *, report_defaults: bool = True
+) -> bool:
+    """Return whether a present setting should be schema-normalized."""
+    if spec.required:
+        return True
+    if not report_defaults:
+        return False
+    return spec.choices is not None or spec.value_type in {int, float}
 
 
 def _collection_size(value: Any) -> int:
@@ -1060,12 +1118,14 @@ class _InvalidValue:
 _INVALID_VALUE = _InvalidValue()
 
 
-def _normalize_setting_value(value: Any, spec: SettingSpec) -> Any:
+def _normalize_setting_value(value: Any, spec: SettingSpec, *, name: str = "") -> Any:
     """Normalize a value to the schema type, or return an invalid sentinel."""
     if spec.value_type in {str, int, float, bool} and isinstance(
         value, (dict, DictProxy, list, ListProxy)
     ):
-        return value
+        if _allows_structured_setting_value(name, value):
+            return value
+        return _INVALID_VALUE
 
     try:
         if spec.value_type is bool:
@@ -1090,6 +1150,15 @@ def _normalize_setting_value(value: Any, spec: SettingSpec) -> Any:
     if spec.maximum is not None and normalized > spec.maximum:
         return _INVALID_VALUE
     return normalized
+
+
+def _allows_structured_setting_value(name: str, value: Any) -> bool:
+    """Return whether a structured value is valid for a legacy text-edit schema."""
+    if name in {"axes", "axes_mapping", "joystick_axes"}:
+        return isinstance(value, (list, ListProxy))
+    if name == "coupled_axes":
+        return isinstance(value, (dict, DictProxy))
+    return False
 
 
 def _resolve_schema_target(category: str, device) -> Optional[tuple[str, str]]:

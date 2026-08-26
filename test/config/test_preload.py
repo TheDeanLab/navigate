@@ -874,6 +874,295 @@ def test_preload_adds_required_schema_default(loaded_configuration, monkeypatch)
     assert any(change.rule == "schema-required-default" for change in report.changes)
 
 
+def test_preload_uses_hardware_connection_value_for_schema_serial_number(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    camera.pop("serial_number", None)
+    camera["hardware"]["serial_number"] = "camera-serial-123"
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {"serial_number": SettingSpec(str, default="", required=True)}
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert "serial_number" not in camera
+    assert camera["hardware"]["serial_number"] == "camera-serial-123"
+    assert not any(
+        change.path.endswith(".camera.serial_number") for change in report.changes
+    )
+
+
+def test_preload_replaces_structured_required_scalar_with_default(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    update_config_dict(manager, camera, "required_scalar", {"bad": 1})
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "required_scalar": SettingSpec(
+                    float,
+                    default=1.0,
+                    required=True,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert camera["required_scalar"] == 1.0
+    assert any(
+        change.rule == "schema-invalid-default"
+        and change.path.endswith(".required_scalar")
+        for change in report.changes
+    )
+
+
+def test_preload_replaces_structured_hamamatsu_defect_correct_mode_with_default(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    update_config_dict(manager, camera, "defect_correct_mode", {"bad": 1})
+
+    report = preload_configuration(manager, configuration)
+
+    assert camera["defect_correct_mode"] == 1.0
+    assert any(
+        change.rule == "schema-invalid-default"
+        and change.path.endswith(".defect_correct_mode")
+        for change in report.changes
+    )
+
+
+def test_preload_normalizes_required_int_within_range(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    cameras = [
+        microscope["camera"]
+        for microscope in configuration["configuration"]["microscopes"].values()
+    ]
+    for camera in cameras:
+        camera["required_int"] = "3"
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "required_int": SettingSpec(
+                    int,
+                    minimum=1,
+                    maximum=4,
+                    required=True,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert all(camera["required_int"] == 3 for camera in cameras)
+    assert any(
+        change.rule == "schema-type-normalized"
+        and change.path.endswith(".required_int")
+        for change in report.changes
+    )
+
+
+def test_preload_replaces_out_of_range_required_int_with_default_warning(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    camera["required_int"] = 10
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "required_int": SettingSpec(
+                    int,
+                    default=2,
+                    minimum=1,
+                    maximum=4,
+                    required=True,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert camera["required_int"] == 2
+    assert any(
+        issue.rule == "schema-invalid-default"
+        and issue.path.endswith(".required_int")
+        and not issue.fatal
+        for issue in report.issues
+    )
+
+
+def test_preload_replaces_out_of_range_optional_int_with_default_warning(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    camera["optional_int"] = 10
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "optional_int": SettingSpec(
+                    int,
+                    default=2,
+                    minimum=1,
+                    maximum=4,
+                    required=False,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert camera["optional_int"] == 2
+    assert any(
+        issue.rule == "schema-optional-invalid-default"
+        and issue.path.endswith(".optional_int")
+        and not issue.fatal
+        for issue in report.issues
+    )
+
+
+def test_preload_normalizes_required_float_within_range(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    cameras = [
+        microscope["camera"]
+        for microscope in configuration["configuration"]["microscopes"].values()
+    ]
+    for camera in cameras:
+        camera["required_float"] = "3.5"
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "required_float": SettingSpec(
+                    float,
+                    minimum=1.0,
+                    maximum=4.0,
+                    required=True,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert all(camera["required_float"] == 3.5 for camera in cameras)
+    assert any(
+        change.rule == "schema-type-normalized"
+        and change.path.endswith(".required_float")
+        for change in report.changes
+    )
+
+
+def test_preload_replaces_out_of_range_required_float_with_default_warning(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    camera["required_float"] = 10.0
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "required_float": SettingSpec(
+                    float,
+                    default=2.5,
+                    minimum=1.0,
+                    maximum=4.0,
+                    required=True,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert camera["required_float"] == 2.5
+    assert any(
+        issue.rule == "schema-invalid-default"
+        and issue.path.endswith(".required_float")
+        and not issue.fatal
+        for issue in report.issues
+    )
+
+
+def test_preload_replaces_out_of_range_optional_float_with_default_warning(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    camera["optional_float"] = 10.0
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "optional_float": SettingSpec(
+                    float,
+                    default=2.5,
+                    minimum=1.0,
+                    maximum=4.0,
+                    required=False,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert camera["optional_float"] == 2.5
+    assert any(
+        issue.rule == "schema-optional-invalid-default"
+        and issue.path.endswith(".optional_float")
+        and not issue.fatal
+        for issue in report.issues
+    )
+
+
 def test_preload_ignores_missing_optional_schema_choice(
     loaded_configuration, monkeypatch
 ):
@@ -909,6 +1198,40 @@ def test_preload_replaces_invalid_optional_schema_choice_with_default(
     manager, configuration = loaded_configuration
     camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
     camera["optional_choice"] = "invalid"
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "optional_choice": SettingSpec(
+                    str,
+                    default="valid",
+                    choices=("valid", "other"),
+                    required=False,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    report = preload_configuration(manager, configuration)
+
+    assert camera["optional_choice"] == "valid"
+    assert any(
+        issue.rule == "schema-optional-invalid-default"
+        and issue.path.endswith(".optional_choice")
+        and not issue.fatal
+        for issue in report.issues
+    )
+
+
+def test_preload_replaces_structured_optional_schema_choice_with_default(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    update_config_dict(manager, camera, "optional_choice", {"bad": 1})
 
     monkeypatch.setattr(
         "navigate.config.preload_rules.configuration.get_configuration_schema",
@@ -990,6 +1313,99 @@ def test_preload_raises_for_required_schema_value_without_default(
     assert error.value.report.has_fatal_issues
     assert any(
         issue.rule == "schema-required-missing" for issue in error.value.report.issues
+    )
+
+
+def test_preload_raises_for_structured_required_scalar_without_default(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    update_config_dict(manager, camera, "required_scalar", {"bad": 1})
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {"required_scalar": SettingSpec(float, required=True)}
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "schema-invalid-value" and issue.path.endswith(".required_scalar")
+        for issue in error.value.report.issues
+    )
+
+
+def test_preload_raises_for_out_of_range_required_int_without_default(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    camera["required_int"] = 10
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "required_int": SettingSpec(
+                    int,
+                    minimum=1,
+                    maximum=4,
+                    required=True,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "schema-invalid-value"
+        and issue.path.endswith(".required_int")
+        and issue.fatal
+        for issue in error.value.report.issues
+    )
+
+
+def test_preload_raises_for_out_of_range_required_float_without_default(
+    loaded_configuration, monkeypatch
+):
+    manager, configuration = loaded_configuration
+    camera = configuration["configuration"]["microscopes"]["Mesoscale"]["camera"]
+    camera["required_float"] = 10.0
+
+    monkeypatch.setattr(
+        "navigate.config.preload_rules.configuration.get_configuration_schema",
+        lambda category, manufacturer, model: (
+            {
+                "required_float": SettingSpec(
+                    float,
+                    minimum=1.0,
+                    maximum=4.0,
+                    required=True,
+                )
+            }
+            if category == "camera"
+            else {}
+        ),
+    )
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "schema-invalid-value"
+        and issue.path.endswith(".required_float")
+        and issue.fatal
+        for issue in error.value.report.issues
     )
 
 

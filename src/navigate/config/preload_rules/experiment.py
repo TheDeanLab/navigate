@@ -126,22 +126,22 @@ def repair_autofocus_parameters(context: PreloadContext) -> None:
                             autofocus_setting_dict[microscope_name][device][device_ref][
                                 k
                             ] = autofocus_sample_setting[k]
-    # cleanup
-    for microscope_name in list(autofocus_setting_dict.keys()):
-        if microscope_name not in device_dict:
-            autofocus_setting_dict.pop(microscope_name)
-        else:
-            for device in list(autofocus_setting_dict[microscope_name].keys()):
-                if device not in device_dict[microscope_name]:
-                    autofocus_setting_dict[microscope_name].pop(device)
-                else:
-                    for device_ref in list(
-                        autofocus_setting_dict[microscope_name][device].keys()
-                    ):
-                        if device_ref not in device_dict[microscope_name][device]:
-                            autofocus_setting_dict[microscope_name][device].pop(
-                                device_ref
-                            )
+    # # cleanup
+    # for microscope_name in list(autofocus_setting_dict.keys()):
+    #     if microscope_name not in device_dict:
+    #         autofocus_setting_dict.pop(microscope_name)
+    #     else:
+    #         for device in list(autofocus_setting_dict[microscope_name].keys()):
+    #             if device not in device_dict[microscope_name]:
+    #                 autofocus_setting_dict[microscope_name].pop(device)
+    #             else:
+    #                 for device_ref in list(
+    #                     autofocus_setting_dict[microscope_name][device].keys()
+    #                 ):
+    #                     if device_ref not in device_dict[microscope_name][device]:
+    #                         autofocus_setting_dict[microscope_name][device].pop(
+    #                             device_ref
+    #                         )
 
 
 def repair_saving_settings(context: PreloadContext) -> None:
@@ -271,12 +271,12 @@ def repair_camera_parameters(context: PreloadContext) -> None:
             if camera_setting_dict[k] < 1:
                 camera_setting_dict[k] = camera_parameters_dict_sample[k]
 
-    # cleanup
-    for k in configuration["experiment"]["CameraParameters"].keys():
-        if k in camera_parameters_dict_sample.keys():
-            continue
-        if k not in microscope_names:
-            configuration["experiment"]["CameraParameters"].pop(k)
+    # # cleanup
+    # for k in configuration["experiment"]["CameraParameters"].keys():
+    #     if k in camera_parameters_dict_sample.keys():
+    #         continue
+    #     if k not in microscope_names:
+    #         configuration["experiment"]["CameraParameters"].pop(k)
 
     # update image_pixel size
     microscope_name = configuration["experiment"]["MicroscopeState"]["microscope_name"]

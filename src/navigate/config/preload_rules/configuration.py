@@ -177,7 +177,7 @@ def add_missing_required_devices(context: PreloadContext) -> None:
 def normalize_laser_hardware(context: PreloadContext) -> None:
     """Generate the unified laser hardware section used by runtime startup."""
     microscopes = context.configuration["configuration"]["microscopes"]
-    for microscope_config in microscopes.values():
+    for microscope_name, microscope_config in microscopes.items():
         laser_config = microscope_config.get("laser")
         if not isinstance(laser_config, (list, ListProxy)):
             continue
@@ -202,7 +202,21 @@ def normalize_laser_hardware(context: PreloadContext) -> None:
                 hardware_config = dict(power_hardware)
             else:
                 hardware_config = {"type": "Synthetic"}
-            hardware_config["wavelength"] = laser.get("wavelength")
+            # ensure "wavelength" is valid
+            w = laser.get("wavelength")
+            try:
+                wavelength = int(w)
+            except (TypeError, ValueError):
+                context.report.add_issue(
+                    f"configuration.microscopes.{microscope_name}.laser",
+                    "wavelength",
+                    f"Laser must have a valid integer wavelength, shouldn't be {w}.",
+                    fatal=True,
+                )
+                return
+
+            laser["wavelength"] = wavelength
+            hardware_config["wavelength"] = wavelength
             update_config_dict(context.manager, laser, "hardware", hardware_config)
 
 
@@ -394,9 +408,12 @@ def clean_stage_joystick_axes(context: PreloadContext) -> None:
 def normalize_filter_wheels(context: PreloadContext) -> None:
     """Normalize filter-wheel shape and assign stable unique display names."""
     microscopes = context.configuration["configuration"]["microscopes"]
-    reference_names = []
-    reference_configs = []
+    wheel_reference_dict = {}
     used_names = set()
+
+    filter_wheel_ref_list = list(DEVICE_REFERENCE_FIELDS.get("filter_wheel", []))
+    if not filter_wheel_ref_list:
+        filter_wheel_ref_list = ["type", "wheel_number"]
 
     for microscope_name, microscope_config in microscopes.items():
         filter_wheel_config = microscope_config.get("filter_wheel")
@@ -422,43 +439,36 @@ def normalize_filter_wheels(context: PreloadContext) -> None:
             _ensure_filter_wheel_available_filters(
                 context, microscope_name, wheel_config, hardware
             )
+
             wheel_ref = build_ref_name(
                 "-",
-                hardware.get("type"),
-                hardware.get("wheel_number"),
+                *(hardware.get(field) for field in filter_wheel_ref_list),
             )
-            if wheel_ref not in reference_names:
-                reference_names.append(wheel_ref)
-                reference_configs.append(wheel_config)
+            # device_name
+            if wheel_config.get("name"):
+                device_name = wheel_config.get("name")
+            elif hardware.get("name"):
+                device_name = hardware.get("name")
+            else:
+                device_name = None
+            # update name
+            if device_name and device_name not in used_names:
                 if (
-                    wheel_config.get("name") is None
-                    and hardware.get("name") is not None
+                    wheel_ref not in wheel_reference_dict
+                    or wheel_reference_dict[wheel_ref] is None
                 ):
-                    wheel_config["name"] = hardware["name"]
+                    wheel_reference_dict[wheel_ref] = device_name
+                    used_names.add(device_name)
+            elif wheel_ref not in wheel_reference_dict:
+                wheel_reference_dict[wheel_ref] = None
 
-            reference_config = reference_configs[reference_names.index(wheel_ref)]
-            if reference_config.get("name") is not None:
-                wheel_config["name"] = reference_config["name"]
-            elif wheel_config.get("name") is not None:
-                reference_config["name"] = wheel_config["name"]
-            elif hardware.get("name") is not None:
-                reference_config["name"] = hardware["name"]
-
-            if reference_config.get("name") is not None:
-                if reference_config["name"] in used_names:
-                    reference_config["name"] = None
-                else:
-                    used_names.add(reference_config["name"])
-
-    for index, wheel_config in enumerate(reference_configs):
-        if wheel_config.get("name") is not None:
+    for wheel_ref in wheel_reference_dict.keys():
+        if wheel_reference_dict[wheel_ref]:
             continue
         name = _next_filter_wheel_name(used_names)
-        wheel_config["name"] = name
+        wheel_reference_dict[wheel_ref] = name
         used_names.add(name)
 
-    if not reference_configs:
-        return
     for microscope_config in microscopes.values():
         filter_wheel_config = microscope_config.get("filter_wheel")
         if not isinstance(filter_wheel_config, (list, ListProxy)):
@@ -469,13 +479,10 @@ def normalize_filter_wheels(context: PreloadContext) -> None:
                 continue
             wheel_ref = build_ref_name(
                 "-",
-                hardware.get("type"),
-                hardware.get("wheel_number"),
+                *(hardware.get(field) for field in filter_wheel_ref_list),
             )
-            if wheel_ref in reference_names:
-                wheel_config["name"] = reference_configs[
-                    reference_names.index(wheel_ref)
-                ]["name"]
+            wheel_config["name"] = wheel_reference_dict[wheel_ref]
+            hardware["name"] = wheel_reference_dict[wheel_ref]
 
 
 def _ensure_filter_wheel_available_filters(
@@ -1225,6 +1232,7 @@ CONFIGURATION_RULES = [
         "configuration",
         "laser_hardware",
         normalize_laser_hardware,
+        stop_on_fatal=True,
     ),
     PreloadRule(
         "configuration",

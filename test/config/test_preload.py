@@ -121,13 +121,30 @@ def test_preload_generates_unified_laser_hardware(loaded_configuration):
     laser["onoff"]["hardware"]["type"] = "ASI"
     laser["onoff"]["hardware"]["channel"] = "output"
     laser["power"]["hardware"]["type"] = "Synthetic"
+    laser["wavelength"] = "488"
     laser.pop("hardware", None)
 
     preload_configuration(manager, configuration)
 
+    assert laser["wavelength"] == 488
     assert laser["hardware"]["type"] == "asi.ASI"
     assert laser["hardware"]["channel"] == "output"
-    assert laser["hardware"]["wavelength"] == laser["wavelength"]
+    assert laser["hardware"]["wavelength"] == 488
+
+
+def test_preload_raises_for_invalid_laser_wavelength(loaded_configuration):
+    manager, configuration = loaded_configuration
+    laser = configuration["configuration"]["microscopes"]["Mesoscale"]["laser"][0]
+    laser["wavelength"] = "not-a-wavelength"
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "wavelength"
+        and issue.path == "configuration.microscopes.Mesoscale.laser"
+        for issue in error.value.report.issues
+    )
 
 
 def test_preload_adds_zoom_hardware_defaults(loaded_configuration):
@@ -190,6 +207,38 @@ def test_preload_normalizes_filter_wheel_shape_and_name(loaded_configuration):
 
     assert len(microscope["filter_wheel"]) == 1
     assert microscope["filter_wheel"][0]["name"] == "Emission Wheel"
+    assert microscope["filter_wheel"][0]["hardware"]["name"] == "Emission Wheel"
+
+
+def test_preload_filter_wheel_uses_config_name_for_matching_reference(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+    first_wheel = microscope["filter_wheel"]
+    second_wheel = {
+        "name": "Duplicate Reference Name",
+        "hardware": {
+            "type": first_wheel["hardware"]["type"],
+            "wheel_number": first_wheel["hardware"]["wheel_number"],
+        },
+        "available_filters": dict(first_wheel["available_filters"]),
+        "filter_wheel_delay": first_wheel.get("filter_wheel_delay", 0.03),
+    }
+    first_wheel.pop("name", None)
+    first_wheel["hardware"].pop("name", None)
+    update_config_dict(
+        manager,
+        microscope,
+        "filter_wheel",
+        [dict(first_wheel), second_wheel],
+    )
+
+    preload_configuration(manager, configuration)
+
+    for wheel in microscope["filter_wheel"]:
+        assert wheel["name"] == "Duplicate Reference Name"
+        assert wheel["hardware"]["name"] == "Duplicate Reference Name"
 
 
 def test_preload_adds_empty_filter_for_synthetic_filter_wheel(loaded_configuration):
@@ -386,7 +435,7 @@ def test_preload_adds_synthetic_stage_axes_to_autofocus(loaded_configuration):
     assert set(autofocus_stage.keys()) == {"x", "y", "z", "theta", "f"}
 
 
-def test_preload_removes_stale_autofocus_entries(loaded_configuration):
+def test_preload_preserves_stale_autofocus_entries(loaded_configuration):
     manager, configuration = loaded_configuration
     update_config_dict(
         manager,
@@ -404,9 +453,11 @@ def test_preload_removes_stale_autofocus_entries(loaded_configuration):
     preload_configuration(manager, configuration)
 
     autofocus = configuration["experiment"]["AutoFocusParameters"]
-    assert "StaleMicroscope" not in autofocus
-    assert "stale_device" not in autofocus["Mesoscale"]
-    assert "stale_axis" not in autofocus["Mesoscale"]["stage"]
+    assert "StaleMicroscope" in autofocus
+    assert "stale_device" in autofocus["Mesoscale"]
+    assert "stale_axis" in autofocus["Mesoscale"]["stage"]
+    assert "y" in autofocus["Mesoscale"]["stage"]
+    assert "coarse_range" in autofocus["Mesoscale"]["stage"]["x"]
 
 
 def test_preload_saving_defaults_do_not_add_label(loaded_configuration):
@@ -418,7 +469,7 @@ def test_preload_saving_defaults_do_not_add_label(loaded_configuration):
     assert "label" not in configuration["experiment"]["Saving"]
 
 
-def test_preload_camera_parameters_remove_stale_microscope_and_sync_root(
+def test_preload_camera_parameters_preserve_stale_microscope_and_sync_root(
     loaded_configuration,
 ):
     manager, configuration = loaded_configuration
@@ -448,7 +499,7 @@ def test_preload_camera_parameters_remove_stale_microscope_and_sync_root(
     preload_configuration(manager, configuration)
 
     camera_parameters = configuration["experiment"]["CameraParameters"]
-    assert "StaleMicroscope" not in camera_parameters
+    assert "StaleMicroscope" in camera_parameters
     assert camera_parameters["x_pixels"] == 1000
     assert camera_parameters["y_pixels"] == 500
     assert camera_parameters["img_x_pixels"] == 500

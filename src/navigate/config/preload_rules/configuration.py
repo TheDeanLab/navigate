@@ -65,6 +65,21 @@ REQUIRED_DEVICE_CATEGORIES = (
 
 REQUIRED_STAGE_AXES = ("x", "y", "z", "f", "theta")
 
+NI_CHANNEL_FIELDS = {
+    "daq": (
+        "trigger_source",
+        "master_trigger_out_line",
+        "camera_trigger_out_line",
+    ),
+    "remote_focus": ("hardware/channel",),
+    "galvo": ("hardware/channel",),
+    "shutter": ("hardware/channel",),
+}
+
+NI_OPTIONAL_CHANNEL_FIELDS = {
+    "daq": ("laser_port_switcher",),
+}
+
 
 def record_silent_legacy_repairs(context: PreloadContext) -> None:
     """Apply deceased-name repairs that should not appear in the user report."""
@@ -485,6 +500,171 @@ def normalize_filter_wheels(context: PreloadContext) -> None:
             hardware["name"] = wheel_reference_dict[wheel_ref]
 
 
+def validate_ni_channels(context: PreloadContext) -> None:
+    """Validate channel values required by NI-backed device sections."""
+    if context.is_synthetic:
+        return
+
+    microscopes = context.configuration["configuration"]["microscopes"]
+    for microscope_name, microscope_config in microscopes.items():
+        for category, channel_paths in NI_CHANNEL_FIELDS.items():
+            device_config = microscope_config.get(category)
+            if device_config is None:
+                continue
+            devices = (
+                list(device_config)
+                if isinstance(device_config, (list, ListProxy))
+                else [device_config]
+            )
+            for index, device in enumerate(devices):
+                if not _device_uses_ni_channel(category, device):
+                    continue
+                path_prefix = (
+                    f"configuration.microscopes.{microscope_name}.{category}"
+                    f"[{index}]"
+                )
+                for channel_path in channel_paths:
+                    _validate_ni_channel(
+                        context,
+                        path=f"{path_prefix}.{channel_path.replace('/', '.')}",
+                        channel=_get_path(device, channel_path),
+                    )
+
+        for category, channel_paths in NI_OPTIONAL_CHANNEL_FIELDS.items():
+            device_config = microscope_config.get(category)
+            if device_config is None:
+                continue
+            devices = (
+                list(device_config)
+                if isinstance(device_config, (list, ListProxy))
+                else [device_config]
+            )
+            for index, device in enumerate(devices):
+                if not _device_uses_ni_channel(category, device):
+                    continue
+                path_prefix = (
+                    f"configuration.microscopes.{microscope_name}.{category}"
+                    f"[{index}]"
+                )
+                for channel_path in channel_paths:
+                    channel = _get_path(device, channel_path)
+                    if not _value_is_present(channel):
+                        continue
+                    _validate_ni_channel(
+                        context,
+                        path=f"{path_prefix}.{channel_path.replace('/', '.')}",
+                        channel=channel,
+                        fatal=False,
+                        rule="ni-invalid-optional-channel",
+                    )
+
+        stage_config = microscope_config.get("stage")
+        if isinstance(stage_config, (dict, DictProxy)):
+            stage_hardware = stage_config.get("hardware")
+            stages = (
+                list(stage_hardware)
+                if isinstance(stage_hardware, (list, ListProxy))
+                else [stage_hardware]
+            )
+            for index, stage in enumerate(stages):
+                if not _is_ni_stage(stage):
+                    continue
+                _validate_ni_stage_axes_mapping(
+                    context,
+                    path=(
+                        f"configuration.microscopes.{microscope_name}."
+                        f"stage.hardware[{index}].axes_mapping"
+                    ),
+                    axes=_stage_axes(stage.get("axes")),
+                    axes_mapping=stage.get("axes_mapping"),
+                )
+
+        laser_config = microscope_config.get("laser")
+        if not isinstance(laser_config, (list, ListProxy)):
+            continue
+        for index, laser in enumerate(laser_config):
+            for control_path in ("power/hardware", "onoff/hardware"):
+                hardware = _get_path(laser, control_path)
+                if not isinstance(hardware, (dict, DictProxy)):
+                    continue
+                if not _is_ni_type("laser", hardware.get("type")):
+                    continue
+                _validate_ni_channel(
+                    context,
+                    path=(
+                        f"configuration.microscopes.{microscope_name}."
+                        f"laser[{index}].{control_path.replace('/', '.')}.channel"
+                    ),
+                    channel=hardware.get("channel"),
+                )
+
+
+def _device_uses_ni_channel(category: str, device) -> bool:
+    """Return whether one configured device needs an NI channel value."""
+    if not isinstance(device, (dict, DictProxy)):
+        return False
+    hardware = device.get("hardware")
+    if not isinstance(hardware, (dict, DictProxy)):
+        return False
+    return _is_ni_type(category, hardware.get("type"))
+
+
+def _is_ni_stage(stage) -> bool:
+    """Return whether one stage hardware entry is an NI-backed stage."""
+    if not isinstance(stage, (dict, DictProxy)):
+        return False
+    return _is_ni_type("stage", stage.get("type"))
+
+
+def _validate_ni_channel(
+    context: PreloadContext,
+    *,
+    path: str,
+    channel: object,
+    fatal: bool = True,
+    rule: str = "ni-invalid-channel",
+) -> None:
+    """Add a preload issue when an NI channel string is missing or malformed."""
+    if _is_valid_channel(channel):
+        return
+    context.report.add_issue(
+        path,
+        rule,
+        "NI devices require a channel value like 'Dev1/ao0' or 'Dev1/port0/line0'.",
+        fatal=fatal,
+    )
+
+
+def _validate_ni_stage_axes_mapping(
+    context: PreloadContext, *, path: str, axes: list[str], axes_mapping: object
+) -> None:
+    """Validate NI stage axis-to-output-channel mappings."""
+    if not isinstance(axes_mapping, (list, ListProxy, tuple)) or len(axes_mapping) == 0:
+        context.report.add_issue(
+            path,
+            "ni-stage-invalid-axes-mapping",
+            "NI stages require axes_mapping entries like 'Dev1/ao0'.",
+            fatal=True,
+        )
+        return
+
+    if axes and len(axes_mapping) < len(axes):
+        context.report.add_issue(
+            path,
+            "ni-stage-invalid-axes-mapping",
+            "NI stage axes_mapping must include one channel for each configured axis.",
+            fatal=True,
+        )
+        return
+
+    for index, channel in enumerate(axes_mapping):
+        _validate_ni_channel(
+            context,
+            path=f"{path}[{index}]",
+            channel=channel,
+        )
+
+
 def _ensure_filter_wheel_available_filters(
     context: PreloadContext, microscope_name: str, wheel_config, hardware
 ) -> None:
@@ -516,10 +696,10 @@ def _ensure_filter_wheel_available_filters(
             )
         return
 
-    if not _is_ni_type(hardware.get("type")):
+    if not _is_ni_type("filter_wheel", hardware.get("type")):
         return
     for filter_name, channel in available_filters.items():
-        if isinstance(channel, str) and "/" in channel:
+        if _is_valid_channel(channel):
             continue
         context.report.add_issue(
             (
@@ -539,10 +719,18 @@ def _is_synthetic_type(device_type: object) -> bool:
     )
 
 
-def _is_ni_type(device_type: object) -> bool:
+def _is_ni_type(category: str, device_type: object) -> bool:
     """Return whether a config type token identifies an NI device."""
-    normalized_type = canonical_device_type("filter_wheel", device_type)
+    normalized_type = canonical_device_type(category, device_type)
     return normalized_type == "ni.NI" or device_type == "NI"
+
+
+def _is_valid_channel(channel: object) -> bool:
+    """Return whether a channel is a valid one"""
+    if not isinstance(channel, str):
+        return False
+    channel_parts = [part for part in channel.strip().split("/") if part]
+    return len(channel_parts) >= 2
 
 
 def _repair_deceased_stage_type_names(
@@ -1263,6 +1451,12 @@ CONFIGURATION_RULES = [
         "configuration",
         "filter_wheels",
         normalize_filter_wheels,
+    ),
+    PreloadRule(
+        "configuration",
+        "ni_channel_validation",
+        validate_ni_channels,
+        stop_on_fatal=True,
     ),
     PreloadRule(
         "configuration",

@@ -322,6 +322,174 @@ def test_preload_accepts_ni_filter_wheel_valid_channel(loaded_configuration):
     )
 
 
+def test_preload_raises_for_ni_remote_focus_without_valid_channel(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    remote_focus = configuration["configuration"]["microscopes"]["Mesoscale"][
+        "remote_focus"
+    ]
+    remote_focus["hardware"]["type"] = "NI"
+    remote_focus["hardware"]["channel"] = "ao2"
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "ni-invalid-channel" for issue in error.value.report.issues
+    )
+
+
+def test_preload_raises_for_ni_daq_without_valid_trigger_channels(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    daq = configuration["configuration"]["microscopes"]["Mesoscale"]["daq"]
+    daq["hardware"]["type"] = "NI"
+    daq["trigger_source"] = "PFI0"
+    daq["master_trigger_out_line"] = "PXI6259/port0/line1"
+    daq["camera_trigger_out_line"] = "/PXI6259/ctr0"
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "ni-invalid-channel"
+        and issue.path.endswith("daq[0].trigger_source")
+        for issue in error.value.report.issues
+    )
+
+
+def test_preload_warns_for_invalid_ni_daq_laser_port_switcher(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    daq = configuration["configuration"]["microscopes"]["Mesoscale"]["daq"]
+    daq["hardware"]["type"] = "NI"
+    daq["laser_port_switcher"] = "port0line0"
+
+    report = preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "ni-invalid-optional-channel"
+        and issue.path.endswith("daq[0].laser_port_switcher")
+        and not issue.fatal
+        for issue in report.issues
+    )
+
+
+def test_preload_allows_empty_ni_daq_laser_port_switcher(loaded_configuration):
+    manager, configuration = loaded_configuration
+    daq = configuration["configuration"]["microscopes"]["Mesoscale"]["daq"]
+    daq["hardware"]["type"] = "NI"
+    daq["laser_port_switcher"] = ""
+
+    report = preload_configuration(manager, configuration)
+
+    assert not any(
+        issue.path.endswith("daq[0].laser_port_switcher") for issue in report.issues
+    )
+
+
+def test_preload_synthetic_mode_skips_ni_channel_validation(loaded_configuration):
+    manager, configuration = loaded_configuration
+    microscope = configuration["configuration"]["microscopes"]["Mesoscale"]
+    microscope["daq"]["hardware"]["type"] = "NI"
+    microscope["daq"]["trigger_source"] = "PFI0"
+    microscope["daq"]["laser_port_switcher"] = "port0line0"
+    microscope["remote_focus"]["hardware"]["type"] = "NI"
+    microscope["remote_focus"]["hardware"]["channel"] = "ao2"
+
+    report = preload_configuration(manager, configuration, is_synthetic=True)
+
+    assert not any(issue.rule.startswith("ni-") for issue in report.issues)
+
+
+def test_preload_raises_for_ni_galvo_without_valid_channel(loaded_configuration):
+    manager, configuration = loaded_configuration
+    galvo = configuration["configuration"]["microscopes"]["Mesoscale"]["galvo"][0]
+    galvo["hardware"]["type"] = "NI"
+    galvo["hardware"]["channel"] = "PXI6259/"
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "ni-invalid-channel" for issue in error.value.report.issues
+    )
+
+
+def test_preload_raises_for_ni_stage_without_valid_axes_mapping(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    stage = configuration["configuration"]["microscopes"]["Mesoscale"]["stage"][
+        "hardware"
+    ][0]
+    stage["type"] = "NI"
+    stage["axes"] = ["f"]
+    stage["axes_mapping"] = ["ao0"]
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "ni-invalid-channel"
+        and issue.path.endswith("stage.hardware[0].axes_mapping[0]")
+        for issue in error.value.report.issues
+    )
+
+
+def test_preload_raises_for_ni_stage_with_incomplete_axes_mapping(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    stage = configuration["configuration"]["microscopes"]["Mesoscale"]["stage"][
+        "hardware"
+    ][0]
+    stage["type"] = "NI"
+    stage["axes"] = ["f", "theta"]
+    stage["axes_mapping"] = ["PXI6259/ao0"]
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "ni-stage-invalid-axes-mapping"
+        for issue in error.value.report.issues
+    )
+
+
+def test_preload_raises_for_ni_shutter_without_channel(loaded_configuration):
+    manager, configuration = loaded_configuration
+    shutter = configuration["configuration"]["microscopes"]["Mesoscale"]["shutter"]
+    shutter["hardware"]["type"] = "NI"
+    shutter["hardware"].pop("channel", None)
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "ni-invalid-channel" for issue in error.value.report.issues
+    )
+
+
+def test_preload_raises_for_ni_laser_branch_without_valid_channel(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    laser = configuration["configuration"]["microscopes"]["Mesoscale"]["laser"][0]
+    laser["onoff"]["hardware"]["type"] = "NI"
+    laser["onoff"]["hardware"]["channel"] = "port0line2"
+
+    with pytest.raises(PreloadError) as error:
+        preload_configuration(manager, configuration)
+
+    assert any(
+        issue.rule == "ni-invalid-channel" for issue in error.value.report.issues
+    )
+
+
 def test_preload_repairs_gui_channel_count_and_defaults(loaded_configuration):
     manager, configuration = loaded_configuration
     microscope = configuration["configuration"]["microscopes"]["Mesoscale"]

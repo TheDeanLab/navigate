@@ -504,14 +504,14 @@ class StageController(GUIController):
         return handler
 
     def stop_button_handler(self, *args: Iterable) -> None:
-        """This function stops the stage after a 250 ms debouncing period of time.
+        """Request an immediate stop for all stages.
 
         Parameters
         ----------
         *args : Iterable
             Variable length argument list
         """
-        self.view.after(250, lambda *args: self.parent_controller.execute("stop_stage"))
+        self.parent_controller.execute("stop_stage")
 
     #    Tai's home button
     def home_button_handler(self, *args: Iterable) -> None:

@@ -588,6 +588,31 @@ def test_execute_resolution(controller):
     pass
 
 
+def test_execute_resolution_does_not_join_worker():
+    from types import SimpleNamespace
+
+    from navigate.controller.controller import Controller
+
+    worker = MagicMock()
+    controller = Controller.__new__(Controller)
+    controller.configuration_controller = SimpleNamespace(
+        microscope_list=["scope"],
+        microscope_name="scope",
+        get_zoom_value_list=lambda _name: ["1x"],
+    )
+    controller.menu_controller = SimpleNamespace(
+        resolution_value=SimpleNamespace(get=lambda: "scope 1x", set=MagicMock())
+    )
+    controller.change_microscope = MagicMock()
+    controller.threads_pool = SimpleNamespace(
+        createThread=MagicMock(return_value=worker)
+    )
+
+    controller.execute("resolution", "scope 1x")
+
+    worker.join.assert_not_called()
+
+
 def test_execute_set_save(controller):
 
     for save_data in [True, False]:
@@ -1067,6 +1092,53 @@ def test_stop_stage(controller):
     controller.model.stop_stage = MagicMock()
     controller.stop_stage()
     controller.model.stop_stage.assert_called_with()
+
+
+def test_stop_stage_retries_proxy_contention():
+    from types import SimpleNamespace
+
+    from navigate.controller.controller import Controller
+
+    attempts = []
+
+    def stop_stage():
+        attempts.append("stop")
+        if len(attempts) == 1:
+            raise RuntimeError(
+                "Two different threads tried to use the same "
+                "ObjectInSubprocess at the same time!"
+            )
+
+    controller = Controller.__new__(Controller)
+    controller.model = SimpleNamespace(stop_stage=stop_stage)
+
+    controller.stop_stage()
+
+    assert attempts == ["stop", "stop"]
+
+
+def test_stop_stage_does_not_retry_hardware_runtime_error():
+    from types import SimpleNamespace
+
+    import pytest
+
+    from navigate.controller.controller import Controller
+
+    attempts = []
+
+    def stop_stage():
+        attempts.append("stop")
+        if len(attempts) == 1:
+            raise RuntimeError("hardware stop failed")
+        raise AssertionError("hardware failure was incorrectly retried")
+
+    controller = Controller.__new__(Controller)
+    controller.model = SimpleNamespace(stop_stage=stop_stage)
+
+    with pytest.raises(RuntimeError, match="hardware stop failed"):
+        controller.stop_stage()
+
+    assert attempts == ["stop"]
 
 
 def test_update_stage_controller_silent(controller):

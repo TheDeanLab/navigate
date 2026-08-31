@@ -37,11 +37,12 @@ import pytest
 
 # Local Imports
 from navigate.view.popups.feature_list_popup import (
+    FeatureCollectionInput,
     FeatureIcon,
     FeatureConfigPopup,
     FeatureListPopup,
 )
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
 
@@ -131,6 +132,62 @@ def test_feature_config_popup_renders_dynamic_zoom_choices_as_readonly_combobox(
     assert str(zoom_widget["state"]) == "readonly"
     assert zoom_widget["values"] == ("1x", "4x", "10x")
     assert config_popup.inputs_by_name["zoom_value"].get() == "4x"
+
+
+def test_feature_config_popup_renders_single_mapping_collection(tk_root):
+    """Single-mapping collections render as grouped feature parameter inputs."""
+    config_popup = FeatureConfigPopup(
+        tk_root,
+        ["Autofocus"],
+        feature_name="Autofocus",
+        args_name=["scan_settings"],
+        args_value=[
+            {
+                "coarse_selected": False,
+                "coarse_range": 250,
+                "coarse_step_size": 25,
+            }
+        ],
+        parameter_schema={
+            "scan_settings": CollectionSpec(
+                item_schema={
+                    "coarse_selected": SettingSpec(bool, default=True, label="Coarse"),
+                    "coarse_range": SettingSpec(
+                        float,
+                        default=500,
+                        label="Coarse Range",
+                        minimum=0,
+                        step=1,
+                        required=True,
+                    ),
+                    "coarse_step_size": SettingSpec(
+                        float,
+                        default=50,
+                        label="Coarse Step",
+                        minimum=0,
+                        step=1,
+                        required=True,
+                    ),
+                },
+                storage="single_mapping",
+                label="Scan Settings",
+            )
+        },
+        title="Test",
+    )
+    tk_root.update()
+
+    scan_settings_input = config_popup.inputs_by_name["scan_settings"]
+
+    assert isinstance(scan_settings_input, FeatureCollectionInput)
+    assert scan_settings_input.widget["text"] == "Scan Settings"
+    assert isinstance(scan_settings_input.widgets["coarse_selected"], ttk.Combobox)
+    assert isinstance(scan_settings_input.widgets["coarse_range"], ValidatedSpinbox)
+    assert scan_settings_input.get() == {
+        "coarse_selected": "False",
+        "coarse_range": "250",
+        "coarse_step_size": "25",
+    }
 
 
 @pytest.mark.parametrize("title", ["Add Feature List", "Edit Feature Parameters"])

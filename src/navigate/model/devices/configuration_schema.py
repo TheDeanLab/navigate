@@ -38,9 +38,10 @@ from typing import Any, Mapping, Optional, Tuple
 class SettingSpec:
     """Description of one user-editable setting or feature parameter.
 
-    ``choices`` defines a closed set of values. ``dynamic_source`` identifies
-    choices that should be resolved at render time, and ``depends_on`` names the
-    parameter that provides context for dependent choices. ``minimum``,
+    ``choices`` defines a closed set of displayed values. ``choice_values`` maps
+    displayed values to saved values when those should differ. ``dynamic_source``
+    identifies choices that should be resolved at render time, and ``depends_on``
+    names the parameter that provides context for dependent choices. ``minimum``,
     ``maximum``, and ``step`` define a numeric range; they are intentionally
     mutually exclusive with ``choices``.
     """
@@ -50,6 +51,7 @@ class SettingSpec:
     label: Optional[str] = None
     help_text: Optional[str] = None
     choices: Optional[Tuple[Any, ...]] = None
+    choice_values: Optional[Mapping[Any, Any]] = None
     minimum: Optional[float] = None
     maximum: Optional[float] = None
     step: Optional[float] = None
@@ -66,6 +68,12 @@ class SettingSpec:
             raise ValueError(
                 "SettingSpec choices and numeric ranges are mutually exclusive."
             )
+        if self.choice_values is not None and self.choices is None:
+            raise ValueError("SettingSpec choice_values require choices.")
+        if self.choice_values is not None and any(
+            choice not in self.choice_values for choice in self.choices
+        ):
+            raise ValueError("SettingSpec choice_values must map every choice.")
         if has_range and self.value_type not in (int, float):
             raise ValueError("Numeric ranges require an int or float SettingSpec.")
         if (
@@ -91,7 +99,8 @@ class CollectionSpec:
     the mapping key and ``value_field`` as its value. ``storage='parallel_mappings'``
     stores selected row fields as separate YAML mappings keyed by ``key_field``.
     ``storage='nested_mapping'`` stores calibration rows as
-    ``solvent -> axis -> zoom -> position``.
+    ``solvent -> axis -> zoom -> position``. ``storage='single_mapping'``
+    stores one fixed mapping using the item schema keys as fields.
     """
 
     item_schema: Mapping[str, SettingSpec]
@@ -105,8 +114,15 @@ class CollectionSpec:
 
     def __post_init__(self) -> None:
         """Validate collection metadata at class-definition time."""
-        if self.storage not in {"mapping", "parallel_mappings", "nested_mapping"}:
+        if self.storage not in {
+            "mapping",
+            "parallel_mappings",
+            "nested_mapping",
+            "single_mapping",
+        }:
             raise ValueError("CollectionSpec has an unsupported storage type.")
+        if self.storage == "single_mapping":
+            return
         if self.key_field not in self.item_schema:
             raise ValueError("CollectionSpec key_field must be in item_schema.")
         if self.value_field not in self.item_schema:

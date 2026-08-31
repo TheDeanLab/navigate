@@ -53,7 +53,8 @@ from navigate.model.features.feature_related_functions import (
 )
 from navigate.model.features import feature_related_functions
 from navigate.model.features.common_features import PrepareNextChannel
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.controller.sub_controllers.autofocus import AutofocusPopupController
 from navigate.model.features.parameter_tools import (
     coerce_feature_parameter,
     infer_feature_parameter_spec,
@@ -257,6 +258,9 @@ class FeatureListGraphController:
     CHIP_GAP = 10
     MICROSCOPE_DYNAMIC_SOURCE = "microscopes"
     ZOOM_DYNAMIC_SOURCE = "zoom_values"
+    STAGE_AXIS_DYNAMIC_SOURCE = "stage_axes"
+    CHANNEL_DYNAMIC_SOURCE = "channels"
+    AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE = "autofocus_calibration_actions"
 
     def __init__(
         self,
@@ -390,6 +394,55 @@ class FeatureListGraphController:
             pass
         return ()
 
+    def stage_axis_choices(self):
+        """Return all stage axes configured by any loaded microscope."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        configuration = getattr(configuration_controller, "configuration", None)
+        try:
+            microscopes = configuration["configuration"]["microscopes"]
+        except (KeyError, TypeError):
+            return ()
+
+        axes = []
+        for microscope in microscopes.values():
+            stage = microscope.get("stage", {})
+            hardware_entries = stage.get("hardware", [])
+            if isinstance(hardware_entries, dict):
+                hardware_entries = [hardware_entries]
+            for hardware in hardware_entries:
+                for axis in hardware.get("axes", []):
+                    if axis not in axes:
+                        axes.append(axis)
+        return tuple(axes)
+
+    def channel_choices(self):
+        """Return channel keys from GUI channel count."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        configuration = getattr(configuration_controller, "configuration", None)
+        try:
+            channel_count = int(configuration["gui"]["channel_settings"]["count"])
+        except (KeyError, TypeError, ValueError):
+            return ()
+        return tuple(f"channel_{index}" for index in range(1, channel_count + 1))
+
+    @staticmethod
+    def autofocus_calibration_action_choices():
+        """Return displayed autofocus calibration action labels."""
+        return tuple(AutofocusPopupController.CALIBRATION_ACTIONS.keys())
+
+    @staticmethod
+    def autofocus_calibration_action_choice_values():
+        """Return displayed action labels mapped to internal action values."""
+        return dict(AutofocusPopupController.CALIBRATION_ACTIONS)
+
+    @staticmethod
+    def autofocus_calibration_action_display_value(action_value):
+        """Return the display label for an internal autofocus action value."""
+        for label, value in AutofocusPopupController.CALIBRATION_ACTIONS.items():
+            if action_value == value:
+                return label
+        return action_value
+
     def apply_dynamic_parameter_choices(
         self,
         args_name,
@@ -399,15 +452,17 @@ class FeatureListGraphController:
     ):
         """Add runtime microscope and zoom choices to feature parameter specs."""
         microscope_choices = self.microscope_choices()
-        if not microscope_choices:
-            return args_value, parameter_specs
 
         args_value = list(args_value)
         parameter_specs = dict(parameter_specs)
 
         for index, arg_name in enumerate(args_name):
             spec = parameter_specs[arg_name]
+            if isinstance(spec, CollectionSpec):
+                continue
             if spec.dynamic_source != self.MICROSCOPE_DYNAMIC_SOURCE:
+                continue
+            if not microscope_choices:
                 continue
             parameter_specs[arg_name] = replace(spec, choices=microscope_choices)
             if args_value[index] not in microscope_choices:
@@ -415,6 +470,8 @@ class FeatureListGraphController:
 
         for index, arg_name in enumerate(args_name):
             spec = parameter_specs[arg_name]
+            if isinstance(spec, CollectionSpec):
+                continue
             if spec.dynamic_source != self.ZOOM_DYNAMIC_SOURCE:
                 continue
             microscope_parameter = spec.depends_on
@@ -428,6 +485,38 @@ class FeatureListGraphController:
                 args_value[index] = choices[0]
             elif not choices:
                 args_value[index] = ""
+
+        dynamic_choice_sources = {
+            self.STAGE_AXIS_DYNAMIC_SOURCE: self.stage_axis_choices(),
+            self.CHANNEL_DYNAMIC_SOURCE: self.channel_choices(),
+            self.AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE: (
+                self.autofocus_calibration_action_choices()
+            ),
+        }
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if isinstance(spec, CollectionSpec):
+                continue
+            choices = dynamic_choice_sources.get(spec.dynamic_source)
+            if choices is None:
+                continue
+            choice_values = (
+                self.autofocus_calibration_action_choice_values()
+                if spec.dynamic_source
+                == self.AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE
+                else spec.choice_values
+            )
+            parameter_specs[arg_name] = replace(
+                spec,
+                choices=choices,
+                choice_values=choice_values,
+            )
+            if spec.dynamic_source == self.AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE:
+                args_value[index] = self.autofocus_calibration_action_display_value(
+                    args_value[index]
+                )
+            if choices and args_value[index] not in choices:
+                args_value[index] = choices[0]
 
         return args_value, parameter_specs
 
@@ -453,9 +542,18 @@ class FeatureListGraphController:
             )
         args_value = [
             (
-                parameter_specs[arg_name].default
-                if isinstance(parameter_specs[arg_name], SettingSpec)
-                else defaults[index]
+                {
+                    field_name: field_spec.default
+                    for field_name, field_spec in parameter_specs[
+                        arg_name
+                    ].item_schema.items()
+                }
+                if isinstance(parameter_specs[arg_name], CollectionSpec)
+                else (
+                    parameter_specs[arg_name].default
+                    if isinstance(parameter_specs[arg_name], SettingSpec)
+                    else defaults[index]
+                )
             )
             for index, arg_name in enumerate(args_name)
         ]
@@ -511,6 +609,8 @@ class FeatureListGraphController:
         for zoom_parameter_name in popup.parameter_names:
             zoom_index = popup.parameter_index_by_name[zoom_parameter_name]
             zoom_spec = popup.parameter_specs[zoom_index]
+            if isinstance(zoom_spec, CollectionSpec):
+                continue
             if zoom_spec.dynamic_source != self.ZOOM_DYNAMIC_SOURCE:
                 continue
             microscope_parameter_name = zoom_spec.depends_on

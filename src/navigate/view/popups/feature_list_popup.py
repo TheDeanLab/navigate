@@ -39,8 +39,130 @@ from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.configurator_application_window import ConfiguratorTooltip
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features.parameter_tools import infer_feature_parameter_spec
 from navigate.view.theme import get_theme_padding_px, get_theme_space_px
+
+
+class FeatureCollectionInput:
+    """Fixed mapping editor used for structured feature parameters."""
+
+    def __init__(self, parent, name, spec, value=None):
+        """Create a fixed mapping input from a ``CollectionSpec``."""
+        self.spec = spec
+        self.frame = ttk.LabelFrame(
+            parent,
+            text=spec.label or name.replace("_", " ").title(),
+            padding=get_theme_padding_px((6, 6)),
+        )
+        self.label = self.frame
+        self.widgets = {}
+        self.variables = {}
+        values = value if isinstance(value, dict) else {}
+
+        for row, (field_name, field_spec) in enumerate(spec.item_schema.items()):
+            label = ttk.Label(
+                self.frame,
+                text=(field_spec.label or field_name.replace("_", " ").title()) + ":",
+                width=18,
+            )
+            label.grid(
+                row=row,
+                column=0,
+                sticky=tk.W,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
+            if field_spec.help_text:
+                ConfiguratorTooltip(label, field_spec.help_text)
+
+            variable = self.create_variable(field_spec, values.get(field_name))
+            self.variables[field_name] = variable
+            widget = self.create_widget(row, field_spec, variable)
+            self.widgets[field_name] = widget
+
+    def create_variable(self, spec, value):
+        """Create a Tk variable suitable for a collection field."""
+        value = spec.default if value is None else value
+        if spec.value_type is bool:
+            if isinstance(value, str):
+                value = value.strip() == "True"
+            return tk.StringVar(value=str(bool(value)))
+        return tk.StringVar(value="" if value is None else str(value))
+
+    def create_widget(self, row, spec, variable):
+        """Render one collection field."""
+        grid_options = {
+            "row": row,
+            "column": 1,
+            "sticky": tk.EW,
+            "padx": get_theme_space_px(3),
+            "pady": get_theme_padding_px((1, 1)),
+        }
+        if spec.value_type is bool:
+            widget = ttk.Combobox(
+                self.frame,
+                textvariable=variable,
+                values=("True", "False"),
+                state="readonly",
+                width=18,
+            )
+        elif spec.choices is not None:
+            widget = ttk.Combobox(
+                self.frame,
+                textvariable=variable,
+                values=spec.choices,
+                state="readonly",
+                width=18,
+            )
+        elif spec.value_type in (int, float):
+            widget = ValidatedSpinbox(
+                self.frame,
+                textvariable=variable,
+                width=18,
+                from_=-1000000 if spec.minimum is None else spec.minimum,
+                to=1000000 if spec.maximum is None else spec.maximum,
+                increment=(
+                    (0.1 if spec.value_type is float else 1)
+                    if spec.step is None
+                    else spec.step
+                ),
+                required=spec.required,
+                value_type=spec.value_type,
+            )
+        else:
+            widget = ttk.Entry(self.frame, textvariable=variable, width=20)
+        widget.grid(**grid_options)
+        return widget
+
+    @property
+    def widget(self):
+        """Expose the container through the same attribute as ``LabelInput``."""
+        return self.frame
+
+    def grid(self, *args, **kwargs):
+        """Delegate geometry management to the collection frame."""
+        self.frame.grid(*args, **kwargs)
+
+    def get(self):
+        """Return the collection as a field mapping."""
+        return {
+            field_name: variable.get()
+            for field_name, variable in self.variables.items()
+        }
+
+    def set(self, value):
+        """Set collection values from a mapping."""
+        if not isinstance(value, dict):
+            return
+        for field_name, field_value in value.items():
+            if field_name in self.variables:
+                if self.spec.item_schema[field_name].value_type is bool:
+                    if isinstance(field_value, str):
+                        field_value = field_value.strip() == "True"
+                    else:
+                        field_value = bool(field_value)
+                self.variables[field_name].set(str(field_value))
 
 
 class FeatureIcon(ttk.Button):
@@ -279,6 +401,30 @@ class FeatureConfigPopup:
             arg_spec = parameter_schema.get(arg_name) or infer_feature_parameter_spec(
                 arg_value
             )
+            if isinstance(arg_spec, CollectionSpec):
+                temp = FeatureCollectionInput(
+                    self.parameter_frame,
+                    arg_name,
+                    arg_spec,
+                    arg_value,
+                )
+                self.inputs.append(temp)
+                self.inputs_type.append(dict)
+                self.parameter_specs.append(arg_spec)
+                self.parameter_names.append(arg_name)
+                self.inputs_by_name[arg_name] = temp
+                self.parameter_index_by_name[arg_name] = i
+                temp.grid(
+                    row=i + 2,
+                    column=0,
+                    sticky=tk.NSEW,
+                    padx=get_theme_space_px(30),
+                    pady=get_theme_space_px(10),
+                )
+                if arg_spec.help_text:
+                    ConfiguratorTooltip(temp.label, arg_spec.help_text)
+                continue
+
             arg_input_class = ttk.Entry
             arg_input_var = tk.StringVar
             input_args = {"width": 30}

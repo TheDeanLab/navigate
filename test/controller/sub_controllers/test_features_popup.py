@@ -10,7 +10,7 @@ from navigate.controller.sub_controllers.features_popup import (
     FeaturePopupController,
     FeatureListGraphController,
 )
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features import feature_related_functions
 from navigate.model.features.parameter_tools import coerce_feature_parameter
 
@@ -502,6 +502,96 @@ def test_feature_parameter_values_use_explicit_dynamic_metadata(graph_controller
     assert schema["magnification"].choices == ("4x", "10x")
 
 
+def test_feature_parameter_values_add_autofocus_dynamic_choices(graph_controller):
+    """Autofocus-specific dynamic sources populate from loaded configuration."""
+
+    class TestFeature:
+        parameter_schema = {
+            "device": SettingSpec(str, default="stage", choices=("stage",)),
+            "device_ref": SettingSpec(
+                str,
+                default="f",
+                dynamic_source="stage_axes",
+            ),
+            "target_channel": SettingSpec(
+                str,
+                default=None,
+                dynamic_source="channels",
+            ),
+            "calibration_action": SettingSpec(
+                str,
+                default=None,
+                dynamic_source="autofocus_calibration_actions",
+            ),
+            "reference_channel": SettingSpec(
+                str,
+                default="channel_2",
+                dynamic_source="channels",
+            ),
+        }
+
+        def __init__(
+            self,
+            model,
+            device="stage",
+            device_ref="f",
+            target_channel=None,
+            calibration_action=None,
+            reference_channel="channel_2",
+        ):
+            pass
+
+    graph_controller.configuration_controller = SimpleNamespace(
+        configuration={
+            "configuration": {
+                "microscopes": {
+                    "ScopeA": {
+                        "stage": {
+                            "hardware": [
+                                {"axes": ["x", "y", "z"]},
+                                {"axes": ["f"]},
+                            ]
+                        }
+                    },
+                    "ScopeB": {"stage": {"hardware": [{"axes": ["theta", "f"]}]}},
+                }
+            },
+            "gui": {"channel_settings": {"count": 3}},
+        }
+    )
+
+    _, args_value, schema = graph_controller.get_feature_parameter_values(
+        TestFeature,
+        {"name": TestFeature, "args": ("stage", "f", None, "capture_reference")},
+    )
+
+    assert args_value == ["stage", "f", "channel_1", "Capture Reference", "channel_2"]
+    assert schema["device"].choices == ("stage",)
+    assert schema["device_ref"].choices == ("x", "y", "z", "f", "theta")
+    assert schema["target_channel"].choices == (
+        "channel_1",
+        "channel_2",
+        "channel_3",
+    )
+    assert schema["reference_channel"].choices == (
+        "channel_1",
+        "channel_2",
+        "channel_3",
+    )
+    assert schema["calibration_action"].choices == (
+        "Regular",
+        "Auto Defocus",
+        "Capture Reference",
+        "Populate Defocus",
+    )
+    assert schema["calibration_action"].choice_values == {
+        "Regular": None,
+        "Auto Defocus": "auto_defocus",
+        "Capture Reference": "capture_reference",
+        "Populate Defocus": "populate_defocus",
+    }
+
+
 def test_refresh_linked_zoom_choices_updates_widget_and_schema(graph_controller):
     """Changing the selected microscope updates the linked zoom choices."""
 
@@ -609,6 +699,43 @@ def test_coerce_feature_parameter_rejects_invalid_numeric_input():
         coerce_feature_parameter("count", "6", spec)
 
     assert coerce_feature_parameter("count", "4", spec) == 4
+
+
+def test_coerce_feature_parameter_supports_single_mapping_collection():
+    """Fixed feature collections are coerced to nested dictionaries."""
+    spec = CollectionSpec(
+        item_schema={
+            "coarse_selected": SettingSpec(bool, default=True),
+            "coarse_range": SettingSpec(float, default=500, required=True),
+        },
+        storage="single_mapping",
+    )
+
+    coerced = coerce_feature_parameter(
+        "scan_settings",
+        {"coarse_selected": "False", "coarse_range": "250"},
+        spec,
+    )
+
+    assert coerced == {"coarse_selected": False, "coarse_range": 250.0}
+
+
+def test_coerce_feature_parameter_maps_choice_labels_to_saved_values():
+    """Choice labels can save a separate internal value."""
+    spec = SettingSpec(
+        str,
+        choices=("Regular", "Capture Reference"),
+        choice_values={
+            "Regular": None,
+            "Capture Reference": "capture_reference",
+        },
+    )
+
+    assert coerce_feature_parameter("calibration_action", "Regular", spec) is None
+    assert (
+        coerce_feature_parameter("calibration_action", "Capture Reference", spec)
+        == "capture_reference"
+    )
 
 
 def test_update_feature_list_keeps_acquisition_configuration_runtime_only(

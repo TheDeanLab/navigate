@@ -12,6 +12,7 @@ from navigate.controller.sub_controllers.features_popup import (
 )
 from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features import feature_related_functions
+from navigate.model.features.base import FeatureBase
 from navigate.model.features.parameter_tools import coerce_feature_parameter
 
 
@@ -91,6 +92,33 @@ def test_normal_feature_replaces_terminal_branch(graph_controller, monkeypatch):
 
     assert graph_controller.feature_structure == [0]
     assert graph_controller.features == [{"name": TestFeature}]
+
+
+def test_feature_palette_includes_only_feature_base_subclasses(monkeypatch):
+    """Imported helper classes should not be displayed as feature nodes."""
+
+    class TestFeature(FeatureBase):
+        pass
+
+    class HelperClass:
+        pass
+
+    monkeypatch.setattr(
+        feature_related_functions, "UnitTestFeature", TestFeature, raising=False
+    )
+    monkeypatch.setattr(
+        feature_related_functions, "UnitTestHelper", HelperClass, raising=False
+    )
+
+    controller = FeatureListGraphController(
+        feature_list_view=None,
+        feature_content_view=None,
+        preview_btn=MagicMock(),
+    )
+
+    assert "UnitTestFeature" in controller.feature_names
+    assert "UnitTestHelper" not in controller.feature_names
+    assert "SharedList" not in controller.feature_names
 
 
 def test_move_feature_right_to_interior_slot_changes_order(graph_controller):

@@ -39,13 +39,14 @@ import time
 
 # Local application imports
 from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.features.base import FeatureBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ChangeResolution:
+class ChangeResolution(FeatureBase):
     """
     ChangeResolution class for modifying the resolution mode of a microscope.
 
@@ -200,7 +201,7 @@ class ChangeResolution:
         self.model.resume_data_thread()
 
 
-class SetCameraParameters:
+class SetCameraParameters(FeatureBase):
     """
     SetCameraParameters class for modifying the parameters of a camera.
 
@@ -373,7 +374,7 @@ class SetCameraParameters:
         self.model.resume_data_thread()
 
 
-class UpdateExperimentSetting:
+class UpdateExperimentSetting(FeatureBase):
     parameter_schema = {
         "experiment_parameters": SettingSpec(
             dict,

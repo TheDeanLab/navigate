@@ -44,6 +44,7 @@ import logging
 
 # Local Imports
 from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.features.base import FeatureBase
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -75,7 +76,7 @@ def prepare_service(service_url, **kwargs):
     return None
 
 
-class IlastikSegmentation:
+class IlastikSegmentation(FeatureBase):
     """Ilastik segmentation class.
 
     Uses Ilastik REST API to perform segmentation in a separate process.

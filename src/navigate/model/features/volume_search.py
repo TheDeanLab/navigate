@@ -43,6 +43,7 @@ from navigate.model.analysis.boundary_detect import (
     map_labels,
 )
 from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.features.base import FeatureBase
 from navigate.tools.multipos_table_tools import write_to_csv_file
 
 
@@ -76,7 +77,7 @@ def draw_box(img, xl, yl, xu, yu, fill=65535):
     return img
 
 
-class VolumeSearch:
+class VolumeSearch(FeatureBase):
     """VolumeSearch.
 
     Find the outer boundary of a tissue, moving the stage through z. Assumes
@@ -518,7 +519,7 @@ class VolumeSearch:
         self.has_tissue_queue.put(False)
 
 
-class VolumeSearch3D:
+class VolumeSearch3D(FeatureBase):
     parameter_schema = {
         "target_resolution": SettingSpec(
             str,

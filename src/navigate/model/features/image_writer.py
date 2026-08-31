@@ -52,13 +52,14 @@ import navigate
 from navigate.model import data_sources
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.features.base import FeatureBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ImageWriter:
+class ImageWriter(FeatureBase):
     """Class for saving acquired data to disk."""
 
     parameter_schema = {

@@ -43,6 +43,7 @@ import json
 # Local application imports
 from .image_writer import ImageWriter
 from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.features.base import FeatureBase
 from navigate.tools.common_functions import VariableWithLock
 from navigate.model.waveforms import remote_focus_ramp
 
@@ -65,7 +66,7 @@ def stage_move_requires_pause(
     ) or (abs(theta_delta) > THETA_MOVE_EPSILON)
 
 
-class Snap:
+class Snap(FeatureBase):
     """Snap class for capturing data frames using a microscope.
 
     This class provides functionality to capture data frames using a microscope
@@ -141,7 +142,7 @@ class Snap:
         return True
 
 
-class WaitForExternalTrigger:
+class WaitForExternalTrigger(FeatureBase):
     """WaitForExternalTrigger class to time features using external input.
 
     This class waits for either an external trigger (or the timeout) before continuing
@@ -216,7 +217,7 @@ class WaitForExternalTrigger:
         return result
 
 
-class ProjectionMode:
+class ProjectionMode(FeatureBase):
 
     parameter_schema = {
         "axis": SettingSpec(
@@ -377,7 +378,7 @@ class ProjectionMode:
         )
 
 
-class WaitToContinue:
+class WaitToContinue(FeatureBase):
     """WaitToContinue class for synchronizing signal and data acquisition.
 
     This feature is used to synchronize signal and data acquisition processes, allowing
@@ -525,7 +526,7 @@ class WaitToContinue:
             self.pause_data_lock.release()
 
 
-class LoopByCount:
+class LoopByCount(FeatureBase):
     """LoopByCount class for controlling signal and data acquisition loops.
 
     This class provides functionality to control signal and data acquisition loops by
@@ -743,7 +744,7 @@ class LoopByCount:
         logger.debug(f"LoopByCount-Synchronize {thread_name} ends.")
 
 
-class PrepareNextChannel:
+class PrepareNextChannel(FeatureBase):
     """PrepareNextChannel class for preparing microscopes for the next imaging channel.
 
     This class provides functionality to prepare multiple microscopes, including virtual
@@ -800,7 +801,7 @@ class PrepareNextChannel:
         return True
 
 
-class MoveToNextPositionInMultiPositionTable:
+class MoveToNextPositionInMultiPositionTable(FeatureBase):
     """MoveToNextPositionInMultiPositionTable class for advancing in a multi-position
     table.
 
@@ -1070,7 +1071,7 @@ class MoveToNextPositionInMultiPositionTable:
         self.model.resume_data_thread()
 
 
-class StackPause:
+class StackPause(FeatureBase):
     """StackPause class for pausing stack acquisition.
 
     This class provides functionality to pause stack acquisition for a specified
@@ -1165,7 +1166,7 @@ class StackPause:
             self.model.resume_data_thread()
 
 
-class ZStackAcquisition:
+class ZStackAcquisition(FeatureBase):
     """ZStackAcquisition class for controlling z-stack acquisition in microscopy.
 
     This class provides functionality to control z-stack acquisition, including managing
@@ -2015,7 +2016,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         return False
 
 
-class FindTissueSimple2D:
+class FindTissueSimple2D(FeatureBase):
     """FindTissueSimple2D class for detecting tissue and gridding out the imaging
     space in  2D.
 

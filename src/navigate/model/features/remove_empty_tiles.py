@@ -40,6 +40,7 @@ from skimage.filters import threshold_otsu
 # Local Imports
 from navigate.model.analysis.boundary_detect import find_tissue_boundary_2d
 from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.features.base import FeatureBase
 
 
 def detect_tissue(image_data, percentage=0.0):
@@ -158,7 +159,7 @@ def detect_tissue3(image_data, threshold=150):
     return t >= threshold
 
 
-class DetectTissueInStack:
+class DetectTissueInStack(FeatureBase):
     """Detect Tissue in a Stack of Images.
 
     This class is used to detect tissue in a stack of images by moving the microscope
@@ -603,7 +604,7 @@ class DetectTissueInStackAndRecord(DetectTissueInStack):
         return super().end_func_data()
 
 
-class RemoveEmptyPositions:
+class RemoveEmptyPositions(FeatureBase):
     """Remove Empty Positions from the Model.
 
     This class is used to remove empty positions from the model based on the specified

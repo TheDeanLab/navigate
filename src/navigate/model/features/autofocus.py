@@ -41,6 +41,7 @@ from scipy.stats import linregress
 from scipy.interpolate import UnivariateSpline
 
 # Local imports
+from navigate.model.features.base import FeatureBase
 from navigate.model.features.feature_container import load_features
 from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
@@ -143,7 +144,7 @@ def power_tent(x, x_offset, y_offset, amplitude, sigma, alpha):
     return function
 
 
-class Autofocus:
+class Autofocus(FeatureBase):
     """Autofocus Data Process
 
     This function is called by the data thread. It will get the data from the

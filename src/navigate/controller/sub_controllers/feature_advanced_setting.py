@@ -40,6 +40,7 @@ from tkinter import filedialog, messagebox
 
 # Local application imports
 from navigate.model.features import feature_related_functions
+from navigate.model.features.base import is_feature_class
 from navigate.view.popups.feature_list_popup import FeatureAdvancedSettingPopup
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.tools.common_functions import load_module_from_file
@@ -66,7 +67,7 @@ class FeatureAdvancedSettingController:
         self.feature_names = []
         temp = dir(feature_related_functions)
         for t in temp:
-            if inspect.isclass(getattr(feature_related_functions, t)):
+            if is_feature_class(getattr(feature_related_functions, t)):
                 self.feature_names.append(t)
 
         #: FeatureAdvancedSettingPopup: The popup window

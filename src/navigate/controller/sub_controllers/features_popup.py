@@ -54,6 +54,7 @@ from navigate.model.features.feature_related_functions import (
 from navigate.model.features import feature_related_functions
 from navigate.model.features.common_features import PrepareNextChannel
 from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.model.features.base import is_feature_class
 from navigate.controller.sub_controllers.autofocus import AutofocusPopupController
 from navigate.model.features.parameter_tools import (
     coerce_feature_parameter,
@@ -305,11 +306,10 @@ class FeatureListGraphController:
         # get all feature names
         #: list: The list of feature names.
         self.feature_names = []
-        excluded_palette_classes = {"Iterable", "Queue", "SharedList"}
         temp = dir(feature_related_functions)
         for t in temp:
             feature = getattr(feature_related_functions, t)
-            if inspect.isclass(feature) and t not in excluded_palette_classes:
+            if is_feature_class(feature):
                 self.feature_names.append(t)
 
         # initialize the feature nodes

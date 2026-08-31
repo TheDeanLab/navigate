@@ -37,6 +37,7 @@ from tkinter import messagebox
 import inspect
 import os
 import platform
+import re
 
 # Third party imports
 from PIL import Image, ImageTk
@@ -354,6 +355,58 @@ class FeatureListGraphController:
     def get_feature_parameter_schema(feature_class):
         """Return schema metadata for a feature constructor."""
         return getattr(feature_class, "parameter_schema", {}) or {}
+
+    @staticmethod
+    def get_feature_description(feature_class):
+        """Return a concise user-facing description for a feature class."""
+        description = getattr(
+            feature_class,
+            "feature_description",
+            getattr(feature_class, "description", None),
+        )
+        if not description:
+            description = inspect.getdoc(feature_class) or ""
+        paragraphs = [
+            " ".join(paragraph.split())
+            for paragraph in description.split("\n\n")
+            if paragraph.strip()
+        ]
+        if not paragraphs:
+            return FeatureListGraphController.split_feature_name(feature_class.__name__)
+        return FeatureListGraphController.clean_feature_description(
+            paragraphs[0],
+            feature_class.__name__,
+        )
+
+    @staticmethod
+    def clean_feature_description(description, feature_name):
+        """Remove boilerplate prefixes from a feature description."""
+        description = re.sub(
+            rf"^\s*{re.escape(feature_name)}\s+class\s+for\s+",
+            "",
+            description,
+            flags=re.IGNORECASE,
+        )
+        description = re.sub(
+            r"^\s*[A-Za-z_][\w]*\s+class\s+for\s+",
+            "",
+            description,
+            flags=re.IGNORECASE,
+        )
+        description = re.sub(
+            r"^\s*class\s+for\s+",
+            "",
+            description,
+            flags=re.IGNORECASE,
+        ).strip()
+        if description:
+            return description[0].upper() + description[1:]
+        return FeatureListGraphController.split_feature_name(feature_name)
+
+    @staticmethod
+    def split_feature_name(feature_name):
+        """Convert a CamelCase feature class name to readable words."""
+        return re.sub(r"(?<!^)(?=[A-Z])", " ", feature_name).strip()
 
     def microscope_choices(self):
         """Return microscope names from the loaded configuration."""
@@ -975,6 +1028,7 @@ class FeatureListGraphController:
                 title="Feature Parameters",
                 parameter_config=feature_parameter_config,
                 parameter_schema=parameter_schema,
+                feature_description=self.get_feature_description(feature["name"]),
                 **kwargs,
             )
             self.bind_dynamic_parameter_choices(popup)
@@ -1075,6 +1129,7 @@ class FeatureListGraphController:
                 feature_parameter_config,
                 parameter_schema,
             )
+            popup.set_feature_description(self.get_feature_description(new_feature))
             self.bind_dynamic_parameter_choices(popup)
 
         def select_palette_feature(popup, feature_name):

@@ -338,6 +338,55 @@ def test_feature_parameter_values_preserve_existing_feature_args(graph_controlle
     assert args_value == [9]
 
 
+def test_feature_description_uses_metadata_or_docstring_summary():
+    """Feature descriptions prefer explicit metadata and fall back to docstrings."""
+
+    class FeatureWithDescription:
+        feature_description = "Explicit editor summary."
+
+    class FeatureWithDocstring:
+        """First paragraph summary.
+
+        Longer implementation notes should not crowd the editor.
+        """
+
+    class SampleFeature:
+        """SampleFeature class for doing useful microscope work.
+
+        Longer implementation notes should not crowd the editor.
+        """
+
+    class BareClassForFeature:
+        """class for running a small feature.
+
+        Longer implementation notes should not crowd the editor.
+        """
+
+    class FeatureWithoutDocstring:
+        pass
+
+    assert (
+        FeatureListGraphController.get_feature_description(FeatureWithDescription)
+        == "Explicit editor summary."
+    )
+    assert (
+        FeatureListGraphController.get_feature_description(FeatureWithDocstring)
+        == "First paragraph summary."
+    )
+    assert (
+        FeatureListGraphController.get_feature_description(SampleFeature)
+        == "Doing useful microscope work."
+    )
+    assert (
+        FeatureListGraphController.get_feature_description(BareClassForFeature)
+        == "Running a small feature."
+    )
+    assert (
+        FeatureListGraphController.get_feature_description(FeatureWithoutDocstring)
+        == "Feature Without Docstring"
+    )
+
+
 def test_feature_parameter_values_add_loaded_microscope_and_zoom_choices(
     graph_controller,
 ):

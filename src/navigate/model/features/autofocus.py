@@ -154,6 +154,8 @@ class Autofocus(FeatureBase):
     move to. If the autofocus_pos_queue is empty, the autofocus is finished.
     """
 
+    description = "Autofocus and Defocus calibration"
+
     parameter_schema = {
         "device": SettingSpec(
             str,

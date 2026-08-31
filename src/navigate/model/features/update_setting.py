@@ -375,6 +375,8 @@ class SetCameraParameters(FeatureBase):
 
 
 class UpdateExperimentSetting(FeatureBase):
+
+    description = "Update experiment values on the fly"
     parameter_schema = {
         "experiment_parameters": CollectionSpec(
             item_schema={

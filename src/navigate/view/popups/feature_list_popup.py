@@ -366,17 +366,34 @@ class FeatureConfigPopup:
         separator = ttk.Separator(content_frame)
         separator.grid(row=1, column=0, sticky=tk.NSEW, pady=get_theme_space_px(10))
 
+        #: tk.StringVar: Feature description displayed above parameter inputs.
+        self.feature_description = tk.StringVar()
+        self.feature_description_widget = ttk.Label(
+            content_frame,
+            textvariable=self.feature_description,
+            wraplength=520,
+            justify=tk.LEFT,
+        )
+        self.feature_description_widget.grid(
+            row=2,
+            column=0,
+            sticky=tk.EW,
+            padx=get_theme_space_px(30),
+            pady=get_theme_padding_px((0, 10)),
+        )
+        self.set_feature_description(kwargs.get("feature_description", ""))
+
         #: ttk.Frame: Parameter frame
         self.parameter_frame = ttk.Frame(content_frame)
         self.parameter_frame.grid(
-            row=2,
+            row=3,
             column=0,
             sticky=tk.NSEW,
             padx=get_theme_space_px(30),
             pady=get_theme_space_px(30),
         )
 
-        row = 3
+        row = 4
         if "true" in kwargs:
             self.preview_btn_true = ttk.Button(content_frame, text="Preview (True)")
             self.preview_btn_true.grid(row=row, column=0, sticky=tk.NSEW)
@@ -410,6 +427,15 @@ class FeatureConfigPopup:
             kwargs.get("parameter_config", {}),
             kwargs.get("parameter_schema", {}),
         )
+
+    def set_feature_description(self, description):
+        """Set the feature-level description shown in the parameter editor."""
+        description = description or ""
+        self.feature_description.set(description)
+        if description:
+            self.feature_description_widget.grid()
+        else:
+            self.feature_description_widget.grid_remove()
 
     def build_widgets(
         self,

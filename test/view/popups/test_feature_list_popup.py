@@ -133,6 +133,31 @@ def test_feature_config_popup_renders_dynamic_zoom_choices_as_readonly_combobox(
     assert config_popup.inputs_by_name["zoom_value"].get() == "4x"
 
 
+def test_feature_config_popup_displays_feature_description(tk_root):
+    """The parameter editor shows optional feature-level help text."""
+    config_popup = FeatureConfigPopup(
+        tk_root,
+        ["ChangeResolution"],
+        feature_name="ChangeResolution",
+        args_name=[],
+        args_value=[],
+        feature_description="Switch to another microscope resolution.",
+        title="Test",
+    )
+    tk_root.update()
+
+    assert (
+        config_popup.feature_description.get()
+        == "Switch to another microscope resolution."
+    )
+    assert config_popup.feature_description_widget.winfo_ismapped()
+
+    config_popup.set_feature_description("")
+    tk_root.update()
+
+    assert not config_popup.feature_description_widget.winfo_ismapped()
+
+
 def test_feature_config_popup_renders_single_mapping_collection(tk_root):
     """Single-mapping collections render as grouped feature parameter inputs."""
     config_popup = FeatureConfigPopup(

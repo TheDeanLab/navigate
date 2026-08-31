@@ -19,6 +19,9 @@ microscopes:
         name: mirror
         type: ImagineOpticsMirror
         flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+        wfc_config_file_path: D:\WaveKitX64\MirrorFiles\WaveFrontCorrector_Mirao52-e_0259.dat
+        haso_config_file_path: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat
+        interaction_matrix_file_path: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc
       n_modes: 32
 
     zoom:
@@ -39,7 +42,6 @@ microscopes:
         type: HamamatsuOrca
         serial_number: 001301
       defect_correct_mode: 2.0
-      delay: 10 #ms
       settle_down: 0.0 #ms
     remote_focus_device:
       hardware:
@@ -172,6 +174,9 @@ microscopes:
         name: mirror
         type: ImagineOpticsMirror
         flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+        wfc_config_file_path: D:\WaveKitX64\MirrorFiles\WaveFrontCorrector_Mirao52-e_0259.dat
+        haso_config_file_path: D:\WaveKitX64\MirrorFiles\HASO4_first_7458.dat
+        interaction_matrix_file_path: D:\WaveKitX64\MirrorFiles\VAST_Sept_2023_b.aoc
       n_modes: 32
 
     zoom:
@@ -193,7 +198,6 @@ microscopes:
         type: HamamatsuOrca
         serial_number: 001301
       defect_correct_mode: 2.0
-      delay: 10 #ms
 
     remote_focus_device:
       hardware:

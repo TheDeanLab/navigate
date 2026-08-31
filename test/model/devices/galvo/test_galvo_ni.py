@@ -61,7 +61,6 @@ def build_ni_configuration():
                         "sample_rate": 100,
                         "trigger_source": "/Dev1/PFI0",
                     },
-                    "camera": {"delay": 0},
                 }
             }
         },
@@ -75,7 +74,7 @@ def build_ni_configuration():
             }
         },
         "waveform_constants": {
-            "other_constants": {"galvo_factor": "none"},
+            "other_constants": {"camera_delay": "0", "galvo_factor": "none"},
             "galvo_constants": {
                 "Galvo 0": {
                     "TestScope": {

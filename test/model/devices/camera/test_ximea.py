@@ -116,7 +116,9 @@ def ximea_module(monkeypatch):
     sys.modules.pop("navigate.model.devices.camera.ximea", None)
 
     module = importlib.import_module("navigate.model.devices.camera.ximea")
-    monkeypatch.setattr(module.CameraBase, "get_offset_variance_maps", disable_camera_maps)
+    monkeypatch.setattr(
+        module.CameraBase, "get_offset_variance_maps", disable_camera_maps
+    )
     return module
 
 
@@ -188,14 +190,20 @@ def test_sensor_mode_exposure_line_interval_and_binning_branches(ximea_camera):
 def test_set_roi_rejects_invalid_geometry(ximea_camera):
     camera, _ = ximea_camera
 
-    assert camera.set_ROI(roi_width=3000, roi_height=3000, center_x=200, center_y=200) is False
+    assert (
+        camera.set_ROI(roi_width=3000, roi_height=3000, center_x=200, center_y=200)
+        is False
+    )
 
 
 def test_set_roi_returns_false_on_sdk_error(ximea_camera):
     camera, cam = ximea_camera
     cam.fail_on_set.add("width")
 
-    assert camera.set_ROI(roi_width=400, roi_height=200, center_x=1024, center_y=1024) is False
+    assert (
+        camera.set_ROI(roi_width=400, roi_height=200, center_x=1024, center_y=1024)
+        is False
+    )
 
 
 def test_set_roi_success_updates_dimensions(ximea_camera):
@@ -244,10 +252,16 @@ def test_serial_number_property_current_behavior(ximea_camera):
     assert "device_sn" in cam.get_param_calls
 
 
-def test_mu196xr_overrides_trigger_port(ximea_module):
+def test_mu196xr_uses_the_configured_trigger_port(ximea_module):
     cam = FakeXiCam(ximea_module.xiapi.Xi_error)
     camera = ximea_module.MU196XRCamera("test_scope", cam, build_configuration())
 
     assert str(camera) == "Ximea MU196XR Camera"
-    assert cam.set_calls[-2] == ("gpi_selector", "XI_GPI_PORT2")
-    assert cam.set_calls[-1] == ("gpi_mode", "XI_GPI_TRIGGER")
+    assert cam.set_calls[0] == ("gpi_selector", "XI_GPI_PORT1")
+
+
+def test_mu196xr_defaults_to_trigger_port_two(ximea_module):
+    cam = FakeXiCam(ximea_module.xiapi.Xi_error)
+    ximea_module.MU196XRCamera("test_scope", cam, build_configuration(None))
+
+    assert cam.set_calls[0] == ("gpi_selector", "XI_GPI_PORT2")

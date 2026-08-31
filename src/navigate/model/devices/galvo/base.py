@@ -45,6 +45,7 @@ from navigate.model.waveforms import (
     sine_wave,
     single_pulse,
 )
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # # Logger Setup
@@ -64,6 +65,45 @@ class GalvoBase(ABC):
     according to camera exposure times and configuration parameters. Child classes
     must implement the turn_off method to control hardware-specific behaviors.
     """
+
+    configuration_schema = {
+        "waveform": SettingSpec(
+            str,
+            default="sawtooth",
+            label="Waveform",
+            help_text="Waveform shape generated for this galvo.",
+            choices=(
+                "sawtooth",
+                "centered_cubic",
+                "quadratic",
+                "sine",
+                "pulse",
+                "halfsaw",
+            ),
+            required=False,
+        ),
+        "phase": SettingSpec(
+            float,
+            default=1.57079,
+            label="Phase",
+            help_text="Phase offset used by sine waveforms, in radians.",
+            required=True,
+        ),
+        "hardware/min": SettingSpec(
+            float,
+            default=-5.0,
+            label="Minimum Voltage",
+            help_text="Minimum galvo output voltage.",
+            required=True,
+        ),
+        "hardware/max": SettingSpec(
+            float,
+            default=5.0,
+            label="Maximum Voltage",
+            help_text="Maximum galvo output voltage.",
+            required=True,
+        ),
+    }
 
     def __init__(
         self,
@@ -110,14 +150,6 @@ class GalvoBase(ABC):
         #: float: Sweep time.
         self.sweep_time = 0
 
-        #: float: Camera delay
-        self.camera_delay = (
-            configuration["configuration"]["microscopes"][microscope_name]["camera"][
-                "delay"
-            ]
-            / 1000
-        )
-
         #: float: Galvo max voltage.
         self.galvo_max_voltage = self.device_config["hardware"]["max"]
 
@@ -138,6 +170,18 @@ class GalvoBase(ABC):
     def __del__(self):
         """Destructor"""
         pass
+
+    @property
+    def camera_delay(self) -> float:
+        """Return the current camera delay from waveform constants, in seconds."""
+        return (
+            float(
+                self.configuration["waveform_constants"]["other_constants"][
+                    "camera_delay"
+                ]
+            )
+            / 1000
+        )
 
     @abstractmethod
     def adjust(

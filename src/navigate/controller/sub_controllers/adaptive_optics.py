@@ -34,6 +34,8 @@
 from tkinter import filedialog
 import logging
 
+import numpy as np
+
 # Third-party imports
 # from matplotlib.figure import Figure
 # from matplotlib.axes import Axes
@@ -348,11 +350,23 @@ class AdaptiveOpticsPopupController(GUIController):
         """
 
         try:
+            img = data["mirror_img"]
+            lim = np.nanmax(np.abs(img))
+
             self.mirror_img.clear()
-            self.mirror_img.imshow(
-                data["mirror_img"], cmap="bwr", vmin=-0.25, vmax=0.25
+            im = self.mirror_img.imshow(
+                data["mirror_img"], cmap="bwr", vmin=-lim, vmax=lim
             )
             self.mirror_img.set_title("Mirror Pistons")
+            if not hasattr(self, "mirror_cbar"):
+                self.mirror_cbar = self.view.fig.colorbar(
+                    im,
+                    ax=self.mirror_img,
+                    fraction=0.046,
+                    pad=0.04,
+                )
+            else:
+                self.mirror_cbar.update_normal(im)
         except Exception:
             pass
 

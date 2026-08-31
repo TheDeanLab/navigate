@@ -42,6 +42,7 @@ from pyvcam.camera import Camera as PyvcamCamera
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.devices.device_types import IntegratedDevice
 from navigate.tools.decorators import log_initialization
 
@@ -64,6 +65,40 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         PyVCAM-master folder in APIs and run:
         python setup.py install
     """
+
+    configuration_schema = {
+        "readout_port": SettingSpec(
+            int,
+            default=0,
+            label="Readout Port",
+            help_text="Photometrics readout port index used for image acquisition.",
+            required=False,
+        ),
+        "speed_table_index": SettingSpec(
+            int,
+            default=1,
+            label="Speed Table Index",
+            help_text="Photometrics readout-speed table entry to use.",
+            required=False,
+        ),
+        "gain": SettingSpec(
+            int,
+            default=1,
+            label="Gain",
+            help_text="Photometrics camera gain setting.",
+            required=False,
+        ),
+        "unitforlinedelay": SettingSpec(
+            float,
+            default=1,
+            label="Unit for Line Delay",
+            help_text=(
+                "Line-delay scale in milliseconds used for light-sheet exposure "
+                "timing."
+            ),
+            required=False,
+        ),
+    }
 
     def __init__(
         self,

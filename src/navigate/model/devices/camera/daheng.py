@@ -63,8 +63,8 @@ import numpy as np
 # Local Imports
 from navigate.model.utils.exceptions import UserVisibleException
 from navigate.model.devices.camera.base import CameraBase
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
-
 
 # Logger Setup
 p = __name__.split(".")[1]

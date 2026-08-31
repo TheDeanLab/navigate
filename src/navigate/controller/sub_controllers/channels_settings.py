@@ -375,7 +375,7 @@ class ChannelSettingController(GUIController):
                 #     else widget_name
                 # )
                 # setting_range = self.parent_controller.parent_controller.
-                # configuration["configuration"]["gui"]["channels"][ref_name]
+                # configuration["gui"]["channel_settings"][ref_name]
                 # if (
                 #     setting_dict[widget_name] < setting_range["min"]
                 #     or setting_dict[widget_name] > setting_range["max"]
@@ -425,6 +425,8 @@ class ChannelSettingController(GUIController):
             setting_dict = self.channel_setting_dict[channel_key]
 
             r = update_setting_dict(setting_dict, widget_name)
+
+            self.channel_setting_dict[channel_key] = setting_dict
 
             if self.mode == "live":
                 # call central controller

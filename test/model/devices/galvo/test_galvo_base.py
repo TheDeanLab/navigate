@@ -85,7 +85,6 @@ def build_base_configuration(
                         "sample_rate": 100,
                         "trigger_source": "/Dev1/PFI0",
                     },
-                    "camera": {"delay": 0},
                 }
             }
         },
@@ -100,7 +99,10 @@ def build_base_configuration(
             }
         },
         "waveform_constants": {
-            "other_constants": {"galvo_factor": galvo_factor},
+            "other_constants": {
+                "camera_delay": "0",
+                "galvo_factor": galvo_factor,
+            },
             "galvo_constants": {
                 "Galvo 0": {"TestScope": {"1x": galvo_parameters}},
             },
@@ -238,9 +240,11 @@ def test_adjust_pulse_waveform_respects_camera_delay_and_clears_final_sample():
         min_voltage=-10,
         channel_2_selected=False,
     )
-    config["configuration"]["microscopes"]["TestScope"]["camera"]["delay"] = 10
+    config["waveform_constants"]["other_constants"]["camera_delay"] = "10"
     config["configuration"]["microscopes"]["TestScope"]["daq"]["sample_rate"] = 1000
+    waveform_constants = config.pop("waveform_constants")
     galvo = build_synthetic_galvo(config)
+    config["waveform_constants"] = waveform_constants
 
     waveforms = galvo.adjust(
         exposure_times={"channel_1": 0.2},

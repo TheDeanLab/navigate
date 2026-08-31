@@ -44,6 +44,7 @@ from navigate.model.waveforms import (
     remote_focus_ramp_triangular,
 )
 from navigate.tools.decorators import log_initialization
+from navigate.config.configuration_schema import SettingSpec
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -53,6 +54,23 @@ logger = logging.getLogger(p)
 @log_initialization
 class RemoteFocusBase(ABC):
     """RemoteFocusBase Class - Parent class for Remote Focusing Device."""
+
+    configuration_schema = {
+        "hardware/min": SettingSpec(
+            float,
+            default=-5.0,
+            label="Minimum Voltage",
+            help_text="Lowest control voltage supported by the remote-focus device.",
+            required=True,
+        ),
+        "hardware/max": SettingSpec(
+            float,
+            default=5.0,
+            label="Maximum Voltage",
+            help_text="Highest control voltage supported by the remote-focus device.",
+            required=True,
+        ),
+    }
 
     def __init__(
         self,
@@ -96,14 +114,6 @@ class RemoteFocusBase(ABC):
         #: float: Sweep time of the DAQ.
         self.sweep_time = 0
 
-        #: float: Camera delay percent.
-        self.camera_delay = (
-            configuration["configuration"]["microscopes"][microscope_name]["camera"][
-                "delay"
-            ]
-            / 1000
-        )
-
         # Waveform Parameters
         #: float: Remote focus max voltage.
         self.remote_focus_max_voltage = self.device_config["hardware"]["max"]
@@ -121,6 +131,18 @@ class RemoteFocusBase(ABC):
     def __del__(self) -> None:
         """Destructor"""
         pass
+
+    @property
+    def camera_delay(self) -> float:
+        """Return the current camera delay from waveform constants, in seconds."""
+        return (
+            float(
+                self.configuration["waveform_constants"]["other_constants"][
+                    "camera_delay"
+                ]
+            )
+            / 1000
+        )
 
     @abstractmethod
     def move(

@@ -194,6 +194,9 @@ class FeatureAdvancedSettingController:
                     else:
                         unloaded_functions.append(row[0].get())
 
+            if feature_parameter_config.get(arg_name, None):
+                feature_parameter_config[arg_name]["None"] = None
+
         # save to yaml file
         parameter_config_path = (
             get_navigate_path() + "/feature_lists/feature_parameter_setting"

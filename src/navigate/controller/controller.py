@@ -50,6 +50,7 @@ from navigate.view.theme import apply_theme
 
 # Local Sub-Controller Imports
 from navigate.controller.configuration_controller import ConfigurationController
+from navigate.controller.autofocus_calibration import AutofocusCalibrationController
 from navigate.controller.sub_controllers import (
     KeystrokeController,
     WaveformTabController,
@@ -78,11 +79,9 @@ from navigate.config.config import (
     load_configs,
     update_config_dict,
     verify_experiment_config,
-    verify_waveform_constants,
-    verify_positions_config,
-    verify_configuration,
     get_navigate_path,
 )
+from navigate.config.preload import preload_configuration
 from navigate.tools.file_functions import (
     load_yaml_file,
     save_yaml_file,
@@ -199,6 +198,9 @@ class Controller:
         #: mp.Queue: Queue for retrieving events ('event_name', value) from model
         self.event_queue = mp.Queue(100)
 
+        #: mp.Queue: Single-slot, latest-value transport for autofocus plotting.
+        self.autofocus_progress_queue = mp.Queue(1)
+
         #: Manager: A shared memory manager
         self.manager = Manager()
 
@@ -213,13 +215,13 @@ class Controller:
             gui=self.gui_configuration_path,
         )
 
-        verify_configuration(self.manager, self.configuration)
-        verify_experiment_config(self.manager, self.configuration)
-        verify_waveform_constants(self.manager, self.configuration)
-
         positions = load_yaml_file(multi_positions_path)
-        positions = verify_positions_config(positions)
-        self.configuration["multi_positions"] = positions
+        self.preload_report = preload_configuration(
+            self.manager,
+            self.configuration,
+            is_synthetic=self.args.synthetic_hardware,
+            multi_positions=positions,
+        )
 
         total_ram, available_ram = get_ram_info()
         logger.info(
@@ -235,6 +237,7 @@ class Controller:
                 args,
                 self.configuration,
                 event_queue=self.event_queue,
+                autofocus_progress_queue=self.autofocus_progress_queue,
                 log_queue=log_queue,
             )
         else:
@@ -243,6 +246,7 @@ class Controller:
                 args,
                 self.configuration,
                 event_queue=self.event_queue,
+                autofocus_progress_queue=self.autofocus_progress_queue,
                 log_queue=log_queue,
             )
 
@@ -267,8 +271,13 @@ class Controller:
         #: View: View object in MVC architecture.
         self.view = view(self.root)
 
+        #: AutofocusCalibrationController: Popup-independent calibration state.
+        self.autofocus_calibration_controller = AutofocusCalibrationController(self)
+
         #: dict: Event listeners for the controller.
-        self.event_listeners = {}
+        self.event_listeners = {
+            "autofocus_complete": self.autofocus_calibration_controller.handle_autofocus_complete
+        }
 
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acquire_bar, self)
@@ -364,6 +373,12 @@ class Controller:
 
         #: bool: Flag for stopping acquisition.
         self.stop_acquisition_flag = False
+
+        #: bool: Whether an autofocus routine is currently active.
+        self.is_autofocusing = False
+
+        #: str: Acquisition lifecycle state shown by the autofocus popup.
+        self.autofocus_acquisition_state = "idle"
 
         #: int: current image id in the buffer
         self.current_image_id = -1
@@ -523,9 +538,13 @@ class Controller:
         """
         while True:
             try:
-                func, args, kwargs, done_event, result = (
-                    self._main_thread_dispatch_queue.get_nowait()
-                )
+                (
+                    func,
+                    args,
+                    kwargs,
+                    done_event,
+                    result,
+                ) = self._main_thread_dispatch_queue.get_nowait()
             except queue.Empty:
                 return
 
@@ -590,6 +609,18 @@ class Controller:
             stop=False,
         )
 
+    def _set_autofocus_acquisition_state(self, state: str) -> None:
+        """Synchronize an open autofocus popup with acquisition state."""
+        self.autofocus_acquisition_state = state
+        if hasattr(self, "af_popup_controller"):
+            self.af_popup_controller.set_acquisition_state(state)
+
+    def _set_autofocus_state(self, is_active: bool) -> None:
+        """Synchronize an open autofocus popup with autofocus activity."""
+        self.is_autofocusing = is_active
+        if hasattr(self, "af_popup_controller"):
+            self.af_popup_controller.set_autofocus_state(is_active)
+
     def _handle_capture_start_error(self, error: Exception) -> None:
         """Display capture startup errors on the Tk thread.
 
@@ -607,6 +638,8 @@ class Controller:
             message=f"WARNING:\n{error}",
         )
         self.set_mode_of_sub("stop")
+        self._set_autofocus_acquisition_state("idle")
+        self._set_autofocus_state(False)
 
     def _on_capture_started(self, microscope_name: str) -> None:
         """Apply post-start capture UI updates on the Tk thread.
@@ -622,6 +655,7 @@ class Controller:
         """
         self.acquire_bar_controller.view.acquire_btn.configure(text="Stop")
         self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
+        self._set_autofocus_acquisition_state("running")
         self.camera_view_controller.initialize_non_live_display(
             self.configuration["experiment"]["MicroscopeState"],
             self.configuration["experiment"]["CameraParameters"][microscope_name],
@@ -682,8 +716,10 @@ class Controller:
             stop=True,
         )
         self.set_mode_of_sub("stop")
+        self._set_autofocus_acquisition_state("idle")
+        self._set_autofocus_state(False)
 
-    def change_microscope(self, microscope_name: str, zoom: str | None = None) -> None:
+    def change_microscope(self, microscope_name: str, zoom: str | None = None) -> bool:
         """Change the microscope configuration.
 
         Parameters
@@ -695,28 +731,98 @@ class Controller:
 
         Returns
         -------
-        None
+        bool
+            ``True`` when the microscope or zoom is updated successfully,
+            otherwise ``False``.
         """
-        self.configuration["experiment"]["MicroscopeState"][
-            "microscope_name"
-        ] = microscope_name
-        if zoom:
+        if self.configuration_controller.change_microscope(microscope_name):
+            supported_zoom = list(
+                self.configuration_controller.get_zoom_value_list(microscope_name)
+            )
+            if not supported_zoom:
+                messagebox.showwarning(
+                    title="Navigate",
+                    message=(
+                        f"No zoom values are configured for microscope "
+                        f"'{microscope_name}'. Please update the configuration YAML."
+                    ),
+                )
+                return False
+            if zoom not in supported_zoom:
+                fallback_zoom = supported_zoom[0]
+                messagebox.showwarning(
+                    title="Navigate",
+                    message=(
+                        f"Zoom '{zoom}' is not available for microscope "
+                        f"'{microscope_name}'. Using '{fallback_zoom}' instead."
+                    ),
+                )
+                zoom = fallback_zoom
+
+            # update microscope name
+            self.configuration["experiment"]["MicroscopeState"][
+                "microscope_name"
+            ] = microscope_name
+            # set zoom value
             self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
-        if self.configuration_controller.change_microscope():
             # update widgets
             self.stage_controller.initialize()
             self.channels_tab_controller.initialize()
             self.channels_tab_controller.populate_experiment_values()
             self.camera_setting_controller.update_camera_device_related_setting()
             self.camera_setting_controller.populate_experiment_values()
-            self.camera_setting_controller.calculate_physical_dimensions()
+            r = self.camera_setting_controller.calculate_physical_dimensions()
+            if not r:
+                messagebox.showwarning(
+                    title="Navigate",
+                    message=(
+                        f"Please make sure a valid pixel size is configured for zoom "
+                        f"'{zoom}' on microscope '{microscope_name}' in the "
+                        "configuration YAML."
+                    ),
+                )
             self.camera_view_controller.update_snr()
-
+            result = True
+        elif self.configuration_controller.microscope_name == microscope_name:
+            # update zoom only if it's valid
+            if zoom != self.configuration["experiment"]["MicroscopeState"][
+                "zoom"
+            ] and zoom in self.configuration_controller.get_zoom_value_list(
+                microscope_name
+            ):
+                self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
+                r = self.camera_setting_controller.calculate_physical_dimensions()
+                if not r:
+                    messagebox.showwarning(
+                        title="Navigate",
+                        message=(
+                            f"Please make sure a valid pixel size is configured for "
+                            f"zoom '{zoom}' on microscope '{microscope_name}' in the "
+                            "configuration YAML."
+                        ),
+                    )
+                result = True
+            else:
+                result = False
+        else:
+            messagebox.showwarning(
+                title="Navigate",
+                message=(
+                    f"Microscope '{microscope_name}' is not configured."
+                    if not zoom
+                    else (
+                        f"Microscope '{microscope_name}' with zoom '{zoom}' "
+                        "is not configured."
+                    )
+                ),
+            )
+            return False
         if (
             hasattr(self, "waveform_popup_controller")
             and self.waveform_popup_controller
         ):
             self.waveform_popup_controller.populate_experiment_values()
+        return result
 
     def initialize_cam_view(self) -> None:
         """Populate view and maximum intensity projection tabs.
@@ -771,6 +877,7 @@ class Controller:
             "microscope_name"
         ]
         self.configuration_controller.change_microscope()
+        self.camera_setting_controller.populate_experiment_values()
         self.menu_controller.resolution_value.set(
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
@@ -789,7 +896,6 @@ class Controller:
             self.configuration["multi_positions"]
         )
         self.channels_tab_controller.populate_experiment_values()
-        self.camera_setting_controller.populate_experiment_values()
         self.waveform_tab_controller.set_waveform_template(
             self.configuration["experiment"]["MicroscopeState"]["waveform_template"]
         )
@@ -1049,6 +1155,7 @@ class Controller:
             if microscope_name == self.configuration_controller.microscope_name:
                 self.stage_controller.initialize()
                 self.channels_tab_controller.update_stack_position_limits()
+                self._refresh_autofocus_bounds()
             self.threads_pool.createThread(
                 resourceName="model",
                 target=self.update_stage_limits,
@@ -1131,6 +1238,7 @@ class Controller:
             if resolution_value != self.menu_controller.resolution_value.get():
                 self.menu_controller.resolution_value.set(resolution_value)
                 return
+
             self.change_microscope(temp[0], temp[1])
             work_thread = self.threads_pool.createThread(
                 resourceName="model",
@@ -1171,7 +1279,9 @@ class Controller:
 
         elif command == "stage_limits":
             self.stage_controller.stage_limits = args[0]
+            self.configuration["experiment"]["StageParameters"]["limits"] = args[0]
             self.channels_tab_controller.update_stack_position_limits()
+            self._refresh_autofocus_bounds()
             self.threads_pool.createThread(
                 resourceName="model",
                 target=lambda: self.model.run_command("stage_limits", *args),
@@ -1180,12 +1290,17 @@ class Controller:
         elif command == "autofocus":
             """Execute autofocus routine."""
             if not self.acquire_bar_controller.is_acquiring:
+                self._set_autofocus_state(True)
+                self._set_autofocus_acquisition_state("starting")
+                self.acquire_bar_controller.is_acquiring = True
+                self.acquire_bar_controller.view.acquire_btn.configure(state="disabled")
                 self.threads_pool.createThread(
                     resourceName="camera",
                     target=self.capture_image,
                     args=("autofocus", "live", *args),
                 )
             elif self.acquire_bar_controller.mode == "live":
+                self._set_autofocus_state(True)
                 self.threads_pool.createThread(
                     resourceName="model",
                     target=lambda: self.model.run_command("autofocus", *args),
@@ -1259,10 +1374,6 @@ class Controller:
                 filename="multi_positions.yml",
             )
 
-            self.camera_setting_controller.solvent = self.configuration["experiment"][
-                "Saving"
-            ]["solvent"]
-            self.camera_setting_controller.calculate_physical_dimensions()
             self.execute("acquire")
 
         elif command == "acquire":
@@ -1338,6 +1449,7 @@ class Controller:
 
         elif command == "stop_acquire":
             """Stop the acquisition."""
+            self._set_autofocus_acquisition_state("stopping")
             self.stop_acquisition_flag = True
 
             # self.model.run_command('stop')
@@ -1366,8 +1478,13 @@ class Controller:
                 ("rest_api_config", "rest_api_config.yml"),
                 ("waveform_templates", "waveform_templates.yml"),
             ]:
+                config_directory = file_directory
+                if config_name == "gui":
+                    gui_configuration_path = os.fspath(self.gui_configuration_path)
+                    config_directory = os.path.dirname(gui_configuration_path)
+                    filename = os.path.basename(gui_configuration_path)
                 save_yaml_file(
-                    file_directory=file_directory,
+                    file_directory=config_directory,
                     content_dict=self.configuration[config_name],
                     filename=filename,
                 )
@@ -1780,6 +1897,13 @@ class Controller:
             ax = axis.split("_")[0]
             stage_gui_dict[ax] = val
         self.stage_controller.set_position_silent(stage_gui_dict)
+        self._refresh_autofocus_bounds()
+
+    def _refresh_autofocus_bounds(self) -> None:
+        """Refresh an open autofocus popup after stage state changes."""
+        autofocus_controller = getattr(self, "af_popup_controller", None)
+        if autofocus_controller is not None:
+            autofocus_controller.refresh_bounds_validation()
 
     def update_frame_rate(self, frame_rate: float) -> None:
         """Update the frame rate display in the GUI.
@@ -1818,6 +1942,22 @@ class Controller:
         -------
         None
         """
+        latest_progress = None
+        while self._event_pump_running:
+            try:
+                latest_progress = self.autofocus_progress_queue.get_nowait()
+            except queue.Empty:
+                break
+        if latest_progress is not None:
+            handler = self.event_listeners.get("autofocus_progress")
+            if handler is not None:
+                try:
+                    handler(latest_progress)
+                except Exception:
+                    print(
+                        "*** unhandled event: autofocus_progress, " f"{latest_progress}"
+                    )
+
         while self._event_pump_running:
             try:
                 event, value = self.event_queue.get_nowait()
@@ -1855,6 +1995,9 @@ class Controller:
             elif event == "frame_rate":
                 # Update the GUI with the accurate frame rate from the model
                 self.update_frame_rate(value)
+
+            elif event == "autofocus_sequence_complete":
+                self._set_autofocus_state(False)
 
             elif event in self.event_listeners.keys():
                 try:

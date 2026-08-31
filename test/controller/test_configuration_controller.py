@@ -85,6 +85,13 @@ def test_filter_wheel_types(configuration):
     assert controller.filter_wheel_types == ["Sutter", "SyntheticFilterWheel"]
 
 
+def test_gui_settings_are_read_from_gui_configuration(configuration):
+    controller = ConfigurationController(configuration)
+
+    assert controller.number_of_channels == 5
+    assert controller.gui_setting is configuration["gui"]
+
+
 @pytest.mark.parametrize("visibility", [None, "invalid", [True]])
 def test_filter_wheel_visibility_defaults_to_all_true(configuration, visibility):
     if visibility is not None:
@@ -116,3 +123,16 @@ def test_filter_wheel_visibility_listproxy(configuration):
         controller = ConfigurationController(configuration)
 
         assert controller.filter_wheel_visibility == [True, False]
+
+
+def test_change_microscope_logs_warning_for_missing_name(configuration, caplog):
+    controller = ConfigurationController(configuration)
+
+    with caplog.at_level("WARNING", logger="navigate"):
+        result = controller.change_microscope("missing_scope")
+
+    assert result is False
+    assert controller.microscope_name == "scope_a"
+    assert "Microscope missing_scope not found in configuration." in caplog.text
+    assert "scope_a" in caplog.text
+    assert "scope_b" in caplog.text

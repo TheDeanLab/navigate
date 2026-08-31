@@ -99,6 +99,15 @@ class ConfigurationController:
             microscope_name = self.configuration["experiment"]["MicroscopeState"][
                 "microscope_name"
             ]
+        if (
+            microscope_name
+            not in self.configuration["configuration"]["microscopes"].keys()
+        ):
+            logger.warning(
+                f"Microscope {microscope_name} not found in configuration. Available microscopes: "
+                f" {list(self.configuration['configuration']['microscopes'].keys())}"
+            )
+            return False
 
         assert (
             microscope_name in self.configuration["configuration"]["microscopes"].keys()
@@ -142,7 +151,9 @@ class ConfigurationController:
         setting = {
             "laser": self.lasers_info,
         }
-        for i, filter_wheel_config in enumerate(self.microscope_config.get("filter_wheel", [])):
+        for i, filter_wheel_config in enumerate(
+            self.microscope_config.get("filter_wheel", [])
+        ):
             filter_wheel_name = filter_wheel_config.get("name", f"FilterWheel-{i}")
             setting[filter_wheel_name] = list(
                 filter_wheel_config["available_filters"].keys()
@@ -515,12 +526,7 @@ class ConfigurationController:
         number_of_channels : int
             Number of channels.
         """
-        if self.microscope_config is not None:
-            number_of_channels = (
-                self.configuration["gui"].get("channel_settings", {}).get("count", 5)
-            )
-            return number_of_channels
-        return 5
+        return self.configuration["gui"].get("channel_settings", {}).get("count", 5)
 
     @property
     def number_of_filter_wheels(self) -> int:
@@ -619,6 +625,25 @@ class ConfigurationController:
             microscope_name
         ].keys()
 
+    def get_zoom_pixel_sizes(self, microscope_name: str) -> dict:
+        """Return a dictionary of pixel sizes
+
+        Returns
+        -------
+        pixel_size_dict : dict
+            A dictionary of pixel sizes: {zoom_value : pixel_size}
+        """
+        if (
+            microscope_name is None
+            or microscope_name
+            not in self.configuration["configuration"]["microscopes"].keys()
+        ):
+            microscope_name = self.microscope_name
+
+        return self.configuration["configuration"]["microscopes"][microscope_name][
+            "zoom"
+        ]["pixel_size"].copy()
+
     @property
     def gui_setting(self) -> dict:
         """Return the GUI settings
@@ -628,7 +653,7 @@ class ConfigurationController:
         gui_setting : dict
             Dictionary with the GUI settings.
         """
-        return self.configuration["configuration"]["gui"]
+        return self.configuration["gui"]
 
     def is_same_camera(self, microscope_name: str) -> bool:
         """Check if the current microscope uses the same camera as the given microscope.

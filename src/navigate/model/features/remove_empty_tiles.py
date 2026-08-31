@@ -616,7 +616,7 @@ class RemoveEmptyPositions(FeatureBase):
             list,
             default=[],
             label="Position Flags",
-            help_text="Boolean flags identifying which multi-position rows contain tissue.",
+            help_text="Boolean flags identifying which multi-position rows should be removed (True: keep; False: delete).",
         ),
     }
 

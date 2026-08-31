@@ -101,6 +101,8 @@ class CollectionSpec:
     ``storage='nested_mapping'`` stores calibration rows as
     ``solvent -> axis -> zoom -> position``. ``storage='single_mapping'``
     stores one fixed mapping using the item schema keys as fields.
+    ``dynamic_source`` identifies collection fields that should be resolved at
+    render time.
     """
 
     item_schema: Mapping[str, SettingSpec]
@@ -110,6 +112,7 @@ class CollectionSpec:
     storage_fields: Optional[Tuple[str, ...]] = None
     label: Optional[str] = None
     help_text: Optional[str] = None
+    dynamic_source: Optional[str] = None
     minimum_items: int = 0
 
     def __post_init__(self) -> None:

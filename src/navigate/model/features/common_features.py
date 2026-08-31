@@ -42,7 +42,7 @@ import json
 
 # Local application imports
 from .image_writer import ImageWriter
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features.base import FeatureBase
 from navigate.tools.common_functions import VariableWithLock
 from navigate.model.waveforms import remote_focus_ramp
@@ -840,11 +840,12 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
             dynamic_source="zoom_values",
             depends_on="resolution_value",
         ),
-        "offset": SettingSpec(
-            list,
-            default=None,
+        "offset": CollectionSpec(
+            item_schema={},
+            storage="single_mapping",
             label="Offset",
-            help_text="Optional [x, y, z, theta, f] stage offset list.",
+            help_text="Optional stage offsets keyed by axis.",
+            dynamic_source="stage_axes",
         ),
     }
 
@@ -859,8 +860,8 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
             The resolution/microscope name of the current multiposition table
         zoom_value : str
             The zoom name. For example "1x", "2x", ...
-        offset : list
-            The position offset [x, y, z, theta, f]
+        offset : dict
+            The position offsets keyed by axis name.
         """
         #: MicroscopeModel: The microscope model associated with position control.
         self.model = model
@@ -902,6 +903,40 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
         #: bool: The flag indicates whether this node is initialized
         self.initialized = False
 
+    def normalize_stage_offset(self):
+        """Normalize optional stage offsets into an axis-keyed float mapping."""
+        offset = self.offset
+        axes_num = len(self.stage_axes)
+        if type(offset) is str:
+            try:
+                offset = ast.literal_eval(offset)
+            except (SyntaxError, ValueError):
+                offset = {}
+        if not offset:
+            offset = {}
+
+        if isinstance(offset, dict):
+            normalized_offset = {}
+            for axis in self.stage_axes:
+                try:
+                    normalized_offset[axis] = float(offset.get(axis, 0))
+                except (ValueError, TypeError):
+                    normalized_offset[axis] = 0
+            self.offset = normalized_offset
+            return
+
+        if type(offset) is not list:
+            offset = [0] * axes_num
+
+        if len(offset) < axes_num:
+            offset[len(offset) : axes_num] = [0] * (axes_num - len(offset))
+        self.offset = {}
+        for i, axis in enumerate(self.stage_axes):
+            try:
+                self.offset[axis] = float(offset[i])
+            except (ValueError, TypeError):
+                self.offset[axis] = 0
+
     def pre_signal_func(self):
         """Calculate stage offset if applicable."""
         if self.initialized:
@@ -919,25 +954,7 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
         #: multi-position table.
         self.axes_index = [headers.index(axis.upper()) for axis in self.stage_axes]
         self.position_count = len(self.multiposition_table)
-        axes_num = len(self.stage_axes)
-        if type(self.offset) is str:
-            try:
-                self.offset = ast.literal_eval(self.offset)
-            except SyntaxError:
-                self.offset = [0] * axes_num
-        if not self.offset or type(self.offset) is not list:
-            self.offset = [0] * axes_num
-
-        # assert offset has values for each axis
-        if len(self.offset) < axes_num:
-            self.offset[len(self.offset) : axes_num] = [0] * (
-                axes_num - len(self.offset)
-            )
-        for i in range(axes_num):
-            try:
-                self.offset[i] = float(self.offset[i])
-            except (ValueError, TypeError):
-                self.offset[i] = 0
+        self.normalize_stage_offset()
 
         curr_resolution = self.model.active_microscope_name
         curr_zoom = self.model.active_microscope.zoom.zoomvalue
@@ -953,9 +970,9 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
             curr_stage_offset = self.model.configuration["configuration"][
                 "microscopes"
             ][curr_resolution]["stage"]
-            for i, axis in enumerate(self.stage_axes):
-                self.offset[i] = (
-                    self.offset[i]
+            for axis in self.stage_axes:
+                self.offset[axis] = (
+                    self.offset[axis]
                     + curr_stage_offset.get(axis + "_offset", 0)
                     - stage_offset.get(axis + "_offset", 0)
                 )
@@ -964,11 +981,11 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
             stage_solvent_offsets = self.model.active_microscope.zoom.stage_offsets
             if solvent in stage_solvent_offsets.keys():
                 stage_offset = stage_solvent_offsets[solvent]
-                for i, axis in enumerate(self.stage_axes):
+                for axis in self.stage_axes:
                     if axis not in stage_offset.keys():
                         continue
                     try:
-                        self.offset[i] = self.offset[i] + float(
+                        self.offset[axis] = self.offset[axis] + float(
                             stage_offset[axis][self.zoom_value][curr_zoom]
                         )
                     except (ValueError, KeyError):
@@ -998,16 +1015,13 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
         if self.current_idx >= self.position_count:
             return False
         # add offset
-        pos_dict = dict(
-            zip(
-                self.stage_axes,
-                [
-                    self.multiposition_table[self.current_idx][self.axes_index[i]]
-                    + self.offset[i]
-                    for i in range(len(self.axes_index))
-                ],
+        pos_dict = {
+            axis: (
+                self.multiposition_table[self.current_idx][self.axes_index[i]]
+                + self.offset[axis]
             )
-        )
+            for i, axis in enumerate(self.stage_axes)
+        }
         # pause data thread if necessary
         if self.current_idx == 0:
             temp = self.model.get_stage_position()
@@ -1018,18 +1032,13 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
                 )
             )
         else:
-            pre_stage_pos = dict(
-                zip(
-                    self.stage_axes,
-                    [
-                        self.multiposition_table[self.current_idx - 1][
-                            self.axes_index[i]
-                        ]
-                        + self.offset[i]
-                        for i in range(len(self.axes_index))
-                    ],
+            pre_stage_pos = {
+                axis: (
+                    self.multiposition_table[self.current_idx - 1][self.axes_index[i]]
+                    + self.offset[axis]
                 )
-            )
+                for i, axis in enumerate(self.stage_axes)
+            }
         delta_distances = [
             abs(pos_dict[axis] - pre_stage_pos[axis]) for axis in self.stage_axes
         ]
@@ -1196,7 +1205,10 @@ class ZStackAcquisition(FeatureBase):
             bool,
             default=False,
             label="Save Stack",
-            help_text="Write stack frames while this feature runs.",
+            help_text=(
+                "Write stack frames while this feature runs (saves another copy of "
+                "images if 'Save' is selected in navigate)."
+            ),
         ),
         "saving_dir": SettingSpec(
             str,

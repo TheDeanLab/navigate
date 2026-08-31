@@ -426,6 +426,17 @@ class FeatureListGraphController:
         return tuple(f"channel_{index}" for index in range(1, channel_count + 1))
 
     @staticmethod
+    def stage_axis_offset_spec(axis):
+        """Return a float setting spec for one stage-axis offset."""
+        return SettingSpec(
+            float,
+            default=0,
+            label=axis.upper() if len(axis) == 1 else axis.title(),
+            help_text=f"Additional {axis}-axis position offset.",
+            step=0.01,
+        )
+
+    @staticmethod
     def autofocus_calibration_action_choices():
         """Return displayed autofocus calibration action labels."""
         return tuple(AutofocusPopupController.CALIBRATION_ACTIONS.keys())
@@ -517,6 +528,24 @@ class FeatureListGraphController:
                 )
             if choices and args_value[index] not in choices:
                 args_value[index] = choices[0]
+
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if not isinstance(spec, CollectionSpec):
+                continue
+            if spec.dynamic_source != self.STAGE_AXIS_DYNAMIC_SOURCE:
+                continue
+            axes = self.stage_axis_choices()
+            if not axes:
+                continue
+            item_schema = {axis: self.stage_axis_offset_spec(axis) for axis in axes}
+            parameter_specs[arg_name] = replace(spec, item_schema=item_schema)
+            if not isinstance(args_value[index], dict):
+                args_value[index] = {}
+            args_value[index] = {
+                axis: args_value[index].get(axis, item_schema[axis].default)
+                for axis in item_schema
+            }
 
         return args_value, parameter_specs
 

@@ -620,6 +620,51 @@ def test_feature_parameter_values_add_autofocus_dynamic_choices(graph_controller
     }
 
 
+def test_feature_parameter_values_add_dynamic_stage_axis_collection_fields(
+    graph_controller,
+):
+    """Dynamic collection schemas expand to all configured stage axes."""
+
+    class TestFeature:
+        parameter_schema = {
+            "offset": CollectionSpec(
+                item_schema={},
+                storage="single_mapping",
+                dynamic_source="stage_axes",
+            )
+        }
+
+        def __init__(self, model, offset=None):
+            pass
+
+    graph_controller.configuration_controller = SimpleNamespace(
+        configuration={
+            "configuration": {
+                "microscopes": {
+                    "ScopeA": {"stage": {"hardware": [{"axes": ["x", "aux"]}]}},
+                    "ScopeB": {
+                        "stage": {
+                            "hardware": [
+                                {"axes": ["theta"]},
+                                {"axes": ["sample"]},
+                            ]
+                        }
+                    },
+                }
+            }
+        }
+    )
+
+    _, args_value, schema = graph_controller.get_feature_parameter_values(
+        TestFeature,
+        {"name": TestFeature, "args": ({"aux": 2.5},)},
+    )
+
+    assert tuple(schema["offset"].item_schema) == ("x", "aux", "theta", "sample")
+    assert args_value == [{"x": 0, "aux": 2.5, "theta": 0, "sample": 0}]
+    assert schema["offset"].item_schema["sample"].label == "Sample"
+
+
 def test_refresh_linked_zoom_choices_updates_widget_and_schema(graph_controller):
     """Changing the selected microscope updates the linked zoom choices."""
 

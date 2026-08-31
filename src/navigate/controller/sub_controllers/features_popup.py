@@ -327,6 +327,7 @@ class FeatureListGraphController:
         self.branch_drag_target = None
         self.branch_drag_targets = []
         self.branch_drag_window = None
+        self.selected_palette_button = None
         self.selected_branch_palette_button = None
         if self.palette_items is not None:
             for feature_name in self.feature_names:
@@ -1527,6 +1528,14 @@ class FeatureListGraphController:
 
     def start_palette_drag(self, event, name):
         self.clear_selection()
+        previous_button = self.selected_palette_button
+        if (
+            previous_button is not None
+            and previous_button is not event.widget
+            and previous_button.winfo_exists()
+        ):
+            previous_button.state(["!pressed"])
+        self.selected_palette_button = event.widget
         return self.start_drag(event, name)
 
     def start_branch_palette_drag(self, event, name, branch_controllers):

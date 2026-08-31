@@ -121,6 +121,37 @@ def test_feature_palette_includes_only_feature_base_subclasses(monkeypatch):
     assert "SharedList" not in controller.feature_names
 
 
+def test_start_palette_drag_keeps_only_latest_palette_button_pressed(graph_controller):
+    """Clicking another feature palette button clears the previous pressed state."""
+
+    class FakePaletteButton:
+        def __init__(self):
+            self.state_calls = []
+
+        def state(self, states):
+            self.state_calls.append(states)
+
+        def winfo_exists(self):
+            return True
+
+    first_button = FakePaletteButton()
+    second_button = FakePaletteButton()
+    graph_controller.selected_palette_button = first_button
+    graph_controller.clear_selection = MagicMock()
+    graph_controller.start_drag = MagicMock(return_value="break")
+
+    result = graph_controller.start_palette_drag(
+        SimpleNamespace(widget=second_button),
+        "StackPause",
+    )
+
+    assert result == "break"
+    assert first_button.state_calls == [["!pressed"]]
+    assert graph_controller.selected_palette_button is second_button
+    graph_controller.clear_selection.assert_called_once()
+    graph_controller.start_drag.assert_called_once()
+
+
 def test_move_feature_right_to_interior_slot_changes_order(graph_controller):
     """Moving right to an interior slot must change displayed and saved order."""
     graph_controller.features = make_three_features()

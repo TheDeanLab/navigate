@@ -145,8 +145,6 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
 
         self.set_sensor_mode("Normal")
         self.camera_controller.binning = 1
-        # TODO: Implement readout_speed, defect_correct_mode
-        self.camera_controller.exp_mode = "Edge Trigger"
         self.camera_controller.prog_scan_dir = 0
 
         # Photometrics camera settings from config file

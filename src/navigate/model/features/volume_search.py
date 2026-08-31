@@ -42,7 +42,7 @@ from navigate.model.analysis.boundary_detect import (
     find_cell_boundary_3d,
     map_labels,
 )
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.features.base import FeatureBase
 from navigate.tools.multipos_table_tools import write_to_csv_file
 

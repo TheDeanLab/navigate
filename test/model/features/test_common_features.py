@@ -35,7 +35,7 @@ import random
 from unittest.mock import MagicMock
 
 import pytest
-from navigate.model.devices.configuration_schema import CollectionSpec
+from navigate.config.configuration_schema import CollectionSpec
 from navigate.model.features.common_features import (
     ASIZStackAcquisition,
     MoveToNextPositionInMultiPositionTable,

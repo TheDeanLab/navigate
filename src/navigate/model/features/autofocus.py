@@ -43,7 +43,7 @@ from scipy.interpolate import UnivariateSpline
 # Local imports
 from navigate.model.features.base import FeatureBase
 from navigate.model.features.feature_container import load_features
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 from navigate.model.utils.exceptions import UserVisibleException
 

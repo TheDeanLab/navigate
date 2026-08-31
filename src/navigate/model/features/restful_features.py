@@ -43,7 +43,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.features.base import FeatureBase
 
 # Logger Setup

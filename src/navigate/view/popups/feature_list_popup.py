@@ -41,7 +41,7 @@ from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.configurator_application_window import ConfiguratorTooltip
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features.parameter_tools import infer_feature_parameter_spec
 from navigate.view.theme import get_theme_padding_px, get_theme_space_px
 

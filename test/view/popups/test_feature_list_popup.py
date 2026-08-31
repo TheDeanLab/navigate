@@ -41,7 +41,7 @@ from navigate.view.popups.feature_list_popup import (
     FeatureConfigPopup,
     FeatureListPopup,
 )
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
 

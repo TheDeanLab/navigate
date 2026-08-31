@@ -41,7 +41,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 # Local imports
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.features.base import FeatureBase
 from navigate.model.features.common_features import PrepareNextChannel
 import navigate.model.analysis.image_contrast as img_contrast

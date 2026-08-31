@@ -38,7 +38,7 @@ import time
 # Third party imports
 
 # Local application imports
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features.base import FeatureBase
 
 # Logger Setup

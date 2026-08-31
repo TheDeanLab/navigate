@@ -10,7 +10,7 @@ from navigate.controller.sub_controllers.features_popup import (
     FeaturePopupController,
     FeatureListGraphController,
 )
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features import feature_related_functions
 from navigate.model.features.base import FeatureBase
 from navigate.model.features.parameter_tools import coerce_feature_parameter

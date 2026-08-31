@@ -39,7 +39,7 @@ from skimage.filters import threshold_otsu
 
 # Local Imports
 from navigate.model.analysis.boundary_detect import find_tissue_boundary_2d
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.features.base import FeatureBase
 
 

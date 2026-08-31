@@ -8,7 +8,7 @@ import ast
 from typing import Union
 
 # Local application imports
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 
 
 def coerce_feature_parameter(

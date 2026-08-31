@@ -51,7 +51,7 @@ except ImportError:
 import navigate
 from navigate.model import data_sources
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.features.base import FeatureBase
 
 # Logger Setup

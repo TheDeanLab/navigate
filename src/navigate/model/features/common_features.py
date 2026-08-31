@@ -42,7 +42,7 @@ import json
 
 # Local application imports
 from .image_writer import ImageWriter
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features.base import FeatureBase
 from navigate.tools.common_functions import VariableWithLock
 from navigate.model.waveforms import remote_focus_ramp

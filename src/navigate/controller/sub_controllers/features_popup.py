@@ -54,7 +54,7 @@ from navigate.model.features.feature_related_functions import (
 )
 from navigate.model.features import feature_related_functions
 from navigate.model.features.common_features import PrepareNextChannel
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features.base import is_feature_class
 from navigate.controller.sub_controllers.autofocus import AutofocusPopupController
 from navigate.model.features.parameter_tools import (

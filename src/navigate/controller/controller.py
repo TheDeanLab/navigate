@@ -1410,7 +1410,7 @@ class Controller:
                         self.view, title="Feature List Configuration"
                     )
                     self.features_popup_controller = FeaturePopupController(
-                        feature_list_popup, self
+                        feature_list_popup, self, persist_feature_list_edits=True
                     )
                     self.features_popup_controller.populate_feature_list(feature_id)
 

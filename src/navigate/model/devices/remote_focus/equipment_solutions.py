@@ -43,7 +43,7 @@ from navigate.tools.decorators import log_initialization
 from navigate.model.devices.remote_focus.ni import NIRemoteFocus
 from navigate.model.devices.remote_focus.asi import ASIRemoteFocus
 from navigate.model.devices.device_types import ASIDevice, SerialDevice
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]

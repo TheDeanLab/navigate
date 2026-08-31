@@ -43,7 +43,7 @@ from nidaqmx.constants import LineGrouping
 # Local Imports
 from navigate.model.devices.laser.base import LaserBase
 from navigate.model.devices.device_types import NIDevice
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup

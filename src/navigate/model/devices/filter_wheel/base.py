@@ -39,7 +39,7 @@ from abc import ABC, abstractmethod
 
 # Local Imports
 from navigate.tools.decorators import log_initialization
-from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]

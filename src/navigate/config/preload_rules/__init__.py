@@ -1,17 +1,14 @@
 # Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the
-# limitations in the disclaimer below) provided that the following conditions are met:
-
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
-
 #      * Redistributions in binary form must reproduce the above copyright
 #      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
-
 #      * Neither the name of the copyright holders nor the names of its
 #      contributors may be used to endorse or promote products derived from this
 #      software without specific prior written permission.
@@ -29,12 +26,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Compatibility imports for device configuration schemas."""
 
-from navigate.config.configuration_schema import (
-    CollectionSpec,
-    SettingSpec,
-    merge_configuration_schemas,
+"""Rule groups for Navigate configuration preload."""
+
+from navigate.config.preload_rules.configuration import CONFIGURATION_RULES
+from navigate.config.preload_rules.experiment import EXPERIMENT_RULES
+from navigate.config.preload_rules.gui import GUI_RULES
+from navigate.config.preload_rules.positions import POSITIONS_RULES
+from navigate.config.preload_rules.waveform import WAVEFORM_CONSTANTS_RULES
+
+PRELOAD_RULES = (
+    CONFIGURATION_RULES
+    + GUI_RULES
+    + EXPERIMENT_RULES
+    + WAVEFORM_CONSTANTS_RULES
+    + POSITIONS_RULES
 )
-
-__all__ = ["CollectionSpec", "SettingSpec", "merge_configuration_schemas"]

@@ -40,7 +40,7 @@ from typing import Any, Optional
 from navigate.model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
 from navigate.model.devices.zoom.base import ZoomBase
 from navigate.model.devices.device_types import SerialDevice
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup

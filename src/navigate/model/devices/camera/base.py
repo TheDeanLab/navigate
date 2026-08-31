@@ -42,6 +42,7 @@ import numpy as np
 
 # Local Imports
 from navigate.config import get_navigate_path
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -56,6 +57,35 @@ class CameraBase(ABC):
     This class provides the interface and common functionality for controlling
     cameras with navigate.
     """
+
+    configuration_schema = {
+        "flip_x": SettingSpec(
+            bool,
+            default=False,
+            label="Flip X",
+            required=False,
+            help_text="Mirror acquired images horizontally before displaying or saving them.",
+        ),
+        "flip_y": SettingSpec(
+            bool,
+            default=False,
+            label="Flip Y",
+            required=False,
+            help_text="Mirror acquired images vertically before displaying or saving them.",
+        ),
+        "pixel_size_in_microns": SettingSpec(
+            float,
+            default=6.5,
+            label="Pixel Size (µm)",
+            help_text=(
+                "Physical size of one camera pixel in micrometres. "
+                "Use the manufacturer-specified sensor pixel size."
+            ),
+            minimum=0.0,
+            step=0.1,
+            required=False,
+        ),
+    }
 
     def __init__(
         self,
@@ -124,8 +154,8 @@ class CameraBase(ABC):
 
         #: float: minimum exposure time
         self.minimum_exposure_time = 0.001
-        self.camera_parameters["x_pixels"] = 2048
-        self.camera_parameters["y_pixels"] = 2048
+        self.camera_parameters.setdefault("x_pixels", 2048)
+        self.camera_parameters.setdefault("y_pixels", 2048)
 
         if "pixel_size_in_microns" not in self.camera_parameters:
             self.camera_parameters["pixel_size_in_microns"] = 6.5

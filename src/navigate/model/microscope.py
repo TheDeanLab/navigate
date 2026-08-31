@@ -42,6 +42,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 # Local application imports
+from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
 from navigate.model.device_startup_functions import load_devices, start_device
 from navigate.tools.common_functions import build_ref_name
 
@@ -166,14 +167,9 @@ class Microscope:
             return
 
         device_ref_dict = {
-            "camera": ["serial_number"],
-            "filter_wheel": ["type", "wheel_number"],
-            "zoom": ["type", "servo_id"],
-            "shutter": ["type", "channel"],
-            "remote_focus": ["type", "channel"],
-            "galvo": ["type", "channel"],
-            "laser": ["wavelength"],
-            "mirror": ["type"],
+            name: list(fields)
+            for name, fields in DEVICE_REFERENCE_FIELDS.items()
+            if name != "stage"
         }
 
         device_name_dict = {"laser": "wavelength", "filter_wheel": "name"}
@@ -673,10 +669,7 @@ class Microscope:
         logger.info(f"Waveform constants: {repr(dict(waveform_constants))}")
 
         camera_delay = (
-            self.configuration["configuration"]["microscopes"][self.microscope_name][
-                "camera"
-            ]["delay"]
-            / 1000
+            float(waveform_constants["other_constants"]["camera_delay"]) / 1000
         )
         camera_settle_duration = (
             self.configuration["configuration"]["microscopes"][self.microscope_name][

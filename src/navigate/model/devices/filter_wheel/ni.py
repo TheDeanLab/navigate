@@ -43,6 +43,7 @@ from nidaqmx.constants import LineGrouping
 
 # Local Imports
 from navigate.model.devices.filter_wheel.base import FilterWheelBase
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.devices.device_types import NIDevice
 from navigate.tools.decorators import log_initialization
 
@@ -54,6 +55,32 @@ logger = logging.getLogger(p)
 @log_initialization
 class NIFilterWheel(FilterWheelBase, NIDevice):
     """DAQFilterWheel - Class for controlling filter wheels with a DAQ."""
+
+    configuration_schema = {
+        "available_filters": CollectionSpec(
+            label="Available Filters",
+            help_text=(
+                "Filter names and the NI DAQ digital output line used for each."
+            ),
+            item_schema={
+                "name": SettingSpec(
+                    str,
+                    label="Filter Name",
+                    help_text="Display name for this filter selection.",
+                    required=True,
+                ),
+                "channel": SettingSpec(
+                    str,
+                    label="NI DAQ DO Channel Name",
+                    help_text="NI digital-output line that selects this filter.",
+                    required=True,
+                ),
+            },
+            key_field="name",
+            value_field="channel",
+            minimum_items=1,
+        ),
+    }
 
     filter_wheel_value = {}
 

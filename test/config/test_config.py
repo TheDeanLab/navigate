@@ -53,6 +53,7 @@ def test_config_methods():
     methods = dir(config)
     desired_methods = [
         "DictProxy",
+        "GUI_SETTING_DEFAULTS",
         "ListProxy",
         "Path",
         "__builtins__",
@@ -280,6 +281,7 @@ class TestVerifyConfiguration(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
 
         configuration["configuration"]["microscopes"]["Mesoscale"]["filter_wheel"][
@@ -304,10 +306,54 @@ class TestVerifyConfiguration(unittest.TestCase):
                     filter_wheel_name == temp
                 ), "filter wheel names should be the same for all microscopes"
 
+    def test_verify_waveform_constants_uses_legacy_camera_delay_as_default(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+        )
+        microscope_name = list(configuration["configuration"]["microscopes"].keys())[0]
+        configuration["configuration"]["microscopes"][microscope_name]["camera"][
+            "delay"
+        ] = "7.5"
+        configuration["configuration"]["microscopes"][microscope_name]["camera"][
+            "delay_percent"
+        ] = "12.5"
+        del configuration["waveform_constants"]["other_constants"]["camera_delay"]
+
+        config.verify_waveform_constants(self.manager, configuration)
+
+        assert (
+            configuration["waveform_constants"]["other_constants"]["camera_delay"]
+            == "7.5"
+        )
+
+    def test_verify_waveform_constants_uses_legacy_delay_percent_as_default(self):
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            waveform_constants=os.path.join(self.config_path, "waveform_constants.yml"),
+        )
+        microscope_name = list(configuration["configuration"]["microscopes"].keys())[0]
+        camera_config = configuration["configuration"]["microscopes"][microscope_name][
+            "camera"
+        ]
+        camera_config.pop("delay", None)
+        camera_config["delay_percent"] = "10"
+        del configuration["waveform_constants"]["other_constants"]["camera_delay"]
+
+        config.verify_waveform_constants(self.manager, configuration)
+
+        assert (
+            configuration["waveform_constants"]["other_constants"]["camera_delay"]
+            == "10"
+        )
+
     def test_verify_configuration_with_no_filterwheel(self):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         for microscope_name in configuration["configuration"]["microscopes"].keys():
             del configuration["configuration"]["microscopes"][microscope_name][
@@ -330,6 +376,7 @@ class TestVerifyConfiguration(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         microscope_names = list(configuration["configuration"]["microscopes"].keys())
         # delete filter wheel of the first microscope
@@ -360,6 +407,7 @@ class TestVerifyConfiguration(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         microscope_names = list(configuration["configuration"]["microscopes"].keys())
         # change filter wheel of the first microscope to have different number of filter wheels and different filter wheel types
@@ -415,6 +463,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         configuration = config.load_configs(
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
         saving_dict_sample = {
@@ -525,6 +574,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
             experiment=experiment_file_path,
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
         config.verify_experiment_config(self.manager, configuration)
@@ -611,6 +661,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             experiment=os.path.join(
                 self.test_root, "experiment_missing_parameters.yml"
             ),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
         config.verify_experiment_config(self.manager, configuration)
@@ -647,6 +698,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
             experiment=os.path.join(self.config_path, "experiment.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
         experiment = configuration["experiment"]
@@ -924,6 +976,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
             experiment=os.path.join(self.config_path, "experiment.yml"),
+            gui=os.path.join(self.config_path, "gui_configuration.yml"),
         )
         config.verify_configuration(self.manager, configuration)
 
@@ -945,9 +998,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
 
         config.verify_experiment_config(self.manager, configuration)
 
-        assert (
-            experiment["MicroscopeState"]["channels"]["channel_2"]["defocus"] == -2.5
-        )
+        assert experiment["MicroscopeState"]["channels"]["channel_2"]["defocus"] == -2.5
 
     def select_random_entries_from_list(self, parameter_list):
         n = random.randint(1, len(parameter_list))

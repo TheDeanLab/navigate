@@ -47,6 +47,7 @@ import numpy as np
 
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
 from navigate.tools.decorators import log_initialization
 
@@ -58,6 +59,57 @@ logger = logging.getLogger(p)
 @log_initialization
 class NIDAQ(DAQBase):
     """NIDAQ class for Control of NI Data Acquisition Cards."""
+
+    configuration_schema = {
+        "trigger_source": SettingSpec(
+            str,
+            default="/PXI6259/PFI0",
+            label="Trigger Source",
+            help_text="DAQ input line used as the external trigger source.",
+            required=True,
+        ),
+        "master_trigger_out_line": SettingSpec(
+            str,
+            default="PXI6259/port0/line1",
+            label="Master Trigger Out",
+            help_text="Digital output line used for the master trigger.",
+            required=True,
+        ),
+        "camera_trigger_out_line": SettingSpec(
+            str,
+            default="/PXI6259/ctr0",
+            label="Camera Trigger Out",
+            help_text="Counter or digital output line used to trigger the camera.",
+            required=True,
+        ),
+        "laser_port_switcher": SettingSpec(
+            str,
+            default="PXI6733/port0/line0",
+            label="Laser Port Switcher",
+            help_text="Digital output line used to switch laser ports.",
+            required=False,
+        ),
+        "laser_switch_state": SettingSpec(
+            bool,
+            default=False,
+            label="Laser Switch State",
+            help_text="Default state of the digital laser switch output.",
+            required=False,
+        ),
+        "trigger_reset_count": SettingSpec(
+            int,
+            default=0,
+            label="Trigger Reset Count",
+            help_text=(
+                "Number of triggers before resetting an unstable DAQ system. "
+                "Set to 0 to disable automatic resets."
+            ),
+            minimum=0,
+            maximum=1000000,
+            step=1,
+            required=False,
+        ),
+    }
 
     def __init__(self, configuration: dict[str, Any]) -> None:
         """Initialize NIDAQ class.

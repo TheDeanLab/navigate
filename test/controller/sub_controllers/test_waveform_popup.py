@@ -1,5 +1,6 @@
 import pytest
 import random
+from decimal import Decimal
 from unittest.mock import MagicMock
 
 
@@ -125,7 +126,47 @@ def test_show_laser_info(waveform_popup_controller):
 
 def test_configure_widget_range(waveform_popup_controller):
     waveform_popup_controller.configure_widget_range()
-    assert True
+
+    gui_settings = waveform_popup_controller.parent_controller.configuration["gui"]
+    widgets = waveform_popup_controller.view.get_widgets()
+    for laser in waveform_popup_controller.lasers:
+        assert float(widgets[laser + " Amp"].widget.cget("increment")) == float(
+            gui_settings["remote_focus_waveform"]["amplitude_step_size"]
+        )
+        assert widgets[laser + " Amp"].widget.precision == min(
+            Decimal(
+                str(gui_settings["remote_focus_waveform"]["amplitude_step_size"])
+            ).normalize().as_tuple().exponent,
+            0,
+        )
+        assert float(widgets[laser + " Off"].widget.cget("increment")) == float(
+            gui_settings["remote_focus_waveform"]["offset_step_size"]
+        )
+        assert widgets[laser + " Off"].widget.precision == min(
+            Decimal(
+                str(gui_settings["remote_focus_waveform"]["offset_step_size"])
+            ).normalize().as_tuple().exponent,
+            0,
+        )
+    for galvo in waveform_popup_controller.galvos:
+        assert float(widgets[galvo + " Amp"].widget.cget("increment")) == float(
+            gui_settings["galvo_waveform"]["amplitude_step_size"]
+        )
+        assert widgets[galvo + " Amp"].widget.precision == min(
+            Decimal(
+                str(gui_settings["galvo_waveform"]["amplitude_step_size"])
+            ).normalize().as_tuple().exponent,
+            0,
+        )
+        assert float(widgets[galvo + " Off"].widget.cget("increment")) == float(
+            gui_settings["galvo_waveform"]["offset_step_size"]
+        )
+        assert widgets[galvo + " Off"].widget.precision == min(
+            Decimal(
+                str(gui_settings["galvo_waveform"]["offset_step_size"])
+            ).normalize().as_tuple().exponent,
+            0,
+        )
 
 
 def test_estimate_galvo_setting_empty_string(waveform_popup_controller):

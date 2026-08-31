@@ -33,6 +33,7 @@
 import random
 import pytest
 import os
+from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Iterable, Iterator, Optional
 from multiprocessing import Manager
@@ -73,6 +74,8 @@ def test_receive_last_frame_id_handles_coalesced_batches() -> None:
 
 @pytest.fixture(scope="module")
 def model():
+    from logging import NullHandler
+    from logging.handlers import QueueListener
     from types import SimpleNamespace
     from pathlib import Path
 
@@ -84,13 +87,17 @@ def model():
         verify_configuration,
         verify_positions_config,
     )
+    from navigate.log_files.log_functions import log_setup
     from navigate.tools.file_functions import load_yaml_file
 
     with Manager() as manager:
 
         # Use configuration files that ship with the code base
         configuration_directory = Path.joinpath(
-            Path(__file__).resolve().parent.parent.parent, "src", "navigate", "config"
+            Path(__file__).resolve().parent.parent.parent,
+            "src",
+            "navigate",
+            "config",
         )
         configuration_path = Path.joinpath(
             configuration_directory, "configuration.yaml"
@@ -98,6 +105,9 @@ def model():
         experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
         waveform_constants_path = Path.joinpath(
             configuration_directory, "waveform_constants.yml"
+        )
+        gui_configuration_path = Path.joinpath(
+            configuration_directory, "gui_configuration.yml"
         )
         rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
         multi_positions_path = Path.joinpath(
@@ -112,6 +122,7 @@ def model():
             experiment=experiment_path,
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
+            gui=gui_configuration_path,
         )
         verify_configuration(manager, configuration)
         verify_experiment_config(manager, configuration)
@@ -121,22 +132,25 @@ def model():
         positions = verify_positions_config(positions)
         configuration["multi_positions"] = positions
 
-        queue = multiprocessing.Queue()
+        log_queue = multiprocessing.Queue()
+        log_listener = QueueListener(log_queue, NullHandler())
+        log_listener.start()
 
         model = Model(
             args=SimpleNamespace(synthetic_hardware=True),
             configuration=configuration,
             event_queue=event_queue,
-            log_queue=queue,
+            log_queue=log_queue,
         )
 
         model.__test_manager = manager
 
         yield model
-        while not queue.empty():
-            queue.get()
-        queue.close()
-        queue.join_thread()
+        # Restore file handlers before closing the queue-backed handlers.
+        log_setup("logging.yml")
+        log_listener.stop()
+        log_queue.close()
+        log_queue.join_thread()
 
 
 @pytest.mark.flaky(reruns=3, reruns_delay=2)
@@ -341,6 +355,35 @@ def test_autofocus_live_injection_preserves_channel_args(model):
         model.data_container = original_data_container
 
 
+def test_reset_feature_list_reports_injected_autofocus_completion(model):
+    """Restoring live features reports completion of the injected sequence."""
+    original_event_queue = model.event_queue
+    original_signal_container = getattr(model, "signal_container", None)
+    original_data_container = getattr(model, "data_container", None)
+    model.event_queue = Queue()
+    model.signal_container = MagicMock()
+    model.data_container = MagicMock()
+    model.data_container.end_flag = True
+    model.injected_flag.value = True
+
+    try:
+        with patch(
+            "navigate.model.model.load_features",
+            return_value=(MagicMock(), MagicMock()),
+        ):
+            model.reset_feature_list()
+
+        assert model.event_queue.get_nowait() == (
+            "autofocus_sequence_complete",
+            None,
+        )
+        assert model.injected_flag.value is False
+    finally:
+        model.event_queue = original_event_queue
+        model.signal_container = original_signal_container
+        model.data_container = original_data_container
+
+
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")
 def test_multiposition_acquisition(model):
     """Test that the multiposition acquisition works as expected.
@@ -541,27 +584,31 @@ def test_load_feature_list_from_str(model):
     del feature_lists[-1]
 
 
-def test_load_feature_records(model):
+def test_load_feature_records(model, tmp_path, monkeypatch):
     feature_lists = model.feature_list
     l = len(feature_lists)  # noqa
 
-    from navigate.config.config import get_navigate_path
     from navigate.tools.file_functions import save_yaml_file, load_yaml_file
     from navigate.model.features.feature_related_functions import (
         convert_feature_list_to_str,
     )
 
-    feature_lists_path = get_navigate_path() + "/feature_lists"
+    navigate_home = tmp_path / "navigate_home"
+    monkeypatch.setattr(
+        "navigate.model.model.get_navigate_path",
+        lambda: str(navigate_home),
+    )
+    feature_lists_path = navigate_home / "feature_lists"
 
     if not os.path.exists(feature_lists_path):
         os.makedirs(feature_lists_path)
 
-    feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+    feature_records = load_yaml_file(feature_lists_path / "__sequence.yml")
     if not feature_records:
         feature_records = []
 
     save_yaml_file(
-        feature_lists_path,
+        str(feature_lists_path),
         {
             "module_name": None,
             "feature_list_name": "Test Feature List 5",
@@ -579,10 +626,10 @@ def test_load_feature_records(model):
     )
 
     del feature_lists[-1]
-    os.remove(f"{feature_lists_path}/__test_1.yml")
+    os.remove(feature_lists_path / "__test_1.yml")
 
     model.load_feature_records()
     assert len(feature_lists) == l + len(feature_records) * 2
-    feature_records_2 = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+    feature_records_2 = load_yaml_file(feature_lists_path / "__sequence.yml")
     assert feature_records == feature_records_2
-    os.remove(f"{feature_lists_path}/__sequence.yml")
+    os.remove(feature_lists_path / "__sequence.yml")

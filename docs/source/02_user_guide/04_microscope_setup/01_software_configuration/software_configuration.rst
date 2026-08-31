@@ -339,6 +339,18 @@ The ``waveform_constants.yml`` file stores waveform parameters exposed through
 Users normally do not need to edit this file manually. **navigate** updates it
 automatically during use and on exit.
 
+:guilabel:`Camera Delay` is the delay between the acquisition trigger and the
+camera trigger, in milliseconds. The value in ``waveform_constants.yml`` is
+used during acquisition and is shared by all microscope modes in the active
+configuration. Loading another waveform constants file updates the value used
+by the data acquisition device.
+
+For compatibility with older configurations, **navigate** initializes a missing
+or non-numeric ``camera_delay`` from the first configured microscope's legacy
+``camera.delay`` value, or its older ``camera.delay_percent`` value. If neither
+value exists, the default is 1 millisecond. After migration, set Camera Delay
+through the Waveform Parameters popup rather than adding it to a camera block.
+
 .. _configure_waveform_templates:
 
 Waveform Templates File

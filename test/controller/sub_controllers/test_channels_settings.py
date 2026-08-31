@@ -29,6 +29,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+from multiprocessing import Manager
+
 import pytest
 
 
@@ -191,3 +193,30 @@ class TestChannelSettingController:
     def test_get_index(self):
         # Not needed to test IMO
         pass
+
+    def test_channel_callback_persists_updates_in_proxy_dict(self):
+        with Manager() as manager:
+            self.channel_setting.channel_setting_dict = manager.dict(
+                {
+                    "channel_1": {
+                        "is_selected": False,
+                        "laser": self.channel_setting.view.laser_variables[0].get(),
+                        "laser_index": 0,
+                        "camera_exposure_time": 50.0,
+                        "laser_power": 10.0,
+                        "interval_time": 1.0,
+                        "defocus": 0.0,
+                    }
+                }
+            )
+            self.channel_setting.in_initialization = False
+
+            self.channel_setting.view.exptime_variables[0].set(125.0)
+            self.channel_setting.channel_callback(0, "camera_exposure_time")()
+
+            assert (
+                self.channel_setting.channel_setting_dict["channel_1"][
+                    "camera_exposure_time"
+                ]
+                == 125.0
+            )

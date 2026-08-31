@@ -39,6 +39,7 @@ from typing import Any, Optional
 # Local Imports
 from navigate.model.devices.remote_focus.base import RemoteFocusBase
 from navigate.model.devices.device_types import NIDevice
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # # Logger Setup
@@ -48,6 +49,15 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class NIRemoteFocus(RemoteFocusBase, NIDevice):
+    configuration_schema = {
+        "hardware/channel": SettingSpec(
+            str,
+            default="",
+            label="Channel",
+            help_text="NI analog-output channel connected to the remote-focus device.",
+            required=True,
+        )
+    }
     """RemoteFocusNI Class - Analog control of the remote focus device."""
 
     def __init__(

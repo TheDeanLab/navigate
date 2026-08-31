@@ -39,6 +39,7 @@ from ximea import xiapi
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -492,6 +493,22 @@ class MU196XRCamera(XimeaBase):
 
     This camear class supports ximea camera models: MU196MR/MU196CR.
     """
+
+    configuration_schema = {
+        "input_trigger_port": SettingSpec(
+            int,
+            default=2,
+            label="Input Trigger Port",
+            help_text=(
+                "Ximea GPI input port number. The driver maps this value to "
+                "XI_GPI_PORT<i>; MU196XR cameras normally use port 2."
+            ),
+            minimum=1,
+            maximum=12,
+            step=1,
+            required=False,
+        ),
+    }
 
     def __init__(
         self,

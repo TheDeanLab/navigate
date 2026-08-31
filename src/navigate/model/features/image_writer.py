@@ -91,13 +91,13 @@ class ImageWriter:
             list,
             default=None,
             label="Saving Flags",
-            help_text="Optional list of frame-saving flags.",
+            help_text="Optional list of frame-saving flags. Leave empty to use the system default value",
         ),
         "saving_config": SettingSpec(
             dict,
             default=None,
             label="Saving Config",
-            help_text="Optional image-writer configuration mapping.",
+            help_text="Optional image-writer configuration mapping. Leave empty to use the system default value",
         ),
     }
 

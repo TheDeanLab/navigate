@@ -292,7 +292,7 @@ class ProjectionMode:
         ]
         self.waveform_constants = self.model.configuration["waveform_constants"]
 
-        (self.exposure_times, self.sweep_times) = (
+        self.exposure_times, self.sweep_times = (
             self.model.active_microscope.get_exposure_sweep_times()
         )
 
@@ -553,10 +553,9 @@ class LoopByCount:
         "steps": SettingSpec(
             str,
             default=1,
-            label="Steps",
+            label="Number of loops",
             help_text=(
-                "Loop count, or a configuration reference such as channels, "
-                "positions, or experiment.MicroscopeState.timepoints."
+                "Loop count: an Integer value, or one of [channels, timepoints, positions]"
             ),
             required=True,
         ),
@@ -570,7 +569,7 @@ class LoopByCount:
             bool,
             default=False,
             label="Nested Loop",
-            help_text="Synchronize signal and data threads for nested loop usage.",
+            help_text="If this loop is nested within another loop.",
         ),
     }
 
@@ -703,6 +702,10 @@ class LoopByCount:
             return len(self.model.active_microscope.available_channels)
         elif steps == "positions":
             return len(self.model.configuration["multi_positions"]) - 1
+        elif steps == "timepoints":
+            steps = self.model.configuration["experiment"]["MicroscopeState"].get(
+                "timepoints", 1
+            )
         else:
             try:
                 parameters = steps.split(".")
@@ -2028,7 +2031,7 @@ class FindTissueSimple2D:
             label="Overlap",
             help_text="Fractional overlap between adjacent grid tiles.",
             minimum=0.0,
-            maximum=1.0,
+            maximum=100.0,
             step=0.01,
         ),
         "target_resolution": SettingSpec(

@@ -79,11 +79,9 @@ from navigate.config.config import (
     load_configs,
     update_config_dict,
     verify_experiment_config,
-    verify_waveform_constants,
-    verify_positions_config,
-    verify_configuration,
     get_navigate_path,
 )
+from navigate.config.preload import preload_configuration
 from navigate.tools.file_functions import (
     load_yaml_file,
     save_yaml_file,
@@ -217,13 +215,13 @@ class Controller:
             gui=self.gui_configuration_path,
         )
 
-        verify_configuration(self.manager, self.configuration)
-        verify_experiment_config(self.manager, self.configuration)
-        verify_waveform_constants(self.manager, self.configuration)
-
         positions = load_yaml_file(multi_positions_path)
-        positions = verify_positions_config(positions)
-        self.configuration["multi_positions"] = positions
+        self.preload_report = preload_configuration(
+            self.manager,
+            self.configuration,
+            is_synthetic=self.args.synthetic_hardware,
+            multi_positions=positions,
+        )
 
         total_ram, available_ram = get_ram_info()
         logger.info(
@@ -1953,8 +1951,7 @@ class Controller:
                     handler(latest_progress)
                 except Exception:
                     print(
-                        "*** unhandled event: autofocus_progress, "
-                        f"{latest_progress}"
+                        "*** unhandled event: autofocus_progress, " f"{latest_progress}"
                     )
 
         while self._event_pump_running:

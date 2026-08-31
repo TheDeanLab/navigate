@@ -47,7 +47,7 @@ import numpy as np
 
 # Local Imports
 from navigate.model.devices.daq.base import DAQBase
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
 from navigate.tools.decorators import log_initialization
 

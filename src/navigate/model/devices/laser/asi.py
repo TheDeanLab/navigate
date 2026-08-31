@@ -39,7 +39,7 @@ from typing import Any
 # Local Imports
 from navigate.model.devices.laser.base import LaserBase
 from navigate.model.devices.device_types import SerialDevice
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 from navigate.tools.decorators import log_initialization
 

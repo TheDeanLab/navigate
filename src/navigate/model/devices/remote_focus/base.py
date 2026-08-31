@@ -44,7 +44,7 @@ from navigate.model.waveforms import (
     remote_focus_ramp_triangular,
 )
 from navigate.tools.decorators import log_initialization
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.config.configuration_schema import SettingSpec
 
 # # Logger Setup
 p = __name__.split(".")[1]

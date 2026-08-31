@@ -30,8 +30,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-import ast
-import importlib
 import re
 import tkinter as tk
 from pathlib import Path
@@ -40,13 +38,21 @@ from typing import Optional
 
 import yaml
 
-from navigate.model.devices.configuration_schema import (
+from navigate.config.configuration_schema import (
     CollectionSpec,
     SettingSpec,
-    merge_configuration_schemas,
 )
-from navigate.model.devices.device_types import SerialDevice, SequenceDevice
-from navigate.config.configuration_database import deceased_device_type_names
+from navigate.config.device_schema import (
+    canonical_device_type,
+    category_base_class_name,
+    category_model_suffix,
+    class_inherits,
+    device_directory,
+    get_configuration_schema,
+    get_connect_params,
+    module_classes,
+    strip_category_model_suffix,
+)
 
 # Local Imports
 from navigate.view.configurator_application_window import (
@@ -410,34 +416,15 @@ class Configurator:
         YAML may name a model directly (``NI``), use its full class-style name
         (``NIDAQ``), or qualify either form with ``manufacturer.``.
         """
-        manufacturer_name: Optional[str] = None
-        model_name = device_type
-        if "." in device_type:
-            manufacturer_name, model_name = device_type.split(".", maxsplit=1)
-        legacy_names = {
-            old_name.lower(): new_name
-            for old_name, new_name in deceased_device_type_names.items()
-        }
-        model_name = legacy_names.get(model_name.lower(), model_name)
-
-        manufacturers = cls.get_device_manufacturers(category)
-        if manufacturer_name is not None:
-            manufacturers = [
-                manufacturer
-                for manufacturer in manufacturers
-                if manufacturer.lower() == manufacturer_name.lower()
-            ]
-
-        category_suffix = cls.category_base_class_name(category)[: -len("Base")]
-        for manufacturer in manufacturers:
-            for model in cls.get_device_models(category, manufacturer):
-                short_model_name = (
-                    model[: -len(category_suffix)]
-                    if model.endswith(category_suffix)
-                    else model
-                )
-                if model_name.lower() in {model.lower(), short_model_name.lower()}:
-                    return manufacturer, model
+        canonical_type = canonical_device_type(category, device_type)
+        if canonical_type is None or "." not in canonical_type:
+            return None
+        manufacturer, model = canonical_type.split(".", maxsplit=1)
+        suffix = category_model_suffix(category)
+        class_name = model if model.endswith(suffix) else model + suffix
+        for available_model in cls.get_device_models(category, manufacturer):
+            if available_model.casefold() == class_name.casefold():
+                return manufacturer, available_model
         return None
 
     @staticmethod
@@ -455,7 +442,7 @@ class Configurator:
     ) -> dict[str, object]:
         """Extract known schema values from one YAML device configuration."""
         schema = self.get_configuration_schema(category, manufacturer, model)
-        connection_names = set(self.get_connect_params(category, manufacturer, model))
+        connection_names = set(get_connect_params(category, manufacturer, model))
         connection_names.update({"port", "baudrate", "timeout", "serial_number"})
         settings = {}
         for name, spec in schema.items():
@@ -881,10 +868,7 @@ class Configurator:
     @classmethod
     def saved_device_type(cls, category: str, manufacturer: str, model: str) -> str:
         """Return a YAML device type as ``manufacturer.Model``."""
-        category_suffix = cls.category_base_class_name(category)[: -len("Base")]
-        model_name = (
-            model[: -len(category_suffix)] if model.endswith(category_suffix) else model
-        )
+        model_name = strip_category_model_suffix(category, model)
         if category == "daq":
             return model_name
         return f"{manufacturer}.{model_name}"
@@ -894,10 +878,10 @@ class Configurator:
         """Return a laser control type in the YAML ``manufacturer.Model`` form."""
         if not isinstance(device_type, str):
             return device_type
-        resolved_type = cls.resolve_device_type("laser", device_type)
-        if resolved_type is None:
+        canonical_type = canonical_device_type("laser", device_type)
+        if canonical_type is None:
             return device_type
-        return cls.saved_device_type("laser", *resolved_type)
+        return canonical_type
 
     def device_configuration(
         self, category: str, manufacturer: str, model: str, settings: dict[str, object]
@@ -917,7 +901,7 @@ class Configurator:
             else {"hardware": {"type": device_type}}
         )
 
-        connection_names = set(self.get_connect_params(category, manufacturer, model))
+        connection_names = set(get_connect_params(category, manufacturer, model))
         # those connection names are from SerialDevice and SequenceDevice
         connection_names.update({"port", "baudrate", "timeout", "serial_number"})
         for name, value in values.items():
@@ -1299,166 +1283,7 @@ class Configurator:
         compatibility fallback until concrete device classes declare their own
         ``configuration_schema`` values.
         """
-        connection_schema = {
-            property_name: SettingSpec(
-                str,
-                default="",
-                label=property_name.replace("_", " ").title(),
-                help_text="Connection value required to initialize this device.",
-                required=True,
-            )
-            for property_name in self.get_connect_params(category, manufacturer, model)
-        }
-        schemas = [connection_schema]
-        if self.class_inherits(category, manufacturer, model, "SerialDevice"):
-            schemas.append(SerialDevice.configuration_schema)
-        if self.class_inherits(category, manufacturer, model, "SequenceDevice"):
-            schemas.append(SequenceDevice.configuration_schema)
-        base_class_name = self.category_base_class_name(category)
-        if self.class_inherits(category, manufacturer, model, base_class_name):
-            try:
-                base_module = importlib.import_module(
-                    f"navigate.model.devices.{category}.base"
-                )
-                base_class = getattr(base_module, base_class_name)
-                schemas.append(getattr(base_class, "configuration_schema", {}))
-            except (ImportError, AttributeError):
-                logger.exception(
-                    "Could not load the configuration schema for %s.", base_class_name
-                )
-        schemas.append(
-            self.get_class_configuration_schema(category, manufacturer, model)
-        )
-        return merge_configuration_schemas(*schemas)
-
-    @classmethod
-    def get_class_configuration_schema(
-        cls, category: str, manufacturer: str, class_name: str
-    ) -> dict[str, SettingSpec]:
-        """Read class-level schemas without importing device hardware APIs.
-
-        Device modules can import vendor SDKs that are unavailable to the
-        configurator. The schema is intentionally declarative, so AST parsing
-        provides the required metadata safely. Local parent schemas are merged
-        before their child schemas.
-        """
-        module = ast.parse(
-            (cls.device_directory() / category / (manufacturer + ".py")).read_text(
-                encoding="utf-8"
-            )
-        )
-        nodes = {
-            node.name: node for node in module.body if isinstance(node, ast.ClassDef)
-        }
-
-        def setting_spec(call: ast.Call) -> Optional[SettingSpec]:
-            """Convert a literal ``SettingSpec`` call to a setting specification."""
-            if not (
-                isinstance(call.func, ast.Name)
-                and call.func.id == "SettingSpec"
-                and call.args
-                and isinstance(call.args[0], ast.Name)
-            ):
-                return None
-            value_type = {
-                "str": str,
-                "int": int,
-                "float": float,
-                "bool": bool,
-            }.get(call.args[0].id)
-            if value_type is None:
-                return None
-            kwargs = {}
-            for keyword in call.keywords:
-                if keyword.arg is None:
-                    continue
-                try:
-                    kwargs[keyword.arg] = ast.literal_eval(keyword.value)
-                except ValueError:
-                    continue
-            return SettingSpec(value_type, **kwargs)
-
-        def collection_spec(call: ast.Call) -> Optional[CollectionSpec]:
-            """Convert a literal ``CollectionSpec`` call to a collection spec."""
-            if not (
-                isinstance(call.func, ast.Name) and call.func.id == "CollectionSpec"
-            ):
-                return None
-            keywords = {
-                keyword.arg: keyword.value for keyword in call.keywords if keyword.arg
-            }
-            item_schema_node = keywords.pop("item_schema", None)
-            if not isinstance(item_schema_node, ast.Dict):
-                return None
-            item_schema = {}
-            for key, value in zip(item_schema_node.keys, item_schema_node.values):
-                if not (
-                    isinstance(key, ast.Constant)
-                    and isinstance(key.value, str)
-                    and isinstance(value, ast.Call)
-                ):
-                    continue
-                spec = setting_spec(value)
-                if spec is not None:
-                    item_schema[key.value] = spec
-            if not item_schema:
-                return None
-            kwargs = {"item_schema": item_schema}
-            for name, value in keywords.items():
-                try:
-                    kwargs[name] = ast.literal_eval(value)
-                except ValueError:
-                    continue
-            try:
-                return CollectionSpec(**kwargs)
-            except (TypeError, ValueError):
-                return None
-
-        def class_schema(node: ast.ClassDef) -> dict[str, object]:
-            """Convert a literal ``configuration_schema`` assignment to specs."""
-            for statement in node.body:
-                if not (
-                    isinstance(statement, ast.Assign)
-                    and any(
-                        isinstance(target, ast.Name)
-                        and target.id == "configuration_schema"
-                        for target in statement.targets
-                    )
-                    and isinstance(statement.value, ast.Dict)
-                ):
-                    continue
-                schema: dict[str, object] = {}
-                for key, value in zip(statement.value.keys, statement.value.values):
-                    if not (
-                        isinstance(key, ast.Constant)
-                        and isinstance(key.value, str)
-                        and isinstance(value, ast.Call)
-                    ):
-                        continue
-                    spec = setting_spec(value) or collection_spec(value)
-                    if spec is not None:
-                        schema[key.value] = spec
-                return schema
-            return {}
-
-        def inherited_schema(name: str, visited: set[str]) -> dict[str, object]:
-            """Merge schemas from local parents before the selected class."""
-            if name in visited or name not in nodes:
-                return {}
-            visited.add(name)
-            node = nodes[name]
-            schemas = []
-            for base in node.bases:
-                base_name = (
-                    base.id
-                    if isinstance(base, ast.Name)
-                    else base.attr if isinstance(base, ast.Attribute) else ""
-                )
-                schemas.append(inherited_schema(base_name, visited))
-            schemas.append(class_schema(node))
-            return merge_configuration_schemas(*schemas)
-
-        return inherited_schema(class_name, set())
+        return get_configuration_schema(category, manufacturer, model)
 
     def render_device_info(
         self, schema: dict[str, object], values: Optional[dict[str, object]] = None
@@ -1912,16 +1737,12 @@ class Configurator:
         for item in tree.get_children():
             tree.delete(item)
 
-    @staticmethod
-    def device_directory() -> Path:
-        return Path(__file__).resolve().parents[1] / "model" / "devices"
-
     @classmethod
     def get_device_categories(cls) -> list[str]:
         """Return device category package names, excluding APIs and caches."""
         return sorted(
             path.name
-            for path in cls.device_directory().iterdir()
+            for path in device_directory().iterdir()
             if path.is_dir() and path.name != "APIs" and not path.name.startswith("__")
         )
 
@@ -1930,171 +1751,20 @@ class Configurator:
         """Return Python manufacturer modules for a category."""
         return sorted(
             path.stem
-            for path in (cls.device_directory() / category).glob("*.py")
+            for path in (device_directory() / category).glob("*.py")
             if path.stem not in {"__init__", "base"}
         )
 
     @classmethod
-    def module_classes(cls, category: str, manufacturer: str) -> dict[str, list[str]]:
-        """Return class names mapped to directly declared base-class names."""
-        module = ast.parse(
-            (cls.device_directory() / category / (manufacturer + ".py")).read_text(
-                encoding="utf-8"
-            )
-        )
-        return {
-            node.name: [
-                (
-                    base.id
-                    if isinstance(base, ast.Name)
-                    else base.attr if isinstance(base, ast.Attribute) else ""
-                )
-                for base in node.bases
-            ]
-            for node in module.body
-            if isinstance(node, ast.ClassDef)
-        }
-
-    @classmethod
-    def class_inherits(
-        cls, category: str, manufacturer: str, class_name: str, parent: str
-    ) -> bool:
-        """Check inheritance without importing device hardware APIs.
-
-        In addition to classes in the selected module, follow imports from other
-        modules in the same device category. This keeps model discovery safe when
-        a device implementation inherits from a category-specific class defined
-        by another manufacturer module.
-        """
-
-        def module_details(
-            module_name: str,
-        ) -> tuple[dict[str, list[str]], dict[str, str]]:
-            """Return declared classes and same-category imported classes."""
-            module = ast.parse(
-                (cls.device_directory() / category / (module_name + ".py")).read_text(
-                    encoding="utf-8"
-                )
-            )
-            classes = {
-                node.name: [
-                    (
-                        base.id
-                        if isinstance(base, ast.Name)
-                        else base.attr if isinstance(base, ast.Attribute) else ""
-                    )
-                    for base in node.bases
-                ]
-                for node in module.body
-                if isinstance(node, ast.ClassDef)
-            }
-            imports = {}
-            module_prefix = f"navigate.model.devices.{category}."
-            for node in module.body:
-                if not (
-                    isinstance(node, ast.ImportFrom)
-                    and node.module
-                    and node.module.startswith(module_prefix)
-                ):
-                    continue
-                imported_module = node.module.removeprefix(module_prefix)
-                if "." in imported_module:
-                    continue
-                for alias in node.names:
-                    imports[alias.asname or alias.name] = imported_module
-            return classes, imports
-
-        def inherits(
-            module_name: str, name: str, visited: set[tuple[str, str]]
-        ) -> bool:
-            key = (module_name, name)
-            if key in visited:
-                return False
-            visited.add(key)
-            try:
-                classes, imports = module_details(module_name)
-            except FileNotFoundError:
-                return False
-            if name not in classes:
-                return False
-            for base in classes[name]:
-                if base == parent:
-                    return True
-                if inherits(module_name, base, visited):
-                    return True
-                imported_module = imports.get(base)
-                if imported_module and inherits(imported_module, base, visited):
-                    return True
-            return False
-
-        return inherits(manufacturer, class_name, set())
-
-    @classmethod
     def get_device_models(cls, category: str, manufacturer: str) -> list[str]:
         """Return non-base device classes inheriting from the category base class."""
-        parent = cls.category_base_class_name(category)
+        parent = category_base_class_name(category)
         return [
             name
-            for name in cls.module_classes(category, manufacturer)
+            for name in module_classes(category, manufacturer)
             if not name.endswith("Base")
-            and cls.class_inherits(category, manufacturer, name, parent)
+            and class_inherits(category, manufacturer, name, parent)
         ]
-
-    @staticmethod
-    def category_base_class_name(category: str) -> str:
-        """Return a category's base class name, including acronym exceptions."""
-        base_names = {"daq": "DAQBase"}
-        return base_names.get(
-            category,
-            "".join(word.title() for word in category.split("_")) + "Base",
-        )
-
-    @classmethod
-    def get_connect_params(
-        cls, category: str, manufacturer: str, class_name: str
-    ) -> list[str]:
-        """Read literal ``get_connect_params`` values from a class or local ancestor."""
-        module = ast.parse(
-            (cls.device_directory() / category / (manufacturer + ".py")).read_text(
-                encoding="utf-8"
-            )
-        )
-        nodes = {
-            node.name: node for node in module.body if isinstance(node, ast.ClassDef)
-        }
-
-        def inspect(name: str, visited: set[str]) -> list[str]:
-            if name in visited or name not in nodes:
-                return []
-            visited.add(name)
-            node = nodes[name]
-            for function in node.body:
-                if (
-                    isinstance(function, ast.FunctionDef)
-                    and function.name == "get_connect_params"
-                ):
-                    for statement in function.body:
-                        if isinstance(statement, ast.Return) and isinstance(
-                            statement.value, (ast.List, ast.Tuple)
-                        ):
-                            return [
-                                value.value
-                                for value in statement.value.elts
-                                if isinstance(value, ast.Constant)
-                                and isinstance(value.value, str)
-                            ]
-            for base in node.bases:
-                base_name = (
-                    base.id
-                    if isinstance(base, ast.Name)
-                    else base.attr if isinstance(base, ast.Attribute) else ""
-                )
-                params = inspect(base_name, visited)
-                if params:
-                    return params
-            return []
-
-        return inspect(class_name, set())
 
     @staticmethod
     def format_category_name(name: str) -> str:

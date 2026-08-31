@@ -32,6 +32,7 @@
 
 import pytest
 from unittest.mock import MagicMock, call
+from types import SimpleNamespace
 import numpy as np
 
 AXES = ["x", "y", "z", "theta", "f"]
@@ -40,6 +41,72 @@ CAXES = ["xy", "z", "theta", "f"]
 
 def pos_dict(v, axes=AXES):
     return {k: v for k in axes}
+
+
+def hover_button():
+    return SimpleNamespace(hover=SimpleNamespace(setdescription=MagicMock()))
+
+
+def test_set_hover_descriptions_without_exec():
+    from navigate.controller.sub_controllers.stages import StageController
+
+    controller = object.__new__(StageController)
+    controller.stage_axes = AXES
+    controller.widget_vals = {
+        "xy_step": MagicMock(get=MagicMock(return_value=10.0)),
+        "z_step": MagicMock(get=MagicMock(return_value=20.0)),
+        "theta_step": MagicMock(get=MagicMock(return_value=30.0)),
+        "f_step": MagicMock(get=MagicMock(return_value=40.0)),
+    }
+    controller.view = SimpleNamespace(
+        xy_frame=SimpleNamespace(
+            large_up_x_btn=hover_button(),
+            large_down_x_btn=hover_button(),
+            up_x_btn=hover_button(),
+            down_x_btn=hover_button(),
+            large_up_y_btn=hover_button(),
+            large_down_y_btn=hover_button(),
+            up_y_btn=hover_button(),
+            down_y_btn=hover_button(),
+        ),
+        z_frame=SimpleNamespace(
+            large_up_btn=hover_button(),
+            large_down_btn=hover_button(),
+            up_btn=hover_button(),
+            down_btn=hover_button(),
+        ),
+        theta_frame=SimpleNamespace(
+            large_up_btn=hover_button(),
+            large_down_btn=hover_button(),
+            up_btn=hover_button(),
+            down_btn=hover_button(),
+        ),
+        f_frame=SimpleNamespace(
+            large_up_btn=hover_button(),
+            large_down_btn=hover_button(),
+            up_btn=hover_button(),
+            down_btn=hover_button(),
+        ),
+        position_frame=SimpleNamespace(
+            inputs={
+                axis: SimpleNamespace(
+                    widget=SimpleNamespace(
+                        hover=SimpleNamespace(setdescription=MagicMock())
+                    )
+                )
+                for axis in AXES
+            }
+        ),
+        stack_shortcuts=SimpleNamespace(
+            set_start_button=hover_button(),
+            set_end_button=hover_button(),
+        ),
+        stop_frame=SimpleNamespace(joystick_btn=hover_button()),
+    )
+
+    controller.set_hover_descriptions()
+
+    controller.view.xy_frame.large_up_x_btn.hover.setdescription.assert_called_once()
 
 
 @pytest.fixture

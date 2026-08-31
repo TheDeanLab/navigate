@@ -1141,6 +1141,121 @@ def test_stop_stage_does_not_retry_hardware_runtime_error():
     assert attempts == ["stop"]
 
 
+def make_resolution_recovery_controller():
+    from types import SimpleNamespace
+
+    from navigate.controller.controller import Controller
+
+    controller = Controller.__new__(Controller)
+    controller.view = SimpleNamespace(root=object())
+    controller.model = MagicMock()
+    controller.threads_pool = SimpleNamespace(createThread=MagicMock())
+    controller.stage_controller = SimpleNamespace(
+        stage_axes=["x", "z", "f"],
+        view=SimpleNamespace(toggle_button_states=MagicMock()),
+        force_enable_all_axes=MagicMock(),
+    )
+    controller._resolution_recovery_task_id = None
+    controller._resolution_change_popup = None
+    return controller
+
+
+def test_resolution_cancelled_popup_is_deduplicated_by_task_id():
+    from unittest.mock import patch
+
+    controller = make_resolution_recovery_controller()
+    payload = {"task_id": 7, "return_allowed": True}
+
+    with patch(
+        "navigate.controller.controller.ResolutionChangeCancelledPopup"
+    ) as popup_class:
+        controller._show_resolution_change_cancelled(payload)
+        controller._show_resolution_change_cancelled(payload)
+
+    popup_class.assert_called_once()
+    assert popup_class.call_args.kwargs["return_enabled"] is True
+
+
+def test_resolution_keep_accepts_stopped_position_without_moving_stage():
+    from unittest.mock import patch
+
+    controller = make_resolution_recovery_controller()
+
+    with patch(
+        "navigate.controller.controller.ResolutionChangeCancelledPopup"
+    ) as popup_class:
+        controller._show_resolution_change_cancelled(
+            {"task_id": 7, "return_allowed": False}
+        )
+        keep_command = popup_class.call_args.kwargs["keep_command"]
+        keep_command()
+
+    create_call = controller.threads_pool.createThread.call_args
+    assert create_call.kwargs["resourceName"] == "model"
+    create_call.kwargs["target"]()
+    controller.model.run_command.assert_called_once_with(
+        "resolution_recovery", 7, "keep"
+    )
+    controller.stage_controller.view.toggle_button_states.assert_not_called()
+    assert controller._resolution_recovery_task_id is None
+
+
+def test_resolution_return_closes_modal_before_disabling_stage_controls():
+    from unittest.mock import patch
+
+    controller = make_resolution_recovery_controller()
+    payload = {"task_id": 7, "return_allowed": True}
+
+    with patch(
+        "navigate.controller.controller.ResolutionChangeCancelledPopup"
+    ) as popup_class:
+        controller._show_resolution_change_cancelled(payload)
+        return_command = popup_class.call_args.kwargs["return_command"]
+        return_command()
+
+    controller.stage_controller.view.toggle_button_states.assert_called_once_with(
+        True, ["x", "z", "f"]
+    )
+    create_call = controller.threads_pool.createThread.call_args
+    assert create_call.kwargs["resourceName"] == "model"
+    create_call.kwargs["target"]()
+    controller.model.run_command.assert_called_once_with(
+        "resolution_recovery", 7, "return"
+    )
+
+
+def test_resolution_return_complete_reenables_stage_controls():
+    controller = make_resolution_recovery_controller()
+    controller._resolution_recovery_task_id = 7
+
+    controller._finish_resolution_return(
+        {"task_id": 7, "succeeded": False, "cancelled": True}
+    )
+
+    controller.stage_controller.force_enable_all_axes.assert_called_once_with()
+    assert controller._resolution_recovery_task_id is None
+
+
+def test_resolution_recovery_events_are_dispatched_by_event_pump():
+    from queue import Queue
+
+    controller = make_resolution_recovery_controller()
+    controller._event_pump_running = True
+    controller.event_queue = Queue()
+    controller.event_listeners = {}
+    controller._show_resolution_change_cancelled = MagicMock()
+    controller._finish_resolution_return = MagicMock()
+    cancellation = {"task_id": 7, "return_allowed": True}
+    completion = {"task_id": 7, "succeeded": True, "cancelled": False}
+    controller.event_queue.put(("resolution_change_cancelled", cancellation))
+    controller.event_queue.put(("resolution_return_complete", completion))
+
+    controller.update_event()
+
+    controller._show_resolution_change_cancelled.assert_called_once_with(cancellation)
+    controller._finish_resolution_return.assert_called_once_with(completion)
+
+
 def test_update_stage_controller_silent(controller):
     pos_dict = {"x": 1, "y": 2.0, "z": 3.14, "theta": 400, "f": 5.01}
     controller.update_stage_controller_silent(pos_dict)

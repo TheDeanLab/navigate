@@ -78,7 +78,10 @@ from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.common_functions import load_module_from_file, VariableWithLock
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.microscope import Microscope
-from navigate.model.resolution_change import _ResolutionChangeTask
+from navigate.model.resolution_change import (
+    _ResolutionChangeTask,
+    _ResolutionRecovery,
+)
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel
 
@@ -258,6 +261,7 @@ class Model:
         self._resolution_change_lock = threading.Lock()
         self._resolution_change_counter = 0
         self._resolution_change_task = None
+        self._resolution_recovery = None
 
         #: bool: Signal side completed a finite acquisition.
         self.signal_acquisition_complete = False
@@ -812,6 +816,17 @@ class Model:
             self.end_acquisition()
             self.stop_stage()
 
+        elif command == "resolution_recovery":
+            task_id, choice = args
+            if choice == "keep":
+                self._keep_resolution_position(task_id)
+            elif choice == "return":
+                self._start_resolution_return(task_id)
+            else:
+                self.event_queue.put(
+                    ("warning", f"Unknown resolution recovery choice: {choice}")
+                )
+
         elif command == "terminate":
             self.terminate()
 
@@ -943,10 +958,12 @@ class Model:
         if cancel_resolution_change and task is not None:
             lock = getattr(self, "_resolution_change_lock", None)
             if lock is None:
+                task.stop_complete_event.clear()
                 task.cancel_event.set()
                 task.state = "cancel_requested"
             else:
                 with lock:
+                    task.stop_complete_event.clear()
                     task.cancel_event.set()
                     task.state = "cancel_requested"
 
@@ -975,20 +992,27 @@ class Model:
             task.stop_errors.extend(stop_errors)
 
         try:
-            ret_pos_dict = self.get_stage_position()
-        except Exception as e:
-            self.logger.exception("Failed to read stage position after stopping")
-            error = f"{type(e).__name__}: {e}"
+            try:
+                ret_pos_dict = self.get_stage_position()
+            except Exception as e:
+                self.logger.exception("Failed to read stage position after stopping")
+                error = f"{type(e).__name__}: {e}"
+                if cancel_resolution_change and task is not None:
+                    task.stop_errors.append(error)
+                self.event_queue.put(
+                    (
+                        "warning",
+                        f"Stages were stopped, but position readback failed: {e}",
+                    )
+                )
+                return
+            update_stage_dict(self, ret_pos_dict)
+            self.event_queue.put(("update_stage", ret_pos_dict))
             if cancel_resolution_change and task is not None:
-                task.stop_errors.append(error)
-            self.event_queue.put(
-                ("warning", f"Stages were stopped, but position readback failed: {e}")
-            )
-            return
-        update_stage_dict(self, ret_pos_dict)
-        self.event_queue.put(("update_stage", ret_pos_dict))
-        if cancel_resolution_change and task is not None:
-            task.stopped_position = ret_pos_dict
+                task.stopped_position = ret_pos_dict
+        finally:
+            if cancel_resolution_change and task is not None:
+                task.stop_complete_event.set()
 
     def end_acquisition(self) -> None:
         """End the acquisition.
@@ -1550,6 +1574,7 @@ class Model:
                 )
                 return None
             self._resolution_change_counter += 1
+            self._resolution_recovery = None
             task = _ResolutionChangeTask(
                 task_id=self._resolution_change_counter,
                 resolution_value=resolution_value,
@@ -1566,6 +1591,16 @@ class Model:
         cancelled = task.cancel_event.is_set()
         task.state = "cancelled" if cancelled else "completed"
         if cancelled:
+            # Recovery is safe only after every stop attempt and readback finishes.
+            task.stop_complete_event.wait()
+            return_allowed = self._is_resolution_return_position_valid(task)
+            if task.previous_position is not None:
+                self._resolution_recovery = _ResolutionRecovery(
+                    task_id=task.task_id,
+                    microscope_name=self.active_microscope_name,
+                    previous_position=dict(task.previous_position),
+                    return_allowed=return_allowed,
+                )
             self.event_queue.put(
                 (
                     "resolution_change_cancelled",
@@ -1577,7 +1612,7 @@ class Model:
                         ],
                         "previous_position": task.previous_position,
                         "stopped_position": task.stopped_position,
-                        "return_allowed": False,
+                        "return_allowed": return_allowed,
                         "errors": list(task.stop_errors),
                     },
                 )
@@ -1587,6 +1622,135 @@ class Model:
         with self._resolution_change_lock:
             if self._resolution_change_task is task:
                 self._resolution_change_task = None
+
+    def _is_resolution_return_position_valid(self, task: _ResolutionChangeTask) -> bool:
+        """Return whether every saved axis passes active stage limits."""
+        if (
+            task.previous_position is None
+            or task.stopped_position is None
+            or task.stop_errors
+        ):
+            return False
+
+        validated_axes = set()
+        requested_axes = {
+            key[: key.index("_")] for key in task.previous_position.keys()
+        }
+        for stage, axes in self.active_microscope.stages_list:
+            position = {
+                key: value
+                for key, value in task.previous_position.items()
+                if key[: key.index("_")] in axes
+            }
+            if not position or not hasattr(stage, "verify_abs_position"):
+                continue
+            try:
+                verified = stage.verify_abs_position(position, is_strict=True)
+            except Exception:
+                self.logger.exception(
+                    "Failed to validate the saved resolution-change position"
+                )
+                return False
+            if len(verified) != len(position):
+                return False
+            validated_axes.update(verified.keys())
+        return validated_axes == requested_axes
+
+    def _keep_resolution_position(self, task_id: int) -> None:
+        """Discard the matching recovery snapshot without moving stages."""
+        with self._resolution_change_lock:
+            recovery = self._resolution_recovery
+            if recovery is not None and recovery.task_id == task_id:
+                self._resolution_recovery = None
+
+    def _start_resolution_return(self, task_id: int) -> bool:
+        """Start a model-owned return to a validated recovery position."""
+        with self._resolution_change_lock:
+            recovery = self._resolution_recovery
+            if (
+                recovery is None
+                or recovery.task_id != task_id
+                or not recovery.return_allowed
+                or recovery.microscope_name != self.active_microscope_name
+                or self._resolution_change_task is not None
+            ):
+                self.event_queue.put(
+                    ("warning", "The saved resolution-change position is unavailable.")
+                )
+                self.event_queue.put(
+                    (
+                        "resolution_return_complete",
+                        {
+                            "task_id": task_id,
+                            "succeeded": False,
+                            "cancelled": False,
+                        },
+                    )
+                )
+                return False
+
+            self._resolution_change_counter += 1
+            task = _ResolutionChangeTask(
+                task_id=self._resolution_change_counter,
+                resolution_value=self.active_microscope_name,
+                former_microscope_name=self.active_microscope_name,
+                target_microscope_name=self.active_microscope_name,
+                state="returning",
+                previous_position=dict(recovery.previous_position),
+            )
+            self._resolution_change_task = task
+            self._resolution_recovery = None
+
+        worker = ThreadWithWarning(
+            target=lambda: self._run_resolution_return(task, recovery),
+            warning_queue=self.event_queue,
+            logger=self.logger,
+        )
+        worker.name = "Resolution Position Return"
+        task.worker = worker
+        worker.start()
+        return True
+
+    def _run_resolution_return(
+        self,
+        task: _ResolutionChangeTask,
+        recovery: _ResolutionRecovery,
+    ) -> None:
+        """Run and finalize one cancellable recovery movement."""
+        succeeded = False
+        try:
+            if not task.cancel_event.is_set():
+                succeeded = self.move_stage(
+                    dict(recovery.previous_position),
+                    wait_until_done=True,
+                    cancel_event=task.cancel_event,
+                )
+            if succeeded and not task.cancel_event.is_set():
+                self.stop_stage(cancel_resolution_change=False)
+        except Exception as e:
+            self.logger.exception(
+                "Failed to return stages after resolution cancellation"
+            )
+            task.stop_errors.append(f"{type(e).__name__}: {e}")
+            self.event_queue.put(
+                ("warning", f"Could not return stages to the previous position: {e}")
+            )
+        finally:
+            cancelled = task.cancel_event.is_set()
+            task.state = "cancelled" if cancelled else "completed"
+            with self._resolution_change_lock:
+                if self._resolution_change_task is task:
+                    self._resolution_change_task = None
+            self.event_queue.put(
+                (
+                    "resolution_return_complete",
+                    {
+                        "task_id": recovery.task_id,
+                        "succeeded": succeeded and not cancelled,
+                        "cancelled": cancelled,
+                    },
+                )
+            )
 
     def _perform_resolution_change(self, task: _ResolutionChangeTask) -> bool:
         """Run the physical resolution change for a tracked task."""

@@ -30,8 +30,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Standard Library Imports
-# import tkinter as tk
+import tkinter as tk
 from tkinter import ttk
 import pytest
 
@@ -188,6 +187,64 @@ def test_feature_config_popup_renders_single_mapping_collection(tk_root):
         "coarse_range": "250",
         "coarse_step_size": "25",
     }
+
+
+def test_feature_config_popup_renders_dict_collection_field_as_text(tk_root):
+    """Dict fields render as readable multi-line literals."""
+
+    class ProxyMapping:
+        def __init__(self, values):
+            self.values = values
+
+        def __repr__(self):
+            return "<DictProxy object, typeid 'dict'>"
+
+        def items(self):
+            return self.values.items()
+
+    channels = ProxyMapping(
+        {
+            "channel_1": ProxyMapping(
+                {
+                    "is_selected": True,
+                    "laser": "488nm",
+                    "camera_exposure_time": 200.0,
+                }
+            )
+        }
+    )
+    config_popup = FeatureConfigPopup(
+        tk_root,
+        ["UpdateExperimentSetting"],
+        feature_name="UpdateExperimentSetting",
+        args_name=["experiment_parameters"],
+        args_value=[{"MicroscopeState.channels": channels}],
+        parameter_schema={
+            "experiment_parameters": CollectionSpec(
+                item_schema={
+                    "MicroscopeState.channels": SettingSpec(
+                        dict,
+                        default={},
+                        label="Channels",
+                    ),
+                },
+                storage="single_mapping",
+                label="Experiment Parameters",
+            )
+        },
+        title="Test",
+    )
+    tk_root.update()
+
+    collection_input = config_popup.inputs_by_name["experiment_parameters"]
+    channels_widget = collection_input.widgets["MicroscopeState.channels"]
+    channels_text = channels_widget.get("1.0", "end-1c")
+
+    assert isinstance(channels_widget, tk.Text)
+    assert "'channel_1'" in channels_text
+    assert "'laser': '488nm'" in channels_text
+    assert "DictProxy object" not in channels_text
+    assert collection_input.get()["MicroscopeState.channels"] == channels_text
 
 
 @pytest.mark.parametrize("title", ["Add Feature List", "Edit Feature Parameters"])

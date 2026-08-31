@@ -90,6 +90,10 @@ def coerce_feature_parameter(
             coerced = spec.choice_values[coerced]
     if spec.minimum is not None and coerced < spec.minimum:
         raise ValueError(f"{parameter_name} must be at least {spec.minimum}.")
+    if spec.exclusive_minimum is not None and coerced <= spec.exclusive_minimum:
+        raise ValueError(
+            f"{parameter_name} must be greater than {spec.exclusive_minimum}."
+        )
     if spec.maximum is not None and coerced > spec.maximum:
         raise ValueError(f"{parameter_name} must be no more than {spec.maximum}.")
     return coerced

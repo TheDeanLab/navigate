@@ -38,7 +38,7 @@ import time
 # Third party imports
 
 # Local application imports
-from navigate.model.devices.configuration_schema import SettingSpec
+from navigate.model.devices.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features.base import FeatureBase
 
 # Logger Setup
@@ -376,11 +376,87 @@ class SetCameraParameters(FeatureBase):
 
 class UpdateExperimentSetting(FeatureBase):
     parameter_schema = {
-        "experiment_parameters": SettingSpec(
-            dict,
-            default={},
+        "experiment_parameters": CollectionSpec(
+            item_schema={
+                "MicroscopeState.stack_cycling_mode": SettingSpec(
+                    str,
+                    default="per_stack",
+                    label="Stack Cycling Mode",
+                    help_text="How channels cycle through a z-stack.",
+                    choices=("per_stack", "per_z"),
+                    required=True,
+                ),
+                "MicroscopeState.start_position": SettingSpec(
+                    float,
+                    default=0,
+                    label="Start Position",
+                    help_text="Relative z-stack start position.",
+                    step=0.1,
+                ),
+                "MicroscopeState.end_position": SettingSpec(
+                    float,
+                    default=0,
+                    label="End Position",
+                    help_text="Relative z-stack end position.",
+                    step=0.1,
+                ),
+                "MicroscopeState.step_size": SettingSpec(
+                    float,
+                    default=0,
+                    label="Step Size",
+                    help_text="Distance between z planes.",
+                    exclusive_minimum=0,
+                    step=0.1,
+                ),
+                "MicroscopeState.number_z_steps": SettingSpec(
+                    float,
+                    default=1,
+                    label="Number Z Steps",
+                    help_text="Number of z planes in the stack.",
+                    minimum=0,
+                    step=1,
+                ),
+                "MicroscopeState.timepoints": SettingSpec(
+                    int,
+                    default=1,
+                    label="Timepoints",
+                    help_text="Number of timepoints to acquire.",
+                    minimum=1,
+                    step=1,
+                ),
+                "MicroscopeState.stack_pause": SettingSpec(
+                    float,
+                    default=0,
+                    label="Stack Pause",
+                    help_text="Pause between z-stack acquisitions.",
+                    minimum=0,
+                    step=0.1,
+                ),
+                "MicroscopeState.start_focus": SettingSpec(
+                    float,
+                    default=0,
+                    label="Start Focus",
+                    help_text="Relative remote-focus start position.",
+                    step=0.1,
+                ),
+                "MicroscopeState.end_focus": SettingSpec(
+                    float,
+                    default=0,
+                    label="End Focus",
+                    help_text="Relative remote-focus end position.",
+                    step=0.1,
+                ),
+                "MicroscopeState.channels": SettingSpec(
+                    dict,
+                    default={},
+                    label="Channels",
+                    help_text="Complete channel mapping for MicroscopeState.",
+                ),
+            },
+            storage="single_mapping",
             label="Experiment Parameters",
-            help_text="Mapping of experiment configuration paths to replacement values.",
+            help_text="MicroscopeState values to update when this feature runs.",
+            dynamic_source="microscope_state",
         ),
     }
 

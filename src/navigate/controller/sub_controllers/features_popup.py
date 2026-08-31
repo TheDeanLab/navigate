@@ -262,6 +262,7 @@ class FeatureListGraphController:
     STAGE_AXIS_DYNAMIC_SOURCE = "stage_axes"
     CHANNEL_DYNAMIC_SOURCE = "channels"
     AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE = "autofocus_calibration_actions"
+    MICROSCOPE_STATE_DYNAMIC_SOURCE = "microscope_state"
 
     def __init__(
         self,
@@ -425,6 +426,16 @@ class FeatureListGraphController:
             return ()
         return tuple(f"channel_{index}" for index in range(1, channel_count + 1))
 
+    def microscope_state_values(self):
+        """Return currently loaded experiment MicroscopeState values."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        configuration = getattr(configuration_controller, "configuration", None)
+        try:
+            microscope_state = configuration["experiment"]["MicroscopeState"]
+        except (KeyError, TypeError):
+            return {}
+        return dict(microscope_state)
+
     @staticmethod
     def stage_axis_offset_spec(axis):
         """Return a float setting spec for one stage-axis offset."""
@@ -545,6 +556,41 @@ class FeatureListGraphController:
             args_value[index] = {
                 axis: args_value[index].get(axis, item_schema[axis].default)
                 for axis in item_schema
+            }
+
+        microscope_state = self.microscope_state_values()
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if not isinstance(spec, CollectionSpec):
+                continue
+            if spec.dynamic_source != self.MICROSCOPE_STATE_DYNAMIC_SOURCE:
+                continue
+            item_schema = {}
+            for field_name, field_spec in spec.item_schema.items():
+                microscope_state_key = field_name.split(".", 1)[-1]
+                item_schema[field_name] = replace(
+                    field_spec,
+                    default=microscope_state.get(
+                        microscope_state_key,
+                        field_spec.default,
+                    ),
+                )
+            parameter_specs[arg_name] = replace(spec, item_schema=item_schema)
+            if not isinstance(args_value[index], dict):
+                args_value[index] = {}
+            has_saved_args = (
+                feature is not None
+                and "args" in feature
+                and index < len(feature["args"])
+                and isinstance(feature["args"][index], dict)
+            )
+            saved_values = args_value[index] if has_saved_args else {}
+            args_value[index] = {
+                field_name: saved_values.get(
+                    field_name,
+                    field_spec.default,
+                )
+                for field_name, field_spec in item_schema.items()
             }
 
         return args_value, parameter_specs

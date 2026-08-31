@@ -42,8 +42,8 @@ class SettingSpec:
     displayed values to saved values when those should differ. ``dynamic_source``
     identifies choices that should be resolved at render time, and ``depends_on``
     names the parameter that provides context for dependent choices. ``minimum``,
-    ``maximum``, and ``step`` define a numeric range; they are intentionally
-    mutually exclusive with ``choices``.
+    ``exclusive_minimum``, ``maximum``, and ``step`` define a numeric range; they
+    are intentionally mutually exclusive with ``choices``.
     """
 
     value_type: type
@@ -53,6 +53,7 @@ class SettingSpec:
     choices: Optional[Tuple[Any, ...]] = None
     choice_values: Optional[Mapping[Any, Any]] = None
     minimum: Optional[float] = None
+    exclusive_minimum: Optional[float] = None
     maximum: Optional[float] = None
     step: Optional[float] = None
     required: bool = False
@@ -62,7 +63,13 @@ class SettingSpec:
     def __post_init__(self) -> None:
         """Validate a schema definition when its class is imported."""
         has_range = any(
-            value is not None for value in (self.minimum, self.maximum, self.step)
+            value is not None
+            for value in (
+                self.minimum,
+                self.exclusive_minimum,
+                self.maximum,
+                self.step,
+            )
         )
         if self.choices is not None and has_range:
             raise ValueError(
@@ -82,6 +89,12 @@ class SettingSpec:
             and self.minimum > self.maximum
         ):
             raise ValueError("SettingSpec minimum cannot exceed maximum.")
+        if (
+            self.exclusive_minimum is not None
+            and self.maximum is not None
+            and self.exclusive_minimum >= self.maximum
+        ):
+            raise ValueError("SettingSpec exclusive_minimum must be below maximum.")
         if self.step is not None and self.step <= 0:
             raise ValueError("SettingSpec step must be greater than zero.")
 

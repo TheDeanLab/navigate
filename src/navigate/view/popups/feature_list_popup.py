@@ -31,6 +31,8 @@
 #
 
 # Standard Library Imports
+from collections.abc import Mapping
+from pprint import pformat
 import tkinter as tk
 from tkinter import ttk
 
@@ -88,7 +90,29 @@ class FeatureCollectionInput:
             if isinstance(value, str):
                 value = value.strip() == "True"
             return tk.StringVar(value=str(bool(value)))
+        if spec.value_type is dict:
+            return tk.StringVar(value=self.format_mapping_value(value))
         return tk.StringVar(value="" if value is None else str(value))
+
+    @classmethod
+    def format_mapping_value(cls, value):
+        """Return a readable literal for nested mapping-like values."""
+        if value is None:
+            return ""
+        return pformat(cls.to_plain_value(value), width=88)
+
+    @classmethod
+    def to_plain_value(cls, value):
+        """Convert proxy mappings and nested containers to built-in values."""
+        if isinstance(value, Mapping) or (
+            hasattr(value, "items") and callable(value.items)
+        ):
+            return {key: cls.to_plain_value(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [cls.to_plain_value(item) for item in value]
+        if isinstance(value, tuple):
+            return tuple(cls.to_plain_value(item) for item in value)
+        return value
 
     def create_widget(self, row, spec, variable):
         """Render one collection field."""
@@ -116,11 +140,20 @@ class FeatureCollectionInput:
                 width=18,
             )
         elif spec.value_type in (int, float):
+            lower_bound = (
+                spec.minimum
+                if spec.minimum is not None
+                else (
+                    spec.exclusive_minimum
+                    if spec.exclusive_minimum is not None
+                    else -1000000
+                )
+            )
             widget = ValidatedSpinbox(
                 self.frame,
                 textvariable=variable,
                 width=18,
-                from_=-1000000 if spec.minimum is None else spec.minimum,
+                from_=lower_bound,
                 to=1000000 if spec.maximum is None else spec.maximum,
                 increment=(
                     (0.1 if spec.value_type is float else 1)
@@ -130,6 +163,14 @@ class FeatureCollectionInput:
                 required=spec.required,
                 value_type=spec.value_type,
             )
+        elif spec.value_type is dict:
+            widget = tk.Text(
+                self.frame,
+                width=56,
+                height=7,
+                wrap=tk.NONE,
+            )
+            widget.insert("1.0", variable.get())
         else:
             widget = ttk.Entry(self.frame, textvariable=variable, width=20)
         widget.grid(**grid_options)
@@ -146,10 +187,14 @@ class FeatureCollectionInput:
 
     def get(self):
         """Return the collection as a field mapping."""
-        return {
-            field_name: variable.get()
-            for field_name, variable in self.variables.items()
-        }
+        values = {}
+        for field_name, variable in self.variables.items():
+            widget = self.widgets[field_name]
+            if isinstance(widget, tk.Text):
+                values[field_name] = widget.get("1.0", "end-1c")
+            else:
+                values[field_name] = variable.get()
+        return values
 
     def set(self, value):
         """Set collection values from a mapping."""
@@ -157,11 +202,20 @@ class FeatureCollectionInput:
             return
         for field_name, field_value in value.items():
             if field_name in self.variables:
-                if self.spec.item_schema[field_name].value_type is bool:
+                field_spec = self.spec.item_schema[field_name]
+                if field_spec.value_type is bool:
                     if isinstance(field_value, str):
                         field_value = field_value.strip() == "True"
                     else:
                         field_value = bool(field_value)
+                if field_spec.value_type is dict:
+                    text = self.format_mapping_value(field_value)
+                    self.variables[field_name].set(text)
+                    widget = self.widgets[field_name]
+                    if isinstance(widget, tk.Text):
+                        widget.delete("1.0", tk.END)
+                        widget.insert("1.0", text)
+                    continue
                 self.variables[field_name].set(str(field_value))
 
 
@@ -439,10 +493,19 @@ class FeatureConfigPopup:
                 arg_input_class = ttk.Combobox
                 values = list(arg_spec.choices)
             elif arg_spec.value_type in (int, float):
+                lower_bound = (
+                    arg_spec.minimum
+                    if arg_spec.minimum is not None
+                    else (
+                        arg_spec.exclusive_minimum
+                        if arg_spec.exclusive_minimum is not None
+                        else -1000000
+                    )
+                )
                 arg_input_class = ValidatedSpinbox
                 input_args = {
                     "width": 30,
-                    "from_": -1000000 if arg_spec.minimum is None else arg_spec.minimum,
+                    "from_": lower_bound,
                     "to": 1000000 if arg_spec.maximum is None else arg_spec.maximum,
                     "increment": (
                         (0.1 if arg_spec.value_type is float else 1)

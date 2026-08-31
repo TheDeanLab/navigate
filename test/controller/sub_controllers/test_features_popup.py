@@ -665,6 +665,89 @@ def test_feature_parameter_values_add_dynamic_stage_axis_collection_fields(
     assert schema["offset"].item_schema["sample"].label == "Sample"
 
 
+def test_feature_parameter_values_populate_microscope_state_collection(
+    graph_controller,
+):
+    """MicroscopeState collections use loaded experiment values as defaults."""
+    graph_controller.configuration_controller = SimpleNamespace(
+        configuration={
+            "experiment": {
+                "MicroscopeState": {
+                    "stack_cycling_mode": "per_z",
+                    "start_position": -10.5,
+                    "end_position": 20.25,
+                    "step_size": 0.5,
+                    "number_z_steps": 62.0,
+                    "timepoints": 3,
+                    "stack_pause": 1.5,
+                    "start_focus": -2.0,
+                    "end_focus": 2.0,
+                    "channels": {
+                        "channel_1": {
+                            "is_selected": True,
+                            "laser": "488nm",
+                        }
+                    },
+                }
+            }
+        }
+    )
+
+    args_name, args_value, schema = graph_controller.get_feature_parameter_values(
+        feature_related_functions.UpdateExperimentSetting,
+    )
+    values = args_value[0]
+
+    assert args_name == ["experiment_parameters"]
+    assert isinstance(schema["experiment_parameters"], CollectionSpec)
+    assert values["MicroscopeState.stack_cycling_mode"] == "per_z"
+    assert values["MicroscopeState.start_position"] == -10.5
+    assert values["MicroscopeState.channels"] == {
+        "channel_1": {"is_selected": True, "laser": "488nm"}
+    }
+    assert schema["experiment_parameters"].item_schema[
+        "MicroscopeState.stack_cycling_mode"
+    ].choices == ("per_stack", "per_z")
+    assert (
+        schema["experiment_parameters"]
+        .item_schema["MicroscopeState.step_size"]
+        .exclusive_minimum
+        == 0
+    )
+
+
+def test_feature_parameter_values_keep_saved_microscope_state_overrides(
+    graph_controller,
+):
+    """Saved MicroscopeState collection values override loaded defaults."""
+    graph_controller.configuration_controller = SimpleNamespace(
+        configuration={
+            "experiment": {
+                "MicroscopeState": {
+                    "timepoints": 1,
+                    "stack_pause": 0,
+                }
+            }
+        }
+    )
+
+    _, args_value, _ = graph_controller.get_feature_parameter_values(
+        feature_related_functions.UpdateExperimentSetting,
+        {
+            "name": feature_related_functions.UpdateExperimentSetting,
+            "args": (
+                {
+                    "MicroscopeState.timepoints": 5,
+                    "MicroscopeState.stack_pause": 7.5,
+                },
+            ),
+        },
+    )
+
+    assert args_value[0]["MicroscopeState.timepoints"] == 5
+    assert args_value[0]["MicroscopeState.stack_pause"] == 7.5
+
+
 def test_refresh_linked_zoom_choices_updates_widget_and_schema(graph_controller):
     """Changing the selected microscope updates the linked zoom choices."""
 
@@ -772,6 +855,16 @@ def test_coerce_feature_parameter_rejects_invalid_numeric_input():
         coerce_feature_parameter("count", "6", spec)
 
     assert coerce_feature_parameter("count", "4", spec) == 4
+
+
+def test_coerce_feature_parameter_rejects_exclusive_numeric_minimum():
+    """Exclusive lower bounds reject equal numeric values."""
+    spec = SettingSpec(float, exclusive_minimum=0, required=True)
+
+    with pytest.raises(ValueError, match="greater than 0"):
+        coerce_feature_parameter("step_size", "0", spec)
+
+    assert coerce_feature_parameter("step_size", "0.1", spec) == 0.1
 
 
 def test_coerce_feature_parameter_supports_single_mapping_collection():

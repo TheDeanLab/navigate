@@ -1877,10 +1877,19 @@ class Configurator:
             ).grid(**grid_options)
             return
         if spec.value_type in (int, float):
+            lower_bound = (
+                spec.minimum
+                if spec.minimum is not None
+                else (
+                    spec.exclusive_minimum
+                    if spec.exclusive_minimum is not None
+                    else -1000000
+                )
+            )
             ValidatedSpinbox(
                 parent,
                 textvariable=variable,
-                from_=-1000000 if spec.minimum is None else spec.minimum,
+                from_=lower_bound,
                 to=1000000 if spec.maximum is None else spec.maximum,
                 increment=(
                     (0.1 if spec.value_type is float else 1)

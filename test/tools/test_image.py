@@ -32,7 +32,7 @@
 
 # Standard Library Imports
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 # Third-Party Imports
 import numpy as np
@@ -107,6 +107,19 @@ class TestCreateArrowImage(unittest.TestCase):
             self.assertEqual(image3.width, 400)
             self.assertEqual(image3.height, 300)
             assert image == image3
+
+    def test_create_arrow_image_falls_back_from_system_color(self):
+        xys = [(50, 50), (150, 50), (200, 100)]
+        mock_style = MagicMock()
+        mock_style.lookup.return_value = "SystemWindowText"
+
+        with patch("navigate.tools.image.ttk.Style", return_value=mock_style):
+            with patch("navigate.tools.image.get_theme_color") as mock_theme_color:
+                mock_theme_color.return_value = "#112233"
+                image = create_arrow_image(xys, direction="right")
+
+        self.assertIsInstance(image, Image.Image)
+        mock_theme_color.assert_called_once_with("text", "black")
 
 
 if __name__ == "__main__":

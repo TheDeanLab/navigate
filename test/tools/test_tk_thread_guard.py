@@ -92,9 +92,11 @@ def test_install_wraps_methods_and_logs_off_main_thread(monkeypatch):
 def test_install_uses_default_logger_when_none(monkeypatch):
     root = _build_root_with_tk_methods()
     default_logger = Mock()
+    logging_module = Mock()
+    logging_module.getLogger.return_value = default_logger
 
     monkeypatch.setattr(guard, "_guard_disabled_by_environment", lambda: False)
-    monkeypatch.setattr(guard.logging, "getLogger", Mock(return_value=default_logger))
+    monkeypatch.setattr(guard, "logging", logging_module)
 
     assert guard.install_tk_thread_guard(root, logger=None) is True
     default_logger.info.assert_called()

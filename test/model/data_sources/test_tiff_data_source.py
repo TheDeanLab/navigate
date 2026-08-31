@@ -5,6 +5,32 @@ import pytest
 from navigate.tools.file_functions import delete_folder
 
 
+def test_non_ome_tiff_write_sets_centimeter_resolution(tmp_path):
+    """Write physical pixel sizes with legacy and current tifffile APIs."""
+    import numpy as np
+    import tifffile
+
+    from navigate.model.data_sources.tiff_data_source import TiffDataSource
+
+    data_source = TiffDataSource(str(tmp_path / "test.tif"))
+    data_source.metadata.shape_x = 3
+    data_source.metadata.shape_y = 2
+    data_source.metadata.shape_c = 1
+    data_source.metadata.shape_z = 1
+    data_source.metadata.shape_t = 1
+    data_source.metadata.dx = 2.0
+    data_source.metadata.dy = 4.0
+    data_source.get_shape_from_metadata()
+
+    data_source.write(np.zeros((2, 3), dtype=np.uint16))
+
+    with tifffile.TiffFile(data_source.file_name[0]) as image:
+        page = image.pages[0]
+        assert int(page.tags["ResolutionUnit"].value) == 3
+        assert page.tags["XResolution"].value == (5000, 1)
+        assert page.tags["YResolution"].value == (2500, 1)
+
+
 @pytest.mark.parametrize("is_ome", [True, False])
 @pytest.mark.parametrize("multiposition", [True, False])
 @pytest.mark.parametrize("per_stack", [True, False])

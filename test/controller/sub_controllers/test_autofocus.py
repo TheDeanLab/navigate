@@ -506,9 +506,12 @@ class TestAutofocusPopupController:
         self.autofocus_controller.widgets["target_channel"].set("CH2")
         self.autofocus_controller.widgets["calibration_action"].set("Capture Reference")
 
-        with patch.object(
-            self.autofocus_controller.parent_controller, "execute"
-        ) as execute:
+        with (
+            patch.object(
+                self.autofocus_controller.parent_controller, "execute"
+            ) as execute,
+            patch("navigate.controller.sub_controllers.autofocus.messagebox.showerror"),
+        ):
             self.autofocus_controller.start_autofocus()
 
             device = self.autofocus_controller.widgets["device"].get()

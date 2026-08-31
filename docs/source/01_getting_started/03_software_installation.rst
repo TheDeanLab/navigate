@@ -113,22 +113,46 @@ If you are on Windows and do not have Git installed, install `Git for Windows <h
     git clone https://github.com/TheDeanLab/navigate.git
     cd navigate
 
-2. Create/activate an environment (Conda or :command:`venv`), then install from source:
+2. Create/activate an environment (Conda or :command:`venv`), then install from
+   source. On Windows, use the constraint file matching the environment's
+   Python version:
 
 .. code-block:: console
 
-    # Non-editable install
+    # Windows with Python 3.9
+    pip install -c constraints/windows-py39.txt .
+
+    # Windows with Python 3.10
+    pip install -c constraints/windows-py310.txt .
+
+    # Windows with Python 3.11
+    pip install -c constraints/windows-py311.txt .
+
+    # Linux/Mac
     pip install .
 
 For development dependencies, use:
 
 .. code-block:: console
 
-    # Editable install with dev dependencies on Windows
-    pip install -e .[dev]
+    # Windows with Python 3.9
+    pip install -c constraints/windows-py39.txt -e ".[dev]"
 
-    # Editable install with dev dependencies on Linux/Mac
+    # Windows with Python 3.10
+    pip install -c constraints/windows-py310.txt -e ".[dev]"
+
+    # Windows with Python 3.11
+    pip install -c constraints/windows-py311.txt -e ".[dev]"
+
+    # Linux/Mac
     pip install -e ".[dev]"
+
+The Windows files are complete snapshots of environments that passed the test
+suite. `pip constraints
+<https://pip.pypa.io/en/stable/user_guide/#constraints-files>`_ control the
+versions selected during installation without declaring every transitive
+dependency in :file:`pyproject.toml`. The constraint file must match the
+environment's Python minor version.
 
 For full contributor setup, see :doc:`Developer Install <../03_contributing/02_developer_install/02_developer_install>`.
 

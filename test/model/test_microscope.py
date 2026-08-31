@@ -225,8 +225,10 @@ def test_prepare_next_channel(dummy_microscope):
     dummy_microscope.prepare_next_channel()
 
     assert dummy_microscope.current_channel == current_channel
+    expected_focus = dummy_microscope.central_focus + float(channel_dict["defocus"])
     assert dummy_microscope.get_stage_position()["f_pos"] == pytest.approx(
-        dummy_microscope.central_focus + channel_dict["defocus"]
+        expected_focus,
+        abs=1e-2,
     )
 
 

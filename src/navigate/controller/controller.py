@@ -275,9 +275,10 @@ class Controller:
         self.autofocus_calibration_controller = AutofocusCalibrationController(self)
 
         #: dict: Event listeners for the controller.
-        self.event_listeners = {
-            "autofocus_complete": self.autofocus_calibration_controller.handle_autofocus_complete
-        }
+        handle_autofocus_complete = (
+            self.autofocus_calibration_controller.handle_autofocus_complete
+        )
+        self.event_listeners = {"autofocus_complete": handle_autofocus_complete}
 
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acquire_bar, self)
@@ -1418,8 +1419,13 @@ class Controller:
                     self.view.wait_window(feature_list_popup.popup)
 
                     # do not run acquisition if "cancel" is selected
-                    temp = self.features_popup_controller.start_acquisiton_flag
-                    delattr(self, "features_popup_controller")
+                    temp = getattr(
+                        getattr(self, "features_popup_controller", None),
+                        "start_acquisiton_flag",
+                        False,
+                    )
+                    if hasattr(self, "features_popup_controller"):
+                        delattr(self, "features_popup_controller")
                     if not temp:
                         self.set_mode_of_sub("stop")
                         return

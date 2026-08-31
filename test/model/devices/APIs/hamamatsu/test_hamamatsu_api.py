@@ -38,7 +38,6 @@ import pytest
 # Local application imports
 
 
-@pytest.mark.hardware
 @pytest.fixture(autouse=True, scope="class")
 def open_camera():
     from navigate.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg

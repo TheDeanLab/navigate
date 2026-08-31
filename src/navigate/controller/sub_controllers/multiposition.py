@@ -45,6 +45,7 @@ import yaml
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.tools.dataframe_compat import append_dataframe_rows, insert_blank_row
 from navigate.tools.file_functions import save_yaml_file
 from navigate.tools.multipos_table_tools import update_rowcolors
 
@@ -415,7 +416,18 @@ class MultiPositionController(GUIController):
 
     def insert_row_func(self) -> None:
         """Insert a row in the Multi-Position Acquisition Interface."""
-        self.table.model.addRow(self.table.currentrow)
+        row_index = self.table.currentrow
+        self._sync_hidden_position_df()
+        self.table.model.df = insert_blank_row(self.table.model.df, row_index)
+        self._hidden_position_df = insert_blank_row(self._hidden_position_df, row_index)
+        if self.table.model.df.shape[0] == 0:
+            self.table.currentrow = 0
+        elif self.table.currentrow is None:
+            self.table.currentrow = self.table.model.df.shape[0] - 1
+        else:
+            self.table.currentrow = max(
+                0, min(int(self.table.currentrow), self.table.model.df.shape[0] - 1)
+            )
         self._sync_hidden_position_df()
         update_rowcolors(self.table)
         self._refresh_table_view()
@@ -457,12 +469,10 @@ class MultiPositionController(GUIController):
                 headers.append(column_name)
                 temp.append(normalized_position[col_name])
 
-        # update the column headers
-        self.table.model.df = self.table.model.df.reindex(columns=headers)
-
         # temp = list(map(lambda k: position[k], position))
-        self.table.model.df = pd.concat(
-            [self.table.model.df, pd.DataFrame([temp], columns=headers)],
+        self.table.model.df = append_dataframe_rows(
+            self.table.model.df,
+            pd.DataFrame([temp], columns=headers),
             ignore_index=True,
         )
         self.table.currentrow = self.table.model.df.shape[0] - 1

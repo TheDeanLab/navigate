@@ -55,9 +55,9 @@ stage-ready gate, and the ``Sweep Time`` stage advance are otherwise unchanged.
 .. image:: ../../images/plc_control_loop_2.png
    :align: center
    :alt: ASI Tiger PLC control logic for Z-stack acquisition with remote focus preceding camera trigger.
-   
+
 To complete the loop, BNC cables must be connected to trigger the stage, and to receive
-the stage sync signal. PLC connection 3 triggers the stage, and PLC connection 4 receives 
+the stage sync signal. PLC connection 3 triggers the stage, and PLC connection 4 receives
 the sync signal. This is pictured below:
 
 .. figure:: ../../images/plc_stage_connection.png
@@ -66,7 +66,7 @@ the sync signal. This is pictured below:
 
 
 In some cases, both the focus stage and z-stage are incremented together during a Z-stack.
-In this case, the stage sync signal must be taken from the slowest-moving stage (Standard 
+In this case, the stage sync signal must be taken from the slowest-moving stage (Standard
 stages are slower than piezo stages). The stage trigger must be split between the two stages, as shown below:
 
 .. figure:: ../../images/plc_stage_connection2.png
@@ -78,15 +78,15 @@ Continuous Acquisition
 
 Continuous acquisition uses a related PLC pattern, but replaces the finite
 ``numZSteps`` stack counter with a free-running loop. Cell 1 starts the sequence,
-cells 2, 9, and 10 generate the paired galvo triggers, and cell 3 inserts the 
-common startup delay before cell 4 latches the continuous state. Cells 5, 6, and 7 
-then form the repeating RFVC (remote focus voice coil) loop: cell 5 enables the next 
+cells 2, 9, and 10 generate the paired galvo triggers, and cell 3 inserts the
+common startup delay before cell 4 latches the continuous state. Cells 5, 6, and 7
+then form the repeating RFVC (remote focus voice coil) loop: cell 5 enables the next
 RFVC trigger while cell 7 is inactive, cell 6 issues that trigger, and cell 7 delays
 the next loop iteration. From cell 6, cells 11 and 12 apply the camera delay and
 then assert the camera trigger output. The loop continues until software clears
 the continuous-acquisition state.
 
-The same dynamic allocation of cells 11 and 12 shown in the Z-stack mode diagram is used 
+The same dynamic allocation of cells 11 and 12 shown in the Z-stack mode diagram is used
 to swap the camera and remote-focus timing paths, but is not shown in the diagram below.
 
 .. image:: ../../images/plc_continuous.png

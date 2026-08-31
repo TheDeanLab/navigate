@@ -481,7 +481,7 @@ class Autofocus:
             return self._stage_scan_bounds_error("fine", positions)
         if not self.coarse_selected and not self.fine_selected:
             return (
-                f"Coarse/Fine settings error!\n\n"
+                "Coarse/Fine settings error!\n\n"
                 "Select at least one mode: Coarse or Fine.\n"
                 "Please ensure the range and step size are greater than zero."
             )
@@ -945,7 +945,7 @@ class Autofocus:
         - Input data are sorted by x before fitting for stability.
         - The spline degree `k` is chosen adaptively as `min(3, max(1, n-1))`
           where `n` is the number of samples.
-        - If no data are available, the function returns ([], None, 0.0).
+        - If no data are available, the function returns `([], None, 0.0)`.
 
         See Also
         --------

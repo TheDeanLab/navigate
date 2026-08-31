@@ -157,6 +157,22 @@ def test_update_rowcolors_re_raises_unrelated_attribute_errors():
         update_rowcolors(_TableBadAttribute())
 
 
+def test_update_rowcolors_fallback_on_drop_type_error():
+    class _TableDropTypeError:
+        def __init__(self):
+            self.model = SimpleNamespace(df=pd.DataFrame({"A": [1, 2]}, index=[0, 1]))
+            self.rowcolors = pd.DataFrame({"A": ["red"]}, index=[0])
+
+        def update_rowcolors(self):
+            raise TypeError("drop() takes from 1 to 2 positional arguments")
+
+    table = _TableDropTypeError()
+    update_rowcolors(table)
+
+    assert list(table.rowcolors.index) == [0, 1]
+    assert list(table.rowcolors.columns) == ["A"]
+
+
 def test_write_to_csv_file_success_and_failure(tmp_path):
     success_file = tmp_path / "positions.csv"
     positions = [[1, 2, 3, 4, 5], [10, 20, 30, 40, 50]]

@@ -196,6 +196,52 @@ class TestAcquireBarController:
         assert after_stop == 0, "Progress Bar did not stop"
         assert after_ovr == 0, "Progress Bar did not stop"
 
+    def test_progress_bar_uses_multiposition_configuration(self, monkeypatch):
+        configuration = self.acquire_bar_controller.parent_controller.configuration
+        shared_microscope_state = configuration["experiment"]["MicroscopeState"]
+        microscope_state = dict(shared_microscope_state)
+        microscope_state["channels"] = {
+            key: dict(channel)
+            for key, channel in shared_microscope_state["channels"].items()
+        }
+        microscope_state["timepoints"] = 1
+        microscope_state["number_z_steps"] = 1
+        microscope_state["is_multiposition"] = True
+
+        for idx, channel in enumerate(microscope_state["channels"].values()):
+            channel["is_selected"] = idx == 0
+
+        # Header + 3 positions.
+        monkeypatch.setitem(
+            configuration,
+            "multi_positions",
+            [
+                ["X", "Y", "Z", "R", "F"],
+                [0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0],
+                [2, 2, 0, 0, 0],
+            ],
+        )
+
+        self.acquire_bar_controller.progress_bar(
+            images_received=0,
+            microscope_state=microscope_state,
+            mode="z-stack",
+            stop=False,
+        )
+        self.acquire_bar_controller.progress_bar(
+            images_received=1,
+            microscope_state=microscope_state,
+            mode="z-stack",
+            stop=False,
+        )
+
+        assert float(self.acquire_bar_controller.view.CurAcq["value"]) == 100.0
+        assert float(self.acquire_bar_controller.view.OvrAcq["value"]) == pytest.approx(
+            33.3333333333,
+            rel=1e-6,
+        )
+
     @pytest.mark.parametrize("mode", ["live", "single", "z-stack", "customized"])
     def test_get_set_mode(self, mode):
         """Tests the get_mode and set_mode methods of the AcquireBarController class
@@ -507,7 +553,8 @@ class TestAcquireBarController:
                     widgets["celltype"].set("34T")
 
                     # Set dynamic label entries for each selected channel
-                    # The popup creates entries like label_488nm, label_562nm, label_642nm
+                    # The popup creates entries such as label_488nm and
+                    # label_562nm.
                     for key in widgets.keys():
                         if key.startswith("label_"):
                             widgets[key].set("BCB")

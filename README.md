@@ -61,12 +61,22 @@ cd navigate
 Install in editable mode with development dependencies:
 
 ```bash
-# Windows (cmd/powershell)
-pip install -e .[dev]
+# Windows with Python 3.9
+pip install -c constraints/windows-py39.txt -e ".[dev]"
+
+# Windows with Python 3.10
+pip install -c constraints/windows-py310.txt -e ".[dev]"
+
+# Windows with Python 3.11
+pip install -c constraints/windows-py311.txt -e ".[dev]"
 
 # Linux/macOS
 pip install -e ".[dev]"
 ```
+
+The Windows constraint files reproduce environments that passed the complete
+test suite. They control resolved versions without adding every transitive
+dependency to `pyproject.toml`; use the file matching your Python version.
 
 ## Command Line Arguments
 

@@ -99,7 +99,6 @@ class ImagineOpticsMirror(MirrorBase, IntegratedDevice):
             Path to the .wcs file defining the flat actuator positions.
         interaction_matrix_file_path : str
             Path to the .aoc interaction matrix used to build the command matrix.
-
         Returns
         -------
         IMOP_Mirror

@@ -459,3 +459,6 @@ class CameraBase(ABC):
         if self.camera_parameters["cooling"] is False:
             logger.warning(f"{str(self)} does not support cooling.")
             return None
+
+    def generate_new_frame(self) -> None:
+        pass

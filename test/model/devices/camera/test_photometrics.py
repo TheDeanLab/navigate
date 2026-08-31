@@ -100,7 +100,9 @@ def photometrics_module(monkeypatch):
     sys.modules.pop("navigate.model.devices.camera.photometrics", None)
 
     module = importlib.import_module("navigate.model.devices.camera.photometrics")
-    monkeypatch.setattr(module.CameraBase, "get_offset_variance_maps", disable_camera_maps)
+    monkeypatch.setattr(
+        module.CameraBase, "get_offset_variance_maps", disable_camera_maps
+    )
     return module
 
 
@@ -159,11 +161,11 @@ def test_trigger_and_readout_direction_branches(photometrics_camera):
     camera, controller = photometrics_camera
 
     camera.set_trigger_mode("External")
-    assert controller.trig_mode == "External"
+    assert controller.exp_mode == "External"
     camera.set_trigger_mode("Internal")
-    assert controller.trig_mode == "Internal"
+    assert controller.exp_mode == "Internal"
     camera.set_trigger_mode("Unknown")
-    assert controller.trig_mode == "Internal"
+    assert controller.exp_mode == "Internal"
 
     camera.set_readout_direction("Top-to-Bottom")
     assert controller.prog_scan_dir == 0
@@ -189,8 +191,8 @@ def test_readout_exposure_line_interval_and_aslm_math(photometrics_camera):
     assert camera._scan_delay == 17
     assert controller.prog_scan_line_delay == 17
 
-    exposure_time, line_delay, acquisition_time = camera.calculate_light_sheet_exposure_time(
-        0.2, 100
+    exposure_time, line_delay, acquisition_time = (
+        camera.calculate_light_sheet_exposure_time(0.2, 100)
     )
     assert exposure_time == pytest.approx(0.01, rel=1e-6)
     assert line_delay == 46

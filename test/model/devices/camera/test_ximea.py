@@ -257,7 +257,8 @@ def test_mu196xr_uses_the_configured_trigger_port(ximea_module):
     camera = ximea_module.MU196XRCamera("test_scope", cam, build_configuration())
 
     assert str(camera) == "Ximea MU196XR Camera"
-    assert cam.set_calls[0] == ("gpi_selector", "XI_GPI_PORT1")
+    # MU196 camera uses XI_GPI_PORT2
+    assert cam.set_calls[0] == ("gpi_selector", "XI_GPI_PORT2")
 
 
 def test_mu196xr_defaults_to_trigger_port_two(ximea_module):

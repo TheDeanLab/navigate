@@ -1491,7 +1491,7 @@ class FeatureListGraphController:
                             arg_str += str(a)
                         elif type(a) is int or type(a) is float:
                             arg_str += str(a)
-                        elif type(a) is dict:
+                        elif type(a) is dict or type(a) is list:
                             arg_str += str(a)
                         else:
                             try:

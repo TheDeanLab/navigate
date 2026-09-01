@@ -227,8 +227,8 @@ def test_move_feature_removes_redundant_outer_group(graph_controller):
     assert graph_controller.feature_structure == ["(", 0, 1, ")", 2, 3]
 
 
-def test_update_feature_list_rejects_imported_record(monkeypatch):
-    """Confirm must not mutate runtime state for a source-owned feature list."""
+def test_update_feature_list_warns_but_loads_imported_record(monkeypatch):
+    """Source-owned lists are not saved locally but can be tuned at runtime."""
     record = {
         "module_name": "ImportedFeature",
         "feature_list_name": "Display Name",
@@ -245,13 +245,15 @@ def test_update_feature_list_rejects_imported_record(monkeypatch):
     controller.update_feature_list()
 
     save_yaml_file.assert_not_called()
-    controller.parent_controller.execute.assert_not_called()
-    controller.view.popup.dismiss.assert_not_called()
+    controller.parent_controller.execute.assert_called_once_with(
+        "load_feature", 7, '[{"name": Snap,}]'
+    )
+    controller.view.popup.dismiss.assert_called_once()
     showerror.assert_called_once()
 
 
-def test_update_feature_list_rejects_missing_record(monkeypatch):
-    """Confirm must fail closed if the selected sequence record disappears."""
+def test_update_feature_list_warns_but_loads_missing_record(monkeypatch):
+    """Missing sequence metadata should not prevent the runtime update."""
     controller = make_feature_popup_controller(None, None)
     save_yaml_file = MagicMock()
     showerror = MagicMock()
@@ -261,8 +263,10 @@ def test_update_feature_list_rejects_missing_record(monkeypatch):
     controller.update_feature_list()
 
     save_yaml_file.assert_not_called()
-    controller.parent_controller.execute.assert_not_called()
-    controller.view.popup.dismiss.assert_not_called()
+    controller.parent_controller.execute.assert_called_once_with(
+        "load_feature", 7, '[{"name": Snap,}]'
+    )
+    controller.view.popup.dismiss.assert_called_once()
     showerror.assert_called_once()
     assert "missing or invalid" in showerror.call_args.kwargs["message"]
 
@@ -302,8 +306,8 @@ def test_update_feature_list_saves_sequence_filename_before_runtime_update(
     controller.view.popup.dismiss.assert_called_once()
 
 
-def test_update_feature_list_stays_open_when_persistence_fails(monkeypatch):
-    """A failed YAML write must not look like a successful editor update."""
+def test_update_feature_list_warns_but_loads_when_persistence_fails(monkeypatch):
+    """A failed YAML write should warn while still applying runtime edits."""
     record = {
         "module_name": None,
         "feature_list_name": "Display Name",
@@ -319,8 +323,10 @@ def test_update_feature_list_stays_open_when_persistence_fails(monkeypatch):
     controller.update_feature_list()
 
     save_yaml_file.assert_called_once()
-    controller.parent_controller.execute.assert_not_called()
-    controller.view.popup.dismiss.assert_not_called()
+    controller.parent_controller.execute.assert_called_once_with(
+        "load_feature", 7, '[{"name": Snap,}]'
+    )
+    controller.view.popup.dismiss.assert_called_once()
     showerror.assert_called_once()
     assert "could not be saved" in showerror.call_args.kwargs["message"]
 

@@ -189,10 +189,9 @@ class FeaturePopupController(GUIController):
             if feature_list_config is None or yaml_file_name is None:
                 messagebox.showerror(
                     title="Feature List Error",
-                    message="The selected feature-list record is missing or invalid.",
+                    message="The selected feature-list record is missing or invalid. Any changes can't be saved!",
                 )
-                return
-            if feature_list_config["module_name"] is not None:
+            elif feature_list_config["module_name"] is not None:
                 messagebox.showerror(
                     title="Feature List Error",
                     message=(
@@ -200,24 +199,22 @@ class FeaturePopupController(GUIController):
                         "and cannot be edited in the visual editor."
                     ),
                 )
-                return
-
-            feature_lists_path = get_navigate_path() + "/feature_lists"
-            feature_list_name = feature_list_config["feature_list_name"]
-            if not save_yaml_file(
-                feature_lists_path,
-                {
-                    "module_name": None,
-                    "feature_list_name": feature_list_name,
-                    "feature_list": feature_list_content,
-                },
-                yaml_file_name,
-            ):
-                messagebox.showerror(
-                    title="Feature List Error",
-                    message="The feature list could not be saved. No changes applied.",
-                )
-                return
+            else:
+                feature_lists_path = get_navigate_path() + "/feature_lists"
+                feature_list_name = feature_list_config["feature_list_name"]
+                if not save_yaml_file(
+                    feature_lists_path,
+                    {
+                        "module_name": None,
+                        "feature_list_name": feature_list_name,
+                        "feature_list": feature_list_content,
+                    },
+                    yaml_file_name,
+                ):
+                    messagebox.showerror(
+                        title="Feature List Error",
+                        message="Any changes to this feature list could not be saved.",
+                    )
 
         self.parent_controller.execute(
             "load_feature", self.feature_list_id, feature_list_content

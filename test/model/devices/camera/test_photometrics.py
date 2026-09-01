@@ -161,11 +161,13 @@ def test_trigger_and_readout_direction_branches(photometrics_camera):
     camera, controller = photometrics_camera
 
     camera.set_trigger_mode("External")
-    assert controller.exp_mode == "External"
+    assert controller.exp_mode == "Edge Trigger"
     camera.set_trigger_mode("Internal")
-    assert controller.exp_mode == "Internal"
+    assert controller.exp_mode == "Internal Trigger"
     camera.set_trigger_mode("Unknown")
-    assert controller.exp_mode == "Internal"
+    assert controller.exp_mode == "Internal Trigger"
+    camera.set_trigger_mode("Software")
+    assert controller.exp_mode == "Software Trigger Edge"
 
     camera.set_readout_direction("Top-to-Bottom")
     assert controller.prog_scan_dir == 0

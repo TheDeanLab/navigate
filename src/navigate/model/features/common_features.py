@@ -704,7 +704,7 @@ class LoopByCount(FeatureBase):
         elif steps == "positions":
             return len(self.model.configuration["multi_positions"]) - 1
         elif steps == "timepoints":
-            steps = self.model.configuration["experiment"]["MicroscopeState"].get(
+            return self.model.configuration["experiment"]["MicroscopeState"].get(
                 "timepoints", 1
             )
         else:

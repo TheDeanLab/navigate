@@ -51,56 +51,14 @@ except ImportError:
 import navigate
 from navigate.model import data_sources
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
-from navigate.config.configuration_schema import SettingSpec
-from navigate.model.features.base import FeatureBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ImageWriter(FeatureBase):
+class ImageWriter:
     """Class for saving acquired data to disk."""
-
-    parameter_schema = {
-        "microscope_name": SettingSpec(
-            str,
-            default=None,
-            label="Microscope",
-            help_text="Microscope name to save. Leave empty for the active microscope.",
-            dynamic_source="microscopes",
-        ),
-        "data_buffer": SettingSpec(
-            list,
-            default=None,
-            label="Data Buffer",
-            help_text="Optional data-buffer list. Leave empty to use the model buffer.",
-        ),
-        "sub_dir": SettingSpec(
-            str,
-            default="",
-            label="Subdirectory",
-            help_text="Subdirectory under the configured save directory.",
-        ),
-        "image_name": SettingSpec(
-            str,
-            default=None,
-            label="Image Name",
-            help_text="Optional image name. Leave empty to generate one automatically.",
-        ),
-        "saving_flags": SettingSpec(
-            list,
-            default=None,
-            label="Saving Flags",
-            help_text="Optional list of frame-saving flags. Leave empty to use the system default value",
-        ),
-        "saving_config": SettingSpec(
-            dict,
-            default=None,
-            label="Saving Config",
-            help_text="Optional image-writer configuration mapping. Leave empty to use the system default value",
-        ),
-    }
 
     def __init__(
         self,

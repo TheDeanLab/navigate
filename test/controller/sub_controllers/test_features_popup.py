@@ -704,22 +704,35 @@ def test_feature_parameter_values_add_autofocus_dynamic_choices(graph_controller
         {"name": TestFeature, "args": ("stage", "f", None, "capture_reference")},
     )
 
-    assert args_value == ["stage", "f", "channel_1", "Capture Reference", "channel_2"]
+    assert args_value == ["stage", "f", "None", "Capture Reference", "channel_2"]
     assert schema["device"].choices == ("stage",)
     assert schema["device_ref"].choices == ("x", "y", "z", "f", "theta")
     assert schema["target_channel"].choices == (
+        "None",
         "channel_1",
         "channel_2",
         "channel_3",
     )
+    assert schema["target_channel"].choice_values == {
+        "None": None,
+        "channel_1": "channel_1",
+        "channel_2": "channel_2",
+        "channel_3": "channel_3",
+    }
     assert schema["reference_channel"].choices == (
+        "None",
         "channel_1",
         "channel_2",
         "channel_3",
     )
+    assert schema["reference_channel"].choice_values == {
+        "None": None,
+        "channel_1": "channel_1",
+        "channel_2": "channel_2",
+        "channel_3": "channel_3",
+    }
     assert schema["calibration_action"].choices == (
         "Regular",
-        "Auto Defocus",
         "Capture Reference",
         "Populate Defocus",
     )
@@ -1086,6 +1099,18 @@ def test_coerce_feature_parameter_maps_choice_labels_to_saved_values():
         coerce_feature_parameter("calibration_action", "Capture Reference", spec)
         == "capture_reference"
     )
+
+
+def test_coerce_feature_parameter_accepts_optional_channel_none_choice():
+    """Optional channel parameters can save a displayed None choice."""
+    spec = SettingSpec(
+        str,
+        choices=("None", "channel_1"),
+        choice_values={"None": None, "channel_1": "channel_1"},
+    )
+
+    assert coerce_feature_parameter("target_channel", "None", spec) is None
+    assert coerce_feature_parameter("target_channel", "channel_1", spec) == "channel_1"
 
 
 def test_update_feature_list_keeps_acquisition_configuration_runtime_only(

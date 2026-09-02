@@ -477,6 +477,17 @@ class FeatureListGraphController:
             return ()
         return tuple(f"channel_{index}" for index in range(1, channel_count + 1))
 
+    def optional_channel_choices(self):
+        """Return optional channel choices with a displayed None entry."""
+        return ("None",) + self.channel_choices()
+
+    def optional_channel_choice_values(self):
+        """Return optional channel display labels mapped to saved values."""
+        return {
+            choice: (None if choice == "None" else choice)
+            for choice in self.optional_channel_choices()
+        }
+
     def microscope_state_values(self):
         """Return currently loaded experiment MicroscopeState values."""
         configuration_controller = getattr(self, "configuration_controller", None)
@@ -516,7 +527,11 @@ class FeatureListGraphController:
     @staticmethod
     def autofocus_calibration_action_choices():
         """Return displayed autofocus calibration action labels."""
-        return tuple(AutofocusPopupController.CALIBRATION_ACTIONS.keys())
+        return tuple(
+            k
+            for k in AutofocusPopupController.CALIBRATION_ACTIONS.keys()
+            if k != "Auto Defocus"
+        )
 
     @staticmethod
     def autofocus_calibration_action_choice_values():
@@ -588,11 +603,18 @@ class FeatureListGraphController:
             choices = dynamic_choice_sources.get(spec.dynamic_source)
             if choices is None:
                 continue
+            if spec.dynamic_source == self.CHANNEL_DYNAMIC_SOURCE and not spec.required:
+                choices = self.optional_channel_choices()
             choice_values = (
                 self.autofocus_calibration_action_choice_values()
                 if spec.dynamic_source
                 == self.AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE
-                else spec.choice_values
+                else (
+                    self.optional_channel_choice_values()
+                    if spec.dynamic_source == self.CHANNEL_DYNAMIC_SOURCE
+                    and not spec.required
+                    else spec.choice_values
+                )
             )
             parameter_specs[arg_name] = replace(
                 spec,
@@ -603,6 +625,12 @@ class FeatureListGraphController:
                 args_value[index] = self.autofocus_calibration_action_display_value(
                     args_value[index]
                 )
+            elif (
+                spec.dynamic_source == self.CHANNEL_DYNAMIC_SOURCE
+                and not spec.required
+                and args_value[index] is None
+            ):
+                args_value[index] = "None"
             if choices and args_value[index] not in choices:
                 args_value[index] = choices[0]
 

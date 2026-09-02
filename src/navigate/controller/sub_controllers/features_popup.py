@@ -499,6 +499,21 @@ class FeatureListGraphController:
         )
 
     @staticmethod
+    def stage_axis_offset_values(value, item_schema):
+        """Return axis-keyed offset values from saved mapping or sequence input."""
+        if isinstance(value, dict):
+            return {
+                axis: value.get(axis, field_spec.default)
+                for axis, field_spec in item_schema.items()
+            }
+        if isinstance(value, (list, tuple)):
+            return {
+                axis: value[index] if index < len(value) else field_spec.default
+                for index, (axis, field_spec) in enumerate(item_schema.items())
+            }
+        return {axis: field_spec.default for axis, field_spec in item_schema.items()}
+
+    @staticmethod
     def autofocus_calibration_action_choices():
         """Return displayed autofocus calibration action labels."""
         return tuple(AutofocusPopupController.CALIBRATION_ACTIONS.keys())
@@ -602,12 +617,10 @@ class FeatureListGraphController:
                 continue
             item_schema = {axis: self.stage_axis_offset_spec(axis) for axis in axes}
             parameter_specs[arg_name] = replace(spec, item_schema=item_schema)
-            if not isinstance(args_value[index], dict):
-                args_value[index] = {}
-            args_value[index] = {
-                axis: args_value[index].get(axis, item_schema[axis].default)
-                for axis in item_schema
-            }
+            args_value[index] = self.stage_axis_offset_values(
+                args_value[index],
+                item_schema,
+            )
 
         microscope_state = self.microscope_state_values()
         for index, arg_name in enumerate(args_name):

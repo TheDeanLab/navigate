@@ -776,6 +776,65 @@ def test_feature_parameter_values_add_dynamic_stage_axis_collection_fields(
     assert schema["offset"].item_schema["sample"].label == "Sample"
 
 
+def test_feature_parameter_values_maps_list_offsets_to_stage_axes(graph_controller):
+    """Saved list offsets display as axis-keyed collection values."""
+
+    class TestFeature:
+        parameter_schema = {
+            "offset": CollectionSpec(
+                item_schema={},
+                storage="single_mapping",
+                dynamic_source="stage_axes",
+            )
+        }
+
+        def __init__(self, model, offset=None):
+            pass
+
+    graph_controller.configuration_controller = SimpleNamespace(
+        configuration={
+            "configuration": {
+                "microscopes": {
+                    "ScopeA": {
+                        "stage": {
+                            "hardware": [
+                                {
+                                    "axes": [
+                                        "first_axis",
+                                        "second_axis",
+                                        "third_axis",
+                                        "fourth_axis",
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                }
+            }
+        }
+    )
+
+    _, args_value, schema = graph_controller.get_feature_parameter_values(
+        TestFeature,
+        {"name": TestFeature, "args": ([10, 20, -5],)},
+    )
+
+    assert tuple(schema["offset"].item_schema) == (
+        "first_axis",
+        "second_axis",
+        "third_axis",
+        "fourth_axis",
+    )
+    assert args_value == [
+        {
+            "first_axis": 10,
+            "second_axis": 20,
+            "third_axis": -5,
+            "fourth_axis": 0,
+        }
+    ]
+
+
 def test_feature_parameter_values_populate_microscope_state_collection(
     graph_controller,
 ):

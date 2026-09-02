@@ -32,7 +32,6 @@
 
 # Standard library imports
 import logging
-from functools import reduce
 import time
 
 # Third party imports
@@ -408,15 +407,7 @@ class UpdateExperimentSetting(FeatureBase):
                     label="Step Size",
                     help_text="Distance between z planes.",
                     exclusive_minimum=0,
-                    step=0.1,
-                ),
-                "MicroscopeState.number_z_steps": SettingSpec(
-                    float,
-                    default=1,
-                    label="Number Z Steps",
-                    help_text="Number of z planes in the stack.",
-                    minimum=0,
-                    step=1,
+                    step=0.01,
                 ),
                 "MicroscopeState.timepoints": SettingSpec(
                     int,
@@ -473,6 +464,57 @@ class UpdateExperimentSetting(FeatureBase):
 
         self.experiment_parameters = experiment_parameters
 
+    def _laser_names(self) -> list[str]:
+        """Return laser names for the active microscope in channel GUI format."""
+        microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+        microscope_name = microscope_state["microscope_name"]
+        lasers = self.model.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["laser"]
+        return [f"{laser['wavelength']}nm" for laser in lasers]
+
+    def _normalize_channel_laser_index(self, channel: dict) -> None:
+        """Keep a channel's laser index synchronized with its laser name."""
+        if "laser" not in channel:
+            return
+
+        laser_names = self._laser_names()
+        if not laser_names:
+            return
+        if channel["laser"] not in laser_names:
+            channel["laser"] = laser_names[0]
+        channel["laser_index"] = laser_names.index(channel["laser"])
+
+    @staticmethod
+    def _is_mapping_like(value) -> bool:
+        """Return True for normal dictionaries and multiprocessing dict proxies."""
+        return hasattr(value, "items") and hasattr(value, "__getitem__")
+
+    def _update_channels(self, channel_updates) -> None:
+        """Update channel settings in place to preserve shared GUI references."""
+        channels = self.model.configuration["experiment"]["MicroscopeState"]["channels"]
+        for channel_key, channel_update in channel_updates.items():
+            if channel_key in channels and self._is_mapping_like(channel_update):
+                channels[channel_key].update(channel_update)
+            else:
+                channels[channel_key] = channel_update
+
+        for channel in channels.values():
+            if self._is_mapping_like(channel):
+                self._normalize_channel_laser_index(channel)
+
+    def _update_experiment_parameter(self, parameter: str, value) -> None:
+        """Update one experiment parameter without replacing shared channel maps."""
+        if parameter == "MicroscopeState.channels":
+            self._update_channels(value)
+            return
+
+        config_ref = self.model.configuration["experiment"]
+        parameters = parameter.split(".")
+        for key in parameters[:-1]:
+            config_ref = config_ref[key]
+        config_ref[parameters[-1]] = value
+
     def signal_func(self):
         """Perform actions to change the resolution mode and update the active
          microscope.
@@ -504,9 +546,7 @@ class UpdateExperimentSetting(FeatureBase):
         # check if any parameter about x, y, c, z, t changed
         for k, v in self.experiment_parameters.items():
             try:
-                parameters = k.split(".")
-                config_ref = reduce(lambda pre, n: f"{pre}['{n}']", parameters, "")
-                exec(f"self.model.configuration['experiment']{config_ref} = {v}")
+                self._update_experiment_parameter(k, v)
             except Exception as e:
                 logger.error(f"*** parameter {k} failed to update to value {v}")
                 logger.error(e)
@@ -519,6 +559,20 @@ class UpdateExperimentSetting(FeatureBase):
         # update image writer
         if self.model.image_writer:
             z_steps = state["number_z_steps"]
+            # calculate the right z_steps
+            step_size = state["step_size"]
+            if step_size == 0:
+                step_size = 0.01
+            if state["end_position"] < state["start_position"] and step_size > 0:
+                state["step_size"] = -step_size
+            elif state["end_position"] > state["start_position"] and step_size < 0:
+                state["step_size"] = -step_size
+            z_range = state["end_position"] - state["start_position"]
+            z_steps = abs(int(z_range / step_size))
+            if z_steps <= 0:
+                z_steps = 1
+            state["number_z_steps"] = z_steps
+
             channels = sum(
                 [v["is_selected"] is True for k, v in state["channels"].items()]
             )

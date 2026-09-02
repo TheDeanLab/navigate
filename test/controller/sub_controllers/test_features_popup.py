@@ -375,6 +375,31 @@ def test_feature_parameter_values_preserve_existing_feature_args(graph_controlle
     assert args_value == [9]
 
 
+def test_feature_parameter_values_default_nullable_collection_to_none(graph_controller):
+    """Nullable collection parameters default to None for new features."""
+
+    class TestFeature:
+        parameter_schema = {
+            "scan_settings": CollectionSpec(
+                item_schema={
+                    "coarse_range": SettingSpec(float, default=500),
+                },
+                storage="single_mapping",
+                none_option_label="Use system default",
+            )
+        }
+
+        def __init__(self, model, scan_settings=None):
+            pass
+
+    args_name, args_value, _schema = graph_controller.get_feature_parameter_values(
+        TestFeature
+    )
+
+    assert args_name == ["scan_settings"]
+    assert args_value == [None]
+
+
 def test_feature_description_uses_metadata_or_docstring_summary():
     """Feature descriptions prefer explicit metadata and fall back to docstrings."""
 
@@ -970,6 +995,20 @@ def test_coerce_feature_parameter_supports_single_mapping_collection():
     )
 
     assert coerced == {"coarse_selected": False, "coarse_range": 250.0}
+
+
+def test_coerce_feature_parameter_allows_nullable_collection():
+    """Nullable collection specs can preserve an explicit None value."""
+    spec = CollectionSpec(
+        item_schema={
+            "coarse_selected": SettingSpec(bool, default=True),
+            "coarse_range": SettingSpec(float, default=500, required=True),
+        },
+        storage="single_mapping",
+        none_option_label="Use system default",
+    )
+
+    assert coerce_feature_parameter("scan_settings", None, spec) is None
 
 
 def test_coerce_feature_parameter_maps_choice_labels_to_saved_values():

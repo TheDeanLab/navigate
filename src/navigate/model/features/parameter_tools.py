@@ -28,6 +28,8 @@ def coerce_feature_parameter(
             raise ValueError(
                 f"{parameter_name} uses unsupported collection storage {spec.storage}."
             )
+        if value is None and spec.none_option_label is not None:
+            return None
         if not isinstance(value, dict):
             raise ValueError(f"{parameter_name} must be a valid mapping.")
         return {

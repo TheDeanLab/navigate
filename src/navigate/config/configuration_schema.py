@@ -127,6 +127,7 @@ class CollectionSpec:
     help_text: Optional[str] = None
     dynamic_source: Optional[str] = None
     minimum_items: int = 0
+    none_option_label: Optional[str] = None
 
     def __post_init__(self) -> None:
         """Validate collection metadata at class-definition time."""

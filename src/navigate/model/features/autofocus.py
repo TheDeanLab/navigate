@@ -254,6 +254,7 @@ class Autofocus(FeatureBase):
             storage="single_mapping",
             label="Scan Settings",
             help_text="Optional autofocus scan settings mapping.",
+            none_option_label="Use system default",
         ),
     }
 

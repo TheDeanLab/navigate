@@ -60,7 +60,29 @@ class FeatureCollectionInput:
         self.label = self.frame
         self.widgets = {}
         self.variables = {}
+        self.use_none = tk.BooleanVar(
+            value=spec.none_option_label is not None and value is None
+        )
         values = value if isinstance(value, dict) else {}
+
+        row_offset = 0
+        if spec.none_option_label is not None:
+            default_widget = ttk.Checkbutton(
+                self.frame,
+                text=spec.none_option_label,
+                variable=self.use_none,
+                command=self.sync_widget_state,
+            )
+            default_widget.grid(
+                row=0,
+                column=0,
+                columnspan=2,
+                sticky=tk.W,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 5)),
+            )
+            self.default_widget = default_widget
+            row_offset = 1
 
         for row, (field_name, field_spec) in enumerate(spec.item_schema.items()):
             label = ttk.Label(
@@ -69,7 +91,7 @@ class FeatureCollectionInput:
                 width=18,
             )
             label.grid(
-                row=row,
+                row=row + row_offset,
                 column=0,
                 sticky=tk.W,
                 padx=get_theme_space_px(3),
@@ -80,8 +102,10 @@ class FeatureCollectionInput:
 
             variable = self.create_variable(field_spec, values.get(field_name))
             self.variables[field_name] = variable
-            widget = self.create_widget(row, field_spec, variable)
+            widget = self.create_widget(row + row_offset, field_spec, variable)
             self.widgets[field_name] = widget
+
+        self.sync_widget_state()
 
     def create_variable(self, spec, value):
         """Create a Tk variable suitable for a collection field."""
@@ -187,6 +211,8 @@ class FeatureCollectionInput:
 
     def get(self):
         """Return the collection as a field mapping."""
+        if self.spec.none_option_label is not None and self.use_none.get():
+            return None
         values = {}
         for field_name, variable in self.variables.items():
             widget = self.widgets[field_name]
@@ -198,6 +224,9 @@ class FeatureCollectionInput:
 
     def set(self, value):
         """Set collection values from a mapping."""
+        if self.spec.none_option_label is not None:
+            self.use_none.set(value is None)
+            self.sync_widget_state()
         if not isinstance(value, dict):
             return
         for field_name, field_value in value.items():
@@ -217,6 +246,20 @@ class FeatureCollectionInput:
                         widget.insert("1.0", text)
                     continue
                 self.variables[field_name].set(str(field_value))
+        self.sync_widget_state()
+
+    def sync_widget_state(self):
+        """Enable or disable collection fields when the null option changes."""
+        disabled = self.spec.none_option_label is not None and self.use_none.get()
+        state = tk.DISABLED if disabled else tk.NORMAL
+        readonly_state = "disabled" if disabled else "readonly"
+        for widget in self.widgets.values():
+            if isinstance(widget, ttk.Combobox):
+                widget.config(state=readonly_state)
+            elif isinstance(widget, tk.Text):
+                widget.config(state=state)
+            else:
+                widget.config(state=state)
 
 
 class FeatureIcon(ttk.Button):

@@ -214,6 +214,53 @@ def test_feature_config_popup_renders_single_mapping_collection(tk_root):
     }
 
 
+def test_feature_config_popup_collection_none_option_returns_none(tk_root):
+    """Nullable collections render a checkbox that returns None when selected."""
+    config_popup = FeatureConfigPopup(
+        tk_root,
+        ["Autofocus"],
+        feature_name="Autofocus",
+        args_name=["scan_settings"],
+        args_value=[None],
+        parameter_schema={
+            "scan_settings": CollectionSpec(
+                item_schema={
+                    "coarse_selected": SettingSpec(bool, default=True, label="Coarse"),
+                    "coarse_range": SettingSpec(
+                        float,
+                        default=500,
+                        label="Coarse Range",
+                        minimum=0,
+                        step=1,
+                        required=True,
+                    ),
+                },
+                storage="single_mapping",
+                label="Scan Settings",
+                none_option_label="Use system default",
+            )
+        },
+        title="Test",
+    )
+    tk_root.update()
+
+    scan_settings_input = config_popup.inputs_by_name["scan_settings"]
+
+    assert scan_settings_input.default_widget["text"] == "Use system default"
+    assert scan_settings_input.use_none.get() is True
+    assert scan_settings_input.widgets["coarse_range"]["state"] == tk.DISABLED
+    assert scan_settings_input.get() is None
+
+    scan_settings_input.use_none.set(False)
+    scan_settings_input.sync_widget_state()
+
+    assert scan_settings_input.widgets["coarse_range"]["state"] == tk.NORMAL
+    assert scan_settings_input.get() == {
+        "coarse_selected": "True",
+        "coarse_range": "500",
+    }
+
+
 def test_feature_config_popup_renders_dict_collection_field_as_text(tk_root):
     """Dict fields render as readable multi-line literals."""
 

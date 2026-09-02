@@ -666,23 +666,24 @@ class FeatureListGraphController:
                     else infer_feature_parameter_spec(default)
                 ),
             )
-        args_value = [
-            (
-                {
-                    field_name: field_spec.default
-                    for field_name, field_spec in parameter_specs[
-                        arg_name
-                    ].item_schema.items()
-                }
-                if isinstance(parameter_specs[arg_name], CollectionSpec)
-                else (
-                    parameter_specs[arg_name].default
-                    if isinstance(parameter_specs[arg_name], SettingSpec)
-                    else defaults[index]
-                )
-            )
-            for index, arg_name in enumerate(args_name)
-        ]
+        args_value = []
+        for index, arg_name in enumerate(args_name):
+            parameter_spec = parameter_specs[arg_name]
+            if isinstance(parameter_spec, CollectionSpec):
+                if parameter_spec.none_option_label is not None:
+                    args_value.append(None)
+                else:
+                    item_schema = parameter_spec.item_schema
+                    args_value.append(
+                        {
+                            field_name: field_spec.default
+                            for field_name, field_spec in item_schema.items()
+                        }
+                    )
+            elif isinstance(parameter_spec, SettingSpec):
+                args_value.append(parameter_spec.default)
+            else:
+                args_value.append(defaults[index])
         if feature is not None and "args" in feature:
             for index, value in enumerate(feature["args"]):
                 if index >= len(args_value):

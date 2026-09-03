@@ -236,11 +236,11 @@ def test_update_feature_list_warns_but_loads_imported_record(monkeypatch):
     }
     controller = make_feature_popup_controller(record, "imported-feature.yml")
     save_yaml_file = MagicMock()
-    showerror = MagicMock()
+    showwarning = MagicMock()
     monkeypatch.setattr(features_popup_module, "get_navigate_path", lambda: "/tmp")
     monkeypatch.setattr(features_popup_module, "load_yaml_file", lambda path: record)
     monkeypatch.setattr(features_popup_module, "save_yaml_file", save_yaml_file)
-    monkeypatch.setattr(features_popup_module.messagebox, "showerror", showerror)
+    monkeypatch.setattr(features_popup_module.messagebox, "showwarning", showwarning)
 
     controller.update_feature_list()
 
@@ -249,7 +249,7 @@ def test_update_feature_list_warns_but_loads_imported_record(monkeypatch):
         "load_feature", 7, '[{"name": Snap,}]'
     )
     controller.view.popup.dismiss.assert_called_once()
-    showerror.assert_called_once()
+    showwarning.assert_called_once()
 
 
 def test_update_feature_list_warns_but_loads_missing_record(monkeypatch):

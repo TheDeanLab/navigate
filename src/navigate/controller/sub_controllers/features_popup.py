@@ -192,11 +192,11 @@ class FeaturePopupController(GUIController):
                     message="The selected feature-list record is missing or invalid. Any changes can't be saved!",
                 )
             elif feature_list_config["module_name"] is not None:
-                messagebox.showerror(
+                messagebox.showwarning(
                     title="Feature List Error",
                     message=(
-                        "This feature list is provided by Python code or a plugin "
-                        "and cannot be edited in the visual editor."
+                        "This feature list is provided by Python script or a plugin. "
+                        "All changes are temporary and can't be saved upon exiting."
                     ),
                 )
             else:

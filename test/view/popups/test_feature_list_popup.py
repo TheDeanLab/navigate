@@ -44,7 +44,6 @@ from navigate.view.popups.feature_list_popup import (
 from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
-
 # @pytest.fixture
 # def tk_root():
 #     root = tk.Tk()
@@ -248,13 +247,13 @@ def test_feature_config_popup_collection_none_option_returns_none(tk_root):
 
     assert scan_settings_input.default_widget["text"] == "Use system default"
     assert scan_settings_input.use_none.get() is True
-    assert scan_settings_input.widgets["coarse_range"]["state"] == tk.DISABLED
+    assert str(scan_settings_input.widgets["coarse_range"]["state"]) == str(tk.DISABLED)
     assert scan_settings_input.get() is None
 
     scan_settings_input.use_none.set(False)
     scan_settings_input.sync_widget_state()
 
-    assert scan_settings_input.widgets["coarse_range"]["state"] == tk.NORMAL
+    assert str(scan_settings_input.widgets["coarse_range"]["state"]) == str(tk.NORMAL)
     assert scan_settings_input.get() == {
         "coarse_selected": "True",
         "coarse_range": "500",

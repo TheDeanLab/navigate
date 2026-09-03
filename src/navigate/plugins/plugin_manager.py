@@ -70,7 +70,7 @@ def register_features(module: Any) -> None:
         logger.warning(
             "Some plugin features do not inherit from FeatureBase. "
             "Support for legacy features without FeatureBase is deprecated. "
-            "Please update your plugin classes to inherit from FeatureBase.",
+            "Please update your plugin feature classes to inherit from FeatureBase.",
         )
 
 

@@ -151,7 +151,7 @@ class FeatureCollectionInput:
             widget = ttk.Combobox(
                 self.frame,
                 textvariable=variable,
-                values=("True", "False"),
+                values=("True", "False") if spec.choices is None else spec.choices,
                 state="readonly",
                 width=18,
             )
@@ -554,7 +554,11 @@ class FeatureConfigPopup:
             values = None
             if arg_spec.value_type is bool:
                 arg_input_class = ttk.Combobox
-                values = ["True", "False"]
+                values = (
+                    ["True", "False"]
+                    if arg_spec.choices is None
+                    else list(arg_spec.choices)
+                )
             elif parameter_config is not None and arg_name in parameter_config:
                 arg_input_class = ttk.Combobox
                 values = list(parameter_config[arg_name].keys())

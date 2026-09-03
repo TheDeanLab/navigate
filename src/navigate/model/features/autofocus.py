@@ -198,6 +198,7 @@ class Autofocus(FeatureBase):
             bool,
             default=False,
             label="Set Defocus For All",
+            choices=(False,),
             help_text="Apply computed defocus values to all channels.",
         ),
         "scan_settings": CollectionSpec(

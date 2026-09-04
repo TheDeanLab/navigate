@@ -81,7 +81,6 @@ from navigate.model.microscope import Microscope
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel
 
-
 # Logger Setup
 p = __name__.split(".")[1]
 
@@ -407,9 +406,9 @@ class Model:
         }
         # append plugin acquisition mode
         for mode in self.plugin_acquisition_modes:
-            self.acquisition_modes_feature_setting[
-                mode
-            ] = self.plugin_acquisition_modes[mode].feature_list
+            self.acquisition_modes_feature_setting[mode] = (
+                self.plugin_acquisition_modes[mode].feature_list
+            )
 
         self.load_feature_records()
 
@@ -809,9 +808,10 @@ class Model:
                         self.addon_feature,
                         f"{get_navigate_path()}/feature_lists/feature_parameter_setting",
                     )
-                    self.signal_container, self.data_container = load_features(
-                        self, self.addon_feature
-                    )
+                    if self.addon_feature:
+                        self.signal_container, self.data_container = load_features(
+                            self, self.addon_feature
+                        )
             elif type(args[0]) is str:
                 try:
                     if len(args) > 1:

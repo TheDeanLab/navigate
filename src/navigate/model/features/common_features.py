@@ -42,6 +42,8 @@ import json
 
 # Local application imports
 from .image_writer import ImageWriter
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
+from navigate.model.features.base import FeatureBase
 from navigate.tools.common_functions import VariableWithLock
 from navigate.model.waveforms import remote_focus_ramp
 
@@ -59,12 +61,12 @@ def stage_move_requires_pause(
     theta_delta: float = 0.0,
 ) -> bool:
     """Return True when a stage move should pause camera frame reads."""
-    return any(abs(distance) > stage_distance_threshold for distance in delta_distances) or (
-        abs(theta_delta) > THETA_MOVE_EPSILON
-    )
+    return any(
+        abs(distance) > stage_distance_threshold for distance in delta_distances
+    ) or (abs(theta_delta) > THETA_MOVE_EPSILON)
 
 
-class Snap:
+class Snap(FeatureBase):
     """Snap class for capturing data frames using a microscope.
 
     This class provides functionality to capture data frames using a microscope
@@ -84,6 +86,15 @@ class Snap:
     - The `config_table` attribute is used to define the configuration for the
     data capture process, specifically the main data capture function.
     """
+
+    parameter_schema = {
+        "saving_flag": SettingSpec(
+            bool,
+            default=False,
+            label="Save Frames",
+            help_text="Mark snapped frames to be written by the active image writer.",
+        ),
+    }
 
     def __init__(self, model, saving_flag=False):
         """Initialize the Snap class.
@@ -131,7 +142,7 @@ class Snap:
         return True
 
 
-class WaitForExternalTrigger:
+class WaitForExternalTrigger(FeatureBase):
     """WaitForExternalTrigger class to time features using external input.
 
     This class waits for either an external trigger (or the timeout) before continuing
@@ -145,6 +156,24 @@ class WaitForExternalTrigger:
 
     - Only digital triggers are handeled at this time: use the PFI inputs on the DAQ.
     """
+
+    parameter_schema = {
+        "trigger_channel": SettingSpec(
+            str,
+            default="/PCIe-6738/PFI4",
+            label="Trigger Channel",
+            help_text="DAQ digital input channel that will receive the external trigger.",
+            required=True,
+        ),
+        "timeout": SettingSpec(
+            float,
+            default=-1,
+            label="Timeout",
+            help_text="Maximum wait time in seconds. Negative values wait forever.",
+            step=0.1,
+            required=True,
+        ),
+    }
 
     def __init__(self, model, trigger_channel="/PCIe-6738/PFI4", timeout=-1):
         """Initialize the WaitForExternalTrigger class.
@@ -188,7 +217,47 @@ class WaitForExternalTrigger:
         return result
 
 
-class ProjectionMode:
+class ProjectionMode(FeatureBase):
+
+    parameter_schema = {
+        "axis": SettingSpec(
+            str,
+            default="z",
+            label="Stage Axis",
+            help_text="Stage axis used for projection-mode scanning.",
+            required=True,
+        ),
+        "galvo_num": SettingSpec(
+            int,
+            default=0,
+            label="Galvo Number",
+            help_text="Index of the galvo used for shear control.",
+            minimum=0,
+            step=1,
+            required=True,
+        ),
+        "enable": SettingSpec(
+            bool,
+            default=True,
+            label="Enable",
+            help_text="Turn projection mode on or off.",
+        ),
+        "z_range": SettingSpec(
+            float,
+            default=None,
+            label="Z Range",
+            help_text="Optional scan range override. Leave empty to use current settings.",
+            minimum=0,
+            step=0.1,
+        ),
+        "shear_amp": SettingSpec(
+            float,
+            default=None,
+            label="Shear Amplitude",
+            help_text="Optional shear amplitude override. Leave empty to use current settings.",
+            step=0.1,
+        ),
+    }
 
     def __init__(
         self, model, axis="z", galvo_num=0, enable=True, z_range=None, shear_amp=None
@@ -224,7 +293,7 @@ class ProjectionMode:
         ]
         self.waveform_constants = self.model.configuration["waveform_constants"]
 
-        (self.exposure_times, self.sweep_times) = (
+        self.exposure_times, self.sweep_times = (
             self.model.active_microscope.get_exposure_sweep_times()
         )
 
@@ -309,7 +378,7 @@ class ProjectionMode:
         )
 
 
-class WaitToContinue:
+class WaitToContinue(FeatureBase):
     """WaitToContinue class for synchronizing signal and data acquisition.
 
     This feature is used to synchronize signal and data acquisition processes, allowing
@@ -457,7 +526,7 @@ class WaitToContinue:
             self.pause_data_lock.release()
 
 
-class LoopByCount:
+class LoopByCount(FeatureBase):
     """LoopByCount class for controlling signal and data acquisition loops.
 
     This class provides functionality to control signal and data acquisition loops by
@@ -480,6 +549,30 @@ class LoopByCount:
     during microscopy experiments, either by specifying a fixed count or by
     dynamically determining it from configuration references.
     """
+
+    parameter_schema = {
+        "steps": SettingSpec(
+            str,
+            default=1,
+            label="Number of loops",
+            help_text=(
+                "Loop count: an Integer value, or one of [channels, timepoints, positions]"
+            ),
+            required=True,
+        ),
+        "step_by_frame": SettingSpec(
+            bool,
+            default=False,
+            label="Step By Frame",
+            help_text="Count received frames instead of feature-node executions.",
+        ),
+        "is_nested": SettingSpec(
+            bool,
+            default=False,
+            label="Nested Loop",
+            help_text="If this loop is nested within another loop.",
+        ),
+    }
 
     def __init__(self, model, steps=1, step_by_frame=False, is_nested=False):
         """Initialize the LoopByCount class.
@@ -610,6 +703,10 @@ class LoopByCount:
             return len(self.model.active_microscope.available_channels)
         elif steps == "positions":
             return len(self.model.configuration["multi_positions"]) - 1
+        elif steps == "timepoints":
+            return self.model.configuration["experiment"]["MicroscopeState"].get(
+                "timepoints", 1
+            )
         else:
             try:
                 parameters = steps.split(".")
@@ -647,7 +744,7 @@ class LoopByCount:
         logger.debug(f"LoopByCount-Synchronize {thread_name} ends.")
 
 
-class PrepareNextChannel:
+class PrepareNextChannel(FeatureBase):
     """PrepareNextChannel class for preparing microscopes for the next imaging channel.
 
     This class provides functionality to prepare multiple microscopes, including virtual
@@ -704,7 +801,7 @@ class PrepareNextChannel:
         return True
 
 
-class MoveToNextPositionInMultiPositionTable:
+class MoveToNextPositionInMultiPositionTable(FeatureBase):
     """MoveToNextPositionInMultiPositionTable class for advancing in a multi-position
     table.
 
@@ -727,6 +824,31 @@ class MoveToNextPositionInMultiPositionTable:
     process, including signal acquisition and cleanup steps.
     """
 
+    parameter_schema = {
+        "resolution_value": SettingSpec(
+            str,
+            default=None,
+            label="Resolution",
+            help_text="Microscope/resolution name for the source multi-position table.",
+            dynamic_source="microscopes",
+        ),
+        "zoom_value": SettingSpec(
+            str,
+            default=None,
+            label="Zoom",
+            help_text="Zoom value for the source multi-position table.",
+            dynamic_source="zoom_values",
+            depends_on="resolution_value",
+        ),
+        "offset": CollectionSpec(
+            item_schema={},
+            storage="single_mapping",
+            label="Offset",
+            help_text="Optional stage offsets keyed by axis.",
+            dynamic_source="stage_axes",
+        ),
+    }
+
     def __init__(self, model, resolution_value=None, zoom_value=None, offset=None):
         """Initialize the MoveToNextPositionInMultiPositionTable class.
 
@@ -738,8 +860,8 @@ class MoveToNextPositionInMultiPositionTable:
             The resolution/microscope name of the current multiposition table
         zoom_value : str
             The zoom name. For example "1x", "2x", ...
-        offset : list
-            The position offset [x, y, z, theta, f]
+        offset : dict
+            The position offsets keyed by axis name.
         """
         #: MicroscopeModel: The microscope model associated with position control.
         self.model = model
@@ -781,6 +903,40 @@ class MoveToNextPositionInMultiPositionTable:
         #: bool: The flag indicates whether this node is initialized
         self.initialized = False
 
+    def normalize_stage_offset(self):
+        """Normalize optional stage offsets into an axis-keyed float mapping."""
+        offset = self.offset
+        axes_num = len(self.stage_axes)
+        if type(offset) is str:
+            try:
+                offset = ast.literal_eval(offset)
+            except (SyntaxError, ValueError):
+                offset = {}
+        if not offset:
+            offset = {}
+
+        if isinstance(offset, dict):
+            normalized_offset = {}
+            for axis in self.stage_axes:
+                try:
+                    normalized_offset[axis] = float(offset.get(axis, 0))
+                except (ValueError, TypeError):
+                    normalized_offset[axis] = 0
+            self.offset = normalized_offset
+            return
+
+        if type(offset) is not list:
+            offset = [0] * axes_num
+
+        if len(offset) < axes_num:
+            offset[len(offset) : axes_num] = [0] * (axes_num - len(offset))
+        self.offset = {}
+        for i, axis in enumerate(self.stage_axes):
+            try:
+                self.offset[axis] = float(offset[i])
+            except (ValueError, TypeError):
+                self.offset[axis] = 0
+
     def pre_signal_func(self):
         """Calculate stage offset if applicable."""
         if self.initialized:
@@ -798,25 +954,7 @@ class MoveToNextPositionInMultiPositionTable:
         #: multi-position table.
         self.axes_index = [headers.index(axis.upper()) for axis in self.stage_axes]
         self.position_count = len(self.multiposition_table)
-        axes_num = len(self.stage_axes)
-        if type(self.offset) is str:
-            try:
-                self.offset = ast.literal_eval(self.offset)
-            except SyntaxError:
-                self.offset = [0] * axes_num
-        if not self.offset or type(self.offset) is not list:
-            self.offset = [0] * axes_num
-
-        # assert offset has values for each axis
-        if len(self.offset) < axes_num:
-            self.offset[len(self.offset) : axes_num] = [0] * (
-                axes_num - len(self.offset)
-            )
-        for i in range(axes_num):
-            try:
-                self.offset[i] = float(self.offset[i])
-            except (ValueError, TypeError):
-                self.offset[i] = 0
+        self.normalize_stage_offset()
 
         curr_resolution = self.model.active_microscope_name
         curr_zoom = self.model.active_microscope.zoom.zoomvalue
@@ -832,9 +970,9 @@ class MoveToNextPositionInMultiPositionTable:
             curr_stage_offset = self.model.configuration["configuration"][
                 "microscopes"
             ][curr_resolution]["stage"]
-            for i, axis in enumerate(self.stage_axes):
-                self.offset[i] = (
-                    self.offset[i]
+            for axis in self.stage_axes:
+                self.offset[axis] = (
+                    self.offset[axis]
                     + curr_stage_offset.get(axis + "_offset", 0)
                     - stage_offset.get(axis + "_offset", 0)
                 )
@@ -843,11 +981,11 @@ class MoveToNextPositionInMultiPositionTable:
             stage_solvent_offsets = self.model.active_microscope.zoom.stage_offsets
             if solvent in stage_solvent_offsets.keys():
                 stage_offset = stage_solvent_offsets[solvent]
-                for i, axis in enumerate(self.stage_axes):
+                for axis in self.stage_axes:
                     if axis not in stage_offset.keys():
                         continue
                     try:
-                        self.offset[i] = self.offset[i] + float(
+                        self.offset[axis] = self.offset[axis] + float(
                             stage_offset[axis][self.zoom_value][curr_zoom]
                         )
                     except (ValueError, KeyError):
@@ -877,16 +1015,13 @@ class MoveToNextPositionInMultiPositionTable:
         if self.current_idx >= self.position_count:
             return False
         # add offset
-        pos_dict = dict(
-            zip(
-                self.stage_axes,
-                [
-                    self.multiposition_table[self.current_idx][self.axes_index[i]]
-                    + self.offset[i]
-                    for i in range(len(self.axes_index))
-                ],
+        pos_dict = {
+            axis: (
+                self.multiposition_table[self.current_idx][self.axes_index[i]]
+                + self.offset[axis]
             )
-        )
+            for i, axis in enumerate(self.stage_axes)
+        }
         # pause data thread if necessary
         if self.current_idx == 0:
             temp = self.model.get_stage_position()
@@ -897,18 +1032,13 @@ class MoveToNextPositionInMultiPositionTable:
                 )
             )
         else:
-            pre_stage_pos = dict(
-                zip(
-                    self.stage_axes,
-                    [
-                        self.multiposition_table[self.current_idx - 1][
-                            self.axes_index[i]
-                        ]
-                        + self.offset[i]
-                        for i in range(len(self.axes_index))
-                    ],
+            pre_stage_pos = {
+                axis: (
+                    self.multiposition_table[self.current_idx - 1][self.axes_index[i]]
+                    + self.offset[axis]
                 )
-            )
+                for i, axis in enumerate(self.stage_axes)
+            }
         delta_distances = [
             abs(pos_dict[axis] - pre_stage_pos[axis]) for axis in self.stage_axes
         ]
@@ -950,7 +1080,7 @@ class MoveToNextPositionInMultiPositionTable:
         self.model.resume_data_thread()
 
 
-class StackPause:
+class StackPause(FeatureBase):
     """StackPause class for pausing stack acquisition.
 
     This class provides functionality to pause stack acquisition for a specified
@@ -971,6 +1101,16 @@ class StackPause:
     - The `config_table` attribute defines the configuration for the stack pause control
     process, specifically the main pause function.
     """
+
+    parameter_schema = {
+        "pause_num": SettingSpec(
+            str,
+            default="experiment.MicroscopeState.timepoints",
+            label="Pause Count",
+            help_text="Number of stack pauses, or a configuration reference to the count.",
+            required=True,
+        ),
+    }
 
     def __init__(self, model, pause_num="experiment.MicroscopeState.timepoints"):
         """Initialize the StackPause class.
@@ -1035,7 +1175,7 @@ class StackPause:
             self.model.resume_data_thread()
 
 
-class ZStackAcquisition:
+class ZStackAcquisition(FeatureBase):
     """ZStackAcquisition class for controlling z-stack acquisition in microscopy.
 
     This class provides functionality to control z-stack acquisition, including managing
@@ -1053,6 +1193,37 @@ class ZStackAcquisition:
     - The `config_table` attribute defines the configuration for the z-stack acquisition
     process, including signal acquisition, data handling, and node type.
     """
+
+    parameter_schema = {
+        "get_origin": SettingSpec(
+            bool,
+            default=False,
+            label="Get Origin",
+            help_text="Record the current z/f positions as the stack origin.",
+        ),
+        "saving_flag": SettingSpec(
+            bool,
+            default=False,
+            label="Save Stack",
+            help_text=(
+                "Write stack frames while this feature runs (saves another copy of "
+                "images if 'Save' is selected in navigate)."
+            ),
+        ),
+        "saving_dir": SettingSpec(
+            str,
+            default="z-stack",
+            label="Saving Directory",
+            help_text="Subdirectory name used for saved z-stack images.",
+            required=True,
+        ),
+        "force_multiposition": SettingSpec(
+            bool,
+            default=False,
+            label="Force Multiposition",
+            help_text="Use multiposition-stack behavior even for a single position.",
+        ),
+    }
 
     def __init__(
         self,
@@ -1857,7 +2028,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
         return False
 
 
-class FindTissueSimple2D:
+class FindTissueSimple2D(FeatureBase):
     """FindTissueSimple2D class for detecting tissue and gridding out the imaging
     space in  2D.
 
@@ -1865,6 +2036,35 @@ class FindTissueSimple2D:
     space for 2D imaging. It processes acquired frames to determine regions of
     interest (tissue), calculates offsets, and generates grid positions for imaging.
     """
+
+    parameter_schema = {
+        "overlap": SettingSpec(
+            float,
+            default=0.1,
+            label="Overlap",
+            help_text="Fractional overlap between adjacent grid tiles.",
+            minimum=0.0,
+            maximum=100.0,
+            step=0.01,
+        ),
+        "target_resolution": SettingSpec(
+            str,
+            default="Nanoscale",
+            label="Target Resolution",
+            help_text="Microscope/resolution name to use for generated tissue positions.",
+            required=True,
+            dynamic_source="microscopes",
+        ),
+        "target_zoom": SettingSpec(
+            str,
+            default="N/A",
+            label="Target Zoom",
+            help_text="Zoom value for the target resolution.",
+            required=True,
+            dynamic_source="zoom_values",
+            depends_on="target_resolution",
+        ),
+    }
 
     def __init__(
         self,

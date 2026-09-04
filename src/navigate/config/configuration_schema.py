@@ -36,11 +36,14 @@ from typing import Any, Mapping, Optional, Tuple
 
 @dataclass(frozen=True)
 class SettingSpec:
-    """Description of one persisted, user-editable device setting.
+    """Description of one user-editable setting or feature parameter.
 
-    ``choices`` defines a closed set of values. ``minimum``, ``maximum``, and
-    ``step`` define a numeric range; they are intentionally mutually exclusive
-    with ``choices``.
+    ``choices`` defines a closed set of displayed values. ``choice_values`` maps
+    displayed values to saved values when those should differ. ``dynamic_source``
+    identifies choices that should be resolved at render time, and ``depends_on``
+    names the parameter that provides context for dependent choices. ``minimum``,
+    ``exclusive_minimum``, ``maximum``, and ``step`` define a numeric range; they
+    are intentionally mutually exclusive with ``choices``.
     """
 
     value_type: type
@@ -48,20 +51,36 @@ class SettingSpec:
     label: Optional[str] = None
     help_text: Optional[str] = None
     choices: Optional[Tuple[Any, ...]] = None
+    choice_values: Optional[Mapping[Any, Any]] = None
     minimum: Optional[float] = None
+    exclusive_minimum: Optional[float] = None
     maximum: Optional[float] = None
     step: Optional[float] = None
     required: bool = False
+    dynamic_source: Optional[str] = None
+    depends_on: Optional[str] = None
 
     def __post_init__(self) -> None:
         """Validate a schema definition when its class is imported."""
         has_range = any(
-            value is not None for value in (self.minimum, self.maximum, self.step)
+            value is not None
+            for value in (
+                self.minimum,
+                self.exclusive_minimum,
+                self.maximum,
+                self.step,
+            )
         )
         if self.choices is not None and has_range:
             raise ValueError(
                 "SettingSpec choices and numeric ranges are mutually exclusive."
             )
+        if self.choice_values is not None and self.choices is None:
+            raise ValueError("SettingSpec choice_values require choices.")
+        if self.choice_values is not None and any(
+            choice not in self.choice_values for choice in self.choices
+        ):
+            raise ValueError("SettingSpec choice_values must map every choice.")
         if has_range and self.value_type not in (int, float):
             raise ValueError("Numeric ranges require an int or float SettingSpec.")
         if (
@@ -70,6 +89,12 @@ class SettingSpec:
             and self.minimum > self.maximum
         ):
             raise ValueError("SettingSpec minimum cannot exceed maximum.")
+        if (
+            self.exclusive_minimum is not None
+            and self.maximum is not None
+            and self.exclusive_minimum >= self.maximum
+        ):
+            raise ValueError("SettingSpec exclusive_minimum must be below maximum.")
         if self.step is not None and self.step <= 0:
             raise ValueError("SettingSpec step must be greater than zero.")
 
@@ -87,7 +112,10 @@ class CollectionSpec:
     the mapping key and ``value_field`` as its value. ``storage='parallel_mappings'``
     stores selected row fields as separate YAML mappings keyed by ``key_field``.
     ``storage='nested_mapping'`` stores calibration rows as
-    ``solvent -> axis -> zoom -> position``.
+    ``solvent -> axis -> zoom -> position``. ``storage='single_mapping'``
+    stores one fixed mapping using the item schema keys as fields.
+    ``dynamic_source`` identifies collection fields that should be resolved at
+    render time.
     """
 
     item_schema: Mapping[str, SettingSpec]
@@ -97,12 +125,21 @@ class CollectionSpec:
     storage_fields: Optional[Tuple[str, ...]] = None
     label: Optional[str] = None
     help_text: Optional[str] = None
+    dynamic_source: Optional[str] = None
     minimum_items: int = 0
+    none_option_label: Optional[str] = None
 
     def __post_init__(self) -> None:
         """Validate collection metadata at class-definition time."""
-        if self.storage not in {"mapping", "parallel_mappings", "nested_mapping"}:
+        if self.storage not in {
+            "mapping",
+            "parallel_mappings",
+            "nested_mapping",
+            "single_mapping",
+        }:
             raise ValueError("CollectionSpec has an unsupported storage type.")
+        if self.storage == "single_mapping":
+            return
         if self.key_field not in self.item_schema:
             raise ValueError("CollectionSpec key_field must be in item_schema.")
         if self.value_field not in self.item_schema:

@@ -32,19 +32,20 @@
 
 # Standard library imports
 import logging
-from functools import reduce
 import time
 
 # Third party imports
 
 # Local application imports
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
+from navigate.model.features.base import FeatureBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ChangeResolution:
+class ChangeResolution(FeatureBase):
     """
     ChangeResolution class for modifying the resolution mode of a microscope.
 
@@ -69,6 +70,26 @@ class ChangeResolution:
     - The `config_table` attribute is used to define the configuration for the
     resolution change process, including signal acquisition and cleanup steps.
     """
+
+    parameter_schema = {
+        "resolution_mode": SettingSpec(
+            str,
+            default="high",
+            label="Resolution",
+            help_text="Microscope/resolution name to switch to.",
+            required=True,
+            dynamic_source="microscopes",
+        ),
+        "zoom_value": SettingSpec(
+            str,
+            default="N/A",
+            label="Zoom",
+            help_text="Zoom value to use after changing resolution.",
+            required=True,
+            dynamic_source="zoom_values",
+            depends_on="resolution_mode",
+        ),
+    }
 
     def __init__(self, model, resolution_mode="high", zoom_value="N/A"):
         """Initialize the ChangeResolution class.
@@ -179,7 +200,7 @@ class ChangeResolution:
         self.model.resume_data_thread()
 
 
-class SetCameraParameters:
+class SetCameraParameters(FeatureBase):
     """
     SetCameraParameters class for modifying the parameters of a camera.
 
@@ -191,6 +212,44 @@ class SetCameraParameters:
 
     - If the value of a parameter is None it doesn't update the parameter value.
     """
+
+    parameter_schema = {
+        "microscope_name": SettingSpec(
+            str,
+            default=None,
+            label="Microscope",
+            help_text="Microscope name to update. Leave empty for the active microscope.",
+            dynamic_source="microscopes",
+        ),
+        "sensor_mode": SettingSpec(
+            str,
+            default="Normal",
+            label="Sensor Mode",
+            help_text="Camera sensor mode.",
+            choices=("Normal", "Light-Sheet"),
+            required=True,
+        ),
+        "readout_direction": SettingSpec(
+            str,
+            default=None,
+            label="Readout Direction",
+            help_text="Readout direction for light-sheet sensor mode.",
+            choices=(
+                "Top-to-Bottom",
+                "Bottom-to-Top",
+                "Bidirectional",
+                "Rev. Bidirectional",
+            ),
+        ),
+        "rolling_shutter_width": SettingSpec(
+            int,
+            default=None,
+            label="Rolling Shutter Width",
+            help_text="Number of pixels used for rolling-shutter acquisition.",
+            minimum=1,
+            step=1,
+        ),
+    }
 
     def __init__(
         self,
@@ -314,7 +373,86 @@ class SetCameraParameters:
         self.model.resume_data_thread()
 
 
-class UpdateExperimentSetting:
+class UpdateExperimentSetting(FeatureBase):
+
+    description = "Update experiment values on the fly"
+    parameter_schema = {
+        "experiment_parameters": CollectionSpec(
+            item_schema={
+                "MicroscopeState.stack_cycling_mode": SettingSpec(
+                    str,
+                    default="per_stack",
+                    label="Stack Cycling Mode",
+                    help_text="How channels cycle through a z-stack.",
+                    choices=("per_stack", "per_z"),
+                    required=True,
+                ),
+                "MicroscopeState.start_position": SettingSpec(
+                    float,
+                    default=0,
+                    label="Start Position",
+                    help_text="Relative z-stack start position.",
+                    step=0.1,
+                ),
+                "MicroscopeState.end_position": SettingSpec(
+                    float,
+                    default=0,
+                    label="End Position",
+                    help_text="Relative z-stack end position.",
+                    step=0.1,
+                ),
+                "MicroscopeState.step_size": SettingSpec(
+                    float,
+                    default=0,
+                    label="Step Size",
+                    help_text="Distance between z planes.",
+                    exclusive_minimum=0,
+                    step=0.01,
+                ),
+                "MicroscopeState.timepoints": SettingSpec(
+                    int,
+                    default=1,
+                    label="Timepoints",
+                    help_text="Number of timepoints to acquire.",
+                    minimum=1,
+                    step=1,
+                ),
+                "MicroscopeState.stack_pause": SettingSpec(
+                    float,
+                    default=0,
+                    label="Stack Pause",
+                    help_text="Pause between z-stack acquisitions.",
+                    minimum=0,
+                    step=0.1,
+                ),
+                "MicroscopeState.start_focus": SettingSpec(
+                    float,
+                    default=0,
+                    label="Start Focus",
+                    help_text="Relative remote-focus start position.",
+                    step=0.1,
+                ),
+                "MicroscopeState.end_focus": SettingSpec(
+                    float,
+                    default=0,
+                    label="End Focus",
+                    help_text="Relative remote-focus end position.",
+                    step=0.1,
+                ),
+                "MicroscopeState.channels": SettingSpec(
+                    dict,
+                    default={},
+                    label="Channels",
+                    help_text="Complete channel mapping for MicroscopeState.",
+                ),
+            },
+            storage="single_mapping",
+            label="Experiment Parameters",
+            help_text="MicroscopeState values to update when this feature runs.",
+            dynamic_source="microscope_state",
+        ),
+    }
+
     def __init__(self, model, experiment_parameters={}):
         self.model = model
 
@@ -325,6 +463,57 @@ class UpdateExperimentSetting:
         }
 
         self.experiment_parameters = experiment_parameters
+
+    def _laser_names(self) -> list[str]:
+        """Return laser names for the active microscope in channel GUI format."""
+        microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+        microscope_name = microscope_state["microscope_name"]
+        lasers = self.model.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["laser"]
+        return [f"{laser['wavelength']}nm" for laser in lasers]
+
+    def _normalize_channel_laser_index(self, channel: dict) -> None:
+        """Keep a channel's laser index synchronized with its laser name."""
+        if "laser" not in channel:
+            return
+
+        laser_names = self._laser_names()
+        if not laser_names:
+            return
+        if channel["laser"] not in laser_names:
+            channel["laser"] = laser_names[0]
+        channel["laser_index"] = laser_names.index(channel["laser"])
+
+    @staticmethod
+    def _is_mapping_like(value) -> bool:
+        """Return True for normal dictionaries and multiprocessing dict proxies."""
+        return hasattr(value, "items") and hasattr(value, "__getitem__")
+
+    def _update_channels(self, channel_updates) -> None:
+        """Update channel settings in place to preserve shared GUI references."""
+        channels = self.model.configuration["experiment"]["MicroscopeState"]["channels"]
+        for channel_key, channel_update in channel_updates.items():
+            if channel_key in channels and self._is_mapping_like(channel_update):
+                channels[channel_key].update(channel_update)
+            else:
+                channels[channel_key] = channel_update
+
+        for channel in channels.values():
+            if self._is_mapping_like(channel):
+                self._normalize_channel_laser_index(channel)
+
+    def _update_experiment_parameter(self, parameter: str, value) -> None:
+        """Update one experiment parameter without replacing shared channel maps."""
+        if parameter == "MicroscopeState.channels":
+            self._update_channels(value)
+            return
+
+        config_ref = self.model.configuration["experiment"]
+        parameters = parameter.split(".")
+        for key in parameters[:-1]:
+            config_ref = config_ref[key]
+        config_ref[parameters[-1]] = value
 
     def signal_func(self):
         """Perform actions to change the resolution mode and update the active
@@ -357,9 +546,7 @@ class UpdateExperimentSetting:
         # check if any parameter about x, y, c, z, t changed
         for k, v in self.experiment_parameters.items():
             try:
-                parameters = k.split(".")
-                config_ref = reduce(lambda pre, n: f"{pre}['{n}']", parameters, "")
-                exec(f"self.model.configuration['experiment']{config_ref} = {v}")
+                self._update_experiment_parameter(k, v)
             except Exception as e:
                 logger.error(f"*** parameter {k} failed to update to value {v}")
                 logger.error(e)
@@ -372,6 +559,20 @@ class UpdateExperimentSetting:
         # update image writer
         if self.model.image_writer:
             z_steps = state["number_z_steps"]
+            # calculate the right z_steps
+            step_size = state["step_size"]
+            if step_size == 0:
+                step_size = 0.01
+            if state["end_position"] < state["start_position"] and step_size > 0:
+                state["step_size"] = -step_size
+            elif state["end_position"] > state["start_position"] and step_size < 0:
+                state["step_size"] = -step_size
+            z_range = state["end_position"] - state["start_position"]
+            z_steps = abs(int(z_range / step_size))
+            if z_steps <= 0:
+                z_steps = 1
+            state["number_z_steps"] = z_steps
+
             channels = sum(
                 [v["is_selected"] is True for k, v in state["channels"].items()]
             )

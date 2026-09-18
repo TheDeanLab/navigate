@@ -276,6 +276,9 @@ class Controller:
         #: Optional[int]: resolution-change task awaiting a recovery choice.
         self._resolution_recovery_task_id = None
 
+        #: Optional[int]: last completed resolution-change task id.
+        self._last_completed_resolution_task_id = None
+
         #: Optional[ResolutionChangeCancelledPopup]: active recovery dialog.
         self._resolution_change_popup = None
 
@@ -1879,6 +1882,9 @@ class Controller:
         if self._resolution_recovery_task_id == task_id:
             return
 
+        if self._last_completed_resolution_task_id == task_id:
+            return
+
         if self._resolution_change_popup is not None:
             try:
                 self._resolution_change_popup.popup.dismiss()
@@ -1956,6 +1962,7 @@ class Controller:
         """
         if payload.get("task_id") != self._resolution_recovery_task_id:
             return
+        self._last_completed_resolution_task_id = self._resolution_recovery_task_id
         self.stage_controller.force_enable_all_axes()
         self._resolution_change_popup = None
         self._resolution_recovery_task_id = None

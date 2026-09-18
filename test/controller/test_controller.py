@@ -1049,6 +1049,7 @@ def make_resolution_recovery_controller():
         force_enable_all_axes=MagicMock(),
     )
     controller._resolution_recovery_task_id = None
+    controller._last_completed_resolution_task_id = None
     controller._resolution_change_popup = None
     return controller
 
@@ -1126,7 +1127,27 @@ def test_resolution_return_complete_reenables_stage_controls():
     )
 
     controller.stage_controller.force_enable_all_axes.assert_called_once_with()
+    assert controller._last_completed_resolution_task_id == 7
     assert controller._resolution_recovery_task_id is None
+
+
+def test_completed_resolution_return_suppresses_late_cancelled_event():
+    from unittest.mock import patch
+
+    controller = make_resolution_recovery_controller()
+    controller._resolution_recovery_task_id = 7
+    controller._finish_resolution_return(
+        {"task_id": 7, "succeeded": True, "cancelled": False}
+    )
+
+    with patch(
+        "navigate.controller.controller.ResolutionChangeCancelledPopup"
+    ) as popup_class:
+        controller._show_resolution_change_cancelled(
+            {"task_id": 7, "return_allowed": True}
+        )
+
+    popup_class.assert_not_called()
 
 
 def test_resolution_recovery_events_are_dispatched_by_event_pump():

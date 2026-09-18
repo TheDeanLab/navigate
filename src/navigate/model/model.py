@@ -805,6 +805,7 @@ class Model:
             if self.signal_thread:
                 self.signal_thread.join()
             if self.is_data_thread_on and self.data_thread:
+                self.resume_data_thread()
                 self.data_thread.join()
 
             self.end_acquisition()
@@ -892,7 +893,6 @@ class Model:
         success : bool
             Was the move successful?
         """
-        self.logger.debug("****** moving stage to: %s", pos_dict)
         try:
             r = self.active_microscope.move_stage(
                 pos_dict, wait_until_done, cancel_event=cancel_event
@@ -1376,20 +1376,15 @@ class Model:
                     self.grab_image(getattr(self.image_writer, "save_image", None))
                 self.active_microscope.daq.wait_acquisition_done()
         except:  # noqa
-            self.active_microscope.daq.stop_acquisition()
-            if self.active_microscope.current_channel == 0:
-                self.stop_acquisition = True
-                self.event_queue.put(
-                    (
-                        "warning",
-                        "An error happened. Please read the log files for details!",
-                    )
+            self.active_microscope.turn_off_lasers()
+            self.stop_acquisition = True
+            self.event_queue.put(
+                (
+                    "warning",
+                    "An error happened. Please read the log files for details!",
                 )
-                return
-            self.active_microscope.daq.prepare_acquisition(
-                f"channel_{self.active_microscope.current_channel}"
             )
-            self.active_microscope.daq.run_acquisition()
+            return
         finally:
             # Ensure the laser is turned off
             self.active_microscope.turn_off_lasers()
@@ -1656,6 +1651,9 @@ class Model:
             recovery = self._resolution_recovery
             if recovery is not None and recovery.task_id == task_id:
                 self._resolution_recovery = None
+
+        # tell the GUI to update to the current stage position
+        self.stop_stage(cancel_resolution_change=False)
 
     def _start_resolution_return(self, task_id: int) -> bool:
         """Start a model-owned return to a validated recovery position."""

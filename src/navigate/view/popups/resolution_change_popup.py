@@ -51,7 +51,7 @@ class ResolutionChangeCancelledPopup:
             text=(
                 "Stage motion was stopped at the position now shown in Navigate. "
                 "Keep the stages here, or return them to their positions before "
-                "the resolution change. Returning will move the stages again."
+                "the resolution change. Returning will move the stages again. "
             ),
             justify=tk.LEFT,
             wraplength=520,

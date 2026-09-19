@@ -137,7 +137,10 @@ class ChangeResolution(FeatureBase):
             self.resolution_mode
             not in self.model.configuration["configuration"]["microscopes"].keys()
         ):
-            error_message = f"Can't change resolution: Microscope name {self.resolution_mode} isn't exist!"
+            error_message = (
+                f"Can't change resolution: Microscope name {self.resolution_mode} "
+                "isn't exist!"
+            )
             # logger.exception(error_message) doesn't work
             print(error_message)
             raise Exception(error_message)
@@ -165,31 +168,47 @@ class ChangeResolution(FeatureBase):
             # logger.exception(error_message) doesn't work
             print(error_message)
             raise Exception(error_message)
-        # pause data thread
-        self.model.pause_data_thread()
-        # end active microscope
-        self.model.active_microscope.end_acquisition()
-        # prepare new microscope
-        self.model.configuration["experiment"]["MicroscopeState"][
-            "microscope_name"
-        ] = self.resolution_mode
-        self.model.configuration["experiment"]["MicroscopeState"][
-            "zoom"
-        ] = self.zoom_value
-        self.model.change_resolution(self.resolution_mode)
-        logger.debug(f"current resolution is {self.resolution_mode}")
-        logger.debug(
-            f"current active microscope is {self.model.active_microscope_name}"
-        )
-        # prepare active microscope
-        waveform_dict = self.model.active_microscope.prepare_acquisition()
-        self.model.event_queue.put(("waveform", waveform_dict))
-        self.model.frame_id = 0
-        # prepare channel
-        self.model.active_microscope.prepare_next_channel()
-        # resume data thread
-        self.model.resume_data_thread()
-        return True
+        task = self.model._begin_resolution_change(self.resolution_mode)
+        if task is None:
+            return False
+
+        succeeded = False
+        data_thread_paused = False
+        try:
+            self.model.pause_data_thread()
+            data_thread_paused = True
+            self.model.active_microscope.end_acquisition()
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "microscope_name"
+            ] = self.resolution_mode
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "zoom"
+            ] = self.zoom_value
+
+            if not self.model._perform_resolution_change(task):
+                self.model.stop_acquisition = True
+                self.model.stop_send_signal = True
+                # Release the data thread so it can observe the stop request.
+                self.model.resume_data_thread()
+                data_thread_paused = False
+                return False
+
+            logger.debug(f"current resolution is {self.resolution_mode}")
+            logger.debug(
+                f"current active microscope is {self.model.active_microscope_name}"
+            )
+            waveform_dict = self.model.active_microscope.prepare_acquisition()
+            self.model.event_queue.put(("waveform", waveform_dict))
+            self.model.frame_id = 0
+            self.model.active_microscope.prepare_next_channel()
+            self.model.resume_data_thread()
+            data_thread_paused = False
+            succeeded = True
+            return True
+        finally:
+            if data_thread_paused:
+                self.model.resume_data_thread()
+            self.model._finish_resolution_change(task, succeeded)
 
     def cleanup(self):
         """Perform cleanup actions if needed.
@@ -218,7 +237,9 @@ class SetCameraParameters(FeatureBase):
             str,
             default=None,
             label="Microscope",
-            help_text="Microscope name to update. Leave empty for the active microscope.",
+            help_text=(
+                "Microscope name to update. Leave empty for the active microscope."
+            ),
             dynamic_source="microscopes",
         ),
         "sensor_mode": SettingSpec(

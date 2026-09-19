@@ -252,6 +252,73 @@ def test_run_data_process_drains_pending_frames_after_signal_completion():
     assert show_img_pipe.sent == [2, "stop"]
 
 
+def test_stop_command_resumes_data_thread_before_joining():
+    from navigate.model.model import Model
+
+    model = SimpleNamespace(
+        data_buffer=[object()],
+        data_thread=MagicMock(),
+        end_acquisition=MagicMock(),
+        is_data_thread_on=True,
+        resume_data_thread=MagicMock(),
+        signal_container=SimpleNamespace(end_flag=False),
+        signal_thread=MagicMock(),
+        stop_acquisition=False,
+        stop_stage=MagicMock(),
+    )
+
+    Model.run_command(model, "stop")
+
+    assert model.stop_acquisition is True
+    assert model.signal_container.end_flag is True
+    model.signal_thread.join.assert_called_once_with()
+    model.resume_data_thread.assert_called_once_with()
+    model.data_thread.join.assert_called_once_with()
+    model.end_acquisition.assert_called_once_with()
+    model.stop_stage.assert_called_once_with()
+
+
+def test_snap_image_stops_acquisition_after_daq_error_without_channel_retry():
+    from navigate.model.model import Model
+
+    daq = MagicMock()
+    daq.run_acquisition.side_effect = RuntimeError("daq failed")
+    microscope = SimpleNamespace(
+        current_channel=1,
+        daq=daq,
+        turn_off_lasers=MagicMock(),
+        turn_on_laser=MagicMock(),
+    )
+    model = SimpleNamespace(
+        active_microscope=microscope,
+        data_buffer_positions=[[0, 0, 0, 0, 0]],
+        event_queue=MagicMock(),
+        frame_id=0,
+        get_stage_position=MagicMock(
+            return_value={
+                "x_pos": 1,
+                "y_pos": 2,
+                "z_pos": 3,
+                "theta_pos": 4,
+                "f_pos": 5,
+            }
+        ),
+        is_data_thread_on=True,
+        logger=SimpleNamespace(performance=MagicMock()),
+        stop_acquisition=False,
+    )
+
+    Model.snap_image(model)
+
+    assert model.stop_acquisition is True
+    model.event_queue.put.assert_called_once_with(
+        ("warning", "An error happened. Please read the log files for details!")
+    )
+    daq.prepare_acquisition.assert_not_called()
+    daq.run_acquisition.assert_called_once_with(wait_until_done=True)
+    microscope.turn_off_lasers.assert_called()
+
+
 def test_live_acquisition(model):
     state = model.configuration["experiment"]["MicroscopeState"]
     state["image_mode"] = "live"

@@ -191,6 +191,8 @@ Core tests cover:
 - feature-driven resolution changes terminating their feature/acquisition path;
 - model-proxy contention retrying instead of dropping Stop Stage;
 - stopped-position readback and event payload correctness; and
+- cancellation recovery waiting for stop attempts and position readback before
+  validating or displaying Return; and
 - termination cancelling and joining outstanding workers.
 
 Recovery tests cover:
@@ -254,6 +256,8 @@ second closing directive.
 - No resolution or acquisition operation schedules new motion after
   cancellation.
 - The GUI shows the actual stopped stage coordinates.
+- The recovery dialog is not emitted until hardware stop attempts and stopped-position
+  readback finish.
 - Recovery movement never starts without explicit Return selection.
 - Close, Escape, and Keep leave the stages stopped where they are.
 - Return uses the recorded pre-movement coordinates and can be stopped again.

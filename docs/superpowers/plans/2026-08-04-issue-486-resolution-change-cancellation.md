@@ -519,7 +519,7 @@ Push `kdean/issue-486-stop-resolution-change` and open a draft PR targeting `dev
 - Consumes: core terminal `resolution_change_cancelled` event and Task 2 cancellation-aware `move_stage`.
 - Produces: `Model.run_command("resolution_recovery", task_id, choice)` accepting literal choices `"keep"` and `"return"`; terminal `resolution_return_complete` event.
 
-- [ ] **Step 1: Write failing recovery tests**
+- [x] **Step 1: Write failing recovery tests**
 
 ```python
 def test_keep_resolution_position_discards_snapshot_without_motion():
@@ -542,11 +542,11 @@ def test_return_moves_to_literal_snapshot_and_can_be_cancelled():
     assert model.return_stage.stop_called.is_set()
 ```
 
-- [ ] **Step 2: Run recovery tests and verify RED**
+- [x] **Step 2: Run recovery tests and verify RED**
 
 Run the two named tests. Expected: the recovery command and snapshot store are absent.
 
-- [ ] **Step 3: Add recovery ownership and validation**
+- [x] **Step 3: Add recovery ownership and validation**
 
 On terminal cancellation, retain an immutable copy of the pre-movement coordinates in a separate private recovery record after clearing the active task. Mark Return eligible only when every requested axis passes the affected stage's existing strict absolute-position validation. A newer resolution task invalidates an older recovery record.
 
@@ -559,7 +559,7 @@ class _ResolutionRecovery:
     return_allowed: bool
 ```
 
-- [ ] **Step 4: Implement keep and return commands**
+- [x] **Step 4: Implement keep and return commands**
 
 Keep atomically clears the matching snapshot and emits no movement. Return validates task ID and eligibility, creates a `returning` task before starting its worker, clears the popup snapshot exactly once, calls the existing cancellation-aware `Model.move_stage(..., wait_until_done=True)`, updates actual positions, and emits `resolution_return_complete` with success or cancellation.
 
@@ -574,11 +574,11 @@ elif command == "resolution_recovery":
         self.event_queue.put(("warning", f"Unknown resolution recovery: {choice}"))
 ```
 
-- [ ] **Step 5: Run all model recovery and core tests**
+- [x] **Step 5: Run all model recovery and core tests**
 
 Run `test/model/test_resolution_change.py`, the existing `test_change_resolution`, and the concurrency guard. Expected: pass.
 
-- [ ] **Step 6: Commit recovery movement**
+- [x] **Step 6: Commit recovery movement**
 
 Create branch `kdean/issue-486-resolution-recovery` from the core branch before this commit, then:
 
@@ -601,7 +601,7 @@ git commit -m "feat: add cancellable resolution position recovery" -m \
 - Consumes: `resolution_change_cancelled` and `resolution_return_complete` events; Task 6 recovery command.
 - Produces: `ResolutionChangeCancelledPopup(root, keep_command, return_command, return_enabled)`; controller handlers `_show_resolution_change_cancelled(payload)` and `_finish_resolution_return(payload)`.
 
-- [ ] **Step 1: Write failing popup callback tests without Tk construction**
+- [x] **Step 1: Write failing popup callback tests without Tk construction**
 
 ```python
 def test_popup_close_keeps_current_position():
@@ -622,15 +622,15 @@ def test_popup_return_dismisses_before_starting_motion():
     assert order == ["dismiss", "return"]
 ```
 
-- [ ] **Step 2: Write failing controller event tests**
+- [x] **Step 2: Write failing controller event tests**
 
 Patch the popup class with a complete fake exposing `showup`/`dismiss`. Assert that two events with the same task ID create one popup; Keep dispatches `("resolution_recovery", task_id, "keep")`; Return dispatches `"return"`; and `resolution_return_complete` clears the tracked popup/task state.
 
-- [ ] **Step 3: Run popup/controller tests and verify RED**
+- [x] **Step 3: Run popup/controller tests and verify RED**
 
 Run only the new popup tests and named controller tests. Expected: imports and event handlers are absent.
 
-- [ ] **Step 4: Implement the view**
+- [x] **Step 4: Implement the view**
 
 Build a `PopUp` titled `Resolution Change Cancelled` with the approved explanatory text and buttons `Keep Current Position` and `Return to Previous Position`. Focus Keep, bind Escape and `WM_DELETE_WINDOW` to `_keep`, disable Return when `return_enabled` is false, and dismiss before either callback. Do not start model work from the view itself.
 
@@ -645,7 +645,7 @@ def _return(self) -> None:
     self._return_command()
 ```
 
-- [ ] **Step 5: Implement controller event handling**
+- [x] **Step 5: Implement controller event handling**
 
 Register the two event handlers through the existing event-listener dictionary. Track the displayed task ID to deduplicate and dispatch choices through the existing model thread pool. Before Return, call `stage_controller.view.toggle_button_states(True, stage_controller.stage_axes)` after the modal closes; the separate Stop Stage frame remains enabled. On `resolution_return_complete`, call `stage_controller.force_enable_all_axes()` and clear the tracked task ID.
 
@@ -662,11 +662,11 @@ def _return_resolution_position(self, task_id: int) -> None:
     )
 ```
 
-- [ ] **Step 6: Run popup/controller tests and verify GREEN**
+- [x] **Step 6: Run popup/controller tests and verify GREEN**
 
 Run the Step 3 tests. Expected: pass without creating `tk.Tk()` locally.
 
-- [ ] **Step 7: Commit the recovery UI**
+- [x] **Step 7: Commit the recovery UI**
 
 ```bash
 git add src/navigate/view/popups/resolution_change_popup.py \
@@ -685,11 +685,11 @@ git commit -m "feat: offer safe resolution-change recovery choices"
 - Consumes: Tasks 6-7 and the core PR branch.
 - Produces: a focused stacked recovery PR whose base is the core branch until the core merges.
 
-- [ ] **Step 1: Run formatting, lint, and focused tests**
+- [x] **Step 1: Run formatting, lint, and focused tests**
 
 Run Ruff and Black on all recovery-modified files. Run the full model resolution test file, feature test, controller tests, and popup callback tests.
 
-- [ ] **Step 2: Run a native GUI smoke check outside Aqua**
+- [x] **Step 2: Run a native GUI smoke check outside Aqua**
 
 Use Windows CI or a Linux X11 Tk environment:
 
@@ -700,7 +700,7 @@ xvfb-run -a /opt/anaconda3/envs/navigate/bin/python -m pytest -o addopts='' -q \
 
 If the available environment is macOS Aqua Tk, skip window construction and explicitly report that Xvfb cannot isolate it.
 
-- [ ] **Step 3: Review the stacked diff**
+- [x] **Step 3: Review the stacked diff**
 
 ```bash
 git diff kdean/issue-486-stop-resolution-change --check
@@ -710,7 +710,7 @@ git log --oneline kdean/issue-486-stop-resolution-change..HEAD
 
 Confirm that the recovery PR contains no duplicate stage executor, stop path, or acquisition restart.
 
-- [ ] **Step 4: Push and open the recovery PR**
+- [x] **Step 4: Push and open the recovery PR**
 
 Push `kdean/issue-486-resolution-recovery` and open a draft PR based on `kdean/issue-486-stop-resolution-change`. Link the design, plan, and core PR; list test evidence and Xvfb limitation; request the designated reviewer if known; and reference #486 without a second closing directive.
 
@@ -767,3 +767,48 @@ Commit only the new test and the design/plan updates, then push the commit as a
 fast-forward update to `kdean/issue-486-stop-resolution-change`. Confirm the
 live PR head and report fresh CI status without treating absent or pending jobs
 as success.
+
+### Task 10: Wait for Stop Stage readback before offering Return
+
+**Files:**
+- Modify: `src/navigate/model/resolution_change.py`
+- Modify: `src/navigate/model/model.py`
+- Modify: `test/model/test_resolution_change.py`
+- Modify: `docs/superpowers/specs/2026-08-04-issue-486-resolution-change-cancellation-design.md`
+- Modify: `docs/superpowers/plans/2026-08-04-issue-486-resolution-change-cancellation.md`
+
+**Interfaces:**
+- Consumes: `_ResolutionChangeTask.cancel_event`, `Model.stop_stage`, and `Model._finish_resolution_change`.
+- Produces: task-owned stop-completion synchronization that preserves immediate cancellation but defers recovery validation and notification until stopped-position readback completes.
+
+- [x] **Step 1: Reproduce the hardware ordering failure**
+
+Block the real `Model.stop_stage` path inside a microscope double while a second
+thread finalizes the cancelled resolution task. Assert that no cancellation
+event is emitted until the stop is released, then require the emitted payload to
+contain the stopped position and enable Return.
+
+- [x] **Step 2: Verify RED**
+
+Run the named concurrency test against the current PR #1237 implementation.
+Expected: failure because `resolution_change_cancelled` is emitted while the
+hardware stop double is still blocked.
+
+- [x] **Step 3: Synchronize cancellation finalization**
+
+Add a task-owned `stop_complete_event` that is initially set, clear it before
+publishing cancellation, and set it in a `finally` block after every stop and
+readback outcome. In cancelled resolution finalization, wait for that signal
+before validating the recovery snapshot or emitting the popup event.
+
+- [x] **Step 4: Verify GREEN and surrounding safety behavior**
+
+Run the named regression, the complete resolution-change test module, the
+controller and popup recovery tests, both Stop Stage click tests, Ruff, Black
+checks scoped against the stacked diff, and `git diff --check`.
+
+- [x] **Step 5: Commit and update PR #1237**
+
+Commit only the synchronization fix, its regression coverage, and the design
+records. Push the existing recovery branch and verify the live head, stacked
+base, mergeability, and CI state before asking for another hardware test.

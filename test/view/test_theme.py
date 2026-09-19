@@ -30,6 +30,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from unittest.mock import MagicMock, call
+
 from navigate.view import theme
 
 
@@ -82,6 +84,12 @@ def test_get_theme_font_uses_active_tokens_with_fallback(monkeypatch):
 
     assert theme.get_theme_font("title") == ("TkDefaultFont", 14, "bold")
     assert theme.get_theme_font("missing", ("Fira Sans", 12)) == ("Fira Sans", 12)
+
+
+def test_get_theme_preset_returns_active_preset(monkeypatch):
+    monkeypatch.setattr(theme, "_ACTIVE_THEME_PRESET", "classic_night")
+
+    assert theme.get_theme_preset() == "classic_night"
 
 
 def test_get_theme_spacing_and_padding_use_active_tokens(monkeypatch):
@@ -164,3 +172,24 @@ def test_get_theme_matplotlib_font_uses_sans_serif_for_private_tk_family(monkeyp
 
     assert fontdict["family"] == "sans-serif"
     assert fontdict["size"] == 10
+
+
+def test_apply_theme_sets_legible_menu_state_colors(monkeypatch):
+    root = MagicMock()
+    style = MagicMock()
+    style.theme_names.return_value = ("clam",)
+    monkeypatch.setattr(theme.ttk, "Style", lambda _root: style)
+    monkeypatch.setattr(
+        theme, "_apply_rounded_notebook_tabs", lambda *args, **kwargs: None
+    )
+
+    _, palette = theme.apply_theme(root)
+
+    expected_menu_options = [
+        call("*Menu.disabledForeground", palette["muted_text"]),
+        call("*Menu.selectColor", palette["text"]),
+        call("*Menu.activeBackground", palette["accent"]),
+        call("*Menu.activeForeground", palette["text"]),
+    ]
+    for expected_call in expected_menu_options:
+        assert expected_call in root.option_add.call_args_list

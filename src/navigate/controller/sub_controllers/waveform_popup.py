@@ -32,6 +32,7 @@
 
 # Standard library imports
 import logging
+from decimal import Decimal
 
 # Third-party imports
 
@@ -47,6 +48,11 @@ from navigate.view.custom_widgets.popup import PopUp
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+def precision_from_step_size(step_size: float) -> int:
+    """Return the number of decimal places permitted by a waveform step size."""
+    return min(Decimal(str(step_size)).normalize().as_tuple().exponent, 0)
 
 
 class WaveformPopupController(GUIController):
@@ -234,10 +240,9 @@ class WaveformPopupController(GUIController):
         sawtooth and galvo_r_waveform: dc_value? And then adjust the
         ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
 
-        This function updates the widget ranges and precisions based on the current
-        resolution mode. The precision is set to -3 for high and nanoscale modes and -2
-        for low mode. The increment is set to 0.001 for high and nanoscale modes and
-        0.01 for low mode.
+        This function updates the widget ranges and precision based on the current
+        resolution mode. Remote-focus and galvo amplitude/offset increments come from
+        the GUI configuration. Each widget's precision is derived from its increment.
 
         """
         self.laser_min = self.configuration_controller.remote_focus_dict["hardware"][
@@ -247,37 +252,59 @@ class WaveformPopupController(GUIController):
             "max"
         ]
 
-        precision = int(
-            self.configuration_controller.remote_focus_dict["hardware"].get(
-                "precision", 0
-            )
-        )
-        self.increment = int(
+        frequency_increment = float(
             self.configuration_controller.remote_focus_dict["hardware"].get("step", 0)
         )
-        if precision == 0:
-            precision = -4 if self.laser_max < 1 else -3
-        elif precision > 0:
-            precision = -precision
-        if self.increment == 0:
-            self.increment = 0.0001 if self.laser_max < 1 else 0.001
-        elif self.increment < 0:
-            self.increment = -self.increment
+        if frequency_increment == 0:
+            frequency_increment = 0.0001 if self.laser_max < 1 else 0.001
+        elif frequency_increment < 0:
+            frequency_increment = -frequency_increment
+
+        gui_settings = self.parent_controller.configuration["gui"]
+        remote_focus_increment = gui_settings["remote_focus_waveform"]
+        galvo_increment = gui_settings["galvo_waveform"]
+        self.remote_focus_amplitude_increment = float(
+            remote_focus_increment["amplitude_step_size"]
+        )
+        self.remote_focus_offset_increment = float(
+            remote_focus_increment["offset_step_size"]
+        )
+        self.galvo_amplitude_increment = float(galvo_increment["amplitude_step_size"])
+        self.galvo_offset_increment = float(galvo_increment["offset_step_size"])
+        remote_focus_amplitude_precision = precision_from_step_size(
+            self.remote_focus_amplitude_increment
+        )
+        remote_focus_offset_precision = precision_from_step_size(
+            self.remote_focus_offset_increment
+        )
+        galvo_amplitude_precision = precision_from_step_size(
+            self.galvo_amplitude_increment
+        )
+        galvo_offset_precision = precision_from_step_size(self.galvo_offset_increment)
+        frequency_precision = precision_from_step_size(frequency_increment)
 
         # set ranges of value for those lasers
         for laser in self.lasers:
             self.widgets[laser + " Amp"].widget.configure(from_=self.laser_min)
             self.widgets[laser + " Amp"].widget.configure(to=self.laser_max)
-            self.widgets[laser + " Amp"].widget.configure(increment=self.increment)
-            self.widgets[laser + " Amp"].widget.set_precision(precision)
+            self.widgets[laser + " Amp"].widget.configure(
+                increment=self.remote_focus_amplitude_increment
+            )
+            self.widgets[laser + " Amp"].widget.set_precision(
+                remote_focus_amplitude_precision
+            )
             self.widgets[laser + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
             #       in update_remote_focus_settings()
             self.widgets[laser + " Off"].widget.configure(from_=self.laser_min)
             self.widgets[laser + " Off"].widget.configure(to=self.laser_max)
-            self.widgets[laser + " Off"].widget.configure(increment=self.increment)
-            self.widgets[laser + " Off"].widget.set_precision(precision)
+            self.widgets[laser + " Off"].widget.configure(
+                increment=self.remote_focus_offset_increment
+            )
+            self.widgets[laser + " Off"].widget.set_precision(
+                remote_focus_offset_precision
+            )
             self.widgets[laser + " Off"].widget.trigger_focusout_validation()
 
         for galvo, d in zip(self.galvos, self.galvo_dict):
@@ -285,8 +312,10 @@ class WaveformPopupController(GUIController):
             galvo_max = d["hardware"]["max"]
             self.widgets[galvo + " Amp"].widget.configure(from_=galvo_min)
             self.widgets[galvo + " Amp"].widget.configure(to=galvo_max)
-            self.widgets[galvo + " Amp"].widget.configure(increment=self.increment)
-            self.widgets[galvo + " Amp"].widget.set_precision(precision)
+            self.widgets[galvo + " Amp"].widget.configure(
+                increment=self.galvo_amplitude_increment
+            )
+            self.widgets[galvo + " Amp"].widget.set_precision(galvo_amplitude_precision)
             self.widgets[galvo + " Amp"].widget["state"] = "normal"
             self.widgets[galvo + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
@@ -294,14 +323,18 @@ class WaveformPopupController(GUIController):
             #       in update_remote_focus_settings()
             self.widgets[galvo + " Off"].widget.configure(from_=galvo_min)
             self.widgets[galvo + " Off"].widget.configure(to=galvo_max)
-            self.widgets[galvo + " Off"].widget.configure(increment=self.increment)
-            self.widgets[galvo + " Off"].widget.set_precision(precision)
+            self.widgets[galvo + " Off"].widget.configure(
+                increment=self.galvo_offset_increment
+            )
+            self.widgets[galvo + " Off"].widget.set_precision(galvo_offset_precision)
             self.widgets[galvo + " Off"].widget["state"] = "normal"
             self.widgets[galvo + " Off"].widget.trigger_focusout_validation()
 
             self.widgets[galvo + " Freq"].widget.configure(from_=0)
-            self.widgets[galvo + " Freq"].widget.configure(increment=self.increment)
-            self.widgets[galvo + " Freq"].widget.set_precision(precision)
+            self.widgets[galvo + " Freq"].widget.configure(
+                increment=frequency_increment
+            )
+            self.widgets[galvo + " Freq"].widget.set_precision(frequency_precision)
             self.widgets[galvo + " Freq"].widget["state"] = "normal"
             self.widgets[galvo + " Freq"].widget.trigger_focusout_validation()
 
@@ -909,7 +942,12 @@ class WaveformPopupController(GUIController):
                 ].widget.configure(to=self.galvo_dict[j]["hardware"]["max"])
                 self.advanced_setting_popup.parameters[
                     f"galvo_{i}_{j}_amp"
-                ].widget.configure(increment=self.increment)
+                ].widget.configure(increment=self.galvo_amplitude_increment)
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_amp"
+                ].widget.set_precision(
+                    precision_from_step_size(self.galvo_amplitude_increment)
+                )
                 self.advanced_setting_popup.parameters[
                     f"galvo_{i}_{j}_off"
                 ].widget.configure(from_=self.galvo_dict[j]["hardware"]["min"])
@@ -918,7 +956,12 @@ class WaveformPopupController(GUIController):
                 ].widget.configure(to=self.galvo_dict[j]["hardware"]["max"])
                 self.advanced_setting_popup.parameters[
                     f"galvo_{i}_{j}_off"
-                ].widget.configure(increment=self.increment)
+                ].widget.configure(increment=self.galvo_offset_increment)
+                self.advanced_setting_popup.parameters[
+                    f"galvo_{i}_{j}_off"
+                ].widget.set_precision(
+                    precision_from_step_size(self.galvo_offset_increment)
+                )
                 self.advanced_setting_popup.parameters[
                     f"galvo_{i}_{j}_amp"
                 ].get_variable().trace_add(

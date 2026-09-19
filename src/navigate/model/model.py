@@ -85,7 +85,6 @@ from navigate.model.resolution_change import (
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel
 
-
 # Logger Setup
 p = __name__.split(".")[1]
 
@@ -101,6 +100,7 @@ class Model:
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
         log_queue: Optional[multiprocessing.Queue] = None,
+        autofocus_progress_queue: multiprocessing.Queue = None,
     ) -> None:
         """Initialize the Model.
 
@@ -114,6 +114,8 @@ class Model:
             Event queue. Receives events from the controller.
         log_queue : Optional[multiprocessing.Queue]
             Log queue. Receives log messages from the controller.
+        autofocus_progress_queue : multiprocessing.Queue
+            Single-slot queue for replaceable autofocus progress snapshots.
         """
         # Set up logging
         log_setup("logging.yml", queue=log_queue)
@@ -231,6 +233,9 @@ class Model:
         # waveform queue
         #: multiprocessing.Queue: Waveform queue.
         self.event_queue = event_queue
+
+        #: multiprocessing.Queue: Replaceable autofocus plotting snapshots.
+        self.autofocus_progress_queue = autofocus_progress_queue
 
         # frame signal id
         #: int: Frame ID.
@@ -772,9 +777,10 @@ class Model:
                         self.addon_feature,
                         f"{get_navigate_path()}/feature_lists/feature_parameter_setting",
                     )
-                    self.signal_container, self.data_container = load_features(
-                        self, self.addon_feature
-                    )
+                    if self.addon_feature:
+                        self.signal_container, self.data_container = load_features(
+                            self, self.addon_feature
+                        )
             elif type(args[0]) is str:
                 try:
                     if len(args) > 1:
@@ -2289,6 +2295,7 @@ class ASIModel(Model):
         configuration: Optional[Dict[str, Any]] = None,
         event_queue: multiprocessing.Queue = None,
         log_queue: Optional[multiprocessing.Queue] = None,
+        autofocus_progress_queue: multiprocessing.Queue = None,
     ) -> None:
         """Initialize the ASI Model.
 
@@ -2302,8 +2309,16 @@ class ASIModel(Model):
             Event queue for communication with the controller. Default is None.
         log_queue : multiprocessing.Queue
             Log queue for logging messages. Default is None.
+        autofocus_progress_queue : multiprocessing.Queue
+            Single-slot queue for replaceable autofocus progress snapshots.
         """
-        super().__init__(args, configuration, event_queue, log_queue)
+        super().__init__(
+            args,
+            configuration,
+            event_queue,
+            log_queue,
+            autofocus_progress_queue,
+        )
 
         self.acquisition_modes_feature_setting["z-stack"] = [
             (

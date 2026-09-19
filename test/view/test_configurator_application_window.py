@@ -30,6 +30,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import tkinter as tk
 from tkinter import ttk
 
 from navigate.view.custom_widgets.CollapsibleFrame import CollapsibleFrame
@@ -89,6 +90,21 @@ def test_configurator_window_uses_themed_spacing(tk_root):
     view.top_window.add_button.destroy()
     view.top_window.save_button.destroy()
     view.top_window.cancel_button.destroy()
+    view.destroy()
+
+
+def test_device_info_panel_has_vertical_scrollbar(tk_root):
+    view = ConfigurationAssistantWindow(tk_root)
+    tk_root.update_idletasks()
+
+    panel = view.device_info_frame
+
+    assert isinstance(panel.vertical_scrollbar, ttk.Scrollbar)
+    assert str(panel.vertical_scrollbar.cget("orient")) == tk.VERTICAL
+    assert int(panel.vertical_scrollbar.grid_info()["row"]) == 2
+    assert int(panel.vertical_scrollbar.grid_info()["column"]) == 1
+    assert str(panel.vertical_scrollbar.grid_info()["sticky"]).lower() == tk.NS
+
     view.destroy()
 
 

@@ -36,9 +36,10 @@
 
 # Local application imports
 from navigate.model.features.autofocus import Autofocus
+from navigate.model.features.base import FeatureBase
 
 
-class CalculateFocusRange:
+class CalculateFocusRange(FeatureBase):
     """CalculateFocusRange class for determining the focus range using autofocus.
 
     This class provides functionality to calculate the focus range of a microscope

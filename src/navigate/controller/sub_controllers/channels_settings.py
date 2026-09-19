@@ -375,7 +375,7 @@ class ChannelSettingController(GUIController):
                 #     else widget_name
                 # )
                 # setting_range = self.parent_controller.parent_controller.
-                # configuration["configuration"]["gui"]["channels"][ref_name]
+                # configuration["gui"]["channel_settings"][ref_name]
                 # if (
                 #     setting_dict[widget_name] < setting_range["min"]
                 #     or setting_dict[widget_name] > setting_range["max"]

@@ -42,6 +42,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 # Local application imports
+from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
 from navigate.model.device_startup_functions import load_devices, start_device
 from navigate.tools.common_functions import build_ref_name
 
@@ -173,14 +174,9 @@ class Microscope:
             return
 
         device_ref_dict = {
-            "camera": ["serial_number"],
-            "filter_wheel": ["type", "wheel_number"],
-            "zoom": ["type", "servo_id"],
-            "shutter": ["type", "channel"],
-            "remote_focus": ["type", "channel"],
-            "galvo": ["type", "channel"],
-            "laser": ["wavelength"],
-            "mirror": ["type"],
+            name: list(fields)
+            for name, fields in DEVICE_REFERENCE_FIELDS.items()
+            if name != "stage"
         }
 
         device_name_dict = {"laser": "wavelength", "filter_wheel": "name"}
@@ -270,7 +266,8 @@ class Microscope:
                     try:
                         if device_connection is None:
                             exec(
-                                f"device_plugin_dict['{device_ref_name}'] = devices_dict["
+                                f"device_plugin_dict['{device_ref_name}'] = "
+                                "devices_dict["
                                 f"'__plugins__']['{device_name}']['load_device']"
                                 f"(configuration['configuration']['microscopes']["
                                 f"self.microscope_name]['{device_name}']['hardware'], "
@@ -380,6 +377,17 @@ class Microscope:
         # connect daq and camera in synthetic mode
         if self.daq is not None and type(self.daq).__name__ == "SyntheticDAQ":
             self.daq.add_camera(self.microscope_name, self.camera)
+            # set default trigger mode to software if daq is synthetic
+            self.configuration["experiment"]["CameraParameters"][self.microscope_name][
+                "trigger_source_backup"
+            ] = self.configuration["experiment"]["CameraParameters"][
+                self.microscope_name
+            ].get(
+                "trigger_source"
+            )
+            self.configuration["experiment"]["CameraParameters"][self.microscope_name][
+                "trigger_source"
+            ] = "Software"
 
     def update_data_buffer(
         self, data_buffer: List[np.ndarray], number_of_frames: int
@@ -702,10 +710,7 @@ class Microscope:
         logger.info(f"Waveform constants: {repr(dict(waveform_constants))}")
 
         camera_delay = (
-            self.configuration["configuration"]["microscopes"][self.microscope_name][
-                "camera"
-            ]["delay"]
-            / 1000
+            float(waveform_constants["other_constants"]["camera_delay"]) / 1000
         )
         camera_settle_duration = (
             self.configuration["configuration"]["microscopes"][self.microscope_name][
@@ -1312,7 +1317,8 @@ class Microscope:
             else:
                 count = 1
             if getattr(self, "camera_temperature_event", None) is None:
-                # Event used to signal when the camera temperature refresh thread should stop.
+                # Event used to signal when the camera temperature refresh
+                # thread should stop.
                 self.camera_temperature_event = threading.Event()
             else:
                 # stop current thread if it is running

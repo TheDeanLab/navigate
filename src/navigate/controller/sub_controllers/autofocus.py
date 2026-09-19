@@ -32,6 +32,8 @@
 
 # Standard Library Imports
 import logging
+import threading
+from typing import Optional
 
 # Third Party Imports
 import numpy as np
@@ -40,7 +42,11 @@ from tkinter import messagebox
 
 # Local Imports
 import navigate
+from navigate.config.device_schema import canonical_device_type
 from navigate.controller.sub_controllers.gui import GUIController
+from navigate.controller.autofocus_calibration import AutofocusCalibrationController
+from navigate.model.features.autofocus import autofocus_bounds_error
+from navigate.model.features.autofocus import plan_autofocus_positions
 from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
 
 # Logger Setup
@@ -71,6 +77,17 @@ class AutofocusPopupController(GUIController):
         parent_controller : navigate.controller.controller.Controller
             The parent controller of the autofocus popup.
         """
+        calibration_controller = getattr(
+            parent_controller, "autofocus_calibration_controller", None
+        )
+        if calibration_controller is None:
+            calibration_controller = AutofocusCalibrationController(parent_controller)
+            parent_controller.autofocus_calibration_controller = calibration_controller
+        parent_controller.event_listeners[
+            "autofocus_complete"
+        ] = calibration_controller.handle_autofocus_complete
+        self.calibration_controller = calibration_controller
+
         super().__init__(view, parent_controller)
 
         #: dict: The autofocus setting dictionary.
@@ -82,19 +99,55 @@ class AutofocusPopupController(GUIController):
         #: dict: The autofocus setting dictionary.
         self.setting_dict = None
 
+        #: bool: Suppress write-back while refreshing selections and saved values.
+        self._updating_autofocus_settings = False
+
         #: object: The autofocus figure.
         self.autofocus_fig = self.view.fig
 
         #: object: The autofocus coarse plot.
         self.autofocus_coarse = self.view.coarse
 
-        #: dict: Temporary reference focus for defocus calibration.
-        self.defocus_calibration_reference = None
-
         self.populate_experiment_values()
 
         #: object: The autofocus coarse plot.
         self.coarse_plot = None
+
+        #: int: Thread identifier used to keep plot mutations on the Tk thread.
+        self._main_thread_ident = threading.get_ident()
+
+        #: np.ndarray: Latest autofocus progress snapshot waiting to be rendered.
+        self._pending_autofocus_data = None
+
+        #: str: Tk after-id for the coalesced autofocus progress callback.
+        self._autofocus_after_id = None
+
+        canvas = self.autofocus_fig.canvas
+
+        #: bool: Whether the active Matplotlib canvas supports artist blitting.
+        self._blit_supported = all(
+            hasattr(canvas, method)
+            for method in ("copy_from_bbox", "restore_region", "blit")
+        )
+
+        #: object: Cached static axes background for autofocus blitting.
+        self._autofocus_background = None
+
+        #: object: Persistent artist containing measured autofocus points.
+        self._autofocus_artist = None
+
+        #: bool: Whether the next update requires a full canvas draw.
+        self._force_full_redraw = True
+
+        #: bool: Whether the most recent progress render used blitting.
+        self._last_render_used_blit = False
+
+        #: tuple: Last live x/y axis bounds.
+        self._last_xlim = None
+        self._last_ylim = None
+
+        canvas.mpl_connect("draw_event", self._on_autofocus_draw)
+        canvas.mpl_connect("resize_event", self._invalidate_autofocus_blit_cache)
 
         # Dismiss popup.
         self.view.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
@@ -108,9 +161,11 @@ class AutofocusPopupController(GUIController):
         self.acquisition_state = getattr(
             self.parent_controller,
             "autofocus_acquisition_state",
-            "running"
-            if acquire_bar_controller and acquire_bar_controller.is_acquiring
-            else "idle",
+            (
+                "running"
+                if acquire_bar_controller and acquire_bar_controller.is_acquiring
+                else "idle"
+            ),
         )
         self.autofocus_active = bool(
             getattr(self.parent_controller, "is_autofocusing", False)
@@ -124,6 +179,7 @@ class AutofocusPopupController(GUIController):
         )
         for k in self.view.setting_vars:
             self.view.setting_vars[k].trace_add("write", self.update_setting_dict(k))
+        self.refresh_bounds_validation()
 
     @staticmethod
     def _channel_key_to_label(channel_key: str) -> str:
@@ -149,14 +205,22 @@ class AutofocusPopupController(GUIController):
         """
         # We should add saving function to the function closing the window
 
+        self._cancel_pending_autofocus_update()
+        event_listeners = getattr(self.parent_controller, "event_listeners", {})
+        for event_name, event_handler in self.custom_events.items():
+            if event_listeners.get(event_name) == event_handler:
+                event_listeners.pop(event_name)
         self.view.popup.dismiss()
-        delattr(self.parent_controller, "af_popup_controller")
+        if getattr(self.parent_controller, "af_popup_controller", None) is self:
+            delattr(self.parent_controller, "af_popup_controller")
 
     def populate_experiment_values(self) -> None:
-        """Populate Experiment Values
+        """Refresh current hardware choices and display saved autofocus settings.
 
-        Populates the experiment values from the experiment settings dictionary
+        Inactive settings remain stored but are not offered as acquisition targets.
+        Preserve a valid selection within the same microscope.
         """
+        previous_microscope = self.microscope_name
         self.setting_dict = self.parent_controller.configuration["experiment"][
             "AutoFocusParameters"
         ]
@@ -164,23 +228,14 @@ class AutofocusPopupController(GUIController):
             "MicroscopeState"
         ]["microscope_name"]
 
-        setting_dict = self.setting_dict[self.microscope_name]
-
-        # Default to stages, if they exist.
-        if "stage" in setting_dict:
-            device = "stage"
-        else:
-            device = setting_dict.keys()[0]
-        self.widgets["device"].widget["values"] = setting_dict.keys()
-        self.widgets["device"].set(device)
-
-        # Default to the f axis, if it exists.
-        if "f" in setting_dict[device]:
-            device_ref = "f"
-        else:
-            device_ref = setting_dict[device].keys()[0]
-        self.widgets["device_ref"].widget["values"] = setting_dict[device].keys()
-        self.widgets["device_ref"].set(device_ref)
+        if previous_microscope != self.microscope_name:
+            self._updating_autofocus_settings = True
+            try:
+                self.widgets["device"].set("")
+                self.widgets["device_ref"].set("")
+            finally:
+                self._updating_autofocus_settings = False
+        self.update_device_ref()
 
         channels = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -200,11 +255,9 @@ class AutofocusPopupController(GUIController):
         self.widgets["calibration_action"].set("Regular")
         self._update_reference_status()
 
-        for k in self.view.setting_vars:
-            self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
-
     def showup(self) -> None:
-        """Shows the popup window"""
+        """Refresh current microscope choices and show the popup window."""
+        self.populate_experiment_values()
         self.view.popup.deiconify()
 
     def _update_button_states(self) -> None:
@@ -215,6 +268,7 @@ class AutofocusPopupController(GUIController):
         acquisition_mode = getattr(acquire_bar_controller, "mode", "live")
         can_start = (
             not self.autofocus_active
+            and bool(self._available_autofocus_targets())
             and self.acquisition_state in ("idle", "running")
             and (self.acquisition_state == "idle" or acquisition_mode == "live")
         )
@@ -249,9 +303,24 @@ class AutofocusPopupController(GUIController):
         self.parent_controller.execute("stop_acquire")
 
     def start_autofocus(self) -> None:
-        """Starts the autofocus process."""
-        device = self.widgets["device"].widget.get()
-        device_ref = self.widgets["device_ref"].widget.get()
+        """Start autofocus only if the selected hardware target is still current.
+
+        Unavailable targets produce a user-facing error before any acquisition
+        state or calibration values are changed.
+        """
+        device = self.widgets["device"].get()
+        device_ref = self.widgets["device_ref"].get()
+        if device_ref not in self._available_autofocus_targets().get(device, []):
+            messagebox.showerror(
+                title="Navigate",
+                message=(
+                    "The selected autofocus device or focusing axis is no longer "
+                    "available for the current microscope. Reopen Autofocus "
+                    "Settings from the menu and select an available target "
+                    "before starting."
+                ),
+            )
+            return
         self.parent_controller.configuration["experiment"]["MicroscopeState"][
             "autofocus_device"
         ] = device
@@ -262,8 +331,10 @@ class AutofocusPopupController(GUIController):
         # verify autofocus parameters
         setting_dict = self.setting_dict[self.microscope_name][device][device_ref]
         warning_message = ""
+        is_selected = False
         for k in ["coarse", "fine"]:
             if setting_dict[f"{k}_selected"]:
+                is_selected = True
                 try:
                     step = float(setting_dict[f"{k}_step_size"])
                     value = float(setting_dict[f"{k}_range"])
@@ -272,10 +343,19 @@ class AutofocusPopupController(GUIController):
                 except Exception as e:
                     logger.exception(e)
                     warning_message += f"{k} settings are not correct!\n"
+        if not is_selected:
+            warning_message = "Please select at least one mode: Coarse or Fine."
         if warning_message:
             messagebox.showerror(
                 title="Navigate",
                 message=warning_message,
+            )
+            return
+        bounds_errors = self.refresh_bounds_validation()
+        if bounds_errors:
+            messagebox.showerror(
+                title="Navigate",
+                message="\n".join(bounds_errors),
             )
             return
         target_channel = self._channel_label_to_key(
@@ -325,6 +405,7 @@ class AutofocusPopupController(GUIController):
             reference_channel = self.defocus_calibration_reference["channel"]
 
         self._write_channel_defocus(target_channel, 0)
+        self._initialize_progress_plot()
         self.parent_controller.execute(
             "autofocus",
             device,
@@ -337,57 +418,21 @@ class AutofocusPopupController(GUIController):
 
     def handle_autofocus_complete(self, payload: dict) -> None:
         """Handle autofocus completion metadata for defocus calibration."""
-        action = payload.get("calibration_action")
-        if action == "capture_reference":
-            self.defocus_calibration_reference = {
-                "channel": payload["channel"],
-                "focus_position": float(payload["focus_position"]),
-            }
-            self._update_reference_status()
-            self._notify_defocus_reference(self.defocus_calibration_reference)
-            # update defocus value
-            channels = self.parent_controller.configuration["experiment"][
-                "MicroscopeState"
-            ]["channels"]
-            defocus = channels[payload["channel"]]["defocus"]
-            for channel_key in channels.keys():
-                self._write_channel_defocus(
-                    channel_key, channels[channel_key]["defocus"] - defocus
-                )
-            return
-
-        if action == "populate_defocus":
-            if self.defocus_calibration_reference is None:
-                self._show_missing_reference_warning()
-                return
-            target_channel = payload["channel"]
-            target_focus = float(payload["focus_position"])
-            reference_focus = self.defocus_calibration_reference["focus_position"]
-            focus = target_focus - reference_focus
-            if target_channel == self.defocus_calibration_reference["channel"]:
-                focus = 0
-            self._write_channel_defocus(target_channel, focus)
-
-        if self.defocus_calibration_reference is not None:
-            self._notify_defocus_reference(self.defocus_calibration_reference)
+        self.calibration_controller.handle_autofocus_complete(payload)
 
     def _write_channel_defocus(self, channel_key: str, defocus: float) -> None:
-        channels = self.parent_controller.configuration["experiment"][
-            "MicroscopeState"
-        ]["channels"]
-        channels[channel_key]["defocus"] = defocus
-        handler = getattr(self.parent_controller, "event_listeners", {}).get(
-            "channel_defocus"
-        )
-        if handler is not None:
-            handler((channel_key, defocus))
+        """Write a defocus value through the persistent calibration state."""
+        self.calibration_controller.write_channel_defocus(channel_key, defocus)
 
-    def _notify_defocus_reference(self, reference: dict) -> None:
-        handler = getattr(self.parent_controller, "event_listeners", {}).get(
-            "defocus_reference"
-        )
-        if handler is not None:
-            handler(reference)
+    @property
+    def defocus_calibration_reference(self) -> Optional[dict]:
+        """Return popup-independent defocus calibration reference state."""
+        return self.calibration_controller.reference
+
+    @defocus_calibration_reference.setter
+    def defocus_calibration_reference(self, reference: Optional[dict]) -> None:
+        """Set popup-independent defocus calibration reference state."""
+        self.calibration_controller.reference = reference
 
     def _update_reference_status(self) -> None:
         if not hasattr(self.view, "reference_status_var"):
@@ -407,24 +452,73 @@ class AutofocusPopupController(GUIController):
         self.setting_dict["reference_channel"] = channel
         self.setting_dict["reference_position"] = focus
 
-    def _show_missing_reference_warning(self) -> None:
-        messagebox.showwarning(
-            title="Navigate",
-            message="Capture a reference focus before populating defocus.",
-        )
+    def _available_autofocus_targets(self) -> dict[str, list[str]]:
+        """Intersect current hardware targets with saved settings, without mutation.
+
+        Use the same eligibility as preload: configured stage axes (including
+        synthetic stages) and the current NI remote-focus channel. Recompute
+        rather than caching choices so a hardware change invalidates old targets.
+        """
+        configuration_controller = self.parent_controller.configuration_controller
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        if (
+            microscope_name != self.microscope_name
+            or configuration_controller.microscope_name != microscope_name
+        ):
+            return {}
+        settings = self.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ].get(microscope_name, {})
+        targets = {}
+        axes = [
+            axis
+            for axis in configuration_controller.stage_axes
+            if axis in settings.get("stage", {})
+        ]
+        if axes:
+            targets["stage"] = list(dict.fromkeys(axes))
+        remote_focus = configuration_controller.remote_focus_dict
+        if remote_focus:
+            hardware = remote_focus.get("hardware", {})
+            channel = hardware.get("channel")
+            if canonical_device_type(
+                "remote_focus", hardware.get("type")
+            ) == "ni.NI" and channel in settings.get("remote_focus", {}):
+                targets["remote_focus"] = [channel]
+        return targets
 
     def update_device_ref(self, *_: tuple[str]) -> None:
-        """Update device reference name
+        """Refresh eligible devices and references without editing stored settings.
 
         Parameters
         ----------
         _: tuple[str]
             The event arguments.
         """
-        device = self.widgets["device"].widget.get()
-        device_refs = self.setting_dict[self.microscope_name][device].keys()
-        self.widgets["device_ref"].widget["values"] = device_refs
-        self.widgets["device_ref"].widget.set(device_refs[0])
+        if self._updating_autofocus_settings:
+            return
+        targets = self._available_autofocus_targets()
+        # Read variables: a Tk trace can run before the widget text is updated.
+        device = self.widgets["device"].get()
+        device_ref = self.widgets["device_ref"].get()
+        if device not in targets:
+            device = "stage" if "stage" in targets else next(iter(targets), "")
+        device_refs = targets.get(device, [])
+        if device_ref not in device_refs:
+            device_ref = "f" if "f" in device_refs else next(iter(device_refs), "")
+        self._updating_autofocus_settings = True
+        try:
+            self.widgets["device"].widget["values"] = tuple(targets)
+            self.widgets["device"].set(device)
+            self.widgets["device_ref"].widget["values"] = tuple(device_refs)
+            self.widgets["device_ref"].set(device_ref)
+        finally:
+            self._updating_autofocus_settings = False
+        self.show_autofocus_setting()
+        if hasattr(self, "acquisition_state"):
+            self._update_button_states()
 
     def show_autofocus_setting(self, *_: tuple[str]) -> None:
         """Show Autofocus Parameters
@@ -434,11 +528,21 @@ class AutofocusPopupController(GUIController):
         _: tuple[str]
             The event arguments.
         """
-        device = self.widgets["device"].widget.get()
-        device_ref = self.widgets["device_ref"].widget.get()
+        if self._updating_autofocus_settings:
+            return
+        device = self.widgets["device"].get()
+        device_ref = self.widgets["device_ref"].get()
+        if device_ref not in self._available_autofocus_targets().get(device, []):
+            self.refresh_bounds_validation()
+            return
         setting_dict = self.setting_dict[self.microscope_name]
-        for k in self.view.setting_vars:
-            self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
+        self._updating_autofocus_settings = True
+        try:
+            for k in self.view.setting_vars:
+                self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
+        finally:
+            self._updating_autofocus_settings = False
+        self.refresh_bounds_validation()
 
     def update_setting_dict(self, parameter: str) -> callable:
         """Show Autofocus Parameters
@@ -455,13 +559,271 @@ class AutofocusPopupController(GUIController):
         """
 
         def func(*_: tuple[str]) -> None:
-            device = self.widgets["device"].widget.get()
-            device_ref = self.widgets["device_ref"].widget.get()
+            if self._updating_autofocus_settings:
+                return
+            device = self.widgets["device"].get()
+            device_ref = self.widgets["device_ref"].get()
+            if device_ref not in self._available_autofocus_targets().get(device, []):
+                return
             self.setting_dict[self.microscope_name][device][device_ref][
                 parameter
             ] = self.view.setting_vars[parameter].get()
+            self.refresh_bounds_validation()
 
         return func
+
+    def refresh_bounds_validation(self) -> list[str]:
+        """Refresh advisory scan bounds feedback from current stage state.
+
+        Returns
+        -------
+        list[str]
+            Immediately knowable bounds diagnostics.
+        """
+        errors = []
+        scan_errors = {"coarse": False, "fine": False}
+        device = self.widgets["device"].widget.get()
+        device_ref = self.widgets["device_ref"].widget.get()
+
+        if device == "stage":
+            stage_parameters = self.parent_controller.configuration["experiment"][
+                "StageParameters"
+            ]
+            if stage_parameters.get("limits", True):
+                try:
+                    center = float(stage_parameters[device_ref])
+                    minimum = self.parent_controller.configuration_controller.get_stage_position_limits(
+                        "_min"
+                    )[
+                        device_ref
+                    ]
+                    maximum = self.parent_controller.configuration_controller.get_stage_position_limits(
+                        "_max"
+                    )[
+                        device_ref
+                    ]
+                    settings = self.setting_dict[self.microscope_name][device][
+                        device_ref
+                    ]
+
+                    scans_to_validate = []
+                    if settings["coarse_selected"]:
+                        scans_to_validate.append("coarse")
+                    elif settings["fine_selected"]:
+                        scans_to_validate.append("fine")
+
+                    for scan_name in scans_to_validate:
+                        scan_range = float(settings[f"{scan_name}_range"])
+                        step_size = float(settings[f"{scan_name}_step_size"])
+                        if step_size <= 0 or scan_range < step_size:
+                            continue
+                        positions = plan_autofocus_positions(
+                            center, scan_range, step_size
+                        )
+                        error = autofocus_bounds_error(
+                            scan_name,
+                            positions,
+                            minimum,
+                            maximum,
+                            device_ref,
+                        )
+                        if error:
+                            errors.append(error)
+                            scan_errors[scan_name] = True
+                except (KeyError, TypeError, ValueError):
+                    pass
+
+        for scan_name in ("coarse", "fine"):
+            range_widget = self.widgets[f"{scan_name}_range"].widget
+            range_widget._toggle_error(
+                scan_errors[scan_name] or bool(range_widget.error.get())
+            )
+        self.view.bounds_warning_var.set("\n".join(errors))
+        return errors
+
+    def display_autofocus_progress(self, data) -> None:
+        """Queue the latest autofocus measurements for a Tk-thread update."""
+        if threading.get_ident() != self._main_thread_ident:
+            run_on_main = getattr(self.parent_controller, "_run_on_main_thread", None)
+            if callable(run_on_main):
+                run_on_main(self.display_autofocus_progress, data, wait=False)
+            return
+
+        progress_data = np.asarray(data, dtype=float)
+        self._pending_autofocus_data = progress_data.copy()
+        if self._autofocus_after_id is not None:
+            return
+
+        widget = self.autofocus_fig.canvas.get_tk_widget()
+        self._autofocus_after_id = widget.after_idle(
+            self._flush_pending_autofocus_update
+        )
+
+    def _flush_pending_autofocus_update(self) -> None:
+        """Render only the newest pending autofocus progress snapshot."""
+        self._autofocus_after_id = None
+        data = self._pending_autofocus_data
+        self._pending_autofocus_data = None
+        if data is None:
+            return
+        try:
+            self._update_progress_plot(data)
+        except Exception as exc:
+            logger.exception("Autofocus plot update failed: %s", exc)
+
+    def _cancel_pending_autofocus_update(self) -> None:
+        """Cancel a scheduled progress update without changing plotted data."""
+        if self._autofocus_after_id is not None:
+            try:
+                self.autofocus_fig.canvas.get_tk_widget().after_cancel(
+                    self._autofocus_after_id
+                )
+            except Exception:
+                pass
+        self._autofocus_after_id = None
+        self._pending_autofocus_data = None
+
+    def _initialize_progress_plot(self) -> None:
+        """Prepare static axes and one persistent measured-points artist."""
+        self._cancel_pending_autofocus_update()
+        self.autofocus_coarse.clear()
+        self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
+        self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)
+        self.autofocus_coarse.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+        self.autofocus_coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.autofocus_coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
+        self._autofocus_artist = self.autofocus_coarse.plot(
+            [], [], "k.", animated=self._blit_supported
+        )[0]
+        self._last_xlim = self._get_initial_progress_xlim()
+        if self._last_xlim is not None:
+            self.autofocus_coarse.set_xlim(*self._last_xlim)
+        self._last_ylim = None
+        self._invalidate_autofocus_blit_cache()
+        self.autofocus_fig.tight_layout()
+        self._render_autofocus(force_full_redraw=True)
+
+    def _get_initial_progress_xlim(self):
+        """Return padded x limits for the exact immediately knowable scan."""
+        try:
+            device = self.widgets["device"].widget.get()
+            device_ref = self.widgets["device_ref"].widget.get()
+            settings = self.setting_dict[self.microscope_name][device][device_ref]
+            if settings["coarse_selected"]:
+                scan_name = "coarse"
+            elif settings["fine_selected"]:
+                scan_name = "fine"
+            else:
+                return None
+            center = 0.0
+            if device == "stage":
+                center = float(
+                    self.parent_controller.configuration["experiment"][
+                        "StageParameters"
+                    ][device_ref]
+                )
+            positions = plan_autofocus_positions(
+                center,
+                float(settings[f"{scan_name}_range"]),
+                float(settings[f"{scan_name}_step_size"]),
+            )
+            limits, _ = self._expanded_limits(None, positions)
+            return limits
+        except (KeyError, TypeError, ValueError, ZeroDivisionError):
+            return None
+
+    @staticmethod
+    def _expanded_limits(current, values):
+        """Return live axis limits that expand, but never shrink, as data arrive."""
+        finite_values = np.asarray(values, dtype=float)
+        finite_values = finite_values[np.isfinite(finite_values)]
+        if finite_values.size == 0:
+            return current, False
+
+        data_minimum = float(np.min(finite_values))
+        data_maximum = float(np.max(finite_values))
+        span = data_maximum - data_minimum
+        if span > 0:
+            padding = span * 0.1
+        else:
+            padding = max(abs(data_minimum) * 0.1, 1e-9)
+        target = (data_minimum - padding, data_maximum + padding)
+        if current is None:
+            return target, True
+        if data_minimum >= current[0] and data_maximum <= current[1]:
+            return current, False
+        return (min(current[0], target[0]), max(current[1], target[1])), True
+
+    def _update_progress_plot(self, data: np.ndarray) -> None:
+        """Update the persistent measured-points artist from one snapshot."""
+        data = np.asarray(data, dtype=float)
+        if data.size == 0:
+            return
+        if data.ndim != 2 or data.shape[1] < 2:
+            raise ValueError("Autofocus progress data must have two columns.")
+        if self._autofocus_artist is None:
+            self._initialize_progress_plot()
+
+        self._autofocus_artist.set_data(data[:, 0], data[:, 1])
+        force_full_redraw = self._force_full_redraw
+
+        x_limits, x_changed = self._expanded_limits(self._last_xlim, data[:, 0])
+        if x_changed:
+            self.autofocus_coarse.set_xlim(*x_limits)
+            self._last_xlim = x_limits
+            force_full_redraw = True
+
+        y_limits, y_changed = self._expanded_limits(self._last_ylim, data[:, 1])
+        if y_changed:
+            self.autofocus_coarse.set_ylim(*y_limits)
+            self._last_ylim = y_limits
+            force_full_redraw = True
+
+        self._render_autofocus(force_full_redraw=force_full_redraw)
+
+    def _render_autofocus(self, force_full_redraw: bool = False) -> None:
+        """Render live autofocus points with blitting or a full-draw fallback."""
+        canvas = self.autofocus_fig.canvas
+        can_blit = self._blit_supported and self._autofocus_artist is not None
+        if (
+            not can_blit
+            or force_full_redraw
+            or self._autofocus_background is None
+            or self._force_full_redraw
+        ):
+            canvas.draw()
+            self._last_render_used_blit = False
+            self._force_full_redraw = False
+            if can_blit:
+                self._autofocus_background = canvas.copy_from_bbox(
+                    self.autofocus_coarse.bbox
+                )
+                canvas.restore_region(self._autofocus_background)
+                self.autofocus_coarse.draw_artist(self._autofocus_artist)
+                canvas.blit(self.autofocus_coarse.bbox)
+            return
+
+        canvas.restore_region(self._autofocus_background)
+        self.autofocus_coarse.draw_artist(self._autofocus_artist)
+        canvas.blit(self.autofocus_coarse.bbox)
+        self._last_render_used_blit = True
+
+    def _invalidate_autofocus_blit_cache(self, *_args) -> None:
+        """Clear the background cache so the next update performs a full draw."""
+        self._autofocus_background = None
+        self._force_full_redraw = True
+
+    def _on_autofocus_draw(self, event) -> None:
+        """Refresh the static background cache after a full canvas draw."""
+        if not self._blit_supported:
+            return
+        if event is None or getattr(event, "canvas", None) is self.autofocus_fig.canvas:
+            try:
+                self._autofocus_background = self.autofocus_fig.canvas.copy_from_bbox(
+                    self.autofocus_coarse.bbox
+                )
+            except Exception:
+                self._autofocus_background = None
 
     def display_plot(self, data_and_flags: tuple[np.ndarray, bool, bool]) -> None:
         """
@@ -502,6 +864,11 @@ class AutofocusPopupController(GUIController):
         coarse_steps = int(coarse_range) // int(coarse_step) + 1
 
         if clear_data:
+            self._cancel_pending_autofocus_update()
+            self._autofocus_artist = None
+            self._invalidate_autofocus_blit_cache()
+            self._last_xlim = None
+            self._last_ylim = None
             self.autofocus_coarse.clear()
             if data.shape[0] > 0:
                 self.autofocus_coarse.plot(
@@ -587,5 +954,5 @@ class AutofocusPopupController(GUIController):
         """
         return {
             "autofocus": self.display_plot,
-            "autofocus_complete": self.handle_autofocus_complete,
+            "autofocus_progress": self.display_autofocus_progress,
         }

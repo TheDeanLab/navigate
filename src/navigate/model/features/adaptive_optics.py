@@ -41,6 +41,8 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 # Local imports
+from navigate.config.configuration_schema import SettingSpec
+from navigate.model.features.base import FeatureBase
 from navigate.model.features.common_features import PrepareNextChannel
 import navigate.model.analysis.image_contrast as img_contrast
 from navigate.model.features.image_writer import ImageWriter
@@ -152,8 +154,17 @@ def fourier_annulus(im, radius_1=0, radius_2=64):
     return np.mean(IM_mask), IM_mask
 
 
-class TonyWilson:
+class TonyWilson(FeatureBase):
     """Tony Wilson iterative AO routine"""
+
+    parameter_schema = {
+        "verbose": SettingSpec(
+            bool,
+            default=False,
+            label="Verbose",
+            help_text="Print detailed adaptive-optics progress while the routine runs.",
+        ),
+    }
 
     def __init__(self, model, verbose=False):
         """Initialize the Tony Wilson iterative AO routine

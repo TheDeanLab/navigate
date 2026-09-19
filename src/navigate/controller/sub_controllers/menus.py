@@ -58,6 +58,10 @@ from navigate.view.popups.camera_setting_popup import (
 )
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
+from navigate.view.popups.gui_settings_popup import GuiSettingsPopup
+from navigate.controller.sub_controllers.gui_settings_popup import (
+    GuiSettingsPopupController,
+)
 
 # Local Controller Imports
 from navigate.controller.sub_controllers.gui import GUIController
@@ -95,6 +99,8 @@ from navigate.config.config import (
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+_CURRENT_MICROSCOPE_MENU_PREFIX = "Current microscope:"
 
 
 def log_function_call(func):
@@ -430,6 +436,7 @@ class MenuController(GUIController):
         windows_menu = {
             self.view.menubar.menu_window: {
                 "Online Documentation": ["standard", self.popup_help, None, None, None],
+                "Setting": ["standard", self.popup_gui_settings, None, None, None],
                 "add_separator_0": ["standard", None, None, None, None],
                 "Select Channel Settings": [
                     "standard",
@@ -543,7 +550,7 @@ class MenuController(GUIController):
 
         # Create a variable to track histogram state
         self.histogram_enabled = tk.BooleanVar(
-            value=self.parent_controller.configuration["gui"]["histogram"].get(
+            value=self.parent_controller.configuration["gui"].get("histogram", {}).get(
                 "enabled", True
             )
         )
@@ -566,8 +573,12 @@ class MenuController(GUIController):
         mip_menu = tk.Menu(self.view.menubar.menu_window)
         self.view.menubar.menu_window.add_cascade(label="MIP Display", menu=mip_menu)
 
-        # Create a variable to track histogram state
-        self.mip_enabled = tk.BooleanVar()
+        # Create a variable to track MIP display state.
+        self.mip_enabled = tk.BooleanVar(
+            value=self.parent_controller.configuration["gui"].get("mip_display", {}).get(
+                "enabled", True
+            )
+        )
 
         # Add radiobuttons to the histogram submenu
         mip_menu.add_radiobutton(
@@ -584,6 +595,14 @@ class MenuController(GUIController):
         )
 
         # Zoom menu
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        self.view.menubar.menu_resolution.add_command(
+            label=f"{_CURRENT_MICROSCOPE_MENU_PREFIX} {microscope_name}",
+            state="disabled",
+        )
+        self.view.menubar.menu_resolution.add_separator()
         for microscope_name in self.parent_controller.configuration["configuration"][
             "microscopes"
         ].keys():
@@ -607,12 +626,7 @@ class MenuController(GUIController):
                     variable=self.resolution_value,
                     value=f"{microscope_name} {zoom_positions.keys()[0]}",
                 )
-        self.resolution_value.trace_add(
-            "write",
-            lambda *args: self.parent_controller.execute(
-                "resolution", self.resolution_value.get()
-            ),
-        )
+        self.resolution_value.trace_add("write", self._on_resolution_value_changed)
 
         configuration_dict = {
             self.view.menubar.menu_resolution: {
@@ -736,6 +750,9 @@ class MenuController(GUIController):
             label="Add Customized Feature List", command=self.popup_feature_list_setting
         )
         self.view.menubar.menu_features.add_command(
+            label="Edit Selected Feature List", command=self.edit_feature_list
+        )
+        self.view.menubar.menu_features.add_command(
             label="Delete Selected Feature List", command=self.delete_feature_list
         )
         self.view.menubar.menu_features.add_command(
@@ -764,6 +781,17 @@ class MenuController(GUIController):
 
         # Note: Any menu items added below this return statement will not
         # be populated if feature_records does not exist.
+
+    def _on_resolution_value_changed(self, *args) -> None:
+        """Synchronize the microscope menu label and dispatch a resolution change."""
+        resolution_value = self.resolution_value.get()
+        if resolution_value:
+            microscope_name = resolution_value.rsplit(" ", 1)[0]
+            self.view.menubar.menu_resolution.entryconfigure(
+                f"{_CURRENT_MICROSCOPE_MENU_PREFIX}*",
+                label=f"{_CURRENT_MICROSCOPE_MENU_PREFIX} {microscope_name}",
+            )
+        self.parent_controller.execute("resolution", resolution_value)
 
     @log_function_call
     def toggle_histogram(self) -> None:
@@ -1046,6 +1074,21 @@ class MenuController(GUIController):
         webbrowser.open_new_tab("https://thedeanlab.github.io/navigate/")
 
     @log_function_call
+    def popup_gui_settings(self) -> None:
+        """Display the complete current GUI configuration."""
+        popup_controller = getattr(
+            self.parent_controller, "gui_settings_popup_controller", None
+        )
+        if popup_controller is not None:
+            popup_controller.showup()
+            return
+
+        popup = GuiSettingsPopup(self.view)
+        self.parent_controller.gui_settings_popup_controller = GuiSettingsPopupController(
+            popup, self.parent_controller
+        )
+
+    @log_function_call
     def toggle_stage_limits(self, *args) -> None:
         """Toggle stage limits."""
         if self.disable_stage_limits.get() == 1:
@@ -1229,6 +1272,84 @@ class MenuController(GUIController):
         self.parent_controller.features_popup_controller = FeaturePopupController(
             feature_list_popup, self.parent_controller
         )
+
+    def _get_custom_feature_list_record(self, feature_id):
+        """Return a custom feature-list record and its authoritative YAML filename."""
+        feature_lists_path = os.path.join(get_navigate_path(), "feature_lists")
+        feature_records = load_yaml_file(
+            os.path.join(feature_lists_path, "__sequence.yml")
+        )
+        record_index = feature_id - self.system_feature_list_count
+        if (
+            not isinstance(feature_records, list)
+            or record_index < 0
+            or record_index >= len(feature_records)
+        ):
+            return None, None
+
+        sequence_record = feature_records[record_index]
+        if not isinstance(sequence_record, dict):
+            return None, None
+        yaml_file_name = sequence_record.get("yaml_file_name")
+        if not yaml_file_name:
+            return None, None
+
+        feature_list_config = load_yaml_file(
+            os.path.join(feature_lists_path, yaml_file_name)
+        )
+        if (
+            not isinstance(feature_list_config, dict)
+            or "module_name" not in feature_list_config
+            or "feature_list_name" not in feature_list_config
+            or (
+                feature_list_config["module_name"] is None
+                and "feature_list" not in feature_list_config
+            )
+        ):
+            return None, None
+        return feature_list_config, yaml_file_name
+
+    @log_function_call
+    def edit_feature_list(self) -> None:
+        """Edit a selected customized feature list"""
+        feature_id = self.feature_id_val.get()
+        if feature_id < self.system_feature_list_count:
+            messagebox.showerror(
+                title="Feature List Error",
+                message="Can't edit system feature list or you haven't select any "
+                "feature list",
+            )
+            return
+
+        feature_list_config, _ = self._get_custom_feature_list_record(feature_id)
+        if feature_list_config is None:
+            messagebox.showerror(
+                title="Feature List Error",
+                message="The selected feature-list record is missing or invalid.",
+            )
+            return
+        if feature_list_config["module_name"] is not None:
+            messagebox.showerror(
+                title="Feature List Error",
+                message=(
+                    "This feature list is provided by Python code or a plugin and "
+                    "cannot be edited in the visual editor."
+                ),
+            )
+            return
+
+        if hasattr(self.parent_controller, "features_popup_controller"):
+            self.parent_controller.features_popup_controller.exit_func()
+
+        feature_list_popup = FeatureListPopup(
+            self.view, title="Feature List Configuration"
+        )
+        self.parent_controller.features_popup_controller = FeaturePopupController(
+            feature_list_popup,
+            self.parent_controller,
+            persist_feature_list_edits=True,
+        )
+        self.parent_controller.features_popup_controller.populate_feature_list(feature_id)
 
     @log_function_call
     def load_feature_list(self) -> None:

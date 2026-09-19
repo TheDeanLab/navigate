@@ -22,7 +22,6 @@ microscopes:
       flip_x: True
       flip_y: False
       defect_correct_mode: 2.0
-      delay: 20
     remote_focus_device:
       hardware:
         type: EquipmentSolutions # NI

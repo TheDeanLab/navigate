@@ -801,6 +801,17 @@ def test_enable_microscope_switches_scope_and_laser_task(ni_module):
     assert new_switch_task.write_calls[0]["data"].item() is False
 
 
+def test_enable_microscope_reads_replaced_waveform_constants(ni_module):
+    module, _, _ = ni_module
+    configuration = _build_configuration()
+    daq = module.NIDAQ(configuration)
+    configuration["waveform_constants"] = {"other_constants": {"camera_delay": 11}}
+
+    daq.enable_microscope("ScopeA")
+
+    assert daq.camera_delay == pytest.approx(0.011)
+
+
 def test_enable_microscope_without_laser_switch_settings_is_noop(ni_module):
     module, _, _ = ni_module
     config = _build_configuration()

@@ -58,7 +58,6 @@ def _build_config(sensor_mode="Widefield", readout_direction="Top-to-Bottom"):
                         }
                     },
                     "daq": {"sample_rate": 10, "trigger_source": "PFI1"},
-                    "camera": {"delay": 5},
                 }
             }
         },
@@ -80,6 +79,7 @@ def _build_config(sensor_mode="Widefield", readout_direction="Top-to-Bottom"):
         },
         "waveform_constants": {
             "other_constants": {
+                "camera_delay": "5",
                 "remote_focus_ramp_falling": "17.5",
                 "remote_focus_delay": "0",
                 "percent_smoothing": "0",

@@ -39,6 +39,7 @@ from abc import ABC, abstractmethod
 
 # Local Imports
 from navigate.model.waveforms import camera_exposure
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -56,6 +57,19 @@ class DAQBase(ABC):
     channels.
     """
 
+    configuration_schema = {
+        "sample_rate": SettingSpec(
+            int,
+            default=100000,
+            label="Sample Rate (Hz)",
+            help_text="DAQ waveform sampling rate in hertz.",
+            minimum=1,
+            maximum=10000000,
+            step=1000,
+            required=True,
+        ),
+    }
+
     def __init__(self, configuration: dict[str, Any]) -> None:
         """Initializes the DAQBase class.
 
@@ -67,9 +81,6 @@ class DAQBase(ABC):
 
         #: dict: Dictionary of configuration parameters
         self.configuration = configuration
-
-        #: dict: Dictionary of waveform constants
-        self.waveform_constants = self.configuration["waveform_constants"]
 
         #: str: Name of the active microscope
         self.microscope_name = self.configuration["experiment"]["MicroscopeState"][
@@ -113,6 +124,11 @@ class DAQBase(ABC):
     def __str__(self) -> str:
         """Returns the string representation of the DAQBase class"""
         return "DAQBase"
+
+    @property
+    def waveform_constants(self) -> dict[str, Any]:
+        """Return the currently loaded waveform constants."""
+        return self.configuration["waveform_constants"]
 
     @abstractmethod
     def stop_acquisition(self) -> None:

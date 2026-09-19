@@ -52,6 +52,17 @@ from navigate.tools.file_functions import save_yaml_file
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+GUI_SETTING_DEFAULTS = {
+    "remote_focus_waveform": {
+        "amplitude_step_size": 0.0001,
+        "offset_step_size": 0.0001,
+    },
+    "galvo_waveform": {
+        "amplitude_step_size": 0.0001,
+        "offset_step_size": 0.0001,
+    },
+}
+
 
 def get_navigate_path():
     """Establish a program home directory in AppData/Local/.navigate for Windows
@@ -619,7 +630,7 @@ def verify_experiment_config(manager, configuration):
         ].get("filter_wheel", [])
     ]
     prefix = "channel_"
-    channel_nums = configuration["configuration"]["gui"]["channels"]["count"]
+    channel_nums = configuration["gui"].get("channel_settings", {}).get("count", 5)
     channel_setting_dict = microscope_setting_dict["channels"]
     selected_channel_num = 0
     for channel in channel_setting_dict.keys():
@@ -874,15 +885,18 @@ def verify_waveform_constants(manager, configuration):
     # other_constants
     waveform_dict = configuration["waveform_constants"]
     microscope_name = configuration["configuration"]["microscopes"].keys()[0]
+    camera_config = configuration["configuration"]["microscopes"][microscope_name][
+        "camera"
+    ]
     other_constants_dict = {
         "remote_focus_settle_duration": "0",
         "percent_smoothing": "0",
         "remote_focus_delay": "0",
         "remote_focus_ramp_falling": "5",
         "camera_settle_duration": "0",
-        "camera_delay": configuration["configuration"]["microscopes"][microscope_name][
-            "camera"
-        ]["delay"],
+        "camera_delay": camera_config.get(
+            "delay", camera_config.get("delay_percent", "1.0")
+        ),
     }
     if (
         "other_constants" not in waveform_dict.keys()
@@ -974,8 +988,6 @@ def verify_configuration(manager, configuration):
     ]
     filter_wheel_seq = []
     for microscope_name in device_config.keys():
-        # camera
-        # delay_percent -> delay
         for device_name in required_devices:
             if device_name not in device_config[microscope_name]:
                 print(
@@ -991,9 +1003,6 @@ def verify_configuration(manager, configuration):
                     f"No {device_name} defined for microscope {microscope_name}"
                 )
         camera_config = device_config[microscope_name]["camera"]
-        if "delay" not in camera_config.keys():
-            camera_config["delay"] = camera_config.get("delay_percent", 2)
-
         try:
             channel_count = max(channel_count, camera_config.get("count", 5))
         except TypeError:
@@ -1093,12 +1102,17 @@ def verify_configuration(manager, configuration):
             idx = ref_list["filter_wheel"].index(filter_wheel_idx)
             temp_config[i]["name"] = filter_wheel_seq[idx]["name"]
 
-    update_config_dict(
-        manager,
-        configuration["configuration"],
-        "gui",
-        {"channels": {"count": channel_count}},
-    )
+    gui_settings = configuration["gui"]
+    if "channel_settings" not in gui_settings:
+        update_config_dict(manager, gui_settings, "channel_settings", {})
+    gui_settings["channel_settings"]["count"] = channel_count
+    for group_name, defaults in GUI_SETTING_DEFAULTS.items():
+        if group_name not in gui_settings:
+            update_config_dict(manager, gui_settings, group_name, defaults)
+            continue
+        for setting_name, value in defaults.items():
+            if setting_name not in gui_settings[group_name]:
+                gui_settings[group_name][setting_name] = value
 
 
 def verify_positions_config(positions):

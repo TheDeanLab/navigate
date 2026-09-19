@@ -1,10 +1,11 @@
 import os
 import random
 import tkinter as tk
+from tkinter import ttk
 
 import pytest
 
-from navigate.view.custom_widgets.validation import ValidatedEntry
+from navigate.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
@@ -21,6 +22,32 @@ def entry(tk_root):
     entry = ValidatedEntry(tk_root, textvariable=tk.DoubleVar())
 
     return entry
+
+
+@pytest.fixture
+def spinbox(monkeypatch):
+    """Create a spinbox without requiring a Tk display server."""
+    widget = object.__new__(ValidatedSpinbox)
+    monkeypatch.setattr(ttk.Spinbox, "configure", lambda *args, **kwargs: None)
+    return widget
+
+
+@pytest.mark.parametrize(
+    ("increment", "precision"),
+    [(1, 0), (0.01, -2), (0.0001, -4)],
+)
+def test_spinbox_increment_updates_validation_precision(
+    spinbox, increment, precision
+):
+    spinbox.configure(increment=increment)
+
+    assert spinbox.precision == precision
+
+
+def test_spinbox_config_alias_updates_validation_precision(spinbox):
+    spinbox.config(increment=0.001)
+
+    assert spinbox.precision == -3
 
 
 # TODO: Figure out why this doesn't work in GitHub Actions.

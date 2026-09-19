@@ -40,6 +40,7 @@ from typing import Any, Optional
 from navigate.model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
 from navigate.model.devices.zoom.base import ZoomBase
 from navigate.model.devices.device_types import SerialDevice
+from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -50,6 +51,16 @@ logger = logging.getLogger(p)
 @log_initialization
 class DynamixelZoom(ZoomBase, SerialDevice):
     """DynamixelZoom Class - Controls the Dynamixel Servo."""
+
+    configuration_schema = {
+        "hardware/servo_id": SettingSpec(
+            int,
+            default=1,
+            label="Servo ID",
+            help_text="Dynamixel bus ID assigned to the zoom servo.",
+            required=True,
+        )
+    }
 
     def __init__(
         self,

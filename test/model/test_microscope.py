@@ -40,6 +40,11 @@ def dummy_microscope(dummy_model):
     from navigate.model.microscope import Microscope
     from navigate.model.device_startup_functions import load_devices
 
+    camera_parameters = dummy_model.configuration["experiment"]["CameraParameters"][
+        dummy_model.active_microscope_name
+    ]
+    camera_parameters.setdefault("trigger_source", "External")
+
     devices_dict = load_devices(
         dummy_model.active_microscope_name, dummy_model.configuration, is_synthetic=True
     )
@@ -75,6 +80,34 @@ def test_prepare_acquisition(dummy_microscope):
         k in waveform_dict.keys()
         for k in ["camera_waveform", "remote_focus_waveform", "galvo_waveform"]
     ]
+
+
+def test_synthetic_microscope_backs_up_trigger_source(dummy_model):
+    from navigate.model.device_startup_functions import load_devices
+    from navigate.model.microscope import Microscope
+
+    microscope_name = dummy_model.active_microscope_name
+    camera_parameters = dummy_model.configuration["experiment"]["CameraParameters"][
+        microscope_name
+    ]
+    original_trigger_source = "External"
+    camera_parameters["trigger_source"] = original_trigger_source
+    camera_parameters.pop("trigger_source_backup", None)
+
+    devices_dict = load_devices(
+        microscope_name, dummy_model.configuration, is_synthetic=True
+    )
+
+    Microscope(
+        microscope_name,
+        dummy_model.configuration,
+        devices_dict,
+        is_synthetic=True,
+        is_virtual=False,
+    )
+
+    assert camera_parameters["trigger_source_backup"] == original_trigger_source
+    assert camera_parameters["trigger_source"] == "Software"
 
 
 def test_move_stage(dummy_microscope):

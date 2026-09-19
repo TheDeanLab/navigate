@@ -31,13 +31,235 @@
 #
 
 # Standard Library Imports
+from collections.abc import Mapping
+from pprint import pformat
 import tkinter as tk
 from tkinter import ttk
 
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.configurator_application_window import ConfiguratorTooltip
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
+from navigate.model.features.parameter_tools import infer_feature_parameter_spec
 from navigate.view.theme import get_theme_padding_px, get_theme_space_px
+
+
+class FeatureCollectionInput:
+    """Fixed mapping editor used for structured feature parameters."""
+
+    def __init__(self, parent, name, spec, value=None):
+        """Create a fixed mapping input from a ``CollectionSpec``."""
+        self.spec = spec
+        self.frame = ttk.LabelFrame(
+            parent,
+            text=spec.label or name.replace("_", " ").title(),
+            padding=get_theme_padding_px((6, 6)),
+        )
+        self.label = self.frame
+        self.widgets = {}
+        self.variables = {}
+        self.use_none = tk.BooleanVar(
+            value=spec.none_option_label is not None and value is None
+        )
+        values = value if isinstance(value, dict) else {}
+
+        row_offset = 0
+        if spec.none_option_label is not None:
+            default_widget = ttk.Checkbutton(
+                self.frame,
+                text=spec.none_option_label,
+                variable=self.use_none,
+                command=self.sync_widget_state,
+            )
+            default_widget.grid(
+                row=0,
+                column=0,
+                columnspan=2,
+                sticky=tk.W,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 5)),
+            )
+            self.default_widget = default_widget
+            row_offset = 1
+
+        for row, (field_name, field_spec) in enumerate(spec.item_schema.items()):
+            label = ttk.Label(
+                self.frame,
+                text=(field_spec.label or field_name.replace("_", " ").title()) + ":",
+                width=18,
+            )
+            label.grid(
+                row=row + row_offset,
+                column=0,
+                sticky=tk.W,
+                padx=get_theme_space_px(3),
+                pady=get_theme_padding_px((1, 1)),
+            )
+            if field_spec.help_text:
+                ConfiguratorTooltip(label, field_spec.help_text)
+
+            variable = self.create_variable(field_spec, values.get(field_name))
+            self.variables[field_name] = variable
+            widget = self.create_widget(row + row_offset, field_spec, variable)
+            self.widgets[field_name] = widget
+
+        self.sync_widget_state()
+
+    def create_variable(self, spec, value):
+        """Create a Tk variable suitable for a collection field."""
+        value = spec.default if value is None else value
+        if spec.value_type is bool:
+            if isinstance(value, str):
+                value = value.strip() == "True"
+            return tk.StringVar(value=str(bool(value)))
+        if spec.value_type is dict:
+            return tk.StringVar(value=self.format_mapping_value(value))
+        return tk.StringVar(value="" if value is None else str(value))
+
+    @classmethod
+    def format_mapping_value(cls, value):
+        """Return a readable literal for nested mapping-like values."""
+        if value is None:
+            return ""
+        return pformat(cls.to_plain_value(value), width=88)
+
+    @classmethod
+    def to_plain_value(cls, value):
+        """Convert proxy mappings and nested containers to built-in values."""
+        if isinstance(value, Mapping) or (
+            hasattr(value, "items") and callable(value.items)
+        ):
+            return {key: cls.to_plain_value(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [cls.to_plain_value(item) for item in value]
+        if isinstance(value, tuple):
+            return tuple(cls.to_plain_value(item) for item in value)
+        return value
+
+    def create_widget(self, row, spec, variable):
+        """Render one collection field."""
+        grid_options = {
+            "row": row,
+            "column": 1,
+            "sticky": tk.EW,
+            "padx": get_theme_space_px(3),
+            "pady": get_theme_padding_px((1, 1)),
+        }
+        if spec.value_type is bool:
+            widget = ttk.Combobox(
+                self.frame,
+                textvariable=variable,
+                values=("True", "False") if spec.choices is None else spec.choices,
+                state="readonly",
+                width=18,
+            )
+        elif spec.choices is not None:
+            widget = ttk.Combobox(
+                self.frame,
+                textvariable=variable,
+                values=spec.choices,
+                state="readonly",
+                width=18,
+            )
+        elif spec.value_type in (int, float):
+            lower_bound = (
+                spec.minimum
+                if spec.minimum is not None
+                else (
+                    spec.exclusive_minimum
+                    if spec.exclusive_minimum is not None
+                    else -1000000
+                )
+            )
+            widget = ValidatedSpinbox(
+                self.frame,
+                textvariable=variable,
+                width=18,
+                from_=lower_bound,
+                to=1000000 if spec.maximum is None else spec.maximum,
+                increment=(
+                    (0.1 if spec.value_type is float else 1)
+                    if spec.step is None
+                    else spec.step
+                ),
+                required=spec.required,
+                value_type=spec.value_type,
+            )
+        elif spec.value_type is dict:
+            widget = tk.Text(
+                self.frame,
+                width=56,
+                height=7,
+                wrap=tk.NONE,
+            )
+            widget.insert("1.0", variable.get())
+        else:
+            widget = ttk.Entry(self.frame, textvariable=variable, width=20)
+        widget.grid(**grid_options)
+        return widget
+
+    @property
+    def widget(self):
+        """Expose the container through the same attribute as ``LabelInput``."""
+        return self.frame
+
+    def grid(self, *args, **kwargs):
+        """Delegate geometry management to the collection frame."""
+        self.frame.grid(*args, **kwargs)
+
+    def get(self):
+        """Return the collection as a field mapping."""
+        if self.spec.none_option_label is not None and self.use_none.get():
+            return None
+        values = {}
+        for field_name, variable in self.variables.items():
+            widget = self.widgets[field_name]
+            if isinstance(widget, tk.Text):
+                values[field_name] = widget.get("1.0", "end-1c")
+            else:
+                values[field_name] = variable.get()
+        return values
+
+    def set(self, value):
+        """Set collection values from a mapping."""
+        if self.spec.none_option_label is not None:
+            self.use_none.set(value is None)
+            self.sync_widget_state()
+        if not isinstance(value, dict):
+            return
+        for field_name, field_value in value.items():
+            if field_name in self.variables:
+                field_spec = self.spec.item_schema[field_name]
+                if field_spec.value_type is bool:
+                    if isinstance(field_value, str):
+                        field_value = field_value.strip() == "True"
+                    else:
+                        field_value = bool(field_value)
+                if field_spec.value_type is dict:
+                    text = self.format_mapping_value(field_value)
+                    self.variables[field_name].set(text)
+                    widget = self.widgets[field_name]
+                    if isinstance(widget, tk.Text):
+                        widget.delete("1.0", tk.END)
+                        widget.insert("1.0", text)
+                    continue
+                self.variables[field_name].set(str(field_value))
+        self.sync_widget_state()
+
+    def sync_widget_state(self):
+        """Enable or disable collection fields when the null option changes."""
+        disabled = self.spec.none_option_label is not None and self.use_none.get()
+        state = tk.DISABLED if disabled else tk.NORMAL
+        readonly_state = "disabled" if disabled else "readonly"
+        for widget in self.widgets.values():
+            if isinstance(widget, ttk.Combobox):
+                widget.config(state=readonly_state)
+            elif isinstance(widget, tk.Text):
+                widget.config(state=state)
+            else:
+                widget.config(state=state)
 
 
 class FeatureIcon(ttk.Button):
@@ -69,6 +291,7 @@ class FeatureConfigPopup:
         root,
         *args,
         features=[],
+        palette_features=None,
         feature_name="",
         args_name=[],
         args_value=[],
@@ -84,6 +307,8 @@ class FeatureConfigPopup:
             List of arguments
         features : list
             List of features
+        palette_features : list, optional
+            Feature names displayed in the left-side palette
         feature_name : str
             Name of the feature
         args_name : list
@@ -91,15 +316,73 @@ class FeatureConfigPopup:
         args_value : list
             List of arguments value
         """
+        # Support the legacy positional ``features`` argument as well as the
+        # keyword form used by the controller.
+        if not features and args:
+            features = args[0]
+        if palette_features is None:
+            palette_features = features
+
         # Creating popup window with this name and size/placement,
 
         #: PopUp: Popup window
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
+        self.popup.resizable(tk.TRUE, tk.TRUE)
 
-        # Creating content frame
+        # Creating content frame and feature node palette
         content_frame = self.popup.get_frame()
+        content_frame.grid_columnconfigure(0, weight=1)
+        content_frame.grid_rowconfigure(0, weight=1)
+
+        outer_frame = ttk.Frame(content_frame)
+        outer_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        outer_frame.columnconfigure(1, weight=1)
+        outer_frame.rowconfigure(0, weight=1)
+
+        palette = ttk.LabelFrame(outer_frame, text="Feature Nodes", padding=10)
+        palette.grid(row=0, column=0, sticky=tk.NS, padx=(0, 12))
+        palette.rowconfigure(0, weight=1)
+        palette.columnconfigure(0, weight=1)
+
+        palette_canvas = tk.Canvas(
+            palette, width=150, height=380, highlightthickness=0, borderwidth=0
+        )
+        palette_scrollbar = ttk.Scrollbar(
+            palette, orient="vertical", command=palette_canvas.yview
+        )
+        palette_canvas.configure(yscrollcommand=palette_scrollbar.set)
+        palette_canvas.grid(row=0, column=0, sticky=tk.NS)
+        palette_scrollbar.grid(row=0, column=1, sticky=tk.NS, padx=(6, 0))
+
+        #: ttk.Frame: Container for the feature node palette buttons.
+        self.palette_items = ttk.Frame(palette_canvas)
+        palette_window = palette_canvas.create_window(
+            (0, 0), window=self.palette_items, anchor="nw"
+        )
+        palette_canvas.bind(
+            "<Configure>",
+            lambda event: palette_canvas.itemconfigure(
+                palette_window, width=event.width
+            ),
+        )
+        self.palette_items.bind(
+            "<Configure>",
+            lambda _event: palette_canvas.configure(
+                scrollregion=palette_canvas.bbox("all")
+            ),
+        )
+        self.palette_buttons = {}
+        for feature in palette_features:
+            button = ttk.Button(self.palette_items, text=feature)
+            button.pack(fill="x", padx=5, pady=3)
+            self.palette_buttons[feature] = button
+
+        # Creating configuration content frame
+        content_frame = ttk.Frame(outer_frame)
+        content_frame.grid(row=0, column=1, sticky=tk.NSEW)
+        content_frame.columnconfigure(0, weight=1)
 
         #: list: List of input widgets
         self.inputs = []
@@ -126,17 +409,34 @@ class FeatureConfigPopup:
         separator = ttk.Separator(content_frame)
         separator.grid(row=1, column=0, sticky=tk.NSEW, pady=get_theme_space_px(10))
 
+        #: tk.StringVar: Feature description displayed above parameter inputs.
+        self.feature_description = tk.StringVar()
+        self.feature_description_widget = ttk.Label(
+            content_frame,
+            textvariable=self.feature_description,
+            wraplength=520,
+            justify=tk.LEFT,
+        )
+        self.feature_description_widget.grid(
+            row=2,
+            column=0,
+            sticky=tk.EW,
+            padx=get_theme_space_px(30),
+            pady=get_theme_padding_px((0, 10)),
+        )
+        self.set_feature_description(kwargs.get("feature_description", ""))
+
         #: ttk.Frame: Parameter frame
         self.parameter_frame = ttk.Frame(content_frame)
         self.parameter_frame.grid(
-            row=2,
+            row=3,
             column=0,
             sticky=tk.NSEW,
             padx=get_theme_space_px(30),
             pady=get_theme_space_px(30),
         )
 
-        row = 3
+        row = 4
         if "true" in kwargs:
             self.preview_btn_true = ttk.Button(content_frame, text="Preview (True)")
             self.preview_btn_true.grid(row=row, column=0, sticky=tk.NSEW)
@@ -164,9 +464,29 @@ class FeatureConfigPopup:
             self.feature_list_false_frame = FeatureListFrame(content_frame)
             self.feature_list_false_frame.grid(row=row + 2, column=0, sticky=tk.NSEW)
 
-        self.build_widgets(args_name, args_value, kwargs.get("parameter_config", {}))
+        self.build_widgets(
+            args_name,
+            args_value,
+            kwargs.get("parameter_config", {}),
+            kwargs.get("parameter_schema", {}),
+        )
 
-    def build_widgets(self, args_name, args_value, parameter_config=None):
+    def set_feature_description(self, description):
+        """Set the feature-level description shown in the parameter editor."""
+        description = description or ""
+        self.feature_description.set(description)
+        if description:
+            self.feature_description_widget.grid()
+        else:
+            self.feature_description_widget.grid_remove()
+
+    def build_widgets(
+        self,
+        args_name,
+        args_value,
+        parameter_config=None,
+        parameter_schema=None,
+    ):
         """Build widgets for the popup
 
         Parameters
@@ -177,36 +497,113 @@ class FeatureConfigPopup:
             List of arguments value
         parameter_config : dict
             Dictionary of parameter configuration
+        parameter_schema : dict
+            Dictionary of feature parameter schema definitions
         """
         #: list: List of input widgets
         self.inputs = []
         #: list: List of input widgets type
         self.inputs_type = []
+        #: list: List of parameter schema definitions
+        self.parameter_specs = []
+        #: list: Parameter names in the same order as the input widgets
+        self.parameter_names = []
+        #: dict: Parameter inputs keyed by constructor argument name
+        self.inputs_by_name = {}
+        #: dict: Parameter positions keyed by constructor argument name
+        self.parameter_index_by_name = {}
 
         for child in self.parameter_frame.winfo_children():
             child.destroy()
 
+        args_value = [] if args_value is None else list(args_value)
+        parameter_schema = parameter_schema or {}
+
         for i, arg_name in enumerate(args_name):
+            arg_value = args_value[i] if i < len(args_value) else None
+            arg_spec = parameter_schema.get(arg_name) or infer_feature_parameter_spec(
+                arg_value
+            )
+            if isinstance(arg_spec, CollectionSpec):
+                temp = FeatureCollectionInput(
+                    self.parameter_frame,
+                    arg_name,
+                    arg_spec,
+                    arg_value,
+                )
+                self.inputs.append(temp)
+                self.inputs_type.append(dict)
+                self.parameter_specs.append(arg_spec)
+                self.parameter_names.append(arg_name)
+                self.inputs_by_name[arg_name] = temp
+                self.parameter_index_by_name[arg_name] = i
+                temp.grid(
+                    row=i + 2,
+                    column=0,
+                    sticky=tk.NSEW,
+                    padx=get_theme_space_px(30),
+                    pady=get_theme_space_px(10),
+                )
+                if arg_spec.help_text:
+                    ConfiguratorTooltip(temp.label, arg_spec.help_text)
+                continue
+
             arg_input_class = ttk.Entry
             arg_input_var = tk.StringVar
-            if type(args_value[i]) is bool:
+            input_args = {"width": 30}
+            values = None
+            if arg_spec.value_type is bool:
                 arg_input_class = ttk.Combobox
-                values = ["True", "False"]
+                values = (
+                    ["True", "False"]
+                    if arg_spec.choices is None
+                    else list(arg_spec.choices)
+                )
             elif parameter_config is not None and arg_name in parameter_config:
                 arg_input_class = ttk.Combobox
                 values = list(parameter_config[arg_name].keys())
+            elif arg_spec.choices is not None:
+                arg_input_class = ttk.Combobox
+                values = list(arg_spec.choices)
+            elif arg_spec.value_type in (int, float):
+                lower_bound = (
+                    arg_spec.minimum
+                    if arg_spec.minimum is not None
+                    else (
+                        arg_spec.exclusive_minimum
+                        if arg_spec.exclusive_minimum is not None
+                        else -1000000
+                    )
+                )
+                arg_input_class = ValidatedSpinbox
+                input_args = {
+                    "width": 30,
+                    "from_": lower_bound,
+                    "to": 1000000 if arg_spec.maximum is None else arg_spec.maximum,
+                    "increment": (
+                        (0.1 if arg_spec.value_type is float else 1)
+                        if arg_spec.step is None
+                        else arg_spec.step
+                    ),
+                    "required": arg_spec.required,
+                    "value_type": arg_spec.value_type,
+                }
 
             temp = LabelInput(
                 parent=self.parameter_frame,
-                label=arg_name + ":",
+                label=(arg_spec.label or arg_name) + ":",
                 label_args={"padding": (2, 5, 5, 0), "width": 20},
                 input_class=arg_input_class,
                 input_var=arg_input_var(),
-                input_args={"width": 30},
+                input_args=input_args,
             )
 
             self.inputs.append(temp)
-            self.inputs_type.append(type(args_value[i]))
+            self.inputs_type.append(arg_spec.value_type)
+            self.parameter_specs.append(arg_spec)
+            self.parameter_names.append(arg_name)
+            self.inputs_by_name[arg_name] = temp
+            self.parameter_index_by_name[arg_name] = i
             temp.grid(
                 row=i + 2,
                 column=0,
@@ -214,10 +611,15 @@ class FeatureConfigPopup:
                 padx=get_theme_space_px(30),
                 pady=get_theme_space_px(10),
             )
+            if arg_spec.help_text:
+                ConfiguratorTooltip(temp.label, arg_spec.help_text)
             if arg_input_class is ttk.Combobox:
                 temp.set_values(values)
                 temp.widget.config(state="readonly")
-            temp.set(str(args_value[i]))
+            display_value = (
+                "" if arg_value is None and not arg_spec.required else arg_value
+            )
+            temp.set(str(display_value))
 
     def get_widgets(self):
         """Get widgets
@@ -249,7 +651,7 @@ class FeatureListPopup:
         # PopUp is a Toplevel window
         #: PopUp: Popup window
         self.popup = PopUp(
-            root, kwargs["title"], "+320+180", top=False, transient=False
+            root, kwargs["title"], "+500+360", top=False, transient=False
         )
         self.popup.resizable(tk.TRUE, tk.TRUE)
         self.popup.grid_columnconfigure(0, weight=1)
@@ -293,26 +695,75 @@ class FeatureListPopup:
             pady=get_theme_space_px(3),
         )
 
-        scroll_frame = ttk.Frame(content_frame)
-        scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
-        canvas = tk.Canvas(scroll_frame, width=800, height=350)
+        outer_frame = ttk.Frame(content_frame)
+        content_frame.grid_rowconfigure(3, weight=1)
+        outer_frame.grid(row=3, column=0, sticky=tk.NSEW)
+        outer_frame.columnconfigure(1, weight=1)
+        outer_frame.rowconfigure(0, weight=1)
+
+        # feature nodes palette
+        palette = ttk.LabelFrame(outer_frame, text="Feature Nodes", padding=10)
+        palette.grid(row=0, column=0, sticky="nsw", padx=(0, 12))
+        palette.rowconfigure(0, weight=1)
+        palette.columnconfigure(1, weight=1)
+
+        palette_canvas = tk.Canvas(
+            palette, width=150, height=380, highlightthickness=0, borderwidth=0
+        )
         scrollbar = ttk.Scrollbar(
-            scroll_frame, orient="horizontal", command=canvas.xview
+            palette, orient="vertical", command=palette_canvas.yview
         )
-        self.feature_view_frame = ttk.Frame(canvas)
+        palette_canvas.configure(yscrollcommand=scrollbar.set)
+        palette_canvas.grid(row=0, column=0, sticky="ns")
+        scrollbar.grid(row=0, column=1, sticky="ns", padx=(6, 0))
 
-        self.feature_view_frame.bind(
-            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        self.palette_items = ttk.Frame(palette_canvas)
+        palette_window = palette_canvas.create_window(
+            (0, 0), window=self.palette_items, anchor="nw"
+        )
+        palette_canvas.bind(
+            "<Configure>",
+            lambda e: palette_canvas.itemconfig(palette_window, width=e.width),
+        )
+        self.palette_items.bind(
+            "<Configure>",
+            lambda e: palette_canvas.configure(scrollregion=palette_canvas.bbox("all")),
         )
 
-        canvas.create_window((0, 0), window=self.feature_view_frame, anchor="nw")
+        board_content_frame = ttk.Frame(outer_frame)
+        board_content_frame.grid(row=0, column=1, sticky="nsew")
+        board_content_frame.columnconfigure(0, weight=1)
+        board_content_frame.rowconfigure(0, weight=1)
 
-        canvas.configure(xscrollcommand=scrollbar.set)
+        board_box = ttk.LabelFrame(board_content_frame, text="Feature List", padding=10)
+        board_box.grid(row=0, column=0, sticky="nsew")
+        board_box.columnconfigure(0, weight=1)
+        board_box.rowconfigure(1, weight=1)
+        label = ttk.Label(
+            board_box,
+            text="Drag feature nodes from the left panel to this board to create a feature list.",
+        )
+        label.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
-        canvas.pack(side="top", fill="both", expand=True)
-        scrollbar.pack(side="bottom", fill="x")
+        self.board_canvas = tk.Canvas(board_box, highlightthickness=0, borderwidth=0)
+        self.board_canvas.configure(takefocus=True)
+        self.board_canvas.grid(row=1, column=0, sticky="nsew")
+        board_scrollbar = ttk.Scrollbar(
+            board_box, orient="horizontal", command=self.board_canvas.xview
+        )
+        board_scrollbar.grid(row=2, column=0, sticky="ew", pady=(6, 0))
+        self.board_canvas.configure(xscrollcommand=board_scrollbar.set)
 
-        separator = ttk.Separator(content_frame)
+        self.feature_view_frame = ttk.Frame(self.board_canvas)
+        self.board_window = self.board_canvas.create_window(
+            (0, 0), window=self.feature_view_frame, anchor="nw"
+        )
+
+        self.marker = tk.Frame(
+            self.feature_view_frame, background="#2878d4", width=3, height=30
+        )
+
+        separator = ttk.Separator(board_content_frame)
         separator.grid(
             row=4,
             column=0,
@@ -320,7 +771,7 @@ class FeatureListPopup:
             padx=get_theme_space_px(3),
             pady=get_theme_space_px(3),
         )
-        self.inputs["content"] = tk.Text(content_frame, width=100, height=10)
+        self.inputs["content"] = tk.Text(board_content_frame, width=100, height=10)
         self.inputs["content"].grid(
             row=5,
             column=0,
@@ -362,23 +813,27 @@ class FeatureListFrame(ttk.Frame):
 
     def __init__(self, root, *args, width=800, height=200, **kwargs):
         super().__init__(root)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
-        scroll_frame = ttk.Frame(self)
-        scroll_frame.grid(row=0, column=0, sticky=tk.NSEW)
-        canvas = tk.Canvas(scroll_frame, width=width, height=height)
-        scrollbar = ttk.Scrollbar(scroll_frame, orient="horizon", command=canvas.xview)
-        self.feature_view_frame = ttk.Frame(canvas)
-
-        self.feature_view_frame.bind(
-            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        self.board_canvas = tk.Canvas(
+            self, width=width, height=height, highlightthickness=0, borderwidth=0
         )
+        self.board_canvas.configure(takefocus=True)
+        self.board_canvas.grid(row=0, column=0, sticky=tk.NSEW)
+        scrollbar = ttk.Scrollbar(
+            self, orient="horizontal", command=self.board_canvas.xview
+        )
+        scrollbar.grid(row=1, column=0, sticky=tk.EW, pady=(6, 0))
+        self.board_canvas.configure(xscrollcommand=scrollbar.set)
 
-        canvas.create_window((0, 0), window=self.feature_view_frame, anchor="nw")
-
-        canvas.configure(xscrollcommand=scrollbar.set)
-
-        canvas.pack(side="top", fill="both", expand=True)
-        scrollbar.pack(side="bottom", fill="x")
+        self.feature_view_frame = ttk.Frame(self.board_canvas)
+        self.board_window = self.board_canvas.create_window(
+            (0, 0), window=self.feature_view_frame, anchor="nw"
+        )
+        self.marker = tk.Frame(
+            self.feature_view_frame, background="#2878d4", width=3, height=30
+        )
 
         self.content = tk.Text(self, width=100, height=5)
         self.content.grid(

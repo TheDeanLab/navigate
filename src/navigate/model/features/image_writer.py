@@ -41,6 +41,7 @@ from datetime import datetime
 
 # Third Party Imports
 import numpy as np
+
 try:
     from tifffile import imsave
 except ImportError:

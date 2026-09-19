@@ -70,6 +70,16 @@ def test_enable_microscope_updates_rate_and_delay():
     assert daq.camera_delay == 0.009
 
 
+def test_enable_microscope_reads_replaced_waveform_constants():
+    configuration = _build_configuration(camera_delay_ms=1)
+    daq = _ConcreteDAQ(configuration)
+    configuration["waveform_constants"] = {"other_constants": {"camera_delay": 7}}
+
+    daq.enable_microscope("ScopeA")
+
+    assert daq.camera_delay == 0.007
+
+
 def test_set_external_trigger_updates_trigger_mode():
     daq = _ConcreteDAQ(_build_configuration())
 

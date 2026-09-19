@@ -32,13 +32,14 @@
 
 #  Standard Library Imports
 import logging
-from typing import Any
+from typing import Any, Union
 
 # Third Party Imports
 
 # Local Imports
 from navigate.model.devices.laser.base import LaserBase
 from navigate.model.devices.device_types import SerialDevice
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 from navigate.tools.decorators import log_initialization
 
@@ -49,6 +50,22 @@ logger = logging.getLogger(p)
 
 @log_initialization
 class ASILaser(LaserBase, SerialDevice):
+    configuration_schema = {
+        "power/hardware/axis": SettingSpec(
+            str,
+            default="B",
+            label="Power Axis",
+            help_text="ASI controller axis used for laser-power control.",
+            required=False,
+        ),
+        "onoff/hardware/axis": SettingSpec(
+            str,
+            default="",
+            label="On/Off Axis",
+            help_text="ASI controller axis used to switch the laser.",
+            required=False,
+        ),
+    }
     """ASILaser - Class for controlling ASI Lasers
 
     This class is used to control a laser connected to a ASI Device.
@@ -91,11 +108,11 @@ class ASILaser(LaserBase, SerialDevice):
             digital = digital.upper()
 
         # Determine modulation type
-        if analog == "ASI" and digital == "ASI":
+        if self._is_asi_type(analog) and self._is_asi_type(digital):
             modulation_type = "mixed"
-        elif analog == "ASI":
+        elif self._is_asi_type(analog):
             modulation_type = "analog"
-        elif digital == "ASI":
+        elif self._is_asi_type(digital):
             modulation_type = "digital"
         else:
             raise ValueError("Laser modulation type not recognized.")
@@ -251,3 +268,22 @@ class ASILaser(LaserBase, SerialDevice):
     def __del__(self):
         """Destructor for the ASILaser class."""
         self.close()
+
+    def _is_asi_type(self, hardware_type: Union[str, None]) -> bool:
+        """Check if the hardware type is ASI type.
+
+        Parameters
+        ----------
+        hardware_type : Union[str, None]
+            The hardware type to check.
+
+        Returns
+        -------
+        bool
+            True if the hardware type is ASI type, False otherwise.
+        """
+        return (
+            hardware_type
+            and isinstance(hardware_type, str)
+            and hardware_type.lower() in ("asi", "asi.asi")
+        )

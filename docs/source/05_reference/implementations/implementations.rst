@@ -8,6 +8,53 @@ As an example of the flexibility of the **navigate** software, we describe sever
 
 For more information on how to build these microscopes, as well as their performance, please refer to the publications listed in the relevant sections.
 
+Camera trigger timing is stored in ``waveform_constants.yml``, not in the
+camera blocks included below. Set :guilabel:`Camera Delay` through
+:menuselection:`Microscope Configuration --> Waveform Parameters` and validate
+it on the connected hardware. The following values are the legacy starting
+points from these example configurations; they are not automatically loaded by
+the configuration files. Camera Delay is currently shared by all microscope
+modes in an active configuration, including implementations that previously
+listed different values for different modes.
+
+.. list-table:: Legacy Camera Delay starting values
+   :header-rows: 1
+   :widths: 42 38 20
+
+   * - Configuration file
+     - Microscope mode
+     - Delay (ms)
+   * - ``configuration_voodoo.yaml``
+     - CTASLMv2
+     - 20
+   * - ``configuration_OPMv2.yaml``
+     - OPMv2
+     - 7.5
+   * - ``configuration_OPMv3.yaml``
+     - ProjectionScope and StackingScope
+     - 10
+   * - ``configuration_ctaslmv1.yaml``
+     - CTASLMv1
+     - 2
+   * - ``configuration_ctaslmv2.yaml``
+     - CTASLMv2
+     - 20
+   * - ``configuration_upright.yaml``
+     - Nanoscale / Macroscale
+     - 10 / 25
+   * - ``configuration_multiscale.yaml``
+     - Mesoscale and Nanoscale
+     - 10
+   * - ``configuration_spectral_tirf.yaml``
+     - SpectralTIRF_lt538
+     - 10
+   * - ``configuration_biofrontiers.yaml``
+     - OPM
+     - 10
+   * - ``configuration_mesospimbt.yaml``
+     - BTMesoSPIM
+     - 10
+
 ------------------
 
 ASLM

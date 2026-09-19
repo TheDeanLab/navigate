@@ -43,9 +43,14 @@ from pathlib import Path
 from navigate.view.custom_widgets.hover import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
+from navigate.view.custom_widgets.common import (
+    configure_grid,
+    themed_grid,
+    uniform_grid,
+)
 from navigate.view.theme import (
     get_theme_padding_px,
+    get_theme_preset,
     get_theme_spacing,
     get_theme_space_px,
 )
@@ -758,9 +763,13 @@ class StackAcquisitionFrame(ttk.Labelframe):
 
         image_directory = Path(__file__).resolve().parent
 
+        cubic_image = "cubic_bottom_to_top.png"
+        if get_theme_preset() == "classic_night":
+            cubic_image = "cubic_bottom_to_top_dark-theme.png"
+
         self.image = tk.PhotoImage(
             master=self,
-            file=image_directory.joinpath("images", "cubic_bottom_to_top.png"),
+            file=image_directory.joinpath("images", cubic_image),
         )
 
         # Use ttk.Label

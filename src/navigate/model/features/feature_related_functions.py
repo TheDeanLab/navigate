@@ -375,6 +375,8 @@ def load_dynamic_parameter_functions(
     ]
     ```
     """
+    if not feature_list:
+        return
     for item in feature_list:
         if type(item) is dict:
             if "args" in item:

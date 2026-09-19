@@ -526,12 +526,7 @@ class ConfigurationController:
         number_of_channels : int
             Number of channels.
         """
-        if self.microscope_config is not None:
-            number_of_channels = (
-                self.configuration["gui"].get("channel_settings", {}).get("count", 5)
-            )
-            return number_of_channels
-        return 5
+        return self.configuration["gui"].get("channel_settings", {}).get("count", 5)
 
     @property
     def number_of_filter_wheels(self) -> int:
@@ -658,7 +653,7 @@ class ConfigurationController:
         gui_setting : dict
             Dictionary with the GUI settings.
         """
-        return self.configuration["configuration"]["gui"]
+        return self.configuration["gui"]
 
     def is_same_camera(self, microscope_name: str) -> bool:
         """Check if the current microscope uses the same camera as the given microscope.

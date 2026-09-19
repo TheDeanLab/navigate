@@ -50,6 +50,7 @@ from navigate.view.theme import apply_theme
 
 # Local Sub-Controller Imports
 from navigate.controller.configuration_controller import ConfigurationController
+from navigate.controller.autofocus_calibration import AutofocusCalibrationController
 from navigate.controller.sub_controllers import (
     KeystrokeController,
     WaveformTabController,
@@ -78,11 +79,9 @@ from navigate.config.config import (
     load_configs,
     update_config_dict,
     verify_experiment_config,
-    verify_waveform_constants,
-    verify_positions_config,
-    verify_configuration,
     get_navigate_path,
 )
+from navigate.config.preload import preload_configuration
 from navigate.tools.file_functions import (
     load_yaml_file,
     save_yaml_file,
@@ -199,6 +198,9 @@ class Controller:
         #: mp.Queue: Queue for retrieving events ('event_name', value) from model
         self.event_queue = mp.Queue(100)
 
+        #: mp.Queue: Single-slot, latest-value transport for autofocus plotting.
+        self.autofocus_progress_queue = mp.Queue(1)
+
         #: Manager: A shared memory manager
         self.manager = Manager()
 
@@ -213,13 +215,13 @@ class Controller:
             gui=self.gui_configuration_path,
         )
 
-        verify_configuration(self.manager, self.configuration)
-        verify_experiment_config(self.manager, self.configuration)
-        verify_waveform_constants(self.manager, self.configuration)
-
         positions = load_yaml_file(multi_positions_path)
-        positions = verify_positions_config(positions)
-        self.configuration["multi_positions"] = positions
+        self.preload_report = preload_configuration(
+            self.manager,
+            self.configuration,
+            is_synthetic=self.args.synthetic_hardware,
+            multi_positions=positions,
+        )
 
         total_ram, available_ram = get_ram_info()
         logger.info(
@@ -235,6 +237,7 @@ class Controller:
                 args,
                 self.configuration,
                 event_queue=self.event_queue,
+                autofocus_progress_queue=self.autofocus_progress_queue,
                 log_queue=log_queue,
             )
         else:
@@ -243,6 +246,7 @@ class Controller:
                 args,
                 self.configuration,
                 event_queue=self.event_queue,
+                autofocus_progress_queue=self.autofocus_progress_queue,
                 log_queue=log_queue,
             )
 
@@ -267,8 +271,15 @@ class Controller:
         #: View: View object in MVC architecture.
         self.view = view(self.root)
 
+        #: AutofocusCalibrationController: Popup-independent calibration state.
+        self.autofocus_calibration_controller = AutofocusCalibrationController(self)
+
         #: dict: Event listeners for the controller.
-        self.event_listeners = {}
+        self.event_listeners = {
+            "autofocus_complete": (
+                self.autofocus_calibration_controller.handle_autofocus_complete
+            )
+        }
 
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acquire_bar, self)
@@ -404,6 +415,10 @@ class Controller:
         ValueError
             If the DAQ type is unknown.
         """
+        # run in synthetic mode
+        if self.args.synthetic_hardware:
+            return False
+
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
@@ -1142,6 +1157,7 @@ class Controller:
             if microscope_name == self.configuration_controller.microscope_name:
                 self.stage_controller.initialize()
                 self.channels_tab_controller.update_stack_position_limits()
+                self._refresh_autofocus_bounds()
             self.threads_pool.createThread(
                 resourceName="model",
                 target=self.update_stage_limits,
@@ -1264,7 +1280,9 @@ class Controller:
 
         elif command == "stage_limits":
             self.stage_controller.stage_limits = args[0]
+            self.configuration["experiment"]["StageParameters"]["limits"] = args[0]
             self.channels_tab_controller.update_stack_position_limits()
+            self._refresh_autofocus_bounds()
             self.threads_pool.createThread(
                 resourceName="model",
                 target=lambda: self.model.run_command("stage_limits", *args),
@@ -1397,7 +1415,10 @@ class Controller:
                         self.view, title="Feature List Configuration"
                     )
                     self.features_popup_controller = FeaturePopupController(
-                        feature_list_popup, self
+                        feature_list_popup,
+                        self,
+                        persist_feature_list_edits=feature_id
+                        >= self.menu_controller.system_feature_list_count,
                     )
                     self.features_popup_controller.populate_feature_list(feature_id)
 
@@ -1452,6 +1473,8 @@ class Controller:
             """
             self.sloppy_stop()
             self.update_experiment_setting()
+            # restore camera triggers in the experiment file
+            self._restore_camera_trigger_setting()
             file_directory = os.path.join(get_navigate_path(), "config")
             for config_name, filename in [
                 ("experiment", "experiment.yml"),
@@ -1461,8 +1484,13 @@ class Controller:
                 ("rest_api_config", "rest_api_config.yml"),
                 ("waveform_templates", "waveform_templates.yml"),
             ]:
+                config_directory = file_directory
+                if config_name == "gui":
+                    gui_configuration_path = os.fspath(self.gui_configuration_path)
+                    config_directory = os.path.dirname(gui_configuration_path)
+                    filename = os.path.basename(gui_configuration_path)
                 save_yaml_file(
-                    file_directory=file_directory,
+                    file_directory=config_directory,
                     content_dict=self.configuration[config_name],
                     filename=filename,
                 )
@@ -1884,6 +1912,13 @@ class Controller:
             ax = axis.split("_")[0]
             stage_gui_dict[ax] = val
         self.stage_controller.set_position_silent(stage_gui_dict)
+        self._refresh_autofocus_bounds()
+
+    def _refresh_autofocus_bounds(self) -> None:
+        """Refresh an open autofocus popup after stage state changes."""
+        autofocus_controller = getattr(self, "af_popup_controller", None)
+        if autofocus_controller is not None:
+            autofocus_controller.refresh_bounds_validation()
 
     def update_frame_rate(self, frame_rate: float) -> None:
         """Update the frame rate display in the GUI.
@@ -1922,6 +1957,22 @@ class Controller:
         -------
         None
         """
+        latest_progress = None
+        while self._event_pump_running:
+            try:
+                latest_progress = self.autofocus_progress_queue.get_nowait()
+            except queue.Empty:
+                break
+        if latest_progress is not None:
+            handler = self.event_listeners.get("autofocus_progress")
+            if handler is not None:
+                try:
+                    handler(latest_progress)
+                except Exception:
+                    print(
+                        "*** unhandled event: autofocus_progress, " f"{latest_progress}"
+                    )
+
         while self._event_pump_running:
             try:
                 event, value = self.event_queue.get_nowait()
@@ -2025,3 +2076,37 @@ class Controller:
         """
         for event_name, event_handler in events.items():
             self.register_event_listener(event_name, event_handler)
+
+    def _restore_camera_trigger_setting(self):
+        """Restore the camera trigger setting."""
+        for microscope_name in (
+            self.configuration.get("configuration", {}).get("microscopes", {}).keys()
+        ):
+            if (
+                "trigger_source_backup"
+                in self.configuration["experiment"]["CameraParameters"][
+                    microscope_name
+                ].keys()
+            ):
+                if (
+                    self.configuration["experiment"]["CameraParameters"][
+                        microscope_name
+                    ].get("trigger_source_backup")
+                    is not None
+                ):
+                    self.configuration["experiment"]["CameraParameters"][
+                        microscope_name
+                    ]["trigger_source"] = self.configuration["experiment"][
+                        "CameraParameters"
+                    ][
+                        microscope_name
+                    ][
+                        "trigger_source_backup"
+                    ]
+                else:
+                    del self.configuration["experiment"]["CameraParameters"][
+                        microscope_name
+                    ]["trigger_source"]
+                del self.configuration["experiment"]["CameraParameters"][
+                    microscope_name
+                ]["trigger_source_backup"]

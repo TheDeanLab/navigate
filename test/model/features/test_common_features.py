@@ -35,6 +35,7 @@ import random
 from unittest.mock import MagicMock
 
 import pytest
+from navigate.config.configuration_schema import CollectionSpec
 from navigate.model.features.common_features import (
     ASIZStackAcquisition,
     MoveToNextPositionInMultiPositionTable,
@@ -69,6 +70,47 @@ def test_multiposition_theta_move_pauses_data_thread(dummy_model_to_test_feature
     record_names = [record[0] for record in model.signal_records]
     assert record_names.index("pause_data_thread") < record_names.index("move_stage")
     assert record_names.index("move_stage") < record_names.index("resume_data_thread")
+
+
+def test_multiposition_table_offset_schema_is_axis_mapping():
+    """Position offsets are edited as an axis-keyed mapping."""
+    offset_schema = MoveToNextPositionInMultiPositionTable.parameter_schema["offset"]
+
+    assert isinstance(offset_schema, CollectionSpec)
+    assert offset_schema.storage == "single_mapping"
+    assert offset_schema.item_schema == {}
+    assert offset_schema.dynamic_source == "stage_axes"
+
+
+def test_multiposition_table_accepts_axis_offset_mapping(dummy_model_to_test_features):
+    """Axis-keyed offsets are applied to multi-position moves."""
+    model = dummy_model_to_test_features
+    model.signal_records = []
+    model.configuration["experiment"]["StageParameters"].update(
+        {"x": 0, "y": 0, "z": 0, "theta": 0, "f": 0}
+    )
+    model.configuration["multi_positions"] = [
+        ["X", "Y", "Z", "THETA", "F"],
+        [1, 2, 3, 4, 5],
+    ]
+    feature = MoveToNextPositionInMultiPositionTable(
+        model,
+        offset={"x": 10, "y": "20", "z": None, "theta": -5, "f": 0.5},
+    )
+
+    feature.pre_signal_func()
+    feature.signal_func()
+
+    move_stage_records = [
+        record for record in model.signal_records if record[0] == "move_stage"
+    ]
+    assert move_stage_records[-1][1][0] == {
+        "x_abs": 11.0,
+        "y_abs": 22.0,
+        "z_abs": 3,
+        "theta_abs": -1.0,
+        "f_abs": 5.5,
+    }
 
 
 def test_z_stack_preserves_primary_axis_restore_and_pre_position(

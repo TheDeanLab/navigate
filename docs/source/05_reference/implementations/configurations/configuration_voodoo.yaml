@@ -17,7 +17,6 @@ microscopes:
         type: HamamatsuOrca
         serial_number: 100803
       defect_correct_mode: 2.0
-      delay: 20 #ms
       settle_down: 0.0 #ms
 #      -
 #        hardware:

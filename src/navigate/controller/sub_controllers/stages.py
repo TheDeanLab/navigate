@@ -673,9 +673,10 @@ class StageController(GUIController):
                 description = f"\N{GREEK SMALL LETTER MU}m in {axis.upper()}."
 
             for i in range(len(btn_prefix)):
-                exec(
-                    f"self.view.{frame_prefix}_frame.{btn_prefix[i]}_{btn_suffix}.hover."
-                    f"setdescription('Move {step_multiple[i] * step_value} {description}')"
+                frame = getattr(self.view, f"{frame_prefix}_frame")
+                button = getattr(frame, f"{btn_prefix[i]}_{btn_suffix}")
+                button.hover.setdescription(
+                    f"Move {step_multiple[i] * step_value} {description}"
                 )
 
         # Position Frame

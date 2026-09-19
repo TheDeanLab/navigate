@@ -91,7 +91,11 @@ Waveform Parameters
    :align: center
    :alt: Waveform Parameter Settings popup.
 
-Use this popup to configure waveform amplitudes, offsets, timing, and smoothing used by :ref:`Waveform Settings <ui_waveform_settings>`.
+Use this popup to configure waveform amplitudes, offsets, timing, and smoothing
+used by :ref:`Waveform Settings <ui_waveform_settings>`. The
+:guilabel:`Camera Delay` value is measured in milliseconds and is saved in
+``waveform_constants.yml``. It is shared by all microscope modes in the active
+configuration.
 
 Advanced Galvo Setting
 ======================

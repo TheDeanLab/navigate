@@ -95,6 +95,22 @@ class TestNIStage:
             getattr(stage, "get_abs_position")
         )
 
+    @patch("nidaqmx.Task")
+    def test_camera_delay_reads_waveform_constants(self, *args):
+        camera_config = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["camera"]
+        camera_config.pop("delay", None)
+        self.configuration["waveform_constants"]["other_constants"][
+            "camera_delay"
+        ] = "7.5"
+        waveform_constants = self.configuration.pop("waveform_constants")
+
+        stage = NIStage(self.microscope_name, self.daq, self.configuration)
+        self.configuration["waveform_constants"] = waveform_constants
+
+        assert stage.camera_delay == pytest.approx(0.0075)
+
     @pytest.mark.parametrize("axes", [(["x"]), (["y"]), (["f"])])
     def test_initialize_stage(self, axes):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes

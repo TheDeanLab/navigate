@@ -57,7 +57,6 @@ microscopes:
         serial_number: 302352
       lightsheet_rolling_shutter_width: 608
       defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
-      delay_percent: 10
       pulse_percent: 1
       x_pixels_step: 4
       y_pixels_step: 4

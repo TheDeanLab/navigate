@@ -24,7 +24,6 @@ microscopes:
         serial_number: 302158
         camera_connection: PMPCIECam00 #Photometrics only
       defect_correct_mode: 2.0
-      delay: 1.0 #ms
       settle_down: 0.0 #ms
       flip_x: False
       flip_y: False
@@ -219,7 +218,6 @@ microscopes:
         serial_number: 302352
         camera_connection: PMPCIECam00 #Photometrics only
       defect_correct_mode: 2.0
-      delay: 1.0 #ms
       settle_down: 0 #ms
       flip_x: False
       flip_y: False

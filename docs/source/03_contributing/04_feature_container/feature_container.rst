@@ -184,12 +184,9 @@ To create a customized feature list, follow these steps:
 - Now, open **navigate**.
 - Go to the :guilabel:`Features` menu.
 
-   .. image:: images/step_1.png
-      :alt: Features menu showing Add Custom Feature List option
+   .. image:: ../../images/menu-features.png
+      :alt: Features menu showing Load Customized Feature List.
 
-- Import the customized feature. Select :guilabel:`Add Custom Feature List` from the :guilabel:`Features` menu. A dialog box will appear, allowing you to select the Python file containing your customized feature list function.
-
-   .. image:: images/step_2.png
-      :alt: File dialog used to select a custom feature list file
+- Import the customized feature. Select :guilabel:`Load Customized Feature List` from the :guilabel:`Features` menu. A dialog box will appear, allowing you to select the Python file containing your customized feature list function.
 
 - Choose the Python file containing your customized feature list function. **navigate** will load the specified feature list, making it available for use in your experiments and analyses. It will appear at the bottom of the :guilabel:`Features` menu.

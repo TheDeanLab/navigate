@@ -19,9 +19,10 @@ This guide provides a step-by-step overview of how to set up and utilize the **V
 
    - Load the analysis function that will be used to detect the objects of interest. This function should be capable of processing the low-resolution images and identifying the features you want to target. Detailed directions on how to do this can be found in the :ref:`Loading Custom Functions <loading_custom_functions>` section of the documentation.
 
-    .. image:: images/Picture2.png
+    .. image:: ../../../images/popup_tutorial_analysis_function.png
        :width: 60%
        :align: center
+       :alt: Popup tutorial analysis function.
 
    - For the following example, we developed our own segmentation method:
 
@@ -97,9 +98,10 @@ This guide provides a step-by-step overview of how to set up and utilize the **V
 
 3. **Select the VolumeSearch3D feature from the Features menu in navigate.**
 
-    .. image:: images/Picture1.png
+    .. image:: ../../../images/menu-features.png
        :width: 60%
        :align: center
+       :alt: Features menu with built-in routines and custom feature list commands.
 
    - If the feature is not available, you may need create your own version of the feature, which can be done by selecting the **Add New Feature** menu from the **Features** menu. This can be done by copying the following code into the **Feature Popup Window**.
 
@@ -129,15 +131,17 @@ This guide provides a step-by-step overview of how to set up and utilize the **V
    - Ensure that the **VolumeSearch3D** feature is selected in the features list menu.
    - Change the acquisition mode to **Customized**, and select **Acquire**.
 
-    .. image:: images/Picture3.png
+    .. image:: ../../../images/tutorial-customized-acquire.png
        :width: 60%
        :align: center
+       :alt: Customized acquisition mode beside the Acquire button.
 
    - This will open the **Feature List Configuration Window**.
 
-    .. image:: images/Picture4.png
+    .. image:: ../../../images/tutorial-volume-search-3d.png
        :width: 100%
        :align: center
+       :alt: VolumeSearch3D feature list configuration.
 
 5. **Press the VolumeSearch3D Button in the Feature List Configuration Window**:
 
@@ -156,9 +160,10 @@ This guide provides a step-by-step overview of how to set up and utilize the **V
 
    - Once you have configured the parameters, close the window to save the settings.
 
-    .. image:: images/Picture6.png
+    .. image:: ../../../images/tutorial-volume-search-3d-parameters.png
        :width: 60%
        :align: center
+       :alt: VolumeSearch3D detection and target microscope parameters.
 
 6. **Press the SetCameraParameters button in the Feature List Configuration Window**:
 
@@ -166,9 +171,10 @@ This guide provides a step-by-step overview of how to set up and utilize the **V
 
     - Once the settings are configured, close the window to save the settings.
 
-    .. image:: images/Picture7.png
+    .. image:: ../../../images/tutorial-camera-parameters.png
        :width: 60%
        :align: center
+       :alt: SetCameraParameters sensor mode and readout settings.
 
 7. **Press the UpdateExperimentSetting button in the Feature List Configuration Window**:
 
@@ -184,9 +190,10 @@ This guide provides a step-by-step overview of how to set up and utilize the **V
 
 |
 
-    .. image:: images/Picture8.png
+    .. image:: ../../../images/tutorial-update-experiment.png
        :width: 60%
        :align: center
+       :alt: UpdateExperimentSetting channel selection parameters.
 
 8. **Press Confirm to Begin Imaging**:
 

@@ -1,0 +1,119 @@
+{
+  "source_commit": "62ea25020ebc64eff847349f9f5136aebdc3bdb4",
+  "output_directory": "docs/source/images/case-studies",
+  "note": "Lossless crops preserve the original published results; bounds are left, top, right, bottom in source pixels. No new experimental data.",
+  "images": {
+    "meso-beam-4.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/meso_beam_4.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "meso-beam-6.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/meso_beam_6.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "meso-beam-8.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/meso_beam_8.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "meso-beam-9.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/meso_beam_9.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "meso-beam-11.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/meso_beam_11.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "meso-beam-13.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/meso_beam_13.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "meso-beam-15.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/meso_beam_15.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "find-sample.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/find_sample.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "autofocus-image.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/autofocus_image.png",
+      "crop": [
+        500,
+        138,
+        1010,
+        648
+      ]
+    },
+    "autofocus-settings-plot.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/autofocus_settings.png",
+      "crop": [
+        6,
+        202,
+        533,
+        702
+      ]
+    },
+    "autofocus-settings-partial-plot.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/autofocus_settings_partial.png",
+      "crop": [
+        6,
+        202,
+        533,
+        702
+      ]
+    },
+    "ilastik-segmentation.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/ilastik_9.png",
+      "crop": [
+        749,
+        194,
+        1513,
+        958
+      ]
+    },
+    "ilastik-positions.png": {
+      "source": "docs/source/02_user_guide/06_case_studies/images/ilastik_13.png",
+      "crop": null
+    }
+  }
+}

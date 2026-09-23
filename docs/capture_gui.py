@@ -6,6 +6,9 @@ This module uses a capture registry plus CLI selectors so screenshots can be
 updated in focused batches or all at once.
 """
 
+# Imports below follow the checkout-local sys.path setup.
+# ruff: noqa: E402
+
 import argparse
 import json
 import math
@@ -50,15 +53,18 @@ class CaptureSpec:
     runner: Callable[[Dict[str, object], argparse.Namespace], str]
 
 
-def settle_window(root: tk.Tk, passes: int = 3, delay_ms: int = 200) -> None:
+def settle_window(
+    root: tk.Tk, passes: int = 3, delay_ms: int = 200, raise_window: bool = True
+) -> None:
     """Allow Tk to finish layout/idle rendering before screenshot capture."""
-    try:
-        root.deiconify()
-        root.lift()
-        root.attributes("-topmost", True)
-        root.focus_force()
-    except tk.TclError:
-        pass
+    if raise_window:
+        try:
+            root.deiconify()
+            root.lift()
+            root.attributes("-topmost", True)
+            root.focus_force()
+        except tk.TclError:
+            pass
 
     for _ in range(passes):
         root.update_idletasks()
@@ -266,6 +272,8 @@ def _build_controller_context() -> Dict[str, object]:
         None,
         args,
     )
+    # Leave room for padded captures when Xvfb has no window manager.
+    root.geometry("+40+60")
     return {"root": root, "controller": controller}
 
 
@@ -318,7 +326,9 @@ def _capture_bbox(bbox: Tuple[int, int, int, int], out_path: str) -> str:
     return out_path
 
 
-def _bbox_from_path(root: tk.Tk, widget_path: str, pad: int = 0) -> Tuple[int, int, int, int]:
+def _bbox_from_path(
+    root: tk.Tk, widget_path: str, pad: int = 0
+) -> Tuple[int, int, int, int]:
     root.update_idletasks()
     x = int(root.tk.call("winfo", "rootx", widget_path)) - pad
     y = int(root.tk.call("winfo", "rooty", widget_path)) - pad
@@ -340,30 +350,6 @@ def _is_mapped_path(root: tk.Tk, widget_path: str) -> bool:
         return bool(int(root.tk.call("winfo", "ismapped", widget_path)))
     except tk.TclError:
         return False
-
-
-def _popup_capture_target(
-    cli_args: argparse.Namespace,
-    popup_name: str,
-    legacy_names: Tuple[str, ...] = (),
-) -> Tuple[str, bool]:
-    """Resolve popup screenshot output path and legacy skip behavior.
-
-    Returns
-    -------
-    Tuple[str, bool]
-        (path, should_skip_capture)
-    """
-    out_path = os.path.join(cli_args.output_root, f"popup_{popup_name}.png")
-    if os.path.exists(out_path):
-        return out_path, True
-
-    for legacy_name in legacy_names:
-        legacy_path = os.path.join(cli_args.output_root, legacy_name)
-        if os.path.exists(legacy_path):
-            return legacy_path, True
-
-    return out_path, False
 
 
 def _extract_popup_toplevel(popup_obj):
@@ -429,16 +415,11 @@ def _capture_popup_obj(
     popup_obj,
     popup_name: str,
     *,
-    legacy_names: Tuple[str, ...] = (),
     tab_text: Optional[str] = None,
     pad: int = 2,
 ) -> str:
-    """Capture a popup object to popup_<name>.png with optional legacy-skip."""
-    out_path, should_skip = _popup_capture_target(
-        cli_args, popup_name, legacy_names=legacy_names
-    )
-    if should_skip:
-        return out_path
+    """Capture a popup, replacing any previous screenshot."""
+    out_path = os.path.join(cli_args.output_root, f"popup_{popup_name}.png")
 
     popup = _extract_popup_toplevel(popup_obj)
     try:
@@ -518,6 +499,7 @@ def _capture_combobox_dropdown(
                 root,
                 passes=max(3, cli_args.passes),
                 delay_ms=cli_args.delay_ms,
+                raise_window=False,
             )
             popup_base = str(root.tk.call("ttk::combobox::PopdownWindow", combobox))
         except tk.TclError:
@@ -816,9 +798,7 @@ def _capture_intensity_frame(
     return _capture_widget(camera_tab.lut, out_path, pad=2)
 
 
-def _capture_metrics_frame(
-    ctx: Dict[str, object], cli_args: argparse.Namespace
-) -> str:
+def _capture_metrics_frame(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
     _set_idle_acquire_bar(ctx)
@@ -830,9 +810,7 @@ def _capture_metrics_frame(
     return _capture_widget(camera_tab.image_metrics, out_path, pad=2)
 
 
-def _capture_render_frame(
-    ctx: Dict[str, object], cli_args: argparse.Namespace
-) -> str:
+def _capture_render_frame(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
     _set_idle_acquire_bar(ctx)
@@ -899,7 +877,9 @@ def _ensure_waveform_preview_dict(controller) -> None:
     samples = np.array([i * 0.01 for i in range(101)], dtype=float)
     waveform_ctrl.waveform_dict = {
         "camera_waveform": {
-            "CH1": np.array([1 if 0.32 <= t <= 0.38 else 0 for t in samples], dtype=float)
+            "CH1": np.array(
+                [1 if 0.32 <= t <= 0.38 else 0 for t in samples], dtype=float
+            )
         },
         "remote_focus_waveform": {
             "CH1": np.array(
@@ -1014,9 +994,7 @@ def _capture_stop_acquisition(
     return _capture_widget(controller.view, out_path)
 
 
-def _capture_save_data(
-    ctx: Dict[str, object], cli_args: argparse.Namespace
-) -> str:
+def _capture_save_data(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
     _set_idle_acquire_bar(ctx)
@@ -1152,9 +1130,7 @@ def _capture_stage_control_end_pos_zstack(
     return _capture_widget(controller.view, out_path)
 
 
-def _capture_press_end_pos(
-    ctx: Dict[str, object], cli_args: argparse.Namespace
-) -> str:
+def _capture_press_end_pos(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
     root = ctx["root"]
     controller = ctx["controller"]
     _set_idle_acquire_bar(ctx)
@@ -1298,20 +1274,42 @@ def _open_feature_list_popup(
     cli_args: argparse.Namespace,
     content: str,
     feature_list_name: str = "TestFeature",
+    configuration_mode: bool = False,
 ):
     controller = ctx["controller"]
     _set_idle_acquire_bar(ctx)
     _select_settings_tab(ctx, "channels_tab")
     _close_feature_list_popup(ctx)
-    controller.menu_controller.popup_feature_list_setting()
+    if configuration_mode:
+        from navigate.controller.sub_controllers.features_popup import (
+            FeaturePopupController,
+        )
+        from navigate.view.popups.feature_list_popup import FeatureListPopup
+
+        view = FeatureListPopup(controller.view, title="Feature List Configuration")
+        controller.features_popup_controller = FeaturePopupController(view, controller)
+    else:
+        controller.menu_controller.popup_feature_list_setting()
     popup_controller = controller.features_popup_controller
     popup_view = popup_controller.view
     popup_view.inputs["feature_list_name"].set(feature_list_name)
+    if configuration_mode:
+        popup_view.inputs["feature_list_name"].widget.configure(state="disabled")
     popup_view.inputs["content"].delete("1.0", tk.END)
     popup_view.inputs["content"].insert("1.0", content)
     popup_controller.feature_list_graph_controller.draw_feature_list_graph(
         new_list_flag=True
     )
+    popup_view.popup.update_idletasks()
+    graph_view = popup_controller.feature_list_graph_controller.feature_list_view
+    needed_width = max(
+        (w.winfo_x() + w.winfo_width() for w in graph_view.winfo_children()),
+        default=800,
+    )
+    width = min(
+        popup_view.popup.winfo_screenwidth() - 80, max(1000, needed_width + 260)
+    )
+    popup_view.popup.geometry(f"{width}x700+30+60")
     _prepare_for_capture(popup_view.popup, cli_args)
     return popup_controller
 
@@ -1322,13 +1320,23 @@ def _capture_feature_list_popup_state(
     *,
     content: str,
     out_name: str,
+    node_index: Optional[int] = None,
+    configuration_mode: bool = False,
 ) -> str:
-    popup_controller = _open_feature_list_popup(ctx, cli_args, content=content)
+    popup_controller = _open_feature_list_popup(
+        ctx, cli_args, content=content, configuration_mode=configuration_mode
+    )
     out_path = os.path.join(cli_args.output_root, out_name)
     try:
-        _prepare_for_capture(popup_controller.view.popup, cli_args)
-        return _capture_widget(popup_controller.view.popup, out_path, pad=2)
+        target = popup_controller.view.popup
+        if node_index is not None:
+            graph = popup_controller.feature_list_graph_controller
+            graph.show_config_popup(node_index)(None)
+            target = graph.child_popups[-1].popup
+        _prepare_for_capture(target, cli_args)
+        return _capture_widget(target, out_path, pad=2)
     finally:
+        popup_controller.close_child_popups()
         _close_feature_list_popup(ctx)
 
 
@@ -1342,6 +1350,8 @@ def _capture_feature_gui_1(ctx: Dict[str, object], cli_args: argparse.Namespace)
 
 
 def _capture_feature_gui_2(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
+    if ctx["root"].tk.call("tk", "windowingsystem") == "aqua":
+        raise RuntimeError("Context-menu capture requires X11 (for example Xvfb).")
     popup_controller = _open_feature_list_popup(
         ctx, cli_args, content=SMART_ROUTINE_CONTENT_BASE
     )
@@ -1353,18 +1363,21 @@ def _capture_feature_gui_2(ctx: Dict[str, object], cli_args: argparse.Namespace)
         if not feature_buttons:
             raise RuntimeError("Feature list graph did not render any nodes.")
         anchor = feature_buttons[0]
-        context_menu = tk.Menu(feature_graph.feature_list_view, tearoff=0)
-        context_menu.add_command(label="Delete")
-        context_menu.add_command(label="Insert Before")
-        context_menu.add_command(label="Insert After")
         _prepare_for_capture(popup_controller.view.popup, cli_args)
-        context_menu.post(
-            anchor.winfo_rootx() + 8, anchor.winfo_rooty() + anchor.winfo_height() + 6
+        event = tk.Event()
+        event.x_root = anchor.winfo_rootx() + 8
+        event.y_root = anchor.winfo_rooty() + anchor.winfo_height() + 6
+        feature_graph.show_menu(0)(event)
+        context_menu = next(
+            widget
+            for widget in feature_graph.feature_list_view.winfo_children()
+            if isinstance(widget, tk.Menu)
         )
         settle_window(
             popup_controller.view.popup,
             passes=max(2, cli_args.passes),
             delay_ms=cli_args.delay_ms,
+            raise_window=False,
         )
         return _capture_widget(popup_controller.view.popup, out_path, pad=2)
     finally:
@@ -1561,13 +1574,7 @@ def _capture_multiposition_empty(
 def _capture_popup_save_dialog_misc_notes(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
-    out_path, should_skip = _popup_capture_target(
-        cli_args,
-        "save_dialog_misc_notes",
-        legacy_names=("save-dialog-box.png",),
-    )
-    if should_skip:
-        return out_path
+    out_path = os.path.join(cli_args.output_root, "popup_save_dialog_misc_notes.png")
 
     _, popup = _open_save_dialog(ctx, cli_args)
     try:
@@ -1582,11 +1589,7 @@ def _capture_popup_save_dialog_misc_notes(
 def _capture_popup_save_dialog_bdv_settings(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
-    out_path, should_skip = _popup_capture_target(
-        cli_args, "save_dialog_bdv_settings"
-    )
-    if should_skip:
-        return out_path
+    out_path = os.path.join(cli_args.output_root, "popup_save_dialog_bdv_settings.png")
 
     _, popup = _open_save_dialog(ctx, cli_args)
     try:
@@ -1602,9 +1605,7 @@ def _capture_popup_autofocus(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
     controller = ctx["controller"]
-    out_path, should_skip = _popup_capture_target(cli_args, "autofocus_settings")
-    if should_skip:
-        return out_path
+    out_path = os.path.join(cli_args.output_root, "popup_autofocus_settings.png")
 
     _cleanup_controller_popup_attr(controller, "af_popup_controller")
     controller.menu_controller.popup_autofocus_setting()
@@ -1665,9 +1666,20 @@ def _capture_popup_additional_camera_view(
 def _capture_popup_performance_diagnostics(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
+    from unittest.mock import patch
+
+    from navigate.controller.sub_controllers.diagnostics_popup import (
+        DiagnosticsPopupController,
+    )
     from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
 
     popup_obj = DiagnosticsPopup(ctx["controller"].view)
+    # Show the real empty-state plots without importing a user's measurements.
+    with patch(
+        "navigate.controller.sub_controllers.diagnostics_popup.load_performance_log",
+        return_value=None,
+    ):
+        DiagnosticsPopupController(popup_obj, ctx["controller"])
     return _capture_popup_obj(
         ctx,
         cli_args,
@@ -1690,17 +1702,13 @@ def _capture_popup_feature_list(
 def _capture_popup_feature_config(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
-    from navigate.view.popups.feature_list_popup import FeatureConfigPopup
-
-    popup_obj = FeatureConfigPopup(
-        ctx["controller"].view,
-        title="Feature Configuration",
-        features=["PrepareNextChannel", "LoopByCount", "ZStackAcquisition"],
-        feature_name="LoopByCount",
-        args_name=["channels", "continue_flag"],
-        args_value=["(channels,)", True],
+    return _capture_feature_list_popup_state(
+        ctx,
+        cli_args,
+        content='[{"name": PrepareNextChannel}, {"name": LoopByCount}]',
+        out_name="popup_feature_config.png",
+        node_index=1,
     )
-    return _capture_popup_obj(ctx, cli_args, popup_obj, "feature_config")
 
 
 def _capture_popup_feature_advanced_settings(
@@ -1745,9 +1753,7 @@ def _capture_popup_configure_microscopes(
     return _capture_popup_obj(ctx, cli_args, popup_obj, "configure_microscopes")
 
 
-def _capture_popup_plugins(
-    ctx: Dict[str, object], cli_args: argparse.Namespace
-) -> str:
+def _capture_popup_plugins(ctx: Dict[str, object], cli_args: argparse.Namespace) -> str:
     from navigate.view.popups.plugins_popup import PluginsPopup
 
     popup_obj = PluginsPopup(ctx["controller"].view)
@@ -1797,7 +1803,9 @@ def _capture_popup_tiling_wizard(
 ) -> str:
     from navigate.view.popups.tiling_wizard_popup import TilingWizardPopup
 
-    axes = [axis.upper() for axis in ctx["controller"].configuration_controller.stage_axes]
+    axes = [
+        axis.upper() for axis in ctx["controller"].configuration_controller.stage_axes
+    ]
     popup_obj = TilingWizardPopup(ctx["controller"].view, axes=axes)
     return _capture_popup_obj(ctx, cli_args, popup_obj, "tiling_wizard")
 
@@ -1908,7 +1916,9 @@ CAPTURES: List[CaptureSpec] = [
         group="main-ui",
         description="Camera settings notebook tab",
         context="controller",
-        runner=lambda ctx, args: _capture_settings_tab(ctx, args, "camera_settings_tab"),
+        runner=lambda ctx, args: _capture_settings_tab(
+            ctx, args, "camera_settings_tab"
+        ),
     ),
     CaptureSpec(
         name="sensor-mode",
@@ -2458,6 +2468,286 @@ CAPTURES: List[CaptureSpec] = [
     ),
 ]
 
+# Tutorial states use the same feature editor and parameter schemas as the app.
+TUTORIAL_FEATURES = {
+    "tutorial-feature-loop": (
+        '[{"name": PrepareNextChannel}, {"name": LoopByCount}]',
+        None,
+    ),
+    "tutorial-feature-loop-parameters": (
+        '[{"name": PrepareNextChannel}, {"name": LoopByCount}]',
+        1,
+    ),
+    "tutorial-feature-loop-grouped": (
+        '[({"name": PrepareNextChannel}, {"name": LoopByCount})]',
+        None,
+    ),
+    "tutorial-zstack-parameters": (
+        '[{"name": ZStackAcquisition, "args": (True, True, "z-stack", False)}]',
+        0,
+    ),
+    "tutorial-volume-search": ('[{"name": VolumeSearch}]', None),
+    "tutorial-volume-search-parameters": ('[{"name": VolumeSearch}]', 0),
+    "tutorial-ilastik": ('[{"name": IlastikSegmentation}]', None),
+    "tutorial-ilastik-parameters": ('[{"name": IlastikSegmentation}]', 0),
+    "tutorial-camera-parameters": (
+        '[{"name": SetCameraParameters, "args": ("Nanoscale", "Light-Sheet", "Top-to-Bottom", 20)}]',
+        0,
+    ),
+    "tutorial-update-experiment": (
+        '[{"name": UpdateExperimentSetting, "args": ({"MicroscopeState.channels.channel_1.is_selected": True, "MicroscopeState.channels.channel_3.is_selected": True},)}]',
+        0,
+    ),
+}
+_HUMAN_FEATURES = (
+    '[{"name": PrepareNextChannel}, '
+    '({"name": MoveToNextPositionInMultiPositionTable, "args": ("Mesoscale", "1x", None)}, '
+    '{"name": ZStackAcquisition, "args": (True, True, "z-stack", False)}, '
+    '{"name": LoopByCount, "args": ("experiment.MicroscopeState.multiposition_count",)}), '
+    '{"name": ChangeResolution, "args": ("Mesoscale", "1x")}]'
+)
+_VOLUME3D_FEATURES = (
+    '[{"name": ZStackAcquisition, "args": (False, False, "z-stack", False)}, '
+    '{"name": WaitToContinue}, '
+    '{"name": VolumeSearch3D, "args": ("Nanoscale", "N/A", 0, 0.2, "-y", "x", 0.05, "segment_data", 1.01, 10)}, '
+    '{"name": WaitToContinue}, {"name": ChangeResolution, "args": ("Nanoscale", "N/A")}, '
+    '{"name": SetCameraParameters, "args": ("Nanoscale", "Light-Sheet", "Top-to-Bottom", 20)}, '
+    '{"name": UpdateExperimentSetting, "args": ({"MicroscopeState.channels.channel_1.is_selected": True, '
+    '"MicroscopeState.channels.channel_3.is_selected": True},)}, '
+    '{"name": ZStackAcquisition, "args": (False, False, "z-stack", True)}]'
+)
+TUTORIAL_FEATURES.update(
+    {
+        "tutorial-human-in-the-loop": (_HUMAN_FEATURES, None),
+        "tutorial-move-parameters": (_HUMAN_FEATURES, 1),
+        "tutorial-volume-search-3d": (_VOLUME3D_FEATURES, None),
+        "tutorial-volume-search-3d-parameters": (_VOLUME3D_FEATURES, 2),
+    }
+)
+
+
+def _capture_tutorial_microscopes(ctx, cli_args, mode):
+    """Show primary/additional camera choices without changing hardware state."""
+    from navigate.view.popups.microscope_setting_popup_window import (
+        MicroscopeSettingPopupWindow,
+    )
+
+    controller = ctx["controller"]
+    info = controller.model.get_microscope_info()
+    popup = MicroscopeSettingPopupWindow(controller.view, info)
+    names = list(info)
+    try:
+        for index, name in enumerate(names):
+            choice = popup.inputs[name]
+            choice.widget.configure(
+                values=("Primary Microscope", "Additional Microscope", "Not Use")
+            )
+            choice.set(
+                "Primary Microscope"
+                if index == 0
+                else "Additional Microscope"
+                if mode == "enabled"
+                else "Not Use"
+            )
+            zooms = list(
+                controller.configuration["configuration"]["microscopes"][name]["zoom"][
+                    "position"
+                ].keys()
+            )
+            popup.inputs[f"{name}_zoom_value"].set(zooms[0])
+        out_path = os.path.join(
+            cli_args.output_root, f"tutorial-microscopes-{mode}.png"
+        )
+        _prepare_for_capture(popup.popup, cli_args)
+        if mode == "choices":
+            return _capture_combobox_dropdown(
+                popup.popup,
+                popup.inputs[names[0]].widget,
+                popup.popup,
+                out_path,
+                cli_args,
+                selected_value="Primary Microscope",
+            )
+        return _capture_widget(popup.popup, out_path)
+    finally:
+        _dismiss_popup_obj(popup)
+
+
+def _capture_tutorial_ilastik(ctx, cli_args, mark):
+    """Illustrate label selection using a clearly named example project."""
+    from navigate.view.popups.ilastik_setting_popup import ilastik_setting_popup
+
+    popup = ilastik_setting_popup(ctx["controller"].view)
+    popup.project_name_var.set("example_segmentation.ilp")
+    labels = [
+        w for w in popup.label_frame.winfo_children() if isinstance(w, ttk.Checkbutton)
+    ]
+    popup.capture_variables = []
+    for widget, label in zip(labels, ("Tumor", "Lung", "Background")):
+        variable = tk.BooleanVar(master=popup.popup, value=label == "Lung")
+        popup.capture_variables.append(variable)
+        widget.configure(text=label, variable=variable)
+    for widget, selected in (
+        (popup.mark_position, mark),
+        (popup.show_on_gui, not mark),
+    ):
+        variable = tk.BooleanVar(master=popup.popup, value=selected)
+        popup.capture_variables.append(variable)
+        widget.configure(variable=variable)
+    return _capture_popup_obj(
+        ctx,
+        cli_args,
+        popup,
+        "tutorial_ilastik_mark" if mark else "tutorial_ilastik_display",
+    )
+
+
+def _capture_tutorial_advanced(ctx, cli_args):
+    """Show the example analysis function from the 3D detection tutorial."""
+    from navigate.view.popups.feature_list_popup import FeatureAdvancedSettingPopup
+
+    popup = FeatureAdvancedSettingPopup(
+        ctx["controller"].view,
+        title="Advanced Setting",
+        features=["VolumeSearch3D"],
+        feature_name="VolumeSearch3D",
+    )
+    popup.build_widgets(
+        args_name=["analysis_function"],
+        parameter_config={
+            "analysis_function": {"segment_data": "/path/to/segment_data.py"}
+        },
+    )
+    return _capture_popup_obj(ctx, cli_args, popup, "tutorial_analysis_function")
+
+
+CAPTURES.extend(
+    CaptureSpec(
+        name=name,
+        group="tutorials",
+        description=name.replace("-", " "),
+        context="controller",
+        runner=lambda ctx, args, name=name, content=content, node=node: _capture_feature_list_popup_state(
+            ctx,
+            args,
+            content=content,
+            out_name=f"{name}.png",
+            node_index=node,
+            configuration_mode=not name.startswith("tutorial-feature-loop"),
+        ),
+    )
+    for name, (content, node) in TUTORIAL_FEATURES.items()
+)
+CAPTURES.extend(
+    CaptureSpec(
+        name=f"tutorial-microscopes-{mode}",
+        group="tutorials",
+        description=f"Microscope roles: {mode}",
+        context="controller",
+        runner=lambda ctx, args, mode=mode: _capture_tutorial_microscopes(
+            ctx, args, mode
+        ),
+    )
+    for mode in ("enabled", "disabled", "choices")
+)
+CAPTURES.extend(
+    [
+        CaptureSpec(
+            "tutorial-ilastik-display",
+            "tutorials",
+            "Ilastik display selection",
+            "controller",
+            lambda ctx, args: _capture_tutorial_ilastik(ctx, args, False),
+        ),
+        CaptureSpec(
+            "tutorial-ilastik-mark",
+            "tutorials",
+            "Ilastik mark-position selection",
+            "controller",
+            lambda ctx, args: _capture_tutorial_ilastik(ctx, args, True),
+        ),
+        CaptureSpec(
+            "tutorial-analysis-function",
+            "tutorials",
+            "VolumeSearch3D analysis function",
+            "controller",
+            _capture_tutorial_advanced,
+        ),
+    ]
+)
+
+
+def _capture_menu(ctx, cli_args, attr, out_name):
+    """Capture the application's real Tk menu (use X11 for unattended capture)."""
+    root = ctx["root"]
+    if root.tk.call("tk", "windowingsystem") == "aqua":
+        raise RuntimeError("Menu capture requires X11 (for example Xvfb).")
+    controller = ctx["controller"]
+    menu = (
+        controller.camera_view_controller.menu
+        if attr == "camera"
+        else getattr(controller.view.menubar, attr)
+    )
+    _prepare_for_capture(root, cli_args)
+    try:
+        menu.post(root.winfo_rootx() + 40, root.winfo_rooty() + 80)
+        root.update_idletasks()
+        root.update()
+        # Unlike native macOS menus, X11 menus expose their rendered bounds.
+        if menu.winfo_width() <= 1 or menu.winfo_height() <= 1:
+            raise RuntimeError(
+                "Menu capture requires an X11 display (for example Xvfb)."
+            )
+        return _capture_widget(menu, os.path.join(cli_args.output_root, out_name))
+    finally:
+        menu.unpost()
+        root.update()
+
+
+def _capture_customized_acquire(ctx, cli_args):
+    """Show the acquisition mode used by the feature tutorials without acquiring."""
+    _set_idle_acquire_bar(ctx)
+    controller = ctx["controller"]
+    controller.acquire_bar_controller.set_mode("customized")
+    _prepare_for_capture(ctx["root"], cli_args)
+    return _capture_widget(
+        controller.view.acquire_bar,
+        os.path.join(cli_args.output_root, "tutorial-customized-acquire.png"),
+    )
+
+
+CAPTURES.extend(
+    CaptureSpec(
+        name=name,
+        group="menus",
+        description=name.replace("-", " "),
+        context="controller",
+        runner=lambda ctx, args, name=name, attr=attr: _capture_menu(
+            ctx, args, attr, f"{name}.png"
+        ),
+    )
+    for name, attr in {
+        "menu-file": "menu_file",
+        "menu-microscope-configuration": "menu_resolution",
+        "menu-stage-control": "menu_multi_positions",
+        "menu-autofocus": "menu_autofocus",
+        "menu-features": "menu_features",
+        "menu-plugins": "menu_plugins",
+        "menu-window": "menu_window",
+        "menu-camera-context": "camera",
+    }.items()
+)
+CAPTURES.append(
+    CaptureSpec(
+        "tutorial-customized-acquire",
+        "tutorials",
+        "Customized acquisition mode",
+        "controller",
+        _capture_customized_acquire,
+    )
+)
+
+
 CAPTURE_INDEX = {spec.name: spec for spec in CAPTURES}
 GROUPS = sorted({spec.group for spec in CAPTURES})
 DEFAULT_MANIFEST = [spec.name for spec in CAPTURES]
@@ -2493,9 +2783,7 @@ def _resolve_selection(cli_args: argparse.Namespace) -> List[str]:
         selected = []
         if cli_args.group:
             group_set = set(cli_args.group)
-            selected.extend(
-                [spec.name for spec in CAPTURES if spec.group in group_set]
-            )
+            selected.extend([spec.name for spec in CAPTURES if spec.group in group_set])
         selected.extend(cli_args.capture)
 
     deduped = []
@@ -2508,8 +2796,7 @@ def _resolve_selection(cli_args: argparse.Namespace) -> List[str]:
     unknown = [name for name in deduped if name not in CAPTURE_INDEX]
     if unknown:
         raise ValueError(
-            f"Unknown capture id(s): {', '.join(unknown)}. "
-            "Use --list to see valid ids."
+            f"Unknown capture id(s): {', '.join(unknown)}. Use --list to see valid ids."
         )
     return deduped
 
@@ -2580,7 +2867,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--manifest",
-        help="Path to JSON manifest (list of capture ids, or {\"captures\": [...]})",
+        help='Path to JSON manifest (list of capture ids, or {"captures": [...]})',
     )
     parser.add_argument(
         "--output-root",

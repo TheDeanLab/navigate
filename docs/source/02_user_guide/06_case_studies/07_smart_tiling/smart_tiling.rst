@@ -26,8 +26,9 @@ This guide provides a step-by-step overview of how to set up and use the **Volum
    - Change the acquisition mode to **Customized**, and select **Acquire**.
    - This will open the **Feature List Configuration Window**.
 
-   .. image:: images/Picture1.png
-     :align: center
+   .. image:: ../../../images/tutorial-volume-search.png
+      :align: center
+      :alt: Tutorial volume search.
 
 4. **Press the VolumeSearch Button in the Feature List Configuration Window**:
 
@@ -42,9 +43,10 @@ This guide provides a step-by-step overview of how to set up and use the **Volum
 
     - Once you have configured the parameters, close the window to save the settings.
 
-   .. image:: images/Picture2.png
+   .. image:: ../../../images/tutorial-volume-search-parameters.png
       :width: 60%
       :align: center
+      :alt: Tutorial volume search parameters.
 
 5. **Press Confirm to Begin Imaging**:
 

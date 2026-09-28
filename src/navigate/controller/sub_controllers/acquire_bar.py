@@ -131,8 +131,20 @@ class AcquireBarController(GUIController):
         images_received : int
             Number of images received in the controller.
         stop : bool
-            Stop flag to set back to 0.
+            Stop progress timers and reset remaining time, even before a frame
+            has arrived.
+
+        Notes
+        -----
+        Non-positive Z-stack image totals reset the bars and display an unknown
+        remaining time. Acquisition validation belongs to the channels controller;
+        this display update does not modify the microscope state.
         """
+
+        if stop:
+            self.update_progress_label(seconds_left=0)
+            self.stop_progress_bar()
+            return
 
         if images_received == 0:
             if mode == "live" or mode == "customized":
@@ -180,54 +192,55 @@ class AcquireBarController(GUIController):
             * number_of_positions
         )
 
+        # Shared acquisition settings may change after startup validation.
+        # Do not divide by invalid totals or present misleading percentages.
+        if mode == "z-stack" and (
+            top_anticipated_images <= 0 or bottom_anticipated_images <= 0
+        ):
+            self.view.CurAcq["value"] = 0
+            self.view.OvrAcq["value"] = 0
+            self.view.total_acquisition_label.config(text="--:--:--")
+            return
+
         if images_received > 0:
             # Update progress bars according to imaging mode.
-            if stop is False:
-                if mode == "z-stack" or mode == "single":
-                    # Calculate the number of images remaining.
-                    # Time is estimated from the framerate, which includes stage
-                    # movement time inherently.
-                    try:
-                        images_remaining = bottom_anticipated_images - images_received
-                        seconds_left = images_remaining / self.framerate
-                        self.update_progress_label(seconds_left)
-                    except ZeroDivisionError:
-                        pass
-                else:
-                    self.view.CurAcq.start()
-                    self.view.OvrAcq.start()
-                    self.view.total_acquisition_label.config(text="--:--:--")
+            if mode == "z-stack" or mode == "single":
+                # Calculate the number of images remaining.
+                # Time is estimated from the framerate, which includes stage
+                # movement time inherently.
+                try:
+                    images_remaining = bottom_anticipated_images - images_received
+                    seconds_left = images_remaining / self.framerate
+                    self.update_progress_label(seconds_left)
+                except ZeroDivisionError:
+                    pass
+            else:
+                self.view.CurAcq.start()
+                self.view.OvrAcq.start()
+                self.view.total_acquisition_label.config(text="--:--:--")
 
-                if mode == "z-stack":
-                    top_percent_complete = 100 * (
-                        images_received / top_anticipated_images
-                    )
+            if mode == "z-stack":
+                top_percent_complete = 100 * (images_received / top_anticipated_images)
 
-                    self.view.CurAcq["value"] = (
-                        top_percent_complete % 100
-                        if (top_percent_complete > 100.0)
-                        else top_percent_complete
-                    )
+                self.view.CurAcq["value"] = (
+                    top_percent_complete % 100
+                    if (top_percent_complete > 100.0)
+                    else top_percent_complete
+                )
 
-                    bottom_anticipated_images = 100 * (
-                        images_received / bottom_anticipated_images
-                    )
-                    self.view.OvrAcq["value"] = bottom_anticipated_images
+                bottom_anticipated_images = 100 * (
+                    images_received / bottom_anticipated_images
+                )
+                self.view.OvrAcq["value"] = bottom_anticipated_images
 
-                elif mode == "single":
-                    top_percent_complete = 100 * (
-                        images_received / top_anticipated_images
-                    )
-                    self.view.CurAcq["value"] = top_percent_complete
-                    self.view.OvrAcq["value"] = top_percent_complete
+            elif mode == "single":
+                top_percent_complete = 100 * (images_received / top_anticipated_images)
+                self.view.CurAcq["value"] = top_percent_complete
+                self.view.OvrAcq["value"] = top_percent_complete
 
-                else:
-                    self.view.CurAcq.start()
-                    self.view.OvrAcq.start()
-
-            elif stop is True:
-                self.update_progress_label(seconds_left=0)
-                self.stop_progress_bar()
+            else:
+                self.view.CurAcq.start()
+                self.view.OvrAcq.start()
 
     def stop_progress_bar(self) -> None:
         """Stop moving the continuous progress bar."""

@@ -39,14 +39,21 @@ from threading import Event
 import pytest
 
 from navigate.controller.thread_pool import SelfLockThread, SynchronizedThreadPool
+from navigate.controller import thread_pool
 
 
 @pytest.mark.parametrize("pooled", [False, True])
-def test_thread_exceptions_preserve_traceback_and_format_for_queue(caplog, pooled):
+def test_thread_exceptions_preserve_traceback_and_format_for_queue(
+    caplog, monkeypatch, pooled
+):
     def fail(**kwargs):
         raise ZeroDivisionError("invalid acquisition total")
 
-    logger = logging.getLogger("controller")
+    # Controller integration tests configure non-propagating application loggers.
+    # Use real logging handlers without depending on that global configuration.
+    logger = logging.Logger("thread-pool-test", level=logging.ERROR)
+    monkeypatch.setattr(thread_pool, "logger", logger)
+    logger.addHandler(caplog.handler)
     queue = SimpleQueue()
     handler = QueueHandler(queue)
     logger.addHandler(handler)
@@ -60,10 +67,9 @@ def test_thread_exceptions_preserve_traceback_and_format_for_queue(caplog, poole
     )
     thread = SelfLockThread(target=target, name="camera", kwargs={})
     try:
-        with caplog.at_level(logging.ERROR, logger="controller"):
-            thread.start()
-            thread.join(timeout=2)
-            assert not thread.is_alive()
+        thread.start()
+        thread.join(timeout=2)
+        assert not thread.is_alive()
     finally:
         logger.removeHandler(handler)
         handler.close()

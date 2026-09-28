@@ -33,6 +33,7 @@ import tkinter
 #
 
 # Standard library imports
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 # Third party imports
@@ -507,7 +508,7 @@ class TestAcquireBarController:
                     widgets["celltype"].set("34T")
 
                     # Set dynamic label entries for each selected channel
-                    # The popup creates entries like label_488nm, label_562nm, label_642nm
+                    # The popup creates entries such as label_488nm and label_562nm.
                     for key in widgets.keys():
                         if key.startswith("label_"):
                             widgets[key].set("BCB")
@@ -621,3 +622,73 @@ class TestAcquireBarController:
         self.acquire_bar_controller.view.acquire_btn.invoke()
         res = self.acquire_bar_controller.parent_controller.pop()
         assert res == "Empty command list"
+
+
+@pytest.fixture
+def progress_controller(tk_root):
+    """Use real progress widgets without constructing the full application."""
+    from navigate.view.main_window_content.acquire_notebook import AcquireBar
+
+    parent = SimpleNamespace(
+        configuration={
+            "experiment": {},
+            "multi_positions": [["X", "Y", "Z", "THETA", "F"]],
+        }
+    )
+    view = AcquireBar(tk_root, tk_root)
+    controller = AcquireBarController(view, parent)
+    controller.framerate = 2
+    yield controller
+    controller.stop_progress_bar()
+    view.destroy()
+
+
+def progress_state(**overrides):
+    state = {
+        "channels": {"channel_1": {"is_selected": True}},
+        "timepoints": 2,
+        "is_multiposition": False,
+        "number_z_steps": 4,
+    }
+    state.update(overrides)
+    return state
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"number_z_steps": 0},
+        {"number_z_steps": -1},
+        {"timepoints": 0},
+        {"timepoints": -1},
+        {"channels": {"channel_1": {"is_selected": False}}},
+        {"is_multiposition": True},
+    ],
+)
+def test_progress_invalid_totals_recover(progress_controller, overrides):
+    controller = progress_controller
+    controller.progress_bar(1, progress_state(), "z-stack")
+    controller.progress_bar(1, progress_state(**overrides), "z-stack")
+    assert float(controller.view.CurAcq["value"]) == 0
+    assert float(controller.view.OvrAcq["value"]) == 0
+    assert controller.view.total_acquisition_label["text"] == "--:--:--"
+
+    # A subsequent valid state must resume normal percentages and remaining time.
+    controller.progress_bar(2, progress_state(), "z-stack")
+    assert float(controller.view.CurAcq["value"]) == 50
+    assert float(controller.view.OvrAcq["value"]) == 25
+    assert controller.view.total_acquisition_label["text"] == "00:00:03"
+
+
+@pytest.mark.parametrize("images_received", [0, 1])
+def test_progress_stop_does_not_require_image_totals(
+    progress_controller, images_received
+):
+    controller = progress_controller
+    existing_timers = set(controller.view.tk.call("after", "info"))
+    controller.view.CurAcq.start(10000)
+    controller.view.OvrAcq.start(10000)
+    controller.view.total_acquisition_label.config(text="--:--:--")
+    controller.progress_bar(images_received, {}, "z-stack", stop=True)
+    assert set(controller.view.tk.call("after", "info")) == existing_timers
+    assert controller.view.total_acquisition_label["text"] == "00:00:00"

@@ -38,7 +38,6 @@ import ctypes
 import sys
 from collections import deque
 import logging
-import traceback
 
 # Third Party Imports
 
@@ -96,11 +95,8 @@ class SelfLockThread(threading.Thread):
         if self._target:
             try:
                 self._target(*self._args, **self._kwargs)
-            except Exception as e:
-                logger.exception(
-                    f"{self.name} thread ended because of exception!: {e}",
-                    traceback.format_exc(),
-                )
+            except Exception:
+                logger.exception("%s thread ended because of an exception", self.name)
             finally:
                 pass
 
@@ -246,12 +242,9 @@ class SynchronizedThreadPool:
             if callable(target):
                 try:
                     target(*args, **kwargs)
-                except Exception as e:
+                except Exception:
                     logger.exception(
-                        threading.current_thread().name,
-                        "thread exception happened!",
-                        e,
-                        traceback.format_exc(),
+                        "%s thread exception happened!", threading.current_thread().name
                     )
 
             # wake up next thread if any

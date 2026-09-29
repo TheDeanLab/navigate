@@ -31,9 +31,11 @@
 #
 
 import pytest
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, call
 import numpy as np
+import yaml
 
 AXES = ["x", "y", "z", "theta", "f"]
 CAXES = ["xy", "z", "theta", "f"]
@@ -45,6 +47,171 @@ def pos_dict(v, axes=AXES):
 
 def hover_button():
     return SimpleNamespace(hover=SimpleNamespace(setdescription=MagicMock()))
+
+
+@pytest.fixture
+def initialize_controller():
+    """Build an isolated controller without creating a Tk window."""
+    from navigate.controller.sub_controllers.stages import StageController
+
+    def build(axes, gui_settings, saved_steps=None, limits=(-100, 200)):
+        config = SimpleNamespace(
+            stage_axes=axes,
+            all_stage_axes=axes,
+            microscope_name="scope",
+            gui_setting=gui_settings,
+            stage_flip_flags={},
+            stage_home_position={},
+            get_stage_position_limits=lambda suffix: dict.fromkeys(
+                axes, limits[0] if suffix == "_min" else limits[1]
+            ),
+        )
+        widgets = {axis: MagicMock() for axis in axes}
+        widgets.update(
+            {
+                f"{'xy' if axis in ('x', 'y') else axis}_step": MagicMock()
+                for axis in axes
+            }
+        )
+        controller = object.__new__(StageController)
+        controller.parent_controller = SimpleNamespace(
+            configuration_controller=config,
+            configuration={"configuration": {"microscopes": {"scope": {"stage": {}}}}},
+        )
+        controller.stage_setting_dict = {"scope": saved_steps or {}}
+        controller.joystick_axes = []
+        controller.disable_synthetic_stages = MagicMock()
+        controller.view = MagicMock()
+        controller.view.get_widgets.return_value = widgets
+        return controller, widgets
+
+    return build
+
+
+@pytest.mark.parametrize("axis", [*AXES, "aux"])
+def test_initialize_uses_axis_gui_step_settings(initialize_controller, axis):
+    step_key = f"{'xy' if axis in ('x', 'y') else axis}_step"
+    controller, widgets = initialize_controller(
+        [axis],
+        {"stage_movement": {step_key: {"step": 0.125, "min": 0.025}}},
+        {step_key: 50},
+    )
+
+    controller.initialize()
+
+    widgets[step_key].widget.configure.assert_any_call(increment=0.125)
+    widgets[step_key].widget.configure.assert_any_call(from_=0.025)
+    widgets[step_key].set.assert_called_once_with(50)
+
+
+@pytest.mark.parametrize(
+    "gui_settings, saved_steps, expected_min, expected_increment, expected_value",
+    [
+        ({}, {"z_step": 50}, 0.01, 5, 50),
+        ({"stage_movement": {}}, {"z_step": 50}, 0.01, 5, 50),
+        (
+            {"stage_movement": {"xy_step": {"step": 0.25, "min": 0.1}}},
+            {"z_step": 50},
+            0.01,
+            5,
+            50,
+        ),
+        ({"stage_movement": {"z_step": {}}}, {}, 0.01, 1, 10),
+        ({}, {"z_step": 0.5}, 0.01, 1, 0.5),
+        (
+            {"stage_movement": {"z_step": {"step": 0.25}}},
+            {"z_step": 50},
+            0.01,
+            0.25,
+            50,
+        ),
+        (
+            {"stage_movement": {"z_step": {"min": 0.05}}},
+            {"z_step": 50},
+            0.05,
+            5,
+            50,
+        ),
+    ],
+    ids=[
+        "missing-section",
+        "missing-axis",
+        "other-axis-only",
+        "empty-axis",
+        "small-saved-step",
+        "increment-only",
+        "minimum-only",
+    ],
+)
+def test_initialize_step_settings_fallbacks(
+    initialize_controller,
+    gui_settings,
+    saved_steps,
+    expected_min,
+    expected_increment,
+    expected_value,
+):
+    controller, widgets = initialize_controller(["z"], gui_settings, saved_steps)
+
+    controller.initialize()
+
+    widgets["z_step"].widget.configure.assert_any_call(from_=expected_min)
+    widgets["z_step"].widget.configure.assert_any_call(increment=expected_increment)
+    widgets["z_step"].set.assert_called_once_with(expected_value)
+
+
+@pytest.mark.parametrize("limits", [(-100, 200), (100, 300), (-300, -100), (0, 200)])
+def test_initialize_step_maximum_uses_full_travel_range(initialize_controller, limits):
+    controller, widgets = initialize_controller(["z"], {}, limits=limits)
+
+    controller.initialize()
+
+    widgets["z_step"].widget.configure.assert_any_call(to=limits[1] - limits[0])
+    assert widgets["z"].widget.min == limits[0]
+    assert widgets["z"].widget.max == limits[1]
+
+
+def test_initialize_refreshes_independent_axis_settings(initialize_controller):
+    settings = {
+        "stage_movement": {
+            "xy_step": {"step": 0.25, "min": 0.05},
+            "z_step": {"step": 0.5, "min": 0.1},
+        }
+    }
+    controller, widgets = initialize_controller(["x", "y", "z"], settings)
+    controller.initialize()
+    widgets["xy_step"].widget.configure.assert_any_call(increment=0.25)
+    widgets["z_step"].widget.configure.assert_any_call(increment=0.5)
+
+    settings["stage_movement"]["xy_step"] = {"step": 0.125, "min": 0.025}
+    widgets["xy_step"].reset_mock()
+    widgets["z_step"].reset_mock()
+    controller.initialize()
+
+    widgets["xy_step"].widget.configure.assert_any_call(increment=0.125)
+    widgets["xy_step"].widget.configure.assert_any_call(from_=0.025)
+    widgets["z_step"].widget.configure.assert_any_call(increment=0.5)
+    widgets["z_step"].widget.configure.assert_any_call(from_=0.1)
+
+
+def test_initialize_uses_shipped_gui_step_defaults(initialize_controller):
+    import navigate
+
+    config_path = Path(navigate.__file__).parent / "config" / "gui_configuration.yml"
+    with config_path.open() as config_file:
+        settings = yaml.safe_load(config_file)
+    for axis in CAXES:
+        assert settings["stage_movement"][f"{axis}_step"] == {"step": 1, "min": 0.01}
+    controller, widgets = initialize_controller(
+        AXES, settings, {f"{axis}_step": 50 for axis in CAXES}
+    )
+
+    controller.initialize()
+
+    for axis in CAXES:
+        widgets[f"{axis}_step"].widget.configure.assert_any_call(increment=1)
+        widgets[f"{axis}_step"].widget.configure.assert_any_call(from_=0.01)
+        widgets[f"{axis}_step"].set.assert_called_with(50)
 
 
 def test_set_hover_descriptions_without_exec():

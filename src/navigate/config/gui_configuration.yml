@@ -47,6 +47,21 @@ channel_settings:
     step: 1
     min: -100
     max: 100
+# Step size spinbox settings; maximum values come from stage travel limits.
+# Additional axes can be configured with the same <axis>_step structure.
+stage_movement:
+  xy_step:
+    step: 1
+    min: 0.01
+  z_step:
+    step: 1
+    min: 0.01
+  theta_step:
+    step: 1
+    min: 0.01
+  f_step:
+    step: 1
+    min: 0.01
 stack_acquisition:
   step_size:
     step: 0.01

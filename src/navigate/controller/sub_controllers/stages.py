@@ -216,6 +216,7 @@ class StageController(GUIController):
 
         widgets = self.view.get_widgets()
         step_dict = self.stage_setting_dict[config.microscope_name]
+        step_settings = config.gui_setting.get("stage_movement", {})
         for axis in self.stage_axes:
             # Set Stage Limits
             widgets[axis].widget.min = self.position_min[axis]
@@ -225,15 +226,20 @@ class StageController(GUIController):
             else:
                 step_axis = axis
 
-            # Set step size.
-            # the minimum step should be non-zero and non-negative.
-            # TODO: Move to the GUI configuration file.
-            widgets[step_axis + "_step"].widget.configure(from_=0.01)
-            widgets[step_axis + "_step"].widget.configure(to=self.position_max[axis])
+            # Configure the step size control from the GUI settings.
+            axis_settings = step_settings.get(f"{step_axis}_step", {})
+            widgets[step_axis + "_step"].widget.configure(
+                from_=axis_settings.get("min", 0.01)
+            )
+            widgets[step_axis + "_step"].widget.configure(
+                to=(self.position_max[axis] - self.position_min[axis])
+            )
             step_increment = step_dict.get(f"{step_axis}_step", 10) // 10
             if step_increment == 0:
                 step_increment = 1
-            widgets[step_axis + "_step"].widget.configure(increment=step_increment)
+            widgets[step_axis + "_step"].widget.configure(
+                increment=axis_settings.get("step", step_increment)
+            )
             widgets[step_axis + "_step"].set(step_dict.get(f"{step_axis}_step", 10))
 
         # Joystick

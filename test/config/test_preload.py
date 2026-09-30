@@ -8,7 +8,11 @@ from pathlib import Path
 import pytest
 import yaml
 
-from navigate.config.config import load_configs, update_config_dict
+from navigate.config.config import (
+    load_configs,
+    update_config_dict,
+    verify_experiment_config,
+)
 from navigate.config.device_schema import canonical_device_type
 from navigate.config.preload import (
     PreloadError,
@@ -39,6 +43,26 @@ def loaded_configuration():
             gui=CONFIG_DIR / "gui_configuration.yml",
         )
         yield manager, configuration
+
+
+@pytest.mark.parametrize("loader", [preload_configuration, verify_experiment_config])
+@pytest.mark.parametrize("step", [0.01, 0.25, 1.75, "0.25"])
+def test_experiment_loading_preserves_fractional_stage_steps(
+    loaded_configuration, loader, step
+):
+    manager, configuration = loaded_configuration
+    preload_configuration(manager, configuration)
+    stages = configuration["experiment"]["StageParameters"]
+    microscopes = list(configuration["configuration"]["microscopes"].keys())
+    for microscope in microscopes:
+        for axis in ("xy", "z", "theta", "f"):
+            stages[microscope][f"{axis}_step"] = step
+
+    loader(manager, configuration)
+
+    for microscope in microscopes:
+        for axis in ("xy", "z", "theta", "f"):
+            assert stages[microscope][f"{axis}_step"] == float(step)
 
 
 def test_preload_warning_and_fatal_logs_are_wrapped_with_separators(caplog):

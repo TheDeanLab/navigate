@@ -339,7 +339,7 @@ def repair_stage_parameters(context: PreloadContext) -> None:
                     ][k]
                 else:
                     try:
-                        stage_setting_dict[microscope_name][k] = int(
+                        stage_setting_dict[microscope_name][k] = float(
                             stage_setting_dict[microscope_name][k]
                         )
                     except ValueError:

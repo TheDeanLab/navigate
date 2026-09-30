@@ -647,7 +647,7 @@ class StageController(GUIController):
                 "MicroscopeState"
             ]["microscope_name"]
             try:
-                step_size = int(self.widget_vals[axis + "_step"].get())
+                step_size = float(self.widget_vals[axis + "_step"].get())
             except (ValueError, tk.TclError):
                 return
             self.stage_setting_dict[microscope_name][axis + "_step"] = step_size

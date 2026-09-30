@@ -524,7 +524,7 @@ def verify_experiment_config(manager, configuration):
                     ][k]
                 else:
                     try:
-                        stage_setting_dict[microscope_name][k] = int(
+                        stage_setting_dict[microscope_name][k] = float(
                             stage_setting_dict[microscope_name][k]
                         )
                     except ValueError:

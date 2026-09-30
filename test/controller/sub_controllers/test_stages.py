@@ -31,6 +31,7 @@
 #
 
 import pytest
+import tkinter as tk
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, call
@@ -212,6 +213,63 @@ def test_initialize_uses_shipped_gui_step_defaults(initialize_controller):
         widgets[f"{axis}_step"].widget.configure.assert_any_call(increment=1)
         widgets[f"{axis}_step"].widget.configure.assert_any_call(from_=0.01)
         widgets[f"{axis}_step"].set.assert_called_with(50)
+
+
+@pytest.mark.parametrize("axis", [*CAXES, "aux"])
+@pytest.mark.parametrize("value", [0.01, 0.25, 1.75, 10])
+def test_update_step_size_preserves_fractional_values(
+    initialize_controller, axis, value
+):
+    controller, _ = initialize_controller(["z"], {})
+    controller.parent_controller.configuration["experiment"] = {
+        "MicroscopeState": {"microscope_name": "scope"}
+    }
+    controller.stage_setting_dict["other_scope"] = {f"{axis}_step": 20}
+    controller.widget_vals = {
+        f"{axis}_step": MagicMock(get=MagicMock(return_value=value))
+    }
+    controller.set_hover_descriptions = MagicMock()
+
+    controller.update_step_size_handler(axis)("variable", "", "write")
+
+    assert controller.stage_setting_dict["scope"][f"{axis}_step"] == value
+    assert controller.stage_setting_dict["other_scope"][f"{axis}_step"] == 20
+    controller.set_hover_descriptions.assert_called_once_with()
+
+
+@pytest.mark.parametrize("error", [ValueError("invalid"), tk.TclError("empty")])
+def test_update_step_size_ignores_invalid_input(initialize_controller, error):
+    controller, _ = initialize_controller(["z"], {}, {"z_step": 0.25})
+    controller.parent_controller.configuration["experiment"] = {
+        "MicroscopeState": {"microscope_name": "scope"}
+    }
+    controller.widget_vals = {"z_step": MagicMock(get=MagicMock(side_effect=error))}
+    controller.set_hover_descriptions = MagicMock()
+
+    controller.update_step_size_handler("z")()
+
+    assert controller.stage_setting_dict["scope"]["z_step"] == 0.25
+    controller.set_hover_descriptions.assert_not_called()
+
+
+def test_fractional_step_survives_reinitialization(stage_controller):
+    controller = stage_controller
+    controller.widget_vals["z_step"].set(0.25)
+    microscope_name = controller.parent_controller.configuration["experiment"][
+        "MicroscopeState"
+    ]["microscope_name"]
+    assert controller.stage_setting_dict[microscope_name]["z_step"] == 0.25
+
+    controller.initialize()
+
+    assert controller.widget_vals["z_step"].get() == 0.25
+    controller.widget_vals["z"].set(0)
+    controller.position_callback = MagicMock(return_value=MagicMock())
+    controller.flip_flags["z"] = False
+    controller.up_btn_handler("z")()
+    assert float(controller.widget_vals["z"].get()) == 0.25
+    controller.down_btn_handler("z", large_step=True)()
+    assert float(controller.widget_vals["z"].get()) == -1.0
 
 
 def test_set_hover_descriptions_without_exec():

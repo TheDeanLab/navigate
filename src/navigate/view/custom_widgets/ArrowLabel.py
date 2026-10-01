@@ -34,10 +34,11 @@
 import tkinter as tk
 
 # Third Party Imports
-from PIL import Image, ImageTk
+from PIL import ImageTk
 
 # Local Imports
 from navigate.tools.image import create_arrow_image
+from navigate.view.theme import get_theme_color
 
 
 class ArrowLabel(tk.Label):
@@ -72,9 +73,12 @@ class ArrowLabel(tk.Label):
         **kwargs : dict
             Additional keyword arguments to pass to the tk.Label constructor.
         """
+        if "bg" not in kwargs and "background" not in kwargs:
+            kwargs["background"] = get_theme_color("panel_bg", "#1a212b")
+        kwargs.setdefault("borderwidth", 0)
+        kwargs.setdefault("highlightthickness", 0)
         super().__init__(master, *args, **kwargs)
         img = create_arrow_image(xys, image_width, image_height, direction)
-        image_gif = img.convert("P", palette=Image.ADAPTIVE)
         #: ImageTk.PhotoImage: The image to display.
-        self.image = ImageTk.PhotoImage(image_gif)
-        self["image"] = self.image
+        self.image = ImageTk.PhotoImage(img, master=self)
+        self.configure(image=self.image)

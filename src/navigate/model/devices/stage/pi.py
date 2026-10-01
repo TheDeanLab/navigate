@@ -36,7 +36,12 @@ import time
 from typing import Any, Optional
 
 # Third Party Imports
-from pipython import GCSDevice, pitools, GCSError
+from pipython import GCSDevice, pitools
+
+try:
+    from pipython.pidevice.gcserror import GCSError
+except ImportError:  # pragma: no cover - older pipython fallback
+    from pipython import GCSError
 
 # Local Imports
 from navigate.model.devices.stage.base import StageBase

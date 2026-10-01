@@ -235,7 +235,7 @@ class AutofocusPopup:
         ]
 
         for i in range(2):
-            variable = tk.BooleanVar(False)
+            variable = tk.BooleanVar(value=False)
             widget = HoverCheckButton(
                 scan_frame, text=setting_labels[i], variable=variable
             )
@@ -318,7 +318,7 @@ class AutofocusPopup:
         for c in range(3):
             options_frame.grid_columnconfigure(c, weight=1)
 
-        variable = tk.BooleanVar(False)
+        variable = tk.BooleanVar(value=False)
         robust_fit = HoverCheckButton(
             options_frame, text=setting_labels[2], variable=variable
         )
@@ -334,7 +334,7 @@ class AutofocusPopup:
             "Fit the data with an inverse power tent to identify the ideal focus."
         )
 
-        variable = tk.BooleanVar(False)
+        variable = tk.BooleanVar(value=False)
         spline_fit = HoverCheckButton(
             options_frame, text="Spline Fit", variable=variable
         )
@@ -350,7 +350,7 @@ class AutofocusPopup:
             "Fit the data with a spline to identify the ideal focus."
         )
 
-        variable = tk.BooleanVar(False)
+        variable = tk.BooleanVar(value=False)
         test_significance = HoverCheckButton(
             options_frame, text="Test Significance", variable=variable
         )

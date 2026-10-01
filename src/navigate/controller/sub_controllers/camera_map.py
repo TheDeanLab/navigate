@@ -127,8 +127,8 @@ class CameraMapSettingPopupController(GUIController):
         save_path_offset = Path(save_dir).joinpath(save_name_offset)
         save_path_variance = Path(save_dir).joinpath(save_name_variance)
 
-        tifffile.imsave(save_path_offset, self.off)
-        tifffile.imsave(save_path_variance, self.var)
+        tifffile.imwrite(save_path_offset, self.off)
+        tifffile.imwrite(save_path_variance, self.var)
 
     def display_plot(self):
         """Display the offset and variance maps."""

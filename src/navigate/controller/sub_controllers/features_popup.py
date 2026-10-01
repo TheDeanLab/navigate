@@ -40,11 +40,12 @@ import platform
 import re
 
 # Third party imports
-from PIL import Image, ImageTk
+from PIL import ImageTk
 
 # Local application imports
 from navigate.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPopup
 from navigate.view.custom_widgets.ArrowLabel import ArrowLabel
+from navigate.view.theme import get_theme_color
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.image import create_arrow_image
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
@@ -1010,11 +1011,15 @@ class FeatureListGraphController:
                         stack.append(c)
                 end_pos = c * (feature_icon_width + al_width) + feature_icon_width // 2
         if arrow_image:
-            image_gif = arrow_image.convert("P", palette=Image.ADAPTIVE)
-
             #: ImageTk.PhotoImage: The image of the feature list graph.
-            self.image = ImageTk.PhotoImage(image_gif)
-            al = tk.Label(self.feature_list_view, image=self.image)
+            self.image = ImageTk.PhotoImage(arrow_image, master=self.feature_list_view)
+            al = tk.Label(
+                self.feature_list_view,
+                image=self.image,
+                bg=get_theme_color("panel_bg", "#1a212b"),
+                borderwidth=0,
+                highlightthickness=0,
+            )
             al.grid(row=1, column=0, columnspan=2 * l + 1, sticky="ew")
 
         self.layout_chips()
@@ -1920,8 +1925,8 @@ class FeatureListGraphController:
         else:
             new_structure.insert(new_structure.index(successor), moved_identity)
 
-        # A group must contain at least two direct elements.  Moving an item out
-        # of a group can leave a one-item loop behind and cause errors; remove all one-item group.
+        # A group must contain at least two direct elements. Moving an item out
+        # can leave one-item loops behind, so remove each invalid group.
         grouped_structure = [[]]
         for token in new_structure:
             if token == "(":

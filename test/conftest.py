@@ -31,6 +31,7 @@
 #"""
 
 # Standard Library Imports
+import os
 import tkinter as tk
 
 # Third Party Imports
@@ -172,3 +173,22 @@ class IgnoreObj:
 @pytest.fixture(scope="package")
 def ignore_obj():
     return IgnoreObj()
+
+
+def pytest_collection_modifyitems(config, items):
+    """Skip hardware-marked tests on GitHub Actions runners.
+
+    Set ``NAVIGATE_RUN_HARDWARE_TESTS=1`` to opt in on self-hosted runners
+    that actually have hardware attached.
+    """
+    if os.getenv("GITHUB_ACTIONS", "").lower() != "true":
+        return
+    if os.getenv("NAVIGATE_RUN_HARDWARE_TESTS", "0") == "1":
+        return
+
+    skip_hardware = pytest.mark.skip(
+        reason="Hardware tests are disabled on GitHub Actions runners."
+    )
+    for item in items:
+        if "hardware" in item.keywords:
+            item.add_marker(skip_hardware)

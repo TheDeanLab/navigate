@@ -41,7 +41,9 @@ from scipy.stats import linregress
 from scipy.interpolate import UnivariateSpline
 
 # Local imports
+from navigate.model.features.base import FeatureBase
 from navigate.model.features.feature_container import load_features
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 from navigate.model.utils.exceptions import UserVisibleException
 
@@ -142,7 +144,7 @@ def power_tent(x, x_offset, y_offset, amplitude, sigma, alpha):
     return function
 
 
-class Autofocus:
+class Autofocus(FeatureBase):
     """Autofocus Data Process
 
     This function is called by the data thread. It will get the data from the
@@ -151,6 +153,111 @@ class Autofocus:
     higher. The autofocus_pos_queue is then filled with the next position to
     move to. If the autofocus_pos_queue is empty, the autofocus is finished.
     """
+
+    description = "Autofocus and Defocus calibration"
+
+    parameter_schema = {
+        "device": SettingSpec(
+            str,
+            default="stage",
+            label="Device",
+            help_text="Device group used for autofocus movement.",
+            choices=("stage",),
+            required=True,
+        ),
+        "device_ref": SettingSpec(
+            str,
+            default="f",
+            label="Device Reference",
+            help_text="Stage/device axis used for autofocus movement.",
+            dynamic_source="stage_axes",
+            required=True,
+        ),
+        "target_channel": SettingSpec(
+            str,
+            default=None,
+            label="Target Channel",
+            help_text="Optional channel selected for autofocus.",
+            dynamic_source="channels",
+        ),
+        "calibration_action": SettingSpec(
+            str,
+            default=None,
+            label="Calibration Action",
+            help_text="Optional autofocus calibration action.",
+            dynamic_source="autofocus_calibration_actions",
+        ),
+        "reference_channel": SettingSpec(
+            str,
+            default=None,
+            label="Reference Channel",
+            help_text="Optional reference channel for calibration-aware autofocus.",
+            dynamic_source="channels",
+        ),
+        "set_defocus_for_all_flag": SettingSpec(
+            bool,
+            default=False,
+            label="Set Defocus For All",
+            choices=(False,),
+            help_text="Apply computed defocus values to all channels.",
+        ),
+        "scan_settings": CollectionSpec(
+            item_schema={
+                "coarse_selected": SettingSpec(
+                    bool,
+                    default=True,
+                    label="Coarse",
+                    help_text="Run the coarse autofocus scan.",
+                ),
+                "coarse_range": SettingSpec(
+                    float,
+                    default=500,
+                    label="Coarse Range",
+                    help_text="Total travel range for the coarse autofocus scan.",
+                    minimum=0,
+                    step=1,
+                    required=True,
+                ),
+                "coarse_step_size": SettingSpec(
+                    float,
+                    default=50,
+                    label="Coarse Step",
+                    help_text="Step size for the coarse autofocus scan.",
+                    minimum=0,
+                    step=1,
+                    required=True,
+                ),
+                "fine_selected": SettingSpec(
+                    bool,
+                    default=True,
+                    label="Fine",
+                    help_text="Run the fine autofocus scan.",
+                ),
+                "fine_range": SettingSpec(
+                    float,
+                    default=50,
+                    label="Fine Range",
+                    help_text="Total travel range for the fine autofocus scan.",
+                    minimum=0,
+                    step=1,
+                    required=True,
+                ),
+                "fine_step_size": SettingSpec(
+                    float,
+                    default=5,
+                    label="Fine Step",
+                    help_text="Step size for the fine autofocus scan.",
+                    minimum=0,
+                    step=1,
+                    required=True,
+                ),
+            },
+            storage="single_mapping",
+            label="Scan Settings",
+            help_text="Optional autofocus scan settings mapping.",
+            none_option_label="Use system default",
+        ),
+    }
 
     def __init__(
         self,

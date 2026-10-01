@@ -30,13 +30,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard library imports
+from dataclasses import replace
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import inspect
-import ast
 import os
 import platform
+import re
 
 # Third party imports
 from PIL import ImageTk
@@ -54,6 +55,13 @@ from navigate.model.features.feature_related_functions import (
 )
 from navigate.model.features import feature_related_functions
 from navigate.model.features.common_features import PrepareNextChannel
+from navigate.config.configuration_schema import CollectionSpec, SettingSpec
+from navigate.model.features.base import is_feature_class
+from navigate.controller.sub_controllers.autofocus import AutofocusPopupController
+from navigate.model.features.parameter_tools import (
+    coerce_feature_parameter,
+    infer_feature_parameter_spec,
+)
 from navigate.config.config import get_navigate_path
 
 
@@ -103,6 +111,11 @@ class FeaturePopupController(GUIController):
             self.view.board_canvas,
             self.view.board_window,
             self.view.marker,
+            configuration_controller=getattr(
+                self.parent_controller,
+                "configuration_controller",
+                None,
+            ),
         )
 
         if "add" in self.view.buttons:
@@ -177,35 +190,32 @@ class FeaturePopupController(GUIController):
             if feature_list_config is None or yaml_file_name is None:
                 messagebox.showerror(
                     title="Feature List Error",
-                    message="The selected feature-list record is missing or invalid.",
+                    message="The selected feature-list record is missing or invalid. Any changes can't be saved!",
                 )
-                return
-            if feature_list_config["module_name"] is not None:
-                messagebox.showerror(
+            elif feature_list_config["module_name"] is not None:
+                messagebox.showwarning(
                     title="Feature List Error",
                     message=(
-                        "This feature list is provided by Python code or a plugin "
-                        "and cannot be edited in the visual editor."
+                        "This feature list is provided by Python script or a plugin. "
+                        "All changes are temporary and can't be saved upon exiting."
                     ),
                 )
-                return
-
-            feature_lists_path = get_navigate_path() + "/feature_lists"
-            feature_list_name = feature_list_config["feature_list_name"]
-            if not save_yaml_file(
-                feature_lists_path,
-                {
-                    "module_name": None,
-                    "feature_list_name": feature_list_name,
-                    "feature_list": feature_list_content,
-                },
-                yaml_file_name,
-            ):
-                messagebox.showerror(
-                    title="Feature List Error",
-                    message="The feature list could not be saved. No changes applied.",
-                )
-                return
+            else:
+                feature_lists_path = get_navigate_path() + "/feature_lists"
+                feature_list_name = feature_list_config["feature_list_name"]
+                if not save_yaml_file(
+                    feature_lists_path,
+                    {
+                        "module_name": None,
+                        "feature_list_name": feature_list_name,
+                        "feature_list": feature_list_content,
+                    },
+                    yaml_file_name,
+                ):
+                    messagebox.showerror(
+                        title="Feature List Error",
+                        message="Any changes to this feature list could not be saved.",
+                    )
 
         self.parent_controller.execute(
             "load_feature", self.feature_list_id, feature_list_content
@@ -246,6 +256,12 @@ class FeaturePopupController(GUIController):
 
 class FeatureListGraphController:
     CHIP_GAP = 10
+    MICROSCOPE_DYNAMIC_SOURCE = "microscopes"
+    ZOOM_DYNAMIC_SOURCE = "zoom_values"
+    STAGE_AXIS_DYNAMIC_SOURCE = "stage_axes"
+    CHANNEL_DYNAMIC_SOURCE = "channels"
+    AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE = "autofocus_calibration_actions"
+    MICROSCOPE_STATE_DYNAMIC_SOURCE = "microscope_state"
 
     def __init__(
         self,
@@ -257,6 +273,7 @@ class FeatureListGraphController:
         board_window=None,
         marker=None,
         child_popups=None,
+        configuration_controller=None,
     ):
         """Initialize feature list window
 
@@ -278,6 +295,7 @@ class FeatureListGraphController:
         self.board_canvas = board_canvas
         self.board_window = board_window
         self.marker = marker
+        self.configuration_controller = configuration_controller
 
         self.feature_list = None
         self.features = []
@@ -288,11 +306,10 @@ class FeatureListGraphController:
         # get all feature names
         #: list: The list of feature names.
         self.feature_names = []
-        excluded_palette_classes = {"Iterable", "Queue", "SharedList"}
         temp = dir(feature_related_functions)
         for t in temp:
             feature = getattr(feature_related_functions, t)
-            if inspect.isclass(feature) and t not in excluded_palette_classes:
+            if is_feature_class(feature):
                 self.feature_names.append(t)
 
         # initialize the feature nodes
@@ -308,6 +325,7 @@ class FeatureListGraphController:
         self.branch_drag_target = None
         self.branch_drag_targets = []
         self.branch_drag_window = None
+        self.selected_palette_button = None
         self.selected_branch_palette_button = None
         if self.palette_items is not None:
             for feature_name in self.feature_names:
@@ -331,6 +349,459 @@ class FeatureListGraphController:
 
         # popups
         self.child_popups = [] if child_popups is None else child_popups
+
+    @staticmethod
+    def get_feature_parameter_schema(feature_class):
+        """Return schema metadata for a feature constructor."""
+        return getattr(feature_class, "parameter_schema", {}) or {}
+
+    @staticmethod
+    def get_feature_description(feature_class):
+        """Return a concise user-facing description for a feature class."""
+        description = getattr(
+            feature_class,
+            "feature_description",
+            getattr(feature_class, "description", None),
+        )
+        if not description:
+            description = inspect.getdoc(feature_class) or ""
+        paragraphs = [
+            " ".join(paragraph.split())
+            for paragraph in description.split("\n\n")
+            if paragraph.strip()
+        ]
+        if not paragraphs:
+            return FeatureListGraphController.split_feature_name(feature_class.__name__)
+        return FeatureListGraphController.clean_feature_description(
+            paragraphs[0],
+            feature_class.__name__,
+        )
+
+    @staticmethod
+    def clean_feature_description(description, feature_name):
+        """Remove boilerplate prefixes from a feature description."""
+        description = re.sub(
+            rf"^\s*{re.escape(feature_name)}\s+class\s+for\s+",
+            "",
+            description,
+            flags=re.IGNORECASE,
+        )
+        description = re.sub(
+            r"^\s*[A-Za-z_][\w]*\s+class\s+for\s+",
+            "",
+            description,
+            flags=re.IGNORECASE,
+        )
+        description = re.sub(
+            r"^\s*class\s+for\s+",
+            "",
+            description,
+            flags=re.IGNORECASE,
+        ).strip()
+        if description:
+            return description[0].upper() + description[1:]
+        return FeatureListGraphController.split_feature_name(feature_name)
+
+    @staticmethod
+    def split_feature_name(feature_name):
+        """Convert a CamelCase feature class name to readable words."""
+        return re.sub(r"(?<!^)(?=[A-Z])", " ", feature_name).strip()
+
+    def microscope_choices(self):
+        """Return microscope names from the loaded configuration."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        if configuration_controller is None:
+            return ()
+        try:
+            return tuple(configuration_controller.microscope_list)
+        except (AttributeError, KeyError, TypeError):
+            return ()
+
+    def default_microscope_choice(self, choices):
+        """Return the active microscope or first configured microscope."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        active = getattr(configuration_controller, "microscope_name", None)
+        if active in choices:
+            return active
+        return choices[0] if choices else None
+
+    def zoom_choices(self, microscope_name):
+        """Return zoom names for one configured microscope."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        if configuration_controller is None or not microscope_name:
+            return ()
+        try:
+            return tuple(configuration_controller.get_zoom_value_list(microscope_name))
+        except (AttributeError, KeyError, TypeError):
+            pass
+
+        try:
+            microscope = configuration_controller.configuration["configuration"][
+                "microscopes"
+            ][microscope_name]
+            zoom_config = microscope.get("zoom", {})
+            for key in ("position", "pixel_size"):
+                if isinstance(zoom_config.get(key), dict):
+                    return tuple(zoom_config[key].keys())
+        except (AttributeError, KeyError, TypeError):
+            pass
+        return ()
+
+    def stage_axis_choices(self):
+        """Return all stage axes configured by any loaded microscope."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        configuration = getattr(configuration_controller, "configuration", None)
+        try:
+            microscopes = configuration["configuration"]["microscopes"]
+        except (KeyError, TypeError):
+            return ()
+
+        axes = []
+        for microscope in microscopes.values():
+            stage = microscope.get("stage", {})
+            hardware_entries = stage.get("hardware", [])
+            if isinstance(hardware_entries, dict):
+                hardware_entries = [hardware_entries]
+            for hardware in hardware_entries:
+                for axis in hardware.get("axes", []):
+                    if axis not in axes:
+                        axes.append(axis)
+        return tuple(axes)
+
+    def channel_choices(self):
+        """Return channel keys from GUI channel count."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        configuration = getattr(configuration_controller, "configuration", None)
+        try:
+            channel_count = int(configuration["gui"]["channel_settings"]["count"])
+        except (KeyError, TypeError, ValueError):
+            return ()
+        return tuple(f"channel_{index}" for index in range(1, channel_count + 1))
+
+    def optional_channel_choices(self):
+        """Return optional channel choices with a displayed None entry."""
+        return ("None",) + self.channel_choices()
+
+    def optional_channel_choice_values(self):
+        """Return optional channel display labels mapped to saved values."""
+        return {
+            choice: (None if choice == "None" else choice)
+            for choice in self.optional_channel_choices()
+        }
+
+    def microscope_state_values(self):
+        """Return currently loaded experiment MicroscopeState values."""
+        configuration_controller = getattr(self, "configuration_controller", None)
+        configuration = getattr(configuration_controller, "configuration", None)
+        try:
+            microscope_state = configuration["experiment"]["MicroscopeState"]
+        except (KeyError, TypeError):
+            return {}
+        return dict(microscope_state)
+
+    @staticmethod
+    def stage_axis_offset_spec(axis):
+        """Return a float setting spec for one stage-axis offset."""
+        return SettingSpec(
+            float,
+            default=0,
+            label=axis.upper() if len(axis) == 1 else axis.title(),
+            help_text=f"Additional {axis}-axis position offset.",
+            step=0.01,
+        )
+
+    @staticmethod
+    def stage_axis_offset_values(value, item_schema):
+        """Return axis-keyed offset values from saved mapping or sequence input."""
+        if isinstance(value, dict):
+            return {
+                axis: value.get(axis, field_spec.default)
+                for axis, field_spec in item_schema.items()
+            }
+        if isinstance(value, (list, tuple)):
+            return {
+                axis: value[index] if index < len(value) else field_spec.default
+                for index, (axis, field_spec) in enumerate(item_schema.items())
+            }
+        return {axis: field_spec.default for axis, field_spec in item_schema.items()}
+
+    @staticmethod
+    def autofocus_calibration_action_choices():
+        """Return displayed autofocus calibration action labels."""
+        return tuple(
+            k
+            for k in AutofocusPopupController.CALIBRATION_ACTIONS.keys()
+            if k != "Auto Defocus"
+        )
+
+    @staticmethod
+    def autofocus_calibration_action_choice_values():
+        """Return displayed action labels mapped to internal action values."""
+        return dict(AutofocusPopupController.CALIBRATION_ACTIONS)
+
+    @staticmethod
+    def autofocus_calibration_action_display_value(action_value):
+        """Return the display label for an internal autofocus action value."""
+        for label, value in AutofocusPopupController.CALIBRATION_ACTIONS.items():
+            if action_value == value:
+                return label
+        return action_value
+
+    def apply_dynamic_parameter_choices(
+        self,
+        args_name,
+        args_value,
+        parameter_specs,
+        feature=None,
+    ):
+        """Add runtime microscope and zoom choices to feature parameter specs."""
+        microscope_choices = self.microscope_choices()
+
+        args_value = list(args_value)
+        parameter_specs = dict(parameter_specs)
+
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if isinstance(spec, CollectionSpec):
+                continue
+            if spec.dynamic_source != self.MICROSCOPE_DYNAMIC_SOURCE:
+                continue
+            if not microscope_choices:
+                continue
+            parameter_specs[arg_name] = replace(spec, choices=microscope_choices)
+            if args_value[index] not in microscope_choices:
+                args_value[index] = self.default_microscope_choice(microscope_choices)
+
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if isinstance(spec, CollectionSpec):
+                continue
+            if spec.dynamic_source != self.ZOOM_DYNAMIC_SOURCE:
+                continue
+            microscope_parameter = spec.depends_on
+            if microscope_parameter is None or microscope_parameter not in args_name:
+                continue
+            microscope_index = args_name.index(microscope_parameter)
+            microscope_name = args_value[microscope_index]
+            choices = self.zoom_choices(microscope_name)
+            parameter_specs[arg_name] = replace(spec, choices=choices)
+            if choices and args_value[index] not in choices:
+                args_value[index] = choices[0]
+            elif not choices:
+                args_value[index] = ""
+
+        dynamic_choice_sources = {
+            self.STAGE_AXIS_DYNAMIC_SOURCE: self.stage_axis_choices(),
+            self.CHANNEL_DYNAMIC_SOURCE: self.channel_choices(),
+            self.AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE: (
+                self.autofocus_calibration_action_choices()
+            ),
+        }
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if isinstance(spec, CollectionSpec):
+                continue
+            choices = dynamic_choice_sources.get(spec.dynamic_source)
+            if choices is None:
+                continue
+            if spec.dynamic_source == self.CHANNEL_DYNAMIC_SOURCE and not spec.required:
+                choices = self.optional_channel_choices()
+            choice_values = (
+                self.autofocus_calibration_action_choice_values()
+                if spec.dynamic_source
+                == self.AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE
+                else (
+                    self.optional_channel_choice_values()
+                    if spec.dynamic_source == self.CHANNEL_DYNAMIC_SOURCE
+                    and not spec.required
+                    else spec.choice_values
+                )
+            )
+            parameter_specs[arg_name] = replace(
+                spec,
+                choices=choices,
+                choice_values=choice_values,
+            )
+            if spec.dynamic_source == self.AUTOFOCUS_CALIBRATION_ACTION_DYNAMIC_SOURCE:
+                args_value[index] = self.autofocus_calibration_action_display_value(
+                    args_value[index]
+                )
+            elif (
+                spec.dynamic_source == self.CHANNEL_DYNAMIC_SOURCE
+                and not spec.required
+                and args_value[index] is None
+            ):
+                args_value[index] = "None"
+            if choices and args_value[index] not in choices:
+                args_value[index] = choices[0]
+
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if not isinstance(spec, CollectionSpec):
+                continue
+            if spec.dynamic_source != self.STAGE_AXIS_DYNAMIC_SOURCE:
+                continue
+            axes = self.stage_axis_choices()
+            if not axes:
+                continue
+            item_schema = {axis: self.stage_axis_offset_spec(axis) for axis in axes}
+            parameter_specs[arg_name] = replace(spec, item_schema=item_schema)
+            args_value[index] = self.stage_axis_offset_values(
+                args_value[index],
+                item_schema,
+            )
+
+        microscope_state = self.microscope_state_values()
+        for index, arg_name in enumerate(args_name):
+            spec = parameter_specs[arg_name]
+            if not isinstance(spec, CollectionSpec):
+                continue
+            if spec.dynamic_source != self.MICROSCOPE_STATE_DYNAMIC_SOURCE:
+                continue
+            item_schema = {}
+            for field_name, field_spec in spec.item_schema.items():
+                microscope_state_key = field_name.split(".", 1)[-1]
+                item_schema[field_name] = replace(
+                    field_spec,
+                    default=microscope_state.get(
+                        microscope_state_key,
+                        field_spec.default,
+                    ),
+                )
+            parameter_specs[arg_name] = replace(spec, item_schema=item_schema)
+            if not isinstance(args_value[index], dict):
+                args_value[index] = {}
+            has_saved_args = (
+                feature is not None
+                and "args" in feature
+                and index < len(feature["args"])
+                and isinstance(feature["args"][index], dict)
+            )
+            saved_values = args_value[index] if has_saved_args else {}
+            args_value[index] = {
+                field_name: saved_values.get(
+                    field_name,
+                    field_spec.default,
+                )
+                for field_name, field_spec in item_schema.items()
+            }
+
+        return args_value, parameter_specs
+
+    def get_feature_parameter_values(self, feature_class, feature=None):
+        """Return constructor parameter names, values, and merged specs."""
+        spec = inspect.getfullargspec(feature_class)
+        args_name = spec.args[2:]
+        defaults = list(spec.defaults or ())
+        required_count = len(args_name) - len(defaults)
+        if len(defaults) < len(args_name):
+            defaults = [None] * (len(args_name) - len(defaults)) + defaults
+        schema = FeatureListGraphController.get_feature_parameter_schema(feature_class)
+        parameter_specs = {}
+        for index, arg_name in enumerate(args_name):
+            default = defaults[index] if index < len(defaults) else None
+            parameter_specs[arg_name] = schema.get(
+                arg_name,
+                (
+                    SettingSpec(str, default=None, required=True)
+                    if index < required_count
+                    else infer_feature_parameter_spec(default)
+                ),
+            )
+        args_value = []
+        for index, arg_name in enumerate(args_name):
+            parameter_spec = parameter_specs[arg_name]
+            if isinstance(parameter_spec, CollectionSpec):
+                if parameter_spec.none_option_label is not None:
+                    args_value.append(None)
+                else:
+                    item_schema = parameter_spec.item_schema
+                    args_value.append(
+                        {
+                            field_name: field_spec.default
+                            for field_name, field_spec in item_schema.items()
+                        }
+                    )
+            elif isinstance(parameter_spec, SettingSpec):
+                args_value.append(parameter_spec.default)
+            else:
+                args_value.append(defaults[index])
+        if feature is not None and "args" in feature:
+            for index, value in enumerate(feature["args"]):
+                if index >= len(args_value):
+                    break
+                args_value[index] = value
+        args_value, parameter_specs = self.apply_dynamic_parameter_choices(
+            args_name,
+            args_value,
+            parameter_specs,
+            feature,
+        )
+        return args_name, args_value, parameter_specs
+
+    def refresh_linked_zoom_choices(
+        self,
+        popup,
+        zoom_parameter_name,
+        microscope_parameter_name,
+        reset_invalid=True,
+    ):
+        """Refresh a zoom combobox after its microscope selection changes."""
+        microscope_widget = popup.inputs_by_name.get(microscope_parameter_name)
+        zoom_widget = popup.inputs_by_name.get(zoom_parameter_name)
+        if microscope_widget is None or zoom_widget is None:
+            return
+
+        choices = self.zoom_choices(microscope_widget.get())
+        zoom_widget.set_values(choices)
+        current_value = zoom_widget.get()
+        if reset_invalid and current_value not in choices:
+            zoom_widget.set(choices[0] if choices else "")
+
+        zoom_index = popup.parameter_index_by_name[zoom_parameter_name]
+        popup.parameter_specs[zoom_index] = replace(
+            popup.parameter_specs[zoom_index],
+            choices=choices,
+        )
+
+    def bind_dynamic_parameter_choices(self, popup):
+        """Link runtime microscope comboboxes to their dependent zoom comboboxes."""
+
+        def refresh_zoom(zoom_parameter_name, microscope_parameter_name):
+            self.refresh_linked_zoom_choices(
+                popup,
+                zoom_parameter_name,
+                microscope_parameter_name,
+                reset_invalid=True,
+            )
+
+        for zoom_parameter_name in popup.parameter_names:
+            zoom_index = popup.parameter_index_by_name[zoom_parameter_name]
+            zoom_spec = popup.parameter_specs[zoom_index]
+            if isinstance(zoom_spec, CollectionSpec):
+                continue
+            if zoom_spec.dynamic_source != self.ZOOM_DYNAMIC_SOURCE:
+                continue
+            microscope_parameter_name = zoom_spec.depends_on
+            if microscope_parameter_name is None:
+                continue
+            microscope_widget = popup.inputs_by_name.get(microscope_parameter_name)
+            if microscope_widget is None or not isinstance(
+                microscope_widget.widget, ttk.Combobox
+            ):
+                continue
+            microscope_widget.widget.bind(
+                "<<ComboboxSelected>>",
+                lambda _event, z=zoom_parameter_name, m=microscope_parameter_name: refresh_zoom(
+                    z, m
+                ),
+                add="+",
+            )
+            self.refresh_linked_zoom_choices(
+                popup,
+                zoom_parameter_name,
+                microscope_parameter_name,
+            )
 
     def update(self, feature_list_content):
         """Update feature list window
@@ -579,17 +1050,10 @@ class FeatureListGraphController:
             feature_parameter_config = None
             if os.path.exists(feature_config_path):
                 feature_parameter_config = load_yaml_file(feature_config_path)
-            spec = inspect.getfullargspec(feature["name"])
-            if spec.defaults:
-                args_value = list(spec.defaults)
-            else:
-                args_value = spec.defaults
-            # if there is any parameters
-            if args_value is not None and "args" in feature:
-                for i, a in enumerate(feature["args"]):
-                    if i >= len(args_value):
-                        break
-                    args_value[i] = a
+            args_name, args_value, parameter_schema = self.get_feature_parameter_values(
+                feature["name"],
+                feature,
+            )
             kwargs = {}
             if "true" in feature:
                 kwargs["true"] = True
@@ -604,12 +1068,15 @@ class FeatureListGraphController:
                     else self.feature_names
                 ),
                 feature_name=feature["name"].__name__,
-                args_name=spec.args[2:],
+                args_name=args_name,
                 args_value=args_value,
                 title="Feature Parameters",
                 parameter_config=feature_parameter_config,
+                parameter_schema=parameter_schema,
+                feature_description=self.get_feature_description(feature["name"]),
                 **kwargs,
             )
+            self.bind_dynamic_parameter_choices(popup)
             popup.feature_name_widget.widget.bind(
                 "<<ComboboxSelected>>", lambda event: refresh_parameters(popup)
             )
@@ -619,31 +1086,33 @@ class FeatureListGraphController:
             )
 
             if "true" in feature:
-                self.feature_list_graph_controllers_true[
-                    idx
-                ] = FeatureListGraphController(
-                    popup.feature_list_true_frame.feature_view_frame,
-                    popup.feature_list_true_frame.content,
-                    popup.preview_btn_true,
-                    None,
-                    popup.feature_list_true_frame.board_canvas,
-                    popup.feature_list_true_frame.board_window,
-                    popup.feature_list_true_frame.marker,
-                    self.child_popups,
+                self.feature_list_graph_controllers_true[idx] = (
+                    FeatureListGraphController(
+                        popup.feature_list_true_frame.feature_view_frame,
+                        popup.feature_list_true_frame.content,
+                        popup.preview_btn_true,
+                        None,
+                        popup.feature_list_true_frame.board_canvas,
+                        popup.feature_list_true_frame.board_window,
+                        popup.feature_list_true_frame.marker,
+                        self.child_popups,
+                        self.configuration_controller,
+                    )
                 )
                 self.feature_list_graph_controllers_true[idx].update(feature["true"])
             if "false" in feature:
-                self.feature_list_graph_controllers_false[
-                    idx
-                ] = FeatureListGraphController(
-                    popup.feature_list_false_frame.feature_view_frame,
-                    popup.feature_list_false_frame.content,
-                    popup.preview_btn_false,
-                    None,
-                    popup.feature_list_false_frame.board_canvas,
-                    popup.feature_list_false_frame.board_window,
-                    popup.feature_list_false_frame.marker,
-                    self.child_popups,
+                self.feature_list_graph_controllers_false[idx] = (
+                    FeatureListGraphController(
+                        popup.feature_list_false_frame.feature_view_frame,
+                        popup.feature_list_false_frame.content,
+                        popup.preview_btn_false,
+                        None,
+                        popup.feature_list_false_frame.board_canvas,
+                        popup.feature_list_false_frame.board_window,
+                        popup.feature_list_false_frame.marker,
+                        self.child_popups,
+                        self.configuration_controller,
+                    )
                 )
                 self.feature_list_graph_controllers_false[idx].update(feature["false"])
 
@@ -696,8 +1165,17 @@ class FeatureListGraphController:
             feature_parameter_config = None
             if os.path.exists(feature_config_path):
                 feature_parameter_config = load_yaml_file(feature_config_path)
-            spec = inspect.getfullargspec(new_feature)
-            popup.build_widgets(spec.args[2:], spec.defaults, feature_parameter_config)
+            args_name, args_value, parameter_schema = self.get_feature_parameter_values(
+                new_feature
+            )
+            popup.build_widgets(
+                args_name,
+                args_value,
+                feature_parameter_config,
+                parameter_schema,
+            )
+            popup.set_feature_description(self.get_feature_description(new_feature))
+            self.bind_dynamic_parameter_choices(popup)
 
         def select_palette_feature(popup, feature_name):
             """Select a feature from the popup's feature node palette."""
@@ -721,34 +1199,24 @@ class FeatureListGraphController:
             if "args" in feature and len(widgets) == 0:
                 del feature["args"]
             if len(widgets) > 0:
-                feature["args"] = [w.get() for w in widgets]
-                for i, a in enumerate(feature["args"]):
-                    if a == "True":
-                        feature["args"][i] = True
-                    elif a == "False":
-                        feature["args"][i] = False
-                    elif popup.inputs_type[i] is float:
-                        try:
-                            feature["args"][i] = float(a)
-                        except ValueError:
-                            feature["args"][i] = a
-                    elif popup.inputs_type[i] is dict:
-                        try:
-                            feature["args"][i] = ast.literal_eval(a.replace("'", '"'))
-                        except (SyntaxError, ValueError):
-                            spec = inspect.getfullargspec(feature["name"])
-                            arg_name = spec.args[i + 2]
-                            error_message = (
-                                f"The argument {arg_name} has something wrong!\n"
-                                "Please make sure you input a correct value!"
+                feature["args"] = []
+                for i, widget in enumerate(widgets):
+                    arg_name = inspect.getfullargspec(feature["name"]).args[i + 2]
+                    parameter_spec = popup.parameter_specs[i]
+                    try:
+                        feature["args"].append(
+                            coerce_feature_parameter(
+                                arg_name,
+                                widget.get(),
+                                parameter_spec,
                             )
-                            messagebox.showerror(
-                                title="Upate Feature Parameter Error",
-                                message=error_message,
-                            )
-                            return
-                    elif a == "None":
-                        feature["args"][i] = None
+                        )
+                    except ValueError as error:
+                        messagebox.showerror(
+                            title="Update Feature Parameter Error",
+                            message=str(error),
+                        )
+                        return
             if "true" in feature:
                 feature["true"] = convert_str_to_feature_list(
                     self.feature_list_graph_controllers_true[idx].get_feature_content()
@@ -1067,7 +1535,7 @@ class FeatureListGraphController:
                             arg_str += str(a)
                         elif type(a) is int or type(a) is float:
                             arg_str += str(a)
-                        elif type(a) is dict:
+                        elif type(a) is dict or type(a) is list:
                             arg_str += str(a)
                         else:
                             try:
@@ -1104,6 +1572,14 @@ class FeatureListGraphController:
 
     def start_palette_drag(self, event, name):
         self.clear_selection()
+        previous_button = self.selected_palette_button
+        if (
+            previous_button is not None
+            and previous_button is not event.widget
+            and previous_button.winfo_exists()
+        ):
+            previous_button.state(["!pressed"])
+        self.selected_palette_button = event.widget
         return self.start_drag(event, name)
 
     def start_branch_palette_drag(self, event, name, branch_controllers):

@@ -63,72 +63,76 @@ If the ilastik server runs on a different machine, set the configuration as foll
 
     As shown here, the default port is 5000. If another port is used, provide it here.
 
+.. note::
+
+    Interface illustrations use example settings in the current night theme.
+    The segmentation image and CSV coordinates are preserved from the original
+    case study. They are illustrative results, not newly acquired data.
+
 Load and set ilastik project
 ############################
 
 #. Select and click menu :menuselection:`Features --> ilastik Settings`.
 
-    .. image:: images/ilastik_1.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/menu-features.png
+       :width: 400px
+       :align: center
+       :alt: Features menu with built-in routines and custom feature list commands.
 
 #. Load one ilastik segmentation project file from the pop-up window.
 
-    .. image:: images/ilastik_2.png
-     :width: 400px
-     :align: center
-
-    .. image:: images/ilastik_3.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/popup_ilastik_settings.png
+       :width: 400px
+       :align: center
+       :alt: Ilastik project selection and segmentation settings.
 
 #. Select target labels and the way to use the segmentation (display or mark positions), then click :guilabel:`Confirm`.
 
-    .. image:: images/ilastik_5.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/popup_tutorial_ilastik_display.png
+       :width: 400px
+       :align: center
+       :alt: Lung label selected with Show Segmentation enabled.
 
 Use ilastik feature
 #######################
 
-#. Choose :guilabel:`Customize` acquisition mode, and select the menu :menuselection:`Features --> ilastik Segmentation`.
-
-    .. image:: images/ilastik_6.png
-     :width: 400px
-     :align: center
+#. Choose :guilabel:`Customized` acquisition mode, and select the menu :menuselection:`Features --> ilastik Segmentation`.
 
 #. Click :guilabel:`Acquire` to run acquisition. If you choose to show segmentation only, click :guilabel:`Confirm` in the popup window directly.
 
-    .. image:: images/ilastik_7.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/tutorial-ilastik.png
+       :width: 400px
+       :align: center
+       :alt: IlastikSegmentation feature list configuration.
 
-    .. image:: images/ilastik_9.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/case-studies/ilastik-segmentation.png
+       :width: 400px
+       :align: center
+       :alt: Original lung segmentation result.
 
 If you choose to :guilabel:`Mark Position`, please click :guilabel:`ilastik` in the pop-up window and set the target microscope name and zoom value.
 
-    .. image:: images/ilastik_10.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/popup_tutorial_ilastik_mark.png
+       :width: 400px
+       :align: center
+       :alt: Lung label selected with Mark Position enabled.
 
-    .. image:: images/ilastik_8.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/tutorial-ilastik-parameters.png
+       :width: 400px
+       :align: center
+       :alt: IlastikSegmentation target microscope and zoom parameters.
 
-The positions will be populated to the multi-position table.
+The positions will be populated to the multi-position table. The screenshot
+below illustrates the current table layout with example positions.
 
-    .. image:: images/ilastik_11.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/MultiPositionTab.png
+       :width: 400px
+       :align: center
+       :alt: Multiposition table with example stage coordinates.
 
 The positions look like the following if saved in a CSV file.
 
-    .. image:: images/ilastik_12.png
-     :width: 400px
-     :align: center
-
-    .. image:: images/ilastik_13.png
-     :width: 400px
-     :align: center
+    .. image:: ../../images/case-studies/ilastik-positions.png
+       :width: 400px
+       :align: center
+       :alt: Original segmentation positions exported as CSV.

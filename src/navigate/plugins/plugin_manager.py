@@ -44,6 +44,7 @@ from typing import Callable, Optional, Any
 from navigate.tools.file_functions import load_yaml_file
 from navigate.tools.common_functions import load_module_from_file
 from navigate.model.features import feature_related_functions
+from navigate.model.features.base import FeatureBase
 
 # Logger setup
 p = __name__.split(".")[1]
@@ -58,9 +59,19 @@ def register_features(module: Any) -> None:
     module : Any
         A python module contains features
     """
+    warning_flag = False
     for c in dir(module):
         if inspect.isclass(getattr(module, c)):
+            if not issubclass(getattr(module, c), FeatureBase):
+                warning_flag = True
             setattr(feature_related_functions, c, getattr(module, c))
+
+    if warning_flag:
+        logger.warning(
+            "Some plugin features do not inherit from FeatureBase. "
+            "Support for legacy features without FeatureBase is deprecated. "
+            "Please update your plugin feature classes to inherit from FeatureBase.",
+        )
 
 
 class PluginPackageManager:

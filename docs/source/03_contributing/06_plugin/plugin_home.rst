@@ -18,24 +18,14 @@ After you build or download a plugin, you can install it from the GUI. In this e
 
 #. Open :menuselection:`Plugins --> Install Plugin`.
 
-   .. image:: images/plugin_1.png
+   .. image:: ../../images/menu-plugins.png
       :width: 60%
       :align: center
       :alt: Plugins menu showing Install Plugin option
 
 #. Select the plugin folder (for example, ``ConfocalProjectionPlugin``) and click :guilabel:`Select`.
 
-   .. image:: images/plugin_2.png
-      :width: 60%
-      :align: center
-      :alt: Folder selection dialog for plugin installation
-
 #. Confirm the success message.
-
-   .. image:: images/plugin_3.png
-      :width: 60%
-      :align: center
-      :alt: Confirmation message after plugin installation
 
 #. Restart **navigate** to load the plugin.
 
@@ -44,24 +34,19 @@ Uninstalling a Plugin
 
 #. Open :menuselection:`Plugins --> Uninstall Plugins`.
 
-   .. image:: images/plugin_4.png
+   .. image:: ../../images/menu-plugins.png
       :width: 60%
       :align: center
       :alt: Plugins menu showing Uninstall Plugins option
 
 #. Select the plugin to remove.
 
-   .. image:: images/plugin_5.png
+   .. image:: ../../images/popup_plugins.png
       :width: 60%
       :align: center
       :alt: Plugin selection window for uninstall
 
 #. Click :guilabel:`Uninstall`.
-
-   .. image:: images/plugin_6.png
-      :width: 60%
-      :align: center
-      :alt: Confirmation flow for plugin uninstall
 
 #. Restart **navigate** to complete removal.
 

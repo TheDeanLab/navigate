@@ -31,8 +31,12 @@
 #
 
 import pytest
+import tkinter as tk
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, call
 import numpy as np
+import yaml
 
 AXES = ["x", "y", "z", "theta", "f"]
 CAXES = ["xy", "z", "theta", "f"]
@@ -40,6 +44,294 @@ CAXES = ["xy", "z", "theta", "f"]
 
 def pos_dict(v, axes=AXES):
     return {k: v for k in axes}
+
+
+def hover_button():
+    return SimpleNamespace(hover=SimpleNamespace(setdescription=MagicMock()))
+
+
+@pytest.fixture
+def initialize_controller():
+    """Build an isolated controller without creating a Tk window."""
+    from navigate.controller.sub_controllers.stages import StageController
+
+    def build(axes, gui_settings, saved_steps=None, limits=(-100, 200)):
+        config = SimpleNamespace(
+            stage_axes=axes,
+            all_stage_axes=axes,
+            microscope_name="scope",
+            gui_setting=gui_settings,
+            stage_flip_flags={},
+            stage_home_position={},
+            get_stage_position_limits=lambda suffix: dict.fromkeys(
+                axes, limits[0] if suffix == "_min" else limits[1]
+            ),
+        )
+        widgets = {axis: MagicMock() for axis in axes}
+        widgets.update(
+            {
+                f"{'xy' if axis in ('x', 'y') else axis}_step": MagicMock()
+                for axis in axes
+            }
+        )
+        controller = object.__new__(StageController)
+        controller.parent_controller = SimpleNamespace(
+            configuration_controller=config,
+            configuration={"configuration": {"microscopes": {"scope": {"stage": {}}}}},
+        )
+        controller.stage_setting_dict = {"scope": saved_steps or {}}
+        controller.joystick_axes = []
+        controller.disable_synthetic_stages = MagicMock()
+        controller.view = MagicMock()
+        controller.view.get_widgets.return_value = widgets
+        return controller, widgets
+
+    return build
+
+
+@pytest.mark.parametrize("axis", [*AXES, "aux"])
+def test_initialize_uses_axis_gui_step_settings(initialize_controller, axis):
+    step_key = f"{'xy' if axis in ('x', 'y') else axis}_step"
+    controller, widgets = initialize_controller(
+        [axis],
+        {"stage_movement": {step_key: {"step": 0.125, "min": 0.025}}},
+        {step_key: 50},
+    )
+
+    controller.initialize()
+
+    widgets[step_key].widget.configure.assert_any_call(increment=0.125)
+    widgets[step_key].widget.configure.assert_any_call(from_=0.025)
+    widgets[step_key].set.assert_called_once_with(50)
+
+
+@pytest.mark.parametrize(
+    "gui_settings, saved_steps, expected_min, expected_increment, expected_value",
+    [
+        ({}, {"z_step": 50}, 0.01, 5, 50),
+        ({"stage_movement": {}}, {"z_step": 50}, 0.01, 5, 50),
+        (
+            {"stage_movement": {"xy_step": {"step": 0.25, "min": 0.1}}},
+            {"z_step": 50},
+            0.01,
+            5,
+            50,
+        ),
+        ({"stage_movement": {"z_step": {}}}, {}, 0.01, 1, 10),
+        ({}, {"z_step": 0.5}, 0.01, 1, 0.5),
+        (
+            {"stage_movement": {"z_step": {"step": 0.25}}},
+            {"z_step": 50},
+            0.01,
+            0.25,
+            50,
+        ),
+        (
+            {"stage_movement": {"z_step": {"min": 0.05}}},
+            {"z_step": 50},
+            0.05,
+            5,
+            50,
+        ),
+    ],
+    ids=[
+        "missing-section",
+        "missing-axis",
+        "other-axis-only",
+        "empty-axis",
+        "small-saved-step",
+        "increment-only",
+        "minimum-only",
+    ],
+)
+def test_initialize_step_settings_fallbacks(
+    initialize_controller,
+    gui_settings,
+    saved_steps,
+    expected_min,
+    expected_increment,
+    expected_value,
+):
+    controller, widgets = initialize_controller(["z"], gui_settings, saved_steps)
+
+    controller.initialize()
+
+    widgets["z_step"].widget.configure.assert_any_call(from_=expected_min)
+    widgets["z_step"].widget.configure.assert_any_call(increment=expected_increment)
+    widgets["z_step"].set.assert_called_once_with(expected_value)
+
+
+@pytest.mark.parametrize("limits", [(-100, 200), (100, 300), (-300, -100), (0, 200)])
+def test_initialize_step_maximum_uses_full_travel_range(initialize_controller, limits):
+    controller, widgets = initialize_controller(["z"], {}, limits=limits)
+
+    controller.initialize()
+
+    widgets["z_step"].widget.configure.assert_any_call(to=limits[1] - limits[0])
+    assert widgets["z"].widget.min == limits[0]
+    assert widgets["z"].widget.max == limits[1]
+
+
+def test_initialize_refreshes_independent_axis_settings(initialize_controller):
+    settings = {
+        "stage_movement": {
+            "xy_step": {"step": 0.25, "min": 0.05},
+            "z_step": {"step": 0.5, "min": 0.1},
+        }
+    }
+    controller, widgets = initialize_controller(["x", "y", "z"], settings)
+    controller.initialize()
+    widgets["xy_step"].widget.configure.assert_any_call(increment=0.25)
+    widgets["z_step"].widget.configure.assert_any_call(increment=0.5)
+
+    settings["stage_movement"]["xy_step"] = {"step": 0.125, "min": 0.025}
+    widgets["xy_step"].reset_mock()
+    widgets["z_step"].reset_mock()
+    controller.initialize()
+
+    widgets["xy_step"].widget.configure.assert_any_call(increment=0.125)
+    widgets["xy_step"].widget.configure.assert_any_call(from_=0.025)
+    widgets["z_step"].widget.configure.assert_any_call(increment=0.5)
+    widgets["z_step"].widget.configure.assert_any_call(from_=0.1)
+
+
+def test_initialize_uses_shipped_gui_step_defaults(initialize_controller):
+    import navigate
+
+    config_path = Path(navigate.__file__).parent / "config" / "gui_configuration.yml"
+    with config_path.open() as config_file:
+        settings = yaml.safe_load(config_file)
+    for axis in CAXES:
+        assert settings["stage_movement"][f"{axis}_step"] == {"step": 1, "min": 0.01}
+    controller, widgets = initialize_controller(
+        AXES, settings, {f"{axis}_step": 50 for axis in CAXES}
+    )
+
+    controller.initialize()
+
+    for axis in CAXES:
+        widgets[f"{axis}_step"].widget.configure.assert_any_call(increment=1)
+        widgets[f"{axis}_step"].widget.configure.assert_any_call(from_=0.01)
+        widgets[f"{axis}_step"].set.assert_called_with(50)
+
+
+@pytest.mark.parametrize("axis", [*CAXES, "aux"])
+@pytest.mark.parametrize("value", [0.01, 0.25, 1.75, 10])
+def test_update_step_size_preserves_fractional_values(
+    initialize_controller, axis, value
+):
+    controller, _ = initialize_controller(["z"], {})
+    controller.parent_controller.configuration["experiment"] = {
+        "MicroscopeState": {"microscope_name": "scope"}
+    }
+    controller.stage_setting_dict["other_scope"] = {f"{axis}_step": 20}
+    controller.widget_vals = {
+        f"{axis}_step": MagicMock(get=MagicMock(return_value=value))
+    }
+    controller.set_hover_descriptions = MagicMock()
+
+    controller.update_step_size_handler(axis)("variable", "", "write")
+
+    assert controller.stage_setting_dict["scope"][f"{axis}_step"] == value
+    assert controller.stage_setting_dict["other_scope"][f"{axis}_step"] == 20
+    controller.set_hover_descriptions.assert_called_once_with()
+
+
+@pytest.mark.parametrize("error", [ValueError("invalid"), tk.TclError("empty")])
+def test_update_step_size_ignores_invalid_input(initialize_controller, error):
+    controller, _ = initialize_controller(["z"], {}, {"z_step": 0.25})
+    controller.parent_controller.configuration["experiment"] = {
+        "MicroscopeState": {"microscope_name": "scope"}
+    }
+    controller.widget_vals = {"z_step": MagicMock(get=MagicMock(side_effect=error))}
+    controller.set_hover_descriptions = MagicMock()
+
+    controller.update_step_size_handler("z")()
+
+    assert controller.stage_setting_dict["scope"]["z_step"] == 0.25
+    controller.set_hover_descriptions.assert_not_called()
+
+
+def test_fractional_step_survives_reinitialization(stage_controller):
+    controller = stage_controller
+    controller.widget_vals["z_step"].set(0.25)
+    microscope_name = controller.parent_controller.configuration["experiment"][
+        "MicroscopeState"
+    ]["microscope_name"]
+    assert controller.stage_setting_dict[microscope_name]["z_step"] == 0.25
+
+    controller.initialize()
+
+    assert controller.widget_vals["z_step"].get() == 0.25
+    controller.widget_vals["z"].set(0)
+    controller.position_callback = MagicMock(return_value=MagicMock())
+    controller.flip_flags["z"] = False
+    controller.up_btn_handler("z")()
+    assert float(controller.widget_vals["z"].get()) == 0.25
+    controller.down_btn_handler("z", large_step=True)()
+    assert float(controller.widget_vals["z"].get()) == -1.0
+
+
+def test_set_hover_descriptions_without_exec():
+    from navigate.controller.sub_controllers.stages import StageController
+
+    controller = object.__new__(StageController)
+    controller.stage_axes = AXES
+    controller.widget_vals = {
+        "xy_step": MagicMock(get=MagicMock(return_value=10.0)),
+        "z_step": MagicMock(get=MagicMock(return_value=20.0)),
+        "theta_step": MagicMock(get=MagicMock(return_value=30.0)),
+        "f_step": MagicMock(get=MagicMock(return_value=40.0)),
+    }
+    controller.view = SimpleNamespace(
+        xy_frame=SimpleNamespace(
+            large_up_x_btn=hover_button(),
+            large_down_x_btn=hover_button(),
+            up_x_btn=hover_button(),
+            down_x_btn=hover_button(),
+            large_up_y_btn=hover_button(),
+            large_down_y_btn=hover_button(),
+            up_y_btn=hover_button(),
+            down_y_btn=hover_button(),
+        ),
+        z_frame=SimpleNamespace(
+            large_up_btn=hover_button(),
+            large_down_btn=hover_button(),
+            up_btn=hover_button(),
+            down_btn=hover_button(),
+        ),
+        theta_frame=SimpleNamespace(
+            large_up_btn=hover_button(),
+            large_down_btn=hover_button(),
+            up_btn=hover_button(),
+            down_btn=hover_button(),
+        ),
+        f_frame=SimpleNamespace(
+            large_up_btn=hover_button(),
+            large_down_btn=hover_button(),
+            up_btn=hover_button(),
+            down_btn=hover_button(),
+        ),
+        position_frame=SimpleNamespace(
+            inputs={
+                axis: SimpleNamespace(
+                    widget=SimpleNamespace(
+                        hover=SimpleNamespace(setdescription=MagicMock())
+                    )
+                )
+                for axis in AXES
+            }
+        ),
+        stack_shortcuts=SimpleNamespace(
+            set_start_button=hover_button(),
+            set_end_button=hover_button(),
+        ),
+        stop_frame=SimpleNamespace(joystick_btn=hover_button()),
+    )
+
+    controller.set_hover_descriptions()
+
+    controller.view.xy_frame.large_up_x_btn.hover.setdescription.assert_called_once()
 
 
 @pytest.fixture
@@ -330,13 +622,15 @@ def test_down_btn_handler(stage_controller, flip_x, flip_y, flip_z):
     stage_config["flip_z"] = False
 
 
-def test_stop_button_handler(stage_controller):
+def test_stop_button_handler_dispatches_immediately():
+    from navigate.controller.sub_controllers.stages import StageController
 
-    stage_controller.view.after = MagicMock()
+    parent_controller = MagicMock()
+    stage_controller = SimpleNamespace(parent_controller=parent_controller)
 
-    stage_controller.stop_button_handler()
+    StageController.stop_button_handler(stage_controller)
 
-    stage_controller.view.after.assert_called_once()
+    parent_controller.execute.assert_called_once_with("stop_stage")
 
 
 def test_position_callback(stage_controller):

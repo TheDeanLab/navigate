@@ -42,6 +42,7 @@ from tkinter import messagebox
 
 # Local Imports
 import navigate
+from navigate.config.device_schema import canonical_device_type
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.controller.autofocus_calibration import AutofocusCalibrationController
 from navigate.model.features.autofocus import autofocus_bounds_error
@@ -82,9 +83,9 @@ class AutofocusPopupController(GUIController):
         if calibration_controller is None:
             calibration_controller = AutofocusCalibrationController(parent_controller)
             parent_controller.autofocus_calibration_controller = calibration_controller
-        parent_controller.event_listeners["autofocus_complete"] = (
-            calibration_controller.handle_autofocus_complete
-        )
+        parent_controller.event_listeners[
+            "autofocus_complete"
+        ] = calibration_controller.handle_autofocus_complete
         self.calibration_controller = calibration_controller
 
         super().__init__(view, parent_controller)
@@ -97,6 +98,9 @@ class AutofocusPopupController(GUIController):
 
         #: dict: The autofocus setting dictionary.
         self.setting_dict = None
+
+        #: bool: Suppress write-back while refreshing selections and saved values.
+        self._updating_autofocus_settings = False
 
         #: object: The autofocus figure.
         self.autofocus_fig = self.view.fig
@@ -211,10 +215,12 @@ class AutofocusPopupController(GUIController):
             delattr(self.parent_controller, "af_popup_controller")
 
     def populate_experiment_values(self) -> None:
-        """Populate Experiment Values
+        """Refresh current hardware choices and display saved autofocus settings.
 
-        Populates the experiment values from the experiment settings dictionary
+        Inactive settings remain stored but are not offered as acquisition targets.
+        Preserve a valid selection within the same microscope.
         """
+        previous_microscope = self.microscope_name
         self.setting_dict = self.parent_controller.configuration["experiment"][
             "AutoFocusParameters"
         ]
@@ -222,23 +228,14 @@ class AutofocusPopupController(GUIController):
             "MicroscopeState"
         ]["microscope_name"]
 
-        setting_dict = self.setting_dict[self.microscope_name]
-
-        # Default to stages, if they exist.
-        if "stage" in setting_dict:
-            device = "stage"
-        else:
-            device = setting_dict.keys()[0]
-        self.widgets["device"].widget["values"] = setting_dict.keys()
-        self.widgets["device"].set(device)
-
-        # Default to the f axis, if it exists.
-        if "f" in setting_dict[device]:
-            device_ref = "f"
-        else:
-            device_ref = setting_dict[device].keys()[0]
-        self.widgets["device_ref"].widget["values"] = setting_dict[device].keys()
-        self.widgets["device_ref"].set(device_ref)
+        if previous_microscope != self.microscope_name:
+            self._updating_autofocus_settings = True
+            try:
+                self.widgets["device"].set("")
+                self.widgets["device_ref"].set("")
+            finally:
+                self._updating_autofocus_settings = False
+        self.update_device_ref()
 
         channels = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -258,11 +255,9 @@ class AutofocusPopupController(GUIController):
         self.widgets["calibration_action"].set("Regular")
         self._update_reference_status()
 
-        for k in self.view.setting_vars:
-            self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
-
     def showup(self) -> None:
-        """Shows the popup window"""
+        """Refresh current microscope choices and show the popup window."""
+        self.populate_experiment_values()
         self.view.popup.deiconify()
 
     def _update_button_states(self) -> None:
@@ -273,6 +268,7 @@ class AutofocusPopupController(GUIController):
         acquisition_mode = getattr(acquire_bar_controller, "mode", "live")
         can_start = (
             not self.autofocus_active
+            and bool(self._available_autofocus_targets())
             and self.acquisition_state in ("idle", "running")
             and (self.acquisition_state == "idle" or acquisition_mode == "live")
         )
@@ -307,9 +303,24 @@ class AutofocusPopupController(GUIController):
         self.parent_controller.execute("stop_acquire")
 
     def start_autofocus(self) -> None:
-        """Starts the autofocus process."""
-        device = self.widgets["device"].widget.get()
-        device_ref = self.widgets["device_ref"].widget.get()
+        """Start autofocus only if the selected hardware target is still current.
+
+        Unavailable targets produce a user-facing error before any acquisition
+        state or calibration values are changed.
+        """
+        device = self.widgets["device"].get()
+        device_ref = self.widgets["device_ref"].get()
+        if device_ref not in self._available_autofocus_targets().get(device, []):
+            messagebox.showerror(
+                title="Navigate",
+                message=(
+                    "The selected autofocus device or focusing axis is no longer "
+                    "available for the current microscope. Reopen Autofocus "
+                    "Settings from the menu and select an available target "
+                    "before starting."
+                ),
+            )
+            return
         self.parent_controller.configuration["experiment"]["MicroscopeState"][
             "autofocus_device"
         ] = device
@@ -441,18 +452,73 @@ class AutofocusPopupController(GUIController):
         self.setting_dict["reference_channel"] = channel
         self.setting_dict["reference_position"] = focus
 
+    def _available_autofocus_targets(self) -> dict[str, list[str]]:
+        """Intersect current hardware targets with saved settings, without mutation.
+
+        Use the same eligibility as preload: configured stage axes (including
+        synthetic stages) and the current NI remote-focus channel. Recompute
+        rather than caching choices so a hardware change invalidates old targets.
+        """
+        configuration_controller = self.parent_controller.configuration_controller
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        if (
+            microscope_name != self.microscope_name
+            or configuration_controller.microscope_name != microscope_name
+        ):
+            return {}
+        settings = self.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ].get(microscope_name, {})
+        targets = {}
+        axes = [
+            axis
+            for axis in configuration_controller.stage_axes
+            if axis in settings.get("stage", {})
+        ]
+        if axes:
+            targets["stage"] = list(dict.fromkeys(axes))
+        remote_focus = configuration_controller.remote_focus_dict
+        if remote_focus:
+            hardware = remote_focus.get("hardware", {})
+            channel = hardware.get("channel")
+            if canonical_device_type(
+                "remote_focus", hardware.get("type")
+            ) == "ni.NI" and channel in settings.get("remote_focus", {}):
+                targets["remote_focus"] = [channel]
+        return targets
+
     def update_device_ref(self, *_: tuple[str]) -> None:
-        """Update device reference name
+        """Refresh eligible devices and references without editing stored settings.
 
         Parameters
         ----------
         _: tuple[str]
             The event arguments.
         """
-        device = self.widgets["device"].widget.get()
-        device_refs = self.setting_dict[self.microscope_name][device].keys()
-        self.widgets["device_ref"].widget["values"] = device_refs
-        self.widgets["device_ref"].widget.set(device_refs[0])
+        if self._updating_autofocus_settings:
+            return
+        targets = self._available_autofocus_targets()
+        # Read variables: a Tk trace can run before the widget text is updated.
+        device = self.widgets["device"].get()
+        device_ref = self.widgets["device_ref"].get()
+        if device not in targets:
+            device = "stage" if "stage" in targets else next(iter(targets), "")
+        device_refs = targets.get(device, [])
+        if device_ref not in device_refs:
+            device_ref = "f" if "f" in device_refs else next(iter(device_refs), "")
+        self._updating_autofocus_settings = True
+        try:
+            self.widgets["device"].widget["values"] = tuple(targets)
+            self.widgets["device"].set(device)
+            self.widgets["device_ref"].widget["values"] = tuple(device_refs)
+            self.widgets["device_ref"].set(device_ref)
+        finally:
+            self._updating_autofocus_settings = False
+        self.show_autofocus_setting()
+        if hasattr(self, "acquisition_state"):
+            self._update_button_states()
 
     def show_autofocus_setting(self, *_: tuple[str]) -> None:
         """Show Autofocus Parameters
@@ -462,11 +528,20 @@ class AutofocusPopupController(GUIController):
         _: tuple[str]
             The event arguments.
         """
-        device = self.widgets["device"].widget.get()
-        device_ref = self.widgets["device_ref"].widget.get()
+        if self._updating_autofocus_settings:
+            return
+        device = self.widgets["device"].get()
+        device_ref = self.widgets["device_ref"].get()
+        if device_ref not in self._available_autofocus_targets().get(device, []):
+            self.refresh_bounds_validation()
+            return
         setting_dict = self.setting_dict[self.microscope_name]
-        for k in self.view.setting_vars:
-            self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
+        self._updating_autofocus_settings = True
+        try:
+            for k in self.view.setting_vars:
+                self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
+        finally:
+            self._updating_autofocus_settings = False
         self.refresh_bounds_validation()
 
     def update_setting_dict(self, parameter: str) -> callable:
@@ -484,11 +559,15 @@ class AutofocusPopupController(GUIController):
         """
 
         def func(*_: tuple[str]) -> None:
-            device = self.widgets["device"].widget.get()
-            device_ref = self.widgets["device_ref"].widget.get()
-            self.setting_dict[self.microscope_name][device][device_ref][parameter] = (
-                self.view.setting_vars[parameter].get()
-            )
+            if self._updating_autofocus_settings:
+                return
+            device = self.widgets["device"].get()
+            device_ref = self.widgets["device_ref"].get()
+            if device_ref not in self._available_autofocus_targets().get(device, []):
+                return
+            self.setting_dict[self.microscope_name][device][device_ref][
+                parameter
+            ] = self.view.setting_vars[parameter].get()
             self.refresh_bounds_validation()
 
         return func

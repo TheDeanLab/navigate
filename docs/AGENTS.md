@@ -130,10 +130,12 @@ conda run -n navigate python docs/capture_gui.py --list
 
 - Key selectors:
   - `--all`
-  - `--group <group>`
+  - `--group <group>` (including `menus` and `tutorials`)
   - `--capture <id>`
   - `--manifest <json>`
   - `--configurator-only` (compatibility shortcut)
+- Selected captures overwrite existing files, including popup screenshots.
+- For full unattended captures, use Linux/X11 with Xvfb; see `docs/SCREENSHOTS.rst`.
 - The capture path expects `mss` in docs dependencies; do not add a PIL fallback.
 - For UI pages that are not fully rendered, increase settle timing:
   - `--passes <n>`

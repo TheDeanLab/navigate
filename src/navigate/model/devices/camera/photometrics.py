@@ -42,6 +42,7 @@ from pyvcam.camera import Camera as PyvcamCamera
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.devices.device_types import IntegratedDevice
 from navigate.tools.decorators import log_initialization
 
@@ -64,6 +65,40 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         PyVCAM-master folder in APIs and run:
         python setup.py install
     """
+
+    configuration_schema = {
+        "readout_port": SettingSpec(
+            int,
+            default=0,
+            label="Readout Port",
+            help_text="Photometrics readout port index used for image acquisition.",
+            required=False,
+        ),
+        "speed_table_index": SettingSpec(
+            int,
+            default=1,
+            label="Speed Table Index",
+            help_text="Photometrics readout-speed table entry to use.",
+            required=False,
+        ),
+        "gain": SettingSpec(
+            int,
+            default=1,
+            label="Gain",
+            help_text="Photometrics camera gain setting.",
+            required=False,
+        ),
+        "unitforlinedelay": SettingSpec(
+            float,
+            default=1,
+            label="Unit for Line Delay",
+            help_text=(
+                "Line-delay scale in milliseconds used for light-sheet exposure "
+                "timing."
+            ),
+            required=False,
+        ),
+    }
 
     def __init__(
         self,
@@ -134,10 +169,17 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         self.camera_parameters["x_pixels"] = self.camera_controller.sensor_size[0]
         self.camera_parameters["y_pixels"] = self.camera_controller.sensor_size[1]
 
+        #: trigger source
+        self.trigger_source = None
+        self.camera_parameters["supported_trigger_sources"] = [
+            "External",
+            "Internal",
+            "Software",
+        ]
+        self.set_trigger_mode("External")
+
         self.set_sensor_mode("Normal")
         self.camera_controller.binning = 1
-        # TODO: Implement readout_speed, defect_correct_mode
-        self.camera_controller.exp_mode = "Edge Trigger"
         self.camera_controller.prog_scan_dir = 0
 
         # Photometrics camera settings from config file
@@ -256,12 +298,17 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         trigger_source : str
             Trigger source. Options are 'External' or 'Internal'.
         """
+        self.trigger_source = trigger_source
         if trigger_source == "External":
-            self.camera_controller.trig_mode = "External"
-        elif trigger_source == "Internal":
-            self.camera_controller.trig_mode = "Internal"
+            self.camera_controller.exp_mode = "Edge Trigger"
+            logger.debug("Set camera trigger mode: External Edge Trigger.")
+        elif trigger_source == "Software":
+            self.camera_controller.exp_mode = "Software Trigger Edge"
+            logger.debug("Set camera trigger mode: Software Trigger.")
         else:
-            logger.debug("Camera trigger mode not supported")
+            self.camera_controller.exp_mode = "Internal Trigger"
+            self.trigger_source = "Internal"
+            logger.debug("Set camera trigger mode: Free running mode.")
 
     def set_readout_direction(self, mode: str) -> None:
         """Set Photometrics readout direction.
@@ -507,14 +554,12 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         self._scan_mode = self.camera_controller.prog_scan_mode
         if self._scan_mode == 1:
             # Programmable scan mode (ASLM)
-            self.camera_controller.exp_mode = "Edge Trigger"
             self.camera_controller.prog_scan_line_delay = self._scan_delay
             self.camera_controller.exp_out_mode = 4
 
         else:
             # Normal mode
             self.camera_controller.exp_out_mode = "Any Row"
-            self.camera_controller.exp_mode = "Edge Trigger"
 
         # Prepare for buffered acquisition
         #: int: Number of frames
@@ -583,6 +628,12 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
             data in data buffer
         """
         return self._receive_images()
+
+    def generate_new_frame(self) -> None:
+        if not self.is_acquiring:
+            return
+        if self.trigger_source == "Software":
+            self.camera_controller.sw_trigger()
 
     def close_image_series(self) -> None:
         """Close Photometrics image series.

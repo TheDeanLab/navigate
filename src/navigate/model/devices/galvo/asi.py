@@ -37,6 +37,7 @@ from typing import Any
 
 # Local Imports
 from navigate.model.devices.galvo.base import GalvoBase
+from navigate.config.configuration_schema import SettingSpec
 from navigate.model.devices.device_types import SerialDevice
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 from navigate.tools.decorators import log_initialization
@@ -49,6 +50,16 @@ logger = logging.getLogger(p)
 @log_initialization
 class ASIGalvo(GalvoBase, SerialDevice):
     """GalvoASI Class - ASI DAQ Control of Galvanometers"""
+
+    configuration_schema = {
+        "hardware/axis": SettingSpec(
+            str,
+            default="B",
+            label="Axis",
+            help_text="ASI controller axis assigned to this galvo.",
+            required=True,
+        ),
+    }
 
     def __init__(
         self,

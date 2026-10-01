@@ -78,9 +78,12 @@ from navigate.tools.common_dict_tools import update_stage_dict
 from navigate.tools.common_functions import load_module_from_file, VariableWithLock
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.microscope import Microscope
+from navigate.model.resolution_change import (
+    _ResolutionChangeTask,
+    _ResolutionRecovery,
+)
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel
-
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -252,6 +255,12 @@ class Model:
 
         #: bool: Stop signal thread?
         self.stop_send_signal = False  # stop signal thread
+
+        # Resolution changes outlive the proxy call so Stop Stage can reach the model.
+        self._resolution_change_lock = threading.Lock()
+        self._resolution_change_counter = 0
+        self._resolution_change_task = None
+        self._resolution_recovery = None
 
         #: bool: Signal side completed a finite acquisition.
         self.signal_acquisition_complete = False
@@ -691,51 +700,10 @@ class Model:
             consisting of the resolution_mode, the zoom, and the laser_info.
             e.g., self.resolution_info['waveform_constants'][self.resolution][self.mag]
             """
-            reboot = False
-            microscope_name = self.configuration["experiment"]["MicroscopeState"][
-                "microscope_name"
-            ]
-            if self.is_acquiring:
-                # We called this while in the middle of an acquisition
-                # stop live thread
-                self.stop_send_signal = True
-                self.signal_thread.join()
-                if microscope_name != self.active_microscope_name:
-                    self.pause_data_thread()
-                    self.active_microscope.end_acquisition()
-                    reboot = True
-                self.active_microscope.current_channel = 0
-
             if args[0] == "resolution":
-                self.change_resolution(
-                    self.configuration["experiment"]["MicroscopeState"][
-                        "microscope_name"
-                    ]
-                )
-
-            if reboot:
-                # prepare active microscope
-                waveform_dict = self.active_microscope.prepare_acquisition()
-                self.resume_data_thread()
-            else:
-                waveform_dict = self.active_microscope.calculate_all_waveform()
-
-            self.event_queue.put(("waveform", waveform_dict))
-
-            if self.is_acquiring:
-                # prepare devices based on updated info
-                # load features
-                self.signal_container, self.data_container = load_features(
-                    self, self.acquisition_modes_feature_setting[self.imaging_mode]
-                )
-                self.stop_send_signal = False
-                self.signal_thread = ThreadWithWarning(
-                    target=self.run_live_acquisition,
-                    warning_queue=self.event_queue,
-                    logger=self.logger,
-                )
-                self.signal_thread.name = "Waveform Popup Signal"
-                self.signal_thread.start()
+                self._start_resolution_setting_update()
+                return
+            self._update_setting(args[0])
 
         elif command == "autofocus":
             """Autofocus Routine
@@ -809,9 +777,10 @@ class Model:
                         self.addon_feature,
                         f"{get_navigate_path()}/feature_lists/feature_parameter_setting",
                     )
-                    self.signal_container, self.data_container = load_features(
-                        self, self.addon_feature
-                    )
+                    if self.addon_feature:
+                        self.signal_container, self.data_container = load_features(
+                            self, self.addon_feature
+                        )
             elif type(args[0]) is str:
                 try:
                     if len(args) > 1:
@@ -842,10 +811,22 @@ class Model:
             if self.signal_thread:
                 self.signal_thread.join()
             if self.is_data_thread_on and self.data_thread:
+                self.resume_data_thread()
                 self.data_thread.join()
 
             self.end_acquisition()
             self.stop_stage()
+
+        elif command == "resolution_recovery":
+            task_id, choice = args
+            if choice == "keep":
+                self._keep_resolution_position(task_id)
+            elif choice == "return":
+                self._start_resolution_return(task_id)
+            else:
+                self.event_queue.put(
+                    ("warning", f"Unknown resolution recovery choice: {choice}")
+                )
 
         elif command == "terminate":
             self.terminate()
@@ -892,7 +873,12 @@ class Model:
 
         # print(self.configuration['experiment']['MirrorParameters']['modes'])
 
-    def move_stage(self, pos_dict: Dict[str, Any], wait_until_done=False) -> bool:
+    def move_stage(
+        self,
+        pos_dict: Dict[str, Any],
+        wait_until_done: bool = False,
+        cancel_event: Optional[threading.Event] = None,
+    ) -> bool:
         """Moves the stages.
 
         Updates the stage dictionary, moves to the desired position, and reports
@@ -904,15 +890,19 @@ class Model:
             Dictionary of stage positions.
         wait_until_done : bool
             Checks "on target state" after command and waits until done.
+        cancel_event : Optional[threading.Event], optional
+            Cooperative cancellation signal forwarded to the active microscope. The
+            caller remains responsible for issuing a hardware stage stop.
 
         Returns
         -------
         success : bool
             Was the move successful?
         """
-        self.logger.debug("****** moving stage to: %s", pos_dict)
         try:
-            r = self.active_microscope.move_stage(pos_dict, wait_until_done)
+            r = self.active_microscope.move_stage(
+                pos_dict, wait_until_done, cancel_event=cancel_event
+            )
             self.logger.info(
                 f"Stage moved to:, {pos_dict}, " f"Wait until done: {wait_until_done}"
             )
@@ -949,12 +939,80 @@ class Model:
         microscope = self.microscopes[microscope_name]
         microscope.update_stage_limits()
 
-    def stop_stage(self) -> None:
-        """Stop the stages."""
-        self.active_microscope.stop_stage()
-        ret_pos_dict = self.get_stage_position()
-        update_stage_dict(self, ret_pos_dict)
-        self.event_queue.put(("update_stage", ret_pos_dict))
+    def stop_stage(self, *, cancel_resolution_change: bool = True) -> None:
+        """Stop stage motion and publish the actual stopped position.
+
+        Parameters
+        ----------
+        cancel_resolution_change : bool, optional
+            Cancel an active resolution-change task before stopping hardware. Internal
+            position refreshes at the successful end of a change pass ``False``.
+
+        Notes
+        -----
+        When a resolution change is active, cancellation is recorded before any
+        hardware stop call. Former, target, and active microscope configurations share
+        one device-ID set so each physical stage receives one best-effort stop attempt.
+        """
+        task = getattr(self, "_resolution_change_task", None)
+        if cancel_resolution_change and task is not None:
+            lock = getattr(self, "_resolution_change_lock", None)
+            if lock is None:
+                task.stop_complete_event.clear()
+                task.cancel_event.set()
+                task.state = "cancel_requested"
+            else:
+                with lock:
+                    task.stop_complete_event.clear()
+                    task.cancel_event.set()
+                    task.state = "cancel_requested"
+
+        microscope_names = [self.active_microscope_name]
+        if cancel_resolution_change and task is not None:
+            microscope_names = [
+                task.former_microscope_name,
+                task.target_microscope_name,
+                self.active_microscope_name,
+            ]
+
+        stopped_stage_ids = set()
+        stop_errors = []
+        for microscope_name in dict.fromkeys(microscope_names):
+            try:
+                stop_errors.extend(
+                    self.microscopes[microscope_name].stop_stage(stopped_stage_ids)
+                )
+            except Exception as e:
+                self.logger.exception(
+                    "Failed while stopping stages for %s", microscope_name
+                )
+                stop_errors.append(f"{type(e).__name__}: {e}")
+
+        if cancel_resolution_change and task is not None:
+            task.stop_errors.extend(stop_errors)
+
+        try:
+            try:
+                ret_pos_dict = self.get_stage_position()
+            except Exception as e:
+                self.logger.exception("Failed to read stage position after stopping")
+                error = f"{type(e).__name__}: {e}"
+                if cancel_resolution_change and task is not None:
+                    task.stop_errors.append(error)
+                self.event_queue.put(
+                    (
+                        "warning",
+                        f"Stages were stopped, but position readback failed: {e}",
+                    )
+                )
+                return
+            update_stage_dict(self, ret_pos_dict)
+            self.event_queue.put(("update_stage", ret_pos_dict))
+            if cancel_resolution_change and task is not None:
+                task.stopped_position = ret_pos_dict
+        finally:
+            if cancel_resolution_change and task is not None:
+                task.stop_complete_event.set()
 
     def end_acquisition(self) -> None:
         """End the acquisition.
@@ -1324,20 +1382,15 @@ class Model:
                     self.grab_image(getattr(self.image_writer, "save_image", None))
                 self.active_microscope.daq.wait_acquisition_done()
         except:  # noqa
-            self.active_microscope.daq.stop_acquisition()
-            if self.active_microscope.current_channel == 0:
-                self.stop_acquisition = True
-                self.event_queue.put(
-                    (
-                        "warning",
-                        "An error happened. Please read the log files for details!",
-                    )
+            self.active_microscope.turn_off_lasers()
+            self.stop_acquisition = True
+            self.event_queue.put(
+                (
+                    "warning",
+                    "An error happened. Please read the log files for details!",
                 )
-                return
-            self.active_microscope.daq.prepare_acquisition(
-                f"channel_{self.active_microscope.current_channel}"
             )
-            self.active_microscope.daq.run_acquisition()
+            return
         finally:
             # Ensure the laser is turned off
             self.active_microscope.turn_off_lasers()
@@ -1505,26 +1558,342 @@ class Model:
             injected_flag.value = False
             self.event_queue.put(("autofocus_sequence_complete", None))
 
-    def change_resolution(self, resolution_value: str) -> None:
+    def _begin_resolution_change(
+        self, resolution_value: str
+    ) -> Optional[_ResolutionChangeTask]:
+        """Create the single active model-owned resolution task."""
+        with self._resolution_change_lock:
+            if self._resolution_change_task is not None:
+                self.event_queue.put(
+                    ("warning", "A resolution change is already in progress.")
+                )
+                return None
+            self._resolution_change_counter += 1
+            self._resolution_recovery = None
+            task = _ResolutionChangeTask(
+                task_id=self._resolution_change_counter,
+                resolution_value=resolution_value,
+                former_microscope_name=self.active_microscope_name,
+                target_microscope_name=resolution_value,
+            )
+            self._resolution_change_task = task
+            return task
+
+    def _finish_resolution_change(
+        self, task: _ResolutionChangeTask, succeeded: bool
+    ) -> None:
+        """Record terminal task state and release the active-task slot."""
+        cancelled = task.cancel_event.is_set()
+        task.state = "cancelled" if cancelled else "completed"
+        if cancelled:
+            # Recovery is safe only after every stop attempt and readback finishes.
+            task.stop_complete_event.wait()
+            return_allowed = self._is_resolution_return_position_valid(task)
+            if task.previous_position is not None:
+                self._resolution_recovery = _ResolutionRecovery(
+                    task_id=task.task_id,
+                    microscope_name=self.active_microscope_name,
+                    previous_position=dict(task.previous_position),
+                    return_allowed=return_allowed,
+                )
+            self.event_queue.put(
+                (
+                    "resolution_change_cancelled",
+                    {
+                        "task_id": task.task_id,
+                        "microscope_name": self.active_microscope_name,
+                        "zoom": self.configuration["experiment"]["MicroscopeState"][
+                            "zoom"
+                        ],
+                        "previous_position": task.previous_position,
+                        "stopped_position": task.stopped_position,
+                        "return_allowed": return_allowed,
+                        "errors": list(task.stop_errors),
+                    },
+                )
+            )
+        elif not succeeded:
+            self.event_queue.put(("warning", "Resolution change did not complete."))
+        with self._resolution_change_lock:
+            if self._resolution_change_task is task:
+                self._resolution_change_task = None
+
+    def _is_resolution_return_position_valid(self, task: _ResolutionChangeTask) -> bool:
+        """Return whether every saved axis passes active stage limits."""
+        if (
+            task.previous_position is None
+            or task.stopped_position is None
+            or task.stop_errors
+        ):
+            return False
+
+        validated_axes = set()
+        requested_axes = {
+            key[: key.index("_")] for key in task.previous_position.keys()
+        }
+        for stage, axes in self.active_microscope.stages_list:
+            position = {
+                key: value
+                for key, value in task.previous_position.items()
+                if key[: key.index("_")] in axes
+            }
+            if not position or not hasattr(stage, "verify_abs_position"):
+                continue
+            try:
+                verified = stage.verify_abs_position(position, is_strict=True)
+            except Exception:
+                self.logger.exception(
+                    "Failed to validate the saved resolution-change position"
+                )
+                return False
+            if len(verified) != len(position):
+                return False
+            validated_axes.update(verified.keys())
+        return validated_axes == requested_axes
+
+    def _keep_resolution_position(self, task_id: int) -> None:
+        """Discard the matching recovery snapshot without moving stages."""
+        with self._resolution_change_lock:
+            recovery = self._resolution_recovery
+            if recovery is not None and recovery.task_id == task_id:
+                self._resolution_recovery = None
+
+        # tell the GUI to update to the current stage position
+        self.stop_stage(cancel_resolution_change=False)
+
+    def _start_resolution_return(self, task_id: int) -> bool:
+        """Start a model-owned return to a validated recovery position."""
+        with self._resolution_change_lock:
+            recovery = self._resolution_recovery
+            if (
+                recovery is None
+                or recovery.task_id != task_id
+                or not recovery.return_allowed
+                or recovery.microscope_name != self.active_microscope_name
+                or self._resolution_change_task is not None
+            ):
+                self.event_queue.put(
+                    ("warning", "The saved resolution-change position is unavailable.")
+                )
+                self.event_queue.put(
+                    (
+                        "resolution_return_complete",
+                        {
+                            "task_id": task_id,
+                            "succeeded": False,
+                            "cancelled": False,
+                        },
+                    )
+                )
+                return False
+
+            self._resolution_change_counter += 1
+            task = _ResolutionChangeTask(
+                task_id=self._resolution_change_counter,
+                resolution_value=self.active_microscope_name,
+                former_microscope_name=self.active_microscope_name,
+                target_microscope_name=self.active_microscope_name,
+                state="returning",
+                previous_position=dict(recovery.previous_position),
+            )
+            self._resolution_change_task = task
+            self._resolution_recovery = None
+
+        worker = ThreadWithWarning(
+            target=lambda: self._run_resolution_return(task, recovery),
+            warning_queue=self.event_queue,
+            logger=self.logger,
+        )
+        worker.name = "Resolution Position Return"
+        task.worker = worker
+        worker.start()
+        return True
+
+    def _run_resolution_return(
+        self,
+        task: _ResolutionChangeTask,
+        recovery: _ResolutionRecovery,
+    ) -> None:
+        """Run and finalize one cancellable recovery movement."""
+        succeeded = False
+        try:
+            if not task.cancel_event.is_set():
+                succeeded = self.move_stage(
+                    dict(recovery.previous_position),
+                    wait_until_done=True,
+                    cancel_event=task.cancel_event,
+                )
+            if succeeded and not task.cancel_event.is_set():
+                self.stop_stage(cancel_resolution_change=False)
+        except Exception as e:
+            self.logger.exception(
+                "Failed to return stages after resolution cancellation"
+            )
+            task.stop_errors.append(f"{type(e).__name__}: {e}")
+            self.event_queue.put(
+                ("warning", f"Could not return stages to the previous position: {e}")
+            )
+        finally:
+            cancelled = task.cancel_event.is_set()
+            task.state = "cancelled" if cancelled else "completed"
+            with self._resolution_change_lock:
+                if self._resolution_change_task is task:
+                    self._resolution_change_task = None
+            self.event_queue.put(
+                (
+                    "resolution_return_complete",
+                    {
+                        "task_id": recovery.task_id,
+                        "succeeded": succeeded and not cancelled,
+                        "cancelled": cancelled,
+                    },
+                )
+            )
+
+    def _perform_resolution_change(self, task: _ResolutionChangeTask) -> bool:
+        """Run the physical resolution change for a tracked task."""
+        return self._change_resolution(
+            task.resolution_value, cancel_event=task.cancel_event, task=task
+        )
+
+    def _start_resolution_setting_update(self) -> bool:
+        """Start a manual resolution update without occupying the proxy call."""
+        resolution_value = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        task = self._begin_resolution_change(resolution_value)
+        if task is None:
+            return False
+        worker = ThreadWithWarning(
+            target=lambda: self._update_setting("resolution", task),
+            warning_queue=self.event_queue,
+            logger=self.logger,
+        )
+        worker.name = "Resolution Change"
+        task.worker = worker
+        worker.start()
+        return True
+
+    def _update_setting(
+        self,
+        setting: str,
+        resolution_task: Optional[_ResolutionChangeTask] = None,
+    ) -> None:
+        """Apply a waveform or resolution setting update."""
+        reboot = False
+        succeeded = False
+        microscope_name = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        try:
+            if self.is_acquiring:
+                self.stop_send_signal = True
+                self.signal_thread.join()
+                if microscope_name != self.active_microscope_name:
+                    self.pause_data_thread()
+                    self.active_microscope.end_acquisition()
+                    reboot = True
+                self.active_microscope.current_channel = 0
+
+            if setting == "resolution":
+                if resolution_task is None:
+                    succeeded = self.change_resolution(microscope_name) is not False
+                else:
+                    succeeded = self._perform_resolution_change(resolution_task)
+                if not succeeded:
+                    self.stop_acquisition = True
+                    self.stop_send_signal = True
+                    if reboot:
+                        self.resume_data_thread()
+                    return
+
+            if reboot:
+                waveform_dict = self.active_microscope.prepare_acquisition()
+                self.resume_data_thread()
+            else:
+                waveform_dict = self.active_microscope.calculate_all_waveform()
+
+            self.event_queue.put(("waveform", waveform_dict))
+
+            if self.is_acquiring:
+                self.signal_container, self.data_container = load_features(
+                    self, self.acquisition_modes_feature_setting[self.imaging_mode]
+                )
+                self.stop_send_signal = False
+                self.signal_thread = ThreadWithWarning(
+                    target=self.run_live_acquisition,
+                    warning_queue=self.event_queue,
+                    logger=self.logger,
+                )
+                self.signal_thread.name = "Waveform Popup Signal"
+                self.signal_thread.start()
+            succeeded = True
+        finally:
+            if resolution_task is not None:
+                self._finish_resolution_change(resolution_task, succeeded)
+
+    def change_resolution(self, resolution_value: str) -> bool:
         """Switch resolution mode of the microscope.
 
         Parameters
         ----------
         resolution_value : str
             Resolution mode.
+
+        Returns
+        -------
+        bool
+            ``True`` when microscope, zoom, and stage updates complete. ``False``
+            when a move fails or an internal resolution task is cancelled.
+
+        Notes
+        -----
+        Manual GUI changes use a model-owned worker around this operation. Callers
+        that require cancellation should use the existing resolution command rather
+        than starting a second movement lifecycle.
         """
+        return self._change_resolution(resolution_value)
+
+    def _change_resolution(
+        self,
+        resolution_value: str,
+        cancel_event: Optional[threading.Event] = None,
+        task: Optional[_ResolutionChangeTask] = None,
+    ) -> bool:
+        """Apply microscope and stage changes with cooperative cancellation."""
         self.active_microscope.central_focus = None
 
-        former_microscope = self.active_microscope_name
+        former_microscope = (
+            task.former_microscope_name
+            if task is not None
+            else self.active_microscope_name
+        )
+        if cancel_event is not None and cancel_event.is_set():
+            return False
+
         if resolution_value != self.active_microscope_name:
             self.get_active_microscope()
-            self.active_microscope.move_stage_offset(former_microscope)
+            if task is not None:
+                task.previous_position = {
+                    key.replace("_pos", "_abs"): value
+                    for key, value in self.get_stage_position().items()
+                }
+            if cancel_event is not None and cancel_event.is_set():
+                return False
+            if not self.active_microscope.move_stage_offset(
+                former_microscope, cancel_event=cancel_event
+            ):
+                return False
 
         # update zoom if possible
         try:
+            if cancel_event is not None and cancel_event.is_set():
+                return False
             curr_zoom = self.active_microscope.zoom.zoomvalue
             zoom_value = self.configuration["experiment"]["MicroscopeState"]["zoom"]
             self.active_microscope.zoom.set_zoom(zoom_value)
+            if cancel_event is not None and cancel_event.is_set():
+                return False
             self.logger.info(
                 f"Change zoom of {self.active_microscope_name} to {zoom_value}"
             )
@@ -1537,6 +1906,11 @@ class Model:
                 and self.active_microscope_name == former_microscope
                 and solvent in offsets.keys()
             ):
+                if task is not None and task.previous_position is None:
+                    task.previous_position = {
+                        key.replace("_pos", "_abs"): value
+                        for key, value in self.get_stage_position().items()
+                    }
                 # stop stages
                 self.active_microscope.stop_stage()
                 curr_pos = self.get_stage_position()
@@ -1545,17 +1919,26 @@ class Model:
                     shift_pos[f"{axis}_abs"] = curr_pos[f"{axis}_pos"] + float(
                         mags[curr_zoom][zoom_value]
                     )
-                self.move_stage(shift_pos, wait_until_done=True)
+                if not self.move_stage(
+                    shift_pos,
+                    wait_until_done=True,
+                    cancel_event=cancel_event,
+                ):
+                    return False
+            if cancel_event is not None and cancel_event.is_set():
+                return False
             # stop stages and update GUI
-            self.stop_stage()
+            self.stop_stage(cancel_resolution_change=False)
+            return True
 
         except ValueError as e:
             self.logger.debug(
                 f"Error changing microscope resolution:"
                 f".{self.active_microscope_name} - {e}"
             )
-
-        self.active_microscope.ask_stage_for_position = True
+            return False
+        finally:
+            self.active_microscope.ask_stage_for_position = True
 
     def get_camera_line_interval_and_exposure_time(
         self, exposure_time: float, number_of_pixel: int
@@ -1757,6 +2140,11 @@ class Model:
 
     def terminate(self) -> None:
         """Terminate the model."""
+        task = getattr(self, "_resolution_change_task", None)
+        if task is not None and task.worker is not None and task.worker.is_alive():
+            self.stop_stage()
+            if task.worker is not threading.current_thread():
+                task.worker.join()
         self.active_microscope.terminate()
         for microscope_name in self.virtual_microscopes:
             self.virtual_microscopes[microscope_name].terminate()

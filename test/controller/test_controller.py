@@ -178,7 +178,7 @@ def controller(controller_root):
 
     try:
         controller.execute("exit")
-    except SystemExit:
+    except (AttributeError, SystemExit):
         pass
 
     # Tear down the controller properly
@@ -617,6 +617,31 @@ def test_execute_resolution(controller):
     pass
 
 
+def test_execute_resolution_does_not_join_worker():
+    from types import SimpleNamespace
+
+    from navigate.controller.controller import Controller
+
+    worker = MagicMock()
+    controller = Controller.__new__(Controller)
+    controller.configuration_controller = SimpleNamespace(
+        microscope_list=["scope"],
+        microscope_name="scope",
+        get_zoom_value_list=lambda _name: ["1x"],
+    )
+    controller.menu_controller = SimpleNamespace(
+        resolution_value=SimpleNamespace(get=lambda: "scope 1x", set=MagicMock())
+    )
+    controller.change_microscope = MagicMock()
+    controller.threads_pool = SimpleNamespace(
+        createThread=MagicMock(return_value=worker)
+    )
+
+    controller.execute("resolution", "scope 1x")
+
+    worker.join.assert_not_called()
+
+
 def test_execute_set_save(controller):
 
     for save_data in [True, False]:
@@ -992,6 +1017,7 @@ def test_execute_exit_saves_gui_configuration_to_loaded_path(tmp_path):
     controller.configuration = {
         name: {"name": name}
         for name in [
+            "configuration",
             "experiment",
             "multi_positions",
             "gui",
@@ -999,6 +1025,27 @@ def test_execute_exit_saves_gui_configuration_to_loaded_path(tmp_path):
             "rest_api_config",
             "waveform_templates",
         ]
+    }
+    controller.configuration["configuration"]["microscopes"] = {
+        "Mesoscale": {},
+        "Synthetic Scope": {},
+        "Scope Without Backup": {},
+        "Scope With No Trigger": {},
+    }
+    controller.configuration["experiment"]["CameraParameters"] = {
+        "Mesoscale": {
+            "trigger_source": "Software",
+            "trigger_source_backup": "External",
+        },
+        "Synthetic Scope": {
+            "trigger_source": "Software",
+            "trigger_source_backup": "Internal",
+        },
+        "Scope Without Backup": {"trigger_source": "Software"},
+        "Scope With No Trigger": {
+            "trigger_source": "Software",
+            "trigger_source_backup": None,
+        },
     }
     controller.sloppy_stop = MagicMock()
     controller.update_experiment_setting = MagicMock()
@@ -1020,6 +1067,15 @@ def test_execute_exit_saves_gui_configuration_to_loaded_path(tmp_path):
         file_directory=str(controller.gui_configuration_path.parent),
         content_dict=controller.configuration["gui"],
         filename=controller.gui_configuration_path.name,
+    )
+    camera_parameters = controller.configuration["experiment"]["CameraParameters"]
+    assert camera_parameters["Mesoscale"]["trigger_source"] == "External"
+    assert camera_parameters["Synthetic Scope"]["trigger_source"] == "Internal"
+    assert camera_parameters["Scope Without Backup"]["trigger_source"] == "Software"
+    assert "trigger_source" not in camera_parameters["Scope With No Trigger"]
+    assert all(
+        "trigger_source_backup" not in parameters
+        for parameters in camera_parameters.values()
     )
 
 
@@ -1134,6 +1190,190 @@ def test_stop_stage(controller):
     controller.model.stop_stage = MagicMock()
     controller.stop_stage()
     controller.model.stop_stage.assert_called_with()
+
+
+def test_stop_stage_retries_proxy_contention():
+    from types import SimpleNamespace
+
+    from navigate.controller.controller import Controller
+
+    attempts = []
+
+    def stop_stage():
+        attempts.append("stop")
+        if len(attempts) == 1:
+            raise RuntimeError(
+                "Two different threads tried to use the same "
+                "ObjectInSubprocess at the same time!"
+            )
+
+    controller = Controller.__new__(Controller)
+    controller.model = SimpleNamespace(stop_stage=stop_stage)
+
+    controller.stop_stage()
+
+    assert attempts == ["stop", "stop"]
+
+
+def test_stop_stage_does_not_retry_hardware_runtime_error():
+    from types import SimpleNamespace
+
+    import pytest
+
+    from navigate.controller.controller import Controller
+
+    attempts = []
+
+    def stop_stage():
+        attempts.append("stop")
+        if len(attempts) == 1:
+            raise RuntimeError("hardware stop failed")
+        raise AssertionError("hardware failure was incorrectly retried")
+
+    controller = Controller.__new__(Controller)
+    controller.model = SimpleNamespace(stop_stage=stop_stage)
+
+    with pytest.raises(RuntimeError, match="hardware stop failed"):
+        controller.stop_stage()
+
+    assert attempts == ["stop"]
+
+
+def make_resolution_recovery_controller():
+    from types import SimpleNamespace
+
+    from navigate.controller.controller import Controller
+
+    controller = Controller.__new__(Controller)
+    controller.view = SimpleNamespace(root=object())
+    controller.model = MagicMock()
+    controller.threads_pool = SimpleNamespace(createThread=MagicMock())
+    controller.stage_controller = SimpleNamespace(
+        stage_axes=["x", "z", "f"],
+        view=SimpleNamespace(toggle_button_states=MagicMock()),
+        force_enable_all_axes=MagicMock(),
+    )
+    controller._resolution_recovery_task_id = None
+    controller._last_completed_resolution_task_id = None
+    controller._resolution_change_popup = None
+    return controller
+
+
+def test_resolution_cancelled_popup_is_deduplicated_by_task_id():
+    from unittest.mock import patch
+
+    controller = make_resolution_recovery_controller()
+    payload = {"task_id": 7, "return_allowed": True}
+
+    with patch(
+        "navigate.controller.controller.ResolutionChangeCancelledPopup"
+    ) as popup_class:
+        controller._show_resolution_change_cancelled(payload)
+        controller._show_resolution_change_cancelled(payload)
+
+    popup_class.assert_called_once()
+    assert popup_class.call_args.kwargs["return_enabled"] is True
+
+
+def test_resolution_keep_accepts_stopped_position_without_moving_stage():
+    from unittest.mock import patch
+
+    controller = make_resolution_recovery_controller()
+
+    with patch(
+        "navigate.controller.controller.ResolutionChangeCancelledPopup"
+    ) as popup_class:
+        controller._show_resolution_change_cancelled(
+            {"task_id": 7, "return_allowed": False}
+        )
+        keep_command = popup_class.call_args.kwargs["keep_command"]
+        keep_command()
+
+    create_call = controller.threads_pool.createThread.call_args
+    assert create_call.kwargs["resourceName"] == "model"
+    create_call.kwargs["target"]()
+    controller.model.run_command.assert_called_once_with(
+        "resolution_recovery", 7, "keep"
+    )
+    controller.stage_controller.view.toggle_button_states.assert_not_called()
+    assert controller._resolution_recovery_task_id is None
+
+
+def test_resolution_return_closes_modal_before_disabling_stage_controls():
+    from unittest.mock import patch
+
+    controller = make_resolution_recovery_controller()
+    payload = {"task_id": 7, "return_allowed": True}
+
+    with patch(
+        "navigate.controller.controller.ResolutionChangeCancelledPopup"
+    ) as popup_class:
+        controller._show_resolution_change_cancelled(payload)
+        return_command = popup_class.call_args.kwargs["return_command"]
+        return_command()
+
+    controller.stage_controller.view.toggle_button_states.assert_called_once_with(
+        True, ["x", "z", "f"]
+    )
+    create_call = controller.threads_pool.createThread.call_args
+    assert create_call.kwargs["resourceName"] == "model"
+    create_call.kwargs["target"]()
+    controller.model.run_command.assert_called_once_with(
+        "resolution_recovery", 7, "return"
+    )
+
+
+def test_resolution_return_complete_reenables_stage_controls():
+    controller = make_resolution_recovery_controller()
+    controller._resolution_recovery_task_id = 7
+
+    controller._finish_resolution_return(
+        {"task_id": 7, "succeeded": False, "cancelled": True}
+    )
+
+    controller.stage_controller.force_enable_all_axes.assert_called_once_with()
+    assert controller._last_completed_resolution_task_id == 7
+    assert controller._resolution_recovery_task_id is None
+
+
+def test_completed_resolution_return_suppresses_late_cancelled_event():
+    from unittest.mock import patch
+
+    controller = make_resolution_recovery_controller()
+    controller._resolution_recovery_task_id = 7
+    controller._finish_resolution_return(
+        {"task_id": 7, "succeeded": True, "cancelled": False}
+    )
+
+    with patch(
+        "navigate.controller.controller.ResolutionChangeCancelledPopup"
+    ) as popup_class:
+        controller._show_resolution_change_cancelled(
+            {"task_id": 7, "return_allowed": True}
+        )
+
+    popup_class.assert_not_called()
+
+
+def test_resolution_recovery_events_are_dispatched_by_event_pump():
+    from queue import Queue
+
+    controller = make_resolution_recovery_controller()
+    controller._event_pump_running = True
+    controller.event_queue = Queue()
+    controller.autofocus_progress_queue = Queue(maxsize=1)
+    controller.event_listeners = {}
+    controller._show_resolution_change_cancelled = MagicMock()
+    controller._finish_resolution_return = MagicMock()
+    cancellation = {"task_id": 7, "return_allowed": True}
+    completion = {"task_id": 7, "succeeded": True, "cancelled": False}
+    controller.event_queue.put(("resolution_change_cancelled", cancellation))
+    controller.event_queue.put(("resolution_return_complete", completion))
+
+    controller.update_event()
+
+    controller._show_resolution_change_cancelled.assert_called_once_with(cancellation)
+    controller._finish_resolution_return.assert_called_once_with(completion)
 
 
 def test_update_stage_controller_silent(controller):

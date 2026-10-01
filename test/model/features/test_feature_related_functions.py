@@ -39,6 +39,7 @@ import pytest
 from navigate.model.features.feature_related_functions import (
     convert_str_to_feature_list,
     convert_feature_list_to_str,
+    load_dynamic_parameter_functions,
 )
 from navigate.model.features.common_features import (
     PrepareNextChannel,
@@ -131,3 +132,8 @@ def test_convert_feature_list_to_str(feature_list, expected_str):
 
     if feature_list:
         assert convert_str_to_feature_list(feature_str) == feature_list
+
+
+@pytest.mark.parametrize("feature_list", [None, []])
+def test_load_dynamic_parameter_functions_ignores_empty_feature_list(feature_list):
+    load_dynamic_parameter_functions(feature_list, "/unused/path")

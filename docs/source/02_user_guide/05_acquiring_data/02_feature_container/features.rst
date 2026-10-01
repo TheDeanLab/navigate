@@ -26,34 +26,38 @@ features:
 
 #. Select :menuselection:`Features --> Add Customized Feature List`. This will open a new dialog box that allows you to create a new feature list.
 
-#. Provide the feature list with a :guilabel:`Feature List Name` of your choice, and type the feature list content (which must be a list object). The feature list content could be the whole feature list or just a simple feature name. In this example, the feature list name is ``Feature Example 2``, and the content is a simple feature name:
+#. Provide the feature list with a :guilabel:`Feature List Name` of your choice, and type the feature list content (which must be a list object). The feature list content could be the whole feature list or just a simple feature name. In this example, the feature list name is ``TestFeature``, and the content is a simple feature name:
 
    .. code-block::
 
        [{"name": PrepareNextChannel}]
 
-   Once you select `Preview`, the feature list will be displayed in the  :guilabel:`Preview` window. If you are satisfied with the feature list, select `OK` to save it.
+   Once you select `Preview`, the feature list will be displayed in the  :guilabel:`Preview` window. If you are satisfied with the feature list, select :guilabel:`Add` to save it.
 
-   .. image:: images/step_3.png
-
+   .. image:: ../../../images/feature_gui_1.png
+      :alt: Feature list editor previewing PrepareNextChannel.
 
 #. You can edit the list of features directly by modifying the text, or through a popup menu that is available by right clicking the feature tile. The popup menu allows you to add a new feature, delete a feature, or edit a feature. In this example, click :guilabel:`Insert After`, and a new feature ``PrepareNextChannel`` will be inserted by default.
 
-   .. image:: images/step_4.png
+   .. image:: ../../../images/feature_gui_2.png
+      :alt: Feature tile context menu with Insert After.
 
-   .. image:: images/step_5.png
+   .. image:: ../../../images/feature_gui_3.png
+      :alt: Feature list with a second PrepareNextChannel tile.
 
-#. To change the identity of the inserted feature, you can select a different feature form the drop-down menu. For example, the feature can be changed from    ``PrepareNextChannel`` to ``LoopByCount``. The parameters of the feature can be changed automatically in the popup window.
+#. To change the identity of the inserted feature, you can select a different feature from the drop-down menu. For example, the feature can be changed from    ``PrepareNextChannel`` to ``LoopByCount``. The parameters of the selected feature appear in the popup window.
 
-   .. image:: images/step_6.png
+   .. image:: ../../../images/tutorial-feature-loop-parameters.png
+      :alt: LoopByCount parameters in the feature editor.
 
 #. If you click the preview button, a graphical representation of the feature list will be displayed.
 
-   .. image:: images/step_7.png
+   .. image:: ../../../images/tutorial-feature-loop.png
+      :alt: Feature list preview with PrepareNextChannel and LoopByCount.
 
 6. If you want a loop structure, type a pair of parentheses around the features, then click :guilabel:`Preview`. Given this design, you can loop through  arbitrary features in a user-selected format.
 
-   .. image:: images/step_8.png
+   .. image:: ../../../images/tutorial-feature-loop-grouped.png
       :alt: How to create a custom feature list.
 
 #. After editing the feature list, click :guilabel:`Add`. The new feature list will show up under the :guilabel:`Features` menu.
@@ -65,20 +69,22 @@ Editing Feature Lists on the Fly
 
 #. Select the feature list you want to run, choose "Customized" acquisition mode, and then click :guilabel:`Acquire`. A :guilabel:`Feature List Configuration` popup window will show up. In this popup window, you can see the structure of the selected feature list.
 
-   .. image:: images/step_16.png
+   .. image:: ../../../images/menu-features.png
+      :alt: Features menu with built-in routines and custom feature list commands.
 
-   .. image:: images/step_17.png
+   .. image:: ../../../images/tutorial-customized-acquire.png
+      :alt: Customized acquisition mode beside the Acquire button.
 
-   .. image:: images/step_18.png
+   .. image:: ../../../images/tutorial-human-in-the-loop.png
+      :alt: Human-in-the-loop feature list configuration.
 
-#. Click one feature in the preview window, a :guilabel:`Feature Parameters` window will show up. Then set the desired parameters (e.g., :guilabel:`planes`    in this screenshot). Close the :guilabel:`Feature Parameters` window.
+#. Click one feature in the preview window, a :guilabel:`Feature Parameters` window will show up. Then set the desired parameters (for example, the save directory for :guilabel:`ZStackAcquisition`). Close the :guilabel:`Feature Parameters` window.
 
-   .. image:: images/step_19.png
+   .. image:: ../../../images/tutorial-zstack-parameters.png
+      :alt: ZStackAcquisition parameters and save directory.
 
 #. Click :guilabel:`Confirm`. The feature list will start to run.
 
-
-   .. image:: images/step_20.png
 
 -----------
 
@@ -88,7 +94,8 @@ Deleting Feature Lists
 #. Select the feature list you want to delete in the :guilabel:`Features` menu.
 #. Then, go back to the :guilabel:`Features` menu and select :guilabel:`Delete Selected Feature` The feature list will be removed from the menu and the software.
 
-   .. image:: images/step_9.png
+   .. image:: ../../../images/menu-features.png
+      :alt: Features menu with built-in routines and custom feature list commands.
 
 -----------
 
@@ -125,24 +132,20 @@ You can load custom Python-based functions into the software, which will then be
 
 #. You can load customized functions in the software by selecting the menu :menuselection:`Features --> Advanced Setting`.
 
-   .. image:: images/step_10.png
+   .. image:: ../../../images/menu-features.png
+      :alt: Features menu with built-in routines and custom feature list commands.
 
-#. In the :guilabel:`Advanced Setting` popup window, choose the feature name with which you want to use the dynamic customized functions as feature parameters.
+#. In the :guilabel:`Advanced Setting` popup window, choose the feature that will use your custom function. This example uses ``VolumeSearch3D`` with an ``analysis_function`` named ``segment_data``. Replace the example path with the Python file containing your function.
 
-   .. image:: images/step_11.png
-
-
-   .. image:: images/step_12.png
+   .. image:: ../../../images/popup_tutorial_analysis_function.png
+      :alt: Popup tutorial analysis function.
 
 #. Click :guilabel:`Add`, A new line will appear and allow you to edit the parameter options. Type the function name which is defined in your python file.
 
-   .. image:: images/step_13.png
-
 #. Then click :guilabel:`Load` to choose your Python file.
-
-   .. image:: images/step_14.png
 
 #. When you run a feature list containing the feature you just set, the new function name will appear and you can choose the one you just added.
 
-   .. image:: images/step_15.png
+   .. image:: ../../../images/tutorial-volume-search-3d-parameters.png
+      :alt: VolumeSearch3D detection and target microscope parameters.
 

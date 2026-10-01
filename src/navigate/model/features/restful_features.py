@@ -43,6 +43,8 @@ import logging
 # Third Party Imports
 
 # Local Imports
+from navigate.config.configuration_schema import SettingSpec
+from navigate.model.features.base import FeatureBase
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -74,11 +76,31 @@ def prepare_service(service_url, **kwargs):
     return None
 
 
-class IlastikSegmentation:
+class IlastikSegmentation(FeatureBase):
     """Ilastik segmentation class.
 
     Uses Ilastik REST API to perform segmentation in a separate process.
     """
+
+    parameter_schema = {
+        "microscope_name": SettingSpec(
+            str,
+            default="Nanoscale",
+            label="Microscope",
+            help_text="High-resolution microscope used after segmentation.",
+            required=True,
+            dynamic_source="microscopes",
+        ),
+        "zoom_value": SettingSpec(
+            str,
+            default="N/A",
+            label="Zoom",
+            help_text="Zoom value for high-resolution follow-up imaging.",
+            required=True,
+            dynamic_source="zoom_values",
+            depends_on="microscope_name",
+        ),
+    }
 
     def __init__(self, model, microscope_name="Nanoscale", zoom_value="N/A"):
         """Initialize Ilastik segmentation class.

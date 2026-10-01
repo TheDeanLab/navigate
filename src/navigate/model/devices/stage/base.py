@@ -39,6 +39,7 @@ from abc import ABC, abstractmethod
 
 # Local Imports
 from navigate.tools.decorators import log_initialization
+from navigate.config.configuration_schema import SettingSpec
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,6 +49,40 @@ logger = logging.getLogger(p)
 @log_initialization
 class StageBase(ABC):
     """Stage Parent Class"""
+
+    configuration_schema = {
+        "axes": SettingSpec(
+            str,
+            default="",
+            label="Axes",
+            help_text="Comma-separated software axes provided by this stage.",
+            required=True,
+        ),
+        "axes_mapping": SettingSpec(
+            str,
+            default="",
+            label="Axes Mapping",
+            help_text="Controller-axis mapping corresponding to the configured axes.",
+            required=False,
+        ),
+        "joystick_axes": SettingSpec(
+            str,
+            default="",
+            label="Joystick Axes",
+            help_text="Stage axes controlled by the joystick, saved as a list.",
+            required=False,
+        ),
+        "coupled_axes": SettingSpec(
+            str,
+            default="",
+            label="Coupled Axes",
+            help_text=(
+                "Enter comma-separated leader:follower pairs for axes that move "
+                "together, for example: x:x1, y:y1."
+            ),
+            required=False,
+        ),
+    }
 
     def __init__(
         self,

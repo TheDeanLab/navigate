@@ -216,6 +216,7 @@ class StageController(GUIController):
 
         widgets = self.view.get_widgets()
         step_dict = self.stage_setting_dict[config.microscope_name]
+        step_settings = config.gui_setting.get("stage_movement", {})
         for axis in self.stage_axes:
             # Set Stage Limits
             widgets[axis].widget.min = self.position_min[axis]
@@ -225,15 +226,20 @@ class StageController(GUIController):
             else:
                 step_axis = axis
 
-            # Set step size.
-            # the minimum step should be non-zero and non-negative.
-            # TODO: Move to the GUI configuration file.
-            widgets[step_axis + "_step"].widget.configure(from_=0.01)
-            widgets[step_axis + "_step"].widget.configure(to=self.position_max[axis])
+            # Configure the step size control from the GUI settings.
+            axis_settings = step_settings.get(f"{step_axis}_step", {})
+            widgets[step_axis + "_step"].widget.configure(
+                from_=axis_settings.get("min", 0.01)
+            )
+            widgets[step_axis + "_step"].widget.configure(
+                to=(self.position_max[axis] - self.position_min[axis])
+            )
             step_increment = step_dict.get(f"{step_axis}_step", 10) // 10
             if step_increment == 0:
                 step_increment = 1
-            widgets[step_axis + "_step"].widget.configure(increment=step_increment)
+            widgets[step_axis + "_step"].widget.configure(
+                increment=axis_settings.get("step", step_increment)
+            )
             widgets[step_axis + "_step"].set(step_dict.get(f"{step_axis}_step", 10))
 
         # Joystick
@@ -504,14 +510,14 @@ class StageController(GUIController):
         return handler
 
     def stop_button_handler(self, *args: Iterable) -> None:
-        """This function stops the stage after a 250 ms debouncing period of time.
+        """Request an immediate stop for all stages.
 
         Parameters
         ----------
         *args : Iterable
             Variable length argument list
         """
-        self.view.after(250, lambda *args: self.parent_controller.execute("stop_stage"))
+        self.parent_controller.execute("stop_stage")
 
     #    Tai's home button
     def home_button_handler(self, *args: Iterable) -> None:
@@ -641,7 +647,7 @@ class StageController(GUIController):
                 "MicroscopeState"
             ]["microscope_name"]
             try:
-                step_size = int(self.widget_vals[axis + "_step"].get())
+                step_size = float(self.widget_vals[axis + "_step"].get())
             except (ValueError, tk.TclError):
                 return
             self.stage_setting_dict[microscope_name][axis + "_step"] = step_size
@@ -673,9 +679,10 @@ class StageController(GUIController):
                 description = f"\N{GREEK SMALL LETTER MU}m in {axis.upper()}."
 
             for i in range(len(btn_prefix)):
-                exec(
-                    f"self.view.{frame_prefix}_frame.{btn_prefix[i]}_{btn_suffix}.hover."
-                    f"setdescription('Move {step_multiple[i] * step_value} {description}')"
+                frame = getattr(self.view, f"{frame_prefix}_frame")
+                button = getattr(frame, f"{btn_prefix[i]}_{btn_suffix}")
+                button.hover.setdescription(
+                    f"Move {step_multiple[i] * step_value} {description}"
                 )
 
         # Position Frame

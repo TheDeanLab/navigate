@@ -14,20 +14,20 @@ See :ref:`camera_configuration` for hardware setup details.
 
 1. Open :menuselection:`Microscope Configuration --> Configure Microscope`.
 
-   .. image:: images/multi_cams_1.png
+   .. image:: ../../../images/menu-microscope-configuration.png
       :align: center
       :alt: Menu path to open Configure Microscope.
 
    A popup appears with available microscope configurations and hardware details.
 
-   .. image:: images/multi_cams_2.png
+   .. image:: ../../../images/popup_configure_microscopes.png
       :width: 400px
       :align: center
       :alt: Configure Microscope popup listing microscope configurations.
 
    Each microscope entry has three configurable options.
 
-   .. image:: images/multi_cams_3.png
+   .. image:: ../../../images/tutorial-microscopes-choices.png
       :width: 400px
       :align: center
       :alt: Per-microscope options shown in Configure Microscope.
@@ -35,7 +35,7 @@ See :ref:`camera_configuration` for hardware setup details.
 2. Set :guilabel:`Primary Microscope` and :guilabel:`Additional Microscope`,
    then click :guilabel:`Confirm`.
 
-   .. image:: images/multi_cams_4.png
+   .. image:: ../../../images/tutorial-microscopes-enabled.png
       :width: 400px
       :align: center
       :alt: Primary and additional microscope selections.
@@ -43,7 +43,7 @@ See :ref:`camera_configuration` for hardware setup details.
 3. Choose acquisition mode and click :guilabel:`Acquire` as usual.
    A popup window appears with images from the additional camera.
 
-   .. image:: images/multi_cams_5.png
+   .. image:: ../../../images/popup_additional_camera_view.png
       :align: center
       :alt: Additional camera view popup during acquisition.
 
@@ -54,7 +54,7 @@ When finished with multi-camera acquisition, reset to single-camera mode.
 
 1. Open :menuselection:`Microscope Configuration --> Configure Microscope`.
 
-   .. image:: images/multi_cams_1.png
+   .. image:: ../../../images/menu-microscope-configuration.png
       :align: center
       :alt: Menu path to open Configure Microscope.
 
@@ -62,7 +62,7 @@ When finished with multi-camera acquisition, reset to single-camera mode.
    :guilabel:`Additional Microscope` to :guilabel:`Not Use`.
    Click :guilabel:`Confirm`.
 
-   .. image:: images/multi_cams_9.png
+   .. image:: ../../../images/tutorial-microscopes-disabled.png
       :width: 400px
       :align: center
       :alt: Configure Microscope popup with Additional Microscope set to Not Use.

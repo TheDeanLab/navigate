@@ -36,7 +36,7 @@ dependencies = [
     'opencv-python',
     'numpy',
     'scikit-image',
-    'zarr',
+    'zarr<3',
     'fsspec',
     'h5py',
     'requests',

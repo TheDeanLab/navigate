@@ -34,6 +34,8 @@ import tkinter
 
 # Standard library imports
 from types import SimpleNamespace
+from pathlib import Path
+from typing import Optional
 from unittest.mock import MagicMock
 
 # Third party imports
@@ -390,6 +392,7 @@ class TestAcquireBarController:
             ]["MicroscopeState"]["image_mode"]
         )
 
+    @pytest.mark.parametrize("use_channel_labels", [True, False])
     @pytest.mark.parametrize(
         "text,is_acquiring, save,mode,file_types,choice",
         [
@@ -403,8 +406,17 @@ class TestAcquireBarController:
         ],
     )
     def test_launch_popup_window(
-        self, text, is_acquiring, save, mode, file_types, choice
-    ):
+        self,
+        text: str,
+        is_acquiring: bool,
+        save: Optional[bool],
+        mode: str,
+        file_types: list[str],
+        choice: Optional[str],
+        use_channel_labels: bool,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
         """Tests the launch_popup_window method of the AcquireBarController class
 
         This is the largest test for this controller.
@@ -430,7 +442,12 @@ class TestAcquireBarController:
             List of file types to save as
         choice : str
             Choice of the user in the popup window
-
+        use_channel_labels : bool
+            Whether the popup uses per-channel labels or the fallback label.
+        monkeypatch : pytest.MonkeyPatch
+            Restore configuration changes and intercept modal warnings.
+        tmp_path : pathlib.Path
+            Temporary acquisition output directory.
 
         Raises
         ------
@@ -438,6 +455,26 @@ class TestAcquireBarController:
             If the launch_popup_window method of the
             AcquireBarController class is not correct
         """
+
+        # Keep acquisition output independent of the user's configured directory.
+        monkeypatch.setitem(
+            self.acquire_bar_controller.saving_settings, "root_directory", str(tmp_path)
+        )
+        # Exercise a fresh form without relying on an existing saved label.
+        monkeypatch.setitem(self.acquire_bar_controller.saving_settings, "label", "")
+        channels = self.acquire_bar_controller.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["channels"]
+        for channel in channels.values():
+            monkeypatch.setitem(channel, "is_selected", use_channel_labels)
+
+        # Tk button callbacks can swallow exceptions; assert on the mock after
+        # invoking the button instead of raising inside a modal dialog callback.
+        warning = MagicMock()
+        monkeypatch.setattr(
+            "navigate.controller.sub_controllers.acquire_bar.messagebox.showwarning",
+            warning,
+        )
 
         # Setup Gui for test
         self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
@@ -552,11 +589,12 @@ class TestAcquireBarController:
                     widgets["user"].set("John")
                     widgets["tissue"].set("Heart")
                     widgets["celltype"].set("34T")
+                    widgets["prefix"].set("Cell_")
 
                     # Set dynamic label entries for each selected channel
                     # The popup creates entries such as label_488nm and label_562nm.
                     for key in widgets.keys():
-                        if key.startswith("label_"):
+                        if key == "label" or key.startswith("label_"):
                             widgets[key].set("BCB")
 
                     widgets["solvent"].set("uDISCO")
@@ -601,6 +639,7 @@ class TestAcquireBarController:
 
                     # Launch acquisition start/test
                     buttons["Done"].invoke()  # Call to launch acquisition
+                    warning.assert_not_called()
 
                     # Check if update experiment values works correctly
                     pop_vals = self.acquire_bar_controller.acquire_pop.get_variables()

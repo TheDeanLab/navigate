@@ -87,18 +87,65 @@ class TestArgParser(unittest.TestCase):
 class TestMainController(unittest.TestCase):
     """Unit Test for main.py"""
 
-    @patch("navigate.main.tk.Tk.mainloop")
+    @patch("navigate.main.log_setup")
+    @patch("navigate.main.evaluate_parser_input_arguments")
+    @patch("navigate.main.SplashScreen")
+    @patch("navigate.main.tk.Tk")
     @patch("navigate.main.Controller")
     @patch("argparse.ArgumentParser.parse_args")
     def test_main_call_controller(
-        self, mock_parse_args, mock_controller, mock_mainloop
+        self,
+        mock_parse_args,
+        mock_controller,
+        mock_tk,
+        mock_splash,
+        mock_evaluate_args,
+        mock_log_setup,
     ):
+        # This tests startup wiring. Real Tk updates can dispatch callbacks left
+        # by earlier GUI tests, and real logging replaces pytest's handlers.
         args = get_args()
         mock_parse_args.return_value = args
+        paths = [
+            Path(name)
+            for name in (
+                "configuration.yaml",
+                "experiment.yml",
+                "waveform_constants.yml",
+                "rest_api_config.yml",
+                "waveform_templates.yml",
+                "logs",
+                "gui_configuration.yml",
+                "multi_positions.yml",
+            )
+        ]
+        mock_evaluate_args.return_value = (*paths[:6], False, *paths[6:])
+        log_queue, log_listener = MagicMock(), MagicMock()
+        mock_log_setup.return_value = (log_queue, log_listener)
 
-        mock_mainloop.return_value = MagicMock()
         main()
-        mock_controller.assert_called_once()
+
+        mock_tk.assert_called_once_with()
+        mock_tk.return_value.withdraw.assert_called_once_with()
+        mock_evaluate_args.assert_called_once_with(args)
+        mock_log_setup.assert_called_once_with(
+            "logging.yml", paths[5], start_listener=True
+        )
+        mock_controller.assert_called_once_with(
+            root=mock_tk.return_value,
+            splash_screen=mock_splash.return_value,
+            configuration_path=paths[0],
+            experiment_path=paths[1],
+            waveform_constants_path=paths[2],
+            rest_api_path=paths[3],
+            waveform_templates_path=paths[4],
+            gui_configuration_path=paths[6],
+            multi_positions_path=paths[7],
+            log_queue=log_queue,
+            args=args,
+        )
+        mock_tk.return_value.mainloop.assert_called_once_with()
+        log_listener.stop.assert_called_once_with()
 
 
 # class TestMainConfigurator(unittest.TestCase):

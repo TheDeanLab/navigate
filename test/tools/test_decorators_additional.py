@@ -52,7 +52,9 @@ def test_performance_monitor_hides_args_and_result_by_default(monkeypatch):
 
 def test_log_initialization_logs_success(monkeypatch):
     logger = Mock()
-    monkeypatch.setattr(decorators.logging, "getLogger", Mock(return_value=logger))
+    logging_module = Mock()
+    logging_module.getLogger.return_value = logger
+    monkeypatch.setattr(decorators, "logging", logging_module)
 
     class Device:
         __module__ = "navigate.fake_device"
@@ -71,7 +73,9 @@ def test_log_initialization_logs_success(monkeypatch):
 
 def test_log_initialization_logs_failure_and_reraises(monkeypatch):
     logger = Mock()
-    monkeypatch.setattr(decorators.logging, "getLogger", Mock(return_value=logger))
+    logging_module = Mock()
+    logging_module.getLogger.return_value = logger
+    monkeypatch.setattr(decorators, "logging", logging_module)
 
     class Device:
         __module__ = "navigate.fake_device"

@@ -38,6 +38,7 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
 # Local Imports
+from navigate.view.theme import get_theme_color
 
 
 def text_array(text: str, offset: tuple = (0, 0)):
@@ -99,10 +100,14 @@ def create_arrow_image(
         image = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
     if fill is None:
-        style = ttk.Style()
-        fill = style.lookup("TLabel", "foreground", default="black")
-        if fill.startswith("system"):
-            fill = "black"
+        fallback_fill = get_theme_color("text", "black")
+        try:
+            style = ttk.Style()
+            fill = style.lookup("TLabel", "foreground", default=fallback_fill)
+        except Exception:
+            fill = fallback_fill
+        if not fill or str(fill).lower().startswith("system"):
+            fill = fallback_fill
 
     # draw line
     for i in range(len(xys) - 1):

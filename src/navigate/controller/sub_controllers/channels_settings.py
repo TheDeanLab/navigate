@@ -129,12 +129,13 @@ class ChannelSettingController(GUIController):
 
         self.mode = mode
         state = "normal" if mode == "stop" else "disabled"
-        state_readonly = "readonly" if mode == "stop" else "disabled"
+        laser_state = "readonly" if mode == "stop" else "disabled"
+        filterwheel_state = "readonly" if mode == "stop" else "disabled"
         for i in range(self.num):
             # State set regardless of operating mode.
             self.view.channel_checks[i].config(state=state)
             self.view.interval_spins[i].config(state="disabled")
-            self.view.laser_pulldowns[i]["state"] = state_readonly
+            self.view.laser_pulldowns[i]["state"] = laser_state
 
             if self.mode != "live" or (
                 self.mode == "live" and not self.view.channel_variables[i].get()
@@ -146,7 +147,7 @@ class ChannelSettingController(GUIController):
                 for j in range(self.number_of_filter_wheels):
                     self.view.filterwheel_pulldowns[
                         i * self.number_of_filter_wheels + j
-                    ]["state"] = state_readonly
+                    ]["state"] = filterwheel_state
                 self.view.defocus_spins[i].config(state=state)
 
     def initialize(self):
@@ -193,7 +194,8 @@ class ChannelSettingController(GUIController):
             channel_value = setting_dict[channel]
             for name in channel_vals:
                 if channel_value.get(name, None):
-                    # don't set the value if the filter wheel value not in the dropdown options
+                    # Do not set a filter wheel value that is absent from the
+                    # dropdown options.
                     if name in filter_wheel_names and channel_value[
                         name
                     ] not in self._get_dropdown_values(

@@ -75,7 +75,6 @@ def test_generate_new_frame_only_triggers_active_camera(
     )
 
 
-@pytest.mark.hardware
 @pytest.fixture(scope="module")
 def prepare_cameras(dummy_model):
     from navigate.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg

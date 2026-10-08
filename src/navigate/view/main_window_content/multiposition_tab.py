@@ -34,14 +34,20 @@
 import tkinter as tk
 from tkinter import ttk
 import logging
+from contextlib import contextmanager
 from typing import Any
 
 # Third Party Imports
 import pandas as pd
 from pandastable import Table, Menu, RowHeader, ColumnHeader
 from pandastable.headers import IndexHeader
+from pandastable import images as pt_images
 
 # Local Imports
+from navigate.tools.dataframe_compat import (
+    insert_blank_row,
+    sync_rowcolors_with_dataframe,
+)
 from navigate.view.custom_widgets.common import configure_grid, themed_grid
 from navigate.view.theme import get_theme_color, get_theme_font
 
@@ -58,6 +64,23 @@ def _safe_widget_configure(widget: Any, **kwargs: Any) -> None:
             widget.configure(**{key: value})
         except (tk.TclError, AttributeError):
             continue
+
+
+@contextmanager
+def _bind_pandastable_image_master(master: Any):
+    """Ensure pandastable icon images are created in the current Tk interpreter."""
+
+    original_photo_image = pt_images.tk.PhotoImage
+
+    def _photo_image_with_master(*args: Any, **kwargs: Any):
+        kwargs.setdefault("master", master)
+        return original_photo_image(*args, **kwargs)
+
+    pt_images.tk.PhotoImage = _photo_image_with_master
+    try:
+        yield
+    finally:
+        pt_images.tk.PhotoImage = original_photo_image
 
 
 class MultiPositionTab(tk.Frame):
@@ -506,6 +529,44 @@ class MultiPositionTable(Table):
         self.insertRow = None
         self.addStagePosition = None
 
+    def update_rowcolors(self) -> None:
+        """Keep rowcolors aligned with table data across pandas versions."""
+        self.rowcolors = sync_rowcolors_with_dataframe(
+            self.model.df, getattr(self, "rowcolors", None)
+        )
+
+    def addRow(self) -> None:
+        """Insert a blank row without using deprecated pandas append APIs."""
+        row = self.getSelectedRow()
+        if row is None:
+            row = self.model.df.shape[0]
+
+        self.model.df = insert_blank_row(self.model.df, row)
+        self.currentrow = max(0, min(int(row), self.model.df.shape[0] - 1))
+        self.update_rowcolors()
+        self.redraw()
+        self.tableChanged()
+
+    def _ensure_selection_anchor(self) -> bool:
+        """Ensure pandastable has a valid anchor before extending selection."""
+        if self.startrow is None:
+            self.startrow = self.currentrow
+        if self.startcol is None:
+            self.startcol = self.currentcol
+        return self.startrow is not None and self.startcol is not None
+
+    def handle_left_shift_click(self, event):
+        """Handle shift-click when pandastable has not seeded an anchor row."""
+        if not self._ensure_selection_anchor():
+            return
+        return super().handle_left_shift_click(event)
+
+    def handle_mouse_drag(self, event):
+        """Handle drag selection when pandastable has not seeded an anchor row."""
+        if not self._ensure_selection_anchor():
+            return
+        return super().handle_mouse_drag(event)
+
     def apply_theme(self, redraw=True):
         """Apply active Navigate theme tokens to pandastable surfaces."""
         panel_bg = get_theme_color("panel_bg", "#1a212b")
@@ -604,7 +665,11 @@ class MultiPositionTable(Table):
         callback : function
             The function that is called when the table is shown.
         """
-        super().show(callback)
+        # Pandastable creates statusbar icon PhotoImage objects without explicit
+        # masters. In multi-root test sessions this can bind icons to another Tk
+        # interpreter and later raise: image "pyimage..." doesn't exist.
+        with _bind_pandastable_image_master(self.parentframe):
+            super().show(callback)
 
         try:
             self.rowheader.destroy()

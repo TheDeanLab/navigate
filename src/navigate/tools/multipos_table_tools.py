@@ -39,6 +39,10 @@ import numpy as np
 import pandas as pd
 
 # Local application imports
+from navigate.tools.dataframe_compat import (
+    append_dataframe_rows,
+    sync_rowcolors_with_dataframe,
+)
 
 
 def sign(x):
@@ -274,7 +278,7 @@ def update_table(table, pos, axes, append=False):
         axes.extend([" "] * (axes_count - len(axes)))
     frame = pd.DataFrame(pos, columns=[axis.upper() for axis in axes])
     if append:
-        table.model.df = pd.concat([table.model.df, frame], ignore_index=True)
+        table.model.df = append_dataframe_rows(table.model.df, frame, ignore_index=True)
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1
@@ -301,9 +305,6 @@ def update_rowcolors(table) -> None:
     -------
     None
     """
-    df = table.model.df
-    rc = table.rowcolors
-
     # Prefer upstream behavior when available.
     try:
         table.update_rowcolors()
@@ -312,26 +313,14 @@ def update_rowcolors(table) -> None:
         # Pandastable still uses DataFrame.append(), which pandas 2 removed.
         if "append" not in str(exc):
             raise
+    except TypeError as exc:
+        # Older pandastable variants can also fail during drop(..., axis) calls.
+        if "drop" not in str(exc):
+            raise
 
-    if len(df) == len(rc):
-        rc = rc.copy()
-        rc.set_index(df.index, inplace=True)
-    elif len(df) > len(rc):
-        idx = df.index.difference(rc.index)
-        rc = pd.concat([rc, pd.DataFrame(index=idx)], axis=0)
-    else:
-        idx = rc.index.difference(df.index)
-        rc = rc.drop(index=idx)
-
-    cols_to_drop = list(rc.columns.difference(df.columns))
-    if cols_to_drop:
-        rc = rc.drop(columns=cols_to_drop)
-
-    cols_to_add = list(df.columns.difference(rc.columns))
-    for col in cols_to_add:
-        rc[col] = np.nan
-
-    table.rowcolors = rc
+    table.rowcolors = sync_rowcolors_with_dataframe(
+        table.model.df, getattr(table, "rowcolors", None)
+    )
 
 
 def write_to_csv_file(positions, file_path):

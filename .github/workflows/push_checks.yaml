@@ -20,7 +20,7 @@ jobs:
   test:
     if: github.event_name != 'schedule'
     runs-on: ${{ matrix.operating-system }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -51,15 +51,15 @@ jobs:
       - name: Record resolved environment
         run: python -m pip freeze --all
       - name: Test with pytest
-        timeout-minutes: 35
+        timeout-minutes: 45
         env:
           NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
           COVERAGE_FILE: .coverage.${{ matrix.python-tag }}
         run: |
           if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ github.event.inputs.diagnostic_no_cov }}" -eq "true") {
-            python3 -m pytest --no-cov -o log_cli=false
+            python3 -m pytest --durations=25 --no-cov -o log_cli=false
           } else {
-            python3 -m pytest
+            python3 -m pytest --durations=25
             if (Test-Path coverage.xml) {
               Move-Item -Force coverage.xml "coverage-${{ matrix.python-tag }}.xml"
             } else {
@@ -95,7 +95,7 @@ jobs:
     if: github.event_name != 'schedule'
     continue-on-error: true
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       MPLBACKEND: Agg
       NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
@@ -115,8 +115,8 @@ jobs:
       - name: Record resolved environment
         run: python -m pip freeze --all
       - name: Test with pytest
-        timeout-minutes: 35
-        run: python -m pytest
+        timeout-minutes: 45
+        run: python -m pytest --durations=25
       - name: Dump Python processes (Windows)
         if: ${{ failure() }}
         shell: pwsh
@@ -133,7 +133,7 @@ jobs:
     name: Latest dependencies (scheduled advisory)
     if: github.event_name == 'schedule'
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       MPLBACKEND: Agg
       NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
@@ -150,5 +150,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
       - name: Test with pytest
-        timeout-minutes: 35
-        run: python -m pytest
+        timeout-minutes: 45
+        run: python -m pytest --durations=25

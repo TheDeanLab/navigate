@@ -1,7 +1,11 @@
 """Regression tests for interrupted downloads and Bio-Formats cache integrity."""
 
 import hashlib
+import io
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+import socket
+import ssl
 from threading import Thread
 import time
 
@@ -121,3 +125,65 @@ def test_cache_directory_is_created(tmp_path, archive_server):
     archive = bioformats._get_bftools_archive(cache_dir)
     assert archive.parent == cache_dir
     assert archive.read_bytes() == _PAYLOAD
+
+
+@pytest.mark.parametrize("error_type", [socket.timeout, ssl.SSLError])
+@pytest.mark.parametrize("failures", [1, 3], ids=["recover", "exhaust"])
+def test_response_body_errors_are_retried(tmp_path, monkeypatch, error_type, failures):
+    responses = []
+    delays = []
+
+    class BrokenBody(io.BytesIO):
+        def read(self, size=-1):
+            if self.tell() == 0:
+                return super().read(5)
+            raise error_type("response-body read failed")
+
+    def open_response(url, *, timeout):
+        response = (
+            BrokenBody(_PAYLOAD) if len(responses) < failures else io.BytesIO(_PAYLOAD)
+        )
+        responses.append(response)
+        return response
+
+    monkeypatch.setattr(bioformats, "urlopen", open_response)
+    monkeypatch.setattr(bioformats, "_SHA256", hashlib.sha256(_PAYLOAD).hexdigest())
+    monkeypatch.setattr(time, "sleep", delays.append)
+
+    if failures == 1:
+        archive = bioformats._get_bftools_archive(tmp_path)
+        assert archive.read_bytes() == _PAYLOAD
+        assert len(responses) == 2
+        assert delays == [1]
+        assert list(tmp_path.iterdir()) == [archive]
+    else:
+        with pytest.raises(RuntimeError, match="after 3 attempts") as error:
+            bioformats._get_bftools_archive(tmp_path)
+        assert isinstance(error.value.__cause__, error_type)
+        assert len(responses) == 3
+        assert delays == [1, 2]
+        assert list(tmp_path.iterdir()) == []
+    assert all(response.closed for response in responses)
+
+
+def test_filesystem_errors_are_not_retried(tmp_path, monkeypatch):
+    responses = []
+    original_open = Path.open
+
+    def open_response(url, *, timeout):
+        response = io.BytesIO(_PAYLOAD)
+        responses.append(response)
+        return response
+
+    def deny_output(path, mode="r", *args, **kwargs):
+        if mode == "wb":
+            raise PermissionError("cache is not writable")
+        return original_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(bioformats, "urlopen", open_response)
+    monkeypatch.setattr(Path, "open", deny_output)
+    with pytest.raises(PermissionError, match="cache is not writable"):
+        bioformats._get_bftools_archive(tmp_path)
+    assert len(responses) == 1
+    assert responses[0].closed
+    assert list(tmp_path.iterdir()) == []

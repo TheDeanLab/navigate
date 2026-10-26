@@ -53,3 +53,13 @@ Verification record
 - Focused type checking reported zero errors (four advisory warnings).
 - Independent review found no actionable defects; native Windows execution
   remains for the PR CI jobs.
+
+Copilot review follow-up
+------------------------
+Response-body reads can raise ssl.SSLError or, on Python 3.9, socket.timeout
+without urllib wrapping them. Catch both explicitly while leaving filesystem
+errors outside the retry handler. Four new recovery/exhaustion cases failed
+before the fix and passed afterward; a filesystem-error regression confirms
+immediate propagation. All 40 metadata tests passed on Python 3.9 after the
+fix, including real XML validation; Black, Ruff, pinned hooks and diff checks
+passed. This extends the existing helper without adding an API or dependency.

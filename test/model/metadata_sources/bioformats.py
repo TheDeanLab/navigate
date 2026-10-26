@@ -4,6 +4,8 @@ import hashlib
 from http.client import HTTPException
 from pathlib import Path
 import shutil
+import socket
+import ssl
 from tempfile import TemporaryDirectory
 import time
 from urllib.error import URLError
@@ -68,6 +70,8 @@ def _get_bftools_archive(cache_dir: Path) -> Path:
                 URLError,
                 HTTPException,
                 TimeoutError,
+                socket.timeout,  # Distinct from TimeoutError on Python 3.9.
+                ssl.SSLError,
                 ConnectionError,
                 ValueError,
             ) as error:

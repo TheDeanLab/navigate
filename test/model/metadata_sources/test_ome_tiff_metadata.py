@@ -1,46 +1,31 @@
-import urllib.request
-import os
 import platform
+import subprocess
+from pathlib import Path
 
-from navigate.tools.file_functions import delete_folder
+import pytest
+
+from test.model.metadata_sources.bioformats import _get_bftools_archive
 
 
-def test_ome_metadata_valid(dummy_model):
+@pytest.mark.integration
+def test_ome_metadata_valid(dummy_model, pytestconfig, tmp_path):
     from navigate.model.metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
-    # First, download OME-XML validation tools
-    # new_path = https://downloads.openmicroscopy.org/bio-formats/8.1.0/artifacts/bftools.zip
-    # old_path = https://downloads.openmicroscopy.org/bio-formats/6.0.1/artifacts/bftools.zip
+    archive = _get_bftools_archive(Path(pytestconfig.cache.mkdir("bioformats")))
+    subprocess.run(["tar", "-xf", str(archive)], cwd=tmp_path, check=True, timeout=60)
 
-    urllib.request.urlretrieve(
-        "https://downloads.openmicroscopy.org/bio-formats/8.1.0/artifacts/bftools.zip",
-        "bftools.zip",
-    )
-
-    # Unzip
-    _ = os.popen("tar -xzvf bftools.zip").read()
-
-    # Create metadata
     md = OMETIFFMetadata()
-
     md.configuration = dummy_model.configuration
+    xml_path = tmp_path / "test.xml"
+    md.write_xml(str(xml_path))
 
-    # Write metadata to file
-    md.write_xml("test.xml")
-
-    # Validate the XML
-    if platform.system() == "Windows":
-        output = os.popen("bftools\\xmlvalid.bat test.xml").read()
-    else:
-        output = os.popen("./bftools/xmlvalid test.xml").read()
-
-    print(output)
-
-    # Delete bftools
-    delete_folder("./bftools")
-    os.remove("bftools.zip")
-
-    # Delete XML
-    os.remove("test.xml")
-
-    assert "No validation errors found." in output
+    launcher = "xmlvalid.bat" if platform.system() == "Windows" else "xmlvalid"
+    result = subprocess.run(
+        [str(tmp_path / "bftools" / launcher), str(xml_path)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=120,
+    )
+    assert "No validation errors found." in result.stdout, result.stdout + result.stderr

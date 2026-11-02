@@ -8,8 +8,9 @@ Function definitions can be found at 'dcamsdk4/doc/api_reference/dcamapi4_en.htm
 """
 
 # Standard Library Imports
+import ctypes
+from ctypes.util import find_library
 from ctypes import (
-    windll,
     Structure,
     c_int32,
     c_void_p,
@@ -24,6 +25,7 @@ from ctypes import (
 )
 from enum import IntEnum
 import logging
+import platform
 
 # Third Party Imports
 
@@ -35,7 +37,36 @@ logger = logging.getLogger(p)
 
 # ==== load shared library ====
 
-__dll = windll.LoadLibrary("dcamapi.dll")
+
+def _load_dcam_library() -> ctypes.CDLL:
+    """Load the installed DCAM runtime using the platform's calling convention.
+
+    Returns
+    -------
+    ctypes.CDLL
+        Native DCAM library (a WinDLL on Windows).
+
+    Raises
+    ------
+    OSError
+        If the platform is unsupported or the DCAM runtime cannot be loaded.
+    """
+    system = platform.system()
+    try:
+        if system == "Windows":
+            return ctypes.windll.LoadLibrary("dcamapi.dll")
+        if system == "Linux":
+            return ctypes.CDLL(find_library("dcamapi") or "libdcamapi.so.4")
+    except OSError as exc:
+        raise OSError(
+            f"Unable to load DCAM-API on {system}. Install the Hamamatsu "
+            "DCAM runtime for this platform and ensure its library is on the "
+            f"system library search path. Original error: {exc}"
+        ) from exc
+    raise OSError(f"DCAM-API supports Windows and Linux, not {system}.")
+
+
+__dll = _load_dcam_library()
 
 # ==== declare constants ====
 DCAMBUF_ATTACHKIND_FRAME = 0
@@ -699,6 +730,33 @@ dcamcap_firetrigger = __dll.dcamcap_firetrigger
 # dcamdev_setdata = __dll.dcamdev_setdata
 dcamdev_getstring = __dll.dcamdev_getstring
 
+# DCAM uses signed 32-bit status codes and pointer-sized device/wait handles.
+# Explicit prototypes also prevent structures being passed by value on Linux.
+_function_signatures = [
+    (dcamapi_init, [POINTER(DCAMAPI_INIT)]),
+    (dcamapi_uninit, []),
+    (dcamdev_open, [POINTER(DCAMDEV_OPEN)]),
+    (dcamdev_close, [c_void_p]),
+    (dcamwait_open, [POINTER(DCAMWAIT_OPEN)]),
+    (dcamwait_close, [c_void_p]),
+    (dcamprop_getattr, [c_void_p, POINTER(DCAMPROP_ATTR)]),
+    (dcamprop_getvalue, [c_void_p, c_int32, POINTER(c_double)]),
+    (dcamprop_setvalue, [c_void_p, c_int32, c_double]),
+    (dcamprop_setgetvalue, [c_void_p, c_int32, POINTER(c_double), c_int32]),
+    (dcambuf_attach, [c_void_p, POINTER(DCAMBUF_ATTACH)]),
+    (dcambuf_release, [c_void_p, c_int32]),
+    (dcamcap_start, [c_void_p, c_int32]),
+    (dcamcap_stop, [c_void_p]),
+    (dcamcap_transferinfo, [c_void_p, POINTER(DCAMCAP_TRANSFERINFO)]),
+    (dcamwait_start, [c_void_p, POINTER(DCAMWAIT_START)]),
+    (dcamwait_abort, [c_void_p]),
+    (dcamcap_firetrigger, [c_void_p, c_int32]),
+    (dcamdev_getstring, [c_void_p, POINTER(DCAMDEV_STRING)]),
+]
+for _function, _argtypes in _function_signatures:
+    _function.argtypes = _argtypes
+    _function.restype = c_int32
+
 
 class camReg(object):
     """
@@ -845,6 +903,7 @@ class DCAM:
 
         ret = self.__result(dcamdev_open(byref(paramopen)))
         if ret is False:
+            camReg.unregCamera()
             print("Camera dev_open failed")
             return False
 
@@ -865,7 +924,7 @@ class DCAM:
             dcamdev_close(self.__hdcam)
             self.__hdcam = 0
 
-        camReg.unregCamera()
+            camReg.unregCamera()
 
         return True
 
@@ -1142,7 +1201,7 @@ class DCAM:
         attach_param.iKind = DCAMBUF_ATTACHKIND_FRAME
         attach_param.buffer = self.data_ptr
         attach_param.buffercount = self.number_of_frames
-        if self.__result(dcambuf_attach(self.__hdcam, attach_param)):
+        if self.__result(dcambuf_attach(self.__hdcam, byref(attach_param))):
             self.pre_frame_count = 0
             self.pre_index = 0
             return self.__result(dcamcap_start(self.__hdcam, DCAMCAP_START_SEQUENCE))

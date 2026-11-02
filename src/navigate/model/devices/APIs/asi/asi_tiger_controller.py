@@ -162,9 +162,8 @@ class TigerController:
         list[str]
             Sorted list of COM ports
         """
-        com_ports = [port.device for port in list_ports.comports()]
-        com_ports.sort(key=lambda value: int(value[3:]))
-        return com_ports
+        # ListPortInfo provides natural ordering for both COM10 and ttyUSB10.
+        return [port.device for port in sorted(list_ports.comports())]
 
     def connect_to_serial(
         self,
@@ -198,9 +197,6 @@ class TigerController:
         self.serial.write_timeout = write_timeout
         self.serial.timeout = read_timeout
 
-        # set the size of the rx and tx buffers before calling open
-        self.serial.set_buffer_size(rx_size, tx_size)
-
         # try to open the serial port
         try:
             self.serial.open()
@@ -211,6 +207,10 @@ class TigerController:
             )
 
         if self.is_open():
+            # PySerial exposes this only on Windows, and requires an open port.
+            if hasattr(self.serial, "set_buffer_size"):
+                self.serial.set_buffer_size(rx_size, tx_size)
+
             # clear the rx and tx buffers
             self.serial.reset_input_buffer()
             self.serial.reset_output_buffer()
@@ -671,7 +671,9 @@ class TigerController:
         pct : float
             Percentage of the maximum speed
         """
-        local_axes_sequence = [axis for axis in self.default_axes_sequence if axis != "P"]
+        local_axes_sequence = [
+            axis for axis in self.default_axes_sequence if axis != "P"
+        ]
         if local_axes_sequence is None:
             logger.error(
                 f"{str(self)}, Default axes sequence is not set. Cannot set speed."

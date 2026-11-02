@@ -32,6 +32,7 @@
 # Standard Imports
 import logging
 import time
+from multiprocessing.managers import ListProxy
 from typing import Any, Optional
 
 # Third Party Imports
@@ -74,6 +75,16 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
     """
 
     configuration_schema = {
+        "apply_default_settings": SettingSpec(
+            bool,
+            default=True,
+            label="Apply Default Controller Settings",
+            help_text=(
+                "Apply Navigate alignment, accuracy, backlash, and speed defaults "
+                "when connecting. Disable to retain existing controller tuning."
+            ),
+            required=False,
+        ),
         "feedback_alignment": SettingSpec(
             str,
             default="",
@@ -128,7 +139,12 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             }
 
         self.asi_controller = device_connection
-        if device_connection is not None:
+        hardware = self.stage_configuration["hardware"]
+        if isinstance(hardware, (list, ListProxy)):
+            hardware = hardware[device_id]
+        if device_connection is not None and hardware.get(
+            "apply_default_settings", True
+        ):
             # Set feedback alignment values
             for ax, aa in feedback_alignment.items():
                 self.asi_controller.set_feedback_alignment(ax, aa)
@@ -678,7 +694,12 @@ class MS2000Stage(ASIStage):
 
         #: object: ASI MS2000 Controller
         self.asi_controller = device_connection
-        if device_connection is not None:
+        hardware = self.stage_configuration["hardware"]
+        if isinstance(hardware, (list, ListProxy)):
+            hardware = hardware[device_id]
+        if device_connection is not None and hardware.get(
+            "apply_default_settings", True
+        ):
             # Set feedback alignment values
             for ax, aa in feedback_alignment.items():
                 self.asi_controller.set_feedback_alignment(ax, aa)

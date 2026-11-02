@@ -325,7 +325,6 @@ class SynchronizedThreadPool:
         """Clear all the threads in the pool."""
 
         # move all the threads except first one to toDeleteList
-        sys.settrace(self.globaltrace)
         for resourceName in self.resources:
             with self.resources[resourceName] as temp:
                 headThread = temp.waitlist[0] if len(temp.waitlist) > 0 else None
@@ -345,7 +344,6 @@ class SynchronizedThreadPool:
         threadList : dict
             The threadList to kill.
         """
-        sys.settrace(self.globaltrace)
         # remove all the threads in threadList
         if resourceName in threadList:
             with threadList[resourceName] as temp:

@@ -109,25 +109,29 @@ def main():
         "logging.yml", logging_path, start_listener=True
     )
 
-    if command_line_args.configurator:
-        Configurator(root, splash_screen)
-    else:
-        Controller(
-            root=root,
-            splash_screen=splash_screen,
-            configuration_path=configuration_path,
-            experiment_path=experiment_path,
-            waveform_constants_path=waveform_constants_path,
-            rest_api_path=rest_api_path,
-            waveform_templates_path=waveform_templates_path,
-            gui_configuration_path=gui_configuration_path,
-            multi_positions_path=multi_positions_path,
-            log_queue=log_queue,
-            args=command_line_args,
-        )
+    try:
+        if command_line_args.configurator:
+            Configurator(root, splash_screen)
+        else:
+            Controller(
+                root=root,
+                splash_screen=splash_screen,
+                configuration_path=configuration_path,
+                experiment_path=experiment_path,
+                waveform_constants_path=waveform_constants_path,
+                rest_api_path=rest_api_path,
+                waveform_templates_path=waveform_templates_path,
+                gui_configuration_path=gui_configuration_path,
+                multi_positions_path=multi_positions_path,
+                log_queue=log_queue,
+                args=command_line_args,
+            )
 
-    root.mainloop()
-    log_listener.stop()
+        root.mainloop()
+    finally:
+        # Controller exit raises SystemExit from a Tk callback. Stop the logging
+        # consumer before multiprocessing tears down its queue in that path too.
+        log_listener.stop()
 
 
 if __name__ == "__main__":

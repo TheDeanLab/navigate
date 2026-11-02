@@ -136,7 +136,11 @@ class HamamatsuBase(CameraBase, SequenceDevice):
 
         self.set_trigger_mode()
 
-        self.camera_parameters["supported_trigger_sources"] = ["External", "Internal", "Software"]
+        self.camera_parameters["supported_trigger_sources"] = [
+            "External",
+            "Internal",
+            "Software",
+        ]
         self.camera_parameters["cooling"] = True
 
         cooling_state = self.camera_controller.get_property_value("cooling")
@@ -526,7 +530,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             Frame ids from HamamatsuOrca camera.
         """
         return self.camera_controller.get_frames()
-    
+
     def generate_new_frame(self) -> None:
         if not self.is_acquiring:
             return
@@ -559,6 +563,64 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         """
         temperature = self.camera_controller.get_property_value("temperature")
         return temperature
+
+
+@log_initialization
+class HamamatsuOrcaQuest2Camera(HamamatsuBase):
+    """ORCA-Quest 2 with standard area imaging through DCAM.
+
+    Geometry and pixel pitch are queried from the camera. Only Normal mode is
+    exposed until Quest-specific light-sheet timing has been implemented and
+    validated. Software triggering supports acquisition with a SyntheticDAQ.
+    """
+
+    def __init__(
+        self,
+        microscope_name: str,
+        device_connection: Any,
+        configuration: dict[str, Any],
+        *args: Optional[Any],
+        **kwargs: Optional[Any],
+    ) -> None:
+        """Initialize the Quest 2 camera.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Microscope name in the configuration.
+        device_connection : Any
+            Connected DCAM camera.
+        configuration : dict[str, Any]
+            Global microscope configuration.
+        """
+        super().__init__(microscope_name, device_connection, configuration)
+        self.camera_parameters["supported_sensor_modes"] = ["Normal"]
+        self.camera_parameters["cooling"] = (
+            self.camera_controller.get_property_value("cooling") is not False
+        )
+
+    def __str__(self) -> str:
+        """Return the camera model name."""
+        return "HamamatsuOrcaQuest2"
+
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time: float, shutter_width: int
+    ) -> tuple[float, float, float]:
+        """Reject unvalidated Quest 2 light-sheet timing.
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Requested exposure time in seconds.
+        shutter_width : int
+            Requested rolling-shutter width in pixels.
+
+        Raises
+        ------
+        NotImplementedError
+            Quest 2 light-sheet timing is not implemented.
+        """
+        raise NotImplementedError("ORCA-Quest 2 currently supports Normal mode only.")
 
 
 @log_initialization

@@ -35,11 +35,29 @@ import logging
 from logging.handlers import QueueHandler
 from queue import SimpleQueue
 from threading import Event
+import sys
 
 import pytest
 
 from navigate.controller.thread_pool import SelfLockThread, SynchronizedThreadPool
 from navigate.controller import thread_pool
+
+
+@pytest.mark.parametrize("operation", ["clear", "killThreadInList"])
+def test_pool_cleanup_preserves_callers_trace_function(operation):
+    """Pool cleanup must not make caught main-thread exceptions raise SystemExit."""
+    pool = SynchronizedThreadPool()
+    pool.registerResource("camera")
+    original = sys.gettrace()
+    try:
+        if operation == "clear":
+            pool.clear()
+        else:
+            pool.killThreadInList("camera", {})
+        after_cleanup = sys.gettrace()
+    finally:
+        sys.settrace(original)
+    assert after_cleanup is original
 
 
 @pytest.mark.parametrize("pooled", [False, True])

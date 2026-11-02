@@ -79,6 +79,9 @@ class SyntheticDAQ(DAQBase):
         #: str: Trigger mode. Self-trigger or external-trigger.
         self.trigger_mode = "self-trigger"
 
+        #: str | None: Channel selected by prepare_acquisition.
+        self.current_channel_key: str | None = None
+
     def __str__(self) -> str:
         """String representation of the class."""
         return "SyntheticDAQ"
@@ -117,11 +120,17 @@ class SyntheticDAQ(DAQBase):
             self.wait_acquisition_done()
 
     def wait_acquisition_done(self) -> None:
-        """Wait for a short time to generate an image"""
-        time.sleep(0.01)
+        """Trigger cameras and wait for the active channel's exposure/readout.
+
+        A real software-triggered camera must finish its sweep before the model
+        changes channel settings or issues another trigger. The 10 ms fallback
+        keeps standalone synthetic use working before waveforms are calculated.
+        """
         if self.trigger_mode == "self-trigger":
             for microscope_name in self.camera:
                 self.camera[microscope_name].generate_new_frame()
+        sweep_time = (self.sweep_times or {}).get(self.current_channel_key, 0.01)
+        time.sleep(max(0.01, sweep_time))
 
     def stop_acquisition(self) -> None:
         """Stop Acquisition."""

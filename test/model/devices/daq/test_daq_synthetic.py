@@ -1,4 +1,5 @@
 from navigate.model.devices.daq.synthetic import SyntheticDAQ
+import pytest
 
 
 class _FakeCamera:
@@ -52,7 +53,9 @@ def test_add_camera_and_wait_acquisition_self_trigger(monkeypatch):
     camera_b = _FakeCamera()
     daq.add_camera("ScopeA", camera_a)
     daq.add_camera("ScopeB", camera_b)
-    monkeypatch.setattr("navigate.model.devices.daq.synthetic.time.sleep", lambda *_: None)
+    monkeypatch.setattr(
+        "navigate.model.devices.daq.synthetic.time.sleep", lambda *_: None
+    )
 
     daq.wait_acquisition_done()
 
@@ -65,7 +68,9 @@ def test_wait_acquisition_done_external_trigger_skips_camera(monkeypatch):
     camera = _FakeCamera()
     daq.add_camera("ScopeA", camera)
     daq.trigger_mode = "external-trigger"
-    monkeypatch.setattr("navigate.model.devices.daq.synthetic.time.sleep", lambda *_: None)
+    monkeypatch.setattr(
+        "navigate.model.devices.daq.synthetic.time.sleep", lambda *_: None
+    )
 
     daq.wait_acquisition_done()
 
@@ -139,3 +144,25 @@ def test_update_analog_task_successful_transition():
 def test_stop_acquisition_is_noop():
     daq = SyntheticDAQ(_build_configuration())
     daq.stop_acquisition()
+
+
+@pytest.mark.parametrize(
+    "channel, duration", [("channel_1", 0.08), ("channel_2", 0.25)]
+)
+def test_software_trigger_waits_for_channel_sweep(monkeypatch, channel, duration):
+    """Wait for exposure/readout before the next channel changes or trigger."""
+    daq = SyntheticDAQ(_build_configuration())
+    daq.sweep_times = {"channel_1": 0.08, "channel_2": 0.25}
+    daq.prepare_acquisition(channel)
+    events = []
+    camera = _FakeCamera()
+    monkeypatch.setattr(camera, "generate_new_frame", lambda: events.append("trigger"))
+    daq.add_camera("ScopeA", camera)
+    monkeypatch.setattr(
+        "navigate.model.devices.daq.synthetic.time.sleep",
+        lambda seconds: events.append(("wait", seconds)),
+    )
+
+    daq.run_acquisition()
+
+    assert events == ["trigger", ("wait", duration)]

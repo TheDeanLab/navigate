@@ -226,9 +226,8 @@ class TigerController:
     def get_default_motor_axis_sequence(self) -> list[str]:
         """Get the default motor axis sequence from the ASI device
 
-        Only returns stage types XYMotor, ZMotor, Theta. Avoids problems associated
-        with other tiger controller cards, which could include piezos, filter wheels,
-        logic cards, etc.
+        Returns XYMotor, ZMotor, Theta, and piezo axes. Excludes slave axes,
+        filter wheels, and logic cards from the position-query sequence.
 
         Returns
         -------

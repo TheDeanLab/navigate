@@ -106,7 +106,8 @@ def test_quest2_camera_profile_and_software_trigger(
     camera = HamamatsuOrcaQuest2Camera("Quest2", connection, configuration)
     assert parameters["x_pixels"] == 4096
     assert parameters["y_pixels"] == 2304
-    assert parameters["supported_sensor_modes"] == ["Normal"]
+    assert (camera.x_pixels, camera.y_pixels) == (4096, 2304)
+    assert parameters["supported_sensor_modes"] == ["Normal", "Light-Sheet"]
     assert parameters["cooling"] is (cooling_value is not False)
     assert parameters["pixel_size_in_microns"] == 4.6
     assert str(camera) == "HamamatsuOrcaQuest2"
@@ -115,8 +116,6 @@ def test_quest2_camera_profile_and_software_trigger(
     camera.is_acquiring = True
     camera.generate_new_frame()
     connection.fire_software_trigger.assert_called_once_with()
-    with pytest.raises(NotImplementedError, match="Normal mode only"):
-        camera.calculate_light_sheet_exposure_time(0.01, 10)
 
 
 @pytest.fixture(scope="module")

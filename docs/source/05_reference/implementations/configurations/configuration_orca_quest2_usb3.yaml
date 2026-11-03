@@ -22,6 +22,8 @@ microscopes:
       hardware:
         type: HamamatsuOrcaQuest2
         serial_number: REPLACE_WITH_CAMERA_SERIAL
+      # Linux DCAM 4.0.7087 USB restart workaround; requires only one camera.
+      reinitialize_on_restart: true
       defect_correct_mode: 1.0
       settle_down: 0.0
       flip_x: false

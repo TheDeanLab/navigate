@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+import math
 from typing import Any, Optional
 
 # Third Party Imports
@@ -567,12 +568,25 @@ class HamamatsuBase(CameraBase, SequenceDevice):
 
 @log_initialization
 class HamamatsuOrcaQuest2Camera(HamamatsuBase):
-    """ORCA-Quest 2 with standard area imaging through DCAM.
+    """ORCA-Quest 2 area and unidirectional light-sheet imaging through DCAM.
 
-    Geometry and pixel pitch are queried from the camera. Only Normal mode is
-    exposed until Quest-specific light-sheet timing has been implemented and
-    validated. Software triggering supports acquisition with a SyntheticDAQ.
+    Light-sheet timing uses pairs of sensor rows. USB frame pacing is kept
+    separate from the illumination sweep through ``minimum_frame_interval``.
     """
+
+    configuration_schema = {
+        **HamamatsuBase.configuration_schema,
+        "reinitialize_on_restart": SettingSpec(
+            bool,
+            default=False,
+            required=False,
+            label="Reinitialize DCAM on Restart",
+            help_text=(
+                "Work around stale USB capture state on Linux DCAM 4.0.7087. "
+                "Requires a single camera; adds startup delay."
+            ),
+        ),
+    }
 
     def __init__(
         self,
@@ -594,7 +608,14 @@ class HamamatsuOrcaQuest2Camera(HamamatsuBase):
             Global microscope configuration.
         """
         super().__init__(microscope_name, device_connection, configuration)
-        self.camera_parameters["supported_sensor_modes"] = ["Normal"]
+        self.camera_parameters["supported_sensor_modes"] = ["Normal", "Light-Sheet"]
+        self.camera_parameters["supported_readout_directions"] = [
+            "Top-to-Bottom",
+            "Bottom-to-Top",
+        ]
+        self.minimum_frame_interval = 0.0
+        self.x_pixels = int(self.camera_parameters["x_pixels"])
+        self.y_pixels = int(self.camera_parameters["y_pixels"])
         self.camera_parameters["cooling"] = (
             self.camera_controller.get_property_value("cooling") is not False
         )
@@ -603,24 +624,150 @@ class HamamatsuOrcaQuest2Camera(HamamatsuBase):
         """Return the camera model name."""
         return "HamamatsuOrcaQuest2"
 
+    def initialize_image_series(
+        self, data_buffer: Optional[list] = None, number_of_frames: int = 100
+    ) -> None:
+        """Start capture, optionally resetting stale single-camera USB state."""
+        if getattr(
+            self, "_capture_started_before", False
+        ) and self.camera_parameters.get("reinitialize_on_restart", False):
+            self.camera_controller.reinitialize()
+        if not self.camera_controller.start_acquisition(data_buffer, number_of_frames):
+            raise RuntimeError("ORCA-Quest 2 could not start capture.")
+        self._capture_started_before = True
+        self.is_acquiring = True
+
+    def _set_checked(self, name: str, value: float) -> None:
+        """Apply a DCAM property, raising on rejection instead of continuing."""
+        if not self.camera_controller.set_property_value(name, value):
+            raise RuntimeError(f"ORCA-Quest 2 could not set {name} to {value}.")
+
+    def set_sensor_mode(self, mode: str) -> None:
+        """Set area/light-sheet mode while stopped and refresh ROI constraints."""
+        if mode not in ("Normal", "Light-Sheet"):
+            raise ValueError(f"Unsupported ORCA-Quest 2 sensor mode: {mode}")
+        if self.is_acquiring:
+            raise RuntimeError("Stop acquisition before changing sensor mode.")
+        if mode == "Light-Sheet":
+            self._set_checked("binning", 1)
+        # The base implementation refreshes mode-dependent ROI size limits.
+        super().set_sensor_mode(mode)
+        expected = 12 if mode == "Light-Sheet" else 1
+        if self.camera_controller.get_property_value("sensor_mode") != expected:
+            raise RuntimeError(f"ORCA-Quest 2 could not enter {mode} mode.")
+        self.minimum_frame_interval = 0.0
+
+    def set_readout_direction(self, mode: str) -> None:
+        """Select forward/backward; alternating directions are not validated."""
+        directions = {"Top-to-Bottom": 1, "Bottom-to-Top": 2}
+        if mode not in directions:
+            raise ValueError(f"Unsupported ORCA-Quest 2 readout direction: {mode}")
+        self._set_checked("readout_direction", directions[mode])
+
+    def set_binning(self, binning_string: str) -> bool:
+        """Reject binning in light-sheet mode before changing image geometry."""
+        if (
+            self.camera_controller.get_property_value("sensor_mode") == 12
+            and binning_string != "1x1"
+        ):
+            raise ValueError("ORCA-Quest 2 Light-Sheet mode requires 1x1 binning.")
+        return super().set_binning(binning_string)
+
+    def set_line_interval(self, line_interval_time: float) -> bool:
+        """Apply the line interval and retain the actual DCAM readback.
+
+        Parameters
+        ----------
+        line_interval_time : float
+            Line interval in seconds.
+
+        Returns
+        -------
+        bool
+            True when DCAM accepted the setting; raises on rejection.
+        """
+        self._set_checked("internal_line_interval", line_interval_time)
+        self.camera_parameters["line_interval"] = self.get_line_interval()
+        return True
+
+    def set_exposure_time(self, exposure_time: float) -> bool:
+        """Apply exposure and refresh the transport-dependent trigger period.
+
+        Parameters
+        ----------
+        exposure_time : float
+            Exposure duration in seconds.
+
+        Returns
+        -------
+        bool
+            True when the setting and trigger-period query succeeded.
+        """
+        self._set_checked("exposure_time", exposure_time)
+        period = self.camera_controller.get_property_value("minimum_trigger_interval")
+        if period is False or not math.isfinite(period) or period < 0:
+            raise RuntimeError("ORCA-Quest 2 minimum trigger interval unavailable.")
+        self.minimum_frame_interval = float(period)
+        return True
+
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time: float, shutter_width: int
     ) -> tuple[float, float, float]:
-        """Reject unvalidated Quest 2 light-sheet timing.
+        """Convert sweep seconds and slit width in rows to Quest timing.
 
         Parameters
         ----------
         full_chip_exposure_time : float
-            Requested exposure time in seconds.
+            Requested full sweep duration in seconds.
         shutter_width : int
-            Requested rolling-shutter width in pixels.
+            Requested rolling slit width in sensor rows.
 
-        Raises
-        ------
-        NotImplementedError
-            Quest 2 light-sheet timing is not implemented.
+        Returns
+        -------
+        exposure_time : float
+            Exposure duration for each row pair, in seconds.
+        camera_line_interval : float
+            Quantized line interval in seconds.
+        full_chip_exposure_time : float
+            Effective sweep duration in seconds.
+
+        Notes
+        -----
+        Two rows advance per interval; the sweep includes 4H
+        trigger delay and 5H readout overhead, matching Navigate's convention.
+        Odd slit widths round up to a whole row pair. Interval limits and steps
+        are queried in light-sheet mode from the connected camera.
         """
-        raise NotImplementedError("ORCA-Quest 2 currently supports Normal mode only.")
+        if not math.isfinite(full_chip_exposure_time) or full_chip_exposure_time <= 0:
+            raise ValueError("Light-sheet sweep duration must be finite and positive.")
+        if (
+            not math.isfinite(shutter_width)
+            or int(shutter_width) != shutter_width
+            or not 1 <= shutter_width <= self.y_pixels
+        ):
+            raise ValueError(
+                "Light-sheet slit width must be whole rows within the ROI."
+            )
+        if self.camera_controller.get_property_value("sensor_mode") == 12:
+            low, high, step = self.camera_controller.get_property_range(
+                "internal_line_interval"
+            )
+        else:
+            # The GUI previews waveforms before applying the sensor mode.
+            # Normal mode reports a fixed interval, not the light-sheet range.
+            # Use Quest 2 limits for preview; query DCAM again in actual mode.
+            low, high, step = 7.2e-6, 237.6e-6, 0.24e-6
+        if any(v is None or not math.isfinite(v) for v in (low, high, step)) or not (
+            0 < low <= high and step > 0
+        ):
+            raise RuntimeError("ORCA-Quest 2 line-interval range unavailable.")
+        pairs = math.ceil(shutter_width / 2)
+        sweep_intervals = 9 + self.y_pixels / 2 + pairs
+        requested = full_chip_exposure_time / sweep_intervals
+        interval = min(high, max(low, requested))
+        interval = min(high, low + math.ceil((interval - low) / step - 1e-9) * step)
+        self.camera_parameters["line_interval"] = interval
+        return pairs * interval, interval, sweep_intervals * interval
 
 
 @log_initialization

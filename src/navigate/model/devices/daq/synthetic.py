@@ -130,7 +130,17 @@ class SyntheticDAQ(DAQBase):
             for microscope_name in self.camera:
                 self.camera[microscope_name].generate_new_frame()
         sweep_time = (self.sweep_times or {}).get(self.current_channel_key, 0.01)
-        time.sleep(max(0.01, sweep_time))
+        # USB transport may need longer than a light-sheet sensor sweep. Keep
+        # that dead time out of the illumination waveform itself. The margin
+        # avoids firing exactly on a device's minimum-ready boundary.
+        frame_period = max(
+            (
+                getattr(camera, "minimum_frame_interval", 0.0)
+                for camera in self.camera.values()
+            ),
+            default=0.0,
+        )
+        time.sleep(max(0.01, sweep_time, frame_period * 1.05))
 
     def stop_acquisition(self) -> None:
         """Stop Acquisition."""

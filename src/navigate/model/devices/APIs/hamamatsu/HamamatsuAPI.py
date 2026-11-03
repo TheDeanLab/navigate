@@ -908,6 +908,7 @@ class DCAM:
             return False
 
         self.__hdcam = c_void_p(paramopen.hdcam)
+        self.__iDevice = paramopen.index
 
         return True
 
@@ -926,6 +927,56 @@ class DCAM:
 
             camReg.unregCamera()
 
+        return True
+
+    def reinitialize(self) -> bool:
+        """Reset a sole camera's DCAM session, preserving supported settings.
+
+        This opt-in workaround clears stale USB capture state observed with
+        ORCA-Quest 2 on Linux DCAM 4.0.7087. The caller must stop capture first.
+        Refuse a reset while other cameras use the shared DCAM runtime.
+        """
+        if camReg.numCameras != 1:
+            raise RuntimeError("DCAM reinitialization requires the only open camera.")
+        names = [
+            "sensor_mode",
+            "readout_speed",
+            "binning",
+            "readout_direction",
+            "trigger_source",
+            "trigger_active",
+            "trigger_mode",
+            "trigger_polarity",
+            "trigger_delay",
+            "defect_correct_mode",
+            "subarray_hsize",
+            "subarray_vsize",
+            "subarray_hpos",
+            "subarray_vpos",
+            "subarray_mode",
+            "internal_line_interval",
+            "exposure_time",
+        ]
+        settings = {name: self.get_property_value(name) for name in names}
+        if any(value is False for value in settings.values()):
+            raise RuntimeError("Cannot snapshot DCAM settings for restart.")
+        index = self.__iDevice
+        self.dev_close()
+        if not self.dev_open(index) or not self.__open_hdcamwait():
+            raise RuntimeError("Cannot reopen DCAM camera after restart.")
+        # Make ROI restoration independent of the driver's initial ROI state.
+        for name, value in [
+            ("subarray_mode", 1),
+            ("subarray_hpos", 0),
+            ("subarray_vpos", 0),
+            *settings.items(),
+        ]:
+            if not self.prop_setvalue(property_dict[name], value):
+                raise RuntimeError(f"Cannot restore DCAM property {name}.")
+        for name, value in settings.items():
+            actual = self.get_property_value(name)
+            if actual is False or abs(actual - value) > max(1e-12, abs(value) * 1e-6):
+                raise RuntimeError(f"DCAM restart changed {name}: {value} -> {actual}.")
         return True
 
     # dcamprop functions

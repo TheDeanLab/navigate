@@ -166,3 +166,20 @@ def test_software_trigger_waits_for_channel_sweep(monkeypatch, channel, duration
     daq.run_acquisition()
 
     assert events == ["trigger", ("wait", duration)]
+
+
+def test_usb_camera_period_can_exceed_light_sheet_sweep(monkeypatch):
+    daq = SyntheticDAQ(_build_configuration())
+    daq.sweep_times = {"channel_1": 0.012}
+    daq.prepare_acquisition("channel_1")
+    camera = _FakeCamera()
+    camera.minimum_frame_interval = 0.057
+    daq.add_camera("ScopeA", camera)
+    sleeps = []
+    monkeypatch.setattr(
+        "navigate.model.devices.daq.synthetic.time.sleep", sleeps.append
+    )
+    daq.run_acquisition()
+    assert camera.generate_calls == 1
+    assert sleeps[0] >= 0.057
+    assert daq.sweep_times["channel_1"] == 0.012

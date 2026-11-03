@@ -203,3 +203,61 @@ def test_capture_rejects_failed_zero_offset_read(capture_helpers):
     camera = SimpleNamespace(prop_getvalue=lambda prop: False)
     with pytest.raises(AssertionError):
         capture_helpers.read_property(camera, 0x00420350)
+
+
+def test_reinitialize_refuses_to_reset_other_open_cameras(monkeypatch):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    api.camReg.numCameras = 2
+    with pytest.raises(RuntimeError, match="only open camera"):
+        camera.reinitialize()
+
+
+def test_reinitialize_restores_settings_including_zero_positions(monkeypatch):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__iDevice = 7
+    api.camReg.numCameras = 1
+    original = {name: 1.0 for name in api.property_dict}
+    original.update(
+        sensor_mode=12,
+        subarray_hsize=512,
+        subarray_vsize=512,
+        subarray_hpos=0,
+        subarray_vpos=896,
+        internal_line_interval=72.96e-6,
+        exposure_time=729.6e-6,
+        trigger_delay=0,
+    )
+    state = original.copy()
+    events = []
+    camera.get_property_value = lambda name: state[name]
+
+    def close():
+        events.append("close")
+        state.clear()
+
+    def open_device(index):
+        assert index == 7
+        events.append("open")
+        return True
+
+    camera.dev_close = close
+    camera.dev_open = open_device
+    camera._DCAM__open_hdcamwait = lambda: True
+    names_by_id = {prop: name for name, prop in api.property_dict.items()}
+
+    def set_value(prop, value):
+        state[names_by_id[prop]] = value
+        return True
+
+    camera.prop_setvalue = set_value
+    assert camera.reinitialize()
+    assert events == ["close", "open"]
+    assert state
+    assert all(value == original[name] for name, value in state.items())
+    assert state["subarray_hpos"] == 0
+    assert state["subarray_vpos"] == 896
+    assert state["internal_line_interval"] == 72.96e-6

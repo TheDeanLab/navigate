@@ -72,6 +72,44 @@ Hamamatsu
 
 -----------------
 
+ORCA-Quest 2 (USB)
+~~~~~~~~~~~~~~~~~
+
+Use the ``HamamatsuOrcaQuest2`` camera type. Normal mode and forward/backward
+Light-Sheet mode are supported. In :guilabel:`Camera Settings`, select
+:guilabel:`Light-Sheet`, then :guilabel:`Top-to-Bottom` or
+:guilabel:`Bottom-to-Top`. Light-sheet mode uses 1x1 binning. Alternating readout
+directions are not exposed by this camera class.
+
+The rolling slit advances two sensor rows per line interval. Odd slit widths
+round up to a row pair, and sweep durations adjust to the camera's line-interval
+limits and increments. USB transfer can take longer than the sensor sweep;
+SyntheticDAQ waits for the reported minimum frame period with a small margin.
+This permits camera-only testing with software triggers, but does not establish
+synchronization with illumination hardware.
+
+Linux DCAM 4.0.7087 was observed to return no frames for initial software triggers
+after restarting capture. For a single-camera USB setup, set
+``reinitialize_on_restart: true`` under the camera configuration, alongside
+``defect_correct_mode``. This opt-in workaround closes and reinitializes DCAM,
+restores the application's camera settings, and checks their readbacks before
+restarting. It adds several seconds to acquisition startup and refuses to reset
+DCAM while another camera is open. It is disabled by default for other setups.
+
+Camera-only examples are provided in
+:download:`configuration_orca_quest2_usb3.yaml <../../05_reference/implementations/configurations/configuration_orca_quest2_usb3.yaml>`
+and
+:download:`experiment_orca_quest2_lightsheet.yml <../../05_reference/implementations/configurations/experiment_orca_quest2_lightsheet.yml>`.
+Back up your configuration before using these files, replace the example camera
+serial, and retain simulated auxiliary devices until you have validated the
+actual hardware. Start normally with :command:`navigate`; ``-sh`` would also
+simulate the camera.
+
+See the manufacturer's `ORCA-Quest 2 manual
+<https://camera.hamamatsu.com/content/dam/hamamatsu-photonics/sites/static/sys/en/manual/C15550-22UP_IM_En.pdf>`_,
+section 11-2, for light-sheet timing and USB throughput limits.
+
+
 ORCA-Flash4.0 V3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

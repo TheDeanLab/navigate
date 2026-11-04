@@ -1,0 +1,195 @@
+# Quest 2 camera, Tiger XYZ and serial ADEPT focus; theta/auxiliaries simulated.
+# Logical f maps to Tiger P. Hardware F is the FTP slave: never map it here.
+# Match port/serial to your controller and confirm PM=0, PR=3, UM=10000.
+# Set and validate controller WT settling time before automated imaging.
+microscopes:
+  ORCA-Quest2:
+    daq:
+      hardware:
+        name: daq
+        type: Synthetic
+      sample_rate: 100000
+      sweep_time: 0.2
+      master_trigger_out_line: PXI6259/port0/line1
+      camera_trigger_out_line: /PXI6259/ctr0
+      trigger_source: /PXI6259/PFI0
+      laser_port_switcher: PXI6733/port0/line0
+      laser_switch_state: false
+    camera:
+      hardware:
+        type: HamamatsuOrcaQuest2
+        serial_number: REPLACE_WITH_CAMERA_SERIAL
+      reinitialize_on_restart: true
+      defect_correct_mode: 1.0
+      settle_down: 0.0
+      flip_x: false
+      flip_y: false
+      pixel_size_in_microns: 4.6
+    remote_focus:
+      hardware:
+        name: daq
+        type: Synthetic
+        channel: PXI6259/ao2
+        min: 0
+        max: 5
+      delay_percent: 7.5
+      ramp_rising_percent: 85
+      ramp_falling_percent: 2.5
+      amplitude: 0.7
+      offset: 2.3
+      smoothing: 0.0
+    galvo:
+    - hardware:
+        name: daq
+        type: Synthetic
+        channel: PXI6259/ao0
+        min: -5
+        max: 5
+      waveform: sine
+      frequency: 99.9
+      amplitude: 2.5
+      offset: 0.5
+      duty_cycle: 50
+      phase: 1.57079
+    filter_wheel:
+      hardware:
+        name: filter_wheel
+        type: Synthetic
+        wheel_number: 1
+      filter_wheel_delay: 0.0
+      available_filters:
+        Empty-Alignment: 0
+    stage:
+      hardware:
+      - type: ASI
+        serial_number: '0001'
+        port: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
+        baudrate: 115200
+        timeout: 1
+        axes:
+        - x
+        - y
+        - z
+        - f
+        axes_mapping:
+        - X
+        - Y
+        - Z
+        - P
+        apply_default_settings: false
+      - type: Synthetic
+        serial_number: synthetic-theta
+        axes:
+        - theta
+        axes_mapping:
+        - theta
+      joystick_axes:
+      - x
+      - y
+      - z
+      x_max: 100000
+      x_min: -100000
+      y_max: 100000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
+      f_max: 75.0
+      f_min: -75.0
+      theta_max: 360
+      theta_min: 0
+      x_step: 10
+      y_step: 10
+      z_step: 10
+      theta_step: 30
+      f_step: 1.0
+      velocity: 1000
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      theta_offset: 0
+      f_offset: 0.0
+      flip_x: false
+      flip_y: false
+      flip_z: false
+    zoom:
+      hardware:
+        type: Synthetic
+        servo_id: 0
+      position:
+        1x: 0
+      pixel_size:
+        1x: 4.6
+    shutter:
+      hardware:
+        name: daq
+        type: Synthetic
+        channel: PXI6259/port0/line0
+        min: 0
+        max: 5
+    laser:
+    - wavelength: 488
+      onoff:
+        hardware:
+          name: daq
+          type: Synthetic
+          channel: PXI6733/port0/line2
+          min: 0
+          max: 5
+      power:
+        hardware:
+          name: daq
+          type: Synthetic
+          channel: PXI6733/ao0
+          min: 0
+          max: 5
+      type: Synthetic
+      index: 0
+      delay_percent: 10
+      pulse_percent: 87
+gui:
+  channels:
+    count: 1
+    laser_power:
+      min: 0
+      max: 100
+      step: 10
+    exposure_time:
+      min: 1
+      max: 1000
+      step: 5
+    interval_time:
+      min: 0
+      max: 1000
+      step: 5
+  stack_acquisition:
+    step_size:
+      min: 0.1
+      max: 1000
+      step: 0.1
+    start_pos:
+      min: -5000
+      max: 5000
+      step: 1
+    end_pos:
+      min: -5000
+      max: 10000
+      step: 1
+  timepoint:
+    timepoints:
+      min: 1
+      max: 1000
+      step: 1
+    stack_pause:
+      min: 0
+      max: 1000
+      step: 1
+BDVParameters:
+  shear:
+    shear_data: false
+    shear_dimension: YZ
+    shear_angle: 45
+  rotate:
+    rotate_data: false
+    X: 0
+    Y: 0
+    Z: 0

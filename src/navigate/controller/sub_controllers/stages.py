@@ -456,7 +456,7 @@ class StageController(GUIController):
             # guarantee stage won't move out of limits
             if float(position_val.get()) != temp:
                 position_val.set(temp)
-                self.position_callback(axis)()
+                self.position_callback(axis, require_focus=False)()
 
         return handler
 
@@ -505,7 +505,7 @@ class StageController(GUIController):
             # guarantee stage won't move out of limits
             if float(position_val.get()) != temp:
                 position_val.set(temp)
-                self.position_callback(axis)()
+                self.position_callback(axis, require_focus=False)()
 
         return handler
 
@@ -562,7 +562,11 @@ class StageController(GUIController):
         self.view.force_enable_all_axes()
 
     def position_callback(
-        self, axis: str, *args: Iterable, **kwargs: dict
+        self,
+        axis: str,
+        *args: Iterable,
+        require_focus: bool = True,
+        **kwargs: dict,
     ) -> Callable[[], None]:
         """Callback functions bind to position variables.
 
@@ -575,6 +579,10 @@ class StageController(GUIController):
             axis can be 'x', 'y', 'z', 'theta', 'f'
         *args : Iterable
             Variable length argument list
+        require_focus : bool
+            Ignore focus-out events when the application has no keyboard focus.
+            Explicit jog buttons disable this check so their displayed target
+            is still sent when Tk reports no focused widget.
         kwargs : Iterable
             Variable length keyword argument list
 
@@ -591,7 +599,7 @@ class StageController(GUIController):
         def handler(*_):
             """Callback functions bind to position variables."""
             # check if focus on another window
-            if not self.view.focus_get():
+            if require_focus and not self.view.focus_get():
                 return
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])

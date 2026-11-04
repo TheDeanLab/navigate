@@ -1,0 +1,93 @@
+# Companion starting settings for configuration_orca_quest2_usb3.yaml.
+# Experimental: acquisition restart is not yet reliable.
+User:
+  name: Kevin_Dean
+Saving:
+  root_directory: .
+  save_directory: .
+  user: Kevin
+  tissue: Camera-test
+  celltype: ORCA-Quest2
+  label: USB3
+  file_type: TIFF
+  date: 2022-06-07
+  solvent: Water
+CameraParameters:
+  x_pixels: 4096
+  y_pixels: 2304
+  img_x_pixels: 4096
+  img_y_pixels: 2304
+  center_x: 2048
+  center_y: 1152
+  is_centered: true
+  sensor_mode: Normal
+  readout_direction: Top-to-Bottom
+  number_of_pixels: 10
+  binning: 1x1
+  databuffer_size: 8
+  trigger_source: Software
+  ORCA-Quest2:
+    x_pixels: 4096
+    y_pixels: 2304
+    img_x_pixels: 4096
+    img_y_pixels: 2304
+    center_x: 2048
+    center_y: 1152
+    is_centered: true
+    sensor_mode: Normal
+    readout_direction: Top-to-Bottom
+    number_of_pixels: 10
+    binning: 1x1
+    databuffer_size: 8
+    trigger_source: Software
+AutoFocusParameters:
+  coarse_range: 500
+  coarse_step_size: 50
+  coarse_selected: true
+  fine_range: 50
+  fine_step_size: 5
+  fine_selected: true
+  robust_fit: true
+  spline_fit: false
+  test_significance: false
+StageParameters:
+  x: 0.0
+  y: 0.0
+  z: 0.0
+  theta: 0.0
+  f: 0.0
+  limits: true
+MicroscopeState:
+  microscope_name: ORCA-Quest2
+  image_mode: single
+  zoom: 1x
+  stack_cycling_mode: per_stack
+  start_position: 0.0
+  end_position: 200.0
+  step_size: 0.2
+  number_z_steps: 500.0
+  timepoints: 1
+  stack_pause: 0.0
+  is_save: false
+  stack_acq_time: 199.9999999999972
+  timepoint_interval: 0
+  experiment_duration: 600.0899999999995
+  is_multiposition: false
+  channels:
+    channel_1:
+      is_selected: true
+      laser: 488nm
+      laser_index: 0
+      filter_wheel_0: Empty-Alignment
+      filter_position_0: 0
+      camera_exposure_time: 10.0
+      laser_power: 0.0
+      interval_time: 0.0
+      defocus: 0.0
+  stack_z_origin: 0.0
+  stack_focus_origin: 0.0
+  start_focus: 0.0
+  end_focus: 0.0
+  abs_z_start: 0.0
+  abs_z_end: 200.0
+  waveform_template: Default

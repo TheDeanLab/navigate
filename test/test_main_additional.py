@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import navigate.main as main_module
+import pytest
 
 
 class _FakeRoot:
@@ -24,7 +25,10 @@ def _evaluation_result():
     )
 
 
-def test_main_uses_controller_branch_and_stops_log_listener(monkeypatch, capsys):
+@pytest.mark.parametrize("loop_error", [None, SystemExit, RuntimeError])
+def test_main_uses_controller_branch_and_stops_log_listener(
+    monkeypatch, capsys, loop_error
+):
     root = _FakeRoot()
     splash = object()
     args = SimpleNamespace(configurator=False)
@@ -51,7 +55,12 @@ def test_main_uses_controller_branch_and_stops_log_listener(monkeypatch, capsys)
     monkeypatch.setattr(main_module, "Controller", controller)
     monkeypatch.setattr(main_module, "Configurator", configurator)
 
-    main_module.main()
+    root.mainloop.side_effect = loop_error
+    if loop_error is None:
+        main_module.main()
+    else:
+        with pytest.raises(loop_error):
+            main_module.main()
 
     assert (
         "WARNING: navigate was built to operate on a Windows platform."

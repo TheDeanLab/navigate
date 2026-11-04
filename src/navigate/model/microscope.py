@@ -769,11 +769,9 @@ class Microscope:
                             f"{channel_key} is {round(updated_exposure_time*1000, 1)}"
                             f"ms, not {exposure_time*1000}ms!"
                         )
-                        exposure_time = round(updated_exposure_time, 4)
+                        exposure_time = updated_exposure_time
                         # update the experiment file
-                        channel["camera_exposure_time"] = round(
-                            updated_exposure_time * 1000, 1
-                        )
+                        channel["camera_exposure_time"] = updated_exposure_time * 1000
                         self.output_event_queue.put(
                             (
                                 "exposure_time",

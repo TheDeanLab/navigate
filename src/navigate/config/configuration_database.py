@@ -3,6 +3,7 @@ camera_device_types = {
     "Hamamatsu ORCA Lightning": ("HamamatsuOrcaLightning", "hamamatsu"),
     "Hamamatsu ORCA Fire": ("HamamatsuOrcaFire", "hamamatsu"),
     "Hamamatsu ORCA Fusion": ("HamamatsuOrcaFusion", "hamamatsu"),
+    "Hamamatsu ORCA Quest 2": ("HamamatsuOrcaQuest2", "hamamatsu"),
     "Hamamatsu Flash 4.0": ("HamamatsuOrca", "hamamatsu"),
     "Photometrics Iris 15B": ("Photometrics", "photometrics"),
     "Ximea MU196MR-ON": ("MU196XR", "ximea"),

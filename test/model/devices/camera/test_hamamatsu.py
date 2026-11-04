@@ -75,6 +75,49 @@ def test_generate_new_frame_only_triggers_active_camera(
     )
 
 
+@pytest.mark.parametrize("cooling_value", [False, 2])
+def test_quest2_camera_profile_and_software_trigger(
+    hamamatsu_camera_class, cooling_value
+):
+    """Quest 2 uses sensor geometry and triggers without Flash-specific modes."""
+    from navigate.config.configuration_database import camera_device_types
+    from navigate.model.devices.camera.hamamatsu import HamamatsuOrcaQuest2Camera
+
+    assert camera_device_types["Hamamatsu ORCA Quest 2"] == (
+        "HamamatsuOrcaQuest2",
+        "hamamatsu",
+    )
+    connection = MagicMock()
+    connection.max_image_width = 4096
+    connection.max_image_height = 2304
+    connection.min_image_width = connection.min_image_height = 8
+    connection.step_image_width = connection.step_image_height = 8
+    connection.get_property_range.return_value = (0.001, 1, 0.001)
+    connection.get_property_value.side_effect = lambda name: {
+        "readout_speed": 1,
+        "pixel_width": 4.6,
+        "cooling": cooling_value,
+    }[name]
+    parameters = {"hardware": {"serial_number": "000473"}, "defect_correct_mode": 1}
+    configuration = {
+        "configuration": {"microscopes": {"Quest2": {"camera": parameters}}},
+        "experiment": {"CameraParameters": {"Quest2": {}}},
+    }
+    camera = HamamatsuOrcaQuest2Camera("Quest2", connection, configuration)
+    assert parameters["x_pixels"] == 4096
+    assert parameters["y_pixels"] == 2304
+    assert (camera.x_pixels, camera.y_pixels) == (4096, 2304)
+    assert parameters["supported_sensor_modes"] == ["Normal", "Light-Sheet"]
+    assert parameters["cooling"] is (cooling_value is not False)
+    assert parameters["pixel_size_in_microns"] == 4.6
+    assert str(camera) == "HamamatsuOrcaQuest2"
+    camera.set_trigger_mode("Software")
+    connection.set_property_value.assert_any_call("trigger_source", 3)
+    camera.is_acquiring = True
+    camera.generate_new_frame()
+    connection.fire_software_trigger.assert_called_once_with()
+
+
 @pytest.fixture(scope="module")
 def prepare_cameras(dummy_model):
     from navigate.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg

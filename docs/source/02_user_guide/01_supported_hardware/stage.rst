@@ -97,6 +97,64 @@ first establish communication with the device using `ASI provided software <http
               flip_z: False
               flip_f: False
 
+.. _asi_tiger_serial_piezo:
+
+Serial ADEPT focus piezo
+^^^^^^^^^^^^^^^^^^^^^^^
+
+An ADEPT piezo can use the existing ``ASI`` stage driver. Query ``WHO`` and
+``BU X`` to identify the piezo axis before configuring it. On an FTP-equipped
+controller, physical ``F`` may be the slave of ``Z``; the logical focus axis
+``f`` in **navigate** must instead map to the actual piezo axis, such as ``P``.
+
+For a controller reporting ``P`` as a 150 micrometer piezo with limits of
+-0.075 to +0.075 mm, the relevant settings are:
+
+.. code-block:: yaml
+
+    stage:
+      hardware:
+        - type: ASI
+          serial_number: '0001'
+          port: /dev/serial/by-id/REPLACE_WITH_CONTROLLER_ID
+          baudrate: 115200
+          timeout: 1
+          axes: [f]
+          axes_mapping: [P]
+          apply_default_settings: false
+      f_min: -75.0
+      f_max: 75.0
+      f_step: 1.0
+      f_offset: 0.0
+
+For axes on the same Tiger, extend this entry's ``axes`` and ``axes_mapping``
+lists; use separate entries for other stage devices. Set the saved experiment's
+F jog step to 1 micrometer as well; an existing experiment can override the
+configuration default. A complete example with a real Quest 2 camera, Tiger XYZ
+and ADEPT focus, and simulated theta/auxiliaries is available as
+:download:`configuration_orca_quest2_tiger_piezo.yaml </05_reference/implementations/configurations/configuration_orca_quest2_tiger_piezo.yaml>`.
+
+Confirm ``PM P?`` reports 0 (controller input, closed loop), ``PR P?`` reports
+3 (150 micrometers), and ``UM P?`` reports 10000 units/mm. The existing driver
+uses 0.1 micrometer position units. Read the actual limits using ``SL P?`` and
+``SU P?``; their units are mm. ``apply_default_settings: false`` preserves
+controller tuning instead of applying motor alignment, accuracy, backlash,
+and speed defaults. Use card-addressed ``4PZINFO`` for diagnostics when the
+piezo is on card 4; the shorter ``PZI`` form requires newer communication
+firmware. See the `ASI piezo documentation <https://docs.asiimaging.com/products/piezo_portal>`_.
+
+.. note::
+
+    Validate settling before autofocus or acquisition after a focus move.
+    For piezos, the controller's ``WT`` timer determines how long it reports
+    busy after applying the commanded voltage. A zero wait does not establish
+    that the piezo has settled. See
+    `ASI WAIT documentation <https://docs.asiimaging.com/commands/wait>`_.
+    The current shared driver also stops waiting after its default 1.75-second
+    timeout without reporting a timeout failure. Readback tests alone do not
+    validate physical travel or settling. Choose autofocus ranges within the
+    available travel; the generic 500-micrometer coarse range is too large here.
+
 -----------------
 
 MFC2000

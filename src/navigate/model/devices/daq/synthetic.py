@@ -137,6 +137,7 @@ class SyntheticDAQ(DAQBase):
             (
                 getattr(camera, "minimum_frame_interval", 0.0)
                 for camera in self.camera.values()
+                if getattr(camera, "is_acquiring", False)
             ),
             default=0.0,
         )

@@ -1255,7 +1255,11 @@ class DCAM:
         if self.__result(dcambuf_attach(self.__hdcam, byref(attach_param))):
             self.pre_frame_count = 0
             self.pre_index = 0
-            return self.__result(dcamcap_start(self.__hdcam, DCAMCAP_START_SEQUENCE))
+            started = self.__result(dcamcap_start(self.__hdcam, DCAMCAP_START_SEQUENCE))
+            if not started:
+                # Callers may skip cleanup when capture never became active.
+                self.stop_acquisition()
+            return started
         return False
 
     def stop_acquisition(self):

@@ -99,6 +99,82 @@ def test_capture_passes_buffer_descriptor_by_pointer(monkeypatch):
     assert received == [(0x123456789, 1)]
 
 
+@pytest.fixture(params=["Linux", "Windows"])
+def capture_controller(monkeypatch, request):
+    api, _ = load_api(monkeypatch, system=request.param)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+    camera._DCAM__hdcamwait = 0
+    frame = (ctypes.c_uint16 * 4)()
+    buffer = SimpleNamespace(
+        ctypes=SimpleNamespace(data=ctypes.addressof(frame)), owner=frame
+    )
+    return api, camera, [buffer]
+
+
+@pytest.mark.parametrize("stop_result", [1, -1])
+def test_failed_capture_start_releases_buffers_and_allows_retry(
+    monkeypatch, capture_controller, stop_result
+):
+    api, camera, buffers = capture_controller
+    attached = False
+    events = []
+    start_results = iter([-1, 1])
+
+    def attach(*args):
+        nonlocal attached
+        events.append("attach")
+        if attached:
+            return -1
+        attached = True
+        return 1
+
+    def start(*args):
+        events.append("start")
+        assert attached
+        return next(start_results)
+
+    def stop(*args):
+        events.append("stop")
+        return stop_result
+
+    def release(*args):
+        nonlocal attached
+        events.append("release")
+        attached = False
+        return 1
+
+    monkeypatch.setattr(api, "dcambuf_attach", attach)
+    monkeypatch.setattr(api, "dcamcap_start", start)
+    monkeypatch.setattr(api, "dcamcap_stop", stop)
+    monkeypatch.setattr(api, "dcambuf_release", release)
+
+    assert camera.start_acquisition(buffers, 1) is False
+    assert attached is False
+    assert events == ["attach", "start", "stop", "release"]
+
+    assert camera.start_acquisition(buffers, 1) is True
+    assert attached is True  # A successful start keeps buffers until capture ends.
+    assert events == ["attach", "start", "stop", "release", "attach", "start"]
+
+
+def test_failed_buffer_attach_does_not_start_or_release_capture(
+    monkeypatch, capture_controller
+):
+    api, camera, buffers = capture_controller
+    monkeypatch.setattr(api, "dcambuf_attach", lambda *args: -1)
+    start, stop, release = Mock(), Mock(), Mock()
+    monkeypatch.setattr(api, "dcamcap_start", start)
+    monkeypatch.setattr(api, "dcamcap_stop", stop)
+    monkeypatch.setattr(api, "dcambuf_release", release)
+
+    assert camera.start_acquisition(buffers, 1) is False
+    start.assert_not_called()
+    stop.assert_not_called()
+    release.assert_not_called()
+
+
 def test_repeated_close_does_not_unregister_another_camera(monkeypatch):
     api, _ = load_api(monkeypatch)
     camera = api.DCAM.__new__(api.DCAM)

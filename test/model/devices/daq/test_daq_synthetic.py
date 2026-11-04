@@ -3,11 +3,14 @@ import pytest
 
 
 class _FakeCamera:
-    def __init__(self):
+    def __init__(self, is_acquiring=True, minimum_frame_interval=0.0):
         self.generate_calls = 0
+        self.is_acquiring = is_acquiring
+        self.minimum_frame_interval = minimum_frame_interval
 
     def generate_new_frame(self):
-        self.generate_calls += 1
+        if self.is_acquiring:
+            self.generate_calls += 1
 
 
 class _FakeLock:
@@ -183,3 +186,36 @@ def test_usb_camera_period_can_exceed_light_sheet_sweep(monkeypatch):
     assert camera.generate_calls == 1
     assert sleeps[0] >= 0.057
     assert daq.sweep_times["channel_1"] == 0.012
+
+
+@pytest.mark.parametrize(
+    "camera_states,sweep,expected_wait",
+    [
+        ([(True, 0.01), (False, 1.0)], 0.02, 0.02),
+        ([(True, 0.02), (True, 0.08), (False, 1.0)], 0.015, 0.084),
+        ([(False, 1.0)], 0.02, 0.02),
+        ([(False, 1.0)], None, 0.01),
+        ([], 0.02, 0.02),
+    ],
+    ids=["stopped-camera", "multiple-active", "all-stopped", "fallback", "no-cameras"],
+)
+def test_only_acquiring_cameras_extend_frame_wait(
+    monkeypatch, camera_states, sweep, expected_wait
+):
+    daq = SyntheticDAQ(_build_configuration())
+    daq.sweep_times = {} if sweep is None else {"channel_1": sweep}
+    daq.prepare_acquisition("channel_1")
+    cameras = [_FakeCamera(active, period) for active, period in camera_states]
+    for index, camera in enumerate(cameras):
+        daq.add_camera(f"Scope{index}", camera)
+    sleeps = []
+    monkeypatch.setattr(
+        "navigate.model.devices.daq.synthetic.time.sleep", sleeps.append
+    )
+
+    daq.run_acquisition()
+
+    assert sleeps == pytest.approx([expected_wait])
+    assert [camera.generate_calls for camera in cameras] == [
+        int(active) for active, _ in camera_states
+    ]

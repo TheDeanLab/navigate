@@ -979,7 +979,7 @@ class DCAM:
             raise RuntimeError("Cannot snapshot DCAM settings for restart.")
         format_settings = {
             name: self.get_property_value(name)
-            for name in ("bits_per_channel", "image_pixel_type")
+            for name in ("image_pixel_type", "bits_per_channel")
         }
         format_settings = {
             name: value for name, value in format_settings.items() if value is not False

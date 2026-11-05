@@ -190,30 +190,131 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         )
         return self._image_format
 
+    def _snapshot_depth_settings(self) -> dict[str, float]:
+        """Snapshot format and timing in their restoration dependency order."""
+        sdk = self.camera_controller
+        names = (
+            "readout_speed",
+            "image_pixel_type",
+            "bits_per_channel",
+            "internal_line_interval",
+            "exposure_time",
+        )
+        previous = {name: sdk.get_property_value(name) for name in names}
+        if previous["bits_per_channel"] != self.get_bit_depth() or previous[
+            "image_pixel_type"
+        ] not in (1, 2):
+            raise RuntimeError("Cannot confirm the camera format snapshot.")
+        if (
+            previous["bits_per_channel"] is False
+            or previous["bits_per_channel"] is None
+        ):
+            raise RuntimeError("Cannot snapshot unknown camera precision.")
+        for name, value in previous.items():
+            if (value is False or value is None) and sdk.is_property_writable(name):
+                raise RuntimeError(f"Cannot snapshot writable camera property {name}.")
+        return {
+            name: value
+            for name, value in previous.items()
+            if value is not False and value is not None
+        }
+
+    def _restore_depth_settings(self, previous: dict[str, float]) -> None:
+        """Restore pixel type before precision and block capture on failure.
+
+        Parameters
+        ----------
+        previous : dict[str, float]
+            Settings in the order returned by ``_snapshot_depth_settings``.
+        """
+        sdk = self.camera_controller
+        try:
+            for name, value in previous.items():
+                if sdk.get_property_value(name) != value:
+                    if not sdk.set_property_value(name, value):
+                        raise RuntimeError(f"Cannot restore {name}.")
+            if any(
+                sdk.get_property_value(name) != value
+                for name, value in previous.items()
+            ):
+                raise RuntimeError("Camera property rollback did not match readback.")
+            self._refresh_image_format()
+            self._refresh_depth_timing()
+        except Exception as exc:
+            self._bit_depth_error = (
+                "Camera bit-depth restoration failed; "
+                "reconnect the camera before acquiring."
+            )
+            raise RuntimeError(self._bit_depth_error) from exc
+
     def get_advanced_setting_capabilities(self) -> dict[str, CameraSettingCapability]:
-        """Discover supported precision without changing any camera properties."""
+        """Discover precision, restoring an idle MONO8 probe before returning.
+
+        DCAM can hide MONO16 precision choices while MONO8 is selected. Only
+        that state requires a temporary pixel-type change, with exact rollback.
+        Acquiring, failed-restoration and coupled Lightning cameras never probe.
+        """
         current = self.get_bit_depth()
         choices = ()
         reason = getattr(self, "_bit_depth_error", None)
+        if self.is_acquiring or reason:
+            return {
+                "bit_depth": CameraSettingCapability(
+                    current_value=None if reason else current,
+                    reason=reason or "Stop acquisition to change camera bit depth.",
+                )
+            }
         try:
             self._refresh_image_format()
-            values = self.camera_controller.get_property_values("bits_per_channel")
-            choices = tuple(
+            sdk = self.camera_controller
+            values = sdk.get_property_values("bits_per_channel")
+            depth_writable = sdk.is_property_writable("bits_per_channel")
+            wide_current = current
+            pixels = sdk.get_property_values("image_pixel_type") or ()
+            pixel_switch = (
+                getattr(self, "_pixel_type_depth_switching", True)
+                and 1 in pixels
+                and 2 in pixels
+                and sdk.is_property_writable("image_pixel_type")
+            )
+            if (
+                pixel_switch
+                and current == 8
+                and sdk.get_property_value("image_pixel_type") == 1
+            ):
+                previous = self._snapshot_depth_settings()
+                try:
+                    if (
+                        not sdk.set_property_value("image_pixel_type", 2)
+                        or sdk.get_property_value("image_pixel_type") != 2
+                    ):
+                        raise RuntimeError("Cannot discover MONO16 camera precision.")
+                    values = sdk.get_property_values("bits_per_channel")
+                    depth_writable = sdk.is_property_writable("bits_per_channel")
+                    wide_current = self.get_bit_depth()
+                finally:
+                    self._restore_depth_settings(previous)
+            if not depth_writable and pixel_switch:
+                values = () if wide_current is None else (wide_current,)
+            discovered = {
                 int(v)
                 for v in (values or ())
                 if math.isfinite(v) and v == int(v) and 1 <= v <= 16
-            )
+            }
+            if pixel_switch and discovered and current is not None:
+                discovered.add(8)
+            choices = tuple(sorted(discovered))
             if not reason:
                 if not choices or current not in choices:
                     reason = "The camera did not report reliable bit-depth choices."
                 elif len(choices) < 2:
                     reason = "This camera mode has a fixed bit depth."
-                elif not self.camera_controller.is_property_writable(
-                    "bits_per_channel"
-                ):
+                elif not (depth_writable or pixel_switch):
                     reason = "Bit depth is read-only in this camera mode."
         except (ValueError, RuntimeError, TypeError) as exc:
             reason = str(exc)
+            if getattr(self, "_bit_depth_error", None):
+                current = None
         return {
             "bit_depth": CameraSettingCapability(
                 current_value=current,
@@ -262,35 +363,18 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         if not capability.writable:
             raise RuntimeError(capability.reason)
         sdk = self.camera_controller
-        names = (
-            "bits_per_channel",
-            "image_pixel_type",
-            "readout_speed",
-            "internal_line_interval",
-            "exposure_time",
-        )
-        previous = {name: sdk.get_property_value(name) for name in names}
-        if previous["bits_per_channel"] != capability.current_value or previous[
-            "image_pixel_type"
-        ] not in (1, 2):
+        previous = self._snapshot_depth_settings()
+        if previous["bits_per_channel"] != capability.current_value:
             raise RuntimeError(
                 "Cannot confirm the camera format snapshot before changing depth."
             )
-        previous = {
-            name: value
-            for name, value in previous.items()
-            if value is not False and value is not None
-        }
         try:
-            if (
-                not sdk.set_property_value("bits_per_channel", requested)
-                or self.get_bit_depth() != requested
-            ):
-                raise RuntimeError("Camera rejected the requested bit depth.")
             pixel_type = 1 if requested <= 8 else 2
             pixel_types = sdk.get_property_values("image_pixel_type") or ()
-            if pixel_type in pixel_types and sdk.is_property_writable(
-                "image_pixel_type"
+            if (
+                sdk.get_property_value("image_pixel_type") != pixel_type
+                and pixel_type in pixel_types
+                and sdk.is_property_writable("image_pixel_type")
             ):
                 if (
                     not sdk.set_property_value("image_pixel_type", pixel_type)
@@ -298,32 +382,16 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 ):
                     raise RuntimeError("Camera rejected the requested pixel container.")
             if self.get_bit_depth() != requested:
-                raise RuntimeError(
-                    "Changing pixel container changed the requested bit depth."
-                )
+                if not sdk.is_property_writable(
+                    "bits_per_channel"
+                ) or not sdk.set_property_value("bits_per_channel", requested):
+                    raise RuntimeError("Camera rejected the requested bit depth.")
+            if self.get_bit_depth() != requested:
+                raise RuntimeError("Camera did not confirm the requested bit depth.")
             self._refresh_image_format()
             self._refresh_depth_timing()
         except Exception as exc:
-            try:
-                for name, value in previous.items():
-                    if sdk.get_property_value(name) != value:
-                        if not sdk.set_property_value(name, value):
-                            raise RuntimeError(f"Cannot restore {name}.")
-                if any(
-                    sdk.get_property_value(name) != value
-                    for name, value in previous.items()
-                ):
-                    raise RuntimeError(
-                        "Camera property rollback did not match readback."
-                    )
-                self._refresh_image_format()
-                self._refresh_depth_timing()
-            except Exception as restore_error:
-                self._bit_depth_error = (
-                    "Camera bit-depth restoration failed; "
-                    "reconnect the camera before acquiring."
-                )
-                raise RuntimeError(self._bit_depth_error) from restore_error
+            self._restore_depth_settings(previous)
             raise RuntimeError(
                 f"Camera bit-depth change failed and was restored: {exc}"
             ) from exc
@@ -970,6 +1038,8 @@ class HamamatsuOrcaQuest2Camera(HamamatsuBase):
 @log_initialization
 class HamamatsuOrcaLightningCamera(HamamatsuBase):
     """HamamatsuOrcaLightning camera class."""
+
+    _pixel_type_depth_switching = False
 
     def get_advanced_setting_capabilities(self) -> dict[str, CameraSettingCapability]:
         """Keep coupled full-well mode changes unavailable until validated."""

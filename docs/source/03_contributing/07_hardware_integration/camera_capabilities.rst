@@ -64,6 +64,14 @@ The adapter checks exact readback and restores captured settings if application
 fails. A failed restoration blocks acquisition until the camera is reconnected.
 Quest restart restores and verifies depth and pixel type before attaching buffers.
 
+Pixel type must be selected before precision. For example, an ORCA-Quest 2 can
+report writable 12/16 choices in MONO16, then report fixed/read-only 8 after
+selecting MONO8. The adapter combines the advertised pixel types with precision
+choices. When idle in MONO8, it temporarily selects MONO16 to query its choices,
+then restores and verifies the original format and timing before returning.
+Discovery during capture, after failed restoration, or for ORCA-Lightning never
+performs that probe. No camera-model table supplies guessed depth choices.
+
 Only unpacked MONO8 and MONO16 layouts are currently accepted. Row padding and
 buffer top offsets are handled using native scratch buffers; normalized arrays
 preserve integer counts without scaling. Packed MONO12/MONO12P and color layouts
@@ -78,3 +86,11 @@ connection, sensor/readout mode, each offered depth, confirmed native layout,
 exact saved counts and measured acquisition throughput. Repeat after a restart
 and a mode change. Unsupported or untested models must never receive guessed
 choices from a product-name table.
+
+On 2026-11-05, direct SDK tests on a USB-connected ORCA-Quest 2 C15550-22UP,
+firmware 3.20, driver 1.2.6.0 and Linux DCAM 4.0.7087 verified MONO8 capture in
+Normal and Light-Sheet modes. Starting in either 12 or 16 bits, writing
+BITSPERCHANNEL=8 first returned INVALIDVALUE; selecting MONO8 first succeeded
+and made precision read back as 8. Native 512 by 512 frames used 262,144 bytes
+in MONO8 versus 524,288 bytes in MONO16. This establishes native byte counts,
+not sustained throughput or support for other camera/firmware combinations.

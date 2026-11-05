@@ -17,6 +17,8 @@ class FakeDCAM:
             "image_pixel_type": 2.0,
             "internal_line_interval": 1e-5,
             "minimum_trigger_interval": 0.01,
+            "readout_speed": 1.0,
+            "exposure_time": 0.01,
         }
         self.choices = (8.0, 12.0, 16.0)
         self.writable = True
@@ -29,7 +31,9 @@ class FakeDCAM:
         return self.values.get(name, False)
 
     def get_property_values(self, name):
-        return self.choices if name == "bits_per_channel" else (1.0, 2.0)
+        if name == "bits_per_channel":
+            return self.choices
+        return (1.0, 2.0) if self.choices and 8 in self.choices else (2.0,)
 
     def is_property_writable(self, name):
         return self.writable
@@ -247,3 +251,161 @@ def test_failed_quest_restart_cannot_adopt_changed_depth_on_retry(camera):
         camera.initialize_image_series([np.zeros((2, 3), np.uint16)], 1)
     with pytest.raises(RuntimeError):
         camera.initialize_image_series([np.zeros((2, 3), np.uint16)], 1)
+
+
+class CoupledDCAM(FakeDCAM):
+    """Quest 2 behavior measured with Linux DCAM 4.0.7087 on firmware 3.20."""
+
+    def get_property_values(self, name):
+        if name == "bits_per_channel":
+            return (8.0,) if self.values["image_pixel_type"] == 1 else (12.0, 16.0)
+        return (1.0, 2.0)
+
+    def is_property_writable(self, name):
+        return not (name == "bits_per_channel" and self.values["image_pixel_type"] == 1)
+
+    def set_property_value(self, name, value):
+        if name == "bits_per_channel" and value not in self.get_property_values(name):
+            self.writes.append((name, value))
+            return False
+        result = super().set_property_value(name, value)
+        if result and name == "image_pixel_type":
+            self.values["bits_per_channel"] = 8.0 if value == 1 else 16.0
+        return result
+
+
+@pytest.fixture
+def coupled_camera(camera):
+    camera.camera_controller = CoupledDCAM()
+    return camera
+
+
+@pytest.mark.parametrize("start,target", [(16, 8), (12, 8), (8, 12), (8, 16)])
+def test_coupled_pixel_depth_transitions(coupled_camera, start, target):
+    camera = coupled_camera
+    sdk = camera.camera_controller
+    sdk.values.update(
+        bits_per_channel=float(start), image_pixel_type=1.0 if start == 8 else 2.0
+    )
+    assert camera.set_bit_depth(target) == target
+    assert camera.get_image_format() == CameraImageFormat.for_bit_depth(target)
+    assert camera.get_bit_depth() == target
+
+
+@pytest.mark.parametrize("depth", [8, 12, 16])
+def test_coupled_discovery_preserves_original_settings(coupled_camera, depth):
+    sdk = coupled_camera.camera_controller
+    sdk.values.update(
+        bits_per_channel=float(depth), image_pixel_type=1.0 if depth == 8 else 2.0
+    )
+    before = dict(sdk.values)
+    capability = coupled_camera.get_advanced_setting_capabilities()["bit_depth"]
+    assert capability.choices == (8, 12, 16)
+    assert capability.current_value == depth and capability.writable
+    assert sdk.values == before
+
+
+def test_coupled_discovery_never_probes_during_capture(coupled_camera):
+    sdk = coupled_camera.camera_controller
+    sdk.values.update(bits_per_channel=8.0, image_pixel_type=1.0)
+    coupled_camera.is_acquiring = True
+    capability = coupled_camera.get_advanced_setting_capabilities()["bit_depth"]
+    assert not capability.writable
+    assert not sdk.writes
+
+
+def test_coupled_failed_discovery_restore_blocks_acquisition(coupled_camera):
+    sdk = coupled_camera.camera_controller
+    sdk.values.update(bits_per_channel=8.0, image_pixel_type=1.0)
+    sdk.reject = ("image_pixel_type", 1)
+    capability = coupled_camera.get_advanced_setting_capabilities()["bit_depth"]
+    assert not capability.writable and "restor" in capability.reason
+    assert capability.current_value is None
+    assert (
+        coupled_camera.get_advanced_setting_capabilities()["bit_depth"].current_value
+        is None
+    )
+    with pytest.raises(RuntimeError, match="restor"):
+        coupled_camera.initialize_image_series([], 0)
+
+
+def test_coupled_partial_change_restores_pixel_type_before_depth(coupled_camera):
+    sdk = coupled_camera.camera_controller
+    original_set = sdk.set_property_value
+
+    def reject_after_write(name, value):
+        result = original_set(name, value)
+        return False if (name, value) == ("image_pixel_type", 1) else result
+
+    sdk.set_property_value = reject_after_write
+    with pytest.raises(RuntimeError, match="restored"):
+        coupled_camera.set_bit_depth(8)
+    assert sdk.values["bits_per_channel"] == 16
+    assert sdk.values["image_pixel_type"] == 2
+    assert not getattr(coupled_camera, "_bit_depth_error", None)
+
+
+def test_coupled_lightning_discovery_never_changes_pixel_type(coupled_camera):
+    module = sys.modules["navigate.model.devices.camera.hamamatsu"]
+    coupled_camera.__class__ = module.HamamatsuOrcaLightningCamera
+    sdk = coupled_camera.camera_controller
+    sdk.values.update(bits_per_channel=8.0, image_pixel_type=1.0)
+    assert not coupled_camera.get_advanced_setting_capabilities()["bit_depth"].writable
+    assert not sdk.writes
+
+
+@pytest.mark.parametrize(
+    "missing", ["readout_speed", "exposure_time", "internal_line_interval"]
+)
+def test_missing_writable_snapshot_prevents_discovery_probe(coupled_camera, missing):
+    sdk = coupled_camera.camera_controller
+    sdk.values.update(bits_per_channel=8.0, image_pixel_type=1.0)
+    read = sdk.get_property_value
+    sdk.get_property_value = lambda name: False if name == missing else read(name)
+    capability = coupled_camera.get_advanced_setting_capabilities()["bit_depth"]
+    assert not capability.writable
+    assert not sdk.writes
+
+
+def test_discovery_restores_timing_changed_by_pixel_type(coupled_camera):
+    sdk = coupled_camera.camera_controller
+    sdk.values.update(bits_per_channel=8.0, image_pixel_type=1.0)
+    before = dict(sdk.values)
+    write = sdk.set_property_value
+
+    def change_timing(name, value):
+        result = write(name, value)
+        if name == "image_pixel_type":
+            sdk.values.update(exposure_time=0.04, internal_line_interval=2e-5)
+        return result
+
+    sdk.set_property_value = change_timing
+    assert coupled_camera.get_advanced_setting_capabilities()["bit_depth"].writable
+    assert sdk.values == before
+
+
+def test_failed_mono16_probe_restores_original_without_latching(coupled_camera):
+    sdk = coupled_camera.camera_controller
+    sdk.values.update(bits_per_channel=8.0, image_pixel_type=1.0)
+    before = dict(sdk.values)
+    sdk.reject = ("image_pixel_type", 2)
+    assert not coupled_camera.get_advanced_setting_capabilities()["bit_depth"].writable
+    assert sdk.values == before
+    assert not getattr(coupled_camera, "_bit_depth_error", None)
+
+
+@pytest.mark.parametrize("start", [8, 16])
+def test_readonly_wide_precision_does_not_advertise_unselectable_depth(
+    coupled_camera, start
+):
+    sdk = coupled_camera.camera_controller
+    sdk.values.update(
+        bits_per_channel=float(start), image_pixel_type=1.0 if start == 8 else 2.0
+    )
+    sdk.is_property_writable = lambda name: name != "bits_per_channel"
+    capability = coupled_camera.get_advanced_setting_capabilities()["bit_depth"]
+    assert capability.choices == (8, 16)
+    assert capability.writable
+    with pytest.raises(ValueError):
+        coupled_camera.set_bit_depth(12)
+    assert coupled_camera.get_bit_depth() == start

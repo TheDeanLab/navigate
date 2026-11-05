@@ -498,7 +498,9 @@ class Model:
                             "CameraParameters"
                         ][name]
                         result["data_buffer"] = self.get_data_buffer(
-                            parameters["img_x_pixels"], parameters["img_y_pixels"], name
+                            int(parameters["img_x_pixels"]),
+                            int(parameters["img_y_pixels"]),
+                            name,
                         )
                 except Exception:
                     try:

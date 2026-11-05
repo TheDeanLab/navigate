@@ -99,6 +99,19 @@ def test_confirmed_write_persists_and_replaces_active_buffer(model):
     )
 
 
+def test_depth_switch_reallocates_after_gui_roi_becomes_integral_floats(model):
+    identity = request(model)["identity"]
+    assert request(model, identity=identity, bit_depth=8)["error"] is None
+    parameters = model.configuration["experiment"]["CameraParameters"]["scope"]
+    # The camera settings controller computes ROI/binning with true division.
+    parameters.update(img_x_pixels=3.0, img_y_pixels=2.0)
+    result = request(model, identity=identity, bit_depth=16)
+    assert result["error"] is None
+    assert result["data_buffer"][0].shape == (2, 3)
+    assert result["data_buffer"][0].dtype == np.uint16
+    assert parameters["bit_depth"] == 16
+
+
 @pytest.mark.parametrize("failure", ["busy", "identity", "invalid"])
 def test_rejected_request_does_not_write_or_persist(model, failure):
     identity = request(model)["identity"]

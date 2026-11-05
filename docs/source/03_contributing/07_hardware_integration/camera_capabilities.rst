@@ -55,3 +55,26 @@ The writable attribute alone does not authorize a setting change during
 acquisition. Adapters must enforce idle requirements and verify actual readback
 when implementing setters. A successful SDK query is not evidence of physical
 acquisition validation for a particular model and interface.
+
+Hamamatsu validation boundaries
+-------------------------------
+
+DCAM depth choices are discovered from the connected camera in its current mode.
+The adapter checks exact readback and restores captured settings if application
+fails. A failed restoration blocks acquisition until the camera is reconnected.
+Quest restart restores and verifies depth and pixel type before attaching buffers.
+
+Only unpacked MONO8 and MONO16 layouts are currently accepted. Row padding and
+buffer top offsets are handled using native scratch buffers; normalized arrays
+preserve integer counts without scaling. Packed MONO12/MONO12P and color layouts
+are rejected. An advertised 12-bit option therefore still requires a supported
+unpacked transport layout. ORCA-Lightning remains read-only until its coupled
+High Dynamic Range/full-well mode and timing changes are implemented.
+
+Automated fake-SDK tests cover discovery, rollback, attachment, padding, offsets,
+range checks and restart failures. They do not certify a physical camera model.
+Before declaring a model tested, record its model/serial, firmware, DCAM version,
+connection, sensor/readout mode, each offered depth, confirmed native layout,
+exact saved counts and measured acquisition throughput. Repeat after a restart
+and a mode change. Unsupported or untested models must never receive guessed
+choices from a product-name table.

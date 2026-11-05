@@ -306,10 +306,13 @@ def test_reinitialize_restores_settings_including_zero_positions(monkeypatch):
         internal_line_interval=72.96e-6,
         exposure_time=729.6e-6,
         trigger_delay=0,
+        bits_per_channel=12,
+        image_pixel_type=2,
     )
     state = original.copy()
     events = []
     camera.get_property_value = lambda name: state[name]
+    camera.is_property_writable = lambda name: True
 
     def close():
         events.append("close")
@@ -337,6 +340,8 @@ def test_reinitialize_restores_settings_including_zero_positions(monkeypatch):
     assert state["subarray_hpos"] == 0
     assert state["subarray_vpos"] == 896
     assert state["internal_line_interval"] == 72.96e-6
+    assert state["bits_per_channel"] == 12
+    assert state["image_pixel_type"] == 2
 
 
 @pytest.fixture

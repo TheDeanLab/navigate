@@ -498,9 +498,7 @@ class Model:
                             "CameraParameters"
                         ][name]
                         result["data_buffer"] = self.get_data_buffer(
-                            int(parameters["img_x_pixels"]),
-                            int(parameters["img_y_pixels"]),
-                            name,
+                            parameters["img_x_pixels"], parameters["img_y_pixels"], name
                         )
                 except Exception:
                     try:
@@ -677,6 +675,8 @@ class Model:
             raise RuntimeError("Stop acquisition before replacing camera buffers.")
         microscope_name = microscope_name or self.active_microscope_name
         image_format = self.get_camera_image_format(microscope_name)
+        # ROI/binning calculations and saved experiments can contain integral floats.
+        img_width, img_height = int(img_width), int(img_height)
         # Allocate first: allocation failure must leave the old mappings usable.
         data_buffer = [
             SharedNDArray(shape=(img_height, img_width), dtype=image_format.dtype)

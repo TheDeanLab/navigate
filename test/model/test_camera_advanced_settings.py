@@ -159,6 +159,16 @@ def test_prepare_negotiates_after_mode_change_before_allocation(model):
     assert model.active_microscope._buffer_image_format.bit_depth == 8
 
 
+def test_prepare_allocates_saved_eight_bit_with_integral_float_roi(model):
+    model.active_microscope.camera.depth = 8
+    model.configuration["experiment"]["CameraParameters"]["scope"].update(
+        img_x_pixels=3.0, img_y_pixels=2.0, bit_depth=8
+    )
+    result = model.prepare_camera_buffers("scope")
+    assert result["data_buffer"][0].shape == (2, 3)
+    assert result["data_buffer"][0].dtype == np.uint8
+
+
 @pytest.mark.parametrize("saved", [None, 8, 12])
 def test_microscope_applies_optional_depth_after_mode_and_roi(saved):
     m = Microscope.__new__(Microscope)

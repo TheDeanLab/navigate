@@ -1430,8 +1430,6 @@ class Model:
                 self.logger.info("Loop stop condition met.")
                 self.stop_acquisition = True
 
-        # Send stop signal to controller
-        self.show_img_pipe.send("stop")
         self.logger.info("Data thread stopped.")
         self.logger.info(f"Received frames in total: {acquired_frame_num}")
 
@@ -1439,8 +1437,12 @@ class Model:
         if self.pause_data_ready_lock.locked():
             self.pause_data_ready_lock.release()
 
-        # Turn off the lasers/close the shutters
-        self.end_acquisition()
+        # The GUI can query capabilities as soon as it sees stop. Finish camera
+        # cleanup first, but release the GUI even if cleanup itself fails.
+        try:
+            self.end_acquisition()
+        finally:
+            self.show_img_pipe.send("stop")
 
     def _should_drain_signal_completed_frames(self) -> bool:
         """Return True when finite acquisition data should drain after signal stop."""
@@ -1769,14 +1771,16 @@ class Model:
         if not self.is_data_thread_on:
             if self.available_image_count > 0:
                 self.grab_image(getattr(self.image_writer, "save_image", None))
-            self.show_img_pipe.send("stop")
         if self.imaging_mode != "live":
             if not self.stop_acquisition and not self.stop_send_signal:
                 self.signal_acquisition_complete = True
             self.stop_acquisition = True
 
         if not self.is_data_thread_on:
-            self.end_acquisition()
+            try:
+                self.end_acquisition()
+            finally:
+                self.show_img_pipe.send("stop")
 
     def reset_feature_list(self) -> None:
         """Reset live mode feature list."""

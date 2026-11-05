@@ -314,6 +314,37 @@ class AdvancedCameraSettingPopup:
             row=2, column=1, pady=get_theme_space_px(5), padx=get_theme_space_px(5)
         )
 
+        ttk.Label(
+            self.camera_control_frame, text="Camera bit depth", style="Section.TLabel"
+        ).grid(
+            row=3,
+            column=0,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
+            sticky="w",
+        )
+        self.inputs["bit_depth"] = ttk.Combobox(
+            self.camera_control_frame, width=12, state="disabled"
+        )
+        self.inputs["bit_depth"].grid(
+            row=3, column=1, padx=get_theme_space_px(5), pady=get_theme_space_px(5)
+        )
+        self.variables["bit_depth_status"] = tk.StringVar(
+            value="Reading camera settings…"
+        )
+        ttk.Label(
+            self.camera_control_frame,
+            textvariable=self.variables["bit_depth_status"],
+            wraplength=370,
+        ).grid(
+            row=4,
+            column=0,
+            columnspan=3,
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
+            sticky="w",
+        )
+
     def clear_view(self) -> None:
         """Clear the view by destroying all widgets and resetting variables."""
         # destroy camera control inputs
@@ -334,7 +365,7 @@ class AdvancedCameraSettingPopup:
         if self.save_button is not None:
             self.save_button.destroy()
 
-        # Clear all remaining widgets except the microscope dropdown and camera control frame
+        # Keep the microscope dropdown and camera control frame.
         for widget in self.frame.winfo_children():
             grid_info = widget.grid_info()
             if (

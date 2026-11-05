@@ -74,6 +74,7 @@ from navigate.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
 from navigate.model.model import Model, ASIModel
+from navigate.model.devices.camera.format import CameraSettingCapability
 from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
@@ -445,6 +446,89 @@ class Controller:
             return True
         else:
             raise ValueError(f"Unknown daq type: {daq_type}")
+
+    def _bind_camera_buffer(self, result: dict) -> None:
+        """Bind a confirmed image ring on the Tk thread.
+
+        Parameters
+        ----------
+        result : dict
+            Microscope identity and optional negotiated shared buffer.
+        """
+        selected = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        data = result.get("data_buffer")
+        if result["microscope"] == selected and data is not None:
+            self.data_buffer = data
+            self.img_height, self.img_width = data[0].shape
+
+    def dispatch_camera_advanced_settings(
+        self, request: dict, callback: Callable
+    ) -> None:
+        """Serialize camera queries on a model worker and return results on Tk.
+
+        Parameters
+        ----------
+        request : dict
+            Identity-tagged query or requested depth.
+        callback : callable
+            Tk callback receiving the confirmed result, even on failure.
+        """
+        writing = "bit_depth" in request
+        busy_at_dispatch = self.acquire_bar_controller.is_acquiring
+        self._camera_settings_pending = getattr(
+            self, "_camera_settings_pending", 0
+        ) + int(writing)
+
+        def finish(result: dict) -> None:
+            self._camera_settings_pending -= int(writing)
+            self._bind_camera_buffer(result)
+            callback(result)
+
+        def worker() -> None:
+            try:
+                if writing and busy_at_dispatch:
+                    raise RuntimeError("Stop acquisition to change camera bit depth.")
+                result = self.model.camera_advanced_settings(request)
+            except Exception as error:
+                result = dict(
+                    request,
+                    identity=None,
+                    error=str(error),
+                    data_buffer=None,
+                    capability=CameraSettingCapability(reason=str(error)),
+                )
+            self._run_on_main_thread(finish, result, wait=True)
+
+        self.threads_pool.createThread("model", worker)
+
+    def _start_model_capture(self, command: str, *args: Any) -> None:
+        """Negotiate idle camera formats on the worker before starting capture.
+
+        Parameters
+        ----------
+        command : str
+            Acquisition command passed to the model.
+        *args : Any
+            Arguments for that command.
+        """
+        name = self.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        additional = (
+            tuple(self.additional_microscopes_configs) if command == "acquire" else ()
+        )
+        result = self.model.prepare_camera_buffers(name, additional)
+        self._run_on_main_thread(self._bind_camera_buffer, result, wait=True)
+        if command == "acquire":
+            self._run_on_main_thread(self.launch_additional_microscopes, wait=True)
+        try:
+            self.model.run_command(command, *args)
+        except Exception:
+            try:
+                self.model.run_command("stop")
+            except Exception:
+                logger.exception("Camera startup cleanup failed")
+            raise
 
     def update_buffer(self) -> None:
         """Update the shared image buffer for the active camera geometry.
@@ -1077,7 +1161,7 @@ class Controller:
 
         # update real image width and height
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
-        self.update_buffer()
+        # Hardware modes and the resulting dtype are negotiated by the worker.
         return True
 
     def set_mode_of_sub(self, mode: str) -> None:
@@ -1097,6 +1181,10 @@ class Controller:
         self.camera_setting_controller.set_mode(mode)
         self.mip_setting_controller.set_mode(mode)
         self.waveform_tab_controller.set_mode(mode)
+        if hasattr(self, "advanced_camera_setting_controller"):
+            self.advanced_camera_setting_controller.set_acquisition_state(
+                mode != "stop"
+            )
 
         # additional microscopes
         for microscope_name in self.additional_microscopes_configs:
@@ -1129,6 +1217,22 @@ class Controller:
             Command-dependent return value. Most commands return ``None``; some, such
             as ``"get_stage_position"``, return structured data.
         """
+
+        if command == "camera_advanced_settings":
+            self.dispatch_camera_advanced_settings(*args)
+            return
+        if command in (
+            "acquire",
+            "acquire_and_save",
+            "autofocus",
+            "tony_wilson",
+        ) and getattr(self, "_camera_settings_pending", 0):
+            if command in ("acquire", "acquire_and_save"):
+                self.acquire_bar_controller.stop_acquire()
+            messagebox.showinfo(
+                "Camera settings", "Wait for the camera setting to finish applying."
+            )
+            return
 
         if command == "stage":
             """Creates a thread and uses it to call the model to move stage
@@ -1466,7 +1570,6 @@ class Controller:
                     )
 
             self.stop_acquisition_flag = False
-            self.launch_additional_microscopes()
 
             self.threads_pool.createThread(
                 "camera",
@@ -1614,11 +1717,19 @@ class Controller:
         """
         self._run_on_main_thread(self._start_capture_ui, mode, wait=True)
         images_received = 0
+        start_errors = []
+
+        def start_capture() -> None:
+            try:
+                self._start_model_capture(command, *args)
+            except Exception as error:
+                start_errors.append(error)
+
         try:
-            work_thread = self.threads_pool.createThread(
-                "model", lambda: self.model.run_command(command, *args)
-            )
+            work_thread = self.threads_pool.createThread("model", start_capture)
             work_thread.join()
+            if start_errors:
+                raise start_errors[0]
         except Exception as e:
             self._run_on_main_thread(self._handle_capture_start_error, e, wait=True)
             return

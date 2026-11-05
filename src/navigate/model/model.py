@@ -44,7 +44,10 @@ import numpy as np
 
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
-from navigate.model.devices.camera.format import CameraImageFormat
+from navigate.model.devices.camera.format import (
+    CameraImageFormat,
+    CameraSettingCapability,
+)
 from navigate.model.features.autofocus import Autofocus
 from navigate.model.features.adaptive_optics import TonyWilson
 from navigate.model.features.image_writer import ImageWriter
@@ -422,6 +425,147 @@ class Model:
             ] = self.plugin_acquisition_modes[mode].feature_list
 
         self.load_feature_records()
+
+    def camera_advanced_settings(self, request: dict) -> dict:
+        """Read or apply an identity-tagged idle camera setting.
+
+        Parameters
+        ----------
+        request : dict
+            Microscope, request_id, and optional identity/bit_depth to apply.
+
+        Returns
+        -------
+        dict
+            Confirmed capability, error and any replacement active image buffer.
+        """
+        name = request["microscope"]
+        camera = self.microscopes[name].camera
+        identity = (id(getattr(camera, "camera_controller", None) or camera),)
+        result = dict(
+            microscope=name,
+            request_id=request["request_id"],
+            identity=identity,
+            error=None,
+            data_buffer=None,
+        )
+        busy = self.is_acquiring or any(
+            m.camera.is_acquiring for m in self.microscopes.values()
+        )
+        blocked = getattr(self, "_camera_format_errors", {})
+        if busy or identity in blocked:
+            reason = blocked.get(
+                identity, "Stop acquisition to change camera bit depth."
+            )
+            result["capability"] = CameraSettingCapability(
+                current_value=camera.get_image_format().bit_depth, reason=reason
+            )
+            if "bit_depth" in request:
+                result["error"] = reason
+            return result
+        try:
+            capability = camera.get_advanced_setting_capabilities()["bit_depth"]
+            if "bit_depth" in request:
+                if request.get("identity") != identity:
+                    raise RuntimeError(
+                        "The camera connection changed. Refresh settings."
+                    )
+                depth = CameraImageFormat.for_bit_depth(request["bit_depth"]).bit_depth
+                if not capability.writable or depth not in capability.choices:
+                    raise ValueError(
+                        capability.reason or "Unsupported camera bit depth."
+                    )
+                previous = capability.current_value
+                if previous is None:
+                    raise RuntimeError("Cannot confirm the previous camera bit depth.")
+                camera.set_bit_depth(depth)
+                try:
+                    capability = camera.get_advanced_setting_capabilities()["bit_depth"]
+                    if (
+                        capability.current_value != depth
+                        or camera.get_image_format().bit_depth != depth
+                    ):
+                        raise RuntimeError("Camera bit-depth readback did not match.")
+                    selected = self.configuration["experiment"]["MicroscopeState"][
+                        "microscope_name"
+                    ]
+                    if name == selected:
+                        parameters = self.configuration["experiment"][
+                            "CameraParameters"
+                        ][name]
+                        result["data_buffer"] = self.get_data_buffer(
+                            parameters["img_x_pixels"], parameters["img_y_pixels"], name
+                        )
+                except Exception:
+                    try:
+                        camera.set_bit_depth(previous)
+                        if (
+                            camera.get_advanced_setting_capabilities()[
+                                "bit_depth"
+                            ].current_value
+                            != previous
+                        ):
+                            raise RuntimeError("Rollback readback failed")
+                    except Exception as rollback_error:
+                        blocked[
+                            identity
+                        ] = "Camera restoration failed. Reconnect before acquiring."
+                        self._camera_format_errors = blocked
+                        raise RuntimeError(blocked[identity]) from rollback_error
+                    raise
+                self.configuration["experiment"]["CameraParameters"][name][
+                    "bit_depth"
+                ] = depth
+            result["capability"] = capability
+        except Exception as error:
+            result["error"] = str(error)
+            try:
+                result["capability"] = camera.get_advanced_setting_capabilities()[
+                    "bit_depth"
+                ]
+            except Exception:
+                result["capability"] = CameraSettingCapability(reason=str(error))
+            if identity in blocked:
+                result["capability"] = CameraSettingCapability(reason=blocked[identity])
+        return result
+
+    def prepare_camera_buffers(
+        self, microscope_name: str, additional: tuple = ()
+    ) -> dict:
+        """Apply idle camera modes and saved depths before allocating buffers.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Main acquisition microscope.
+        additional : tuple
+            Additional microscopes that will receive independent image rings.
+
+        Returns
+        -------
+        dict
+            Main microscope identity and negotiated shared image buffer.
+        """
+        if self.is_acquiring or any(
+            m.camera.is_acquiring for m in self.microscopes.values()
+        ):
+            raise RuntimeError("Stop acquisition before preparing camera buffers.")
+        if self.active_microscope_name != microscope_name:
+            raise RuntimeError("Wait for the microscope change before acquiring.")
+        for name in dict.fromkeys((microscope_name, *additional)):
+            microscope = self.microscopes[name]
+            camera = microscope.camera
+            identity = (id(getattr(camera, "camera_controller", None) or camera),)
+            if identity in getattr(self, "_camera_format_errors", {}):
+                raise RuntimeError(self._camera_format_errors[identity])
+            microscope._buffer_image_format = microscope.configure_camera()
+        parameters = self.configuration["experiment"]["CameraParameters"][
+            microscope_name
+        ]
+        data = self.get_data_buffer(
+            parameters["img_x_pixels"], parameters["img_y_pixels"], microscope_name
+        )
+        return {"microscope": microscope_name, "data_buffer": data}
 
     def get_camera_image_format(
         self, microscope_name: Optional[str] = None
@@ -2169,6 +2313,8 @@ class Model:
                     setattr(
                         microscope, k, getattr(self.microscopes[microscope_name], k)
                     )
+
+        microscope._buffer_image_format = image_format
 
         # connect virtual microscope with data_buffer
         microscope.update_data_buffer(data_buffer, self.number_of_frames)

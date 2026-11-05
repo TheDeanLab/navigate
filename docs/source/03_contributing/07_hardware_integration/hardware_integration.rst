@@ -14,3 +14,4 @@ They include guidelines for hardware communication patterns, instructions for ad
    hardware_communication_guidelines
    add_new_device
    advanced
+   camera_capabilities

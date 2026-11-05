@@ -25,7 +25,9 @@ from ctypes import (
 )
 from enum import IntEnum
 import logging
+import math
 import platform
+from typing import Optional
 
 # Third Party Imports
 
@@ -75,6 +77,9 @@ DCAMWAIT_CAPEVENT_FRAMEREADY = 2
 DCAMWAIT_CAPEVENT_STOPPED = 16
 DCAMPROP_MODE__OFF = 1  # OFF
 DCAMPROP_MODE__ON = 2  # ON
+DCAMPROP_OPTION_SUPPORT = 0
+DCAMPROP_OPTION_NEXT = 0x01000000
+DCAMPROP_ATTR_WRITABLE = 0x00020000
 
 
 class DCAMPROP:
@@ -668,6 +673,13 @@ class DCAMDEV_STRING(Structure):
 
 
 property_dict = {
+    "bits_per_channel": 0x00420130,
+    "image_pixel_type": 0x00420270,
+    "image_row_bytes": 0x00420230,
+    "image_frame_bytes": 0x00420240,
+    "buffer_pixel_type": 0x00420360,
+    "buffer_row_bytes": 0x00420330,
+    "buffer_frame_bytes": 0x00420340,
     "exposure_time": 2031888,  # 0x001F0110, R/W, sec, "EXPOSURE TIME"
     "sensor_mode": 4194832,  # 0x00400210, R/W, mode,  "SENSOR MODE"
     "defect_correct_mode": 4653072,  # 0x00470010, R/W, mode,  "DEFECT CORRECT MODE"
@@ -681,7 +693,7 @@ property_dict = {
     "trigger_polarity": 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
     "trigger_source": 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
     "trigger_delay": 1049184,  # 0x00100260,	/* R/W, sec,	"TRIGGER DELAY"
-    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
+    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec, "INTERNAL LINE INTERVAL"
     "internal_line_speed": 4208704,  # 0x00403840, R/W, m/sec,    "INTERNAL LINE SPEED"
     "image_width": 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
     "image_height": 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
@@ -691,7 +703,6 @@ property_dict = {
     "subarray_hsize": 4202784,  # 0x00402120, R/W, long,   "SUBARRAY HSIZE"
     "subarray_vpos": 4202800,  # 0x00402130, R/W, long,    "SUBARRAY VPOS"
     "subarray_vsize": 4202816,  # 0x00402140, R/W, long,   "SUBARRAY VSIZE"
-    "subarray_mode": 4202832,  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
     "cyclic_trigger_period": 4206624,  # 0x00403020, R/O, sec,
     # "TIMING CYCLIC TRIGGER PERIOD"
     "minimum_trigger_blank": 4206640,  # 0x00403030, R/O, sec,
@@ -703,7 +714,7 @@ property_dict = {
     "pixel_height": 4327456,  # 0x00420820, R/O, micro-meter,
     # "IMAGE DETECTOR PIXEL HEIGHT"
     "cooling": 2097952,  # 0x00200320, R/W, mode,    "SENSOR COOLER"
-    "cooling_temperature": 2097968,  # 0x00200330, R/W, celsius,"SENSOR TEMPERATURE TARGET"
+    "cooling_temperature": 2097968,  # 0x00200330, R/W, Celsius, temperature target
     "temperature": 2097936,  # 0x00200310, R/O, celsius,"SENSOR TEMPERATURE"
 }
 
@@ -719,6 +730,7 @@ dcamprop_getattr = __dll.dcamprop_getattr
 dcamprop_getvalue = __dll.dcamprop_getvalue
 dcamprop_setvalue = __dll.dcamprop_setvalue
 dcamprop_setgetvalue = __dll.dcamprop_setgetvalue
+dcamprop_queryvalue = __dll.dcamprop_queryvalue
 dcambuf_attach = __dll.dcambuf_attach
 dcambuf_release = __dll.dcambuf_release
 dcamcap_start = __dll.dcamcap_start
@@ -743,6 +755,7 @@ _function_signatures = [
     (dcamprop_getvalue, [c_void_p, c_int32, POINTER(c_double)]),
     (dcamprop_setvalue, [c_void_p, c_int32, c_double]),
     (dcamprop_setgetvalue, [c_void_p, c_int32, POINTER(c_double), c_int32]),
+    (dcamprop_queryvalue, [c_void_p, c_int32, POINTER(c_double), c_int32]),
     (dcambuf_attach, [c_void_p, POINTER(DCAMBUF_ATTACH)]),
     (dcambuf_release, [c_void_p, c_int32]),
     (dcamcap_start, [c_void_p, c_int32]),
@@ -1074,6 +1087,70 @@ class DCAM:
             return False
 
         return cDouble.value
+
+    def is_property_writable(self, name: str) -> bool:
+        """Query whether the SDK marks a named property as writable.
+
+        Parameters
+        ----------
+        name : str
+            Name in property_dict.
+
+        Returns
+        -------
+        bool
+            False for unknown properties or failed attribute queries. Actual
+            writes still require idle-state checks and readback in the adapter.
+        """
+        if name not in property_dict:
+            return False
+        attributes = self.prop_getattr(property_dict[name])
+        return attributes is not None and bool(
+            attributes.attribute & DCAMPROP_ATTR_WRITABLE
+        )
+
+    def get_property_values(self, name: str) -> Optional[tuple[float, ...]]:
+        """Enumerate a small discrete property using read-only DCAM queries.
+
+        Parameters
+        ----------
+        name : str
+            Name in property_dict. Intended for discrete settings such as depth,
+            not continuous exposure ranges.
+
+        Returns
+        -------
+        tuple of float or None
+            Supported values, or None if discovery fails or is inconsistent.
+            Partial results are never advertised. Enumeration is bounded to
+            256 values to protect against malformed or non-discrete properties.
+        """
+        if name not in property_dict or not self.__hdcam:
+            return None
+        prop = property_dict[name]
+        attributes = self.prop_getattr(prop)
+        if attributes is None:
+            return None
+        low, high = attributes.valuemin, attributes.valuemax
+        if not (math.isfinite(low) and math.isfinite(high) and low <= high):
+            return None
+        values = []
+        value = c_double(low)
+        option = DCAMPROP_OPTION_SUPPORT
+        for _ in range(256):
+            result = dcamprop_queryvalue(self.__hdcam, prop, byref(value), option)
+            if result <= 0:
+                return None
+            current = value.value
+            if not math.isfinite(current) or not low <= current <= high:
+                return None
+            if values and current <= values[-1]:
+                return None
+            values.append(current)
+            if current == high:
+                return tuple(values)
+            option = DCAMPROP_OPTION_NEXT
+        return None
 
     def get_property_range(self, name):
         """

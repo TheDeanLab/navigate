@@ -44,6 +44,10 @@ import numpy as np
 from navigate.config import get_navigate_path
 from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
+from navigate.model.devices.camera.format import (
+    CameraImageFormat,
+    CameraSettingCapability,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -64,14 +68,18 @@ class CameraBase(ABC):
             default=False,
             label="Flip X",
             required=False,
-            help_text="Mirror acquired images horizontally before displaying or saving them.",
+            help_text=(
+                "Mirror acquired images horizontally before displaying or saving them."
+            ),
         ),
         "flip_y": SettingSpec(
             bool,
             default=False,
             label="Flip Y",
             required=False,
-            help_text="Mirror acquired images vertically before displaying or saving them.",
+            help_text=(
+                "Mirror acquired images vertically before displaying or saving them."
+            ),
         ),
         "pixel_size_in_microns": SettingSpec(
             float,
@@ -176,6 +184,49 @@ class CameraBase(ABC):
         #: np.ndarray: Variance map
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
+
+    def get_advanced_setting_capabilities(self) -> dict[str, CameraSettingCapability]:
+        """Return current capabilities without changing camera settings.
+
+        Returns
+        -------
+        dict[str, CameraSettingCapability]
+            Safe fallback for legacy and third-party drivers. Hardware-specific
+            adapters override this to report the settings they can apply.
+        """
+        return {
+            "bit_depth": CameraSettingCapability(current_value=self.get_bit_depth())
+        }
+
+    def get_bit_depth(self) -> Optional[int]:
+        """Return meaningful output bits, or None when the driver cannot query them."""
+        return None
+
+    def set_bit_depth(self, bit_depth: int) -> int:
+        """Apply and read back camera output precision while acquisition is idle.
+
+        Parameters
+        ----------
+        bit_depth : int
+            Requested meaningful output bits.
+
+        Returns
+        -------
+        int
+            Confirmed effective depth, supplied by supporting adapters.
+
+        Raises
+        ------
+        NotImplementedError
+            This driver has not implemented independent bit-depth control.
+        """
+        raise NotImplementedError(
+            "This camera driver does not support bit-depth control."
+        )
+
+    def get_image_format(self) -> CameraImageFormat:
+        """Return the legacy uint16 array contract without assuming sensor depth."""
+        return CameraImageFormat()
 
     def __str__(self) -> str:
         """Return string representation of CameraBase."""

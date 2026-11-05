@@ -148,9 +148,14 @@ class PyramidalDataSource(DataSource):
             * self.shape_t
             * self.shape_c
             * self.positions
-            * self.bits
-            // 8
+            * np.dtype(self.dtype).itemsize
         ).sum()
+
+    def get_shape_from_metadata(self) -> None:
+        """Refresh geometry and discard cached pyramid shapes and chunks."""
+        self._shapes = None
+        self._subdivisions = None
+        super().get_shape_from_metadata()
 
     def set_metadata_from_configuration_experiment(
         self, configuration: Dict[str, Any], microscope_name: str = None

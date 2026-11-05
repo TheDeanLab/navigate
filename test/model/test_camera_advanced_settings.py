@@ -249,3 +249,43 @@ def test_synthetic_apply_save_experiment_reload_capture_and_save(
     with tifffile.TiffFile(filename) as image:
         assert image.pages[0].dtype == frames[0].dtype
         assert f'"camera_bit_depth": {depth}' in image.pages[0].description
+
+
+def test_stop_invalidates_prepared_capture_before_start_rpc(model):
+    token = model.prepare_camera_buffers("scope")["capture_token"]
+    model.signal_thread = None
+    model.is_data_thread_on = False
+    model.end_acquisition = Mock()
+    model.stop_stage = Mock()
+    model.run_command("stop")
+    model.run_command = Mock()
+    assert not model.start_prepared_capture(token, "acquire")
+    model.run_command.assert_not_called()
+
+
+def test_confirmed_setting_invalidates_prepared_capture(model):
+    token = model.prepare_camera_buffers("scope")["capture_token"]
+    assert (
+        request(model, identity=request(model)["identity"], bit_depth=8)["error"]
+        is None
+    )
+    model.run_command = Mock()
+    assert not model.start_prepared_capture(token, "acquire")
+    model.run_command.assert_not_called()
+
+
+def test_prepared_capture_token_is_consumed_once(model):
+    token = model.prepare_camera_buffers("scope")["capture_token"]
+    model.run_command = Mock()
+    assert model.start_prepared_capture(token, "acquire")
+    assert not model.start_prepared_capture(token, "acquire")
+    model.run_command.assert_called_once_with("acquire")
+
+
+def test_failed_preparation_does_not_retire_gui_owned_virtual_buffers(model):
+    model.virtual_microscopes = {"aux": object()}
+    model.destroy_virtual_microscope = Mock()
+    model.active_microscope.configure_camera.side_effect = ValueError("mode failed")
+    with pytest.raises(ValueError, match="mode failed"):
+        model.prepare_camera_buffers("scope")
+    model.destroy_virtual_microscope.assert_not_called()

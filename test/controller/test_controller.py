@@ -1138,8 +1138,15 @@ def test_capture_image(controller, monkeypatch):
     monkeypatch.setattr(controller, "data_buffer", images)
     work_thread = MagicMock()
     work_thread.join = MagicMock()
-    controller.threads_pool.createThread = MagicMock()
-    controller.threads_pool.createThread.return_value = work_thread
+    monkeypatch.setattr(
+        controller.threads_pool,
+        "createThread",
+        MagicMock(side_effect=lambda resource, worker: (worker(), work_thread)[1]),
+    )
+    monkeypatch.setattr(controller, "stop_acquisition_flag", False)
+    monkeypatch.setattr(
+        controller, "_start_model_capture", MagicMock(return_value=True)
+    )
     controller.show_img_pipe.recv = get_image_id
     controller.show_img_pipe.poll = MagicMock()
     controller.show_img_pipe.poll.return_value = False
@@ -1154,6 +1161,7 @@ def test_capture_image(controller, monkeypatch):
 
     for command in ["acquire"]:  # "autofocus"
         for mode in ["continuous", "live", "z-stack", "single"]:
+            controller.stop_acquisition_flag = False
             controller.capture_image(command, mode)
 
             # Evaluate calls

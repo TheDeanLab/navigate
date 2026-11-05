@@ -15,6 +15,7 @@ def controller():
     c = Controller.__new__(Controller)
     c.configuration = {"experiment": {"MicroscopeState": {"microscope_name": "scope"}}}
     c.additional_microscopes_configs = {}
+    c.stop_acquisition_flag = False
     c.model = Mock()
     c.acquire_bar_controller = SimpleNamespace(is_acquiring=False)
     c.threads_pool = Mock()
@@ -63,14 +64,14 @@ def test_capture_negotiates_then_binds_before_starting_model(controller):
     data = [np.zeros((2, 3), np.uint8)]
     c.model.prepare_camera_buffers.side_effect = lambda *args: events.append(
         "prepare"
-    ) or {"microscope": "scope", "data_buffer": data}
+    ) or {"microscope": "scope", "data_buffer": data, "capture_token": (1, "scope")}
     c.launch_additional_microscopes.side_effect = lambda: events.append("launch")
 
     def run(*args):
         assert c.data_buffer is data
         events.append("capture")
 
-    c.model.run_command.side_effect = run
+    c.model.start_prepared_capture.side_effect = run
     c._start_model_capture("acquire")
     assert events == ["prepare", "launch", "capture"]
 
@@ -99,11 +100,58 @@ def test_capture_start_failure_cleans_up_partial_acquisition(controller):
     c.model.prepare_camera_buffers.return_value = {
         "microscope": "scope",
         "data_buffer": [np.zeros((2, 3), np.uint8)],
+        "capture_token": (1, "scope"),
     }
-    c.model.run_command.side_effect = [RuntimeError("capture failed"), None]
+    c.model.start_prepared_capture.side_effect = RuntimeError("capture failed")
     with pytest.raises(RuntimeError, match="capture failed"):
         c._start_model_capture("acquire")
-    assert [call.args[0] for call in c.model.run_command.call_args_list] == [
-        "acquire",
-        "stop",
-    ]
+    c.model.run_command.assert_called_once_with("stop")
+
+
+def test_canceled_capture_never_reads_frames_or_clears_stop(controller):
+    c = controller
+    c._start_capture_ui = Mock()
+    c._finish_capture_ui = Mock()
+    c._on_capture_started = Mock()
+    c.show_img_pipe = Mock()
+
+    def cancel(*args):
+        c.stop_acquisition_flag = True
+        return False
+
+    c._start_model_capture = Mock(side_effect=cancel)
+    c.threads_pool.createThread.side_effect = lambda resource, worker: (
+        worker(),
+        Mock(),
+    )[1]
+    c.capture_image("acquire", "single")
+    assert c.stop_acquisition_flag
+    c.show_img_pipe.recv.assert_not_called()
+    c._on_capture_started.assert_not_called()
+    c._finish_capture_ui.assert_called_once_with("single", 0)
+
+
+def test_retired_auxiliary_window_can_still_be_removed(controller):
+    c = controller
+    window = Mock()
+    c.additional_microscopes = {"aux": {"popup_window": window}}
+    c.destroy_virtual_microscope("aux", destroy_window=True)
+    assert not c.additional_microscopes
+    window.popup.dismiss.assert_called_once()
+    c.model.destroy_virtual_microscope.assert_not_called()
+
+
+def test_binding_retired_auxiliary_drops_old_buffer_but_keeps_window(controller):
+    c = controller
+    window = Mock()
+    c.additional_microscopes = {
+        "aux": {
+            "popup_window": window,
+            "data_buffer": object(),
+            "show_img_pipe": object(),
+        }
+    }
+    c._bind_camera_buffer(
+        {"microscope": "scope", "data_buffer": None, "retired": ["aux"]}
+    )
+    assert c.additional_microscopes["aux"] == {"popup_window": window}

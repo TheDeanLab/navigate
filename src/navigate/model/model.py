@@ -458,7 +458,10 @@ class Model:
                 identity, "Stop acquisition to change camera bit depth."
             )
             result["capability"] = CameraSettingCapability(
-                current_value=camera.get_image_format().bit_depth, reason=reason
+                current_value=(
+                    None if identity in blocked else camera.get_image_format().bit_depth
+                ),
+                reason=reason,
             )
             if "bit_depth" in request:
                 result["error"] = reason
@@ -478,8 +481,9 @@ class Model:
                 previous = capability.current_value
                 if previous is None:
                     raise RuntimeError("Cannot confirm the previous camera bit depth.")
-                camera.set_bit_depth(depth)
+                self._prepared_camera_token = None
                 try:
+                    camera.set_bit_depth(depth)
                     capability = camera.get_advanced_setting_capabilities()["bit_depth"]
                     if (
                         capability.current_value != depth
@@ -552,6 +556,12 @@ class Model:
             raise RuntimeError("Stop acquisition before preparing camera buffers.")
         if self.active_microscope_name != microscope_name:
             raise RuntimeError("Wait for the microscope change before acquiring.")
+        self._prepared_camera_token = None
+        retired = [
+            name
+            for name in getattr(self, "virtual_microscopes", {})
+            if name not in additional
+        ]
         for name in dict.fromkeys((microscope_name, *additional)):
             microscope = self.microscopes[name]
             camera = microscope.camera
@@ -565,7 +575,55 @@ class Model:
         data = self.get_data_buffer(
             parameters["img_x_pixels"], parameters["img_y_pixels"], microscope_name
         )
-        return {"microscope": microscope_name, "data_buffer": data}
+        for name in retired:
+            pipe = getattr(self, f"{name}_show_img_pipe", None)
+            if pipe is not None:
+                pipe.send("stop")
+            self.destroy_virtual_microscope(name)
+        self._camera_capture_sequence = getattr(self, "_camera_capture_sequence", 0) + 1
+        self._prepared_camera_token = (self._camera_capture_sequence, microscope_name)
+        return {
+            "microscope": microscope_name,
+            "data_buffer": data,
+            "capture_token": self._prepared_camera_token,
+            "retired": retired,
+        }
+
+    def start_prepared_capture(self, token: tuple, command: str, *args: Any) -> bool:
+        """Start only if no Stop or setting change invalidated preparation.
+
+        Parameters
+        ----------
+        token : tuple
+            Generation and microscope returned by prepare_camera_buffers.
+        command : str
+            Capture command.
+        *args : Any
+            Arguments for the capture command.
+
+        Returns
+        -------
+        bool
+            False when preparation was canceled before this serialized RPC.
+        """
+        name = self.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        if (
+            token is None
+            or token != getattr(self, "_prepared_camera_token", None)
+            or token[1] != name
+        ):
+            return False
+        self._prepared_camera_token = None
+        self.run_command(command, *args)
+        return True
+
+    def cancel_prepared_capture(self) -> None:
+        """Invalidate pending capture and release waiting auxiliary displays."""
+        self._prepared_camera_token = None
+        for name in getattr(self, "virtual_microscopes", {}):
+            pipe = getattr(self, f"{name}_show_img_pipe", None)
+            if pipe is not None:
+                pipe.send("stop")
 
     def get_camera_image_format(
         self, microscope_name: Optional[str] = None
@@ -998,6 +1056,7 @@ class Model:
             """
             Called when user halts the acquisition
             """
+            self._prepared_camera_token = None
             self.stop_acquisition = True
 
             if hasattr(self, "signal_container"):

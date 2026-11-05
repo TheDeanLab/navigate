@@ -288,6 +288,11 @@ class DummyModel:
                 self.data_buffer, self.number_of_frames
             )
 
+    def get_camera_image_format(self, microscope_name=None):
+        """Mirror the model's confirmed-format query for writer tests."""
+        name = microscope_name or self.active_microscope_name
+        return self.camera[name].get_image_format()
+
     def signal_func(self):
         """Perform signal-related functionality.
 

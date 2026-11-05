@@ -37,8 +37,10 @@ import abc
 
 # Third Party Imports
 import numpy.typing as npt
+import numpy as np
 
 # Local Imports
+from navigate.model.devices.camera.format import CameraImageFormat
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -87,6 +89,8 @@ class DataSource:
 
         #: int: Number of bits per pixel.
         self.bits = 16
+        #: int or None: Confirmed camera precision, separate from storage width.
+        self.significant_bits = None
 
         if not hasattr(self, "dtype"):
             self.dtype = "uint16"
@@ -138,17 +142,51 @@ class DataSource:
         total_bytes : int
             Size of this data source in bytes.
         """
-        total_bits = (
+        total_bytes = (
             self.shape_x
             * self.shape_y
             * self.shape_z
             * self.shape_t
             * self.shape_c
             * self.positions
-            * self.bits
+            * np.dtype(self.dtype).itemsize
         )
-        total_bytes = total_bits // 8
         return total_bytes
+
+    def set_image_format(self, image_format: CameraImageFormat) -> None:
+        """Set the confirmed acquisition format before writing the first frame.
+
+        Parameters
+        ----------
+        image_format : CameraImageFormat
+            Normalized array dtype and meaningful camera precision.
+        """
+        if getattr(self, "_current_frame", 0):
+            raise RuntimeError("Cannot change image format after writing has started.")
+        self._set_read_format(image_format.dtype, image_format.bit_depth)
+
+    def _set_read_format(self, dtype: str, significant_bits: int = None) -> None:
+        """Synchronize stored dtype and separately recorded camera precision."""
+        self.dtype = np.dtype(dtype).name
+        self.bits = np.dtype(dtype).itemsize * 8
+        self.significant_bits = (
+            int(significant_bits) if significant_bits is not None else None
+        )
+        if self.metadata is not None:
+            self.metadata.dtype = self.dtype
+            self.metadata.significant_bits = self.significant_bits
+
+    def _validate_frame_format(self, data: npt.NDArray) -> None:
+        """Reject implicit casts or changing layouts within an acquisition."""
+        if data.dtype != np.dtype(self.dtype):
+            raise ValueError(f"Frame dtype {data.dtype} does not match {self.dtype}.")
+
+    def _write_format_attributes(self) -> None:
+        """Record camera precision on array-store roots without guessing it."""
+        if self.significant_bits is not None:
+            self.image.attrs["camera_bit_depth"] = self.significant_bits
+        elif "camera_bit_depth" in self.image.attrs:
+            del self.image.attrs["camera_bit_depth"]
 
     @property
     def mode(self) -> str:

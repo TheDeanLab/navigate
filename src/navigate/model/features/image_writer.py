@@ -219,13 +219,14 @@ class ImageWriter:
 
             if c_idx == 0 and z_idx == 0:
                 # Initialize MIP array with same number of channels as the data
-                self.mip = np.ndarray(
+                self.mip = np.zeros(
                     (
                         int(self.data_source.shape_c),
                         int(self.data_source.shape_y),
                         int(self.data_source.shape_x),
-                    )
-                ).astype(np.uint16)
+                    ),
+                    dtype=self.data_source.dtype,
+                )
 
             # flip image if necessary
             if self.flip_flags["x"] and self.flip_flags["y"]:
@@ -336,7 +337,7 @@ class ImageWriter:
         big-tiff or tiff is needed. Tiff file formats were designed for 32-bit
         operating systems, whereas big-tiff was designed for 64-bit operating systems.
 
-        Assumes 16-bit image type, without compression."""
+        Uses the confirmed storage dtype, without compression."""
 
         self.last_disk_space_check = time.time()
         # Return disk usage statistics in bytes
@@ -439,6 +440,14 @@ class ImageWriter:
         )
 
         self.data_source.set_metadata(self.saving_config)
+        image_format = self.model.get_camera_image_format(self.microscope_name)
+        if any(
+            frame.dtype != np.dtype(image_format.dtype) for frame in self.data_buffer
+        ):
+            raise ValueError(
+                "Saving buffer does not match the confirmed camera format."
+            )
+        self.data_source.set_image_format(image_format)
 
         # Make sure that there is enough disk space to save the data.
         self.calculate_and_check_disk_space()

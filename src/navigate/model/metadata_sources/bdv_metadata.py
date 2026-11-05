@@ -620,7 +620,8 @@ class BigDataViewerMetadata(XMLMetadata):
 
         # Parse the file path
         base_path = root.find("BasePath")
-        file = root.find("SequenceDescription/ImageLoader/hdf5")
+        file_type = "n5" if image_loader.attrib["format"] == "bdv.n5" else "hdf5"
+        file = image_loader.find(file_type)
         file_path = os.path.join(base_path.text, file.text)
 
         # Get setups. Each setup represents a visualisation data source in the viewer

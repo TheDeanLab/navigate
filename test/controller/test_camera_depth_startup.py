@@ -203,12 +203,13 @@ def test_failed_hamamatsu_rollback_blocks_same_physical_camera_alias(monkeypatch
         for name, cam in zip(("scope", "alias"), cameras)
     }
     first = m.camera_advanced_settings({"microscope": "scope", "request_id": 1})
+    original_write = sdk.set_property_value
 
     def failed_write_and_restore(name, value):
         if name == "bits_per_channel":
             sdk.values[name] = 8.0
             return False
-        return True
+        return original_write(name, value)
 
     sdk.set_property_value = failed_write_and_restore
     failure = m.camera_advanced_settings(

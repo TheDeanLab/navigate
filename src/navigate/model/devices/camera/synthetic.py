@@ -33,7 +33,6 @@
 # Standard Library Imports
 import logging
 import time
-import ctypes
 from typing import Optional, Any, List
 
 # Third Party Imports
@@ -44,6 +43,10 @@ from tifffile import TiffFile, TiffFileError
 from navigate.model.analysis import camera
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
 from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices.camera.format import (
+    CameraImageFormat,
+    CameraSettingCapability,
+)
 from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 
@@ -147,6 +150,9 @@ class SyntheticCamera(CameraBase):
 
         #: bool: Whether the camera is currently acquiring
         self.is_acquiring = False
+
+        #: int: Meaningful output precision of generated frames.
+        self._bit_depth = 16
 
         #: int: mean background count for synthetic image
         self._mean_background_count = 100
@@ -300,6 +306,46 @@ class SyntheticCamera(CameraBase):
         self.y_pixels = int(self.y_pixels / self.y_binning)
         return True
 
+    def get_bit_depth(self) -> int:
+        """Return the simulated camera output precision."""
+        return self._bit_depth
+
+    def get_image_format(self) -> CameraImageFormat:
+        """Return the unpacked array type for the selected simulated depth."""
+        return CameraImageFormat.for_bit_depth(self._bit_depth)
+
+    def get_advanced_setting_capabilities(self) -> dict[str, CameraSettingCapability]:
+        """Describe synthetic controls for exercising the acquisition pipeline."""
+        return {
+            "bit_depth": CameraSettingCapability(
+                current_value=self._bit_depth,
+                choices=(8, 12, 16),
+                writable=True,
+                reason="",
+            )
+        }
+
+    def set_bit_depth(self, bit_depth: int) -> int:
+        """Select simulated output precision while acquisition is stopped.
+
+        Parameters
+        ----------
+        bit_depth : int
+            One of 8, 12 or 16 bits.
+
+        Returns
+        -------
+        int
+            The applied output precision.
+        """
+        image_format = CameraImageFormat.for_bit_depth(bit_depth)
+        if image_format.bit_depth not in (8, 12, 16):
+            raise ValueError("Synthetic camera supports 8, 12 and 16 bits.")
+        if self.is_acquiring:
+            raise RuntimeError("Stop acquisition before changing camera bit depth.")
+        self._bit_depth = image_format.bit_depth
+        return self._bit_depth
+
     def initialize_image_series(
         self,
         data_buffer: Optional[List[SharedNDArray]] = None,
@@ -314,6 +360,16 @@ class SyntheticCamera(CameraBase):
         number_of_frames : int
             Number of frames.  Default is 100.
         """
+        if data_buffer is not None:
+            image_format = self.get_image_format()
+            if len(data_buffer) < number_of_frames or any(
+                frame.dtype != np.dtype(image_format.dtype)
+                or frame.shape != (self.y_pixels, self.x_pixels)
+                for frame in data_buffer
+            ):
+                raise ValueError(
+                    "Synthetic camera buffer does not match its image format."
+                )
         self.data_buffer = data_buffer
         self.num_of_frame = number_of_frames
         self.current_frame_idx = 0
@@ -385,12 +441,15 @@ class SyntheticCamera(CameraBase):
         if not self.is_acquiring:
             return
         if self.random_image:
-            image = np.random.normal(
-                0,
-                self._noise_sigma
-                / 0.47,  # TODO: Don't hardcode 0.47 electrons per count
-                size=(self.x_pixels, self.y_pixels),
-            ).astype(np.uint16) + int(self._mean_background_count)
+            image = (
+                np.random.normal(
+                    0,
+                    self._noise_sigma
+                    / 0.47,  # TODO: Don't hardcode 0.47 electrons per count
+                    size=(self.y_pixels, self.x_pixels),
+                )
+                + self._mean_background_count
+            )
         else:
             image = self.tif_images[self.current_tif_id][self.img_id]
             self.img_id += 1
@@ -398,11 +457,11 @@ class SyntheticCamera(CameraBase):
                 self.img_id = 0
                 self.current_tif_id = (self.current_tif_id + 1) % len(self.tif_images)
 
-        ctypes.memmove(
-            self.data_buffer[self.current_frame_idx].ctypes.data,
-            image.ctypes.data,
-            self.x_pixels * self.y_pixels * 2,
+        image_format = self.get_image_format()
+        normalized = np.clip(image, 0, (1 << self._bit_depth) - 1).astype(
+            image_format.dtype, copy=False
         )
+        np.copyto(self.data_buffer[self.current_frame_idx], normalized, casting="no")
 
         self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
 
@@ -520,7 +579,7 @@ class SyntheticCamera(CameraBase):
         """
         super().set_cooling(cooling)
         if cooling == "On":
-            logger.info(f"Camera cooling turned On.")
+            logger.info("Camera cooling turned On.")
             self.temperature_step = -1.0
         else:
             self.temperature = 20.0

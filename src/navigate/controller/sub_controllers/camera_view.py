@@ -728,7 +728,7 @@ class BaseViewController(GUIController, ABaseViewController):
         channel_state: Dict[str, Any],
         signature: Optional[Any] = None,
     ) -> tuple[np.ndarray, float]:
-        """Return a BGR colorized channel buffer, using cache when signature is stable."""
+        """Return a BGR channel buffer, cached while its signature is stable."""
         cache_key = None
         if signature is not None:
             cache_key = (
@@ -2068,9 +2068,11 @@ class CameraViewController(BaseViewController):
 
         slider_index = self.view.slider.get()
         if self._should_use_overlay_mode():
-            channel_images, channel_signatures, all_available = (
-                self._collect_camera_overlay_channels()
-            )
+            (
+                channel_images,
+                channel_signatures,
+                all_available,
+            ) = self._collect_camera_overlay_channels()
             if not all_available:
                 return
             img_out = self._compose_overlay_from_channels(
@@ -2214,9 +2216,9 @@ class CameraViewController(BaseViewController):
         acquired data.
         """
         # record the max without rescanning the full frame
-        self.max_intensity_history[self._max_intensity_history_idx] = (
-            self._last_frame_display_max
-        )
+        self.max_intensity_history[
+            self._max_intensity_history_idx
+        ] = self._last_frame_display_max
         self._max_intensity_history_idx = (self._max_intensity_history_idx + 1) % 32
 
         # Get the number of frames to average from the VIEW
@@ -2253,7 +2255,7 @@ class CameraViewController(BaseViewController):
     def display_image(self, image: np.ndarray) -> None:
         """Display an image using the LUT specified in the View.
 
-        If Autoscale is selected, automatically calculates the min and max values for the data.
+        If Autoscale is selected, automatically calculates the data's min and max.
 
         If Autoscale is not selected, takes the user values as specified in the min
         and max counts.
@@ -2265,9 +2267,11 @@ class CameraViewController(BaseViewController):
         """
         if self._should_use_overlay_mode():
             self._sync_overlay_cache_from_controls()
-            channel_images, channel_signatures, all_available = (
-                self._collect_camera_overlay_channels(image)
-            )
+            (
+                channel_images,
+                channel_signatures,
+                all_available,
+            ) = self._collect_camera_overlay_channels(image)
             if not all_available:
                 return
             img_out = self._compose_overlay_from_channels(
@@ -2439,7 +2443,7 @@ class MIPViewController(BaseViewController):
                 new_config={"enabled": True},
             )
 
-        # Set histogram according to the experiment.yaml file. If disabled, stays disabled upon restart.
+        # Restore histogram preference, including disabled state, after restart.
         self.display_enabled.set(
             self.parent_controller.configuration["gui"]["mip_display"].get(
                 "enabled", True
@@ -2525,13 +2529,14 @@ class MIPViewController(BaseViewController):
         Pre-allocated matrix is shape (number_of_channels, number_of_slices, width)
         """
 
+        image_dtype = getattr(self, "image_dtype", np.dtype("uint16"))
         self.xy_mip = 100 * np.ones(
             (
                 self.number_of_channels,
                 self.original_image_height,
                 self.original_image_width,
             ),
-            dtype=np.uint16,
+            dtype=image_dtype,
         )
 
         self.zy_mip = 100 * np.ones(
@@ -2540,7 +2545,7 @@ class MIPViewController(BaseViewController):
                 self.number_of_slices,
                 self.original_image_width,
             ),
-            dtype=np.uint16,
+            dtype=image_dtype,
         )
 
         self.zx_mip = 100 * np.ones(
@@ -2549,11 +2554,15 @@ class MIPViewController(BaseViewController):
                 self.number_of_slices,
                 self.original_image_height,
             ),
-            dtype=np.uint16,
+            dtype=image_dtype,
         )
 
-        self._zy_reduce_buf = np.empty((1, self.original_image_width), dtype=np.uint16)
-        self._zx_reduce_buf = np.empty((self.original_image_height, 1), dtype=np.uint16)
+        self._zy_reduce_buf = np.empty(
+            (1, self.original_image_width), dtype=image_dtype
+        )
+        self._zx_reduce_buf = np.empty(
+            (self.original_image_height, 1), dtype=image_dtype
+        )
 
     def _ensure_mip_buffers_compatible(self, image: np.ndarray) -> np.ndarray:
         """Ensure MIP buffers match incoming frame shape and dtype.
@@ -2576,11 +2585,13 @@ class MIPViewController(BaseViewController):
 
         frame_height, frame_width = frame.shape
         xy_mip = getattr(self, "xy_mip", None)
-        needs_realloc = xy_mip is None or xy_mip.shape[1:] != (
-            frame_height,
-            frame_width,
+        needs_realloc = (
+            xy_mip is None
+            or xy_mip.dtype != frame.dtype
+            or xy_mip.shape[1:] != (frame_height, frame_width)
         )
         if needs_realloc:
+            self.image_dtype = frame.dtype
             self.original_image_height = frame_height
             self.original_image_width = frame_width
             self.preallocate_matrices()
@@ -3077,6 +3088,9 @@ class SpooledImageLoader:
         #: int: The number of bytes in the image.
         self.n_bytes = None
 
+        #: np.dtype: Array type established by the first frame in this stack.
+        self.dtype = None
+
         #: int: The height of the image.
         self.size_y = size_y
 
@@ -3142,10 +3156,14 @@ class SpooledImageLoader:
             The slice index of the image.
         """
 
-        image = image.flatten()
-
-        if self.temp_files[channel].tell() == 0:
+        if image.shape != (self.size_y, self.size_x):
+            raise ValueError("Frame shape does not match the spooled image stack.")
+        if self.dtype is None:
+            self.dtype = image.dtype
             self.n_bytes = image.nbytes
+        elif image.dtype != self.dtype:
+            raise ValueError("Frame dtype cannot change within a spooled image stack.")
+        image = np.ascontiguousarray(image).reshape(-1)
 
         start_idx, end_idx = self.get_indices(slice_index)
         self.temp_files[channel].seek(start_idx)
@@ -3166,12 +3184,14 @@ class SpooledImageLoader:
         np.ndarray or None
             The image data or None if the image could not be loaded.
         """
+        if self.dtype is None:
+            return None
         start_idx, _ = self.get_indices(slice_index)
         self.temp_files[channel].seek(start_idx)
 
         try:
             image = np.frombuffer(
-                self.temp_files[channel].read(self.n_bytes), dtype=np.uint16
+                self.temp_files[channel].read(self.n_bytes), dtype=self.dtype
             )
             image = np.copy(image.reshape((self.size_y, self.size_x)))
         except (ValueError, TypeError, AttributeError):

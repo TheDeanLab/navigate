@@ -27,6 +27,7 @@ def camera(monkeypatch):
         "internal_line_interval": 10.08e-6,
         "minimum_trigger_interval": 0.05652864,
         "exposure_time": 100.8e-6,
+        "bits_per_channel": 16,
     }[name]
     c.camera_parameters = {}
     c.y_pixels = 2304

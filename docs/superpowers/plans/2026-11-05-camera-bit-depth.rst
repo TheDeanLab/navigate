@@ -101,6 +101,36 @@ Consumes capabilities and setter; produces identity-tagged asynchronous results.
 Follow-ups
 ----------
 
+Physical Quest 2 MONO8 correction (authorized 2026-11-05)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Direct SDK tests proved that MONO16 exposes 12/16 precision, whereas selecting
+MONO8 changes BITSPERCHANNEL to fixed/read-only 8 and halves native byte counts.
+Both setting orders were tested from 12/16 in Normal and Light-Sheet modes;
+the initial depth-first write fails, while pixel-first succeeds throughout.
+
+Implement this correction in PR 4 and integrate it into PR 5. Keep SDK-derived
+choices, exact readback, rollback, inactive controls during capture, and native
+uint8 storage. Do not hard-code a camera-model depth list or truncate host data.
+
+* Add a coupled SDK double and failing regressions for 16/12 to 8 and back,
+  cold MONO8 discovery, rejected format writes, rollback, and restart.
+* Select the target pixel type before setting precision. Skip an unnecessary
+  precision write when the pixel change already produced the requested value.
+* While idle in MONO8, discover the MONO16 choices with a bounded temporary
+  format change and restore the original format/timing exactly. This explicit
+  exception to read-only high-level discovery is needed because DCAM hides the
+  other precision choices in MONO8. Never probe during capture or after a
+  restoration failure; Lightning remains read-only without format probing.
+* Share snapshot/restoration logic between capability probing and setting;
+  restore readout, then pixel format, then precision and timing. Failed
+  restoration blocks further capture. DCAM restart uses pixel-first ordering.
+* Run focused adapter/native tests, independent review, physical 8/12/16
+  switching/restart/capture at both ROIs, actual GUI save/reload, all writers,
+  and the practical non-hardware suite. Restore camera and active config state.
+* Update draft PRs 1259/1260 with commits and measured evidence; leave them
+  unmerged. No guaranteed throughput gain follows merely from smaller buffers.
+
 Write focused plans before each vendor or compression PR using the same contracts.
 Lightning owns coupled full-well timing/calibration semantics. Ximea owns SDK image
 format dependencies; Daheng owns supported monochrome PixelFormats; Photometrics

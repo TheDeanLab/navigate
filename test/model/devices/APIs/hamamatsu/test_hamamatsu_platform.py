@@ -306,10 +306,13 @@ def test_reinitialize_restores_settings_including_zero_positions(monkeypatch):
         internal_line_interval=72.96e-6,
         exposure_time=729.6e-6,
         trigger_delay=0,
+        bits_per_channel=12,
+        image_pixel_type=2,
     )
     state = original.copy()
     events = []
     camera.get_property_value = lambda name: state[name]
+    camera.is_property_writable = lambda name: True
 
     def close():
         events.append("close")
@@ -337,6 +340,43 @@ def test_reinitialize_restores_settings_including_zero_positions(monkeypatch):
     assert state["subarray_hpos"] == 0
     assert state["subarray_vpos"] == 896
     assert state["internal_line_interval"] == 72.96e-6
+    assert state["bits_per_channel"] == 12
+    assert state["image_pixel_type"] == 2
+
+
+def test_reinitialize_selects_mono8_before_restoring_eight_bit_precision(monkeypatch):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__iDevice = 0
+    api.camReg.numCameras = 1
+    original = {name: 1.0 for name in api.property_dict}
+    original.update(bits_per_channel=8, image_pixel_type=1)
+    state = original.copy()
+    camera.get_property_value = lambda name: state.get(name, False)
+    camera.is_property_writable = lambda name: True
+    camera.dev_close = lambda: None
+
+    def reopen(index):
+        state.update(bits_per_channel=16, image_pixel_type=2)
+        return True
+
+    camera.dev_open = reopen
+    camera._DCAM__open_hdcamwait = lambda: True
+    names = {value: key for key, value in api.property_dict.items()}
+
+    def write(prop, value):
+        name = names[prop]
+        if name == "bits_per_channel" and value == 8 and state["image_pixel_type"] == 2:
+            return False
+        state[name] = value
+        if name == "image_pixel_type" and value == 1:
+            state["bits_per_channel"] = 8
+        return True
+
+    camera.prop_setvalue = write
+    assert camera.reinitialize()
+    assert state == original
 
 
 @pytest.fixture

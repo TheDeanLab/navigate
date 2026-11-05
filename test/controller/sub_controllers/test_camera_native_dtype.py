@@ -56,3 +56,22 @@ def test_mip_buffers_follow_incoming_dtype(dtype):
         controller._zx_reduce_buf,
     ):
         assert array.dtype == dtype
+
+
+@pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
+def test_native_mip_preserves_counts_below_placeholder_background(dtype, monkeypatch):
+    from types import SimpleNamespace
+    from navigate.controller.sub_controllers.camera_view import BaseViewController
+
+    controller = MIPViewController.__new__(MIPViewController)
+    controller.image_mode = "z-stack"
+    controller.display_enabled = SimpleNamespace(get=lambda: True)
+    controller.identify_channel_index_and_slice = lambda: (0, 0)
+    controller.number_of_channels = 1
+    controller.number_of_slices = 2
+    monkeypatch.setattr(BaseViewController, "try_to_display_image", lambda *args: None)
+    frame = np.array([[0, 1, 2], [3, 4, 5]], dtype=dtype)
+    controller.try_to_display_image(frame)
+    np.testing.assert_array_equal(controller.xy_mip[0], frame)
+    np.testing.assert_array_equal(controller.zy_mip[0, 0], frame.max(axis=0))
+    np.testing.assert_array_equal(controller.zx_mip[0, 0], frame.max(axis=1))

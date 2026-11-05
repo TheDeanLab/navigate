@@ -2530,7 +2530,7 @@ class MIPViewController(BaseViewController):
         """
 
         image_dtype = getattr(self, "image_dtype", np.dtype("uint16"))
-        self.xy_mip = 100 * np.ones(
+        self.xy_mip = np.zeros(
             (
                 self.number_of_channels,
                 self.original_image_height,
@@ -2539,7 +2539,7 @@ class MIPViewController(BaseViewController):
             dtype=image_dtype,
         )
 
-        self.zy_mip = 100 * np.ones(
+        self.zy_mip = np.zeros(
             (
                 self.number_of_channels,
                 self.number_of_slices,
@@ -2548,7 +2548,7 @@ class MIPViewController(BaseViewController):
             dtype=image_dtype,
         )
 
-        self.zx_mip = 100 * np.ones(
+        self.zx_mip = np.zeros(
             (
                 self.number_of_channels,
                 self.number_of_slices,
@@ -2585,13 +2585,22 @@ class MIPViewController(BaseViewController):
 
         frame_height, frame_width = frame.shape
         xy_mip = getattr(self, "xy_mip", None)
+        # Preserve native camera storage; retain the existing conversion for
+        # processed/plugin frames such as floating-point images.
+        image_dtype = (
+            frame.dtype
+            if frame.dtype in (np.dtype("uint8"), np.dtype("uint16"))
+            else xy_mip.dtype
+            if xy_mip is not None
+            else np.dtype("uint16")
+        )
         needs_realloc = (
             xy_mip is None
-            or xy_mip.dtype != frame.dtype
+            or xy_mip.dtype != image_dtype
             or xy_mip.shape[1:] != (frame_height, frame_width)
         )
         if needs_realloc:
-            self.image_dtype = frame.dtype
+            self.image_dtype = image_dtype
             self.original_image_height = frame_height
             self.original_image_width = frame_width
             self.preallocate_matrices()

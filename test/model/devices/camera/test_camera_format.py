@@ -6,11 +6,30 @@ from dataclasses import asdict
 import numpy as np
 import pytest
 
-from navigate.model.devices.camera.synthetic import SyntheticCamera
+from navigate.model.devices.camera.base import CameraBase
+
+
+class LegacyCamera(CameraBase):
+    """An existing plugin implements only the original abstract interface."""
+
+    def unused(self, *args, **kwargs):
+        pass
+
+    get_new_frame = unused
+    initialize_image_series = unused
+    close_image_series = unused
+    set_line_interval = unused
+    set_exposure_time = unused
+    set_readout_direction = unused
+    calculate_light_sheet_exposure_time = unused
+    set_ROI = unused
+    set_binning = unused
+    set_trigger_mode = unused
+    set_sensor_mode = unused
 
 
 def test_legacy_driver_keeps_uint16_without_claiming_sensor_precision():
-    camera = SyntheticCamera.__new__(SyntheticCamera)
+    camera = LegacyCamera.__new__(LegacyCamera)
     assert camera.get_bit_depth() is None
     capability = camera.get_advanced_setting_capabilities()["bit_depth"]
     assert capability.current_value is None

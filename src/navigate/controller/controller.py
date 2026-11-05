@@ -466,13 +466,22 @@ class Controller:
                 "img_y_pixels"
             ]
         )
-        if img_width == self.img_width and img_height == self.img_height:
+        image_format = self.model.get_camera_image_format(microscope_name)
+        if (
+            img_width == self.img_width
+            and img_height == self.img_height
+            and self.data_buffer is not None
+            and self.data_buffer[0].dtype.name == image_format.dtype
+        ):
             return
 
-        if self.data_buffer is not None:
-            for i in range(len(self.data_buffer)):
-                self.data_buffer[i].shared_memory.close()
-        self.data_buffer = self.model.get_data_buffer(img_width, img_height)
+        data_buffer = self.model.get_data_buffer(
+            img_width, img_height, microscope_name=microscope_name
+        )
+        # Queued display/histogram callbacks can still own old frame views. Let
+        # their SharedMemory handles close when the last local reference dies;
+        # the model owns unlinking, which leaves these mapped views readable.
+        self.data_buffer = data_buffer
         self.img_width = img_width
         self.img_height = img_height
 

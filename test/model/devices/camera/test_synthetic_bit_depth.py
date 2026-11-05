@@ -61,3 +61,17 @@ def test_synthetic_rejects_unadvertised_depth(camera):
     with pytest.raises(ValueError):
         camera.set_bit_depth(10)
     assert camera.get_bit_depth() == 16
+
+
+def test_model_can_unload_images_after_buffer_geometry_changes(camera):
+    from types import SimpleNamespace
+    from navigate.model.model import Model
+
+    model = Model.__new__(Model)
+    model.active_microscope = SimpleNamespace(camera=camera)
+    model.data_buffer = [np.zeros((1, 2), dtype=np.uint16)]
+    model.number_of_frames = 1
+    model.load_images(None)
+    assert camera.random_image
+    assert not camera.is_acquiring
+    assert camera.data_buffer is None

@@ -445,7 +445,12 @@ class Model:
         )
         return microscope.camera.get_image_format()
 
-    def update_data_buffer(self, img_width: int = 512, img_height: int = 512) -> None:
+    def update_data_buffer(
+        self,
+        img_width: int = 512,
+        img_height: int = 512,
+        microscope_name: Optional[str] = None,
+    ) -> None:
         """Update the Data Buffer
 
         Parameters
@@ -454,6 +459,8 @@ class Model:
             Number of active pixels in the x-dimension.
         img_height : int
             Number of active pixels in the y-dimension.
+        microscope_name : str, optional
+            Camera owning the requested format, defaulting to the active microscope.
 
         Returns
         -------
@@ -464,14 +471,15 @@ class Model:
             microscope.camera.is_acquiring for microscope in self.microscopes.values()
         ):
             raise RuntimeError("Stop acquisition before replacing camera buffers.")
-        image_format = self.get_camera_image_format()
+        microscope_name = microscope_name or self.active_microscope_name
+        image_format = self.get_camera_image_format(microscope_name)
         # Allocate first: allocation failure must leave the old mappings usable.
         data_buffer = [
             SharedNDArray(shape=(img_height, img_width), dtype=image_format.dtype)
             for _ in range(self.number_of_frames)
         ]
-        for microscope_name in self.microscopes:
-            self.microscopes[microscope_name].update_data_buffer(
+        for microscope in self.microscopes.values():
+            microscope.update_data_buffer(
                 data_buffer,
                 self.number_of_frames,
             )
@@ -480,7 +488,7 @@ class Model:
         self.img_width = img_width
         self.img_height = img_height
         self.binning = self.configuration["experiment"]["CameraParameters"][
-            self.active_microscope_name
+            microscope_name
         ]["binning"]
         if previous is not None:
             for frame in previous:
@@ -488,7 +496,10 @@ class Model:
                 frame.shared_memory.unlink()
 
     def get_data_buffer(
-        self, img_width: int = 512, img_height: int = 512
+        self,
+        img_width: int = 512,
+        img_height: int = 512,
+        microscope_name: Optional[str] = None,
     ) -> List[SharedNDArray]:
         """Get the data buffer.
 
@@ -501,25 +512,28 @@ class Model:
             Number of active pixels in the x-dimension.
         img_width : int
             Number of active pixels in the y-dimension.
+        microscope_name : str, optional
+            Camera owning the requested format, defaulting to the active microscope.
 
         Returns
         -------
         data_buffer : List[SharedNDArray]
             Shared memory object.
         """
+        microscope_name = microscope_name or self.active_microscope_name
         if (
             self.data_buffer is None
             or len(self.data_buffer) != self.number_of_frames
             or self.data_buffer[0].dtype
-            != np.dtype(self.get_camera_image_format().dtype)
+            != np.dtype(self.get_camera_image_format(microscope_name).dtype)
             or img_width != self.img_width
             or img_height != self.img_height
-            or self.configuration["experiment"]["CameraParameters"][
-                self.active_microscope_name
-            ]["binning"]
+            or self.configuration["experiment"]["CameraParameters"][microscope_name][
+                "binning"
+            ]
             != self.binning
         ):
-            self.update_data_buffer(img_width, img_height)
+            self.update_data_buffer(img_width, img_height, microscope_name)
         return self.data_buffer
 
     def create_pipe(self, pipe_name: str) -> multiprocessing.Pipe:
@@ -2012,11 +2026,15 @@ class Model:
         filenames : Optional[list[str]]
             The list of filenames to load.
         """
+        # File selection does not acquire frames. ROI/binning are applied later
+        # by prepare_acquisition, so do not attach a potentially resized ring yet.
         self.active_microscope.camera.initialize_image_series(
-            self.data_buffer, self.number_of_frames
+            number_of_frames=self.number_of_frames
         )
-        self.active_microscope.camera.load_images(filenames)
-        self.active_microscope.camera.close_image_series()
+        try:
+            self.active_microscope.camera.load_images(filenames)
+        finally:
+            self.active_microscope.camera.close_image_series()
 
     def update_ilastik_setting(
         self,

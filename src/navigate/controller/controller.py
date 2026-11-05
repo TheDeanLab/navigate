@@ -475,10 +475,12 @@ class Controller:
         ):
             return
 
-        data_buffer = self.model.get_data_buffer(img_width, img_height)
-        if self.data_buffer is not None:
-            for i in range(len(self.data_buffer)):
-                self.data_buffer[i].shared_memory.close()
+        data_buffer = self.model.get_data_buffer(
+            img_width, img_height, microscope_name=microscope_name
+        )
+        # Queued display/histogram callbacks can still own old frame views. Let
+        # their SharedMemory handles close when the last local reference dies;
+        # the model owns unlinking, which leaves these mapped views readable.
         self.data_buffer = data_buffer
         self.img_width = img_width
         self.img_height = img_height

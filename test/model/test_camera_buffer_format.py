@@ -134,3 +134,74 @@ def test_virtual_microscope_allocates_selected_camera_dtype(buffer_model, monkey
         for frame in frames:
             frame.shared_memory.close()
             frame.shared_memory.unlink()
+
+
+def test_replaced_controller_mapping_lives_until_consumers_release_it(buffer_model):
+    import gc
+    import pickle
+    import weakref
+    from navigate.controller.controller import Controller
+
+    model = buffer_model
+    model.update_data_buffer(3, 2)
+    model.data_buffer[0][:] = 1234
+    controller = Controller.__new__(Controller)
+    controller.model = model
+    controller.img_width, controller.img_height = 3, 2
+    controller.data_buffer = pickle.loads(pickle.dumps(model.data_buffer))
+    controller.configuration = model.configuration
+    model.configuration["experiment"]["MicroscopeState"] = {"microscope_name": "camera"}
+    model.configuration["experiment"]["CameraParameters"]["camera"].update(
+        img_x_pixels=3, img_y_pixels=2
+    )
+    # Real display and histogram callbacks retain either a frame or a flipped view.
+    display = SimpleNamespace(image=controller.data_buffer[0][:, ::-1])
+    pending = SimpleNamespace(image=controller.data_buffer[0])
+    mapping_ref = weakref.ref(pending.image.shared_memory)
+    model.active_microscope.camera.image_format = CameraImageFormat.for_bit_depth(8)
+    controller.update_buffer()
+    assert (
+        mapping_ref()._mmap is not None
+    )  # Check before dereferencing unmapped memory.
+    np.testing.assert_array_equal(np.asarray(display.image), np.full((2, 3), 1234))
+    np.testing.assert_array_equal(np.asarray(pending.image), np.full((2, 3), 1234))
+    display.image = pending.image = None
+    gc.collect()
+    assert mapping_ref() is None
+
+
+def test_controller_allocates_for_selected_microscope_before_resolution_switch(
+    buffer_model,
+):
+    import pickle
+    from navigate.controller.controller import Controller
+
+    model = buffer_model
+    model.update_data_buffer(3, 2)
+    selected = SimpleNamespace(
+        camera=SimpleNamespace(
+            is_acquiring=False,
+            get_image_format=lambda: CameraImageFormat.for_bit_depth(8),
+        )
+    )
+    selected.update_data_buffer = lambda data, count: setattr(
+        selected, "data_buffer", data
+    )
+    model.microscopes["selected"] = selected
+    model.configuration["experiment"]["CameraParameters"]["selected"] = {
+        "img_x_pixels": 3,
+        "img_y_pixels": 2,
+        "binning": "1x1",
+    }
+    model.configuration["experiment"]["MicroscopeState"] = {
+        "microscope_name": "selected"
+    }
+    controller = Controller.__new__(Controller)
+    controller.model = model
+    controller.configuration = model.configuration
+    controller.img_width, controller.img_height = 3, 2
+    controller.data_buffer = pickle.loads(pickle.dumps(model.data_buffer))
+    controller.update_buffer()
+    assert model.active_microscope_name == "camera"
+    assert controller.data_buffer[0].dtype == np.uint8
+    assert selected.data_buffer is model.data_buffer

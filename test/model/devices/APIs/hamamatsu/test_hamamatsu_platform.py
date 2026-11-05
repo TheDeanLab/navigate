@@ -337,3 +337,117 @@ def test_reinitialize_restores_settings_including_zero_positions(monkeypatch):
     assert state["subarray_hpos"] == 0
     assert state["subarray_vpos"] == 896
     assert state["internal_line_interval"] == 72.96e-6
+
+
+@pytest.fixture
+def property_camera(monkeypatch):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(0x123456789)
+    attributes = api.DCAMPROP_ATTR()
+    attributes.attribute = 0x00010000 | 0x00020000
+    attributes.valuemin, attributes.valuemax = 8, 16
+    queried = []
+
+    def get_attribute(handle, output):
+        assert handle.value == 0x123456789
+        output._obj.attribute = attributes.attribute
+        output._obj.valuemin = attributes.valuemin
+        output._obj.valuemax = attributes.valuemax
+        return 1
+
+    def query(handle, prop, value, option):
+        assert handle.value == 0x123456789
+        assert prop == 0x00420130
+        queried.append((value._obj.value, option))
+        eligible = [
+            v
+            for v in (8, 12, 16)
+            if v > value._obj.value or (option == 0 and v == value._obj.value)
+        ]
+        if not eligible:
+            return -2147481560  # DCAMERR_NOPROPERTY
+        value._obj.value = eligible[0]
+        return 1
+
+    def unexpected_write(*args):
+        pytest.fail("Capability discovery must never set a property")
+
+    monkeypatch.setattr(api, "dcamprop_getattr", get_attribute)
+    monkeypatch.setattr(api, "dcamprop_queryvalue", query, raising=False)
+    monkeypatch.setattr(api, "dcamprop_setvalue", unexpected_write)
+    monkeypatch.setattr(api, "dcamprop_setgetvalue", unexpected_write)
+    yield api, camera, attributes, queried
+    # Pytest may retain failed-call frames beyond monkeypatch teardown.
+    camera._DCAM__hdcam = 0
+    camera._DCAM__hdcamwait = 0
+
+
+def test_property_discovery_enumerates_sparse_values_without_writes(property_camera):
+    api, camera, _, queried = property_camera
+    assert camera.get_property_values("bits_per_channel") == (8.0, 12.0, 16.0)
+    assert queried == [(8.0, 0), (8.0, 0x01000000), (12.0, 0x01000000)]
+    assert camera.is_property_writable("bits_per_channel") is True
+
+
+def test_property_discovery_reports_fixed_and_read_only(property_camera):
+    _, camera, attributes, _ = property_camera
+    attributes.valuemin = attributes.valuemax = 12
+    attributes.attribute = 0x00010000
+    assert camera.get_property_values("bits_per_channel") == (12.0,)
+    assert camera.is_property_writable("bits_per_channel") is False
+
+
+def test_property_discovery_handles_missing_properties(property_camera, monkeypatch):
+    api, camera, _, _ = property_camera
+    assert camera.get_property_values("not_a_property") is None
+    assert camera.is_property_writable("not_a_property") is False
+    monkeypatch.setattr(api, "dcamprop_getattr", lambda *args: -1)
+    assert camera.get_property_values("bits_per_channel") is None
+    assert camera.is_property_writable("bits_per_channel") is False
+
+
+@pytest.mark.parametrize("bad_value", [float("nan"), float("inf"), 7, 17])
+def test_property_discovery_rejects_malformed_query_results(
+    property_camera, monkeypatch, bad_value
+):
+    api, camera, _, _ = property_camera
+
+    def query(handle, prop, output, option):
+        output._obj.value = bad_value
+        return 1
+
+    monkeypatch.setattr(api, "dcamprop_queryvalue", query)
+    assert camera.get_property_values("bits_per_channel") is None
+
+
+def test_property_discovery_rejects_non_progressing_driver(
+    property_camera, monkeypatch
+):
+    api, camera, _, _ = property_camera
+    monkeypatch.setattr(api, "dcamprop_queryvalue", lambda *args: 1)
+    assert camera.get_property_values("bits_per_channel") is None
+
+
+def test_property_discovery_discards_partial_list_after_sdk_failure(
+    property_camera, monkeypatch
+):
+    api, camera, _, _ = property_camera
+
+    def query(handle, prop, output, option):
+        return 1 if option == 0 else int(api.DCAMERR.INVALIDHANDLE)
+
+    monkeypatch.setattr(api, "dcamprop_queryvalue", query)
+    assert camera.get_property_values("bits_per_channel") is None
+
+
+def test_property_query_has_pointer_sized_handle_and_double_output(monkeypatch):
+    api, _ = load_api(monkeypatch)
+    assert api.dcamprop_queryvalue.argtypes == [
+        ctypes.c_void_p,
+        ctypes.c_int32,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int32,
+    ]
+    assert api.dcamprop_queryvalue.restype is ctypes.c_int32

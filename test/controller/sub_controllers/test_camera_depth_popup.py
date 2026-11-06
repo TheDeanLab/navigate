@@ -2,6 +2,7 @@
 
 from types import SimpleNamespace
 from unittest.mock import Mock, MagicMock
+import time
 
 import pytest
 
@@ -120,8 +121,9 @@ def test_acquisition_locks_popup_even_with_late_writable_reply(popup):
     )
 
 
+@pytest.mark.parametrize("defer_mapping", [False, True])
 def test_real_popup_builds_depth_control_and_switches_microscope(
-    dummy_controller, tk_root, monkeypatch
+    dummy_controller, tk_root, monkeypatch, defer_mapping
 ):
     from navigate.view.popups.camera_setting_popup import AdvancedCameraSettingPopup
 
@@ -138,8 +140,18 @@ def test_real_popup_builds_depth_control_and_switches_microscope(
     view = AdvancedCameraSettingPopup(tk_root)
     c = AdvancedCameraSettingController(view, dummy_controller)
     monkeypatch.setattr(c, "save_camera_settings", Mock())
+    mapping_event = None
+    if defer_mapping:
+        view.popup.withdraw()
+        mapping_event = tk_root.after(50, view.popup.deiconify)
     try:
-        tk_root.update_idletasks()
+        # Mapping may require window events, which update_idletasks omits.
+        deadline = time.monotonic() + 5
+        while not view.inputs["bit_depth"].winfo_ismapped():
+            tk_root.update()
+            if time.monotonic() >= deadline:
+                pytest.fail("Camera bit-depth control did not become visible")
+            time.sleep(0.01)
         assert str(view.inputs["bit_depth"]["state"]) == "disabled"
         c._receive_bit_depth(response(c, microscope=c.current_microscope))
         assert str(view.inputs["bit_depth"]["state"]) == "readonly"
@@ -154,4 +166,6 @@ def test_real_popup_builds_depth_control_and_switches_microscope(
             assert c._depth_request_id > previous_request
             assert str(view.inputs["bit_depth"]["state"]) == "disabled"
     finally:
+        if mapping_event is not None:
+            tk_root.after_cancel(mapping_event)
         c.close_popup()

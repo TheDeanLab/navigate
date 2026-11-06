@@ -24,7 +24,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [windows-latest, ubuntu-latest]
+        # Python 3.9 has no setup-python build for Ubuntu 26.04 (ubuntu-latest).
+        operating-system: [windows-latest, ubuntu-24.04]
         python-version: ["3.9", "3.10", "3.11"]
         include:
           - python-version: "3.9"
@@ -122,7 +123,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [windows-latest, ubuntu-latest]
+        operating-system: [windows-latest, ubuntu-24.04]
     timeout-minutes: 60
     env:
       MPLBACKEND: Agg

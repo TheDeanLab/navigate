@@ -24,20 +24,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Python 3.9 has no setup-python build for Ubuntu 26.04 (ubuntu-latest).
+        operating-system: [windows-latest, ubuntu-24.04]
+        python-version: ["3.9", "3.10", "3.11"]
         include:
-          - operating-system: windows-latest
-            python-version: "3.9"
+          - python-version: "3.9"
             python-tag: py39
-          - operating-system: windows-latest
-            python-version: "3.10"
+          - python-version: "3.10"
             python-tag: py310
-          - operating-system: windows-latest
-            python-version: "3.11"
+          - python-version: "3.11"
             python-tag: py311
     env:
       MPLBACKEND: Agg  # https://github.com/microsoft/azure-pipelines-tasks/issues/16426
+      PYTHONPATH: src
+      NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
+      COVERAGE_FILE: .coverage.${{ matrix.operating-system }}.${{ matrix.python-tag }}
     steps:
       - uses: actions/checkout@v7
+      - name: Install Linux display dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xauth libegl1 libopengl0
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v7
         with:
@@ -45,6 +53,8 @@ jobs:
           cache: pip
           cache-dependency-path: constraints/windows-${{ matrix.python-tag }}.txt
       - name: Install dependencies
+        # Reuse the existing version pins on both platforms. Constraints for
+        # Windows-only packages do not cause those packages to install on Linux.
         run: |
           python -m pip install --upgrade pip
           pip install -c constraints/windows-${{ matrix.python-tag }}.txt -e ".[dev]"
@@ -55,22 +65,32 @@ jobs:
         with:
           path: .pytest_cache/d/bioformats
           key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
-      - name: Test with pytest
+      - name: Test with pytest (Windows)
+        if: runner.os == 'Windows'
         timeout-minutes: 45
-        env:
-          NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
-          COVERAGE_FILE: .coverage.${{ matrix.python-tag }}
+        shell: pwsh
         run: |
           if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ github.event.inputs.diagnostic_no_cov }}" -eq "true") {
-            python3 -m pytest --durations=25 --no-cov -o log_cli=false
+            python -m pytest --durations=25 --no-cov -o log_cli=false
           } else {
-            python3 -m pytest --durations=25
+            python -m pytest --durations=25
             if (Test-Path coverage.xml) {
-              Move-Item -Force coverage.xml "coverage-${{ matrix.python-tag }}.xml"
+              Move-Item -Force coverage.xml "coverage-${{ runner.os }}-${{ matrix.python-tag }}.xml"
             } else {
               Write-Error "coverage.xml was not produced."
             }
           }
+      - name: Test with pytest (Linux)
+        if: runner.os == 'Linux'
+        timeout-minutes: 45
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.diagnostic_no_cov }}" == "true" ]]; then
+            xvfb-run -a python -m pytest -p no:xvfb --durations=25 --no-cov -o log_cli=false
+          else
+            xvfb-run -a python -m pytest -p no:xvfb --durations=25
+            mv coverage.xml "coverage-${{ runner.os }}-${{ matrix.python-tag }}.xml"
+          fi
       - name: Dump Python processes (Windows)
         if: ${{ failure() && runner.os == 'Windows' }}
         shell: pwsh
@@ -90,23 +110,33 @@ jobs:
           directory: ./coverage/reports/
           env_vars: OS,PYTHON
           fail_ci_if_error: false
-          files: ./coverage-${{ matrix.python-tag }}.xml
-          flags: unittests-${{ matrix.python-tag }}
+          files: ./coverage-${{ runner.os }}-${{ matrix.python-tag }}.xml
+          flags: unittests-${{ runner.os }}-${{ matrix.python-tag }}
           name: codecov-${{ matrix.operating-system }}-${{ matrix.python-tag }}
           verbose: true
 
   experimental-python:
-    name: Experimental Python 3.12
+    name: Experimental Python 3.12 (${{ matrix.operating-system }})
     if: github.event_name != 'schedule'
     continue-on-error: true
-    runs-on: windows-latest
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [windows-latest, ubuntu-24.04]
     timeout-minutes: 60
     env:
       MPLBACKEND: Agg
+      PYTHONPATH: src
       NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
-      COVERAGE_FILE: .coverage.py312
+      COVERAGE_FILE: .coverage.${{ matrix.operating-system }}.py312
     steps:
       - uses: actions/checkout@v7
+      - name: Install Linux display dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xauth libegl1 libopengl0
       - name: Set up Python 3.12
         uses: actions/setup-python@v7
         with:
@@ -124,11 +154,16 @@ jobs:
         with:
           path: .pytest_cache/d/bioformats
           key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
-      - name: Test with pytest
+      - name: Test with pytest (Windows)
+        if: runner.os == 'Windows'
         timeout-minutes: 45
         run: python -m pytest --durations=25
+      - name: Test with pytest (Linux)
+        if: runner.os == 'Linux'
+        timeout-minutes: 45
+        run: xvfb-run -a python -m pytest -p no:xvfb --durations=25
       - name: Dump Python processes (Windows)
-        if: ${{ failure() }}
+        if: ${{ failure() && runner.os == 'Windows' }}
         shell: pwsh
         run: |
           Write-Host "Tasklist snapshot for python processes:"

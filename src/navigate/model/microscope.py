@@ -42,6 +42,8 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 # Local application imports
+from navigate.model.devices.camera.format import CameraImageFormat
+
 from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
 from navigate.model.device_startup_functions import load_devices, start_device
 from navigate.tools.common_functions import build_ref_name
@@ -467,6 +469,30 @@ class Microscope:
         self.ask_stage_for_position = True
         return success
 
+    def configure_camera(self) -> CameraImageFormat:
+        """Apply idle mode, geometry and an optional saved depth in that order.
+
+        Returns
+        -------
+        CameraImageFormat
+            Confirmed normalized format after all mode-dependent settings.
+        """
+        if self.camera.is_acquiring:
+            raise RuntimeError("Stop acquisition before configuring the camera.")
+        self.set_camera_trigger_mode()
+        self.set_camera_sensor_mode()
+        if not self.set_camera_roi_and_binning():
+            raise RuntimeError("Camera ROI or binning setting failed.")
+        parameters = self.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ]
+        if "bit_depth" in parameters:
+            depth = parameters["bit_depth"]
+            CameraImageFormat.for_bit_depth(depth)
+            if self.camera.set_bit_depth(depth) != depth:
+                raise RuntimeError("Saved camera bit depth was not confirmed.")
+        return self.camera.get_image_format()
+
     def prepare_acquisition(self) -> dict:
         """Prepare the acquisition.
 
@@ -490,11 +516,20 @@ class Microscope:
 
         if self.camera.is_acquiring:
             self.camera.close_image_series()
-        # set camera trigger source
-        self.set_camera_trigger_mode()
-        self.set_camera_sensor_mode()
-        if not self.set_camera_roi_and_binning():
-            return None
+        image_format = self.configure_camera()
+        expected = getattr(self, "_buffer_image_format", image_format)
+        if image_format != expected:
+            raise RuntimeError(
+                "Camera format changed after buffer negotiation. Restart acquisition."
+            )
+        if (
+            self.data_buffer is not None
+            and len(self.data_buffer)
+            and self.data_buffer[0].dtype.name != image_format.dtype
+        ):
+            raise RuntimeError(
+                "Camera buffer dtype does not match the confirmed format."
+            )
         logger.debug(f"Running microscope {self.microscope_name}")
         self.report_camera_settings()
         # Initialize Image Series - Attaches camera buffer and start imaging

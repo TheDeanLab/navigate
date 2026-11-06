@@ -44,7 +44,10 @@ import numpy as np
 
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
-from navigate.model.devices.camera.format import CameraImageFormat
+from navigate.model.devices.camera.format import (
+    CameraImageFormat,
+    CameraSettingCapability,
+)
 from navigate.model.features.autofocus import Autofocus
 from navigate.model.features.adaptive_optics import TonyWilson
 from navigate.model.features.image_writer import ImageWriter
@@ -423,6 +426,205 @@ class Model:
 
         self.load_feature_records()
 
+    def camera_advanced_settings(self, request: dict) -> dict:
+        """Read or apply an identity-tagged idle camera setting.
+
+        Parameters
+        ----------
+        request : dict
+            Microscope, request_id, and optional identity/bit_depth to apply.
+
+        Returns
+        -------
+        dict
+            Confirmed capability, error and any replacement active image buffer.
+        """
+        name = request["microscope"]
+        camera = self.microscopes[name].camera
+        identity = (id(getattr(camera, "camera_controller", None) or camera),)
+        result = dict(
+            microscope=name,
+            request_id=request["request_id"],
+            identity=identity,
+            error=None,
+            data_buffer=None,
+        )
+        busy = self.is_acquiring or any(
+            m.camera.is_acquiring for m in self.microscopes.values()
+        )
+        blocked = getattr(self, "_camera_format_errors", {})
+        if busy or identity in blocked:
+            reason = blocked.get(
+                identity, "Stop acquisition to change camera bit depth."
+            )
+            result["capability"] = CameraSettingCapability(
+                current_value=(
+                    None if identity in blocked else camera.get_image_format().bit_depth
+                ),
+                reason=reason,
+            )
+            if "bit_depth" in request:
+                result["error"] = reason
+            return result
+        try:
+            capability = camera.get_advanced_setting_capabilities()["bit_depth"]
+            if "bit_depth" in request:
+                if request.get("identity") != identity:
+                    raise RuntimeError(
+                        "The camera connection changed. Refresh settings."
+                    )
+                depth = CameraImageFormat.for_bit_depth(request["bit_depth"]).bit_depth
+                if not capability.writable or depth not in capability.choices:
+                    raise ValueError(
+                        capability.reason or "Unsupported camera bit depth."
+                    )
+                previous = capability.current_value
+                if previous is None:
+                    raise RuntimeError("Cannot confirm the previous camera bit depth.")
+                self._prepared_camera_token = None
+                try:
+                    camera.set_bit_depth(depth)
+                    capability = camera.get_advanced_setting_capabilities()["bit_depth"]
+                    if (
+                        capability.current_value != depth
+                        or camera.get_image_format().bit_depth != depth
+                    ):
+                        raise RuntimeError("Camera bit-depth readback did not match.")
+                    selected = self.configuration["experiment"]["MicroscopeState"][
+                        "microscope_name"
+                    ]
+                    if name == selected:
+                        parameters = self.configuration["experiment"][
+                            "CameraParameters"
+                        ][name]
+                        result["data_buffer"] = self.get_data_buffer(
+                            parameters["img_x_pixels"], parameters["img_y_pixels"], name
+                        )
+                except Exception:
+                    try:
+                        camera.set_bit_depth(previous)
+                        if (
+                            camera.get_advanced_setting_capabilities()[
+                                "bit_depth"
+                            ].current_value
+                            != previous
+                        ):
+                            raise RuntimeError("Rollback readback failed")
+                    except Exception as rollback_error:
+                        blocked[
+                            identity
+                        ] = "Camera restoration failed. Reconnect before acquiring."
+                        self._camera_format_errors = blocked
+                        raise RuntimeError(blocked[identity]) from rollback_error
+                    raise
+                self.configuration["experiment"]["CameraParameters"][name][
+                    "bit_depth"
+                ] = depth
+            result["capability"] = capability
+        except Exception as error:
+            result["error"] = str(error)
+            try:
+                result["capability"] = camera.get_advanced_setting_capabilities()[
+                    "bit_depth"
+                ]
+            except Exception:
+                result["capability"] = CameraSettingCapability(reason=str(error))
+            if identity in blocked:
+                result["capability"] = CameraSettingCapability(reason=blocked[identity])
+        return result
+
+    def prepare_camera_buffers(
+        self, microscope_name: str, additional: tuple = ()
+    ) -> dict:
+        """Apply idle camera modes and saved depths before allocating buffers.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Main acquisition microscope.
+        additional : tuple
+            Additional microscopes that will receive independent image rings.
+
+        Returns
+        -------
+        dict
+            Main microscope identity and negotiated shared image buffer.
+        """
+        if self.is_acquiring or any(
+            m.camera.is_acquiring for m in self.microscopes.values()
+        ):
+            raise RuntimeError("Stop acquisition before preparing camera buffers.")
+        if self.active_microscope_name != microscope_name:
+            raise RuntimeError("Wait for the microscope change before acquiring.")
+        self._prepared_camera_token = None
+        retired = [
+            name
+            for name in getattr(self, "virtual_microscopes", {})
+            if name not in additional
+        ]
+        for name in dict.fromkeys((microscope_name, *additional)):
+            microscope = self.microscopes[name]
+            camera = microscope.camera
+            identity = (id(getattr(camera, "camera_controller", None) or camera),)
+            if identity in getattr(self, "_camera_format_errors", {}):
+                raise RuntimeError(self._camera_format_errors[identity])
+            microscope._buffer_image_format = microscope.configure_camera()
+        parameters = self.configuration["experiment"]["CameraParameters"][
+            microscope_name
+        ]
+        data = self.get_data_buffer(
+            parameters["img_x_pixels"], parameters["img_y_pixels"], microscope_name
+        )
+        for name in retired:
+            pipe = getattr(self, f"{name}_show_img_pipe", None)
+            if pipe is not None:
+                pipe.send("stop")
+            self.destroy_virtual_microscope(name)
+        self._camera_capture_sequence = getattr(self, "_camera_capture_sequence", 0) + 1
+        self._prepared_camera_token = (self._camera_capture_sequence, microscope_name)
+        return {
+            "microscope": microscope_name,
+            "data_buffer": data,
+            "capture_token": self._prepared_camera_token,
+            "retired": retired,
+        }
+
+    def start_prepared_capture(self, token: tuple, command: str, *args: Any) -> bool:
+        """Start only if no Stop or setting change invalidated preparation.
+
+        Parameters
+        ----------
+        token : tuple
+            Generation and microscope returned by prepare_camera_buffers.
+        command : str
+            Capture command.
+        *args : Any
+            Arguments for the capture command.
+
+        Returns
+        -------
+        bool
+            False when preparation was canceled before this serialized RPC.
+        """
+        name = self.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        if (
+            token is None
+            or token != getattr(self, "_prepared_camera_token", None)
+            or token[1] != name
+        ):
+            return False
+        self._prepared_camera_token = None
+        self.run_command(command, *args)
+        return True
+
+    def cancel_prepared_capture(self) -> None:
+        """Invalidate pending capture and release waiting auxiliary displays."""
+        self._prepared_camera_token = None
+        for name in getattr(self, "virtual_microscopes", {}):
+            pipe = getattr(self, f"{name}_show_img_pipe", None)
+            if pipe is not None:
+                pipe.send("stop")
+
     def get_camera_image_format(
         self, microscope_name: Optional[str] = None
     ) -> CameraImageFormat:
@@ -473,6 +675,8 @@ class Model:
             raise RuntimeError("Stop acquisition before replacing camera buffers.")
         microscope_name = microscope_name or self.active_microscope_name
         image_format = self.get_camera_image_format(microscope_name)
+        # ROI/binning calculations and saved experiments can contain integral floats.
+        img_width, img_height = int(img_width), int(img_height)
         # Allocate first: allocation failure must leave the old mappings usable.
         data_buffer = [
             SharedNDArray(shape=(img_height, img_width), dtype=image_format.dtype)
@@ -854,6 +1058,7 @@ class Model:
             """
             Called when user halts the acquisition
             """
+            self._prepared_camera_token = None
             self.stop_acquisition = True
 
             if hasattr(self, "signal_container"):
@@ -1227,8 +1432,6 @@ class Model:
                 self.logger.info("Loop stop condition met.")
                 self.stop_acquisition = True
 
-        # Send stop signal to controller
-        self.show_img_pipe.send("stop")
         self.logger.info("Data thread stopped.")
         self.logger.info(f"Received frames in total: {acquired_frame_num}")
 
@@ -1236,8 +1439,12 @@ class Model:
         if self.pause_data_ready_lock.locked():
             self.pause_data_ready_lock.release()
 
-        # Turn off the lasers/close the shutters
-        self.end_acquisition()
+        # The GUI can query capabilities as soon as it sees stop. Finish camera
+        # cleanup first, but release the GUI even if cleanup itself fails.
+        try:
+            self.end_acquisition()
+        finally:
+            self.show_img_pipe.send("stop")
 
     def _should_drain_signal_completed_frames(self) -> bool:
         """Return True when finite acquisition data should drain after signal stop."""
@@ -1566,14 +1773,16 @@ class Model:
         if not self.is_data_thread_on:
             if self.available_image_count > 0:
                 self.grab_image(getattr(self.image_writer, "save_image", None))
-            self.show_img_pipe.send("stop")
         if self.imaging_mode != "live":
             if not self.stop_acquisition and not self.stop_send_signal:
                 self.signal_acquisition_complete = True
             self.stop_acquisition = True
 
         if not self.is_data_thread_on:
-            self.end_acquisition()
+            try:
+                self.end_acquisition()
+            finally:
+                self.show_img_pipe.send("stop")
 
     def reset_feature_list(self) -> None:
         """Reset live mode feature list."""
@@ -2169,6 +2378,8 @@ class Model:
                     setattr(
                         microscope, k, getattr(self.microscopes[microscope_name], k)
                     )
+
+        microscope._buffer_image_format = image_format
 
         # connect virtual microscope with data_buffer
         microscope.update_data_buffer(data_buffer, self.number_of_frames)

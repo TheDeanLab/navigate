@@ -37,6 +37,7 @@ from typing import Optional
 # Third Party Imports
 
 # Local Imports
+from navigate.model.devices.camera.format import CameraSettingCapability
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.config.config import update_config_dict
 from navigate.tools.file_functions import write_to_yaml
@@ -97,6 +98,12 @@ class AdvancedCameraSettingController:
         #: event: Event for refreshing temperature button.
         self.refresh_temperature_event = None
 
+        self._depth_request_id = 0
+        self._depth_identity = None
+        self._depth_pending = False
+        self._depth_closed = False
+        self._depth_close_requested = False
+        self._depth_capability = CameraSettingCapability()
         self.update_microscope(in_initialization=True)
 
         # Add a trace to the microscope dropdown to detect microscope changes.
@@ -116,6 +123,112 @@ class AdvancedCameraSettingController:
     def showup(self):
         """This function will let the popup window show in front."""
         self.view.popup.deiconify()
+        self.refresh_bit_depth()
+
+    def refresh_bit_depth(self) -> None:
+        """Request current capabilities without blocking the Tk thread."""
+        if self._depth_closed or self._depth_pending:
+            return
+        self._depth_request_id += 1
+        self._depth_identity = None
+        self.view.variables["bit_depth_status"].set("Reading camera settings…")
+        self.view.inputs["bit_depth"]["state"] = "disabled"
+        self.parent_controller.execute(
+            "camera_advanced_settings",
+            {
+                "microscope": self.current_microscope,
+                "request_id": self._depth_request_id,
+            },
+            self._receive_bit_depth,
+        )
+
+    def set_bit_depth(self, *args) -> None:
+        """Apply a selection asynchronously; persist only confirmed model values."""
+        if self._depth_pending or self._depth_identity is None or self._depth_busy():
+            return
+        depth = int(self.view.inputs["bit_depth"].get())
+        if (
+            not self._depth_capability.writable
+            or depth not in self._depth_capability.choices
+        ):
+            return
+        self._depth_request_id += 1
+        self._depth_pending = True
+        self.view.inputs["bit_depth"]["state"] = "disabled"
+        self.view.microscope.widget.configure(state="disabled")
+        self.view.save_button.configure(state="disabled")
+        self.view.variables["bit_depth_status"].set("Applying camera bit depth…")
+        self.parent_controller.execute(
+            "camera_advanced_settings",
+            {
+                "microscope": self.current_microscope,
+                "request_id": self._depth_request_id,
+                "identity": self._depth_identity,
+                "bit_depth": depth,
+            },
+            self._receive_bit_depth,
+        )
+
+    def _depth_busy(self) -> bool:
+        """Return whether acquisition owns the camera from the GUI's perspective."""
+        return bool(self.parent_controller.acquire_bar_controller.is_acquiring)
+
+    def _receive_bit_depth(self, result: dict) -> None:
+        """Display a matching model result on the Tk thread.
+
+        Parameters
+        ----------
+        result : dict
+            Tagged confirmed capability and optional application error.
+        """
+        if (
+            self._depth_closed
+            or result["request_id"] != self._depth_request_id
+            or result["microscope"] != self.current_microscope
+        ):
+            return
+        self._depth_pending = False
+        self._depth_identity = result["identity"]
+        capability = self._depth_capability = result["capability"]
+        widget = self.view.inputs["bit_depth"]
+        widget["values"] = tuple(str(value) for value in capability.choices)
+        widget.set(
+            "Unknown"
+            if capability.current_value is None
+            else str(capability.current_value)
+        )
+        busy = self._depth_busy()
+        widget["state"] = "readonly" if capability.writable and not busy else "disabled"
+        self.view.microscope.widget.configure(state="readonly")
+        self.view.save_button.configure(state="normal")
+        reason = result.get("error") or capability.reason
+        if busy:
+            reason = "Stop acquisition to change camera bit depth."
+        self.view.variables["bit_depth_status"].set(
+            reason or "8-bit uses smaller files. 12-bit and 16-bit use 16-bit storage."
+        )
+        if result.get("error"):
+            self._depth_close_requested = False
+        elif self._depth_close_requested:
+            self.close_popup()
+
+    def set_acquisition_state(self, acquiring: bool) -> None:
+        """Lock selection during capture and refresh it when capture ends.
+
+        Parameters
+        ----------
+        acquiring : bool
+            Whether acquisition is starting or running.
+        """
+        if self._depth_closed:
+            return
+        if acquiring:
+            self.view.inputs["bit_depth"]["state"] = "disabled"
+            self.view.variables["bit_depth_status"].set(
+                "Stop acquisition to change camera bit depth."
+            )
+        else:
+            self.refresh_bit_depth()
 
     def save_camera_settings(self) -> None:
         """Save the current camera settings to the configuration file."""
@@ -242,6 +355,10 @@ class AdvancedCameraSettingController:
 
     def close_popup(self) -> None:
         """Close the popup window."""
+        if self._depth_pending:
+            self._depth_close_requested = True
+            return
+        self._depth_closed = True
         self.save_camera_settings()
         self.view.popup.destroy()
 
@@ -263,6 +380,10 @@ class AdvancedCameraSettingController:
             If True, this method is called during initialization and does not
             save the previous camera settings.
         """
+        if self._depth_pending:
+            if self.view.microscope.get() != self.current_microscope:
+                self.view.microscope.set(self.current_microscope)
+            return
         # Save the configuration for the previous microscope before switching.
         if not in_initialization:
             self.save_camera_settings()
@@ -318,6 +439,8 @@ class AdvancedCameraSettingController:
             self.view.inputs["cooling"].set("Off")
             self.view.inputs["cooling"]["state"] = "disabled"
 
+        self.refresh_bit_depth()
+
     def _configure_widget_traces(self) -> None:
         """Configure traces and commands for widgets after they're created."""
         # Configure the flip flags for each camera axis.
@@ -327,6 +450,7 @@ class AdvancedCameraSettingController:
         # Save button trace.
         self.view.save_button.configure(command=self.save_camera_settings)
 
+        self.view.inputs["bit_depth"].bind("<<ComboboxSelected>>", self.set_bit_depth)
         self.view.inputs["cooling"].bind("<<ComboboxSelected>>", self.set_cooling_state)
         self.view.buttons["refresh_temperature"].configure(
             command=self.refresh_temperature

@@ -260,7 +260,7 @@ class DummyModel:
         self.number_of_frames = 10
         #: ndarray: The data buffer.
         self.data_buffer = np.zeros(
-            (self.number_of_frames, self.img_width, self.img_height)
+            (self.number_of_frames, self.img_height, self.img_width), dtype=np.uint16
         )
         #: ndarray: The data buffer positions.
         self.data_buffer_positions = np.zeros(
@@ -287,6 +287,11 @@ class DummyModel:
             self.camera[k].initialize_image_series(
                 self.data_buffer, self.number_of_frames
             )
+
+    def get_camera_image_format(self, microscope_name=None):
+        """Mirror the model's confirmed-format query for writer tests."""
+        name = microscope_name or self.active_microscope_name
+        return self.camera[name].get_image_format()
 
     def signal_func(self):
         """Perform signal-related functionality.

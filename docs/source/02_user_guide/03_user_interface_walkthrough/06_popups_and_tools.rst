@@ -157,7 +157,26 @@ Advanced Camera Settings
    :align: center
    :alt: Advanced Camera Settings popup.
 
-Use this popup for advanced camera control options, including microscope selection and image-direction settings.
+Use this popup for microscope selection, image-direction settings and camera controls.
+
+:guilabel:`Camera bit depth` shows the connected driver's confirmed setting.
+Stop acquisition before changing it. Choose an available depth and wait for the
+camera to confirm it. The confirmed choice belongs to that microscope's experiment
+settings and is included when you save the experiment. A failed change restores
+the confirmed value; if restoration fails, reconnect the camera before acquiring.
+
+A disabled control includes an explanation: the driver may not support changes,
+the current mode may have fixed depth, or acquisition may be running. Unknown
+depth is shown as :guilabel:`Unknown`, without assuming it is 16-bit. Choices are
+discovered from the camera; an untested model is not enabled by its product name.
+
+8-bit images use one byte per pixel in memory and supported image files. 12-bit
+and 16-bit images both use two bytes per pixel; packed 12-bit file storage is not
+included. Counts are preserved without display rescaling in the saved data.
+Reduced depth may increase camera throughput, depending on its mode and connection;
+software selection alone does not guarantee a higher frame rate. Confirm that the
+lower dynamic range is suitable for your experiment. ORCA-Lightning remains
+read-only until its coupled HDR/full-well settings are supported.
 
 Camera Map Settings
 ===================

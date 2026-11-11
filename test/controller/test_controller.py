@@ -170,6 +170,9 @@ def controller(controller_root):
     # because the testcases from other files use DummyController
     # and DummyModel instead of this controller fixture
     controller.model = MagicMock()
+    from navigate.model.devices.camera.format import CameraImageFormat
+
+    controller.model.get_camera_image_format.return_value = CameraImageFormat()
     controller._real_model_for_cleanup = real_model
     controller.threads_pool = MagicMock()
     controller.model.get_offset_variance_maps.return_value = (None, None)
@@ -1111,7 +1114,7 @@ def test_execute_random(controller):
     assert True
 
 
-def test_capture_image(controller):
+def test_capture_image(controller, monkeypatch):
 
     count = 0
 
@@ -1132,11 +1135,18 @@ def test_capture_image(controller):
         microscope_name
     ]["img_y_pixels"]
     images = numpy.random.rand(10, width, height)
-    controller.data_buffer = images
+    monkeypatch.setattr(controller, "data_buffer", images)
     work_thread = MagicMock()
     work_thread.join = MagicMock()
-    controller.threads_pool.createThread = MagicMock()
-    controller.threads_pool.createThread.return_value = work_thread
+    monkeypatch.setattr(
+        controller.threads_pool,
+        "createThread",
+        MagicMock(side_effect=lambda resource, worker: (worker(), work_thread)[1]),
+    )
+    monkeypatch.setattr(controller, "stop_acquisition_flag", False)
+    monkeypatch.setattr(
+        controller, "_start_model_capture", MagicMock(return_value=True)
+    )
     controller.show_img_pipe.recv = get_image_id
     controller.show_img_pipe.poll = MagicMock()
     controller.show_img_pipe.poll.return_value = False
@@ -1151,6 +1161,7 @@ def test_capture_image(controller):
 
     for command in ["acquire"]:  # "autofocus"
         for mode in ["continuous", "live", "z-stack", "single"]:
+            controller.stop_acquisition_flag = False
             controller.capture_image(command, mode)
 
             # Evaluate calls

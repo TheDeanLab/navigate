@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2026  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-from typing import Optional, Dict, Any
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -149,11 +148,14 @@ class OMEZarrDataSource(PyramidalDataSource):
         kw : dict
             Keyword arguments
         """
+        self._validate_frame_format(data)
         #: str: Mode of the data source.
         self.mode = "w"
 
         if self.__store is None:
             self.setup()
+        if self._current_frame == 0:
+            self._write_format_attributes()
 
         c, z, t, p = self._cztp_indices(
             self._current_frame, self.metadata.per_stack
@@ -182,7 +184,16 @@ class OMEZarrDataSource(PyramidalDataSource):
         self.mode = "r"
         self.__store = zarr.storage.FSStore(self.file_name, mode=self.mode)
         self.image = zarr.group(store=self.__store)
-        # TODO: parse the image metadata
+        dataset = self.image[f"{GROUP_PREFIX}0_0"]
+        self._set_read_format(dataset.dtype, self.image.attrs.get("camera_bit_depth"))
+        (
+            self.metadata.shape_t,
+            self.metadata.shape_c,
+            self.metadata.shape_z,
+            self.metadata.shape_y,
+            self.metadata.shape_x,
+        ) = dataset.shape
+        self.metadata.positions = len(self.image.attrs.get("multiscales", [])) or 1
         self.get_shape_from_metadata()
 
     def close(self) -> None:

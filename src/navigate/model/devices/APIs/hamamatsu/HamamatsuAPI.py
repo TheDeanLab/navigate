@@ -25,11 +25,16 @@ from ctypes import (
 )
 from enum import IntEnum
 import logging
+import math
 import platform
+from typing import Optional
 
 # Third Party Imports
+import numpy as np
 
 # Local Imports
+from navigate.model.devices.APIs.hamamatsu.frame_layout import DCAMFrameLayout
+from navigate.model.devices.camera.format import CameraImageFormat
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -75,6 +80,9 @@ DCAMWAIT_CAPEVENT_FRAMEREADY = 2
 DCAMWAIT_CAPEVENT_STOPPED = 16
 DCAMPROP_MODE__OFF = 1  # OFF
 DCAMPROP_MODE__ON = 2  # ON
+DCAMPROP_OPTION_SUPPORT = 0
+DCAMPROP_OPTION_NEXT = 0x01000000
+DCAMPROP_ATTR_WRITABLE = 0x00020000
 
 
 class DCAMPROP:
@@ -668,6 +676,14 @@ class DCAMDEV_STRING(Structure):
 
 
 property_dict = {
+    "bits_per_channel": 0x00420130,
+    "image_pixel_type": 0x00420270,
+    "image_row_bytes": 0x00420230,
+    "image_frame_bytes": 0x00420240,
+    "buffer_pixel_type": 0x00420360,
+    "buffer_row_bytes": 0x00420330,
+    "buffer_frame_bytes": 0x00420340,
+    "buffer_top_offset": 0x00420350,
     "exposure_time": 2031888,  # 0x001F0110, R/W, sec, "EXPOSURE TIME"
     "sensor_mode": 4194832,  # 0x00400210, R/W, mode,  "SENSOR MODE"
     "defect_correct_mode": 4653072,  # 0x00470010, R/W, mode,  "DEFECT CORRECT MODE"
@@ -681,7 +697,7 @@ property_dict = {
     "trigger_polarity": 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
     "trigger_source": 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
     "trigger_delay": 1049184,  # 0x00100260,	/* R/W, sec,	"TRIGGER DELAY"
-    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
+    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec, "INTERNAL LINE INTERVAL"
     "internal_line_speed": 4208704,  # 0x00403840, R/W, m/sec,    "INTERNAL LINE SPEED"
     "image_width": 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
     "image_height": 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
@@ -691,7 +707,6 @@ property_dict = {
     "subarray_hsize": 4202784,  # 0x00402120, R/W, long,   "SUBARRAY HSIZE"
     "subarray_vpos": 4202800,  # 0x00402130, R/W, long,    "SUBARRAY VPOS"
     "subarray_vsize": 4202816,  # 0x00402140, R/W, long,   "SUBARRAY VSIZE"
-    "subarray_mode": 4202832,  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
     "cyclic_trigger_period": 4206624,  # 0x00403020, R/O, sec,
     # "TIMING CYCLIC TRIGGER PERIOD"
     "minimum_trigger_blank": 4206640,  # 0x00403030, R/O, sec,
@@ -703,7 +718,7 @@ property_dict = {
     "pixel_height": 4327456,  # 0x00420820, R/O, micro-meter,
     # "IMAGE DETECTOR PIXEL HEIGHT"
     "cooling": 2097952,  # 0x00200320, R/W, mode,    "SENSOR COOLER"
-    "cooling_temperature": 2097968,  # 0x00200330, R/W, celsius,"SENSOR TEMPERATURE TARGET"
+    "cooling_temperature": 2097968,  # 0x00200330, R/W, Celsius, temperature target
     "temperature": 2097936,  # 0x00200310, R/O, celsius,"SENSOR TEMPERATURE"
 }
 
@@ -719,6 +734,7 @@ dcamprop_getattr = __dll.dcamprop_getattr
 dcamprop_getvalue = __dll.dcamprop_getvalue
 dcamprop_setvalue = __dll.dcamprop_setvalue
 dcamprop_setgetvalue = __dll.dcamprop_setgetvalue
+dcamprop_queryvalue = __dll.dcamprop_queryvalue
 dcambuf_attach = __dll.dcambuf_attach
 dcambuf_release = __dll.dcambuf_release
 dcamcap_start = __dll.dcamcap_start
@@ -743,6 +759,7 @@ _function_signatures = [
     (dcamprop_getvalue, [c_void_p, c_int32, POINTER(c_double)]),
     (dcamprop_setvalue, [c_void_p, c_int32, c_double]),
     (dcamprop_setgetvalue, [c_void_p, c_int32, POINTER(c_double), c_int32]),
+    (dcamprop_queryvalue, [c_void_p, c_int32, POINTER(c_double), c_int32]),
     (dcambuf_attach, [c_void_p, POINTER(DCAMBUF_ATTACH)]),
     (dcambuf_release, [c_void_p, c_int32]),
     (dcamcap_start, [c_void_p, c_int32]),
@@ -960,6 +977,22 @@ class DCAM:
         settings = {name: self.get_property_value(name) for name in names}
         if any(value is False for value in settings.values()):
             raise RuntimeError("Cannot snapshot DCAM settings for restart.")
+        format_settings = {
+            name: self.get_property_value(name)
+            for name in ("image_pixel_type", "bits_per_channel")
+        }
+        format_settings = {
+            name: value for name, value in format_settings.items() if value is not False
+        }
+        writable_format = {
+            name for name in format_settings if self.is_property_writable(name)
+        }
+        # Sensor/readout mode precede depth; ROI and timing follow it.
+        settings = dict(
+            list(settings.items())[:2]
+            + list(format_settings.items())
+            + list(settings.items())[2:]
+        )
         index = self.__iDevice
         self.dev_close()
         if not self.dev_open(index) or not self.__open_hdcamwait():
@@ -971,6 +1004,8 @@ class DCAM:
             ("subarray_vpos", 0),
             *settings.items(),
         ]:
+            if name in format_settings and name not in writable_format:
+                continue
             if not self.prop_setvalue(property_dict[name], value):
                 raise RuntimeError(f"Cannot restore DCAM property {name}.")
         for name, value in settings.items():
@@ -1074,6 +1109,70 @@ class DCAM:
             return False
 
         return cDouble.value
+
+    def is_property_writable(self, name: str) -> bool:
+        """Query whether the SDK marks a named property as writable.
+
+        Parameters
+        ----------
+        name : str
+            Name in property_dict.
+
+        Returns
+        -------
+        bool
+            False for unknown properties or failed attribute queries. Actual
+            writes still require idle-state checks and readback in the adapter.
+        """
+        if name not in property_dict:
+            return False
+        attributes = self.prop_getattr(property_dict[name])
+        return attributes is not None and bool(
+            attributes.attribute & DCAMPROP_ATTR_WRITABLE
+        )
+
+    def get_property_values(self, name: str) -> Optional[tuple[float, ...]]:
+        """Enumerate a small discrete property using read-only DCAM queries.
+
+        Parameters
+        ----------
+        name : str
+            Name in property_dict. Intended for discrete settings such as depth,
+            not continuous exposure ranges.
+
+        Returns
+        -------
+        tuple of float or None
+            Supported values, or None if discovery fails or is inconsistent.
+            Partial results are never advertised. Enumeration is bounded to
+            256 values to protect against malformed or non-discrete properties.
+        """
+        if name not in property_dict or not self.__hdcam:
+            return None
+        prop = property_dict[name]
+        attributes = self.prop_getattr(prop)
+        if attributes is None:
+            return None
+        low, high = attributes.valuemin, attributes.valuemax
+        if not (math.isfinite(low) and math.isfinite(high) and low <= high):
+            return None
+        values = []
+        value = c_double(low)
+        option = DCAMPROP_OPTION_SUPPORT
+        for _ in range(256):
+            result = dcamprop_queryvalue(self.__hdcam, prop, byref(value), option)
+            if result <= 0:
+                return None
+            current = value.value
+            if not math.isfinite(current) or not low <= current <= high:
+                return None
+            if values and current <= values[-1]:
+                return None
+            values.append(current)
+            if current == high:
+                return tuple(values)
+            option = DCAMPROP_OPTION_NEXT
+        return None
 
     def get_property_range(self, name):
         """
@@ -1231,6 +1330,88 @@ class DCAM:
             self.prop_getvalue(property_dict["image_height"]),
         )
 
+    def get_frame_layout(self) -> DCAMFrameLayout:
+        """Read and validate the layout required by ``dcambuf_attach``."""
+        return DCAMFrameLayout(
+            self.get_property_value("image_width"),
+            self.get_property_value("image_height"),
+            self.get_property_value("buffer_pixel_type"),
+            self.get_property_value("buffer_row_bytes"),
+            self.get_property_value("buffer_frame_bytes"),
+            self.get_property_value("buffer_top_offset"),
+        )
+
+    def configure_frame_format(self, image_format: CameraImageFormat) -> None:
+        """Set the adapter's normalized output contract before attaching frames.
+
+        Parameters
+        ----------
+        image_format : CameraImageFormat
+            Confirmed meaningful depth and NumPy storage type.
+        """
+        layout = self.get_frame_layout()
+        if (
+            image_format.bit_depth is not None
+            and image_format.bit_depth > np.dtype(layout.dtype).itemsize * 8
+        ):
+            raise ValueError(
+                "Native DCAM container cannot hold the reported precision."
+            )
+        self._output_format = image_format
+
+    def _prepare_frame_buffers(self, data_buffer: list, number_of_frames: int) -> list:
+        """Validate destinations and allocate native storage only when required."""
+        layout = self.get_frame_layout()
+        dtype = np.dtype(self._output_format.dtype)
+        if number_of_frames < 1 or len(data_buffer) < number_of_frames:
+            raise ValueError("DCAM requires a nonempty destination buffer ring.")
+        for frame in data_buffer[:number_of_frames]:
+            if (
+                frame.shape != (layout.height, layout.width)
+                or frame.dtype != dtype
+                or not frame.flags.c_contiguous
+                or not frame.flags.writeable
+            ):
+                raise ValueError(
+                    "DCAM destination buffer does not match the output format."
+                )
+        direct = (
+            layout.dtype == dtype.name
+            and layout.top_offset == 0
+            and layout.row_bytes == layout.width * dtype.itemsize
+            and layout.frame_bytes == layout.height * layout.row_bytes
+        )
+        self._native_buffers = (
+            data_buffer
+            if direct
+            else [
+                np.empty(layout.frame_bytes, dtype=np.uint8)
+                for _ in range(number_of_frames)
+            ]
+        )
+        self._native_frame_views = [
+            layout.view(frame) for frame in self._native_buffers[:number_of_frames]
+        ]
+        self._copy_native_frames = not direct
+        return self._native_buffers
+
+    def _normalize_frames(self, frame_ids: list[int]) -> None:
+        """Copy padded/native frames without changing counts or truncating values."""
+        if getattr(self, "_output_format", None) is None:
+            return
+        limit = np.iinfo(self._output_format.dtype).max
+        if self._output_format.bit_depth is not None:
+            limit = (1 << self._output_format.bit_depth) - 1
+        for index in frame_ids:
+            source = self._native_frame_views[index]
+            if limit < np.iinfo(source.dtype).max and np.max(source) > limit:
+                self.stop_acquisition()
+                raise RuntimeError(
+                    "DCAM pixel range does not match the reported precision/alignment."
+                )
+            if self._copy_native_frames:
+                np.copyto(self.data_buffer[index], source, casting="unsafe")
+
     def start_acquisition(self, data_buffer, number_of_frames=100):
         """
         # this function will initialize parameters, attach buffer, start capture
@@ -1241,10 +1422,15 @@ class DCAM:
 
         # prepare buffer pointer array
         self.data_buffer = data_buffer
+        native_buffers = (
+            self._prepare_frame_buffers(data_buffer, number_of_frames)
+            if getattr(self, "_output_format", None) is not None
+            else data_buffer
+        )
         ptr_array = c_void_p * number_of_frames
         self.data_ptr = ptr_array()
         for i in range(number_of_frames):
-            np_array = data_buffer[i]
+            np_array = native_buffers[i]
             self.data_ptr[i] = np_array.ctypes.data
 
         # attach buffer
@@ -1346,6 +1532,7 @@ class DCAM:
             self.pre_index = cap_info.nNewestFrameIndex
             self.pre_frame_count = cap_info.nFrameCount
 
+        self._normalize_frames(frame_idx_list)
         return frame_idx_list
 
     def get_camera_handler(self):

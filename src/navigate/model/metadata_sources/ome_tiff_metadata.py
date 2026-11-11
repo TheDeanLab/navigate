@@ -102,9 +102,9 @@ class OMETIFFMetadata(XMLMetadata):
         ome_dict["Image"]["Pixels"] = {"ID": f"Pixels:{idx}"}
         ome_dict["Image"]["Pixels"]["BigEndian"] = "false"
         ome_dict["Image"]["Pixels"]["Interleaved"] = "false"
-        ome_dict["Image"]["Pixels"][
-            "Type"
-        ] = "uint16"  # Hardcoded from SharedNDArray call
+        ome_dict["Image"]["Pixels"]["Type"] = self.dtype
+        if self.significant_bits is not None:
+            ome_dict["Image"]["Pixels"]["SignificantBits"] = self.significant_bits
 
         ome_dict["Image"]["Pixels"]["SizeX"] = self.shape_x
         ome_dict["Image"]["Pixels"]["SizeY"] = self.shape_y

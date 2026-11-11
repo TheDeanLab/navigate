@@ -161,6 +161,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
         kw : dict
             The keyword arguments to write.
         """
+        self._validate_frame_format(data)
         self.mode = "w"
 
         # find current channel
@@ -182,6 +183,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
 
         if not (z or c or t or pos):
             self.setup()
+            self._write_format_attributes()
 
         ds_name = self.ds_name(t, c, pos)
         is_kw = len(kw) > 0
@@ -196,9 +198,8 @@ class BigDataViewerDataSource(PyramidalDataSource):
                 zs = min(z // dz, self.shapes[i, 0] - 1)  # TODO: Is this necessary?
                 try:
                     # Down-sample in X and Y.
-                    self.image[dataset_name][zs, ...] = data[::dy, ::dx].astype(
-                        self.dtype
-                    )
+                    # Keep all three axes: N5 encodes the supplied chunk rank.
+                    self.image[dataset_name][zs : zs + 1, ...] = data[None, ::dy, ::dx]
                     if is_kw and (i == 0):
                         self._views.append(kw)
                 except OSError as e:
@@ -263,10 +264,13 @@ class BigDataViewerDataSource(PyramidalDataSource):
         if self.__file_type == "h5":
             self.image = h5py.File(self.file_name, "r")
         elif self.__file_type == "n5":
-            self.image = zarr.N5Store(self.file_name)
+            self.__store = zarr.N5Store(self.file_name)
+            self.image = zarr.open_group(self.__store, mode="r")
         xml_fn = os.path.splitext(self.file_name)[0] + ".xml"
         self.metadata.parse_xml(xml_fn)
         self.get_shape_from_metadata()
+        dataset = self.image[self.ds_name(0, 0, 0).replace("???", "0")]
+        self._set_read_format(dataset.dtype, self.image.attrs.get("camera_bit_depth"))
 
     def _setup_h5(self, *args, create_flag=True):
         """Set up the HDF5 file.
@@ -371,14 +375,13 @@ class BigDataViewerDataSource(PyramidalDataSource):
                 timepoint = setup.create_group(time_group_name)
                 for j in range(self.subdivisions.shape[0]):
                     s_group_name = f"s{j}"
-                    shape = [int(x) for x in self.shapes[j, ...][::-1]]
-                    # chunks = self.subdivisions[j, ...]
-                    sx = timepoint.zeros(
-                        s_group_name, shape=tuple(shape), chunks=(shape[0], shape[1], 1)
+                    shape = tuple(int(x) for x in self.shapes[j, ...])
+                    timepoint.zeros(
+                        s_group_name,
+                        shape=shape,
+                        chunks=(1, shape[1], shape[2]),
+                        dtype=self.dtype,
                     )
-                    sx.attrs["dataType"] = self.dtype
-                    sx.attrs["blockSize"] = [shape[0], shape[1], 1]
-                    sx.attrs["dimensions"] = list(shape)
         # print(self.image.tree())
 
     def close(self) -> None:

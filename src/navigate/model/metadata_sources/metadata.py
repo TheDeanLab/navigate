@@ -61,6 +61,10 @@ class Metadata:
         """
         #: dict: Configuration dictionary
         self._configuration = None
+        #: str: Pixel storage type; meaningful precision is recorded separately.
+        self.dtype = "uint16"
+        #: int or None: Confirmed camera output precision.
+        self.significant_bits = None
 
         #: float: Pixel size in x (um)
         #: float: Pixel size in y (um)

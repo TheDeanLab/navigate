@@ -31,7 +31,7 @@ Windows Host Configuration
 --------------------------
 
 1. Update baseline software and firmware
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #. Ensure the system is on a supported Windows release (Windows 10/11 or Windows Server).
 #. Apply your vendor's recommended BIOS/BMC/firmware updates (Supermicro/HPE/Dell/etc.).
@@ -160,7 +160,7 @@ Recommended BIOS settings
      - Caps package idle to shallow states only (best for consistent multi-socket performance).
 
 Validation and Troubleshooting
------------------------------
+------------------------------
 
 *Generate an energy report (helps spot platform power issues):*
 

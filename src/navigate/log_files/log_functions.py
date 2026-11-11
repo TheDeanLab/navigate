@@ -285,14 +285,16 @@ def get_folder_date(folder_name: str) -> datetime:
     folder_name : str
         Folder name in the format 'YYYY-MM-DD-HHMM'.
 
-    Returns : datetime or bool
-        Returns a datetime object if the folder name is in the correct format.
-        The format is 'YYYY-MM-DD-HHMM', where:
-            - YYYY: 4-digit year
-            - MM: 2-digit month (01-12)
-            - DD: 2-digit day (01-31)
-            - HHMM: 4-digit hour and minute (HHMM, e.g., 1530 for 3:30 PM)
-        If the folder name is not in this format, it will return False.
+    Returns
+    -------
+    datetime or bool
+        Date and time parsed from the folder name, or ``False`` if parsing fails.
+        The format is ``YYYY-MM-DD-HHMM``, where:
+
+        - YYYY: 4-digit year
+        - MM: 2-digit month (01-12)
+        - DD: 2-digit day (01-31)
+        - HHMM: 4-digit hour and minute (e.g., 1530 for 3:30 PM)
     """
     try:
         # Extract the year, month, day, hour, and minute from the folder name

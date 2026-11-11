@@ -127,7 +127,7 @@ class SerialDevice:
         #: str: Name of the device, used as a unique identifier.
         self.device_name = device_name
 
-        #: str: Unique identifier for the device, serial_ followed by the port.
+        #: str: Unique identifier for the device, ``serial_`` followed by the port.
         self.unique_id = "serial_" + port
 
     def connect(

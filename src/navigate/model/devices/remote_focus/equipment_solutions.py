@@ -145,8 +145,11 @@ class EquipmentSolutionsRemoteFocus(NIRemoteFocus, SerialDevice):
     def connect(
         cls, port: str = "COM1", baudrate: int = 115200, timeout: float = 1.25
     ) -> serial.Serial:
-        """Connect to Serial Communication Port
-        port : str
+        """Connect to the serial communication port.
+
+        Parameters
+        ----------
+        port : str, optional
             Serial Port (default is "COM1")
         baudrate : int, optional
             Baud rate of the serial port (default is 115200)

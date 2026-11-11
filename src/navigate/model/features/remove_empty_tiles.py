@@ -48,48 +48,46 @@ def detect_tissue(image_data, percentage=0.0):
 
     This function takes an image in the form of image data and detects tissue
     within the image. It calculates the percentage of tissue area with respect
-    to the total image area using a sliding window approach.
+    to the total number of cells in a 50-pixel boundary grid.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     image_data : ndarray
         A NumPy array representing the image data. The image should be
         preprocessed and ready for tissue detection.
 
     percentage : float, optional (default: 0.0)
-        The minimum required percentage of tissue in the image for it to be
+        The threshold fraction of tissue grid cells, from 0 to 1, for the image to be
         considered as containing tissue. If the detected tissue percentage is
-        greater than or equal to this value, the function returns True; otherwise,
+        strictly greater than this value, the function returns True; otherwise,
         it returns False.
 
-    Returns:
-    --------
+    Returns
+    -------
     bool
-        True if the detected tissue percentage is greater than or equal to the
-        specified percentage; False otherwise.
+        True if the detected tissue fraction is strictly greater than the
+        specified fraction; False otherwise.
 
-    Notes:
-    ------
-    - The function applies a sliding window approach to count tissue squares
-      within the image.
+    Notes
+    -----
+    - The function counts tissue grid cells within the detected row boundaries
+      after downsampling the thresholded image by a factor of 50.
     - It calculates the tissue percentage by dividing the number of tissue squares
       by the total possible squares in the image.
     - The width of the sliding window is determined by the 'width' variable.
 
-    Example:
+    Examples
     --------
-    Given an image data array and a percentage threshold of 0.5:
-    ```
-    image_data = np.array([[0, 0, 1, 1, 1],
-                           [0, 0, 0, 1, 1],
-                           [1, 0, 0, 0, 0],
-                           [1, 1, 0, 0, 1]])
+    Check whether tissue covers more than half of the boundary grid:
 
-    result = detect_tissue(image_data, 0.5)
-    ```
+    .. code-block:: python
 
-    The function would return True, as the detected tissue percentage in the
-    image (10 out of 20 squares) is greater than or equal to 0.5.
+        image_data = np.zeros((100, 100), dtype=np.uint16)
+        image_data[:50, :] = 100
+        result = detect_tissue(image_data, percentage=0.5)
+
+    Here the upper two of four 50-pixel grid cells contain tissue. The fraction
+    is exactly 0.5, so the strict comparison returns ``False``.
     """
 
     width = 50
@@ -112,8 +110,8 @@ def detect_tissue2(image_data, percentage=0.0):
     a specified percentage threshold. Unlike other tissue detection methods,
     this version (Version 2) always returns `False`, indicating no tissue is detected.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     image_data : numpy.ndarray
         The input image data as a NumPy array.
 
@@ -121,13 +119,13 @@ def detect_tissue2(image_data, percentage=0.0):
         The percentage threshold for tissue detection. Default is 0.0,
         indicating that no tissue detection is performed.
 
-    Returns:
-    --------
+    Returns
+    -------
     bool
         Always returns `False`, indicating no tissue detection.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This function is a placeholder and always returns `False`.
     - For actual tissue detection, consider using other functions or methods.
     """
@@ -141,16 +139,16 @@ def detect_tissue3(image_data, threshold=150):
     This function computes the Otsu threshold value for an image and compares that
     computed value against a minimum threshold.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     image_data : numpy.ndarray
         The input image data as a NumPy array.
     threshold : float, optional
         The minimum computed Otsu threshold required for tissue detection.
         Default is 150.
 
-    Returns:
-    --------
+    Returns
+    -------
     bool
         True if the computed Otsu threshold is greater than or equal to
         ``threshold``; False otherwise.
@@ -209,8 +207,8 @@ class DetectTissueInStack(FeatureBase):
     ):
         """Initialize the DetectTissueInStack class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         model : object
             The model object representing the microscope.
         planes : int, optional
@@ -341,8 +339,8 @@ class DetectTissueInStack(FeatureBase):
         This method is called to determine whether the signal phase should end.
         It checks if the specified number of Z planes have been scanned.
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
             True if the signal phase should end, False otherwise.
         """
@@ -373,8 +371,8 @@ class DetectTissueInStack(FeatureBase):
         This method is called at the beginning of the data processing phase and
         initializes variables for tracking received frames and tissue detection.
 
-        Returns:
-        --------
+        Returns
+        -------
         None
         """
         #: int: The number of received frames.
@@ -393,13 +391,13 @@ class DetectTissueInStack(FeatureBase):
         for tissue presence. It checks if any of the received frames contain
         sufficient tissue.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         frame_ids : list
             A list of frame IDs to analyze.
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
             True if tissue is detected, False otherwise.
         """
@@ -426,8 +424,8 @@ class DetectTissueInStack(FeatureBase):
         This method is called to determine whether the data phase should end. It checks
          if the specified number of frames have been received.
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
             True if the data phase should end, False otherwise.
         """
@@ -440,8 +438,8 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
     ):
         """Initialize the DetectTissueInStackAndReturn class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         model : object
             The model object representing the microscope.
         planes : int, optional
@@ -468,8 +466,8 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
         This method is called at the beginning of the data processing phase and
         initializes variables for tracking received frames and tissue detection.
 
-        Returns:
-        --------
+        Returns
+        -------
         None
         """
         super().pre_func_data()
@@ -490,13 +488,13 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
         for tissue presence. It checks if any of the received frames contain
         sufficient tissue.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         frame_ids : list
             A list of frame IDs to analyze.
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
             True if tissue is detected, False otherwise.
         """
@@ -516,8 +514,8 @@ class DetectTissueInStackAndReturn(DetectTissueInStack):
         This method is called to determine whether the data phase should end. It checks
          if the specified number of frames have been received.
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
             True if the data phase should end, False otherwise.
         """
@@ -549,8 +547,8 @@ class DetectTissueInStackAndRecord(DetectTissueInStack):
     ):
         """Initialize the DetectTissueInStackAndRecord class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         model : object
             The model object representing the microscope.
         planes : int, optional
@@ -594,8 +592,8 @@ class DetectTissueInStackAndRecord(DetectTissueInStack):
         if the specified number of frames have been received and updates the position
         record.
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
             True if the data phase should end, False otherwise.
         """
@@ -623,8 +621,8 @@ class RemoveEmptyPositions(FeatureBase):
     def __init__(self, model, position_flags=[]):
         """Initialize the RemoveEmptyPositions class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         model : object
             The model object representing the microscope.
         position_flags : list, optional
@@ -648,8 +646,8 @@ class RemoveEmptyPositions(FeatureBase):
         on the specified position flags. It puts a "remove_positions" event into the
         model's event queue to trigger the removal.
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
             True indicating the successful execution of the signal function.
         """

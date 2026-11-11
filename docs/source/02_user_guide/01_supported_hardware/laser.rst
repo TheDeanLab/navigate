@@ -111,6 +111,7 @@ Most lasers are controlled externally via mixed analog and digital modulation. T
                     channel: PXI6733/ao1
                     min: 0.0
                     max: 5.0
+
 |
 
 -------------------
@@ -154,4 +155,5 @@ Synthetic Lasers
                     channel: PXI6733/ao1
                     min: 0.0
                     max: 5.0
+
 |

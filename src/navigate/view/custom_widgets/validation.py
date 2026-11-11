@@ -61,10 +61,12 @@ and B. M. Harwani
 The below classes take advantage of multiple inheritance to achieve validation.
 
 Validation Events: none, focusin, focusout, focus, key, all
+
 - Focus is whether user is using widget
 - Key is when user is typing keystrokes
 
 Substitution Codes for validation in tkinter: %P, %s, %i, %S, %v, %V, %W, %d
+
 - %P = proposed value from user
 - %s = value currently in field
 - %i = index of text being edited. String
@@ -75,24 +77,27 @@ Substitution Codes for validation in tkinter: %P, %s, %i, %S, %v, %V, %W, %d
 - %d = code that indicates action attempted. 0 for delete, 1 for insert, -1 for other.
 
 String Tkinter Validation process:
+
 - validate sets the event that triggers callback
 - validatecommand takes in command that determines if data is valid
 - invalidcommand runs command given if validatecommand is False
 
-A python callable is passed to a .register function for the widget
-def someFun(): do something
-def otherFun(): do something
-widget = ttk.Entry()
-wrapped_function = widget.register(someFun)
-other_function = widget.register(otherFun)
-validation_function = (wrapped_function, '%P') # Can use any amount of substitution
-codes above to pass in various data
-invalid = (other_function, '%P', '%s')
-widget.config(
-            validate='all',
-            validatecommand=validation_function with args,
-            invalidcommand=invalid_function with args
-)
+A Python callable is passed to a ``.register`` function for the widget.
+The following pseudocode illustrates the process::
+
+    def someFun(): do something
+    def otherFun(): do something
+    widget = ttk.Entry()
+    wrapped_function = widget.register(someFun)
+    other_function = widget.register(otherFun)
+    # Use any number of substitution codes above to pass in various data.
+    validation_function = (wrapped_function, '%P')
+    invalid = (other_function, '%P', '%s')
+    widget.config(
+        validate='all',
+        validatecommand=validation_function with args,
+        invalidcommand=invalid_function with args
+    )
 
 """
 

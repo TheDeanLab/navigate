@@ -71,17 +71,18 @@ class LabelInput(ttk.Frame):
     For reference on widget arguments, visit: https://tkdocs.com/shipman/
 
     To use kwargs for parent arguments, update kwargs like this:
-    kwargs.update(width=900, height=600)
-    Ensure you use super().__init__(parent, **kwargs) to override values correctly.
+    ``kwargs.update(width=900, height=600)``.
+    Ensure you use ``super().__init__(parent, **kwargs)`` to override values correctly.
 
     User Guide:
     Create instances of LabelInput as children of a LabelFrame for grouped data.
-    Access the widget within LabelInput using self.widget for customization.
-    Example usage:
-    LabelInput(settings, label_pos="top", label="Exposure Time",
-               input_class=ttk.Spinbox, input_var=tk.IntVar(),
-               input_args={"from_": 0.5, "to": 100, "increment": 0.1},
-               label_args={"height": 2, "width": 4})
+    Access the widget within LabelInput using ``self.widget`` for customization.
+    Example usage::
+
+        LabelInput(settings, label_pos="top", label="Exposure Time",
+                   input_class=ttk.Spinbox, input_var=tk.IntVar(),
+                   input_args={"from_": 0.5, "to": 100, "increment": 0.1},
+                   label_args={"height": 2, "width": 4})
 
     """
 

@@ -193,13 +193,15 @@ class MenuController(GUIController):
         add_separator, then a separator is added to the menu.
 
         List of parameters:
-            Type of entry: standard, checkbutton, radiobutton, cascade
-            Function: function to be called when menu item is selected
-            Accelerator: keyboard shortcut
-            Bindings: keyboard shortcut bindings for Windows
-            Bindings: keyboard shortcut bindings for Mac
 
-        Example:
+        - Type of entry: standard, checkbutton, radiobutton, cascade
+        - Function: function to be called when menu item is selected
+        - Accelerator: keyboard shortcut
+        - Bindings: keyboard shortcut bindings for Windows
+        - Bindings: keyboard shortcut bindings for Mac
+
+        Example::
+
             "Acquire Data": [
                 "standard",
                 self.acquire_data,
@@ -871,16 +873,10 @@ class MenuController(GUIController):
         Parameters
         ----------
         menu_dict : dict
-            menu_dict = {
-                Menu object: {
-                    "Menu String Entry": [
-                        entry_type (standard, radio),
-                        Command,
-                        Accelerator,
-                        Windows Keystroke,
-                        Apple Keystroke",
-            ],
-            ....
+            Mapping from menu objects to dictionaries of menu entries. Each
+            entry maps its label to a list containing the entry type
+            (``standard`` or ``radio``), command, accelerator, Windows
+            keystroke, and Apple keystroke, in that order.
 
         """
         for menu in menu_dict:

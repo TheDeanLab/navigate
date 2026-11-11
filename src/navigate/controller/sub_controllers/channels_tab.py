@@ -780,9 +780,11 @@ class ChannelsTabController(GUIController):
         'Experiment Duration'?
 
         Does not do any calculation when initializing the software.
-        Order of priority for per_stack: timepoints > positions > channels > z-steps
-                                        > delay
-        Order of priority for perZ: timepoints > positions > z-steps > delays > channels
+
+        - Order of priority for ``per_stack``: timepoints > positions > channels >
+          z-steps > delay
+        - Order of priority for ``perZ``: timepoints > positions > z-steps > delays >
+          channels
         """
 
         if self.in_initialization:

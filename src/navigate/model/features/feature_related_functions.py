@@ -84,8 +84,8 @@ class SharedList(list):
     called 'name' for identifying and sharing lists of data. It is particularly
     useful when sharing data between different parts of a program.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is designed to be used when you need to pass and share lists of
       data between different components of a program.
     - The '__name__' attribute can be used to give the shared list a meaningful
@@ -96,12 +96,12 @@ class SharedList(list):
         """
         Initialize a SharedList object.
 
-        Parameters:
+        Parameters
         ----------
         value : Iterable
             Initial values for the list (default is an empty list).
         name : Optional[str]
-            A name to identify the shared list (default is 'shared_list__').
+            A name to identify the shared list (default is ``shared_list__``).
         """
         super().__init__(value)
         if name is None:
@@ -111,14 +111,14 @@ class SharedList(list):
     def __str__(self) -> str:
         """Return a string representation of the shared list.
 
-        Returns:
+        Returns
         -------
         str
             A string containing the type, name, and current values of the shared
             list.
 
-        Notes:
-        ------
+        Notes
+        -----
         The string representation is in the form of a dictionary with 'type',
         'name', and 'value' keys.
         """
@@ -152,18 +152,18 @@ def convert_str_to_feature_list(content: str) -> Union[list, str, None]:
         are converted to tuples. It operates recursively to handle nested feature
         lists.
 
-        Parameters:
+        Parameters
         ----------
         feature_list : list
             The feature list to process. It can contain dictionaries with 'args'
             elements that need to be converted to tuples.
 
-        Returns:
+        Returns
         -------
         None
 
-        Notes:
-        ------
+        Notes
+        -----
         - This function operates in-place and does not return a new list.
         - It is useful for ensuring that 'args' elements within a feature list are
           of tuple type, as required by certain functions or processes.
@@ -207,18 +207,18 @@ def convert_feature_list_to_str(feature_list: list) -> str:
     resulting string can be useful for saving, displaying, or transmitting
     feature lists.
 
-    Parameters:
+    Parameters
     ----------
     feature_list : list
         A valid feature list.
 
-    Returns:
+    Returns
     -------
     result : str
         The string representation of the feature list.
 
-    Notes:
-    ------
+    Notes
+    -----
     - The function recursively processes the input feature list, converting
       dictionaries, tuples, and lists to their corresponding string
       representations.
@@ -231,27 +231,28 @@ def convert_feature_list_to_str(feature_list: list) -> str:
       can be easily saved to a file, transmitted over a network, or displayed
       to users.
 
-    Example:
+    Examples
     --------
-    Given the following feature list:
+    Given feature functions ``func1`` through ``func4`` and string arguments:
 
-    ```
-    [
-        {"name": func1, "args": (arg1, arg2)},
-        {"name": func2},
-        [
-            {"name": func3, "args": (arg3),},
-            {"name": func4}
+    .. code-block:: python
+
+        feature_list = [
+            {"name": func1, "args": ("arg1", "arg2")},
+            {"name": func2},
+            [
+                {"name": func3, "args": ("arg3",)},
+                {"name": func4},
+            ],
         ]
-    ]
-    ```
 
-    The function would return the string representation:
+    The returned string contains the following text (shown on two lines for
+    readability; the function does not insert a newline):
 
-    ```
-    "[{'name': 'func1', 'args': ('arg1', 'arg2')}, {'name': 'func2'},
-    [{'name': 'func3', 'args': ('arg3'),}, {'name': 'func4'}]]"
-    ```
+    .. code-block:: text
+
+        [{"name": func1,"args": ("arg1","arg2",),},{"name": func2,},
+        [{"name": func3,"args": ("arg3",),},{"name": func4,},],]
     """
     if feature_list == "break" or feature_list == "continue":
         return f'"{feature_list}"'
@@ -312,68 +313,58 @@ def convert_feature_list_to_str(feature_list: list) -> str:
 def load_dynamic_parameter_functions(
     feature_list: list, feature_parameter_setting_path: str
 ) -> None:
-    """Load dynamic parameter functions into a feature list.
+    """Load dynamic parameter functions into a feature list in place.
 
-    This function takes a feature list and a path to the parameter setting files
-    and dynamically updates the feature list with parameter values specified in
-    the setting files. It searches for parameter values in the setting files
-    and replaces corresponding arguments in the feature list with the loaded
-    values. The function is designed to support dynamic configuration of
-    feature functions with external parameter files.
+    Resolve named function arguments using per-feature YAML settings. Each
+    setting maps a parameter name to function names and their importable modules
+    or Python source paths.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     feature_list : list
-        A list of feature configurations, typically used for specifying
-        configuration options. It may contain dictionaries with "name" and "args"
-        keys, where "name" is the feature function and "args" is a tuple of
-        arguments. Arguments that match parameter names specified in the setting
-        files will be replaced with loaded values.
-
+        Feature dictionaries and nested lists or tuples. Each dictionary uses
+        ``name`` for the feature class and optionally ``args`` for its positional
+        arguments after ``self`` and ``model``. Matching argument names are
+        replaced with loaded functions in the existing dictionaries.
     feature_parameter_setting_path : str
-        The path to the directory containing parameter setting files. These files
-        should be named based on the feature function names (e.g., function_name.yml).
+        Directory containing settings named ``<feature class name>.yml``.
+        Features without a settings file are left unchanged.
 
-    Notes:
-    ------
-    - The function iterates through the feature list, inspecting each feature
-      dictionary for parameter values specified in the setting files.
-    - Parameters that match argument names in the feature list are replaced with
-      the loaded values from the setting files.
-    - The function supports loading parameter values from YAML files and
-      dynamically updating the feature list.
+    Notes
+    -----
+    A configured argument becomes ``None`` when its name is absent from the
+    parameter's mapping or its mapped value is ``None`` or ``"None"``. Existing
+    source paths are loaded as modules; other mapped strings are imported as
+    module names. Nested lists and tuples are processed recursively, while
+    ``"break"`` and ``"continue"`` entries are skipped.
 
-    Example:
+    Examples
     --------
-    Given a feature list and a parameter setting file:
-    - feature_list:
-      ```
-      [
-          {"name": func1, "args": (arg1, arg2)},
-          {"name": func2},
-          [
-              {"name": func3, "args": (arg3),},
-              {"name": func4}
-          ]
-      ]
-      ```
-    - parameter setting file (func1.yml):
-      ```
-      arg1: value1
-      arg2: value2
-      ```
+    Given a feature class with a dynamic function parameter:
 
-    The function would update the feature list as follows:
-    ```
-    [
-        {"name": func1, "args": ("value1", "value2")},
-        {"name": func2},
-        [
-            {"name": func3, "args": (arg3),},
-            {"name": func4}
+    .. code-block:: python
+
+        class ExampleFeature:
+            def __init__(self, model, transform):
+                self.transform = transform
+
+        feature_list = [
+            {"name": ExampleFeature, "args": ("sqrt",)},
         ]
-    ]
-    ```
+
+    Store the following in ``ExampleFeature.yml`` in the settings directory:
+
+    .. code-block:: yaml
+
+        transform:
+            sqrt: math
+
+    Loading these settings replaces the string argument with ``math.sqrt``:
+
+    .. code-block:: python
+
+        load_dynamic_parameter_functions(feature_list, settings_directory)
+        # feature_list[0]["args"] is now (math.sqrt,).
     """
     if not feature_list:
         return

@@ -12,6 +12,10 @@
 #
 import os
 import sys
+import inspect
+from typing import Any, Optional
+
+from sphinx.application import Sphinx
 from navigate import __version__
 import datetime
 
@@ -36,12 +40,13 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.coverage",
     "sphinx_toolbox.collapse",
     "sphinx.ext.autosectionlabel",
-    "sphinx.ext.todo"
+    "sphinx.ext.todo",
 ]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
@@ -53,6 +58,9 @@ autosectionlabel_prefix_document = True
 # autosummary directives, and to generate stub pages for each
 # (http://sphinx-doc.org/latest/ext/autosummary.html)
 autosummary_generate = True
+
+# Resolve references in inherited NumPy attribute documentation.
+intersphinx_mapping = {"numpy": ("https://numpy.org/doc/stable/", None)}
 
 # Both the class’ and the __init__ method’s docstring are concatenated
 # and inserted.
@@ -152,3 +160,35 @@ latex_documents = [
 ]
 
 latex_domain_indices = False
+
+
+def _skip_external_api_member(
+    app: Sphinx,
+    what: str,
+    name: str,
+    obj: Any,
+    skip: bool,
+    options: Any,
+) -> Optional[bool]:
+    """Exclude external methods while retaining Navigate's inherited API.
+
+    Autodoc passes the containing object type; autosummary passes the member
+    type. Returning None preserves Sphinx's normal decision for all other
+    members, including source-documented instance attributes.
+    """
+    if what not in {"class", "method", "attribute", "property"}:
+        return None
+    member = obj.fget if isinstance(obj, property) else obj
+    if not inspect.isroutine(member):
+        return None
+    module = getattr(member, "__module__", None)
+    if module is None:
+        module = getattr(getattr(member, "__objclass__", None), "__module__", None)
+    if module and module != "navigate" and not module.startswith("navigate."):
+        return True
+    return None
+
+
+def setup(app: Sphinx) -> None:
+    """Register the shared autodoc and autosummary member filter."""
+    app.connect("autodoc-skip-member", _skip_external_api_member)

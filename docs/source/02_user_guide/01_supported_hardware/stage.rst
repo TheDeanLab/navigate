@@ -100,7 +100,7 @@ first establish communication with the device using `ASI provided software <http
 .. _asi_tiger_serial_piezo:
 
 Serial ADEPT focus piezo
-^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 An ADEPT piezo can use the existing ``ASI`` stage driver. Query ``WHO`` and
 ``BU X`` to identify the piezo axis before configuring it. On an FTP-equipped
@@ -779,6 +779,7 @@ The Newport `ESP302 Motion Controller <https://www.newport.com/f/esp30x-3-axis-d
                   port: "192.168.1.90"
                   baudrate: 5001
                   timeout: 5.0
+
 |
 
 ---------------

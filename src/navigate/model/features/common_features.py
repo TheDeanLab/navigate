@@ -72,19 +72,19 @@ class Snap(FeatureBase):
     This class provides functionality to capture data frames using a microscope
     and log information about the camera and frame IDs.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to capture data frames using a microscope and log
-    relevant information, such as the active camera and frame IDs.
+      relevant information, such as the active camera and frame IDs.
 
     - The `Snap` class is typically used for capturing individual frames during
-    microscopy experiments.
+      microscopy experiments.
 
     - The data capture process involves capturing frames and logging
-    camera-related information.
+      camera-related information.
 
     - The `config_table` attribute is used to define the configuration for the
-    data capture process, specifically the main data capture function.
+      data capture process, specifically the main data capture function.
     """
 
     parameter_schema = {
@@ -149,8 +149,8 @@ class WaitForExternalTrigger(FeatureBase):
     on to the next feature block in the list. Useful when combined with LoopByCount
     when each iteration may depend on some external event happening.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class pauses the data thread while waiting for the trigger to avoid
       camera timeout issues.
 
@@ -384,24 +384,24 @@ class WaitToContinue(FeatureBase):
     This feature is used to synchronize signal and data acquisition processes, allowing
     the faster one to wait until the other one ends.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to synchronize signal and data acquisition processes in a
-    controlled manner. It ensures that the faster process waits for the slower one to
-    complete, improving synchronization during microscopy experiments.
+      controlled manner. It ensures that the faster process waits for the slower one to
+      complete, improving synchronization during microscopy experiments.
 
     - The synchronization process involves using locks to control when the signal and
-    data acquisition processes are allowed to proceed.
+      data acquisition processes are allowed to proceed.
 
     - The `config_table` attribute defines the configuration for each stage of the
-    synchronization process, including initialization, main execution, and cleanup
-    steps.
+      synchronization process, including initialization, main execution, and cleanup
+      steps.
 
     - The `first_enter_node` attribute tracks which process (signal or data) enters the
-    node first to determine synchronization order.
+      node first to determine synchronization order.
 
     - The `WaitToContinue` class helps maintain order and synchronization between signal
-    and data acquisition nodes in microscopy experiments.
+      and data acquisition nodes in microscopy experiments.
     """
 
     def __init__(self, model):
@@ -532,22 +532,22 @@ class LoopByCount(FeatureBase):
     This class provides functionality to control signal and data acquisition loops by
     specifying the number of steps or frames to execute.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to control signal and data acquisition loops by specifying the
-    number of steps or frames to execute. It allows for flexible control of the
-    acquisition process.
+      number of steps or frames to execute. It allows for flexible control of the
+      acquisition process.
 
     - The `steps` parameter can be an integer specifying the number of steps/frames
-    directly or a string representing a configuration reference to determine the loop
-    count dynamically.
+      directly or a string representing a configuration reference to determine the loop
+      count dynamically.
 
     - The loop control process involves tracking the remaining steps/frames and deciding
-     whether to continue the loop or exit based on the remaining count.
+      whether to continue the loop or exit based on the remaining count.
 
     - The `LoopByCount` class is useful for controlling the number of acquisitions
-    during microscopy experiments, either by specifying a fixed count or by
-    dynamically determining it from configuration references.
+      during microscopy experiments, either by specifying a fixed count or by
+      dynamically determining it from configuration references.
     """
 
     parameter_schema = {
@@ -751,20 +751,20 @@ class PrepareNextChannel(FeatureBase):
     microscopes and the primary microscope, for the next imaging channel during
     microscopy experiments.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to prepare multiple microscopes for the next imaging
-    channel, ensuring that both virtual microscopes and the primary microscope are
-    ready for the next step in microscopy experiments.
+      channel, ensuring that both virtual microscopes and the primary microscope are
+      ready for the next step in microscopy experiments.
 
     - The `PrepareNextChannel` class is typically used to manage the preparation of
-    microscopes before transitioning to a new imaging channel.
+      microscopes before transitioning to a new imaging channel.
 
     - The channel preparation process involves calling the `prepare_next_channel()`
-    method for each virtual microscope and the active microscope.
+      method for each virtual microscope and the active microscope.
 
     - The `config_table` attribute is used to define the configuration for the
-    channel preparation process, specifically the main preparation function.
+      channel preparation process, specifically the main preparation function.
     """
 
     def __init__(self, model):
@@ -808,20 +808,20 @@ class MoveToNextPositionInMultiPositionTable(FeatureBase):
     This class provides functionality to move to the next position in a multi-position
     table and control the data thread accordingly.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to advance to the next position in a multi-position table,
-    controlling the data thread based on stage distance thresholds.
+      controlling the data thread based on stage distance thresholds.
 
     - The `MoveToNextPositionInMultiPositionTable` class is typically used to automate
-     position changes during microscopy experiments, ensuring proper data thread
-     management.
+      position changes during microscopy experiments, ensuring proper data thread
+      management.
 
     - The position control process involves moving to the next position in the table,
-    pausing the data thread if necessary, and resuming it after the movement.
+      pausing the data thread if necessary, and resuming it after the movement.
 
     - The `config_table` attribute defines the configuration for the position control
-    process, including signal acquisition and cleanup steps.
+      process, including signal acquisition and cleanup steps.
     """
 
     parameter_schema = {
@@ -1087,19 +1087,19 @@ class StackPause(FeatureBase):
     number of timepoints or based on a defined pause time. It manages the data thread
     accordingly.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to pause stack acquisition for a specified number of timepoints
-    or based on a defined pause time during microscopy experiments.
+      or based on a defined pause time during microscopy experiments.
 
     - The `StackPause` class allows for flexible control of stack acquisition pauses,
-    ensuring synchronization with data acquisition.
+      ensuring synchronization with data acquisition.
 
     - The stack pause control process involves managing the data thread, calculating
-    pause times, and handling stack acquisition pauses.
+      pause times, and handling stack acquisition pauses.
 
     - The `config_table` attribute defines the configuration for the stack pause control
-    process, specifically the main pause function.
+      process, specifically the main pause function.
     """
 
     parameter_schema = {
@@ -1182,16 +1182,16 @@ class ZStackAcquisition(FeatureBase):
     z and focus positions, acquiring image data, and handling multi-channel
     acquisitions.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to control z-stack acquisition during microscopy experiments,
-    allowing for position cycling, multi-channel acquisitions, and image saving.
+      allowing for position cycling, multi-channel acquisitions, and image saving.
 
     - The z-stack acquisition process involves initializing parameters, controlling
-    position and focus movements, handling data acquisition, and managing data threads.
+      position and focus movements, handling data acquisition, and managing data threads.
 
     - The `config_table` attribute defines the configuration for the z-stack acquisition
-    process, including signal acquisition, data handling, and node type.
+      process, including signal acquisition, data handling, and node type.
     """
 
     parameter_schema = {

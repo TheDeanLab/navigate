@@ -83,5 +83,3 @@ Example Computer Configuration
 
     .. note::
        The specifications listed are based on an example system configuration and can be adjusted based on specific needs and availability.
-
----------------------

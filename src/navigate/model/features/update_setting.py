@@ -52,23 +52,23 @@ class ChangeResolution(FeatureBase):
     This class provides functionality to change the resolution mode of a microscope by
     reconfiguring the microscope settings and updating the active microscope.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to change the resolution mode of a microscope by updating the
-    microscope settings and configuring the active microscope accordingly.
+      microscope settings and configuring the active microscope accordingly.
 
     - The `resolution_mode` parameter specifies the desired resolution mode, and the
-    `zoom_value` parameter specifies the zoom value to be set. These parameters can
-    be adjusted to modify the microscope's configuration.
+      `zoom_value` parameter specifies the zoom value to be set. These parameters can
+      be adjusted to modify the microscope's configuration.
 
     - The `ChangeResolution` class is typically used to adapt the microscope's settings
-    for different imaging requirements during microscopy experiments.
+      for different imaging requirements during microscopy experiments.
 
     - The resolution change process involves reconfiguring the microscope, updating the
-    active microscope instance, and resuming data acquisition.
+      active microscope instance, and resuming data acquisition.
 
     - The `config_table` attribute is used to define the configuration for the
-    resolution change process, including signal acquisition and cleanup steps.
+      resolution change process, including signal acquisition and cleanup steps.
     """
 
     parameter_schema = {
@@ -95,7 +95,7 @@ class ChangeResolution(FeatureBase):
         """Initialize the ChangeResolution class.
 
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for resolution mode changes.
@@ -127,7 +127,7 @@ class ChangeResolution(FeatureBase):
          by reconfiguring the microscope settings, updating the active microscope, and
          resuming data acquisition.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating the success of the resolution change process.
@@ -225,8 +225,8 @@ class SetCameraParameters(FeatureBase):
 
     This class provides functionality to update the parameters of a camera.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class can set sensor_mode, readout_direction and rolling_shutter_with.
 
     - If the value of a parameter is None it doesn't update the parameter value.
@@ -283,7 +283,7 @@ class SetCameraParameters(FeatureBase):
         """Initialize the ChangeResolution class.
 
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for resolution mode changes.
@@ -326,7 +326,7 @@ class SetCameraParameters(FeatureBase):
          by reconfiguring the microscope settings, updating the active microscope, and
          resuming data acquisition.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating the success of the resolution change process.
@@ -544,7 +544,7 @@ class UpdateExperimentSetting(FeatureBase):
          by reconfiguring the microscope settings, updating the active microscope, and
          resuming data acquisition.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating the success of the resolution change process.

@@ -166,16 +166,19 @@ class ChannelSettingController(GUIController):
     def populate_experiment_values(self, setting_dict):
         """Populates the View with the values from the setting dictionary.
 
-        Set channel values according to channel id
-        the value should be a dict {
-        'channel_id': {
-            'is_selected': True(False),
-            'laser': ,
-            'filter': ,
-            'camera_exposure_time': ,
-            'laser_power': ,
-            'interval_time':}
-        }
+        Set channel values according to channel id. The value should be a
+        dictionary with this structure::
+
+            {
+                'channel_id': {
+                    'is_selected': True(False),
+                    'laser': ...,
+                    'filter': ...,
+                    'camera_exposure_time': ...,
+                    'laser_power': ...,
+                    'interval_time': ...,
+                }
+            }
 
         Parameters
         ----------
@@ -256,7 +259,7 @@ class ChannelSettingController(GUIController):
     def set_spinbox_range_limits(self, settings):
         """Set the range limits for the spinboxes in the View.
 
-        This function will set the spinbox widget's values of from_, to, step
+        This function will set the spinbox widget's values of ``from_``, ``to``, ``step``
         according to the settings
 
         Parameters

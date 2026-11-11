@@ -775,7 +775,7 @@ class IntensityFrame(ttk.Labelframe, CommonMethods):
     ) -> None:
         """Initialize the IntensityFrame class.
 
-         Parameters
+        Parameters
         ----------
         camera_tab : CameraTab
             The frame that will hold the intensity controls.

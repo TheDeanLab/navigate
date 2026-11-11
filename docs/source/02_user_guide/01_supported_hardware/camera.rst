@@ -73,7 +73,7 @@ Hamamatsu
 -----------------
 
 ORCA-Quest 2 (USB)
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Use the ``HamamatsuOrcaQuest2`` camera type. Normal mode and forward/backward
 Light-Sheet mode are supported. In :guilabel:`Camera Settings`, select

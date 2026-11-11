@@ -132,7 +132,7 @@ class SynchronizedThreadPool:
     Note
     ----
     - This class provides explicit control over thread creation, removal,
-    and synchronization.
+      and synchronization.
     - It allows managing threads associated with different resources efficiently.
     - The `clear` method moves threads to the `toDeleteList` for later deletion.
 

@@ -53,8 +53,8 @@ class TreeNode:
     behavior of a microscope or similar device. Each node has a name, associated
     functions, and properties that define its behavior in the control sequence.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to represent nodes in a control sequence tree where each node
       corresponds to a feature or action in the control sequence.
 
@@ -82,7 +82,7 @@ class TreeNode:
     ):
         """Initialize the TreeNode object.
 
-        Parameters:
+        Parameters
         ----------
         feature_name : str
             The name or identifier of the feature associated with this node.
@@ -127,7 +127,7 @@ class TreeNode:
         argument pairs and updates the corresponding attributes of the TreeNode
         object.
 
-        Parameters:
+        Parameters
         ----------
         **kwargs : dict
             Keyword arguments with attribute names as keys and values to set as
@@ -147,8 +147,8 @@ class SignalNode(TreeNode):
     controlling the behavior of a microscope or similar device. It inherits from the
     TreeNode class and adds signal processing capabilities.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to represent signal-processing nodes in a control sequence
       tree where each node corresponds to a feature or action in the control sequence.
 
@@ -181,7 +181,7 @@ class SignalNode(TreeNode):
     ):
         """Initialize the SignalNode object.
 
-        Parameters:
+        Parameters
         ----------
         feature_name : str
             The name or identifier of the feature associated with this node.
@@ -222,7 +222,7 @@ class SignalNode(TreeNode):
         handle response logic based on the node's properties. It can be used with or
         without waiting for a response.
 
-        Parameters:
+        Parameters
         ----------
         *args : any
             Additional arguments to pass to the main function.
@@ -231,7 +231,7 @@ class SignalNode(TreeNode):
             A boolean indicating whether to wait for a response from this node. Default
             is False.
 
-        Returns:
+        Returns
         -------
         tuple
             A tuple containing the result of executing the main function and a boolean
@@ -278,8 +278,8 @@ class DataNode(TreeNode):
     controlling the behavior of a microscope or similar device. It inherits from the
     TreeNode class and adds data processing capabilities.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to represent data-processing nodes in a control sequence tree
       where each node corresponds to a data processing step in the control sequence.
 
@@ -311,7 +311,7 @@ class DataNode(TreeNode):
     ):
         """Initialize the DataNode object.
 
-        Parameters:
+        Parameters
         ----------
         feature_name : str
             The name or identifier of the feature associated with this node.
@@ -349,12 +349,12 @@ class DataNode(TreeNode):
         initialized and determines whether the current frame meets the criteria to
         execute the main data processing function.
 
-        Parameters:
+        Parameters
         ----------
         *args : any
             Additional arguments to pass to the data processing functions.
 
-        Returns:
+        Returns
         -------
         tuple
             A tuple containing the result of executing the main data processing
@@ -391,8 +391,8 @@ class Container:
     nodes representing different actions or steps in the control sequence. It provides
     methods for resetting the tree and performing cleanup operations on specified nodes.
 
-    Notes:
-    ------
+    Notes
+    -----
     - The `Container` class is used to manage the execution of a control sequence
       tree. It maintains the state of the control sequence and provides methods
       for resetting the state and performing cleanup operations.
@@ -416,7 +416,7 @@ class Container:
     def __init__(self, root=None, cleanup_list=[]):
         """Initialize the Container object.
 
-        Parameters:
+        Parameters
         ----------
         root : TreeNode or None, optional
             The root node of the control sequence tree. Default is None.
@@ -476,8 +476,8 @@ class SignalContainer(Container):
     of signal-based nodes. It extends the functionality of the base `Container` class
     and provides methods for running signal-based control sequences.
 
-    Notes:
-    ------
+    Notes
+    -----
     - The `SignalContainer` class is designed for managing control sequences that are
       signal-based, typically used in applications involving devices and sensors.
 
@@ -494,7 +494,7 @@ class SignalContainer(Container):
     ):
         """Initialize the SignalContainer object.
 
-        Parameters:
+        Parameters
         ----------
         root : TreeNode or None, optional
             The root node of the control sequence tree. Default is None.
@@ -536,8 +536,8 @@ class SignalContainer(Container):
         nodes and executing them in order. It manages the execution of nodes and
         handles transitions between nodes based on their logic.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         *args : arguments
             Optional arguments to pass to the control sequence nodes.
 
@@ -545,8 +545,8 @@ class SignalContainer(Container):
             A flag indicating whether to wait for responses during execution.
             Default is False.
 
-        Notes:
-        ------
+        Notes
+        -----
         - The `run` method is responsible for executing the control sequence nodes in
           the order defined by the control sequence tree.
 
@@ -600,8 +600,8 @@ class DataContainer(Container):
     data-based nodes. It extends the functionality of the base `Container` class and
     provides methods for running data-based control sequences.
 
-    Notes:
-    ------
+    Notes
+    -----
     - The `DataContainer` class is designed for managing control sequences that are
       data-based, typically used in applications involving data processing and
       analysis.
@@ -617,7 +617,7 @@ class DataContainer(Container):
     def __init__(self, root=None, cleanup_list=[]):
         """Initialize the DataContainer object.
 
-        Parameters:
+        Parameters
         ----------
         root : TreeNode or None, optional
             The root node of the control sequence tree. Default is None.
@@ -634,13 +634,13 @@ class DataContainer(Container):
         nodes and executing them in order. It manages the execution of nodes, handles
         transitions between nodes, and performs node cleanup when necessary.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         *args : arguments
             Optional arguments to pass to the control sequence nodes.
 
-        Notes:
-        ------
+        Notes
+        -----
         - The `run` method is responsible for executing the data-based control
           sequence nodes in the order defined by the control sequence tree.
 
@@ -706,7 +706,7 @@ def get_registered_funcs(feature_module, func_type="signal"):
     such as 'init', 'main', and 'end' are present in the dictionary, and assigns them
     default dummy functions if they are missing.
 
-    Parameters:
+    Parameters
     ----------
     feature_module : module
         The feature module containing the configuration table of functions.
@@ -714,13 +714,13 @@ def get_registered_funcs(feature_module, func_type="signal"):
     func_type : str, optional
         The type of functions to retrieve, either 'signal' (default) or 'data'.
 
-    Returns:
+    Returns
     -------
     dict
         A dictionary of registered functions for the specified function type.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This function is typically used to retrieve a dictionary of functions defined
       in a feature module's configuration table. The dictionary includes 'init',
       'main', and 'end' functions, and optionally 'pre-main' for data functions and
@@ -756,7 +756,7 @@ def load_features(model, feature_list):
     feature module. It also handles shared variables and cleanup functions for
     the nodes.
 
-    Parameters:
+    Parameters
     ----------
     model : object
         The model or system to which the features are applied.
@@ -765,7 +765,7 @@ def load_features(model, feature_list):
         A list of dictionaries or tuples representing the feature modules and
         their configurations.
 
-    Returns:
+    Returns
     -------
     SignalContainer
         A container containing the root of the SignalNode tree and a cleanup list
@@ -775,8 +775,8 @@ def load_features(model, feature_list):
         A container containing the root of the DataNode tree and a cleanup list for
         data nodes.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This function creates SignalNodes and DataNodes for each feature module in
       the feature_list, organizing them into a child-sibling tree structure.
 
@@ -806,13 +806,13 @@ def load_features(model, feature_list):
         instances, and handles node configurations, including 'need_response' and
         'device_related' properties.
 
-        Parameters:
+        Parameters
         ----------
         feature_dict : dict
             A dictionary containing the feature module's name, arguments, and
             node configuration.
 
-        Returns:
+        Returns
         -------
         SignalNode
             A SignalNode instance for the feature module.
@@ -820,8 +820,8 @@ def load_features(model, feature_list):
         DataNode
             A DataNode instance for the feature module.
 
-        Notes:
-        ------
+        Notes
+        -----
         - This function creates SignalNode and DataNode instances based on the
           feature dictionary's information.
 
@@ -887,13 +887,13 @@ def load_features(model, feature_list):
         of feature modules. It creates SignalNode and DataNode instances for each
         feature module and organizes them into the tree structure.
 
-        Parameters:
+        Parameters
         ----------
         feature_list : list
             A list of dictionaries and tuples representing feature modules and their
             configurations.
 
-        Returns:
+        Returns
         -------
         SignalNode
             The root SignalNode of the tree structure.
@@ -907,8 +907,8 @@ def load_features(model, feature_list):
         DataNode
             The last DataNode in the tree structure.
 
-        Notes:
-        ------
+        Notes
+        -----
         - This function recursively builds a child-sibling tree structure for the
           given feature list.
 
@@ -1056,18 +1056,18 @@ def dummy_True(*args):
     This function serves as a placeholder for operations that need to return a
     Boolean value. It is designed to always return True.
 
-    Parameters:
+    Parameters
     ----------
     *args : tuple
         Variable-length argument list (unused).
 
-    Returns:
+    Returns
     -------
     bool
         Always returns True.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This function is a simple placeholder that returns True and is often used in
       situations where a real function is not yet implemented or is not relevant
       for a specific context.
@@ -1082,17 +1082,17 @@ def dummy_func(*args):
     but do not perform any actual computation. It does not have any side effects
     and simply does nothing when called.
 
-    Parameters:
+    Parameters
     ----------
     *args : tuple
         Variable-length argument list (unused).
 
-    Returns:
+    Returns
     -------
     None
 
-    Notes:
-    ------
+    Notes
+    -----
     - This function is used as a placeholder for situations where a function is
       expected but no real operation is needed.
     """

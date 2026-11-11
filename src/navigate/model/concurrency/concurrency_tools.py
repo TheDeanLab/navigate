@@ -179,8 +179,10 @@ class ResultThread(threading.Thread):
     We changed the return value of 'start' from 'None' to 'self' -- just to
     trivially save us a line of code when launching threads.
 
-    Example:
-    ```
+    Examples
+    --------
+    .. code-block:: python
+
         def f(a):
             ''' A function that does something... '''
             return a.sum()
@@ -225,8 +227,9 @@ class ResultThread(threading.Thread):
         # the parent thread when you call 'get_result'.
         # Tracebacks may print to STDERR when the exception occurs in
         # the child thread, but don't affect the parent thread (yet).
-    ```
-    NOTE: This module modifies threading.excepthook. You can't just copy/paste
+    Notes
+    -----
+    This module modifies threading.excepthook. You can't just copy/paste
     this class definition and expect it to work.
     """
 
@@ -348,11 +351,24 @@ class ObjectInSubprocess:
         threading CAN parallelize),  without too much mental overhead for the
         coder.
 
-        initializer -- callable that returns an instance of a Python object
-        initargs, initkwargs --  arguments to 'initializer'
-        close_method_name -- string, optional, name of our object's method to
-            be called automatically when the child process exits
-        closeargs, closekwargs -- arguments to 'close_method'
+        Parameters
+        ----------
+        initializer : callable
+            Callable that returns an instance of a Python object.
+        *initargs : tuple
+            Positional arguments to ``initializer``.
+        custom_loop : callable, optional
+            Child-process loop to use instead of the default message loop.
+        close_method_name : str, optional
+            Name of the object's method to call when the child process exits.
+        closeargs : tuple, optional
+            Positional arguments to the close method.
+        closekwargs : dict, optional
+            Keyword arguments to the close method.
+        with_lock : bool, optional
+            Whether to create a resource lock for this subprocess.
+        **initkwargs : dict
+            Keyword arguments to ``initializer``.
         """
         # Put an instance of the Python object returned by 'initializer'
         # in a child process:

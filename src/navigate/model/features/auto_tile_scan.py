@@ -45,31 +45,31 @@ class CalculateFocusRange(FeatureBase):
     This class provides functionality to calculate the focus range of a microscope
     using autofocus measurements.
 
-    Notes:
-    ------
+    Notes
+    -----
     - This class is used to calculate the focus range of a microscope by utilizing
-    autofocus measurements. It provides methods for different stages of the
-    calculation process.
+      autofocus measurements. It provides methods for different stages of the
+      calculation process.
 
     - The `config_table` attribute is a dictionary that defines the configuration for
-    each stage of the calculation process, including initialization, main execution,
-    and finalization steps.
+      each stage of the calculation process, including initialization, main execution,
+      and finalization steps.
 
     - The autofocus measurements are performed using an instance of the `Autofocus`
-    class, which is initialized with the same `model` object used for focus range
-    calculation.
+      class, which is initialized with the same `model` object used for focus range
+      calculation.
 
     - The focus range calculation involves signal acquisition and data acquisition
-    stages, which are controlled using the provided methods.
+      stages, which are controlled using the provided methods.
 
     - The `CalculateFocusRange` class can be used to automate the process of
-    determining the optimal focus range for microscopy experiments.
+      determining the optimal focus range for microscopy experiments.
     """
 
     def __init__(self, model):
         """Initialize the CalculateFocusRange class.
 
-        Parameters:
+        Parameters
         ----------
         model : MicroscopeModel
             The microscope model object used for focus range calculation.
@@ -154,7 +154,7 @@ class CalculateFocusRange(FeatureBase):
         This method finalizes the signal acquisition stage and checks if additional
         steps are needed based on the results of autofocus measurements.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether additional steps are required.
@@ -191,7 +191,7 @@ class CalculateFocusRange(FeatureBase):
         include data
         acquisition for specific frame IDs if provided.
 
-        Parameters:
+        Parameters
         ----------
         frame_ids : list, optional
             A list of frame IDs for which data acquisition should be performed.
@@ -206,7 +206,7 @@ class CalculateFocusRange(FeatureBase):
         additional actions or
         checks.
 
-        Returns:
+        Returns
         -------
         bool
             A boolean value indicating whether additional steps are required.

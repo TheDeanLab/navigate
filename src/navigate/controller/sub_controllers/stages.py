@@ -67,11 +67,11 @@ class StageController(GUIController):
         """Initializes the StageController
 
         Parameters
-         ----------
-         view : navigate.view.stage_view.StageView
-             The stage view
-         parent_controller : navigate.controller.Controller
-             The parent controller of the stage controller
+        ----------
+        view : navigate.view.stage_view.StageView
+            The stage view
+        parent_controller : navigate.controller.Controller
+            The parent controller of the stage controller
         """
         super().__init__(view, parent_controller)
 

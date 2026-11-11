@@ -158,7 +158,10 @@ class TestSyntheticCamera:
 
         number_of_frames = 100
         data_buffer = [
-            SharedNDArray(shape=(2048, 2048), dtype="uint16")
+            SharedNDArray(
+                shape=(self.synthetic_camera.y_pixels, self.synthetic_camera.x_pixels),
+                dtype="uint16",
+            )
             for i in range(number_of_frames)
         ]
 

@@ -260,7 +260,7 @@ class DummyModel:
         self.number_of_frames = 10
         #: ndarray: The data buffer.
         self.data_buffer = np.zeros(
-            (self.number_of_frames, self.img_width, self.img_height)
+            (self.number_of_frames, self.img_height, self.img_width), dtype=np.uint16
         )
         #: ndarray: The data buffer positions.
         self.data_buffer_positions = np.zeros(

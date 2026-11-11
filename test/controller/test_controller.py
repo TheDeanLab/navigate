@@ -170,6 +170,9 @@ def controller(controller_root):
     # because the testcases from other files use DummyController
     # and DummyModel instead of this controller fixture
     controller.model = MagicMock()
+    from navigate.model.devices.camera.format import CameraImageFormat
+
+    controller.model.get_camera_image_format.return_value = CameraImageFormat()
     controller._real_model_for_cleanup = real_model
     controller.threads_pool = MagicMock()
     controller.model.get_offset_variance_maps.return_value = (None, None)
@@ -1111,7 +1114,7 @@ def test_execute_random(controller):
     assert True
 
 
-def test_capture_image(controller):
+def test_capture_image(controller, monkeypatch):
 
     count = 0
 
@@ -1132,7 +1135,7 @@ def test_capture_image(controller):
         microscope_name
     ]["img_y_pixels"]
     images = numpy.random.rand(10, width, height)
-    controller.data_buffer = images
+    monkeypatch.setattr(controller, "data_buffer", images)
     work_thread = MagicMock()
     work_thread.join = MagicMock()
     controller.threads_pool.createThread = MagicMock()

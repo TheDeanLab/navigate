@@ -36,6 +36,8 @@ import os
 import uuid
 from pathlib import Path
 import logging
+import json
+import xml.etree.ElementTree as ET
 
 # Third Party Imports
 import tifffile
@@ -96,6 +98,9 @@ class TiffDataSource(DataSource):
         else:
             self._is_ome = False
             self.metadata = Metadata()
+
+        self.metadata.dtype = self.dtype
+        self.metadata.significant_bits = self.significant_bits
 
         self._is_bigtiff = is_bigtiff
 
@@ -161,6 +166,19 @@ class TiffDataSource(DataSource):
         """Read a tiff file."""
         self.mode = "r"
         self.image = tifffile.TiffFile(self.file_name)
+        significant_bits = None
+        if self.image.ome_metadata:
+            pixels = ET.fromstring(self.image.ome_metadata).find("{*}Image/{*}Pixels")
+            if pixels is not None:
+                significant_bits = pixels.get("SignificantBits")
+        else:
+            try:
+                significant_bits = json.loads(self.image.pages[0].description).get(
+                    "camera_bit_depth"
+                )
+            except (ValueError, AttributeError, TypeError):
+                pass
+        self._set_read_format(self.image.series[0].dtype, significant_bits)
 
         # TODO: Parse metadata
         for i, ax in enumerate(list(self.image.series[0].axes)):
@@ -234,6 +252,7 @@ class TiffDataSource(DataSource):
         kw : dict
             Keyword arguments to pass to tifffile.imwrite.
         """
+        self._validate_frame_format(data)
         self.mode = "w"
 
         c, z, self._current_time, self._current_position = self._cztp_indices(
@@ -265,6 +284,8 @@ class TiffDataSource(DataSource):
                 "timepoint": self._current_time,
                 "notes": self.metadata.misc,
             }
+            if self.significant_bits is not None:
+                md["camera_bit_depth"] = self.significant_bits
             resolution = (1e4 / dx, 1e4 / dy)
             resolution_unit_kw = {"resolutionunit": "CENTIMETER"}
             if not _TIFF_WRITE_SUPPORTS_RESOLUTIONUNIT:

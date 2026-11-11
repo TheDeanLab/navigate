@@ -96,6 +96,7 @@ def test_quest2_camera_profile_and_software_trigger(
     connection.get_property_value.side_effect = lambda name: {
         "readout_speed": 1,
         "pixel_width": 4.6,
+        "bits_per_channel": 16,
         "cooling": cooling_value,
     }[name]
     parameters = {"hardware": {"serial_number": "000473"}, "defect_correct_mode": 1}

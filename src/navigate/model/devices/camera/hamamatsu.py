@@ -347,7 +347,14 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         }
 
     def snapshot_advanced_settings(self) -> dict:
-        """Capture format, corrections and timing in restoration order."""
+        """Capture ordered SDK properties and supported timing dependencies.
+
+        Returns
+        -------
+        dict
+            Opaque transaction snapshot containing ``properties`` and
+            ``timing_properties`` for strict post-change and rollback checks.
+        """
         previous = self._snapshot_depth_settings()
         corrections = {}
         sdk = self.camera_controller
@@ -381,12 +388,26 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         sensor = (
             {"sensor_mode": mode.pop("sensor_mode")} if "sensor_mode" in mode else {}
         )
-        return {**sensor, **previous, **mode, **corrections, **timing}
+        return {
+            "properties": {**sensor, **previous, **mode, **corrections, **timing},
+            "timing_properties": self._refresh_named_timing(),
+        }
+
+    def validate_advanced_settings(self, previous: dict) -> None:
+        """Reconfirm timing after dependent queries and before model persistence.
+
+        Parameters
+        ----------
+        previous : dict
+            Named-transaction snapshot with pre-change timing support.
+        """
+        self._refresh_named_timing(previous["timing_properties"])
 
     def restore_advanced_settings(self, previous: dict) -> None:
         """Restore all dependent SDK values, blocking every alias on failure."""
         try:
-            self._restore_depth_settings(previous)
+            self._restore_depth_settings(previous["properties"])
+            self.validate_advanced_settings(previous)
         except Exception:
             self.camera_controller._advanced_settings_error = (
                 "Camera settings restoration failed; reconnect before acquiring."
@@ -424,19 +445,9 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             self._refresh_image_format()
             if self.get_bit_depth() is None:
                 raise RuntimeError("Camera precision could not be confirmed.")
-            self._refresh_depth_timing()
+            self.validate_advanced_settings(previous)
             if name == "sensor_mode":
                 self._refresh_sensor_geometry()
-            exposure = sdk.get_property_value("exposure_time")
-            low, high, _ = sdk.get_property_range("exposure_time")
-            if (
-                exposure is False
-                or exposure is None
-                or low is None
-                or high is None
-                or not low <= exposure <= high
-            ):
-                raise RuntimeError("Camera exposure could not be confirmed.")
             refreshed = self._get_scan_correction_capabilities()
             if (
                 refreshed[name].current_value != value
@@ -528,6 +539,71 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 reason=reason or "",
             )
         }
+
+    def _refresh_named_timing(self, required_properties: tuple = ()) -> tuple:
+        """Confirm named-transaction timing before updating any cached value.
+
+        Parameters
+        ----------
+        required_properties : tuple
+            Optional timing properties confirmed in the pre-change snapshot.
+            A later failed query for one of these is not unsupported hardware.
+
+        Returns
+        -------
+        tuple
+            Supported optional timing properties to verify after a change or
+            rollback. Legacy bit-depth timing retains its existing behavior.
+        """
+        sdk = self.camera_controller
+
+        def valid(value: Any) -> bool:
+            return (
+                isinstance(value, (int, float))
+                and not isinstance(value, bool)
+                and math.isfinite(value)
+                and value >= 0
+            )
+
+        limits = sdk.get_property_range("exposure_time")
+        if not all(valid(value) for value in limits) or limits[0] > limits[1]:
+            raise RuntimeError("Camera timing exposure limits could not be confirmed.")
+        exposure = sdk.get_property_value("exposure_time")
+        readout = sdk.get_property_value("readout_time")
+        if (
+            not valid(exposure)
+            or not limits[0] <= exposure <= limits[1]
+            or not valid(readout)
+        ):
+            raise RuntimeError("Camera timing readback could not be confirmed.")
+        optional = {}
+        for name in ("internal_line_interval", "minimum_trigger_interval"):
+            value = sdk.get_property_value(name)
+            attributes = sdk.get_property_range(name)
+            supported = name in required_properties or any(
+                v is not None for v in attributes
+            )
+            if valid(value):
+                optional[name] = value
+            elif supported or value is not False and value is not None:
+                raise RuntimeError(f"Camera timing {name} could not be confirmed.")
+        # Commit the complete readback together; never retain the previous scan's
+        # cache when a supported dependency fails to refresh.
+        (
+            self.minimum_exposure_time,
+            self.maximum_exposure_time,
+            self.exposure_time_step,
+        ) = limits
+        self.readout_time = readout
+        if "internal_line_interval" in optional:
+            self.camera_parameters["line_interval"] = optional["internal_line_interval"]
+        else:
+            self.camera_parameters.pop("line_interval", None)
+        if "minimum_trigger_interval" in optional:
+            self.minimum_frame_interval = optional["minimum_trigger_interval"]
+        else:
+            self.__dict__.pop("minimum_frame_interval", None)
+        return tuple(optional)
 
     def _refresh_depth_timing(self) -> None:
         """Refresh timing limits after a change in output precision."""

@@ -131,7 +131,7 @@ fixed Standard scan speed in Light-Sheet mode, for testing without hardware.
 It does not simulate the physical noise-reduction effects of correction.
 
 Transactions and persistence
----------------------------
+----------------------------
 
 New model requests include :code:`setting` and :code:`value`, alongside the
 existing microscope, connection identity and request ID. Replies include
@@ -145,7 +145,11 @@ before a named change. It verifies readback and the resulting image layout,
 refreshes dependent choices, and restores the snapshot if the write or buffer
 negotiation fails. :code:`snapshot_advanced_settings()` and
 :code:`restore_advanced_settings(snapshot)` allow model failures to use the same
-rollback. Failed restoration blocks writes and acquisition for all microscope
+rollback. :code:`validate_advanced_settings(snapshot)` confirms adapter-specific
+dependencies after capability refresh and before persistence. For named
+Hamamatsu changes, timing must remain confirmed even after the legacy precision
+probe; failed timing reads cause rollback rather than retaining old scan timing.
+Failed restoration blocks writes and acquisition for all microscope
 aliases sharing the physical connection until it is reconnected. SDK failure
 sentinels are never accepted as numeric zero or an Off value.
 

@@ -131,3 +131,48 @@ def test_main_sensor_selection_updates_pending_mode_and_refreshes_popup():
     c.update_sensor_mode()
     assert c.camera_setting_dict["sensor_mode"] == "Normal"
     advanced.refresh_bit_depth.assert_called_once()
+
+
+def test_pending_mode_apply_preserves_new_main_selection_and_displays_mismatch(popup):
+    from navigate.model.model import Model
+    from navigate.model.devices.camera.synthetic import SyntheticCamera
+
+    c = popup
+    c.camera_setting_dict.update(img_x_pixels=3, img_y_pixels=2, binning="1x1")
+    configuration = {
+        "experiment": {
+            "MicroscopeState": {"microscope_name": "scope"},
+            "CameraParameters": {"scope": c.camera_setting_dict},
+        },
+        "configuration": {
+            "microscopes": {
+                "scope": {
+                    "camera": {
+                        "hardware": {"serial_number": "mode-race"},
+                        "x_pixels": 3,
+                        "y_pixels": 2,
+                    }
+                }
+            }
+        },
+    }
+    camera = SyntheticCamera("scope", None, configuration)
+    model = Model.__new__(Model)
+    model.configuration = configuration
+    model.is_acquiring = False
+    model.microscopes = {"scope": SimpleNamespace(camera=camera)}
+    model.get_data_buffer = lambda *args: None
+    c.camera_setting_dict["sensor_mode"] = "Light-Sheet"
+    initial = model.camera_advanced_settings(dict(microscope="scope", request_id=0))
+    c._receive_bit_depth(initial)
+    c.apply_sensor_mode()
+    pending_request = c.parent_controller.execute.call_args.args[1]
+    assert c._depth_pending
+    c.camera_setting_dict["sensor_mode"] = "Normal"
+    c.refresh_bit_depth()  # the main-tab handler cannot query during the write
+    completed = model.camera_advanced_settings(pending_request)
+    c._receive_bit_depth(completed)
+    assert c.camera_setting_dict["sensor_mode"] == "Normal"
+    assert camera.get_advanced_setting("sensor_mode") == 12
+    assert str(c.view.inputs["scan_speed"]["state"]) == "disabled"
+    assert str(c.view.buttons["apply_sensor_mode"]["state"]) == "normal"

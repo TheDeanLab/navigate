@@ -1306,7 +1306,12 @@ class DCAM:
         # Set value and get what is set
         final_configuration = self.prop_setgetvalue(idprop, value)
 
-        if abs(final_configuration - value) < value / 100:
+        # False is the native-call failure sentinel, not a numeric zero.
+        # A nonzero absolute tolerance permits legitimate zero-valued offsets;
+        # transactional restoration still verifies exact property readback.
+        if final_configuration is not False and math.isclose(
+            final_configuration, value, rel_tol=0.01, abs_tol=1e-12
+        ):
             return True
         else:
             print(name, "Configuration Failed", value, final_configuration)

@@ -224,6 +224,17 @@ class CameraBase(ABC):
             if capability.current_value is not None
         }
 
+    def validate_advanced_settings(self, previous: dict) -> None:
+        """Confirm adapter-specific dependencies after capability refresh.
+
+        Parameters
+        ----------
+        previous : dict
+            Pre-change snapshot identifying dependencies that must remain
+            readable. The base adapter has no additional dependencies.
+        """
+        pass
+
     def restore_advanced_settings(self, previous: dict) -> None:
         """Restore a transaction snapshot and verify every saved value."""
         for name, value in previous.items():

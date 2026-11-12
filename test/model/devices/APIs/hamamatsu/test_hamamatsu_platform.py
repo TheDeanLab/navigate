@@ -515,3 +515,101 @@ def test_property_value_text_uses_sdk_buffer_and_preserves_failure(monkeypatch):
     assert camera.get_property_value_text("hot_pixel_correct_level", 1) == "STANDARD"
     monkeypatch.setattr(api, "dcamprop_getvaluetext", lambda *args: -1)
     assert camera.get_property_value_text("hot_pixel_correct_level", 1) is None
+
+
+@pytest.mark.parametrize(
+    "native_result,readback,expected",
+    [(1, 0.0, True), (-1, 0.0, False), (1, 0.25, False)],
+)
+def test_native_zero_property_write_distinguishes_failure(
+    monkeypatch, native_result, readback, expected
+):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+
+    def attributes(handle, pointer):
+        pointer._obj.valuemin = 0
+        pointer._obj.valuemax = 2048
+        pointer._obj.valuestep = 1
+        return 1
+
+    def set_value(handle, prop, value, option):
+        assert prop.value == 0x00402110  # SUBARRAY HPOS
+        assert value._obj.value == 0
+        value._obj.value = readback
+        return native_result
+
+    monkeypatch.setattr(api, "dcamprop_getattr", attributes)
+    monkeypatch.setattr(api, "dcamprop_setgetvalue", set_value)
+    assert camera.set_property_value("subarray_hpos", 0) is expected
+
+
+@pytest.mark.parametrize("native_result", [1, -1])
+def test_adapter_zero_roi_rollback_uses_real_sdk_wrapper(monkeypatch, native_result):
+    import importlib
+    import sys
+    from types import ModuleType
+    from navigate.model.devices.APIs.hamamatsu.frame_layout import DCAMFrameLayout
+
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+    camera.get_frame_layout = lambda: DCAMFrameLayout(3, 2, 2, 6, 12)
+    values = {
+        "subarray_hpos": 8.0,
+        "subarray_vpos": 4.0,
+        "bits_per_channel": 16.0,
+        "readout_time": 0.01,
+        "internal_line_interval": 1e-5,
+        "minimum_trigger_interval": 0.01,
+    }
+    names = {code: name for name, code in api.property_dict.items()}
+
+    def attributes(handle, pointer):
+        pointer._obj.valuemin = 0
+        pointer._obj.valuemax = 2048
+        pointer._obj.valuestep = 1
+        return 1
+
+    def read(handle, prop, value):
+        value._obj.value = values[names[prop]]
+        return 1
+
+    def write(handle, prop, value, option):
+        if native_result > 0:
+            values[names[prop.value]] = value._obj.value
+        return native_result
+
+    monkeypatch.setattr(api, "dcamprop_getattr", attributes)
+    monkeypatch.setattr(api, "dcamprop_getvalue", read)
+    monkeypatch.setattr(api, "dcamprop_setgetvalue", write)
+    api_name = "navigate.model.devices.APIs.hamamatsu.HamamatsuAPI"
+    module_name = "navigate.model.devices.camera.hamamatsu"
+    fake_import = ModuleType(api_name)
+    fake_import.DCAM = api.DCAM
+    monkeypatch.setitem(sys.modules, api_name, fake_import)
+    monkeypatch.delitem(sys.modules, module_name, raising=False)
+    module = importlib.import_module(module_name)
+    adapter = object.__new__(module.HamamatsuOrcaCamera)
+    adapter.camera_controller = camera
+    adapter.camera_parameters = {}
+    try:
+        if native_result > 0:
+            adapter._restore_depth_settings(
+                {"subarray_hpos": 0.0, "subarray_vpos": 0.0}
+            )
+            assert values["subarray_hpos"] == values["subarray_vpos"] == 0
+            assert adapter._setting_error() is None
+        else:
+            with pytest.raises(RuntimeError, match="restoration"):
+                adapter._restore_depth_settings(
+                    {"subarray_hpos": 0.0, "subarray_vpos": 0.0}
+                )
+            assert values["subarray_hpos"] == 8
+            assert adapter._setting_error()
+    finally:
+        camera._DCAM__hdcam = 0
+        sys.modules.pop(module_name, None)

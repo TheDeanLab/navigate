@@ -15,7 +15,9 @@ synthetic_camera = synthetic_tests.camera
 def scan_camera(camera):
     sdk = camera.camera_controller
     sdk.is_property_writable = lambda name: name in sdk.values
-    sdk.values.update(defect_correct_mode=2.0, hot_pixel_correct_level=1.0)
+    sdk.values.update(
+        defect_correct_mode=2.0, hot_pixel_correct_level=1.0, readout_time=0.01
+    )
     original = sdk.get_property_values
     sdk.options = {
         "readout_speed": (1.0, 2.0),
@@ -305,3 +307,149 @@ def test_stale_request_does_not_trigger_legacy_precision_probe(
     )
     assert result["error"]
     assert sdk.writes == []
+
+
+@pytest.mark.parametrize(
+    "property_name",
+    ["readout_time", "internal_line_interval", "minimum_trigger_interval"],
+)
+def test_scan_failed_supported_timing_refresh_rolls_back(scan_camera, property_name):
+    sdk = scan_camera.camera_controller
+    original = sdk.get_property_value
+    sdk.get_property_value = (
+        lambda name: False
+        if name == property_name and sdk.values["readout_speed"] == 2
+        else original(name)
+    )
+    with pytest.raises(RuntimeError, match="timing"):
+        scan_camera.set_advanced_setting("scan_speed", 2)
+    assert sdk.values["readout_speed"] == 1
+    assert scan_camera.readout_time == 0.01
+    assert scan_camera.camera_parameters["line_interval"] == 1e-5
+    assert scan_camera.minimum_frame_interval == 0.01
+    assert scan_camera._setting_error() is None
+
+
+@pytest.mark.parametrize(
+    "limits",
+    [
+        (None, 1, 1e-6),
+        (1e-6, float("nan"), 1e-6),
+        (1e-6, 1, float("nan")),
+        (1e-6, 1, -1),
+    ],
+)
+def test_scan_invalid_exposure_limits_roll_back(scan_camera, limits):
+    sdk = scan_camera.camera_controller
+    original = sdk.get_property_range
+    sdk.get_property_range = (
+        lambda name: limits
+        if name == "exposure_time" and sdk.values["readout_speed"] == 2
+        else original(name)
+    )
+    with pytest.raises(RuntimeError):
+        scan_camera.set_advanced_setting("scan_speed", 2)
+    assert sdk.values["readout_speed"] == 1
+    assert scan_camera.minimum_exposure_time == 1e-6
+    assert scan_camera.maximum_exposure_time == 10
+    assert scan_camera.exposure_time_step == 1e-6
+
+
+def test_scan_allows_genuinely_unsupported_optional_timing(scan_camera):
+    sdk = scan_camera.camera_controller
+    for name in ("internal_line_interval", "minimum_trigger_interval"):
+        sdk.values.pop(name)
+    original = sdk.get_property_range
+    sdk.get_property_range = (
+        lambda name: (None, None, None)
+        if name in ("internal_line_interval", "minimum_trigger_interval")
+        else original(name)
+    )
+    assert scan_camera.set_advanced_setting("scan_speed", 2) == 2
+    assert scan_camera.readout_time == 0.01
+
+
+def test_named_setting_rejects_unknown_required_timing_before_write(scan_camera):
+    sdk = scan_camera.camera_controller
+    sdk.values["readout_time"] = False
+    with pytest.raises(RuntimeError, match="timing"):
+        scan_camera.set_advanced_setting("scan_speed", 2)
+    assert sdk.writes == []
+
+
+def test_failed_scan_timing_never_persists_success_to_model(
+    scan_camera, transaction_model
+):
+    sdk = scan_camera.camera_controller
+    original = sdk.get_property_value
+    sdk.get_property_value = (
+        lambda name: False
+        if name == "readout_time" and sdk.values["readout_speed"] == 2
+        else original(name)
+    )
+    transaction_model.active_microscope.camera = scan_camera
+    parameters = transaction_model.configuration["experiment"]["CameraParameters"][
+        "scope"
+    ]
+    parameters.update(scan_speed=1, readout_time=10)
+    result = transaction_model.camera_advanced_settings(
+        {
+            "microscope": "scope",
+            "request_id": 1,
+            "identity": (id(sdk),),
+            "setting": "scan_speed",
+            "value": 2,
+        }
+    )
+    assert "timing" in result["error"]
+    assert parameters["scan_speed"] == 1
+    assert parameters["readout_time"] == 10
+    assert result["data_buffer"] is None
+
+
+def test_model_rechecks_timing_after_legacy_mono8_capability_probe(
+    scan_camera, transaction_model
+):
+    sdk = scan_camera.camera_controller
+    sdk.values.update(bits_per_channel=8.0, image_pixel_type=1.0)
+    state = {"probe_after_scan": False}
+    original_write, original_read = sdk.set_property_value, sdk.get_property_value
+
+    def write(name, value):
+        result = original_write(name, value)
+        if (
+            name == "image_pixel_type"
+            and value == 2
+            and sdk.values["readout_speed"] == 2
+        ):
+            state["probe_after_scan"] = True
+        return result
+
+    def read(name):
+        if (
+            name == "readout_time"
+            and sdk.values["readout_speed"] == 2
+            and state["probe_after_scan"]
+        ):
+            return False
+        return original_read(name)
+
+    sdk.set_property_value, sdk.get_property_value = write, read
+    transaction_model.active_microscope.camera = scan_camera
+    result = transaction_model.camera_advanced_settings(
+        {
+            "microscope": "scope",
+            "request_id": 1,
+            "identity": (id(sdk),),
+            "setting": "scan_speed",
+            "value": 2,
+        }
+    )
+    assert result["error"] and "timing" in result["error"]
+    assert sdk.values["readout_speed"] == 1
+    assert (
+        "scan_speed"
+        not in transaction_model.configuration["experiment"]["CameraParameters"][
+            "scope"
+        ]
+    )

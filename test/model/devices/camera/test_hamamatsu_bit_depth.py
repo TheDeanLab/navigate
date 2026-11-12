@@ -415,3 +415,9 @@ def test_readonly_wide_precision_does_not_advertise_unselectable_depth(
     with pytest.raises(ValueError):
         coupled_camera.set_bit_depth(12)
     assert coupled_camera.get_bit_depth() == start
+
+
+def test_legacy_depth_change_retains_missing_readout_timing_compatibility(camera):
+    assert camera.camera_controller.get_property_value("readout_time") is False
+    assert camera.set_bit_depth(8) == 8
+    assert camera.get_image_format().dtype == "uint8"

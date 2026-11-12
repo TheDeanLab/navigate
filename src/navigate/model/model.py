@@ -601,6 +601,9 @@ class Model:
             ):
                 raise RuntimeError("Camera setting readback did not match.")
             refreshed_capabilities = camera.get_advanced_setting_capabilities()
+            # Legacy precision discovery may probe a different native format.
+            # Reconfirm named-transaction dependencies after its final rollback.
+            camera.validate_advanced_settings(previous)
             selected = self.configuration["experiment"]["MicroscopeState"][
                 "microscope_name"
             ]
@@ -624,6 +627,9 @@ class Model:
         # Persist readback for every previously selected dependent setting.
         for key, refreshed in refreshed_capabilities.items():
             if key == "sensor_mode":
+                # This field is pending main-tab intent, not physical readback.
+                # A newer selection may arrive while the SDK call is in flight.
+                # Return actual mode in capabilities without overwriting intent.
                 continue
             if key == setting or key in parameters:
                 if refreshed.current_value is not None:
@@ -643,8 +649,6 @@ class Model:
         }
         if "readout_time" in result["timing"]:
             parameters["readout_time"] = result["timing"]["readout_time"] * 1000
-        if setting == "sensor_mode":
-            parameters["sensor_mode"] = {1: "Normal", 12: "Light-Sheet"}[value]
         return refreshed_capabilities
 
     def get_camera_settings_metadata(self, microscope_name: str = None) -> dict:

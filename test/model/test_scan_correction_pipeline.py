@@ -138,3 +138,24 @@ def test_ambiguous_legacy_and_named_write_is_rejected(configured_model):
     assert result["error"]
     assert m.active_microscope.camera.get_advanced_setting("scan_speed") == 1
     assert m.active_microscope.camera.get_bit_depth() == 16
+
+
+def test_sensor_apply_preserves_newer_mode_intent_during_camera_write(configured_model):
+    m = configured_model
+    parameters = m.configuration["experiment"]["CameraParameters"]["scope"]
+    parameters["sensor_mode"] = "Light-Sheet"
+    camera = m.active_microscope.camera
+    original = camera.set_advanced_setting
+
+    def apply(name, value):
+        confirmed = original(name, value)
+        parameters["sensor_mode"] = "Normal"  # a newer main-tab selection
+        return confirmed
+
+    camera.set_advanced_setting = apply
+    result = request(
+        m, identity=request(m)["identity"], setting="sensor_mode", value=12
+    )
+    assert result["error"] is None
+    assert result["capabilities"]["sensor_mode"].current_value == 12
+    assert parameters["sensor_mode"] == "Normal"

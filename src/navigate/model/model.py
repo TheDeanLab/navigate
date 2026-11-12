@@ -592,7 +592,7 @@ class Model:
             raise ValueError(capability.reason or "Unsupported camera setting.")
         if capability.current_value is None:
             raise RuntimeError("Cannot confirm the previous camera setting.")
-        previous = camera.snapshot_advanced_settings()
+        previous = camera.snapshot_advanced_settings(setting)
         self._prepared_camera_token = None
         try:
             if (
@@ -604,6 +604,9 @@ class Model:
             # Legacy precision discovery may probe a different native format.
             # Reconfirm named-transaction dependencies after its final rollback.
             camera.validate_advanced_settings(previous)
+            geometry = (
+                camera.get_camera_geometry() if setting == "sensor_mode" else None
+            )
             selected = self.configuration["experiment"]["MicroscopeState"][
                 "microscope_name"
             ]
@@ -622,6 +625,8 @@ class Model:
                 self._camera_format_errors = blocked
                 raise RuntimeError(blocked[identity]) from rollback_error
             raise
+        if geometry is not None:
+            result["geometry"] = geometry
         parameters = self.configuration["experiment"]["CameraParameters"][name]
         # A scan/mode change can alter precision and correction availability.
         # Persist readback for every previously selected dependent setting.

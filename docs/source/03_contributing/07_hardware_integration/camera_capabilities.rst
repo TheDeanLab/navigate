@@ -136,6 +136,10 @@ Transactions and persistence
 New model requests include :code:`setting` and :code:`value`, alongside the
 existing microscope, connection identity and request ID. Replies include
 :code:`capabilities` for all settings and confirmed timing after a named change.
+Successful named sensor-mode replies also include :code:`geometry`, containing
+confirmed pixel minimum, maximum and step for each axis. The matching main or
+additional camera tab refreshes these constraints independently of timing,
+without replacing pending sensor intent or valid ROI edits.
 Legacy :code:`bit_depth` requests and the singular :code:`capability` reply remain
 supported. SDK work runs on the serialized model worker; the controller applies
 widget updates on the Tk main thread and discards stale replies.
@@ -143,12 +147,17 @@ widget updates on the Tk main thread and discards stale replies.
 The camera snapshots mode, format, ROI, correction and timing dependencies
 before a named change. It verifies readback and the resulting image layout,
 refreshes dependent choices, and restores the snapshot if the write or buffer
-negotiation fails. :code:`snapshot_advanced_settings()` and
+negotiation fails. :code:`snapshot_advanced_settings(setting=None)` and
 :code:`restore_advanced_settings(snapshot)` allow model failures to use the same
 rollback. :code:`validate_advanced_settings(snapshot)` confirms adapter-specific
 dependencies after capability refresh and before persistence. For named
 Hamamatsu changes, timing must remain confirmed even after the legacy precision
 probe; failed timing reads cause rollback rather than retaining old scan timing.
+Named sensor-mode transactions also validate both ROI ranges before updating
+geometry caches and require the original confirmed geometry during rollback.
+Missing, malformed or changed restoration ranges block the physical connection.
+This strict geometry requirement applies to named mode changes, not scan changes
+or legacy mode setup.
 Failed restoration blocks writes and acquisition for all microscope
 aliases sharing the physical connection until it is reconnected. SDK failure
 sentinels are never accepted as numeric zero or an Off value.

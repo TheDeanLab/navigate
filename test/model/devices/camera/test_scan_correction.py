@@ -18,6 +18,12 @@ def scan_camera(camera):
     sdk.values.update(
         defect_correct_mode=2.0, hot_pixel_correct_level=1.0, readout_time=0.01
     )
+    original_range = sdk.get_property_range
+    sdk.get_property_range = (
+        lambda name: (4, 2048, 4)
+        if name in ("subarray_hsize", "subarray_vsize")
+        else original_range(name)
+    )
     original = sdk.get_property_values
     sdk.options = {
         "readout_speed": (1.0, 2.0),
@@ -453,3 +459,189 @@ def test_model_rechecks_timing_after_legacy_mono8_capability_probe(
             "scope"
         ]
     )
+
+
+@pytest.mark.parametrize(
+    "bad_range",
+    [
+        (None, None, None),
+        (4, 2048, 0),
+        (True, 2048, 4),
+        (4, float("inf"), 4),
+        (4, 2, 4),
+        (0, 2048, 4),
+        (4, 2048, 1.5),
+    ],
+)
+def test_named_mode_invalid_geometry_rolls_back_without_partial_cache(
+    scan_camera, bad_range
+):
+    sdk = scan_camera.camera_controller
+    sdk.values["sensor_mode"] = 1.0
+    sdk.options["sensor_mode"] = (1.0, 12.0)
+    scan_camera.camera_parameters.update(
+        x_pixels_min=4, x_pixels_step=4, y_pixels_min=4, y_pixels_step=4
+    )
+    sdk.min_image_width = (
+        sdk.min_image_height
+    ) = sdk.step_image_width = sdk.step_image_height = 4
+    original = sdk.get_property_range
+    width_cache_during_height_read = []
+
+    def limits(name):
+        if sdk.values["sensor_mode"] == 12:
+            if name == "subarray_hsize":
+                return (8, 1024, 8)
+            if name == "subarray_vsize":
+                width_cache_during_height_read.append(sdk.min_image_width)
+                return bad_range
+        return original(name)
+
+    sdk.get_property_range = limits
+    with pytest.raises(RuntimeError, match="geometry"):
+        scan_camera.set_advanced_setting("sensor_mode", 12)
+    assert width_cache_during_height_read == [4]
+    assert sdk.values["sensor_mode"] == 1
+    assert sdk.min_image_width == sdk.min_image_height == 4
+    assert scan_camera.camera_parameters["x_pixels_step"] == 4
+    assert scan_camera.camera_parameters["y_pixels_step"] == 4
+    assert scan_camera._setting_error() is None
+
+
+def test_failed_mode_geometry_restoration_blocks_physical_alias(scan_camera):
+    sdk = scan_camera.camera_controller
+    sdk.values["sensor_mode"] = 1.0
+    sdk.options["sensor_mode"] = (1.0, 12.0)
+    original_write, original_range = sdk.set_property_value, sdk.get_property_range
+    state = {"changed": False}
+
+    def write(name, value):
+        if name == "sensor_mode" and value == 12:
+            state["changed"] = True
+        return original_write(name, value)
+
+    sdk.set_property_value = write
+    sdk.get_property_range = (
+        lambda name: (None, None, None)
+        if state["changed"] and name == "subarray_vsize"
+        else original_range(name)
+    )
+    with pytest.raises(RuntimeError, match="restoration"):
+        scan_camera.set_advanced_setting("sensor_mode", 12)
+    alias = object.__new__(type(scan_camera))
+    alias.camera_controller, alias.camera_parameters, alias.is_acquiring = (
+        sdk,
+        {},
+        False,
+    )
+    assert not alias.get_advanced_setting_capabilities()["sensor_mode"].writable
+    with pytest.raises(RuntimeError, match="restoration"):
+        alias.set_sensor_mode("Normal")
+
+
+def test_model_returns_both_confirmed_geometry_ranges_after_mode(
+    scan_camera, transaction_model
+):
+    sdk = scan_camera.camera_controller
+    sdk.values["sensor_mode"] = 1.0
+    sdk.options["sensor_mode"] = (1.0, 12.0)
+    original = sdk.get_property_range
+
+    def limits(name):
+        if sdk.values["sensor_mode"] == 12:
+            if name == "subarray_hsize":
+                return (8, 1024, 8)
+            if name == "subarray_vsize":
+                return (16, 768, 16)
+        return original(name)
+
+    sdk.get_property_range = limits
+    transaction_model.active_microscope.camera = scan_camera
+    result = transaction_model.camera_advanced_settings(
+        {
+            "microscope": "scope",
+            "request_id": 1,
+            "identity": (id(sdk),),
+            "setting": "sensor_mode",
+            "value": 12,
+        }
+    )
+    assert result["error"] is None
+    assert result["geometry"] == {
+        "x_pixels_min": 8,
+        "x_pixels_max": 1024,
+        "x_pixels_step": 8,
+        "y_pixels_min": 16,
+        "y_pixels_max": 768,
+        "y_pixels_step": 16,
+    }
+    assert sdk.min_image_width == 8 and sdk.step_image_height == 16
+
+
+def test_buffer_failure_restores_mode_geometry_without_replying_with_new_limits(
+    scan_camera, transaction_model
+):
+    sdk = scan_camera.camera_controller
+    sdk.values["sensor_mode"] = 1.0
+    sdk.options["sensor_mode"] = (1.0, 12.0)
+    original = sdk.get_property_range
+    sdk.get_property_range = (
+        lambda name: (8, 1024, 8)
+        if sdk.values["sensor_mode"] == 12
+        and name in ("subarray_hsize", "subarray_vsize")
+        else original(name)
+    )
+    transaction_model.active_microscope.camera = scan_camera
+
+    def no_memory(*args):
+        raise MemoryError("No image buffer memory")
+
+    transaction_model.get_data_buffer = no_memory
+    result = transaction_model.camera_advanced_settings(
+        {
+            "microscope": "scope",
+            "request_id": 1,
+            "identity": (id(sdk),),
+            "setting": "sensor_mode",
+            "value": 12,
+        }
+    )
+    assert "memory" in result["error"]
+    assert "geometry" not in result
+    assert sdk.values["sensor_mode"] == 1
+    assert scan_camera.get_camera_geometry()["x_pixels_step"] == 4
+    assert scan_camera.get_camera_geometry()["y_pixels_max"] == 2048
+    assert scan_camera._setting_error() is None
+
+
+def test_valid_but_changed_rollback_geometry_blocks_connection(scan_camera):
+    sdk = scan_camera.camera_controller
+    sdk.values["sensor_mode"] = 1.0
+    sdk.options["sensor_mode"] = (1.0, 12.0)
+    original_write, original_range, original_read = (
+        sdk.set_property_value,
+        sdk.get_property_range,
+        sdk.get_property_value,
+    )
+    state = {"changed": False}
+
+    def write(name, value):
+        if name == "sensor_mode" and value == 12:
+            state["changed"] = True
+        return original_write(name, value)
+
+    sdk.set_property_value = write
+    sdk.get_property_value = (
+        lambda name: False
+        if name == "readout_time" and sdk.values["sensor_mode"] == 12
+        else original_read(name)
+    )
+    sdk.get_property_range = (
+        lambda name: (8, 2048, 8)
+        if state["changed"] and name in ("subarray_hsize", "subarray_vsize")
+        else original_range(name)
+    )
+    with pytest.raises(RuntimeError, match="restoration"):
+        scan_camera.set_advanced_setting("sensor_mode", 12)
+    assert scan_camera._setting_error()
+    assert not scan_camera.get_advanced_setting_capabilities()["sensor_mode"].writable

@@ -221,13 +221,17 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             if value is not False and value is not None
         }
 
-    def _restore_depth_settings(self, previous: dict[str, float]) -> None:
+    def _restore_depth_settings(
+        self, previous: dict[str, float], expected_geometry: Optional[dict] = None
+    ) -> None:
         """Restore pixel type before precision and block capture on failure.
 
         Parameters
         ----------
         previous : dict[str, float]
             Settings in the order returned by ``_snapshot_depth_settings``.
+        expected_geometry : dict, optional
+            Confirmed ROI ranges required when restoring a named mode change.
         """
         sdk = self.camera_controller
         try:
@@ -245,7 +249,9 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             self._refresh_image_format()
             self._refresh_depth_timing()
             if "sensor_mode" in previous:
-                self._refresh_sensor_geometry()
+                self._refresh_sensor_geometry(
+                    strict=expected_geometry is not None, expected=expected_geometry
+                )
         except Exception as exc:
             self._bit_depth_error = (
                 "Camera bit-depth restoration failed; "
@@ -346,8 +352,13 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             **self._get_scan_correction_capabilities(),
         }
 
-    def snapshot_advanced_settings(self) -> dict:
-        """Capture ordered SDK properties and supported timing dependencies.
+    def snapshot_advanced_settings(self, setting: Optional[str] = None) -> dict:
+        """Capture ordered SDK properties and supported dependencies.
+
+        Parameters
+        ----------
+        setting : str, optional
+            A named sensor-mode change also requires a confirmed ROI snapshot.
 
         Returns
         -------
@@ -388,10 +399,13 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         sensor = (
             {"sensor_mode": mode.pop("sensor_mode")} if "sensor_mode" in mode else {}
         )
-        return {
+        snapshot = {
             "properties": {**sensor, **previous, **mode, **corrections, **timing},
             "timing_properties": self._refresh_named_timing(),
         }
+        if setting == "sensor_mode":
+            snapshot["geometry"] = self._refresh_sensor_geometry(strict=True)
+        return snapshot
 
     def validate_advanced_settings(self, previous: dict) -> None:
         """Reconfirm timing after dependent queries and before model persistence.
@@ -402,12 +416,20 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             Named-transaction snapshot with pre-change timing support.
         """
         self._refresh_named_timing(previous["timing_properties"])
+        if "geometry" in previous:
+            self._refresh_sensor_geometry(strict=True)
+
+    def get_camera_geometry(self) -> dict:
+        """Return a copy of the last strictly confirmed ROI ranges."""
+        return dict(getattr(self, "_confirmed_geometry", {}))
 
     def restore_advanced_settings(self, previous: dict) -> None:
         """Restore all dependent SDK values, blocking every alias on failure."""
         try:
-            self._restore_depth_settings(previous["properties"])
-            self.validate_advanced_settings(previous)
+            self._restore_depth_settings(
+                previous["properties"], previous.get("geometry")
+            )
+            self._refresh_named_timing(previous["timing_properties"])
         except Exception:
             self.camera_controller._advanced_settings_error = (
                 "Camera settings restoration failed; reconnect before acquiring."
@@ -434,7 +456,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             if value == capability.current_value and len(capability.choices) == 1:
                 return value
             raise RuntimeError(capability.reason)
-        previous = self.snapshot_advanced_settings()
+        previous = self.snapshot_advanced_settings(name)
         sdk = self.camera_controller
         try:
             if value != capability.current_value:
@@ -446,8 +468,6 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             if self.get_bit_depth() is None:
                 raise RuntimeError("Camera precision could not be confirmed.")
             self.validate_advanced_settings(previous)
-            if name == "sensor_mode":
-                self._refresh_sensor_geometry()
             refreshed = self._get_scan_correction_capabilities()
             if (
                 refreshed[name].current_value != value
@@ -818,28 +838,60 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             print("Camera mode not supported")
             logger.debug("Camera mode not supported")
 
-    def _refresh_sensor_geometry(self) -> None:
-        """Refresh mode-dependent ROI limits without changing the ROI."""
-        # Update minimum image sizes based on scan mode
-        (
-            self.camera_controller.min_image_width,
-            _,
-            self.camera_controller.step_image_width,
-        ) = self.camera_controller.get_property_range("subarray_hsize")
-        (
-            self.camera_controller.min_image_height,
-            _,
-            self.camera_controller.step_image_height,
-        ) = self.camera_controller.get_property_range("subarray_vsize")
-        # update configuration dict
-        self.camera_parameters["x_pixels_min"] = self.camera_controller.min_image_width
-        self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
-        self.camera_parameters[
-            "x_pixels_step"
-        ] = self.camera_controller.step_image_width
-        self.camera_parameters[
-            "y_pixels_step"
-        ] = self.camera_controller.step_image_height
+    def _refresh_sensor_geometry(
+        self, strict: bool = False, expected: Optional[dict] = None
+    ) -> dict:
+        """Read both ROI ranges before changing geometry caches.
+
+        Parameters
+        ----------
+        strict : bool
+            Require positive, finite integer bounds and steps for named mode
+            transactions. Legacy sensor-mode setup retains its old tolerance.
+        expected : dict, optional
+            Exact pre-change geometry required during named-mode rollback.
+
+        Returns
+        -------
+        dict
+            Confirmed minimum, maximum and step for both dimensions.
+        """
+        geometry = {}
+        for axis, name in (("x", "subarray_hsize"), ("y", "subarray_vsize")):
+            values = self.camera_controller.get_property_range(name)
+            if strict:
+                if not isinstance(values, (tuple, list)) or len(values) != 3:
+                    raise RuntimeError(
+                        f"Camera geometry {name} could not be confirmed."
+                    )
+                parsed = tuple(self._discrete_value(value) for value in values)
+                if (
+                    any(value is None or value <= 0 for value in parsed)
+                    or parsed[0] > parsed[1]
+                ):
+                    raise RuntimeError(
+                        f"Camera geometry {name} could not be confirmed."
+                    )
+                values = parsed
+            for key, value in zip(("min", "max", "step"), values):
+                geometry[f"{axis}_pixels_{key}"] = value
+        if expected is not None and geometry != expected:
+            raise RuntimeError("Camera geometry restoration readback did not match.")
+        # Both axes are confirmed before any of these shared caches are changed.
+        self.camera_controller.min_image_width = geometry["x_pixels_min"]
+        self.camera_controller.step_image_width = geometry["x_pixels_step"]
+        self.camera_controller.min_image_height = geometry["y_pixels_min"]
+        self.camera_controller.step_image_height = geometry["y_pixels_step"]
+        self.camera_parameters.update(
+            {
+                name: value
+                for name, value in geometry.items()
+                if strict or not name.endswith("_max")
+            }
+        )
+        if strict:
+            self._confirmed_geometry = dict(geometry)
+        return geometry
 
     def set_readout_direction(self, mode: str) -> None:
         """Set HamamatsuOrca readout direction.

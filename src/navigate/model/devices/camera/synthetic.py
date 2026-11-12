@@ -255,7 +255,10 @@ class SyntheticCamera(CameraBase):
         mode : str
             'Normal' or 'Light-Sheet'
         """
-        self.set_advanced_setting("sensor_mode", {"Normal": 1, "Light-Sheet": 12}[mode])
+        modes = {"Normal": 1, "Light-Sheet": 12}
+        if mode not in modes:
+            raise ValueError(f"Unsupported synthetic sensor mode: {mode}")
+        self.set_advanced_setting("sensor_mode", modes[mode])
 
     def set_exposure_time(self, exposure_time: float) -> None:
         """Set SyntheticCamera exposure time.

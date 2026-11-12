@@ -156,6 +156,7 @@ def test_pending_mode_apply_preserves_new_main_selection_and_displays_mismatch(p
             }
         },
     }
+    c.parent_controller.configuration = configuration
     camera = SyntheticCamera("scope", None, configuration)
     model = Model.__new__(Model)
     model.configuration = configuration
@@ -176,3 +177,119 @@ def test_pending_mode_apply_preserves_new_main_selection_and_displays_mismatch(p
     assert camera.get_advanced_setting("sensor_mode") == 12
     assert str(c.view.inputs["scan_speed"]["state"]) == "disabled"
     assert str(c.view.buttons["apply_sensor_mode"]["state"]) == "normal"
+
+
+@pytest.mark.parametrize("initial_width,expected_initial_width", [(24, 24), (64, 48)])
+@pytest.mark.parametrize("target_name", ["scope", "other"])
+@pytest.mark.parametrize(
+    "old_step,new_step,requested_width,expected_width", [(4, 8, 12, 8), (8, 4, 12, 12)]
+)
+def test_mode_geometry_reply_refreshes_real_roi_validation_without_repopulating(
+    popup,
+    tk_root,
+    target_name,
+    old_step,
+    new_step,
+    requested_width,
+    expected_width,
+    initial_width,
+    expected_initial_width,
+):
+    from navigate.controller.sub_controllers.camera_settings import (
+        CameraSettingController,
+    )
+    from navigate.view.main_window_content.camera_tab import CameraSettingsTab
+
+    c = popup
+    camera_configs = {
+        name: {
+            "x_pixels": 64,
+            "y_pixels": 64,
+            "x_pixels_min": old_step,
+            "y_pixels_min": old_step,
+            "x_pixels_step": old_step,
+            "y_pixels_step": old_step,
+            "pixel_size_in_microns": 1,
+            "supported_sensor_modes": ["Normal", "Light-Sheet"],
+            "supported_readout_directions": ["Top-to-Bottom"],
+        }
+        for name in ("scope", "other")
+    }
+    parameters = {
+        name: {
+            "sensor_mode": "Normal",
+            "binning": "1x1",
+            "pixel_size": 1,
+            "readout_direction": "Top-to-Bottom",
+            "number_of_pixels": 1,
+        }
+        for name in camera_configs
+    }
+    parent = c.parent_controller
+    parent.configuration = {
+        "configuration": {
+            "microscopes": {
+                name: {"camera": config, "zoom": {"pixel_size": {"1x": 1}}}
+                for name, config in camera_configs.items()
+            }
+        },
+        "experiment": {
+            "MicroscopeState": {"microscope_name": "scope", "zoom": "1x"},
+            "CameraParameters": parameters,
+        },
+    }
+    parent.configuration_controller = SimpleNamespace(
+        camera_config_dict=camera_configs["scope"]
+    )
+    views = [CameraSettingsTab(tk_root), CameraSettingsTab(tk_root)]
+    try:
+        main = CameraSettingController(views[0], parent)
+        additional = CameraSettingController(views[1], parent, microscope_name="other")
+        parent.camera_setting_controller = main
+        parent.other_camera_setting_controller = additional
+        target, untouched = (
+            (main, additional) if target_name == "scope" else (additional, main)
+        )
+        c.current_microscope = target_name
+        c.camera_setting_dict = parameters[target_name]
+        target.mode_widgets["Sensor"].set("Normal")  # newer pending UI mode
+        target.roi_widgets["Binning"].set("1x1")
+        target.roi_widgets["is_centered"].set(True)
+        target.roi_widgets["Width"].set(initial_width)
+        target.roi_widgets["Height"].set(24)
+        target.in_initialization = False
+        geometry = {
+            "x_pixels_min": new_step,
+            "x_pixels_max": 48,
+            "x_pixels_step": new_step,
+            "y_pixels_min": new_step,
+            "y_pixels_max": 48,
+            "y_pixels_step": new_step,
+        }
+        camera_configs[target_name].update(geometry)
+        result = response(c)
+        result.update(microscope=target_name, geometry=geometry)
+        result["capabilities"]["sensor_mode"] = CameraSettingCapability(
+            12, (1, 12), True, reason=""
+        )
+        assert "timing" not in result
+        c._receive_bit_depth(result)
+        assert target.step_width == target.step_height == new_step
+        assert target.min_width == target.min_height == new_step
+        assert target.default_width == target.default_height == 48
+        assert target.roi_widgets["Width"].widget.cget("increment") == new_step
+        assert target.roi_widgets["Width"].get() == expected_initial_width
+        assert target.roi_widgets["Height"].get() == 24
+        assert (
+            target.mode_widgets["Sensor"].get()
+            == parameters[target_name]["sensor_mode"]
+            == "Normal"
+        )
+        assert untouched.step_width == old_step
+        target.roi_widgets["Width"].set(requested_width)
+        assert target.update_experiment_values() == ""
+        assert parameters[target_name]["x_pixels"] == expected_width
+        assert parameters[target_name]["img_x_pixels"] == expected_width
+    finally:
+        for view in views:
+            view.destroy()

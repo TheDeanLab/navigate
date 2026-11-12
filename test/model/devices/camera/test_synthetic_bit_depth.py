@@ -75,3 +75,11 @@ def test_model_can_unload_images_after_buffer_geometry_changes(camera):
     assert camera.random_image
     assert not camera.is_acquiring
     assert camera.data_buffer is None
+
+
+def test_unknown_sensor_mode_reports_validation_error_without_changing_settings(camera):
+    camera.set_sensor_mode("Light-Sheet")
+    with pytest.raises(ValueError, match="Unsupported synthetic sensor mode"):
+        camera.set_sensor_mode("test")
+    assert camera.get_advanced_setting("sensor_mode") == 12
+    assert camera.get_advanced_setting("scan_speed") == 2

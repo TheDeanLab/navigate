@@ -344,15 +344,26 @@ class AdvancedCameraSettingController:
         self.view.variables["bit_depth_status"].set(
             reason or "8-bit uses smaller files. 12-bit and 16-bit use 16-bit storage."
         )
-        if result.get("timing") and hasattr(
-            self.parent_controller, "camera_setting_controller"
-        ):
-            main = self.parent_controller.camera_setting_controller
+        if not result.get("error") and (result.get("geometry") or result.get("timing")):
             selected = self.parent_controller.configuration["experiment"][
                 "MicroscopeState"
             ]["microscope_name"]
-            if self.current_microscope == selected:
-                main.update_readout_time()
+            targets = []
+            main = getattr(self.parent_controller, "camera_setting_controller", None)
+            if self.current_microscope == selected and main is not None:
+                targets.append(main)
+            additional = getattr(
+                self.parent_controller,
+                f"{self.current_microscope.lower()}_camera_setting_controller",
+                None,
+            )
+            if additional is not None and additional not in targets:
+                targets.append(additional)
+            for controller in targets:
+                if result.get("geometry"):
+                    controller.update_camera_geometry(result["geometry"])
+                if result.get("timing"):
+                    controller.update_readout_time()
         self._display_advanced_settings(result, busy)
         if result.get("error"):
             self._depth_close_requested = False
@@ -1241,6 +1252,56 @@ class CameraSettingController(GUIController):
                 "update_setting", "number_of_pixels"
             ),
         )
+
+    def update_camera_geometry(self, geometry: dict) -> None:
+        """Update confirmed ROI constraints on Tk without repopulating user edits.
+
+        Parameters
+        ----------
+        geometry : dict
+            Confirmed x/y pixel minimum, maximum and step from the model's named
+            mode transaction. Sensor selection and valid ROI values stay intact.
+        """
+        self.min_width, self.min_height = (
+            geometry["x_pixels_min"],
+            geometry["y_pixels_min"],
+        )
+        self.step_width, self.step_height = (
+            geometry["x_pixels_step"],
+            geometry["y_pixels_step"],
+        )
+        self.default_width, self.default_height = (
+            geometry["x_pixels_max"],
+            geometry["y_pixels_max"],
+        )
+        for name, minimum, maximum, step in (
+            ("Width", self.min_width, self.default_width, self.step_width),
+            ("Height", self.min_height, self.default_height, self.step_height),
+        ):
+            self.roi_widgets[name].widget.configure(
+                from_=minimum, to=maximum, increment=step
+            )
+        for name in ("Top_X", "Bottom_X"):
+            self.roi_widgets[name].widget.configure(
+                to=self.default_width, increment=self.step_width
+            )
+        for name in ("Top_Y", "Bottom_Y"):
+            self.roi_widgets[name].widget.configure(
+                to=self.default_height, increment=self.step_height
+            )
+        # Keep valid in-progress edits. Only values outside the newly confirmed
+        # bounds need clamping; normal ROI validation applies the new steps.
+        for name, minimum, maximum in (
+            ("Width", self.min_width, self.default_width),
+            ("Height", self.min_height, self.default_height),
+        ):
+            try:
+                value = self.roi_widgets[name].get()
+                if value < minimum or value > maximum:
+                    self.roi_widgets[name].set(min(maximum, max(minimum, value)))
+            except (TypeError, ValueError):
+                # A partially typed value is handled by normal field validation.
+                continue
 
     def update_camera_device_related_setting(self):
         """Update caramera device related parameters.

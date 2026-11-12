@@ -216,13 +216,23 @@ class CameraBase(ABC):
             return self.set_bit_depth(value)
         raise ValueError(f"Unsupported camera setting: {name}")
 
-    def snapshot_advanced_settings(self) -> dict:
-        """Capture confirmed settings for an idle model transaction."""
+    def snapshot_advanced_settings(self, setting: Optional[str] = None) -> dict:
+        """Capture confirmed settings for an idle model transaction.
+
+        Parameters
+        ----------
+        setting : str, optional
+            Named setting being changed, for mode-specific dependencies.
+        """
         return {
             name: capability.current_value
             for name, capability in self.get_advanced_setting_capabilities().items()
             if capability.current_value is not None
         }
+
+    def get_camera_geometry(self) -> dict:
+        """Return confirmed mode-dependent ROI limits, if the adapter provides them."""
+        return {}
 
     def validate_advanced_settings(self, previous: dict) -> None:
         """Confirm adapter-specific dependencies after capability refresh.

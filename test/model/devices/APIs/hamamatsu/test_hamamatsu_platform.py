@@ -342,6 +342,7 @@ def test_reinitialize_restores_settings_including_zero_positions(monkeypatch):
     assert state["internal_line_interval"] == 72.96e-6
     assert state["bits_per_channel"] == 12
     assert state["image_pixel_type"] == 2
+    assert state["hot_pixel_correct_level"] == 1
 
 
 def test_reinitialize_selects_mono8_before_restoring_eight_bit_precision(monkeypatch):
@@ -491,3 +492,26 @@ def test_property_query_has_pointer_sized_handle_and_double_output(monkeypatch):
         ctypes.c_int32,
     ]
     assert api.dcamprop_queryvalue.restype is ctypes.c_int32
+
+
+def test_property_value_text_uses_sdk_buffer_and_preserves_failure(monkeypatch):
+    api, _ = load_api(monkeypatch)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+
+    def text(handle, pointer):
+        item = ctypes.cast(pointer, ctypes.POINTER(api.DCAMPROP_VALUETEXT)).contents
+        assert item.iProp == 0x00470030
+        assert item.value == 1
+        # Read pointer address without c_char_p's automatic bytes conversion.
+        address = ctypes.c_void_p.from_address(
+            ctypes.addressof(item) + api.DCAMPROP_VALUETEXT.text.offset
+        ).value
+        ctypes.memmove(address, b"STANDARD\x00", 9)
+        return 1
+
+    monkeypatch.setattr(api, "dcamprop_getvaluetext", text, raising=False)
+    assert camera.get_property_value_text("hot_pixel_correct_level", 1) == "STANDARD"
+    monkeypatch.setattr(api, "dcamprop_getvaluetext", lambda *args: -1)
+    assert camera.get_property_value_text("hot_pixel_correct_level", 1) is None

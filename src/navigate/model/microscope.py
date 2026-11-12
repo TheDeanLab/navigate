@@ -470,7 +470,7 @@ class Microscope:
         return success
 
     def configure_camera(self) -> CameraImageFormat:
-        """Apply idle mode, geometry and an optional saved depth in that order.
+        """Apply idle mode, saved scan, geometry, depth and corrections in order.
 
         Returns
         -------
@@ -481,16 +481,32 @@ class Microscope:
             raise RuntimeError("Stop acquisition before configuring the camera.")
         self.set_camera_trigger_mode()
         self.set_camera_sensor_mode()
-        if not self.set_camera_roi_and_binning():
-            raise RuntimeError("Camera ROI or binning setting failed.")
         parameters = self.configuration["experiment"]["CameraParameters"][
             self.microscope_name
         ]
+        if "scan_speed" in parameters:
+            value = parameters["scan_speed"]
+            if self.camera.set_advanced_setting("scan_speed", value) != value:
+                raise RuntimeError("Saved camera scan speed was not confirmed.")
+        if not self.set_camera_roi_and_binning():
+            raise RuntimeError("Camera ROI or binning setting failed.")
         if "bit_depth" in parameters:
             depth = parameters["bit_depth"]
             CameraImageFormat.for_bit_depth(depth)
             if self.camera.set_bit_depth(depth) != depth:
                 raise RuntimeError("Saved camera bit depth was not confirmed.")
+        for name in ("defect_correction", "hot_pixel_correction"):
+            if name in parameters:
+                value = parameters[name]
+                if self.camera.set_advanced_setting(name, value) != value:
+                    raise RuntimeError(f"Saved camera {name} was not confirmed.")
+        read_setting = getattr(self.camera, "get_advanced_setting", lambda name: None)
+        self._camera_settings_metadata = {
+            name: value
+            for name in ("scan_speed", "defect_correction", "hot_pixel_correction")
+            for value in (read_setting(name),)
+            if value is not None
+        }
         return self.camera.get_image_format()
 
     def prepare_acquisition(self) -> dict:

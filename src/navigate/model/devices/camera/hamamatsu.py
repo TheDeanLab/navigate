@@ -121,7 +121,9 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         )
 
         #: object: Camera controller
-        if self.camera_controller.get_property_value("readout_speed"):
+        if "scan_speed" not in configuration["experiment"]["CameraParameters"][
+            microscope_name
+        ] and self.camera_controller.get_property_value("readout_speed"):
             _, speed_max, _ = self.camera_controller.get_property_range("readout_speed")
             if speed_max is not None:
                 self.camera_controller.set_property_value(
@@ -230,24 +232,227 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         sdk = self.camera_controller
         try:
             for name, value in previous.items():
-                if sdk.get_property_value(name) != value:
+                current = sdk.get_property_value(name)
+                if current is False or current is None or current != value:
                     if not sdk.set_property_value(name, value):
                         raise RuntimeError(f"Cannot restore {name}.")
             if any(
-                sdk.get_property_value(name) != value
+                current is False or current is None or current != value
                 for name, value in previous.items()
+                for current in (sdk.get_property_value(name),)
             ):
                 raise RuntimeError("Camera property rollback did not match readback.")
             self._refresh_image_format()
             self._refresh_depth_timing()
+            if "sensor_mode" in previous:
+                self._refresh_sensor_geometry()
         except Exception as exc:
             self._bit_depth_error = (
                 "Camera bit-depth restoration failed; "
                 "reconnect the camera before acquiring."
             )
-            raise RuntimeError(self._bit_depth_error) from exc
+            self.camera_controller._advanced_settings_error = self._bit_depth_error
+            raise RuntimeError(self._setting_error()) from exc
+
+    _advanced_properties = {
+        "sensor_mode": "sensor_mode",
+        "scan_speed": "readout_speed",
+        "defect_correction": "defect_correct_mode",
+        "hot_pixel_correction": "hot_pixel_correct_level",
+    }
+
+    def _setting_error(self) -> Optional[str]:
+        """Share failed-restoration state among adapters for one DCAM handle."""
+        return self.camera_controller.__dict__.get(
+            "_advanced_settings_error"
+        ) or getattr(self, "_bit_depth_error", None)
+
+    @staticmethod
+    def _discrete_value(value: Any) -> Optional[int]:
+        """Reject SDK failure sentinels and malformed discrete readbacks."""
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            if math.isfinite(value) and value == int(value):
+                return int(value)
+        return None
+
+    def get_advanced_setting(self, name: str) -> Optional[int]:
+        """Read an actual SDK value without probing or changing hardware."""
+        if name == "bit_depth":
+            return self.get_bit_depth()
+        prop = self._advanced_properties.get(name)
+        if prop is None or self._setting_error():
+            return None
+        return self._discrete_value(self.camera_controller.get_property_value(prop))
+
+    def _get_scan_correction_capabilities(self) -> dict[str, CameraSettingCapability]:
+        """Discover only complete SDK enums; never write during discovery."""
+        capabilities = {}
+        sdk = self.camera_controller
+        format_error = None
+        if not self.is_acquiring and not self._setting_error():
+            try:
+                if self._refresh_image_format().bit_depth is None:
+                    format_error = "Camera precision could not be confirmed."
+            except (ValueError, RuntimeError, TypeError) as exc:
+                format_error = str(exc)
+        for name, prop in self._advanced_properties.items():
+            current, choices, labels = None, (), ()
+            reason = self._setting_error() or format_error
+            try:
+                if not reason:
+                    current = self.get_advanced_setting(name)
+                if self.is_acquiring:
+                    reason = reason or "Stop acquisition to change camera settings."
+                if not reason:
+                    values = sdk.get_property_values(prop)
+                    parsed = tuple(self._discrete_value(v) for v in (values or ()))
+                    if not parsed or None in parsed or len(set(parsed)) != len(parsed):
+                        reason = "The camera did not report reliable choices."
+                    else:
+                        choices = (
+                            tuple(v for v in parsed if v in (1, 12))
+                            if name == "sensor_mode"
+                            else parsed
+                        )
+                        get_text = getattr(
+                            sdk, "get_property_value_text", lambda *args: None
+                        )
+                        labels = tuple(
+                            (v, get_text(prop, v) or str(v)) for v in choices
+                        )
+                        if current is None or current not in choices:
+                            reason = "The camera did not confirm its current setting."
+                        elif len(choices) < 2:
+                            reason = "This setting is fixed in the current camera mode."
+                        elif not sdk.is_property_writable(prop):
+                            reason = (
+                                "This setting is read-only in the current camera mode."
+                            )
+            except (ValueError, RuntimeError, TypeError) as exc:
+                reason = str(exc)
+            capabilities[name] = CameraSettingCapability(
+                current_value=current,
+                choices=choices,
+                writable=not bool(reason),
+                reason=reason or "",
+                value_labels=labels,
+            )
+        return capabilities
 
     def get_advanced_setting_capabilities(self) -> dict[str, CameraSettingCapability]:
+        """Return precision and current-mode scan/correction capabilities."""
+        return {
+            **self._get_depth_capabilities(),
+            **self._get_scan_correction_capabilities(),
+        }
+
+    def snapshot_advanced_settings(self) -> dict:
+        """Capture format, corrections and timing in restoration order."""
+        previous = self._snapshot_depth_settings()
+        corrections = {}
+        sdk = self.camera_controller
+        for prop in ("defect_correct_mode", "hot_pixel_correct_level"):
+            value = sdk.get_property_value(prop)
+            if self._discrete_value(value) is not None:
+                corrections[prop] = value
+            elif sdk.is_property_writable(prop):
+                raise RuntimeError(f"Cannot snapshot camera property {prop}.")
+        timing = {
+            name: previous.pop(name)
+            for name in ("internal_line_interval", "exposure_time")
+            if name in previous
+        }
+        mode = {}
+        for prop in (
+            "sensor_mode",
+            "binning",
+            "subarray_hsize",
+            "subarray_vsize",
+            "subarray_hpos",
+            "subarray_vpos",
+            "subarray_mode",
+            "readout_direction",
+        ):
+            value = sdk.get_property_value(prop)
+            if self._discrete_value(value) is not None:
+                mode[prop] = value
+            elif sdk.is_property_writable(prop):
+                raise RuntimeError(f"Cannot snapshot camera property {prop}.")
+        sensor = (
+            {"sensor_mode": mode.pop("sensor_mode")} if "sensor_mode" in mode else {}
+        )
+        return {**sensor, **previous, **mode, **corrections, **timing}
+
+    def restore_advanced_settings(self, previous: dict) -> None:
+        """Restore all dependent SDK values, blocking every alias on failure."""
+        try:
+            self._restore_depth_settings(previous)
+        except Exception:
+            self.camera_controller._advanced_settings_error = (
+                "Camera settings restoration failed; reconnect before acquiring."
+            )
+            raise RuntimeError(self.camera_controller._advanced_settings_error)
+
+    def set_advanced_setting(self, name: str, value: Any) -> int:
+        """Apply a supported idle setting with dependency readback and rollback."""
+        if name == "bit_depth":
+            return self.set_bit_depth(value)
+        if self.is_acquiring or self._setting_error():
+            raise RuntimeError(
+                self._setting_error()
+                or "Stop acquisition before changing camera settings."
+            )
+        capability = self._get_scan_correction_capabilities().get(name)
+        if (
+            capability is None
+            or self._discrete_value(value) is None
+            or value not in capability.choices
+        ):
+            raise ValueError(f"Unsupported camera setting: {name}={value}")
+        if not capability.writable:
+            if value == capability.current_value and len(capability.choices) == 1:
+                return value
+            raise RuntimeError(capability.reason)
+        previous = self.snapshot_advanced_settings()
+        sdk = self.camera_controller
+        try:
+            if value != capability.current_value:
+                if not sdk.set_property_value(self._advanced_properties[name], value):
+                    raise RuntimeError("Camera rejected the requested setting.")
+            if self.get_advanced_setting(name) != value:
+                raise RuntimeError("Camera setting readback did not match.")
+            self._refresh_image_format()
+            if self.get_bit_depth() is None:
+                raise RuntimeError("Camera precision could not be confirmed.")
+            self._refresh_depth_timing()
+            if name == "sensor_mode":
+                self._refresh_sensor_geometry()
+            exposure = sdk.get_property_value("exposure_time")
+            low, high, _ = sdk.get_property_range("exposure_time")
+            if (
+                exposure is False
+                or exposure is None
+                or low is None
+                or high is None
+                or not low <= exposure <= high
+            ):
+                raise RuntimeError("Camera exposure could not be confirmed.")
+            refreshed = self._get_scan_correction_capabilities()
+            if (
+                refreshed[name].current_value != value
+                or value not in refreshed[name].choices
+            ):
+                raise RuntimeError(
+                    "Camera constraints changed while applying the setting."
+                )
+        except Exception as exc:
+            self.restore_advanced_settings(previous)
+            raise RuntimeError(
+                f"Camera setting change failed and was restored: {exc}"
+            ) from exc
+        return value
+
+    def _get_depth_capabilities(self) -> dict[str, CameraSettingCapability]:
         """Discover precision, restoring an idle MONO8 probe before returning.
 
         DCAM can hide MONO16 precision choices while MONO8 is selected. Only
@@ -256,7 +461,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         """
         current = self.get_bit_depth()
         choices = ()
-        reason = getattr(self, "_bit_depth_error", None)
+        reason = self._setting_error()
         if self.is_acquiring or reason:
             return {
                 "bit_depth": CameraSettingCapability(
@@ -313,7 +518,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                     reason = "Bit depth is read-only in this camera mode."
         except (ValueError, RuntimeError, TypeError) as exc:
             reason = str(exc)
-            if getattr(self, "_bit_depth_error", None):
+            if self._setting_error():
                 current = None
         return {
             "bit_depth": CameraSettingCapability(
@@ -326,9 +531,12 @@ class HamamatsuBase(CameraBase, SequenceDevice):
 
     def _refresh_depth_timing(self) -> None:
         """Refresh timing limits after a change in output precision."""
-        self.minimum_exposure_time, _, _ = self.camera_controller.get_property_range(
-            "exposure_time"
-        )
+        (
+            self.minimum_exposure_time,
+            self.maximum_exposure_time,
+            self.exposure_time_step,
+        ) = self.camera_controller.get_property_range("exposure_time")
+        self.readout_time = self.camera_controller.get_property_value("readout_time")
         interval = self.camera_controller.get_property_value("internal_line_interval")
         if interval is not False:
             self.camera_parameters["line_interval"] = interval
@@ -352,8 +560,8 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         requested = CameraImageFormat.for_bit_depth(bit_depth).bit_depth
         if self.is_acquiring:
             raise RuntimeError("Stop acquisition before changing camera bit depth.")
-        if getattr(self, "_bit_depth_error", None):
-            raise RuntimeError(self._bit_depth_error)
+        if self._setting_error():
+            raise RuntimeError(self._setting_error())
         capability = self.get_advanced_setting_capabilities()["bit_depth"]
         if requested not in capability.choices:
             raise ValueError(f"Unsupported camera bit depth: {requested}")
@@ -484,6 +692,8 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         trigger_source : str
             Trigger source: "External" or "Internal". Default is "External".
         """
+        if self._setting_error():
+            raise RuntimeError(self._setting_error())
         if trigger_source == "Software":
             self.trigger_source = "Software"
             # Standard trigger mode
@@ -520,38 +730,40 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         mode : str
             'Normal' or 'Light-Sheet'
         """
+        if self._setting_error():
+            raise RuntimeError(self._setting_error())
         modes_dict = {"Normal": 1, "Light-Sheet": 12}
         if mode in modes_dict:
             self.camera_controller.set_property_value("sensor_mode", modes_dict[mode])
 
-            # Update minimum image sizes based on scan mode
-            (
-                self.camera_controller.min_image_width,
-                _,
-                self.camera_controller.step_image_width,
-            ) = self.camera_controller.get_property_range("subarray_hsize")
-            (
-                self.camera_controller.min_image_height,
-                _,
-                self.camera_controller.step_image_height,
-            ) = self.camera_controller.get_property_range("subarray_vsize")
-            # update configuration dict
-            self.camera_parameters[
-                "x_pixels_min"
-            ] = self.camera_controller.min_image_width
-            self.camera_parameters[
-                "y_pixels_min"
-            ] = self.camera_controller.min_image_height
-            self.camera_parameters[
-                "x_pixels_step"
-            ] = self.camera_controller.step_image_width
-            self.camera_parameters[
-                "y_pixels_step"
-            ] = self.camera_controller.step_image_height
+            self._refresh_sensor_geometry()
             self._refresh_image_format()
         else:
             print("Camera mode not supported")
             logger.debug("Camera mode not supported")
+
+    def _refresh_sensor_geometry(self) -> None:
+        """Refresh mode-dependent ROI limits without changing the ROI."""
+        # Update minimum image sizes based on scan mode
+        (
+            self.camera_controller.min_image_width,
+            _,
+            self.camera_controller.step_image_width,
+        ) = self.camera_controller.get_property_range("subarray_hsize")
+        (
+            self.camera_controller.min_image_height,
+            _,
+            self.camera_controller.step_image_height,
+        ) = self.camera_controller.get_property_range("subarray_vsize")
+        # update configuration dict
+        self.camera_parameters["x_pixels_min"] = self.camera_controller.min_image_width
+        self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
+        self.camera_parameters[
+            "x_pixels_step"
+        ] = self.camera_controller.step_image_width
+        self.camera_parameters[
+            "y_pixels_step"
+        ] = self.camera_controller.step_image_height
 
     def set_readout_direction(self, mode: str) -> None:
         """Set HamamatsuOrca readout direction.
@@ -762,8 +974,8 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         number_of_frames : int
             Number of frames.  Default is 100.
         """
-        if getattr(self, "_bit_depth_error", None):
-            raise RuntimeError(self._bit_depth_error)
+        if self._setting_error():
+            raise RuntimeError(self._setting_error())
         image_format = self._refresh_image_format()
         self.camera_controller.configure_frame_format(image_format)
         if not self.camera_controller.start_acquisition(data_buffer, number_of_frames):
@@ -884,8 +1096,8 @@ class HamamatsuOrcaQuest2Camera(HamamatsuBase):
         self, data_buffer: Optional[list] = None, number_of_frames: int = 100
     ) -> None:
         """Start capture, optionally resetting stale single-camera USB state."""
-        if getattr(self, "_bit_depth_error", None):
-            raise RuntimeError(self._bit_depth_error)
+        if self._setting_error():
+            raise RuntimeError(self._setting_error())
         if getattr(
             self, "_capture_started_before", False
         ) and self.camera_parameters.get("reinitialize_on_restart", False):
@@ -897,7 +1109,8 @@ class HamamatsuOrcaQuest2Camera(HamamatsuBase):
                     "Camera restart restoration failed; "
                     "reconnect the camera before acquiring."
                 )
-                raise RuntimeError(self._bit_depth_error) from exc
+                self.camera_controller._advanced_settings_error = self._bit_depth_error
+                raise RuntimeError(self._setting_error()) from exc
         super().initialize_image_series(data_buffer, number_of_frames)
         self._capture_started_before = True
         self.is_acquiring = True
@@ -1043,8 +1256,10 @@ class HamamatsuOrcaLightningCamera(HamamatsuBase):
 
     def get_advanced_setting_capabilities(self) -> dict[str, CameraSettingCapability]:
         """Keep coupled full-well mode changes unavailable until validated."""
-        capability = super().get_advanced_setting_capabilities()["bit_depth"]
+        capabilities = super().get_advanced_setting_capabilities()
+        capability = capabilities["bit_depth"]
         return {
+            **capabilities,
             "bit_depth": CameraSettingCapability(
                 current_value=capability.current_value,
                 choices=capability.choices,
@@ -1052,7 +1267,7 @@ class HamamatsuOrcaLightningCamera(HamamatsuBase):
                     "Lightning bit depth depends on full-well mode; "
                     "switching is not implemented."
                 ),
-            )
+            ),
         }
 
     def __init__(

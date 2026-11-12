@@ -153,6 +153,23 @@ class DataSource:
         )
         return total_bytes
 
+    def set_camera_settings(self, settings: dict) -> None:
+        """Copy confirmed acquisition settings into writer metadata.
+
+        Parameters
+        ----------
+        settings : dict
+            Values captured from the camera during idle preparation, not GUI
+            requests or defaults inferred from the camera model.
+        """
+        if getattr(self, "_current_frame", 0):
+            raise RuntimeError(
+                "Cannot change camera settings after writing has started."
+            )
+        self.camera_settings = dict(settings)
+        if self.metadata is not None:
+            self.metadata.camera_settings = dict(settings)
+
     def set_image_format(self, image_format: CameraImageFormat) -> None:
         """Set the confirmed acquisition format before writing the first frame.
 
@@ -183,6 +200,8 @@ class DataSource:
 
     def _write_format_attributes(self) -> None:
         """Record camera precision on array-store roots without guessing it."""
+        for name, value in getattr(self, "camera_settings", {}).items():
+            self.image.attrs["camera_" + name] = value
         if self.significant_bits is not None:
             self.image.attrs["camera_bit_depth"] = self.significant_bits
         elif "camera_bit_depth" in self.image.attrs:

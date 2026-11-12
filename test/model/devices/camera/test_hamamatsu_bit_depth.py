@@ -251,6 +251,12 @@ def test_failed_quest_restart_cannot_adopt_changed_depth_on_retry(camera):
         camera.initialize_image_series([np.zeros((2, 3), np.uint16)], 1)
     with pytest.raises(RuntimeError):
         camera.initialize_image_series([np.zeros((2, 3), np.uint16)], 1)
+    alias = object.__new__(module.HamamatsuOrcaCamera)
+    alias.camera_controller = sdk
+    alias.is_acquiring = False
+    alias.camera_parameters = {}
+    with pytest.raises(RuntimeError):
+        alias.set_bit_depth(8)
 
 
 class CoupledDCAM(FakeDCAM):

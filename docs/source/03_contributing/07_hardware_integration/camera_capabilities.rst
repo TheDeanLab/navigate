@@ -7,7 +7,9 @@ Camera adapters describe advanced settings through
 :code:`get_advanced_setting_capabilities()`. Each entry contains a
 :code:`CameraSettingCapability` with the current value, available choices,
 whether the adapter can change the value, whether acquisition must be stopped,
-and an explanation when the control is unavailable.
+and an explanation when the control is unavailable. Optional :code:`value_labels`
+contains serializable :code:`(value, label)` pairs; adapters that omit it retain
+numeric labels.
 
 Query the connected device instead of inferring its capabilities from its model
 name. The connection type, driver version and operating mode can affect which
@@ -94,3 +96,79 @@ BITSPERCHANNEL=8 first returned INVALIDVALUE; selecting MONO8 first succeeded
 and made precision read back as 8. Native 512 by 512 frames used 262,144 bytes
 in MONO8 versus 524,288 bytes in MONO16. This establishes native byte counts,
 not sustained throughput or support for other camera/firmware combinations.
+
+
+Scan speed and correction controls
+----------------------------------
+
+In :guilabel:`Advanced Camera Settings`, stop acquisition before changing
+:guilabel:`Scan speed`, :guilabel:`Defect correction`, or
+:guilabel:`Hot-pixel correction`. Each list contains choices reported by the
+connected camera. Fixed, unsupported and unknown settings remain disabled.
+An unavailable text label appears as its numeric SDK value; **navigate** does
+not guess its meaning or infer correction strength from numeric order.
+
+If the sensor mode selected in the main Camera Settings tab differs from the
+camera's actual mode, click :guilabel:`Apply sensor mode` in the advanced popup.
+This explicit idle action changes only the camera and refreshes its available
+choices, ROI limits, exposure limits and readout timing. It does not start an
+acquisition. Ordinary refresh remains read-only for these settings. The existing
+MONO8 precision-discovery probe described above is unchanged.
+
+The Hamamatsu adapter maps :code:`scan_speed` to DCAM :code:`READOUTSPEED`
+(:code:`0x00400110`), :code:`defect_correction` to :code:`DEFECTCORRECT_MODE`
+(:code:`0x00470010`), and :code:`hot_pixel_correction` to
+:code:`HOTPIXELCORRECT_LEVEL` (:code:`0x00470030`). The wrapper reads value labels
+with :code:`dcamprop_getvaluetext`. Only complete device enumeration supplies
+choices: global SDK enum definitions do not establish camera support. In
+particular, scan labels and supported speeds can differ between Quest 2 and
+Fusion BT. Photon-number-resolving sensor mode is not exposed by this feature.
+
+Adapters implement :code:`get_advanced_setting(name)` and
+:code:`set_advanced_setting(name, value)`. The base class leaves the new settings
+unavailable. The synthetic camera provides simulated controls, including a
+fixed Standard scan speed in Light-Sheet mode, for testing without hardware.
+It does not simulate the physical noise-reduction effects of correction.
+
+Transactions and persistence
+---------------------------
+
+New model requests include :code:`setting` and :code:`value`, alongside the
+existing microscope, connection identity and request ID. Replies include
+:code:`capabilities` for all settings and confirmed timing after a named change.
+Legacy :code:`bit_depth` requests and the singular :code:`capability` reply remain
+supported. SDK work runs on the serialized model worker; the controller applies
+widget updates on the Tk main thread and discards stale replies.
+
+The camera snapshots mode, format, ROI, correction and timing dependencies
+before a named change. It verifies readback and the resulting image layout,
+refreshes dependent choices, and restores the snapshot if the write or buffer
+negotiation fails. :code:`snapshot_advanced_settings()` and
+:code:`restore_advanced_settings(snapshot)` allow model failures to use the same
+rollback. Failed restoration blocks writes and acquisition for all microscope
+aliases sharing the physical connection until it is reconnected. SDK failure
+sentinels are never accepted as numeric zero or an Off value.
+
+Confirmed selections are saved per microscope under the experiment's
+:code:`CameraParameters` keys :code:`scan_speed`, :code:`defect_correction`, and
+:code:`hot_pixel_correction`. Save the experiment to retain them across sessions.
+Preparation applies sensor mode, saved scan speed, ROI/binning, saved bit depth,
+and saved correction values before allocating image buffers. Missing keys in
+older experiments do not create new correction selections. A saved scan speed
+prevents the Hamamatsu constructor's legacy fastest-speed initialization.
+Invalid or unavailable saved selections stop preparation rather than silently
+substituting an unsupported value.
+
+Acquisition preparation captures actual settings independently of pending UI
+values. TIFF stores them in :code:`camera_settings`, OME-TIFF uses a referenced
+map annotation, and H5, N5 and OME-Zarr store :code:`camera_scan_speed`,
+:code:`camera_defect_correction` and :code:`camera_hot_pixel_correction` attributes.
+Unknown values are omitted. These controls do not rescale pixels or change the
+native normalized dtype except when a confirmed camera format change requires
+new buffers. The optional Quest 2 restart also restores hot-pixel correction
+when the SDK reports it.
+
+Automated tests cover fake SDK transactions, real Tk popup controls, experiment
+save/reload, and native pixel/metadata round trips through every supported image
+writer. These tests do not validate correction effects or scan performance on
+physical hardware; no new hardware acquisition is claimed by this feature.

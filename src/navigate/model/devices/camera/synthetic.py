@@ -153,6 +153,12 @@ class SyntheticCamera(CameraBase):
 
         #: int: Meaningful output precision of generated frames.
         self._bit_depth = 16
+        self._advanced_settings = {
+            "sensor_mode": 1,
+            "scan_speed": 1,
+            "defect_correction": 2,
+            "hot_pixel_correction": 1,
+        }
 
         #: int: mean background count for synthetic image
         self._mean_background_count = 100
@@ -249,7 +255,7 @@ class SyntheticCamera(CameraBase):
         mode : str
             'Normal' or 'Light-Sheet'
         """
-        pass
+        self.set_advanced_setting("sensor_mode", {"Normal": 1, "Light-Sheet": 12}[mode])
 
     def set_exposure_time(self, exposure_time: float) -> None:
         """Set SyntheticCamera exposure time.
@@ -316,14 +322,66 @@ class SyntheticCamera(CameraBase):
 
     def get_advanced_setting_capabilities(self) -> dict[str, CameraSettingCapability]:
         """Describe synthetic controls for exercising the acquisition pipeline."""
-        return {
-            "bit_depth": CameraSettingCapability(
-                current_value=self._bit_depth,
-                choices=(8, 12, 16),
-                writable=True,
-                reason="",
-            )
+        labels = {
+            "sensor_mode": ((1, "Normal"), (12, "Light-Sheet")),
+            "scan_speed": ((1, "Ultra quiet"), (2, "Standard")),
+            "defect_correction": ((1, "Off"), (2, "On")),
+            "hot_pixel_correction": (
+                (1, "Standard"),
+                (2, "Minimum"),
+                (3, "Aggressive"),
+            ),
         }
+        capabilities = {}
+        for name, value in self._advanced_settings.items():
+            choices = tuple(v for v, label in labels[name])
+            if name == "scan_speed" and self._advanced_settings["sensor_mode"] == 12:
+                choices = (2,)
+            reason = (
+                "Stop acquisition to change camera settings."
+                if self.is_acquiring
+                else (
+                    "This setting is fixed in the current camera mode."
+                    if len(choices) == 1
+                    else ""
+                )
+            )
+            capabilities[name] = CameraSettingCapability(
+                current_value=value,
+                choices=choices,
+                writable=not bool(reason),
+                reason=reason,
+                value_labels=tuple(
+                    (v, label) for v, label in labels[name] if v in choices
+                ),
+            )
+        capabilities["bit_depth"] = CameraSettingCapability(
+            current_value=self._bit_depth,
+            choices=(8, 12, 16),
+            writable=not self.is_acquiring,
+            reason="Stop acquisition to change camera settings."
+            if self.is_acquiring
+            else "",
+        )
+        return capabilities
+
+    def set_advanced_setting(self, name: str, value: int) -> int:
+        """Apply a supported simulated setting without changing array storage."""
+        if name == "bit_depth":
+            return self.set_bit_depth(value)
+        capability = self.get_advanced_setting_capabilities().get(name)
+        if self.is_acquiring:
+            raise RuntimeError("Stop acquisition before changing camera settings.")
+        if (
+            capability is None
+            or isinstance(value, bool)
+            or value not in capability.choices
+        ):
+            raise ValueError(f"Unsupported camera setting: {name}={value}")
+        self._advanced_settings[name] = value
+        if name == "sensor_mode" and value == 12:
+            self._advanced_settings["scan_speed"] = 2
+        return value
 
     def set_bit_depth(self, bit_depth: int) -> int:
         """Select simulated output precision while acquisition is stopped.

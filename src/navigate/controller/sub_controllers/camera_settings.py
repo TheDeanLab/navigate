@@ -104,6 +104,7 @@ class AdvancedCameraSettingController:
         self._depth_closed = False
         self._depth_close_requested = False
         self._depth_capability = CameraSettingCapability()
+        self._advanced_capabilities = {}
         self.update_microscope(in_initialization=True)
 
         # Add a trace to the microscope dropdown to detect microscope changes.
@@ -132,7 +133,7 @@ class AdvancedCameraSettingController:
         self._depth_request_id += 1
         self._depth_identity = None
         self.view.variables["bit_depth_status"].set("Reading camera settings…")
-        self.view.inputs["bit_depth"]["state"] = "disabled"
+        self._lock_advanced_controls()
         self.parent_controller.execute(
             "camera_advanced_settings",
             {
@@ -154,7 +155,7 @@ class AdvancedCameraSettingController:
             return
         self._depth_request_id += 1
         self._depth_pending = True
-        self.view.inputs["bit_depth"]["state"] = "disabled"
+        self._lock_advanced_controls()
         self.view.microscope.widget.configure(state="disabled")
         self.view.save_button.configure(state="disabled")
         self.view.variables["bit_depth_status"].set("Applying camera bit depth…")
@@ -168,6 +169,142 @@ class AdvancedCameraSettingController:
             },
             self._receive_bit_depth,
         )
+
+    _advanced_names = ("scan_speed", "defect_correction", "hot_pixel_correction")
+
+    def _lock_advanced_controls(self) -> None:
+        """Disable every camera write while a query or transaction is pending."""
+        for name in ("bit_depth", *self._advanced_names):
+            if name in self.view.inputs:
+                self.view.inputs[name]["state"] = "disabled"
+        if "apply_sensor_mode" in self.view.buttons:
+            self.view.buttons["apply_sensor_mode"].configure(state="disabled")
+
+    @staticmethod
+    def _setting_labels(capability: CameraSettingCapability) -> dict:
+        """Keep each displayed SDK label unambiguously associated with a value."""
+        reported = dict(capability.value_labels)
+        labels = {
+            value: reported.get(value, str(value)) for value in capability.choices
+        }
+        for value, label in tuple(labels.items()):
+            if list(labels.values()).count(label) > 1:
+                labels[value] = f"{label} ({value})"
+        return labels
+
+    def _desired_sensor_mode(self):
+        """Return the explicit sensor-mode selection in this microscope's UI."""
+        return {"Normal": 1, "Light-Sheet": 12}.get(
+            getattr(self, "camera_setting_dict", {}).get("sensor_mode")
+        )
+
+    def set_advanced_setting(self, name: str) -> None:
+        """Translate a selected label to the SDK value without saving optimistically."""
+        capability = getattr(self, "_advanced_capabilities", {}).get(
+            name, CameraSettingCapability()
+        )
+        labels = self._setting_labels(capability)
+        value = next(
+            (v for v, label in labels.items() if label == self.view.inputs[name].get()),
+            None,
+        )
+        self._request_advanced_setting(name, value)
+
+    def apply_sensor_mode(self) -> None:
+        """Explicitly apply the pending sensor mode without starting acquisition."""
+        self._request_advanced_setting("sensor_mode", self._desired_sensor_mode())
+
+    def _request_advanced_setting(self, name: str, value) -> None:
+        """Send one idle identity-tagged write through the serialized model worker."""
+        if (
+            self._depth_closed
+            or self._depth_pending
+            or self._depth_identity is None
+            or self._depth_busy()
+        ):
+            return
+        capability = getattr(self, "_advanced_capabilities", {}).get(
+            name, CameraSettingCapability()
+        )
+        if not capability.writable or value not in capability.choices:
+            return
+        sensor = self._advanced_capabilities.get("sensor_mode")
+        if (
+            name != "sensor_mode"
+            and sensor
+            and self._desired_sensor_mode() not in (None, sensor.current_value)
+        ):
+            return
+        self._depth_request_id += 1
+        self._depth_pending = True
+        self._lock_advanced_controls()
+        self.view.microscope.widget.configure(state="disabled")
+        self.view.save_button.configure(state="disabled")
+        self.view.variables[name + "_status"].set("Applying camera setting…")
+        self.parent_controller.execute(
+            "camera_advanced_settings",
+            {
+                "microscope": self.current_microscope,
+                "request_id": self._depth_request_id,
+                "identity": self._depth_identity,
+                "setting": name,
+                "value": value,
+            },
+            self._receive_bit_depth,
+        )
+
+    def _display_advanced_settings(self, result: dict, busy: bool) -> None:
+        """Render current-mode choices and the optional explicit sensor-mode action."""
+        self._advanced_capabilities = result.get("capabilities", {})
+        sensor = self._advanced_capabilities.get("sensor_mode")
+        desired = self._desired_sensor_mode()
+        mismatch = (
+            sensor is not None
+            and desired is not None
+            and sensor.current_value != desired
+        )
+        for name in self._advanced_names:
+            if name not in self.view.inputs:
+                continue
+            capability = self._advanced_capabilities.get(
+                name, CameraSettingCapability()
+            )
+            labels = self._setting_labels(capability)
+            widget = self.view.inputs[name]
+            widget["values"] = tuple(labels.values())
+            widget.set(
+                "Unknown"
+                if capability.current_value is None
+                else labels.get(capability.current_value, str(capability.current_value))
+            )
+            widget["state"] = (
+                "readonly"
+                if capability.writable and not busy and not mismatch
+                else "disabled"
+            )
+            reason = result.get("error") or capability.reason
+            if mismatch:
+                reason = "Apply the selected sensor mode to refresh available choices."
+            if busy:
+                reason = "Stop acquisition to change camera settings."
+            self.view.variables[name + "_status"].set(reason or "")
+        if "apply_sensor_mode" in self.view.buttons:
+            enabled = (
+                mismatch and sensor.writable and desired in sensor.choices and not busy
+            )
+            self.view.buttons["apply_sensor_mode"].configure(
+                state="normal" if enabled else "disabled"
+            )
+            self.view.variables["sensor_mode_status"].set(
+                result.get("error")
+                or (
+                    "The selected sensor mode has not been applied to the camera."
+                    if mismatch
+                    else ""
+                )
+            )
+        if mismatch:
+            self.view.inputs["bit_depth"]["state"] = "disabled"
 
     def _depth_busy(self) -> bool:
         """Return whether acquisition owns the camera from the GUI's perspective."""
@@ -207,6 +344,16 @@ class AdvancedCameraSettingController:
         self.view.variables["bit_depth_status"].set(
             reason or "8-bit uses smaller files. 12-bit and 16-bit use 16-bit storage."
         )
+        if result.get("timing") and hasattr(
+            self.parent_controller, "camera_setting_controller"
+        ):
+            main = self.parent_controller.camera_setting_controller
+            selected = self.parent_controller.configuration["experiment"][
+                "MicroscopeState"
+            ]["microscope_name"]
+            if self.current_microscope == selected:
+                main.update_readout_time()
+        self._display_advanced_settings(result, busy)
         if result.get("error"):
             self._depth_close_requested = False
         elif self._depth_close_requested:
@@ -223,7 +370,7 @@ class AdvancedCameraSettingController:
         if self._depth_closed:
             return
         if acquiring:
-            self.view.inputs["bit_depth"]["state"] = "disabled"
+            self._lock_advanced_controls()
             self.view.variables["bit_depth_status"].set(
                 "Stop acquisition to change camera bit depth."
             )
@@ -451,6 +598,12 @@ class AdvancedCameraSettingController:
         self.view.save_button.configure(command=self.save_camera_settings)
 
         self.view.inputs["bit_depth"].bind("<<ComboboxSelected>>", self.set_bit_depth)
+        for name in self._advanced_names:
+            self.view.inputs[name].bind(
+                "<<ComboboxSelected>>",
+                lambda event, name=name: self.set_advanced_setting(name),
+            )
+        self.view.buttons["apply_sensor_mode"].configure(command=self.apply_sensor_mode)
         self.view.inputs["cooling"].bind("<<ComboboxSelected>>", self.set_cooling_state)
         self.view.buttons["refresh_temperature"].configure(
             command=self.refresh_temperature
@@ -811,6 +964,21 @@ class CameraSettingController(GUIController):
             self.mode_widgets["Pixels"].widget["state"] = "normal"
 
             self.show_verbose_info("Light Sheet Camera Readout Mode")
+
+        if not self.in_initialization:
+            self.camera_setting_dict["sensor_mode"] = sensor_value
+            advanced = getattr(
+                self.parent_controller, "advanced_camera_setting_controller", None
+            )
+            if advanced is not None:
+                name = (
+                    self.microscope_name
+                    or self.parent_controller.configuration["experiment"][
+                        "MicroscopeState"
+                    ]["microscope_name"]
+                )
+                if advanced.current_microscope == name:
+                    advanced.refresh_bit_depth()
 
         # calculate readout time
         self.update_readout_time()

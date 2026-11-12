@@ -59,6 +59,8 @@ class CameraSettingCapability:
         Whether acquisition must be stopped before applying a value.
     reason : str
         Explanation to display when the setting is unavailable or read-only.
+    value_labels : tuple
+        Optional (value, label) pairs supplied by the camera.
     """
 
     current_value: Any = None
@@ -66,6 +68,7 @@ class CameraSettingCapability:
     writable: bool = False
     requires_idle: bool = True
     reason: str = "This camera driver does not support this setting."
+    value_labels: tuple = ()
 
 
 @dataclass(frozen=True)

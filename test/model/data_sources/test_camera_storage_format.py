@@ -115,3 +115,38 @@ def test_writer_rejects_dtype_changes_before_writing(storage):
     assert source._current_frame == 1
     with pytest.raises(RuntimeError):
         source.set_image_format(CameraImageFormat.for_bit_depth(16))
+
+
+def test_confirmed_scan_correction_metadata_round_trip(storage):
+    kind, source = storage
+    settings = {"scan_speed": 2, "defect_correction": 1, "hot_pixel_correction": 3}
+    source.set_camera_settings(settings)
+    settings["scan_speed"] = 999
+    source.write(np.zeros((2, 3), dtype=np.uint16), x=0, y=0, z=0, theta=0, f=0)
+    source.write(np.ones((2, 3), dtype=np.uint16), x=0, y=0, z=0, theta=0, f=0)
+    source.close()
+    expected = {"scan_speed": 2, "defect_correction": 1, "hot_pixel_correction": 3}
+    if kind in ("TIFF", "OME-TIFF"):
+        with tifffile.TiffFile(source.file_name[0]) as image:
+            if kind == "TIFF":
+                assert (
+                    json.loads(image.pages[0].description)["camera_settings"]
+                    == expected
+                )
+            else:
+                entries = ET.fromstring(image.ome_metadata).findall(
+                    "{*}StructuredAnnotations/{*}MapAnnotation/{*}Value/{*}M"
+                )
+                assert {e.get("K"): int(e.text) for e in entries} == expected
+    elif kind == "H5":
+        with h5py.File(source.file_name, "r") as image:
+            assert {key: image.attrs["camera_" + key] for key in expected} == expected
+    else:
+        store = (
+            zarr.N5Store(source.file_name)
+            if kind == "N5"
+            else zarr.storage.FSStore(source.file_name)
+        )
+        image = zarr.open_group(store, mode="r")
+        assert {key: image.attrs["camera_" + key] for key in expected} == expected
+        store.close()

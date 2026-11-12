@@ -345,6 +345,64 @@ class AdvancedCameraSettingPopup:
             sticky="w",
         )
 
+        for index, (name, label) in enumerate(
+            (
+                ("scan_speed", "Scan speed"),
+                ("defect_correction", "Defect correction"),
+                ("hot_pixel_correction", "Hot-pixel correction"),
+            )
+        ):
+            row = 5 + index * 2
+            ttk.Label(
+                self.camera_control_frame, text=label, style="Section.TLabel"
+            ).grid(
+                row=row,
+                column=0,
+                padx=get_theme_space_px(5),
+                pady=get_theme_space_px(5),
+                sticky="w",
+            )
+            self.inputs[name] = ttk.Combobox(
+                self.camera_control_frame, width=20, state="disabled"
+            )
+            self.inputs[name].grid(
+                row=row,
+                column=1,
+                padx=get_theme_space_px(5),
+                pady=get_theme_space_px(5),
+            )
+            self.variables[name + "_status"] = tk.StringVar(
+                value="Reading camera settings…"
+            )
+            ttk.Label(
+                self.camera_control_frame,
+                textvariable=self.variables[name + "_status"],
+                wraplength=370,
+            ).grid(
+                row=row + 1,
+                column=0,
+                columnspan=3,
+                sticky="w",
+                padx=get_theme_space_px(5),
+            )
+        self.buttons["apply_sensor_mode"] = ttk.Button(
+            self.camera_control_frame, text="Apply sensor mode", state="disabled"
+        )
+        self.buttons["apply_sensor_mode"].grid(
+            row=11,
+            column=0,
+            columnspan=2,
+            sticky="w",
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
+        )
+        self.variables["sensor_mode_status"] = tk.StringVar()
+        ttk.Label(
+            self.camera_control_frame,
+            textvariable=self.variables["sensor_mode_status"],
+            wraplength=370,
+        ).grid(row=12, column=0, columnspan=3, sticky="w", padx=get_theme_space_px(5))
+
     def clear_view(self) -> None:
         """Clear the view by destroying all widgets and resetting variables."""
         # destroy camera control inputs

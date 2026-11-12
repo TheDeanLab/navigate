@@ -448,6 +448,9 @@ class ImageWriter:
                 "Saving buffer does not match the confirmed camera format."
             )
         self.data_source.set_image_format(image_format)
+        read_settings = getattr(self.model, "get_camera_settings_metadata", None)
+        if callable(read_settings):
+            self.data_source.set_camera_settings(read_settings(self.microscope_name))
 
         # Make sure that there is enough disk space to save the data.
         self.calculate_and_check_disk_space()

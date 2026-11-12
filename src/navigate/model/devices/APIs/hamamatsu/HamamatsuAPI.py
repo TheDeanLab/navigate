@@ -686,6 +686,7 @@ property_dict = {
     "buffer_top_offset": 0x00420350,
     "exposure_time": 2031888,  # 0x001F0110, R/W, sec, "EXPOSURE TIME"
     "sensor_mode": 4194832,  # 0x00400210, R/W, mode,  "SENSOR MODE"
+    "hot_pixel_correct_level": 0x00470030,  # HOT PIXEL CORRECT LEVEL
     "defect_correct_mode": 4653072,  # 0x00470010, R/W, mode,  "DEFECT CORRECT MODE"
     "binning": 4198672,  # 0x00401110, R/W, mode, "BINNING"
     "subarray_mode": 4202832,  # 0x00402150, R/W, mode,   "SUBARRAY MODE"
@@ -723,6 +724,23 @@ property_dict = {
 }
 
 
+class DCAMPROP_VALUETEXT(Structure):
+    """DCAM value-text descriptor (SDK ABI uses eight-byte packing)."""
+
+    _pack_ = 8
+    _fields_ = [
+        ("cbSize", c_int32),
+        ("iProp", c_int32),
+        ("value", c_double),
+        ("text", c_char_p),
+        ("textbytes", c_int32),
+    ]
+
+    def __init__(self):
+        super().__init__()
+        self.cbSize = sizeof(self)
+
+
 # ==== api function references ====
 dcamapi_init = __dll.dcamapi_init
 dcamapi_uninit = __dll.dcamapi_uninit
@@ -735,6 +753,7 @@ dcamprop_getvalue = __dll.dcamprop_getvalue
 dcamprop_setvalue = __dll.dcamprop_setvalue
 dcamprop_setgetvalue = __dll.dcamprop_setgetvalue
 dcamprop_queryvalue = __dll.dcamprop_queryvalue
+dcamprop_getvaluetext = __dll.dcamprop_getvaluetext
 dcambuf_attach = __dll.dcambuf_attach
 dcambuf_release = __dll.dcambuf_release
 dcamcap_start = __dll.dcamcap_start
@@ -760,6 +779,7 @@ _function_signatures = [
     (dcamprop_setvalue, [c_void_p, c_int32, c_double]),
     (dcamprop_setgetvalue, [c_void_p, c_int32, POINTER(c_double), c_int32]),
     (dcamprop_queryvalue, [c_void_p, c_int32, POINTER(c_double), c_int32]),
+    (dcamprop_getvaluetext, [c_void_p, POINTER(DCAMPROP_VALUETEXT)]),
     (dcambuf_attach, [c_void_p, POINTER(DCAMBUF_ATTACH)]),
     (dcambuf_release, [c_void_p, c_int32]),
     (dcamcap_start, [c_void_p, c_int32]),
@@ -979,7 +999,11 @@ class DCAM:
             raise RuntimeError("Cannot snapshot DCAM settings for restart.")
         format_settings = {
             name: self.get_property_value(name)
-            for name in ("image_pixel_type", "bits_per_channel")
+            for name in (
+                "image_pixel_type",
+                "bits_per_channel",
+                "hot_pixel_correct_level",
+            )
         }
         format_settings = {
             name: value for name, value in format_settings.items() if value is not False
@@ -1130,6 +1154,33 @@ class DCAM:
         return attributes is not None and bool(
             attributes.attribute & DCAMPROP_ATTR_WRITABLE
         )
+
+    def get_property_value_text(self, name: str, value: float) -> Optional[str]:
+        """Read the camera's label for a value; unavailable text stays unknown.
+
+        Parameters
+        ----------
+        name : str
+            Property name in ``property_dict``.
+        value : float
+            A value discovered by ``get_property_values``.
+
+        Returns
+        -------
+        str or None
+            Device-provided text, never a label inferred from global enums.
+        """
+        if name not in property_dict or not self.__hdcam:
+            return None
+        buffer = create_string_buffer(256)
+        descriptor = DCAMPROP_VALUETEXT()
+        descriptor.iProp = property_dict[name]
+        descriptor.value = value
+        descriptor.text = ctypes.cast(buffer, c_char_p)
+        descriptor.textbytes = len(buffer)
+        if dcamprop_getvaluetext(self.__hdcam, byref(descriptor)) <= 0:
+            return None
+        return buffer.value.decode("utf-8", errors="replace").strip() or None
 
     def get_property_values(self, name: str) -> Optional[tuple[float, ...]]:
         """Enumerate a small discrete property using read-only DCAM queries.

@@ -195,8 +195,44 @@ class CameraBase(ABC):
             adapters override this to report the settings they can apply.
         """
         return {
-            "bit_depth": CameraSettingCapability(current_value=self.get_bit_depth())
+            "bit_depth": CameraSettingCapability(current_value=self.get_bit_depth()),
+            **{
+                name: CameraSettingCapability()
+                for name in ("scan_speed", "defect_correction", "hot_pixel_correction")
+            },
         }
+
+    def get_advanced_setting(self, name: str) -> Any:
+        """Return a confirmed setting value, or None for unsupported settings."""
+        return (
+            self.get_advanced_setting_capabilities()
+            .get(name, CameraSettingCapability())
+            .current_value
+        )
+
+    def set_advanced_setting(self, name: str, value: Any) -> Any:
+        """Apply a named idle setting; unsupported adapters reject writes."""
+        if name == "bit_depth":
+            return self.set_bit_depth(value)
+        raise ValueError(f"Unsupported camera setting: {name}")
+
+    def snapshot_advanced_settings(self) -> dict:
+        """Capture confirmed settings for an idle model transaction."""
+        return {
+            name: capability.current_value
+            for name, capability in self.get_advanced_setting_capabilities().items()
+            if capability.current_value is not None
+        }
+
+    def restore_advanced_settings(self, previous: dict) -> None:
+        """Restore a transaction snapshot and verify every saved value."""
+        for name, value in previous.items():
+            if self.get_advanced_setting(name) != value:
+                self.set_advanced_setting(name, value)
+        if any(
+            self.get_advanced_setting(name) != value for name, value in previous.items()
+        ):
+            raise RuntimeError("Camera restoration readback failed.")
 
     def get_bit_depth(self) -> Optional[int]:
         """Return meaningful output bits, or None when the driver cannot query them."""

@@ -105,8 +105,10 @@ In :guilabel:`Advanced Camera Settings`, stop acquisition before changing
 :guilabel:`Scan speed`, :guilabel:`Defect correction`, or
 :guilabel:`Hot-pixel correction`. Each list contains choices reported by the
 connected camera. Fixed, unsupported and unknown settings remain disabled.
-An unavailable text label appears as its numeric SDK value; **navigate** does
-not guess its meaning or infer correction strength from numeric order.
+An unavailable text label normally appears as its numeric SDK value;
+**navigate** does not infer correction strength from numeric order. Quest 2
+has verified fallback scan labels: 1 is :guilabel:`Ultra quiet` and 2 is
+:guilabel:`Standard`. These labels are not applied to other camera models.
 
 If the sensor mode selected in the main Camera Settings tab differs from the
 camera's actual mode, click :guilabel:`Apply sensor mode` in the advanced popup.
@@ -123,6 +125,24 @@ with :code:`dcamprop_getvaluetext`. Only complete device enumeration supplies
 choices: global SDK enum definitions do not establish camera support. In
 particular, scan labels and supported speeds can differ between Quest 2 and
 Fusion BT. Photon-number-resolving sensor mode is not exposed by this feature.
+
+Quest 2 Light-Sheet mode operates at fixed Standard scan. Its SDK can still
+advertise and accept both scan values, retaining a raw Area-mode preference.
+The Quest 2 adapter reports effective scan 2 (Standard) with a disabled control
+in Light-Sheet mode, while retaining the raw value for exact rollback and a
+return to Area mode. Discovery does not change the hardware preference.
+These constraints and labels were checked against the Quest 2 manual v1.2 and
+physical C15550-22UP firmware 3.20 on 2026-11-12. See the
+`Quest 2 instruction manual <https://camera.hamamatsu.com/content/dam/hamamatsu-photonics/sites/static/sys/en/manual/C15550-22UP_IM_En.pdf>`_
+for the mode/scan diagram and scan timing.
+
+Quest 2 exposure writes allow SDK rounding by one confirmed line interval.
+This accommodates Ultra quiet's approximately 33.9 microsecond clock without
+loosening other camera/property comparisons. The adapter confirms the actual
+exposure and minimum trigger period; unavailable timing, failed writes and
+readbacks beyond this allowance remain errors. The SDK wrapper's optional
+:code:`absolute_tolerance` is in property units and replaces its legacy relative
+tolerance only for callers that explicitly supply it.
 
 Adapters implement :code:`get_advanced_setting(name)` and
 :code:`set_advanced_setting(name, value)`. The base class leaves the new settings
@@ -170,7 +190,10 @@ and saved correction values before allocating image buffers. Missing keys in
 older experiments do not create new correction selections. A saved scan speed
 prevents the Hamamatsu constructor's legacy fastest-speed initialization.
 Invalid or unavailable saved selections stop preparation rather than silently
-substituting an unsupported value.
+substituting an unsupported value. When a mode reports exactly one confirmed
+fixed scan, that effective value replaces an incompatible saved preference.
+For example, older Quest 2 Light-Sheet experiments with raw scan 1 are saved
+back as effective scan 2; acquisition metadata also records Standard.
 
 Acquisition preparation captures actual settings independently of pending UI
 values. TIFF stores them in :code:`camera_settings`, OME-TIFF uses a referenced

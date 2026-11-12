@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 import math
+from dataclasses import replace
 from typing import Any, Optional
 
 # Third Party Imports
@@ -1220,6 +1221,48 @@ class HamamatsuOrcaQuest2Camera(HamamatsuBase):
         """Return the camera model name."""
         return "HamamatsuOrcaQuest2"
 
+    def get_advanced_setting(self, name: str) -> Optional[int]:
+        """Read the effective setting, retaining raw scan preference in DCAM.
+
+        Quest 2 accepts both raw scan values in progressive/Light-Sheet mode,
+        but operates at Standard scan there (manual v1.2, section 5). Raw SDK
+        values remain in transaction snapshots for exact rollback and for Area
+        mode; experiment settings and acquisition metadata use effective scan.
+        """
+        value = super().get_advanced_setting(name)
+        if name == "scan_speed" and value is not None:
+            mode = super().get_advanced_setting("sensor_mode")
+            if mode == 12:
+                return 2 if value in (1, 2) else None
+            if mode != 1:
+                return None
+        return value
+
+    def _get_scan_correction_capabilities(self) -> dict[str, CameraSettingCapability]:
+        """Apply verified Quest 2 labels and fixed Light-Sheet scan constraints."""
+        capabilities = super()._get_scan_correction_capabilities()
+        scan = capabilities["scan_speed"]
+        fallback = {1: "Ultra quiet", 2: "Standard"}
+        labels = tuple(
+            (value, fallback.get(value, label) if label == str(value) else label)
+            for value, label in scan.value_labels
+        )
+        scan = replace(scan, value_labels=labels)
+        if (
+            super().get_advanced_setting("sensor_mode") == 12
+            and scan.current_value == 2
+            and 2 in scan.choices
+        ):
+            scan = replace(
+                scan,
+                choices=(2,),
+                writable=False,
+                reason="ORCA-Quest 2 Light-Sheet mode uses fixed Standard scan.",
+                value_labels=((2, dict(labels)[2]),),
+            )
+        capabilities["scan_speed"] = scan
+        return capabilities
+
     def initialize_image_series(
         self, data_buffer: Optional[list] = None, number_of_frames: int = 100
     ) -> None:
@@ -1309,10 +1352,42 @@ class HamamatsuOrcaQuest2Camera(HamamatsuBase):
         bool
             True when the setting and trigger-period query succeeded.
         """
-        self._set_checked("exposure_time", exposure_time)
+
+        def valid(value: Any) -> bool:
+            return (
+                isinstance(value, (int, float))
+                and not isinstance(value, bool)
+                and math.isfinite(value)
+                and value >= 0
+            )
+
+        sdk = self.camera_controller
+        interval = sdk.get_property_value("internal_line_interval")
+        if not valid(interval) or interval == 0:
+            raise RuntimeError("ORCA-Quest 2 exposure line interval unavailable.")
+        if not valid(exposure_time):
+            raise ValueError("Exposure time must be finite and nonnegative.")
+        minimum, maximum, _ = sdk.get_property_range("exposure_time")
+        if not valid(minimum) or not valid(maximum) or minimum > maximum:
+            raise RuntimeError("ORCA-Quest 2 exposure limits unavailable.")
+        requested = min(max(exposure_time, minimum), maximum)
+        # Quest 2 rounds exposure in whole line periods, including its much
+        # coarser Ultra quiet clock. A percentage tolerance rejects valid values.
+        if not sdk.set_property_value(
+            "exposure_time", exposure_time, absolute_tolerance=interval
+        ):
+            raise RuntimeError("ORCA-Quest 2 could not set exposure_time.")
+        actual = sdk.get_property_value("exposure_time")
+        if (
+            not valid(actual)
+            or not minimum <= actual <= maximum
+            or not math.isclose(actual, requested, rel_tol=0, abs_tol=interval + 1e-12)
+        ):
+            raise RuntimeError("ORCA-Quest 2 exposure readback did not match.")
         period = self.camera_controller.get_property_value("minimum_trigger_interval")
-        if period is False or not math.isfinite(period) or period < 0:
+        if not valid(period):
             raise RuntimeError("ORCA-Quest 2 minimum trigger interval unavailable.")
+        self.camera_exposure_time = float(actual)
         self.minimum_frame_interval = float(period)
         return True
 

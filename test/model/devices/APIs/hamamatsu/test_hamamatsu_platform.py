@@ -613,3 +613,53 @@ def test_adapter_zero_roi_rollback_uses_real_sdk_wrapper(monkeypatch, native_res
     finally:
         camera._DCAM__hdcam = 0
         sys.modules.pop(module_name, None)
+
+
+@pytest.mark.parametrize(
+    "native_result,actual,expected",
+    [
+        (1, 0.0010184727272727272, True),
+        (-1, 0.001, False),
+        (1, 0.0011, False),
+        (1, float("nan"), False),
+        (1, float("inf"), False),
+    ],
+)
+def test_explicit_quantization_tolerance_uses_native_readback(
+    monkeypatch, native_result, actual, expected
+):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+
+    def attributes(handle, pointer):
+        pointer._obj.valuemin = 33.94909090909091e-6
+        pointer._obj.valuemax = 1800
+        pointer._obj.valuestep = 1e-8
+        return 1
+
+    def write(handle, prop, value, option):
+        value._obj.value = actual
+        return native_result
+
+    monkeypatch.setattr(api, "dcamprop_getattr", attributes)
+    monkeypatch.setattr(api, "dcamprop_setgetvalue", write)
+    assert (
+        camera.set_property_value(
+            "exposure_time", 0.001, absolute_tolerance=33.94909090909091e-6
+        )
+        is expected
+    )
+    # The opt-in must not loosen unrelated legacy property comparisons.
+    assert not camera.set_property_value("exposure_time", 0.001)
+
+
+@pytest.mark.parametrize("tolerance", [-1, float("nan"), float("inf"), True])
+def test_invalid_quantization_tolerance_never_writes(monkeypatch, tolerance):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera.prop_setgetvalue = Mock(side_effect=AssertionError("Unexpected write"))
+    with pytest.raises(ValueError, match="tolerance"):
+        camera.set_property_value("exposure_time", 0.001, absolute_tolerance=tolerance)

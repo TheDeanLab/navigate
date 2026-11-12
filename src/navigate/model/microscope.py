@@ -486,8 +486,19 @@ class Microscope:
         ]
         if "scan_speed" in parameters:
             value = parameters["scan_speed"]
+            scan = self.camera.get_advanced_setting_capabilities().get("scan_speed")
+            if (
+                scan is not None
+                and not scan.writable
+                and scan.current_value is not None
+                and scan.choices == (scan.current_value,)
+            ):
+                # A mode with one confirmed effective scan cannot apply an old
+                # Area-mode preference (e.g. Quest 2 Light-Sheet raw scan 1).
+                value = scan.current_value
             if self.camera.set_advanced_setting("scan_speed", value) != value:
                 raise RuntimeError("Saved camera scan speed was not confirmed.")
+            parameters["scan_speed"] = value
         if not self.set_camera_roi_and_binning():
             raise RuntimeError("Camera ROI or binning setting failed.")
         if "bit_depth" in parameters:

@@ -1250,10 +1250,28 @@ class DCAM:
             ]
         return [None, None, None]
 
-    def set_property_value(self, name, value):
+    def set_property_value(
+        self, name: str, value: float, *, absolute_tolerance: Optional[float] = None
+    ) -> bool:
+        """Set a named property and validate the SDK-confirmed value.
+
+        Parameters
+        ----------
+        name : str
+            Property name in ``property_dict``.
+        value : float
+            Requested value, clamped to the SDK's reported range.
+        absolute_tolerance : float, optional
+            Explicit device quantization allowance, in the property's units.
+            Replaces the legacy relative tolerance when supplied.
         """
-        # this function will set property value according to property name
-        """
+        if absolute_tolerance is not None and (
+            isinstance(absolute_tolerance, bool)
+            or not isinstance(absolute_tolerance, (int, float))
+            or not math.isfinite(absolute_tolerance)
+            or absolute_tolerance < 0
+        ):
+            raise ValueError("Property tolerance must be finite and nonnegative.")
         if name not in property_dict:
             print(
                 "could not set value for",
@@ -1310,7 +1328,10 @@ class DCAM:
         # A nonzero absolute tolerance permits legitimate zero-valued offsets;
         # transactional restoration still verifies exact property readback.
         if final_configuration is not False and math.isclose(
-            final_configuration, value, rel_tol=0.01, abs_tol=1e-12
+            final_configuration,
+            value,
+            rel_tol=0.01 if absolute_tolerance is None else 0,
+            abs_tol=1e-12 if absolute_tolerance is None else absolute_tolerance + 1e-12,
         ):
             return True
         else:

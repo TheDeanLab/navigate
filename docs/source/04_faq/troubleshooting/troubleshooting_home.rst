@@ -13,3 +13,4 @@ For system-level power settings, also see :ref:`Power Management <power_manageme
 
    01_proxy
    02_usb_connectivity
+   03_linux_window_focus

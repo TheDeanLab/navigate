@@ -258,10 +258,14 @@ class HistogramController:
         event : tk.Event
             Event
         """
+        menu_posted = False
         try:
             self.menu.tk_popup(event.x_root, event.y_root, 0)
+            menu_posted = True
         finally:
-            self.menu.grab_release()
+            # X11 returns while the menu is open; Tk releases its grab on dismissal.
+            if not menu_posted or self.menu.tk.call("tk", "windowingsystem") != "x11":
+                self.menu.grab_release()
 
     def populate_histogram(self, image: SharedNDArray) -> None:
         """Populate the histogram on the Tk thread.

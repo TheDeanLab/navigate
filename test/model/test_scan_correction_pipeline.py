@@ -14,6 +14,25 @@ request = model_tests.request
 camera = synthetic_tests.camera
 
 
+@pytest.mark.parametrize("snapshot", [None, {}, {"scan_speed": 1}])
+def test_auxiliary_metadata_uses_final_snapshot_without_stale_fallback(model, snapshot):
+    physical = SimpleNamespace(_camera_settings_metadata={"scan_speed": 2})
+    virtual = SimpleNamespace()
+    if snapshot is not None:
+        virtual._camera_settings_metadata = snapshot
+    model.microscopes["aux"] = physical
+    model.virtual_microscopes["aux"] = virtual
+    expected = {} if snapshot is None else dict(snapshot)
+    metadata = model.get_camera_settings_metadata("aux")
+    assert metadata == expected
+    metadata["scan_speed"] = 3
+    assert getattr(virtual, "_camera_settings_metadata", None) == (
+        None if snapshot is None else expected
+    )
+    del model.virtual_microscopes["aux"]
+    assert model.get_camera_settings_metadata("aux") == {"scan_speed": 2}
+
+
 @pytest.fixture
 def configured_model(model, camera):
     model.active_microscope.camera = camera

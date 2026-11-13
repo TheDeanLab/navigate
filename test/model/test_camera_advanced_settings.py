@@ -197,8 +197,9 @@ def test_busy_read_does_not_query_sdk(model):
 
 
 @pytest.mark.parametrize("depth", [8, 12, 16])
+@pytest.mark.parametrize("auxiliary", [False, True])
 def test_synthetic_apply_save_experiment_reload_capture_and_save(
-    model, tmp_path, depth
+    model, tmp_path, depth, auxiliary
 ):
     from queue import Queue
     from types import MethodType
@@ -265,7 +266,26 @@ def test_synthetic_apply_save_experiment_reload_capture_and_save(
     assert {
         name: camera.get_advanced_setting(name) for name in confirmed_settings
     } == confirmed_settings
-    model.configuration["experiment"]["CameraParameters"]["scope"]["scan_speed"] = 1
+    if auxiliary:
+        # Auxiliary preparation runs on a virtual microscope sharing the camera.
+        # Its final settings can differ from the physical buffer-preparation pass.
+        virtual = SimpleNamespace(**vars(microscope))
+        virtual.configure_camera = MethodType(Microscope.configure_camera, virtual)
+        model.virtual_microscopes["scope"] = virtual
+        confirmed_settings = {
+            "scan_speed": 1,
+            "defect_correction": 2,
+            "hot_pixel_correction": 2,
+        }
+        model.configuration["experiment"]["CameraParameters"]["scope"].update(
+            confirmed_settings
+        )
+        virtual.configure_camera()
+        assert microscope._camera_settings_metadata["scan_speed"] == 2
+    # Pending UI intent must not replace either acquisition's confirmed snapshot.
+    model.configuration["experiment"]["CameraParameters"]["scope"]["scan_speed"] = (
+        2 if auxiliary else 1
+    )
     pattern = np.array(
         [0, 1, 127, 128, 254, (1 << depth) - 1], dtype=frames[0].dtype
     ).reshape(2, 3)
@@ -278,7 +298,11 @@ def test_synthetic_apply_save_experiment_reload_capture_and_save(
     model.imaging_mode = "single"
     model.event_queue = Queue()
     model.stop_acquisition = False
-    writer = ImageWriter(model)
+    writer = (
+        ImageWriter(model, microscope_name="scope", data_buffer=frames)
+        if auxiliary
+        else ImageWriter(model)
+    )
     try:
         writer.save_image([0])
     finally:

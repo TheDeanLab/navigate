@@ -658,7 +658,12 @@ class Model:
 
     def get_camera_settings_metadata(self, microscope_name: str = None) -> dict:
         """Return settings captured during idle preparation without querying SDKs."""
-        microscope = self.microscopes[microscope_name or self.active_microscope_name]
+        name = microscope_name or self.active_microscope_name
+        # Auxiliary acquisition prepares the shared camera again on its virtual
+        # microscope; that final snapshot supersedes physical buffer preparation.
+        microscope = self.virtual_microscopes.get(name)
+        if microscope is None:
+            microscope = self.microscopes[name]
         return dict(getattr(microscope, "_camera_settings_metadata", {}))
 
     def prepare_camera_buffers(

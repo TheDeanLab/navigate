@@ -7,7 +7,9 @@ Camera adapters describe advanced settings through
 :code:`get_advanced_setting_capabilities()`. Each entry contains a
 :code:`CameraSettingCapability` with the current value, available choices,
 whether the adapter can change the value, whether acquisition must be stopped,
-and an explanation when the control is unavailable.
+and an explanation when the control is unavailable. Optional :code:`value_labels`
+contains serializable :code:`(value, label)` pairs; adapters that omit it retain
+numeric labels.
 
 Query the connected device instead of inferring its capabilities from its model
 name. The connection type, driver version and operating mode can affect which
@@ -94,3 +96,135 @@ BITSPERCHANNEL=8 first returned INVALIDVALUE; selecting MONO8 first succeeded
 and made precision read back as 8. Native 512 by 512 frames used 262,144 bytes
 in MONO8 versus 524,288 bytes in MONO16. This establishes native byte counts,
 not sustained throughput or support for other camera/firmware combinations.
+
+
+Scan speed and correction controls
+----------------------------------
+
+In :guilabel:`Advanced Camera Settings`, stop acquisition before changing
+:guilabel:`Scan speed`, :guilabel:`Defect correction`, or
+:guilabel:`Hot-pixel correction`. Each list contains choices reported by the
+connected camera. Fixed, unsupported and unknown settings remain disabled.
+An unavailable text label normally appears as its numeric SDK value;
+**navigate** does not infer correction strength from numeric order. Quest 2
+has verified fallback scan labels: 1 is :guilabel:`Ultra quiet` and 2 is
+:guilabel:`Standard`. These labels are not applied to other camera models.
+
+If the sensor mode selected in the main Camera Settings tab differs from the
+camera's actual mode, click :guilabel:`Apply sensor mode` in the advanced popup.
+This explicit idle action changes only the camera and refreshes its available
+choices, ROI limits, exposure limits and readout timing. It does not start an
+acquisition. Ordinary refresh remains read-only for these settings. The existing
+MONO8 precision-discovery probe described above is unchanged.
+
+The Hamamatsu adapter maps :code:`scan_speed` to DCAM :code:`READOUTSPEED`
+(:code:`0x00400110`), :code:`defect_correction` to :code:`DEFECTCORRECT_MODE`
+(:code:`0x00470010`), and :code:`hot_pixel_correction` to
+:code:`HOTPIXELCORRECT_LEVEL` (:code:`0x00470030`). The wrapper reads value labels
+with :code:`dcamprop_getvaluetext`. Only complete device enumeration supplies
+choices: global SDK enum definitions do not establish camera support. In
+particular, scan labels and supported speeds can differ between Quest 2 and
+Fusion BT. Photon-number-resolving sensor mode is not exposed by this feature.
+
+Quest 2 Light-Sheet mode operates at fixed Standard scan. Its SDK can still
+advertise and accept both scan values, retaining a raw Area-mode preference.
+The Quest 2 adapter reports effective scan 2 (Standard) with a disabled control
+in Light-Sheet mode, while retaining the raw value for exact rollback and a
+return to Area mode. Discovery does not change the hardware preference.
+These constraints and labels were checked against the Quest 2 manual v1.2 and
+physical C15550-22UP firmware 3.20 on 2026-11-12. See the
+`Quest 2 instruction manual <https://camera.hamamatsu.com/content/dam/hamamatsu-photonics/sites/static/sys/en/manual/C15550-22UP_IM_En.pdf>`_
+for the mode/scan diagram and scan timing.
+
+Quest 2 exposure writes allow SDK rounding by one confirmed line interval.
+This accommodates Ultra quiet's approximately 33.9 microsecond clock without
+loosening other camera/property comparisons. The adapter confirms the actual
+exposure and minimum trigger period; unavailable timing, failed writes and
+readbacks beyond this allowance remain errors. The SDK wrapper's optional
+:code:`absolute_tolerance` is in property units and replaces its legacy relative
+tolerance only for callers that explicitly supply it.
+
+Before Quest 2 capture starts, preparation temporarily applies each selected
+channel's exposure and reads the actual timing. It restores the original timing
+after every probe and blocks capture if restoration fails. Camera, galvo and
+remote-focus waveform calculations use these confirmed durations. Area mode uses
+actual exposure; Light-Sheet mode keeps the full illumination sweep separate
+from each row's exposure. The requested channel values remain unchanged.
+Per-channel writes must match the prepared timing; changing exposure during
+capture requires restarting preparation.
+
+Adapters implement :code:`get_advanced_setting(name)` and
+:code:`set_advanced_setting(name, value)`. The base class leaves the new settings
+unavailable. The synthetic camera provides simulated controls, including a
+fixed Standard scan speed in Light-Sheet mode, for testing without hardware.
+It does not simulate the physical noise-reduction effects of correction.
+
+Transactions and persistence
+----------------------------
+
+New model requests include :code:`setting` and :code:`value`, alongside the
+existing microscope, connection identity and request ID. Replies include
+:code:`capabilities` for all settings and confirmed timing after a named change.
+Successful named sensor-mode replies also include :code:`geometry`, containing
+confirmed pixel minimum, maximum and step for each axis. The matching main or
+additional camera tab refreshes these constraints independently of timing,
+without replacing pending sensor intent or valid ROI edits. Physical sensor
+size remains separate from the current mode's maximum ROI size. Refresh retains
+these mode limits. Centered ROI boundaries must also satisfy the current pixel
+step after binning normalization; invalid boundaries produce an error rather
+than silently shifting the ROI.
+Legacy :code:`bit_depth` requests and the singular :code:`capability` reply remain
+supported. SDK work runs on the serialized model worker; the controller applies
+widget updates on the Tk main thread and discards stale replies.
+
+The camera snapshots mode, format, ROI, correction and timing dependencies
+before a named change. It verifies readback and the resulting image layout,
+refreshes dependent choices, and restores the snapshot if the write or buffer
+negotiation fails. :code:`snapshot_advanced_settings(setting=None)` and
+:code:`restore_advanced_settings(snapshot)` allow model failures to use the same
+rollback. :code:`validate_advanced_settings(snapshot)` confirms adapter-specific
+dependencies after capability refresh and before persistence. For named
+Hamamatsu changes, timing must remain confirmed even after the legacy precision
+probe; failed timing reads cause rollback rather than retaining old scan timing.
+Named sensor-mode transactions also validate both ROI ranges before updating
+geometry caches and require the original confirmed geometry during rollback.
+Missing, malformed or changed restoration ranges block the physical connection.
+This strict geometry requirement applies to named mode changes, not scan changes
+or legacy mode setup.
+Failed restoration blocks writes and acquisition for all microscope
+aliases sharing the physical connection until it is reconnected. SDK failure
+sentinels are never accepted as numeric zero or an Off value.
+
+Confirmed selections are saved per microscope under the experiment's
+:code:`CameraParameters` keys :code:`scan_speed`, :code:`defect_correction`, and
+:code:`hot_pixel_correction`. Save the experiment to retain them across sessions.
+Preparation applies sensor mode, saved scan speed, ROI/binning, saved bit depth,
+and saved correction values before allocating image buffers. Missing keys in
+older experiments do not create new correction selections. A saved scan speed
+prevents the Hamamatsu constructor's legacy fastest-speed initialization.
+Invalid or unavailable saved selections stop preparation rather than silently
+substituting an unsupported value. When a mode reports exactly one confirmed
+fixed scan, that effective value replaces an incompatible saved preference.
+For example, older Quest 2 Light-Sheet experiments with raw scan 1 are saved
+back as effective scan 2; acquisition metadata also records Standard.
+
+Acquisition preparation captures actual settings independently of pending UI
+values. TIFF stores them in :code:`camera_settings`, OME-TIFF uses a referenced
+map annotation, and H5, N5 and OME-Zarr store :code:`camera_scan_speed`,
+:code:`camera_defect_correction` and :code:`camera_hot_pixel_correction` attributes.
+Unknown values are omitted. If confirmed settings change during a feature-driven
+stop/reconfigure/restart, the writer closes the current output and writes the
+next batch in a numbered :file:`camera-settings-001` directory (then
+:file:`camera-settings-002`, and so on). Each segment keeps its own settings and
+previous files remain unchanged. This applies to all five formats and additional
+camera writers. Existing segment directories are skipped to avoid overwriting.
+An empty snapshot starts a segment without stale settings metadata.
+These controls do not rescale pixels or change the
+native normalized dtype except when a confirmed camera format change requires
+new buffers. The optional Quest 2 restart also restores hot-pixel correction
+when the SDK reports it.
+
+Automated tests cover fake SDK transactions, real Tk popup controls, experiment
+save/reload, and native pixel/metadata round trips through every supported image
+writer. These tests do not validate correction effects or scan performance on
+physical hardware; no new hardware acquisition is claimed by this feature.

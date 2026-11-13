@@ -342,6 +342,7 @@ def test_reinitialize_restores_settings_including_zero_positions(monkeypatch):
     assert state["internal_line_interval"] == 72.96e-6
     assert state["bits_per_channel"] == 12
     assert state["image_pixel_type"] == 2
+    assert state["hot_pixel_correct_level"] == 1
 
 
 def test_reinitialize_selects_mono8_before_restoring_eight_bit_precision(monkeypatch):
@@ -491,3 +492,174 @@ def test_property_query_has_pointer_sized_handle_and_double_output(monkeypatch):
         ctypes.c_int32,
     ]
     assert api.dcamprop_queryvalue.restype is ctypes.c_int32
+
+
+def test_property_value_text_uses_sdk_buffer_and_preserves_failure(monkeypatch):
+    api, _ = load_api(monkeypatch)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+
+    def text(handle, pointer):
+        item = ctypes.cast(pointer, ctypes.POINTER(api.DCAMPROP_VALUETEXT)).contents
+        assert item.iProp == 0x00470030
+        assert item.value == 1
+        # Read pointer address without c_char_p's automatic bytes conversion.
+        address = ctypes.c_void_p.from_address(
+            ctypes.addressof(item) + api.DCAMPROP_VALUETEXT.text.offset
+        ).value
+        ctypes.memmove(address, b"STANDARD\x00", 9)
+        return 1
+
+    monkeypatch.setattr(api, "dcamprop_getvaluetext", text, raising=False)
+    assert camera.get_property_value_text("hot_pixel_correct_level", 1) == "STANDARD"
+    monkeypatch.setattr(api, "dcamprop_getvaluetext", lambda *args: -1)
+    assert camera.get_property_value_text("hot_pixel_correct_level", 1) is None
+
+
+@pytest.mark.parametrize(
+    "native_result,readback,expected",
+    [(1, 0.0, True), (-1, 0.0, False), (1, 0.25, False)],
+)
+def test_native_zero_property_write_distinguishes_failure(
+    monkeypatch, native_result, readback, expected
+):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+
+    def attributes(handle, pointer):
+        pointer._obj.valuemin = 0
+        pointer._obj.valuemax = 2048
+        pointer._obj.valuestep = 1
+        return 1
+
+    def set_value(handle, prop, value, option):
+        assert prop.value == 0x00402110  # SUBARRAY HPOS
+        assert value._obj.value == 0
+        value._obj.value = readback
+        return native_result
+
+    monkeypatch.setattr(api, "dcamprop_getattr", attributes)
+    monkeypatch.setattr(api, "dcamprop_setgetvalue", set_value)
+    assert camera.set_property_value("subarray_hpos", 0) is expected
+
+
+@pytest.mark.parametrize("native_result", [1, -1])
+def test_adapter_zero_roi_rollback_uses_real_sdk_wrapper(monkeypatch, native_result):
+    import importlib
+    import sys
+    from types import ModuleType
+    from navigate.model.devices.APIs.hamamatsu.frame_layout import DCAMFrameLayout
+
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+    camera.get_frame_layout = lambda: DCAMFrameLayout(3, 2, 2, 6, 12)
+    values = {
+        "subarray_hpos": 8.0,
+        "subarray_vpos": 4.0,
+        "bits_per_channel": 16.0,
+        "readout_time": 0.01,
+        "internal_line_interval": 1e-5,
+        "minimum_trigger_interval": 0.01,
+    }
+    names = {code: name for name, code in api.property_dict.items()}
+
+    def attributes(handle, pointer):
+        pointer._obj.valuemin = 0
+        pointer._obj.valuemax = 2048
+        pointer._obj.valuestep = 1
+        return 1
+
+    def read(handle, prop, value):
+        value._obj.value = values[names[prop]]
+        return 1
+
+    def write(handle, prop, value, option):
+        if native_result > 0:
+            values[names[prop.value]] = value._obj.value
+        return native_result
+
+    monkeypatch.setattr(api, "dcamprop_getattr", attributes)
+    monkeypatch.setattr(api, "dcamprop_getvalue", read)
+    monkeypatch.setattr(api, "dcamprop_setgetvalue", write)
+    api_name = "navigate.model.devices.APIs.hamamatsu.HamamatsuAPI"
+    module_name = "navigate.model.devices.camera.hamamatsu"
+    fake_import = ModuleType(api_name)
+    fake_import.DCAM = api.DCAM
+    monkeypatch.setitem(sys.modules, api_name, fake_import)
+    monkeypatch.delitem(sys.modules, module_name, raising=False)
+    module = importlib.import_module(module_name)
+    adapter = object.__new__(module.HamamatsuOrcaCamera)
+    adapter.camera_controller = camera
+    adapter.camera_parameters = {}
+    try:
+        if native_result > 0:
+            adapter._restore_depth_settings(
+                {"subarray_hpos": 0.0, "subarray_vpos": 0.0}
+            )
+            assert values["subarray_hpos"] == values["subarray_vpos"] == 0
+            assert adapter._setting_error() is None
+        else:
+            with pytest.raises(RuntimeError, match="restoration"):
+                adapter._restore_depth_settings(
+                    {"subarray_hpos": 0.0, "subarray_vpos": 0.0}
+                )
+            assert values["subarray_hpos"] == 8
+            assert adapter._setting_error()
+    finally:
+        camera._DCAM__hdcam = 0
+        sys.modules.pop(module_name, None)
+
+
+@pytest.mark.parametrize(
+    "native_result,actual,expected",
+    [
+        (1, 0.0010184727272727272, True),
+        (-1, 0.001, False),
+        (1, 0.0011, False),
+        (1, float("nan"), False),
+        (1, float("inf"), False),
+    ],
+)
+def test_explicit_quantization_tolerance_uses_native_readback(
+    monkeypatch, native_result, actual, expected
+):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera._DCAM__hdcam = ctypes.c_void_p(123)
+
+    def attributes(handle, pointer):
+        pointer._obj.valuemin = 33.94909090909091e-6
+        pointer._obj.valuemax = 1800
+        pointer._obj.valuestep = 1e-8
+        return 1
+
+    def write(handle, prop, value, option):
+        value._obj.value = actual
+        return native_result
+
+    monkeypatch.setattr(api, "dcamprop_getattr", attributes)
+    monkeypatch.setattr(api, "dcamprop_setgetvalue", write)
+    assert (
+        camera.set_property_value(
+            "exposure_time", 0.001, absolute_tolerance=33.94909090909091e-6
+        )
+        is expected
+    )
+    # The opt-in must not loosen unrelated legacy property comparisons.
+    assert not camera.set_property_value("exposure_time", 0.001)
+
+
+@pytest.mark.parametrize("tolerance", [-1, float("nan"), float("inf"), True])
+def test_invalid_quantization_tolerance_never_writes(monkeypatch, tolerance):
+    api, _ = load_api(monkeypatch)
+    monkeypatch.setattr(api.DCAM, "__del__", lambda self: None)
+    camera = api.DCAM.__new__(api.DCAM)
+    camera.prop_setgetvalue = Mock(side_effect=AssertionError("Unexpected write"))
+    with pytest.raises(ValueError, match="tolerance"):
+        camera.set_property_value("exposure_time", 0.001, absolute_tolerance=tolerance)

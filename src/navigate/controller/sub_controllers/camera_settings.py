@@ -104,6 +104,7 @@ class AdvancedCameraSettingController:
         self._depth_closed = False
         self._depth_close_requested = False
         self._depth_capability = CameraSettingCapability()
+        self._advanced_capabilities = {}
         self.update_microscope(in_initialization=True)
 
         # Add a trace to the microscope dropdown to detect microscope changes.
@@ -132,7 +133,7 @@ class AdvancedCameraSettingController:
         self._depth_request_id += 1
         self._depth_identity = None
         self.view.variables["bit_depth_status"].set("Reading camera settings…")
-        self.view.inputs["bit_depth"]["state"] = "disabled"
+        self._lock_advanced_controls()
         self.parent_controller.execute(
             "camera_advanced_settings",
             {
@@ -154,7 +155,7 @@ class AdvancedCameraSettingController:
             return
         self._depth_request_id += 1
         self._depth_pending = True
-        self.view.inputs["bit_depth"]["state"] = "disabled"
+        self._lock_advanced_controls()
         self.view.microscope.widget.configure(state="disabled")
         self.view.save_button.configure(state="disabled")
         self.view.variables["bit_depth_status"].set("Applying camera bit depth…")
@@ -168,6 +169,142 @@ class AdvancedCameraSettingController:
             },
             self._receive_bit_depth,
         )
+
+    _advanced_names = ("scan_speed", "defect_correction", "hot_pixel_correction")
+
+    def _lock_advanced_controls(self) -> None:
+        """Disable every camera write while a query or transaction is pending."""
+        for name in ("bit_depth", *self._advanced_names):
+            if name in self.view.inputs:
+                self.view.inputs[name]["state"] = "disabled"
+        if "apply_sensor_mode" in self.view.buttons:
+            self.view.buttons["apply_sensor_mode"].configure(state="disabled")
+
+    @staticmethod
+    def _setting_labels(capability: CameraSettingCapability) -> dict:
+        """Keep each displayed SDK label unambiguously associated with a value."""
+        reported = dict(capability.value_labels)
+        labels = {
+            value: reported.get(value, str(value)) for value in capability.choices
+        }
+        for value, label in tuple(labels.items()):
+            if list(labels.values()).count(label) > 1:
+                labels[value] = f"{label} ({value})"
+        return labels
+
+    def _desired_sensor_mode(self):
+        """Return the explicit sensor-mode selection in this microscope's UI."""
+        return {"Normal": 1, "Light-Sheet": 12}.get(
+            getattr(self, "camera_setting_dict", {}).get("sensor_mode")
+        )
+
+    def set_advanced_setting(self, name: str) -> None:
+        """Translate a selected label to the SDK value without saving optimistically."""
+        capability = getattr(self, "_advanced_capabilities", {}).get(
+            name, CameraSettingCapability()
+        )
+        labels = self._setting_labels(capability)
+        value = next(
+            (v for v, label in labels.items() if label == self.view.inputs[name].get()),
+            None,
+        )
+        self._request_advanced_setting(name, value)
+
+    def apply_sensor_mode(self) -> None:
+        """Explicitly apply the pending sensor mode without starting acquisition."""
+        self._request_advanced_setting("sensor_mode", self._desired_sensor_mode())
+
+    def _request_advanced_setting(self, name: str, value) -> None:
+        """Send one idle identity-tagged write through the serialized model worker."""
+        if (
+            self._depth_closed
+            or self._depth_pending
+            or self._depth_identity is None
+            or self._depth_busy()
+        ):
+            return
+        capability = getattr(self, "_advanced_capabilities", {}).get(
+            name, CameraSettingCapability()
+        )
+        if not capability.writable or value not in capability.choices:
+            return
+        sensor = self._advanced_capabilities.get("sensor_mode")
+        if (
+            name != "sensor_mode"
+            and sensor
+            and self._desired_sensor_mode() not in (None, sensor.current_value)
+        ):
+            return
+        self._depth_request_id += 1
+        self._depth_pending = True
+        self._lock_advanced_controls()
+        self.view.microscope.widget.configure(state="disabled")
+        self.view.save_button.configure(state="disabled")
+        self.view.variables[name + "_status"].set("Applying camera setting…")
+        self.parent_controller.execute(
+            "camera_advanced_settings",
+            {
+                "microscope": self.current_microscope,
+                "request_id": self._depth_request_id,
+                "identity": self._depth_identity,
+                "setting": name,
+                "value": value,
+            },
+            self._receive_bit_depth,
+        )
+
+    def _display_advanced_settings(self, result: dict, busy: bool) -> None:
+        """Render current-mode choices and the optional explicit sensor-mode action."""
+        self._advanced_capabilities = result.get("capabilities", {})
+        sensor = self._advanced_capabilities.get("sensor_mode")
+        desired = self._desired_sensor_mode()
+        mismatch = (
+            sensor is not None
+            and desired is not None
+            and sensor.current_value != desired
+        )
+        for name in self._advanced_names:
+            if name not in self.view.inputs:
+                continue
+            capability = self._advanced_capabilities.get(
+                name, CameraSettingCapability()
+            )
+            labels = self._setting_labels(capability)
+            widget = self.view.inputs[name]
+            widget["values"] = tuple(labels.values())
+            widget.set(
+                "Unknown"
+                if capability.current_value is None
+                else labels.get(capability.current_value, str(capability.current_value))
+            )
+            widget["state"] = (
+                "readonly"
+                if capability.writable and not busy and not mismatch
+                else "disabled"
+            )
+            reason = result.get("error") or capability.reason
+            if mismatch:
+                reason = "Apply the selected sensor mode to refresh available choices."
+            if busy:
+                reason = "Stop acquisition to change camera settings."
+            self.view.variables[name + "_status"].set(reason or "")
+        if "apply_sensor_mode" in self.view.buttons:
+            enabled = (
+                mismatch and sensor.writable and desired in sensor.choices and not busy
+            )
+            self.view.buttons["apply_sensor_mode"].configure(
+                state="normal" if enabled else "disabled"
+            )
+            self.view.variables["sensor_mode_status"].set(
+                result.get("error")
+                or (
+                    "The selected sensor mode has not been applied to the camera."
+                    if mismatch
+                    else ""
+                )
+            )
+        if mismatch:
+            self.view.inputs["bit_depth"]["state"] = "disabled"
 
     def _depth_busy(self) -> bool:
         """Return whether acquisition owns the camera from the GUI's perspective."""
@@ -207,6 +344,27 @@ class AdvancedCameraSettingController:
         self.view.variables["bit_depth_status"].set(
             reason or "8-bit uses smaller files. 12-bit and 16-bit use 16-bit storage."
         )
+        if not result.get("error") and (result.get("geometry") or result.get("timing")):
+            selected = self.parent_controller.configuration["experiment"][
+                "MicroscopeState"
+            ]["microscope_name"]
+            targets = []
+            main = getattr(self.parent_controller, "camera_setting_controller", None)
+            if self.current_microscope == selected and main is not None:
+                targets.append(main)
+            additional = getattr(
+                self.parent_controller,
+                f"{self.current_microscope.lower()}_camera_setting_controller",
+                None,
+            )
+            if additional is not None and additional not in targets:
+                targets.append(additional)
+            for controller in targets:
+                if result.get("geometry"):
+                    controller.update_camera_geometry(result["geometry"])
+                if result.get("timing"):
+                    controller.update_readout_time()
+        self._display_advanced_settings(result, busy)
         if result.get("error"):
             self._depth_close_requested = False
         elif self._depth_close_requested:
@@ -223,7 +381,7 @@ class AdvancedCameraSettingController:
         if self._depth_closed:
             return
         if acquiring:
-            self.view.inputs["bit_depth"]["state"] = "disabled"
+            self._lock_advanced_controls()
             self.view.variables["bit_depth_status"].set(
                 "Stop acquisition to change camera bit depth."
             )
@@ -451,6 +609,12 @@ class AdvancedCameraSettingController:
         self.view.save_button.configure(command=self.save_camera_settings)
 
         self.view.inputs["bit_depth"].bind("<<ComboboxSelected>>", self.set_bit_depth)
+        for name in self._advanced_names:
+            self.view.inputs[name].bind(
+                "<<ComboboxSelected>>",
+                lambda event, name=name: self.set_advanced_setting(name),
+            )
+        self.view.buttons["apply_sensor_mode"].configure(command=self.apply_sensor_mode)
         self.view.inputs["cooling"].bind("<<ComboboxSelected>>", self.set_cooling_state)
         self.view.buttons["refresh_temperature"].configure(
             command=self.refresh_temperature
@@ -503,9 +667,11 @@ class CameraSettingController(GUIController):
         #: int: Default pixel size
         self.default_pixel_size = None
 
-        #: int: Default width
-        #: int: Default height
+        #: int: Physical sensor width and height, used for ROI coordinates.
         self.default_width, self.default_height = None, None
+
+        #: int: Maximum ROI width and height in the confirmed camera mode.
+        self.max_width, self.max_height = None, None
 
         #: int: Camera width step interval
         self.step_width = 4
@@ -580,12 +746,6 @@ class CameraSettingController(GUIController):
         self.framerate_widgets["readout_time"].widget["state"] = "disabled"
         self.framerate_widgets["max_framerate"].widget["state"] = "disabled"
 
-        # Set range value
-        self.roi_widgets["Width"].widget.config(from_=2)
-        self.roi_widgets["Width"].widget.config(increment=2)
-        self.roi_widgets["Height"].widget.config(from_=2)
-        self.roi_widgets["Height"].widget.config(increment=2)
-
         # set binning options
         self.roi_widgets["Binning"].widget["values"] = [
             "{}x{}".format(i, i) for i in [1, 2, 4]
@@ -636,10 +796,10 @@ class CameraSettingController(GUIController):
         self.roi_widgets["Bottom_Y"].set(
             self.camera_setting_dict.get("bottom_y", self.default_height)
         )
-        if self.camera_setting_dict["x_pixels"] > self.default_width:
-            self.camera_setting_dict["x_pixels"] = self.default_width
-        if self.camera_setting_dict["y_pixels"] > self.default_height:
-            self.camera_setting_dict["y_pixels"] = self.default_height
+        if self.camera_setting_dict["x_pixels"] > self.max_width:
+            self.camera_setting_dict["x_pixels"] = self.max_width
+        if self.camera_setting_dict["y_pixels"] > self.max_height:
+            self.camera_setting_dict["y_pixels"] = self.max_height
         self.roi_widgets["Width"].set(self.camera_setting_dict["x_pixels"])
         self.roi_widgets["Height"].set(self.camera_setting_dict["y_pixels"])
 
@@ -710,8 +870,19 @@ class CameraSettingController(GUIController):
             center_x = self.default_width // 2
             center_y = self.default_height // 2
 
-        x_pixel = self.roi_widgets["Width"].get()
-        y_pixel = self.roi_widgets["Height"].get()
+        if self.roi_widgets["is_centered"].get():
+            x_pixel = self.roi_widgets["Width"].get()
+            y_pixel = self.roi_widgets["Height"].get()
+        else:
+            x_pixel = bottom_x - top_x
+            y_pixel = bottom_y - top_y
+
+        if x_pixel > self.max_width or y_pixel > self.max_height:
+            return (
+                "The camera ROI exceeds the current mode's maximum size. "
+                f"Set Width at most {self.max_width} and Height at most "
+                f"{self.max_height}."
+            )
 
         # Round to nearest step
         x_pixels = int(x_pixel // self.step_width) * self.step_width
@@ -735,6 +906,26 @@ class CameraSettingController(GUIController):
 
         x_pixels = img_width * binning[0]
         y_pixels = img_height * binning[1]
+
+        if not (
+            self.min_width <= x_pixels <= self.max_width
+            and self.min_height <= y_pixels <= self.max_height
+        ):
+            return "The camera ROI size is invalid for the current mode and binning."
+
+        for center, size, sensor_size, step in (
+            (center_x, x_pixels, self.default_width, self.step_width),
+            (center_y, y_pixels, self.default_height, self.step_height),
+        ):
+            start, end = center - size // 2, center + size // 2
+            if start < 0 or end > sensor_size or start % step or end % step:
+                return (
+                    "The camera ROI boundaries are invalid for the current mode. "
+                    "For a centered ROI, choose Width and Height so both edges "
+                    f"are divisible by {self.step_width} (X) and "
+                    f"{self.step_height} (Y), or disable centering and enter "
+                    "valid boundaries."
+                )
 
         self.camera_setting_dict["x_pixels"] = x_pixels
         self.camera_setting_dict["y_pixels"] = y_pixels
@@ -812,6 +1003,21 @@ class CameraSettingController(GUIController):
 
             self.show_verbose_info("Light Sheet Camera Readout Mode")
 
+        if not self.in_initialization:
+            self.camera_setting_dict["sensor_mode"] = sensor_value
+            advanced = getattr(
+                self.parent_controller, "advanced_camera_setting_controller", None
+            )
+            if advanced is not None:
+                name = (
+                    self.microscope_name
+                    or self.parent_controller.configuration["experiment"][
+                        "MicroscopeState"
+                    ]["microscope_name"]
+                )
+                if advanced.current_microscope == name:
+                    advanced.refresh_bit_depth()
+
         # calculate readout time
         self.update_readout_time()
 
@@ -836,15 +1042,15 @@ class CameraSettingController(GUIController):
 
         def handler(*args):
             if btn_name == "All":
-                width = self.default_width
-                height = self.default_height
+                width = self.max_width
+                height = self.max_height
             else:
                 width = float(btn_name)
                 height = width
-                if width > self.default_width:
-                    width = self.default_width
-                if height > self.default_height:
-                    height = self.default_height
+                if width > self.max_width:
+                    width = self.max_width
+                if height > self.max_height:
+                    height = self.max_height
             self.roi_widgets["is_centered"].set(True)
             self.roi_widgets["Width"].set(width)
             self.roi_widgets["Height"].set(height)
@@ -1074,6 +1280,56 @@ class CameraSettingController(GUIController):
             ),
         )
 
+    def update_camera_geometry(self, geometry: dict) -> None:
+        """Update confirmed ROI constraints on Tk without repopulating user edits.
+
+        Parameters
+        ----------
+        geometry : dict
+            Confirmed x/y pixel minimum, maximum and step from the model's named
+            mode transaction. Sensor selection and valid ROI values stay intact.
+        """
+        self.min_width, self.min_height = (
+            geometry["x_pixels_min"],
+            geometry["y_pixels_min"],
+        )
+        self.step_width, self.step_height = (
+            geometry["x_pixels_step"],
+            geometry["y_pixels_step"],
+        )
+        self.max_width, self.max_height = (
+            geometry["x_pixels_max"],
+            geometry["y_pixels_max"],
+        )
+        for name, minimum, maximum, step in (
+            ("Width", self.min_width, self.max_width, self.step_width),
+            ("Height", self.min_height, self.max_height, self.step_height),
+        ):
+            self.roi_widgets[name].widget.configure(
+                from_=minimum, to=maximum, increment=step
+            )
+        for name in ("Top_X", "Bottom_X"):
+            self.roi_widgets[name].widget.configure(
+                to=self.default_width, increment=self.step_width
+            )
+        for name in ("Top_Y", "Bottom_Y"):
+            self.roi_widgets[name].widget.configure(
+                to=self.default_height, increment=self.step_height
+            )
+        # Keep valid in-progress edits. Only values outside the newly confirmed
+        # bounds need clamping; normal ROI validation applies the new steps.
+        for name, minimum, maximum in (
+            ("Width", self.min_width, self.max_width),
+            ("Height", self.min_height, self.max_height),
+        ):
+            try:
+                value = self.roi_widgets[name].get()
+                if value < minimum or value > maximum:
+                    self.roi_widgets[name].set(min(maximum, max(minimum, value)))
+            except (TypeError, ValueError):
+                # A partially typed value is handled by normal field validation.
+                continue
+
     def update_camera_device_related_setting(self):
         """Update caramera device related parameters.
 
@@ -1101,16 +1357,20 @@ class CameraSettingController(GUIController):
         self.default_height = camera_config_dict["y_pixels"]
         self.default_width = camera_config_dict["x_pixels"]
 
-        # roi max width and height
-        self.roi_widgets["Width"].widget.config(to=self.default_width)
-        self.roi_widgets["Height"].widget.config(to=self.default_height)
-        if self.roi_widgets["Width"].get() > self.default_width:
-            self.roi_widgets["Width"].set(self.default_width)
-        if self.roi_widgets["Height"].get() > self.default_height:
-            self.roi_widgets["Height"].set(self.default_height)
-
-        self.roi_widgets["Bottom_X"].widget.config(to=self.default_width)
-        self.roi_widgets["Bottom_Y"].widget.config(to=self.default_height)
+        self.update_camera_geometry(
+            {
+                "x_pixels_min": self.min_width,
+                "y_pixels_min": self.min_height,
+                "x_pixels_step": self.step_width,
+                "y_pixels_step": self.step_height,
+                "x_pixels_max": camera_config_dict.get(
+                    "x_pixels_max", self.default_width
+                ),
+                "y_pixels_max": camera_config_dict.get(
+                    "y_pixels_max", self.default_height
+                ),
+            }
+        )
 
         # update camera setting_dict
         microscope_state_dict = self.parent_controller.configuration["experiment"][

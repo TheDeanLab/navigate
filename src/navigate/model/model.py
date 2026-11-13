@@ -449,13 +449,22 @@ class Model:
             error=None,
             data_buffer=None,
         )
+        writing = "bit_depth" in request or "setting" in request
         busy = self.is_acquiring or any(
             m.camera.is_acquiring for m in self.microscopes.values()
         )
         blocked = getattr(self, "_camera_format_errors", {})
-        if busy or identity in blocked:
+        invalid_request = None
+        if writing and request.get("identity") != identity:
+            invalid_request = "The camera connection changed. Refresh settings."
+        elif "bit_depth" in request and "setting" in request:
+            invalid_request = "Request only one camera setting at a time."
+        if busy or identity in blocked or invalid_request:
             reason = blocked.get(
-                identity, "Stop acquisition to change camera bit depth."
+                identity,
+                "Stop acquisition to change camera settings."
+                if busy
+                else invalid_request,
             )
             result["capability"] = CameraSettingCapability(
                 current_value=(
@@ -463,11 +472,27 @@ class Model:
                 ),
                 reason=reason,
             )
-            if "bit_depth" in request:
+            result["capabilities"] = {
+                key: CameraSettingCapability(reason=reason)
+                for key in (
+                    "scan_speed",
+                    "defect_correction",
+                    "hot_pixel_correction",
+                    "sensor_mode",
+                )
+            }
+            result["capabilities"]["bit_depth"] = result["capability"]
+            if writing:
                 result["error"] = reason
             return result
         try:
-            capability = camera.get_advanced_setting_capabilities()["bit_depth"]
+            capabilities = camera.get_advanced_setting_capabilities()
+            capability = capabilities["bit_depth"]
+            if "setting" in request:
+                capabilities = self._apply_advanced_camera_setting(
+                    camera, name, identity, request, result, capabilities, blocked
+                )
+                capability = capabilities["bit_depth"]
             if "bit_depth" in request:
                 if request.get("identity") != identity:
                     raise RuntimeError(
@@ -484,7 +509,8 @@ class Model:
                 self._prepared_camera_token = None
                 try:
                     camera.set_bit_depth(depth)
-                    capability = camera.get_advanced_setting_capabilities()["bit_depth"]
+                    capabilities = camera.get_advanced_setting_capabilities()
+                    capability = capabilities["bit_depth"]
                     if (
                         capability.current_value != depth
                         or camera.get_image_format().bit_depth != depth
@@ -521,17 +547,124 @@ class Model:
                     "bit_depth"
                 ] = depth
             result["capability"] = capability
+            result["capabilities"] = capabilities
         except Exception as error:
             result["error"] = str(error)
             try:
-                result["capability"] = camera.get_advanced_setting_capabilities()[
-                    "bit_depth"
-                ]
+                result["capabilities"] = camera.get_advanced_setting_capabilities()
+                result["capability"] = result["capabilities"]["bit_depth"]
             except Exception:
                 result["capability"] = CameraSettingCapability(reason=str(error))
             if identity in blocked:
                 result["capability"] = CameraSettingCapability(reason=blocked[identity])
+                result["capabilities"] = {
+                    key: CameraSettingCapability(reason=blocked[identity])
+                    for key in (
+                        "bit_depth",
+                        "scan_speed",
+                        "defect_correction",
+                        "hot_pixel_correction",
+                        "sensor_mode",
+                    )
+                }
         return result
+
+    def _apply_advanced_camera_setting(
+        self,
+        camera,
+        name: str,
+        identity: tuple,
+        request: dict,
+        result: dict,
+        capabilities: dict,
+        blocked: dict,
+    ) -> dict:
+        """Apply one named setting and restore dependencies if buffer setup fails."""
+        if request.get("identity") != identity:
+            raise RuntimeError("The camera connection changed. Refresh settings.")
+        setting, value = request["setting"], request.get("value")
+        capability = capabilities.get(setting, CameraSettingCapability())
+        if (
+            isinstance(value, bool)
+            or not capability.writable
+            or value not in capability.choices
+        ):
+            raise ValueError(capability.reason or "Unsupported camera setting.")
+        if capability.current_value is None:
+            raise RuntimeError("Cannot confirm the previous camera setting.")
+        previous = camera.snapshot_advanced_settings(setting)
+        self._prepared_camera_token = None
+        try:
+            if (
+                camera.set_advanced_setting(setting, value) != value
+                or camera.get_advanced_setting(setting) != value
+            ):
+                raise RuntimeError("Camera setting readback did not match.")
+            refreshed_capabilities = camera.get_advanced_setting_capabilities()
+            # Legacy precision discovery may probe a different native format.
+            # Reconfirm named-transaction dependencies after its final rollback.
+            camera.validate_advanced_settings(previous)
+            geometry = (
+                camera.get_camera_geometry() if setting == "sensor_mode" else None
+            )
+            selected = self.configuration["experiment"]["MicroscopeState"][
+                "microscope_name"
+            ]
+            if name == selected:
+                parameters = self.configuration["experiment"]["CameraParameters"][name]
+                result["data_buffer"] = self.get_data_buffer(
+                    parameters["img_x_pixels"], parameters["img_y_pixels"], name
+                )
+        except Exception:
+            try:
+                camera.restore_advanced_settings(previous)
+            except Exception as rollback_error:
+                blocked[
+                    identity
+                ] = "Camera restoration failed. Reconnect before acquiring."
+                self._camera_format_errors = blocked
+                raise RuntimeError(blocked[identity]) from rollback_error
+            raise
+        if geometry is not None:
+            result["geometry"] = geometry
+        parameters = self.configuration["experiment"]["CameraParameters"][name]
+        # A scan/mode change can alter precision and correction availability.
+        # Persist readback for every previously selected dependent setting.
+        for key, refreshed in refreshed_capabilities.items():
+            if key == "sensor_mode":
+                # This field is pending main-tab intent, not physical readback.
+                # A newer selection may arrive while the SDK call is in flight.
+                # Return actual mode in capabilities without overwriting intent.
+                continue
+            if key == setting or key in parameters:
+                if refreshed.current_value is not None:
+                    parameters[key] = refreshed.current_value
+        result["timing"] = {
+            key: value
+            for key in (
+                "readout_time",
+                "minimum_exposure_time",
+                "maximum_exposure_time",
+                "exposure_time_step",
+            )
+            for value in (getattr(camera, key, None),)
+            if isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and np.isfinite(value)
+        }
+        if "readout_time" in result["timing"]:
+            parameters["readout_time"] = result["timing"]["readout_time"] * 1000
+        return refreshed_capabilities
+
+    def get_camera_settings_metadata(self, microscope_name: str = None) -> dict:
+        """Return settings captured during idle preparation without querying SDKs."""
+        name = microscope_name or self.active_microscope_name
+        # Auxiliary acquisition prepares the shared camera again on its virtual
+        # microscope; that final snapshot supersedes physical buffer preparation.
+        microscope = self.virtual_microscopes.get(name)
+        if microscope is None:
+            microscope = self.microscopes[name]
+        return dict(getattr(microscope, "_camera_settings_metadata", {}))
 
     def prepare_camera_buffers(
         self, microscope_name: str, additional: tuple = ()

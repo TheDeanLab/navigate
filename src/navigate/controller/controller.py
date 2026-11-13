@@ -479,7 +479,7 @@ class Controller:
         callback : callable
             Tk callback receiving the confirmed result, even on failure.
         """
-        writing = "bit_depth" in request
+        writing = "bit_depth" in request or "setting" in request
         busy_at_dispatch = self.acquire_bar_controller.is_acquiring
         self._camera_settings_pending = getattr(
             self, "_camera_settings_pending", 0

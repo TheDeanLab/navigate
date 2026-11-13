@@ -21,6 +21,11 @@ def camera(monkeypatch):
     c = object.__new__(HamamatsuOrcaQuest2Camera)
     c.camera_controller = MagicMock()
     c.camera_controller.get_property_range.return_value = (7.2e-6, 237.6e-6, 0.24e-6)
+    c.camera_controller.get_property_range.side_effect = lambda name: (
+        (7.2e-6, 1800, 1e-8)
+        if name == "exposure_time"
+        else c.camera_controller.get_property_range.return_value
+    )
     c.camera_controller.set_property_value.return_value = True
     c.camera_controller.get_property_value.side_effect = lambda name: {
         "sensor_mode": 12,
@@ -32,6 +37,7 @@ def camera(monkeypatch):
     c.camera_parameters = {}
     c.y_pixels = 2304
     c.is_acquiring = False
+    c.minimum_frame_interval = 0.0
     yield c
     sys.modules.pop(module_name, None)
 
@@ -155,8 +161,19 @@ def test_microscope_preserves_quantized_sweep_before_setting_camera(camera):
             }
         },
     }
+    # The SDK readback follows the exposure/line writes performed by preparation.
+    read = camera.camera_controller.get_property_value.side_effect
+    values = {}
+    camera.camera_controller.set_property_value.side_effect = (
+        lambda name, value, **kwargs: values.update({name: value}) is None
+    )
+    camera.camera_controller.get_property_value.side_effect = (
+        lambda name: values[name] if name in values else read(name)
+    )
+    microscope.confirm_camera_exposures()
     exposures, sweeps = microscope.calculate_exposure_sweep_times()
-    assert channel["camera_exposure_time"] == pytest.approx(20.064)
+    assert channel["camera_exposure_time"] == 20.0
+    assert exposures["channel_1"] == pytest.approx(0.020064)
     assert sweeps["channel_1"] == pytest.approx(0.020064)
     microscope.set_camera_exposure_time(channel)
     assert microscope.current_exposure_time == pytest.approx(0.0007296)
@@ -175,3 +192,48 @@ def test_invalid_driver_range_in_light_sheet_is_not_hidden(camera):
     camera.camera_controller.get_property_range.return_value = (None, None, None)
     with pytest.raises(RuntimeError, match="range"):
         camera.calculate_light_sheet_exposure_time(0.02, 20)
+
+
+@pytest.mark.parametrize("requested", [0.0001, 0.001, 0.01])
+def test_exposure_accepts_one_current_line_of_quantization(camera, requested):
+    interval = 33.94909090909091e-6
+    actual = math.ceil(requested / interval) * interval
+    values = {
+        "internal_line_interval": interval,
+        "exposure_time": actual,
+        "minimum_trigger_interval": 0.05652523636363636,
+    }
+    sdk = camera.camera_controller
+    sdk.get_property_value.side_effect = values.__getitem__
+    sdk.get_property_range.return_value = (interval, 1800.0, 1e-8)
+    sdk.set_property_value.side_effect = lambda name, value, **kw: math.isclose(
+        value, actual, rel_tol=0, abs_tol=kw.get("absolute_tolerance", 0)
+    )
+    assert camera.set_exposure_time(requested)
+    assert camera.camera_exposure_time == pytest.approx(actual)
+    assert camera.minimum_frame_interval == values["minimum_trigger_interval"]
+
+
+@pytest.mark.parametrize("interval", [False, None, 0, -1, math.nan, math.inf])
+def test_unknown_exposure_quantum_prevents_write(camera, interval):
+    camera.camera_controller.get_property_value.side_effect = lambda name: interval
+    with pytest.raises(RuntimeError, match="interval"):
+        camera.set_exposure_time(0.001)
+    camera.camera_controller.set_property_value.assert_not_called()
+
+
+@pytest.mark.parametrize("actual", [False, None, math.nan, math.inf, -1, 0.01])
+def test_exposure_rejects_unconfirmed_or_distant_readback(camera, actual):
+    values = {
+        "internal_line_interval": 33.94909090909091e-6,
+        "exposure_time": actual,
+        "minimum_trigger_interval": 0.01,
+    }
+    camera.camera_controller.get_property_value.side_effect = values.__getitem__
+    camera.camera_controller.get_property_range.return_value = (
+        33.94909090909091e-6,
+        1800,
+        1e-8,
+    )
+    with pytest.raises(RuntimeError, match="exposure"):
+        camera.set_exposure_time(0.001)

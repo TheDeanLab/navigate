@@ -155,3 +155,17 @@ def test_binding_retired_auxiliary_drops_old_buffer_but_keeps_window(controller)
         {"microscope": "scope", "data_buffer": None, "retired": ["aux"]}
     )
     assert c.additional_microscopes["aux"] == {"popup_window": window}
+
+
+def test_scan_write_locks_capture_until_worker_confirms(controller):
+    c = controller
+    c.model.camera_advanced_settings.return_value = {
+        "microscope": "scope",
+        "data_buffer": None,
+    }
+    c.dispatch_camera_advanced_settings(
+        dict(microscope="scope", request_id=1, setting="scan_speed", value=2), Mock()
+    )
+    assert c._camera_settings_pending == 1
+    c.threads_pool.createThread.call_args.args[1]()
+    assert c._camera_settings_pending == 0

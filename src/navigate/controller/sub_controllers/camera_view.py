@@ -1235,6 +1235,7 @@ class BaseViewController(GUIController, ABaseViewController):
         event : tk.Event
             x, y location.  0,0 is top left corner.
         """
+        menu_posted = False
         try:
             # only popup the menu when click on image
             if event.x >= self.canvas_width or event.y >= self.canvas_height:
@@ -1243,8 +1244,11 @@ class BaseViewController(GUIController, ABaseViewController):
             self.move_to_y = event.y
             x, y = self.get_absolute_position()
             self.menu.tk_popup(x, y)
+            menu_posted = True
         finally:
-            self.menu.grab_release()
+            # X11 returns while the menu is open; Tk releases its grab on dismissal.
+            if not menu_posted or self.menu.tk.call("tk", "windowingsystem") != "x11":
+                self.menu.grab_release()
 
     def calculate_offset(self) -> tuple:
         """Calculates the offset of the image.

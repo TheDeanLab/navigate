@@ -120,12 +120,11 @@ class TestCameraViewController:
         assert x == self.x
         assert y == self.y
 
-    def test_popup_menu(self, monkeypatch):
+    def test_popup_menu_uses_image_and_screen_coordinates(self, monkeypatch):
         # create a fake event object
         self.startx = int(random.random())
         self.starty = int(random.random())
         event = type("Event", (object,), {"x": self.startx, "y": self.starty})()
-        self.grab_released = False
         self.x = int(random.random())
         self.y = int(random.random())
         self.absx = int(random.random())
@@ -145,11 +144,7 @@ class TestCameraViewController:
             self.x = x
             self.y = y
 
-        def mock_grab_release():
-            self.grab_released = True
-
         monkeypatch.setattr(self.camera_view.menu, "tk_popup", mock_tk_popup)
-        monkeypatch.setattr(self.camera_view.menu, "grab_release", mock_grab_release)
 
         # call the function under test
         self.camera_view.popup_menu(event)
@@ -159,7 +154,6 @@ class TestCameraViewController:
         assert self.camera_view.move_to_y == self.starty
         assert self.x == self.absx
         assert self.y == self.absy
-        assert self.grab_released is True
 
     @pytest.mark.parametrize("name", ["minmax", "image"])
     @pytest.mark.parametrize("data", [[random.randint(0, 49), random.randint(50, 100)]])

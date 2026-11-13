@@ -45,6 +45,7 @@ from navigate.config import get_navigate_path
 from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 from navigate.model.devices.camera.format import (
+    CameraExposureTiming,
     CameraImageFormat,
     CameraSettingCapability,
 )
@@ -61,6 +62,9 @@ class CameraBase(ABC):
     This class provides the interface and common functionality for controlling
     cameras with navigate.
     """
+
+    #: bool: Whether acquisition must confirm exposure timing before planning.
+    requires_exposure_confirmation = False
 
     configuration_schema = {
         "flip_x": SettingSpec(
@@ -348,6 +352,20 @@ class CameraBase(ABC):
     def set_exposure_time(self, exposure_time: float) -> bool:
         """Set the camera exposure time."""
         return True
+
+    def confirm_exposure_timing(
+        self, exposure_time: float, shutter_width: Optional[int] = None
+    ) -> CameraExposureTiming:
+        """Confirm requested sweep seconds while idle, restoring hardware afterward.
+
+        Only adapters opting into ``requires_exposure_confirmation`` implement
+        this method. ``shutter_width`` supplies Light-Sheet slit width in rows.
+        """
+        raise NotImplementedError("This camera does not confirm exposure timing.")
+
+    def get_exposure_time(self) -> Optional[float]:
+        """Return confirmed row exposure seconds, or None when unavailable."""
+        return None
 
     def get_offset_variance_maps(self) -> Any:
         """Get offset and variance maps from file.

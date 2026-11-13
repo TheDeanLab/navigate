@@ -37,10 +37,33 @@ These descriptors describe the arrays delivered to Navigate, not transport bytes
 """
 
 from dataclasses import dataclass
+import math
 from numbers import Integral
 from typing import Any, Optional
 
 import numpy as np
+
+
+@dataclass(frozen=True)
+class CameraExposureTiming:
+    """Confirmed row exposure and illumination sweep durations, in seconds.
+
+    ``line_interval`` is None for Area acquisition. In Light-Sheet acquisition,
+    the full sweep includes row scanning and must not be replaced by row exposure.
+    """
+
+    exposure_time: float
+    sweep_time: float
+    line_interval: Optional[float] = None
+
+    def __post_init__(self) -> None:
+        for value in (self.exposure_time, self.sweep_time, self.line_interval):
+            if value is not None and (
+                isinstance(value, bool) or not math.isfinite(value) or value <= 0
+            ):
+                raise ValueError("Confirmed camera timing must be finite and positive.")
+        if self.sweep_time < self.exposure_time:
+            raise ValueError("Camera sweep cannot be shorter than row exposure.")
 
 
 @dataclass(frozen=True)

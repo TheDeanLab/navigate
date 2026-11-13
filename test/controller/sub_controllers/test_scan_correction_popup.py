@@ -182,7 +182,7 @@ def test_pending_mode_apply_preserves_new_main_selection_and_displays_mismatch(p
 @pytest.mark.parametrize("initial_width,expected_initial_width", [(24, 24), (64, 48)])
 @pytest.mark.parametrize("target_name", ["scope", "other"])
 @pytest.mark.parametrize(
-    "old_step,new_step,requested_width,expected_width", [(4, 8, 12, 8), (8, 4, 12, 12)]
+    "old_step,new_step,requested_width,expected_width", [(4, 8, 20, 16), (8, 4, 18, 16)]
 )
 def test_mode_geometry_reply_refreshes_real_roi_validation_without_repopulating(
     popup,
@@ -256,7 +256,7 @@ def test_mode_geometry_reply_refreshes_real_roi_validation_without_repopulating(
         target.roi_widgets["Binning"].set("1x1")
         target.roi_widgets["is_centered"].set(True)
         target.roi_widgets["Width"].set(initial_width)
-        target.roi_widgets["Height"].set(24)
+        target.roi_widgets["Height"].set(32)
         target.in_initialization = False
         geometry = {
             "x_pixels_min": new_step,
@@ -276,10 +276,12 @@ def test_mode_geometry_reply_refreshes_real_roi_validation_without_repopulating(
         c._receive_bit_depth(result)
         assert target.step_width == target.step_height == new_step
         assert target.min_width == target.min_height == new_step
-        assert target.default_width == target.default_height == 48
+        assert target.default_width == target.default_height == 64
+        assert target.roi_widgets["Width"].widget.cget("to") == 48
+        assert target.roi_widgets["Height"].widget.cget("to") == 48
         assert target.roi_widgets["Width"].widget.cget("increment") == new_step
         assert target.roi_widgets["Width"].get() == expected_initial_width
-        assert target.roi_widgets["Height"].get() == 24
+        assert target.roi_widgets["Height"].get() == 32
         assert (
             target.mode_widgets["Sensor"].get()
             == parameters[target_name]["sensor_mode"]
@@ -293,3 +295,182 @@ def test_mode_geometry_reply_refreshes_real_roi_validation_without_repopulating(
     finally:
         for view in views:
             view.destroy()
+
+
+@pytest.fixture(params=[None, "other"])
+def roi_controller(tk_root, request):
+    """Real main/additional camera controls with a 64-pixel physical sensor."""
+    from navigate.controller.sub_controllers.camera_settings import (
+        CameraSettingController,
+    )
+    from navigate.view.main_window_content.camera_tab import CameraSettingsTab
+
+    config = {
+        "x_pixels": 64,
+        "y_pixels": 64,
+        "x_pixels_min": 4,
+        "y_pixels_min": 4,
+        "x_pixels_step": 4,
+        "y_pixels_step": 4,
+        "pixel_size_in_microns": 1,
+        "supported_sensor_modes": ["Normal", "Light-Sheet"],
+        "supported_readout_directions": ["Top-to-Bottom"],
+    }
+    parameters = {
+        name: {
+            "sensor_mode": "Normal",
+            "binning": "1x1",
+            "x_pixels": 24,
+            "y_pixels": 24,
+            "readout_direction": "Top-to-Bottom",
+            "number_of_pixels": 1,
+            "is_centered": True,
+            "pixel_size": 1,
+        }
+        for name in ("scope", "other")
+    }
+    parent = SimpleNamespace(
+        configuration_controller=SimpleNamespace(camera_config_dict=config),
+        configuration={
+            "configuration": {
+                "microscopes": {
+                    name: {"camera": dict(config), "zoom": {"pixel_size": {"1x": 1}}}
+                    for name in parameters
+                }
+            },
+            "experiment": {
+                "MicroscopeState": {
+                    "microscope_name": "scope",
+                    "zoom": "1x",
+                    "channels": {"channel_1": {"camera_exposure_time": 10}},
+                },
+                "CameraParameters": parameters,
+            },
+        },
+    )
+    view = CameraSettingsTab(tk_root)
+    c = CameraSettingController(view, parent, microscope_name=request.param)
+    c.populate_experiment_values()
+    yield c
+    view.destroy()
+
+
+def apply_roi_geometry(c, maximum=48, step=4):
+    geometry = {
+        f"{axis}_pixels_{key}": value
+        for axis in ("x", "y")
+        for key, value in (("min", step), ("max", maximum), ("step", step))
+    }
+    if c.microscope_name:
+        config = c.parent_controller.configuration["configuration"]["microscopes"][
+            c.microscope_name
+        ]["camera"]
+    else:
+        config = c.parent_controller.configuration_controller.camera_config_dict
+    config.update(geometry)
+    c.update_camera_geometry(geometry)
+
+
+def test_mode_roi_limit_preserves_physical_center_and_user_size(roi_controller):
+    c = roi_controller
+    apply_roi_geometry(c)
+    assert c.update_experiment_values() == ""
+    assert (c.camera_setting_dict["center_x"], c.camera_setting_dict["center_y"]) == (
+        32,
+        32,
+    )
+    assert (c.camera_setting_dict["x_pixels"], c.camera_setting_dict["y_pixels"]) == (
+        24,
+        24,
+    )
+    assert c.roi_widgets["Width"].widget.cget("to") == 48
+    assert c.roi_widgets["Bottom_X"].widget.cget("to") == 64
+
+
+def test_refresh_and_population_preserve_mode_roi_limits(roi_controller):
+    c = roi_controller
+    apply_roi_geometry(c, step=8)
+    c.update_camera_device_related_setting()
+    c.camera_setting_dict.update(x_pixels=64, y_pixels=64)
+    c.populate_experiment_values()
+    assert c.roi_widgets["Width"].widget.cget("to") == 48
+    assert c.roi_widgets["Height"].widget.cget("to") == 48
+    assert c.roi_widgets["Width"].get() == 48
+    assert c.roi_widgets["Height"].get() == 48
+    c.initialize()
+    assert c.roi_widgets["Width"].widget.cget("from") == 8
+    assert c.roi_widgets["Width"].widget.cget("increment") == 8
+
+
+def test_roi_presets_respect_mode_maximum(roi_controller):
+    c = roi_controller
+    apply_roi_geometry(c)
+    for preset in ("All", "512"):
+        c.update_roi(preset)()
+        assert c.roi_widgets["Width"].get() == 48
+        assert c.roi_widgets["Height"].get() == 48
+        assert c.update_experiment_values() == ""
+        assert c.camera_setting_dict["center_x"] == 32
+
+
+def test_offset_roi_uses_physical_coordinates_but_respects_mode_size(roi_controller):
+    c = roi_controller
+    apply_roi_geometry(c)
+    c.roi_widgets["is_centered"].set(False)
+    for key, value in (
+        ("Top_X", 40),
+        ("Bottom_X", 64),
+        ("Top_Y", 40),
+        ("Bottom_Y", 64),
+    ):
+        c.roi_widgets[key].set(value)
+    assert c.update_experiment_values() == ""
+    assert c.camera_setting_dict["x_pixels"] == 24
+    assert c.camera_setting_dict["center_x"] == 52
+    c.roi_widgets["Top_X"].set(0)
+    assert c.update_experiment_values()  # Width64 exceeds mode maximum48.
+
+
+def test_centered_roi_rejects_boundaries_invalid_after_step_change(roi_controller):
+    c = roi_controller
+    assert c.update_experiment_values() == ""
+    before = dict(c.camera_setting_dict)
+    apply_roi_geometry(c, maximum=64, step=8)
+    warning = c.update_experiment_values()
+    assert warning
+    assert "center" in warning.lower() and "8" in warning
+    assert c.camera_setting_dict == before
+    assert c.roi_widgets["Width"].get() == 24
+    c.roi_widgets["Width"].set(32)
+    c.roi_widgets["Height"].set(32)
+    assert c.update_experiment_values() == ""
+    assert c.camera_setting_dict["center_x"] == 32
+
+
+def test_centered_roi_size_validation_cannot_be_bypassed_by_variable(roi_controller):
+    c = roi_controller
+    apply_roi_geometry(c)
+    # A variable/programmatic edit can bypass spinbox focus-out validation.
+    c.roi_widgets["Width"].set(64)
+    assert c.update_experiment_values()
+
+
+@pytest.mark.parametrize(
+    "size,binning,expected_size", [(24, "2x2", 16), (16, "4x4", None)]
+)
+def test_centered_roi_validates_final_binned_geometry(
+    roi_controller, size, binning, expected_size
+):
+    c = roi_controller
+    apply_roi_geometry(c, maximum=64, step=8)
+    c.roi_widgets["Width"].set(size)
+    c.roi_widgets["Height"].set(size)
+    c.roi_widgets["Binning"].set(binning)
+    warning = c.update_experiment_values()
+    if expected_size is None:
+        assert warning  # Binning and step rounding must not permit a zero-sized ROI.
+    else:
+        assert warning == ""
+        assert c.camera_setting_dict["x_pixels"] == expected_size
+        assert c.camera_setting_dict["y_pixels"] == expected_size
+        assert c.camera_setting_dict["center_x"] == 32

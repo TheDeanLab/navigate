@@ -144,6 +144,15 @@ readbacks beyond this allowance remain errors. The SDK wrapper's optional
 :code:`absolute_tolerance` is in property units and replaces its legacy relative
 tolerance only for callers that explicitly supply it.
 
+Before Quest 2 capture starts, preparation temporarily applies each selected
+channel's exposure and reads the actual timing. It restores the original timing
+after every probe and blocks capture if restoration fails. Camera, galvo and
+remote-focus waveform calculations use these confirmed durations. Area mode uses
+actual exposure; Light-Sheet mode keeps the full illumination sweep separate
+from each row's exposure. The requested channel values remain unchanged.
+Per-channel writes must match the prepared timing; changing exposure during
+capture requires restarting preparation.
+
 Adapters implement :code:`get_advanced_setting(name)` and
 :code:`set_advanced_setting(name, value)`. The base class leaves the new settings
 unavailable. The synthetic camera provides simulated controls, including a
@@ -159,7 +168,11 @@ existing microscope, connection identity and request ID. Replies include
 Successful named sensor-mode replies also include :code:`geometry`, containing
 confirmed pixel minimum, maximum and step for each axis. The matching main or
 additional camera tab refreshes these constraints independently of timing,
-without replacing pending sensor intent or valid ROI edits.
+without replacing pending sensor intent or valid ROI edits. Physical sensor
+size remains separate from the current mode's maximum ROI size. Refresh retains
+these mode limits. Centered ROI boundaries must also satisfy the current pixel
+step after binning normalization; invalid boundaries produce an error rather
+than silently shifting the ROI.
 Legacy :code:`bit_depth` requests and the singular :code:`capability` reply remain
 supported. SDK work runs on the serialized model worker; the controller applies
 widget updates on the Tk main thread and discards stale replies.
@@ -199,7 +212,14 @@ Acquisition preparation captures actual settings independently of pending UI
 values. TIFF stores them in :code:`camera_settings`, OME-TIFF uses a referenced
 map annotation, and H5, N5 and OME-Zarr store :code:`camera_scan_speed`,
 :code:`camera_defect_correction` and :code:`camera_hot_pixel_correction` attributes.
-Unknown values are omitted. These controls do not rescale pixels or change the
+Unknown values are omitted. If confirmed settings change during a feature-driven
+stop/reconfigure/restart, the writer closes the current output and writes the
+next batch in a numbered :file:`camera-settings-001` directory (then
+:file:`camera-settings-002`, and so on). Each segment keeps its own settings and
+previous files remain unchanged. This applies to all five formats and additional
+camera writers. Existing segment directories are skipped to avoid overwriting.
+An empty snapshot starts a segment without stale settings metadata.
+These controls do not rescale pixels or change the
 native normalized dtype except when a confirmed camera format change requires
 new buffers. The optional Quest 2 restart also restores hot-pixel correction
 when the SDK reports it.

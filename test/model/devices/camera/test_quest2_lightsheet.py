@@ -37,6 +37,7 @@ def camera(monkeypatch):
     c.camera_parameters = {}
     c.y_pixels = 2304
     c.is_acquiring = False
+    c.minimum_frame_interval = 0.0
     yield c
     sys.modules.pop(module_name, None)
 
@@ -160,9 +161,6 @@ def test_microscope_preserves_quantized_sweep_before_setting_camera(camera):
             }
         },
     }
-    exposures, sweeps = microscope.calculate_exposure_sweep_times()
-    assert channel["camera_exposure_time"] == pytest.approx(20.064)
-    assert sweeps["channel_1"] == pytest.approx(0.020064)
     # The SDK readback follows the exposure/line writes performed by preparation.
     read = camera.camera_controller.get_property_value.side_effect
     values = {}
@@ -172,6 +170,11 @@ def test_microscope_preserves_quantized_sweep_before_setting_camera(camera):
     camera.camera_controller.get_property_value.side_effect = (
         lambda name: values[name] if name in values else read(name)
     )
+    microscope.confirm_camera_exposures()
+    exposures, sweeps = microscope.calculate_exposure_sweep_times()
+    assert channel["camera_exposure_time"] == 20.0
+    assert exposures["channel_1"] == pytest.approx(0.020064)
+    assert sweeps["channel_1"] == pytest.approx(0.020064)
     microscope.set_camera_exposure_time(channel)
     assert microscope.current_exposure_time == pytest.approx(0.0007296)
 

@@ -31,6 +31,7 @@
 
 # Standard Library imports
 import logging
+import math
 import importlib  # noqa: F401
 from multiprocessing.managers import ListProxy
 import reprlib
@@ -479,6 +480,7 @@ class Microscope:
         """
         if self.camera.is_acquiring:
             raise RuntimeError("Stop acquisition before configuring the camera.")
+        self._confirmed_exposures = {}
         self.set_camera_trigger_mode()
         self.set_camera_sensor_mode()
         parameters = self.configuration["experiment"]["CameraParameters"][
@@ -559,13 +561,74 @@ class Microscope:
             )
         logger.debug(f"Running microscope {self.microscope_name}")
         self.report_camera_settings()
+        self.confirm_camera_exposures()
+        waveform = (
+            self.calculate_all_waveform()
+            if getattr(self.camera, "requires_exposure_confirmation", False) is True
+            else None
+        )
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
 
         # calculate all the waveform
         self.shutter.open_shutter()
 
-        return self.calculate_all_waveform()
+        return waveform if waveform is not None else self.calculate_all_waveform()
+
+    def _exposure_plan_key(self, channel: dict) -> tuple:
+        """Identify a requested exposure without changing shared channel intent."""
+        parameters = self.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ]
+        mode = parameters["sensor_mode"]
+        return (
+            float(channel["camera_exposure_time"]) / 1000,
+            mode,
+            int(parameters["number_of_pixels"]) if mode == "Light-Sheet" else None,
+        )
+
+    def confirm_camera_exposures(self) -> None:
+        """Confirm selected channel timing before capture and waveform planning."""
+        self._confirmed_exposures = {}
+        self._confirmed_channel_requests = {}
+        if getattr(self.camera, "requires_exposure_confirmation", False) is not True:
+            return
+        if self.camera.is_acquiring:
+            raise RuntimeError("Stop acquisition before confirming exposure timing.")
+        confirmed = {}
+        channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
+        for channel in channels.values():
+            if channel["is_selected"]:
+                key = self._exposure_plan_key(channel)
+                if key not in confirmed:
+                    confirmed[key] = self.camera.confirm_exposure_timing(key[0], key[2])
+        self._confirmed_exposures = confirmed
+        self._confirmed_channel_requests = self._channel_exposure_requests()
+
+    def _channel_exposure_requests(self) -> dict:
+        """Keep channel identity when checking the prepared waveform inputs."""
+        channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
+        return {
+            name: self._exposure_plan_key(channel)
+            for name, channel in channels.items()
+            if channel["is_selected"]
+        }
+
+    def _confirmed_channel_timing(self, channel: dict) -> Any:
+        """Read a prepared timing plan, rejecting changed intent during capture."""
+        if getattr(self.camera, "requires_exposure_confirmation", False) is not True:
+            return None
+        key = self._exposure_plan_key(channel)
+        timing = getattr(self, "_confirmed_exposures", {}).get(key)
+        if self._channel_exposure_requests() != getattr(
+            self, "_confirmed_channel_requests", {}
+        ):
+            timing = None
+        if timing is None and self.camera.is_acquiring:
+            raise RuntimeError(
+                "Exposure timing changed. Restart acquisition to prepare it."
+            )
+        return timing
 
     def get_available_channels(self) -> None:
         """Get the available channels for imaging.
@@ -811,8 +874,11 @@ class Microscope:
             channel = microscope_state["channels"][channel_key]
             if channel["is_selected"] is True:
                 exposure_time = float(channel["camera_exposure_time"]) / 1000
+                timing = self._confirmed_channel_timing(channel)
 
-                if readout_mode == "Light-Sheet":
+                if timing is not None:
+                    exposure_time = timing.sweep_time
+                elif readout_mode == "Light-Sheet":
                     (
                         _,
                         _,
@@ -1011,6 +1077,33 @@ class Microscope:
         channel : dict
             Dictionary of channel parameters.
         """
+        if getattr(self.camera, "requires_exposure_confirmation", False) is True:
+            timing = self._confirmed_channel_timing(channel)
+            if timing is None:
+                key = self._exposure_plan_key(channel)
+                timing = self.camera.confirm_exposure_timing(key[0], key[2])
+            if timing.line_interval is not None:
+                self.camera.set_line_interval(timing.line_interval)
+                if not math.isclose(
+                    self.camera.get_line_interval(),
+                    timing.line_interval,
+                    rel_tol=0,
+                    abs_tol=1e-12,
+                ):
+                    raise RuntimeError("Camera line timing changed after preparation.")
+            if self.camera.set_exposure_time(timing.exposure_time) is False:
+                raise RuntimeError("Camera rejected the prepared exposure.")
+            actual = self.camera.get_exposure_time()
+            if (
+                isinstance(actual, bool)
+                or actual is None
+                or not math.isclose(
+                    actual, timing.exposure_time, rel_tol=0, abs_tol=1e-12
+                )
+            ):
+                raise RuntimeError("Camera exposure changed after timing preparation.")
+            self.current_exposure_time = float(actual)
+            return
         self.current_exposure_time = float(channel["camera_exposure_time"]) / 1000
         if (
             self.configuration["experiment"]["CameraParameters"][self.microscope_name][

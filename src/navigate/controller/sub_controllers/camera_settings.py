@@ -667,9 +667,11 @@ class CameraSettingController(GUIController):
         #: int: Default pixel size
         self.default_pixel_size = None
 
-        #: int: Default width
-        #: int: Default height
+        #: int: Physical sensor width and height, used for ROI coordinates.
         self.default_width, self.default_height = None, None
+
+        #: int: Maximum ROI width and height in the confirmed camera mode.
+        self.max_width, self.max_height = None, None
 
         #: int: Camera width step interval
         self.step_width = 4
@@ -744,12 +746,6 @@ class CameraSettingController(GUIController):
         self.framerate_widgets["readout_time"].widget["state"] = "disabled"
         self.framerate_widgets["max_framerate"].widget["state"] = "disabled"
 
-        # Set range value
-        self.roi_widgets["Width"].widget.config(from_=2)
-        self.roi_widgets["Width"].widget.config(increment=2)
-        self.roi_widgets["Height"].widget.config(from_=2)
-        self.roi_widgets["Height"].widget.config(increment=2)
-
         # set binning options
         self.roi_widgets["Binning"].widget["values"] = [
             "{}x{}".format(i, i) for i in [1, 2, 4]
@@ -800,10 +796,10 @@ class CameraSettingController(GUIController):
         self.roi_widgets["Bottom_Y"].set(
             self.camera_setting_dict.get("bottom_y", self.default_height)
         )
-        if self.camera_setting_dict["x_pixels"] > self.default_width:
-            self.camera_setting_dict["x_pixels"] = self.default_width
-        if self.camera_setting_dict["y_pixels"] > self.default_height:
-            self.camera_setting_dict["y_pixels"] = self.default_height
+        if self.camera_setting_dict["x_pixels"] > self.max_width:
+            self.camera_setting_dict["x_pixels"] = self.max_width
+        if self.camera_setting_dict["y_pixels"] > self.max_height:
+            self.camera_setting_dict["y_pixels"] = self.max_height
         self.roi_widgets["Width"].set(self.camera_setting_dict["x_pixels"])
         self.roi_widgets["Height"].set(self.camera_setting_dict["y_pixels"])
 
@@ -874,8 +870,19 @@ class CameraSettingController(GUIController):
             center_x = self.default_width // 2
             center_y = self.default_height // 2
 
-        x_pixel = self.roi_widgets["Width"].get()
-        y_pixel = self.roi_widgets["Height"].get()
+        if self.roi_widgets["is_centered"].get():
+            x_pixel = self.roi_widgets["Width"].get()
+            y_pixel = self.roi_widgets["Height"].get()
+        else:
+            x_pixel = bottom_x - top_x
+            y_pixel = bottom_y - top_y
+
+        if x_pixel > self.max_width or y_pixel > self.max_height:
+            return (
+                "The camera ROI exceeds the current mode's maximum size. "
+                f"Set Width at most {self.max_width} and Height at most "
+                f"{self.max_height}."
+            )
 
         # Round to nearest step
         x_pixels = int(x_pixel // self.step_width) * self.step_width
@@ -899,6 +906,26 @@ class CameraSettingController(GUIController):
 
         x_pixels = img_width * binning[0]
         y_pixels = img_height * binning[1]
+
+        if not (
+            self.min_width <= x_pixels <= self.max_width
+            and self.min_height <= y_pixels <= self.max_height
+        ):
+            return "The camera ROI size is invalid for the current mode and binning."
+
+        for center, size, sensor_size, step in (
+            (center_x, x_pixels, self.default_width, self.step_width),
+            (center_y, y_pixels, self.default_height, self.step_height),
+        ):
+            start, end = center - size // 2, center + size // 2
+            if start < 0 or end > sensor_size or start % step or end % step:
+                return (
+                    "The camera ROI boundaries are invalid for the current mode. "
+                    "For a centered ROI, choose Width and Height so both edges "
+                    f"are divisible by {self.step_width} (X) and "
+                    f"{self.step_height} (Y), or disable centering and enter "
+                    "valid boundaries."
+                )
 
         self.camera_setting_dict["x_pixels"] = x_pixels
         self.camera_setting_dict["y_pixels"] = y_pixels
@@ -1015,15 +1042,15 @@ class CameraSettingController(GUIController):
 
         def handler(*args):
             if btn_name == "All":
-                width = self.default_width
-                height = self.default_height
+                width = self.max_width
+                height = self.max_height
             else:
                 width = float(btn_name)
                 height = width
-                if width > self.default_width:
-                    width = self.default_width
-                if height > self.default_height:
-                    height = self.default_height
+                if width > self.max_width:
+                    width = self.max_width
+                if height > self.max_height:
+                    height = self.max_height
             self.roi_widgets["is_centered"].set(True)
             self.roi_widgets["Width"].set(width)
             self.roi_widgets["Height"].set(height)
@@ -1270,13 +1297,13 @@ class CameraSettingController(GUIController):
             geometry["x_pixels_step"],
             geometry["y_pixels_step"],
         )
-        self.default_width, self.default_height = (
+        self.max_width, self.max_height = (
             geometry["x_pixels_max"],
             geometry["y_pixels_max"],
         )
         for name, minimum, maximum, step in (
-            ("Width", self.min_width, self.default_width, self.step_width),
-            ("Height", self.min_height, self.default_height, self.step_height),
+            ("Width", self.min_width, self.max_width, self.step_width),
+            ("Height", self.min_height, self.max_height, self.step_height),
         ):
             self.roi_widgets[name].widget.configure(
                 from_=minimum, to=maximum, increment=step
@@ -1292,8 +1319,8 @@ class CameraSettingController(GUIController):
         # Keep valid in-progress edits. Only values outside the newly confirmed
         # bounds need clamping; normal ROI validation applies the new steps.
         for name, minimum, maximum in (
-            ("Width", self.min_width, self.default_width),
-            ("Height", self.min_height, self.default_height),
+            ("Width", self.min_width, self.max_width),
+            ("Height", self.min_height, self.max_height),
         ):
             try:
                 value = self.roi_widgets[name].get()
@@ -1330,16 +1357,20 @@ class CameraSettingController(GUIController):
         self.default_height = camera_config_dict["y_pixels"]
         self.default_width = camera_config_dict["x_pixels"]
 
-        # roi max width and height
-        self.roi_widgets["Width"].widget.config(to=self.default_width)
-        self.roi_widgets["Height"].widget.config(to=self.default_height)
-        if self.roi_widgets["Width"].get() > self.default_width:
-            self.roi_widgets["Width"].set(self.default_width)
-        if self.roi_widgets["Height"].get() > self.default_height:
-            self.roi_widgets["Height"].set(self.default_height)
-
-        self.roi_widgets["Bottom_X"].widget.config(to=self.default_width)
-        self.roi_widgets["Bottom_Y"].widget.config(to=self.default_height)
+        self.update_camera_geometry(
+            {
+                "x_pixels_min": self.min_width,
+                "y_pixels_min": self.min_height,
+                "x_pixels_step": self.step_width,
+                "y_pixels_step": self.step_height,
+                "x_pixels_max": camera_config_dict.get(
+                    "x_pixels_max", self.default_width
+                ),
+                "y_pixels_max": camera_config_dict.get(
+                    "y_pixels_max", self.default_height
+                ),
+            }
+        )
 
         # update camera setting_dict
         microscope_state_dict = self.parent_controller.configuration["experiment"][

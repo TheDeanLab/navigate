@@ -180,6 +180,24 @@ class ImageWriter:
         frame_ids : list[int]
             Index into self.model.data_buffer.
         """
+        # SetCameraParameters pauses the data loop after its current batch has
+        # finished, then publishes the new confirmed snapshot before resuming.
+        # Read that snapshot once at the batch boundary; never query the camera
+        # or label an old file with newly requested GUI settings.
+        if frame_ids:
+            try:
+                settings = self._read_camera_settings()
+                if settings != self._camera_settings:
+                    self._start_camera_settings_segment(settings)
+            except Exception as error:
+                self.close()
+                self.model.stop_acquisition = True
+                self.model.event_queue.put(
+                    ("warning", f"Error - ImageWriter camera settings segment: {error}")
+                )
+                logger.exception("Unable to start camera settings output segment")
+                return
+
         for idx in frame_ids:
             if self.asi and self.z_stack and idx == 0:
                 self.read_idx = (self.read_idx + 1) % 20
@@ -329,7 +347,8 @@ class ImageWriter:
 
     def close(self):
         """Close the data source we are writing to."""
-        self.data_source.close()
+        if self.data_source is not None:
+            self.data_source.close()
 
     def calculate_and_check_disk_space(self):
         """Estimate the size of the data that will be written to disk, and confirm
@@ -403,13 +422,76 @@ class ImageWriter:
 
         return file_name
 
-    def initialize_saving(self, sub_dir="", image_name=None):
+    def _read_camera_settings(self) -> dict:
+        """Copy the model's confirmed acquisition snapshot without SDK reads."""
+        read_settings = getattr(self.model, "get_camera_settings_metadata", None)
+        return (
+            dict(read_settings(self.microscope_name) or {})
+            if callable(read_settings)
+            else {}
+        )
+
+    def _start_camera_settings_segment(self, settings: dict) -> None:
+        """Start an unused numbered directory for a new confirmed snapshot.
+
+        Parameters
+        ----------
+        settings : dict
+            Confirmed camera settings for the next batch, including an empty
+            snapshot when settings are unknown.
+        """
+        while True:
+            self._camera_settings_segment += 1
+            sub_dir = os.path.join(
+                self._camera_settings_base_sub_dir,
+                f"camera-settings-{self._camera_settings_segment:03d}",
+            )
+            path = os.path.join(
+                self.model.configuration["experiment"]["Saving"]["save_directory"],
+                sub_dir,
+            )
+            if not os.path.lexists(path):
+                break
+        self._initialize_saving(sub_dir, self._segment_image_name, settings)
+
+    def initialize_saving(
+        self, sub_dir: str = "", image_name: Optional[str] = None
+    ) -> None:
+        """Initialize an output location and its camera-settings segments.
+
+        Parameters
+        ----------
+        sub_dir : str
+            Output subdirectory within the experiment's save directory.
+        image_name : str, optional
+            File name to retain in subsequent camera-settings segments.
+        """
+        self._initialize_saving(sub_dir, image_name, self._read_camera_settings())
+        self._camera_settings_base_sub_dir = self.sub_dir
+        self._camera_settings_segment = 0
+        self._segment_image_name = image_name
+
+    def _initialize_saving(
+        self, sub_dir: str, image_name: Optional[str], settings: dict
+    ) -> None:
+        """Open a fresh data source with the supplied confirmed snapshot.
+
+        Parameters
+        ----------
+        sub_dir : str
+            Output subdirectory within the experiment's save directory.
+        image_name : str, optional
+            Output file name, or None to generate one.
+        settings : dict
+            Confirmed camera settings for this output location.
+        """
 
         if self.data_source is not None:
             self.data_source.close()
             self.data_source = None
 
         self.current_time_point = 0
+        self.mip = None
 
         file_name = self.get_saving_file_name(sub_dir, image_name)
 
@@ -448,9 +530,8 @@ class ImageWriter:
                 "Saving buffer does not match the confirmed camera format."
             )
         self.data_source.set_image_format(image_format)
-        read_settings = getattr(self.model, "get_camera_settings_metadata", None)
-        if callable(read_settings):
-            self.data_source.set_camera_settings(read_settings(self.microscope_name))
+        self.data_source.set_camera_settings(settings)
+        self._camera_settings = dict(settings)
 
         # Make sure that there is enough disk space to save the data.
         self.calculate_and_check_disk_space()

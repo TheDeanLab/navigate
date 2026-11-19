@@ -154,13 +154,17 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             "Internal",
             "Software",
         ]
-        self.camera_parameters["cooling"] = True
-
-        cooling_state = self.camera_controller.get_property_value("cooling")
+        cooling_state = self._discrete_value(
+            self.camera_controller.get_property_value("cooling")
+        )
+        self.camera_parameters["cooling"] = bool(
+            cooling_state in (1, 2)
+            and self.camera_controller.is_property_writable("cooling")
+        )
         parameters = self.configuration["experiment"]["CameraParameters"][
             self.microscope_name
         ]
-        if "cooling" not in parameters and cooling_state is not False:
+        if "cooling" not in parameters and cooling_state in (1, 2):
             parameters["cooling"] = "On" if cooling_state == 2 else "Off"
 
         self._image_format = CameraImageFormat()
@@ -1230,14 +1234,18 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             self.camera_controller.fire_software_trigger()
 
     def set_cooling(self, cooling: str) -> None:
-        """Set camera cooling mode and temperature.
+        """Set adjustable cooling, leaving fixed camera cooling at its own setting.
 
         Parameters
         ----------
         cooling : str
             'On' or 'Off'
         """
-        if self.camera_parameters["cooling"] is False or cooling == "Off":
+        if not self.camera_parameters.get("cooling", False) or not (
+            self.camera_controller.is_property_writable("cooling")
+        ):
+            return
+        if cooling == "Off":
             self.camera_controller.set_property_value("cooling", 1)
             logger.info("Camera cooling turned Off.")
         # 1: "Off", 2: "On"
@@ -1309,9 +1317,6 @@ class HamamatsuOrcaQuest2Camera(HamamatsuBase):
         self.minimum_frame_interval = 0.0
         self.x_pixels = int(self.camera_parameters["x_pixels"])
         self.y_pixels = int(self.camera_parameters["y_pixels"])
-        self.camera_parameters["cooling"] = (
-            self.camera_controller.get_property_value("cooling") is not False
-        )
 
     def __str__(self) -> str:
         """Return the camera model name."""

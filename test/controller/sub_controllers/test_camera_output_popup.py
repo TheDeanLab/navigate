@@ -2,6 +2,7 @@
 
 import copy
 import multiprocessing
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -120,6 +121,60 @@ def test_three_real_tabs_edit_without_io_and_apply_once(output_popup):
     confirm_outputs(c)
     assert not panel.dirty
     assert not c.parent_controller.configuration_path.exists()
+
+
+@pytest.mark.parametrize("number", [1, 2, 3])
+def test_apply_outputs_and_refresh_keep_selected_timing_tab(output_popup, number):
+    c = output_popup
+    panel = c._output_panel
+    panel.notebook.select(number - 1)
+    edit_outputs(c)
+    c.apply_output_triggers()
+    confirm_outputs(c)
+    assert panel.notebook.tab(panel.notebook.select(), "text") == f"TIMING {number}"
+    c._receive_bit_depth(
+        dict(popup_tests.response(c), output_triggers=c.test_outputs.capabilities())
+    )
+    assert panel.notebook.tab(panel.notebook.select(), "text") == f"TIMING {number}"
+
+
+def test_selected_output_uses_connector_identity_when_tabs_change(output_popup):
+    panel = output_popup._output_panel
+    panel.notebook.select(2)
+    capabilities = output_popup.test_outputs.capabilities()
+    del capabilities["connectors"]["1"]
+    panel.populate(capabilities)
+    assert panel.notebook.tab(panel.notebook.select(), "text") == "TIMING 3"
+    del capabilities["connectors"]["3"]
+    panel.populate(capabilities)
+    assert panel.notebook.tab(panel.notebook.select(), "text") == "TIMING 2"
+
+
+@pytest.mark.parametrize("saved", [None, "On"])
+def test_fixed_cooling_does_not_send_commands_or_save_display_label(
+    output_popup, saved
+):
+    c = output_popup
+    parameters = c.parent_controller.configuration["experiment"]["CameraParameters"][
+        "scope"
+    ]
+    if saved is not None:
+        parameters["cooling"] = saved
+    c.camera_setting_dict = parameters
+    c.local_config_controller = SimpleNamespace(camera_config_dict={"cooling": False})
+    c.set_cooling_state()
+    assert c.view.inputs["cooling"].get() == "Not adjustable"
+    assert str(c.view.inputs["cooling"]["state"]) == "disabled"
+    c.parent_controller.execute.assert_not_called()
+    assert c.save_camera_settings()
+    defaults = yaml.safe_load(c.parent_controller.configuration_path.read_text())[
+        "microscopes"
+    ]["scope"]["camera"]["advanced_settings"]
+    if saved is None:
+        assert "cooling" not in parameters
+        assert "cooling" not in defaults
+    else:
+        assert parameters["cooling"] == defaults["cooling"] == saved
 
 
 def test_save_updates_proxy_and_defaults_but_never_writes_experiment(

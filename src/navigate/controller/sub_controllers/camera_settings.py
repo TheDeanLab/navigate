@@ -496,7 +496,9 @@ class AdvancedCameraSettingController:
             "CameraParameters"
         ][self.current_microscope]
         parameters["trigger_source"] = self.view.inputs["trigger_source"].get()
-        parameters["cooling"] = self.view.inputs["cooling"].get()
+        cooling = self.view.inputs["cooling"].get()
+        if cooling in ("On", "Off"):
+            parameters["cooling"] = cooling
         self.camera_dict["advanced_settings"] = camera_defaults(parameters)
 
         # Update the camera dictionary in the main configuration.
@@ -585,9 +587,9 @@ class AdvancedCameraSettingController:
             else:
                 self.view.buttons["refresh_temperature"]["state"] = "normal"
         else:
-            cooling_state = "Off"
-            self.view.inputs["cooling"].set("Off")
-            self.view.buttons["refresh_temperature"]["state"] = "disabled"
+            self.view.inputs["cooling"].set("Not adjustable")
+            self.view.inputs["cooling"]["state"] = "disabled"
+            return
 
         # set the cooling state in the experiment configuration for the same camera
         self.camera_setting_dict["cooling"] = cooling_state
@@ -714,7 +716,7 @@ class AdvancedCameraSettingController:
             self.view.inputs["cooling"].set(cooling)
             self.view.inputs["cooling"]["state"] = "readonly"
         else:
-            self.view.inputs["cooling"].set("Off")
+            self.view.inputs["cooling"].set("Not adjustable")
             self.view.inputs["cooling"]["state"] = "disabled"
 
         self.refresh_bit_depth()

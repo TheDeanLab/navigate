@@ -51,6 +51,8 @@ class CameraOutputSettings(ttk.LabelFrame):
         self, capabilities: dict, saved: Optional[dict] = None, busy: bool = False
     ) -> None:
         """Display fresh readbacks and retain inactive programmable selections."""
+        selected = self.notebook.select()
+        selected_label = self.notebook.tab(selected, "text") if selected else None
         for child in self.notebook.winfo_children():
             child.destroy()
         self.fields = {}
@@ -65,9 +67,10 @@ class CameraOutputSettings(ttk.LabelFrame):
             groups["shared"] = capabilities["shared"]
         for number, fields in groups.items():
             frame = ttk.Frame(self.notebook)
-            self.notebook.add(
-                frame, text="Shared" if number == "shared" else f"TIMING {number}"
-            )
+            label = "Shared" if number == "shared" else f"TIMING {number}"
+            self.notebook.add(frame, text=label)
+            if label == selected_label:
+                self.notebook.select(frame)
             stored = (
                 saved.get("shared", {})
                 if number == "shared"

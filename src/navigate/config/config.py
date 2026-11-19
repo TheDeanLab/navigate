@@ -478,6 +478,10 @@ def verify_experiment_config(manager, configuration):
             if camera_setting_dict[k] < 1:
                 camera_setting_dict[k] = camera_parameters_dict_sample[k]
 
+    from navigate.config.camera_settings import seed_camera_defaults
+
+    seed_camera_defaults(configuration)
+
     # stage parameters
     stage_dict_sample = {}
     device_config = configuration["configuration"]["microscopes"]
@@ -621,7 +625,9 @@ def verify_experiment_config(manager, configuration):
         ]
     ]
     number_of_filter_wheels = len(
-        configuration["configuration"]["microscopes"][microscope_name].get("filter_wheel", [])
+        configuration["configuration"]["microscopes"][microscope_name].get(
+            "filter_wheel", []
+        )
     )
     filterwheel_list = [
         list(filter_wheel_config["available_filters"].keys())

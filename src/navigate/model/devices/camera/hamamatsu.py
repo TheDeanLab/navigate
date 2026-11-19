@@ -40,6 +40,7 @@ from typing import Any, Optional
 
 # Local Imports
 from navigate.model.devices.camera.base import CameraBase
+from navigate.model.devices.camera.hamamatsu_outputs import HamamatsuOutputTriggers
 from navigate.model.devices.camera.format import (
     CameraExposureTiming,
     CameraImageFormat,
@@ -112,16 +113,19 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         self.camera_parameters["y_pixels"] = self.camera_controller.max_image_height
         self.camera_parameters["x_pixels_min"] = self.camera_controller.min_image_width
         self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
-        self.camera_parameters[
-            "x_pixels_step"
-        ] = self.camera_controller.step_image_width
-        self.camera_parameters[
-            "y_pixels_step"
-        ] = self.camera_controller.step_image_height
+        self.camera_parameters["x_pixels_step"] = (
+            self.camera_controller.step_image_width
+        )
+        self.camera_parameters["y_pixels_step"] = (
+            self.camera_controller.step_image_height
+        )
         self.minimum_exposure_time, _, _ = self.camera_controller.get_property_range(
             "exposure_time"
         )
 
+        from navigate.config.camera_settings import seed_camera_defaults
+
+        seed_camera_defaults(configuration)
         #: object: Camera controller
         if "scan_speed" not in configuration["experiment"]["CameraParameters"][
             microscope_name
@@ -134,9 +138,9 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             else:
                 self.camera_controller.set_property_value("readout_speed", 1)
 
-        self.camera_parameters[
-            "pixel_size_in_microns"
-        ] = self.camera_controller.get_property_value("pixel_width")
+        self.camera_parameters["pixel_size_in_microns"] = (
+            self.camera_controller.get_property_value("pixel_width")
+        )
 
         # Values are pulled from the CameraParameters section of the configuration.yml
         # file. Exposure time converted here from milliseconds to seconds.
@@ -153,9 +157,11 @@ class HamamatsuBase(CameraBase, SequenceDevice):
         self.camera_parameters["cooling"] = True
 
         cooling_state = self.camera_controller.get_property_value("cooling")
-        self.configuration["experiment"]["CameraParameters"][self.microscope_name][
-            "cooling"
-        ] = ("On" if cooling_state == 2 else "Off")
+        parameters = self.configuration["experiment"]["CameraParameters"][
+            self.microscope_name
+        ]
+        if "cooling" not in parameters and cooling_state is not False:
+            parameters["cooling"] = "On" if cooling_state == 2 else "Off"
 
         self._image_format = CameraImageFormat()
         self._bit_depth_error = None
@@ -165,6 +171,29 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             # Keep the settings popup available to explain an unsupported layout.
             # Acquisition remains blocked until the device is reconfigured/reopened.
             self._bit_depth_error = str(exc)
+
+    def _output_triggers(self) -> HamamatsuOutputTriggers:
+        """Build a property-only timing-output adapter for the current sensor mode."""
+        return HamamatsuOutputTriggers(
+            self.camera_controller,
+            lightsheet=self.camera_controller.get_property_value("sensor_mode") == 12,
+        )
+
+    def get_output_trigger_capabilities(self) -> dict:
+        """Discover Hamamatsu output fields without changing their state."""
+        result = self._output_triggers().capabilities()
+        result["reason"] = self._setting_error() or (
+            "Stop acquisition to change timing outputs." if self.is_acquiring else ""
+        )
+        return result
+
+    def set_output_triggers(self, settings: dict) -> dict:
+        """Apply an idle connector transaction and return confirmed selections."""
+        if self.is_acquiring or self._setting_error():
+            raise RuntimeError(
+                self._setting_error() or "Stop acquisition to change timing outputs."
+            )
+        return self._output_triggers().apply(settings)
 
     def get_bit_depth(self) -> Optional[int]:
         """Read the SDK's meaningful output depth, leaving missing values unknown."""
@@ -449,6 +478,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             "properties": {**sensor, **previous, **mode, **corrections, **timing},
             "timing_properties": self._refresh_named_timing(),
         }
+        snapshot["outputs"] = self._output_triggers().snapshot()
         if setting == "sensor_mode":
             snapshot["geometry"] = self._refresh_sensor_geometry(strict=True)
         return snapshot
@@ -476,6 +506,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 previous["properties"], previous.get("geometry")
             )
             self._refresh_named_timing(previous["timing_properties"])
+            self._output_triggers().restore(previous.get("outputs", {}))
         except Exception:
             self.camera_controller._advanced_settings_error = (
                 "Camera settings restoration failed; reconnect before acquiring."
@@ -567,6 +598,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 and sdk.get_property_value("image_pixel_type") == 1
             ):
                 previous = self._snapshot_depth_settings()
+                output_snapshot = self._output_triggers().snapshot()
                 try:
                     if (
                         not sdk.set_property_value("image_pixel_type", 2)
@@ -578,6 +610,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                     wide_current = self.get_bit_depth()
                 finally:
                     self._restore_depth_settings(previous)
+                    self._output_triggers().restore(output_snapshot)
             if not depth_writable and pixel_switch:
                 values = () if wide_current is None else (wide_current,)
             discovered = {
@@ -716,6 +749,7 @@ class HamamatsuBase(CameraBase, SequenceDevice):
             raise RuntimeError(capability.reason)
         sdk = self.camera_controller
         previous = self._snapshot_depth_settings()
+        output_snapshot = self._output_triggers().snapshot()
         if previous["bits_per_channel"] != capability.current_value:
             raise RuntimeError(
                 "Cannot confirm the camera format snapshot before changing depth."
@@ -742,8 +776,10 @@ class HamamatsuBase(CameraBase, SequenceDevice):
                 raise RuntimeError("Camera did not confirm the requested bit depth.")
             self._refresh_image_format()
             self._refresh_depth_timing()
+            self._output_triggers().restore(output_snapshot)
         except Exception as exc:
             self._restore_depth_settings(previous)
+            self._output_triggers().restore(output_snapshot)
             raise RuntimeError(
                 f"Camera bit-depth change failed and was restored: {exc}"
             ) from exc

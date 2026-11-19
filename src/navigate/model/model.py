@@ -420,9 +420,9 @@ class Model:
         }
         # append plugin acquisition mode
         for mode in self.plugin_acquisition_modes:
-            self.acquisition_modes_feature_setting[
-                mode
-            ] = self.plugin_acquisition_modes[mode].feature_list
+            self.acquisition_modes_feature_setting[mode] = (
+                self.plugin_acquisition_modes[mode].feature_list
+            )
 
         self.load_feature_records()
 
@@ -462,9 +462,11 @@ class Model:
         if busy or identity in blocked or invalid_request:
             reason = blocked.get(
                 identity,
-                "Stop acquisition to change camera settings."
-                if busy
-                else invalid_request,
+                (
+                    "Stop acquisition to change camera settings."
+                    if busy
+                    else invalid_request
+                ),
             )
             result["capability"] = CameraSettingCapability(
                 current_value=(
@@ -484,6 +486,22 @@ class Model:
             result["capabilities"]["bit_depth"] = result["capability"]
             if writing:
                 result["error"] = reason
+            return result
+        if request.get("setting") == "output_triggers":
+            # Keep output writes independent of legacy bit-depth probing and buffers.
+            result["outputs_only"] = True
+            try:
+                self._prepared_camera_token = None
+                confirmed = camera.set_output_triggers(request.get("value"))
+                self.configuration["experiment"]["CameraParameters"][name][
+                    "output_triggers"
+                ] = confirmed
+            except Exception as error:
+                result["error"] = str(error)
+            try:
+                result["output_triggers"] = camera.get_output_trigger_capabilities()
+            except Exception as error:
+                result["output_triggers"] = {"supported": False, "reason": str(error)}
             return result
         try:
             capabilities = camera.get_advanced_setting_capabilities()
@@ -537,9 +555,9 @@ class Model:
                         ):
                             raise RuntimeError("Rollback readback failed")
                     except Exception as rollback_error:
-                        blocked[
-                            identity
-                        ] = "Camera restoration failed. Reconnect before acquiring."
+                        blocked[identity] = (
+                            "Camera restoration failed. Reconnect before acquiring."
+                        )
                         self._camera_format_errors = blocked
                         raise RuntimeError(blocked[identity]) from rollback_error
                     raise
@@ -567,6 +585,11 @@ class Model:
                         "sensor_mode",
                     )
                 }
+        # Output discovery has its own response: it never performs bit-depth probes.
+        try:
+            result["output_triggers"] = camera.get_output_trigger_capabilities()
+        except Exception as error:
+            result["output_triggers"] = {"supported": False, "reason": str(error)}
         return result
 
     def _apply_advanced_camera_setting(
@@ -619,9 +642,9 @@ class Model:
             try:
                 camera.restore_advanced_settings(previous)
             except Exception as rollback_error:
-                blocked[
-                    identity
-                ] = "Camera restoration failed. Reconnect before acquiring."
+                blocked[identity] = (
+                    "Camera restoration failed. Reconnect before acquiring."
+                )
                 self._camera_format_errors = blocked
                 raise RuntimeError(blocked[identity]) from rollback_error
             raise

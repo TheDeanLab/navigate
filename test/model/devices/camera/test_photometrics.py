@@ -58,9 +58,13 @@ class FakePhotometricsController:
         self.poll_exception = None
         self.poll_payload = np.array([[1, 2], [3, 4]], dtype=np.uint16)
         self.poll_timeout_ms = None
+        # Lets tests simulate PyVCAM's close() raising when the camera isn't clean.
+        self.close_exception = None
 
     def close(self):
         self.close_calls += 1
+        if self.close_exception is not None:
+            raise self.close_exception
 
     def start_live(self, exposure_time=None):
         self.start_live_calls.append(exposure_time)
@@ -239,7 +243,9 @@ def test_initialize_image_series_in_both_modes_and_close(photometrics_camera):
     assert camera.is_acquiring is True
     assert camera._frames_received == 0
     assert camera._frame_ids == []
-    assert controller.start_live_calls[-1] is None
+    # initialize_image_series() now arms with the current exposure time (default
+    # 20ms) instead of a bare start_live(), so the trigger isn't missed later.
+    assert controller.start_live_calls[-1] == 20
 
     camera._scan_delay = 11
     controller.prog_scan_mode = 1
@@ -261,7 +267,8 @@ def test_receive_images_success_wraparound_and_error_path(photometrics_camera):
     camera._frames_received = 1
     frame_ids = camera.get_new_frame()
     assert frame_ids == [1]
-    assert controller.poll_timeout_ms == 10000
+    # 500ms matches model.py's camera_wait_iterations convention (20 * 500ms = 10s).
+    assert controller.poll_timeout_ms == 500
     assert np.array_equal(data_buffer[1], controller.poll_payload)
     assert camera._frames_received == 0
 
@@ -269,8 +276,55 @@ def test_receive_images_success_wraparound_and_error_path(photometrics_camera):
     assert camera.get_new_frame() == []
 
 
+def test_receive_images_runtime_error_is_swallowed_silently(
+    photometrics_module, photometrics_camera, monkeypatch
+):
+    # PVCAM signals "no frame yet" via RuntimeError; this must stay a quiet
+    # retry signal (like DCAM's empty-list return), not a logged error.
+    camera, controller = photometrics_camera
+    camera.initialize_image_series([np.zeros((2, 2), dtype=np.uint16)], 1)
+    controller.poll_exception = RuntimeError("Acquisition not active.")
+
+    mock_exception = MagicMock()
+    monkeypatch.setattr(photometrics_module.logger, "exception", mock_exception)
+
+    assert camera.get_new_frame() == []
+    mock_exception.assert_not_called()
+
+
+def test_receive_images_unexpected_error_is_logged(
+    photometrics_module, photometrics_camera, monkeypatch
+):
+    # A non-RuntimeError from poll_frame is a real bug, not an expected "no
+    # frame yet" condition, so it must still surface via logger.exception.
+    camera, controller = photometrics_camera
+    camera.initialize_image_series([np.zeros((2, 2), dtype=np.uint16)], 1)
+    controller.poll_exception = ValueError("unexpected SDK failure")
+
+    mock_exception = MagicMock()
+    monkeypatch.setattr(photometrics_module.logger, "exception", mock_exception)
+
+    assert camera.get_new_frame() == []
+    mock_exception.assert_called_once()
+
+
 def test_destructor_closes_controller(photometrics_camera):
     camera, controller = photometrics_camera
 
     camera.__del__()
     assert controller.close_calls == 1
+
+
+def test_close_camera_and_destructor_swallow_close_runtime_error(
+    photometrics_camera,
+):
+    # PyVCAM's close() raises RuntimeError if the camera isn't perfectly idle
+    # (unlike DCAM's dev_close()); both call sites must log, not propagate.
+    camera, controller = photometrics_camera
+
+    controller.close_exception = RuntimeError("Failed to close camera.")
+    camera.close_camera()  # must not raise
+    assert controller.close_calls == 1
+
+    camera.__del__()  # must not raise either
+    assert controller.close_calls == 2

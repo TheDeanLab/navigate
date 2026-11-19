@@ -276,9 +276,7 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         try:
             self.camera_controller.close()
         except RuntimeError:
-            logger.debug(
-                "Photometrics: close() failed, camera may already be closed."
-            )
+            logger.debug("Photometrics: close() failed, camera may already be closed.")
 
     def set_sensor_mode(self, mode: str) -> None:
         """Set Photometrics sensor mode
@@ -613,9 +611,7 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         # budget (e.g. waiting out a phantom "next frame" that will never
         # arrive after the last real one).
         try:
-            frame, fps, frame_count = self.camera_controller.poll_frame(
-                timeout_ms=500
-            )
+            frame, fps, frame_count = self.camera_controller.poll_frame(timeout_ms=500)
             self._data_buffer[self._frames_received][:, :] = np.copy(
                 frame["pixel_data"][:]
             )
@@ -636,9 +632,7 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
             # DCAM does: a quiet "try again" signal, not a logged error.
             pass
         except Exception:
-            logger.exception(
-                "Photometrics: unexpected error while polling for a frame"
-            )
+            logger.exception("Photometrics: unexpected error while polling for a frame")
 
         return []
 

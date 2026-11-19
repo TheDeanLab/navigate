@@ -420,9 +420,9 @@ class Model:
         }
         # append plugin acquisition mode
         for mode in self.plugin_acquisition_modes:
-            self.acquisition_modes_feature_setting[
-                mode
-            ] = self.plugin_acquisition_modes[mode].feature_list
+            self.acquisition_modes_feature_setting[mode] = (
+                self.plugin_acquisition_modes[mode].feature_list
+            )
 
         self.load_feature_records()
 
@@ -511,9 +511,9 @@ class Model:
                         ):
                             raise RuntimeError("Rollback readback failed")
                     except Exception as rollback_error:
-                        blocked[
-                            identity
-                        ] = "Camera restoration failed. Reconnect before acquiring."
+                        blocked[identity] = (
+                            "Camera restoration failed. Reconnect before acquiring."
+                        )
                         self._camera_format_errors = blocked
                         raise RuntimeError(blocked[identity]) from rollback_error
                     raise

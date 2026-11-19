@@ -1356,6 +1356,14 @@ class Model:
                 )
                 wait_num -= 1
 
+                # poll_frame() can return immediately instead of blocking for
+                # timeout_ms if the camera backend reports "no acquisition active"
+                # rather than "still waiting for data" (e.g. PVCAM before an
+                # external trigger has arrived). Without a sleep here, the retry
+                # budget below can be exhausted in well under a millisecond,
+                # leaving no real time for the trigger to actually arrive.
+                time.sleep(0.1)
+
                 # If no frames received within the wait limit, abort acquisition
                 if wait_num <= 0:
                     error_statement = (

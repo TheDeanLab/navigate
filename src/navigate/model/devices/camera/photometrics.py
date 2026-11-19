@@ -593,21 +593,7 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         self.is_acquiring = True
 
         # Arm the acquisition once, with the current exposure time already set.
-        logger.debug(
-            f"DIAG: about to start_live. exp_mode={self.camera_controller.exp_mode}, "
-            f"exp_out_mode={self.camera_controller.exp_out_mode}, "
-            f"exp_time={self._exposure_time}, "
-            f"available exp_modes={dict(self.camera_controller.exp_modes)}"
-        )
-        try:
-            self.camera_controller.start_live(self._exposure_time)
-        except Exception:
-            logger.exception("DIAG: start_live raised an exception")
-            raise
-        logger.debug(
-            f"DIAG: start_live returned. check_frame_status="
-            f"{self.camera_controller.check_frame_status()}"
-        )
+        self.camera_controller.start_live(self._exposure_time)
 
     def _receive_images(self) -> list[int]:
         """

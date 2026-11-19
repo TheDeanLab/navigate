@@ -125,14 +125,26 @@ class TestCameraSettingController:
             self.camera_settings.roi_widgets["Width"].widget.cget("to")
             == self.camera_settings.default_width
         )
-        assert self.camera_settings.roi_widgets["Width"].widget.cget("from") == 2
-        assert self.camera_settings.roi_widgets["Width"].widget.cget("increment") == 2
+        assert (
+            self.camera_settings.roi_widgets["Width"].widget.cget("from")
+            == self.camera_settings.min_width
+        )
+        assert (
+            self.camera_settings.roi_widgets["Width"].widget.cget("increment")
+            == self.camera_settings.step_width
+        )
         assert (
             self.camera_settings.roi_widgets["Height"].widget.cget("to")
             == self.camera_settings.default_height
         )
-        assert self.camera_settings.roi_widgets["Height"].widget.cget("from") == 2
-        assert self.camera_settings.roi_widgets["Height"].widget.cget("increment") == 2
+        assert (
+            self.camera_settings.roi_widgets["Height"].widget.cget("from")
+            == self.camera_settings.min_height
+        )
+        assert (
+            self.camera_settings.roi_widgets["Height"].widget.cget("increment")
+            == self.camera_settings.step_height
+        )
 
         # Set binning options
         assert list(self.camera_settings.roi_widgets["Binning"].widget["values"]) == [
@@ -257,8 +269,8 @@ class TestCameraSettingController:
         "mode,width,height,expected_img_width,expected_img_height",
         [
             ("Normal", 1333, 777, 332, 192),
-            ("Light-Sheet", 1, 1, 4, 4),
-            ("Light-Sheet", 1333, 777, 1332, 776),
+            ("Light-Sheet", 8, 8, 8, 8),
+            ("Light-Sheet", 1337, 777, 1336, 776),
         ],
     )
     def test_update_experiment_values(
@@ -287,7 +299,7 @@ class TestCameraSettingController:
         self.camera_settings.roi_widgets["Height"].set(height)
 
         # Update experiment dict and assert
-        self.camera_settings.update_experiment_values()
+        assert self.camera_settings.update_experiment_values() == ""
         assert self.camera_settings.camera_setting_dict["sensor_mode"] == mode
         if mode == "Light-Sheet":
             assert (

@@ -284,6 +284,8 @@ class TiffDataSource(DataSource):
                 "timepoint": self._current_time,
                 "notes": self.metadata.misc,
             }
+            if getattr(self, "camera_settings", None):
+                md["camera_settings"] = dict(self.camera_settings)
             if self.significant_bits is not None:
                 md["camera_bit_depth"] = self.significant_bits
             resolution = (1e4 / dx, 1e4 / dy)

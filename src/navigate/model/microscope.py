@@ -511,6 +511,9 @@ class Microscope:
         for name in ("defect_correction", "hot_pixel_correction"):
             if name in parameters:
                 value = parameters[name]
+                if value == "Unknown":
+                    # if value is unknown, we don't set it, because the camera doesn't support it
+                    continue
                 if self.camera.set_advanced_setting(name, value) != value:
                     raise RuntimeError(f"Saved camera {name} was not confirmed.")
         read_setting = getattr(self.camera, "get_advanced_setting", lambda name: None)

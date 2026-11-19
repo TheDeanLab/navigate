@@ -186,6 +186,30 @@ def test_microscope_applies_optional_depth_after_mode_and_roi(saved):
     assert calls == ["trigger", "sensor", "roi"] + ([] if saved is None else ["depth"])
 
 
+@pytest.mark.parametrize(
+    "unsupported,supported,value",
+    [
+        ("defect_correction", "hot_pixel_correction", 3),
+        ("hot_pixel_correction", "defect_correction", 1),
+    ],
+)
+def test_microscope_skips_unknown_correction_and_applies_supported_correction(
+    unsupported: str, supported: str, value: int
+) -> None:
+    m = Microscope.__new__(Microscope)
+    m.microscope_name = "scope"
+    m.camera = Camera()
+    m.set_camera_trigger_mode = Mock()
+    m.set_camera_sensor_mode = Mock()
+    m.set_camera_roi_and_binning = Mock(return_value=True)
+    m.camera.set_advanced_setting = Mock(return_value=value)
+    parameters = {unsupported: "Unknown", supported: value}
+    m.configuration = {"experiment": {"CameraParameters": {"scope": parameters}}}
+
+    assert m.configure_camera() == CameraImageFormat.for_bit_depth(16)
+    m.camera.set_advanced_setting.assert_called_once_with(supported, value)
+
+
 def test_busy_read_does_not_query_sdk(model):
     model.is_acquiring = True
     model.active_microscope.camera.get_advanced_setting_capabilities = Mock(

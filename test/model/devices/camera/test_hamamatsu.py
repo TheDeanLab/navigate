@@ -76,8 +76,9 @@ def test_generate_new_frame_only_triggers_active_camera(
 
 
 @pytest.mark.parametrize("cooling_value", [False, 2])
+@pytest.mark.parametrize("cooling_writable", [False, True])
 def test_quest2_camera_profile_and_software_trigger(
-    hamamatsu_camera_class, cooling_value
+    hamamatsu_camera_class, cooling_value, cooling_writable
 ):
     """Quest 2 uses sensor geometry and triggers without Flash-specific modes."""
     from navigate.config.configuration_database import camera_device_types
@@ -93,6 +94,7 @@ def test_quest2_camera_profile_and_software_trigger(
     connection.min_image_width = connection.min_image_height = 8
     connection.step_image_width = connection.step_image_height = 8
     connection.get_property_range.return_value = (0.001, 1, 0.001)
+    connection.is_property_writable.return_value = cooling_writable
     connection.get_property_value.side_effect = lambda name: {
         "readout_speed": 1,
         "pixel_width": 4.6,
@@ -109,7 +111,12 @@ def test_quest2_camera_profile_and_software_trigger(
     assert parameters["y_pixels"] == 2304
     assert (camera.x_pixels, camera.y_pixels) == (4096, 2304)
     assert parameters["supported_sensor_modes"] == ["Normal", "Light-Sheet"]
-    assert parameters["cooling"] is (cooling_value is not False)
+    assert parameters["cooling"] is (cooling_value is not False and cooling_writable)
+    saved = configuration["experiment"]["CameraParameters"]["Quest2"]
+    if cooling_value is False:
+        assert "cooling" not in saved
+    else:
+        assert saved["cooling"] == "On"
     assert parameters["pixel_size_in_microns"] == 4.6
     assert str(camera) == "HamamatsuOrcaQuest2"
     camera.set_trigger_mode("Software")
@@ -117,6 +124,27 @@ def test_quest2_camera_profile_and_software_trigger(
     camera.is_acquiring = True
     camera.generate_new_frame()
     connection.fire_software_trigger.assert_called_once_with()
+
+
+@pytest.mark.parametrize("state,expected", [("Off", 1), ("On", 2)])
+@pytest.mark.parametrize("advertised", [False, True])
+@pytest.mark.parametrize("writable", [False, True])
+def test_cooling_writes_only_when_supported_and_writable(
+    hamamatsu_camera_class, state, expected, advertised, writable
+):
+    camera = object.__new__(hamamatsu_camera_class)
+    camera.camera_parameters = {"cooling": advertised}
+    camera.camera_controller = MagicMock()
+    camera.camera_controller.is_property_writable.return_value = writable
+
+    camera.set_cooling(state)
+
+    if advertised and writable:
+        camera.camera_controller.set_property_value.assert_called_once_with(
+            "cooling", expected
+        )
+    else:
+        camera.camera_controller.set_property_value.assert_not_called()
 
 
 @pytest.fixture(scope="module")

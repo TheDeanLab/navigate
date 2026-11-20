@@ -252,6 +252,108 @@ def test_run_data_process_drains_pending_frames_after_signal_completion():
     assert show_img_pipe.sent == [2, "stop"]
 
 
+def test_run_data_process_retries_then_recovers(monkeypatch):
+    # Camera returns no frame a couple of times before delivering one; the
+    # retry loop must sleep between attempts (not spin) and still recover.
+    from navigate.model.model import Model
+
+    sleep_calls = []
+    monkeypatch.setattr(
+        "navigate.model.model.time.sleep", lambda s: sleep_calls.append(s)
+    )
+
+    class FakeCamera:
+        def __init__(self):
+            self.frames = [[], [], [0]]
+
+        def get_new_frame(self):
+            return self.frames.pop(0)
+
+    class FakePipe:
+        def __init__(self):
+            self.sent = []
+
+        def send(self, value):
+            self.sent.append(value)
+
+    show_img_pipe = FakePipe()
+    model = SimpleNamespace(
+        active_microscope=SimpleNamespace(camera=FakeCamera()),
+        ask_to_pause_data_thread=False,
+        camera_wait_iterations=5,
+        event_queue=MagicMock(),
+        imaging_mode="single",
+        logger=MagicMock(),
+        pause_data_ready_lock=MagicMock(locked=MagicMock(return_value=False)),
+        show_img_pipe=show_img_pipe,
+        signal_acquisition_complete=False,
+        stop_acquisition=False,
+    )
+    model.end_acquisition = MagicMock()
+    model._should_drain_signal_completed_frames = (
+        Model._should_drain_signal_completed_frames.__get__(model, type(model))
+    )
+
+    # num_of_frames=1 lets the loop's own "Loop stop condition met" path end
+    # it once the real frame arrives, rather than relying on an external flag.
+    Model.run_data_process(model, num_of_frames=1)
+
+    assert show_img_pipe.sent == [0, "stop"]
+    assert len(sleep_calls) == 2  # one sleep per failed attempt before the frame
+
+
+def test_run_data_process_times_out_after_exhausting_wait_budget(monkeypatch):
+    # Camera never delivers a frame; the loop must sleep on every attempt
+    # (not spin through camera_wait_iterations instantly) before giving up.
+    from navigate.model.model import Model
+
+    sleep_calls = []
+    monkeypatch.setattr(
+        "navigate.model.model.time.sleep", lambda s: sleep_calls.append(s)
+    )
+
+    class FakeCamera:
+        def get_new_frame(self):
+            return []
+
+    class FakePipe:
+        def __init__(self):
+            self.sent = []
+
+        def send(self, value):
+            self.sent.append(value)
+
+    show_img_pipe = FakePipe()
+    event_queue = MagicMock()
+    model = SimpleNamespace(
+        active_microscope=SimpleNamespace(camera=FakeCamera()),
+        ask_to_pause_data_thread=False,
+        camera_wait_iterations=3,
+        event_queue=event_queue,
+        imaging_mode="single",
+        logger=MagicMock(),
+        pause_data_ready_lock=MagicMock(locked=MagicMock(return_value=False)),
+        show_img_pipe=show_img_pipe,
+        signal_acquisition_complete=False,
+        stop_acquisition=False,
+    )
+    model.end_acquisition = MagicMock()
+    model._should_drain_signal_completed_frames = (
+        Model._should_drain_signal_completed_frames.__get__(model, type(model))
+    )
+
+    Model.run_data_process(model)
+
+    assert len(sleep_calls) == 3  # matches camera_wait_iterations
+    assert show_img_pipe.sent == ["stop"]
+    warnings = [
+        call.args[0]
+        for call in event_queue.put.call_args_list
+        if call.args[0][0] == "warning"
+    ]
+    assert len(warnings) == 1
+
+
 def test_stop_command_resumes_data_thread_before_joining():
     from navigate.model.model import Model
 

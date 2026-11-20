@@ -204,7 +204,12 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
     def __del__(self):
         """Delete PhotometricsBase object."""
         if hasattr(self, "camera_controller"):
-            self.camera_controller.close()
+            try:
+                self.camera_controller.close()
+            except RuntimeError:
+                logger.debug(
+                    "Photometrics: close() failed, camera may already be closed."
+                )
 
     @classmethod
     def get_connect_params(cls) -> list[str]:
@@ -268,7 +273,10 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
 
     def close_camera(self):
         """Close Photometrics Camera"""
-        self.camera_controller.close()
+        try:
+            self.camera_controller.close()
+        except RuntimeError:
+            logger.debug("Photometrics: close() failed, camera may already be closed.")
 
     def set_sensor_mode(self, mode: str) -> None:
         """Set Photometrics sensor mode
@@ -369,6 +377,11 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         """
         self._exposure_time = int(exposure_time * 1000)
         self.camera_controller.exp_time = self._exposure_time
+        # Re-arm close to trigger time: the initial arm in initialize_image_series()
+        # can go stale (PVCAM reports READOUT_NOT_ACTIVE) before the DAQ's external
+        # trigger actually fires. This call runs immediately before
+        # daq.run_acquisition() in the per-channel signal cycle, so re-arming here
+        # keeps the acquisition live right up to when the real trigger arrives.
         self.camera_controller.start_live(self._exposure_time)
         return True
 
@@ -577,11 +590,8 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
         #: bool: Acquisition flag
         self.is_acquiring = True
 
-        # Start camera - call it here as there are some error messages showing up
-        # a call to the camera here.
-        # Start live will be called a second time from the exposure time function,
-        # with the current exposure time.
-        self.camera_controller.start_live()
+        # Arm the acquisition once, with the current exposure time already set.
+        self.camera_controller.start_live(self._exposure_time)
 
     def _receive_images(self) -> list[int]:
         """
@@ -595,10 +605,13 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
             data buffer
         """
         # Try to grap the next frame from camera
+        # model.py's retry loop (camera_wait_iterations) is designed around
+        # attempts of ~500ms each; a longer per-attempt timeout here means a
+        # single blocking poll_frame call can eat the entire intended retry
+        # budget (e.g. waiting out a phantom "next frame" that will never
+        # arrive after the last real one).
         try:
-            frame, fps, frame_count = self.camera_controller.poll_frame(
-                timeout_ms=10000
-            )
+            frame, fps, frame_count = self.camera_controller.poll_frame(timeout_ms=500)
             self._data_buffer[self._frames_received][:, :] = np.copy(
                 frame["pixel_data"][:]
             )
@@ -612,8 +625,14 @@ class PhotometricsCamera(CameraBase, IntegratedDevice):
                 self._frames_received = 0
             return frame_to_return
 
-        except Exception as e:
-            print(str(e))
+        except RuntimeError:
+            # PVCAM signals "no frame yet" (not-active, timeout, aborted, ...)
+            # by raising RuntimeError, unlike Hamamatsu/DCAM's get_frames(),
+            # which just returns [] on a timed-out wait. Treat it the same way
+            # DCAM does: a quiet "try again" signal, not a logged error.
+            pass
+        except Exception:
+            logger.exception("Photometrics: unexpected error while polling for a frame")
 
         return []
 

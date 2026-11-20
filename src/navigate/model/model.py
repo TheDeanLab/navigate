@@ -420,9 +420,9 @@ class Model:
         }
         # append plugin acquisition mode
         for mode in self.plugin_acquisition_modes:
-            self.acquisition_modes_feature_setting[
-                mode
-            ] = self.plugin_acquisition_modes[mode].feature_list
+            self.acquisition_modes_feature_setting[mode] = (
+                self.plugin_acquisition_modes[mode].feature_list
+            )
 
         self.load_feature_records()
 
@@ -537,9 +537,9 @@ class Model:
                         ):
                             raise RuntimeError("Rollback readback failed")
                     except Exception as rollback_error:
-                        blocked[
-                            identity
-                        ] = "Camera restoration failed. Reconnect before acquiring."
+                        blocked[identity] = (
+                            "Camera restoration failed. Reconnect before acquiring."
+                        )
                         self._camera_format_errors = blocked
                         raise RuntimeError(blocked[identity]) from rollback_error
                     raise
@@ -1488,6 +1488,14 @@ class Model:
                     f"Expected cause: External trigger not received."
                 )
                 wait_num -= 1
+
+                # poll_frame() can return immediately instead of blocking for
+                # timeout_ms if the camera backend reports "no acquisition active"
+                # rather than "still waiting for data" (e.g. PVCAM before an
+                # external trigger has arrived). Without a sleep here, the retry
+                # budget below can be exhausted in well under a millisecond,
+                # leaving no real time for the trigger to actually arrive.
+                time.sleep(0.1)
 
                 # If no frames received within the wait limit, abort acquisition
                 if wait_num <= 0:

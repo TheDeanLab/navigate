@@ -223,6 +223,18 @@ class OMETIFFMetadata(XMLMetadata):
             }
         }
 
+        if getattr(self, "camera_settings", None):
+            ome_dict["StructuredAnnotations"]["MapAnnotation"] = {
+                "ID": "Annotation:camera_settings",
+                "Namespace": "https://navigate-microscopy.org/camera-settings",
+                "Value": {
+                    "M": [
+                        {"K": name, "text": str(value)}
+                        for name, value in self.camera_settings.items()
+                    ]
+                },
+            }
+            ome_dict["Image"]["AnnotationRef"] = {"ID": "Annotation:camera_settings"}
         return ome_dict
 
     def write_xml(

@@ -45,6 +45,7 @@ from navigate.config import get_navigate_path
 from navigate.config.configuration_schema import SettingSpec
 from navigate.tools.decorators import log_initialization
 from navigate.model.devices.camera.format import (
+    CameraExposureTiming,
     CameraImageFormat,
     CameraSettingCapability,
 )
@@ -61,6 +62,9 @@ class CameraBase(ABC):
     This class provides the interface and common functionality for controlling
     cameras with navigate.
     """
+
+    #: bool: Whether acquisition must confirm exposure timing before planning.
+    requires_exposure_confirmation = False
 
     configuration_schema = {
         "flip_x": SettingSpec(
@@ -195,8 +199,65 @@ class CameraBase(ABC):
             adapters override this to report the settings they can apply.
         """
         return {
-            "bit_depth": CameraSettingCapability(current_value=self.get_bit_depth())
+            "bit_depth": CameraSettingCapability(current_value=self.get_bit_depth()),
+            **{
+                name: CameraSettingCapability()
+                for name in ("scan_speed", "defect_correction", "hot_pixel_correction")
+            },
         }
+
+    def get_advanced_setting(self, name: str) -> Any:
+        """Return a confirmed setting value, or None for unsupported settings."""
+        return (
+            self.get_advanced_setting_capabilities()
+            .get(name, CameraSettingCapability())
+            .current_value
+        )
+
+    def set_advanced_setting(self, name: str, value: Any) -> Any:
+        """Apply a named idle setting; unsupported adapters reject writes."""
+        if name == "bit_depth":
+            return self.set_bit_depth(value)
+        raise ValueError(f"Unsupported camera setting: {name}")
+
+    def snapshot_advanced_settings(self, setting: Optional[str] = None) -> dict:
+        """Capture confirmed settings for an idle model transaction.
+
+        Parameters
+        ----------
+        setting : str, optional
+            Named setting being changed, for mode-specific dependencies.
+        """
+        return {
+            name: capability.current_value
+            for name, capability in self.get_advanced_setting_capabilities().items()
+            if capability.current_value is not None
+        }
+
+    def get_camera_geometry(self) -> dict:
+        """Return confirmed mode-dependent ROI limits, if the adapter provides them."""
+        return {}
+
+    def validate_advanced_settings(self, previous: dict) -> None:
+        """Confirm adapter-specific dependencies after capability refresh.
+
+        Parameters
+        ----------
+        previous : dict
+            Pre-change snapshot identifying dependencies that must remain
+            readable. The base adapter has no additional dependencies.
+        """
+        pass
+
+    def restore_advanced_settings(self, previous: dict) -> None:
+        """Restore a transaction snapshot and verify every saved value."""
+        for name, value in previous.items():
+            if self.get_advanced_setting(name) != value:
+                self.set_advanced_setting(name, value)
+        if any(
+            self.get_advanced_setting(name) != value for name, value in previous.items()
+        ):
+            raise RuntimeError("Camera restoration readback failed.")
 
     def get_bit_depth(self) -> Optional[int]:
         """Return meaningful output bits, or None when the driver cannot query them."""
@@ -291,6 +352,20 @@ class CameraBase(ABC):
     def set_exposure_time(self, exposure_time: float) -> bool:
         """Set the camera exposure time."""
         return True
+
+    def confirm_exposure_timing(
+        self, exposure_time: float, shutter_width: Optional[int] = None
+    ) -> CameraExposureTiming:
+        """Confirm requested sweep seconds while idle, restoring hardware afterward.
+
+        Only adapters opting into ``requires_exposure_confirmation`` implement
+        this method. ``shutter_width`` supplies Light-Sheet slit width in rows.
+        """
+        raise NotImplementedError("This camera does not confirm exposure timing.")
+
+    def get_exposure_time(self) -> Optional[float]:
+        """Return confirmed row exposure seconds, or None when unavailable."""
+        return None
 
     def get_offset_variance_maps(self) -> Any:
         """Get offset and variance maps from file.

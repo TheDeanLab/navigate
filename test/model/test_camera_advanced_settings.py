@@ -186,6 +186,30 @@ def test_microscope_applies_optional_depth_after_mode_and_roi(saved):
     assert calls == ["trigger", "sensor", "roi"] + ([] if saved is None else ["depth"])
 
 
+@pytest.mark.parametrize(
+    "unsupported,supported,value",
+    [
+        ("defect_correction", "hot_pixel_correction", 3),
+        ("hot_pixel_correction", "defect_correction", 1),
+    ],
+)
+def test_microscope_skips_unknown_correction_and_applies_supported_correction(
+    unsupported: str, supported: str, value: int
+) -> None:
+    m = Microscope.__new__(Microscope)
+    m.microscope_name = "scope"
+    m.camera = Camera()
+    m.set_camera_trigger_mode = Mock()
+    m.set_camera_sensor_mode = Mock()
+    m.set_camera_roi_and_binning = Mock(return_value=True)
+    m.camera.set_advanced_setting = Mock(return_value=value)
+    parameters = {unsupported: "Unknown", supported: value}
+    m.configuration = {"experiment": {"CameraParameters": {"scope": parameters}}}
+
+    assert m.configure_camera() == CameraImageFormat.for_bit_depth(16)
+    m.camera.set_advanced_setting.assert_called_once_with(supported, value)
+
+
 def test_busy_read_does_not_query_sdk(model):
     model.is_acquiring = True
     model.active_microscope.camera.get_advanced_setting_capabilities = Mock(
@@ -197,8 +221,9 @@ def test_busy_read_does_not_query_sdk(model):
 
 
 @pytest.mark.parametrize("depth", [8, 12, 16])
+@pytest.mark.parametrize("auxiliary", [False, True])
 def test_synthetic_apply_save_experiment_reload_capture_and_save(
-    model, tmp_path, depth
+    model, tmp_path, depth, auxiliary
 ):
     from queue import Queue
     from types import MethodType
@@ -244,11 +269,47 @@ def test_synthetic_apply_save_experiment_reload_capture_and_save(
     microscope.configure_camera = MethodType(Microscope.configure_camera, microscope)
     result = request(model, identity=request(model)["identity"], bit_depth=depth)
     assert result["error"] is None
+    confirmed_settings = {
+        "scan_speed": 2,
+        "defect_correction": 1,
+        "hot_pixel_correction": 3,
+    }
+    for setting, value in confirmed_settings.items():
+        result = request(
+            model, identity=request(model)["identity"], setting=setting, value=value
+        )
+        assert result["error"] is None
     assert save_yaml_file(str(tmp_path), experiment)
+    camera.set_advanced_setting("scan_speed", 1)
+    camera.set_advanced_setting("defect_correction", 2)
+    camera.set_advanced_setting("hot_pixel_correction", 1)
     camera.set_bit_depth(16)
     model.configuration["experiment"] = load_yaml_file(tmp_path / "experiment.yml")
     frames = model.prepare_camera_buffers("scope")["data_buffer"]
     assert camera.get_bit_depth() == depth
+    assert {
+        name: camera.get_advanced_setting(name) for name in confirmed_settings
+    } == confirmed_settings
+    if auxiliary:
+        # Auxiliary preparation runs on a virtual microscope sharing the camera.
+        # Its final settings can differ from the physical buffer-preparation pass.
+        virtual = SimpleNamespace(**vars(microscope))
+        virtual.configure_camera = MethodType(Microscope.configure_camera, virtual)
+        model.virtual_microscopes["scope"] = virtual
+        confirmed_settings = {
+            "scan_speed": 1,
+            "defect_correction": 2,
+            "hot_pixel_correction": 2,
+        }
+        model.configuration["experiment"]["CameraParameters"]["scope"].update(
+            confirmed_settings
+        )
+        virtual.configure_camera()
+        assert microscope._camera_settings_metadata["scan_speed"] == 2
+    # Pending UI intent must not replace either acquisition's confirmed snapshot.
+    model.configuration["experiment"]["CameraParameters"]["scope"]["scan_speed"] = (
+        2 if auxiliary else 1
+    )
     pattern = np.array(
         [0, 1, 127, 128, 254, (1 << depth) - 1], dtype=frames[0].dtype
     ).reshape(2, 3)
@@ -261,7 +322,11 @@ def test_synthetic_apply_save_experiment_reload_capture_and_save(
     model.imaging_mode = "single"
     model.event_queue = Queue()
     model.stop_acquisition = False
-    writer = ImageWriter(model)
+    writer = (
+        ImageWriter(model, microscope_name="scope", data_buffer=frames)
+        if auxiliary
+        else ImageWriter(model)
+    )
     try:
         writer.save_image([0])
     finally:
@@ -272,6 +337,12 @@ def test_synthetic_apply_save_experiment_reload_capture_and_save(
     with tifffile.TiffFile(filename) as image:
         assert image.pages[0].dtype == frames[0].dtype
         assert f'"camera_bit_depth": {depth}' in image.pages[0].description
+        import json
+
+        assert (
+            json.loads(image.pages[0].description)["camera_settings"]
+            == confirmed_settings
+        )
 
 
 def test_stop_invalidates_prepared_capture_before_start_rpc(model):

@@ -115,7 +115,8 @@ class TestSyntheticCamera:
     def test_synthetic_camera_wheel_method_calls(self):
         self.synthetic_camera.report_settings()
         self.synthetic_camera.close_camera()
-        self.synthetic_camera.set_sensor_mode(mode="test")
+        self.synthetic_camera.set_sensor_mode(mode="Normal")
+        assert self.synthetic_camera.get_advanced_setting("sensor_mode") == 1
         self.synthetic_camera.set_exposure_time(exposure_time=0.2)
         self.synthetic_camera.set_line_interval(line_interval_time=1)
         self.synthetic_camera.set_binning(binning_string="2x2")

@@ -58,20 +58,26 @@ def test_save_camera_settings_writes_to_parent_configuration_path(
         "cooling": MagicMock(get=MagicMock(return_value="Off")),
     }
 
-    with patch(
-        "navigate.controller.sub_controllers.camera_settings.update_config_dict"
-    ) as mock_update_config_dict, patch(
-        "navigate.controller.sub_controllers.camera_settings.write_to_yaml"
-    ) as mock_write_to_yaml:
+    with (
+        patch(
+            "navigate.controller.sub_controllers.camera_settings.update_config_dict"
+        ) as mock_update_config_dict,
+        patch(
+            "navigate.controller.sub_controllers.camera_settings.save_camera_configuration"
+        ) as mock_save_configuration,
+    ):
         controller.save_camera_settings()
 
     mock_update_config_dict.assert_called_once()
-    mock_write_to_yaml.assert_called_once()
+    mock_save_configuration.assert_called_once()
     assert (
-        mock_write_to_yaml.call_args.kwargs["filename"]
+        mock_save_configuration.call_args.kwargs["filename"]
         == dummy_controller.configuration_path
     )
-    assert mock_write_to_yaml.call_args.kwargs["filename"] != legacy_configuration_path
+    assert (
+        mock_save_configuration.call_args.kwargs["filename"]
+        != legacy_configuration_path
+    )
     update_configuration.assert_called_once()
     assert camera_parameters["trigger_source"] == "External"
     assert camera_parameters["cooling"] == "Off"

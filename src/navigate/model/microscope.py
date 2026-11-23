@@ -523,6 +523,21 @@ class Microscope:
             for value in (read_setting(name),)
             if value is not None
         }
+        if "cooling" in parameters:
+            self.camera.set_cooling(parameters["cooling"])
+        if "output_triggers" in parameters and not getattr(self, "is_synthetic", False):
+            confirmed = self.camera.set_output_triggers(parameters["output_triggers"])
+            parameters["output_triggers"] = confirmed
+            from navigate.model.devices.camera.hamamatsu_outputs import applicable
+
+            for number, fields in confirmed["connectors"].items():
+                for key, value in fields.items():
+                    if applicable(key, fields):
+                        self._camera_settings_metadata[
+                            f"output_trigger_{number}_{key}"
+                        ] = value
+            for key, value in confirmed.get("shared", {}).items():
+                self._camera_settings_metadata[f"output_trigger_{key}"] = value
         return self.camera.get_image_format()
 
     def prepare_acquisition(self) -> dict:

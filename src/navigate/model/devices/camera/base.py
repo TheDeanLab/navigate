@@ -189,6 +189,14 @@ class CameraBase(ABC):
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
+    def get_output_trigger_capabilities(self) -> dict:
+        """Return an unavailable timing-output panel for unsupported adapters."""
+        return {"supported": False, "connectors": {}, "shared": {}}
+
+    def set_output_triggers(self, settings: dict) -> dict:
+        """Reject output settings unless the adapter implements them."""
+        raise ValueError("This camera does not support timing-output configuration.")
+
     def get_advanced_setting_capabilities(self) -> dict[str, CameraSettingCapability]:
         """Return current capabilities without changing camera settings.
 

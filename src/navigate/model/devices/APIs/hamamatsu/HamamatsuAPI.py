@@ -27,7 +27,7 @@ from enum import IntEnum
 import logging
 import math
 import platform
-from typing import Optional
+from typing import Optional, Union
 
 # Third Party Imports
 import numpy as np
@@ -1017,6 +1017,12 @@ class DCAM:
             + list(format_settings.items())
             + list(settings.items())[2:]
         )
+        from navigate.model.devices.camera.hamamatsu_outputs import (
+            HamamatsuOutputTriggers,
+        )
+
+        outputs = HamamatsuOutputTriggers(self)
+        output_snapshot = outputs.snapshot()
         index = self.__iDevice
         self.dev_close()
         if not self.dev_open(index) or not self.__open_hdcamwait():
@@ -1030,12 +1036,13 @@ class DCAM:
         ]:
             if name in format_settings and name not in writable_format:
                 continue
-            if not self.prop_setvalue(property_dict[name], value):
+            if not self.prop_setvalue(property_dict.get(name, name), value):
                 raise RuntimeError(f"Cannot restore DCAM property {name}.")
         for name, value in settings.items():
             actual = self.get_property_value(name)
             if actual is False or abs(actual - value) > max(1e-12, abs(value) * 1e-6):
                 raise RuntimeError(f"DCAM restart changed {name}: {value} -> {actual}.")
+        outputs.restore(output_snapshot)
         return True
 
     # dcamprop functions
@@ -1134,7 +1141,7 @@ class DCAM:
 
         return cDouble.value
 
-    def is_property_writable(self, name: str) -> bool:
+    def is_property_writable(self, name: Union[str, int]) -> bool:
         """Query whether the SDK marks a named property as writable.
 
         Parameters
@@ -1148,20 +1155,22 @@ class DCAM:
             False for unknown properties or failed attribute queries. Actual
             writes still require idle-state checks and readback in the adapter.
         """
-        if name not in property_dict:
+        if name not in property_dict and not (type(name) is int and name > 0):
             return False
-        attributes = self.prop_getattr(property_dict[name])
+        attributes = self.prop_getattr(property_dict.get(name, name))
         return attributes is not None and bool(
             attributes.attribute & DCAMPROP_ATTR_WRITABLE
         )
 
-    def get_property_value_text(self, name: str, value: float) -> Optional[str]:
+    def get_property_value_text(
+        self, name: Union[str, int], value: float
+    ) -> Optional[str]:
         """Read the camera's label for a value; unavailable text stays unknown.
 
         Parameters
         ----------
-        name : str
-            Property name in ``property_dict``.
+        name : str or int
+            Property name in ``property_dict`` or a positive DCAM property ID.
         value : float
             A value discovered by ``get_property_values``.
 
@@ -1170,11 +1179,13 @@ class DCAM:
         str or None
             Device-provided text, never a label inferred from global enums.
         """
-        if name not in property_dict or not self.__hdcam:
+        if (
+            name not in property_dict and not (type(name) is int and name > 0)
+        ) or not self.__hdcam:
             return None
         buffer = create_string_buffer(256)
         descriptor = DCAMPROP_VALUETEXT()
-        descriptor.iProp = property_dict[name]
+        descriptor.iProp = property_dict.get(name, name)
         descriptor.value = value
         descriptor.text = ctypes.cast(buffer, c_char_p)
         descriptor.textbytes = len(buffer)
@@ -1182,7 +1193,7 @@ class DCAM:
             return None
         return buffer.value.decode("utf-8", errors="replace").strip() or None
 
-    def get_property_values(self, name: str) -> Optional[tuple[float, ...]]:
+    def get_property_values(self, name: Union[str, int]) -> Optional[tuple[float, ...]]:
         """Enumerate a small discrete property using read-only DCAM queries.
 
         Parameters
@@ -1198,9 +1209,11 @@ class DCAM:
             Partial results are never advertised. Enumeration is bounded to
             256 values to protect against malformed or non-discrete properties.
         """
-        if name not in property_dict or not self.__hdcam:
+        if (
+            name not in property_dict and not (type(name) is int and name > 0)
+        ) or not self.__hdcam:
             return None
-        prop = property_dict[name]
+        prop = property_dict.get(name, name)
         attributes = self.prop_getattr(prop)
         if attributes is None:
             return None
@@ -1225,11 +1238,11 @@ class DCAM:
             option = DCAMPROP_OPTION_NEXT
         return None
 
-    def get_property_range(self, name):
+    def get_property_range(self, name: Union[str, int]) -> list[Optional[float]]:
         """
         # Returns the range of appropriate values start, stop, step
         """
-        if name not in property_dict:
+        if name not in property_dict and not (type(name) is int and name > 0):
             print(
                 "could not set value for",
                 name,
@@ -1239,7 +1252,7 @@ class DCAM:
             return [None, None, None]
 
         # get property code setPropertyValue
-        idprop = property_dict[name]
+        idprop = property_dict.get(name, name)
 
         property_attribute = self.prop_getattr(idprop)
         if property_attribute is not None:
@@ -1251,14 +1264,18 @@ class DCAM:
         return [None, None, None]
 
     def set_property_value(
-        self, name: str, value: float, *, absolute_tolerance: Optional[float] = None
+        self,
+        name: Union[str, int],
+        value: float,
+        *,
+        absolute_tolerance: Optional[float] = None,
     ) -> bool:
         """Set a named property and validate the SDK-confirmed value.
 
         Parameters
         ----------
-        name : str
-            Property name in ``property_dict``.
+        name : str or int
+            Property name in ``property_dict`` or a positive DCAM property ID.
         value : float
             Requested value, clamped to the SDK's reported range.
         absolute_tolerance : float, optional
@@ -1272,7 +1289,7 @@ class DCAM:
             or absolute_tolerance < 0
         ):
             raise ValueError("Property tolerance must be finite and nonnegative.")
-        if name not in property_dict:
+        if name not in property_dict and not (type(name) is int and name > 0):
             print(
                 "could not set value for",
                 name,
@@ -1281,7 +1298,7 @@ class DCAM:
             )
             return False
         # get property code setPropertyValue
-        idprop = property_dict[name]
+        idprop = property_dict.get(name, name)
 
         # Find property limits and correct value if necessary
         (
@@ -1338,11 +1355,11 @@ class DCAM:
             print(name, "Configuration Failed", value, final_configuration)
             return False
 
-    def get_property_value(self, name):
+    def get_property_value(self, name: Union[str, int]) -> Union[float, bool]:
         """
         Provides the idprop value after looking it up in the property_dict
         """
-        return self.prop_getvalue(property_dict[name])
+        return self.prop_getvalue(property_dict.get(name, name))
 
     def get_string_value(self, id_str):
         """

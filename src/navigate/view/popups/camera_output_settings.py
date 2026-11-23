@@ -6,6 +6,7 @@ from typing import Callable, Optional, Any
 
 from navigate.model.devices.camera.hamamatsu_outputs import applicable, FIELDS, SHARED
 from navigate.tools.common_functions import copy_proxy_object
+from navigate.view.theme import get_theme_color
 
 FIELD_LABELS = {
     "kind": "Output function",
@@ -33,12 +34,36 @@ class CameraOutputSettings(ttk.LabelFrame):
         self.dirty = False
         self.edited = False
         self.saved = {}
+        self._layout = None
+        self._populating = False
+        self._range_labels = {}
         self.notebook = ttk.Notebook(self)
         self.notebook.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
         self.status = tk.StringVar()
-        ttk.Label(self, textvariable=self.status, wraplength=370).grid(
-            row=1, column=0, sticky="w", padx=8
+        status_frame = ttk.Frame(self)
+        status_frame.grid(row=1, column=0, sticky="ew", padx=8)
+        status_frame.columnconfigure(0, weight=1)
+        self.status_text = tk.Text(
+            status_frame,
+            width=46,
+            height=3,
+            wrap="word",
+            font="TkDefaultFont",
+            background=get_theme_color("panel_bg", "#1a212b"),
+            foreground=get_theme_color("text", "white"),
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            state="disabled",
+            takefocus=False,
         )
+        self.status_text.grid(row=0, column=0, sticky="ew")
+        scrollbar = ttk.Scrollbar(
+            status_frame, orient="vertical", command=self.status_text.yview
+        )
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        self.status_text.configure(yscrollcommand=scrollbar.set)
+        self.status.trace_add("write", self._display_status)
         self.apply_button = ttk.Button(self, text="Apply Outputs", command=command)
         self.apply_button.grid(row=2, column=0, sticky="e", padx=8, pady=8)
         ttk.Label(
@@ -50,12 +75,7 @@ class CameraOutputSettings(ttk.LabelFrame):
     def populate(
         self, capabilities: dict, saved: Optional[dict] = None, busy: bool = False
     ) -> None:
-        """Display fresh readbacks and retain inactive programmable selections."""
-        selected = self.notebook.select()
-        selected_label = self.notebook.tab(selected, "text") if selected else None
-        for child in self.notebook.winfo_children():
-            child.destroy()
-        self.fields = {}
+        """Refresh existing controls, rebuilding only when available fields change."""
         self.caps = capabilities
         self.busy = busy or bool(capabilities.get("reason"))
         self.dirty = False
@@ -65,36 +85,83 @@ class CameraOutputSettings(ttk.LabelFrame):
         groups = dict(capabilities.get("connectors", {}))
         if any(c.get("available") for c in capabilities.get("shared", {}).values()):
             groups["shared"] = capabilities["shared"]
+        groups = {
+            number: {name: cap for name, cap in fields.items() if cap.get("available")}
+            for number, fields in groups.items()
+        }
+        layout = tuple((number, tuple(fields)) for number, fields in groups.items())
+        if layout != self._layout:
+            self._build_controls(groups)
+            self._layout = layout
+        # Traces distinguish user edits from confirmed model readbacks. Update all
+        # values before evaluating dependencies between function/source and timing.
+        self._populating = True
+        try:
+            self._refresh_controls(groups, saved)
+        finally:
+            self._populating = False
+        self.status.set(
+            capabilities.get("reason")
+            or (
+                "Saved selections differ from the camera. Apply Outputs to restore them."
+                if self.dirty
+                else "Read from camera. Apply Outputs updates the experiment; Save also stores camera defaults."
+            )
+        )
+        self.lock(self.busy)
+
+    def _build_controls(self, groups: dict) -> None:
+        """Build the available connector fields, retaining the selected connector."""
+        selected = self.notebook.select()
+        selected_label = self.notebook.tab(selected, "text") if selected else None
+        for child in self.notebook.winfo_children():
+            child.destroy()
+        self.fields = {}
+        self._range_labels = {}
         for number, fields in groups.items():
             frame = ttk.Frame(self.notebook)
             label = "Shared" if number == "shared" else f"TIMING {number}"
             self.notebook.add(frame, text=label)
             if label == selected_label:
                 self.notebook.select(frame)
-            stored = (
-                saved.get("shared", {})
-                if number == "shared"
-                else saved.get("connectors", {}).get(number, {})
-            )
             for row, (name, cap) in enumerate(fields.items()):
-                if not cap.get("available"):
-                    continue
                 ttk.Label(frame, text=FIELD_LABELS[name]).grid(
                     row=row * 2, column=0, sticky="w", padx=5, pady=4
                 )
-                choices = cap.get("choices", {})
                 variable = tk.StringVar()
                 widget = (
                     ttk.Combobox(
                         frame,
                         textvariable=variable,
-                        values=list(choices.values()),
                         width=25,
                     )
                     if (SHARED if number == "shared" else FIELDS)[name][1] is not None
                     else ttk.Entry(frame, textvariable=variable, width=27)
                 )
                 widget.grid(row=row * 2, column=1, padx=5, pady=4)
+                self.fields[number, name] = (widget, variable, cap)
+                if isinstance(widget, ttk.Entry) and not isinstance(
+                    widget, ttk.Combobox
+                ):
+                    label = ttk.Label(frame)
+                    label.grid(row=row * 2 + 1, column=1, sticky="w", padx=5)
+                    self._range_labels[number, name] = label
+                variable.trace_add("write", self._changed)
+
+    def _refresh_controls(self, groups: dict, saved: dict) -> None:
+        """Update values, choices and ranges without replacing widgets or variables."""
+        for number, fields in groups.items():
+            stored = (
+                saved.get("shared", {})
+                if number == "shared"
+                else saved.get("connectors", {}).get(number, {})
+            )
+            for name, cap in fields.items():
+                widget, variable, _ = self.fields[number, name]
+                self.fields[number, name] = (widget, variable, cap)
+                choices = cap.get("choices", {})
+                if isinstance(widget, ttk.Combobox):
+                    widget.configure(values=list(choices.values()))
                 current = cap.get("current")
                 if name in stored:
                     if (number == "shared" or applicable(name, stored)) and stored[
@@ -107,24 +174,22 @@ class CameraOutputSettings(ttk.LabelFrame):
                     if current is not None
                     else "Unknown"
                 )
-                self.fields[number, name] = (widget, variable, cap)
-                if not choices:
-                    ttk.Label(
-                        frame,
+                if (number, name) in self._range_labels:
+                    self._range_labels[number, name].configure(
                         text=f"Range {cap.get('minimum'):g} to {cap.get('maximum'):g}; step {cap.get('step'):g}",
-                    ).grid(row=row * 2 + 1, column=1, sticky="w", padx=5)
-                variable.trace_add("write", self._changed)
-        self.status.set(
-            capabilities.get("reason")
-            or (
-                "Saved selections differ from the camera. Apply Outputs to restore them."
-                if self.dirty
-                else "Read from camera. Apply Outputs updates the experiment; Save also stores camera defaults."
-            )
-        )
-        self.lock(self.busy)
+                    )
+
+    def _display_status(self, *args: str) -> None:
+        """Keep status geometry fixed and allow scrolling through long errors."""
+        self.status_text.configure(state="normal")
+        self.status_text.delete("1.0", "end")
+        self.status_text.insert("1.0", self.status.get())
+        self.status_text.configure(state="disabled")
+        self.status_text.yview_moveto(0)
 
     def _changed(self, *args: str) -> None:
+        if self._populating:
+            return
         self.dirty = True
         self.edited = True
         self.status.set("Unapplied output changes.")

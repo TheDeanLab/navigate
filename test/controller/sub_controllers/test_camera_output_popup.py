@@ -150,6 +150,93 @@ def test_selected_output_uses_connector_identity_when_tabs_change(output_popup):
     assert panel.notebook.tab(panel.notebook.select(), "text") == "TIMING 2"
 
 
+@pytest.mark.parametrize("number", [1, 2, 3])
+def test_apply_reuses_controls_without_geometry_changes(output_popup, number):
+    c = output_popup
+    panel = c._output_panel
+    window = c.view.popup
+    panel.notebook.select(number - 1)
+    window.update()
+    tabs = panel.notebook.tabs()
+    controls = {
+        key: (widget, variable) for key, (widget, variable, _) in panel.fields.items()
+    }
+    initial_size = (window.winfo_width(), window.winfo_height())
+    initial_request = (window.winfo_reqwidth(), window.winfo_reqheight())
+    configure_sizes = []
+    window.bind(
+        "<Configure>",
+        lambda event: (
+            configure_sizes.append((event.width, event.height))
+            if event.widget == window
+            else None
+        ),
+        add="+",
+    )
+
+    for action in (
+        lambda: edit_outputs(c),
+        c.apply_output_triggers,
+        lambda: confirm_outputs(c),
+    ):
+        action()
+        window.update()
+        assert (window.winfo_width(), window.winfo_height()) == initial_size
+        assert (window.winfo_reqwidth(), window.winfo_reqheight()) == initial_request
+        assert panel.notebook.tabs() == tabs
+        assert {
+            key: (widget, variable)
+            for key, (widget, variable, _) in panel.fields.items()
+        } == controls
+    assert all(size == initial_size for size in configure_sizes)
+    assert not panel.dirty and not panel.edited
+    assert panel.notebook.tab(panel.notebook.select(), "text") == f"TIMING {number}"
+
+
+def test_refresh_updates_capabilities_in_place_without_marking_user_edit(output_popup):
+    panel = output_popup._output_panel
+    capabilities = output_popup.test_outputs.capabilities()
+    controls = {
+        key: (widget, variable) for key, (widget, variable, _) in panel.fields.items()
+    }
+    fields = capabilities["connectors"]["1"]
+    fields["kind"].update(
+        current="programmable", choices={"programmable": "Timed pulse"}
+    )
+    fields["delay_s"].update(current=0.002, maximum=2, step=0.001, writable=False)
+    panel.populate(capabilities)
+    assert {
+        key: (widget, variable) for key, (widget, variable, _) in panel.fields.items()
+    } == controls
+    assert tuple(panel.fields["1", "kind"][0]["values"]) == ("Timed pulse",)
+    assert panel.fields["1", "kind"][1].get() == "Timed pulse"
+    assert panel.fields["1", "delay_s"][1].get() == "0.002"
+    assert str(panel.fields["1", "delay_s"][0]["state"]) == "disabled"
+    assert panel._range_labels["1", "delay_s"]["text"] == "Range 0 to 2; step 0.001"
+    assert not panel.dirty and not panel.edited
+    panel.fields["1", "delay_s"][1].set("0.003")
+    assert panel.dirty and panel.edited
+
+
+def test_long_status_is_scrollable_without_resizing(output_popup):
+    panel = output_popup._output_panel
+    window = output_popup.view.popup
+    window.update()
+    size = (window.winfo_reqwidth(), window.winfo_reqheight())
+    message = "\n".join(f"Output validation detail {number}" for number in range(30))
+    panel.status.set(message)
+    window.update()
+    assert (window.winfo_reqwidth(), window.winfo_reqheight()) == size
+    assert panel.status_text.get("1.0", "end-1c") == message
+    assert str(panel.status_text["state"]) == "disabled"
+    panel.status_text.yview_moveto(1)
+    assert panel.status_text.yview()[0] > 0
+    panel.status.set("Applying timing outputs…")
+    window.update()
+    assert panel.status_text.yview()[0] == 0
+    assert (window.winfo_reqwidth(), window.winfo_reqheight()) == size
+
+
 @pytest.mark.parametrize("saved", [None, "On"])
 def test_fixed_cooling_does_not_send_commands_or_save_display_label(
     output_popup, saved

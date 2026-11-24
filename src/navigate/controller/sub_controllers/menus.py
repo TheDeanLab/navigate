@@ -57,6 +57,10 @@ from navigate.view.popups.camera_setting_popup import (
     AdvancedCameraSettingPopup,
 )
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
+from navigate.view.popups.laser_setting_popup import AdvancedLaserSettingPopup
+from navigate.controller.sub_controllers.laser_settings import (
+    AdvancedLaserSettingController,
+)
 from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
 from navigate.view.popups.gui_settings_popup import GuiSettingsPopup
 from navigate.controller.sub_controllers.gui_settings_popup import (
@@ -87,7 +91,6 @@ from navigate.controller.sub_controllers.camera_settings import (
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.tools.decorators import FeatureList
 from navigate.tools.common_functions import load_module_from_file, combine_funcs
-
 
 # Misc. Local Imports
 from navigate.config.config import (
@@ -552,9 +555,9 @@ class MenuController(GUIController):
 
         # Create a variable to track histogram state
         self.histogram_enabled = tk.BooleanVar(
-            value=self.parent_controller.configuration["gui"].get("histogram", {}).get(
-                "enabled", True
-            )
+            value=self.parent_controller.configuration["gui"]
+            .get("histogram", {})
+            .get("enabled", True)
         )
 
         # Add radiobuttons to the histogram submenu
@@ -577,9 +580,9 @@ class MenuController(GUIController):
 
         # Create a variable to track MIP display state.
         self.mip_enabled = tk.BooleanVar(
-            value=self.parent_controller.configuration["gui"].get("mip_display", {}).get(
-                "enabled", True
-            )
+            value=self.parent_controller.configuration["gui"]
+            .get("mip_display", {})
+            .get("enabled", True)
         )
 
         # Add radiobuttons to the histogram submenu
@@ -683,6 +686,10 @@ class MenuController(GUIController):
             None,
             None,
         ]
+
+        configuration_dict[self.view.menubar.menu_resolution][
+            "Advanced Laser Settings"
+        ] = ["standard", self.popup_advanced_laser_setting, None, None, None]
 
         self.populate_menu(configuration_dict)
 
@@ -1080,8 +1087,8 @@ class MenuController(GUIController):
             return
 
         popup = GuiSettingsPopup(self.view)
-        self.parent_controller.gui_settings_popup_controller = GuiSettingsPopupController(
-            popup, self.parent_controller
+        self.parent_controller.gui_settings_popup_controller = (
+            GuiSettingsPopupController(popup, self.parent_controller)
         )
 
     @log_function_call
@@ -1345,7 +1352,9 @@ class MenuController(GUIController):
             self.parent_controller,
             persist_feature_list_edits=True,
         )
-        self.parent_controller.features_popup_controller.populate_feature_list(feature_id)
+        self.parent_controller.features_popup_controller.populate_feature_list(
+            feature_id
+        )
 
     @log_function_call
     def load_feature_list(self) -> None:
@@ -1557,6 +1566,17 @@ class MenuController(GUIController):
             self.parent_controller,
             "advanced_camera_setting_controller",
             advanced_camera_setting_controller,
+        )
+
+    @log_function_call
+    def popup_advanced_laser_setting(self) -> None:
+        """Open or raise the advanced laser settings popup."""
+        if hasattr(self.parent_controller, "advanced_laser_setting_controller"):
+            self.parent_controller.advanced_laser_setting_controller.showup()
+            return
+        popup = AdvancedLaserSettingPopup(self.view)
+        self.parent_controller.advanced_laser_setting_controller = (
+            AdvancedLaserSettingController(popup, self.parent_controller)
         )
 
     @log_function_call

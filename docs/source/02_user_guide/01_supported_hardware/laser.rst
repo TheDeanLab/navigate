@@ -9,6 +9,49 @@ software connections to the laser. In the configuration file, ``onoff`` selects 
 electrical gate and ``power`` normally selects analog modulation. Existing
 configurations continue to work without adding any settings.
 
+.. _advanced_laser_settings:
+
+Advanced laser settings
+-----------------------
+
+Open :menuselection:`Microscope Configuration --> Advanced Laser Settings` and
+select a microscope and laser. Lasers with a ``software_control`` adapter show
+their connection status, supported modulation modes, internal power limits,
+percentage reference, internal setpoint, emission status, and reported output
+power. A laser without this optional configuration shows
+:guilabel:`Software control not configured`; existing NI/ASI operation is unchanged.
+
+Use :guilabel:`Refresh` for a new reading. Unknown or unavailable readings are
+shown explicitly, and synthetic adapters are labeled simulated. The internal
+setpoint is the peak pulse setting in digital mode and the CW setting in CW mode.
+Analog and mixed modes use external voltage for amplitude, so the popup does not
+present an internal setting as their output power. Reported output power comes
+from the laser and is not a sample-plane measurement.
+
+Select a mode and click :guilabel:`Apply mode`. CW, digital, analog, and mixed
+modes are available when supported by the adapter and compatible with the power
+source. Serial channel power requires CW or digital mode. The selected mode must
+match the installed electrical wiring. Mode changes close the shutter and
+electrical gates and leave them closed until acquisition prepares illumination.
+Emission is never enabled by this popup.
+
+A confirmed mode applies for the current session, including subsequent
+acquisitions. :guilabel:`Next acquisition mode` shows this selection or the startup
+policy. The popup does not rewrite configuration or experiment files; set
+``software_control.mode`` in the configuration to change the startup policy.
+Channel power continues to be set in :guilabel:`Power (%)` in the Channels tab.
+After a mode change, channel confirmations become pending until acquisition
+reapplies and verifies power.
+
+Acquisition metadata includes the confirmed mode for software-controlled lasers,
+including lasers whose power still comes from an external analog signal. Their
+external power remains marked unverified.
+
+Settings requests run outside the GUI thread. Read and write requests are
+disabled during acquisition. Start acquisition after any in-flight request has
+finished. A failed mode change must be corrected and confirmed before acquiring;
+a failed serial connection requires restarting **navigate**.
+
 Optional serial power control
 -----------------------------
 

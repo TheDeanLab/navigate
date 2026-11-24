@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 from math import isfinite
 from typing import Optional
+from uuid import uuid4
 
 from navigate.config.laser import LaserSoftwareConfig, resolve_laser_software_config
 from .base import LaserBase
@@ -43,15 +44,100 @@ class SoftwareControlledLaser(LaserBase):
         self._prepared = False
         self._closed = False
         self._last_request: Optional[float] = None
+        #: str: Connection token used to reject stale popup writes.
+        self.settings_identity = uuid4().hex
+        self._session_mode: Optional[LaserMode] = None
+        self._mode_error: Optional[str] = None
 
-    def prepare_acquisition(self) -> None:
-        """Read settings and optionally apply mode with illumination blocked."""
+    def invalidate_power(self) -> None:
+        """Require channel preparation to reconfirm power after settings changes."""
         self._prepared = False
         self._last_request = None
         self.power_metadata = None
+
+    def available_modes(self) -> frozenset[LaserMode]:
+        """Return device modes compatible with the configured power source."""
+        modes = self.settings.get_supported_modes()
+        if self.options.power_source == "serial":
+            modes = modes.intersection((LaserMode.CW, LaserMode.DIGITAL))
+        return frozenset(modes)
+
+    @property
+    def prepared_mode(self) -> Optional[str]:
+        """Return the confirmed acquisition mode without querying hardware."""
+        return self.mode.value if self._prepared else None
+
+    def set_modulation_mode(self, mode: str) -> None:
+        """Apply a session mode while the caller keeps illumination blocked.
+
+        Parameters
+        ----------
+        mode : str
+            Supported mode compatible with the configured power source.
+        """
+        requested = LaserMode(mode)
+        if requested not in self.available_modes():
+            raise LaserControlError(
+                "Mode is unsupported or incompatible with serial power."
+            )
+        self.invalidate_power()
+        try:
+            self.settings.set_mode(requested)
+            if self.settings.get_mode() != requested:
+                raise LaserControlError("Laser did not accept the requested mode.")
+        except Exception as error:
+            self._mode_error = str(error)
+            raise
+        self._mode_error = None
+        self._session_mode = requested
+
+    def advanced_settings_snapshot(self) -> dict:
+        """Read live settings through the adapter, without changing the laser.
+
+        Returns
+        -------
+        dict
+            Serializable limits, modes, power readings and connection status.
+            Internal setpoint is unknown in modes controlled by analog voltage.
+        """
+        mode = self.settings.get_mode()
+        minimum, maximum = self.settings.get_power_limits_mw()
+        internal_power = mode in (LaserMode.CW, LaserMode.DIGITAL)
+        setpoint = self.settings.get_power_setpoint_mw() if internal_power else None
+        status = self.settings.get_status()
+        available = self.available_modes()
+        return {
+            "connection": "simulated" if status["simulated"] else "connected",
+            "device_identity": status["identity"],
+            "simulated": status["simulated"],
+            "emission_enabled": status["emission_enabled"],
+            "measured_power_mw": status["measured_power_mw"],
+            "mode": mode.value,
+            "available_modes": [m.value for m in LaserMode if m in available],
+            "power_source": self.options.power_source,
+            "minimum_mw": minimum,
+            "maximum_mw": maximum,
+            "percent_reference_mw": self.options.power_reference_mw or maximum,
+            "setpoint_mw": setpoint,
+            "power_kind": "peak_pulse" if mode == LaserMode.DIGITAL else "cw_setpoint",
+            "acquisition_mode": (
+                self._session_mode.value if self._session_mode else self.options.mode
+            ),
+            "mode_error": self._mode_error,
+            "read_at": datetime.now(timezone.utc).isoformat(),
+        }
+
+    def prepare_acquisition(self) -> None:
+        """Read settings and optionally apply mode with illumination blocked."""
+        self.invalidate_power()
+        if self._mode_error:
+            raise LaserControlError(
+                "Apply and confirm a laser mode before acquiring: " + self._mode_error
+            )
         self.mode = self.settings.get_mode()
-        if self.options.mode != "preserve":
-            requested = LaserMode(self.options.mode)
+        mode = self._session_mode or self.options.mode
+        if mode != "preserve":
+            requested = LaserMode(mode)
             if requested not in self.settings.get_supported_modes():
                 raise LaserControlError(
                     f"Laser does not support {requested.value} mode."

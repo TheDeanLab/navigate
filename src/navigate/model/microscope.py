@@ -1117,7 +1117,11 @@ class Microscope:
             "confirmed_setpoint_mw": None,
             "measured_power_mw": None,
             "verification": "pending" if source == "serial" else "unverified_external",
-            "mode": None,
+            "mode": (
+                laser.prepared_mode
+                if isinstance(laser, SoftwareControlledLaser)
+                else None
+            ),
             "event": "requested",
         }
 

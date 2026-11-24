@@ -1,0 +1,169 @@
+"""Real Tk widgets exercise popup state without accessing physical hardware."""
+
+from types import SimpleNamespace
+from unittest.mock import Mock
+
+import pytest
+
+from navigate.controller.sub_controllers.laser_settings import (
+    AdvancedLaserSettingController,
+)
+from navigate.controller.sub_controllers.menus import MenuController
+from navigate.view.popups.laser_setting_popup import AdvancedLaserSettingPopup
+from test.model.devices.lasers.test_laser_software import make_laser
+
+
+@pytest.fixture
+def popup(tk_root):
+    parent = SimpleNamespace(
+        configuration={
+            "configuration": {
+                "microscopes": {
+                    "scope": {"laser": [{"wavelength": 488}, {"wavelength": 640}]},
+                    "empty": {},
+                }
+            },
+            "experiment": {"MicroscopeState": {"microscope_name": "scope"}},
+        },
+        acquire_bar_controller=SimpleNamespace(is_acquiring=False),
+        execute=Mock(),
+    )
+    view = AdvancedLaserSettingPopup(tk_root)
+    controller = AdvancedLaserSettingController(view, parent)
+    parent.advanced_laser_setting_controller = controller
+    yield controller
+    controller.close_popup()
+
+
+def reply(popup, **kwargs):
+    _, request, callback = popup.parent_controller.execute.call_args.args
+    snapshot = make_laser().advanced_settings_snapshot()
+    result = {
+        **request,
+        **snapshot,
+        "error": None,
+        "identity": "connection-token",
+        **kwargs,
+    }
+    callback(result)
+    return result
+
+
+def test_open_queries_async_and_shows_unknown_simulated_readbacks(popup):
+    view = popup.view
+    assert str(view.buttons["apply"]["state"]) == "disabled"
+    assert (
+        popup.parent_controller.execute.call_args.args[0] == "laser_advanced_settings"
+    )
+    assert view.variables["measured"].get() == "Unknown"
+    reply(popup)
+    assert view.variables["connection"].get() == "Simulated"
+    assert view.variables["mode"].get() == "Digital"
+    assert view.inputs["mode"]["values"] == ("CW", "Digital")
+    assert view.variables["limits"].get() == "0–100 mW"
+    assert view.variables["setpoint"].get() == "0 mW (peak pulse)"
+    assert view.variables["measured"].get() == "Unknown"
+    assert view.variables["emission"].get() == "Unknown"
+
+
+def test_mode_selection_is_explicit_and_locked_until_response(popup):
+    reply(popup)
+    popup.view.variables["mode"].set("CW")
+    assert popup.parent_controller.execute.call_count == 1
+    popup.view.buttons["apply"].invoke()
+    request = popup.parent_controller.execute.call_args.args[1]
+    assert request["mode"] == "cw"
+    assert request["identity"] == "connection-token"
+    assert str(popup.view.inputs["microscope"]["state"]) == "disabled"
+    assert str(popup.view.buttons["apply"]["state"]) == "disabled"
+    popup.apply_mode()
+    assert popup.parent_controller.execute.call_count == 2
+    reply(popup, mode="cw", acquisition_mode="cw", power_kind="cw_setpoint")
+    assert popup.view.variables["current_mode"].get() == "CW"
+    assert popup.view.variables["acquisition_mode"].get() == "CW"
+
+
+def test_old_or_different_device_responses_are_ignored(popup):
+    result = reply(popup)
+    popup.view.variables["laser"].set("640 nm")
+    popup.refresh()
+    assert popup.view.variables["setpoint"].get() == "Unknown"
+    popup._receive(result)
+    assert popup._pending
+    assert popup.view.variables["setpoint"].get() == "Unknown"
+    popup._receive({**result, "request_id": popup._request_id})
+    assert popup._pending
+    reply(popup)
+    assert not popup._pending
+
+
+def test_close_while_pending_ignores_late_completion(popup):
+    _, request, callback = popup.parent_controller.execute.call_args.args
+    popup.close_popup()
+    callback(request)  # Would raise TclError if any destroyed widget was touched.
+    assert not hasattr(popup.parent_controller, "advanced_laser_setting_controller")
+
+
+def test_busy_popup_does_not_send_requests_and_refreshes_after_stop(popup):
+    reply(popup)
+    popup.set_acquisition_state(True)
+    popup.refresh()
+    popup.apply_mode()
+    assert popup.parent_controller.execute.call_count == 1
+    assert str(popup.view.buttons["refresh"]["state"]) == "disabled"
+    assert popup.view.variables["measured"].get() == "Unknown"
+    popup.set_acquisition_state(False)
+    assert popup.parent_controller.execute.call_count == 2
+
+
+def test_response_after_capture_starts_does_not_restore_idle_readbacks(popup):
+    popup.set_acquisition_state(True)
+    reply(popup)
+    assert not popup._pending
+    assert popup.view.variables["setpoint"].get() == "Unknown"
+    assert str(popup.view.buttons["apply"]["state"]) == "disabled"
+
+
+def test_error_removes_old_readbacks_and_allows_refresh(popup):
+    reply(popup)
+    popup.refresh()
+    reply(popup, connection="unavailable", error="Serial disconnected")
+    assert popup.view.variables["setpoint"].get() == "Unknown"
+    assert popup.view.variables["connection"].get() == "Unavailable"
+    assert popup.view.variables["status"].get() == "Serial disconnected"
+    assert str(popup.view.buttons["apply"]["state"]) == "disabled"
+    assert str(popup.view.buttons["refresh"]["state"]) == "normal"
+
+
+def test_legacy_and_empty_configurations_do_not_require_new_fields(popup):
+    reply(popup, connection="not_configured")
+    assert popup.view.variables["connection"].get() == "Software control not configured"
+    assert str(popup.view.buttons["apply"]["state"]) == "disabled"
+    popup.view.variables["microscope"].set("empty")
+    popup.update_microscope()
+    assert popup.parent_controller.execute.call_count == 1
+    assert (
+        popup.view.variables["status"].get()
+        == "No lasers configured for this microscope."
+    )
+
+
+def test_external_analog_readbacks_do_not_claim_internal_output(popup):
+    reply(
+        popup,
+        power_source="hardware",
+        mode="analog",
+        available_modes=["cw", "digital", "analog", "mixed"],
+        setpoint_mw=None,
+    )
+    assert popup.view.inputs["mode"]["values"] == ("CW", "Digital", "Analog", "Mixed")
+    assert popup.view.variables["setpoint"].get() == "External analog control"
+    assert popup.view.variables["reference"].get() == "External hardware scale"
+
+
+def test_menu_reuses_existing_popup(popup):
+    menu = MenuController.__new__(MenuController)
+    menu.parent_controller = popup.parent_controller
+    popup.showup = Mock()
+    menu.popup_advanced_laser_setting()
+    popup.showup.assert_called_once()

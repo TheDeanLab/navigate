@@ -32,7 +32,6 @@
 
 # Standard Library Imports
 import tkinter as tk
-import platform
 import os
 
 # Third Party Imports
@@ -52,7 +51,7 @@ os.environ["http_proxy"] = ""
 os.environ["https_proxy"] = ""
 
 
-def main():
+def main() -> None:
     """Light-sheet Microscopy (Navigate).
     Microscope control software built in a Model-View-Controller architecture.
     Provides control of cameras, data acquisition cards, filter wheels, lasers
@@ -71,13 +70,6 @@ def main():
         --logging-confi
         --configurator
     """
-    if platform.system() != "Windows":
-        print(
-            "WARNING: navigate was built to operate on a Windows platform. "
-            "While much of the software will work for evaluation purposes, some "
-            "unanticipated behaviors may occur."
-        )
-
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
     root.withdraw()

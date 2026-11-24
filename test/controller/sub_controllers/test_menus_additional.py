@@ -1,4 +1,5 @@
 import os
+import threading
 from fnmatch import fnmatchcase
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, call
@@ -110,7 +111,9 @@ def menu_controller(monkeypatch):
     return controller, parent_controller
 
 
-def test_populate_menu_handles_bindings_separator_and_state(menu_controller, monkeypatch):
+def test_populate_menu_handles_bindings_separator_and_state(
+    menu_controller, monkeypatch
+):
     controller, _ = menu_controller
     menu = MagicMock()
     action = MagicMock()
@@ -158,6 +161,169 @@ def test_initialize_menus_adds_edit_selected_feature_list_command(
     controller.view.menubar.menu_features.add_command.assert_any_call(
         label="Edit Selected Feature List", command=controller.edit_feature_list
     )
+
+
+@pytest.mark.parametrize(
+    "label, folder",
+    [("Open Log Files", "logs"), ("Open Configuration Files", "config")],
+)
+def test_file_menu_opens_folder_on_linux(
+    menu_controller: tuple[menus_module.MenuController, SimpleNamespace],
+    monkeypatch: pytest.MonkeyPatch,
+    label: str,
+    folder: str,
+) -> None:
+    controller, _ = menu_controller
+    navigate_path = "/tmp/navigate data; literal"
+    launch = Mock()
+    launch.return_value.poll.return_value = 0
+    monkeypatch.setattr(menus_module.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(menus_module.tk, "Menu", MagicMock())
+    monkeypatch.setattr(menus_module, "get_navigate_path", lambda: navigate_path)
+    monkeypatch.setattr(menus_module.os.path, "exists", lambda path: True)
+    monkeypatch.setattr(menus_module, "load_yaml_file", lambda path: None)
+
+    controller.initialize_menus()
+    monkeypatch.setattr(menus_module.subprocess, "Popen", launch)
+    file_menu = controller.view.menubar.menu_file
+    command = next(
+        entry.kwargs["command"]
+        for entry in file_menu.add_command.call_args_list
+        if entry.kwargs["label"] == label
+    )
+    command()
+
+    launch.assert_called_once_with(["xdg-open", os.path.join(navigate_path, folder)])
+    launch.return_value.wait.assert_not_called()
+    launch.return_value.communicate.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "error", [FileNotFoundError("missing opener"), PermissionError("denied")]
+)
+def test_open_folder_reports_launch_error(
+    menu_controller: tuple[menus_module.MenuController, SimpleNamespace],
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    error: OSError,
+) -> None:
+    controller, _ = menu_controller
+    path = "/tmp/navigate data/config"
+    showerror = Mock()
+    monkeypatch.setattr(menus_module.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(menus_module.subprocess, "Popen", Mock(side_effect=error))
+    monkeypatch.setattr(menus_module.messagebox, "showerror", showerror)
+
+    controller.open_folder(path)
+
+    showerror.assert_called_once()
+    assert path in showerror.call_args.kwargs["message"]
+    assert str(error) in showerror.call_args.kwargs["message"]
+    assert path in caplog.text
+
+
+@pytest.mark.parametrize("system", ["Linux", "Darwin"])
+@pytest.mark.parametrize("returncode", [0, 3])
+def test_open_folder_checks_launcher_completion_without_waiting(
+    menu_controller: tuple[menus_module.MenuController, SimpleNamespace],
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    system: str,
+    returncode: int,
+) -> None:
+    controller, _ = menu_controller
+    path = "/tmp/navigate data/config"
+    process = Mock()
+    process.poll.side_effect = [None, None, returncode]
+    showerror = Mock()
+    monkeypatch.setattr(menus_module.platform, "system", lambda: system)
+    monkeypatch.setattr(menus_module.subprocess, "Popen", Mock(return_value=process))
+    monkeypatch.setattr(menus_module.messagebox, "showerror", showerror)
+
+    controller.open_folder(path)
+
+    # Each running-process check yields to Tk before polling again.
+    for _ in range(2):
+        showerror.assert_not_called()
+        controller.view.after.assert_called_once()
+        delay, callback = controller.view.after.call_args.args
+        assert delay > 0
+        controller.view.after.reset_mock()
+        callback()
+
+    assert process.poll.call_count == 3
+    process.wait.assert_not_called()
+    process.communicate.assert_not_called()
+    controller.view.after.assert_not_called()
+    if returncode:
+        showerror.assert_called_once()
+        assert path in showerror.call_args.kwargs["message"]
+        assert f"status {returncode}" in showerror.call_args.kwargs["message"]
+        assert path in caplog.text
+        assert f"status {returncode}" in caplog.text
+    else:
+        showerror.assert_not_called()
+        assert path not in caplog.text
+
+
+def test_open_folder_preserves_windows_launcher_behavior(
+    menu_controller: tuple[menus_module.MenuController, SimpleNamespace],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _ = menu_controller
+    process = Mock()
+    process.poll.return_value = 1
+    showerror = Mock()
+    monkeypatch.setattr(menus_module.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(menus_module.subprocess, "Popen", Mock(return_value=process))
+    monkeypatch.setattr(menus_module.messagebox, "showerror", showerror)
+
+    controller.open_folder("test_path")
+
+    process.wait.assert_not_called()
+    process.communicate.assert_not_called()
+    controller.view.after.assert_not_called()
+    showerror.assert_not_called()
+
+
+def test_open_folder_reports_delayed_failure_on_tk_thread(
+    menu_controller: tuple[menus_module.MenuController, SimpleNamespace],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _ = menu_controller
+    process = Mock()
+    process.poll.return_value = None
+    root = menus_module.tk.Tk()
+    root.withdraw()
+    controller.view = root
+    events = []
+
+    def finish_launcher() -> None:
+        events.append(("responsive", threading.get_ident()))
+        process.poll.return_value = 3
+
+    def showerror(**kwargs: str) -> None:
+        events.append(("error", threading.get_ident()))
+        root.quit()
+
+    monkeypatch.setattr(menus_module.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(menus_module.subprocess, "Popen", Mock(return_value=process))
+    monkeypatch.setattr(menus_module.messagebox, "showerror", showerror)
+
+    timeout = root.after(2000, root.quit)
+    try:
+        controller.open_folder("test_path")
+        root.after(0, finish_launcher)
+        root.mainloop()
+        assert events == [
+            ("responsive", threading.get_ident()),
+            ("error", threading.get_ident()),
+        ]
+        process.wait.assert_not_called()
+        process.communicate.assert_not_called()
+    finally:
+        root.after_cancel(timeout)
+        root.destroy()
 
 
 def test_edit_feature_list_opens_selected_custom_feature_list(
@@ -270,9 +436,7 @@ def test_custom_feature_list_record_uses_sequence_filename(
     assert yaml_file_name == "authoritative-record.yml"
     assert loaded_paths == [
         os.path.join("/tmp/navigate", "feature_lists", "__sequence.yml"),
-        os.path.join(
-            "/tmp/navigate", "feature_lists", "authoritative-record.yml"
-        ),
+        os.path.join("/tmp/navigate", "feature_lists", "authoritative-record.yml"),
     ]
 
 
@@ -354,13 +518,19 @@ def test_toggle_stage_limits_updates_configuration_and_popup(menu_controller):
 
     controller.disable_stage_limits.set(1)
     controller.toggle_stage_limits()
-    assert parent_controller.configuration["experiment"]["StageParameters"]["limits"] is False
+    assert (
+        parent_controller.configuration["experiment"]["StageParameters"]["limits"]
+        is False
+    )
     assert popup_var.get() is False
     parent_controller.execute.assert_called_with("stage_limits", False)
 
     controller.disable_stage_limits.set(0)
     controller.toggle_stage_limits()
-    assert parent_controller.configuration["experiment"]["StageParameters"]["limits"] is True
+    assert (
+        parent_controller.configuration["experiment"]["StageParameters"]["limits"]
+        is True
+    )
     assert popup_var.get() is True
     assert parent_controller.execute.call_args.args == ("stage_limits", True)
 
@@ -410,11 +580,15 @@ def test_popup_waveform_setting_creates_controller(menu_controller, monkeypatch)
     waveform_controller = MagicMock()
     waveform_controller_ctor = Mock(return_value=waveform_controller)
     monkeypatch.setattr(menus_module, "WaveformParameterPopupWindow", popup_ctor)
-    monkeypatch.setattr(menus_module, "WaveformPopupController", waveform_controller_ctor)
+    monkeypatch.setattr(
+        menus_module, "WaveformPopupController", waveform_controller_ctor
+    )
 
     controller.popup_waveform_setting()
 
-    popup_ctor.assert_called_once_with(controller.view, parent_controller.configuration_controller)
+    popup_ctor.assert_called_once_with(
+        controller.view, parent_controller.configuration_controller
+    )
     waveform_controller_ctor.assert_called_once_with(
         popup,
         parent_controller,
@@ -474,7 +648,9 @@ def test_popup_camera_setting_reuses_existing_controller(menu_controller):
 
 def test_install_plugin_warns_for_duplicate_name(menu_controller, monkeypatch):
     controller, _ = menu_controller
-    monkeypatch.setattr(menus_module.filedialog, "askdirectory", lambda: "/plugins/demo")
+    monkeypatch.setattr(
+        menus_module.filedialog, "askdirectory", lambda: "/plugins/demo"
+    )
     monkeypatch.setattr(
         menus_module.os.path,
         "exists",
@@ -501,7 +677,9 @@ def test_install_plugin_warns_for_duplicate_name(menu_controller, monkeypatch):
 
 def test_install_plugin_saves_new_plugin(menu_controller, monkeypatch):
     controller, _ = menu_controller
-    monkeypatch.setattr(menus_module.filedialog, "askdirectory", lambda: "/plugins/demo")
+    monkeypatch.setattr(
+        menus_module.filedialog, "askdirectory", lambda: "/plugins/demo"
+    )
     monkeypatch.setattr(
         menus_module.os.path,
         "exists",
@@ -530,7 +708,9 @@ def test_install_plugin_saves_new_plugin(menu_controller, monkeypatch):
     warning.assert_called_once()
 
 
-def test_popup_uninstall_plugin_reuses_and_creates_controller(menu_controller, monkeypatch):
+def test_popup_uninstall_plugin_reuses_and_creates_controller(
+    menu_controller, monkeypatch
+):
     controller, _ = menu_controller
     controller.uninstall_plugin_controller = MagicMock()
     controller.popup_uninstall_plugin()

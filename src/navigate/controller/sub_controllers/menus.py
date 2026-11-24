@@ -88,7 +88,6 @@ from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.tools.decorators import FeatureList
 from navigate.tools.common_functions import load_module_from_file, combine_funcs
 
-
 # Misc. Local Imports
 from navigate.config.config import (
     update_config_dict,
@@ -552,9 +551,9 @@ class MenuController(GUIController):
 
         # Create a variable to track histogram state
         self.histogram_enabled = tk.BooleanVar(
-            value=self.parent_controller.configuration["gui"].get("histogram", {}).get(
-                "enabled", True
-            )
+            value=self.parent_controller.configuration["gui"]
+            .get("histogram", {})
+            .get("enabled", True)
         )
 
         # Add radiobuttons to the histogram submenu
@@ -577,9 +576,9 @@ class MenuController(GUIController):
 
         # Create a variable to track MIP display state.
         self.mip_enabled = tk.BooleanVar(
-            value=self.parent_controller.configuration["gui"].get("mip_display", {}).get(
-                "enabled", True
-            )
+            value=self.parent_controller.configuration["gui"]
+            .get("mip_display", {})
+            .get("enabled", True)
         )
 
         # Add radiobuttons to the histogram submenu
@@ -838,22 +837,51 @@ class MenuController(GUIController):
 
     @log_function_call
     def open_folder(self, path: str) -> None:
-        """Open folder in file explorer.
+        """Open a folder in the system file manager without waiting for it to exit.
 
         Parameters
         ----------
         path : str
             Path to folder.
         """
+        system = platform.system()
+        if system == "Darwin":
+            command = ["open", "--", path]
+        elif system == "Windows":
+            command = ["explorer", path]
+        else:
+            command = ["xdg-open", path]
+
+        def report_error(reason: str) -> None:
+            """Log the failure and show the manual path on the Tk thread."""
+            logger.warning("Could not open folder %s: %s", path, reason)
+            messagebox.showerror(
+                title="Unable to Open Folder",
+                message=f"Could not open the file manager: {reason}\n\n"
+                f"Open this folder manually:\n{path}",
+            )
+
         try:
-            if platform.system() == "Darwin":  # macOS
-                subprocess.check_call(["open", "--", path])
-            elif platform.system() == "Windows":  # Windows
-                subprocess.check_call(["explorer", path])
-            else:
-                print("Unsupported platform.")
-        except subprocess.CalledProcessError:
-            pass
+            # Desktop launchers can stay alive while the file manager is open.
+            # Waiting here would block the Tk event loop.
+            process = subprocess.Popen(command)
+        except OSError as error:
+            report_error(str(error))
+            return
+
+        if system == "Windows":
+            # Preserve Explorer's existing fire-and-forget behavior.
+            return
+
+        def check_launcher() -> None:
+            """Check completion without blocking or leaving the Tk thread."""
+            returncode = process.poll()
+            if returncode is None:
+                self.view.after(100, check_launcher)
+            elif returncode:
+                report_error(f"Launcher exited with status {returncode}.")
+
+        check_launcher()
 
     @log_function_call
     def open_log_files(self) -> None:
@@ -1080,8 +1108,8 @@ class MenuController(GUIController):
             return
 
         popup = GuiSettingsPopup(self.view)
-        self.parent_controller.gui_settings_popup_controller = GuiSettingsPopupController(
-            popup, self.parent_controller
+        self.parent_controller.gui_settings_popup_controller = (
+            GuiSettingsPopupController(popup, self.parent_controller)
         )
 
     @log_function_call
@@ -1345,7 +1373,9 @@ class MenuController(GUIController):
             self.parent_controller,
             persist_feature_list_edits=True,
         )
-        self.parent_controller.features_popup_controller.populate_feature_list(feature_id)
+        self.parent_controller.features_popup_controller.populate_feature_list(
+            feature_id
+        )
 
     @log_function_call
     def load_feature_list(self) -> None:

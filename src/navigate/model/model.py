@@ -576,6 +576,22 @@ class Model:
             if writing:
                 result["error"] = reason
             return result
+        if request.get("setting") == "output_triggers":
+            # Keep output writes independent of legacy bit-depth probing and buffers.
+            result["outputs_only"] = True
+            try:
+                self._prepared_camera_token = None
+                confirmed = camera.set_output_triggers(request.get("value"))
+                self.configuration["experiment"]["CameraParameters"][name][
+                    "output_triggers"
+                ] = confirmed
+            except Exception as error:
+                result["error"] = str(error)
+            try:
+                result["output_triggers"] = camera.get_output_trigger_capabilities()
+            except Exception as error:
+                result["output_triggers"] = {"supported": False, "reason": str(error)}
+            return result
         try:
             capabilities = camera.get_advanced_setting_capabilities()
             capability = capabilities["bit_depth"]
@@ -658,6 +674,11 @@ class Model:
                         "sensor_mode",
                     )
                 }
+        # Output discovery has its own response: it never performs bit-depth probes.
+        try:
+            result["output_triggers"] = camera.get_output_trigger_capabilities()
+        except Exception as error:
+            result["output_triggers"] = {"supported": False, "reason": str(error)}
         return result
 
     def _apply_advanced_camera_setting(

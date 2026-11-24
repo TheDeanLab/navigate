@@ -7,7 +7,12 @@ from uuid import uuid4
 
 from navigate.config.laser import LaserSoftwareConfig, resolve_laser_software_config
 from .base import LaserBase
-from .settings.base import LaserControlError, LaserMode, LaserSettingsBase
+from .settings.base import (
+    LaserControlError,
+    LaserMode,
+    LaserModeUnavailableError,
+    LaserSettingsBase,
+)
 
 
 class SoftwareControlledLaser(LaserBase):
@@ -100,7 +105,12 @@ class SoftwareControlledLaser(LaserBase):
             Serializable limits, modes, power readings and connection status.
             Internal setpoint is unknown in modes controlled by analog voltage.
         """
-        mode = self.settings.get_mode()
+        mode_warning = None
+        try:
+            mode = self.settings.get_mode()
+        except LaserModeUnavailableError as error:
+            mode = None
+            mode_warning = str(error)
         minimum, maximum = self.settings.get_power_limits_mw()
         internal_power = mode in (LaserMode.CW, LaserMode.DIGITAL)
         setpoint = self.settings.get_power_setpoint_mw() if internal_power else None
@@ -112,7 +122,8 @@ class SoftwareControlledLaser(LaserBase):
             "simulated": status["simulated"],
             "emission_enabled": status["emission_enabled"],
             "measured_power_mw": status["measured_power_mw"],
-            "mode": mode.value,
+            "mode": mode.value if mode is not None else None,
+            "mode_warning": mode_warning,
             "available_modes": [m.value for m in LaserMode if m in available],
             "power_source": self.options.power_source,
             "minimum_mw": minimum,
@@ -134,7 +145,6 @@ class SoftwareControlledLaser(LaserBase):
             raise LaserControlError(
                 "Apply and confirm a laser mode before acquiring: " + self._mode_error
             )
-        self.mode = self.settings.get_mode()
         mode = self._session_mode or self.options.mode
         if mode != "preserve":
             requested = LaserMode(mode)
@@ -148,6 +158,8 @@ class SoftwareControlledLaser(LaserBase):
             self.mode = self.settings.get_mode()
             if self.mode != requested:
                 raise LaserControlError("Laser did not accept the requested mode.")
+        else:
+            self.mode = self.settings.get_mode()
         if self.options.power_source == "serial":
             if self.mode not in (LaserMode.CW, LaserMode.DIGITAL):
                 raise LaserControlError(
@@ -261,7 +273,7 @@ def add_software_control(laser: LaserBase, is_synthetic: bool = False) -> LaserB
     laser : LaserBase
         Existing electrical laser controller.
     is_synthetic : bool, optional
-        Substitute a synthetic adapter even when Vortran is configured.
+        Substitute a synthetic adapter even when a physical backend is configured.
 
     Returns
     -------
@@ -281,11 +293,28 @@ def add_software_control(laser: LaserBase, is_synthetic: bool = False) -> LaserB
                 # A real device's maximum is unavailable in Virtual Devices mode.
                 # Honor its configured percentage reference without opening it.
                 maximum = max(maximum, options.power_reference_mw or maximum)
-            settings = SyntheticLaserSettings(maximum)
-        else:
+            modes = (
+                frozenset((LaserMode.CW, LaserMode.ANALOG))
+                if options.backend == "luxx"
+                else None
+            )
+            settings = SyntheticLaserSettings(maximum, supported_modes=modes)
+        elif options.backend == "vortran":
             from .settings.vortran import VortranLaserSettings
 
             settings = VortranLaserSettings.connect(
+                options.port, options.baudrate, options.timeout
+            )
+        elif options.backend == "obis":
+            from .settings.obis import ObisLaserSettings
+
+            settings = ObisLaserSettings.connect(
+                options.port, options.baudrate, options.timeout
+            )
+        else:
+            from .settings.luxx import LuxxLaserSettings
+
+            settings = LuxxLaserSettings.connect(
                 options.port, options.baudrate, options.timeout
             )
         return SoftwareControlledLaser(laser, settings, options)

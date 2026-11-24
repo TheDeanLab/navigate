@@ -167,3 +167,37 @@ def test_menu_reuses_existing_popup(popup):
     popup.showup = Mock()
     menu.popup_advanced_laser_setting()
     popup.showup.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "backend,labels",
+    [("OBIS", ("CW", "Digital", "Analog", "Mixed")), ("LuxX", ("CW", "Analog"))],
+)
+def test_popup_uses_adapter_capabilities_and_readbacks(popup, backend, labels):
+    from test.model.devices.lasers.test_obis_luxx_settings import adapter
+    from test.model.devices.lasers.test_laser_software import configuration
+
+    laser = make_laser(configuration(source="hardware"))
+    laser.settings, _ = adapter(backend)
+    reply(popup, **laser.advanced_settings_snapshot())
+    assert popup.view.inputs["mode"]["values"] == labels
+    assert popup.view.variables["connection"].get() == "Connected"
+    assert popup.view.variables["limits"].get() == "0–200 mW"
+    assert popup.view.variables["measured"].get() == "7.25 mW"
+
+
+def test_connected_standby_state_allows_selecting_a_supported_mode(popup):
+    reply(
+        popup,
+        connection="connected",
+        available_modes=["cw"],
+        mode=None,
+        setpoint_mw=None,
+        mode_warning="LuxX is in Standby; select CW.",
+    )
+    assert popup.view.variables["connection"].get() == "Connected"
+    assert popup.view.variables["setpoint"].get() == "Unknown"
+    assert "Standby" in popup.view.variables["status"].get()
+    popup.view.variables["mode"].set("CW")
+    popup.apply_mode()
+    assert popup.parent_controller.execute.call_args.args[1]["mode"] == "cw"

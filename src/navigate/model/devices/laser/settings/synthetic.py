@@ -1,6 +1,7 @@
 """In-memory laser settings for simulation and integration tests."""
 
 from math import isfinite
+from typing import Optional
 
 from .base import LaserControlError, LaserMode, LaserSettingsBase, LaserStatus
 
@@ -12,15 +13,38 @@ class SyntheticLaserSettings(LaserSettingsBase):
     ----------
     max_power_mw : float, optional
         Maximum simulated power and default percentage reference.
+    supported_modes : frozenset of LaserMode, optional
+        Capabilities of a substituted physical backend; defaults to all modes.
     """
 
-    def __init__(self, max_power_mw: float = 100.0) -> None:
+    def __init__(
+        self,
+        max_power_mw: float = 100.0,
+        supported_modes: Optional[frozenset[LaserMode]] = None,
+    ) -> None:
         if not isfinite(max_power_mw) or max_power_mw <= 0:
             raise ValueError("Synthetic maximum power must be positive and finite.")
         #: float: Simulated maximum output in mW.
         self.max_power_mw = float(max_power_mw)
+        #: frozenset[LaserMode]: Modes advertised by this simulated device.
+        self.supported_modes = (
+            frozenset(LaserMode) if supported_modes is None else supported_modes
+        )
+        if not self.supported_modes or not self.supported_modes.issubset(
+            frozenset(LaserMode)
+        ):
+            raise ValueError("Synthetic laser needs at least one valid supported mode.")
         #: LaserMode: Simulated operating mode.
-        self.mode = LaserMode.DIGITAL
+        self.mode = next(
+            mode
+            for mode in (
+                LaserMode.DIGITAL,
+                LaserMode.CW,
+                LaserMode.ANALOG,
+                LaserMode.MIXED,
+            )
+            if mode in self.supported_modes
+        )
         #: float: Simulated internal power setpoint in mW.
         self.power_mw = 0.0
         #: bool: Whether the settings connection has been closed.
@@ -32,8 +56,8 @@ class SyntheticLaserSettings(LaserSettingsBase):
             raise LaserControlError("Synthetic laser settings connection is closed.")
 
     def get_supported_modes(self) -> frozenset[LaserMode]:
-        """Return all simulated modulation modes."""
-        return frozenset(LaserMode)
+        """Return the simulated device's supported modulation modes."""
+        return self.supported_modes
 
     def get_power_limits_mw(self) -> tuple[float, float]:
         """Return simulated internal power limits in mW."""
@@ -48,7 +72,10 @@ class SyntheticLaserSettings(LaserSettingsBase):
         """Apply a simulated mode, using the base interface's semantics."""
         self._check_open()
         try:
-            self.mode = LaserMode(mode)
+            requested = LaserMode(mode)
+            if requested not in self.supported_modes:
+                raise ValueError("unsupported mode")
+            self.mode = requested
         except ValueError as error:
             raise LaserControlError(f"Unsupported laser mode: {mode!r}") from error
 

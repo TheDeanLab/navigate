@@ -59,6 +59,52 @@ def test_serial_laser_options_survive_preload_without_new_experiment_fields(
 
 
 @pytest.mark.parametrize(
+    "backend,canonical,baudrate", [("obis", "OBIS", 115200), ("luxx", "LuxX", 500000)]
+)
+def test_obis_luxx_defaults_survive_preload(
+    loaded_configuration, backend, canonical, baudrate
+):
+    from navigate.config.laser import resolve_laser_software_config
+
+    manager, configuration = loaded_configuration
+    name = next(iter(configuration["configuration"]["microscopes"].keys()))
+    laser = configuration["configuration"]["microscopes"][name]["laser"][0]
+    update_config_dict(
+        manager, laser, "power", {"source": "serial", "hardware": {"type": "Synthetic"}}
+    )
+    update_config_dict(
+        manager,
+        laser,
+        "onoff",
+        {"hardware": {"type": "NI", "channel": "Dev1/port0/line0"}},
+    )
+    update_config_dict(
+        manager, laser, "software_control", {"type": backend, "port": "COM7"}
+    )
+    preload_configuration(manager, configuration)
+    assert laser["software_control"]["type"] == canonical
+    assert "baudrate" not in laser["software_control"]
+    assert "mode" not in laser["software_control"]
+    assert resolve_laser_software_config(laser).baudrate == baudrate
+    assert resolve_laser_software_config(laser).mode == "preserve"
+
+
+@pytest.mark.parametrize("mode", ["digital", "mixed"])
+def test_luxx_unsupported_configured_modes_are_rejected(loaded_configuration, mode):
+    manager, configuration = loaded_configuration
+    name = next(iter(configuration["configuration"]["microscopes"].keys()))
+    laser = configuration["configuration"]["microscopes"][name]["laser"][0]
+    update_config_dict(
+        manager,
+        laser,
+        "software_control",
+        {"type": "LuxX", "port": "COM7", "mode": mode},
+    )
+    with pytest.raises(PreloadError, match="LuxX"):
+        preload_configuration(manager, configuration)
+
+
+@pytest.mark.parametrize(
     "software,power",
     [
         ({"type": "unknown"}, {"source": "serial", "hardware": {"type": "Synthetic"}}),

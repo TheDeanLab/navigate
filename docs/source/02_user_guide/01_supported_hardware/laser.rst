@@ -57,7 +57,8 @@ Optional serial power control
 
 Use serial power control when the laser should receive its power setting from
 **navigate**, while an NI or ASI output continues to control illumination timing.
-The first supported physical adapter is the Vortran Stradus RS232 interface.
+Supported software adapters are Vortran Stradus, Coherent OBIS LX/LS, and
+the original Omicron LuxX, through their serial interfaces.
 The laser must already be powered, enabled, and ready to accept commands, as with
 electrical control. The adapter does not enable emission or change emission delays.
 It uses the existing ``pyserial`` dependency; an additional vendor Python package
@@ -120,6 +121,79 @@ not establish physical device behavior; confirm the mode, gating, power readback
 and settling time on the installed laser before collecting experimental data.
 After a serial communication failure, restart **navigate** to establish a new
 connection before acquiring again.
+
+OBIS and LuxX software control
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The same ``software_control`` block selects the additional adapters. Omit
+``baudrate`` to use the adapter-specific default, or specify it to match the
+device. The existing Vortran default remains 19200 baud.
+
+.. list-table:: Serial software adapters
+   :header-rows: 1
+   :widths: 20 20 35 25
+
+   * - ``type``
+     - Default baud rate
+     - Software modulation choices
+     - Serial channel power
+   * - ``OBIS``
+     - 115200
+     - CW, digital, analog, mixed
+     - CW (CWP) or digital
+   * - ``LuxX``
+     - 500000
+     - CW, analog
+     - CW
+
+For an OBIS laser with serial channel power, retain the NI/ASI gate and the
+``power`` block from the configuration example and replace ``software_control``:
+
+.. code-block:: yaml
+
+    software_control:
+      type: OBIS
+      port: COM4
+      mode: digital
+
+For an original LuxX, use:
+
+.. code-block:: yaml
+
+    software_control:
+      type: LuxX
+      port: COM19
+      mode: cw
+
+Omitting ``mode`` preserves the device's current setting. Selecting CW applies
+CWP on OBIS and CW-APC on LuxX. OBIS constant-current mode (CWC) is preserved when
+requested, but serial power requires selecting CWP or digital first.
+
+The original LuxX has CW and analog operating modes, with a separate electrical
+laser-enable input. NI/ASI continues to drive that input for acquisition timing;
+there is no digital or mixed software mode to select on this model. LuxX+ and
+other Omicron models are not covered by this adapter. The popup advertises only
+supported modes, including in Virtual Devices mode. A LuxX in standby remains
+connected in the popup and can be switched to CW or analog; acquisition with
+``mode: preserve`` stops until a usable mode is selected.
+
+OBIS protocol values are in watts and are converted to mW by the adapter. LuxX
+power is quantized to its 12-bit register; the confirmed mW value reflects that
+quantization rather than repeating the requested value. Both adapters read the
+internal setpoint and measured output separately. Neither connection nor power
+updates enable emission, set autostart, or call the API's legacy initialization
+routine. Their connections use finite read/write timeouts and complete response
+frames, so communication failures cannot silently reuse a previous reply.
+
+The popup does not save its mode override to **navigate** configuration files.
+Device firmware can retain changes independently: OBIS saves mode and power
+settings in persistent memory. Consult the
+`Coherent OBIS operator's manual <https://www.coherent.com/resources/manuals/lasers/obis-lx-ls-operators-manual.pdf>`_
+and the
+`Omicron-authored Micro-Manager driver <https://github.com/micro-manager/mmCoreAndDevices/blob/main/DeviceAdapters/Omicron/Omicron.cpp>`_
+for protocol and mode details. Protocol-emulator tests do not establish physical
+hardware behavior; verify power, mode, and electrical gating on the installed
+laser.
 
 Laser power metadata
 ~~~~~~~~~~~~~~~~~~~~

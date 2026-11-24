@@ -121,6 +121,33 @@ def test_metadata_read_is_incremental_and_resets_for_new_acquisition(scope):
     assert all(record["confirmed_setpoint_mw"] is None for record in records)
 
 
+@pytest.mark.parametrize("backend", ["OBIS", "LuxX"])
+def test_new_adapters_record_confirmed_channel_power_and_clear_failed_confirmation(
+    scope, backend
+):
+    from test.model.devices.lasers.test_obis_luxx_settings import adapter
+
+    laser = scope.laser["488"]
+    laser.settings, connection = adapter(backend)
+    scope.prepare_laser_settings()
+    scope.prepare_channel("channel_1")
+    _, records = scope.laser_metadata.read_since()
+    confirmed = records[-1]
+    assert confirmed["verification"] == "readback"
+    assert confirmed["requested_percent"] == 25
+    assert confirmed["requested_mw"] == 50
+    assert confirmed["confirmed_setpoint_mw"] == pytest.approx(50, abs=0.05)
+    assert confirmed["measured_power_mw"] == 7.25
+    assert scope.channels["channel_1"]["laser_power"] == 25
+    connection.ignore_writes = True
+    with pytest.raises(LaserControlError, match="readback"):
+        scope.prepare_channel("channel_2")
+    _, records = scope.laser_metadata.read_since()
+    assert records[-1]["verification"] == "failed"
+    assert records[-1]["confirmed_setpoint_mw"] is None
+    assert scope.shutter.state is False
+
+
 @pytest.mark.parametrize(
     "model_class,method", [(Model, "snap_image"), (ASIModel, "snap_zstack")]
 )

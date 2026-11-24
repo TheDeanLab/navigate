@@ -70,7 +70,7 @@ class LaserBase(ABC):
         "software_control/type": SettingSpec(
             str,
             default="None",
-            choices=("None", "Synthetic", "Vortran"),
+            choices=("None", "Synthetic", "Vortran", "OBIS", "LuxX"),
             label="Laser Software Adapter",
             required=False,
             help_text="Optional connection to settings inside the laser; disabled by default.",
@@ -91,10 +91,11 @@ class LaserBase(ABC):
         ),
         "software_control/baudrate": SettingSpec(
             int,
-            default=19200,
+            default=None,
             minimum=1,
             label="Laser Baud Rate",
             required=False,
+            help_text="Omit for the adapter default: Vortran 19200, OBIS 115200, LuxX 500000.",
         ),
         "software_control/timeout": SettingSpec(
             float,

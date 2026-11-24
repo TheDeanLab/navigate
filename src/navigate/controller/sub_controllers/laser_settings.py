@@ -180,7 +180,9 @@ class AdvancedLaserSettingController:
             self.view.inputs["mode"].configure(
                 values=[self.mode_labels[m] for m in self._modes]
             )
-            current = self.mode_labels[result["mode"]]
+            current = self.mode_labels.get(
+                result["mode"], "Unavailable for acquisition"
+            )
             values["mode"].set(current if result["mode"] in self._modes else "")
             values["current_mode"].set(current)
             values["device_identity"].set(result["device_identity"])
@@ -202,7 +204,9 @@ class AdvancedLaserSettingController:
             values["setpoint"].set(
                 f"{result['setpoint_mw']:g} mW ({kind})"
                 if result["setpoint_mw"] is not None
-                else "External analog control"
+                else (
+                    "Unknown" if result["mode"] is None else "External analog control"
+                )
             )
             measured = result["measured_power_mw"]
             values["measured"].set(
@@ -213,7 +217,11 @@ class AdvancedLaserSettingController:
                 "Unknown" if emission is None else "Yes" if emission else "No"
             )
             values["read_at"].set(result["read_at"])
-        status = result.get("error") or result.get("mode_error")
+        status = (
+            result.get("error")
+            or result.get("mode_error")
+            or result.get("mode_warning")
+        )
         if not status:
             status = (
                 "Configure software_control to enable these settings."

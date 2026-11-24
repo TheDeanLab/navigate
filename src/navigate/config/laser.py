@@ -47,9 +47,9 @@ def resolve_laser_software_config(laser: dict) -> LaserSoftwareConfig:
     mode = str(options.get("mode") or "preserve").lower()
     if source not in ("hardware", "serial"):
         raise ValueError("laser.power.source must be hardware or serial.")
-    if backend not in ("none", "synthetic", "vortran"):
+    if backend not in ("none", "synthetic", "vortran", "obis", "luxx"):
         raise ValueError(
-            "laser.software_control.type must be None, Synthetic, or Vortran."
+            "laser.software_control.type must be None, Synthetic, Vortran, OBIS, or LuxX."
         )
     if source == "serial" and backend == "none":
         raise ValueError("Serial laser power requires a software_control adapter.")
@@ -57,16 +57,24 @@ def resolve_laser_software_config(laser: dict) -> LaserSoftwareConfig:
         raise ValueError("Unknown laser.software_control.mode.")
     if backend == "none":
         return LaserSoftwareConfig(power_source=source)
+    if backend == "luxx" and mode in ("digital", "mixed"):
+        raise ValueError(
+            "Original LuxX supports CW and analog software modes only; NI/ASI handles its separate electronic shutter."
+        )
     if source == "serial" and mode in ("analog", "mixed"):
         raise ValueError(
             "Serial laser power cannot be combined with external analog power."
         )
     port = str(options.get("port") or "")
-    if backend == "vortran" and not port:
-        raise ValueError("Vortran software control requires a serial port.")
+    if backend in ("vortran", "obis", "luxx") and not port:
+        raise ValueError(f"{backend} software control requires a serial port.")
     try:
         timeout = float(options.get("timeout", 0.5))
-        baudrate = int(options.get("baudrate", 19200))
+        default_baudrate = {"obis": 115200, "luxx": 500000}.get(backend, 19200)
+        configured_baudrate = options.get("baudrate")
+        baudrate = int(
+            default_baudrate if configured_baudrate is None else configured_baudrate
+        )
         maximum = float(options.get("max_power_mw", 100.0))
         reference = power.get("percent_reference_mw")
         reference = float(reference) if reference is not None else None
@@ -103,7 +111,7 @@ def resolve_laser_software_config(laser: dict) -> LaserSoftwareConfig:
             "asi.asi",
             "asi.asilaser",
         ):
-            raise ValueError("Vortran serial power requires an NI or ASI digital gate.")
+            raise ValueError("Serial laser power requires an NI or ASI digital gate.")
     return LaserSoftwareConfig(
         source, backend, mode, port, baudrate, timeout, reference, maximum
     )

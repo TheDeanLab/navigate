@@ -252,3 +252,58 @@ def test_unconfirmed_mode_never_becomes_session_policy(model):
     assert result["acquisition_mode"] == "preserve"
     with pytest.raises(LaserControlError, match="Apply and confirm"):
         laser.prepare_acquisition()
+
+
+@pytest.mark.parametrize(
+    "backend,modes",
+    [("OBIS", ["cw", "digital", "analog", "mixed"]), ("LuxX", ["cw", "analog"])],
+)
+def test_new_adapters_use_existing_popup_transaction_path(model, backend, modes):
+    from test.model.devices.lasers.test_obis_luxx_settings import adapter
+
+    scope = model.microscopes["scope"]
+    laser = make_laser(configuration(source="hardware"))
+    laser.settings, connection = adapter(backend)
+    scope.laser["488"] = laser
+    result = request(model)
+    assert result["error"] is None
+    assert result["connection"] == "connected"
+    assert result["available_modes"] == modes
+    assert result["maximum_mw"] == 200
+    assert result["measured_power_mw"] == 7.25
+    result = request(model, identity=result["identity"], mode="analog")
+    assert result["error"] is None
+    assert result["mode"] == "analog"
+    scope.shutter.close_shutter.assert_called_once()
+    laser.external.turn_off.assert_called_once()
+    laser.prepare_acquisition()
+    laser.set_power(25)
+    laser.external.set_power.assert_called_once_with(25)
+    assert not any(command.startswith("?LOn") for command in connection.commands)
+
+
+def test_standby_luxx_is_connected_and_can_be_configured_without_enabling_emission(
+    model,
+):
+    from test.model.devices.lasers.test_obis_luxx_settings import adapter
+
+    laser = model.microscopes["scope"].laser["488"]
+    laser.settings, connection = adapter("LuxX")
+    connection.values["ROM"] = b"0"
+    connection.values["GAS"] = b"0000"
+    result = request(model)
+    assert result["connection"] == "connected"
+    assert result["mode"] is None
+    assert "Standby" in result["mode_warning"]
+    assert result["available_modes"] == ["cw"]
+    with pytest.raises(LaserControlError, match="Standby"):
+        laser.prepare_acquisition()
+    result = request(model, identity=result["identity"], mode="cw")
+    assert result["error"] is None
+    assert result["mode"] == "cw"
+    assert result["emission_enabled"] is False
+    laser.prepare_acquisition()
+    laser.set_power(25)
+    assert laser.power_metadata["mode"] == "cw"
+    assert laser.power_metadata["emission_enabled"] is False
+    assert "?LOn" not in connection.commands

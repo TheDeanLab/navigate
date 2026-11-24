@@ -12,6 +12,10 @@ class LaserControlError(UserVisibleException):
     """A requested laser setting could not be applied or verified."""
 
 
+class LaserModeUnavailableError(LaserControlError):
+    """The connected laser is in a state outside the common modulation modes."""
+
+
 class LaserMode(str, Enum):
     """Common modulation modes; adapters advertise their supported subset."""
 

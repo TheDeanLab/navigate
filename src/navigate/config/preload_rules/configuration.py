@@ -260,6 +260,8 @@ def validate_laser_software_control(context: PreloadContext) -> None:
                             "none": "None",
                             "synthetic": "Synthetic",
                             "vortran": "Vortran",
+                            "obis": "OBIS",
+                            "luxx": "LuxX",
                         }[options.backend],
                     )
                 if "mode" in software:

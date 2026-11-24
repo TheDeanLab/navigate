@@ -1,207 +1,152 @@
+"""Coherent OBIS LX/LS SCPI API; power values at this layer are watts.
+
+Protocol reference: Coherent OBIS LX/LS Operator's Manual, Host Interface.
+This API is independent of Navigate's acquisition laser interface.
 """
-Obis Laser Class
-OBIS561, 150 mW, is COM4
-Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
-"""
-import logging
 
-import serial
-from time import sleep
+from math import isfinite
+from typing import Any, Optional
 
-from navigate.model.devices.laser.base import LaserBase
-
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+from navigate.model.devices.APIs.laser_serial import SerialLaserAPI
+from navigate.model.devices.laser.settings.base import LaserControlError
 
 
-class ObisLaser(LaserBase):
-    def __init__(self, port="COM4"):
+class ObisLaser(SerialLaserAPI):
+    """Open OBIS RS232 without changing emission, power or modulation mode.
 
-        #: float: The timeout for the laser in seconds.
-        self.timeout = 0.05
+    Parameters
+    ----------
+    port : str, optional
+        Serial port name.
+    baudrate : int, optional
+        Serial baud rate; OBIS defaults to 115200.
+    timeout : float, optional
+        Bounded transaction timeout in seconds.
+    connection : object, optional
+        Owned serial connection supplied for protocol testing.
+    """
 
-        #: str: The end of line character for the laser
-        self.end_of_line = "\r"
-
+    def __init__(
+        self,
+        port: str = "COM4",
+        baudrate: int = 115200,
+        timeout: float = 0.5,
+        *,
+        connection: Optional[Any] = None,
+    ) -> None:
+        super().__init__(port, baudrate, timeout, connection)
         try:
-            # Open serial port
-            #: serial.Serial: The serial port for the laser.
-            self.laser = serial.Serial()
-            self.laser.port = port
-            self.laser.baudrate = 115200
-            self.laser.parity = "N"
-            self.laser.stopbits = 1
-            self.laser.bytesize = 8
-            self.laser.timeout = self.timeout
-            self.laser.open()
+            self.ask("SYSTem:COMMunicate:HANDshaking ON")
+            self.ask("SYSTem:COMMunicate:PROMpt OFF")
+        except Exception:
+            self.close()
+            raise
 
-        except serial.SerialException:
-            logger.error(f"{str(self)}, Could not open port {port}")
-            raise OSError(
-                'Port "%s" is unavailable.\n' % port
-                + "Maybe the laser is not connected, the wrong"
-                + " port is specified or the port is already opened"
-            )
+    def ask(self, command: str) -> str:
+        """Exchange a complete SCPI command, data reply and OK/ERR handshake.
 
-    def __del__(self):
-        """
-        # Close the port before exit.
-        """
-        try:
-            # self.set_power(0)
-            self.laser.close()
+        Parameters
+        ----------
+        command : str
+            SCPI query or command without its terminator.
 
-        except serial.SerialException:
-            print("Could not close the port")
+        Returns
+        -------
+        str
+            Query data, or an empty string for an acknowledged command.
+        """
+        with self._lock:
+            deadline = self._send((command + "\r").encode("ascii"))
+            response = None
+            while True:
+                try:
+                    frame = self._read_frame(deadline).decode("ascii").lstrip("> ")
+                except UnicodeError:
+                    self._fail("Non-ASCII OBIS response.")
+                if not frame or frame == command:
+                    continue
+                if frame.startswith("ERR"):
+                    raise LaserControlError(f"OBIS rejected {command!r}: {frame}")
+                if frame == "OK":
+                    if "?" in command and response is None:
+                        self._fail("OBIS query returned no data.")
+                    return response or ""
+                if "?" not in command or response is not None:
+                    self._fail(f"Unexpected OBIS response: {frame!r}")
+                response = frame
 
-    def close(self):
-        """
-        # Close the port before exit.
-        """
-        try:
-            self.laser.close()
+    def get_laser_model(self) -> str:
+        """Return the manufacturer, device identity and firmware string."""
+        return self.ask("*IDN?")
 
-        except serial.SerialException:
-            print("could not close the port")
+    def get_laser_wavelength(self) -> str:
+        """Return the wavelength in nm."""
+        return self.ask("SYSTem:INFormation:WAVelength?")
 
-    def get_laser_model(self):
-        """
-        # Get the laser model.
-        """
-        command = "?SYSTem:INFormation:MODel?"
-        laser_model = self.ask(command)
-        self.laser_model = laser_model
-        return laser_model
+    def get_minimum_laser_power(self) -> str:
+        """Return the minimum power limit in watts."""
+        return self.ask("SOURce:POWer:LIMit:LOW?")
 
-    def get_laser_wavelength(self):
-        """
-        # Get the current laser wavelength in nm.
-        """
-        command = "SYSTem:INFormation:WAVelength?"
-        laser_wavelength = self.ask(command)
-        self.laser_wavelength = laser_wavelength
-        return laser_wavelength
+    def get_maximum_laser_power(self) -> str:
+        """Return the maximum power limit in watts."""
+        return self.ask("SOURce:POWer:LIMit:HIGH?")
 
-    def get_minimum_laser_power(self):
-        """
-        # Get the maximum laser power in mW.
-        """
-        command = "SOURce:POWer:LIMit:LOW?"
-        minimum_laser_power = self.ask(command)
-        self.minimum_laser_power = minimum_laser_power
-        return minimum_laser_power
+    def get_laser_power(self) -> str:
+        """Return measured output power in watts, distinct from its setpoint."""
+        return self.ask("SOURce:POWer:LEVel?")
 
-    def get_maximum_laser_power(self):
-        """
-        # Get the maximum laser power in mW.
-        """
-        command = "SOURce:POWer:LIMit:HIGH?"
-        maximum_laser_power = self.ask(command)
-        self.maximum_laser_power = maximum_laser_power
-        return maximum_laser_power
+    def get_power_setpoint(self) -> str:
+        """Return the internal power setting in watts."""
+        return self.ask("SOURce:POWer:LEVel:IMMediate:AMPLitude?")
 
-    def get_laser_power(self):
-        """
-        # Get the current laser power in mW.
-        """
-        command = "SOURce:POWer:LEVel?"
-        laser_power = self.ask(command)
-        self.laser_power = laser_power
-        return laser_power
+    def set_laser_power(self, power: float) -> None:
+        """Set the internal power in watts without enabling emission.
 
-    def get_ext_control(self):
+        Parameters
+        ----------
+        power : float
+            Nonnegative finite power in watts; caller validates device limits.
         """
-        # Get the external control status.
-        """
-        command = "SYSTem:EXTernal:CONTRol?"
-        ext_control = self.ask(command)
-        self.ext_control = ext_control
-        return ext_control
+        if not isfinite(power) or power < 0:
+            raise LaserControlError("OBIS power must be nonnegative and finite.")
+        self.ask(f"SOURce:POWer:LEVel:IMMediate:AMPLitude {power:.9f}")
 
-    def get_laser_status(self):
-        """
-        # Get the current laser status.
-        """
-        command = "SOURce:STATus?"
-        laser_status = self.ask(command)
-        self.laser_status = laser_status
-        return laser_status
+    def get_ext_control(self) -> str:
+        """Return the external control status."""
+        return self.ask("SYSTem:EXTernal:CONTRol?")
 
-    def set_laser_operating_mode(self, mode):
+    def get_laser_status(self) -> str:
+        """Return the raw status register for existing API clients."""
+        return self.ask("SOURce:STATus?")
+
+    def get_emission_enabled(self) -> bool:
+        """Read emission enable separately from the general status register."""
+        reply = self.ask("SOURce:AM:STATe?").upper()
+        if reply not in ("ON", "OFF"):
+            self._fail("Invalid OBIS emission readback.")
+        return reply == "ON"
+
+    def set_laser_operating_mode(self, mode: str) -> None:
+        """Select an OBIS mode without enabling emission.
+
+        Parameters
+        ----------
+        mode : str
+            CWP, CWC, digital, analog, mixed, DIGSO or MIXSO.
         """
-        # Set the laser operating mode.
-        # Seven mutually exclusive operating modes are available
-        # CWP (continuous wave, constant power)
-        # CWC (continuous wave, constant current)
-        # DIGITAL (CW with external digital modulation)
-        # ANALOG (CW with external analog modulation)
-        # MIXED (CW with external digital + analog modulation)
-        # DIGSO (External digital modulation with power feedback) Note: This
-        # operating mode is not supported in some device models.
-        # MIXSO (External mixed modulation with power feedback) Note: This
-        # operating mode is not supported in some device models.
-        """
-        if mode == "cwp":
-            command = "SOURce:AM:INTernal CWP"
-        elif mode == "cwc":
-            command = "SOURce:AM:INTernal CWC"
-        elif mode == "digital":
-            command = "SOURce:AM:EXTernal DIGital"
-        elif mode == "analog":
-            command = "SOURce:AM:EXTernal ANALog"
-        elif mode == "mixed":
-            command = "SOURce:AM:EXTernal MIXed"
-        elif mode == "digso":
-            command = "SOURce:AM:EXTernal DIGSO"
-        elif mode == "mixso":
-            command = "SOURce:AM:EXTernal MIXSO"
+        mode = mode.upper()
+        if mode in ("CWP", "CWC"):
+            self.ask(f"SOURce:AM:INTernal {mode}")
+        elif mode in ("DIGITAL", "ANALOG", "MIXED", "DIGSO", "MIXSO"):
+            self.ask(f"SOURce:AM:EXTernal {mode}")
         else:
-            print("Invalid mode")
-            return
+            raise LaserControlError(f"Unsupported OBIS mode: {mode}")
 
-        self.laser.write(command.encode())
+    def get_laser_operating_mode(self) -> str:
+        """Return the current OBIS operating mode token."""
+        return self.ask("SOURce:AM:SOURce?").upper()
 
-    def get_laser_operating_mode(self):
-        """
-        # Get the laser operating mode.
-        """
-        #  TODO: Fix
-
-        command = "SOURce:AM:SOURce?"
-        laser_operating_mode = self.ask(command)
-        if "CWP" in laser_operating_mode:
-            self.laser_operating_mode = "cwp"
-        elif "CWC" in laser_operating_mode:
-            self.laser_operating_mode = "cwc"
-        elif "DIGITAL" in laser_operating_mode:
-            self.laser_operating_mode = "digital"
-        elif "ANALOG" in laser_operating_mode:
-            self.laser_operating_mode = "analog"
-        elif "MIXED" in laser_operating_mode:
-            self.laser_operating_mode = "mixed"
-        elif "DIGSO" in laser_operating_mode:
-            self.laser_operating_mode = "digso"
-        elif "MIXSO" in laser_operating_mode:
-            self.laser_operating_mode = "mixso"
-        else:
-            print("Invalid Laser Operating Mode")
-            return
-        return laser_operating_mode
-
-    def ask(self, command):
-        self.laser.write(str(command + self.end_of_line).encode())
-        response = ""
-        read_iteration = self.laser.read()
-        while read_iteration != b"\r":
-            response += read_iteration.decode()
-            sleep(self.timeout)
-            read_iteration = self.laser.read()
-        return response
-
-    def initialize_laser(self):
-        """
-        # Initialize the laser.
-        """
+    def initialize_laser(self) -> None:
+        """Explicit legacy initialization; adapters never call this method."""
         self.set_laser_operating_mode("mixed")
-        self.set_laser_power(self.get_maximum_laser_power())
+        self.set_laser_power(float(self.get_maximum_laser_power()))

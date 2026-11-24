@@ -268,6 +268,9 @@ class AdvancedLaserSettingController:
             return
         self._closed = True
         self.view.popup.destroy()
+        # A pending worker callback can retain this controller after closing.
+        # Release owned Tk variables here, before that callback is dropped off-thread.
+        self.view.variables.clear()
         if (
             getattr(self.parent_controller, "advanced_laser_setting_controller", None)
             is self

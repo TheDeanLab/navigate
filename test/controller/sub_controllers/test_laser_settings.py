@@ -3,6 +3,10 @@
 from types import SimpleNamespace
 from unittest.mock import Mock
 from multiprocessing import Manager
+import gc
+import threading
+import tkinter as tk
+import weakref
 
 import pytest
 
@@ -160,6 +164,55 @@ def test_close_while_pending_ignores_late_completion(popup):
     popup.close_popup()
     callback(request)  # Would raise TclError if any destroyed widget was touched.
     assert not hasattr(popup.parent_controller, "advanced_laser_setting_controller")
+
+
+def test_closed_popup_releases_variables_before_worker_drops_callback(
+    tk_root, monkeypatch
+):
+    main = threading.get_ident()
+    finalized = []
+    owned = set()
+    original = tk.Variable.__del__
+
+    def finalize(variable):
+        if str(variable) in owned:
+            finalized.append(threading.get_ident())
+            if threading.get_ident() != main:
+                # Record the violation without hanging Tcl in the failing case.
+                return
+        original(variable)
+
+    monkeypatch.setattr(tk.Variable, "__del__", finalize)
+
+    def open_and_close():
+        parent = SimpleNamespace(
+            configuration={
+                "configuration": {
+                    "microscopes": {"scope": {"laser": [{"wavelength": 488}]}}
+                },
+                "experiment": {"MicroscopeState": {"microscope_name": "scope"}},
+            },
+            acquire_bar_controller=SimpleNamespace(is_acquiring=False),
+            execute=Mock(),
+        )
+        view = AdvancedLaserSettingPopup(tk_root)
+        controller = AdvancedLaserSettingController(view, parent)
+        refs = [weakref.ref(variable) for variable in view.variables.values()]
+        owned.update(str(variable) for variable in view.variables.values())
+        callback = parent.execute.call_args.args[-1]
+        controller.close_popup()
+        return refs, callback
+
+    refs, callback = open_and_close()
+    pending = [callback]
+    del callback
+    gc.collect()  # Dispose unrelated Tk test objects on their owning thread.
+    worker = threading.Thread(target=lambda: (pending.clear(), gc.collect()))
+    worker.start()
+    worker.join(timeout=2)
+    assert not worker.is_alive()
+    assert all(ref() is None for ref in refs)
+    assert finalized and set(finalized) == {main}
 
 
 def test_busy_popup_does_not_send_requests_and_refreshes_after_stop(popup):

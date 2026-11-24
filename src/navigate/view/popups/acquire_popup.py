@@ -206,6 +206,10 @@ class AcquirePopUp(CommonMethods):
         #: TabFrame: TabFrame object
         self.tab_frame = TabFrame(parent=self, frame=tab_frame)
 
+        # Toplevel bindings also receive destruction events from child widgets.
+        # Clean up each input, including entries with duplicate channel labels.
+        self.popup.bind("<Destroy>", self._release_variables, add="+")
+
         # Resize to the requested content size to avoid large empty gaps.
         self.popup.update_idletasks()
         required_height = self.popup.winfo_reqheight()
@@ -213,6 +217,27 @@ class AcquirePopUp(CommonMethods):
         y_pos = self.popup.winfo_y()
         current_width = self.popup.winfo_width()
         self.popup.geometry(f"{current_width}x{required_height}+{x_pos}+{y_pos}")
+
+    def _release_variables(self, event: tk.Event) -> None:
+        """Release dialog-owned Tk variables when their widget is destroyed.
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            Main-thread destruction event for a dialog widget.
+
+        Notes
+        -----
+        Widget cycles and retained callbacks can otherwise defer variable
+        finalizers to a camera worker. Remove traces that capture their own
+        variable, then drop both input and validation references on Tk.
+        """
+        for attribute in ("variable", "error"):
+            variable = getattr(event.widget, attribute, None)
+            if isinstance(variable, tk.Variable):
+                for modes, callback in variable.trace_info():
+                    variable.trace_remove(modes, callback)
+                setattr(event.widget, attribute, None)
 
 
 class ButtonFrame:

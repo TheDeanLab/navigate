@@ -1085,7 +1085,7 @@ class Microscope:
 
     def request_laser_power_feedback(self) -> None:
         """Republish cached confirmations after an explicit channel edit."""
-        self._laser_feedback_requested = set(self.channels)
+        self._laser_feedback_requested = set(self.channels.keys())
 
     def prepare_laser_settings(self) -> None:
         """Prepare settings without discarding history on an acquisition restart."""

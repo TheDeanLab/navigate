@@ -40,7 +40,8 @@ class AdvancedLaserSettingController:
         self._microscopes = parent_controller.configuration["configuration"][
             "microscopes"
         ]
-        self.view.inputs["microscope"].configure(values=list(self._microscopes))
+        # Nested DictProxy objects cannot create an iterator proxy in this process.
+        self.view.inputs["microscope"].configure(values=list(self._microscopes.keys()))
         selected = parent_controller.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]

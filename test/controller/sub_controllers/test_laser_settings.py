@@ -2,9 +2,11 @@
 
 from types import SimpleNamespace
 from unittest.mock import Mock
+from multiprocessing import Manager
 
 import pytest
 
+from navigate.config.config import update_config_dict
 from navigate.controller.sub_controllers.laser_settings import (
     AdvancedLaserSettingController,
 )
@@ -64,6 +66,56 @@ def test_open_queries_async_and_shows_unknown_simulated_readbacks(popup):
     assert view.variables["setpoint"].get() == "0 mW (peak pulse)"
     assert view.variables["measured"].get() == "Unknown"
     assert view.variables["emission"].get() == "Unknown"
+
+
+def test_popup_populates_selectors_from_nested_shared_configuration(tk_root):
+    with Manager() as manager:
+        configuration = manager.dict()
+        update_config_dict(
+            manager,
+            configuration,
+            "configuration",
+            {
+                "microscopes": {
+                    "ORCA-Quest2": {"laser": [{"wavelength": 488}]},
+                    "other": {"laser": [{"wavelength": 640}]},
+                }
+            },
+        )
+        update_config_dict(
+            manager,
+            configuration,
+            "experiment",
+            {"MicroscopeState": {"microscope_name": "ORCA-Quest2"}},
+        )
+        parent = SimpleNamespace(
+            configuration=configuration,
+            acquire_bar_controller=SimpleNamespace(is_acquiring=False),
+            execute=Mock(),
+        )
+        view = AdvancedLaserSettingPopup(tk_root)
+        controller = None
+        try:
+            controller = AdvancedLaserSettingController(view, parent)
+            assert view.inputs["microscope"]["values"] == ("ORCA-Quest2", "other")
+            assert view.variables["microscope"].get() == "ORCA-Quest2"
+            assert view.inputs["laser"]["values"] == ("488 nm",)
+            assert view.variables["laser"].get() == "488 nm"
+            request = parent.execute.call_args.args[1]
+            assert request["microscope"] == "ORCA-Quest2"
+            assert request["laser"] == "488"
+            reply(controller, mode="cw", bench_mode=True, power_kind="cw_setpoint")
+            assert view.inputs["mode"]["values"] == ("CW", "Digital")
+            assert view.variables["mode"].get() == "CW"
+            view.variables["microscope"].set("other")
+            controller.update_microscope()
+            assert view.inputs["laser"]["values"] == ("640 nm",)
+            assert parent.execute.call_args.args[1]["laser"] == "640"
+        finally:
+            if controller is not None:
+                controller.close_popup()
+            else:
+                view.popup.destroy()
 
 
 def test_serial_bench_display_explains_ungated_illumination(popup):

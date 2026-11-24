@@ -3,9 +3,11 @@
 from queue import Queue
 from types import SimpleNamespace
 from unittest.mock import Mock
+from multiprocessing import Manager
 
 import pytest
 
+from navigate.config.config import update_config_dict
 from navigate.model.metadata_sources.laser_metadata import LaserMetadata
 from navigate.model.microscope import Microscope
 from navigate.model.model import Model, ASIModel
@@ -44,6 +46,18 @@ def scope():
     scope.prepare_laser_settings()
     scope.shutter.open_shutter()
     return scope
+
+
+@pytest.fixture(params=["plain", "shared"])
+def channel_scope(scope, request):
+    if request.param == "plain":
+        yield scope
+    else:
+        with Manager() as manager:
+            shared = manager.dict()
+            update_config_dict(manager, shared, "channels", scope.channels)
+            scope.channels = shared["channels"]
+            yield scope
 
 
 def test_channel_preparation_routes_percentage_and_keeps_intent(scope):
@@ -126,8 +140,9 @@ def test_mid_acquisition_preparation_keeps_unflushed_history_and_skips_mode_writ
 
 
 def test_live_edit_returning_to_same_power_republishes_confirmation_without_io(
-    scope, monkeypatch
+    channel_scope, monkeypatch
 ):
+    scope = channel_scope
     scope.prepare_channel("channel_1")
     laser = scope.laser["488"]
     laser.settings.set_power_mw = Mock(wraps=laser.settings.set_power_mw)

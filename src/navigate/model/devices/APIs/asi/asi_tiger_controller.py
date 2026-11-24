@@ -145,6 +145,11 @@ class TigerController:
         #: threading.Event.set(): Set the safe_to_write event
         self.safe_to_write.set()
 
+        #: threading.Lock: Exclusive ownership of a complete command/reply pair.
+        self._transaction_lock = threading.Lock()
+        #: int | None: Thread awaiting the reply to its command.
+        self._transaction_owner: int | None = None
+
         #: float: Last time a command was sent to the Tiger Controller
         self._last_cmd_send_time = time.perf_counter()
 
@@ -383,6 +388,18 @@ class TigerController:
         if self.verbose:
             print(message)
 
+    def _begin_transaction(self) -> None:
+        """Reserve the serial connection until this thread consumes its reply."""
+        self._transaction_lock.acquire()
+        self._transaction_owner = threading.get_ident()
+        self.safe_to_write.clear()
+
+    def _end_transaction(self) -> None:
+        """Release a completed or failed transaction, including waiting callers."""
+        self._transaction_owner = None
+        self.safe_to_write.set()
+        self._transaction_lock.release()
+
     def send_command(self, cmd: str, *, strict: bool = False) -> None:
         """Send a serial command to the device.
 
@@ -392,25 +409,31 @@ class TigerController:
             Serial command to send to the device
         strict : bool, optional
             Propagate write timeouts for checked illumination operations.
-        """
-        # always reset the buffers before a new command is sent
-        self.safe_to_write.wait()
-        self.safe_to_write.clear()
-        self.serial.read_all()
-        self.serial.reset_input_buffer()
-        self.serial.reset_output_buffer()
 
-        # send the serial command to the controller
-        self.report_to_console(cmd)
-        command = bytes(f"{cmd}\r", encoding="ascii")
+        Notes
+        -----
+        The calling thread must consume the reply with ``read_response`` before
+        sending another command. An Event cannot enforce this ownership: waking
+        multiple waiters lets them all pass ``wait`` before one clears it.
+        """
+        self._begin_transaction()
         try:
-            self.serial.write(command)
-        except SerialTimeoutException as e:
-            if strict:
-                self.safe_to_write.set()
-                raise
-            print(f"Tiger Controller -- SerialTimeoutException: {e}")
-            pass
+            # Buffer operations belong to the transaction, too: they must not
+            # discard another thread's pending response.
+            self.serial.read_all()
+            self.serial.reset_input_buffer()
+            self.serial.reset_output_buffer()
+            self.report_to_console(cmd)
+            command = bytes(f"{cmd}\r", encoding="ascii")
+            try:
+                self.serial.write(command)
+            except SerialTimeoutException as e:
+                if strict:
+                    raise
+                print(f"Tiger Controller -- SerialTimeoutException: {e}")
+        except BaseException:
+            self._end_transaction()
+            raise
 
     def read_response(self) -> str:
         """Read a line from the serial response.
@@ -420,8 +443,14 @@ class TigerController:
         str
             Response from the serial port
         """
-        response = self.serial.readline()
-        self.safe_to_write.set()
+        # Preserve standalone reads while preventing them from consuming a
+        # response owned by another thread.
+        if self._transaction_owner != threading.get_ident():
+            self._begin_transaction()
+        try:
+            response = self.serial.readline()
+        finally:
+            self._end_transaction()
 
         try:
             response = response.decode(encoding="ascii")
@@ -1021,14 +1050,10 @@ class TigerController:
         command : str
             ASI command that returns an :A acknowledgement on success.
         """
-        try:
-            self.send_command(command, strict=True)
-            response = self.read_response()
-            if not response or response.split()[0] != ":A":
-                raise ASIException(f"Missing ASI acknowledgement: {response!r}")
-        except Exception:
-            self.safe_to_write.set()
-            raise
+        self.send_command(command, strict=True)
+        response = self.read_response()
+        if not response or response.split()[0] != ":A":
+            raise ASIException(f"Missing ASI acknowledgement: {response!r}")
 
     def logic_card_off_checked(self, axis: str) -> None:
         """Blank a logic output only after acknowledging both commands."""

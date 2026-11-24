@@ -37,6 +37,7 @@ from multiprocessing.managers import ListProxy
 import reprlib
 import threading
 import time
+from math import isfinite
 from typing import Any, Dict, List, Optional
 
 # Third-party imports
@@ -44,6 +45,8 @@ import numpy as np
 
 # Local application imports
 from navigate.model.devices.camera.format import CameraImageFormat
+from navigate.model.devices.laser.software import SoftwareControlledLaser
+from navigate.model.metadata_sources.laser_metadata import LaserMetadata
 
 from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
 from navigate.model.device_startup_functions import load_devices, start_device
@@ -97,6 +100,9 @@ class Microscope:
 
         #: dict: Configuration dictionary.
         self.configuration = configuration
+
+        #: LaserMetadata: Acquisition-local requested and confirmed laser settings.
+        self.laser_metadata = LaserMetadata()
 
         #: SharedNDArray: Buffer for image data.
         self.data_buffer = None
@@ -545,6 +551,8 @@ class Microscope:
         self.zero_defocus_focus = None
         self.acquisition_focus_restore_position = None
         self.get_available_channels()
+
+        self.prepare_laser_settings()
 
         if self.camera.is_acquiring:
             self.camera.close_image_series()
@@ -1044,9 +1052,7 @@ class Microscope:
         self.current_laser_index = channel["laser_index"]
         for k in self.laser:
             self.laser[k].turn_off()
-        self.laser[str(self.laser_wavelength[self.current_laser_index])].set_power(
-            channel["laser_power"]
-        )
+        self.apply_laser_power(channel_key, channel)
         logger.info(
             f"{self.laser_wavelength[self.current_laser_index]} "
             f"nm laser power set to {channel['laser_power']}"
@@ -1066,6 +1072,94 @@ class Microscope:
                 {"f_abs": self.zero_defocus_focus + float(channel["defocus"])},
                 wait_until_done=True,
                 update_focus=False,
+            )
+
+    def prepare_laser_settings(self) -> None:
+        """Prepare optional software adapters before opening the shutter."""
+        self.laser_metadata = LaserMetadata()
+        lasers = getattr(self, "laser", {})
+        if not lasers:
+            return
+        managed = [
+            laser
+            for laser in lasers.values()
+            if isinstance(laser, SoftwareControlledLaser)
+        ]
+        if managed:
+            self.shutter.close_shutter()
+            for laser in self.laser.values():
+                laser.turn_off()
+            for laser in managed:
+                laser.prepare_acquisition()
+        for key, channel in self.channels.items():
+            if channel.get("is_selected", False):
+                record = self.describe_laser_power(channel)
+                self.laser_metadata.record(key, record)
+                self._publish_laser_power(key, record)
+
+    def describe_laser_power(self, channel: dict) -> dict:
+        """Describe intent without claiming optical measurements or doing I/O."""
+        wavelength = self.laser_wavelength[channel["laser_index"]]
+        laser = self.laser[str(wavelength)]
+        config = getattr(laser, "device_config", None) or {}
+        source = config.get("power", {}).get("source", "hardware").lower()
+        try:
+            percent = float(channel["laser_power"])
+            if not isfinite(percent):
+                percent = None
+        except (KeyError, TypeError, ValueError):
+            percent = None
+        return {
+            "microscope": self.microscope_name,
+            "wavelength_nm": wavelength,
+            "power_source": source,
+            "requested_percent": percent,
+            "confirmed_setpoint_mw": None,
+            "measured_power_mw": None,
+            "verification": "pending" if source == "serial" else "unverified_external",
+            "mode": None,
+            "event": "requested",
+        }
+
+    def apply_laser_power(self, channel_key: str, channel: dict) -> None:
+        """Apply channel power and publish a record only after successful I/O."""
+        laser = self.laser[str(self.laser_wavelength[channel["laser_index"]])]
+        record = self.describe_laser_power(channel)
+        serial_update = (
+            isinstance(laser, SoftwareControlledLaser)
+            and laser.options.power_source == "serial"
+            and laser.needs_power_update(channel["laser_power"])
+        )
+        reopen_shutter = serial_update and self.shutter.state
+        try:
+            if serial_update:
+                self.shutter.close_shutter()
+            laser.set_power(channel["laser_power"])
+        except Exception as error:
+            record.update(event="failed", verification="failed", error=str(error))
+            self.laser_metadata.record(channel_key, record)
+            self._publish_laser_power(channel_key, record)
+            # Prevent even a subsequent accidental turn_on call after failure.
+            for device in self.laser.values():
+                device.turn_off()
+            self.shutter.close_shutter()
+            raise
+        if reopen_shutter:
+            self.shutter.open_shutter()
+        if (
+            isinstance(laser, SoftwareControlledLaser)
+            and laser.power_metadata is not None
+        ):
+            record.update(laser.power_metadata)
+        record["event"] = "prepared"
+        if self.laser_metadata.record(channel_key, record):
+            self._publish_laser_power(channel_key, record)
+
+    def _publish_laser_power(self, channel_key: str, record: dict) -> None:
+        """Send a plain snapshot to the controller's Tk event pump."""
+        if self.output_event_queue is not None:
+            self.output_event_queue.put(
+                ("laser_power", {"channel": channel_key, **record})
             )
 
     def set_camera_exposure_time(self, channel: dict) -> None:
@@ -1439,6 +1533,8 @@ class Microscope:
             del self.galvo[key]
 
         for key in list(self.laser.keys()):
+            if isinstance(self.laser[key], SoftwareControlledLaser):
+                self.laser[key].close()
             del self.laser[key]
 
         for stage, _ in self.stages_list:

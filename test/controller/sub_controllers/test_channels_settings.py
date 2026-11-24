@@ -221,3 +221,50 @@ class TestChannelSettingController:
                 ]
                 == 125.0
             )
+
+    def test_loading_zero_power_preserves_zero(self):
+        channel = dict(self.channel_setting.channel_setting_dict["channel_1"])
+        channel["laser_power"] = 0.0
+        self.channel_setting.view.laserpower_variables[0].set(75)
+        self.channel_setting.populate_experiment_values({"channel_1": channel})
+        assert float(self.channel_setting.view.laserpower_variables[0].get()) == 0
+
+    def test_serial_power_feedback_does_not_overwrite_request(self):
+        controller = self.channel_setting
+        channel = dict(controller.channel_setting_dict["channel_1"])
+        channel["laser_power"] = 25.0
+        controller.populate_experiment_values({"channel_1": channel})
+        name = controller.parent_controller.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["microscope_name"]
+        record = {
+            "microscope": name,
+            "channel": "channel_1",
+            "power_source": "serial",
+            "wavelength_nm": int(channel["laser"].removesuffix("nm")),
+            "requested_percent": 25.0,
+            "confirmed_setpoint_mw": 12.4,
+            "verification": "readback",
+        }
+        controller.set_laser_power_metadata(record)
+        assert controller.view.laserpower_status_labels[0]["text"] == "Set: 12.4 mW"
+        assert float(controller.view.laserpower_variables[0].get()) == 25
+        assert controller.channel_setting_dict["channel_1"]["laser_power"] == 25
+        controller.set_laser_power_metadata(
+            {**record, "requested_percent": 40, "confirmed_setpoint_mw": 20}
+        )
+        assert controller.view.laserpower_status_labels[0]["text"] == "Set: 12.4 mW"
+        controller.set_laser_power_metadata(
+            {**record, "microscope": "another microscope"}
+        )
+        assert controller.view.laserpower_status_labels[0]["text"] == "Set: 12.4 mW"
+        controller.set_laser_power_metadata(
+            {**record, "verification": "failed", "confirmed_setpoint_mw": None}
+        )
+        assert controller.view.laserpower_status_labels[0]["text"] == "Serial: failed"
+
+    def test_legacy_power_feedback_stays_hidden(self):
+        controller = self.channel_setting
+        controller._refresh_laser_power_status(0)
+        assert controller.view.laserpower_status_labels[0]["text"] == ""
+        assert not controller.view.laserpower_status_labels[0].winfo_manager()

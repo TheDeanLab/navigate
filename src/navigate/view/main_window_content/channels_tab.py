@@ -209,6 +209,9 @@ class ChannelCreator(ttk.Labelframe):
         #: list: List of the laser power dropdowns
         self.laserpower_pulldowns = []
 
+        #: list: Optional serial-power confirmation labels, one per channel.
+        self.laserpower_status_labels = []
+
         #: list: List of the variables for the filter wheel dropdowns
         self.filterwheel_variables = []
 
@@ -243,7 +246,7 @@ class ChannelCreator(ttk.Labelframe):
         self.label_text = [
             "Channel",
             "Laser",
-            "Power",
+            "Power (%)",
             "Filter",
             "Exp. Time (ms)",
             "Interval",
@@ -332,19 +335,32 @@ class ChannelCreator(ttk.Labelframe):
             )
 
             # Laser Power Spinbox
-            self.laserpower_variables.append(tk.StringVar())
-            self.laserpower_pulldowns.append(
-                ValidatedSpinbox(
-                    self, textvariable=self.laserpower_variables[num], width=4
-                )
-            )
-            self.laserpower_pulldowns[num].grid(
+            power_frame = ttk.Frame(self)
+            power_frame.grid(
                 row=num + 1,
                 column=(column_id := column_id + 1),
                 sticky=tk.NSEW,
                 padx=self.pad_x,
                 pady=self.pad_y,
             )
+            power_frame.columnconfigure(0, weight=1)
+            self.laserpower_variables.append(tk.StringVar())
+            self.laserpower_pulldowns.append(
+                ValidatedSpinbox(
+                    power_frame, textvariable=self.laserpower_variables[num], width=4
+                )
+            )
+            self.laserpower_pulldowns[num].grid(
+                row=0,
+                column=0,
+                sticky=tk.NSEW,
+                padx=self.pad_x,
+                pady=self.pad_y,
+            )
+            status = ttk.Label(power_frame, text="")
+            status.grid(row=1, column=0, sticky=tk.W)
+            status.grid_remove()
+            self.laserpower_status_labels.append(status)
 
             # FilterWheel Dropdowns
             for i in range(filter_wheels):
@@ -457,7 +473,7 @@ class ChannelCreator(ttk.Labelframe):
         self.label_text = [
             "Channel",
             "Laser",
-            "Power",
+            "Power (%)",
         ]
         for i in range(filter_wheels):
             if self.should_hide_filter_wheel(
@@ -491,6 +507,7 @@ class ChannelCreator(ttk.Labelframe):
         self.laser_pulldowns = []
         self.laserpower_variables = []
         self.laserpower_pulldowns = []
+        self.laserpower_status_labels = []
         self.filterwheel_variables = []
         self.filterwheel_pulldowns = []
         self.exptime_variables = []

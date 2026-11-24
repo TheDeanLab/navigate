@@ -365,7 +365,7 @@ def start_device(
     if device_category == "stage":
         device_config = device_config["hardware"]
 
-    if type(device_config) == ListProxy:
+    if isinstance(device_config, (list, ListProxy)):
         device_config = device_config[device_id]
 
     if device_category != "stage":
@@ -495,7 +495,12 @@ def start_device(
                     "asi_connection": daq_connection,
                 }
 
-        return _class(microscope_name, device_connection, configuration, device_id)
+        device = _class(microscope_name, device_connection, configuration, device_id)
+        if device_category == "laser":
+            from navigate.model.devices.laser.software import add_software_control
+
+            device = add_software_control(device, is_synthetic=is_synthetic)
+        return device
 
     elif device_category in plugin_devices:
         # device_category in ["stage", "shutter", "filter_wheel", "remote_focus", "camera", "galvo", "zoom", "laser"]

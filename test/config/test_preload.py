@@ -30,6 +30,81 @@ from navigate.config.configuration_schema import SettingSpec
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "src" / "navigate" / "config"
 
 
+def test_legacy_laser_yaml_needs_no_new_fields(loaded_configuration):
+    manager, configuration = loaded_configuration
+    preload_configuration(manager, configuration)
+    for scope in configuration["configuration"]["microscopes"].values():
+        for laser in scope["laser"]:
+            assert "software_control" not in laser
+            assert "source" not in laser["power"]
+    for channel in configuration["experiment"]["MicroscopeState"]["channels"].values():
+        assert "confirmed_setpoint_mw" not in channel
+
+
+def test_serial_laser_options_survive_preload_without_new_experiment_fields(
+    loaded_configuration,
+):
+    manager, configuration = loaded_configuration
+    name = next(iter(configuration["configuration"]["microscopes"].keys()))
+    laser = configuration["configuration"]["microscopes"][name]["laser"][0]
+    update_config_dict(
+        manager, laser, "power", {"source": "Serial", "hardware": {"type": "Synthetic"}}
+    )
+    update_config_dict(manager, laser, "software_control", {"type": "synthetic"})
+    preload_configuration(manager, configuration)
+    assert laser["power"]["source"] == "serial"
+    assert laser["software_control"]["type"] == "Synthetic"
+    assert "percent_reference_mw" not in laser["power"]
+    assert "mode" not in laser["software_control"]
+
+
+@pytest.mark.parametrize(
+    "software,power",
+    [
+        ({"type": "unknown"}, {"source": "serial", "hardware": {"type": "Synthetic"}}),
+        ({"type": "None"}, {"source": "serial", "hardware": {"type": "Synthetic"}}),
+        ({"type": "Vortran"}, {"source": "serial", "hardware": {"type": "Synthetic"}}),
+        (
+            {"type": "Synthetic", "mode": "analog"},
+            {"source": "serial", "hardware": {"type": "Synthetic"}},
+        ),
+        (
+            {"type": "Synthetic"},
+            {"source": "serial", "hardware": {"type": "NI", "channel": "Dev1/ao0"}},
+        ),
+        (
+            {"type": "Synthetic", "timeout": 0},
+            {"source": "serial", "hardware": {"type": "Synthetic"}},
+        ),
+    ],
+)
+def test_invalid_serial_routing_is_fatal_instead_of_falling_back(
+    loaded_configuration, software, power
+):
+    manager, configuration = loaded_configuration
+    name = next(iter(configuration["configuration"]["microscopes"].keys()))
+    laser = configuration["configuration"]["microscopes"][name]["laser"][0]
+    update_config_dict(manager, laser, "power", power)
+    update_config_dict(manager, laser, "software_control", software)
+    with pytest.raises(PreloadError):
+        preload_configuration(manager, configuration)
+
+
+@pytest.mark.parametrize("value", [None, "missing"])
+def test_old_experiment_missing_or_null_channel_power_gets_default(
+    loaded_configuration, value
+):
+    manager, configuration = loaded_configuration
+    channels = configuration["experiment"]["MicroscopeState"]["channels"]
+    channel = next(iter(channels.values()))
+    if value == "missing":
+        channel.pop("laser_power", None)
+    else:
+        channel["laser_power"] = None
+    preload_configuration(manager, configuration)
+    assert channel["laser_power"] == 20.0
+
+
 @pytest.fixture
 def loaded_configuration():
     with Manager() as manager:

@@ -1023,9 +1023,9 @@ class ChannelsTabController(GUIController):
                 offset = variable_dict[f"{axis}_offset"].get()
                 secondary_stack_settings[axis] = offset
 
-        self.microscope_state_dict[
-            "secondary_stack_settings"
-        ] = secondary_stack_settings
+        self.microscope_state_dict["secondary_stack_settings"] = (
+            secondary_stack_settings
+        )
 
     def verify_experiment_values(self) -> str:
         """Verify channel tab settings and return warning info
@@ -1176,4 +1176,9 @@ class ChannelsTabController(GUIController):
             "exposure_time": self.set_exposure_time,
             "channel_defocus": self.set_channel_defocus,
             "defocus_reference": self.set_defocus_reference,
+            "laser_power": self.set_laser_power_metadata,
         }
+
+    def set_laser_power_metadata(self, record: dict) -> None:
+        """Route laser confirmations from the existing Tk event pump."""
+        self.channel_setting_controller.set_laser_power_metadata(record)

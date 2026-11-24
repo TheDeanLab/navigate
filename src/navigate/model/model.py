@@ -462,9 +462,11 @@ class Model:
         if busy or identity in blocked or invalid_request:
             reason = blocked.get(
                 identity,
-                "Stop acquisition to change camera settings."
-                if busy
-                else invalid_request,
+                (
+                    "Stop acquisition to change camera settings."
+                    if busy
+                    else invalid_request
+                ),
             )
             result["capability"] = CameraSettingCapability(
                 current_value=(
@@ -619,9 +621,9 @@ class Model:
             try:
                 camera.restore_advanced_settings(previous)
             except Exception as rollback_error:
-                blocked[
-                    identity
-                ] = "Camera restoration failed. Reconnect before acquiring."
+                blocked[identity] = (
+                    "Camera restoration failed. Reconnect before acquiring."
+                )
                 self._camera_format_errors = blocked
                 raise RuntimeError(blocked[identity]) from rollback_error
             raise
@@ -665,6 +667,36 @@ class Model:
         if microscope is None:
             microscope = self.microscopes[name]
         return dict(getattr(microscope, "_camera_settings_metadata", {}))
+
+    def get_laser_settings_metadata(
+        self, microscope_name: Optional[str] = None, cursor: tuple[str, int] = ("", 0)
+    ) -> tuple[tuple[str, int], list[dict]]:
+        """Read new acquisition laser records without accessing hardware.
+
+        Parameters
+        ----------
+        microscope_name : str, optional
+            Microscope whose images are being written.
+        cursor : tuple, optional
+            Acquisition identifier and number of records already written.
+
+        Returns
+        -------
+        tuple[tuple, list[dict]]
+            Updated cursor and new requested/confirmed channel records.
+        """
+        from navigate.model.metadata_sources.laser_metadata import LaserMetadata
+
+        name = microscope_name or self.active_microscope_name
+        microscope = self.virtual_microscopes.get(name)
+        if microscope is None:
+            microscope = self.microscopes.get(name)
+        metadata = getattr(microscope, "laser_metadata", None)
+        if not isinstance(metadata, LaserMetadata):
+            return cursor, []
+        start = cursor[1] if cursor[0] == metadata.acquisition_id else 0
+        end, records = metadata.read_since(start)
+        return (metadata.acquisition_id, end), records
 
     def prepare_camera_buffers(
         self, microscope_name: str, additional: tuple = ()
@@ -1747,6 +1779,9 @@ class Model:
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
+            if self.signal_container.is_closed:
+                self.stop_acquisition = True
+                return
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
@@ -2840,6 +2875,9 @@ class ASIModel(Model):
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
+            if self.signal_container.is_closed:
+                self.stop_acquisition = True
+                return
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is

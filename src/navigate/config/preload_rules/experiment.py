@@ -498,7 +498,7 @@ def repair_channel_settings(context: PreloadContext) -> None:
         for k in temp:
             try:
                 channel_value[k] = float(channel_value[k])
-            except ValueError:
+            except (KeyError, TypeError, ValueError):
                 channel_value[k] = temp[k]
             if k != "defocus" and channel_value[k] < 0:
                 channel_value[k] = temp[k]

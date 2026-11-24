@@ -51,6 +51,66 @@ class LaserBase(ABC):
     """Laser Base Class"""
 
     configuration_schema = {
+        "power/source": SettingSpec(
+            str,
+            default="hardware",
+            choices=("hardware", "serial"),
+            label="Power Control Source",
+            required=False,
+            help_text="Use existing electrical power control, or an optional laser software adapter.",
+        ),
+        "power/percent_reference_mw": SettingSpec(
+            float,
+            default=None,
+            exclusive_minimum=0,
+            required=False,
+            label="Serial Power at 100% (mW)",
+            help_text="Serial power reference; omitted values use the laser's queried maximum.",
+        ),
+        "software_control/type": SettingSpec(
+            str,
+            default="None",
+            choices=("None", "Synthetic", "Vortran"),
+            label="Laser Software Adapter",
+            required=False,
+            help_text="Optional connection to settings inside the laser; disabled by default.",
+        ),
+        "software_control/mode": SettingSpec(
+            str,
+            default="preserve",
+            choices=("preserve", "cw", "digital", "analog", "mixed"),
+            label="Laser Operating Mode",
+            required=False,
+            help_text="Preserve the current laser mode unless a mode is explicitly selected.",
+        ),
+        "software_control/port": SettingSpec(
+            str,
+            default="",
+            label="Laser Serial Port",
+            required=False,
+        ),
+        "software_control/baudrate": SettingSpec(
+            int,
+            default=19200,
+            minimum=1,
+            label="Laser Baud Rate",
+            required=False,
+        ),
+        "software_control/timeout": SettingSpec(
+            float,
+            default=0.5,
+            exclusive_minimum=0,
+            label="Laser Timeout (s)",
+            required=False,
+        ),
+        "software_control/max_power_mw": SettingSpec(
+            float,
+            default=100.0,
+            exclusive_minimum=0,
+            label="Synthetic Maximum Power (mW)",
+            required=False,
+            help_text="Used only by the synthetic settings adapter.",
+        ),
         "wavelength": SettingSpec(
             int,
             default=488,

@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 MODULE_PATH = "navigate.model.devices.laser.asi"
 TIGER_MODULE_PATH = "navigate.model.devices.APIs.asi.asi_tiger_controller"
 
@@ -342,3 +341,39 @@ def test_del_calls_close(asi_module):
         laser.__del__()
 
     mock_close.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    "analog,digital", [("ASI", "ASI"), ("ASI", None), (None, "ASI")]
+)
+def test_optional_software_control_preserves_legacy_asi_identity(
+    asi_module, analog, digital
+):
+    from navigate.model.devices.laser.software import add_software_control
+
+    laser = asi_module.ASILaser(
+        "TestScope", MagicMock(), _laser_configuration(analog, digital), 0
+    )
+    assert add_software_control(laser) is laser
+
+
+def test_asi_digital_gate_with_serial_power_does_not_write_analog_axis(asi_module):
+    from navigate.model.devices.laser.software import add_software_control
+
+    config = _laser_configuration("Synthetic", "ASI")
+    entry = config["configuration"]["microscopes"]["TestScope"]["laser"][0]
+    entry["power"]["source"] = "serial"
+    entry["software_control"] = {"type": "Synthetic"}
+    tiger = MagicMock()
+    external = asi_module.ASILaser("TestScope", tiger, config, 0)
+    laser = add_software_control(external)
+    laser.prepare_acquisition()
+    laser.set_power(32.5)
+    laser.turn_on()
+    laser.turn_off()
+
+    assert laser.settings.get_power_setpoint_mw() == 32.5
+    tiger.move_axis.assert_not_called()
+    tiger.setup_laser.assert_called_with(external.digital_axis)
+    tiger.logic_card_on.assert_called_with(external.digital_axis)
+    tiger.logic_card_off.assert_called_with(external.digital_axis)

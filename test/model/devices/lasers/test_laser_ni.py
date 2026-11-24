@@ -1,10 +1,9 @@
 import importlib
 import sys
 import types
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 
 import pytest
-
 
 MODULE_PATH = "navigate.model.devices.laser.ni"
 NIDAQMX_MODULE_PATH = "nidaqmx"
@@ -426,3 +425,38 @@ def test_del_without_tasks_is_noop(ni_module):
     laser.laser_do_task = None
 
     laser.__del__()
+
+
+@pytest.mark.parametrize("analog,digital", [("NI", "NI"), ("NI", None), (None, "NI")])
+def test_optional_software_control_preserves_legacy_ni_identity(
+    ni_module, analog, digital
+):
+    from navigate.model.devices.laser.software import add_software_control
+
+    module, _ = ni_module
+    laser = module.NILaser("TestScope", None, _laser_configuration(analog, digital), 0)
+    assert add_software_control(laser) is laser
+
+
+def test_ni_digital_gate_with_serial_power_allocates_no_analog_task(ni_module):
+    from navigate.model.devices.laser.software import add_software_control
+
+    module, task_factory = ni_module
+    config = _laser_configuration("Synthetic", "NI")
+    entry = config["configuration"]["microscopes"]["TestScope"]["laser"][0]
+    entry["power"]["source"] = "serial"
+    entry["software_control"] = {"type": "Synthetic"}
+    external = module.NILaser("TestScope", None, config, 0)
+    laser = add_software_control(external)
+    laser.prepare_acquisition()
+    laser.set_power(32.5)
+    laser.turn_on()
+    laser.turn_off()
+
+    assert task_factory.call_count == 1
+    assert external.laser_ao_task is None
+    assert laser.settings.get_power_setpoint_mw() == 32.5
+    assert external.laser_do_task.write.call_args_list[-2:] == [
+        call(True, auto_start=True),
+        call(False, auto_start=True),
+    ]

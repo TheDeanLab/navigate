@@ -60,6 +60,21 @@ def test_channel_preparation_routes_percentage_and_keeps_intent(scope):
     assert records[-1]["verification"] == "simulated"
 
 
+def test_bench_metadata_identifies_ungated_requests_and_failures(scope):
+    from dataclasses import replace
+
+    laser = scope.laser["488"]
+    laser.options = replace(laser.options, bench_mode=True)
+    scope.begin_laser_acquisition()
+    scope.prepare_laser_settings()
+    laser.settings.set_power_mw = Mock(side_effect=LaserControlError("rejected"))
+    with pytest.raises(LaserControlError, match="rejected"):
+        scope.prepare_channel("channel_1")
+    records = scope.laser_metadata.read_since()[1]
+    assert all(record["bench_mode"] for record in records)
+    assert records[-1]["event"] == "failed"
+
+
 def test_shared_laser_channel_switches_and_live_changes(scope):
     for channel, expected in [("channel_1", 25), ("channel_2", 50), ("channel_1", 25)]:
         scope.prepare_channel(channel)
@@ -83,6 +98,88 @@ def test_serial_changes_are_applied_with_shutter_closed(scope):
     settings.set_power_mw = apply
     scope.prepare_channel("channel_1")
     assert scope.shutter.state is True
+
+
+def test_mid_acquisition_preparation_keeps_unflushed_history_and_skips_mode_writes(
+    scope,
+):
+    from dataclasses import replace
+    from navigate.model.devices.laser.settings.base import LaserMode
+
+    laser = scope.laser["488"]
+    laser.options = replace(laser.options, mode="digital")
+    laser.settings.set_mode = Mock(wraps=laser.settings.set_mode)
+    scope.begin_laser_acquisition()
+    scope.prepare_laser_settings()
+    scope.prepare_channel("channel_1")
+    acquisition_id = scope.laser_metadata.acquisition_id
+    _, before = scope.laser_metadata.read_since()
+    scope.prepare_laser_settings()
+    _, after = scope.laser_metadata.read_since()
+    assert scope.laser_metadata.acquisition_id == acquisition_id
+    assert after[: len(before)] == before
+    laser.settings.set_mode.assert_called_once_with(LaserMode.DIGITAL)
+    laser.settings.mode = LaserMode.ANALOG
+    with pytest.raises(LaserControlError, match="requested mode"):
+        scope.prepare_laser_settings()
+    laser.settings.set_mode.assert_called_once()
+
+
+def test_live_edit_returning_to_same_power_republishes_confirmation_without_io(
+    scope, monkeypatch
+):
+    scope.prepare_channel("channel_1")
+    laser = scope.laser["488"]
+    laser.settings.set_power_mw = Mock(wraps=laser.settings.set_power_mw)
+    cursor, _ = scope.laser_metadata.read_since()
+    while not scope.output_event_queue.empty():
+        scope.output_event_queue.get_nowait()
+    # The UI's 25 -> 30 -> 25 edit is debounced into one unchanged final request.
+    model = Model.__new__(Model)
+    model.configuration = {
+        "experiment": {"MicroscopeState": {"microscope_name": "scope"}}
+    }
+    model.active_microscope_name = "scope"
+    model.active_microscope = scope
+    model.is_acquiring = True
+    model.imaging_mode = "live"
+    model.acquisition_modes_feature_setting = {"live": []}
+    model.signal_thread = Mock()
+    model.event_queue = Queue()
+    model.logger = Mock()
+    scope.calculate_all_waveform = Mock(return_value={})
+    monkeypatch.setattr(
+        "navigate.model.model.load_features", Mock(return_value=(Mock(), Mock()))
+    )
+    monkeypatch.setattr("navigate.model.model.ThreadWithWarning", Mock())
+    model._update_setting("channel")
+    scope.prepare_channel("channel_1")
+    kind, payload = scope.output_event_queue.get_nowait()
+    assert kind == "laser_power"
+    assert payload["confirmed_setpoint_mw"] == 25
+    assert scope.laser_metadata.read_since(cursor)[1] == []
+    laser.settings.set_power_mw.assert_not_called()
+    scope.prepare_channel("channel_1")
+    assert scope.output_event_queue.empty()
+
+
+@pytest.mark.parametrize("failed_device", ["shutter", "laser"])
+def test_failed_blanking_prevents_serial_power_write_and_waveforms(
+    scope, failed_device
+):
+    laser = scope.laser["488"]
+    laser.settings.set_power_mw = Mock(wraps=laser.settings.set_power_mw)
+    if failed_device == "shutter":
+        scope.shutter.close_shutter = Mock(side_effect=OSError("blank failed"))
+    else:
+        laser.external.turn_off = Mock(side_effect=OSError("blank failed"))
+    with pytest.raises(LaserControlError, match="blank failed"):
+        scope.apply_laser_power("channel_1", scope.channels["channel_1"])
+    laser.settings.set_power_mw.assert_not_called()
+    scope.daq.prepare_acquisition.assert_not_called()
+    assert laser.power_metadata is None
+    assert scope.laser_metadata.read_since()[1][-1]["event"] == "failed"
+    laser.external.turn_off.assert_called()
 
 
 def test_failed_write_blocks_waveform_preparation_and_records_failure(scope):
@@ -114,6 +211,7 @@ def test_metadata_read_is_incremental_and_resets_for_new_acquisition(scope):
     next_cursor, records = model.get_laser_settings_metadata(cursor=cursor)
     assert len(records) == 1
     assert records[0]["confirmed_setpoint_mw"] == 25
+    scope.begin_laser_acquisition()
     scope.prepare_laser_settings()
     cursor, records = model.get_laser_settings_metadata(cursor=next_cursor)
     assert len(records) == 2

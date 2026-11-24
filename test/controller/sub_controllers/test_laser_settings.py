@@ -66,6 +66,12 @@ def test_open_queries_async_and_shows_unknown_simulated_readbacks(popup):
     assert view.variables["emission"].get() == "Unknown"
 
 
+def test_serial_bench_display_explains_ungated_illumination(popup):
+    reply(popup, bench_mode=True)
+    assert popup.view.variables["power_source"].get() == "Serial (bench; no gating)"
+    assert "does not gate illumination" in popup.view.variables["status"].get()
+
+
 def test_mode_selection_is_explicit_and_locked_until_response(popup):
     reply(popup)
     popup.view.variables["mode"].set("CW")

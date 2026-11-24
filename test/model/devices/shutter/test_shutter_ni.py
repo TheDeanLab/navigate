@@ -37,7 +37,6 @@ from unittest.mock import MagicMock, patch, call
 
 import pytest
 
-
 MODULE_PATH = "navigate.model.devices.shutter.ni"
 NIDAQMX_MODULE_PATH = "nidaqmx"
 NIDAQMX_CONSTANTS_PATH = "nidaqmx.constants"
@@ -76,9 +75,7 @@ def shutter_config():
     return {
         "configuration": {
             "microscopes": {
-                "TestScope": {
-                    "shutter": {"hardware": {"channel": "Dev1/port0/line0"}}
-                }
+                "TestScope": {"shutter": {"hardware": {"channel": "Dev1/port0/line0"}}}
             }
         }
     }
@@ -145,8 +142,26 @@ def test_close_shutter_handles_daq_error(ni_module, shutter_config, capsys):
 
     out = capsys.readouterr().out
     assert "shutter did not close" in out
-    assert shutter.state is False
+    assert shutter.state is True
     task.write.assert_called_once_with(False, auto_start=True)
+    shutter.shutter_task = None
+
+
+def test_checked_close_propagates_failure_and_preserves_last_state(
+    ni_module, shutter_config
+):
+    module, factory = ni_module
+    task = _build_task_mock()
+    factory.return_value = task
+    shutter = module.NIShutter("TestScope", None, shutter_config)
+    task.write.side_effect = _FakeDaqError("close failure")
+    with pytest.raises(_FakeDaqError, match="close failure"):
+        shutter.close_shutter_checked()
+    assert shutter.state is True
+    task.write.side_effect = None
+    shutter.close_shutter_checked()
+    assert shutter.state is False
+    task.write.assert_called_with(False, auto_start=True)
 
     shutter.shutter_task = None
 

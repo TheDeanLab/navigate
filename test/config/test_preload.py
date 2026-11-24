@@ -111,6 +111,76 @@ def test_luxx_unsupported_configured_modes_are_rejected(loaded_configuration, mo
         preload_configuration(manager, configuration)
 
 
+@pytest.mark.parametrize("duplicate", [True, False])
+def test_real_serial_port_has_one_owner_across_microscopes(
+    loaded_configuration, duplicate
+):
+    manager, configuration = loaded_configuration
+    scopes = list(configuration["configuration"]["microscopes"].values())
+    assert len(scopes) >= 2
+    for scope, port in zip(scopes[:2], ["COM7", "com7" if duplicate else "COM8"]):
+        update_config_dict(
+            manager,
+            scope["laser"][0],
+            "software_control",
+            {"type": "Vortran", "port": port},
+        )
+    if duplicate:
+        with pytest.raises(PreloadError, match="one software-control owner per port"):
+            preload_configuration(manager, configuration)
+    else:
+        preload_configuration(manager, configuration)
+
+
+def test_windows_serial_port_identity_ignores_case_and_device_prefix():
+    from navigate.config.laser import laser_serial_port_key
+
+    assert laser_serial_port_key(r"\\.\COM7") == laser_serial_port_key("com7")
+
+
+def test_serial_port_identity_resolves_aliases_without_io(tmp_path):
+    from navigate.config.laser import laser_serial_port_key
+
+    port = tmp_path / "ttyUSB1"
+    port.touch()
+    alias = tmp_path / "stable-id"
+    try:
+        alias.symlink_to(port)
+    except OSError:
+        pytest.skip("Creating symlinks requires privileges on this platform")
+    assert laser_serial_port_key(str(alias)) == laser_serial_port_key(str(port))
+
+
+def test_explicit_serial_bench_configuration_survives_preload(loaded_configuration):
+    from navigate.config.laser import resolve_laser_software_config
+
+    manager, configuration = loaded_configuration
+    scope = next(iter(configuration["configuration"]["microscopes"].values()))
+    laser = scope["laser"][0]
+    update_config_dict(
+        manager,
+        laser,
+        "power",
+        {
+            "source": "serial",
+            "percent_reference_mw": 10,
+            "hardware": {"type": "Synthetic"},
+        },
+    )
+    update_config_dict(manager, laser, "onoff", {"hardware": {"type": "Synthetic"}})
+    update_config_dict(
+        manager,
+        laser,
+        "software_control",
+        {"type": "Vortran", "port": "/dev/ttyUSB1", "bench_mode": True},
+    )
+    preload_configuration(manager, configuration)
+    options = resolve_laser_software_config(laser)
+    assert options.bench_mode
+    assert options.power_reference_mw == 10
+    assert options.mode == "preserve"
+
+
 @pytest.mark.parametrize(
     "software,power",
     [

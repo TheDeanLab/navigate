@@ -172,6 +172,10 @@ class ASIShutter(ShutterBase, SerialDevice):
         except Exception:
             logger.exception(f"Shutter did not close: {traceback.format_exc()}")
 
+    def close_shutter_checked(self) -> None:
+        """Close the shutter with acknowledged commands and observable failures."""
+        self.shutter.logic_card_off_checked(self.axis)
+
     @property
     def state(self) -> bool:
         """Get the state of the shutter.

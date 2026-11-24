@@ -255,6 +255,22 @@ class ASILaser(LaserBase, SerialDevice):
             self.laser.logic_card_off(self.digital_axis)
             logger.info(f"{str(self)} closed with digital modulation.")
 
+    def turn_off_checked(self) -> None:
+        """Blank each output with acknowledged commands, preserving cached power."""
+        errors = []
+        if self.modulation_type in ("digital", "mixed"):
+            try:
+                self.laser.logic_card_off_checked(self.digital_axis)
+            except Exception as error:
+                errors.append(error)
+        if self.modulation_type in ("analog", "mixed"):
+            try:
+                self.laser.command_checked(f"MOVE {self.analog_axis}=0\r")
+            except Exception as error:
+                errors.append(error)
+        if errors:
+            raise errors[0]
+
     def close(self) -> None:
         """Close the ASI Laser serial port.
 

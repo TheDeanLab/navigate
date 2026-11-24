@@ -7,6 +7,7 @@ import serial
 from serial.tools.list_ports_common import ListPortInfo
 
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
+from navigate.model.devices.APIs.asi.asi_tiger_controller import ASIException
 
 
 @pytest.mark.parametrize(
@@ -25,6 +26,39 @@ def test_scan_ports_supports_platform_device_names(monkeypatch, ports, expected)
         lambda: [ListPortInfo(port) for port in ports],
     )
     assert TigerController.scan_ports() == expected
+
+
+@pytest.mark.parametrize("response", [b"", b":N-1\r\n", b"garbage\r\n"])
+def test_checked_blanking_rejects_missing_or_failed_acknowledgement(response):
+    controller = TigerController("unused", 115200)
+    controller.serial = MagicMock()
+    controller.serial.readline.return_value = response
+    with pytest.raises(ASIException):
+        controller.logic_card_off_checked("1")
+    assert controller.serial.write.call_count == 1
+    assert controller.safe_to_write.is_set()
+
+
+def test_checked_blanking_propagates_serial_timeout_and_releases_lock():
+    controller = TigerController("unused", 115200)
+    controller.serial = MagicMock()
+    controller.serial.write.side_effect = serial.SerialTimeoutException("write timeout")
+    with pytest.raises(serial.SerialTimeoutException):
+        controller.logic_card_off_checked("1")
+    assert controller.safe_to_write.is_set()
+    controller.serial.readline.assert_not_called()
+
+
+def test_checked_blanking_requires_both_command_acknowledgements():
+    controller = TigerController("unused", 115200)
+    controller.serial = MagicMock()
+    controller.serial.readline.return_value = b":A\r\n"
+    controller.logic_card_off_checked("1")
+    assert controller.serial.write.call_args_list == [
+        call(b"6 M E = 33\r\r"),
+        call(b"6 CCA Z=0\r\r"),
+    ]
+    assert controller.serial.readline.call_count == 2
 
 
 @pytest.mark.parametrize("supports_buffer_size", [False, True])

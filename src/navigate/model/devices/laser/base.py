@@ -105,6 +105,13 @@ class LaserBase(ABC):
             required=False,
             help_text="Omit for the adapter default: Vortran 2 seconds; other adapters 0.5 seconds.",
         ),
+        "software_control/bench_mode": SettingSpec(
+            bool,
+            default=False,
+            label="Serial-only Bench Testing",
+            required=False,
+            help_text="Allow serial channel power with a synthetic gate. Illumination is not gated by Navigate.",
+        ),
         "software_control/max_power_mw": SettingSpec(
             float,
             default=100.0,

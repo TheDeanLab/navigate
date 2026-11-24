@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 from math import isfinite
+from pathlib import Path
+import re
 from multiprocessing.managers import DictProxy
 from typing import Optional
 
@@ -18,6 +20,15 @@ class LaserSoftwareConfig:
     timeout: float = 0.5
     power_reference_mw: Optional[float] = None
     max_power_mw: float = 100.0
+    bench_mode: bool = False
+
+
+def laser_serial_port_key(port: str) -> str:
+    """Normalize a serial port identity without opening the device."""
+    windows_port = port.removeprefix("\\\\.\\")
+    if re.fullmatch(r"COM\d+", windows_port, re.IGNORECASE):
+        return windows_port.upper()
+    return str(Path(port).expanduser().resolve())
 
 
 def resolve_laser_software_config(laser: dict) -> LaserSoftwareConfig:
@@ -57,6 +68,15 @@ def resolve_laser_software_config(laser: dict) -> LaserSoftwareConfig:
         raise ValueError("Unknown laser.software_control.mode.")
     if backend == "none":
         return LaserSoftwareConfig(power_source=source)
+    bench_mode = options.get("bench_mode", False)
+    if not isinstance(bench_mode, bool):
+        raise ValueError("laser.software_control.bench_mode must be true or false.")
+    if bench_mode and source != "serial":
+        raise ValueError("Laser bench mode requires power.source: serial.")
+    if source == "serial" and backend == "obis" and mode == "cw" and not bench_mode:
+        raise ValueError(
+            "OBIS CW disables external modulation; serial acquisition requires digital mode. Use bench_mode only for ungated bench testing."
+        )
     if backend == "luxx" and mode in ("digital", "mixed"):
         raise ValueError(
             "Original LuxX supports CW and analog software modes only; NI/ASI handles its separate electronic shutter."
@@ -105,17 +125,32 @@ def resolve_laser_software_config(laser: dict) -> LaserSoftwareConfig:
             )
         gate = (laser.get("onoff") or {}).get("hardware") or {}
         gate_type = str(gate.get("type") or "").lower()
-        if backend != "synthetic" and gate_type not in (
-            "ni",
-            "nilaser",
-            "ni.ni",
-            "ni.nilaser",
-            "asi",
-            "asilaser",
-            "asi.asi",
-            "asi.asilaser",
+        synthetic_gate = gate_type in (
+            "",
+            "none",
+            "synthetic",
+            "syntheticlaser",
+            "synthetic.synthetic",
+            "synthetic.syntheticlaser",
+        )
+        if bench_mode and not synthetic_gate:
+            raise ValueError("Laser bench mode requires a Synthetic gate.")
+        if (
+            backend != "synthetic"
+            and not bench_mode
+            and gate_type
+            not in (
+                "ni",
+                "nilaser",
+                "ni.ni",
+                "ni.nilaser",
+                "asi",
+                "asilaser",
+                "asi.asi",
+                "asi.asilaser",
+            )
         ):
             raise ValueError("Serial laser power requires an NI or ASI digital gate.")
     return LaserSoftwareConfig(
-        source, backend, mode, port, baudrate, timeout, reference, maximum
+        source, backend, mode, port, baudrate, timeout, reference, maximum, bench_mode
     )

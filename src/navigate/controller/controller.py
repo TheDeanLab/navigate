@@ -498,7 +498,7 @@ class Controller:
                 result = dict(
                     request, identity=None, connection="unavailable", error=str(error)
                 )
-            self._run_on_main_thread(finish, result, wait=True)
+            self._run_on_main_thread(finish, result, wait=False)
 
         try:
             self.threads_pool.createThread("model", worker)

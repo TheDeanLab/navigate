@@ -2,6 +2,8 @@
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -91,3 +93,61 @@ def test_metadata_io_failure_stops_before_writing_images(acquisition, monkeypatc
     assert model.stop_acquisition is True
     assert model.event_queue.get_nowait()[0] == "warning"
     assert source._current_frame == 0
+
+
+def test_closed_writer_never_appends_later_live_history(acquisition):
+    metadata = acquisition.active_microscope.laser_metadata = LaserMetadata()
+    metadata.record("channel_1", {"confirmed_setpoint_mw": 10})
+    writer = ImageWriter(acquisition)
+    writer.close()
+    path = Path(writer.save_directory) / "laser-settings-scope.jsonl"
+    saved = path.read_bytes()
+    acquisition.active_microscope.laser_metadata = LaserMetadata()
+    acquisition.active_microscope.laser_metadata.record(
+        "channel_1", {"confirmed_setpoint_mw": 20}
+    )
+    writer.close()
+    writer._write_laser_metadata()
+    assert path.read_bytes() == saved
+    # Opening another output on the same writer explicitly re-enables recording.
+    writer.initialize_saving(sub_dir="second")
+    writer.close()
+    new_path = Path(writer.save_directory) / "laser-settings-scope.jsonl"
+    records = [json.loads(line) for line in new_path.read_text().splitlines()]
+    assert [r["confirmed_setpoint_mw"] for r in records] == [20]
+    assert path.read_bytes() == saved
+
+
+def test_final_metadata_failure_closes_source_and_does_not_skip_model_cleanup(
+    acquisition,
+):
+    model = acquisition
+    writer = ImageWriter(model)
+    source_close = writer.data_source.close = Mock(wraps=writer.data_source.close)
+    writer._write_laser_metadata = Mock(side_effect=OSError("metadata disk full"))
+    model.active_microscope.end_acquisition = Mock()
+    virtual_writer = Mock()
+    virtual_writer.close.side_effect = OSError("virtual disk full")
+    virtual_scope = SimpleNamespace(end_acquisition=Mock(), image_writer=virtual_writer)
+    model.virtual_microscopes = {"virtual": virtual_scope}
+    model.image_writer = writer
+    model.plugin_acquisition_modes = {}
+    model.signal_container = Mock()
+    model.data_container = Mock()
+    signal_cleanup = model.signal_container.cleanup
+    data_cleanup = model.data_container.cleanup
+    model.logger = Mock()
+    model.addon_feature = object()
+    model.end_acquisition()
+    model.active_microscope.end_acquisition.assert_called_once()
+    virtual_scope.end_acquisition.assert_called_once()
+    signal_cleanup.assert_called_once()
+    data_cleanup.assert_called_once()
+    source_close.assert_called_once()
+    assert model.addon_feature is None
+    assert model.stop_acquisition
+    warnings = [model.event_queue.get_nowait() for _ in range(2)]
+    assert all(event == "warning" for event, _ in warnings)
+    assert "metadata disk full" in warnings[-1][1]
+    writer.close()
+    source_close.assert_called_once()

@@ -352,9 +352,7 @@ def test_virtual_devices_and_legacy_configuration_never_open_serial(
         external, is_synthetic=True
     ).advanced_settings_snapshot()
     assert snapshot["simulated"]
-    assert snapshot["available_modes"] == (
-        ["cw"] if backend == "LuxX" else ["cw", "digital"]
-    )
+    assert snapshot["available_modes"] == (["cw"] if backend == "LuxX" else ["digital"])
     config["configuration"]["microscopes"]["scope"]["laser"][0].pop("software_control")
     config["configuration"]["microscopes"]["scope"]["laser"][0]["power"].pop("source")
     external = SyntheticLaser("scope", None, config, 0)

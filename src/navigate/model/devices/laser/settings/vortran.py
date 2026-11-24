@@ -218,7 +218,7 @@ class VortranLaserSettings(LaserSettingsBase):
             command = "PP" if mode == LaserMode.DIGITAL else "LP"
             self._number(f"{command}={target:.1f}")
             confirmed = self.get_power_setpoint_mw()
-            if not isclose(confirmed, target, rel_tol=0, abs_tol=0.11):
+            if not isclose(confirmed, target, rel_tol=0, abs_tol=1e-6):
                 raise LaserControlError(
                     f"Vortran power readback {confirmed} mW does not match {target} mW."
                 )

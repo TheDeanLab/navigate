@@ -59,7 +59,7 @@ def test_dispatch_keeps_model_io_off_main_thread(controller, writing):
     fn(*args)
     assert c._laser_settings_pending == 0
     callback.assert_called_once()
-    assert c._run_on_main_thread.call_args.kwargs["wait"] is True
+    assert c._run_on_main_thread.call_args.kwargs["wait"] is False
 
 
 @pytest.mark.parametrize("busy", [False, True])

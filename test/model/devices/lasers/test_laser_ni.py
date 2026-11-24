@@ -111,6 +111,22 @@ def test_init_mixed_modulation_initializes_digital_and_analog(ni_module):
     )
 
 
+def test_checked_blank_attempts_both_outputs_and_preserves_intensity(ni_module):
+    module, factory = ni_module
+    digital, analog = _build_task_mock(), _build_task_mock()
+    factory.side_effect = [digital, analog]
+    laser = module.NILaser("TestScope", None, _laser_configuration("NI", "NI"), 0)
+    laser._current_intensity = 25
+    analog.write.side_effect = _FakeDaqError("analog blank failed")
+    with pytest.raises(_FakeDaqError, match="analog blank failed"):
+        laser.turn_off_checked()
+    digital.write.assert_called_once_with(False, auto_start=True)
+    assert laser._current_intensity == 25
+    laser.laser_do_task = None
+    with pytest.raises(RuntimeError, match="gate is unavailable"):
+        laser.turn_off_checked()
+
+
 def test_init_analog_only_initializes_analog_task(ni_module):
     module, task_factory = ni_module
     ao_task = _build_task_mock(name="ao_task")

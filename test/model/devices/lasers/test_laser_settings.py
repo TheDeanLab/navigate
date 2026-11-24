@@ -209,6 +209,19 @@ def test_vortran_rejected_mode_raises(vortran):
         laser.set_mode(LaserMode.MIXED)
 
 
+@pytest.mark.parametrize("previous,requested", [(0.1, 0), (9.9, 10), (10.1, 10)])
+def test_vortran_rejected_adjacent_cw_setpoint_is_not_confirmed(
+    vortran, previous, requested
+):
+    laser, connection = vortran
+    laser.set_mode(LaserMode.CW)
+    connection.values["LPS"] = str(previous)
+    connection.rejected.add("LP")
+    with pytest.raises(LaserControlError, match="readback"):
+        laser.set_power_mw(requested)
+    assert laser.get_power_setpoint_mw() == previous
+
+
 def test_vortran_rejected_power_control_mode_does_not_report_success(vortran):
     laser, connection = vortran
     connection.values["C"] = "1"

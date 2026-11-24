@@ -45,7 +45,10 @@ import numpy as np
 
 # Local application imports
 from navigate.model.devices.camera.format import CameraImageFormat
-from navigate.model.devices.laser.software import SoftwareControlledLaser
+from navigate.model.devices.laser.software import (
+    SoftwareControlledLaser,
+    blank_laser_illumination,
+)
 from navigate.model.metadata_sources.laser_metadata import LaserMetadata
 
 from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
@@ -1074,9 +1077,20 @@ class Microscope:
                 update_focus=False,
             )
 
-    def prepare_laser_settings(self) -> None:
-        """Prepare optional software adapters before opening the shutter."""
+    def begin_laser_acquisition(self) -> None:
+        """Start metadata history once, before a new acquisition's preparation."""
         self.laser_metadata = LaserMetadata()
+        self._laser_mode_prepared = False
+        self._laser_feedback_requested = set()
+
+    def request_laser_power_feedback(self) -> None:
+        """Republish cached confirmations after an explicit channel edit."""
+        self._laser_feedback_requested = set(self.channels)
+
+    def prepare_laser_settings(self) -> None:
+        """Prepare settings without discarding history on an acquisition restart."""
+        if not isinstance(getattr(self, "laser_metadata", None), LaserMetadata):
+            self.begin_laser_acquisition()
         lasers = getattr(self, "laser", {})
         if not lasers:
             return
@@ -1086,11 +1100,12 @@ class Microscope:
             if isinstance(laser, SoftwareControlledLaser)
         ]
         if managed:
-            self.shutter.close_shutter()
-            for laser in self.laser.values():
-                laser.turn_off()
+            blank_laser_illumination(self.shutter, self.laser.values())
             for laser in managed:
-                laser.prepare_acquisition()
+                laser.prepare_acquisition(
+                    apply_mode=not getattr(self, "_laser_mode_prepared", False)
+                )
+            self._laser_mode_prepared = True
         for key, channel in self.channels.items():
             if channel.get("is_selected", False):
                 record = self.describe_laser_power(channel)
@@ -1113,6 +1128,11 @@ class Microscope:
             "microscope": self.microscope_name,
             "wavelength_nm": wavelength,
             "power_source": source,
+            "bench_mode": (
+                laser.options.bench_mode
+                if isinstance(laser, SoftwareControlledLaser)
+                else False
+            ),
             "requested_percent": percent,
             "confirmed_setpoint_mw": None,
             "measured_power_mw": None,
@@ -1134,19 +1154,23 @@ class Microscope:
             and laser.options.power_source == "serial"
             and laser.needs_power_update(channel["laser_power"])
         )
-        reopen_shutter = serial_update and self.shutter.state
+        reopen_shutter = False
         try:
             if serial_update:
-                self.shutter.close_shutter()
+                reopen_shutter = self.shutter.state
+                blank_laser_illumination(self.shutter, self.laser.values())
             laser.set_power(channel["laser_power"])
         except Exception as error:
             record.update(event="failed", verification="failed", error=str(error))
             self.laser_metadata.record(channel_key, record)
             self._publish_laser_power(channel_key, record)
             # Prevent even a subsequent accidental turn_on call after failure.
-            for device in self.laser.values():
-                device.turn_off()
-            self.shutter.close_shutter()
+            if isinstance(laser, SoftwareControlledLaser):
+                laser.invalidate_power()
+            try:
+                blank_laser_illumination(self.shutter, self.laser.values())
+            except Exception:
+                logger.exception("Unable to block illumination after laser failure")
             raise
         if reopen_shutter:
             self.shutter.open_shutter()
@@ -1156,8 +1180,11 @@ class Microscope:
         ):
             record.update(laser.power_metadata)
         record["event"] = "prepared"
-        if self.laser_metadata.record(channel_key, record):
+        changed = self.laser_metadata.record(channel_key, record)
+        feedback = getattr(self, "_laser_feedback_requested", set())
+        if changed or channel_key in feedback:
             self._publish_laser_power(channel_key, record)
+        feedback.discard(channel_key)
 
     def _publish_laser_power(self, channel_key: str, record: dict) -> None:
         """Send a plain snapshot to the controller's Tk event pump."""

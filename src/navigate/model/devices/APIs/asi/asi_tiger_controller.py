@@ -383,13 +383,15 @@ class TigerController:
         if self.verbose:
             print(message)
 
-    def send_command(self, cmd: str) -> None:
+    def send_command(self, cmd: str, *, strict: bool = False) -> None:
         """Send a serial command to the device.
 
         Parameters
         ----------
         cmd : str
             Serial command to send to the device
+        strict : bool, optional
+            Propagate write timeouts for checked illumination operations.
         """
         # always reset the buffers before a new command is sent
         self.safe_to_write.wait()
@@ -404,6 +406,9 @@ class TigerController:
         try:
             self.serial.write(command)
         except SerialTimeoutException as e:
+            if strict:
+                self.safe_to_write.set()
+                raise
             print(f"Tiger Controller -- SerialTimeoutException: {e}")
             pass
 
@@ -1007,6 +1012,28 @@ class TigerController:
         # CCA Y=2 sets this axis as an output
         self.send_command(f"6 CCA Y=2 Z=64\r")
         self.read_response()
+
+    def command_checked(self, command: str) -> None:
+        """Require an acknowledgement for an illumination blanking command.
+
+        Parameters
+        ----------
+        command : str
+            ASI command that returns an :A acknowledgement on success.
+        """
+        try:
+            self.send_command(command, strict=True)
+            response = self.read_response()
+            if not response or response.split()[0] != ":A":
+                raise ASIException(f"Missing ASI acknowledgement: {response!r}")
+        except Exception:
+            self.safe_to_write.set()
+            raise
+
+    def logic_card_off_checked(self, axis: str) -> None:
+        """Blank a logic output only after acknowledging both commands."""
+        self.command_checked(f"6 M E = {int(axis) + 32}\r")
+        self.command_checked("6 CCA Z=0\r")
 
     def logic_card_off(self, axis: str):
         """Turn off the logic card output

@@ -30,10 +30,16 @@ from the laser and is not a sample-plane measurement.
 
 Select a mode and click :guilabel:`Apply mode`. CW, digital, analog, and mixed
 modes are available when supported by the adapter and compatible with the power
-source. Serial channel power requires CW or digital mode. The selected mode must
-match the installed electrical wiring. Mode changes close the shutter and
-electrical gates and leave them closed until acquisition prepares illumination.
+source. Serial channel power requires CW or digital mode; OBIS requires digital
+mode unless explicit bench mode is enabled. The selected mode must match the
+installed electrical wiring. Mode changes command the shutter and electrical
+gates closed and leave them closed until acquisition prepares illumination.
 Emission is never enabled by this popup.
+
+Software settings changes stop if an NI output write or ASI command acknowledgement
+fails during blanking. An acknowledgement confirms receipt of the command; it does
+not measure shutter position or optical extinction. Confirm the installed wiring
+and shutter timing before acquisition.
 
 A confirmed mode applies for the current session, including subsequent
 acquisitions. :guilabel:`Next acquisition mode` shows this selection or the startup
@@ -104,6 +110,11 @@ For ASI gating, retain the existing ASI ``onoff`` block instead. Setting
 for testing; its optional ``max_power_mw`` defaults to 100. Virtual Devices mode
 also substitutes this adapter for a configured Vortran connection.
 
+Each real laser serial port must have one ``software_control`` owner across all
+microscopes. Preload rejects duplicate port assignments, including Windows COM
+case differences and Linux device symlinks. Sharing a software-controlled laser
+between microscope definitions is not supported yet.
+
 The channel :guilabel:`Power (%)` field keeps its existing percentage meaning.
 With the example above, 25 percent requests 25 mW. No new fields are required in
 :file:`experiment.yml`. During acquisition or live imaging, a label below the
@@ -114,13 +125,56 @@ gating retains the existing acquisition timing. Serial updates add channel-switc
 latency; unchanged settings are cached until the next acquisition preparation.
 
 Vortran distinguishes its laser-enable input from its optional digital modulation
-input. The selected mode must match the actual wiring. Firmware may require
+input. CW requires gating through the laser-enable input; it cannot be gated by
+an inactive digital modulation input. Digital mode requires the corresponding
+digital modulation wiring. Firmware may require
 emission to be enabled before accepting a power change. Rejected commands, missing
 responses, and mismatched readbacks stop acquisition. Protocol-emulator tests do
 not establish physical device behavior; confirm the mode, gating, power readback,
 and settling time on the installed laser before collecting experimental data.
 After a serial communication failure, restart **navigate** to establish a new
 connection before acquiring again.
+
+.. _laser_serial_bench:
+
+Serial-only bench testing
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For a laser without an NI/ASI gate, explicitly set
+``software_control.bench_mode: true``, ``power.source: serial``, and both
+``onoff.hardware.type`` and ``power.hardware.type`` to ``Synthetic``. The adapter
+still connects to the real laser. For example:
+
+.. code-block:: yaml
+
+    laser:
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: Synthetic
+        power:
+          source: serial
+          percent_reference_mw: 10.0
+          hardware:
+            type: Synthetic
+        software_control:
+          type: Vortran
+          port: COM7
+          bench_mode: true
+          mode: preserve
+
+Replace the port with the installed adapter's port. On Linux, a persistent
+:file:`/dev/serial/by-id/` path avoids USB numbering changes. Start **navigate**
+normally: Virtual Devices mode (``-sh``) substitutes a simulated laser adapter.
+Use :guilabel:`Advanced Laser Settings` to inspect the connection and select a
+compatible mode. Channel :guilabel:`Power (%)` applies during live imaging or
+acquisition; in this example, 100 percent requests 10 mW.
+
+The popup labels this configuration :guilabel:`Serial (bench; no gating)`.
+**navigate** does not gate illumination in this setup, including when acquisition
+stops. The laser's emission state remains under the user's control. Bench mode is
+intended for enclosed bench testing, not exposure-synchronized microscopy, and
+defaults to false when omitted. Confirmed metadata includes ``bench_mode: true``.
 
 Vortran timing and power resolution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,7 +222,7 @@ device. The existing Vortran default remains 19200 baud.
    * - ``OBIS``
      - 115200
      - CW, digital, analog, mixed
-     - CW (CWP) or digital
+     - Digital; CW (CWP) in bench mode only
    * - ``LuxX``
      - 500000
      - CW, analog
@@ -195,7 +249,10 @@ For an original LuxX, use:
 
 Omitting ``mode`` preserves the device's current setting. Selecting CW applies
 CWP on OBIS and CW-APC on LuxX. OBIS constant-current mode (CWC) is preserved when
-requested, but serial power requires selecting CWP or digital first.
+requested, but serial power requires selecting digital first (or CWP for bench
+testing). OBIS CW disables external modulation; an NI/ASI output connected to its
+modulation input cannot gate CW illumination. Normal serial acquisition therefore
+rejects OBIS CW, including when ``mode: preserve`` reads an existing CW setting.
 
 The original LuxX has CW and analog operating modes, with a separate electrical
 laser-enable input. NI/ASI continues to drive that input for acquisition timing;
@@ -215,13 +272,20 @@ frames, so communication failures cannot silently reuse a previous reply.
 
 The popup does not save its mode override to **navigate** configuration files.
 Device firmware can retain changes independently: OBIS saves mode and power
-settings in persistent memory. Consult the
+settings in persistent memory. Re-preparing a microscope within one acquisition
+verifies the mode without repeating explicit mode writes. Consult the
 `Coherent OBIS operator's manual <https://www.coherent.com/resources/manuals/lasers/obis-lx-ls-operators-manual.pdf>`_
 and the
 `Omicron-authored Micro-Manager driver <https://github.com/micro-manager/mmCoreAndDevices/blob/main/DeviceAdapters/Omicron/Omicron.cpp>`_
 for protocol and mode details. Protocol-emulator tests do not establish physical
 hardware behavior; verify power, mode, and electrical gating on the installed
 laser.
+
+The OBIS adapter currently requires the setpoint readback to agree within
+0.001 mW. Its serial register resolution still needs physical validation,
+including fractional requests such as 18.315 mW; vendor GUI step sizes alone
+do not establish serial quantization. A mismatch raises an error rather than
+recording the requested setting as confirmed.
 
 Laser power metadata
 ~~~~~~~~~~~~~~~~~~~~
@@ -233,12 +297,16 @@ prepared, or failed channel setting. Records include the channel, acquisition
 identifier, sequence, timestamp, power source, requested percentage, and, when
 available, its mW reference and confirmed internal setting. Changes append records
 instead of replacing earlier settings. Repeated identical channel settings are
-not recorded for every image.
+not recorded for every image. History survives microscope re-preparation and
+resolution changes within an acquisition. Starting a new acquisition creates a
+new history. Closing a saved output prevents later live-session records from
+being appended to that experiment's sidecar.
 
 The records describe channel preparation, not per-image optical measurements.
 ``confirmed_setpoint_mw`` is the internal setting or calibrated peak pulse readback.
 ``measured_power_mw``, when available, is a separate laser-reported reading obtained
-with illumination gated during preparation; it is not sample-plane power or an
+after configured blanking commands during preparation (ungated in bench mode);
+it is not sample-plane power or an
 exposure-average measurement. Missing values are stored as ``null``. Synthetic
 confirmations are marked ``simulated``. Existing electrical-only control is marked
 ``unverified_external`` rather than being presented as measured optical power.

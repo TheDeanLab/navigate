@@ -213,7 +213,7 @@ def test_shutter_failure_prevents_mode_commands(model):
     scope.shutter.close_shutter.side_effect = RuntimeError("shutter failed")
     laser.settings.set_mode = Mock()
     result = request(model, identity=identity, mode="cw")
-    assert result["error"] == "shutter failed"
+    assert "shutter failed" in result["error"]
     laser.settings.set_mode.assert_not_called()
 
 

@@ -114,6 +114,19 @@ def test_init_is_case_insensitive_for_mixed_modulation(asi_module):
     assert laser.digital_axis == "Y"
 
 
+def test_checked_blank_attempts_analog_after_digital_failure(asi_module):
+    connection = MagicMock()
+    laser = asi_module.ASILaser(
+        "TestScope", connection, _laser_configuration("ASI", "ASI"), 0
+    )
+    laser._current_intensity = 25
+    connection.logic_card_off_checked.side_effect = OSError("gate failed")
+    with pytest.raises(OSError, match="gate failed"):
+        laser.turn_off_checked()
+    connection.command_checked.assert_called_once_with("MOVE X=0\r")
+    assert laser._current_intensity == 25
+
+
 def test_init_analog_only_initializes_analog_properties(asi_module):
     device_connection = MagicMock()
     laser = asi_module.ASILaser(

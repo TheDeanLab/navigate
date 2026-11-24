@@ -187,7 +187,11 @@ class AdvancedLaserSettingController:
             values["current_mode"].set(current)
             values["device_identity"].set(result["device_identity"])
             serial = result["power_source"] == "serial"
-            values["power_source"].set("Serial" if serial else "External hardware")
+            values["power_source"].set(
+                "Serial (bench; no gating)"
+                if result.get("bench_mode")
+                else "Serial" if serial else "External hardware"
+            )
             values["limits"].set(
                 f"{result['minimum_mw']:g}–{result['maximum_mw']:g} mW"
             )
@@ -226,7 +230,11 @@ class AdvancedLaserSettingController:
             status = (
                 "Configure software_control to enable these settings."
                 if connection == "not_configured"
-                else "Readbacks refreshed. Mode changes leave illumination gates closed."
+                else (
+                    "Bench mode: Navigate does not gate illumination."
+                    if result.get("bench_mode")
+                    else "Readbacks refreshed. Verify that the gate wiring works in the selected mode."
+                )
             )
             if result.get("power_source") == "serial":
                 status += " Serial power requires CW or digital mode."

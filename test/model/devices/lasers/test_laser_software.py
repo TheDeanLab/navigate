@@ -132,6 +132,69 @@ def test_preserve_mode_does_not_reconfigure_laser():
     laser.settings.set_mode.assert_not_called()
 
 
+def test_real_vortran_bench_uses_serial_with_synthetic_gate(monkeypatch):
+    from test.model.devices.lasers.test_laser_settings import StradusSerial
+    from navigate.model.devices.laser.settings.vortran import VortranLaserSettings
+
+    config = configuration(backend="Vortran")
+    entry = config["configuration"]["microscopes"]["scope"]["laser"][0]
+    entry["onoff"]["hardware"]["type"] = "Synthetic"
+    entry["power"]["percent_reference_mw"] = 10
+    entry["software_control"]["bench_mode"] = True
+    adapter = VortranLaserSettings(StradusSerial())
+    connect = Mock(return_value=adapter)
+    monkeypatch.setattr(VortranLaserSettings, "connect", connect)
+    laser = make_laser(config)
+    connect.assert_called_once()
+    assert laser.settings is adapter
+    laser.prepare_acquisition()
+    laser.set_power(100)
+    assert laser.power_metadata["confirmed_setpoint_mw"] == 10
+    assert laser.power_metadata["bench_mode"] is True
+    assert laser.advanced_settings_snapshot()["bench_mode"] is True
+    laser.close()
+
+
+@pytest.mark.parametrize(
+    "bench,gate,source",
+    [
+        (False, "Synthetic", "serial"),
+        (True, "NI", "serial"),
+        (True, "Synthetic", "hardware"),
+        ("false", "Synthetic", "serial"),
+    ],
+)
+def test_invalid_bench_configurations_are_rejected(bench, gate, source):
+    entry = configuration(source=source, backend="Vortran")["configuration"][
+        "microscopes"
+    ]["scope"]["laser"][0]
+    entry["software_control"]["bench_mode"] = bench
+    entry["onoff"]["hardware"]["type"] = gate
+    with pytest.raises(ValueError):
+        resolve_laser_software_config(entry)
+
+
+def test_obis_cw_requires_explicit_bench_mode(monkeypatch):
+    config = configuration(backend="OBIS")
+    entry = config["configuration"]["microscopes"]["scope"]["laser"][0]
+    entry["software_control"]["mode"] = "cw"
+    with pytest.raises(ValueError, match="OBIS CW"):
+        resolve_laser_software_config(entry)
+    entry["software_control"]["mode"] = "preserve"
+    external = SyntheticLaser("scope", None, config, 0)
+    laser = add_software_control(external, is_synthetic=True)
+    laser.settings.set_mode(LaserMode.CW)
+    with pytest.raises(LaserControlError, match="OBIS requires digital"):
+        laser.prepare_acquisition()
+    entry["software_control"]["bench_mode"] = True
+    entry["onoff"]["hardware"]["type"] = "Synthetic"
+    external = SyntheticLaser("scope", None, config, 0)
+    laser = add_software_control(external, is_synthetic=True)
+    laser.settings.set_mode(LaserMode.CW)
+    laser.prepare_acquisition()
+    assert LaserMode.CW in laser.available_modes()
+
+
 def test_failed_update_invalidates_cached_confirmation_and_gate():
     laser = make_laser()
     laser.prepare_acquisition()

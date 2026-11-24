@@ -48,7 +48,10 @@ from navigate.model.devices.camera.format import (
     CameraImageFormat,
     CameraSettingCapability,
 )
-from navigate.model.devices.laser.software import SoftwareControlledLaser
+from navigate.model.devices.laser.software import (
+    SoftwareControlledLaser,
+    blank_laser_illumination,
+)
 from navigate.model.devices.laser.settings.base import LaserControlError, LaserMode
 from navigate.model.features.autofocus import Autofocus
 from navigate.model.features.adaptive_optics import TonyWilson
@@ -484,9 +487,7 @@ class Model:
                     )
                 # Closing the shutter precedes any mode command, including CW.
                 # Keep it closed on success and on partially applied failures.
-                microscope.shutter.close_shutter()
-                for device in microscope.laser.values():
-                    device.turn_off()
+                blank_laser_illumination(microscope.shutter, microscope.laser.values())
                 laser.set_modulation_mode(request["mode"])
             except Exception as error:
                 result["error"] = str(error)
@@ -1529,11 +1530,21 @@ class Model:
         disconnects buffer in live mode and closes the shutters."""
         self.is_acquiring = False
 
+        def close_writer(writer: ImageWriter) -> None:
+            try:
+                writer.close()
+            except Exception as error:
+                self.stop_acquisition = True
+                self.logger.exception("Unable to close acquisition output")
+                self.event_queue.put(
+                    ("warning", f"Unable to close acquisition output: {error}")
+                )
+
         self.active_microscope.end_acquisition()
         for microscope_name in self.virtual_microscopes:
             self.virtual_microscopes[microscope_name].end_acquisition()
             if hasattr(self.virtual_microscopes[microscope_name], "image_writer"):
-                self.virtual_microscopes[microscope_name].image_writer.close()
+                close_writer(self.virtual_microscopes[microscope_name].image_writer)
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
         if plugin_obj and hasattr(plugin_obj, "end_acquisition_model"):
@@ -1546,7 +1557,7 @@ class Model:
             self.data_container.cleanup()
             delattr(self, "data_container")
         if self.image_writer is not None:
-            self.image_writer.close()
+            close_writer(self.image_writer)
 
         #: obj: Add on feature.
         self.addon_feature = None
@@ -1832,6 +1843,15 @@ class Model:
             self.is_live = False
             self.available_image_count = 0
             self.is_data_thread_on = True
+            scopes = [
+                self.active_microscope,
+                *self.microscopes.values(),
+                *self.virtual_microscopes.values(),
+            ]
+            for scope in {id(scope): scope for scope in scopes}.values():
+                begin = getattr(scope, "begin_laser_acquisition", None)
+                if callable(begin):
+                    begin()
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
         if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_model"):
@@ -2312,6 +2332,8 @@ class Model:
             if self.is_acquiring:
                 self.stop_send_signal = True
                 self.signal_thread.join()
+                if setting == "channel":
+                    self.active_microscope.request_laser_power_feedback()
                 if microscope_name != self.active_microscope_name:
                     self.pause_data_thread()
                     self.active_microscope.end_acquisition()

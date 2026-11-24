@@ -358,14 +358,19 @@ class ImageWriter:
 
     def close(self) -> None:
         """Close the data source we are writing to."""
+        if getattr(self, "_closed", False):
+            return
         try:
             self._write_laser_metadata()
         finally:
+            self._closed = True
             if self.data_source is not None:
                 self.data_source.close()
 
     def _write_laser_metadata(self) -> None:
         """Append pending setting records, including failures, to a JSONL sidecar."""
+        if getattr(self, "_closed", False):
+            return
         reader = getattr(self.model, "get_laser_settings_metadata", None)
         if not callable(reader) or not self.save_directory:
             return
@@ -550,6 +555,7 @@ class ImageWriter:
         self.data_source = data_sources.get_data_source(self.file_type)(
             file_name=file_name,
         )
+        self._closed = False
 
         # Pass experiment and configuration to metadata
         self.data_source.set_metadata_from_configuration_experiment(

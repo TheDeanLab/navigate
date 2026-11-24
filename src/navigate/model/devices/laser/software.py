@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 from math import isfinite
-from typing import Optional
+from typing import Any, Iterable, Optional
 from uuid import uuid4
 
 from navigate.config.laser import LaserSoftwareConfig, resolve_laser_software_config
@@ -65,6 +65,8 @@ class SoftwareControlledLaser(LaserBase):
         modes = self.settings.get_supported_modes()
         if self.options.power_source == "serial":
             modes = modes.intersection((LaserMode.CW, LaserMode.DIGITAL))
+            if self.options.backend == "obis" and not self.options.bench_mode:
+                modes = modes.intersection((LaserMode.DIGITAL,))
         return frozenset(modes)
 
     @property
@@ -126,6 +128,7 @@ class SoftwareControlledLaser(LaserBase):
             "mode_warning": mode_warning,
             "available_modes": [m.value for m in LaserMode if m in available],
             "power_source": self.options.power_source,
+            "bench_mode": self.options.bench_mode,
             "minimum_mw": minimum,
             "maximum_mw": maximum,
             "percent_reference_mw": self.options.power_reference_mw or maximum,
@@ -138,8 +141,15 @@ class SoftwareControlledLaser(LaserBase):
             "read_at": datetime.now(timezone.utc).isoformat(),
         }
 
-    def prepare_acquisition(self) -> None:
-        """Read settings and optionally apply mode with illumination blocked."""
+    def prepare_acquisition(self, apply_mode: bool = True) -> None:
+        """Read settings and optionally apply mode with illumination blocked.
+
+        Parameters
+        ----------
+        apply_mode : bool, optional
+            Apply the explicit policy on the first preparation in an acquisition.
+            Subsequent preparations verify the mode without rewriting it.
+        """
         self.invalidate_power()
         if self._mode_error:
             raise LaserControlError(
@@ -154,16 +164,17 @@ class SoftwareControlledLaser(LaserBase):
                 )
             # Apply explicit modes even when the generic modulation flags match:
             # CW may still be in constant-current rather than power control.
-            self.settings.set_mode(requested)
+            if apply_mode:
+                self.settings.set_mode(requested)
             self.mode = self.settings.get_mode()
             if self.mode != requested:
                 raise LaserControlError("Laser did not accept the requested mode.")
         else:
             self.mode = self.settings.get_mode()
         if self.options.power_source == "serial":
-            if self.mode not in (LaserMode.CW, LaserMode.DIGITAL):
+            if self.mode not in self.available_modes():
                 raise LaserControlError(
-                    "Serial power requires CW or digital laser mode."
+                    "Serial power requires CW or digital laser mode; OBIS requires digital mode for external gating."
                 )
             minimum, maximum = self.settings.get_power_limits_mw()
             self.power_reference_mw = self.options.power_reference_mw or maximum
@@ -231,6 +242,7 @@ class SoftwareControlledLaser(LaserBase):
                 "peak_pulse" if self.mode == LaserMode.DIGITAL else "cw_setpoint"
             ),
             "measurement_context": "channel_preparation",
+            "bench_mode": self.options.bench_mode,
             "verification": "simulated" if status.get("simulated") else "readback",
             "confirmed_at": datetime.now(timezone.utc).isoformat(),
             **status,
@@ -254,6 +266,14 @@ class SoftwareControlledLaser(LaserBase):
         """Blank the existing electrical gate without changing internal power."""
         self.external.turn_off()
 
+    def turn_off_checked(self) -> None:
+        """Blank the electrical output and propagate driver write failures."""
+        checked = getattr(type(self.external), "turn_off_checked", None)
+        if checked is None:
+            self.external.turn_off()
+        else:
+            checked(self.external)
+
     def close(self) -> None:
         """Close owned settings and the external controller once."""
         if self._closed:
@@ -263,6 +283,37 @@ class SoftwareControlledLaser(LaserBase):
             self.settings.close()
         finally:
             self.external.close()
+
+
+def blank_laser_illumination(shutter: Any, lasers: Iterable[LaserBase]) -> None:
+    """Attempt all blanking writes and abort a settings change on any failure.
+
+    Parameters
+    ----------
+    shutter : object
+        Shutter whose checked close operation raises hardware errors.
+    lasers : iterable of LaserBase
+        Electrical controllers to blank before software changes.
+    """
+    lasers = list(lasers)
+    errors = []
+    for device, name in [
+        (shutter, "close_shutter"),
+        *[(laser, "turn_off") for laser in lasers],
+    ]:
+        try:
+            checked = getattr(type(device), name + "_checked", None)
+            if checked is None:
+                getattr(device, name)()
+            else:
+                checked(device)
+        except Exception as error:
+            errors.append(str(error))
+    if errors:
+        for laser in lasers:
+            if isinstance(laser, SoftwareControlledLaser):
+                laser.invalidate_power()
+        raise LaserControlError("Unable to block illumination: " + "; ".join(errors))
 
 
 def add_software_control(laser: LaserBase, is_synthetic: bool = False) -> LaserBase:

@@ -48,7 +48,7 @@ from navigate.config.device_schema import (
 from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
 from navigate.config.preload import PreloadContext, PreloadRule, PreloadReport
 from navigate.config.configuration_schema import CollectionSpec, SettingSpec
-from navigate.config.laser import resolve_laser_software_config
+from navigate.config.laser import resolve_laser_software_config, laser_serial_port_key
 from navigate.tools.common_functions import build_ref_name, load_param_from_module
 
 logger = logging.getLogger(__name__.split(".")[1])
@@ -238,12 +238,22 @@ def normalize_laser_hardware(context: PreloadContext) -> None:
 
 def validate_laser_software_control(context: PreloadContext) -> None:
     """Reject invalid opt-in laser routing without modifying legacy entries."""
+    ports = {}
     for name, microscope in context.configuration["configuration"][
         "microscopes"
     ].items():
         for index, laser in enumerate(microscope.get("laser", [])):
             try:
                 options = resolve_laser_software_config(laser)
+                if options.backend in ("vortran", "obis", "luxx"):
+                    port = laser_serial_port_key(options.port)
+                    owner = f"{name}.laser[{index}]"
+                    if port in ports:
+                        raise ValueError(
+                            f"Laser serial port {options.port!r} is configured twice: "
+                            f"{ports[port]} and {owner}. Configure one software-control owner per port."
+                        )
+                    ports[port] = owner
                 # Canonicalize explicitly provided values before schema validation;
                 # missing options remain missing and retain legacy behavior.
                 if "source" in (laser.get("power") or {}):

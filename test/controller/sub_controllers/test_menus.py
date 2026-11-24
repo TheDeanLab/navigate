@@ -295,6 +295,7 @@ class TestMenuController(unittest.TestCase):
     @patch("navigate.controller.sub_controllers.menus.platform.system")
     @patch("navigate.controller.sub_controllers.menus.subprocess.Popen")
     def test_open_folder(self, mock_popen: MagicMock, mock_system: MagicMock) -> None:
+        mock_popen.return_value.poll.return_value = 0
         mock_system.return_value = "Darwin"
         self.menu_controller.open_folder("test_path")
         mock_popen.assert_called_once_with(["open", "--", "test_path"])

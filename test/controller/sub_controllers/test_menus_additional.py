@@ -1,4 +1,5 @@
 import os
+import threading
 from fnmatch import fnmatchcase
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, call
@@ -175,6 +176,7 @@ def test_file_menu_opens_folder_on_linux(
     controller, _ = menu_controller
     navigate_path = "/tmp/navigate data; literal"
     launch = Mock()
+    launch.return_value.poll.return_value = 0
     monkeypatch.setattr(menus_module.platform, "system", lambda: "Linux")
     monkeypatch.setattr(menus_module.tk, "Menu", MagicMock())
     monkeypatch.setattr(menus_module, "get_navigate_path", lambda: navigate_path)
@@ -218,6 +220,110 @@ def test_open_folder_reports_launch_error(
     assert path in showerror.call_args.kwargs["message"]
     assert str(error) in showerror.call_args.kwargs["message"]
     assert path in caplog.text
+
+
+@pytest.mark.parametrize("system", ["Linux", "Darwin"])
+@pytest.mark.parametrize("returncode", [0, 3])
+def test_open_folder_checks_launcher_completion_without_waiting(
+    menu_controller: tuple[menus_module.MenuController, SimpleNamespace],
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    system: str,
+    returncode: int,
+) -> None:
+    controller, _ = menu_controller
+    path = "/tmp/navigate data/config"
+    process = Mock()
+    process.poll.side_effect = [None, None, returncode]
+    showerror = Mock()
+    monkeypatch.setattr(menus_module.platform, "system", lambda: system)
+    monkeypatch.setattr(menus_module.subprocess, "Popen", Mock(return_value=process))
+    monkeypatch.setattr(menus_module.messagebox, "showerror", showerror)
+
+    controller.open_folder(path)
+
+    # Each running-process check yields to Tk before polling again.
+    for _ in range(2):
+        showerror.assert_not_called()
+        controller.view.after.assert_called_once()
+        delay, callback = controller.view.after.call_args.args
+        assert delay > 0
+        controller.view.after.reset_mock()
+        callback()
+
+    assert process.poll.call_count == 3
+    process.wait.assert_not_called()
+    process.communicate.assert_not_called()
+    controller.view.after.assert_not_called()
+    if returncode:
+        showerror.assert_called_once()
+        assert path in showerror.call_args.kwargs["message"]
+        assert f"status {returncode}" in showerror.call_args.kwargs["message"]
+        assert path in caplog.text
+        assert f"status {returncode}" in caplog.text
+    else:
+        showerror.assert_not_called()
+        assert path not in caplog.text
+
+
+def test_open_folder_preserves_windows_launcher_behavior(
+    menu_controller: tuple[menus_module.MenuController, SimpleNamespace],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _ = menu_controller
+    process = Mock()
+    process.poll.return_value = 1
+    showerror = Mock()
+    monkeypatch.setattr(menus_module.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(menus_module.subprocess, "Popen", Mock(return_value=process))
+    monkeypatch.setattr(menus_module.messagebox, "showerror", showerror)
+
+    controller.open_folder("test_path")
+
+    process.wait.assert_not_called()
+    process.communicate.assert_not_called()
+    controller.view.after.assert_not_called()
+    showerror.assert_not_called()
+
+
+def test_open_folder_reports_delayed_failure_on_tk_thread(
+    menu_controller: tuple[menus_module.MenuController, SimpleNamespace],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _ = menu_controller
+    process = Mock()
+    process.poll.return_value = None
+    root = menus_module.tk.Tk()
+    root.withdraw()
+    controller.view = root
+    events = []
+
+    def finish_launcher() -> None:
+        events.append(("responsive", threading.get_ident()))
+        process.poll.return_value = 3
+
+    def showerror(**kwargs: str) -> None:
+        events.append(("error", threading.get_ident()))
+        root.quit()
+
+    monkeypatch.setattr(menus_module.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(menus_module.subprocess, "Popen", Mock(return_value=process))
+    monkeypatch.setattr(menus_module.messagebox, "showerror", showerror)
+
+    timeout = root.after(2000, root.quit)
+    try:
+        controller.open_folder("test_path")
+        root.after(0, finish_launcher)
+        root.mainloop()
+        assert events == [
+            ("responsive", threading.get_ident()),
+            ("error", threading.get_ident()),
+        ]
+        process.wait.assert_not_called()
+        process.communicate.assert_not_called()
+    finally:
+        root.after_cancel(timeout)
+        root.destroy()
 
 
 def test_edit_feature_list_opens_selected_custom_feature_list(

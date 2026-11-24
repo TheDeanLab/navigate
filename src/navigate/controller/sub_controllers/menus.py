@@ -852,17 +852,36 @@ class MenuController(GUIController):
         else:
             command = ["xdg-open", path]
 
+        def report_error(reason: str) -> None:
+            """Log the failure and show the manual path on the Tk thread."""
+            logger.warning("Could not open folder %s: %s", path, reason)
+            messagebox.showerror(
+                title="Unable to Open Folder",
+                message=f"Could not open the file manager: {reason}\n\n"
+                f"Open this folder manually:\n{path}",
+            )
+
         try:
             # Desktop launchers can stay alive while the file manager is open.
             # Waiting here would block the Tk event loop.
-            subprocess.Popen(command)
+            process = subprocess.Popen(command)
         except OSError as error:
-            logger.warning("Could not open folder %s: %s", path, error)
-            messagebox.showerror(
-                title="Unable to Open Folder",
-                message=f"Could not open the file manager: {error}\n\n"
-                f"Open this folder manually:\n{path}",
-            )
+            report_error(str(error))
+            return
+
+        if system == "Windows":
+            # Preserve Explorer's existing fire-and-forget behavior.
+            return
+
+        def check_launcher() -> None:
+            """Check completion without blocking or leaving the Tk thread."""
+            returncode = process.poll()
+            if returncode is None:
+                self.view.after(100, check_launcher)
+            elif returncode:
+                report_error(f"Launcher exited with status {returncode}.")
+
+        check_launcher()
 
     @log_function_call
     def open_log_files(self) -> None:

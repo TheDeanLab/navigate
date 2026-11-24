@@ -59,10 +59,15 @@ def test_serial_laser_options_survive_preload_without_new_experiment_fields(
 
 
 @pytest.mark.parametrize(
-    "backend,canonical,baudrate", [("obis", "OBIS", 115200), ("luxx", "LuxX", 500000)]
+    "backend,canonical,baudrate,timeout",
+    [
+        ("obis", "OBIS", 115200, 0.5),
+        ("luxx", "LuxX", 500000, 0.5),
+        ("vortran", "Vortran", 19200, 2.0),
+    ],
 )
-def test_obis_luxx_defaults_survive_preload(
-    loaded_configuration, backend, canonical, baudrate
+def test_laser_backend_defaults_survive_preload(
+    loaded_configuration, backend, canonical, baudrate, timeout
 ):
     from navigate.config.laser import resolve_laser_software_config
 
@@ -84,8 +89,10 @@ def test_obis_luxx_defaults_survive_preload(
     preload_configuration(manager, configuration)
     assert laser["software_control"]["type"] == canonical
     assert "baudrate" not in laser["software_control"]
+    assert "timeout" not in laser["software_control"]
     assert "mode" not in laser["software_control"]
     assert resolve_laser_software_config(laser).baudrate == baudrate
+    assert resolve_laser_software_config(laser).timeout == timeout
     assert resolve_laser_software_config(laser).mode == "preserve"
 
 

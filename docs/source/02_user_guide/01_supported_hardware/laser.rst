@@ -95,7 +95,7 @@ For example, this laser uses NI digital gating and Vortran serial power:
           type: Vortran
           port: COM7
           baudrate: 19200
-          timeout: 0.5
+          timeout: 2.0
           mode: digital
 
 Place this entry under the appropriate microscope in :file:`configuration.yaml`.
@@ -121,6 +121,34 @@ not establish physical device behavior; confirm the mode, gating, power readback
 and settling time on the installed laser before collecting experimental data.
 After a serial communication failure, restart **navigate** to establish a new
 connection before acquiring again.
+
+Vortran timing and power resolution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Omit ``timeout`` to use the Vortran default of 2 seconds. Stradus configuration
+and power writes can take about one second even when queries respond quickly;
+a 0.5-second timeout can fail during connection. Explicit timeout values are
+honored. Other software adapters retain their 0.5-second default.
+
+CW settings are rounded to tenths of a milliwatt. Digital peak-power settings
+are rounded to whole milliwatts before writing, matching the pulse-power
+register on Stradus firmware 3.2.0. The confirmed value records this rounding.
+CW and digital power control both require constant-power control (``C=0``);
+explicit mode selection configures this before applying modulation settings.
+Preserving an existing constant-current setting does not make it compatible
+with serial power control.
+
+On the tested firmware, a zero CW power command is rejected, and enabling
+digital modulation while emission is disabled is also rejected. **navigate**
+reports these failures without claiming a successful setting or enabling
+emission automatically. Use the electrical gate for illumination timing.
+
+Serial communication, readbacks, all four modulation modes with emission
+enabled, and low-power setpoints were exercised on a 488 nm, 250 mW Stradus
+with firmware 3.2.0 / protocol 1.0.5 through a USB-to-RS232 adapter. These checks
+do not validate NI/ASI electrical timing, optical calibration, or other
+firmware versions. Allow for serial channel-switching latency; verified power
+updates on this unit took approximately 1.2--1.4 seconds.
 
 OBIS and LuxX software control
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

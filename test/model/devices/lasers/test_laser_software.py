@@ -52,6 +52,21 @@ def make_laser(config=None):
     return add_software_control(external)
 
 
+@pytest.mark.parametrize(
+    "backend,timeout",
+    [("Vortran", 2.0), ("OBIS", 0.5), ("LuxX", 0.5), ("Synthetic", 0.5)],
+)
+def test_backend_timeout_defaults_and_explicit_overrides(backend, timeout):
+    entry = configuration(backend=backend)["configuration"]["microscopes"]["scope"][
+        "laser"
+    ][0]
+    assert resolve_laser_software_config(entry).timeout == timeout
+    entry["software_control"]["timeout"] = None
+    assert resolve_laser_software_config(entry).timeout == timeout
+    entry["software_control"]["timeout"] = 0.75
+    assert resolve_laser_software_config(entry).timeout == 0.75
+
+
 @pytest.mark.parametrize("software", [None, {}, {"type": None}, {"type": "None"}])
 def test_legacy_configuration_never_creates_adapter(software, monkeypatch):
     config = configuration()

@@ -99,10 +99,11 @@ class LaserBase(ABC):
         ),
         "software_control/timeout": SettingSpec(
             float,
-            default=0.5,
+            default=None,
             exclusive_minimum=0,
             label="Laser Timeout (s)",
             required=False,
+            help_text="Omit for the adapter default: Vortran 2 seconds; other adapters 0.5 seconds.",
         ),
         "software_control/max_power_mw": SettingSpec(
             float,

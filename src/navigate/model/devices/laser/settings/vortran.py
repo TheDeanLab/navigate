@@ -5,7 +5,8 @@ power writes and fault-query side effects. No emission, interlock, delay, or
 nonvolatile save command is issued by this adapter.
 """
 
-from math import isclose, isfinite
+from math import floor, isclose, isfinite
+import re
 from threading import RLock
 from time import monotonic
 from typing import Any
@@ -48,7 +49,7 @@ class VortranLaserSettings(LaserSettingsBase):
 
     @classmethod
     def connect(
-        cls, port: str, baudrate: int = 19200, timeout: float = 0.5
+        cls, port: str, baudrate: int = 19200, timeout: float = 2.0
     ) -> "VortranLaserSettings":
         """Open an RS232 settings connection without enabling emission.
 
@@ -59,7 +60,8 @@ class VortranLaserSettings(LaserSettingsBase):
         baudrate : int, optional
             RS232 baud rate, normally 19200.
         timeout : float, optional
-            Finite read and write timeout in seconds.
+            Finite read and write timeout in seconds. Configuration writes can
+            take about one second on Stradus firmware.
 
         Returns
         -------
@@ -99,6 +101,9 @@ class VortranLaserSettings(LaserSettingsBase):
                     if not reply.endswith(b"\r\n"):
                         raise LaserControlError("Incomplete Vortran serial response.")
                     text = reply.decode("ascii").strip().lstrip(">").strip()
+                    # A prompt from the previous command precedes the next frame
+                    # until PROMPT=0 takes effect. Its status is not a reply.
+                    text = re.sub(r"^Stradus:\d+>\s*", "", text)
                     if (
                         not text
                         or reply.endswith(b"\r\r\n")
@@ -168,13 +173,12 @@ class VortranLaserSettings(LaserSettingsBase):
         with self._lock:
             digital = mode in (LaserMode.DIGITAL, LaserMode.MIXED)
             analog = mode in (LaserMode.ANALOG, LaserMode.MIXED)
-            if digital:
-                self._request("C=1")
+            # PUL and PP require power control; C=1 makes this firmware reject
+            # digital modulation even though the current-control write succeeds.
+            self._request("C=0")
             self._request(f"PUL={int(digital)}")
             self._request(f"EPC={int(analog)}")
-            if not digital:
-                self._request("C=0")
-            if self.get_mode() != mode:
+            if self.get_mode() != mode or self._flag("?C"):
                 raise LaserControlError(f"Vortran did not accept {mode.value} mode.")
 
     def get_power_setpoint_mw(self) -> float:
@@ -200,11 +204,17 @@ class VortranLaserSettings(LaserSettingsBase):
                 raise LaserControlError(
                     "Enable the Vortran laser before setting its power."
                 )
-            if mode == LaserMode.CW and self._flag("?C"):
+            if self._flag("?C"):
                 raise LaserControlError(
-                    "Vortran CW power requires constant-power control (C=0)."
+                    "Vortran power requires constant-power control (C=0)."
                 )
-            target = round(requested, 1)
+            # Firmware 3.2.0 stores PP in whole mW, while LP supports tenths.
+            # Quantize before sending so a fractional request is not silently
+            # truncated by the device. Never round above its maximum.
+            scale = 1 if mode == LaserMode.DIGITAL else 10
+            target = (
+                min(round(requested * scale), floor(self._maximum_mw * scale)) / scale
+            )
             command = "PP" if mode == LaserMode.DIGITAL else "LP"
             self._number(f"{command}={target:.1f}")
             confirmed = self.get_power_setpoint_mw()

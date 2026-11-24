@@ -69,7 +69,11 @@ def resolve_laser_software_config(laser: dict) -> LaserSoftwareConfig:
     if backend in ("vortran", "obis", "luxx") and not port:
         raise ValueError(f"{backend} software control requires a serial port.")
     try:
-        timeout = float(options.get("timeout", 0.5))
+        default_timeout = 2.0 if backend == "vortran" else 0.5
+        configured_timeout = options.get("timeout")
+        timeout = float(
+            default_timeout if configured_timeout is None else configured_timeout
+        )
         default_baudrate = {"obis": 115200, "luxx": 500000}.get(backend, 19200)
         configured_baudrate = options.get("baudrate")
         baudrate = int(

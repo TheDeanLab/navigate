@@ -1,3 +1,4 @@
+import platform
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -26,9 +27,10 @@ def _evaluation_result():
 
 
 @pytest.mark.parametrize("loop_error", [None, SystemExit, RuntimeError])
+@pytest.mark.parametrize("system", ["Linux", "Darwin", "Windows"])
 def test_main_uses_controller_branch_and_stops_log_listener(
-    monkeypatch, capsys, loop_error
-):
+    monkeypatch, capsys, loop_error, system: str
+) -> None:
     root = _FakeRoot()
     splash = object()
     args = SimpleNamespace(configurator=False)
@@ -36,7 +38,7 @@ def test_main_uses_controller_branch_and_stops_log_listener(
     controller = MagicMock()
     configurator = MagicMock()
 
-    monkeypatch.setattr(main_module.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(platform, "system", lambda: system)
     monkeypatch.setattr(main_module.tk, "Tk", lambda: root)
     monkeypatch.setattr(main_module, "SplashScreen", MagicMock(return_value=splash))
     monkeypatch.setattr(
@@ -62,10 +64,7 @@ def test_main_uses_controller_branch_and_stops_log_listener(
         with pytest.raises(loop_error):
             main_module.main()
 
-    assert (
-        "WARNING: navigate was built to operate on a Windows platform."
-        in capsys.readouterr().out
-    )
+    assert capsys.readouterr().out == ""
     root.withdraw.assert_called_once_with()
     root.mainloop.assert_called_once_with()
     controller.assert_called_once_with(
@@ -85,7 +84,8 @@ def test_main_uses_controller_branch_and_stops_log_listener(
     listener.stop.assert_called_once_with()
 
 
-def test_main_uses_configurator_branch(monkeypatch, capsys):
+@pytest.mark.parametrize("system", ["Linux", "Darwin", "Windows"])
+def test_main_uses_configurator_branch(monkeypatch, capsys, system: str) -> None:
     root = _FakeRoot()
     splash = object()
     args = SimpleNamespace(configurator=True)
@@ -93,7 +93,7 @@ def test_main_uses_configurator_branch(monkeypatch, capsys):
     controller = MagicMock()
     configurator = MagicMock()
 
-    monkeypatch.setattr(main_module.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(platform, "system", lambda: system)
     monkeypatch.setattr(main_module.tk, "Tk", lambda: root)
     monkeypatch.setattr(main_module, "SplashScreen", MagicMock(return_value=splash))
     monkeypatch.setattr(

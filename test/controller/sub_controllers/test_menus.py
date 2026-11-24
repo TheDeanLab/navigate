@@ -292,22 +292,25 @@ class TestMenuController(unittest.TestCase):
                 == i - 1
             )
 
-    @patch("src.navigate.controller.sub_controllers.menus.platform.system")
-    @patch("src.navigate.controller.sub_controllers.menus.subprocess.check_call")
-    def test_open_folder(self, mock_check_call, mock_system):
+    @patch("navigate.controller.sub_controllers.menus.platform.system")
+    @patch("navigate.controller.sub_controllers.menus.subprocess.Popen")
+    def test_open_folder(self, mock_popen: MagicMock, mock_system: MagicMock) -> None:
+        mock_popen.return_value.poll.return_value = 0
         mock_system.return_value = "Darwin"
         self.menu_controller.open_folder("test_path")
-        mock_check_call.assert_called_once_with(["open", "--", "test_path"])
+        mock_popen.assert_called_once_with(["open", "--", "test_path"])
 
-        mock_check_call.reset_mock()
+        mock_popen.reset_mock()
         mock_system.return_value = "Windows"
         self.menu_controller.open_folder("test_path")
-        mock_check_call.assert_called_once_with(["explorer", "test_path"])
+        mock_popen.assert_called_once_with(["explorer", "test_path"])
 
-        mock_check_call.reset_mock()
+        mock_popen.reset_mock()
         mock_system.return_value = "Linux"
         self.menu_controller.open_folder("test_path")
-        self.assertEqual(mock_check_call.call_count, 0)
+        mock_popen.assert_called_once_with(["xdg-open", "test_path"])
+        mock_popen.return_value.wait.assert_not_called()
+        mock_popen.return_value.communicate.assert_not_called()
 
     @patch("src.navigate.controller.sub_controllers.menus.os.path.join")
     def test_open_log_files(self, mock_join):

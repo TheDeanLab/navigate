@@ -1,5 +1,6 @@
 """OBIS/LuxX protocol emulators exercise the real APIs and settings adapters."""
 
+from itertools import count
 from unittest.mock import Mock
 
 import pytest
@@ -14,6 +15,14 @@ from navigate.model.devices.laser.settings.luxx import LuxxLaserSettings
 from navigate.model.devices.laser.software import add_software_control
 from navigate.model.devices.laser.synthetic import SyntheticLaser
 from test.model.devices.lasers.test_laser_software import configuration, make_laser
+
+
+@pytest.fixture(autouse=True)
+def protocol_clock(monkeypatch: pytest.MonkeyPatch) -> Mock:
+    """Advance protocol deadlines independently of CI scheduling and coverage."""
+    clock = Mock(side_effect=count(step=0.0001))
+    monkeypatch.setattr("navigate.model.devices.APIs.laser_serial.monotonic", clock)
+    return clock
 
 
 class LaserSerial:
@@ -250,6 +259,30 @@ def test_partial_writes_poison_the_connection(device):
         settings.set_mode(LaserMode.CW)
     with pytest.raises(LaserControlError, match="Reconnect"):
         settings.get_status()
+
+
+def test_expired_response_deadline_requires_reconnection(
+    device, protocol_clock: Mock
+) -> None:
+    """A reply arriving after the deadline cannot satisfy a later command."""
+    settings, connection = device
+    protocol_clock.side_effect = [0.0, 1.0]
+    with pytest.raises(LaserControlError, match="timed out"):
+        settings.get_mode()
+    assert connection.buffer  # The late response has not been consumed.
+    previous = len(connection.commands)
+    with pytest.raises(LaserControlError, match="Reconnect"):
+        settings.get_mode()
+    assert len(connection.commands) == previous
+
+
+def test_blank_frames_do_not_extend_response_deadline(device) -> None:
+    """Repeated empty frames must still exhaust the transaction time budget."""
+    settings, connection = device
+    connection.override = b"\r" * 200
+    with pytest.raises(LaserControlError, match="timed out"):
+        settings.get_mode()
+    assert connection.buffer
 
 
 @pytest.mark.parametrize("backend", ["OBIS", "LuxX"])

@@ -1,8 +1,11 @@
 """Compose external laser gating with optional internal settings control."""
 
 from datetime import datetime, timezone
+from contextlib import contextmanager
+from functools import wraps
+from threading import RLock
 from math import isfinite
-from typing import Any, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Optional
 from uuid import uuid4
 
 from navigate.config.laser import LaserSoftwareConfig, resolve_laser_software_config
@@ -14,6 +17,20 @@ from .settings.base import (
     LaserSettingsBase,
 )
 
+if TYPE_CHECKING:
+    from navigate.model.device_startup_functions import SerialConnectionLease
+
+
+def settings_transaction(method: Callable) -> Callable:
+    """Keep each operation and its readbacks within one shared transaction."""
+
+    @wraps(method)
+    def wrapped(self, *args: Any, **kwargs: Any) -> Any:
+        with self.transaction():
+            return method(self, *args, **kwargs)
+
+    return wrapped
+
 
 class SoftwareControlledLaser(LaserBase):
     """Keep the acquisition contract while routing power to its configured source.
@@ -23,9 +40,11 @@ class SoftwareControlledLaser(LaserBase):
     external : LaserBase
         Existing electrical controller, responsible for illumination gating.
     settings : LaserSettingsBase
-        Optional software connection, owned by this object.
+        Software adapter, owned directly or through a counted factory lease.
     options : LaserSoftwareConfig
         Validated routing and internal settings.
+    settings_lease : SerialConnectionLease, optional
+        Counted factory ownership of a shared settings adapter.
     """
 
     def __init__(
@@ -33,11 +52,17 @@ class SoftwareControlledLaser(LaserBase):
         external: LaserBase,
         settings: LaserSettingsBase,
         options: LaserSoftwareConfig,
+        settings_lease: Optional["SerialConnectionLease"] = None,
     ) -> None:
         #: LaserBase: Existing NI/ASI/synthetic acquisition control.
         self.external = external
         #: LaserSettingsBase: Owned software settings connection.
         self.settings = settings
+        self._settings_lease = settings_lease
+        self._settings_lock = getattr(settings, "lock", RLock())
+        self._close_lock = RLock()
+        self._power_revision = None
+        self._prepared_mode_revision = None
         #: LaserSoftwareConfig: Explicitly configured routing policy.
         self.options = options
         self.device_config = external.device_config
@@ -45,7 +70,7 @@ class SoftwareControlledLaser(LaserBase):
         self.configuration = external.configuration
         self.microscope_name = external.microscope_name
         #: Optional[dict]: Last successfully applied software power setting.
-        self.power_metadata: Optional[dict] = None
+        self._power_metadata: Optional[dict] = None
         self._prepared = False
         self._closed = False
         self._last_request: Optional[float] = None
@@ -54,12 +79,37 @@ class SoftwareControlledLaser(LaserBase):
         self._session_mode: Optional[LaserMode] = None
         self._mode_error: Optional[str] = None
 
+    @contextmanager
+    def transaction(self) -> Iterator[None]:
+        """Keep settings, electrical gate decisions, and metadata consistent."""
+        with self._settings_lock:
+            if self._closed:
+                raise LaserControlError("Laser owner is closed.")
+            yield
+
+    @property
+    def power_metadata(self) -> Optional[dict]:
+        """Expose a confirmation only while the shared settings are unchanged."""
+        with self._settings_lock:
+            if self._closed or self._power_revision != getattr(
+                self.settings, "revision", 0
+            ):
+                return None
+            return self._power_metadata
+
+    @power_metadata.setter
+    def power_metadata(self, value: Optional[dict]) -> None:
+        self._power_metadata = value
+        self._power_revision = getattr(self.settings, "revision", 0) if value else None
+
+    @settings_transaction
     def invalidate_power(self) -> None:
         """Require channel preparation to reconfirm power after settings changes."""
         self._prepared = False
         self._last_request = None
         self.power_metadata = None
 
+    @settings_transaction
     def available_modes(self) -> frozenset[LaserMode]:
         """Return device modes compatible with the configured power source."""
         modes = self.settings.get_supported_modes()
@@ -70,10 +120,20 @@ class SoftwareControlledLaser(LaserBase):
         return frozenset(modes)
 
     @property
+    @settings_transaction
     def prepared_mode(self) -> Optional[str]:
         """Return the confirmed acquisition mode without querying hardware."""
-        return self.mode.value if self._prepared else None
+        return (
+            self.mode.value
+            if (
+                self._prepared
+                and self._prepared_mode_revision
+                == getattr(self.settings, "mode_revision", 0)
+            )
+            else None
+        )
 
+    @settings_transaction
     def set_modulation_mode(self, mode: str) -> None:
         """Apply a session mode while the caller keeps illumination blocked.
 
@@ -98,6 +158,7 @@ class SoftwareControlledLaser(LaserBase):
         self._mode_error = None
         self._session_mode = requested
 
+    @settings_transaction
     def advanced_settings_snapshot(self) -> dict:
         """Read live settings through the adapter, without changing the laser.
 
@@ -137,10 +198,11 @@ class SoftwareControlledLaser(LaserBase):
             "acquisition_mode": (
                 self._session_mode.value if self._session_mode else self.options.mode
             ),
-            "mode_error": self._mode_error,
+            "mode_error": getattr(self.settings, "mode_error", self._mode_error),
             "read_at": datetime.now(timezone.utc).isoformat(),
         }
 
+    @settings_transaction
     def prepare_acquisition(self, apply_mode: bool = True) -> None:
         """Read settings and optionally apply mode with illumination blocked.
 
@@ -151,9 +213,10 @@ class SoftwareControlledLaser(LaserBase):
             Subsequent preparations verify the mode without rewriting it.
         """
         self.invalidate_power()
-        if self._mode_error:
+        mode_error = getattr(self.settings, "mode_error", self._mode_error)
+        if mode_error:
             raise LaserControlError(
-                "Apply and confirm a laser mode before acquiring: " + self._mode_error
+                "Apply and confirm a laser mode before acquiring: " + mode_error
             )
         mode = self._session_mode or self.options.mode
         if mode != "preserve":
@@ -183,7 +246,9 @@ class SoftwareControlledLaser(LaserBase):
                     "Laser percentage reference exceeds the device's power limit."
                 )
         self._prepared = True
+        self._prepared_mode_revision = getattr(self.settings, "mode_revision", 0)
 
+    @settings_transaction
     def set_power(self, laser_intensity: float) -> None:
         """Route channel percentage to external voltage or internal mW settings.
 
@@ -196,6 +261,8 @@ class SoftwareControlledLaser(LaserBase):
         if self.options.power_source == "hardware":
             self.external.set_power(laser_intensity)
             return
+        if getattr(self.settings, "mode_error", self._mode_error):
+            raise LaserControlError("Apply and confirm a laser mode before acquiring.")
         if not self._prepared:
             raise LaserControlError(
                 "Prepare laser settings before applying channel power."
@@ -218,7 +285,7 @@ class SoftwareControlledLaser(LaserBase):
             self._last_request = None
             self.power_metadata = None
             raise
-        if percent == self._last_request:
+        if percent == self._last_request and self.power_metadata is not None:
             return
         self._last_request = None
         self.power_metadata = None
@@ -249,13 +316,15 @@ class SoftwareControlledLaser(LaserBase):
         }
         self._last_request = percent
 
+    @settings_transaction
     def needs_power_update(self, percent: float) -> bool:
         """Return whether internal power needs another serial transaction."""
         try:
-            return self._last_request != float(percent)
+            return self.power_metadata is None or self._last_request != float(percent)
         except (TypeError, ValueError):
             return True
 
+    @settings_transaction
     def turn_on(self) -> None:
         """Use the existing electrical gate without sending serial commands."""
         if self.options.power_source == "serial" and self.power_metadata is None:
@@ -276,13 +345,17 @@ class SoftwareControlledLaser(LaserBase):
 
     def close(self) -> None:
         """Close owned settings and the external controller once."""
-        if self._closed:
-            return
-        self._closed = True
-        try:
-            self.settings.close()
-        finally:
-            self.external.close()
+        with self._close_lock:
+            if self._closed:
+                return
+            self._closed = True
+            try:
+                if self._settings_lease is not None:
+                    self._settings_lease.close()
+                else:
+                    self.settings.close()
+            finally:
+                self.external.close()
 
 
 def blank_laser_illumination(shutter: Any, lasers: Iterable[LaserBase]) -> None:
@@ -335,6 +408,7 @@ def add_software_control(laser: LaserBase, is_synthetic: bool = False) -> LaserB
     if options.backend == "none":
         return laser
     settings = None
+    lease = None
     try:
         if is_synthetic or options.backend == "synthetic":
             from .settings.synthetic import SyntheticLaserSettings
@@ -350,27 +424,21 @@ def add_software_control(laser: LaserBase, is_synthetic: bool = False) -> LaserB
                 else None
             )
             settings = SyntheticLaserSettings(maximum, supported_modes=modes)
-        elif options.backend == "vortran":
-            from .settings.vortran import VortranLaserSettings
-
-            settings = VortranLaserSettings.connect(
-                options.port, options.baudrate, options.timeout
-            )
-        elif options.backend == "obis":
-            from .settings.obis import ObisLaserSettings
-
-            settings = ObisLaserSettings.connect(
-                options.port, options.baudrate, options.timeout
-            )
         else:
-            from .settings.luxx import LuxxLaserSettings
+            from navigate.model.device_startup_functions import SerialConnectionFactory
+            from .settings.shared import SharedLaserSettings
 
-            settings = LuxxLaserSettings.connect(
-                options.port, options.baudrate, options.timeout
+            lease = SerialConnectionFactory.acquire_connection(
+                SharedLaserSettings.connect,
+                (options.port, options.baudrate, options.timeout, options.backend),
+                identity=("laser", options.backend, options.baudrate, options.timeout),
             )
-        return SoftwareControlledLaser(laser, settings, options)
+            settings = lease.connection
+        return SoftwareControlledLaser(laser, settings, options, settings_lease=lease)
     except Exception:
-        if settings is not None:
+        if lease is not None:
+            lease.close()
+        elif settings is not None:
             settings.close()
         laser.close()
         raise

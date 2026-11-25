@@ -112,7 +112,7 @@ def test_luxx_unsupported_configured_modes_are_rejected(loaded_configuration, mo
 
 
 @pytest.mark.parametrize("duplicate", [True, False])
-def test_real_serial_port_has_one_owner_across_microscopes(
+def test_compatible_serial_ports_can_be_shared_across_microscopes(
     loaded_configuration, duplicate
 ):
     manager, configuration = loaded_configuration
@@ -125,17 +125,30 @@ def test_real_serial_port_has_one_owner_across_microscopes(
             "software_control",
             {"type": "Vortran", "port": port},
         )
-    if duplicate:
-        with pytest.raises(PreloadError, match="one software-control owner per port"):
-            preload_configuration(manager, configuration)
-    else:
-        preload_configuration(manager, configuration)
+    preload_configuration(manager, configuration)
 
 
 def test_windows_serial_port_identity_ignores_case_and_device_prefix():
     from navigate.config.laser import laser_serial_port_key
 
     assert laser_serial_port_key(r"\\.\COM7") == laser_serial_port_key("com7")
+
+
+@pytest.mark.parametrize(
+    "different", [{"type": "OBIS"}, {"baudrate": 9600}, {"timeout": 3}]
+)
+def test_shared_laser_connection_options_must_match(loaded_configuration, different):
+    manager, configuration = loaded_configuration
+    scopes = list(configuration["configuration"]["microscopes"].values())
+    for scope, options in zip(scopes[:2], [{}, different]):
+        update_config_dict(
+            manager,
+            scope["laser"][0],
+            "software_control",
+            {"type": "Vortran", "port": "COM7", **options},
+        )
+    with pytest.raises(PreloadError, match="Incompatible shared laser port"):
+        preload_configuration(manager, configuration)
 
 
 def test_serial_port_identity_resolves_aliases_without_io(tmp_path):

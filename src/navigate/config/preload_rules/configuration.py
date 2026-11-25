@@ -248,12 +248,16 @@ def validate_laser_software_control(context: PreloadContext) -> None:
                 if options.backend in ("vortran", "obis", "luxx"):
                     port = laser_serial_port_key(options.port)
                     owner = f"{name}.laser[{index}]"
+                    identity = (options.backend, options.baudrate, options.timeout)
                     if port in ports:
-                        raise ValueError(
-                            f"Laser serial port {options.port!r} is configured twice: "
-                            f"{ports[port]} and {owner}. Configure one software-control owner per port."
-                        )
-                    ports[port] = owner
+                        previous_name, previous_owner, previous_identity = ports[port]
+                        if previous_name == name or previous_identity != identity:
+                            raise ValueError(
+                                f"Incompatible shared laser port {options.port!r}: "
+                                f"{previous_owner} and {owner}. Use matching backend, baudrate, "
+                                "and timeout across microscopes, and one entry per microscope."
+                            )
+                    ports[port] = (name, owner, identity)
                 # Canonicalize explicitly provided values before schema validation;
                 # missing options remain missing and retain legacy behavior.
                 if "source" in (laser.get("power") or {}):

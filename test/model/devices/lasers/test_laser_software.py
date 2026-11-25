@@ -146,7 +146,7 @@ def test_real_vortran_bench_uses_serial_with_synthetic_gate(monkeypatch):
     monkeypatch.setattr(VortranLaserSettings, "connect", connect)
     laser = make_laser(config)
     connect.assert_called_once()
-    assert laser.settings is adapter
+    assert laser.settings.adapter is adapter
     laser.prepare_acquisition()
     laser.set_power(100)
     assert laser.power_metadata["confirmed_setpoint_mw"] == 10

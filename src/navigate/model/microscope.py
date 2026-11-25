@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library imports
+from contextlib import nullcontext
 import logging
 import math
 import importlib  # noqa: F401
@@ -1163,43 +1164,49 @@ class Microscope:
     def apply_laser_power(self, channel_key: str, channel: dict) -> None:
         """Apply channel power and publish a record only after successful I/O."""
         laser = self.laser[str(self.laser_wavelength[channel["laser_index"]])]
-        record = self.describe_laser_power(channel)
-        serial_update = (
-            isinstance(laser, SoftwareControlledLaser)
-            and laser.options.power_source == "serial"
-            and laser.needs_power_update(channel["laser_power"])
+        transaction = (
+            laser.transaction()
+            if isinstance(laser, SoftwareControlledLaser)
+            else nullcontext()
         )
-        reopen_shutter = False
-        try:
-            if serial_update:
-                reopen_shutter = self.shutter.state
-                blank_laser_illumination(self.shutter, self.laser.values())
-            laser.set_power(channel["laser_power"])
-        except Exception as error:
-            record.update(event="failed", verification="failed", error=str(error))
-            self.laser_metadata.record(channel_key, record)
-            self._publish_laser_power(channel_key, record)
-            # Prevent even a subsequent accidental turn_on call after failure.
-            if isinstance(laser, SoftwareControlledLaser):
-                laser.invalidate_power()
+        with transaction:
+            record = self.describe_laser_power(channel)
+            serial_update = (
+                isinstance(laser, SoftwareControlledLaser)
+                and laser.options.power_source == "serial"
+                and laser.needs_power_update(channel["laser_power"])
+            )
+            reopen_shutter = False
             try:
-                blank_laser_illumination(self.shutter, self.laser.values())
-            except Exception:
-                logger.exception("Unable to block illumination after laser failure")
-            raise
-        if reopen_shutter:
-            self.shutter.open_shutter()
-        if (
-            isinstance(laser, SoftwareControlledLaser)
-            and laser.power_metadata is not None
-        ):
-            record.update(laser.power_metadata)
-        record["event"] = "prepared"
-        changed = self.laser_metadata.record(channel_key, record)
-        feedback = getattr(self, "_laser_feedback_requested", set())
-        if changed or channel_key in feedback:
-            self._publish_laser_power(channel_key, record)
-        feedback.discard(channel_key)
+                if serial_update:
+                    reopen_shutter = self.shutter.state
+                    blank_laser_illumination(self.shutter, self.laser.values())
+                laser.set_power(channel["laser_power"])
+            except Exception as error:
+                record.update(event="failed", verification="failed", error=str(error))
+                self.laser_metadata.record(channel_key, record)
+                self._publish_laser_power(channel_key, record)
+                # Prevent even a subsequent accidental turn_on call after failure.
+                if isinstance(laser, SoftwareControlledLaser):
+                    laser.invalidate_power()
+                try:
+                    blank_laser_illumination(self.shutter, self.laser.values())
+                except Exception:
+                    logger.exception("Unable to block illumination after laser failure")
+                raise
+            if reopen_shutter:
+                self.shutter.open_shutter()
+            if (
+                isinstance(laser, SoftwareControlledLaser)
+                and laser.power_metadata is not None
+            ):
+                record.update(laser.power_metadata)
+            record["event"] = "prepared"
+            changed = self.laser_metadata.record(channel_key, record)
+            feedback = getattr(self, "_laser_feedback_requested", set())
+            if changed or channel_key in feedback:
+                self._publish_laser_power(channel_key, record)
+            feedback.discard(channel_key)
 
     def _publish_laser_power(self, channel_key: str, record: dict) -> None:
         """Send a plain snapshot to the controller's Tk event pump."""

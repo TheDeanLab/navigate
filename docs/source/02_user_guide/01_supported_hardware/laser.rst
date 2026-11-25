@@ -110,10 +110,19 @@ For ASI gating, retain the existing ASI ``onoff`` block instead. Setting
 for testing; its optional ``max_power_mw`` defaults to 100. Virtual Devices mode
 also substitutes this adapter for a configured Vortran connection.
 
-Each real laser serial port must have one ``software_control`` owner across all
-microscopes. Preload rejects duplicate port assignments, including Windows COM
-case differences and Linux device symlinks. Sharing a software-controlled laser
-between microscope definitions is not supported yet.
+Multiple microscope definitions may share a real laser serial port when their
+``software_control`` backend, baud rate, and timeout match. Windows COM aliases
+and Linux device symlinks identify the same port. Each microscope may list that
+physical laser only once. Incompatible settings are rejected before a second
+connection is opened.
+
+The serial connection factory opens one shared protocol adapter. Each microscope
+retains its own gating, mode policy, percentage reference, and acquisition metadata.
+Closing one microscope's laser releases its ownership; the connection closes only
+after the final owner releases it. A power or mode write through either microscope
+invalidates the other's cached power confirmation, including failed writes. The
+next use must reconfirm power before illumination can be enabled. Shared serial
+access does not provide independent simultaneous control of one physical laser.
 
 The channel :guilabel:`Power (%)` field keeps its existing percentage meaning.
 With the example above, 25 percent requests 25 mW. No new fields are required in

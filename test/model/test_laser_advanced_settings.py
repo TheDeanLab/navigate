@@ -11,6 +11,7 @@ from navigate.model.microscope import Microscope
 from navigate.model.devices.laser.settings.base import LaserControlError, LaserMode
 from test.model.devices.lasers.test_laser_software import configuration, make_laser
 from test.model.devices.lasers.test_laser_settings import StradusSerial
+from test.model.devices.lasers.test_obis_luxx_settings import protocol_clock
 from navigate.model.devices.laser.settings.vortran import VortranLaserSettings
 
 

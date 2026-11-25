@@ -37,7 +37,7 @@ class LaserSerial:
         self.override = None
         self.ignore_writes = False
         self.short_write = False
-        self.timeout = 0.01
+        self.timeout = 0.5
         self.values = (
             {
                 "*IDN?": "Coherent OBIS test",
@@ -119,11 +119,11 @@ def adapter(backend, connection=None):
     connection = connection or LaserSerial(backend)
     if backend == "OBIS":
         return (
-            ObisLaserSettings(ObisLaser("TEST", timeout=0.01, connection=connection)),
+            ObisLaserSettings(ObisLaser("TEST", timeout=0.5, connection=connection)),
             connection,
         )
     return (
-        LuxxLaserSettings(LuxxLaser("TEST", timeout=0.01, connection=connection)),
+        LuxxLaserSettings(LuxxLaser("TEST", timeout=0.5, connection=connection)),
         connection,
     )
 
@@ -276,9 +276,10 @@ def test_expired_response_deadline_requires_reconnection(
     assert len(connection.commands) == previous
 
 
-def test_blank_frames_do_not_extend_response_deadline(device) -> None:
+def test_blank_frames_do_not_extend_response_deadline(device, protocol_clock) -> None:
     """Repeated empty frames must still exhaust the transaction time budget."""
     settings, connection = device
+    protocol_clock.side_effect = count(step=0.1)
     connection.override = b"\r" * 200
     with pytest.raises(LaserControlError, match="timed out"):
         settings.get_mode()
@@ -417,3 +418,11 @@ def test_missing_port_and_conflicting_power_routing_are_rejected(backend):
     entry["power"]["hardware"]["type"] = "NI"
     with pytest.raises(ValueError, match="no analog output"):
         resolve_laser_software_config(entry)
+
+
+@pytest.mark.parametrize("backend", ["OBIS", "LuxX"])
+def test_emulator_uses_production_timeout(backend):
+    """Helpers imported by other suites must not impose a 10 ms deadline."""
+    settings, connection = adapter(backend)
+    assert 0.49 < connection.timeout <= 0.5
+    settings.close()

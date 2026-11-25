@@ -197,7 +197,9 @@ sentinels are never accepted as numeric zero or an Off value.
 
 Confirmed selections are saved per microscope under the experiment's
 :code:`CameraParameters` keys :code:`scan_speed`, :code:`defect_correction`, and
-:code:`hot_pixel_correction`. Save the experiment to retain them across sessions.
+:code:`hot_pixel_correction`. The advanced popup's Save action also writes these
+confirmed values to per-camera :code:`advanced_settings` defaults in configuration.
+Explicit experiment values take precedence over these defaults on restart.
 Preparation applies sensor mode, saved scan speed, ROI/binning, saved bit depth,
 and saved correction values before allocating image buffers. Missing keys in
 older experiments do not create new correction selections. A saved scan speed
@@ -228,3 +230,78 @@ Automated tests cover fake SDK transactions, real Tk popup controls, experiment
 save/reload, and native pixel/metadata round trips through every supported image
 writer. These tests do not validate correction effects or scan performance on
 physical hardware; no new hardware acquisition is claimed by this feature.
+
+Hamamatsu electrical timing outputs
+-----------------------------------
+
+:code:`get_output_trigger_capabilities()` returns serializable per-connector
+fields and optional shared fields. The base camera reports this feature as
+unsupported. DCAM discovery reads :code:`NUMBEROF_OUTPUTTRIGGERCONNECTOR`
+(:code:`0x001C0010`) and uses the :code:`0x100` connector stride. For connector 1,
+source, polarity, active behavior, delay, period (pulse width), kind, base sensor
+and pre-Hsync count occupy :code:`0x001C0110` through :code:`0x001C0190`
+(excluding :code:`0x001C0180`). Shared channel synchronization and programmable
+start use :code:`0x001C0030` and :code:`0x001C0050`. Public wrapper property methods
+accept these integer IDs as well as existing named properties.
+
+Discover choices, writable state, range and step from DCAM. SDK enum definitions
+provide names only; they do not establish availability. Unsupported fields are
+omitted from the editor. Never use an output setter to discover support.
+
+Selections use the same versioned structure under
+:code:`experiment.CameraParameters.<microscope>.output_triggers` and
+:code:`configuration.microscopes.<microscope>.camera.advanced_settings.output_triggers`:
+
+.. code-block:: yaml
+
+   version: 1
+   connectors:
+     "1":
+       kind: programmable
+       source: vsync
+       polarity: positive
+       delay_s: 0.0
+       pulse_width_s: 0.002
+     "2":
+       kind: trigger_ready
+       polarity: positive
+     "3":
+       kind: programmable
+       source: readout_end
+       polarity: positive
+       delay_s: 0.001
+       pulse_width_s: 0.004
+
+Optional :code:`shared` settings contain :code:`channel_sync` and
+:code:`programmable_start` when supported. Inactive timing preferences may remain
+stored, but are neither applied nor reported as effective acquisition metadata.
+Connector keys are normalized to strings. Timing fields accept finite numeric
+strings on reload because the unchanged JSON experiment writer and YAML 1.1
+reader can represent small exponent values as strings.
+
+The model's :code:`setting="output_triggers"` transaction uses the existing
+serialized worker, idle guard and physical-connection identity. It does not probe
+bit depth or allocate image buffers. It snapshots all available outputs and shared
+properties, applies supported values without clamping, then verifies final
+readback across all requested connectors to detect coupled changes. On error it
+restores the snapshot; a failed restore blocks the physical connection until
+reconnection. Raw output snapshots also survive the Quest DCAM reset and the
+legacy MONO8 capability probe. These transactions cannot promise glitch-free
+electrical transitions.
+
+Only confirmed application updates the experiment proxy. Popup Save atomically
+writes configuration defaults using YAML-safe scalar quoting. It never writes
+the experiment file. Acquisition and application-close saving retain their
+existing paths and timing. Startup and experiment reload seed only missing
+advanced keys; preparation reapplies saved outputs after mode, scan, ROI, depth
+and corrections. Invalid saved selections stop preparation.
+Virtual Devices mode retains these preferences without applying physical outputs
+or reporting them as effective electrical metadata.
+
+Effective output metadata uses flattened :code:`output_trigger_1_kind`,
+:code:`output_trigger_1_pulse_width_s` and corresponding connector/field names.
+The existing TIFF, OME-TIFF, H5, N5 and OME-Zarr camera-settings writers preserve
+these values and their segmentation behavior. Tests cover all three connectors,
+real Tk controls, Manager proxies, experiment lifecycle, fresh-process reload,
+DCAM reset, rollback and all five metadata formats. Electrical timing and laser
+compatibility still require physical measurement.

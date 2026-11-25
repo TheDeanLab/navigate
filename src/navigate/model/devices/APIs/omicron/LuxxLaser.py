@@ -1,350 +1,211 @@
-import logging
+"""Omicron LuxX serial API, independent of acquisition gating.
 
-import serial
-import re
+The original LuxX exposes Standby, CW-ACC, CW-APC and Analog through ROM.
+The electronic shutter input is separate from these software mode selections.
+"""
 
-# from time import time
+from math import isfinite
+from typing import Any, Optional, Union
 
-from navigate.model.devices.laser.base import LaserBase
-
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+from navigate.model.devices.APIs.laser_serial import SerialLaserAPI
+from navigate.model.devices.laser.settings.base import LaserControlError
 
 
-class LuxxLaser(LaserBase):
-    def __init__(self, comport):
-        """
-        # Luxx Laser Class
-        # LUXX488, 200 mW, is COM19
-        # LUXX642, 140 mW, is COM17
-        # LIGHTHUB ULTRA, is COM20
-        # Open port (*auto* stands for **/dev/ttyUSB0** in Linux or **COM17**
-        # in Windows, because it is what I use); then get device model;
-        # finally, get maximum output power and store it in **pmax** variable.
-        """
+class LuxxLaser(SerialLaserAPI):
+    """Connect and read identity/limits without initializing emission or power.
+
+    Parameters
+    ----------
+    comport : str
+        Serial port name.
+    baudrate : int, optional
+        Baud rate, retaining the existing API default of 500000.
+    timeout : float, optional
+        Bounded transaction timeout in seconds.
+    connection : object, optional
+        Owned serial connection supplied for protocol testing.
+    """
+
+    MODES = ("Standby", "CW-ACC", "CW-APC", "Analog")
+
+    def __init__(
+        self,
+        comport: str,
+        baudrate: int = 500000,
+        timeout: float = 0.3,
+        *,
+        connection: Optional[Any] = None,
+    ) -> None:
         self.comport = comport
-        self.baudrate = 500000
-        self.timeout = 0.3
-
+        self.baudrate = baudrate
+        super().__init__(comport, baudrate, timeout, connection)
         try:
-            # Open serial port
-            self.laser = serial.Serial(
-                self.comport, self.baudrate, timeout=self.timeout
+            # GSI separates wavelength and rated power with a single 0xA7 byte.
+            self.wavelength = self._number(self.ask("GSI").split(b"\xa7", 1)[0])
+            self.serial = self.ask("GSN").decode("ascii")
+            self.hours = self.ask("GWH").decode("ascii")
+            self.pmax = self._number(self.ask("GMP"))
+            if self.pmax <= 0:
+                raise LaserControlError("LuxX reported an invalid maximum power.")
+        except Exception:
+            self.close()
+            raise
+
+    def write(self, command: str) -> None:
+        """Write and consume the acknowledgment so later queries stay aligned."""
+        self.ask(command)
+
+    def ask(self, command: str) -> bytes:
+        """Exchange one bounded command with a matching response prefix.
+
+        Parameters
+        ----------
+        command : str
+            Three-letter command and optional value, without '?' or CR.
+
+        Returns
+        -------
+        bytes
+            Response payload, preserving GSI's non-ASCII separator.
+        """
+        with self._lock:
+            wire = ("?" + command + "\r").encode("ascii")
+            deadline = self._send(wire)
+            prefix = ("!" + command[:3]).encode("ascii")
+            while True:
+                response = self._read_frame(deadline)
+                if response == wire.strip():
+                    continue
+                if response == b"!UK":
+                    raise LaserControlError(f"LuxX does not support {command!r}.")
+                if not response.startswith(prefix):
+                    self._fail(f"Unexpected LuxX response: {response!r}")
+                value = response[len(prefix) :].strip()
+                if not value:
+                    self._fail("LuxX returned an empty response.")
+                if value.lower().startswith((b"x", b"err")):
+                    raise LaserControlError(f"LuxX rejected {command!r}: {value!r}")
+                return value
+
+    @staticmethod
+    def _number(value: bytes) -> float:
+        """Reject nonnumeric or nonfinite telemetry."""
+        try:
+            number = float(value)
+        except (TypeError, ValueError) as error:
+            raise LaserControlError("Invalid LuxX numeric response.") from error
+        if not isfinite(number):
+            raise LaserControlError("Nonfinite LuxX numeric response.")
+        return number
+
+    def _hex(self, command: str, maximum: int = 0xFFFF) -> int:
+        """Read a bounded hexadecimal register value."""
+        try:
+            value = int(self.ask(command), 16)
+        except ValueError as error:
+            raise LaserControlError("Invalid LuxX hexadecimal response.") from error
+        if not 0 <= value <= maximum:
+            raise LaserControlError("LuxX register readback is out of range.")
+        return value
+
+    def power_code(self, power: float) -> int:
+        """Convert a valid mW request to the existing 12-bit power scale."""
+        if not isfinite(power) or not 0 <= power <= self.pmax:
+            raise LaserControlError(
+                f"LuxX power must be between 0 and {self.pmax:g} mW."
             )
+        return int(4095 * power / self.pmax)
 
-            # Confirm the Laser Wavelength
-            # Must remove non-standard ASCII codes that cause errors in the utf-8 codec
-            wavelength = self.ask("GSI")
-            wavelength = wavelength.replace(b"\xa7200", str(" ").encode())
-            wavelength = wavelength.replace(b"\xa7140", str(" ").encode())
-            wavelength = float(wavelength.decode())
-            self.wavelength = wavelength
+    def set_power(self, power: float) -> None:
+        """Set internal power without enabling emission or silently clamping.
 
-            # Confirm the Laser Serial Number
-            serial_number = self.ask("GSN")
-            serial_number = serial_number.decode()
-            self.serial = serial_number
-
-            # Confirm the Laser Working Hours
-            laser_working_hours = self.ask("GWH")
-            laser_working_hours = laser_working_hours.decode()
-            self.hours = laser_working_hours
-
-            # Confirm the Laser Maximum Power
-            power_max = float(self.ask("GMP"))
-            self.pmax = power_max
-
-        except serial.SerialException:
-            logger.error(f"{str(self)}, Could not open port {self.comport}")
-            raise OSError(
-                'Port "%s" is unavailable.\n' % self.comport
-                + "Maybe the laser is not connected, the wrong"
-                + " port is specified or the port is already opened"
-            )
-
-    def __del__(self):
+        Parameters
+        ----------
+        power : float
+            Requested power in mW.
         """
-        # Close the port before exit.
+        self.ask(f"SLP{self.power_code(power):03X}")
+
+    def get_power(self) -> float:
+        """Return the internal power setpoint in mW, not measured output."""
+        return self._hex("GLP", 0xFFF) * self.pmax / 4095.0
+
+    def get_measured_power(self) -> float:
+        """Return measured diode output power in mW."""
+        return self._number(self.ask("MDP"))
+
+    def get_emission_enabled(self) -> bool:
+        """Read GAS bit 1, the laser operation enable flag."""
+        return bool(self._hex("GAS") & 2)
+
+    def set_mode(self, mode: Union[str, int]) -> None:
+        """Select an existing LuxX ROM mode.
+
+        Parameters
+        ----------
+        mode : str or int
+            Standby, CW-ACC, CW-APC, Analog, or their numeric indices 0–3.
         """
+        if isinstance(mode, str) and mode in self.MODES:
+            mode = self.MODES.index(mode)
+        if isinstance(mode, bool) or not isinstance(mode, int) or mode not in range(4):
+            raise LaserControlError(f"Unsupported LuxX mode: {mode!r}")
+        self.ask(f"ROM{mode}")
+
+    def get_mode(self) -> str:
+        """Return the current ROM mode, rejecting invalid device replies."""
         try:
-            # Turn off the laser emission
-            # self.write("LOf")
+            value = int(self.ask("ROM"))
+        except ValueError as error:
+            raise LaserControlError("Invalid LuxX mode readback.") from error
+        if value not in range(4):
+            raise LaserControlError(f"Unknown LuxX ROM mode: {value}")
+        return self.MODES[value]
 
-            # Close the port
-            self.laser.close()
-
-        except serial.SerialException:
-            print("Could not close the port")
-
-    def close(self):
-        """
-        # Close the port before exit.
-        """
-        try:
-            self.laser.close()
-
-        except serial.SerialException:
-            print("could not close the port")
-
-    def write(self, command):
-        """
-        # Send *command* to device. Preceed it with "?" und end with CR.
-        """
-        command = str("?").encode() + str(command).encode() + str("\r").encode()
-        self.laser.write(command)
-
-    def read(self):
-        """
-        # Read all information from the port and return it as string.
-        """
-        answer = self.laser.readall()
-        answer = answer.replace(str("\r").encode(), str("\n").encode())
-        answer = answer.replace(str("\xa7").encode(), str(" | ").encode())
-        return answer
-
-    def ask(self, command):
-        """
-        # Write, then read.
-        # Uses regular expressions to clean up response from the device
-        # !UK = Unknown command
-        """
-        self.write(command)
-        response = self.read()
-        search_string = str("!UK\n").encode()
-        if re.findall(search_string, response):
-            print("Command '%s' is unknown for this device" % command)
-        else:
-            search_string = "!%s(.+)\n" % command[:3]
-            search_string = search_string.encode()
-            print(f"The search string is: {search_string}")
-            print(f"The response string is: {response}")
-
-            if len(response) > 0:
-                response = re.findall(search_string, response)[-1]
-
-            if response[0] == "x":
-                print("Laser responded with error to command '%s'" % command)
-
-            return response
-
-    def smart_ask(self, command):
-        """
-        #  TODO: Not working.  Depends on broken print_hex function.
-        Several commands return information coded in ASCII HEX numbers.
-        The relevant are bits in the registers. For convenient
-        representation, we will print(these bytes in tables.
-        This is relevant for the following commands:
-            * GOM
-            * GFB
-            * GLF
-            * GLP
-        For all other commands the behavior is identical to **ask** function
-        """
-        if command in ["GOM", "GFB", "GLF", "GLP"]:
-            return print_hex(self.ask(command))
-        else:
-            return self.ask(command)
-
-    def start(self):
-        """
-        # Start the emission (takes about 3 seconds)
-        """
+    def start(self) -> None:
+        """Explicitly enable emission for legacy API clients; adapters never call."""
         self.write("LOn")
 
-    def stop(self):
-        """
-        # Stop the emission immediately
-        """
+    def stop(self) -> None:
+        """Explicitly disable emission for legacy API clients; adapters never call."""
         self.write("LOf")
 
-    def set_power(self, power):
-        """
-        Set the desired power in mW
-        TODO: Intermittent failure due to list index out of range in self.ask (line 115)
-        """
-        # Calculate the corresponding HEX code and transmit it
-        if power > self.pmax:
-            print("Laser provides %imW only. The maximum power is set", self.pmax)
-            self.write("SLPFFF")
-        else:
-            code = hex(int(4095 * power / self.pmax))[2:].upper().zfill(3)
-            stopwatch(self.ask, "SLP%s" % code)
+    def set_autostart(self, state: bool) -> None:
+        """Set emission on power-up for explicit legacy API clients only."""
+        self.ask(f"SAS{int(bool(state))}")
 
-    def get_power(self):
-        """
-        # Get the current power value in mW
-        """
-        code = stopwatch(self.ask, "GLP")
-        return int(code, 16) * self.pmax / 4095.0
+    def get_autostart(self) -> bool:
+        """Read the GOM autostart flag; GAS is a different status register."""
+        return bool(self._hex("GOM") & (1 << 14))
 
-    def set_mode(self, mode):
-        """
-        # The device is able to work in the following modes:
-        #  * Standby
-        #      Laser is ready, but no emission is produced. However, if we
-        #      it is turned on (e.g. with **start** function), then change to
-        #      other mode will result in immediate emission, i.e. without
-        #      3 seconds delay.
-        #  * CW-ACC
-        #      constant wave, automatic current control
-        #  * CW-APC
-        #      constant wave, automatic power control
-        #  * Analog
-        #      the output power is dependent on the analog input; however,
-        #      it cannot exceed the specified with **set_power** value.
-        """
-        if mode == "Standby" or mode == 0:
-            mode = 0
-        elif mode == "CW-ACC" or mode == 1:
-            mode = 1
-        elif mode == "CW-APC" or mode == 2:
-            mode = 2
-        elif mode == "Analog" or mode == 3:
-            mode = 3
-        else:
-            print(
-                "**mode** must be one of 'Standby', 'CW-ACC', "
-                + "'CW-APC', 'Analog' or number 0-3. Nothing changed."
-            )
-            return
-        stopwatch(self.ask, "ROM%i" % mode)
+    def smart_ask(self, command: str) -> Union[list[int], bytes]:
+        """Return register byte values or the original payload."""
+        value = self.ask(command)
+        return print_hex(value) if command in ("GOM", "GFB", "GLF", "GLP") else value
 
-    def get_mode(self):
-        """
-        # Get the current mode.
-        """
-        mode = int(stopwatch(self.ask, "ROM"))
-        if mode == 0:
-            return "Standby"
-        elif mode == 1:
-            return "CW-ACC"
-        elif mode == 2:
-            return "CW-APC"
-        elif mode == 3:
-            return "Analog"
-        else:
-            return mode
+    def get_parameters(self) -> list[int]:
+        """Return operating-register bytes for legacy API clients."""
+        return print_hex(self.ask("GOM"))
 
-    def set_autostart(self, state):
-        """
-        # Decide if light is emitted on powerup.
-        """
-        if state:
-            self.ask("SAS1")
-        else:
-            self.ask("SAS0")
+    def get_errors(self) -> list[int]:
+        """Return fault-register bytes for explicit legacy API clients."""
+        return print_hex(self.ask("GFB"))
 
-    def get_autostart(self):
-        """
-        # Check if light is emitted on powerup.
-        """
-        if self.ask("GAS") == "1":
-            return True
-        else:
-            return False
-
-    def get_parameters(self):
-        """
-        # print a table showing laser status.
-        # Bit description:
-        # 15  Auto PowerUP if ONE
-        # 14  Autostart (emission at powerup) if ONE
-        # 13  Adhoc USB - Laser sends info messages from time to time if ONE
-        # 8   Power control (APC) mode if ONE; current control (ACC) if ZERO
-        # 7   External analog input enabled if ONE
-        # 4   Mod level: ONE - active; ZERO - not active
-        # 3   Bias level: ONE - active; ZERO - not active
-        # Bits 0, 1, 2, 5, 6, 9, 10, 11, 12 are reserved
-        """
-        self.smart_ask("GOM")
-
-    def get_errors(self):
-        """
-        # print contents of failure byte
-        # Bit description:
-        # 15  Diode power exceeded maximum value
-        # 14  An internal error occured
-        # 12  The temperature at the diode exceeded the valid temperature range
-        # 11  The ambient temperature exceeded the minimum or maximum value
-        # 10  The current through the diode exceeded the maximum allowed value
-        # 9   The interlock loop is not closed. Please close the interlockt loop
-        # 8   Overvoltage or Undervoltage lockout occured. Bring supply voltage to
-        #     a valid range
-        # 4   If CDRH-Bit is set and no CDRH-Kit is connected or
-        #     CDRH-Bit is not set but a CDRH-Kit is connected
-        #     CDRH-Kit is a box with a key, a LED and an interlock
-        # 0   Soft interlock: If an interlock error occurs, this bit is set.
-        #     It can only be reset by resetting the whole system, even if the
-        #     interlock error is not present anymore.
-        # Bits 1, 2, 3, 5, 6, 7, 13 are reserved
-        """
-        self.smart_ask("GFB")
-
-    def initialize_laser(self):
-        """
-        # Initialize lasers.
-        # Sets the laser to the maximum power, and sets the mode to CW-APC.
-        """
+    def initialize_laser(self) -> None:
+        """Explicit legacy initialization; settings adapters never call this."""
         self.set_power(self.pmax)
         self.set_mode("CW-APC")
         self.start()
 
-def stopwatch(func, *func_args, **func_kwargs):
-    """
-    # Call **func** and print elapsed time
-    """
-    # start_time = time()
-    result = func(*func_args, **func_kwargs)
-    # print("Time elapsed: %5.2f ms" % ((time() - start_time)*1000.0))
-    return result
+
+def stopwatch(func: Any, *func_args: Any, **func_kwargs: Any) -> Any:
+    """Retain the legacy forwarding helper without console output."""
+    return func(*func_args, **func_kwargs)
 
 
-def print_hex(hex_code):
-    """
-    TODO: Not working.  Concatenation of list and range?
-    print a nice table that represents *hex_code* (ASCII HEX string)
-    in a binary code.
-
-    Returns
-    -------
-    corresponding decimal numbers in array
-    """
-    # If the number is odd, pad it with leading zero
-    length = len(hex_code)
-    byte_number = (length / 2) + (length % 2)
-    if length % 2:
-        hex_code = "0" + hex_code
-
-    # Split it into 8-bit numbers coded in ASCII HEX
-    hex_numbers = []
-    for i in range(int(byte_number)):
-        hex_numbers.append(hex_code[i * 2 : i * 2 + 2])
-
-    # Convert each of them into decimal
-    decimals = []
-    for hex_number in hex_numbers:
-        decimals.append(int(hex_number, 16))
-
-    # print a table
-    table = """BYTE ##  :  '?'
-    | ## | ## | ## | ## | ## | ## | ## | ## |
-    |----|----|----|----|----|----|----|----|
-    |  ? |  ? |  ? |  ? |  ? |  ? |  ? |  ? |
-    """
-    table = table.replace("##", "%2i").replace("?", "%s")
-
-    print("\nRepresentation of ASCII HEX '%s'" % hex_code)
-    for i, number in enumerate(decimals):
-        byte = len(decimals) - i - 1
-
-        # data_range is type Range
-        data_range = range(byte * 8, byte * 8 + 8)[::-1]
-
-        # data_list is type list
-        data_list = list(bin(number)[2:].zfill(8))
-        print("data list:", data_list)
-
-        content = data_range + data_list
-        print(table % tuple([byte, hex_numbers[i]] + content))
-    return decimals
+def print_hex(hex_code: Union[str, bytes]) -> list[int]:
+    """Decode ASCII hexadecimal register bytes without printing debug output."""
+    value = hex_code.decode("ascii") if isinstance(hex_code, bytes) else hex_code
+    if len(value) % 2:
+        value = "0" + value
+    return list(bytes.fromhex(value))

@@ -425,11 +425,14 @@ def property_camera(monkeypatch):
     camera._DCAM__hdcamwait = 0
 
 
-def test_property_discovery_enumerates_sparse_values_without_writes(property_camera):
+@pytest.mark.parametrize("property_id", ["bits_per_channel", 0x00420130])
+def test_property_discovery_enumerates_sparse_values_without_writes(
+    property_camera, property_id
+):
     api, camera, _, queried = property_camera
-    assert camera.get_property_values("bits_per_channel") == (8.0, 12.0, 16.0)
+    assert camera.get_property_values(property_id) == (8.0, 12.0, 16.0)
     assert queried == [(8.0, 0), (8.0, 0x01000000), (12.0, 0x01000000)]
-    assert camera.is_property_writable("bits_per_channel") is True
+    assert camera.is_property_writable(property_id) is True
 
 
 def test_property_discovery_reports_fixed_and_read_only(property_camera):

@@ -1,0 +1,444 @@
+"""Compose external laser gating with optional internal settings control."""
+
+from datetime import datetime, timezone
+from contextlib import contextmanager
+from functools import wraps
+from threading import RLock
+from math import isfinite
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Optional
+from uuid import uuid4
+
+from navigate.config.laser import LaserSoftwareConfig, resolve_laser_software_config
+from .base import LaserBase
+from .settings.base import (
+    LaserControlError,
+    LaserMode,
+    LaserModeUnavailableError,
+    LaserSettingsBase,
+)
+
+if TYPE_CHECKING:
+    from navigate.model.device_startup_functions import SerialConnectionLease
+
+
+def settings_transaction(method: Callable) -> Callable:
+    """Keep each operation and its readbacks within one shared transaction."""
+
+    @wraps(method)
+    def wrapped(self, *args: Any, **kwargs: Any) -> Any:
+        with self.transaction():
+            return method(self, *args, **kwargs)
+
+    return wrapped
+
+
+class SoftwareControlledLaser(LaserBase):
+    """Keep the acquisition contract while routing power to its configured source.
+
+    Parameters
+    ----------
+    external : LaserBase
+        Existing electrical controller, responsible for illumination gating.
+    settings : LaserSettingsBase
+        Software adapter, owned directly or through a counted factory lease.
+    options : LaserSoftwareConfig
+        Validated routing and internal settings.
+    settings_lease : SerialConnectionLease, optional
+        Counted factory ownership of a shared settings adapter.
+    """
+
+    def __init__(
+        self,
+        external: LaserBase,
+        settings: LaserSettingsBase,
+        options: LaserSoftwareConfig,
+        settings_lease: Optional["SerialConnectionLease"] = None,
+    ) -> None:
+        #: LaserBase: Existing NI/ASI/synthetic acquisition control.
+        self.external = external
+        #: LaserSettingsBase: Owned software settings connection.
+        self.settings = settings
+        self._settings_lease = settings_lease
+        self._settings_lock = getattr(settings, "lock", RLock())
+        self._close_lock = RLock()
+        self._power_revision = None
+        self._prepared_mode_revision = None
+        #: LaserSoftwareConfig: Explicitly configured routing policy.
+        self.options = options
+        self.device_config = external.device_config
+        self.device_connection = external.device_connection
+        self.configuration = external.configuration
+        self.microscope_name = external.microscope_name
+        #: Optional[dict]: Last successfully applied software power setting.
+        self._power_metadata: Optional[dict] = None
+        self._prepared = False
+        self._closed = False
+        self._last_request: Optional[float] = None
+        #: str: Connection token used to reject stale popup writes.
+        self.settings_identity = uuid4().hex
+        self._session_mode: Optional[LaserMode] = None
+        self._mode_error: Optional[str] = None
+
+    @contextmanager
+    def transaction(self) -> Iterator[None]:
+        """Keep settings, electrical gate decisions, and metadata consistent."""
+        with self._settings_lock:
+            if self._closed:
+                raise LaserControlError("Laser owner is closed.")
+            yield
+
+    @property
+    def power_metadata(self) -> Optional[dict]:
+        """Expose a confirmation only while the shared settings are unchanged."""
+        with self._settings_lock:
+            if self._closed or self._power_revision != getattr(
+                self.settings, "revision", 0
+            ):
+                return None
+            return self._power_metadata
+
+    @power_metadata.setter
+    def power_metadata(self, value: Optional[dict]) -> None:
+        self._power_metadata = value
+        self._power_revision = getattr(self.settings, "revision", 0) if value else None
+
+    @settings_transaction
+    def invalidate_power(self) -> None:
+        """Require channel preparation to reconfirm power after settings changes."""
+        self._prepared = False
+        self._last_request = None
+        self.power_metadata = None
+
+    @settings_transaction
+    def available_modes(self) -> frozenset[LaserMode]:
+        """Return device modes compatible with the configured power source."""
+        modes = self.settings.get_supported_modes()
+        if self.options.power_source == "serial":
+            modes = modes.intersection((LaserMode.CW, LaserMode.DIGITAL))
+            if self.options.backend == "obis" and not self.options.bench_mode:
+                modes = modes.intersection((LaserMode.DIGITAL,))
+        return frozenset(modes)
+
+    @property
+    @settings_transaction
+    def prepared_mode(self) -> Optional[str]:
+        """Return the confirmed acquisition mode without querying hardware."""
+        return (
+            self.mode.value
+            if (
+                self._prepared
+                and self._prepared_mode_revision
+                == getattr(self.settings, "mode_revision", 0)
+            )
+            else None
+        )
+
+    @settings_transaction
+    def set_modulation_mode(self, mode: str) -> None:
+        """Apply a session mode while the caller keeps illumination blocked.
+
+        Parameters
+        ----------
+        mode : str
+            Supported mode compatible with the configured power source.
+        """
+        requested = LaserMode(mode)
+        if requested not in self.available_modes():
+            raise LaserControlError(
+                "Mode is unsupported or incompatible with serial power."
+            )
+        self.invalidate_power()
+        try:
+            self.settings.set_mode(requested)
+            if self.settings.get_mode() != requested:
+                raise LaserControlError("Laser did not accept the requested mode.")
+        except Exception as error:
+            self._mode_error = str(error)
+            raise
+        self._mode_error = None
+        self._session_mode = requested
+
+    @settings_transaction
+    def advanced_settings_snapshot(self) -> dict:
+        """Read live settings through the adapter, without changing the laser.
+
+        Returns
+        -------
+        dict
+            Serializable limits, modes, power readings and connection status.
+            Internal setpoint is unknown in modes controlled by analog voltage.
+        """
+        mode_warning = None
+        try:
+            mode = self.settings.get_mode()
+        except LaserModeUnavailableError as error:
+            mode = None
+            mode_warning = str(error)
+        minimum, maximum = self.settings.get_power_limits_mw()
+        internal_power = mode in (LaserMode.CW, LaserMode.DIGITAL)
+        setpoint = self.settings.get_power_setpoint_mw() if internal_power else None
+        status = self.settings.get_status()
+        available = self.available_modes()
+        return {
+            "connection": "simulated" if status["simulated"] else "connected",
+            "device_identity": status["identity"],
+            "simulated": status["simulated"],
+            "emission_enabled": status["emission_enabled"],
+            "measured_power_mw": status["measured_power_mw"],
+            "mode": mode.value if mode is not None else None,
+            "mode_warning": mode_warning,
+            "available_modes": [m.value for m in LaserMode if m in available],
+            "power_source": self.options.power_source,
+            "bench_mode": self.options.bench_mode,
+            "minimum_mw": minimum,
+            "maximum_mw": maximum,
+            "percent_reference_mw": self.options.power_reference_mw or maximum,
+            "setpoint_mw": setpoint,
+            "power_kind": "peak_pulse" if mode == LaserMode.DIGITAL else "cw_setpoint",
+            "acquisition_mode": (
+                self._session_mode.value if self._session_mode else self.options.mode
+            ),
+            "mode_error": getattr(self.settings, "mode_error", self._mode_error),
+            "read_at": datetime.now(timezone.utc).isoformat(),
+        }
+
+    @settings_transaction
+    def prepare_acquisition(self, apply_mode: bool = True) -> None:
+        """Read settings and optionally apply mode with illumination blocked.
+
+        Parameters
+        ----------
+        apply_mode : bool, optional
+            Apply the explicit policy on the first preparation in an acquisition.
+            Subsequent preparations verify the mode without rewriting it.
+        """
+        self.invalidate_power()
+        mode_error = getattr(self.settings, "mode_error", self._mode_error)
+        if mode_error:
+            raise LaserControlError(
+                "Apply and confirm a laser mode before acquiring: " + mode_error
+            )
+        mode = self._session_mode or self.options.mode
+        if mode != "preserve":
+            requested = LaserMode(mode)
+            if requested not in self.settings.get_supported_modes():
+                raise LaserControlError(
+                    f"Laser does not support {requested.value} mode."
+                )
+            # Apply explicit modes even when the generic modulation flags match:
+            # CW may still be in constant-current rather than power control.
+            if apply_mode:
+                self.settings.set_mode(requested)
+            self.mode = self.settings.get_mode()
+            if self.mode != requested:
+                raise LaserControlError("Laser did not accept the requested mode.")
+        else:
+            self.mode = self.settings.get_mode()
+        if self.options.power_source == "serial":
+            if self.mode not in self.available_modes():
+                raise LaserControlError(
+                    "Serial power requires CW or digital laser mode; OBIS requires digital mode for external gating."
+                )
+            minimum, maximum = self.settings.get_power_limits_mw()
+            self.power_reference_mw = self.options.power_reference_mw or maximum
+            if not 0 < self.power_reference_mw <= maximum:
+                raise LaserControlError(
+                    "Laser percentage reference exceeds the device's power limit."
+                )
+        self._prepared = True
+        self._prepared_mode_revision = getattr(self.settings, "mode_revision", 0)
+
+    @settings_transaction
+    def set_power(self, laser_intensity: float) -> None:
+        """Route channel percentage to external voltage or internal mW settings.
+
+        Parameters
+        ----------
+        laser_intensity : float
+            Channel power percentage. Serial power uses percent_reference_mw,
+            defaulting to the queried maximum, as its 100 percent value.
+        """
+        if self.options.power_source == "hardware":
+            self.external.set_power(laser_intensity)
+            return
+        if getattr(self.settings, "mode_error", self._mode_error):
+            raise LaserControlError("Apply and confirm a laser mode before acquiring.")
+        if not self._prepared:
+            raise LaserControlError(
+                "Prepare laser settings before applying channel power."
+            )
+        try:
+            percent = float(laser_intensity)
+            if not isfinite(percent) or not 0 <= percent <= 100:
+                raise ValueError("out of range")
+        except (TypeError, ValueError) as error:
+            self._last_request = None
+            self.power_metadata = None
+            raise LaserControlError(
+                "Serial laser power must be between 0 and 100 percent."
+            ) from error
+        # Digital-only ASI set_power also prepares its logic card. Preserve that
+        # existing setup; validated serial configurations have no analog output.
+        try:
+            self.external.set_power(percent)
+        except Exception:
+            self._last_request = None
+            self.power_metadata = None
+            raise
+        if percent == self._last_request and self.power_metadata is not None:
+            return
+        self._last_request = None
+        self.power_metadata = None
+        requested_mw = percent * self.power_reference_mw / 100
+        if self.settings.get_mode() != self.mode:
+            raise LaserControlError(
+                "Laser mode changed after preparation. Restart acquisition."
+            )
+        confirmed = self.settings.set_power_mw(requested_mw)
+        minimum, maximum = self.settings.get_power_limits_mw()
+        if not isfinite(confirmed) or not minimum <= confirmed <= maximum:
+            raise LaserControlError("Laser adapter returned an invalid power readback.")
+        status = self.settings.get_status()
+        self.power_metadata = {
+            "requested_percent": percent,
+            "requested_mw": requested_mw,
+            "percent_reference_mw": self.power_reference_mw,
+            "confirmed_setpoint_mw": confirmed,
+            "mode": self.mode.value,
+            "power_kind": (
+                "peak_pulse" if self.mode == LaserMode.DIGITAL else "cw_setpoint"
+            ),
+            "measurement_context": "channel_preparation",
+            "bench_mode": self.options.bench_mode,
+            "verification": "simulated" if status.get("simulated") else "readback",
+            "confirmed_at": datetime.now(timezone.utc).isoformat(),
+            **status,
+        }
+        self._last_request = percent
+
+    @settings_transaction
+    def needs_power_update(self, percent: float) -> bool:
+        """Return whether internal power needs another serial transaction."""
+        try:
+            return self.power_metadata is None or self._last_request != float(percent)
+        except (TypeError, ValueError):
+            return True
+
+    @settings_transaction
+    def turn_on(self) -> None:
+        """Use the existing electrical gate without sending serial commands."""
+        if self.options.power_source == "serial" and self.power_metadata is None:
+            raise LaserControlError("Laser power has not been successfully confirmed.")
+        self.external.turn_on()
+
+    def turn_off(self) -> None:
+        """Blank the existing electrical gate without changing internal power."""
+        self.external.turn_off()
+
+    def turn_off_checked(self) -> None:
+        """Blank the electrical output and propagate driver write failures."""
+        checked = getattr(type(self.external), "turn_off_checked", None)
+        if checked is None:
+            self.external.turn_off()
+        else:
+            checked(self.external)
+
+    def close(self) -> None:
+        """Close owned settings and the external controller once."""
+        with self._close_lock:
+            if self._closed:
+                return
+            self._closed = True
+            try:
+                if self._settings_lease is not None:
+                    self._settings_lease.close()
+                else:
+                    self.settings.close()
+            finally:
+                self.external.close()
+
+
+def blank_laser_illumination(shutter: Any, lasers: Iterable[LaserBase]) -> None:
+    """Attempt all blanking writes and abort a settings change on any failure.
+
+    Parameters
+    ----------
+    shutter : object
+        Shutter whose checked close operation raises hardware errors.
+    lasers : iterable of LaserBase
+        Electrical controllers to blank before software changes.
+    """
+    lasers = list(lasers)
+    errors = []
+    for device, name in [
+        (shutter, "close_shutter"),
+        *[(laser, "turn_off") for laser in lasers],
+    ]:
+        try:
+            checked = getattr(type(device), name + "_checked", None)
+            if checked is None:
+                getattr(device, name)()
+            else:
+                checked(device)
+        except Exception as error:
+            errors.append(str(error))
+    if errors:
+        for laser in lasers:
+            if isinstance(laser, SoftwareControlledLaser):
+                laser.invalidate_power()
+        raise LaserControlError("Unable to block illumination: " + "; ".join(errors))
+
+
+def add_software_control(laser: LaserBase, is_synthetic: bool = False) -> LaserBase:
+    """Wrap an explicitly configured laser; return legacy devices unchanged.
+
+    Parameters
+    ----------
+    laser : LaserBase
+        Existing electrical laser controller.
+    is_synthetic : bool, optional
+        Substitute a synthetic adapter even when a physical backend is configured.
+
+    Returns
+    -------
+    LaserBase
+        Original device or composed software-controlled laser.
+    """
+    options = resolve_laser_software_config(laser.device_config)
+    if options.backend == "none":
+        return laser
+    settings = None
+    lease = None
+    try:
+        if is_synthetic or options.backend == "synthetic":
+            from .settings.synthetic import SyntheticLaserSettings
+
+            maximum = options.max_power_mw
+            if is_synthetic and options.backend != "synthetic":
+                # A real device's maximum is unavailable in Virtual Devices mode.
+                # Honor its configured percentage reference without opening it.
+                maximum = max(maximum, options.power_reference_mw or maximum)
+            modes = (
+                frozenset((LaserMode.CW, LaserMode.ANALOG))
+                if options.backend == "luxx"
+                else None
+            )
+            settings = SyntheticLaserSettings(maximum, supported_modes=modes)
+        else:
+            from navigate.model.device_startup_functions import SerialConnectionFactory
+            from .settings.shared import SharedLaserSettings
+
+            lease = SerialConnectionFactory.acquire_connection(
+                SharedLaserSettings.connect,
+                (options.port, options.baudrate, options.timeout, options.backend),
+                identity=("laser", options.backend, options.baudrate, options.timeout),
+            )
+            settings = lease.connection
+        return SoftwareControlledLaser(laser, settings, options, settings_lease=lease)
+    except Exception:
+        if lease is not None:
+            lease.close()
+        elif settings is not None:
+            settings.close()
+        laser.close()
+        raise

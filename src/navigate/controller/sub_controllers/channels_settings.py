@@ -196,7 +196,7 @@ class ChannelSettingController(GUIController):
                 return
             channel_value = setting_dict[channel]
             for name in channel_vals:
-                if channel_value.get(name, None):
+                if channel_value.get(name, None) is not None:
                     # Do not set a filter wheel value that is absent from the
                     # dropdown options.
                     if name in filter_wheel_names and channel_value[
@@ -215,8 +215,60 @@ class ChannelSettingController(GUIController):
             self.view.exptime_pulldowns[channel_id].trigger_focusout_validation()
             self.view.interval_spins[channel_id].trigger_focusout_validation()
             self.view.laserpower_pulldowns[channel_id].trigger_focusout_validation()
+            self._refresh_laser_power_status(channel_id)
 
         self.show_verbose_info("channel has been set new value")
+
+    def _refresh_laser_power_status(self, channel_id: int) -> None:
+        """Mark new serial requests pending using configuration only, on Tk."""
+        lasers = self.configuration_controller.microscope_config.get("laser", [])
+        index = self.get_index("laser", self.view.laser_variables[channel_id].get())
+        label = self.view.laserpower_status_labels[channel_id]
+        serial = (
+            0 <= index < len(lasers)
+            and lasers[index].get("power", {}).get("source", "hardware") == "serial"
+        )
+        if serial:
+            label.configure(text="Serial: pending")
+            label.grid()
+        else:
+            label.configure(text="")
+            label.grid_remove()
+
+    def set_laser_power_metadata(self, record: dict) -> None:
+        """Display matching model confirmations without changing channel intent."""
+        if record.get("power_source") != "serial" or self.channel_setting_dict is None:
+            return
+        channel_key = record.get("channel")
+        channel = self.channel_setting_dict.get(channel_key)
+        if channel is None:
+            return
+        active_name = self.parent_controller.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["microscope_name"]
+        if record.get("microscope") != active_name:
+            return
+        try:
+            if float(channel["laser_power"]) != record["requested_percent"]:
+                return
+            if channel["laser"] != f"{record['wavelength_nm']}nm":
+                return
+            index = int(channel_key.removeprefix("channel_")) - 1
+        except (KeyError, TypeError, ValueError):
+            return
+        if not 0 <= index < len(self.view.laserpower_status_labels):
+            return
+        confirmed = record.get("confirmed_setpoint_mw")
+        if record.get("verification") == "failed":
+            text = "Serial: failed"
+        elif confirmed is None:
+            text = "Serial: pending"
+        else:
+            prefix = "Simulated" if record.get("simulated") else "Set"
+            text = f"{prefix}: {confirmed:g} mW"
+        label = self.view.laserpower_status_labels[index]
+        label.configure(text=text)
+        label.grid()
 
     def populate_empty_values(self):
         """Populates the View with empty values.
@@ -430,6 +482,9 @@ class ChannelSettingController(GUIController):
             setting_dict = self.channel_setting_dict[channel_key]
 
             r = update_setting_dict(setting_dict, widget_name)
+
+            if widget_name in ("laser", "laser_power"):
+                self._refresh_laser_power_status(channel_id)
 
             self.channel_setting_dict[channel_key] = setting_dict
 

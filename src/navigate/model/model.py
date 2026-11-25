@@ -48,6 +48,11 @@ from navigate.model.devices.camera.format import (
     CameraImageFormat,
     CameraSettingCapability,
 )
+from navigate.model.devices.laser.software import (
+    SoftwareControlledLaser,
+    blank_laser_illumination,
+)
+from navigate.model.devices.laser.settings.base import LaserControlError, LaserMode
 from navigate.model.features.autofocus import Autofocus
 from navigate.model.features.adaptive_optics import TonyWilson
 from navigate.model.features.image_writer import ImageWriter
@@ -426,6 +431,90 @@ class Model:
 
         self.load_feature_records()
 
+    def laser_advanced_settings(self, request: dict) -> dict:
+        """Read or change laser settings while acquisition is idle.
+
+        Parameters
+        ----------
+        request : dict
+            Microscope, laser wavelength key, request_id, and optional mode and
+            identity from a previous successful read.
+
+        Returns
+        -------
+        dict
+            Identity-tagged readbacks, connection status and any error. This
+            method performs hardware I/O and must be called on a model worker.
+        """
+        result = {
+            "microscope": request.get("microscope"),
+            "laser": request.get("laser"),
+            "request_id": request.get("request_id"),
+            "identity": None,
+            "connection": "unavailable",
+            "error": None,
+        }
+        microscope = self.microscopes.get(result["microscope"])
+        laser = getattr(microscope, "laser", {}).get(result["laser"])
+        if laser is None:
+            result["error"] = "Laser is unavailable. Refresh the selection."
+            return result
+        if not isinstance(laser, SoftwareControlledLaser):
+            result["connection"] = "not_configured"
+            return result
+        result["identity"] = laser.settings_identity
+        scopes = (
+            *self.microscopes.values(),
+            *getattr(self, "virtual_microscopes", {}).values(),
+        )
+        if self.is_acquiring or any(
+            getattr(getattr(scope, "camera", None), "is_acquiring", False)
+            for scope in scopes
+        ):
+            result.update(
+                connection="busy",
+                error="Stop acquisition to read or change laser settings.",
+            )
+            return result
+        if "mode" in request:
+            if request.get("identity") != laser.settings_identity:
+                result["error"] = "The laser connection changed. Refresh settings."
+                return result
+            try:
+                if LaserMode(request["mode"]) not in laser.available_modes():
+                    raise LaserControlError(
+                        "Mode is unsupported or incompatible with serial power."
+                    )
+                # Closing the shutter precedes any mode command, including CW.
+                # Keep it closed on success and on partially applied failures.
+                blank_laser_illumination(microscope.shutter, microscope.laser.values())
+                laser.set_modulation_mode(request["mode"])
+            except Exception as error:
+                result["error"] = str(error)
+            finally:
+                # Old channel confirmations must not survive a mode transaction.
+                laser.invalidate_power()
+                state = self.configuration["experiment"]["MicroscopeState"]
+                channels = (
+                    state.get("channels", {})
+                    if state.get("microscope_name") == result["microscope"]
+                    else getattr(microscope, "channels", {})
+                )
+                for key, channel in channels.items():
+                    index = channel.get("laser_index", -1)
+                    if (
+                        0 <= index < len(microscope.laser_wavelength)
+                        and str(microscope.laser_wavelength[index]) == result["laser"]
+                    ):
+                        microscope._publish_laser_power(
+                            key, microscope.describe_laser_power(channel)
+                        )
+        try:
+            result.update(laser.advanced_settings_snapshot())
+        except Exception as error:
+            result["error"] = result["error"] or str(error)
+        return result
+
     def camera_advanced_settings(self, request: dict) -> dict:
         """Read or apply an identity-tagged idle camera setting.
 
@@ -462,9 +551,11 @@ class Model:
         if busy or identity in blocked or invalid_request:
             reason = blocked.get(
                 identity,
-                "Stop acquisition to change camera settings."
-                if busy
-                else invalid_request,
+                (
+                    "Stop acquisition to change camera settings."
+                    if busy
+                    else invalid_request
+                ),
             )
             result["capability"] = CameraSettingCapability(
                 current_value=(
@@ -484,6 +575,22 @@ class Model:
             result["capabilities"]["bit_depth"] = result["capability"]
             if writing:
                 result["error"] = reason
+            return result
+        if request.get("setting") == "output_triggers":
+            # Keep output writes independent of legacy bit-depth probing and buffers.
+            result["outputs_only"] = True
+            try:
+                self._prepared_camera_token = None
+                confirmed = camera.set_output_triggers(request.get("value"))
+                self.configuration["experiment"]["CameraParameters"][name][
+                    "output_triggers"
+                ] = confirmed
+            except Exception as error:
+                result["error"] = str(error)
+            try:
+                result["output_triggers"] = camera.get_output_trigger_capabilities()
+            except Exception as error:
+                result["output_triggers"] = {"supported": False, "reason": str(error)}
             return result
         try:
             capabilities = camera.get_advanced_setting_capabilities()
@@ -567,6 +674,11 @@ class Model:
                         "sensor_mode",
                     )
                 }
+        # Output discovery has its own response: it never performs bit-depth probes.
+        try:
+            result["output_triggers"] = camera.get_output_trigger_capabilities()
+        except Exception as error:
+            result["output_triggers"] = {"supported": False, "reason": str(error)}
         return result
 
     def _apply_advanced_camera_setting(
@@ -619,9 +731,9 @@ class Model:
             try:
                 camera.restore_advanced_settings(previous)
             except Exception as rollback_error:
-                blocked[
-                    identity
-                ] = "Camera restoration failed. Reconnect before acquiring."
+                blocked[identity] = (
+                    "Camera restoration failed. Reconnect before acquiring."
+                )
                 self._camera_format_errors = blocked
                 raise RuntimeError(blocked[identity]) from rollback_error
             raise
@@ -665,6 +777,36 @@ class Model:
         if microscope is None:
             microscope = self.microscopes[name]
         return dict(getattr(microscope, "_camera_settings_metadata", {}))
+
+    def get_laser_settings_metadata(
+        self, microscope_name: Optional[str] = None, cursor: tuple[str, int] = ("", 0)
+    ) -> tuple[tuple[str, int], list[dict]]:
+        """Read new acquisition laser records without accessing hardware.
+
+        Parameters
+        ----------
+        microscope_name : str, optional
+            Microscope whose images are being written.
+        cursor : tuple, optional
+            Acquisition identifier and number of records already written.
+
+        Returns
+        -------
+        tuple[tuple, list[dict]]
+            Updated cursor and new requested/confirmed channel records.
+        """
+        from navigate.model.metadata_sources.laser_metadata import LaserMetadata
+
+        name = microscope_name or self.active_microscope_name
+        microscope = self.virtual_microscopes.get(name)
+        if microscope is None:
+            microscope = self.microscopes.get(name)
+        metadata = getattr(microscope, "laser_metadata", None)
+        if not isinstance(metadata, LaserMetadata):
+            return cursor, []
+        start = cursor[1] if cursor[0] == metadata.acquisition_id else 0
+        end, records = metadata.read_since(start)
+        return (metadata.acquisition_id, end), records
 
     def prepare_camera_buffers(
         self, microscope_name: str, additional: tuple = ()
@@ -1409,11 +1551,21 @@ class Model:
         disconnects buffer in live mode and closes the shutters."""
         self.is_acquiring = False
 
+        def close_writer(writer: ImageWriter) -> None:
+            try:
+                writer.close()
+            except Exception as error:
+                self.stop_acquisition = True
+                self.logger.exception("Unable to close acquisition output")
+                self.event_queue.put(
+                    ("warning", f"Unable to close acquisition output: {error}")
+                )
+
         self.active_microscope.end_acquisition()
         for microscope_name in self.virtual_microscopes:
             self.virtual_microscopes[microscope_name].end_acquisition()
             if hasattr(self.virtual_microscopes[microscope_name], "image_writer"):
-                self.virtual_microscopes[microscope_name].image_writer.close()
+                close_writer(self.virtual_microscopes[microscope_name].image_writer)
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
         if plugin_obj and hasattr(plugin_obj, "end_acquisition_model"):
@@ -1426,7 +1578,7 @@ class Model:
             self.data_container.cleanup()
             delattr(self, "data_container")
         if self.image_writer is not None:
-            self.image_writer.close()
+            close_writer(self.image_writer)
 
         #: obj: Add on feature.
         self.addon_feature = None
@@ -1712,6 +1864,15 @@ class Model:
             self.is_live = False
             self.available_image_count = 0
             self.is_data_thread_on = True
+            scopes = [
+                self.active_microscope,
+                *self.microscopes.values(),
+                *self.virtual_microscopes.values(),
+            ]
+            for scope in {id(scope): scope for scope in scopes}.values():
+                begin = getattr(scope, "begin_laser_acquisition", None)
+                if callable(begin):
+                    begin()
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
         if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_model"):
@@ -1747,6 +1908,9 @@ class Model:
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
+            if self.signal_container.is_closed:
+                self.stop_acquisition = True
+                return
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
@@ -2189,6 +2353,8 @@ class Model:
             if self.is_acquiring:
                 self.stop_send_signal = True
                 self.signal_thread.join()
+                if setting == "channel":
+                    self.active_microscope.request_laser_power_feedback()
                 if microscope_name != self.active_microscope_name:
                     self.pause_data_thread()
                     self.active_microscope.end_acquisition()
@@ -2840,6 +3006,9 @@ class ASIModel(Model):
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
+            if self.signal_container.is_closed:
+                self.stop_acquisition = True
+                return
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is

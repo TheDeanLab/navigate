@@ -48,6 +48,7 @@ from navigate.config.device_schema import (
 from navigate.config.device_refs import DEVICE_REFERENCE_FIELDS
 from navigate.config.preload import PreloadContext, PreloadRule, PreloadReport
 from navigate.config.configuration_schema import CollectionSpec, SettingSpec
+from navigate.config.laser import resolve_laser_software_config, laser_serial_port_key
 from navigate.tools.common_functions import build_ref_name, load_param_from_module
 
 logger = logging.getLogger(__name__.split(".")[1])
@@ -233,6 +234,61 @@ def normalize_laser_hardware(context: PreloadContext) -> None:
             laser["wavelength"] = wavelength
             hardware_config["wavelength"] = wavelength
             update_config_dict(context.manager, laser, "hardware", hardware_config)
+
+
+def validate_laser_software_control(context: PreloadContext) -> None:
+    """Reject invalid opt-in laser routing without modifying legacy entries."""
+    ports = {}
+    for name, microscope in context.configuration["configuration"][
+        "microscopes"
+    ].items():
+        for index, laser in enumerate(microscope.get("laser", [])):
+            try:
+                options = resolve_laser_software_config(laser)
+                if options.backend in ("vortran", "obis", "luxx"):
+                    port = laser_serial_port_key(options.port)
+                    owner = f"{name}.laser[{index}]"
+                    identity = (options.backend, options.baudrate, options.timeout)
+                    if port in ports:
+                        previous_name, previous_owner, previous_identity = ports[port]
+                        if previous_name == name or previous_identity != identity:
+                            raise ValueError(
+                                f"Incompatible shared laser port {options.port!r}: "
+                                f"{previous_owner} and {owner}. Use matching backend, baudrate, "
+                                "and timeout across microscopes, and one entry per microscope."
+                            )
+                    ports[port] = (name, owner, identity)
+                # Canonicalize explicitly provided values before schema validation;
+                # missing options remain missing and retain legacy behavior.
+                if "source" in (laser.get("power") or {}):
+                    _set_path(
+                        context.manager, laser, "power/source", options.power_source
+                    )
+                software = laser.get("software_control") or {}
+                if "type" in software:
+                    _set_path(
+                        context.manager,
+                        laser,
+                        "software_control/type",
+                        {
+                            "none": "None",
+                            "synthetic": "Synthetic",
+                            "vortran": "Vortran",
+                            "obis": "OBIS",
+                            "luxx": "LuxX",
+                        }[options.backend],
+                    )
+                if "mode" in software:
+                    _set_path(
+                        context.manager, laser, "software_control/mode", options.mode
+                    )
+            except (TypeError, ValueError) as error:
+                context.report.add_issue(
+                    f"configuration.microscopes.{name}.laser[{index}]",
+                    "laser-software-control",
+                    str(error),
+                    fatal=True,
+                )
 
 
 def ensure_zoom_hardware(context: PreloadContext) -> None:
@@ -1431,6 +1487,12 @@ CONFIGURATION_RULES = [
         "configuration",
         "laser_hardware",
         normalize_laser_hardware,
+        stop_on_fatal=True,
+    ),
+    PreloadRule(
+        "configuration",
+        "laser_software_control",
+        validate_laser_software_control,
         stop_on_fatal=True,
     ),
     PreloadRule(

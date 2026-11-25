@@ -282,6 +282,10 @@ def repair_camera_parameters(context: PreloadContext) -> None:
     #     if k not in microscope_names:
     #         configuration["experiment"]["CameraParameters"].pop(k)
 
+    from navigate.config.camera_settings import seed_camera_defaults
+
+    seed_camera_defaults(configuration)
+
     # update image_pixel size
     microscope_name = configuration["experiment"]["MicroscopeState"]["microscope_name"]
     camera_setting_dict = configuration["experiment"]["CameraParameters"]
@@ -498,7 +502,7 @@ def repair_channel_settings(context: PreloadContext) -> None:
         for k in temp:
             try:
                 channel_value[k] = float(channel_value[k])
-            except ValueError:
+            except (KeyError, TypeError, ValueError):
                 channel_value[k] = temp[k]
             if k != "defocus" and channel_value[k] < 0:
                 channel_value[k] = temp[k]

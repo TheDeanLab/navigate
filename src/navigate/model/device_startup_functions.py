@@ -33,6 +33,7 @@
 import logging
 import time
 import importlib
+from threading import RLock
 from multiprocessing.managers import ListProxy
 from typing import Callable, Tuple, Any, Type, Dict, Optional
 import serial
@@ -126,7 +127,7 @@ def auto_redial(
                 time.sleep(0.5)  # TODO: 0.5 reached by trial and error. Better value?
             else:
                 logger.error(f"Device startup failed: {e}")
-                raise exception
+                raise
         else:
             break
 
@@ -140,6 +141,71 @@ class SerialConnectionFactory:
     """
 
     _connections = {}
+    _shared_connections = {}
+    _connection_lock = RLock()
+
+    @classmethod
+    def acquire_connection(
+        cls,
+        build_connection_function: Callable[..., Any],
+        args: Tuple[Any, ...],
+        identity: Tuple[Any, ...],
+    ) -> "SerialConnectionLease":
+        """Acquire a counted connection with compatible protocol settings.
+
+        Parameters
+        ----------
+        build_connection_function : Callable
+            Builder returning an owned protocol adapter with a close method.
+        args : tuple
+            Builder arguments, with the serial port first.
+        identity : tuple
+            Protocol and connection options that must match for all owners.
+
+        Returns
+        -------
+        SerialConnectionLease
+            One owner's lease. Closing the last lease closes and evicts the adapter.
+        """
+        from navigate.config.laser import laser_serial_port_key
+
+        key = laser_serial_port_key(str(args[0]))
+        with cls._connection_lock:
+            record = cls._shared_connections.get(key)
+            if record is None:
+                if any(laser_serial_port_key(p) == key for p in cls._connections):
+                    raise ValueError(
+                        f"Serial port {args[0]!r} already has an unmanaged owner."
+                    )
+                connection = cls.build_connection(build_connection_function, args)
+                record = {
+                    "connection": connection,
+                    "identity": identity,
+                    "port": str(args[0]),
+                    "owners": 0,
+                }
+                cls._shared_connections[key] = record
+            elif record["identity"] != identity:
+                raise ValueError(
+                    f"Incompatible shared serial settings for port {args[0]!r}."
+                )
+            record["owners"] += 1
+            return SerialConnectionLease(cls, key, record)
+
+    @classmethod
+    def release_connection(cls, key: str, record: dict) -> None:
+        """Release one lease and evict the connection after its final owner."""
+        with cls._connection_lock:
+            if cls._shared_connections.get(key) is not record:
+                return
+            record["owners"] -= 1
+            if record["owners"] == 0:
+                try:
+                    record["connection"].close()
+                finally:
+                    del cls._shared_connections[key]
+                    if cls._connections.get(record["port"]) is record["connection"]:
+                        del cls._connections[record["port"]]
 
     @classmethod
     def build_connection(
@@ -175,7 +241,24 @@ class SerialConnectionFactory:
             If the connection building process fails, the specified `exception` is
             raised.
         """
+        with cls._connection_lock:
+            return cls._build_connection(build_connection_function, args, exception)
+
+    @classmethod
+    def _build_connection(
+        cls,
+        build_connection_function: Callable[..., Any],
+        args: Tuple[Any, ...],
+        exception: Type[Exception],
+    ) -> Any:
+        """Build under the registry lock, preserving the legacy device path."""
+        from navigate.config.laser import laser_serial_port_key
+
         port = args[0]
+        if laser_serial_port_key(str(port)) in cls._shared_connections:
+            raise ValueError(
+                f"Serial port {port!r} requires a shared connection lease."
+            )
         if str(port) not in cls._connections:
             conn = auto_redial(build_connection_function, args, exception=exception)
             serial_conn = None
@@ -196,6 +279,31 @@ class SerialConnectionFactory:
                 )(serial_conn.read)
             cls._connections[str(port)] = conn
         return cls._connections[str(port)]
+
+
+class SerialConnectionLease:
+    """Counted ownership of a factory-managed serial protocol adapter."""
+
+    def __init__(self, factory: type, key: str, record: dict) -> None:
+        self.connection = record["connection"]
+        self._factory = factory
+        self._key = key
+        self._record = record
+        self._closed = False
+
+    def close(self) -> None:
+        """Release this owner once without disconnecting remaining owners."""
+        with self._factory._connection_lock:
+            if not self._closed:
+                self._closed = True
+                self._factory.release_connection(self._key, self._record)
+
+    def __del__(self) -> None:
+        """Release abandoned leases; normal shutdown closes them explicitly."""
+        try:
+            self.close()
+        except Exception:
+            pass
 
 
 class IntegratedDeviceFactory:
@@ -365,7 +473,7 @@ def start_device(
     if device_category == "stage":
         device_config = device_config["hardware"]
 
-    if type(device_config) == ListProxy:
+    if isinstance(device_config, (list, ListProxy)):
         device_config = device_config[device_id]
 
     if device_category != "stage":
@@ -495,7 +603,12 @@ def start_device(
                     "asi_connection": daq_connection,
                 }
 
-        return _class(microscope_name, device_connection, configuration, device_id)
+        device = _class(microscope_name, device_connection, configuration, device_id)
+        if device_category == "laser":
+            from navigate.model.devices.laser.software import add_software_control
+
+            device = add_software_control(device, is_synthetic=is_synthetic)
+        return device
 
     elif device_category in plugin_devices:
         # device_category in ["stage", "shutter", "filter_wheel", "remote_focus", "camera", "galvo", "zoom", "laser"]

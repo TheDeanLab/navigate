@@ -1,10 +1,9 @@
 import importlib
 import sys
 import types
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 
 import pytest
-
 
 MODULE_PATH = "navigate.model.devices.laser.ni"
 NIDAQMX_MODULE_PATH = "nidaqmx"
@@ -110,6 +109,22 @@ def test_init_mixed_modulation_initializes_digital_and_analog(ni_module):
     ao_task.ao_channels.add_ao_voltage_chan.assert_called_once_with(
         "Dev1/ao0", min_val=0.0, max_val=5.0
     )
+
+
+def test_checked_blank_attempts_both_outputs_and_preserves_intensity(ni_module):
+    module, factory = ni_module
+    digital, analog = _build_task_mock(), _build_task_mock()
+    factory.side_effect = [digital, analog]
+    laser = module.NILaser("TestScope", None, _laser_configuration("NI", "NI"), 0)
+    laser._current_intensity = 25
+    analog.write.side_effect = _FakeDaqError("analog blank failed")
+    with pytest.raises(_FakeDaqError, match="analog blank failed"):
+        laser.turn_off_checked()
+    digital.write.assert_called_once_with(False, auto_start=True)
+    assert laser._current_intensity == 25
+    laser.laser_do_task = None
+    with pytest.raises(RuntimeError, match="gate is unavailable"):
+        laser.turn_off_checked()
 
 
 def test_init_analog_only_initializes_analog_task(ni_module):
@@ -426,3 +441,38 @@ def test_del_without_tasks_is_noop(ni_module):
     laser.laser_do_task = None
 
     laser.__del__()
+
+
+@pytest.mark.parametrize("analog,digital", [("NI", "NI"), ("NI", None), (None, "NI")])
+def test_optional_software_control_preserves_legacy_ni_identity(
+    ni_module, analog, digital
+):
+    from navigate.model.devices.laser.software import add_software_control
+
+    module, _ = ni_module
+    laser = module.NILaser("TestScope", None, _laser_configuration(analog, digital), 0)
+    assert add_software_control(laser) is laser
+
+
+def test_ni_digital_gate_with_serial_power_allocates_no_analog_task(ni_module):
+    from navigate.model.devices.laser.software import add_software_control
+
+    module, task_factory = ni_module
+    config = _laser_configuration("Synthetic", "NI")
+    entry = config["configuration"]["microscopes"]["TestScope"]["laser"][0]
+    entry["power"]["source"] = "serial"
+    entry["software_control"] = {"type": "Synthetic"}
+    external = module.NILaser("TestScope", None, config, 0)
+    laser = add_software_control(external)
+    laser.prepare_acquisition()
+    laser.set_power(32.5)
+    laser.turn_on()
+    laser.turn_off()
+
+    assert task_factory.call_count == 1
+    assert external.laser_ao_task is None
+    assert laser.settings.get_power_setpoint_mw() == 32.5
+    assert external.laser_do_task.write.call_args_list[-2:] == [
+        call(True, auto_start=True),
+        call(False, auto_start=True),
+    ]

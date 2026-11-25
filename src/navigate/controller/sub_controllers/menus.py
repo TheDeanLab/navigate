@@ -57,6 +57,10 @@ from navigate.view.popups.camera_setting_popup import (
     AdvancedCameraSettingPopup,
 )
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
+from navigate.view.popups.laser_setting_popup import AdvancedLaserSettingPopup
+from navigate.controller.sub_controllers.laser_settings import (
+    AdvancedLaserSettingController,
+)
 from navigate.view.popups.diagnostics_popup import DiagnosticsPopup
 from navigate.view.popups.gui_settings_popup import GuiSettingsPopup
 from navigate.controller.sub_controllers.gui_settings_popup import (
@@ -682,6 +686,10 @@ class MenuController(GUIController):
             None,
             None,
         ]
+
+        configuration_dict[self.view.menubar.menu_resolution][
+            "Advanced Laser Settings"
+        ] = ["standard", self.popup_advanced_laser_setting, None, None, None]
 
         self.populate_menu(configuration_dict)
 
@@ -1587,6 +1595,17 @@ class MenuController(GUIController):
             self.parent_controller,
             "advanced_camera_setting_controller",
             advanced_camera_setting_controller,
+        )
+
+    @log_function_call
+    def popup_advanced_laser_setting(self) -> None:
+        """Open or raise the advanced laser settings popup."""
+        if hasattr(self.parent_controller, "advanced_laser_setting_controller"):
+            self.parent_controller.advanced_laser_setting_controller.showup()
+            return
+        popup = AdvancedLaserSettingPopup(self.view)
+        self.parent_controller.advanced_laser_setting_controller = (
+            AdvancedLaserSettingController(popup, self.parent_controller)
         )
 
     @log_function_call

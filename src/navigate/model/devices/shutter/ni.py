@@ -111,9 +111,9 @@ class NIShutter(ShutterBase):
     def open_shutter(self) -> None:
         """Open the shutter"""
         #: bool: Shutter state
-        self.shutter_state = True
         try:
-            self.shutter_task.write(self.shutter_state, auto_start=True)
+            self.shutter_task.write(True, auto_start=True)
+            self.shutter_state = True
             logger.debug("ShutterTTL - Shutter opened")
         except nidaqmx.errors.DaqError as e:
             print(
@@ -127,9 +127,8 @@ class NIShutter(ShutterBase):
 
     def close_shutter(self) -> None:
         """Close the shutter"""
-        self.shutter_state = False
         try:
-            self.shutter_task.write(self.shutter_state, auto_start=True)
+            self.close_shutter_checked()
             logger.debug("ShutterTTL - The shutter is closed")
         except nidaqmx.errors.DaqError as e:
             print(
@@ -140,6 +139,11 @@ class NIShutter(ShutterBase):
                 "different port."
             )
             logger.debug(e)
+
+    def close_shutter_checked(self) -> None:
+        """Close the output and update cached state only after a successful write."""
+        self.shutter_task.write(False, auto_start=True)
+        self.shutter_state = False
 
     @property
     def state(self) -> bool:

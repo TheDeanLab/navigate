@@ -30,7 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import gc
+import threading
+import tkinter as tk
 from tkinter import ttk
+import weakref
+
+import pytest
 from navigate.view.popups.acquire_popup import AcquirePopUp
 
 
@@ -56,3 +62,68 @@ def test_acquirepopup_uses_ttk_controls(tk_root):
     )
 
     acq_pop.popup.destroy()
+
+
+@pytest.mark.parametrize("close_method", ["destroy", "dismiss", "window_manager"])
+def test_acquirepopup_releases_variables_on_tk_thread(
+    tk_root, monkeypatch, close_method
+):
+    """Destroyed save dialogs must not leave Tk cleanup to worker collection."""
+    main = threading.get_ident()
+    finalized = []
+    owned = {}
+    original = tk.Variable.__del__
+
+    def finalize(variable):
+        if str(variable) in owned:
+            finalized.append(threading.get_ident())
+            if threading.get_ident() != main:
+                return  # Record failures without calling Tcl from the worker.
+        original(variable)
+
+    monkeypatch.setattr(tk.Variable, "__del__", finalize)
+    popup = AcquirePopUp(
+        tk_root,
+        {
+            "experiment": {
+                "MicroscopeState": {
+                    "channels": {
+                        "channel_1": {"is_selected": True, "laser": "488nm"},
+                        "channel_2": {"is_selected": True, "laser": "488nm"},
+                    }
+                }
+            }
+        },
+    )
+
+    def descendants(widget):
+        yield widget
+        for child in widget.winfo_children():
+            yield from descendants(child)
+
+    widgets = list(descendants(popup.popup))
+    for widget in widgets:
+        for attribute in ("variable", "error"):
+            variable = getattr(widget, attribute, None)
+            if isinstance(variable, tk.Variable):
+                owned[str(variable)] = weakref.ref(variable)
+    del widget, variable
+    # Match the controller's file-type trace, which captures its own variable.
+    file_type = popup.inputs["file_type"].get_variable()
+    file_type.trace_add("write", lambda *args, value=file_type: value.get())
+    del file_type
+    assert owned
+
+    if close_method == "window_manager":
+        popup.popup.tk.call(popup.popup.protocol("WM_DELETE_WINDOW"))
+    else:
+        getattr(popup.popup, close_method)()
+    pending = [popup, widgets]
+    del popup, widgets
+    gc.collect()
+    worker = threading.Thread(target=lambda: (pending.clear(), gc.collect()))
+    worker.start()
+    worker.join(timeout=2)
+    assert not worker.is_alive()
+    assert all(ref() is None for ref in owned.values())
+    assert finalized and set(finalized) == {main}

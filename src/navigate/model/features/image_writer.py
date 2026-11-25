@@ -36,8 +36,10 @@ import os
 import logging
 import shutil
 import time
+import json
 from typing import Optional
 from datetime import datetime
+from urllib.parse import quote
 
 # Third Party Imports
 import numpy as np
@@ -136,6 +138,9 @@ class ImageWriter:
         #: DataSource: Data source
         self.data_source = None
 
+        #: dict: Per-output cursors for format-independent laser metadata.
+        self._laser_metadata_cursors: dict[str, tuple] = {}
+
         # camera flip flags
         if self.microscope_name is None:
             self.microscope_name = self.model.active_microscope_name
@@ -186,16 +191,22 @@ class ImageWriter:
         # or label an old file with newly requested GUI settings.
         if frame_ids:
             try:
+                self._write_laser_metadata()
                 settings = self._read_camera_settings()
                 if settings != self._camera_settings:
                     self._start_camera_settings_segment(settings)
             except Exception as error:
-                self.close()
                 self.model.stop_acquisition = True
                 self.model.event_queue.put(
-                    ("warning", f"Error - ImageWriter camera settings segment: {error}")
+                    ("warning", f"Error - ImageWriter settings metadata: {error}")
                 )
-                logger.exception("Unable to start camera settings output segment")
+                logger.exception("Unable to save acquisition settings metadata")
+                try:
+                    self.close()
+                except Exception:
+                    logger.exception(
+                        "Unable to flush metadata while closing the image writer"
+                    )
                 return
 
         for idx in frame_ids:
@@ -345,10 +356,39 @@ class ImageWriter:
         self.current_time_point += 1
         return image_name
 
-    def close(self):
+    def close(self) -> None:
         """Close the data source we are writing to."""
-        if self.data_source is not None:
-            self.data_source.close()
+        if getattr(self, "_closed", False):
+            return
+        try:
+            self._write_laser_metadata()
+        finally:
+            self._closed = True
+            if self.data_source is not None:
+                self.data_source.close()
+
+    def _write_laser_metadata(self) -> None:
+        """Append pending setting records, including failures, to a JSONL sidecar."""
+        if getattr(self, "_closed", False):
+            return
+        reader = getattr(self.model, "get_laser_settings_metadata", None)
+        if not callable(reader) or not self.save_directory:
+            return
+        path = os.path.join(
+            self.save_directory,
+            f"laser-settings-{quote(self.microscope_name, safe='')}.jsonl",
+        )
+        cursor = self._laser_metadata_cursors.get(path, ("", 0))
+        result = reader(self.microscope_name, cursor)
+        # Legacy plugins and lightweight models may not expose laser metadata.
+        if not isinstance(result, tuple) or len(result) != 2:
+            return
+        next_cursor, records = result
+        if records:
+            with open(path, "a", encoding="utf-8") as stream:
+                for record in records:
+                    stream.write(json.dumps(record, allow_nan=False) + "\n")
+        self._laser_metadata_cursors[path] = next_cursor
 
     def calculate_and_check_disk_space(self):
         """Estimate the size of the data that will be written to disk, and confirm
@@ -515,6 +555,7 @@ class ImageWriter:
         self.data_source = data_sources.get_data_source(self.file_type)(
             file_name=file_name,
         )
+        self._closed = False
 
         # Pass experiment and configuration to metadata
         self.data_source.set_metadata_from_configuration_experiment(
@@ -532,6 +573,7 @@ class ImageWriter:
         self.data_source.set_image_format(image_format)
         self.data_source.set_camera_settings(settings)
         self._camera_settings = dict(settings)
+        self._write_laser_metadata()
 
         # Make sure that there is enough disk space to save the data.
         self.calculate_and_check_disk_space()

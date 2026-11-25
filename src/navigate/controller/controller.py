@@ -467,6 +467,45 @@ class Controller:
             self.data_buffer = data
             self.img_height, self.img_width = data[0].shape
 
+    def dispatch_laser_advanced_settings(
+        self, request: dict, callback: Callable
+    ) -> None:
+        """Run laser I/O on the model worker and deliver results on Tk.
+
+        Parameters
+        ----------
+        request : dict
+            Identity-tagged query or modulation mode change.
+        callback : callable
+            Main-thread callback receiving a snapshot or an error.
+        """
+        request = dict(request)
+        busy_at_dispatch = self.acquire_bar_controller.is_acquiring
+        self._laser_settings_pending = getattr(self, "_laser_settings_pending", 0) + 1
+
+        def finish(result: dict) -> None:
+            self._laser_settings_pending -= 1
+            callback(result)
+
+        def worker() -> None:
+            try:
+                if busy_at_dispatch:
+                    raise RuntimeError(
+                        "Stop acquisition to read or change laser settings."
+                    )
+                result = self.model.laser_advanced_settings(request)
+            except Exception as error:
+                result = dict(
+                    request, identity=None, connection="unavailable", error=str(error)
+                )
+            self._run_on_main_thread(finish, result, wait=False)
+
+        try:
+            self.threads_pool.createThread("model", worker)
+        except Exception:
+            self._laser_settings_pending -= 1
+            raise
+
     def dispatch_camera_advanced_settings(
         self, request: dict, callback: Callable
     ) -> None:
@@ -1229,6 +1268,9 @@ class Controller:
             self.acquire_bar_controller.stop_acquire()
             # self.menu_controller.feature_id_val.set(0)
 
+        if hasattr(self, "advanced_laser_setting_controller"):
+            self.advanced_laser_setting_controller.set_acquisition_state(mode != "stop")
+
     def execute(self, command: str, *args: Any) -> Any:
         """Handle controller commands from sub-controllers and UI callbacks.
 
@@ -1251,6 +1293,21 @@ class Controller:
 
         if command == "camera_advanced_settings":
             self.dispatch_camera_advanced_settings(*args)
+            return
+        if command == "laser_advanced_settings":
+            self.dispatch_laser_advanced_settings(*args)
+            return
+        if command in (
+            "acquire",
+            "acquire_and_save",
+            "autofocus",
+            "tony_wilson",
+        ) and getattr(self, "_laser_settings_pending", 0):
+            if command in ("acquire", "acquire_and_save"):
+                self.acquire_bar_controller.stop_acquire()
+            messagebox.showinfo(
+                "Laser settings", "Wait for the laser settings request to finish."
+            )
             return
         if command in (
             "acquire",

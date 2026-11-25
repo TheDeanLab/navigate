@@ -37,7 +37,6 @@ import logging
 
 # Third Party Imports
 from serial import SerialException
-from serial import SerialTimeoutException
 from serial import EIGHTBITS
 from serial import PARITY_NONE
 from serial import STOPBITS_ONE
@@ -168,32 +167,23 @@ class MS2000Controller(TigerController):
             busy = self.is_device_busy()
         self.report = temp
 
-    def send_command(self, cmd: str) -> None:
+    def send_command(self, cmd: str, *, strict: bool = False) -> None:
         """Send a serial command to the device.
 
         Parameters
         ----------
         cmd : str
             Serial command to send to the device
+        strict : bool, optional
+            Propagate write timeouts for checked illumination operations.
         """
-        # always reset the buffers before a new command is sent
-        self.safe_to_write.wait()
-        self.safe_to_write.clear()
-        self.serial.read_all()
-        self.serial.reset_input_buffer()
-        self.serial.reset_output_buffer()
-
-        # send the serial command to the controller
-        self.report_to_console(cmd)
-        command = bytes(f"{cmd}\r", encoding="ascii")
+        super().send_command(cmd, strict=strict)
         try:
-            self.serial.write(command)
-        except SerialTimeoutException as e:
-            print(f"MS2000 Controller -- SerialTimeoutException: {e}")
-            pass
-
-        # sleep to avoid error, empirically found this made it work
-        time.sleep(0.1)
+            # Retain the required delay while still owning the transaction.
+            time.sleep(0.1)
+        except BaseException:
+            self._end_transaction()
+            raise
 
     def set_jog_speed(self, axes: list, jsspd: int):
         """Set jog wheel speed.

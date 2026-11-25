@@ -263,6 +263,26 @@ class NILaser(LaserBase, NIDevice):
         except DaqError as e:
             logger.exception(e)
 
+    def turn_off_checked(self) -> None:
+        """Blank every allocated output, propagating failures to serial control."""
+        errors = []
+        if self.modulation_type in ("digital", "mixed") and self.laser_do_task is None:
+            errors.append(RuntimeError("NI laser gate is unavailable."))
+        if self.modulation_type in ("analog", "mixed") and self.laser_ao_task is None:
+            errors.append(RuntimeError("NI laser power output is unavailable."))
+        outputs = [(self.laser_ao_task, 0)]
+        if self.laser_do_task is not None:
+            value = False if self.digital_port_type == "digital" else self.laser_min_do
+            outputs.append((self.laser_do_task, value))
+        for task, value in outputs:
+            if task is not None:
+                try:
+                    task.write(value, auto_start=True)
+                except Exception as error:
+                    errors.append(error)
+        if errors:
+            raise errors[0]
+
     def close(self) -> None:
         """Close the NI Task before exit."""
         try:

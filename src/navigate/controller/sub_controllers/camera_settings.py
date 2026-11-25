@@ -40,7 +40,7 @@ from typing import Optional
 from navigate.model.devices.camera.format import CameraSettingCapability
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.config.config import update_config_dict
-from navigate.tools.file_functions import write_to_yaml
+from navigate.config.camera_settings import camera_defaults, save_camera_configuration
 from navigate.controller.configuration_controller import ConfigurationController
 
 # Logger Setup
@@ -170,10 +170,95 @@ class AdvancedCameraSettingController:
             self._receive_bit_depth,
         )
 
+    def apply_output_triggers(self) -> None:
+        """Submit all connector edits through the existing idle model worker."""
+        panel = getattr(self, "_output_panel", None)
+        if (
+            panel is None
+            or self._depth_pending
+            or self._depth_busy()
+            or self._depth_identity is None
+        ):
+            return
+        try:
+            from navigate.model.devices.camera.hamamatsu_outputs import (
+                normalize_outputs,
+            )
+
+            settings = normalize_outputs(panel.selection())
+        except ValueError as error:
+            panel.status.set(str(error))
+            self._depth_close_requested = False
+            self._output_save_pending = False
+            return
+        self._depth_request_id += 1
+        self._depth_pending = True
+        self._output_applying = True
+        self._lock_advanced_controls()
+        self.view.microscope.widget.configure(state="disabled")
+        self.view.save_button.configure(state="disabled")
+        panel.status.set("Applying timing outputs…")
+        self.parent_controller.execute(
+            "camera_advanced_settings",
+            dict(
+                microscope=self.current_microscope,
+                request_id=self._depth_request_id,
+                identity=self._depth_identity,
+                setting="output_triggers",
+                value=settings,
+            ),
+            self._receive_bit_depth,
+        )
+
+    def _display_output_triggers(self, result: dict, busy: bool) -> None:
+        """Render the Hamamatsu-only panel after a matching model reply."""
+        capabilities = result.get("output_triggers", {})
+        panel = getattr(self, "_output_panel", None)
+        if not capabilities.get("supported"):
+            if panel is not None:
+                panel.lock(True)
+                panel.status.set(
+                    capabilities.get("reason")
+                    or result.get("error")
+                    or "Output settings unavailable."
+                )
+            return
+        if panel is None:
+            from navigate.view.popups.camera_output_settings import CameraOutputSettings
+
+            panel = self._output_panel = CameraOutputSettings(
+                self.view.frame, self.apply_output_triggers
+            )
+            panel.grid(row=2, column=2, rowspan=3, sticky="nsew", padx=8, pady=8)
+        if result.get("error"):
+            panel.status.set(result["error"])
+            panel.lock(busy or bool(capabilities.get("reason")))
+            self._output_save_pending = False
+            return
+        sensor = result.get("capabilities", {}).get("sensor_mode")
+        mismatch = sensor is not None and self._desired_sensor_mode() not in (
+            None,
+            sensor.current_value,
+        )
+        if (
+            panel.dirty
+            and panel.edited
+            and not getattr(self, "_output_applying", False)
+        ):
+            panel.lock(busy or mismatch or bool(capabilities.get("reason")))
+            return
+        saved = self.parent_controller.configuration["experiment"]["CameraParameters"][
+            self.current_microscope
+        ].get("output_triggers")
+        panel.populate(capabilities, saved, busy=busy or mismatch)
+
     _advanced_names = ("scan_speed", "defect_correction", "hot_pixel_correction")
 
     def _lock_advanced_controls(self) -> None:
         """Disable every camera write while a query or transaction is pending."""
+        panel = getattr(self, "_output_panel", None)
+        if panel is not None:
+            panel.lock(True)
         for name in ("bit_depth", *self._advanced_names):
             if name in self.view.inputs:
                 self.view.inputs[name]["state"] = "disabled"
@@ -325,6 +410,12 @@ class AdvancedCameraSettingController:
         ):
             return
         self._depth_pending = False
+        if result.get("outputs_only"):
+            result = dict(
+                result,
+                capability=self._depth_capability,
+                capabilities=getattr(self, "_advanced_capabilities", {}),
+            )
         self._depth_identity = result["identity"]
         capability = self._depth_capability = result["capability"]
         widget = self.view.inputs["bit_depth"]
@@ -365,6 +456,11 @@ class AdvancedCameraSettingController:
                 if result.get("timing"):
                     controller.update_readout_time()
         self._display_advanced_settings(result, busy)
+        self._display_output_triggers(result, busy)
+        self._output_applying = False
+        if not result.get("error") and getattr(self, "_output_save_pending", False):
+            self._output_save_pending = False
+            self.save_camera_settings()
         if result.get("error"):
             self._depth_close_requested = False
         elif self._depth_close_requested:
@@ -388,8 +484,22 @@ class AdvancedCameraSettingController:
         else:
             self.refresh_bit_depth()
 
-    def save_camera_settings(self) -> None:
-        """Save the current camera settings to the configuration file."""
+    def save_camera_settings(self) -> bool:
+        """Save camera defaults, returning whether the configuration was written."""
+
+        panel = getattr(self, "_output_panel", None)
+        if panel is not None and panel.dirty:
+            self._output_save_pending = True
+            self.apply_output_triggers()
+            return False
+        parameters = self.parent_controller.configuration["experiment"][
+            "CameraParameters"
+        ][self.current_microscope]
+        parameters["trigger_source"] = self.view.inputs["trigger_source"].get()
+        cooling = self.view.inputs["cooling"].get()
+        if cooling in ("On", "Off"):
+            parameters["cooling"] = cooling
+        self.camera_dict["advanced_settings"] = camera_defaults(parameters)
 
         # Update the camera dictionary in the main configuration.
         update_config_dict(
@@ -402,10 +512,19 @@ class AdvancedCameraSettingController:
         )
 
         # Save the updated configuration to a YAML file.
-        write_to_yaml(
-            content_dict=self.parent_controller.configuration["configuration"],
-            filename=self.parent_controller.configuration_path,
-        )
+        try:
+            save_camera_configuration(
+                content_dict=self.parent_controller.configuration["configuration"],
+                filename=self.parent_controller.configuration_path,
+            )
+        except (OSError, ValueError) as error:
+            message = f"Could not save camera defaults: {error}"
+            if panel is not None:
+                panel.status.set(message)
+            self.view.variables["bit_depth_status"].set(message)
+            self._depth_close_requested = False
+            logger.exception(message)
+            return False
 
         # Update the configuration controller with the new configuration.
         self.parent_controller.configuration_controller.update_configuration()
@@ -423,15 +542,7 @@ class AdvancedCameraSettingController:
                 f"Updated camera flip flags for {self.current_microscope}: "
                 f"{self.parent_controller.camera_view_controller.flip_flags}"
             )
-
-        # save to experiment
-        self.parent_controller.configuration["experiment"]["CameraParameters"][
-            self.current_microscope
-        ]["trigger_source"] = self.view.inputs["trigger_source"].get()
-
-        self.parent_controller.configuration["experiment"]["CameraParameters"][
-            self.current_microscope
-        ]["cooling"] = self.view.inputs["cooling"].get()
+        return True
 
     def flip_axis(self, axis: str) -> None:
         """Flip the camera axis in the configuration.
@@ -476,9 +587,9 @@ class AdvancedCameraSettingController:
             else:
                 self.view.buttons["refresh_temperature"]["state"] = "normal"
         else:
-            cooling_state = "Off"
-            self.view.inputs["cooling"].set("Off")
-            self.view.buttons["refresh_temperature"]["state"] = "disabled"
+            self.view.inputs["cooling"].set("Not adjustable")
+            self.view.inputs["cooling"]["state"] = "disabled"
+            return
 
         # set the cooling state in the experiment configuration for the same camera
         self.camera_setting_dict["cooling"] = cooling_state
@@ -516,8 +627,14 @@ class AdvancedCameraSettingController:
         if self._depth_pending:
             self._depth_close_requested = True
             return
+        panel = getattr(self, "_output_panel", None)
+        if panel is not None and panel.dirty:
+            self._depth_close_requested = True
+            self.apply_output_triggers()
+            return
+        if not self.save_camera_settings():
+            return
         self._depth_closed = True
-        self.save_camera_settings()
         self.view.popup.destroy()
 
         if hasattr(self.parent_controller, "advanced_camera_setting_controller"):
@@ -544,7 +661,9 @@ class AdvancedCameraSettingController:
             return
         # Save the configuration for the previous microscope before switching.
         if not in_initialization:
-            self.save_camera_settings()
+            if not self.save_camera_settings():
+                self.view.microscope.set(self.current_microscope)
+                return
 
         self.parent_controller.execute(
             "stop_refresh_camera_temperature", self.current_microscope
@@ -552,6 +671,9 @@ class AdvancedCameraSettingController:
 
         # Get the current microscope from the dropdown.
         self.current_microscope = self.view.microscope.get()
+        if getattr(self, "_output_panel", None) is not None:
+            self._output_panel.destroy()
+        self._output_panel = None
         self.view.clear_view()
 
         # Update the local configuration controller with the new microscope.
@@ -594,7 +716,7 @@ class AdvancedCameraSettingController:
             self.view.inputs["cooling"].set(cooling)
             self.view.inputs["cooling"]["state"] = "readonly"
         else:
-            self.view.inputs["cooling"].set("Off")
+            self.view.inputs["cooling"].set("Not adjustable")
             self.view.inputs["cooling"]["state"] = "disabled"
 
         self.refresh_bit_depth()
@@ -988,9 +1110,9 @@ class CameraSettingController(GUIController):
                 self.camera_setting_dict["readout_direction"]
                 not in self.camera_readout_directions
             ):
-                self.camera_setting_dict[
-                    "readout_direction"
-                ] = self.camera_readout_directions[0]
+                self.camera_setting_dict["readout_direction"] = (
+                    self.camera_readout_directions[0]
+                )
             self.mode_widgets["Readout"].widget.set(
                 self.camera_setting_dict["readout_direction"]
             )

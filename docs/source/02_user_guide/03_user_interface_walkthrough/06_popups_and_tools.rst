@@ -178,6 +178,63 @@ software selection alone does not guarantee a higher frame rate. Confirm that th
 lower dynamic range is suitable for your experiment. ORCA-Lightning remains
 read-only until its coupled HDR/full-well settings are supported.
 
+Hamamatsu timing outputs
+-------------------------
+
+.. figure:: ../../images/popup_hamamatsu_outputs.png
+   :align: center
+   :alt: Advanced camera popup with three timing-output tabs and programmable pulse controls.
+
+   Example editor using simulated capabilities. Available fields depend on the camera.
+
+For supported Hamamatsu cameras, :guilabel:`Hamamatsu Timing Outputs` provides a
+tab for each physical output reported by the driver. ORCA-Quest 2 has three:
+:guilabel:`TIMING 1`, :guilabel:`TIMING 2`, and :guilabel:`TIMING 3`.
+
+1. Stop acquisition and select the microscope. If necessary, click
+   :guilabel:`Apply sensor mode` before configuring its outputs.
+2. Choose each output's function. :guilabel:`Programmable pulse` provides a
+   reference signal, delay and pulse duration, with timing entered in seconds.
+   :guilabel:`Trigger ready` follows camera readiness; it has no programmable
+   pulse duration. Exposure signals and constant Low/High are offered only when
+   the driver reports support.
+3. Choose polarity and any additional supported options. The displayed ranges
+   and increments come from the connected camera. Some drivers unlock timing
+   controls only after applying :guilabel:`Programmable pulse` once.
+4. Click :guilabel:`Apply Outputs` to apply all connector selections together.
+   Wait for readback confirmation. Editing a field alone does not change hardware.
+5. Click :guilabel:`Save` to retain the confirmed settings as camera defaults.
+   Closing the popup also applies pending edits and saves defaults; an error
+   keeps the popup open.
+
+:guilabel:`Readout start (Vsync)` is a readout reference, not an exposure-start
+signal. Line timing (Hsync), its pre-pulse count, and shared synchronization options
+appear only when reported by the driver. Global exposure is unavailable in
+Light-Sheet mode. Timing values are validated; unsupported or out-of-range
+requests produce an error rather than being silently clamped.
+
+Successful application updates the experiment portion of the shared settings.
+It does **not** immediately write an experiment file. Acquisition saves these
+settings with the dataset, and the existing application-close path saves
+:file:`~/.navigate/config/experiment.yml`. :guilabel:`Save` writes defaults to
+the active :file:`configuration.yaml`. On restart, explicit experiment values
+take precedence; missing values are filled from these camera defaults. This
+also retains bit depth, scan speed, correction choices, trigger source and cooling.
+Before acquisition reapplies the saved outputs, the editor displays the saved
+selections and reports when they differ from the camera. :guilabel:`Apply Outputs`
+restores them immediately while stopped.
+
+Output configuration controls electrical timing, not laser power. Check the
+camera output voltage and drive capability against the receiving device's input
+and termination requirements. A laser controller may need a buffer or waveform
+generator between it and the camera. Changing output functions can change the
+electrical level even with acquisition stopped; switching is not guaranteed to
+be free of transient pulses.
+
+For a Vortran Stradus in digital modulation mode, use the laser head's rear SMB
+digital-modulation input. See :ref:`vortran_digital_modulation_wiring` for the
+distinction from the control box's front analog input and a reported bench check.
+
 Camera Map Settings
 ===================
 

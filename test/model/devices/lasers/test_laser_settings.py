@@ -18,7 +18,9 @@ from navigate.model.devices.laser.settings.vortran import VortranLaserSettings
 class StradusSerial:
     """Small command-level emulator with configurable rejected writes."""
 
-    timeout = 0.01
+    # Match the production default; emulator correctness must not depend on
+    # the host scheduling each response within a few milliseconds.
+    timeout = 2.0
 
     def __init__(self):
         self.values = {
@@ -351,3 +353,33 @@ def test_timeout_does_not_allow_a_late_reply_to_confirm_a_later_command(vortran)
     connection.replies.append(b"PP=20.0\r\n")
     with pytest.raises(LaserControlError, match="Reconnect"):
         laser.set_power_mw(20)
+
+
+@pytest.mark.parametrize("elapsed", [0.011, 0.25])
+def test_emulator_readback_tolerates_scheduling_delay(vortran, monkeypatch, elapsed):
+    """Valid queued replies survive delays larger than the old 10 ms budget."""
+    laser, connection = vortran
+    ticks = iter([0.0, elapsed, elapsed])
+    monkeypatch.setattr(
+        "navigate.model.devices.laser.settings.vortran.monotonic", lambda: next(ticks)
+    )
+    assert laser._request("?EPC") == "0"
+    assert connection.commands == ["?EPC"]
+
+
+def test_deadline_expiry_requires_reconnect_even_with_queued_reply(
+    vortran, monkeypatch
+):
+    """Exercise elapsed-time expiry without sleeping or relying on host load."""
+    laser, connection = vortran
+    ticks = iter([0.0, 0.0, connection.timeout + 0.001])
+    monkeypatch.setattr(
+        "navigate.model.devices.laser.settings.vortran.monotonic", lambda: next(ticks)
+    )
+    with pytest.raises(LaserControlError, match="timed out waiting for EPC"):
+        laser._request("?EPC")
+    assert connection.replies  # The valid reply arrived too late for this transaction.
+    before = list(connection.commands)
+    with pytest.raises(LaserControlError, match="Reconnect"):
+        laser._request("?EPC")
+    assert connection.commands == before

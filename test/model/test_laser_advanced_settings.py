@@ -227,7 +227,7 @@ def test_vortran_popup_readbacks_and_modes_use_adapter_protocol(model, mode):
     scope.laser["488"] = laser
     serial.commands.clear()
     result = request(model)
-    assert result["connection"] == "connected"
+    assert result["connection"] == "connected", result.get("error")
     assert result["device_identity"] == "Stradus test"
     assert result["maximum_mw"] == 100
     assert result["setpoint_mw"] == 10
@@ -267,7 +267,7 @@ def test_new_adapters_use_existing_popup_transaction_path(model, backend, modes)
     scope.laser["488"] = laser
     result = request(model)
     assert result["error"] is None
-    assert result["connection"] == "connected"
+    assert result["connection"] == "connected", result.get("error")
     assert result["available_modes"] == modes
     assert result["maximum_mw"] == 200
     assert result["measured_power_mw"] == 7.25
@@ -292,7 +292,7 @@ def test_standby_luxx_is_connected_and_can_be_configured_without_enabling_emissi
     connection.values["ROM"] = b"0"
     connection.values["GAS"] = b"0000"
     result = request(model)
-    assert result["connection"] == "connected"
+    assert result["connection"] == "connected", result.get("error")
     assert result["mode"] is None
     assert "Standby" in result["mode_warning"]
     assert result["available_modes"] == ["cw"]

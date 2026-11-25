@@ -231,6 +231,10 @@ generator between it and the camera. Changing output functions can change the
 electrical level even with acquisition stopped; switching is not guaranteed to
 be free of transient pulses.
 
+For a Vortran Stradus in digital modulation mode, use the laser head's rear SMB
+digital-modulation input. See :ref:`vortran_digital_modulation_wiring` for the
+distinction from the control box's front analog input and a reported bench check.
+
 Camera Map Settings
 ===================
 

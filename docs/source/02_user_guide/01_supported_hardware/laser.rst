@@ -135,6 +135,30 @@ and settling time on the installed laser before collecting experimental data.
 After a serial communication failure, restart **navigate** to establish a new
 connection before acquiring again.
 
+.. _vortran_digital_modulation_wiring:
+
+Vortran digital modulation wiring
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For camera-driven digital modulation, connect the camera timing output to the
+digital-modulation SMB connector on the rear of the Stradus laser head. The
+analog input on the front of the control box serves analog power control;
+selecting digital mode in **navigate** does not turn that connector into a
+digital-modulation input. See sections 6.3.10 and 8.6 of the
+`Vortran Stradus user manual <https://preview-assets-us-01.kc-usercontent.com/078db625-9c43-005d-663d-c89ba2b8888d/eaba4f91-42f3-405f-abb3-8b61f863e873/Stradus%20Manual.pdf>`_.
+
+In a user-reported bench check on November 25, 2026, camera output voltage pulses
+were visible on an oscilloscope, but the laser did not respond in digital mode
+when connected to the control box's front analog input. Moving the signal to the
+rear SMB connector on the laser head produced the expected laser response.
+This confirms the connector choice on that setup; it does not establish optical
+pulse timing, calibrated power, or compatibility with every camera and laser model.
+
+If camera pulses are present but the laser does not respond, check the physical
+connector as well as the mode readback. Verify signal levels and termination
+against the manuals for the installed camera and laser; a voltage measured with
+an unloaded oscilloscope input may differ from the voltage at the connected laser.
+
 .. _laser_serial_bench:
 
 Serial-only bench testing

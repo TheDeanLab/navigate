@@ -1,6 +1,7 @@
 """Independent timing outputs, exact rollback, and fresh-process persistence."""
 
 import copy
+from collections import Counter
 import json
 import os
 import subprocess
@@ -17,6 +18,7 @@ from navigate.model.devices.camera.hamamatsu_outputs import (
     SHARED,
     STRIDE,
     HamamatsuOutputTriggers,
+    applicable,
     normalize_outputs,
 )
 from test.model import test_camera_advanced_settings as model_tests
@@ -302,6 +304,151 @@ def test_lightsheet_rejects_global_exposure_and_preserves_hsync_settings():
     settings["connectors"]["1"].update(source="hsync", pre_hsync_count=4)
     outputs.apply(settings)
     assert sdk.values[0x001C0190] == 4
+
+
+@pytest.mark.parametrize("readonly", [False, True])
+def test_saved_global_exposure_replays_during_lightsheet_preparation(
+    model, scan_camera, readonly
+):
+    """An untouched connector saved in Area mode must not block preparation."""
+    from navigate.model.microscope import Microscope
+
+    sdk = OutputSDK()
+    kind = FIELDS["kind"][0] + STRIDE
+    sdk.values[kind] = 2  # TIMING2 already reports Global exposure.
+    settings = selections()
+    settings["connectors"]["2"] = {"kind": "global_exposure"}
+    saved = HamamatsuOutputTriggers(sdk).apply(settings)
+    if readonly:
+        sdk.readonly.add(kind)
+    scan_camera._output_triggers = lambda: HamamatsuOutputTriggers(sdk, lightsheet=True)
+    microscope = model.active_microscope
+    microscope.camera = scan_camera
+    microscope.configuration = model.configuration
+    microscope.microscope_name = "scope"
+    microscope.is_synthetic = False
+    microscope.set_camera_trigger_mode = lambda: None
+    microscope.set_camera_sensor_mode = lambda: None
+    microscope.set_camera_roi_and_binning = lambda: True
+    parameters = model.configuration["experiment"]["CameraParameters"]["scope"]
+    parameters["output_triggers"] = saved
+    sdk.writes.clear()
+
+    Microscope.configure_camera(microscope)
+
+    assert sdk.writes == []
+    assert parameters["output_triggers"] == saved
+    assert microscope._camera_settings_metadata["output_trigger_2_kind"] == (
+        "global_exposure"
+    )
+    # Only a fresh matching readback permits preservation; a later hardware
+    # change must not allow the old selection to bypass mode validation.
+    sdk.values[kind] = 1
+    with pytest.raises(ValueError, match="unsupported kind=global_exposure"):
+        Microscope.configure_camera(microscope)
+
+
+@pytest.mark.parametrize("name", ["pre_hsync_count", "base_sensor"])
+@pytest.mark.parametrize("unreadable", [False, None, float("nan")])
+@pytest.mark.parametrize("writable", [False, True])
+def test_snapshot_unreadable_output_requires_readback_only_if_writable(
+    name, unreadable, writable
+):
+    sdk = OutputSDK()
+    prop = FIELDS[name][0]
+    sdk.values[prop] = unreadable
+    if not writable:
+        sdk.readonly.add(prop)
+    outputs = HamamatsuOutputTriggers(sdk)
+    if writable:
+        with pytest.raises(RuntimeError, match="Cannot snapshot output property"):
+            outputs.apply(selections())
+    else:
+        snapshot = outputs.snapshot()
+        assert prop not in snapshot
+        assert FIELDS["kind"][0] in snapshot
+        outputs.restore(snapshot)
+    assert sdk.writes == []
+
+
+@pytest.mark.parametrize(
+    "setting,value", [("scan_speed", 2), ("defect_correction", 1), ("bit_depth", 8)]
+)
+def test_unreadable_readonly_output_does_not_block_other_settings(
+    scan_camera, setting, value
+):
+    sdk = OutputSDK()
+    prop = FIELDS["pre_hsync_count"][0]
+    sdk.readonly.add(prop)
+    sdk.values[prop] = False
+    attach_outputs(scan_camera, sdk)
+    if setting == "bit_depth":
+        assert scan_camera.set_bit_depth(value) == value
+    else:
+        assert scan_camera.set_advanced_setting(setting, value) == value
+    assert sdk.writes == []
+
+
+def test_unchanged_replay_uses_fresh_values_without_reenumerating_capabilities(
+    monkeypatch,
+):
+    sdk = OutputSDK()
+    outputs = HamamatsuOutputTriggers(sdk)
+    saved = outputs.apply(selections())
+    calls = Counter()
+    reads = Counter()
+    for name in (
+        "get_property_value",
+        "get_property_range",
+        "get_property_values",
+        "get_property_value_text",
+        "is_property_writable",
+        "prop_setvalue",
+    ):
+        original = getattr(sdk, name)
+
+        def counted(*args, _name=name, _original=original):
+            calls[_name] += 1
+            if _name == "get_property_value":
+                reads[args[0]] += 1
+            return _original(*args)
+
+        monkeypatch.setattr(sdk, name, counted)
+    assert outputs.apply(saved) == saved
+    assert calls["prop_setvalue"] == 0
+    assert calls["get_property_values"] == calls["get_property_value_text"] == 0
+    assert calls["is_property_writable"] == 0
+    # Budget SDK round trips, not wall time: the original replay made 412 calls.
+    assert sum(calls.values()) < 120
+    for number, fields in saved["connectors"].items():
+        for name in fields:
+            if applicable(name, fields):
+                prop = FIELDS[name][0] + (int(number) - 1) * STRIDE
+                assert reads[prop] >= 2  # Fresh confirmation plus final cross-check.
+
+    # An external change is detected and corrected on the next preparation.
+    sdk.values[FIELDS["pulse_width_s"][0]] = 0.006
+    assert outputs.apply(saved) == saved
+    assert sdk.values[FIELDS["pulse_width_s"][0]] == 0.002
+    assert calls["prop_setvalue"] == 1
+
+
+def test_changed_field_uses_capabilities_after_earlier_writes():
+    sdk = OutputSDK()
+    write = sdk.prop_setvalue
+    original = dict(sdk.values)
+    source = FIELDS["source"][0]
+
+    def change(prop, value):
+        result = write(prop, value)
+        if prop == FIELDS["kind"][0] and value == 3:
+            sdk.enums[source] = (1, 2)  # Vsync disappears in the new function.
+        return result
+
+    sdk.prop_setvalue = change
+    with pytest.raises(ValueError, match="unsupported source=vsync"):
+        HamamatsuOutputTriggers(sdk).apply(selections())
+    assert sdk.values == original
 
 
 def attach_outputs(camera, sdk):

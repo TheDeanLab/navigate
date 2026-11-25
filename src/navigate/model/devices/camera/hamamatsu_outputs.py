@@ -207,9 +207,10 @@ class HamamatsuOutputTriggers:
                 )
                 values = ()
             result["choices"] = {
-                enum[int(v)]: LABELS.get(
-                    enum[int(v)],
-                    self.sdk.get_property_value_text(prop, v) or enum[int(v)],
+                enum[int(v)]: (
+                    LABELS.get(enum[int(v)])
+                    or self.sdk.get_property_value_text(prop, v)
+                    or enum[int(v)]
                 )
                 for v in values
                 if int(v) in enum
@@ -240,10 +241,11 @@ class HamamatsuOutputTriggers:
     def snapshot(self) -> dict[int, float]:
         """Read every available output property for exact rollback or device reset."""
         values = {}
-        props = [prop for prop, _ in SHARED.values()] if self.count() else []
+        count = self.count()
+        props = [prop for prop, _ in SHARED.values()] if count else []
         props += [
             prop + (n - 1) * STRIDE
-            for n in range(1, self.count() + 1)
+            for n in range(1, count + 1)
             for prop, _ in FIELDS.values()
         ]
         for prop in props:
@@ -251,7 +253,11 @@ class HamamatsuOutputTriggers:
                 continue
             value = self.sdk.get_property_value(prop)
             if not finite(value):
-                raise RuntimeError(f"Cannot snapshot output property {prop:#x}.")
+                if self.sdk.is_property_writable(prop):
+                    raise RuntimeError(f"Cannot snapshot output property {prop:#x}.")
+                # Mode-dependent read-only fields may advertise a range without
+                # a readable value. They cannot be changed or restored here.
+                continue
             values[prop] = value
         return values
 
@@ -311,7 +317,22 @@ class HamamatsuOutputTriggers:
             )
             raise RuntimeError(self.sdk._advanced_settings_error) from exc
 
+    def _current(self, name: str, number: Optional[int] = None) -> Any:
+        """Read a value without enumerating capabilities or caching device state."""
+        prop, enum = (SHARED if number is None else FIELDS)[name]
+        prop += (number - 1) * STRIDE if number is not None else 0
+        raw = self.sdk.get_property_value(prop)
+        if not finite(raw):
+            return None
+        return enum.get(raw) if enum is not None else raw
+
     def _write(self, name: str, value: Any, number: Optional[int] = None) -> None:
+        # Saved selections include unchanged/read-only connectors. Preserve a
+        # confirmed value even when it is not selectable in the current mode
+        # (e.g. Global exposure after switching to light-sheet). A changed value
+        # still requires fresh capabilities, since earlier writes may alter them.
+        if self._current(name, number) == value:
+            return
         cap = self.field(name, number)
         if not cap["available"]:
             raise ValueError(f"Output {number or 'shared'}: {name} is unavailable.")
@@ -388,9 +409,9 @@ class HamamatsuOutputTriggers:
                     if name in fields and applicable(name, fields):
                         self._write(name, fields[name], int(number))
                 for name in FIELDS:
-                    if applicable(name, fields):
+                    if name not in fields and applicable(name, fields):
                         current = self.field(name, int(number)).get("current")
-                        if name not in fields and current is not None:
+                        if current is not None:
                             fields[name] = current
                 if (
                     fields["kind"] == "programmable"
@@ -403,7 +424,7 @@ class HamamatsuOutputTriggers:
             for number, fields in settings["connectors"].items():
                 for name, value in fields.items():
                     if applicable(name, fields):
-                        current = self.field(name, int(number)).get("current")
+                        current = self._current(name, int(number))
                         matches = (
                             math.isclose(current, value, rel_tol=0, abs_tol=1e-12)
                             if finite(current) and finite(value)
@@ -415,7 +436,7 @@ class HamamatsuOutputTriggers:
                             )
                         fields[name] = current
             for name, value in settings.get("shared", {}).items():
-                if self.field(name).get("current") != value:
+                if self._current(name) != value:
                     raise RuntimeError(
                         "Shared output settings changed during configuration."
                     )

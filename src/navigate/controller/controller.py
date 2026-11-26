@@ -207,6 +207,8 @@ class Controller:
 
         #: mp.Queue: Replaceable idle stage readbacks, separate from control events.
         self.stage_position_queue = mp.Queue(1)
+        #: mp.Queue: Latest received stack plane, separate from control events.
+        self.stack_progress_queue = mp.Queue(1)
         self._stage_position_valid_after = time.monotonic()
 
         #: Manager: A shared memory manager
@@ -247,6 +249,7 @@ class Controller:
                 event_queue=self.event_queue,
                 autofocus_progress_queue=self.autofocus_progress_queue,
                 stage_position_queue=self.stage_position_queue,
+                stack_progress_queue=self.stack_progress_queue,
                 log_queue=log_queue,
             )
         else:
@@ -257,6 +260,7 @@ class Controller:
                 event_queue=self.event_queue,
                 autofocus_progress_queue=self.autofocus_progress_queue,
                 stage_position_queue=self.stage_position_queue,
+                stack_progress_queue=self.stack_progress_queue,
                 log_queue=log_queue,
             )
 
@@ -585,6 +589,9 @@ class Controller:
                 return False
             if command == "acquire":
                 self.launch_additional_microscopes()
+                channels = getattr(self, "channels_tab_controller", None)
+                if channels is not None:
+                    channels.begin_stack_progress(result["capture_token"])
             return True
 
         accepted = self._run_on_main_thread(accept_preparation, wait=True)
@@ -2423,6 +2430,8 @@ class Controller:
                 except Exception:
                     print(f"*** unhandled event: {event}, {value}")
 
+        self._update_stack_progress()
+
         # Control events take precedence over optional telemetry. In particular,
         # a Stop Stages readback invalidates older queued monitor snapshots.
         latest_stage = None
@@ -2438,6 +2447,23 @@ class Controller:
                 self._update_idle_stage_position(latest_stage)
             except Exception:
                 logger.exception("Ignoring failed optional stage telemetry update")
+
+    def _update_stack_progress(self) -> None:
+        """Consume only the latest optional snapshot on the existing Tk event pump."""
+        output = getattr(self, "stack_progress_queue", None)
+        if output is None:
+            return
+        latest = None
+        while self._event_pump_running:
+            try:
+                latest = output.get_nowait()
+            except queue.Empty:
+                break
+        if latest is not None:
+            try:
+                self.channels_tab_controller.update_stack_progress(latest)
+            except Exception:
+                logger.exception("Ignoring failed optional stack progress update")
 
     def add_acquisition_mode(
         self, name: str, acquisition_obj: Callable[[str], Any]

@@ -47,6 +47,7 @@ from navigate.controller.sub_controllers.channels_settings import (
 )
 from navigate.controller.sub_controllers.tiling import TilingWizardController
 from navigate.tools.stack_geometry import StackAxis, StackGeometry, StackReference
+from navigate.tools.stack_progress import StackProgressSnapshot
 from navigate.view.main_window_content.channels_tab import ChannelsTab
 from navigate.view.popups.tiling_wizard_popup import TilingWizardPopup
 
@@ -57,6 +58,8 @@ logger = logging.getLogger(p)
 
 class ChannelsTabController(GUIController):
     """Controller for the channels tab in the main window."""
+
+    _stack_progress_token: "tuple[int, str] | None"
 
     def __init__(
         self,
@@ -135,6 +138,9 @@ class ChannelsTabController(GUIController):
         self._stack_endpoint_context: tuple[str, str, str, bool] | None = None
         #: tuple: Capture buttons associated with the displayed start/end fields.
         self._stack_endpoint_order: tuple[str, str] = ("start", "end")
+        #: Capture generation and frame count accepted by the progress schematic.
+        self._stack_progress_token = None
+        self._stack_progress_completed = 0
 
         #: float: The filter wheel delay.
         self.filter_wheel_delay = None
@@ -204,6 +210,7 @@ class ChannelsTabController(GUIController):
         for setting up the initial configuration and state of the channels tab in the
         main window.
         """
+        self.clear_stack_progress()
         self._stack_endpoint_context = None
         config = self.parent_controller.configuration_controller
         self.channel_setting_controller.rebuild_view()
@@ -249,6 +256,7 @@ class ChannelsTabController(GUIController):
         and updates the GUI accordingly.
 
         """
+        self.clear_stack_progress()
         self._stack_endpoint_context = None
         self.in_initialization = True
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
@@ -526,6 +534,8 @@ class ChannelsTabController(GUIController):
         # stack acquisition settings are disabled in "live" and "single" mode.
         image_mode = self.microscope_state_dict["image_mode"]
         self.mode = mode
+        if mode != "z-stack":
+            self.clear_stack_progress()
         self.channel_setting_controller.set_mode(mode)
 
         # state_readonly = "readonly" if mode == "stop" else "disabled"
@@ -753,6 +763,7 @@ class ChannelsTabController(GUIController):
         """Display the model's frozen reference after successful acquisition preflight."""
         if (
             self.mode == "stop"
+            or self._stack_progress_completed > 0
             or not self._relative_stack_mode()
             or reference["microscope_name"]
             != self.parent_controller.configuration_controller.microscope_name
@@ -771,6 +782,35 @@ class ChannelsTabController(GUIController):
             multiposition=reference["multiposition"],
             frozen=True,
         )
+
+    def clear_stack_progress(self) -> None:
+        """Discard the capture token on stop, failure, reload or scope change."""
+        self._stack_progress_token = None
+        self._stack_progress_completed = 0
+        self.view.stack_acq_frame.clear_stack_progress()
+
+    def begin_stack_progress(self, token: tuple[int, str]) -> None:
+        """Accept only snapshots belonging to the prepared standard Z acquisition."""
+        self.clear_stack_progress()
+        if self.microscope_state_dict.get("image_mode") == "z-stack":
+            self._stack_progress_token = token
+
+    def update_stack_progress(self, snapshot: StackProgressSnapshot) -> None:
+        """Animate a received plane without editing settings or querying hardware."""
+        if (
+            not isinstance(snapshot, StackProgressSnapshot)
+            or self.mode != "z-stack"
+            or snapshot.capture_token != self._stack_progress_token
+            or snapshot.capture_token[1]
+            != self.parent_controller.configuration_controller.microscope_name
+            or snapshot.completed <= self._stack_progress_completed
+            or snapshot.relative != self._relative_stack_mode()
+            or snapshot.z_axis != self._get_stack_axis("z_device", "z")
+            or snapshot.f_axis != self._get_stack_axis("f_device", "f")
+        ):
+            return
+        self.view.stack_acq_frame.draw_stack_progress(snapshot)
+        self._stack_progress_completed = snapshot.completed
 
     def update_z_steps(self, *_: tuple[str]) -> None:
         """Recalculates the number of slices that will be acquired in a z-stack.

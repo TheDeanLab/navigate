@@ -48,11 +48,13 @@ from navigate.tools.common_functions import VariableWithLock
 from navigate.model.waveforms import remote_focus_ramp
 from navigate.tools.stack_geometry import (
     StackAxis,
+    StackGeometry,
     StackReference,
     focus_position,
     stack_position,
 )
 from navigate.model.stack_acquisition import RelativeStackPlan
+from navigate.tools.stack_progress import StackProgressPlan, StackProgressTracker
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -1201,6 +1203,8 @@ class ZStackAcquisition(FeatureBase):
       process, including signal acquisition, data handling, and node type.
     """
 
+    _stack_progress: "StackProgressTracker | None"
+
     parameter_schema = {
         "get_origin": SettingSpec(
             bool,
@@ -1349,6 +1353,9 @@ class ZStackAcquisition(FeatureBase):
 
         #: int: The number of frames received by the data thread.
         self.received_frames = None
+        #: Optional display tracker; never performs hardware I/O.
+        self._stack_progress = None
+        self._stack_progress_initialized = False
 
         # TODO: This does not include timepoints.
         #: int: The number of frames anticipated by the data thread.
@@ -1571,6 +1578,41 @@ class ZStackAcquisition(FeatureBase):
             if v["is_selected"]
         ]
         self.first_channel_defocus = self.defocus[0] if self.defocus else 0.0
+
+        if not self._stack_progress_initialized:
+            self._stack_progress_initialized = True
+            output = getattr(self.model, "stack_progress_queue", None)
+            token = getattr(self.model, "_stack_progress_token", None)
+            if (
+                output is not None
+                and token is not None
+                and getattr(self.model, "imaging_mode", None) == "z-stack"
+            ):
+                try:
+                    zi = self.position_headers.index(self.primary_z_axis.upper())
+                    fi = self.position_headers.index(self.primary_f_axis.upper())
+                    progress_plan = StackProgressPlan(
+                        token,
+                        StackGeometry.from_legacy_state(microscope_state),
+                        tuple(
+                            StackReference(float(row[zi]), float(row[fi]))
+                            for row in self.positions
+                        ),
+                        tuple(
+                            key
+                            for key, channel in microscope_state["channels"].items()
+                            if channel["is_selected"]
+                        ),
+                        tuple(self.defocus),
+                        self.stack_cycling_mode,
+                        int(microscope_state["timepoints"]),
+                        self.primary_z_axis,
+                        self.primary_f_axis,
+                        isinstance(plan, RelativeStackPlan),
+                    )
+                    self._stack_progress = StackProgressTracker(progress_plan, output)
+                except Exception:
+                    logger.exception("Unable to initialize optional stack progress")
 
     def signal_func(self):
         """Control z-stack acquisition, move positions, and manage data threads.
@@ -1831,6 +1873,12 @@ class ZStackAcquisition(FeatureBase):
         self.received_frames += len(frame_ids)
         if self.image_writer is not None:
             self.image_writer.save_image(frame_ids)
+        if self._stack_progress is not None:
+            try:
+                self._stack_progress.advance(len(frame_ids))
+            except Exception:
+                self._stack_progress = None
+                logger.exception("Disabling failed optional stack progress")
 
     def end_data_func(self) -> bool:
         """Check if all expected data frames have been received.

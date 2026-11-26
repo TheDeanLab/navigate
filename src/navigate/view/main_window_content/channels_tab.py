@@ -40,6 +40,7 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
+from navigate.tools.stack_progress import StackProgressSnapshot
 from navigate.view.custom_widgets.hover import HoverButton, Hover
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -1044,6 +1045,93 @@ class StackAcquisitionFrame(ttk.Labelframe):
             f"Dashed line: last sampled {'offset' if multiposition else 'Z'} "
             f"{last - center if multiposition else last:g} µm. "
             "The requested end boundary is not included in the sampled planes."
+        )
+
+    def clear_stack_progress(self) -> None:
+        """Restore the idle schematic without changing acquisition inputs."""
+        canvas = self.relative_schematic
+        if canvas.find_withtag("acquisition_plane"):
+            canvas.delete("all")
+        canvas.configure(width=230, height=175)
+        self.inputs["top"].grid()
+        self.inputs["bottom"].grid()
+        if self.position_mode.get() == "Relative":
+            self.cubic_image_label.grid_remove()
+            canvas.grid(row=0, rowspan=2, column=0, columnspan=2)
+        else:
+            canvas.grid_remove()
+            self.cubic_image_label.grid()
+
+    def draw_stack_progress(self, snapshot: StackProgressSnapshot) -> None:
+        """Move the plane marker using planned coordinates of received frames.
+
+        Canvas items are reused between updates. This method runs only on the Tk
+        thread and does not read stage coordinates or change stack settings.
+        """
+        canvas = self.relative_schematic
+        self.cubic_image_label.grid_remove()
+        self.inputs["top"].grid_remove()
+        self.inputs["bottom"].grid_remove()
+        canvas.configure(width=280, height=215)
+        canvas.grid(row=0, rowspan=2, column=0, columnspan=2)
+        color = get_theme_color("text", "#d7dee8")
+        accent = get_theme_color("accent", "#4b78b8")
+        if not canvas.find_withtag("acquisition_plane"):
+            canvas.delete("all")
+            canvas.create_rectangle(12, 28, 90, 125, outline=color)
+            canvas.create_line([12, 28, 32, 12, 110, 12, 90, 28], fill=color)
+            canvas.create_line([110, 12, 110, 109, 90, 125], fill=color)
+            canvas.create_polygon(
+                [12, 125, 32, 109, 110, 109, 90, 125],
+                fill=accent,
+                outline=color,
+                stipple="gray50",
+                tags="acquisition_plane",
+            )
+            for tag, x, y in (
+                ("progress_top", 120, 28),
+                ("progress_bottom", 120, 125),
+                ("progress_coordinate", 120, 75),
+                ("progress_slice", 12, 149),
+                ("progress_position", 12, 168),
+                ("progress_received", 12, 187),
+            ):
+                canvas.create_text(x, y, anchor="w", fill=color, tags=tag)
+        lower, upper = sorted((snapshot.start, snapshot.end))
+        fraction = (snapshot.z - lower) / (upper - lower) if upper > lower else 0.5
+        y = 125 - max(0, min(1, fraction)) * 97
+        canvas.coords("acquisition_plane", 12, y, 32, y - 16, 110, y - 16, 90, y)
+        reference = snapshot.reference_z if snapshot.relative else 0
+        unit = "°" if snapshot.z_axis == "theta" else "µm"
+        focus_unit = "°" if snapshot.f_axis == "theta" else "µm"
+        sign = "+" if snapshot.relative else ""
+        canvas.itemconfigure("progress_top", text=f"{upper - reference:{sign}g} {unit}")
+        canvas.itemconfigure(
+            "progress_bottom", text=f"{lower - reference:{sign}g} {unit}"
+        )
+        canvas.itemconfigure(
+            "progress_coordinate",
+            text=f"Target {snapshot.z_axis.upper()}: {snapshot.z:g} {unit}\n"
+            f"{snapshot.f_axis.upper()}: {snapshot.focus:g} {focus_unit}",
+        )
+        channel_label = snapshot.channel.replace("channel_", "Ch ", 1)
+        canvas.itemconfigure(
+            "progress_slice",
+            text=f"Slice {snapshot.plane}/{snapshot.planes} · {channel_label}",
+        )
+        canvas.itemconfigure(
+            "progress_position",
+            text=f"Position {snapshot.position}/{snapshot.positions} · "
+            f"Time {snapshot.timepoint}/{snapshot.timepoints}",
+        )
+        canvas.itemconfigure(
+            "progress_received",
+            text=f"Received {snapshot.completed}/{snapshot.total} frames",
+        )
+        self.relative_schematic_hover.setdescription(
+            "Latest received camera plane at its planned coordinates. "
+            "This is acquisition progress, not a measured stage readback. "
+            "No additional stage polling is performed."
         )
 
     def create_additional_stack_widgets(self, axes: list, devices: dict) -> None:

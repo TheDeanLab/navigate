@@ -108,6 +108,8 @@ class Model:
 
     Model for Model-View-Controller Software Architecture."""
 
+    _stack_progress_token: "tuple[int, str] | None"
+
     def __init__(
         self,
         args: argparse.Namespace,
@@ -116,6 +118,7 @@ class Model:
         log_queue: Optional[multiprocessing.Queue] = None,
         autofocus_progress_queue: multiprocessing.Queue = None,
         stage_position_queue: "multiprocessing.Queue | None" = None,
+        stack_progress_queue: "multiprocessing.Queue[Any] | None" = None,
     ) -> None:
         """Initialize the Model.
 
@@ -133,6 +136,8 @@ class Model:
             Single-slot queue for replaceable autofocus progress snapshots.
         stage_position_queue : multiprocessing.Queue
             Single-slot queue for idle stage readbacks.
+        stack_progress_queue : multiprocessing.Queue
+            Single-slot queue for received stack-frame progress.
         """
         # Set up logging
         log_setup("logging.yml", queue=log_queue)
@@ -255,6 +260,9 @@ class Model:
 
         #: multiprocessing.Queue: Replaceable autofocus plotting snapshots.
         self.autofocus_progress_queue = autofocus_progress_queue
+        #: Optional transport for stack animation; no stage reads are requested.
+        self.stack_progress_queue = stack_progress_queue
+        self._stack_progress_token = None
 
         # frame signal id
         #: int: Frame ID.
@@ -915,7 +923,12 @@ class Model:
         ):
             return False
         self._prepared_camera_token = None
-        self.run_command(command, *args)
+        self._stack_progress_token = token if command == "acquire" else None
+        try:
+            self.run_command(command, *args)
+        except Exception:
+            self._stack_progress_token = None
+            raise
         return True
 
     @suspend_stage_polling
@@ -1594,6 +1607,7 @@ class Model:
         disconnects buffer in live mode and closes the shutters."""
         self.is_acquiring = False
         self._relative_stack_plan = None
+        self._stack_progress_token = None
 
         def close_writer(writer: ImageWriter) -> None:
             try:
@@ -2947,6 +2961,7 @@ class ASIModel(Model):
         log_queue: Optional[multiprocessing.Queue] = None,
         autofocus_progress_queue: multiprocessing.Queue = None,
         stage_position_queue: "multiprocessing.Queue | None" = None,
+        stack_progress_queue: "multiprocessing.Queue[Any] | None" = None,
     ) -> None:
         """Initialize the ASI Model.
 
@@ -2964,6 +2979,8 @@ class ASIModel(Model):
             Single-slot queue for replaceable autofocus progress snapshots.
         stage_position_queue : multiprocessing.Queue
             Single-slot queue for idle stage readbacks.
+        stack_progress_queue : multiprocessing.Queue
+            Single-slot queue for received stack-frame progress.
         """
         super().__init__(
             args,
@@ -2972,6 +2989,7 @@ class ASIModel(Model):
             log_queue,
             autofocus_progress_queue,
             stage_position_queue,
+            stack_progress_queue,
         )
 
         self.acquisition_modes_feature_setting["z-stack"] = [

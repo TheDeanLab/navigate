@@ -49,7 +49,15 @@ def setup():
         active_microscope_name="scope",
         microscopes={"scope": scope},
         configuration={
-            "configuration": {"microscopes": {"scope": {"stage": {}}}},
+            "configuration": {
+                "microscopes": {
+                    "scope": {
+                        "stage": {
+                            "hardware": [{"type": "Synthetic", "axes": ["x", "y"]}]
+                        }
+                    }
+                }
+            },
         },
         is_acquiring=False,
         signal_thread=None,
@@ -332,7 +340,9 @@ def test_microscope_change_preserves_shared_connection_rate_limit(setup):
         model.active_microscope = other
         model.active_microscope_name = "other"
         model.microscopes["other"] = other
-        model.configuration["configuration"]["microscopes"]["other"] = {"stage": {}}
+        model.configuration["configuration"]["microscopes"]["other"] = {
+            "stage": {"hardware": [{"type": "Synthetic", "axes": ["y"]}]}
+        }
     now[0] += 0.5
     monitor.poll_once()
     peer.read.assert_not_called()
@@ -340,3 +350,57 @@ def test_microscope_change_preserves_shared_connection_rate_limit(setup):
     monitor.poll_once()
     assert output.get_nowait()["microscope_name"] == "other"
     peer.read.assert_called_once()
+
+
+def test_unexpected_worker_errors_back_off_recover_and_remain_stoppable(setup):
+    monitor, _, _, _, _ = setup
+    monitor.poll_once = Mock(
+        side_effect=[RuntimeError("manager unavailable")] * 7 + [None]
+    )
+    monitor._stop = Mock()
+    monitor._stop.wait.side_effect = [False] * 8 + [True]
+    monitor._run()
+    assert [call.args[0] for call in monitor._stop.wait.call_args_list] == [
+        1,
+        2,
+        4,
+        8,
+        16,
+        30,
+        30,
+        30,
+        1,
+    ]
+    assert monitor.poll_once.call_count == 8
+
+
+@pytest.mark.parametrize("virtual", [False, True])
+def test_plugin_readback_inheritance_does_not_bypass_gui_eligibility(setup, virtual):
+    monitor, model, stage, output, _ = setup
+    model.active_microscope.is_synthetic = virtual
+    model.configuration["configuration"]["microscopes"]["scope"]["stage"][
+        "hardware"
+    ] = [{"type": "custom.ASIStage", "axes": ["x"]}]
+    monitor.poll_once()
+    if virtual:
+        stage.read.assert_called_once()
+        assert output.get_nowait()["positions"] == {"x_pos": 12.35}
+    else:
+        stage.read.assert_not_called()
+        assert output.get_nowait()["unavailable_axes"] == ["x"]
+
+
+def test_mixed_builtin_and_plugin_devices_only_poll_configured_supported_axes(setup):
+    monitor, model, stage, output, _ = setup
+    plugin = ReadbackStage(positions={"y_pos": 99})
+    model.active_microscope.stages_list.append((plugin, ["y"]))
+    model.configuration["configuration"]["microscopes"]["scope"]["stage"][
+        "hardware"
+    ] = [
+        {"type": "ASI", "axes": ["x"]},
+        {"type": "custom.ASIStage", "axes": ["y"]},
+    ]
+    monitor.poll_once()
+    stage.read.assert_called_once()
+    plugin.read.assert_not_called()
+    assert output.get_nowait()["unavailable_axes"] == ["y"]

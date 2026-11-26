@@ -205,6 +205,8 @@ class StageController(GUIController):
         """Initialize the Stage limits of steps and positions."""
         config = self.parent_controller.configuration_controller
         self.stage_axes = config.stage_axes
+        self.refresh_position_telemetry_settings()
+        self._last_position_telemetry = None
 
         # disable stages not available for the current microscope
         for axis in set(config.all_stage_axes) - set(self.stage_axes):
@@ -349,6 +351,7 @@ class StageController(GUIController):
         self.stage_setting_dict = self.parent_controller.configuration["experiment"][
             "StageParameters"
         ]
+        self.refresh_position_telemetry_settings()
         widgets = self.view.get_widgets()
         for k in widgets:
             self.widget_vals[k].set(self.stage_setting_dict.get(k, 0))
@@ -397,7 +400,11 @@ class StageController(GUIController):
             Timestamped positions and unavailable axes from the model monitor.
         """
         widgets = self.view.get_widgets()
-        focused = self.view.focus_get()
+        try:
+            focused = self.view.focus_get()
+        except (KeyError, tk.TclError):
+            # A ttk combobox popdown is a Tcl widget with no Python wrapper.
+            focused = None
         for axis in self.stage_axes:
             key = f"{axis}_pos"
             widget = widgets[axis].widget
@@ -405,6 +412,13 @@ class StageController(GUIController):
                 "disabled",
                 "readonly",
             )
+            if editing:
+                try:
+                    editing = float(self.widget_vals[axis].get()) != float(
+                        self.stage_setting_dict[axis]
+                    )
+                except (ValueError, TypeError, tk.TclError):
+                    editing = True  # Keep incomplete input such as a minus sign.
             if key not in snapshot["positions"] or editing or self.event_id.get(axis):
                 continue
             value = snapshot["positions"][key]
@@ -416,13 +430,21 @@ class StageController(GUIController):
         self._position_refresh_received_at = time.monotonic()
         self.refresh_position_telemetry_status()
 
+    def refresh_position_telemetry_settings(self) -> None:
+        """Cache the preference on configuration reload, scope change, or toggle."""
+        stage_config = (
+            self.parent_controller.configuration_controller.microscope_config["stage"]
+        )
+        self._position_polling_enabled = bool(
+            stage_config.get("position_polling", True)
+        )
+
     def refresh_position_telemetry_status(self) -> None:
         """Show freshness on the Tk thread without repeated warning dialogs."""
         snapshot = getattr(self, "_last_position_telemetry", None)
         parent = self.parent_controller
-        stage_config = parent.configuration_controller.microscope_config["stage"]
         fresh = False
-        if not stage_config.get("position_polling", True):
+        if not getattr(self, "_position_polling_enabled", True):
             text = "Stage position polling: disabled"
         elif (
             parent.acquire_bar_controller.is_acquiring
@@ -668,8 +690,22 @@ class StageController(GUIController):
         def handler(*_):
             """Callback functions bind to position variables."""
             # check if focus on another window
-            if require_focus and not self.view.focus_get():
-                return
+            if require_focus:
+                try:
+                    if not self.view.focus_get():
+                        return
+                except KeyError:
+                    pass  # The focus belongs to a ttk combobox's Tcl popdown.
+                if _:
+                    # A real FocusOut event without an edit must not send the old
+                    # coordinate back to a joystick, even before the next poll.
+                    try:
+                        if float(position_var.get()) == float(
+                            self.stage_setting_dict[axis]
+                        ):
+                            return
+                    except (ValueError, TypeError, tk.TclError):
+                        pass
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])
             # if position is not a number, then do not move stage

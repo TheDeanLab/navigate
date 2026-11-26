@@ -191,6 +191,29 @@ def test_shared_connection_gets_one_grouped_query(setup):
     assert output.get_nowait()["positions"] == {"x_pos": 12.35, "y_pos": 44}
 
 
+def test_disable_during_read_discards_result_and_skips_remaining_devices(setup):
+    monitor, model, stage, output, now = setup
+    other = ReadbackStage(positions={"y_pos": 3})
+    model.active_microscope.stages_list.append((other, ["y"]))
+    settings = model.configuration["configuration"]["microscopes"]["scope"]["stage"]
+
+    def disable(peers):
+        settings["position_polling"] = False
+        return stage.positions
+
+    stage.read.side_effect = disable
+    monitor.poll_once()
+    other.read.assert_not_called()
+    assert output.empty()
+    monitor.poll_once()
+    stage.read.assert_called_once()
+    settings["position_polling"] = True
+    stage.read.side_effect = stage._read
+    now[0] += 1
+    monitor.poll_once()
+    assert output.get_nowait()["positions"] == {"x_pos": 12.35, "y_pos": 3}
+
+
 @pytest.mark.parametrize("disabled", [True, False])
 def test_disabled_and_unsupported_devices_are_not_queried(setup, disabled):
     monitor, model, stage, output, _ = setup
@@ -202,7 +225,10 @@ def test_disabled_and_unsupported_devices_are_not_queried(setup, disabled):
         model.active_microscope.stages_list = [(object(), ["x"])]
     monitor.poll_once()
     stage.read.assert_not_called()
-    assert output.get_nowait()["unavailable_axes"] == ["x"]
+    if disabled:
+        assert output.empty()
+    else:
+        assert output.get_nowait()["unavailable_axes"] == ["x"]
 
 
 def test_operation_waits_for_current_read_and_discards_its_result(setup):

@@ -26,7 +26,9 @@ def controller(monkeypatch):
     controller = Controller.__new__(Controller)
     controller.acquire_bar_controller = SimpleNamespace(is_acquiring=False)
     controller.is_autofocusing = False
-    controller.configuration_controller = SimpleNamespace(microscope_name="scope")
+    controller.configuration_controller = SimpleNamespace(
+        microscope_name="scope", microscope_config={"stage": {}}
+    )
     controller._stage_position_valid_after = 99.0
     controller.stage_controller = Mock()
     return controller
@@ -41,7 +43,8 @@ def test_recent_idle_snapshot_is_applied(controller):
 
 
 @pytest.mark.parametrize(
-    "reason", ["acquiring", "autofocus", "scope", "old", "command", "pending"]
+    "reason",
+    ["acquiring", "autofocus", "scope", "old", "command", "pending", "disabled"],
 )
 def test_stale_or_ineligible_snapshot_is_discarded(controller, reason):
     result = snapshot()
@@ -55,6 +58,10 @@ def test_stale_or_ineligible_snapshot_is_discarded(controller, reason):
         result["sample_started"] = 80
     elif reason == "command":
         controller._stage_position_valid_after = 100.5
+    elif reason == "disabled":
+        controller.configuration_controller.microscope_config["stage"][
+            "position_polling"
+        ] = False
     else:
         controller._stage_position_moves_pending = 1
     controller._update_idle_stage_position(result)
@@ -113,16 +120,21 @@ def test_status_marks_old_positions_stale_and_acquisition_paused(monkeypatch):
     )
     stage = StageController.__new__(StageController)
     stage.parent_controller = SimpleNamespace(
-        acquire_bar_controller=SimpleNamespace(is_acquiring=False)
+        acquire_bar_controller=SimpleNamespace(is_acquiring=False),
+        configuration_controller=SimpleNamespace(microscope_config={"stage": {}}),
     )
     label = Mock()
-    stage.view = SimpleNamespace(position_frame=SimpleNamespace(readback_status=label))
+    stage.view = SimpleNamespace(
+        position_frame=SimpleNamespace(set_polling_indicator=label)
+    )
     stage._last_position_telemetry = snapshot()
     stage.refresh_position_telemetry_status()
-    label.configure.assert_called_with(text="Idle refresh: stale")
+    label.assert_called_with(False, "Stage position polling: last readback is stale")
     stage.parent_controller.acquire_bar_controller.is_acquiring = True
     stage.refresh_position_telemetry_status()
-    label.configure.assert_called_with(text="Idle refresh: paused")
+    label.assert_called_with(
+        False, "Stage position polling: paused during acquisition or movement"
+    )
 
 
 def test_control_events_invalidate_queued_telemetry_before_it_is_displayed(controller):
@@ -137,3 +149,33 @@ def test_control_events_invalidate_queued_telemetry_before_it_is_displayed(contr
     controller.update_event()
     controller.update_stage_controller_silent.assert_called_once_with({"x_pos": 22})
     controller.stage_controller.update_position_telemetry.assert_not_called()
+
+
+def test_indicator_pulses_after_refresh_and_turns_dark_when_disabled(monkeypatch):
+    now = [100.1]
+    monkeypatch.setattr(
+        "navigate.controller.sub_controllers.stages.time.monotonic", lambda: now[0]
+    )
+    stage = StageController.__new__(StageController)
+    stage_config = {}
+    stage.parent_controller = SimpleNamespace(
+        acquire_bar_controller=SimpleNamespace(is_acquiring=False),
+        configuration_controller=SimpleNamespace(
+            microscope_config={"stage": stage_config}
+        ),
+    )
+    indicator = Mock()
+    stage.view = SimpleNamespace(
+        position_frame=SimpleNamespace(set_polling_indicator=indicator)
+    )
+    stage._last_position_telemetry = snapshot()
+    stage._position_refresh_received_at = 100.0
+    stage.refresh_position_telemetry_status()
+    assert indicator.call_args.args[0] is True
+    now[0] = 100.3
+    stage.refresh_position_telemetry_status()
+    assert indicator.call_args.args[0] is False
+    now[0] = 100.1
+    stage_config["position_polling"] = False
+    stage.refresh_position_telemetry_status()
+    indicator.assert_called_with(False, "Stage position polling: disabled")

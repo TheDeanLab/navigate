@@ -172,6 +172,9 @@ class StageController(GUIController):
         self.view.stack_shortcuts.set_end_button.configure(
             command=self.parent_controller.channels_tab_controller.update_end_position
         )
+        self.view.advanced_settings_button.configure(
+            command=lambda: self.parent_controller.menu_controller.stage_limits_popup()
+        )
 
     def stage_key_press(self, event: tk.Event) -> None:
         """The stage key press.
@@ -410,33 +413,45 @@ class StageController(GUIController):
             self.widget_vals[axis].set(value)
             self.stage_setting_dict[axis] = value
         self._last_position_telemetry = snapshot
+        self._position_refresh_received_at = time.monotonic()
         self.refresh_position_telemetry_status()
 
     def refresh_position_telemetry_status(self) -> None:
         """Show freshness on the Tk thread without repeated warning dialogs."""
         snapshot = getattr(self, "_last_position_telemetry", None)
         parent = self.parent_controller
-        if (
+        stage_config = parent.configuration_controller.microscope_config["stage"]
+        fresh = False
+        if not stage_config.get("position_polling", True):
+            text = "Stage position polling: disabled"
+        elif (
             parent.acquire_bar_controller.is_acquiring
             or getattr(parent, "is_autofocusing", False)
             or getattr(parent, "_stage_position_moves_pending", 0)
         ):
-            text = "Idle refresh: paused"
+            text = "Stage position polling: paused during acquisition or movement"
         elif snapshot is None or snapshot["sample_started"] <= getattr(
             parent, "_stage_position_valid_after", 0.0
         ):
-            text = "Idle refresh: waiting"
+            text = "Stage position polling: waiting for a fresh readback"
         elif time.monotonic() - snapshot["sample_started"] > 5:
-            text = "Idle refresh: stale"
+            text = "Stage position polling: last readback is stale"
         elif not snapshot["positions"]:
-            text = "Idle refresh: unavailable"
-        elif snapshot["unavailable_axes"]:
-            text = "Idle refresh: partial"
+            text = "Stage position polling: unavailable or connection busy"
         else:
-            text = "Idle refresh: current"
-        if text != getattr(self, "_position_telemetry_status", None):
-            self.view.position_frame.readback_status.configure(text=text)
-            self._position_telemetry_status = text
+            fresh = True
+            text = (
+                "Stage position polling: refreshed supported axes only"
+                if snapshot["unavailable_axes"]
+                else "Stage position polling: positions refreshed"
+            )
+        refreshing = fresh and (
+            time.monotonic() - getattr(self, "_position_refresh_received_at", 0) < 0.25
+        )
+        state = (refreshing, text)
+        if state != getattr(self, "_position_telemetry_status", None):
+            self.view.position_frame.set_polling_indicator(refreshing, text)
+            self._position_telemetry_status = state
 
     def get_position(self) -> Optional[dict[str, float]]:
         """This function returns current position from the view.

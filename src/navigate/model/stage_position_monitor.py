@@ -150,6 +150,8 @@ class StagePositionMonitor:
         enabled = configuration["configuration"]["microscopes"][name]["stage"].get(
             "position_polling", True
         )
+        if not enabled:
+            return
         snapshot: StagePositionSnapshot = {
             "microscope_name": name,
             "sample_started": self.clock(),
@@ -158,7 +160,7 @@ class StagePositionMonitor:
         }
         groups: dict[int, tuple[list[StagePositionReadback], set[str]]] = {}
         for stage, axes in microscope.stages_list:
-            if not enabled or not isinstance(stage, StagePositionReadback):
+            if not isinstance(stage, StagePositionReadback):
                 snapshot["unavailable_axes"].extend(axes)
                 continue
             identity = id(stage.position_readback_identity)
@@ -172,7 +174,13 @@ class StagePositionMonitor:
                 snapshot["unavailable_axes"].extend(axes)
                 continue
             with self._condition:
-                if not self._idle() or generation != self._generation:
+                if (
+                    not self._idle()
+                    or generation != self._generation
+                    or not configuration["configuration"]["microscopes"][name][
+                        "stage"
+                    ].get("position_polling", True)
+                ):
                     return
                 self._reading = True
             started = self.clock()
@@ -216,6 +224,9 @@ class StagePositionMonitor:
                 self._idle()
                 and generation == self._generation
                 and microscope is self.model.active_microscope
+                and configuration["configuration"]["microscopes"][name]["stage"].get(
+                    "position_polling", True
+                )
             ):
                 self._publish(snapshot)
 

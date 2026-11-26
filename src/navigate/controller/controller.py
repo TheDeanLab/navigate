@@ -2321,6 +2321,9 @@ class Controller:
             self.acquire_bar_controller.is_acquiring
             or self.is_autofocusing
             or getattr(self, "_stage_position_moves_pending", 0)
+            or not self.configuration_controller.microscope_config["stage"].get(
+                "position_polling", True
+            )
             or snapshot["microscope_name"]
             != self.configuration_controller.microscope_name
             or snapshot["sample_started"]

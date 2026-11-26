@@ -274,15 +274,23 @@ Slow responses reduce the refresh rate; communication failures trigger longer
 retry intervals. An in-progress serial query must finish or time out before
 another command can use that connection.
 
-The :guilabel:`Idle refresh` indicator in :guilabel:`Stage Positions` shows whether
-readbacks are current, partial, paused, stale, or unavailable. Failed reads leave
-the last displayed coordinates in place. A coordinate being edited or waiting
-for a move is not replaced by an automatic readback.
+The small indicator at the right of the :guilabel:`Stage Positions` heading
+briefly lights after each successful refresh and is dark otherwise. Hover over
+it for details about paused, stale, partial, or unavailable readbacks. Failed
+reads leave the last displayed coordinates in place. A coordinate being edited
+or waiting for a move is not replaced by an automatic readback.
 
-Refresh is enabled by default for supported devices. To disable it for a
-microscope, add ``position_polling: false`` directly under that microscope's
+Refresh is enabled by default for supported devices. Open
+:guilabel:`Advanced Parameters` below :guilabel:`Z-Stack Start/Stop` on the
+:guilabel:`Stage Control` tab, select a microscope, and change
+:guilabel:`Stage Polling Enabled` beside :guilabel:`Stage Limits Enabled`.
+The change applies immediately; use :guilabel:`Save` to retain it across launches.
+The checkbox is unchecked and read-only when the selected microscope has no
+supported stages. In a mixed configuration, only supported stages are polled.
+
+The preference is stored as ``position_polling`` directly under the microscope's
 ``stage`` section in :file:`configuration.yaml`, alongside ``hardware`` and
-``joystick_axes``. Restart **navigate** after editing the configuration.
+``joystick_axes``. If editing that file manually, restart **navigate** afterward.
 
 Zoom Subsection
 ^^^^^^^^^^^^^^^

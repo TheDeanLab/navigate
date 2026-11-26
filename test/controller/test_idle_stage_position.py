@@ -177,5 +177,101 @@ def test_indicator_pulses_after_refresh_and_turns_dark_when_disabled(monkeypatch
     assert indicator.call_args.args[0] is False
     now[0] = 100.1
     stage_config["position_polling"] = False
+    stage.refresh_position_telemetry_settings()
     stage.refresh_position_telemetry_status()
     indicator.assert_called_with(False, "Stage position polling: disabled")
+
+
+@pytest.mark.parametrize("dirty", [False, True, "incomplete", "popdown"])
+def test_focus_alone_does_not_protect_an_old_joystick_position(dirty):
+    stage = StageController.__new__(StageController)
+    widget = Mock()
+    widget.cget.return_value = "normal"
+    stage.view = SimpleNamespace(
+        get_widgets=lambda: {"x": SimpleNamespace(widget=widget)},
+        focus_get=Mock(return_value=widget),
+    )
+    if dirty == "popdown":
+        stage.view.focus_get.side_effect = KeyError(".!combobox.popdown.f.l")
+    stage.stage_axes = ["x"]
+    stage.event_id = {"x": None}
+    value = "-" if dirty == "incomplete" else (9 if dirty is True else 1)
+    stage.widget_vals = {"x": Mock(get=Mock(return_value=value))}
+    stage.stage_setting_dict = {"x": 1}
+    stage.refresh_position_telemetry_status = Mock()
+    stage.update_position_telemetry(snapshot())
+    if dirty is True or dirty == "incomplete":
+        stage.widget_vals["x"].set.assert_not_called()
+        assert stage.stage_setting_dict["x"] == 1
+    else:
+        stage.widget_vals["x"].set.assert_called_once_with(12)
+        assert stage.stage_setting_dict["x"] == 12
+
+
+def test_status_ticks_use_cached_preference(controller):
+    stage = StageController.__new__(StageController)
+    stage.parent_controller = controller
+    stage.view = SimpleNamespace(position_frame=Mock())
+    stage.refresh_position_telemetry_settings()
+    # This object would fail if a 20 ms tick accessed shared configuration.
+    controller.configuration_controller.microscope_config = None
+    for _ in range(100):
+        stage.refresh_position_telemetry_status()
+    stage.view.position_frame.set_polling_indicator.assert_called_once()
+
+
+@pytest.mark.parametrize("edited", [False, True])
+def test_focusout_only_moves_an_edited_coordinate_even_when_a_popdown_has_focus(edited):
+    stage = StageController.__new__(StageController)
+    stage.widget_vals = {"x": Mock(get=Mock(return_value=9 if edited else 1))}
+    stage.stage_setting_dict = {"x": 1}
+    stage.view = Mock()
+    stage.view.get_widgets.return_value = {"x": SimpleNamespace(widget=Mock())}
+    stage.view.focus_get.side_effect = KeyError(".!combobox.popdown.f.l")
+    stage.event_id = {"x": None}
+    stage.stage_limits = False
+    stage.parent_controller = Mock()
+    stage.show_verbose_info = Mock()
+    stage.position_callback("x")(SimpleNamespace(type="FocusOut"))
+    if edited:
+        stage.view.after.call_args.args[1]()
+        stage.parent_controller.execute.assert_called_once_with("stage", 9, "x")
+    else:
+        stage.view.after.assert_not_called()
+        stage.parent_controller.execute.assert_not_called()
+
+
+@pytest.mark.parametrize("failing_step", ["update_event", "status"])
+def test_event_pump_reschedules_after_an_iteration_error(controller, failing_step):
+    controller._event_pump_running = True
+    controller._drain_main_thread_dispatch_queue = Mock()
+    controller.update_event = Mock()
+    controller.view = SimpleNamespace(root=Mock())
+    failed = (
+        controller.update_event
+        if failing_step == "update_event"
+        else controller.stage_controller.refresh_position_telemetry_status
+    )
+    failed.side_effect = RuntimeError("optional GUI update failed")
+    controller._schedule_event_pump()
+    controller.view.root.after.assert_called_once_with(
+        20, controller._schedule_event_pump
+    )
+    assert controller._event_pump_running
+
+
+def test_optional_telemetry_exception_does_not_escape_event_dispatch(controller):
+    controller._event_pump_running = True
+    controller.event_queue = Queue()
+    controller.autofocus_progress_queue = Queue()
+    controller.stage_position_queue = Queue()
+    controller.event_listeners = {}
+    controller.stage_position_queue.put(snapshot())
+    controller.stage_controller.update_position_telemetry.side_effect = KeyError(
+        "popdown"
+    )
+    controller.update_event()
+    controller.stage_controller.update_position_telemetry.side_effect = None
+    controller.stage_position_queue.put(snapshot())
+    controller.update_event()
+    assert controller.stage_controller.update_position_telemetry.call_count == 2

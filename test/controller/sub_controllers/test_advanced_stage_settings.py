@@ -124,7 +124,10 @@ def _polling_popup(kind, enabled=True):
             "configuration": {"microscopes": {"selected": {"stage": stage}}}
         },
         configuration_controller=SimpleNamespace(microscope_name="selected"),
-        stage_controller=SimpleNamespace(refresh_position_telemetry_status=MagicMock()),
+        stage_controller=SimpleNamespace(
+            refresh_position_telemetry_status=MagicMock(),
+            refresh_position_telemetry_settings=MagicMock(),
+        ),
     )
     return controller
 

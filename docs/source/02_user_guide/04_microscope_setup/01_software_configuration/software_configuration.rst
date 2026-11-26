@@ -274,6 +274,13 @@ Slow responses reduce the refresh rate; communication failures trigger longer
 retry intervals. An in-progress serial query must finish or time out before
 another command can use that connection.
 
+Before enabling polling on physical hardware, verify joystick readbacks and
+Stop Stages response timing. On an ASI MS2000, also verify repeated readbacks
+interleaved with normal movement commands: the bounded polling transaction
+reads its complete reply directly, without the normal command path's buffer
+cleanup or 0.1-second post-write delay. Emulated-device tests do not establish
+that this timing is suitable for a particular controller or firmware.
+
 The small indicator at the right of the :guilabel:`Stage Positions` heading
 briefly lights after each successful refresh and is dark otherwise. Hover over
 it for details about paused, stale, partial, or unavailable readbacks. Failed

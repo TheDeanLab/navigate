@@ -31,7 +31,12 @@ def test_refresh_indicator_and_shortcut_layout(tk_root):
         positions = view.position_frame
         lamp = positions.polling_indicator
         assert positions.cget("text") == "Stage Positions"
-        assert lamp.winfo_x() > positions.winfo_width() / 2
+        # Windows may leave a fresh Toplevel unmapped (width 1). Check the
+        # right-aligned placement contract independently of the window manager.
+        placement = lamp.place_info()
+        assert float(placement["relx"]) == 1.0
+        assert placement["anchor"] == "ne"
+        assert int(placement["x"]) < 0
         positions.set_polling_indicator(False, "Off")
         off_color = lamp.itemcget(positions._polling_lamp, "fill")
         positions.set_polling_indicator(True, "Refreshed")

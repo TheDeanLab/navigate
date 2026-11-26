@@ -106,6 +106,7 @@ class ChannelsTabController(GUIController):
         self.stack_acq_vals["start_position"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["end_position"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["start_focus"].trace_add("write", self.update_z_steps)
+        self.stack_acq_vals["end_focus"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["z_device"].trace_add(
             "write", self.update_additional_stacking_axes
         )
@@ -123,6 +124,11 @@ class ChannelsTabController(GUIController):
 
         #: float: The focus origin of the stack.
         self.focus_origin = 0
+
+        #: tuple or None: Coordinate context owning the capture-button assignments.
+        self._stack_endpoint_context: tuple[str, str, str, bool] | None = None
+        #: tuple: Capture buttons associated with the displayed start/end fields.
+        self._stack_endpoint_order: tuple[str, str] = ("start", "end")
 
         #: float: The filter wheel delay.
         self.filter_wheel_delay = None
@@ -192,6 +198,7 @@ class ChannelsTabController(GUIController):
         for setting up the initial configuration and state of the channels tab in the
         main window.
         """
+        self._stack_endpoint_context = None
         config = self.parent_controller.configuration_controller
         self.channel_setting_controller.rebuild_view()
         self.stack_acq_widgets["cycling"].widget["values"] = ["Per Z", "Per Stack"]
@@ -236,6 +243,7 @@ class ChannelsTabController(GUIController):
         and updates the GUI accordingly.
 
         """
+        self._stack_endpoint_context = None
         self.in_initialization = True
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -650,79 +658,75 @@ class ChannelsTabController(GUIController):
         _ : tuple[str]
             Values is a tuple of strings. e.g., ('PY_VAR0', '', 'write')
         """
-        # get the primary z-stack and focus axis
-        primary_z_stage = self.stack_acq_vals["z_device"].get()
-        primary_z_axis = primary_z_stage.split(" - ")[1]
-        primary_f_stage = self.stack_acq_vals["f_device"].get()
-        primary_f_axis = primary_f_stage.split(" - ")[1]
-        # We have a new origin
-        self.z_origin = self.parent_controller.configuration["experiment"][
-            "StageParameters"
-        ][primary_z_axis]
-        self.focus_origin = self.parent_controller.configuration["experiment"][
-            "StageParameters"
-        ][primary_f_axis]
-        self.update_stack_position_limits()
-
-        flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
-        if flip_flags[primary_z_axis]:
-            self.stack_acq_vals["end_position"].set(0)
-            self.stack_acq_vals["end_focus"].set(0)
-        else:
-            self.stack_acq_vals["start_position"].set(0)
-            self.stack_acq_vals["start_focus"].set(0)
-
-        # Propagate parameter changes to the GUI
-        self.update_z_steps()
+        self._capture_stack_endpoint("start")
 
     def update_end_position(self, *_: tuple[str]) -> None:
-        """Get new z ending position from current stage parameters
+        """Capture the end Z/focus pair without changing the other endpoint.
 
         Parameters
         ----------
         _ : tuple[str]
-            Values is a tuple of strings. e.g., ('PY_VAR0', '', 'write')
-
+            Unused Tk callback arguments.
         """
-        # get the primary z-stack and focus axis
-        primary_z_stage = self.stack_acq_vals["z_device"].get()
-        primary_z_axis = primary_z_stage.split(" - ")[1]
-        primary_f_stage = self.stack_acq_vals["f_device"].get()
-        primary_f_axis = primary_f_stage.split(" - ")[1]
-        # Grab current values
-        z_end = self.parent_controller.configuration["experiment"]["StageParameters"][
-            primary_z_axis
-        ]
-        focus_end = self.parent_controller.configuration["experiment"][
+        self._capture_stack_endpoint("end")
+
+    def _capture_stack_endpoint(self, endpoint: str) -> None:
+        """Replace one physical endpoint and publish the legacy midpoint offsets.
+
+        The fields are sorted for acquisition, but button assignments follow the
+        captured endpoints even when their order crosses. Read coordinates from
+        the fields on every capture so manual edits remain authoritative. Button
+        assignments are reset when loading an experiment or changing devices.
+
+        Parameters
+        ----------
+        endpoint : str
+            Capture button, either ``"start"`` or ``"end"``.
+        """
+        z_device = self.stack_acq_vals["z_device"].get()
+        f_device = self.stack_acq_vals["f_device"].get()
+        z_axis = z_device.split(" - ")[1]
+        f_axis = f_device.split(" - ")[1]
+        config = self.parent_controller.configuration_controller
+        flipped = config.stage_flip_flags[z_axis]
+        context = (config.microscope_name, z_device, f_device, flipped)
+        order = self._stack_endpoint_order
+        if context != self._stack_endpoint_context:
+            order = ("end", "start") if flipped else ("start", "end")
+
+        positions = self.parent_controller.configuration["experiment"][
             "StageParameters"
-        ][primary_f_axis]
+        ]
+        captured = (float(positions[z_axis]), float(positions[f_axis]))
+        pairs: list[tuple[float, float, str]] = []
+        for field, button in zip(("start", "end"), order):
+            if button == endpoint:
+                z, f = captured
+            else:
+                z = self.z_origin + float(
+                    self.stack_acq_vals[f"{field}_position"].get()
+                )
+                f = self.focus_origin + float(
+                    self.stack_acq_vals[f"{field}_focus"].get()
+                )
+            pairs.append((z, f, button))
+        pairs.sort(key=lambda pair: pair[0], reverse=flipped)
 
-        z_start = self.z_origin
-        focus_start = self.focus_origin
-
-        if z_end < z_start:
-            # Sort so we are always going low to high
-            z_start, z_end = z_end, z_start
-            focus_start, focus_end = focus_end, focus_start
-
-        # set origin to be in the middle of start and end
-        self.z_origin = (z_start + z_end) / 2
-        self.focus_origin = (focus_start + focus_end) / 2
-        self.update_stack_position_limits()
-
-        # Propagate parameter changes to the GUI
-        flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
-        start_pos = z_start - self.z_origin
-        end_pos = z_end - self.z_origin
-        start_focus = focus_start - self.focus_origin
-        end_focus = focus_end - self.focus_origin
-        if flip_flags[primary_z_axis]:
-            start_pos, end_pos = end_pos, start_pos
-            start_focus, end_focus = end_focus, start_focus
-        self.stack_acq_vals["start_position"].set(start_pos)
-        self.stack_acq_vals["start_focus"].set(start_focus)
-        self.stack_acq_vals["end_position"].set(end_pos)
-        self.stack_acq_vals["end_focus"].set(end_focus)
+        # Suppress our variable traces until all four offsets and both origins
+        # agree. No model updates or hardware commands are made mid-capture.
+        initializing = self.in_initialization
+        self.in_initialization = True
+        try:
+            self.z_origin = (pairs[0][0] + pairs[1][0]) / 2
+            self.focus_origin = (pairs[0][1] + pairs[1][1]) / 2
+            self.update_stack_position_limits()
+            for field, (z, f, _) in zip(("start", "end"), pairs):
+                self.stack_acq_vals[f"{field}_position"].set(z - self.z_origin)
+                self.stack_acq_vals[f"{field}_focus"].set(f - self.focus_origin)
+            self._stack_endpoint_order = (pairs[0][2], pairs[1][2])
+            self._stack_endpoint_context = context
+        finally:
+            self.in_initialization = initializing
         self.update_z_steps()
 
     def update_cycling_setting(self, *_: tuple[str]) -> None:
@@ -1141,6 +1145,12 @@ class ChannelsTabController(GUIController):
             ] = channel_label
 
     def update_additional_stacking_axes(self, *args, **kwargs):
+        context = self._stack_endpoint_context
+        if context is not None and context[1:3] != (
+            self.stack_acq_vals["z_device"].get(),
+            self.stack_acq_vals["f_device"].get(),
+        ):
+            self._stack_endpoint_context = None
         if self.stack_acq_vals["z_device"].get():
             z_axis = self.stack_acq_vals["z_device"].get().split(" - ")[1]
         else:

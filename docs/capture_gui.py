@@ -1159,6 +1159,27 @@ def _capture_define_step_size(
     return _capture_widget(stack_frame, out_path, pad=2)
 
 
+def _capture_relative_z_stack(
+    ctx: dict[str, object], cli_args: argparse.Namespace
+) -> str:
+    """Show the relative range and its live reference using synthetic hardware."""
+    root, controller = ctx["root"], ctx["controller"]
+    _set_idle_acquire_bar(ctx)
+    _select_settings_tab(ctx, "channels_tab")
+    channels = controller.channels_tab_controller
+    frame = controller.view.settings.channels_tab.stack_acq_frame
+    channels.microscope_state_dict["image_mode"] = "z-stack"
+    channels.mode = "stop"
+    controller.stage_controller.set_position_silent({"z": 1000, "f": 50})
+    frame.position_mode.set("Relative")
+    frame.relative_range.set(500)
+    channels.stack_acq_vals["step_size"].set(5)
+    channels.refresh_stack_reference_preview()
+    _prepare_for_capture(root, cli_args)
+    out_path = os.path.join(cli_args.output_root, "relative-z-stack.png")
+    return _capture_widget(frame, out_path, pad=2)
+
+
 def _capture_laser_cycling_settings(
     ctx: Dict[str, object], cli_args: argparse.Namespace
 ) -> str:
@@ -2362,6 +2383,13 @@ CAPTURES: List[CaptureSpec] = [
         runner=_capture_define_step_size,
     ),
     CaptureSpec(
+        name="relative-z-stack",
+        group="acquiring-data",
+        description="Relative Z-stack range, focus mode and reference schematic",
+        context="controller",
+        runner=_capture_relative_z_stack,
+    ),
+    CaptureSpec(
         name="laser-cycling-settings",
         group="acquiring-data",
         description="Laser cycling combobox dropdown in stack acquisition settings",
@@ -2545,9 +2573,7 @@ def _capture_tutorial_microscopes(ctx, cli_args, mode):
             choice.set(
                 "Primary Microscope"
                 if index == 0
-                else "Additional Microscope"
-                if mode == "enabled"
-                else "Not Use"
+                else "Additional Microscope" if mode == "enabled" else "Not Use"
             )
             zooms = list(
                 controller.configuration["configuration"]["microscopes"][name]["zoom"][

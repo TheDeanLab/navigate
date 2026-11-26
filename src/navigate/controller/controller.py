@@ -2277,6 +2277,7 @@ class Controller:
             ax = axis.split("_")[0]
             stage_gui_dict[ax] = val
         self.stage_controller.set_position_silent(stage_gui_dict)
+        self.channels_tab_controller.refresh_stack_reference_preview()
         self._refresh_autofocus_bounds()
 
     def _refresh_autofocus_bounds(self) -> None:
@@ -2339,6 +2340,9 @@ class Controller:
         ):
             return
         self.stage_controller.update_position_telemetry(snapshot)
+        channels = getattr(self, "channels_tab_controller", None)
+        if channels is not None:
+            channels.refresh_stack_reference_preview()
 
     def update_event(self) -> None:
         """Update the View/Controller based on events from the Model.

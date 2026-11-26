@@ -1410,14 +1410,40 @@ class Microscope:
         self.central_focus = self.get_stage_position().get("f_pos", self.central_focus)
         return errors
 
-    def get_stage_position(self) -> dict:
+    def get_stage_position(self, *, require_fresh: bool = False) -> dict:
         """Get stage position.
+
+        Parameters
+        ----------
+        require_fresh : bool, optional
+            Require a complete, finite reply from every active stage device.
+            Bypass the acquisition cache and publish it only after all replies
+            validate. Used to anchor relative acquisitions before camera startup.
 
         Returns
         -------
         stage_position : dict
             Dictionary of stage positions.
         """
+        if require_fresh:
+            self.ask_stage_for_position = True
+            fresh = {}
+            for stage, axes in self.stages_list:
+                reply = stage.report_position()
+                for axis in axes:
+                    key = f"{axis}_pos"
+                    try:
+                        value = float(reply[key])
+                        if not isfinite(value):
+                            raise ValueError("Nonfinite stage coordinate")
+                    except (KeyError, TypeError, ValueError) as error:
+                        raise ValueError(
+                            f"A fresh, finite {axis} position is required for a relative stack"
+                        ) from error
+                    fresh[key] = value
+            self.ret_pos_dict.update(fresh)
+            self.ask_stage_for_position = False
+
         if self.ask_stage_for_position:
             for stage, axes in self.stages_list:
                 temp_pos = stage.report_position()

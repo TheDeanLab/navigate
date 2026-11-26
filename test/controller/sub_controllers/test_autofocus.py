@@ -94,8 +94,10 @@ class TestAutofocusPopupController:
         )
         autofocus_state_keys = ("autofocus_device", "autofocus_device_ref")
         missing = object()
+        # Manager.get() pickles its default, which loses sentinel identity.
+        local_state = dict(microscope_state)
         original_autofocus_state = {
-            key: microscope_state.get(key, missing) for key in autofocus_state_keys
+            key: local_state.get(key, missing) for key in autofocus_state_keys
         }
         calibration_controller = getattr(
             dummy_controller, "autofocus_calibration_controller", None

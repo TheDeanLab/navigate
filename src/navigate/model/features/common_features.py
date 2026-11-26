@@ -52,6 +52,7 @@ from navigate.tools.stack_geometry import (
     focus_position,
     stack_position,
 )
+from navigate.model.stack_acquisition import RelativeStackPlan
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -1270,10 +1271,10 @@ class ZStackAcquisition(FeatureBase):
         self.start_z_position = 0
 
         #: float: The z stack distance for the z-stack.
-        self.z_stack_distance = None
+        self.z_stack_distance: float = 0.0
 
         #: float: The focus stack distance for the z-stack.
-        self.f_stack_distance = None
+        self.f_stack_distance: float = 0.0
 
         #: float: The z position of the channel being acquired in the z-stack
         self.restore_z = None
@@ -1478,6 +1479,19 @@ class ZStackAcquisition(FeatureBase):
         focus, and data thread management, before the signal stage.
         """
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+        plan = getattr(self.model, "_relative_stack_plan", None)
+        if isinstance(plan, RelativeStackPlan):
+            if (
+                microscope_state["microscope_name"] != plan.microscope_name
+                or microscope_state.get("primary_z_axis", "z") != plan.z_axis
+                or microscope_state.get("primary_f_axis", "f") != plan.f_axis
+            ):
+                raise ValueError(
+                    "The microscope or stack axes changed during a relative acquisition"
+                )
+            microscope_state = microscope_state.copy()
+            microscope_state.update(plan.legacy_fields())
+            microscope_state["is_multiposition"] = bool(plan.positions)
         self.get_microscope_state(microscope_state)
         self.get_z_stack_parameters(microscope_state)
         self.get_f_stack_parameters(microscope_state)
@@ -1494,8 +1508,11 @@ class ZStackAcquisition(FeatureBase):
         # If multiposition, get the header to know which stage is which, and then
         # identify the number of positions to iterate through.
         if bool(microscope_state["is_multiposition"]) or self.force_multiposition:
-            self.position_headers = self.model.configuration["multi_positions"][0]
-            self.positions = self.model.configuration["multi_positions"][1:]
+            if isinstance(plan, RelativeStackPlan) and plan.positions:
+                self.position_headers, self.positions = plan.headers, plan.positions
+            else:
+                self.position_headers = self.model.configuration["multi_positions"][0]
+                self.positions = self.model.configuration["multi_positions"][1:]
         else:
             # If not multiposition, use the current position
             self.position_headers = [axis.upper() for axis in self.stage_axes]
@@ -1509,6 +1526,11 @@ class ZStackAcquisition(FeatureBase):
                 float(pos_dict[f"{self.primary_f_axis}_pos"]),
                 use_current=self.get_origin,
             )
+            if isinstance(plan, RelativeStackPlan):
+                reference = StackReference(
+                    plan.reference.z,
+                    reference.focus if self.get_origin else plan.reference.focus,
+                )
             self.positions[0][self.stage_axes.index(self.primary_z_axis)] = reference.z
             self.positions[0][
                 self.stage_axes.index(self.primary_f_axis)

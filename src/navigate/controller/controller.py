@@ -752,14 +752,18 @@ class Controller:
         """
         if not self._event_pump_running:
             return
-        self._drain_main_thread_dispatch_queue()
-        self.update_event()
-        if hasattr(self, "stage_controller"):
-            self.stage_controller.refresh_position_telemetry_status()
-        if self._event_pump_running:
-            self._event_pump_after_id = self.view.root.after(
-                20, self._schedule_event_pump
-            )
+        try:
+            self._drain_main_thread_dispatch_queue()
+            self.update_event()
+            if hasattr(self, "stage_controller"):
+                self.stage_controller.refresh_position_telemetry_status()
+        except Exception:
+            logger.exception("GUI event-pump iteration failed; continuing")
+        finally:
+            if self._event_pump_running:
+                self._event_pump_after_id = self.view.root.after(
+                    20, self._schedule_event_pump
+                )
 
     def _stop_event_pump(self) -> None:
         """Stop the Tk event queue polling loop.
@@ -2317,6 +2321,9 @@ class Controller:
         snapshot : dict
             Identity-tagged hardware telemetry from the model's single-slot queue.
         """
+        # Supported CPython platforms use a system-wide monotonic clock. Model
+        # and GUI timestamps share that reference; they are never wall-clock time
+        # and must not be persisted or compared across machines/reboots.
         if (
             self.acquire_bar_controller.is_acquiring
             or self.is_autofocusing
@@ -2423,7 +2430,10 @@ class Controller:
                 except queue.Empty:
                     break
         if latest_stage is not None:
-            self._update_idle_stage_position(latest_stage)
+            try:
+                self._update_idle_stage_position(latest_stage)
+            except Exception:
+                logger.exception("Ignoring failed optional stage telemetry update")
 
     def add_acquisition_mode(
         self, name: str, acquisition_obj: Callable[[str], Any]

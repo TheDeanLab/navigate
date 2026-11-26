@@ -200,6 +200,7 @@ class AdvancedStageParametersController:
         ):
             # Discard any readback that began before this preference changed.
             self.parent_controller._stage_position_valid_after = time.monotonic()
+            self.parent_controller.stage_controller.refresh_position_telemetry_settings()
             self.parent_controller.stage_controller.refresh_position_telemetry_status()
 
     def flip_axis(self, axis: str) -> None:

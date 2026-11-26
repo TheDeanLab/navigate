@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, TypedDict
 
+from navigate.config.stage_settings import stage_position_polling_supported
 from navigate.model.devices.stage.readback import StagePositionReadback
 
 if TYPE_CHECKING:
@@ -159,8 +160,24 @@ class StagePositionMonitor:
             "unavailable_axes": [],
         }
         groups: dict[int, tuple[list[StagePositionReadback], set[str]]] = {}
+        stage_config = configuration["configuration"]["microscopes"][name]["stage"]
+        hardware = stage_config.get("hardware", [])
+        if hasattr(hardware, "get"):
+            hardware = [hardware]
+        supported_axes = {
+            axis
+            for device in hardware
+            if stage_position_polling_supported(
+                {"hardware": device}, getattr(microscope, "is_synthetic", False)
+            )
+            for axis in device.get("axes", [])
+        }
         for stage, axes in microscope.stages_list:
-            if not isinstance(stage, StagePositionReadback):
+            # Use the same configured-device eligibility as the GUI toggle.
+            # Inheriting a readback implementation does not opt a plugin in.
+            if not isinstance(stage, StagePositionReadback) or not set(axes).issubset(
+                supported_axes
+            ):
                 snapshot["unavailable_axes"].extend(axes)
                 continue
             identity = id(stage.position_readback_identity)
@@ -231,9 +248,17 @@ class StagePositionMonitor:
                 self._publish(snapshot)
 
     def _run(self) -> None:
-        while not self._stop.wait(1.0):
+        failures = 0
+        delay = 1.0
+        while not self._stop.wait(delay):
             try:
                 self.poll_once()
             except Exception:
-                self._logger.exception("Idle stage monitor stopped after an error")
-                return
+                failures = min(failures + 1, 5)
+                delay = min(30.0, 2**failures)
+                self._logger.exception(
+                    "Idle stage monitor failed; retrying in %.1f seconds", delay
+                )
+            else:
+                failures = 0
+                delay = 1.0

@@ -93,6 +93,10 @@ from navigate.model.resolution_change import (
 )
 from navigate.config.config import get_navigate_path
 from navigate.model.plugins_model import PluginsModel
+from navigate.model.stage_position_monitor import (
+    StagePositionMonitor,
+    suspend_stage_polling,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -110,6 +114,7 @@ class Model:
         event_queue: multiprocessing.Queue = None,
         log_queue: Optional[multiprocessing.Queue] = None,
         autofocus_progress_queue: multiprocessing.Queue = None,
+        stage_position_queue: "multiprocessing.Queue | None" = None,
     ) -> None:
         """Initialize the Model.
 
@@ -125,6 +130,8 @@ class Model:
             Log queue. Receives log messages from the controller.
         autofocus_progress_queue : multiprocessing.Queue
             Single-slot queue for replaceable autofocus progress snapshots.
+        stage_position_queue : multiprocessing.Queue
+            Single-slot queue for idle stage readbacks.
         """
         # Set up logging
         log_setup("logging.yml", queue=log_queue)
@@ -431,6 +438,19 @@ class Model:
 
         self.load_feature_records()
 
+        #: StagePositionMonitor: Optional idle telemetry, started after GUI setup.
+        self._stage_position_monitor = (
+            StagePositionMonitor(self, stage_position_queue)
+            if stage_position_queue is not None
+            else None
+        )
+
+    def start_stage_position_monitor(self) -> None:
+        """Start idle telemetry after the application is ready."""
+        if self._stage_position_monitor is not None:
+            self._stage_position_monitor.start()
+
+    @suspend_stage_polling
     def laser_advanced_settings(self, request: dict) -> dict:
         """Read or change laser settings while acquisition is idle.
 
@@ -515,6 +535,7 @@ class Model:
             result["error"] = result["error"] or str(error)
         return result
 
+    @suspend_stage_polling
     def camera_advanced_settings(self, request: dict) -> dict:
         """Read or apply an identity-tagged idle camera setting.
 
@@ -808,6 +829,7 @@ class Model:
         end, records = metadata.read_since(start)
         return (metadata.acquisition_id, end), records
 
+    @suspend_stage_polling
     def prepare_camera_buffers(
         self, microscope_name: str, additional: tuple = ()
     ) -> dict:
@@ -864,6 +886,7 @@ class Model:
             "retired": retired,
         }
 
+    @suspend_stage_polling
     def start_prepared_capture(self, token: tuple, command: str, *args: Any) -> bool:
         """Start only if no Stop or setting change invalidated preparation.
 
@@ -892,6 +915,7 @@ class Model:
         self.run_command(command, *args)
         return True
 
+    @suspend_stage_polling
     def cancel_prepared_capture(self) -> None:
         """Invalidate pending capture and release waiting auxiliary displays."""
         self._prepared_camera_token = None
@@ -1055,6 +1079,7 @@ class Model:
                 pipe.close()
             delattr(self, pipe_name)
 
+    @suspend_stage_polling
     def get_active_microscope(self) -> Microscope:
         """Get the active microscope.
 
@@ -1081,6 +1106,7 @@ class Model:
 
         return self.active_microscope.camera.get_offset_variance_maps()
 
+    @suspend_stage_polling
     def run_command(
         self, command: str, *args: List[Union[str, int]], **kwargs: Dict[str, Any]
     ) -> None:
@@ -1403,6 +1429,7 @@ class Model:
 
         # print(self.configuration['experiment']['MirrorParameters']['modes'])
 
+    @suspend_stage_polling
     def move_stage(
         self,
         pos_dict: Dict[str, Any],
@@ -1451,6 +1478,7 @@ class Model:
         """
         return self.active_microscope.get_stage_position()
 
+    @suspend_stage_polling
     def query_select_microscope(self, *args: List[Any]) -> Dict[str, Any]:
         """Query the selected stage."""
         microscope_name = args[0]
@@ -1458,6 +1486,7 @@ class Model:
         ret_pos_dict = self.microscopes[microscope_name].get_stage_position()
         return ret_pos_dict
 
+    @suspend_stage_polling
     def update_stage_limits(self, microscope_name: str) -> None:
         """Update stage limits
 
@@ -1469,6 +1498,7 @@ class Model:
         microscope = self.microscopes[microscope_name]
         microscope.update_stage_limits()
 
+    @suspend_stage_polling
     def stop_stage(self, *, cancel_resolution_change: bool = True) -> None:
         """Stop stage motion and publish the actual stopped position.
 
@@ -1544,6 +1574,7 @@ class Model:
             if cancel_resolution_change and task is not None:
                 task.stop_complete_event.set()
 
+    @suspend_stage_polling
     def end_acquisition(self) -> None:
         """End the acquisition.
 
@@ -1838,6 +1869,7 @@ class Model:
         self.logger.info("Data thread stopped.")
         self.logger.info(f"Received frames in total: {acquired_frame_num}")
 
+    @suspend_stage_polling
     def prepare_acquisition(self, turn_off_flags: bool = True) -> bool:
         """Prepare the acquisition.
 
@@ -2273,6 +2305,7 @@ class Model:
         worker.start()
         return True
 
+    @suspend_stage_polling
     def _run_resolution_return(
         self,
         task: _ResolutionChangeTask,
@@ -2338,6 +2371,7 @@ class Model:
         worker.start()
         return True
 
+    @suspend_stage_polling
     def _update_setting(
         self,
         setting: str,
@@ -2398,6 +2432,7 @@ class Model:
             if resolution_task is not None:
                 self._finish_resolution_change(resolution_task, succeeded)
 
+    @suspend_stage_polling
     def change_resolution(self, resolution_value: str) -> bool:
         """Switch resolution mode of the microscope.
 
@@ -2420,6 +2455,7 @@ class Model:
         """
         return self._change_resolution(resolution_value)
 
+    @suspend_stage_polling
     def _change_resolution(
         self,
         resolution_value: str,
@@ -2713,6 +2749,9 @@ class Model:
 
     def terminate(self) -> None:
         """Terminate the model."""
+        monitor = getattr(self, "_stage_position_monitor", None)
+        if monitor is not None:
+            monitor.close()
         task = getattr(self, "_resolution_change_task", None)
         if task is not None and task.worker is not None and task.worker.is_alive():
             self.stop_stage()
@@ -2869,6 +2908,7 @@ class ASIModel(Model):
         event_queue: multiprocessing.Queue = None,
         log_queue: Optional[multiprocessing.Queue] = None,
         autofocus_progress_queue: multiprocessing.Queue = None,
+        stage_position_queue: "multiprocessing.Queue | None" = None,
     ) -> None:
         """Initialize the ASI Model.
 
@@ -2884,6 +2924,8 @@ class ASIModel(Model):
             Log queue for logging messages. Default is None.
         autofocus_progress_queue : multiprocessing.Queue
             Single-slot queue for replaceable autofocus progress snapshots.
+        stage_position_queue : multiprocessing.Queue
+            Single-slot queue for idle stage readbacks.
         """
         super().__init__(
             args,
@@ -2891,6 +2933,7 @@ class ASIModel(Model):
             event_queue,
             log_queue,
             autofocus_progress_queue,
+            stage_position_queue,
         )
 
         self.acquisition_modes_feature_setting["z-stack"] = [
@@ -2920,6 +2963,7 @@ class ASIModel(Model):
 
         self.logger.info("ASIModel initialized.")
 
+    @suspend_stage_polling
     def prepare_acquisition(self, turn_off_flags: bool = True) -> bool:
         result = super().prepare_acquisition(turn_off_flags)
         self.active_microscope.daq.zstack = self.imaging_mode == "z-stack"

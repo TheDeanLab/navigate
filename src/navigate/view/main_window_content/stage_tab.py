@@ -44,7 +44,11 @@ from navigate.view.custom_widgets.hover import HoverTkButton, HoverButton
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.validation import ValidatedEntry
-from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
+from navigate.view.custom_widgets.common import (
+    configure_grid,
+    themed_grid,
+    uniform_grid,
+)
 from navigate.view.theme import get_theme_color, get_theme_space_px
 import navigate
 
@@ -278,8 +282,7 @@ class StageControlTab(tk.Frame):
                 self,
                 f"{name}",
                 tk.PhotoImage(
-                    master=self,
-                    file=image_directory.joinpath("images", f"{name}.png")
+                    master=self, file=image_directory.joinpath("images", f"{name}.png")
                 ).subsample(2, 2),
             )
 
@@ -662,6 +665,10 @@ class PositionFrame(ttk.Labelframe):
         #: list: List of frames for the position entries.
         for i in range(len(entry_names)):
             self.add_position_entry(entry_names[i], entry_labels[i])
+
+        #: ttk.Label: Freshness of optional idle hardware position readback.
+        self.readback_status = ttk.Label(self, text="Idle refresh: waiting")
+        self.readback_status.grid(row=0, column=0, sticky="w")
 
         uniform_grid(self)
 

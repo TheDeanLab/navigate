@@ -152,3 +152,53 @@ def test_progress_transport_failure_does_not_interrupt_saving():
     assert feature.received_frames == 3
     assert feature.image_writer.save_image.call_count == 2
     assert feature._stack_progress is None
+
+
+@pytest.mark.parametrize("feature_type", [ZStackAcquisition, ASIZStackAcquisition])
+@pytest.mark.parametrize("failure", ["StackProgressPlan", "StackProgressTracker"])
+def test_progress_initialization_failure_preserves_capture_and_is_not_retried(
+    feature_type, failure: str, monkeypatch, caplog
+) -> None:
+    """Optional telemetry failure must leave both timepoints and saving intact."""
+    monkeypatch.setattr(
+        "navigate.model.features.common_features.time.sleep", lambda _: None
+    )
+    initializer = Mock(side_effect=RuntimeError("progress unavailable"))
+    monkeypatch.setattr(
+        f"navigate.model.features.common_features.{failure}", initializer
+    )
+    observations = []
+    for enabled in (False, True):
+        model, state, _, moves = relative_model(multiposition=True)
+        state["timepoints"] = 2
+        model._relative_stack_plan = freeze_relative_stack(model)
+        model.stack_progress_queue = Queue(1) if enabled else None
+        model._stack_progress_token = (1, "scope")
+        feature = feature_type(model)
+        feature.image_writer = Mock()
+        for _ in range(2):
+            feature.pre_signal_func()
+            feature.pre_data_func()
+            frames = list(range(feature.total_frames))
+            for _ in frames:
+                feature.signal_func()
+                model.frame_id += 1
+                if feature.signal_end():
+                    break
+            feature.in_data_func(frames)
+            assert feature.end_data_func()
+            assert feature.received_frames == len(frames)
+        assert feature._stack_progress is None
+        if enabled:
+            assert model.stack_progress_queue.empty()
+        observations.append(
+            (
+                moves,
+                model.get_stage_position.call_args_list,
+                model.stop_stage.call_args_list,
+                feature.image_writer.save_image.call_args_list,
+            )
+        )
+    assert observations[0] == observations[1]
+    initializer.assert_called_once()
+    assert caplog.text.count("Unable to initialize optional stack progress") == 1

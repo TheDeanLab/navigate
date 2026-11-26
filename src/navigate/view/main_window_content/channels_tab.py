@@ -801,8 +801,8 @@ class StackAcquisitionFrame(ttk.Labelframe):
             pady=get_theme_space_px(5),
         )
 
-        self.cubic_frame = ttk.Frame(self.stack_frame)
-        self.cubic_frame.grid(
+        self.schematic_frame = ttk.Frame(self.stack_frame)
+        self.schematic_frame.grid(
             row=3,
             rowspan=3,
             column=2,
@@ -811,6 +811,25 @@ class StackAcquisitionFrame(ttk.Labelframe):
             padx=get_theme_padding_px((5, 15)),
             pady=get_theme_padding_px((5, 0)),
         )
+        self.schematic_frame.rowconfigure(0, weight=1)
+        self.schematic_frame.columnconfigure(0, weight=1)
+        # Keep both views in the same grid cell so Tk reserves their maximum
+        # requested size, including the idle endpoint fields. Raising a view
+        # changes visibility without moving the acquisition controls below it.
+        self.cubic_frame = ttk.Frame(self.schematic_frame)
+        self.cubic_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        self.progress_frame = ttk.Frame(self.schematic_frame)
+        self.progress_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        self.progress_schematic = tk.Canvas(
+            self.progress_frame,
+            width=280,
+            height=215,
+            highlightthickness=0,
+            background=get_theme_color("panel_bg", "#1a212b"),
+        )
+        self.progress_schematic.pack(fill=tk.BOTH, expand=True)
+        self.progress_schematic_hover = Hover(self.progress_schematic)
+        self.cubic_frame.tkraise()
 
         image_directory = Path(__file__).resolve().parent
         cubic_image = "cubic_bottom_to_top.png"
@@ -1049,18 +1068,8 @@ class StackAcquisitionFrame(ttk.Labelframe):
 
     def clear_stack_progress(self) -> None:
         """Restore the idle schematic without changing acquisition inputs."""
-        canvas = self.relative_schematic
-        if canvas.find_withtag("acquisition_plane"):
-            canvas.delete("all")
-        canvas.configure(width=230, height=175)
-        self.inputs["top"].grid()
-        self.inputs["bottom"].grid()
-        if self.position_mode.get() == "Relative":
-            self.cubic_image_label.grid_remove()
-            canvas.grid(row=0, rowspan=2, column=0, columnspan=2)
-        else:
-            canvas.grid_remove()
-            self.cubic_image_label.grid()
+        self.progress_schematic.delete("all")
+        self.cubic_frame.tkraise()
 
     def draw_stack_progress(self, snapshot: StackProgressSnapshot) -> None:
         """Move the plane marker using planned coordinates of received frames.
@@ -1068,12 +1077,8 @@ class StackAcquisitionFrame(ttk.Labelframe):
         Canvas items are reused between updates. This method runs only on the Tk
         thread and does not read stage coordinates or change stack settings.
         """
-        canvas = self.relative_schematic
-        self.cubic_image_label.grid_remove()
-        self.inputs["top"].grid_remove()
-        self.inputs["bottom"].grid_remove()
-        canvas.configure(width=280, height=215)
-        canvas.grid(row=0, rowspan=2, column=0, columnspan=2)
+        canvas = self.progress_schematic
+        self.progress_frame.tkraise()
         color = get_theme_color("text", "#d7dee8")
         accent = get_theme_color("accent", "#4b78b8")
         if not canvas.find_withtag("acquisition_plane"):
@@ -1128,7 +1133,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
             "progress_received",
             text=f"Received {snapshot.completed}/{snapshot.total} frames",
         )
-        self.relative_schematic_hover.setdescription(
+        self.progress_schematic_hover.setdescription(
             "Latest received camera plane at its planned coordinates. "
             "This is acquisition progress, not a measured stage readback. "
             "No additional stage polling is performed."

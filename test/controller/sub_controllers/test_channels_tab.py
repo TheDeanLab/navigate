@@ -318,7 +318,7 @@ def test_clear_defocus_reference_resets_main_channel_status(channels_tab_control
 
 @pytest.mark.parametrize("button", ["start", "end"])
 def test_update_endpoint_preserves_other_physical_pair(channels_tab_controller, button):
-    """Capturing one endpoint must not translate the other endpoint."""
+    """Recapturing one endpoint must not translate the other captured endpoint."""
     controller = channels_tab_controller
     controller.microscope_state_dict = controller.parent_controller.configuration[
         "experiment"
@@ -333,6 +333,11 @@ def test_update_endpoint_preserves_other_physical_pair(channels_tab_controller, 
     }.items():
         controller.stack_acq_vals[name].set(value)
     controller.in_initialization = False
+    for endpoint, z, focus in (("start", 100, 10), ("end", 300, 30)):
+        controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ].update(z=z, f=focus)
+        getattr(controller, f"update_{endpoint}_position")()
     controller.parent_controller.configuration["experiment"]["StageParameters"].update(
         z=200, f=25
     )

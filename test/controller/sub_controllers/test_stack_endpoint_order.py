@@ -140,7 +140,23 @@ def test_incomplete_other_endpoint_warns_without_partial_capture(
     variable = controller.stack_acq_vals[f"{field}_{coordinate}"]
     valid = variable.get()
     variable.set(text)
-    before = copy_proxy_object(controller.microscope_state_dict)
+    # Unrelated autofocus tests can leave opaque objects in shared settings.
+    # Manager reads unpickle new identities, so compare the values capture owns.
+    # Include such metadata here to keep this regression independent of order.
+    controller.microscope_state_dict["autofocus_device"] = object()
+    stack_keys = (
+        "start_position",
+        "end_position",
+        "start_focus",
+        "end_focus",
+        "stack_z_origin",
+        "stack_focus_origin",
+        "abs_z_start",
+        "abs_z_end",
+        "number_z_steps",
+        "step_size",
+    )
+    before = {key: controller.microscope_state_dict[key] for key in stack_keys}
     context = controller._stack_endpoint_context
     assignments = controller._stack_endpoint_order
     origins = (controller.z_origin, controller.focus_origin)
@@ -153,10 +169,13 @@ def test_incomplete_other_endpoint_warns_without_partial_capture(
         "navigate.controller.sub_controllers.channels_tab.messagebox.showwarning",
         warning,
     )
+    timepoint_update = Mock(wraps=controller.update_timepoint_setting)
+    monkeypatch.setattr(controller, "update_timepoint_setting", timepoint_update)
     capture(controller, button, 5000, 100)
     warning.assert_called_once()
+    timepoint_update.assert_not_called()
     assert field.title() in warning.call_args.kwargs["message"]
-    assert copy_proxy_object(controller.microscope_state_dict) == before
+    assert {key: controller.microscope_state_dict[key] for key in stack_keys} == before
     assert controller._stack_endpoint_context == context
     assert controller._stack_endpoint_order == assignments
     assert (controller.z_origin, controller.focus_origin) == origins

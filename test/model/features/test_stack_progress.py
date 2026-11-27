@@ -157,7 +157,7 @@ def test_progress_transport_failure_does_not_interrupt_saving():
 @pytest.mark.parametrize("feature_type", [ZStackAcquisition, ASIZStackAcquisition])
 @pytest.mark.parametrize("failure", ["StackProgressPlan", "StackProgressTracker"])
 def test_progress_initialization_failure_preserves_capture_and_is_not_retried(
-    feature_type, failure: str, monkeypatch, caplog
+    feature_type, failure: str, monkeypatch
 ) -> None:
     """Optional telemetry failure must leave both timepoints and saving intact."""
     monkeypatch.setattr(
@@ -166,6 +166,12 @@ def test_progress_initialization_failure_preserves_capture_and_is_not_retried(
     initializer = Mock(side_effect=RuntimeError("progress unavailable"))
     monkeypatch.setattr(
         f"navigate.model.features.common_features.{failure}", initializer
+    )
+    # The application model logger does not propagate to pytest's root handler.
+    # Assert the logging call directly so this also works with pytest 8 on 3.9.
+    log_failure = Mock()
+    monkeypatch.setattr(
+        "navigate.model.features.common_features.logger.exception", log_failure
     )
     observations = []
     for enabled in (False, True):
@@ -201,4 +207,4 @@ def test_progress_initialization_failure_preserves_capture_and_is_not_retried(
         )
     assert observations[0] == observations[1]
     initializer.assert_called_once()
-    assert caplog.text.count("Unable to initialize optional stack progress") == 1
+    log_failure.assert_called_once_with("Unable to initialize optional stack progress")

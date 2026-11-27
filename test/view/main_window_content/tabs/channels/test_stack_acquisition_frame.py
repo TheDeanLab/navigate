@@ -32,28 +32,88 @@
 
 import tkinter as tk
 
+import pytest
 
-class _EmptyImage:
-    def __str__(self):
-        return ""
+from navigate.view.main_window_content.channels_tab import (
+    ChannelsTab,
+    StackAcquisitionFrame,
+)
+from navigate.view.theme import get_theme_space_px
 
 
-def test_stack_acquisition_frame_falls_back_for_invalid_image_handle(monkeypatch):
-    from navigate.view.main_window_content import channels_tab
-
+def test_absolute_preview_uses_vectors_without_loading_an_image(monkeypatch) -> None:
+    """The idle view uses the animation's outline and needs no image resource."""
     root = tk.Tk()
     try:
-        parent = tk.Frame(root)
-        parent.grid(row=0, column=0)
 
-        monkeypatch.setattr(
-            channels_tab.tk, "PhotoImage", lambda *args, **kwargs: _EmptyImage()
-        )
+        def unexpected_image(*args, **kwargs):
+            raise AssertionError("Stack previews must not load bitmap images")
 
-        frame = channels_tab.StackAcquisitionFrame(parent)
+        monkeypatch.setattr(tk, "PhotoImage", unexpected_image)
+        frame = StackAcquisitionFrame(root)
+        frame.draw_absolute_stack(300, 100)
         root.update_idletasks()
+        canvas = frame.idle_schematic
+        assert len(canvas.find_withtag("stack_outline")) == 3
+        assert canvas.itemcget("idle_top", "text") == "300 µm"
+        assert canvas.itemcget("idle_bottom", "text") == "100 µm"
+        frame.draw_absolute_stack(-90, 90, "theta")
+        assert canvas.itemcget("idle_top", "text") == "90 °"
+        assert canvas.itemcget("idle_bottom", "text") == "-90 °"
+    finally:
+        root.destroy()
 
-        assert frame.image is None
-        assert frame.cubic_image_label.cget("image") == ""
+
+@pytest.mark.parametrize("scaling", [1.0, 2.0])
+def test_stack_modes_and_focus_ramp_preserve_compact_layout(scaling: float) -> None:
+    """Mode toggles retain every control's footprint, including inactive fields."""
+    root = tk.Tk()
+    try:
+        root.tk.call("tk", "scaling", scaling)
+        tab = ChannelsTab(root)
+        tab.grid(sticky="nsew")
+        frame = tab.stack_acq_frame
+        frame.create_additional_stack_widgets(["z", "f"], {})
+        root.update_idletasks()
+        size = (frame.winfo_reqwidth(), frame.winfo_reqheight())
+        for relative, ramp, editable in (
+            (False, False, True),
+            (True, False, True),
+            (True, True, True),
+            (True, False, True),
+            (False, True, True),
+            (False, True, False),
+            (True, True, False),
+            (False, False, True),
+        ):
+            frame.configure_position_mode(relative, ramp, editable)
+            root.update_idletasks()
+            current = (frame.winfo_reqwidth(), frame.winfo_reqheight())
+            assert current == size
+            assert frame.relative_controls.winfo_manager() == "grid"
+            for endpoint in ("start", "end"):
+                focus = frame.inputs[f"{endpoint}_focus"]
+                button = frame.buttons[f"set_{endpoint}"]
+                assert focus.winfo_manager() == button.winfo_manager() == "grid"
+                expected_focus = (
+                    "normal" if editable and (not relative or ramp) else "disabled"
+                )
+                assert str(focus.widget.cget("state")) == expected_focus
+                assert button.instate(["disabled"]) == relative
+
+        # The schematic must not stretch individual device rows, even when the
+        # surrounding application allocates more space than the panel requests.
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
+        root.geometry(f"{tab.winfo_reqwidth() + 100}x{tab.winfo_reqheight() + 100}")
+        root.update_idletasks()
+        assert frame.winfo_height() == frame.winfo_reqheight()
+        devices = [
+            frame.inputs[name] for name in ("z_device", "f_device", "cycling", "speed")
+        ]
+        for above, below in zip(devices, devices[1:]):
+            assert above.winfo_height() == above.winfo_reqheight()
+            gap = below.winfo_rooty() - above.winfo_rooty() - above.winfo_height()
+            assert 0 <= gap <= 2 * get_theme_space_px(5)
     finally:
         root.destroy()

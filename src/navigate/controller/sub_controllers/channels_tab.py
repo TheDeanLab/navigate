@@ -889,6 +889,11 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict["number_z_steps"] = geometry.count
         self.stack_acq_vals["bottom"].set(self.microscope_state_dict["abs_z_start"])
         self.stack_acq_vals["top"].set(self.microscope_state_dict["abs_z_end"])
+        self.view.stack_acq_frame.draw_absolute_stack(
+            self.microscope_state_dict["abs_z_start"],
+            self.microscope_state_dict["abs_z_end"],
+            primary_z_axis,
+        )
 
         try:
             self.microscope_state_dict["start_focus"] = self.stack_acq_vals[

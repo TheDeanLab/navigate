@@ -60,7 +60,7 @@ def test_marker_moves_without_mutating_settings_or_creating_new_canvas_items(
     assert not canvas.find_withtag("acquisition_plane")
     assert frame.inputs["top"].winfo_manager() == "grid"
     assert frame.schematic_frame.winfo_children()[-1] == frame.cubic_frame
-    assert (frame.cubic_image_label.winfo_manager() == "grid") is not relative
+    assert frame.idle_schematic.winfo_manager() == "grid"
     controller.update_stack_progress(p.snapshot(80))
     assert not canvas.find_withtag("acquisition_plane")
 
@@ -102,16 +102,11 @@ def test_late_reference_cannot_replace_received_plane_and_reload_clears_token(
     assert not frame.progress_schematic.find_withtag("acquisition_plane")
 
 
-@pytest.mark.parametrize(
-    "relative, ramp", [(False, False), (True, False), (True, True)]
-)
 def test_acquisition_start_progress_and_stop_preserve_layout(
-    controller, relative: bool, ramp: bool
+    controller,
 ) -> None:
-    """Receiving frames must not resize the settings or move sections below them."""
-    frame, p = start(controller, relative)
-    frame.relative_focus_ramp.set(ramp)
-    controller.set_mode("stop")
+    """Mode, ramp and progress toggles must not move neighboring sections."""
+    frame = controller.view.stack_acq_frame
 
     def requested_sizes() -> tuple[tuple[int, int], ...]:
         frame.update_idletasks()
@@ -122,13 +117,55 @@ def test_acquisition_start_progress_and_stop_preserve_layout(
         )
 
     idle = requested_sizes()
-    # Also cover cancellation before the first frame and repeated captures.
-    for counts in ((), (1, 5, p.total), (1,)):
-        controller.set_mode("z-stack")
-        controller.begin_stack_progress(p.capture_token)
-        assert requested_sizes() == idle
-        for completed in counts:
-            controller.update_stack_progress(p.snapshot(completed))
-            assert requested_sizes() == idle
+    for relative, ramp in (
+        (False, False),
+        (True, False),
+        (True, True),
+        (True, False),
+        (False, True),
+    ):
+        frame, p = start(controller, relative)
+        frame.relative_focus_ramp.set(ramp)
         controller.set_mode("stop")
         assert requested_sizes() == idle
+        # Also cover cancellation before the first frame and repeated captures.
+        for counts in ((), (1, 5, p.total), (1,)):
+            controller.set_mode("z-stack")
+            controller.begin_stack_progress(p.capture_token)
+            assert requested_sizes() == idle
+            for completed in counts:
+                controller.update_stack_progress(p.snapshot(completed))
+                assert requested_sizes() == idle
+            controller.set_mode("stop")
+            assert requested_sizes() == idle
+
+
+@pytest.mark.parametrize("relative", [False, True])
+def test_idle_and_progress_use_the_same_outline_without_moving_it(controller, relative):
+    """The cube stays in place when the first received frame starts animation."""
+    frame, p = start(controller, relative)
+    idle = frame.idle_schematic
+    before = [idle.coords(item) for item in idle.find_withtag("stack_outline")]
+    assert len(before) == 3
+    controller.update_stack_progress(p.snapshot(1))
+    progress = frame.progress_schematic
+    assert [
+        progress.coords(item) for item in progress.find_withtag("stack_outline")
+    ] == before
+    frame.update_idletasks()
+    assert (progress.winfo_rootx(), progress.winfo_rooty()) == (
+        idle.winfo_rootx(),
+        idle.winfo_rooty(),
+    )
+    controller.set_mode("stop")
+    assert [idle.coords(item) for item in idle.find_withtag("stack_outline")] == before
+    assert controller.parent_controller.commands == []
+
+
+def test_absolute_preview_updates_after_editing_an_endpoint(controller):
+    """Endpoint edits update the fixed preview through the usual geometry path."""
+    controller.stack_acq_vals["end_position"].set(350)
+    frame = controller.view.stack_acq_frame
+    assert frame.idle_schematic.itemcget("idle_top", "text") == "350 µm"
+    assert frame.idle_schematic.itemcget("idle_bottom", "text") == "0 µm"
+    assert controller.parent_controller.commands == []

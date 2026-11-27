@@ -653,10 +653,12 @@ def map_labels(
             * current_pixel_size
         )
         x_positions = [x_start]
-        for _ in range(1, num_x):
+        for step_idx in range(1, num_x):
             x_positions.append(
                 x_start
-                + x_direction_alignment * (x_pixel * (1 - overlap) * current_pixel_size)
+                + step_idx
+                * x_direction_alignment
+                * (x_pixel * (1 - overlap) * current_pixel_size)
             )
 
         y_start = (
@@ -666,10 +668,12 @@ def map_labels(
             * current_pixel_size
         )
         y_positions = [y_start]
-        for _ in range(1, num_y):
+        for step_idx in range(1, num_y):
             y_positions.append(
                 y_start
-                + y_direction_alignment * (y_pixel * (1 - overlap) * current_pixel_size)
+                + step_idx
+                * y_direction_alignment
+                * (y_pixel * (1 - overlap) * current_pixel_size)
             )
 
         if x_direction_index == 0:

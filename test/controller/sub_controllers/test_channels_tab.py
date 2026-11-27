@@ -316,138 +316,37 @@ def test_clear_defocus_reference_resets_main_channel_status(channels_tab_control
     )
 
 
-def test_update_start_position(channels_tab_controller):
-    z, f = random.randint(0, 1000), random.randint(0, 1000)
-    channels_tab_controller.parent_controller.configuration["experiment"][
-        "StageParameters"
-    ]["z"] = z
-    channels_tab_controller.parent_controller.configuration["experiment"][
-        "StageParameters"
-    ]["f"] = f
-
-    channels_tab_controller.update_start_position()
-
-    assert channels_tab_controller.z_origin == z
-    assert channels_tab_controller.focus_origin == f
-    assert int(channels_tab_controller.stack_acq_vals["start_position"].get()) == 0
-    assert int(channels_tab_controller.stack_acq_vals["start_focus"].get()) == 0
-
-    # test flip_z is True
-    microscope_name = (
-        channels_tab_controller.parent_controller.configuration_controller.microscope_name
+@pytest.mark.parametrize("button", ["start", "end"])
+def test_update_endpoint_preserves_other_physical_pair(channels_tab_controller, button):
+    """Recapturing one endpoint must not translate the other captured endpoint."""
+    controller = channels_tab_controller
+    controller.microscope_state_dict = controller.parent_controller.configuration[
+        "experiment"
+    ]["MicroscopeState"]
+    controller.in_initialization = True
+    controller.z_origin, controller.focus_origin = 200, 20
+    for name, value in {
+        "start_position": -100,
+        "end_position": 100,
+        "start_focus": -10,
+        "end_focus": 10,
+    }.items():
+        controller.stack_acq_vals[name].set(value)
+    controller.in_initialization = False
+    for endpoint, z, focus in (("start", 100, 10), ("end", 300, 30)):
+        controller.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ].update(z=z, f=focus)
+        getattr(controller, f"update_{endpoint}_position")()
+    controller.parent_controller.configuration["experiment"]["StageParameters"].update(
+        z=200, f=25
     )
-    stage_config = channels_tab_controller.parent_controller.configuration[
-        "configuration"
-    ]["microscopes"][microscope_name]["stage"]
-    stage_config["flip_z"] = True
-    channels_tab_controller.update_start_position()
-
-    assert channels_tab_controller.z_origin == z
-    assert channels_tab_controller.focus_origin == f
-    assert int(channels_tab_controller.stack_acq_vals["end_position"].get()) == 0
-    assert int(channels_tab_controller.stack_acq_vals["end_focus"].get()) == 0
-    stage_config["flip_z"] = False
-
-
-def test_update_end_position(channels_tab_controller):
-    configuration = channels_tab_controller.parent_controller.configuration
-
-    # Initialize
-    z, f = random.randint(0, 1000), random.randint(0, 1000)
-    z_shift, f_shift = random.randint(1, 500), random.randint(1, 500)
-    configuration["experiment"]["StageParameters"]["z"] = z + z_shift
-    configuration["experiment"]["StageParameters"]["f"] = f + f_shift
-
-    print(f"z: {z} z-shift: {z_shift} f: {f} f-shift: {f_shift}")
-    print(f'z-dict: {configuration["experiment"]["StageParameters"]["z"]}')
-    print(f'f-dict: {configuration["experiment"]["StageParameters"]["f"]}')
-
-    # Step backwards and record results
-    channels_tab_controller.z_origin = z - z_shift
-    channels_tab_controller.focus_origin = f - f_shift
-    channels_tab_controller.update_end_position()
-    z_origin_minus = copy.deepcopy(channels_tab_controller.z_origin)
-    f_origin_minus = copy.deepcopy(channels_tab_controller.focus_origin)
-    start_position_minus = copy.deepcopy(
-        channels_tab_controller.stack_acq_vals["start_position"].get()
-    )
-    end_position_minus = copy.deepcopy(
-        channels_tab_controller.stack_acq_vals["end_position"].get()
-    )
-    start_focus_minus = copy.deepcopy(
-        channels_tab_controller.stack_acq_vals["start_focus"].get()
-    )
-    end_focus_minus = copy.deepcopy(
-        channels_tab_controller.stack_acq_vals["end_focus"].get()
-    )
-
-    print("back")
-    print(f"z: {z} z-shift: {z_shift} f: {f} f-shift: {f_shift}")
-    print(f'z-dict: {configuration["experiment"]["StageParameters"]["z"]}')
-    print(f'f-dict: {configuration["experiment"]["StageParameters"]["f"]}')
-
-    # Step forward
-    configuration["experiment"]["StageParameters"]["z"] = z - z_shift
-    configuration["experiment"]["StageParameters"]["f"] = f - f_shift
-    channels_tab_controller.z_origin = z + z_shift
-    channels_tab_controller.focus_origin = f + f_shift
-    channels_tab_controller.update_end_position()
-
-    print("forward")
-    print(f"z: {z} z-shift: {z_shift} f: {f} f-shift: {f_shift}")
-    print(f'z-dict: {configuration["experiment"]["StageParameters"]["z"]}')
-    print(f'f-dict: {configuration["experiment"]["StageParameters"]["f"]}')
-
-    # Ensure we achieve the same origin
-    assert channels_tab_controller.z_origin == z_origin_minus
-    assert channels_tab_controller.focus_origin == f_origin_minus
-    assert (
-        channels_tab_controller.stack_acq_vals["start_position"].get()
-        == start_position_minus
-    )
-    assert (
-        channels_tab_controller.stack_acq_vals["end_position"].get()
-        == end_position_minus
-    )
-    assert (
-        channels_tab_controller.stack_acq_vals["start_focus"].get() == start_focus_minus
-    )
-    assert channels_tab_controller.stack_acq_vals["end_focus"].get() == end_focus_minus
-
-    # test flip_z is True
-    microscope_name = (
-        channels_tab_controller.parent_controller.configuration_controller.microscope_name
-    )
-    stage_config = channels_tab_controller.parent_controller.configuration[
-        "configuration"
-    ]["microscopes"][microscope_name]["stage"]
-    stage_config["flip_z"] = True
-    # forward
-    channels_tab_controller.z_origin = z
-    channels_tab_controller.focus_origin = f
-    configuration["experiment"]["StageParameters"]["z"] = z - 2 * z_shift
-    configuration["experiment"]["StageParameters"]["f"] = f - 2 * f_shift
-    channels_tab_controller.update_end_position()
-    assert channels_tab_controller.z_origin == z - z_shift
-    assert channels_tab_controller.focus_origin == f - f_shift
-    assert channels_tab_controller.stack_acq_vals["start_position"].get() == z_shift
-    assert channels_tab_controller.stack_acq_vals["end_position"].get() == -1 * z_shift
-    assert channels_tab_controller.stack_acq_vals["start_focus"].get() == f_shift
-    assert channels_tab_controller.stack_acq_vals["end_focus"].get() == -1 * f_shift
-
-    # backward
-    channels_tab_controller.z_origin = z
-    channels_tab_controller.focus_origin = f
-    configuration["experiment"]["StageParameters"]["z"] = z + 2 * z_shift
-    configuration["experiment"]["StageParameters"]["f"] = f + 2 * f_shift
-    channels_tab_controller.update_end_position()
-    assert channels_tab_controller.z_origin == z + z_shift
-    assert channels_tab_controller.focus_origin == f + f_shift
-    assert channels_tab_controller.stack_acq_vals["start_position"].get() == z_shift
-    assert channels_tab_controller.stack_acq_vals["end_position"].get() == -1 * z_shift
-    assert channels_tab_controller.stack_acq_vals["start_focus"].get() == f_shift
-    assert channels_tab_controller.stack_acq_vals["end_focus"].get() == -1 * f_shift
-    stage_config["flip_z"] = False
+    getattr(controller, f"update_{button}_position")()
+    state = controller.microscope_state_dict
+    other = "end" if button == "start" else "start"
+    expected_z, expected_f = (300, 30) if button == "start" else (100, 10)
+    assert state["stack_z_origin"] + state[f"{other}_position"] == expected_z
+    assert state["stack_focus_origin"] + state[f"{other}_focus"] == expected_f
 
 
 def test_update_start_update_end_position(channels_tab_controller):

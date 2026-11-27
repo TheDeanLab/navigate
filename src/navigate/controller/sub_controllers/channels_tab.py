@@ -38,6 +38,7 @@ from typing import Optional, Dict, Any
 # Third Party Imports
 import numpy as np
 import tkinter as tk
+from tkinter import messagebox
 
 import navigate
 
@@ -677,6 +678,9 @@ class ChannelsTabController(GUIController):
         captured endpoints even when their order crosses. Read coordinates from
         the fields on every capture so manual edits remain authoritative. Button
         assignments are reset when loading an experiment or changing devices.
+        The first capture in a new context anchors the other endpoint's offset
+        at the current position, rather than at the experiment's load position.
+        Incomplete input leaves the stack and capture context unchanged.
 
         Parameters
         ----------
@@ -691,24 +695,39 @@ class ChannelsTabController(GUIController):
         flipped = config.stage_flip_flags[z_axis]
         context = (config.microscope_name, z_device, f_device, flipped)
         order = self._stack_endpoint_order
-        if context != self._stack_endpoint_context:
+        fresh_context = context != self._stack_endpoint_context
+        if fresh_context:
             order = ("end", "start") if flipped else ("start", "end")
 
         positions = self.parent_controller.configuration["experiment"][
             "StageParameters"
         ]
         captured = (float(positions[z_axis]), float(positions[f_axis]))
+        # Preserve the legacy first-Start anchoring and apply it symmetrically
+        # to first-End. Later captures preserve the other physical endpoint.
+        z_reference, f_reference = (
+            captured if fresh_context else (self.z_origin, self.focus_origin)
+        )
         pairs: list[tuple[float, float, str]] = []
         for field, button in zip(("start", "end"), order):
             if button == endpoint:
                 z, f = captured
             else:
-                z = self.z_origin + float(
-                    self.stack_acq_vals[f"{field}_position"].get()
-                )
-                f = self.focus_origin + float(
-                    self.stack_acq_vals[f"{field}_focus"].get()
-                )
+                try:
+                    z = z_reference + float(
+                        self.stack_acq_vals[f"{field}_position"].get()
+                    )
+                    f = f_reference + float(self.stack_acq_vals[f"{field}_focus"].get())
+                except (tk.TclError, ValueError):
+                    messagebox.showwarning(
+                        title="Incomplete stack endpoint",
+                        message=(
+                            f"Enter valid position and focus values for the {field.title()} "
+                            f"endpoint before setting {endpoint.title()} Pos/Foc."
+                        ),
+                        parent=self.view,
+                    )
+                    return
             pairs.append((z, f, button))
         pairs.sort(key=lambda pair: pair[0], reverse=flipped)
 

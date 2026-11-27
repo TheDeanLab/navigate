@@ -87,6 +87,14 @@ This section defines Z-stack geometry and sequencing.
 6. Additional stack-device offset controls, when present, move secondary stack stages at fixed offsets from the primary Z-stack stage.
 7. :guilabel:`Laser Cycling Settings` selects Per Stack or Per Z channel ordering.
 
+You can capture start and end in either order. After loading an experiment or
+changing microscopes or stack devices, the first capture uses the current stage
+position as the reference for the other endpoint's existing offset. For example,
+capturing Start at Z = 5000 µm with an End offset of +50 µm sets the provisional
+End to 5050 µm. Later captures preserve the other endpoint's physical position.
+If the other endpoint's position or focus field is blank or incomplete, a warning
+asks you to finish the entry; the capture leaves the stack unchanged.
+
 .. _ui_timepoint_settings:
 
 Timepoint Settings

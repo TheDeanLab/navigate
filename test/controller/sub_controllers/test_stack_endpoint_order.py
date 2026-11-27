@@ -77,6 +77,99 @@ def physical_pairs(controller: ChannelsTabController) -> list[tuple[float, float
     ]
 
 
+@pytest.mark.parametrize("button", ["start", "end"])
+@pytest.mark.parametrize("flipped", [False, True])
+def test_first_capture_after_load_reanchors_uncaptured_offsets(
+    controller, button: str, flipped: bool
+) -> None:
+    """One capture far from the load position must not create a huge stack."""
+    parent = controller.parent_controller
+    parent.configuration_controller.microscope_config["stage"]["flip_z"] = flipped
+    parent.configuration["experiment"]["StageParameters"].update(z=0, f=0)
+    controller.microscope_state_dict.update(
+        start_position=50 if flipped else -50,
+        end_position=-50 if flipped else 50,
+        start_focus=5 if flipped else -5,
+        end_focus=-5 if flipped else 5,
+        step_size=0.5,
+    )
+    controller.populate_experiment_values()
+    capture(controller, button, 5000, 100)
+    expected = (
+        [(5000, 100), (5050, 105)] if button == "start" else [(4950, 95), (5000, 100)]
+    )
+    assert physical_pairs(controller) == (expected[::-1] if flipped else expected)
+    assert controller.microscope_state_dict["number_z_steps"] == 100
+    assert parent.commands == []
+
+    # The second capture must retain the first physical point, in either order.
+    other = "end" if button == "start" else "start"
+    next_point = (5200, 120) if button == "start" else (4800, 80)
+    capture(controller, other, *next_point)
+    assert sorted(physical_pairs(controller)) == sorted([(5000, 100), next_point])
+
+
+@pytest.mark.parametrize("fresh", [False, True])
+@pytest.mark.parametrize("button", ["start", "end"])
+@pytest.mark.parametrize("flipped", [False, True])
+@pytest.mark.parametrize("coordinate", ["position", "focus"])
+@pytest.mark.parametrize("text", ["", "-"])
+def test_incomplete_other_endpoint_warns_without_partial_capture(
+    controller,
+    monkeypatch,
+    fresh: bool,
+    button: str,
+    flipped: bool,
+    coordinate: str,
+    text: str,
+) -> None:
+    """Invalid Tk input is recoverable and cannot change the capture context."""
+    controller.parent_controller.configuration_controller.microscope_config["stage"][
+        "flip_z"
+    ] = flipped
+    order = ("end", "start") if flipped else ("start", "end")
+    if not fresh:
+        # Crossed endpoints ensure field identity is distinct from button identity.
+        capture(controller, "start", 300, 30)
+        capture(controller, "end", 100, 10)
+        order = controller._stack_endpoint_order
+    field = next(
+        field for field, owner in zip(("start", "end"), order) if owner != button
+    )
+    variable = controller.stack_acq_vals[f"{field}_{coordinate}"]
+    valid = variable.get()
+    variable.set(text)
+    before = copy_proxy_object(controller.microscope_state_dict)
+    context = controller._stack_endpoint_context
+    assignments = controller._stack_endpoint_order
+    origins = (controller.z_origin, controller.focus_origin)
+    raw_fields = {
+        name: controller.view.getvar(str(controller.stack_acq_vals[name]))
+        for name in ("start_position", "end_position", "start_focus", "end_focus")
+    }
+    warning = Mock()
+    monkeypatch.setattr(
+        "navigate.controller.sub_controllers.channels_tab.messagebox.showwarning",
+        warning,
+    )
+    capture(controller, button, 5000, 100)
+    warning.assert_called_once()
+    assert field.title() in warning.call_args.kwargs["message"]
+    assert copy_proxy_object(controller.microscope_state_dict) == before
+    assert controller._stack_endpoint_context == context
+    assert controller._stack_endpoint_order == assignments
+    assert (controller.z_origin, controller.focus_origin) == origins
+    for name, value in raw_fields.items():
+        assert controller.view.getvar(str(controller.stack_acq_vals[name])) == value
+    assert controller.parent_controller.commands == []
+    assert controller.in_initialization is False
+
+    variable.set(valid)
+    capture(controller, button, 5000, 100)
+    assert (5000, 100) in physical_pairs(controller)
+    warning.assert_called_once()
+
+
 @pytest.mark.parametrize("buttons", [("start", "end"), ("end", "start")])
 @pytest.mark.parametrize("flipped", [False, True])
 @pytest.mark.parametrize("reverse_travel", [False, True])
@@ -145,7 +238,7 @@ def test_recapture_after_experiment_reload_discards_old_button_assignments(contr
     controller.populate_experiment_values()
     assert physical_pairs(controller) == [(900, 90), (1100, 110)]
     capture(controller, "end", 1200, 120)
-    assert physical_pairs(controller) == [(900, 90), (1200, 120)]
+    assert physical_pairs(controller) == [(1100, 110), (1200, 120)]
 
 
 def test_selected_axes_and_device_round_trip_reset_capture_assignments(controller):
@@ -157,7 +250,7 @@ def test_selected_axes_and_device_round_trip_reset_capture_assignments(controlle
     controller.stack_acq_vals["z_device"].set("Synthetic - y")
     controller.stack_acq_vals["z_device"].set(z_device)
     capture(controller, "end", 400, 40)
-    assert physical_pairs(controller) == [(100, 10), (400, 40)]
+    assert physical_pairs(controller) == [(300, 30), (400, 40)]
     controller.stack_acq_vals["z_device"].set("Synthetic - y")
     controller.stack_acq_vals["f_device"].set("Synthetic - x")
     capture(controller, "end", 600, 60)
@@ -263,7 +356,7 @@ def test_microscope_switch_keeps_offsets_and_resets_capture_context(
     assert controller.stack_acq_vals["z_device"].get() == f"{device_type} - z"
     assert physical_pairs(controller) == [(25, -5), (225, 15)]
     capture(controller, "end", 325, 25)
-    assert physical_pairs(controller) == [(25, -5), (325, 25)]
+    assert physical_pairs(controller) == [(225, 15), (325, 25)]
     assert parent.commands == []
 
 
